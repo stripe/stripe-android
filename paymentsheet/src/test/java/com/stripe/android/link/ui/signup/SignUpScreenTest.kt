@@ -12,6 +12,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
@@ -226,6 +227,7 @@ internal class SignUpScreenTest {
             linkAuth = linkAuth,
             linkEventsReporter = linkEventsReporter,
             logger = logger,
+            savedStateHandle = SavedStateHandle(),
             navigate = {},
             navigateAndClearStack = {},
             moveToWeb = moveToWeb

@@ -38,6 +38,7 @@ internal fun FullScreenContent(
     navigate: (route: LinkScreen, clearStack: Boolean) -> Unit,
     dismissWithResult: ((LinkActivityResult) -> Unit)?,
     getLinkAccount: () -> LinkAccount?,
+    changeEmail: () -> Unit,
 ) {
     var bottomSheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
     val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
@@ -74,6 +75,7 @@ internal fun FullScreenContent(
                 dismissWithResult = dismissWithResult,
                 getLinkAccount = getLinkAccount,
                 goBack = goBack,
+                changeEmail = changeEmail
             )
         }
     }

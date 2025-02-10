@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.signup
 
+import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
@@ -83,6 +84,41 @@ internal class SignUpViewModelTest {
         assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingRemainingFields)
         linkAuth.ensureAllItemsConsumed()
     }
+
+    @Test
+    fun `When USE_LINK_CONFIGURATION_CUSTOMER_INFO is false, controllers should not be prefilled`() =
+        runTest(dispatcher) {
+            testUseLinkConfigurationCustomerInfo(
+                useLinkConfigurationCustomerInfo = false,
+                expectedSignUpState = SignUpState.InputtingPrimaryField,
+                expectedEmail = "",
+                expectedPhoneNumber = "",
+                expectedName = ""
+            )
+        }
+
+    @Test
+    fun `When USE_LINK_CONFIGURATION_CUSTOMER_INFO is true, controllers should be prefilled`() = runTest(dispatcher) {
+        testUseLinkConfigurationCustomerInfo(
+            useLinkConfigurationCustomerInfo = true,
+            expectedSignUpState = SignUpState.InputtingRemainingFields,
+            expectedEmail = CUSTOMER_EMAIL,
+            expectedPhoneNumber = TestFactory.CUSTOMER_PHONE,
+            expectedName = TestFactory.CUSTOMER_NAME
+        )
+    }
+
+    @Test
+    fun `When USE_LINK_CONFIGURATION_CUSTOMER_INFO is not set, controllers should be prefilled`() =
+        runTest(dispatcher) {
+            testUseLinkConfigurationCustomerInfo(
+                useLinkConfigurationCustomerInfo = null,
+                expectedSignUpState = SignUpState.InputtingRemainingFields,
+                expectedEmail = CUSTOMER_EMAIL,
+                expectedPhoneNumber = TestFactory.CUSTOMER_PHONE,
+                expectedName = TestFactory.CUSTOMER_NAME
+            )
+        }
 
     @Test
     fun `When email changes and then reverts to config email, lookup is triggered`() = runTest(dispatcher) {
@@ -491,6 +527,32 @@ internal class SignUpViewModelTest {
         onSignUpClick()
     }
 
+    private fun testUseLinkConfigurationCustomerInfo(
+        useLinkConfigurationCustomerInfo: Boolean?,
+        expectedSignUpState: SignUpState = SignUpState.InputtingRemainingFields,
+        expectedEmail: String = CUSTOMER_EMAIL,
+        expectedPhoneNumber: String = TestFactory.CUSTOMER_PHONE,
+        expectedName: String = TestFactory.CUSTOMER_NAME
+    ) {
+        val savedStateHandle = SavedStateHandle()
+            .apply {
+                useLinkConfigurationCustomerInfo?.let {
+                    set(SignUpViewModel.USE_LINK_CONFIGURATION_CUSTOMER_INFO, it)
+                }
+            }
+        val viewModel = createViewModel(
+            prefilledEmail = CUSTOMER_EMAIL,
+            savedStateHandle = savedStateHandle
+        )
+
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertThat(viewModel.contentState.signUpState).isEqualTo(expectedSignUpState)
+        assertThat(viewModel.emailController.fieldValue.value).isEqualTo(expectedEmail)
+        assertThat(viewModel.phoneNumberController.fieldValue.value).isEqualTo(expectedPhoneNumber)
+        assertThat(viewModel.nameController.fieldValue.value).isEqualTo(expectedName)
+    }
+
     private fun createViewModel(
         prefilledEmail: String? = null,
         configuration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
@@ -500,6 +562,7 @@ internal class SignUpViewModelTest {
             lookupResult = LinkAuthResult.NoLinkAccountFound
         },
         logger: Logger = FakeLogger(),
+        savedStateHandle: SavedStateHandle = SavedStateHandle(),
         navigate: (LinkScreen) -> Unit = {},
         navigateAndClearStack: (LinkScreen) -> Unit = {},
         moveToWeb: () -> Unit = {}
@@ -517,6 +580,7 @@ internal class SignUpViewModelTest {
             linkAuth = linkAuth,
             linkEventsReporter = linkEventsReporter,
             logger = logger,
+            savedStateHandle = savedStateHandle,
             navigate = navigate,
             navigateAndClearStack = navigateAndClearStack,
             moveToWeb = moveToWeb,

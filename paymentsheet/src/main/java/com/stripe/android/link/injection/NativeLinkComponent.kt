@@ -47,6 +47,7 @@ internal interface NativeLinkComponent {
     val webLinkActivityContract: WebLinkActivityContract
     val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory
     val linkAuth: LinkAuth
+    val savedStateHandle: SavedStateHandle
     val viewModel: LinkActivityViewModel
 
     @Component.Builder
