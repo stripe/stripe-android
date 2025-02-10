@@ -155,6 +155,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             ) { confirmationStateValid, configurationStateValid ->
                 confirmationStateValid && configurationStateValid
             },
+            temporarySelection = selectionHolder.temporarySelection,
             selection = selectionHolder.selection,
             paymentMethodIncentiveInteractor = paymentMethodIncentiveInteractor,
             formTypeForCode = { code ->

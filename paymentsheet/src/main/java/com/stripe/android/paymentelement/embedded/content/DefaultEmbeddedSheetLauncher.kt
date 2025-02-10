@@ -63,6 +63,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     private val formActivityLauncher: ActivityResultLauncher<FormContract.Args> =
         activityResultCaller.registerForActivityResult(FormContract) { result ->
             sheetStateHolder.sheetIsOpen = false
+            selectionHolder.setTemporary(null)
             if (result is FormResult.Complete) {
                 resultCallback.onResult(EmbeddedPaymentElement.Result.Completed())
                 selectionHolder.set(null)
@@ -98,6 +99,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             return
         }
         sheetStateHolder.sheetIsOpen = true
+        selectionHolder.setTemporary(code)
         val args = FormContract.Args(
             selectedPaymentMethodCode = code,
             paymentMethodMetadata = paymentMethodMetadata,

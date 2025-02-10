@@ -1024,6 +1024,30 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
+    fun verticalModeScreenSelection_isUpdatedToTemporarySelection() {
+        val initialPaymentSelection = PaymentSelection.Link()
+        runScenario(
+            initialSelection = initialPaymentSelection,
+            formTypeForCode = { FormHelper.FormType.Empty },
+            updateSelection = {},
+        ) {
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(selection).isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.New("link"))
+                }
+                temporarySelectionSource.value = "card"
+                awaitItem().run {
+                    assertThat(selection).isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.New("card"))
+                }
+                temporarySelectionSource.value = null
+                awaitItem().run {
+                    assertThat(selection).isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.New("link"))
+                }
+            }
+        }
+    }
+
+    @Test
     fun whenVerticalModeScreen_becomesCurrentScreen_updateSelectionCalled() {
         var updatedSelection: PaymentSelection? = null
         fun onUpdateSelection(paymentSelection: PaymentSelection?) {
@@ -1076,6 +1100,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         testBlock: suspend TestParams.() -> Unit
     ) {
         val processing: MutableStateFlow<Boolean> = MutableStateFlow(initialProcessing)
+        val temporarySelection: MutableStateFlow<PaymentMethodCode?> = MutableStateFlow(null)
         val selection: MutableStateFlow<PaymentSelection?> = MutableStateFlow(initialSelection)
         val paymentMethods: MutableStateFlow<List<PaymentMethod>> = MutableStateFlow(initialPaymentMethods)
         val mostRecentlySelectedSavedPaymentMethod: MutableStateFlow<PaymentMethod?> =
@@ -1088,6 +1113,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         val interactor = DefaultPaymentMethodVerticalLayoutInteractor(
             paymentMethodMetadata = paymentMethodMetadata,
             processing = processing,
+            temporarySelection = temporarySelection,
             selection = selection,
             paymentMethodIncentiveInteractor = paymentMethodIncentiveInteractor,
             formTypeForCode = formTypeForCode,
@@ -1116,6 +1142,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
         TestParams(
             processingSource = processing,
+            temporarySelectionSource = temporarySelection,
             selectionSource = selection,
             isCurrentScreenSource = isCurrentScreen,
             mostRecentlySelectedSavedPaymentMethodSource = mostRecentlySelectedSavedPaymentMethod,
@@ -1132,6 +1159,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     private class TestParams(
         val processingSource: MutableStateFlow<Boolean>,
+        val temporarySelectionSource: MutableStateFlow<PaymentMethodCode?>,
         val selectionSource: MutableStateFlow<PaymentSelection?>,
         val isCurrentScreenSource: MutableStateFlow<Boolean>,
         val mostRecentlySelectedSavedPaymentMethodSource: MutableStateFlow<PaymentMethod?>,
