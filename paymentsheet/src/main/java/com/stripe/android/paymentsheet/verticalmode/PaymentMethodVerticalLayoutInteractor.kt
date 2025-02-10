@@ -42,10 +42,18 @@ internal interface PaymentMethodVerticalLayoutInteractor {
     data class State(
         val displayablePaymentMethods: List<DisplayablePaymentMethod>,
         val isProcessing: Boolean,
-        val selection: PaymentSelection?,
+        val selection: Selection?,
         val displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
         val availableSavedPaymentMethodAction: SavedPaymentMethodAction,
     )
+
+    sealed interface Selection {
+        val isSaved: Boolean
+            get() = this == Saved
+
+        object Saved : Selection
+        data class New(val code: PaymentMethodCode) : Selection
+    }
 
     sealed interface ViewAction {
         data object TransitionToManageSavedPaymentMethods : ViewAction
@@ -199,7 +207,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         PaymentMethodVerticalLayoutInteractor.State(
             displayablePaymentMethods = displayablePaymentMethods,
             isProcessing = isProcessing,
-            selection = mostRecentSelection,
+            selection = mostRecentSelection?.asVerticalSelection(),
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
             availableSavedPaymentMethodAction = action,
         )
@@ -391,4 +399,12 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             selectedPaymentMethodCode,
         )
     }
+}
+
+private fun PaymentSelection.asVerticalSelection(): PaymentMethodVerticalLayoutInteractor.Selection = when (this) {
+    is PaymentSelection.Saved -> PaymentMethodVerticalLayoutInteractor.Selection.Saved
+    is PaymentSelection.GooglePay -> PaymentMethodVerticalLayoutInteractor.Selection.New("google_pay")
+    is PaymentSelection.Link -> PaymentMethodVerticalLayoutInteractor.Selection.New("link")
+    is PaymentSelection.New -> PaymentMethodVerticalLayoutInteractor.Selection.New(paymentMethodCreateParams.typeCode)
+    is PaymentSelection.ExternalPaymentMethod -> PaymentMethodVerticalLayoutInteractor.Selection.New(type)
 }

@@ -5,7 +5,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.VerticalMode
@@ -13,6 +12,7 @@ import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
 import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor
+import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.CoroutineTestRule
@@ -64,7 +64,7 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
         val initialScreen = VerticalMode(
             FakePaymentMethodVerticalLayoutInteractor.create(
                 paymentMethodMetadata = metadata,
-                selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
+                selection = PaymentMethodVerticalLayoutInteractor.Selection.New("cashapp"),
             )
         )
         val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
@@ -88,7 +88,7 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
         val initialScreen = VerticalMode(
             FakePaymentMethodVerticalLayoutInteractor.create(
                 paymentMethodMetadata = metadata,
-                selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
+                selection = PaymentMethodVerticalLayoutInteractor.Selection.New("cashapp"),
             )
         )
         val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)

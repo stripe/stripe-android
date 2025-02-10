@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.utils.MockPaymentMethodsFactory
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
@@ -34,7 +33,7 @@ internal class PaymentMethodVerticalLayoutUIScreenshotTest {
                 displayedSavedPaymentMethod = savedPaymentMethod,
                 savedPaymentMethodAction =
                 PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
-                selection = PaymentSelection.Saved(savedPaymentMethod.paymentMethod),
+                selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
                 isEnabled = true,
                 onViewMorePaymentMethods = {},
                 onSelectSavedPaymentMethod = {},
@@ -52,7 +51,7 @@ internal class PaymentMethodVerticalLayoutUIScreenshotTest {
                 displayedSavedPaymentMethod = PaymentMethodFixtures.defaultDisplayableCard(),
                 savedPaymentMethodAction =
                 PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
-                selection = PaymentSelection.Saved(savedPaymentMethod.paymentMethod),
+                selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
                 isEnabled = true,
                 onViewMorePaymentMethods = {},
                 onSelectSavedPaymentMethod = {},
@@ -74,7 +73,7 @@ internal class PaymentMethodVerticalLayoutUIScreenshotTest {
                 displayedSavedPaymentMethod = savedPaymentMethod,
                 savedPaymentMethodAction =
                 PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
-                selection = PaymentSelection.Saved(savedPaymentMethod.paymentMethod),
+                selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
                 isEnabled = true,
                 onViewMorePaymentMethods = {},
                 onSelectSavedPaymentMethod = {},

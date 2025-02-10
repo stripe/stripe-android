@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.verticalmode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentsheet.ViewActionRecorder
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 
@@ -16,7 +15,7 @@ internal class FakePaymentMethodVerticalLayoutInteractor(
         fun create(
             paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             initialShowsWalletsHeader: Boolean = true,
-            selection: PaymentSelection? = null,
+            selection: PaymentMethodVerticalLayoutInteractor.Selection? = null,
             viewActionRecorder: ViewActionRecorder<PaymentMethodVerticalLayoutInteractor.ViewAction> =
                 ViewActionRecorder()
         ): FakePaymentMethodVerticalLayoutInteractor {

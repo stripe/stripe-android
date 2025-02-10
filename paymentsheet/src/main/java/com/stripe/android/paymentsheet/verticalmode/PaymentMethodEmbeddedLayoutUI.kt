@@ -16,9 +16,6 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
-import com.stripe.android.paymentsheet.analytics.code
-import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.isSaved
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.utils.collectAsState
 import org.jetbrains.annotations.VisibleForTesting
@@ -74,7 +71,7 @@ internal fun PaymentMethodEmbeddedLayoutUI(
     paymentMethods: List<DisplayablePaymentMethod>,
     displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
     savedPaymentMethodAction: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
-    selection: PaymentSelection?,
+    selection: PaymentMethodVerticalLayoutInteractor.Selection?,
     isEnabled: Boolean,
     onViewMorePaymentMethods: () -> Unit,
     onManageOneSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
@@ -110,11 +107,11 @@ internal fun PaymentMethodEmbeddedLayoutUI(
         }
 
         val selectedIndex = remember(selection, paymentMethods) {
-            if (selection == null || selection.isSaved) {
-                -1
-            } else {
-                val code = selection.code()
+            if (selection is PaymentMethodVerticalLayoutInteractor.Selection.New) {
+                val code = selection.code
                 paymentMethods.indexOfFirst { it.code == code }
+            } else {
+                -1
             }
         }
 
