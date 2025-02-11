@@ -537,7 +537,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             useAttestationEndpointsForLink = useAttestationEndpointsForLink,
             suppress2faModal = suppress2faModal,
             elementsSessionId = elementsSession.elementsSessionId,
-            initializationMode = initializationMode
+            initializationMode = initializationMode,
+            linkMode = elementsSession.linkSettings?.linkMode,
         )
     }
 

@@ -1,6 +1,6 @@
 package com.stripe.android.link.repositories
 
-import android.content.Context
+import android.app.Application
 import com.stripe.android.DefaultFraudDetectionDataRepository
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
@@ -38,7 +38,7 @@ import kotlin.coroutines.CoroutineContext
  */
 @SuppressWarnings("TooManyFunctions")
 internal class LinkApiRepository @Inject constructor(
-    context: Context,
+    application: Application,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
     private val stripeRepository: StripeRepository,
@@ -49,7 +49,7 @@ internal class LinkApiRepository @Inject constructor(
 ) : LinkRepository {
 
     private val fraudDetectionDataRepository: FraudDetectionDataRepository =
-        DefaultFraudDetectionDataRepository(context, workContext)
+        DefaultFraudDetectionDataRepository(application, workContext)
 
     init {
         fraudDetectionDataRepository.refresh()
@@ -211,9 +211,10 @@ internal class LinkApiRepository @Inject constructor(
         }
     }
 
-    override suspend fun shareLinkCardBrand(
+    override suspend fun sharePaymentDetails(
         consumerSessionClientSecret: String,
         paymentDetailsId: String,
+        expectedPaymentMethodType: String,
     ): Result<SharePaymentDetails> = withContext(workContext) {
         val fraudParams = fraudDetectionDataRepository.getCached()?.params.orEmpty()
         val paymentMethodParams = mapOf("expand" to listOf("payment_method"))
@@ -221,7 +222,7 @@ internal class LinkApiRepository @Inject constructor(
         consumersApiService.sharePaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
             paymentDetailsId = paymentDetailsId,
-            expectedPaymentMethodType = "card", // Link card brand
+            expectedPaymentMethodType = expectedPaymentMethodType,
             requestOptions = buildRequestOptions(),
             requestSurface = REQUEST_SURFACE,
             extraParams = paymentMethodParams + fraudParams,

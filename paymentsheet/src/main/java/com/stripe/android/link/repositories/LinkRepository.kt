@@ -77,9 +77,10 @@ internal interface LinkRepository {
         consumerSessionClientSecret: String,
     ): Result<LinkPaymentDetails>
 
-    suspend fun shareLinkCardBrand(
+    suspend fun sharePaymentDetails(
         consumerSessionClientSecret: String,
         paymentDetailsId: String,
+        expectedPaymentMethodType: String,
     ): Result<SharePaymentDetails>
 
     suspend fun logOut(

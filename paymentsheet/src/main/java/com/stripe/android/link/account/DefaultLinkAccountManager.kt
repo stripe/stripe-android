@@ -256,15 +256,17 @@ internal class DefaultLinkAccountManager @Inject constructor(
         }
     }
 
-    override suspend fun shareLinkCardBrand(
+    override suspend fun sharePaymentDetails(
         paymentDetailsId: String,
+        expectedPaymentMethodType: String,
     ): Result<SharePaymentDetails> {
         return runCatching {
             requireNotNull(linkAccountHolder.linkAccount.value)
         }.mapCatching { account ->
-            linkRepository.shareLinkCardBrand(
+            linkRepository.sharePaymentDetails(
                 paymentDetailsId = paymentDetailsId,
                 consumerSessionClientSecret = account.clientSecret,
+                expectedPaymentMethodType = expectedPaymentMethodType,
             ).getOrThrow()
         }
     }

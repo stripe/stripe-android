@@ -87,8 +87,9 @@ internal interface LinkAccountManager {
         paymentMethodCreateParams: PaymentMethodCreateParams
     ): Result<LinkPaymentDetails>
 
-    suspend fun shareLinkCardBrand(
+    suspend fun sharePaymentDetails(
         paymentDetailsId: String,
+        expectedPaymentMethodType: String,
     ): Result<SharePaymentDetails>
 
     fun setLinkAccountFromLookupResult(

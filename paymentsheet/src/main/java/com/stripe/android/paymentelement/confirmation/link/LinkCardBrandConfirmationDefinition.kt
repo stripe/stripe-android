@@ -81,8 +81,9 @@ internal class LinkCardBrandConfirmationDefinition(
     private suspend fun createPaymentMethodConfirmationOption(
         confirmationOption: LinkCardBrandConfirmationOption,
     ): kotlin.Result<PaymentMethodConfirmationOption> {
-        return linkAccountManager.shareLinkCardBrand(
+        return linkAccountManager.sharePaymentDetails(
             paymentDetailsId = confirmationOption.paymentDetailsId,
+            expectedPaymentMethodType = confirmationOption.expectedPaymentMethodType,
         ).mapCatching {
             requireNotNull(it.encodedPaymentMethod.parsePaymentMethod())
         }.map { paymentMethod ->
@@ -107,10 +108,8 @@ internal class LinkCardBrandConfirmationDefinition(
     )
 }
 
-private fun String.parsePaymentMethod(): PaymentMethod? = try {
+private fun String.parsePaymentMethod(): PaymentMethod? = runCatching {
     val json = JSONObject(this)
     val paymentMethod = PaymentMethodJsonParser().parse(json)
     paymentMethod
-} catch (e: Exception) {
-    null
-}
+}.getOrNull()

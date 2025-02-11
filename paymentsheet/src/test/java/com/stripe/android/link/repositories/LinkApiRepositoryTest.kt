@@ -51,7 +51,7 @@ class LinkApiRepositoryTest {
     }
 
     private val linkRepository = LinkApiRepository(
-        context = ApplicationProvider.getApplicationContext(),
+        application = ApplicationProvider.getApplicationContext(),
         publishableKeyProvider = { PUBLISHABLE_KEY },
         stripeAccountIdProvider = { STRIPE_ACCOUNT_ID },
         stripeRepository = stripeRepository,
@@ -681,7 +681,7 @@ class LinkApiRepositoryTest {
         consumersApiService: ConsumersApiService = FakeConsumersApiService()
     ): LinkApiRepository {
         return LinkApiRepository(
-            context = ApplicationProvider.getApplicationContext(),
+            application = ApplicationProvider.getApplicationContext(),
             publishableKeyProvider = { PUBLISHABLE_KEY },
             stripeAccountIdProvider = { STRIPE_ACCOUNT_ID },
             stripeRepository = stripeRepository,
