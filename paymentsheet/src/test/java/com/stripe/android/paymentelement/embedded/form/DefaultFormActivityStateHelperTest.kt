@@ -12,6 +12,7 @@ import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
@@ -140,6 +141,27 @@ class DefaultFormActivityStateHelperTest {
             stateHolder.update(confirmationStateConfirming(PaymentMethodFixtures.CARD_PAYMENT_SELECTION))
             val confirmingState = awaitItem()
             assertThat(confirmingState.error).isNull()
+        }
+    }
+
+    @Test
+    fun `canceled result clears errors`() = testScenario {
+        stateHolder.state.test {
+            awaitAndVerifyInitialState()
+
+            stateHolder.update(confirmationStateComplete(false))
+            assertThat(awaitItem().error).isEqualTo("Something went wrong".resolvableString)
+
+            stateHolder.update(
+                ConfirmationHandler.State.Complete(
+                    result = ConfirmationHandler.Result.Canceled(
+                        action = ConfirmationHandler.Result.Canceled.Action.None
+                    )
+                )
+            )
+            val canceledState = awaitItem()
+            assertThat(canceledState.error).isNull()
+            assertThat(canceledState.isProcessing).isFalse()
         }
     }
 

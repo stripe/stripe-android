@@ -88,7 +88,12 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
                         isProcessing = false,
                         error = state.result.message
                     )
-                    is ConfirmationHandler.Result.Canceled -> this
+                    is ConfirmationHandler.Result.Canceled -> copy(
+                        processingState = PrimaryButtonProcessingState.Idle(null),
+                        isEnabled = selectionHolder.selection.value != null,
+                        isProcessing = false,
+                        error = null
+                    )
                 }
             }
             is ConfirmationHandler.State.Confirming -> copy(
