@@ -113,7 +113,7 @@ class CustomerStateTest {
     }
 
     @Test
-    fun `Create 'CustomerState' for customer session with nonnull default PM & set as default feature enabled`() {
+    fun `Create 'CustomerState' for customer session with nonnull default PM`() {
         val defaultPaymentMethodId = "pm_123"
 
         val customerState = createCustomerSessionForTestingDefaultPaymentMethod(
@@ -121,39 +121,14 @@ class CustomerStateTest {
             isSetAsDefaultEnabled = true,
         )
 
-        assertThat(customerState.defaultPaymentMethodId).isNotNull()
         assertThat(customerState.defaultPaymentMethodId).isEqualTo(defaultPaymentMethodId)
     }
 
     @Test
-    fun `Create 'CustomerState' for customer session with nonnull default PM & set as default feature disabled`() {
-        val defaultPaymentMethodId = "pm_123"
-
-        val customerState = createCustomerSessionForTestingDefaultPaymentMethod(
-            defaultPaymentMethodId = defaultPaymentMethodId,
-            isSetAsDefaultEnabled = false,
-        )
-
-        assertThat(customerState.defaultPaymentMethodId).isEqualTo(defaultPaymentMethodId)
-    }
-
-    @Test
-    fun `Create 'CustomerState' for customer session with null default PM & set as default feature enabled`() {
+    fun `Create 'CustomerState' for customer session with null default PM`() {
         val customerState = createCustomerSessionForTestingDefaultPaymentMethod(
             defaultPaymentMethodId = null,
             isSetAsDefaultEnabled = true,
-        )
-
-        assertThat(customerState.defaultPaymentMethodId).isNull()
-    }
-
-    @Test
-    fun `Create 'CustomerState' for customer session with null default PM & set as default feature disabled`() {
-        val defaultPaymentMethodId = null
-
-        val customerState = createCustomerSessionForTestingDefaultPaymentMethod(
-            defaultPaymentMethodId = defaultPaymentMethodId,
-            isSetAsDefaultEnabled = false,
         )
 
         assertThat(customerState.defaultPaymentMethodId).isNull()

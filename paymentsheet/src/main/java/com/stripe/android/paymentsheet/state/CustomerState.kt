@@ -118,7 +118,7 @@ internal data class CustomerState(
                      */
                     canRemoveDuplicates = false,
                 ),
-                // This is a customer sessions only feature, so it's always disabled when using a legacy ephemeral key.
+                // This is a customer sessions only feature, so will always be null when using a legacy ephemeral key.
                 defaultPaymentMethodId = null
             )
         }
