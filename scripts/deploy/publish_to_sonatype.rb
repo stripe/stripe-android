@@ -50,10 +50,19 @@ def publish_to_sonatype
             publish_to_sonatype_commands = ['./gradlew', 'publishToSonatype', 'closeAndReleaseSonatypeStagingRepository', '--stacktrace']
         end
 
-        Subprocess.check_call(
-            publish_to_sonatype_commands,
-            env: env
-        )
+        begin
+            Subprocess.check_call(
+                publish_to_sonatype_commands,
+                env: env
+            )
+        rescue StandardError => e
+             rputs "If your script is failing because it cannot find gpg but you have it installed, try setting the signing.gnupg.executable field in your gradle.properties like so:
+
+             - Find the exact path of your gpg installation via the command `which gpg`
+             - In gradle.properties, set signing.gnupg.executable=/path/to/gpg, where /path/to/gpg is the output of the previous command.
+             "
+             raise e # re-raise the exception
+        end
 
         puts "Release succeeded!"
 
