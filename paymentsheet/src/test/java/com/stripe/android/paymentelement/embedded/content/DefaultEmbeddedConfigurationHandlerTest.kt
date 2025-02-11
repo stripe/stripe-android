@@ -55,6 +55,29 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
     }
 
     @Test
+    fun `result is used from saved state handle when configurations are the same and sheetIsOpen`() = runScenario {
+        sheetStateHolder.sheetIsOpen = true
+        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
+        savedStateHandle[ConfigurationCache.KEY] = ConfigurationCache(
+            arguments = DefaultEmbeddedConfigurationHandler.Arguments(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+                ),
+                configuration = configuration.asCommonConfiguration(),
+            ),
+            resultState = loader.createSuccess(configuration.asCommonConfiguration()).getOrThrow(),
+        )
+        val result = handler.configure(
+            intentConfiguration = PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+            ),
+            configuration = configuration,
+        )
+        assertThat(result.getOrThrow())
+            .isInstanceOf<PaymentElementLoader.State>()
+    }
+
+    @Test
     fun paymentElementLoaderIsCalledWithCorrectArguments() = runScenario {
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
         loader.emit(loader.createSuccess(configuration.asCommonConfiguration()))
