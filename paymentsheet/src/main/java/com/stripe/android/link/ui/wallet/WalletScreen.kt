@@ -435,6 +435,7 @@ private fun ExpandedPaymentDetails(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun PaymentDetailsList(
     uiState: WalletUiState,
