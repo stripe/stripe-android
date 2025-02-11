@@ -12,14 +12,14 @@ import org.robolectric.RobolectricTestRunner
 internal class ManageActivityTest {
 
     @Test
-    fun `when launched without args should finish with cancelled result`() {
+    fun `when launched without args should finish with error result`() {
         ActivityScenario.launchActivityForResult(
             ManageActivity::class.java,
             Bundle.EMPTY
         ).use { activityScenario ->
             assertThat(activityScenario.state).isEqualTo(Lifecycle.State.DESTROYED)
             val result = ManageContract.parseResult(0, activityScenario.result.resultData)
-            assertThat(result).isInstanceOf(ManageResult.Cancelled::class.java)
+            assertThat(result).isInstanceOf(ManageResult.Error::class.java)
         }
     }
 }

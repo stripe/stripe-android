@@ -74,11 +74,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         activityResultCaller.registerForActivityResult(ManageContract) { result ->
             sheetStateHolder.sheetIsOpen = false
             when (result) {
-                is ManageResult.Cancelled -> {
-                    if (result.customerState != null) {
-                        customerStateHolder.setCustomerState(result.customerState)
-                    }
-                }
+                is ManageResult.Error -> Unit
                 is ManageResult.Complete -> {
                     customerStateHolder.setCustomerState(result.customerState)
                     selectionHolder.set(result.selection)
