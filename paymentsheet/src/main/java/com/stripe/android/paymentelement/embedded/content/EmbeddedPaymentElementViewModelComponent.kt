@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded.content
 
+import android.app.Application
 import android.content.Context
 import android.content.res.Resources
 import androidx.lifecycle.SavedStateHandle
@@ -63,6 +64,9 @@ internal interface EmbeddedPaymentElementViewModelComponent {
 
         @BindsInstance
         fun context(context: Context): Builder
+
+        @BindsInstance
+        fun application(application: Application): Builder
 
         @BindsInstance
         fun statusBarColor(@Named(STATUS_BAR_COLOR) statusBarColor: Int?): Builder

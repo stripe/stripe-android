@@ -11,6 +11,7 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.analytics.FakeLinkAnalyticsHelper
 import com.stripe.android.link.analytics.LinkAnalyticsHelper
+import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.AccountStatus
@@ -763,6 +764,10 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         }
 
         override fun linkGate(configuration: LinkConfiguration): LinkGate {
+            throw NotImplementedError()
+        }
+
+        override fun linkAttestationCheck(configuration: LinkConfiguration): LinkAttestationCheck {
             throw NotImplementedError()
         }
 

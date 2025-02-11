@@ -32,7 +32,6 @@ internal annotation class NativeLinkScope
     modules = [
         NativeLinkModule::class,
         LinkViewModelModule::class,
-        IntegrityRequestManagerModule::class,
         ApplicationIdModule::class,
         DefaultConfirmationModule::class,
     ]

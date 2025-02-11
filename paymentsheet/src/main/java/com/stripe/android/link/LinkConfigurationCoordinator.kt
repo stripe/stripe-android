@@ -1,5 +1,6 @@
 package com.stripe.android.link
 
+import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.AccountStatus
@@ -24,6 +25,8 @@ internal interface LinkConfigurationCoordinator {
     fun getAccountStatusFlow(configuration: LinkConfiguration): Flow<AccountStatus>
 
     fun linkGate(configuration: LinkConfiguration): LinkGate
+
+    fun linkAttestationCheck(configuration: LinkConfiguration): LinkAttestationCheck
 
     suspend fun signInWithUserInput(
         configuration: LinkConfiguration,
@@ -67,6 +70,10 @@ internal class RealLinkConfigurationCoordinator @Inject internal constructor(
 
     override fun linkGate(configuration: LinkConfiguration): LinkGate {
         return getLinkPaymentLauncherComponent(configuration).linkGate
+    }
+
+    override fun linkAttestationCheck(configuration: LinkConfiguration): LinkAttestationCheck {
+        return getLinkPaymentLauncherComponent(configuration).linkAttestationCheck
     }
 
     /**

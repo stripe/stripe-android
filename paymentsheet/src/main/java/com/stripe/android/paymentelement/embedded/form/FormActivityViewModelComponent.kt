@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded.form
 
+import android.app.Application
 import android.content.Context
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
@@ -76,6 +77,9 @@ internal interface FormActivityViewModelComponent {
 
         @BindsInstance
         fun context(context: Context): Builder
+
+        @BindsInstance
+        fun application(application: Application): Builder
 
         @BindsInstance
         fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
