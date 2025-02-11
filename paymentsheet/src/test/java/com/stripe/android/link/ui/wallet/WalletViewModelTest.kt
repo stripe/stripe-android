@@ -396,10 +396,6 @@ class WalletViewModelTest {
 
         val viewModel = createViewModel(linkAccountManager = linkAccountManager)
 
-        linkAccountManager.listPaymentDetailsResult = Result.success(
-            ConsumerPaymentDetails(paymentDetails = listOf(updatedCard1, updatedCard2))
-        )
-
         viewModel.onSetDefaultClicked(card1)
 
         assertThat(viewModel.uiState.value.cardBeingUpdated).isEqualTo(card1.id)
@@ -414,7 +410,7 @@ class WalletViewModelTest {
             )
         )
         assertThat(viewModel.uiState.value.paymentDetailsList).containsExactly(updatedCard1, updatedCard2)
-        assertThat(linkAccountManager.listPaymentDetailsCalls.size).isEqualTo(2)
+        assertThat(linkAccountManager.listPaymentDetailsCalls.size).isEqualTo(1)
         assertThat(viewModel.uiState.value.isProcessing).isFalse()
         assertThat(viewModel.uiState.value.cardBeingUpdated).isNull()
         assertThat(viewModel.uiState.value.alertMessage).isNull()

@@ -485,10 +485,6 @@ internal class WalletScreenTest {
 
     @Test
     fun `pay method row is loading when card is being updated`() = runTest(dispatcher) {
-        val validCard = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
-            expiryYear = 2099,
-            cvcCheck = CvcCheck.Pass
-        )
         val linkAccountManager = object : FakeLinkAccountManager() {
             override suspend fun updatePaymentDetails(
                 updateParams: ConsumerPaymentDetailsUpdateParams
@@ -497,9 +493,12 @@ internal class WalletScreenTest {
                 return super.updatePaymentDetails(updateParams)
             }
         }
+        val card1 = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "card1", isDefault = false)
+        val card2 = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "card2", isDefault = true)
         linkAccountManager.listPaymentDetailsResult = Result.success(
-            ConsumerPaymentDetails(paymentDetails = listOf(validCard))
+            ConsumerPaymentDetails(paymentDetails = listOf(card1, card2))
         )
+
         val viewModel = createViewModel(linkAccountManager)
         composeTestRule.setContent {
             WalletScreen(
@@ -510,9 +509,12 @@ internal class WalletScreenTest {
         }
         composeTestRule.waitForIdle()
 
-        onWalletPayButton().assertIsEnabled()
+        onCollapsedWalletRow()
+            .performClick()
+        composeTestRule.waitForIdle()
 
-        viewModel.onSetDefaultClicked(validCard)
+        viewModel.onSetDefaultClicked(card1)
+
         composeTestRule.waitForIdle()
 
         onWalletPaymentMethodRowLoadingIndicator().assertIsDisplayed()
