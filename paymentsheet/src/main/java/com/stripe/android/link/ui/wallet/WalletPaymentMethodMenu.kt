@@ -19,9 +19,9 @@ internal fun WalletPaymentMethodMenu(
 ) {
     val items = remember(paymentDetails) {
         buildList {
-            if (paymentDetails is ConsumerPaymentDetails.Card) {
-                add(WalletPaymentMethodMenuItem.EditCard)
-            }
+//            if (paymentDetails is ConsumerPaymentDetails.Card) {
+//                add(WalletPaymentMethodMenuItem.EditCard)
+//            }
 
             if (!paymentDetails.isDefault) {
                 add(WalletPaymentMethodMenuItem.SetAsDefault)
