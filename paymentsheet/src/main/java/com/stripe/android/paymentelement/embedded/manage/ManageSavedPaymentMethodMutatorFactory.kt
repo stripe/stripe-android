@@ -10,8 +10,10 @@ import com.stripe.android.paymentsheet.SavedPaymentMethod
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
@@ -39,7 +41,12 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
                 selectionHolder.set(null)
             },
             customerStateHolder = customerStateHolder,
-            prePaymentMethodRemoveActions = {},
+            prePaymentMethodRemoveActions = {
+                if (customerStateHolder.paymentMethods.value.size > 1) {
+                    manageNavigatorProvider.get().performAction(ManageNavigator.Action.Back)
+                    delay(PaymentMethodRemovalDelayMillis)
+                }
+            },
             postPaymentMethodRemoveActions = ::onPaymentMethodRemoved,
             onUpdatePaymentMethod = { displayableSavedPaymentMethod, _, _, _ ->
                 onUpdatePaymentMethod(displayableSavedPaymentMethod)
