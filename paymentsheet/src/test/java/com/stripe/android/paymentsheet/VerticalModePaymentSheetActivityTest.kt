@@ -181,7 +181,9 @@ internal class VerticalModePaymentSheetActivityTest {
         verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
         managePage.clickEdit()
         managePage.clickEdit("pm_12345")
+        editPage.waitUntilVisible()
         editPage.clickRemove()
+        managePage.waitUntilVisible()
         managePage.clickDone()
         Espresso.pressBack()
 
