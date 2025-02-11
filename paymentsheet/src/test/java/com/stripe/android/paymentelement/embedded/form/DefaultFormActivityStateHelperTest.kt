@@ -124,7 +124,7 @@ class DefaultFormActivityStateHelperTest {
             assertThat(failedState.isEnabled).isTrue()
             assertThat(failedState.isProcessing).isFalse()
             assertThat(failedState.processingState).isEqualTo(PrimaryButtonProcessingState.Idle(null))
-            assertThat(failedState.error).isEqualTo("Whoops".resolvableString)
+            assertThat(failedState.error).isEqualTo("Something went wrong".resolvableString)
         }
     }
 
