@@ -124,6 +124,21 @@ internal class WalletScreenScreenshotTest {
         )
     }
 
+    @Test
+    fun testLongExpandedPaymentDetails() {
+        snapshot(
+            state = walletUiState(
+                paymentDetailsList = (1..100).map { index ->
+                    val card = CONSUMER_PAYMENT_DETAILS_CARD
+                    CONSUMER_PAYMENT_DETAILS_CARD.copy(
+                        id = "${card.id}_$index"
+                    )
+                }
+            ),
+            isExpanded = true
+        )
+    }
+
     private fun walletUiState(
         paymentDetailsList: List<ConsumerPaymentDetails.PaymentDetails> =
             TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,

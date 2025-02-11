@@ -71,7 +71,6 @@ internal fun WalletScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     var isExpanded by rememberSaveable { mutableStateOf(false) }
-
     WalletBody(
         state = state,
         isExpanded = isExpanded,
@@ -111,7 +110,6 @@ internal fun WalletBody(
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: () -> Unit
 ) {
-    val context = LocalContext.current
     if (state.paymentDetailsList.isEmpty()) {
         Loader()
         return
@@ -137,6 +135,55 @@ internal fun WalletBody(
             .testTag(WALLET_SCREEN_BOX)
             .fillMaxSize()
             .padding(16.dp)
+    ) {
+        PaymentDetailsSection(
+            modifier = Modifier
+                .weight(
+                    weight = 1f,
+                    fill = false
+                ),
+            state = state,
+            isExpanded = isExpanded,
+            expiryDateController = expiryDateController,
+            cvcController = cvcController,
+            onItemSelected = onItemSelected,
+            onExpandedChanged = onExpandedChanged,
+            showBottomSheetContent = showBottomSheetContent,
+            onRemoveClicked = onRemoveClicked,
+            onSetDefaultClicked = onSetDefaultClicked,
+            onEditPaymentMethodClicked = onEditPaymentMethodClicked,
+            onAddNewPaymentMethodClicked = onAddNewPaymentMethodClicked,
+            hideBottomSheetContent = hideBottomSheetContent
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        ActionSection(
+            state = state,
+            onPrimaryButtonClick = onPrimaryButtonClick,
+            onPayAnotherWayClicked = onPayAnotherWayClicked
+        )
+    }
+}
+
+@Composable
+private fun PaymentDetailsSection(
+    modifier: Modifier,
+    state: WalletUiState,
+    isExpanded: Boolean,
+    expiryDateController: TextFieldController,
+    cvcController: CvcController,
+    onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onExpandedChanged: (Boolean) -> Unit,
+    onAddNewPaymentMethodClicked: () -> Unit,
+    onEditPaymentMethodClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onRemoveClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    showBottomSheetContent: (BottomSheetContent) -> Unit,
+    hideBottomSheetContent: () -> Unit
+) {
+    Column(
+        modifier = modifier
     ) {
         PaymentMethodSection(
             state = state,
@@ -169,14 +216,6 @@ internal fun WalletBody(
                 )
             }
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        ActionSection(
-            state = state,
-            onPrimaryButtonClick = onPrimaryButtonClick,
-            onPayAnotherWayClicked = onPayAnotherWayClicked
-        )
     }
 }
 
@@ -203,22 +242,24 @@ private fun ActionSection(
     onPrimaryButtonClick: () -> Unit,
     onPayAnotherWayClicked: () -> Unit
 ) {
-    PrimaryButton(
-        modifier = Modifier
-            .testTag(WALLET_SCREEN_PAY_BUTTON),
-        label = state.primaryButtonLabel.resolve(LocalContext.current),
-        state = state.primaryButtonState,
-        onButtonClick = onPrimaryButtonClick,
-        iconEnd = com.stripe.android.ui.core.R.drawable.stripe_ic_lock
-    )
+    Column {
+        PrimaryButton(
+            modifier = Modifier
+                .testTag(WALLET_SCREEN_PAY_BUTTON),
+            label = state.primaryButtonLabel.resolve(LocalContext.current),
+            state = state.primaryButtonState,
+            onButtonClick = onPrimaryButtonClick,
+            iconEnd = com.stripe.android.ui.core.R.drawable.stripe_ic_lock
+        )
 
-    SecondaryButton(
-        modifier = Modifier
-            .testTag(WALLET_SCREEN_PAY_ANOTHER_WAY_BUTTON),
-        enabled = !state.primaryButtonState.isBlocking,
-        label = stringResource(id = R.string.stripe_wallet_pay_another_way),
-        onClick = onPayAnotherWayClicked
-    )
+        SecondaryButton(
+            modifier = Modifier
+                .testTag(WALLET_SCREEN_PAY_ANOTHER_WAY_BUTTON),
+            enabled = !state.primaryButtonState.isBlocking,
+            label = stringResource(id = R.string.stripe_wallet_pay_another_way),
+            onClick = onPayAnotherWayClicked
+        )
+    }
 }
 
 @Composable
@@ -349,7 +390,7 @@ private fun ExpandedPaymentDetails(
 ) {
     val isEnabled = !uiState.primaryButtonState.isBlocking
 
-    LazyColumn(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .border(
@@ -363,13 +404,44 @@ private fun ExpandedPaymentDetails(
                 shape = MaterialTheme.linkShapes.large
             )
     ) {
-        item {
-            ExpandedRowHeader(
-                isEnabled = isEnabled,
-                onCollapse = onCollapse
+        ExpandedRowHeader(
+            isEnabled = isEnabled,
+            onCollapse = onCollapse
+        )
+
+        Column(
+            modifier = Modifier
+                .weight(
+                    weight = 1f,
+                    fill = false
+                )
+        ) {
+            PaymentDetailsList(
+                uiState = uiState,
+                onItemSelected = onItemSelected,
+                onMenuButtonClick = onMenuButtonClick
             )
         }
 
+        AddPaymentMethodRow(
+            isEnabled = isEnabled,
+            onAddNewPaymentMethodClick = onAddNewPaymentMethodClick
+        )
+    }
+}
+
+@Composable
+private fun PaymentDetailsList(
+    uiState: WalletUiState,
+    onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onMenuButtonClick: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+) {
+    val isEnabled = !uiState.primaryButtonState.isBlocking
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
         items(
             items = uiState.paymentDetailsList,
             key = {
@@ -389,13 +461,6 @@ private fun ExpandedPaymentDetails(
                 onMenuButtonClick = {
                     onMenuButtonClick(item)
                 }
-            )
-        }
-
-        item {
-            AddPaymentMethodRow(
-                isEnabled = isEnabled,
-                onAddNewPaymentMethodClick = onAddNewPaymentMethodClick
             )
         }
     }
