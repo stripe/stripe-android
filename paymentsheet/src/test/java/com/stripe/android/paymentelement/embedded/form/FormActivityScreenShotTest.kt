@@ -7,14 +7,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
-import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.paymentsheet.utils.ViewModelStoreOwnerContext
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
@@ -36,7 +36,10 @@ internal class FormActivityScreenShotTest {
     @Test
     fun testFormActivity_enabled() {
         paparazziRule.snapshot {
-            TestFormActivityUi()
+            TestFormActivityUi(
+                confirmationState = ConfirmationHandler.State.Idle,
+                enabled = true
+            )
         }
     }
 
@@ -44,7 +47,7 @@ internal class FormActivityScreenShotTest {
     fun testFormActivity_disabled() {
         paparazziRule.snapshot {
             TestFormActivityUi(
-                isEnabled = false
+                confirmationState = ConfirmationHandler.State.Idle
             )
         }
     }
@@ -53,9 +56,7 @@ internal class FormActivityScreenShotTest {
     fun testFormActivity_processing() {
         paparazziRule.snapshot {
             TestFormActivityUi(
-                isEnabled = false,
-                isProcessing = true,
-                processingState = PrimaryButtonProcessingState.Processing
+                confirmationState = confirmationStateConfirming(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
             )
         }
     }
@@ -64,8 +65,7 @@ internal class FormActivityScreenShotTest {
     fun testFormActivity_complete() {
         paparazziRule.snapshot {
             TestFormActivityUi(
-                isEnabled = false,
-                processingState = PrimaryButtonProcessingState.Completed
+                confirmationState = confirmationStateComplete(true)
             )
         }
     }
@@ -74,9 +74,7 @@ internal class FormActivityScreenShotTest {
     fun testFormActivity_error() {
         paparazziRule.snapshot {
             TestFormActivityUi(
-                isEnabled = true,
-                processingState = PrimaryButtonProcessingState.Idle(null),
-                error = "Something went wrong"
+                confirmationState = confirmationStateComplete(false)
             )
         }
     }
@@ -84,10 +82,8 @@ internal class FormActivityScreenShotTest {
     @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
     @Composable
     private fun TestFormActivityUi(
-        isEnabled: Boolean = true,
-        processingState: PrimaryButtonProcessingState = PrimaryButtonProcessingState.Idle(null),
-        isProcessing: Boolean = false,
-        error: String? = null
+        confirmationState: ConfirmationHandler.State,
+        enabled: Boolean = false
     ) {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val selectionHolder = EmbeddedSelectionHolder(SavedStateHandle())
@@ -112,6 +108,7 @@ internal class FormActivityScreenShotTest {
             formActivityStateHelper = stateHolder,
         ).create()
 
+        stateHolder.update(confirmationState)
         val state by stateHolder.state.collectAsState()
 
         ViewModelStoreOwnerContext {
@@ -120,12 +117,7 @@ internal class FormActivityScreenShotTest {
                 eventReporter = FakeEventReporter(),
                 onClick = {},
                 onProcessingCompleted = {},
-                state = state.copy(
-                    isEnabled = isEnabled,
-                    isProcessing = isProcessing,
-                    error = error?.resolvableString,
-                    processingState = processingState
-                ),
+                state = state.copy(isEnabled = enabled),
                 onDismissed = {}
             )
         }
