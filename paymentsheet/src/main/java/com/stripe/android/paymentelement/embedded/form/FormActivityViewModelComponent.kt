@@ -76,9 +76,6 @@ internal interface FormActivityViewModelComponent {
         fun initializationMode(initializationMode: PaymentElementLoader.InitializationMode): Builder
 
         @BindsInstance
-        fun context(context: Context): Builder
-
-        @BindsInstance
         fun application(application: Application): Builder
 
         @BindsInstance
@@ -114,6 +111,11 @@ internal interface FormActivityViewModelModule {
     fun bindsFormActivityStateHelper(helper: DefaultFormActivityStateHelper): FormActivityStateHelper
 
     companion object {
+        @Provides
+        fun providesContext(application: Application): Context {
+            return application
+        }
+
         @Provides
         @Singleton
         fun providesLinkAccountHolder(savedStateHandle: SavedStateHandle): LinkAccountHolder {

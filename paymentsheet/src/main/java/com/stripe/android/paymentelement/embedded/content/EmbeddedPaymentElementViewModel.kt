@@ -27,7 +27,7 @@ internal class EmbeddedPaymentElementViewModel @Inject constructor(
         override fun <T : ViewModel> create(modelClass: KClass<T>, extras: CreationExtras): T {
             val component = DaggerEmbeddedPaymentElementViewModelComponent.builder()
                 .savedStateHandle(extras.createSavedStateHandle())
-                .context(extras.requireApplication())
+                .application(extras.requireApplication())
                 .statusBarColor(statusBarColor)
                 .build()
             @Suppress("UNCHECKED_CAST")

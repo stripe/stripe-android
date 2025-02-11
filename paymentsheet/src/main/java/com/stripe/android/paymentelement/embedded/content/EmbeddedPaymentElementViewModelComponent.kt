@@ -63,9 +63,6 @@ internal interface EmbeddedPaymentElementViewModelComponent {
         fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
 
         @BindsInstance
-        fun context(context: Context): Builder
-
-        @BindsInstance
         fun application(application: Application): Builder
 
         @BindsInstance
@@ -134,6 +131,11 @@ internal interface EmbeddedPaymentElementViewModelModule {
     fun bindsEmbeddedContentHelper(helper: DefaultEmbeddedContentHelper): EmbeddedContentHelper
 
     companion object {
+        @Provides
+        fun providesContext(application: Application): Context {
+            return application
+        }
+
         @Provides
         @Singleton
         fun providesLinkAccountHolder(savedStateHandle: SavedStateHandle): LinkAccountHolder {

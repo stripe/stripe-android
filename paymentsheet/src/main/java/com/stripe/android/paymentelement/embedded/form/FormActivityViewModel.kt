@@ -33,7 +33,7 @@ internal class FormActivityViewModel @Inject constructor(
                 .configuration(args.configuration)
                 .initializationMode(args.initializationMode)
                 .statusBarColor(args.statusBarColor)
-                .context(extras.requireApplication())
+                .application(extras.requireApplication())
                 .savedStateHandle(extras.createSavedStateHandle())
                 .build()
 
