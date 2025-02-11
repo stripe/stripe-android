@@ -132,20 +132,7 @@ internal class DefaultCustomerSheetLoader(
     ): CustomerSheetState.Full {
         val paymentMethods = customerSheetSession.paymentMethods
 
-        val paymentSelection = customerSheetSession.savedSelection?.let { selection ->
-            when (selection) {
-                is SavedSelection.GooglePay -> PaymentSelection.GooglePay
-                is SavedSelection.Link -> PaymentSelection.Link()
-                is SavedSelection.PaymentMethod -> {
-                    paymentMethods.find { paymentMethod ->
-                        paymentMethod.id == selection.id
-                    }?.let {
-                        PaymentSelection.Saved(it)
-                    }
-                }
-                is SavedSelection.None -> null
-            }
-        }
+        val paymentSelection = getPaymentSelection(customerSheetSession, paymentMethods)
 
         val sortedPaymentMethods = sortPaymentMethods(
             paymentMethods = customerSheetSession.paymentMethods,
@@ -165,6 +152,47 @@ internal class DefaultCustomerSheetLoader(
             validationError = customerSheetSession.elementsSession.stripeIntent.validate(),
             customerPermissions = customerSheetSession.permissions,
         )
+    }
+
+    private fun getPaymentSelection(
+        customerSheetSession: CustomerSheetSession,
+        paymentMethods: List<PaymentMethod>
+    ): PaymentSelection? {
+        return when (val defaultPaymentMethodState = customerSheetSession.defaultPaymentMethodState) {
+            is DefaultPaymentMethodState.Enabled ->
+                useDefaultPaymentMethodAsPaymentSelection(paymentMethods, defaultPaymentMethodState)
+            is DefaultPaymentMethodState.Disabled ->
+                useLocalSelectionAsPaymentSelection(customerSheetSession, paymentMethods)
+        }
+    }
+
+    private fun useDefaultPaymentMethodAsPaymentSelection(
+        paymentMethods: List<PaymentMethod>,
+        defaultPaymentMethodState: DefaultPaymentMethodState.Enabled
+    ): PaymentSelection? {
+        return paymentMethods.find { paymentMethod ->
+            paymentMethod.id == defaultPaymentMethodState.defaultPaymentMethodId
+        }?.let { PaymentSelection.Saved(it) }
+    }
+
+    private fun useLocalSelectionAsPaymentSelection(
+        customerSheetSession: CustomerSheetSession,
+        paymentMethods: List<PaymentMethod>
+    ): PaymentSelection? {
+        return customerSheetSession.savedSelection?.let { selection ->
+            when (selection) {
+                is SavedSelection.GooglePay -> PaymentSelection.GooglePay
+                is SavedSelection.Link -> PaymentSelection.Link()
+                is SavedSelection.PaymentMethod -> {
+                    paymentMethods.find { paymentMethod ->
+                        paymentMethod.id == selection.id
+                    }?.let {
+                        PaymentSelection.Saved(it)
+                    }
+                }
+                is SavedSelection.None -> null
+            }
+        }
     }
 
     private fun filterSupportedPaymentMethods(

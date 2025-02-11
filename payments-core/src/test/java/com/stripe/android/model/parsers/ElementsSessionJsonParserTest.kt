@@ -569,6 +569,7 @@ class ElementsSessionJsonParserTest {
                         customerSheet = ElementsSession.Customer.Components.CustomerSheet.Enabled(
                             isPaymentMethodRemoveEnabled = true,
                             canRemoveLastPaymentMethod = true,
+                            isPaymentMethodSyncDefaultEnabled = false,
                         ),
                     )
                 ),
@@ -742,6 +743,63 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
+    fun `when 'payment_method_sync_default' is enabled, 'isPaymentMethodSyncDefaultEnabled' should be true`() {
+        testPaymentMethodSyncDefault(
+            paymentMethodSyncDefaultValue = "enabled",
+            expectedIsSyncDefaultEnabledValue = true,
+        )
+    }
+
+    @Test
+    fun `when 'payment_method_sync_default' is disabled, 'isPaymentMethodSyncDefaultEnabled' should be false`() {
+        testPaymentMethodSyncDefault(
+            paymentMethodSyncDefaultValue = "disabled",
+            expectedIsSyncDefaultEnabledValue = false,
+        )
+    }
+
+    @Test
+    fun `when 'payment_method_sync_default' is invalid value, 'isPaymentMethodSyncDefaultEnabled' should be false`() {
+        testPaymentMethodSyncDefault(
+            paymentMethodSyncDefaultValue = "not an accepted value",
+            expectedIsSyncDefaultEnabledValue = false,
+        )
+    }
+
+    private fun testPaymentMethodSyncDefault(
+        paymentMethodSyncDefaultValue: String,
+        expectedIsSyncDefaultEnabledValue: Boolean,
+    ) {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                customerSessionClientSecret = "customer_session_client_secret",
+                externalPaymentMethods = emptyList(),
+            ),
+            isLiveMode = false,
+        )
+
+        val intent = createPaymentIntentWithCustomerSession(
+            paymentMethodSyncDefaultFeature = paymentMethodSyncDefaultValue,
+        )
+
+        val elementsSession = parser.parse(intent)
+
+        val customerSheetComponent = elementsSession?.customer?.session?.components?.customerSheet
+
+        assertThat(customerSheetComponent)
+            .isInstanceOf(ElementsSession.Customer.Components.CustomerSheet.Enabled::class.java)
+
+        val enabledCustomerSheetComponent = customerSheetComponent as?
+            ElementsSession.Customer.Components.CustomerSheet.Enabled
+
+        assertThat(enabledCustomerSheetComponent?.isPaymentMethodSyncDefaultEnabled).isEqualTo(
+            expectedIsSyncDefaultEnabledValue
+        )
+    }
+
+    @Suppress("LongMethod")
+    @Test
     fun `ElementsSession has expected customer session information with customer sheet component in the response`() {
         val parser = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
@@ -768,6 +826,7 @@ class ElementsSessionJsonParserTest {
                         customerSheet = ElementsSession.Customer.Components.CustomerSheet.Enabled(
                             isPaymentMethodRemoveEnabled = true,
                             canRemoveLastPaymentMethod = true,
+                            isPaymentMethodSyncDefaultEnabled = false,
                         ),
                     )
                 ),

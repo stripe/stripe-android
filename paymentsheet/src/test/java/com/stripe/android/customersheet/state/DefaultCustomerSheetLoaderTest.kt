@@ -7,6 +7,7 @@ import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetLoader
 import com.stripe.android.customersheet.DefaultCustomerSheetLoader
+import com.stripe.android.customersheet.DefaultPaymentMethodState
 import com.stripe.android.customersheet.FakeCustomerAdapter
 import com.stripe.android.customersheet.data.CustomerAdapterDataSource
 import com.stripe.android.customersheet.data.CustomerSheetDataResult
@@ -122,6 +123,7 @@ class DefaultCustomerSheetLoaderTest {
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3"),
             ),
             savedSelection = SavedSelection.PaymentMethod(id = "pm_3"),
+            defaultPaymentMethodState = DefaultPaymentMethodState.Disabled,
         )
 
         val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
@@ -134,7 +136,7 @@ class DefaultCustomerSheetLoaderTest {
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3"),
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1"),
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
-        )
+        ).inOrder()
         assertThat(state.customerPermissions.canRemovePaymentMethods).isTrue()
         assertThat(state.customerPermissions.canRemoveLastPaymentMethod).isTrue()
         assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
@@ -156,6 +158,7 @@ class DefaultCustomerSheetLoaderTest {
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3"),
             ),
             savedSelection = null,
+            defaultPaymentMethodState = DefaultPaymentMethodState.Disabled,
         )
 
         val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
@@ -168,13 +171,59 @@ class DefaultCustomerSheetLoaderTest {
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1"),
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3"),
-        )
+        ).inOrder()
         assertThat(state.customerPermissions.canRemovePaymentMethods).isTrue()
         assertThat(state.customerPermissions.canRemoveLastPaymentMethod).isTrue()
         assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
         assertThat(state.paymentSelection).isNull()
         assertThat(state.paymentMethodMetadata.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
         assertThat(state.validationError).isNull()
+    }
+
+    @Test
+    fun `when default payment method feature is enabled and default PM available, default PM is first and selected`() = runTest {
+        val expectedPaymentMethods = listOf(
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1"),
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3")
+        )
+        val defaultPaymentMethod = expectedPaymentMethods[2]
+        val loader = createCustomerSheetLoader(
+            paymentMethods = expectedPaymentMethods,
+            // Setting a saved selection here so we can validate that it is not used.
+            savedSelection = SavedSelection.PaymentMethod(expectedPaymentMethods[1].id!!),
+            defaultPaymentMethodState = DefaultPaymentMethodState.Enabled(
+                defaultPaymentMethodId = defaultPaymentMethod.id
+            ),
+        )
+
+        val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
+
+        val state = loader.load(config).getOrThrow()
+        assertThat(state.customerPaymentMethods).containsExactlyElementsIn(expectedPaymentMethods)
+        assertThat(state.customerPaymentMethods.first()).isEqualTo(defaultPaymentMethod)
+        assertThat(state.paymentSelection).isEqualTo(PaymentSelection.Saved(defaultPaymentMethod))
+    }
+
+    @Test
+    fun `when default payment method feature is enabled and default PM null, PM order is preserved`() = runTest {
+        val expectedPaymentMethods = listOf(
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1"),
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3")
+        )
+        val loader = createCustomerSheetLoader(
+            paymentMethods = expectedPaymentMethods,
+            // Setting a saved selection here so we can validate that it is not used.
+            savedSelection = SavedSelection.PaymentMethod(expectedPaymentMethods[1].id!!),
+            defaultPaymentMethodState = DefaultPaymentMethodState.Enabled(defaultPaymentMethodId = null),
+        )
+
+        val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
+
+        val state = loader.load(config).getOrThrow()
+        assertThat(state.customerPaymentMethods).containsExactlyElementsIn(expectedPaymentMethods).inOrder()
+        assertThat(state.paymentSelection).isNull()
     }
 
     @Test
@@ -458,6 +507,7 @@ class DefaultCustomerSheetLoaderTest {
         intent: StripeIntent = STRIPE_INTENT,
         paymentMethods: List<PaymentMethod> = listOf(),
         savedSelection: SavedSelection? = null,
+        defaultPaymentMethodState: DefaultPaymentMethodState = DefaultPaymentMethodState.Disabled,
         initializationDataSource: CustomerSheetInitializationDataSource = FakeCustomerSheetInitializationDataSource(
             onLoadCustomerSheetSession = {
                 CustomerSheetDataResult.success(
@@ -480,6 +530,7 @@ class DefaultCustomerSheetLoaderTest {
                             canRemovePaymentMethods = true,
                             canRemoveLastPaymentMethod = true,
                         ),
+                        defaultPaymentMethodState = defaultPaymentMethodState,
                     )
                 )
             }
