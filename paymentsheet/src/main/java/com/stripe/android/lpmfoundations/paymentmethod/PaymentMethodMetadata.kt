@@ -277,7 +277,7 @@ internal data class PaymentMethodMetadata(
             )
         }
 
-        internal fun create(
+        internal fun createForCustomerSheet(
             elementsSession: ElementsSession,
             configuration: CustomerSheet.Configuration,
             paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
@@ -300,7 +300,8 @@ internal data class PaymentMethodMetadata(
                 shippingDetails = null,
                 customerMetadata = CustomerMetadata(
                     hasCustomerConfiguration = true,
-                    isPaymentMethodSetAsDefaultEnabled = getDefaultPaymentMethodsEnabled(elementsSession),
+                    isPaymentMethodSetAsDefaultEnabled =
+                        getDefaultPaymentMethodsEnabledForCustomerSheet(elementsSession),
                 ),
                 sharedDataSpecs = sharedDataSpecs,
                 isGooglePayReady = isGooglePayReady,
@@ -353,6 +354,16 @@ internal data class PaymentMethodMetadata(
                 as? ElementsSession.Customer.Components.MobilePaymentElement.Enabled
             return mobilePaymentElement?.isPaymentMethodSetAsDefaultEnabled
                 ?: false
+        }
+
+        private fun getDefaultPaymentMethodsEnabledForCustomerSheet(elementsSession: ElementsSession): Boolean {
+            val customerSheetComponent = elementsSession.customer?.session?.components?.customerSheet
+            return when (customerSheetComponent) {
+                is ElementsSession.Customer.Components.CustomerSheet.Enabled ->
+                    customerSheetComponent.isPaymentMethodSyncDefaultEnabled
+                ElementsSession.Customer.Components.CustomerSheet.Disabled,
+                null -> false
+            }
         }
     }
 }

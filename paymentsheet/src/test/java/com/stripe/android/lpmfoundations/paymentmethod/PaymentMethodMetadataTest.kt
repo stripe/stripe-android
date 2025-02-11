@@ -831,7 +831,7 @@ internal class PaymentMethodMetadataTest {
             overrideAllowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS,
         )
 
-        val metadata = PaymentMethodMetadata.create(
+        val metadata = PaymentMethodMetadata.createForCustomerSheet(
             elementsSession = elementsSession,
             configuration = configuration,
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
