@@ -5,7 +5,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.VerticalMode
@@ -13,6 +12,7 @@ import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
 import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor
+import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.CoroutineTestRule
@@ -35,7 +35,7 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
     fun displaysVerticalModeList() {
         val metadata = PaymentMethodMetadataFactory.create()
         val initialScreen = VerticalMode(FakePaymentMethodVerticalLayoutInteractor.create(metadata))
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
 
         paparazziRule.snapshot {
             PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
@@ -46,7 +46,7 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
     fun displaysVerticalModeListWithError() {
         val metadata = PaymentMethodMetadataFactory.create()
         val initialScreen = VerticalMode(FakePaymentMethodVerticalLayoutInteractor.create(metadata))
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
         viewModel.onError("Example error".resolvableString)
 
         paparazziRule.snapshot {
@@ -64,10 +64,10 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
         val initialScreen = VerticalMode(
             FakePaymentMethodVerticalLayoutInteractor.create(
                 paymentMethodMetadata = metadata,
-                selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
+                selection = PaymentMethodVerticalLayoutInteractor.Selection.New("cashapp"),
             )
         )
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
         viewModel.mandateHandler.updateMandateText("Example Mandate".resolvableString, showAbove = true)
         viewModel.primaryButtonUiStateSource.update { original ->
             original?.copy(enabled = true)
@@ -88,10 +88,10 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
         val initialScreen = VerticalMode(
             FakePaymentMethodVerticalLayoutInteractor.create(
                 paymentMethodMetadata = metadata,
-                selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
+                selection = PaymentMethodVerticalLayoutInteractor.Selection.New("cashapp"),
             )
         )
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
         viewModel.onError("Example error".resolvableString)
         viewModel.mandateHandler.updateMandateText("Example Mandate".resolvableString, showAbove = true)
         viewModel.primaryButtonUiStateSource.update { original ->
@@ -111,7 +111,7 @@ internal class PaymentSheetScreenVerticalModeScreenshotTest {
             initialShowsWalletsHeader = true
         )
         val initialScreen = VerticalMode(interactor)
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
         viewModel.walletsStateSource.value = WalletsState(
             link = WalletsState.Link(
                 email = null,

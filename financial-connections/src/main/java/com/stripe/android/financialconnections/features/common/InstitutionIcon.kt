@@ -30,7 +30,7 @@ internal fun InstitutionIcon(
 
     when {
         institutionIcon == null && disablePlaceholder -> {
-            Box(modifier = iconModifier.background(colors.backgroundOffset))
+            Box(modifier = iconModifier.background(colors.backgroundSecondary))
         }
         previewMode || institutionIcon == null -> {
             InstitutionPlaceholder(iconModifier)
@@ -42,7 +42,7 @@ internal fun InstitutionIcon(
                 contentDescription = null,
                 modifier = iconModifier,
                 contentScale = ContentScale.Crop,
-                loadingContent = { Box(modifier = iconModifier.background(colors.backgroundOffset)) },
+                loadingContent = { Box(modifier = iconModifier.background(colors.backgroundSecondary)) },
                 errorContent = { InstitutionPlaceholder(iconModifier) }
             )
         }

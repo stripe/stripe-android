@@ -67,12 +67,11 @@ internal class PaymentSheetAnalyticsListener(
         when (currentScreen) {
             is PaymentSheetScreen.Loading,
             is PaymentSheetScreen.VerticalModeForm,
-            is PaymentSheetScreen.ManageOneSavedPaymentMethod,
             is PaymentSheetScreen.ManageSavedPaymentMethods,
             is PaymentSheetScreen.CvcRecollection -> {
                 // Nothing to do here
             }
-            is PaymentSheetScreen.EditPaymentMethod -> {
+            is PaymentSheetScreen.UpdatePaymentMethod -> {
                 eventReporter.onShowEditablePaymentOption()
             }
             is PaymentSheetScreen.SelectSavedPaymentMethods -> {
@@ -92,7 +91,7 @@ internal class PaymentSheetAnalyticsListener(
 
     fun reportPaymentSheetHidden(hiddenScreen: PaymentSheetScreen) {
         when (hiddenScreen) {
-            is PaymentSheetScreen.EditPaymentMethod -> {
+            is PaymentSheetScreen.UpdatePaymentMethod -> {
                 eventReporter.onHideEditablePaymentOption()
             }
             else -> {

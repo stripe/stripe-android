@@ -19,7 +19,6 @@ import com.stripe.android.paymentsheet.model.SavedSelection
  *
  * Use [CustomerAdapter.create] to create an instance of a [CustomerAdapter].
  */
-@ExperimentalCustomerSheetApi
 interface CustomerAdapter {
 
     /**
@@ -92,7 +91,6 @@ interface CustomerAdapter {
      */
     suspend fun setupIntentClientSecretForCustomerAttach(): Result<String>
 
-    @ExperimentalCustomerSheetApi
     companion object {
 
         /**
@@ -134,7 +132,6 @@ interface CustomerAdapter {
      * A representation of a saved payment method, used for persisting the user's default payment
      * method.
      */
-    @ExperimentalCustomerSheetApi
     sealed class PaymentOption(
         open val id: String
     ) {
@@ -154,7 +151,7 @@ interface CustomerAdapter {
                 }
 
                 is Link -> {
-                    PaymentSelection.Link
+                    PaymentSelection.Link()
                 }
 
                 is StripeId -> {
@@ -173,7 +170,6 @@ interface CustomerAdapter {
             }
         }
 
-        @ExperimentalCustomerSheetApi
         companion object {
 
             @JvmStatic
@@ -204,29 +200,23 @@ interface CustomerAdapter {
         }
     }
 
-    @ExperimentalCustomerSheetApi
     sealed class Result<T> {
 
-        @ExperimentalCustomerSheetApi
         class Success<T> internal constructor(
             val value: T
         ) : Result<T>()
 
-        @ExperimentalCustomerSheetApi
         class Failure<T> internal constructor(
             val cause: Throwable,
             val displayMessage: String? = null
         ) : Result<T>()
 
-        @ExperimentalCustomerSheetApi
         companion object {
-            @ExperimentalCustomerSheetApi
             @JvmStatic
             fun <T> success(value: T): Result<T> {
                 return Success(value)
             }
 
-            @ExperimentalCustomerSheetApi
             @JvmStatic
             fun <T> failure(cause: Throwable, displayMessage: String?): Result<T> {
                 return Failure(cause, displayMessage)
@@ -240,7 +230,6 @@ interface CustomerAdapter {
  * Return [CustomerAdapter.Result.failure] with a [CustomerAdapter.Result.Failure.displayMessage]
  * if something went wrong during the retrieval of the ephemeral key.
  */
-@ExperimentalCustomerSheetApi
 fun interface CustomerEphemeralKeyProvider {
 
     suspend fun provideCustomerEphemeralKey(): CustomerAdapter.Result<CustomerEphemeralKey>
@@ -252,18 +241,15 @@ fun interface CustomerEphemeralKeyProvider {
  * [CustomerAdapter.Result.Failure.displayMessage]  if something went wrong during the retrieval of
  * the [SetupIntent] client secret.
  */
-@ExperimentalCustomerSheetApi
 fun interface SetupIntentClientSecretProvider {
 
     suspend fun provideSetupIntentClientSecret(customerId: String): CustomerAdapter.Result<String>
 }
 
-@ExperimentalCustomerSheetApi
 class CustomerEphemeralKey internal constructor(
     internal val customerId: String,
     internal val ephemeralKey: String,
 ) {
-    @ExperimentalCustomerSheetApi
     companion object {
 
         @JvmStatic

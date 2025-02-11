@@ -12,14 +12,20 @@ import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
+import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import java.util.Calendar
 import javax.inject.Named
 import javax.inject.Provider
 
 @Module
 internal interface CustomerSheetDataCommonModule {
+    @Binds
+    fun bindsCustomerRepository(repository: CustomerApiRepository): CustomerRepository
+
     @Binds
     fun bindsErrorReporter(errorReporter: RealErrorReporter): ErrorReporter
 
@@ -68,5 +74,10 @@ internal interface CustomerSheetDataCommonModule {
             publishableKeyProvider = { paymentConfiguration.get().publishableKey },
             networkTypeProvider = NetworkTypeDetector(context)::invoke,
         )
+
+        @Provides
+        fun provideTimeProvider(): () -> Long = {
+            Calendar.getInstance().timeInMillis
+        }
     }
 }

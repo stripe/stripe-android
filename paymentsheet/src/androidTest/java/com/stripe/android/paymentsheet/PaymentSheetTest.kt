@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet
 
+import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.onAllNodesWithTag
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.utils.urlEncode
@@ -8,6 +10,7 @@ import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.IntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -33,6 +36,11 @@ internal class PaymentSheetTest {
     @TestParameter(valuesProvider = IntegrationTypeProvider::class)
     lateinit var integrationType: IntegrationType
 
+    private val defaultConfiguration = PaymentSheet.Configuration(
+        merchantDisplayName = "Example, Inc.",
+        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+    )
+
     @Test
     fun testSuccessfulCardPayment() = runPaymentSheetTest(
         networkRule = networkRule,
@@ -50,7 +58,7 @@ internal class PaymentSheetTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = null,
+                configuration = defaultConfiguration,
             )
         }
 
@@ -82,7 +90,7 @@ internal class PaymentSheetTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = null,
+                configuration = defaultConfiguration,
             )
         }
 
@@ -117,7 +125,7 @@ internal class PaymentSheetTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = null,
+                configuration = defaultConfiguration,
             )
         }
 
@@ -154,7 +162,7 @@ internal class PaymentSheetTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = null,
+                configuration = defaultConfiguration,
             )
         }
 
@@ -200,7 +208,7 @@ internal class PaymentSheetTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = null,
+                configuration = defaultConfiguration,
             )
         }
     }
@@ -222,7 +230,7 @@ internal class PaymentSheetTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = null,
+                configuration = defaultConfiguration,
             )
         }
 
@@ -259,7 +267,7 @@ internal class PaymentSheetTest {
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = null,
+                configuration = defaultConfiguration,
             )
         }
     }
@@ -283,7 +291,7 @@ internal class PaymentSheetTest {
                 testContext.presentPaymentSheet {
                     presentWithPaymentIntent(
                         paymentIntentClientSecret = "pi_example_secret_example",
-                        configuration = null,
+                        configuration = defaultConfiguration,
                     )
                 }
 
@@ -341,8 +349,9 @@ internal class PaymentSheetTest {
                     merchantDisplayName = "Merchant, Inc.",
                     customer = PaymentSheet.CustomerConfiguration(
                         id = "cus_1",
-                        ephemeralKeySecret = "123",
+                        ephemeralKeySecret = "ek_123",
                     ),
+                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
                 ),
             )
         }
@@ -357,5 +366,89 @@ internal class PaymentSheetTest {
 
         page.fillCvcRecollection("123")
         page.clickPrimaryButton()
+    }
+
+    @Test
+    fun testPrimaryButtonAccessibility() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        testContext.presentPaymentSheet {
+            presentWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = defaultConfiguration,
+            )
+        }
+
+        page.fillOutCardDetails()
+
+        page.assertPrimaryButton(
+            expectedContentDescription = "Pay \$50.99",
+            canPay = true
+        )
+
+        page.clearCard()
+
+        page.assertPrimaryButton(
+            expectedContentDescription = "Pay \$50.99",
+            canPay = false
+        )
+
+        testContext.markTestSucceeded()
+    }
+
+    @Test
+    fun testFocusFirstEditBadgeOnEdit() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_cvc_recollection.json")
+        }
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/payment_methods"),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-get-success.json")
+        }
+
+        testContext.presentPaymentSheet {
+            presentWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = PaymentSheet.Configuration(
+                    merchantDisplayName = "Merchant, Inc.",
+                    customer = PaymentSheet.CustomerConfiguration(
+                        id = "cus_1",
+                        ephemeralKeySecret = "ek_123",
+                    ),
+                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                ),
+            )
+        }
+
+        page.clickEditButton()
+
+        // Check that the first badge is focused
+        composeTestRule
+            .onAllNodesWithTag(TEST_TAG_MODIFY_BADGE)[0]
+            .assertIsFocused()
+
+        testContext.markTestSucceeded()
     }
 }

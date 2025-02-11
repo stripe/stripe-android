@@ -11,6 +11,8 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomerSetti
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultShippingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Layout
+import com.stripe.android.paymentsheet.example.playground.settings.LayoutSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.LinkSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 
@@ -65,6 +67,7 @@ internal data class TestParameters(
             settings[DefaultShippingAddressSettingsDefinition] = false
             settings[DelayedPaymentMethodsSettingsDefinition] = false
             settings[AutomaticPaymentMethodsSettingsDefinition] = false
+            settings[LayoutSettingsDefinition] = Layout.HORIZONTAL
             block(settings)
             return settings
         }
@@ -150,6 +153,38 @@ internal sealed interface AuthorizeAction {
             override fun text(isSetup: Boolean): String = "Modify details"
             override val requiresBrowser: Boolean = false
             override val isConsideredDone: Boolean = false
+        }
+    }
+
+    sealed interface Test3DS2 : AuthorizeAction {
+        data object HSBCHTML : Test3DS2 {
+            override fun text(isSetup: Boolean): String = "Submit"
+            override val requiresBrowser: Boolean = false
+            override val isConsideredDone: Boolean = true
+        }
+
+        data object OOB : Test3DS2 {
+            override fun text(isSetup: Boolean): String = "Complete Authentication"
+            override val requiresBrowser: Boolean = false
+            override val isConsideredDone: Boolean = true
+        }
+
+        data object OTP : Test3DS2 {
+            override fun text(isSetup: Boolean): String = "Submit"
+            override val requiresBrowser: Boolean = false
+            override val isConsideredDone: Boolean = true
+        }
+
+        data object SingleSelect : Test3DS2 {
+            override fun text(isSetup: Boolean): String = "Submit"
+            override val requiresBrowser: Boolean = false
+            override val isConsideredDone: Boolean = true
+        }
+
+        data object MultiSelect : Test3DS2 {
+            override fun text(isSetup: Boolean): String = "Submit"
+            override val requiresBrowser: Boolean = false
+            override val isConsideredDone: Boolean = true
         }
     }
 }

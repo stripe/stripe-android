@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.ui
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
@@ -41,8 +42,7 @@ internal interface SelectSavedPaymentMethodsInteractor {
     sealed class ViewAction {
         data object AddCardPressed : ViewAction()
         data class SelectPaymentMethod(val selection: PaymentSelection?) : ViewAction()
-        data class DeletePaymentMethod(val paymentMethod: PaymentMethod) : ViewAction()
-        data class EditPaymentMethod(val paymentMethod: PaymentMethod) : ViewAction()
+        data class EditPaymentMethod(val paymentMethod: DisplayableSavedPaymentMethod) : ViewAction()
         data object ToggleEdit : ViewAction()
     }
 }
@@ -57,8 +57,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
     private val currentSelection: StateFlow<PaymentSelection?>,
     private val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?>,
     private val onAddCardPressed: () -> Unit,
-    private val onEditPaymentMethod: (PaymentMethod) -> Unit,
-    private val onDeletePaymentMethod: (PaymentMethod) -> Unit,
+    private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val onPaymentMethodSelected: (PaymentSelection?) -> Unit,
     override val isLiveMode: Boolean,
 ) : SelectSavedPaymentMethodsInteractor {
@@ -141,7 +140,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
         coroutineScope.launch {
             currentSelection.filter { selection ->
                 selection is PaymentSelection.Saved ||
-                    selection == PaymentSelection.Link ||
+                    selection is PaymentSelection.Link ||
                     selection == PaymentSelection.GooglePay
             }.collect {
                 _paymentOptionsRelevantSelection.value = it
@@ -171,7 +170,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
         paymentOptionsItems: List<PaymentOptionsItem>,
     ): PaymentOptionsItem? {
         val paymentSelection = when (selection) {
-            is PaymentSelection.Saved, PaymentSelection.Link, PaymentSelection.GooglePay -> selection
+            is PaymentSelection.Saved, is PaymentSelection.Link, PaymentSelection.GooglePay -> selection
 
             is PaymentSelection.New, is PaymentSelection.ExternalPaymentMethod, null -> savedSelection?.let {
                 PaymentSelection.Saved(it)
@@ -186,13 +185,9 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
 
     override fun handleViewAction(viewAction: SelectSavedPaymentMethodsInteractor.ViewAction) {
         when (viewAction) {
-            is SelectSavedPaymentMethodsInteractor.ViewAction.DeletePaymentMethod -> onDeletePaymentMethod(
-                viewAction.paymentMethod
-            )
-
-            is SelectSavedPaymentMethodsInteractor.ViewAction.EditPaymentMethod -> onEditPaymentMethod(
-                viewAction.paymentMethod
-            )
+            is SelectSavedPaymentMethodsInteractor.ViewAction.EditPaymentMethod -> {
+                onUpdatePaymentMethod(viewAction.paymentMethod)
+            }
 
             is SelectSavedPaymentMethodsInteractor.ViewAction.SelectPaymentMethod -> onPaymentMethodSelected(
                 viewAction.selection
@@ -218,7 +213,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
                 paymentOptionsItems = savedPaymentMethodMutator.paymentOptionsItems,
                 editing = savedPaymentMethodMutator.editing,
                 canEdit = savedPaymentMethodMutator.canEdit,
-                canRemove = savedPaymentMethodMutator.canRemove,
+                canRemove = customerStateHolder.canRemove,
                 toggleEdit = savedPaymentMethodMutator::toggleEditing,
                 isProcessing = viewModel.processing,
                 currentSelection = viewModel.selection,
@@ -232,8 +227,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
                         AddAnotherPaymentMethod(interactor = interactor)
                     )
                 },
-                onEditPaymentMethod = savedPaymentMethodMutator::modifyPaymentMethod,
-                onDeletePaymentMethod = savedPaymentMethodMutator::removePaymentMethod,
+                onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,
                 onPaymentMethodSelected = viewModel::handlePaymentMethodSelected,
                 isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             )

@@ -21,6 +21,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.strings.resolve
 
@@ -37,6 +38,7 @@ internal fun NewPaymentMethodTabLayoutUI(
     paymentMethods: List<SupportedPaymentMethod>,
     selectedIndex: Int,
     isEnabled: Boolean,
+    incentive: PaymentMethodIncentive?,
     onItemSelectedListener: (SupportedPaymentMethod) -> Unit,
     imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
@@ -88,6 +90,7 @@ internal fun NewPaymentMethodTabLayoutUI(
                     isSelected = index == selectedIndex,
                     isEnabled = isEnabled,
                     iconRequiresTinting = item.iconRequiresTinting,
+                    promoBadge = incentive?.takeIfMatches(item.code)?.displayText,
                     onItemSelectedListener = {
                         onItemSelectedListener(paymentMethods[index])
                     }

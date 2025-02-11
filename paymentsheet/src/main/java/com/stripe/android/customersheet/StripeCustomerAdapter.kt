@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet
 
 import android.content.Context
+import com.stripe.android.common.coroutines.CoalescingOrchestrator
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
@@ -22,7 +23,6 @@ import kotlin.coroutines.CoroutineContext
  * the customer's selected payment method to [SharedPreferences], which is used by [PaymentSheet]
  * to load the customer's default saved payment method.
  */
-@OptIn(ExperimentalCustomerSheetApi::class)
 @JvmSuppressWildcards
 internal class StripeCustomerAdapter @Inject internal constructor(
     private val context: Context,
@@ -37,6 +37,10 @@ internal class StripeCustomerAdapter @Inject internal constructor(
 
     @Volatile
     private var cachedCustomerEphemeralKey: CachedCustomerEphemeralKey? = null
+
+    private val customerEphemeralKeyCoalescingOrchestrator = CoalescingOrchestrator(
+        factory = customerEphemeralKeyProvider::provideCustomerEphemeralKey,
+    )
 
     override val canCreateSetupIntents: Boolean
         get() = setupIntentClientSecretProvider != null
@@ -66,6 +70,7 @@ internal class StripeCustomerAdapter @Inject internal constructor(
                 customerInfo = CustomerRepository.CustomerInfo(
                     id = customerEphemeralKey.customerId,
                     ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
+                    customerSessionClientSecret = null,
                 ),
                 types = requestedTypes,
                 silentlyFail = false,
@@ -85,7 +90,8 @@ internal class StripeCustomerAdapter @Inject internal constructor(
             customerRepository.attachPaymentMethod(
                 customerInfo = CustomerRepository.CustomerInfo(
                     id = customerEphemeralKey.customerId,
-                    ephemeralKeySecret = customerEphemeralKey.ephemeralKey
+                    ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
+                    customerSessionClientSecret = null,
                 ),
                 paymentMethodId = paymentMethodId
             ).getOrElse {
@@ -104,7 +110,8 @@ internal class StripeCustomerAdapter @Inject internal constructor(
             customerRepository.detachPaymentMethod(
                 customerInfo = CustomerRepository.CustomerInfo(
                     id = customerEphemeralKey.customerId,
-                    ephemeralKeySecret = customerEphemeralKey.ephemeralKey
+                    ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
+                    customerSessionClientSecret = null,
                 ),
                 paymentMethodId = paymentMethodId,
                 canRemoveDuplicates = false,
@@ -125,7 +132,8 @@ internal class StripeCustomerAdapter @Inject internal constructor(
             customerRepository.updatePaymentMethod(
                 customerInfo = CustomerRepository.CustomerInfo(
                     id = customerEphemeralKey.customerId,
-                    ephemeralKeySecret = customerEphemeralKey.ephemeralKey
+                    ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
+                    customerSessionClientSecret = null,
                 ),
                 paymentMethodId = paymentMethodId,
                 params = params
@@ -190,7 +198,7 @@ internal class StripeCustomerAdapter @Inject internal constructor(
                 )
             }?.result ?: run {
                 val newCachedCustomerEphemeralKey = CachedCustomerEphemeralKey(
-                    result = customerEphemeralKeyProvider.provideCustomerEphemeralKey(),
+                    result = customerEphemeralKeyCoalescingOrchestrator.get(),
                     date = timeProvider(),
                 )
                 cachedCustomerEphemeralKey = newCachedCustomerEphemeralKey
@@ -215,7 +223,6 @@ internal class StripeCustomerAdapter @Inject internal constructor(
     }
 }
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 private data class CachedCustomerEphemeralKey(
     val result: CustomerAdapter.Result<CustomerEphemeralKey>,
     val date: Long,

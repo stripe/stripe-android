@@ -1,5 +1,8 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import android.content.res.Configuration
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -13,7 +16,9 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.ui.PaymentMethodIconFromResource
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
@@ -21,15 +26,17 @@ import com.stripe.android.paymentsheet.ui.readNumbersAsIndividualDigits
 import com.stripe.android.paymentsheet.utils.testMetadata
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
+import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.strings.resolve
 
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 internal fun SavedPaymentMethodRowButton(
     displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     isEnabled: Boolean,
-    isClickable: Boolean = isEnabled,
     isSelected: Boolean,
     modifier: Modifier = Modifier,
+    rowStyle: Embedded.RowStyle = Embedded.RowStyle.FloatingButton.default,
     onClick: () -> Unit = {},
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
 ) {
@@ -45,7 +52,6 @@ internal fun SavedPaymentMethodRowButton(
     PaymentMethodRowButton(
         isEnabled = isEnabled,
         isSelected = isSelected,
-        isClickable = isClickable,
         iconContent = {
             val displayBrand = displayableSavedPaymentMethod.paymentMethod.card?.displayBrand
             PaymentMethodIconFromResource(
@@ -61,6 +67,7 @@ internal fun SavedPaymentMethodRowButton(
         },
         title = paymentMethodTitle.resolve(),
         subtitle = null,
+        promoText = null,
         onClick = onClick,
         modifier = modifier
             .testTag(
@@ -68,13 +75,17 @@ internal fun SavedPaymentMethodRowButton(
             ),
         contentDescription = contentDescription,
         trailingContent = trailingContent,
+        style = rowStyle,
+        shouldShowDefaultBadge = displayableSavedPaymentMethod.shouldShowDefaultBadge
     )
 }
 
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Preview
 @Composable
 internal fun PreviewCardSavedPaymentMethodRowButton() {
-    val cardSavedPaymentMethod = DisplayableSavedPaymentMethod(
+    val cardSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
         displayName = "4242".resolvableString,
         paymentMethod = PaymentMethod(
             id = "001",
@@ -89,11 +100,61 @@ internal fun PreviewCardSavedPaymentMethodRowButton() {
         )
     )
 
-    SavedPaymentMethodRowButton(
-        displayableSavedPaymentMethod = cardSavedPaymentMethod,
-        isEnabled = true,
-        isSelected = true,
+    DefaultStripeTheme {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            SavedPaymentMethodRowButton(
+                displayableSavedPaymentMethod = cardSavedPaymentMethod,
+                isEnabled = true,
+                isSelected = true,
+            )
+            SavedPaymentMethodRowButton(
+                displayableSavedPaymentMethod = cardSavedPaymentMethod,
+                isEnabled = false,
+                isSelected = false,
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview
+@Composable
+internal fun PreviewCardDefaultSavedPaymentMethodRowButton() {
+    val defaultSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
+        displayName = "4242".resolvableString,
+        shouldShowDefaultBadge = true,
+        paymentMethod = PaymentMethod(
+            id = "002",
+            created = null,
+            liveMode = false,
+            code = PaymentMethod.Type.Card.code,
+            type = PaymentMethod.Type.Card,
+            card = PaymentMethod.Card(
+                brand = CardBrand.AmericanExpress,
+                last4 = "4444",
+            )
+        )
     )
+
+    DefaultStripeTheme {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            SavedPaymentMethodRowButton(
+                displayableSavedPaymentMethod = defaultSavedPaymentMethod,
+                isEnabled = true,
+                isSelected = true,
+            )
+            SavedPaymentMethodRowButton(
+                displayableSavedPaymentMethod = defaultSavedPaymentMethod,
+                isEnabled = false,
+                isSelected = false,
+            )
+        }
+    }
 }
 
 internal const val TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON = "saved_payment_method_row_button"

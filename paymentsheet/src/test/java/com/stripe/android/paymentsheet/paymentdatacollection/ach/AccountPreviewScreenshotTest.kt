@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
@@ -18,6 +19,7 @@ import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.SameAsShippingController
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.TextFieldController
+import com.stripe.android.utils.BankFormScreenStateFactory
 import org.junit.Rule
 import org.junit.Test
 
@@ -36,6 +38,8 @@ internal class AccountPreviewScreenshotTest {
         amount = null,
         billingDetails = null,
         cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+        hasIntentToSetup = false,
+        paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
     )
 
     private val sameAsShippingElement = SameAsShippingElement(
@@ -51,22 +55,20 @@ internal class AccountPreviewScreenshotTest {
     @Test
     fun testPaymentFlow() {
         paparazzi.snapshot {
-            AccountPreviewScreen(
-                formArgs = formArguments,
-                bankName = "My Bank",
-                last4 = "3456",
-                isProcessing = false,
-                isPaymentFlow = true,
+            BankAccountForm(
+                state = BankFormScreenStateFactory.createWithSession("session_1234"),
                 instantDebits = false,
+                isPaymentFlow = true,
+                formArgs = formArguments,
                 nameController = createNameController(),
                 emailController = createEmailController(),
                 phoneController = createPhoneNumberController(),
                 addressController = createAddressController(),
-                lastTextFieldIdentifier = null,
                 sameAsShippingElement = sameAsShippingElement,
                 saveForFutureUseElement = saveForFutureUseElement,
                 showCheckbox = false,
-                onRemoveAccount = { },
+                lastTextFieldIdentifier = null,
+                onRemoveAccount = {},
             )
         }
     }
@@ -74,22 +76,20 @@ internal class AccountPreviewScreenshotTest {
     @Test
     fun testSetupFlow() {
         paparazzi.snapshot {
-            AccountPreviewScreen(
-                formArgs = formArguments,
-                bankName = "My Bank",
-                last4 = "3456",
-                isProcessing = false,
-                isPaymentFlow = false,
+            BankAccountForm(
+                state = BankFormScreenStateFactory.createWithSession("session_1234"),
                 instantDebits = false,
+                isPaymentFlow = false,
+                formArgs = formArguments,
                 nameController = createNameController(),
                 emailController = createEmailController(),
                 phoneController = createPhoneNumberController(),
                 addressController = createAddressController(),
-                lastTextFieldIdentifier = null,
                 sameAsShippingElement = sameAsShippingElement,
                 saveForFutureUseElement = saveForFutureUseElement,
                 showCheckbox = false,
-                onRemoveAccount = { },
+                lastTextFieldIdentifier = null,
+                onRemoveAccount = {},
             )
         }
     }
@@ -97,26 +97,99 @@ internal class AccountPreviewScreenshotTest {
     @Test
     fun testWithBillingAddress() {
         paparazzi.snapshot {
-            AccountPreviewScreen(
+            BankAccountForm(
+                state = BankFormScreenStateFactory.createWithSession("session_1234"),
+                instantDebits = false,
+                isPaymentFlow = true,
                 formArgs = formArguments.copy(
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                         address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                     ),
                 ),
-                bankName = "My Bank",
-                last4 = "3456",
-                isProcessing = false,
-                isPaymentFlow = true,
-                instantDebits = false,
                 nameController = createNameController(),
                 emailController = createEmailController(),
                 phoneController = createPhoneNumberController(),
                 addressController = createAddressController(fillAddress = true),
-                lastTextFieldIdentifier = null,
                 sameAsShippingElement = sameAsShippingElement,
                 saveForFutureUseElement = saveForFutureUseElement,
                 showCheckbox = false,
-                onRemoveAccount = { },
+                lastTextFieldIdentifier = null,
+                onRemoveAccount = {},
+            )
+        }
+    }
+
+    @Test
+    fun testWithPromoBadge() {
+        paparazzi.snapshot {
+            BankAccountForm(
+                state = BankFormScreenStateFactory.createWithSession(
+                    sessionId = "session_1234",
+                    promoText = "$5",
+                ),
+                instantDebits = true,
+                isPaymentFlow = true,
+                formArgs = formArguments,
+                nameController = createNameController(),
+                emailController = createEmailController(),
+                phoneController = createPhoneNumberController(),
+                addressController = createAddressController(fillAddress = false),
+                sameAsShippingElement = sameAsShippingElement,
+                saveForFutureUseElement = saveForFutureUseElement,
+                showCheckbox = false,
+                lastTextFieldIdentifier = null,
+                onRemoveAccount = {},
+            )
+        }
+    }
+
+    @Test
+    fun testWithPromoBadgeNextToSuperLongAccountName() {
+        paparazzi.snapshot {
+            BankAccountForm(
+                state = BankFormScreenStateFactory.createWithSession(
+                    sessionId = "session_1234",
+                    promoText = "$5",
+                    eligibleForPromo = false,
+                    bankName = "SuperDuperUltraLongBankName",
+                ),
+                instantDebits = true,
+                isPaymentFlow = true,
+                formArgs = formArguments,
+                nameController = createNameController(),
+                emailController = createEmailController(),
+                phoneController = createPhoneNumberController(),
+                addressController = createAddressController(fillAddress = false),
+                sameAsShippingElement = sameAsShippingElement,
+                saveForFutureUseElement = saveForFutureUseElement,
+                showCheckbox = false,
+                lastTextFieldIdentifier = null,
+                onRemoveAccount = {},
+            )
+        }
+    }
+
+    @Test
+    fun testWithIneligiblePromoBadge() {
+        paparazzi.snapshot {
+            BankAccountForm(
+                state = BankFormScreenStateFactory.createWithSession(
+                    sessionId = "session_1234",
+                    promoText = "$5",
+                    eligibleForPromo = false,
+                ),
+                instantDebits = true,
+                isPaymentFlow = true,
+                formArgs = formArguments,
+                nameController = createNameController(),
+                emailController = createEmailController(),
+                phoneController = createPhoneNumberController(),
+                addressController = createAddressController(fillAddress = false),
+                sameAsShippingElement = sameAsShippingElement,
+                saveForFutureUseElement = saveForFutureUseElement,
+                showCheckbox = false,
+                lastTextFieldIdentifier = null,
+                onRemoveAccount = {},
             )
         }
     }

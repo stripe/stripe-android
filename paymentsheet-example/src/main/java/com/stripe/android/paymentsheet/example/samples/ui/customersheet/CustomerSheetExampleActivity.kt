@@ -8,10 +8,15 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -27,13 +32,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal class CustomerSheetExampleActivity : AppCompatActivity() {
     private val viewModel by viewModels<CustomerSheetExampleViewModel>()
 
@@ -59,6 +62,11 @@ internal class CustomerSheetExampleActivity : AppCompatActivity() {
 
                 Column(
                     modifier = Modifier
+                        .padding(
+                            paddingValues = WindowInsets.systemBars.only(
+                                WindowInsetsSides.Horizontal + WindowInsetsSides.Top
+                            ).asPaddingValues()
+                        )
                         .fillMaxSize()
                         .padding(16.dp)
                 ) {
@@ -112,7 +120,6 @@ internal class CustomerSheetExampleActivity : AppCompatActivity() {
     }
 }
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 @Composable
 private fun CustomerPaymentMethods(
     state: CustomerSheetExampleViewState.Data,

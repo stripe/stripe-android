@@ -40,6 +40,7 @@ internal interface FinancialConnectionsManifestRepository {
     suspend fun getOrSynchronizeFinancialConnectionsSession(
         clientSecret: String,
         applicationId: String,
+        supportsAppVerification: Boolean,
         reFetchCondition: (SynchronizeSessionResponse) -> Boolean
     ): SynchronizeSessionResponse
 
@@ -206,15 +207,17 @@ private class FinancialConnectionsManifestRepositoryImpl(
     override suspend fun getOrSynchronizeFinancialConnectionsSession(
         clientSecret: String,
         applicationId: String,
+        supportsAppVerification: Boolean,
         reFetchCondition: (SynchronizeSessionResponse) -> Boolean
     ): SynchronizeSessionResponse = mutex.withLock {
         val cachedSync = cachedSynchronizeSessionResponse?.takeUnless(reFetchCondition)
-        return cachedSync ?: synchronize(applicationId, clientSecret)
+        return cachedSync ?: synchronize(applicationId, clientSecret, supportsAppVerification)
     }
 
     private suspend fun synchronize(
         applicationId: String,
         clientSecret: String,
+        supportsAppVerification: Boolean,
     ): SynchronizeSessionResponse = requestExecutor.execute(
         apiRequestFactory.createPost(
             url = synchronizeSessionUrl,
@@ -228,6 +231,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
                     "forced_authflow_version" to "v3",
                     PARAMS_FULLSCREEN to true,
                     PARAMS_HIDE_CLOSE_BUTTON to true,
+                    PARAMS_SUPPORT_APP_VERIFICATION to supportsAppVerification,
+                    PARAMS_VERIFY_APP_ID to applicationId,
                     NetworkConstants.PARAMS_APPLICATION_ID to applicationId
                 ),
                 NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
@@ -523,6 +528,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
     companion object {
         internal const val PARAMS_FULLSCREEN = "fullscreen"
         internal const val PARAMS_HIDE_CLOSE_BUTTON = "hide_close_button"
+        internal const val PARAMS_SUPPORT_APP_VERIFICATION = "supports_app_verification"
+        internal const val PARAMS_VERIFY_APP_ID = "verified_app_id"
 
         internal const val synchronizeSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/financial_connections/sessions/synchronize"

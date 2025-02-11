@@ -5,6 +5,8 @@ import android.content.res.ColorStateList
 import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import android.view.accessibility.AccessibilityNodeInfo
+import android.widget.Button
 import android.widget.FrameLayout
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
@@ -12,9 +14,12 @@ import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.semantics.invisibleToUser
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.withStyledAttributes
@@ -207,6 +212,13 @@ internal class PrimaryButton @JvmOverloads constructor(
         updateAlpha()
     }
 
+    override fun onInitializeAccessibilityNodeInfo(info: AccessibilityNodeInfo?) {
+        super.onInitializeAccessibilityNodeInfo(info)
+        // Indicate this custom view is a button, so TalkBack can announce it as such.
+        info?.className = Button::class.java.name
+        info?.isEnabled = isEnabled
+    }
+
     fun updateUiState(uiState: UIState?) {
         isVisible = uiState != null
 
@@ -220,6 +232,8 @@ internal class PrimaryButton @JvmOverloads constructor(
             lockVisible = uiState.lockVisible
             viewBinding.lockIcon.isVisible = lockVisible
             setOnClickListener { uiState.onClick() }
+
+            contentDescription = uiState.label.resolve(context)
         }
     }
 
@@ -282,6 +296,7 @@ internal class PrimaryButton @JvmOverloads constructor(
     )
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun LabelUI(label: String, color: Int?) {
     StripeTheme {
@@ -292,6 +307,12 @@ private fun LabelUI(label: String, color: Int?) {
             style = StripeTheme.primaryButtonStyle.getComposeTextStyle(),
             modifier = Modifier
                 .padding(start = 4.dp, end = 4.dp, top = 4.dp, bottom = 5.dp)
+                .semantics {
+                    // This shouldn't be visible for accessibility purposes
+                    // due to the content description and the click listener
+                    // being defined outside of compose, in PrimaryButton.
+                    invisibleToUser()
+                }
         )
     }
 }

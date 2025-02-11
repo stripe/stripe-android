@@ -21,7 +21,10 @@ internal class NetworkingLinkLoginWarmupPreviewParameterProvider :
         payload = Success(
             NetworkingLinkLoginWarmupState.Payload(
                 merchantName = "Test",
-                email = "email@test.com"
+                redactedEmail = "emai•••@test.com",
+                email = "email@test.com",
+                verifiedFlow = false,
+                sessionId = "sessionId"
             )
         ),
         disableNetworkingAsync = Uninitialized,
@@ -44,7 +47,10 @@ internal class NetworkingLinkLoginWarmupPreviewParameterProvider :
         payload = Success(
             NetworkingLinkLoginWarmupState.Payload(
                 merchantName = "Test",
-                email = "email@test.com"
+                redactedEmail = "emai•••@test.com",
+                email = "email@test.com",
+                verifiedFlow = false,
+                sessionId = "sessionId"
             )
         ),
         disableNetworkingAsync = Fail(Exception("Error")),
@@ -55,7 +61,10 @@ internal class NetworkingLinkLoginWarmupPreviewParameterProvider :
         payload = Success(
             NetworkingLinkLoginWarmupState.Payload(
                 merchantName = "Test",
-                email = "email@test.com"
+                redactedEmail = "emai•••@test.com",
+                email = "email@test.com",
+                verifiedFlow = false,
+                sessionId = "sessionId"
             )
         ),
         disableNetworkingAsync = Loading(),
@@ -66,7 +75,10 @@ internal class NetworkingLinkLoginWarmupPreviewParameterProvider :
         payload = Success(
             NetworkingLinkLoginWarmupState.Payload(
                 merchantName = "Test",
-                email = "email@test.com"
+                redactedEmail = "emai•••@test.com",
+                email = "email@test.com",
+                verifiedFlow = false,
+                sessionId = "sessionId"
             )
         ),
         disableNetworkingAsync = Uninitialized,

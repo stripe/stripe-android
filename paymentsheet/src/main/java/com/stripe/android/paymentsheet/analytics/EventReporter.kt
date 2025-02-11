@@ -4,9 +4,10 @@ import androidx.annotation.Keep
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
+import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 
 internal interface EventReporter {
 
@@ -32,7 +33,7 @@ internal interface EventReporter {
         linkMode: LinkMode?,
         googlePaySupported: Boolean,
         currency: String?,
-        initializationMode: PaymentSheet.InitializationMode,
+        initializationMode: PaymentElementLoader.InitializationMode,
         orderedLpms: List<String>,
         requireCvcRecollection: Boolean
     )
@@ -95,6 +96,8 @@ internal interface EventReporter {
     fun onSelectPaymentOption(
         paymentSelection: PaymentSelection,
     )
+
+    fun onDisallowedCardBrandEntered(brand: CardBrand)
 
     /**
      * The customer has pressed the confirm button.
@@ -184,7 +187,8 @@ internal interface EventReporter {
 
     enum class Mode(val code: String) {
         Complete("complete"),
-        Custom("custom");
+        Custom("custom"),
+        Embedded("embedded");
 
         @Keep
         override fun toString(): String = code

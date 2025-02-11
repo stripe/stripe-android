@@ -5,7 +5,6 @@ import android.app.Instrumentation
 import android.content.Intent
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.performClick
 import androidx.core.os.bundleOf
@@ -19,9 +18,9 @@ import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayRepository
-import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
@@ -37,18 +36,16 @@ import com.stripe.android.paymentsheet.utils.ProductIntegrationType
 import com.stripe.android.paymentsheet.utils.ProductIntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
-import com.stripe.android.paymentsheet.utils.assertFailed
 import com.stripe.android.paymentsheet.utils.expectNoResult
 import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 @RunWith(TestParameterInjector::class)
 internal class GooglePayTest {
@@ -132,102 +129,28 @@ internal class GooglePayTest {
         }
     }
 
-    @Test
-    fun googlePayFailsOnGooglePaySheetFailure() {
-        val flowControllerFailureResult = CountDownLatch(1)
-
-        runGooglePayFlowTest(
-            paymentResultCallback = {
-                when (integrationType) {
-                    ProductIntegrationType.PaymentSheet -> expectNoResult(it)
-                    ProductIntegrationType.FlowController -> {
-                        assertFailed(it)
-                        flowControllerFailureResult.countDown()
-                    }
-                }
-            }
-        ) { scenario ->
-            intendingGooglePayToBeLaunched(
-                GooglePayPaymentMethodLauncher.Result.Failed(
-                    error = IllegalStateException("An error occurred!"),
-                    errorCode = GooglePayPaymentMethodLauncher.INTERNAL_ERROR
-                )
-            )
-
-            scenario.confirm()
-
-            intendedGooglePayToBeLaunched()
-
-            when (integrationType) {
-                ProductIntegrationType.PaymentSheet -> {
-                    waitForErrorMessage("An internal error occurred.")
-                    scenario.markTestSucceeded()
-                }
-                ProductIntegrationType.FlowController -> flowControllerFailureResult.await()
-            }
-        }
-    }
-
-    @Test
-    fun googlePayFailsOnPaymentFailure() {
-        val flowControllerFailureResult = CountDownLatch(1)
-
-        runGooglePayFlowTest(
-            paymentResultCallback = {
-                when (integrationType) {
-                    ProductIntegrationType.PaymentSheet -> expectNoResult(it)
-                    ProductIntegrationType.FlowController -> {
-                        assertFailed(it)
-                        flowControllerFailureResult.countDown()
-                    }
-                }
-            }
-        ) { scenario ->
-            intendingGooglePayToBeLaunched(
-                GooglePayPaymentMethodLauncher.Result.Failed(
-                    error = IllegalStateException("An error occurred!"),
-                    errorCode = GooglePayPaymentMethodLauncher.INTERNAL_ERROR
-                )
-            )
-
-            scenario.confirm()
-
-            intendedGooglePayToBeLaunched()
-
-            when (integrationType) {
-                ProductIntegrationType.PaymentSheet -> {
-                    waitForErrorMessage("An internal error occurred.")
-                    scenario.markTestSucceeded()
-                }
-                ProductIntegrationType.FlowController -> flowControllerFailureResult.await()
-            }
-        }
-    }
-
     private fun runGooglePayFlowTest(
         paymentResultCallback: (PaymentSheetResult) -> Unit,
         test: (GooglePayFlowScenario) -> Unit
     ) {
-        val paymentOptionCountDownLatch = CountDownLatch(1)
-
         runGooglePayTest(
             isGooglePayReady = true,
             isGooglePayEnabledInElementsSession = true,
             hasGooglePayConfig = true,
-            paymentOptionCallback = {
-                paymentOptionCountDownLatch.countDown()
-            },
             paymentResultCallback = paymentResultCallback,
         ) { context ->
             test(
-                GooglePayFlowScenario(context::markTestSucceeded) {
+                GooglePayFlowScenario {
                     Espresso.onIdle()
                     composeTestRule.waitForIdle()
 
                     composeTestRule.onGooglePayOption().performClick()
 
                     if (context is ProductIntegrationTestRunnerContext.WithFlowController) {
-                        assertThat(paymentOptionCountDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
+                        runTest {
+                            val label = context.context.configureCallbackTurbine.awaitItem()?.label
+                            assertThat(label).isEqualTo("Google Pay")
+                        }
 
                         context.confirm()
                     }
@@ -245,7 +168,6 @@ internal class GooglePayTest {
         isGooglePayReady = isGooglePayReady,
         isGooglePayEnabledInElementsSession = isGooglePayEnabledInElementsSession,
         hasGooglePayConfig = hasGooglePayConfig,
-        paymentOptionCallback = {},
         paymentResultCallback = ::expectNoResult
     ) { context ->
         composeTestRule.onGooglePayOption().run {
@@ -263,7 +185,6 @@ internal class GooglePayTest {
         isGooglePayReady: Boolean,
         isGooglePayEnabledInElementsSession: Boolean,
         hasGooglePayConfig: Boolean,
-        paymentOptionCallback: PaymentOptionCallback,
         paymentResultCallback: (PaymentSheetResult) -> Unit,
         test: (context: ProductIntegrationTestRunnerContext) -> Unit,
     ) {
@@ -275,10 +196,10 @@ internal class GooglePayTest {
         runProductIntegrationTest(
             networkRule = testRules.networkRule,
             integrationType = integrationType,
-            paymentOptionCallback = paymentOptionCallback,
             resultCallback = paymentResultCallback,
         ) { context ->
             val configBuilder = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
+                .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
 
             if (hasGooglePayConfig) {
                 configBuilder.googlePay(
@@ -360,15 +281,6 @@ internal class GooglePayTest {
         intended(hasComponent(PAYMENT_CONFIRMATION_LAUNCHER_ACTIVITY_NAME))
     }
 
-    private fun waitForErrorMessage(message: String) {
-        composeTestRule.waitUntil(UI_TIMEOUT) {
-            composeTestRule
-                .onAllNodes(hasText(message))
-                .fetchSemanticsNodes()
-                .isNotEmpty()
-        }
-    }
-
     private fun ComposeTestRule.onGooglePayOption(): SemanticsNodeInteraction {
         return when (integrationType) {
             ProductIntegrationType.PaymentSheet -> onNode(hasTestTag(GOOGLE_PAY_BUTTON_TEST_TAG))
@@ -391,7 +303,6 @@ internal class GooglePayTest {
     }
 
     private class GooglePayFlowScenario(
-        val markTestSucceeded: () -> Unit,
         val confirm: () -> Unit,
     )
 

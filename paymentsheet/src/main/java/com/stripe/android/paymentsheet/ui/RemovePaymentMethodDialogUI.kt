@@ -1,8 +1,8 @@
 package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
@@ -16,24 +16,8 @@ internal fun RemovePaymentMethodDialogUI(
     onConfirmListener: () -> Unit,
     onDismissListener: () -> Unit,
 ) {
-    val resources = LocalContext.current.resources
-
-    val removeTitle = stringResource(
-        R.string.stripe_paymentsheet_remove_pm,
-        paymentMethod.displayName.resolve(),
-    )
-    val messageText = when (paymentMethod.paymentMethod.type) {
-        PaymentMethod.Type.Card -> paymentMethod.getDescription().resolve()
-        PaymentMethod.Type.USBankAccount -> resources.getString(
-            R.string.stripe_remove_bank_account_ending_in,
-            paymentMethod.paymentMethod.usBankAccount?.last4
-        )
-        PaymentMethod.Type.SepaDebit -> resources.getString(
-            R.string.stripe_remove_bank_account_ending_in,
-            paymentMethod.paymentMethod.sepaDebit?.last4
-        )
-        else -> ""
-    }
+    val removeTitle = paymentMethod.getRemoveDialogTitle().resolve()
+    val messageText = paymentMethod.getRemoveDialogDescription().resolve()
 
     SimpleDialogElementUI(
         titleText = removeTitle,
@@ -44,4 +28,29 @@ internal fun RemovePaymentMethodDialogUI(
         onConfirmListener = onConfirmListener,
         onDismissListener = onDismissListener,
     )
+}
+
+private fun DisplayableSavedPaymentMethod.getRemoveDialogTitle() = when (paymentMethod.type) {
+    PaymentMethod.Type.Card -> resolvableString(R.string.stripe_paymentsheet_remove_card_title)
+    PaymentMethod.Type.SepaDebit,
+    PaymentMethod.Type.USBankAccount ->
+        resolvableString(R.string.stripe_paymentsheet_remove_bank_account_question_title)
+    else -> resolvableString("")
+}
+
+private fun DisplayableSavedPaymentMethod.getRemoveDialogDescription() = when (paymentMethod.type) {
+    PaymentMethod.Type.Card -> resolvableString(
+        com.stripe.android.R.string.stripe_card_with_last_4,
+        this.brandDisplayName(),
+        paymentMethod.card?.last4
+    )
+    PaymentMethod.Type.SepaDebit -> resolvableString(
+        R.string.stripe_bank_account_with_last_4,
+        paymentMethod.sepaDebit?.last4
+    )
+    PaymentMethod.Type.USBankAccount -> resolvableString(
+        R.string.stripe_bank_account_with_last_4,
+        paymentMethod.usBankAccount?.last4
+    )
+    else -> resolvableString("")
 }

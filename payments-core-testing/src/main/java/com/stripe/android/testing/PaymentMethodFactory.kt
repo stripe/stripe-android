@@ -14,7 +14,11 @@ object PaymentMethodFactory {
         }
     }
 
-    fun PaymentMethod.update(last4: String?, addCbcNetworks: Boolean): PaymentMethod {
+    fun PaymentMethod.update(
+        last4: String?,
+        addCbcNetworks: Boolean,
+        brand: CardBrand = CardBrand.Visa
+    ): PaymentMethod {
         return copy(
             card = card?.copy(
                 last4 = last4,
@@ -25,7 +29,7 @@ object PaymentMethodFactory {
                     addCbcNetworks
                 },
                 displayBrand = "cartes_bancaries".takeIf { addCbcNetworks },
-                brand = CardBrand.Visa,
+                brand = brand,
             )
         )
     }
@@ -44,10 +48,10 @@ object PaymentMethodFactory {
         } else {
             "pm_1234"
         }
-        return card(id)
+        return card(id = id)
     }
 
-    fun card(id: String): PaymentMethod {
+    fun card(id: String?): PaymentMethod {
         return PaymentMethod(
             id = id,
             created = 123456789L,
@@ -56,7 +60,17 @@ object PaymentMethodFactory {
             code = PaymentMethod.Type.Card.code,
             card = PaymentMethod.Card(
                 last4 = "4242",
+                expiryMonth = 3,
+                expiryYear = 2027,
             ),
+        )
+    }
+
+    fun visaCard(): PaymentMethod {
+        return card(random = false).update(
+            last4 = "4242",
+            addCbcNetworks = false,
+            brand = CardBrand.Visa,
         )
     }
 
@@ -103,6 +117,26 @@ object PaymentMethodFactory {
         )
     }
 
+    fun instantDebits(): PaymentMethod {
+        return PaymentMethod(
+            id = "pm_1234",
+            created = 123456789L,
+            liveMode = false,
+            type = PaymentMethod.Type.Link,
+            code = PaymentMethod.Type.Link.code,
+        )
+    }
+
+    fun bacs(): PaymentMethod {
+        return PaymentMethod(
+            id = "pm_1234",
+            created = 123456789L,
+            liveMode = false,
+            type = PaymentMethod.Type.BacsDebit,
+            code = PaymentMethod.Type.BacsDebit.code,
+        )
+    }
+
     fun sepaDebit(): PaymentMethod {
         return PaymentMethod(
             id = "pm_1234",
@@ -110,6 +144,26 @@ object PaymentMethodFactory {
             liveMode = false,
             type = PaymentMethod.Type.SepaDebit,
             code = PaymentMethod.Type.SepaDebit.code,
+        )
+    }
+
+    fun amazonPay(): PaymentMethod {
+        return PaymentMethod(
+            id = "pm_1234",
+            created = 123456789L,
+            liveMode = false,
+            type = PaymentMethod.Type.AmazonPay,
+            code = PaymentMethod.Type.AmazonPay.code,
+        )
+    }
+
+    fun revolutPay(): PaymentMethod {
+        return PaymentMethod(
+            id = "pm_1234",
+            created = 123456789L,
+            liveMode = false,
+            type = PaymentMethod.Type.RevolutPay,
+            code = PaymentMethod.Type.RevolutPay.code,
         )
     }
 
@@ -122,6 +176,8 @@ object PaymentMethodFactory {
         cardJson.put("display_brand", card?.displayBrand)
         cardJson.put("brand", card?.brand?.code)
         cardJson.put("last4", card?.last4)
+        cardJson.put("exp_month", card?.expiryMonth)
+        cardJson.put("exp_year", card?.expiryYear)
 
         val networks = paymentMethod.card?.networks
         val networksJson = JSONObject()
@@ -131,10 +187,12 @@ object PaymentMethodFactory {
             availableJson.put(it)
         }
 
-        networksJson.put("available", availableJson)
-        networksJson.put("preferred", networks?.preferred)
+        if (availableJson.length() > 0) {
+            networksJson.put("available", availableJson)
+            networksJson.put("preferred", networks?.preferred)
 
-        cardJson.put("networks", networksJson)
+            cardJson.put("networks", networksJson)
+        }
 
         paymentMethodJson.put("card", cardJson)
 
@@ -153,7 +211,6 @@ object PaymentMethodFactory {
         usBankAccountJson.put("financial_connections_account", usBankAccount.financialConnectionsAccount)
         usBankAccountJson.put("fingerprint", usBankAccount.fingerprint)
         usBankAccountJson.put("last4", usBankAccount.last4)
-        usBankAccountJson.put("linked_account", usBankAccount.linkedAccount)
         usBankAccountJson.put("routing_number", usBankAccount.routingNumber)
 
         val networksJson = JSONObject()

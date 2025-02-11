@@ -7,6 +7,9 @@ tags:
 - startRecording: ${'/tmp/test_results/testmode-token_manualentry-' + new Date().getTime()}
 - clearState
 - openLink: stripeconnectionsexample://playground?integration_type=Standalone&experience=FinancialConnections&flow=Token&financial_connections_override_native=native&financial_connections_test_mode=true&merchant=testmode&permissions=balances,payment_method
+- scrollUntilVisible:
+    element:
+      id: "connect_accounts"
 - tapOn:
     id: "connect_accounts"
 # Wait until the consent button is visible
@@ -40,5 +43,7 @@ tags:
 # CONFIRM AND COMPLETE
 - tapOn:
     id: "done_button"
-- assertVisible: ".*Completed!.*"
+- scrollUntilVisible:
+    element:
+      text: ".*Completed!.*"
 - stopRecording

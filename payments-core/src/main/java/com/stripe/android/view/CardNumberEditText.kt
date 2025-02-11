@@ -9,6 +9,8 @@ import android.util.AttributeSet
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModelStoreOwner
+import com.stripe.android.CardBrandFilter
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.CardAccountRangeRepository
@@ -48,6 +50,7 @@ class CardNumberEditText internal constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     internal var viewModelStoreOwner: ViewModelStoreOwner? = null,
+    private var cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
 ) : StripeEditText(context, attrs, defStyleAttr) {
 
     @JvmOverloads
@@ -61,7 +64,8 @@ class CardNumberEditText internal constructor(
         defStyleAttr,
         Dispatchers.Main,
         Dispatchers.IO,
-        { PaymentConfiguration.getInstance(context).publishableKey }
+        { PaymentConfiguration.getInstance(context).publishableKey },
+        cardBrandFilter = DefaultCardBrandFilter
     )
 
     private constructor(
@@ -70,7 +74,8 @@ class CardNumberEditText internal constructor(
         defStyleAttr: Int,
         uiContext: CoroutineContext,
         workContext: CoroutineContext,
-        publishableKeySupplier: () -> String
+        publishableKeySupplier: () -> String,
+        cardBrandFilter: CardBrandFilter
     ) : this(
         context,
         attrs,
@@ -83,7 +88,8 @@ class CardNumberEditText internal constructor(
         PaymentAnalyticsRequestFactory(
             context,
             publishableKeyProvider = publishableKeySupplier
-        )
+        ),
+        cardBrandFilter = cardBrandFilter
     )
 
     @VisibleForTesting
@@ -177,7 +183,10 @@ class CardNumberEditText internal constructor(
         staticCardAccountRanges = staticCardAccountRanges,
         isCbcEligible = { isCbcEligible },
         accountRangeResultListener = object : CardAccountRangeService.AccountRangeResultListener {
-            override fun onAccountRangesResult(accountRanges: List<AccountRange>) {
+            override fun onAccountRangesResult(
+                accountRanges: List<AccountRange>,
+                unfilteredAccountRanges: List<AccountRange>
+            ) {
                 updateLengthFilter()
 
                 val brands = accountRanges.map { it.brand }.distinct()
@@ -185,7 +194,7 @@ class CardNumberEditText internal constructor(
 
                 if (isCbcEligible) {
                     implicitCardBrandForCbc = brands.firstOrNull() ?: CardBrand.Unknown
-                    possibleCardBrands = brands
+                    possibleCardBrands = unfilteredAccountRanges.map { it.brand }.distinct()
                 }
             }
         }

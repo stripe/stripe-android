@@ -14,14 +14,16 @@ import org.robolectric.RobolectricTestRunner
 class FinancialConnectionsSheetForInstantDebitsLauncherTest {
 
     private val configuration = FinancialConnectionsSheet.Configuration("", "")
+    private val encodedPaymentMethod = "{\"id\": \"pm_123\"}"
 
     @Test
     fun `create and present should return expected ConnectionsSheetResult#Completed`() {
         val testRegistry = FakeActivityResultRegistry(
             FinancialConnectionsSheetInstantDebitsResult.Completed(
-                paymentMethodId = "pm_123",
+                encodedPaymentMethod = encodedPaymentMethod,
                 last4 = "1234",
                 bankName = "Bank of America",
+                eligibleForIncentive = false,
             )
         )
 
@@ -42,9 +44,10 @@ class FinancialConnectionsSheetForInstantDebitsLauncherTest {
                 assertThat(results)
                     .containsExactly(
                         FinancialConnectionsSheetInstantDebitsResult.Completed(
-                            paymentMethodId = "pm_123",
+                            encodedPaymentMethod = encodedPaymentMethod,
                             last4 = "1234",
                             bankName = "Bank of America",
+                            eligibleForIncentive = false,
                         )
                     )
             }

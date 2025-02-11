@@ -72,7 +72,8 @@ data class FinancialConnectionsSession internal constructor(
     val accounts: FinancialConnectionsAccountList
         get() = accountsNew ?: accountsOld!!
 
-    internal val parsedToken: Token?
+    val parsedToken: Token?
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         get() = bankAccountToken?.let { TokenJsonParser().parse(JSONObject(it)) }
 
     /**

@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.navigation
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
@@ -20,20 +19,18 @@ internal class PaymentSheetScreenVerticalModeFormTest {
     }
 
     @Test
-    fun `topBarState reflects live mode and canGoBack`() = runTest {
-        val trueInteractor = FakeVerticalModeFormInteractor(isLiveMode = true, canGoBack = true)
+    fun `topBarState reflects live mode`() = runTest {
+        val trueInteractor = FakeVerticalModeFormInteractor(isLiveMode = true)
         PaymentSheetScreen.VerticalModeForm(trueInteractor).topBarState().test {
             awaitItem()!!.apply {
                 assertThat(showTestModeLabel).isFalse()
-                assertThat(icon).isEqualTo(R.drawable.stripe_ic_paymentsheet_back)
             }
         }
 
-        val falseInteractor = FakeVerticalModeFormInteractor(isLiveMode = false, canGoBack = false)
+        val falseInteractor = FakeVerticalModeFormInteractor(isLiveMode = false)
         PaymentSheetScreen.VerticalModeForm(falseInteractor).topBarState().test {
             awaitItem()!!.apply {
                 assertThat(showTestModeLabel).isTrue()
-                assertThat(icon).isEqualTo(R.drawable.stripe_ic_paymentsheet_close)
             }
         }
     }
@@ -49,15 +46,10 @@ internal class PaymentSheetScreenVerticalModeFormTest {
     private class FakeVerticalModeFormInteractor(
         override val state: StateFlow<VerticalModeFormInteractor.State> = stateFlowOf(mock()),
         override val isLiveMode: Boolean = false,
-        private val canGoBack: Boolean = false,
         private val onClose: () -> Unit = {},
     ) : VerticalModeFormInteractor {
         override fun handleViewAction(viewAction: VerticalModeFormInteractor.ViewAction) {
             throw AssertionError("Not implemented")
-        }
-
-        override fun canGoBack(): Boolean {
-            return canGoBack
         }
 
         override fun close() {

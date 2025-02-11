@@ -2,9 +2,7 @@ package com.stripe.android.customersheet.data
 
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.customersheet.CustomerAdapter
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal fun <T> CustomerAdapter.Result<T>.toCustomerSheetDataResult(): CustomerSheetDataResult<T> {
     return when (this) {
         is CustomerAdapter.Result.Success -> CustomerSheetDataResult.success(value)

@@ -1,28 +1,32 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState.BillingDetailsCollection
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal fun USBankAccountFormArguments.handleScreenStateChanged(
-    screenState: USBankAccountFormScreenState,
+    screenState: BankFormScreenState,
     enabled: Boolean,
-    onPrimaryButtonClick: (USBankAccountFormScreenState) -> Unit,
+    onPrimaryButtonClick: () -> Unit,
 ) {
     screenState.error?.let {
         onError(it)
     }
 
-    val showProcessingWhenClicked = screenState is BillingDetailsCollection || isCompleteFlow
+    if (screenState.linkedBankAccount == null) {
+        updatePrimaryButton(
+            text = resolvableString(StripeUiCoreR.string.stripe_continue_button_label),
+            onClick = onPrimaryButtonClick,
+            enabled = enabled,
+            shouldShowProcessingWhenClicked = isCompleteFlow,
+        )
+    } else {
+        // Clear the primary button
+        onUpdatePrimaryButtonUIState { null }
+    }
 
-    updatePrimaryButton(
-        text = screenState.primaryButtonText,
-        onClick = { onPrimaryButtonClick(screenState) },
-        enabled = enabled,
-        shouldShowProcessingWhenClicked = showProcessingWhenClicked
-    )
-
-    onMandateTextChanged(screenState.mandateText, false)
+    onMandateTextChanged(screenState.linkedBankAccount?.mandateText, false)
 }
 
 private fun USBankAccountFormArguments.updatePrimaryButton(

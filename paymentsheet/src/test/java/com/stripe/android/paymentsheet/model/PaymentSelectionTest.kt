@@ -3,12 +3,9 @@ package com.stripe.android.paymentsheet.model
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
 import com.stripe.android.testing.PaymentMethodFactory
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -18,7 +15,7 @@ class PaymentSelectionTest {
 
     @Test
     fun `Doesn't display a mandate for Link`() {
-        val link = PaymentSelection.Link
+        val link = PaymentSelection.Link()
         val result = link.mandateText(
             merchantName = "Merchant",
             isSetupFlow = false,
@@ -33,40 +30,6 @@ class PaymentSelectionTest {
             merchantName = "Merchant",
             isSetupFlow = false,
         )
-        assertThat(result).isNull()
-    }
-
-    @Test
-    fun `Doesn't display a mandate for new US bank accounts`() {
-        // We actually do show a mandate, but it's set independently from the PaymentSelection.
-        val newPaymentSelection = PaymentSelection.New.USBankAccount(
-            labelResource = "Test",
-            iconResource = 0,
-            paymentMethodCreateParams = mock(),
-            customerRequestedSave = mock(),
-            input = PaymentSelection.New.USBankAccount.Input(
-                name = "",
-                email = null,
-                phone = null,
-                address = null,
-                saveForFutureUse = false,
-            ),
-            instantDebits = null,
-            screenState = USBankAccountFormScreenState.SavedAccount(
-                financialConnectionsSessionId = "session_1234",
-                intentId = "intent_1234",
-                bankName = "Stripe Bank",
-                last4 = "6789",
-                primaryButtonText = "Continue".resolvableString,
-                mandateText = null,
-            ),
-        )
-
-        val result = newPaymentSelection.mandateText(
-            merchantName = "Merchant",
-            isSetupFlow = false,
-        )
-
         assertThat(result).isNull()
     }
 

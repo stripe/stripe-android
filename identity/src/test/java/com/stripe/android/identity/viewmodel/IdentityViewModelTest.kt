@@ -156,7 +156,8 @@ internal class IdentityViewModelTest {
         mockTfLiteInitializer,
         mockSavedStateHandle,
         mock(),
-        UnconfinedTestDispatcher()
+        UnconfinedTestDispatcher(),
+        mock()
     )
 
     private fun mockUploadSuccess() = runBlocking {

@@ -65,6 +65,7 @@ import com.stripe.android.financialconnections.ui.theme.Theme
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.uicore.elements.DropDown
 import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
+import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.utils.collectAsState
@@ -151,7 +152,9 @@ private fun NetworkingLinkSignupLoaded(
     LaunchedEffect(showFullForm) {
         if (showFullForm) {
             scrollState.animateScrollToBottom()
-            phoneNumberFocusRequester.requestFocus()
+            if (payload.focusPhoneFieldOnShow) {
+                phoneNumberFocusRequester.requestFocus()
+            }
         }
     }
 
@@ -267,7 +270,7 @@ private fun PhoneNumberSection(
                         modifier = Modifier
                             .padding(horizontal = 6.dp)
                             .clip(RoundedCornerShape(8.dp))
-                            .background(colors.background)
+                            .background(colors.backgroundSecondary)
                             .padding(vertical = 12.dp, horizontal = 8.dp)
                     )
                 },
@@ -285,7 +288,9 @@ private fun PhoneNumberSection(
 private fun Title(title: String) {
     AnnotatedText(
         text = TextResource.Text(fromHtml(title)),
-        defaultStyle = typography.headingXLarge,
+        defaultStyle = typography.headingXLarge.copy(
+            color = colors.textDefault,
+        ),
         onClickableTextClick = {},
     )
 }
@@ -294,7 +299,9 @@ private fun Title(title: String) {
 private fun Body(body: String) {
     AnnotatedText(
         text = TextResource.Text(fromHtml(body)),
-        defaultStyle = typography.bodyMedium,
+        defaultStyle = typography.bodyMedium.copy(
+            color = colors.textDefault,
+        ),
         onClickableTextClick = {},
     )
 }
@@ -317,13 +324,19 @@ internal fun EmailSection(
         ) {
             TextFieldSection(
                 modifier = Modifier
-                    .focusRequester(focusRequester)
-                    .onFocusChanged { focused = it.isFocused },
+                    .padding(vertical = 8.dp),
                 isSelected = focused,
                 textFieldController = emailController,
-                imeAction = if (showFullForm) ImeAction.Next else ImeAction.Done,
-                enabled = enabled
-            )
+            ) {
+                TextField(
+                    modifier = Modifier
+                        .focusRequester(focusRequester)
+                        .onFocusChanged { focused = it.isFocused },
+                    textFieldController = emailController,
+                    imeAction = if (showFullForm) ImeAction.Next else ImeAction.Done,
+                    enabled = enabled
+                )
+            }
             if (loading) {
                 CircularProgressIndicator(
                     modifier = Modifier
@@ -334,7 +347,7 @@ internal fun EmailSection(
                             end = 16.dp,
                             bottom = 8.dp
                         ),
-                    color = colors.iconBrand,
+                    color = colors.iconTint,
                     strokeWidth = 2.dp
                 )
             }

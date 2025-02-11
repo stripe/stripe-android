@@ -118,8 +118,8 @@ internal class Selectors(
 
     val googlePayContinueButton = UiAutomatorText(
         "Continue",
-        "android.widget.Button",
-        device
+        className = "android.widget.Button",
+        device = device
     )
 
     val playgroundBuyButton = ComposeButton(composeTestRule, hasTestTag(CHECKOUT_TEST_TAG))

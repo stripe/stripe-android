@@ -40,7 +40,6 @@ import com.stripe.android.identity.navigation.navigateToFinalErrorScreen
 import com.stripe.android.identity.ui.IdentityTheme
 import com.stripe.android.identity.ui.IdentityTopBarState
 import com.stripe.android.identity.viewmodel.IdentityViewModel
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
@@ -64,7 +63,8 @@ internal class IdentityActivity :
             { application },
             { uiContext },
             { workContext },
-            { subcomponent }
+            { subcomponent },
+            { finishWithResult(it) }
         )
 
     private val starterArgs: IdentityVerificationSheetContract.Args by lazy {

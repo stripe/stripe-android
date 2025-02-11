@@ -43,9 +43,7 @@ import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.createTestActivityRule
 import com.stripe.android.view.CardInputWidget.Companion.LOGGING_TOKEN
 import com.stripe.android.view.CardInputWidget.Companion.shouldIconShowBrand
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.parcelize.Parcelize
 import org.hamcrest.CoreMatchers.anything
 import org.junit.Rule
@@ -57,7 +55,6 @@ import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import java.util.Calendar
 import kotlin.coroutines.CoroutineContext
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
@@ -98,11 +95,6 @@ internal class CardInputWidgetTest {
             BinFixtures.DINERSCLUB14,
             listOf(AccountRangeFixtures.DINERSCLUB14)
         )
-    }
-
-    @AfterTest
-    fun cleanup() {
-        Dispatchers.resetMain()
     }
 
     @Test
@@ -1742,6 +1734,7 @@ internal class CardInputWidgetTest {
             expiryDateEditText.append("12")
             expiryDateEditText.append("50")
             cvcEditText.append("123")
+            cardNumberEditText.requestFocus()
 
             onView(withId(R.id.card_brand_view)).perform(click())
             onData(anything()).inRoot(isPlatformPopup()).atPosition(1).perform(click())

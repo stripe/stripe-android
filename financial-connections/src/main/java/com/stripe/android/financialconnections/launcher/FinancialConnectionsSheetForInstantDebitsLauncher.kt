@@ -37,11 +37,12 @@ class FinancialConnectionsSheetForInstantDebitsLauncher(
         )
     )
 
-    override fun present(configuration: FinancialConnectionsSheet.Configuration) {
+    override fun present(
+        configuration: FinancialConnectionsSheet.Configuration,
+        elementsSessionContext: FinancialConnectionsSheet.ElementsSessionContext?
+    ) {
         activityResultLauncher.launch(
-            FinancialConnectionsSheetActivityArgs.ForInstantDebits(
-                configuration
-            )
+            FinancialConnectionsSheetActivityArgs.ForInstantDebits(configuration, elementsSessionContext)
         )
     }
 }

@@ -84,6 +84,28 @@ object ConsumerFixtures {
         """.trimIndent()
     )
 
+    val CONSUMER_SINGLE_CARD_PAYMENT_DETAILS_NULL_VALUES_JSON = JSONObject(
+        """
+            {
+              "redacted_payment_details": {
+                  "id": "QAAAKJ6",
+                  "bank_account_details": null,
+                  "billing_address": null,
+                  "billing_email_address": "",
+                  "card_details": {
+                    "brand": "MASTERCARD",
+                    "checks": null,
+                    "exp_month": 12,
+                    "exp_year": 2023,
+                    "last4": "4444"
+                  },
+                  "is_default": null,
+                  "type": "CARD"
+              }
+            }
+        """.trimIndent()
+    )
+
     val CONSUMER_SINGLE_BANK_ACCOUNT_PAYMENT_DETAILS_JSON = JSONObject(
         """
             {
@@ -109,6 +131,38 @@ object ConsumerFixtures {
                   "billing_email_address": "",
                   "card_details": null,
                   "is_default": true,
+                  "type": "BANK_ACCOUNT"
+                }
+              ]
+            }
+        """.trimIndent()
+    )
+
+    val CONSUMER_SINGLE_BANK_ACCOUNT_PAYMENT_DETAILS_NULL_VALUES_JSON = JSONObject(
+        """
+            {
+              "redacted_payment_details": [
+                {
+                  "id": "wAAACGA",
+                  "bank_account_details": {
+                    "bank_icon_code": null,
+                    "bank_name": null,
+                    "last4": "6789"
+                  },
+                  "billing_address": {
+                    "administrative_area": null,
+                    "country_code": null,
+                    "dependent_locality": null,
+                    "line_1": null,
+                    "line_2": null,
+                    "locality": null,
+                    "name": null,
+                    "postal_code": null,
+                    "sorting_code": null
+                  },
+                  "billing_email_address": "",
+                  "card_details": null,
+                  "is_default": null,
                   "type": "BANK_ACCOUNT"
                 }
               ]

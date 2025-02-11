@@ -4,6 +4,7 @@ import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -28,6 +29,8 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -122,8 +125,8 @@ private fun FinancialConnectionsTopAppBar(
                 onCloseClick = onCloseClick
             )
         },
-        backgroundColor = FinancialConnectionsTheme.colors.textWhite,
-        contentColor = FinancialConnectionsTheme.colors.textBrand,
+        backgroundColor = FinancialConnectionsTheme.colors.background,
+        contentColor = FinancialConnectionsTheme.colors.textAction,
         modifier = modifier.graphicsLayer {
             shadowElevation = elevation.value.toPx()
         }
@@ -148,7 +151,7 @@ private fun BackButton(
         Icon(
             imageVector = Icons.Filled.ArrowBack,
             contentDescription = "Back icon",
-            tint = FinancialConnectionsTheme.colors.iconDefault,
+            tint = FinancialConnectionsTheme.colors.icon,
             modifier = Modifier
                 .testTag("top-app-bar-back-button")
                 .semantics { testTagsAsResourceId = true }
@@ -173,7 +176,7 @@ private fun CloseButton(
         Icon(
             imageVector = Icons.Filled.Close,
             contentDescription = "Close icon",
-            tint = FinancialConnectionsTheme.colors.iconDefault
+            tint = FinancialConnectionsTheme.colors.icon,
         )
     }
 }
@@ -192,6 +195,11 @@ private fun Title(
             Image(
                 modifier = Modifier.size(width = LOGO_WIDTH, height = LOGO_HEIGHT),
                 painter = painterResource(id = theme.icon),
+                colorFilter = if (isSystemInDarkTheme()) {
+                    ColorFilter.tint(FinancialConnectionsTheme.colors.textDefault)
+                } else {
+                    null
+                },
                 contentDescription = null // decorative element
             )
         }
@@ -208,7 +216,7 @@ private fun Title(
                     .padding(vertical = PILL_VERTICAL_PADDING, horizontal = PILL_HORIZONTAL_PADDING),
                 text = "Test",
                 style = FinancialConnectionsTheme.typography.labelMediumEmphasized,
-                color = FinancialConnectionsTheme.colors.textWhite
+                color = Color.White,
             )
         }
     }

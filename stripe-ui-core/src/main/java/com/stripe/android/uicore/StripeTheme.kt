@@ -62,7 +62,6 @@ data class StripeColors(
 data class StripeShapes(
     val cornerRadius: Float,
     val borderStrokeWidth: Float,
-    val borderStrokeWidthSelected: Float
 ) {
 
     val roundedCornerShape: Shape
@@ -125,6 +124,26 @@ data class PrimaryButtonTypography(
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class EmbeddedFlatStyle(
+    val separatorThickness: Float,
+    val separatorColor: Color,
+    val separatorInsets: Float,
+    val topSeparatorEnabled: Boolean,
+    val bottomSeparatorEnabled: Boolean
+)
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class EmbeddedInsets(
+    val checkmarkInsetDp: Float,
+    val additionalInsetsDp: Float
+)
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class EmbeddedFloatingStyle(
+    val spacing: Float
+)
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR = Color(0xFF24B47E)
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -170,7 +189,6 @@ object StripeThemeDefaults {
     val shapes = StripeShapes(
         cornerRadius = 6.0f,
         borderStrokeWidth = 1.0f,
-        borderStrokeWidthSelected = 2.0f
     )
 
     val typography = StripeTypography(
@@ -211,12 +229,28 @@ object StripeThemeDefaults {
             fontSize = typography.largeFontSize
         )
     )
+
+    val flat = EmbeddedFlatStyle(
+        separatorThickness = 1.0f,
+        separatorColor = Color(0xFF787880),
+        separatorInsets = 0.0f,
+        topSeparatorEnabled = true,
+        bottomSeparatorEnabled = true
+    )
+
+    val embeddedCommon = EmbeddedInsets(
+        additionalInsetsDp = 0.0f,
+        checkmarkInsetDp = 12.0f
+    )
+
+    val floating = EmbeddedFloatingStyle(
+        spacing = 12.0f
+    )
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class StripeComposeShapes(
     val borderStrokeWidth: Dp,
-    val borderStrokeWidthSelected: Dp,
     val material: Shapes
 )
 
@@ -226,7 +260,6 @@ data class StripeComposeShapes(
 fun StripeShapes.toComposeShapes(): StripeComposeShapes {
     return StripeComposeShapes(
         borderStrokeWidth = borderStrokeWidth.dp,
-        borderStrokeWidthSelected = borderStrokeWidthSelected.dp,
         material = MaterialTheme.shapes.copy(
             small = RoundedCornerShape(cornerRadius.dp),
             medium = RoundedCornerShape(cornerRadius.dp)
@@ -427,7 +460,7 @@ val MaterialTheme.stripeTypography: StripeTypography
 @ReadOnlyComposable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun MaterialTheme.getBorderStrokeWidth(isSelected: Boolean) =
-    if (isSelected) stripeShapes.borderStrokeWidthSelected.dp else stripeShapes.borderStrokeWidth.dp
+    if (isSelected) max(stripeShapes.borderStrokeWidth, 2f).dp else stripeShapes.borderStrokeWidth.dp
 
 @Composable
 @ReadOnlyComposable

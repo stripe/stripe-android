@@ -4,74 +4,11 @@ import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
-import com.stripe.android.model.CardBrand
-import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.uicore.PrimaryButtonColors
 import com.stripe.android.uicore.PrimaryButtonShape
 import com.stripe.android.uicore.PrimaryButtonTypography
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
-import java.lang.IllegalArgumentException
-
-private const val EPHEMERAL_KEY_SECRET_PREFIX = "ek_"
-private const val CUSTOMER_SESSION_CLIENT_SECRET_KEY_PREFIX = "cuss_"
-
-internal fun PaymentSheet.Configuration.validate() {
-    // These are not localized as they are not intended to be displayed to a user.
-    when {
-        merchantDisplayName.isBlank() -> {
-            throw IllegalArgumentException(
-                "When a Configuration is passed to PaymentSheet," +
-                    " the Merchant display name cannot be an empty string."
-            )
-        }
-        customer?.id?.isBlank() == true -> {
-            throw IllegalArgumentException(
-                "When a CustomerConfiguration is passed to PaymentSheet," +
-                    " the Customer ID cannot be an empty string."
-            )
-        }
-    }
-
-    customer?.accessType?.let { customerAccessType ->
-        when (customerAccessType) {
-            is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> {
-                if (customerAccessType.ephemeralKeySecret.isBlank() || customer.ephemeralKeySecret.isBlank()) {
-                    throw IllegalArgumentException(
-                        "When a CustomerConfiguration is passed to PaymentSheet, " +
-                            "the ephemeralKeySecret cannot be an empty string."
-                    )
-                }
-            }
-            is PaymentSheet.CustomerAccessType.CustomerSession -> {
-                val customerSessionClientSecret = customerAccessType.customerSessionClientSecret
-
-                if (customerSessionClientSecret.isBlank()) {
-                    throw IllegalArgumentException(
-                        "When a CustomerConfiguration is passed to PaymentSheet, " +
-                            "the customerSessionClientSecret cannot be an empty string."
-                    )
-                } else if (customerSessionClientSecret.startsWith(EPHEMERAL_KEY_SECRET_PREFIX)) {
-                    throw IllegalArgumentException(
-                        "Argument looks like an Ephemeral Key secret, but expecting a CustomerSession client " +
-                            "secret. See CustomerSession API: https://docs.stripe.com/api/customer_sessions/create"
-                    )
-                } else if (!customerSessionClientSecret.startsWith(CUSTOMER_SESSION_CLIENT_SECRET_KEY_PREFIX)) {
-                    throw IllegalArgumentException(
-                        "Argument does not look like a CustomerSession client secret. " +
-                            "See CustomerSession API: https://docs.stripe.com/api/customer_sessions/create"
-                    )
-                }
-            }
-        }
-    }
-}
-
-internal fun PaymentSheet.Configuration.containsVolatileDifferences(
-    other: PaymentSheet.Configuration
-): Boolean {
-    return toVolatileConfiguration() != other.toVolatileConfiguration()
-}
 
 internal fun PaymentSheet.Appearance.parseAppearance() {
     StripeTheme.colorsLightMutable = StripeThemeDefaults.colorsLight.copy(
@@ -141,59 +78,5 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
             fontSize = primaryButton.typography.fontSizeSp?.sp
                 ?: (StripeThemeDefaults.typography.largeFontSize * typography.sizeScaleFactor)
         )
-    )
-}
-
-/**
- * Creates a subset of the [PaymentSheet.Configuration] of values that affect the functional behavior of
- * [PaymentSheet]. The items not included mainly affect how [PaymentSheet] will look but not affect what
- * payment options are available to the customer:
- * - UI elements in [PaymentSheet.GooglePayConfiguration]:
- *   - [PaymentSheet.GooglePayConfiguration.amount]
- *   - [PaymentSheet.GooglePayConfiguration.label]
- *   - [PaymentSheet.GooglePayConfiguration.buttonType]
- * - [PaymentSheet.Configuration.merchantDisplayName]
- * - [PaymentSheet.Configuration.primaryButtonColor]
- * - [PaymentSheet.Configuration.appearance]
- * - [PaymentSheet.Configuration.primaryButtonLabel]
- */
-private fun PaymentSheet.Configuration.toVolatileConfiguration(): VolatilePaymentSheetConfiguration {
-    return VolatilePaymentSheetConfiguration(
-        customer = customer,
-        googlePay = googlePay?.toVolatileConfiguration(),
-        defaultBillingDetails = defaultBillingDetails,
-        shippingDetails = shippingDetails,
-        allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
-        allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
-        billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-        preferredNetworks = preferredNetworks,
-        allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
-    )
-}
-
-private fun PaymentSheet.GooglePayConfiguration.toVolatileConfiguration():
-    VolatilePaymentSheetConfiguration.GooglePayConfiguration {
-    return VolatilePaymentSheetConfiguration.GooglePayConfiguration(
-        environment = environment,
-        countryCode = countryCode,
-        currencyCode = currencyCode,
-    )
-}
-
-private data class VolatilePaymentSheetConfiguration(
-    val customer: PaymentSheet.CustomerConfiguration?,
-    val googlePay: GooglePayConfiguration?,
-    val defaultBillingDetails: PaymentSheet.BillingDetails?,
-    val shippingDetails: AddressDetails?,
-    val allowsDelayedPaymentMethods: Boolean,
-    val allowsPaymentMethodsRequiringShippingAddress: Boolean,
-    val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
-    val preferredNetworks: List<CardBrand>,
-    val allowsRemovalOfLastSavedPaymentMethod: Boolean,
-) {
-    data class GooglePayConfiguration(
-        val environment: PaymentSheet.GooglePayConfiguration.Environment,
-        val countryCode: String,
-        val currencyCode: String? = null,
     )
 }

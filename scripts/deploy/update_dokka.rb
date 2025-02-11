@@ -3,6 +3,11 @@
 require_relative 'common'
 
 def generate_dokka()
+    if (@is_older_version)
+        rputs "Skipping updating dokka because this release is for an older version."
+        return
+    end
+
     dokka_change_description = "Generate dokka for #{@version}"
 
     begin
@@ -11,7 +16,7 @@ def generate_dokka()
         execute_or_fail("./gradlew clean")
         execute_or_fail("./gradlew dokkaHtmlMultiModule")
 
-        execute_or_fail("git add docs/*")
+        execute_or_fail("git add -A docs/*")
         execute_or_fail("git commit -m \"#{dokka_change_description}\"")
     rescue
         execute("git restore --staged docs") # unstage any staged docs files

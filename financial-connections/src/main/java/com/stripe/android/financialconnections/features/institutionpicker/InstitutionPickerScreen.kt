@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -219,16 +218,15 @@ private fun LazyListScope.searchResults(
     when {
         // No input: Display featured institutions.
         isInputEmpty -> {
-            itemsIndexed(
+            items(
                 items = payload.featuredInstitutions.data,
-                key = { _, institution -> institution.id },
-                itemContent = { index, institution ->
+                key = { it.id },
+                itemContent = { institution ->
                     InstitutionResultTile(
                         modifier = Modifier.padding(8.dp),
                         loading = selectedInstitutionId == institution.id,
                         enabled = selectedInstitutionId?.let { it == institution.id } ?: true,
                         institution = institution,
-                        index = index,
                         onInstitutionSelected = { onInstitutionSelected(it, true) }
                     )
                 }
@@ -272,16 +270,15 @@ private fun LazyListScope.searchResults(
                 }
             } else {
                 // RESULTS CASE: Institution List + Manual Entry final row if needed.
-                itemsIndexed(
+                items(
                     items = institutions().data,
-                    key = { _, institution -> institution.id },
-                    itemContent = { index, institution ->
+                    key = { it.id },
+                    itemContent = { institution ->
                         InstitutionResultTile(
                             modifier = Modifier.padding(8.dp),
                             loading = selectedInstitutionId == institution.id,
                             enabled = selectedInstitutionId?.let { it == institution.id } ?: true,
                             institution = institution,
-                            index = index,
                             onInstitutionSelected = { onInstitutionSelected(it, false) }
                         )
                     }
@@ -328,7 +325,7 @@ private fun NoResultsTile(
             ),
             annotationStyles = mapOf(
                 StringAnnotation.CLICKABLE to typography.bodyMediumEmphasized.toSpanStyle().copy(
-                    color = colors.textBrand,
+                    color = colors.textAction,
                 )
             ),
         )
@@ -356,7 +353,7 @@ private fun SearchRow(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .background(colors.backgroundSurface)
+            .background(colors.background)
             .padding(top = 0.dp, bottom = 8.dp, start = 8.dp, end = 8.dp)
     ) {
         FinancialConnectionsOutlinedTextField(
@@ -366,7 +363,7 @@ private fun SearchRow(
             leadingIcon = {
                 Icon(
                     painter = painterResource(id = R.drawable.stripe_ic_search),
-                    tint = colors.iconDefault,
+                    tint = colors.icon,
                     contentDescription = "Search icon",
                 )
             },
@@ -415,7 +412,7 @@ private fun ClearSearchButton(
     ) {
         Icon(
             imageVector = Icons.Filled.Clear,
-            tint = colors.backgroundSurface,
+            tint = colors.background,
             contentDescription = "Clear search",
         )
     }
@@ -502,7 +499,6 @@ private fun InstitutionResultTile(
     institution: FinancialConnectionsInstitution,
     loading: Boolean = false,
     enabled: Boolean = true,
-    index: Int,
     onInstitutionSelected: (FinancialConnectionsInstitution) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
@@ -511,7 +507,7 @@ private fun InstitutionResultTile(
         modifier = modifier
             .fillMaxSize()
             .semantics { testTagsAsResourceId = true }
-            .testTag("search_result_$index")
+            .testTag(institution.id)
             .clickable(
                 enabled = enabled && loading.not(),
                 interactionSource = remember { MutableInteractionSource() },

@@ -7,7 +7,7 @@ import org.tensorflow.lite.Interpreter
 import java.io.File
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class InterpreterWrapperImpl(file: File, options: InterpreterOptionsWrapper) : InterpreterWrapper {
+class InterpreterWrapperImpl constructor(file: File, options: InterpreterOptionsWrapper) : InterpreterWrapper {
     private val interpreter: Interpreter = Interpreter(file, options.toInterpreterOptions())
 
     override fun runForMultipleInputsOutputs(inputs: Array<Any>, outputs: Map<Int, Any>) {

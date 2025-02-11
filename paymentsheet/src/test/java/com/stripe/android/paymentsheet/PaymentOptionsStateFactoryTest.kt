@@ -21,7 +21,7 @@ class PaymentOptionsStateFactoryTest {
             currentSelection = PaymentSelection.Saved(paymentMethod),
             nameProvider = { it!!.resolvableString },
             isCbcEligible = false,
-            canRemovePaymentMethods = true,
+            defaultPaymentMethodId = null,
         )
 
         val selectedPaymentMethod = state.selectedItem as? PaymentOptionsItem.SavedPaymentMethod
@@ -36,10 +36,10 @@ class PaymentOptionsStateFactoryTest {
             paymentMethods = paymentMethods,
             showGooglePay = false,
             showLink = false,
-            currentSelection = PaymentSelection.Link,
+            currentSelection = PaymentSelection.Link(),
             nameProvider = { it!!.resolvableString },
             isCbcEligible = false,
-            canRemovePaymentMethods = true,
+            defaultPaymentMethodId = null,
         )
 
         assertThat(state.selectedItem).isNull()
@@ -65,10 +65,10 @@ class PaymentOptionsStateFactoryTest {
             paymentMethods = paymentMethods,
             showGooglePay = false,
             showLink = false,
-            currentSelection = PaymentSelection.Link,
+            currentSelection = PaymentSelection.Link(),
             nameProvider = { it!!.resolvableString },
             isCbcEligible = true,
-            canRemovePaymentMethods = true,
+            defaultPaymentMethodId = null,
         )
 
         assertThat(
@@ -77,10 +77,9 @@ class PaymentOptionsStateFactoryTest {
     }
 
     @Test
-    fun `isEnabledDuringEditing is true for all saved payment methods when remove is enabled`() {
+    fun `isEnabledDuringEditing is true for all saved payment methods when remove is enabled, using updatePM screen`() {
         val state = createPaymentOptionsState(
             paymentMethods = PaymentMethodFixtures.createCards(3),
-            canRemovePaymentMethods = true,
         )
 
         val options = state.items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
@@ -91,62 +90,56 @@ class PaymentOptionsStateFactoryTest {
     }
 
     @Test
-    fun `canRemovePaymentMethods is false for all saved payment methods`() {
+    fun `saved payment methods are enabled even when cannot remove when using updatePM screen`() {
         val state = createPaymentOptionsState(
             paymentMethods = PaymentMethodFixtures.createCards(3),
-            canRemovePaymentMethods = false,
         )
 
         val options = state.items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
 
-        assertThat(options[0].isEnabledDuringEditing).isFalse()
-        assertThat(options[1].isEnabledDuringEditing).isFalse()
-        assertThat(options[2].isEnabledDuringEditing).isFalse()
+        assertThat(options[0].isEnabledDuringEditing).isTrue()
+        assertThat(options[1].isEnabledDuringEditing).isTrue()
+        assertThat(options[2].isEnabledDuringEditing).isTrue()
     }
 
     @Test
-    fun `canRemovePaymentMethods is false for all saved payment methods unless can modify`() {
-        val paymentMethods = PaymentMethodFixtures.createCards(3).run {
-            val mutablePaymentMethods = toMutableList()
-            val updatedPaymentMethod = mutablePaymentMethods[2].run {
-                copy(
-                    card = card?.copy(
-                        networks = PaymentMethod.Card.Networks(
-                            available = setOf("visa", "cartes_bancaires")
-                        )
-                    )
-                )
-            }
+    fun `State is correct when given non null defaultPaymentMethodId`() {
+        val paymentMethods = PaymentMethodFixtures.createCards(3)
 
-            mutablePaymentMethods[2] = updatedPaymentMethod
+        val defaultPaymentMethod = paymentMethods[0]
+        val defaultPaymentMethodId = defaultPaymentMethod.id
 
-            mutablePaymentMethods
-        }
+        assertThat(defaultPaymentMethodId).isNotNull()
 
-        val state = createPaymentOptionsState(
+        val state = PaymentOptionsStateFactory.create(
             paymentMethods = paymentMethods,
-            canRemovePaymentMethods = false,
+            showGooglePay = true,
+            showLink = true,
+            currentSelection = PaymentSelection.Saved(defaultPaymentMethod),
+            nameProvider = { it!!.resolvableString },
+            isCbcEligible = false,
+            defaultPaymentMethodId = defaultPaymentMethodId
         )
 
         val options = state.items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
 
-        assertThat(options[0].isEnabledDuringEditing).isFalse()
-        assertThat(options[1].isEnabledDuringEditing).isFalse()
-        assertThat(options[2].isEnabledDuringEditing).isTrue()
+        assertThat(options[0].paymentMethod.id).isEqualTo(defaultPaymentMethodId)
+        assertThat(options[0].displayableSavedPaymentMethod.shouldShowDefaultBadge).isTrue()
+        assertThat(options[1].displayableSavedPaymentMethod.shouldShowDefaultBadge).isFalse()
+        assertThat(options[2].displayableSavedPaymentMethod.shouldShowDefaultBadge).isFalse()
     }
 
     private fun createPaymentOptionsState(
         paymentMethods: List<PaymentMethod>,
-        canRemovePaymentMethods: Boolean,
     ): PaymentOptionsState {
         return PaymentOptionsStateFactory.create(
             paymentMethods = paymentMethods,
             showGooglePay = false,
             showLink = false,
-            currentSelection = PaymentSelection.Link,
+            currentSelection = PaymentSelection.Link(),
             nameProvider = { it!!.resolvableString },
             isCbcEligible = true,
-            canRemovePaymentMethods = canRemovePaymentMethods,
+            defaultPaymentMethodId = null,
         )
     }
 }

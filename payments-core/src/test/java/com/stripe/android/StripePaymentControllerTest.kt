@@ -25,20 +25,18 @@ import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import com.stripe.android.stripe3ds2.transaction.Transaction
 import com.stripe.android.testing.AbsFakeStripeRepository
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.utils.ParcelUtils
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.util.UUID
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
@@ -65,20 +63,17 @@ internal class StripePaymentControllerTest {
 
     private val controller = createController()
 
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(testDispatcher)
+
     @BeforeTest
     fun setup() {
-        Dispatchers.setMain(testDispatcher)
         runBlocking {
             whenever(transaction.createAuthenticationRequestParameters())
                 .thenReturn(Stripe3ds2Fixtures.createAreqParams(sdkTransactionId))
         }
         whenever(activity.applicationContext)
             .thenReturn(context)
-    }
-
-    @AfterTest
-    fun cleanup() {
-        Dispatchers.resetMain()
     }
 
     @Test

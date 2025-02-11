@@ -4,9 +4,11 @@ import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
+import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.domain.AttachConsumerToLinkAccountSession
 import com.stripe.android.financialconnections.domain.CreateInstantDebitsResult
 import com.stripe.android.financialconnections.domain.HandleError
@@ -23,6 +25,7 @@ import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.NavigationManagerImpl
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState
 import com.stripe.android.financialconnections.repository.ConsumerSessionRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
@@ -40,7 +43,6 @@ import dagger.Provides
 import java.util.Locale
 import javax.inject.Named
 import javax.inject.Provider
-import javax.inject.Singleton
 
 @Module
 internal interface FinancialConnectionsSheetNativeModule {
@@ -48,7 +50,7 @@ internal interface FinancialConnectionsSheetNativeModule {
     @Binds
     fun bindsPresentNoticeSheet(impl: RealPresentSheet): PresentSheet
 
-    @Singleton
+    @ActivityRetainedScope
     @Binds
     fun bindsNavigationManager(
         impl: NavigationManagerImpl
@@ -60,7 +62,7 @@ internal interface FinancialConnectionsSheetNativeModule {
     ): HandleError
 
     @Binds
-    @Singleton
+    @ActivityRetainedScope
     fun bindsProvideApiRequestOptions(impl: RealProvideApiRequestOptions): ProvideApiRequestOptions
 
     @Binds
@@ -75,7 +77,7 @@ internal interface FinancialConnectionsSheetNativeModule {
 
     companion object {
         @Provides
-        @Singleton
+        @ActivityRetainedScope
         fun provideConsumersApiService(
             apiVersion: ApiVersion,
             stripeNetworkClient: StripeNetworkClient,
@@ -86,7 +88,7 @@ internal interface FinancialConnectionsSheetNativeModule {
             stripeNetworkClient = stripeNetworkClient
         )
 
-        @Singleton
+        @ActivityRetainedScope
         @Provides
         fun providesImageLoader(
             context: Application
@@ -95,7 +97,7 @@ internal interface FinancialConnectionsSheetNativeModule {
             diskCache = null,
         )
 
-        @Singleton
+        @ActivityRetainedScope
         @Provides
         fun providesFinancialConnectionsManifestRepository(
             requestExecutor: FinancialConnectionsRequestExecutor,
@@ -113,7 +115,7 @@ internal interface FinancialConnectionsSheetNativeModule {
             initialSync = initialSynchronizeSessionResponse
         )
 
-        @Singleton
+        @ActivityRetainedScope
         @Provides
         fun providesFinancialConnectionsConsumerSessionRepository(
             consumersApiService: ConsumersApiService,
@@ -123,6 +125,8 @@ internal interface FinancialConnectionsSheetNativeModule {
             locale: Locale?,
             logger: Logger,
             isLinkWithStripe: IsLinkWithStripe,
+            fraudDetectionDataRepository: FraudDetectionDataRepository,
+            elementsSessionContext: ElementsSessionContext?,
         ) = FinancialConnectionsConsumerSessionRepository(
             financialConnectionsConsumersApiService = financialConnectionsConsumersApiService,
             provideApiRequestOptions = provideApiRequestOptions,
@@ -131,9 +135,11 @@ internal interface FinancialConnectionsSheetNativeModule {
             locale = locale ?: Locale.getDefault(),
             logger = logger,
             isLinkWithStripe = isLinkWithStripe,
+            fraudDetectionDataRepository = fraudDetectionDataRepository,
+            elementsSessionContext = elementsSessionContext,
         )
 
-        @Singleton
+        @ActivityRetainedScope
         @Provides
         fun providesFinancialConnectionsAccountsRepository(
             requestExecutor: FinancialConnectionsRequestExecutor,
@@ -149,7 +155,7 @@ internal interface FinancialConnectionsSheetNativeModule {
             savedStateHandle = savedStateHandle,
         )
 
-        @Singleton
+        @ActivityRetainedScope
         @Provides
         fun providesFinancialConnectionsInstitutionsRepository(
             requestExecutor: FinancialConnectionsRequestExecutor,
@@ -183,6 +189,13 @@ internal interface FinancialConnectionsSheetNativeModule {
             } else {
                 linkSignupHandlerForNetworking.get()
             }
+        }
+
+        @Provides
+        internal fun provideElementsSessionContext(
+            initialState: FinancialConnectionsSheetNativeState,
+        ): ElementsSessionContext? {
+            return initialState.elementsSessionContext
         }
     }
 }

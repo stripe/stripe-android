@@ -63,6 +63,7 @@ import com.stripe.android.uicore.BuildConfig
 import com.stripe.android.uicore.LocalInstrumentationTest
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.compat.CompatTextField
+import com.stripe.android.uicore.moveFocusSafely
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.autofill
 import com.stripe.android.uicore.utils.collectAsState
@@ -89,11 +90,9 @@ private fun defaultAutofillEventReporter(): (String) -> Unit {
 fun TextFieldSection(
     modifier: Modifier = Modifier,
     textFieldController: TextFieldController,
-    imeAction: ImeAction,
-    enabled: Boolean,
     isSelected: Boolean = false,
     @StringRes sectionTitle: Int? = null,
-    onTextStateChanged: (TextFieldState?) -> Unit = {}
+    content: @Composable () -> Unit,
 ) {
     val error by textFieldController.error.collectAsState()
 
@@ -106,15 +105,13 @@ fun TextFieldSection(
         } ?: stringResource(it.errorMessage)
     }
 
-    Section(title = sectionTitle, error = sectionErrorString, isSelected = isSelected) {
-        TextField(
-            textFieldController = textFieldController,
-            enabled = enabled,
-            imeAction = imeAction,
-            modifier = modifier,
-            onTextStateChanged = onTextStateChanged
-        )
-    }
+    Section(
+        modifier = modifier,
+        title = sectionTitle,
+        error = sectionErrorString,
+        isSelected = isSelected,
+        content = content,
+    )
 }
 
 /**
@@ -144,6 +141,7 @@ fun TextField(
     val shouldShowError by textFieldController.visibleError.collectAsState()
     val loading by textFieldController.loading.collectAsState()
     val contentDescription by textFieldController.contentDescription.collectAsState()
+    val visualTransformation by textFieldController.visualTransformation.collectAsState()
     val placeHolder by textFieldController.placeHolder.collectAsState()
 
     val hasFocus = rememberSaveable { mutableStateOf(false) }
@@ -154,7 +152,7 @@ fun TextField(
     LaunchedEffect(fieldState) {
         // When field is in focus and full, move to next field so the user can keep typing
         if (fieldState == TextFieldStateConstants.Valid.Full && hasFocus.value) {
-            focusManager.moveFocus(nextFocusDirection)
+            focusManager.moveFocusSafely(nextFocusDirection)
         }
     }
 
@@ -164,10 +162,15 @@ fun TextField(
         mutableStateOf<TextRange?>(null)
     }
 
+    var composition by remember {
+        mutableStateOf<TextRange?>(null)
+    }
+
     TextFieldUi(
         value = TextFieldValue(
             text = value,
             selection = selection ?: TextRange(value.length),
+            composition = composition
         ),
         loading = loading,
         onValueChange = { newValue ->
@@ -176,6 +179,7 @@ fun TextField(
 
             if (newTextValue == value || acceptInput) {
                 selection = newValue.selection
+                composition = newValue.composition
             }
 
             if (acceptInput) {
@@ -213,7 +217,7 @@ fun TextField(
         placeholder = placeHolder,
         trailingIcon = trailingIcon,
         shouldShowError = shouldShowError,
-        visualTransformation = textFieldController.visualTransformation,
+        visualTransformation = visualTransformation,
         keyboardOptions = KeyboardOptions(
             keyboardType = textFieldController.keyboardType,
             capitalization = textFieldController.capitalization,
@@ -221,7 +225,7 @@ fun TextField(
         ),
         keyboardActions = KeyboardActions(
             onNext = {
-                focusManager.moveFocus(nextFocusDirection)
+                focusManager.moveFocusSafely(nextFocusDirection)
             },
             onDone = {
                 focusManager.clearFocus(true)
@@ -321,6 +325,7 @@ fun AnimatedIcons(
 
     val isRunningInTestHarness = LocalInstrumentationTest.current
 
+    @SuppressLint("ProduceStateDoesNotAssignValue")
     val target by produceState(initialValue = icons.first()) {
         if (!isRunningInTestHarness) {
             composableScope.launch {
@@ -466,7 +471,7 @@ private fun Modifier.onPreviewKeyEvent(
         event.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DEL &&
         value.isEmpty()
     ) {
-        focusManager.moveFocus(direction)
+        focusManager.moveFocusSafely(direction)
         true
     } else {
         false

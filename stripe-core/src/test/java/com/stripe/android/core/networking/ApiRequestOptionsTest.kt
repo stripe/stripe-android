@@ -23,4 +23,25 @@ class ApiRequestOptionsTest {
             ApiRequest.Options(ApiKeyFixtures.FAKE_SECRET_KEY)
         }
     }
+
+    @Test
+    fun testApiKey_withTest_isNotLiveMode() {
+        val options = ApiRequest.Options(apiKey = "pk_test_1234")
+
+        assertThat(options.apiKeyIsLiveMode).isFalse()
+    }
+
+    @Test
+    fun testApiKey_withLive_isLiveMode() {
+        val options = ApiRequest.Options(apiKey = "pk_live_1234")
+
+        assertThat(options.apiKeyIsLiveMode).isTrue()
+    }
+
+    @Test
+    fun testApiKey_withoutLiveOrTest_isLiveMode() {
+        val options = ApiRequest.Options(apiKey = "pk_other_1234")
+
+        assertThat(options.apiKeyIsLiveMode).isTrue()
+    }
 }

@@ -15,6 +15,8 @@ import androidx.navigation.NavController
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.identity.R
 import com.stripe.android.identity.TestApplication
+import com.stripe.android.identity.camera.IdentityAggregator
+import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.states.IdentityScanState
@@ -96,7 +98,7 @@ class DocumentScanScreenTest {
         testDocumentScanScreen(
             scannerState = IdentityScanViewModel.State.Scanning(),
         ) {
-            onNodeWithTag(SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_front_of_id))
+            onNodeWithTag(SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_front_of_id_document))
             onNodeWithTag(SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.stripe_position_id_front))
             onNodeWithTag(CHECK_MARK_TAG).assertDoesNotExist()
             onNodeWithTag(CONTINUE_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
@@ -114,7 +116,7 @@ class DocumentScanScreenTest {
                 eq(IdentityScanState.ScanType.DOC_FRONT),
                 any()
             )
-            onNodeWithTag(SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_front_of_id))
+            onNodeWithTag(SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_front_of_id_document))
             onNodeWithTag(SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.stripe_hold_still))
             onNodeWithTag(CHECK_MARK_TAG).assertDoesNotExist()
             onNodeWithTag(CONTINUE_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
@@ -133,7 +135,7 @@ class DocumentScanScreenTest {
                 eq(IdentityScanState.ScanType.DOC_BACK),
                 any()
             )
-            onNodeWithTag(SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_back_of_id))
+            onNodeWithTag(SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_back_of_id_document))
             onNodeWithTag(SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.stripe_hold_still))
             onNodeWithTag(CHECK_MARK_TAG).assertDoesNotExist()
             onNodeWithTag(CONTINUE_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
@@ -144,11 +146,17 @@ class DocumentScanScreenTest {
     fun verifyScannedState() {
         testDocumentScanScreen(
             targetScanType = IdentityScanState.ScanType.DOC_FRONT,
-            scannerState = IdentityScanViewModel.State.Scanned(mock()),
+            scannerState = IdentityScanViewModel.State.Scanned(
+                IdentityAggregator.FinalResult(
+                    frame = mock(),
+                    result = mock<FaceDetectorOutput>(),
+                    identityState = mock(),
+                )
+            ),
             messageId = R.string.stripe_scanned
         ) {
             verify(mockDocumentScanViewModel).stopScan(any())
-            onNodeWithTag(SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_front_of_id))
+            onNodeWithTag(SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_front_of_id_document))
             onNodeWithTag(SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.stripe_scanned))
             onNodeWithTag(CHECK_MARK_TAG).assertExists()
             onNodeWithTag(CONTINUE_BUTTON_TAG).onChildAt(0).assertIsEnabled()

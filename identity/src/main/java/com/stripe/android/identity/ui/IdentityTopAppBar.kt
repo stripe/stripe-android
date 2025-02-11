@@ -1,5 +1,7 @@
 package com.stripe.android.identity.ui
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.LocalTextStyle
@@ -42,7 +44,8 @@ internal fun IdentityTopAppBar(
                     }
                 )
             }
-        }
+        },
+        windowInsets = WindowInsets.statusBars
     )
 }
 

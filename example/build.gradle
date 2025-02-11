@@ -1,6 +1,7 @@
 apply from: configs.androidApplication
 
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
 // Read values from gradle.properties or system environment variable
 def getBackendUrl() {
@@ -31,6 +32,7 @@ dependencies {
     implementation libs.compose.activity
     implementation libs.compose.liveData
     implementation libs.compose.material
+    implementation libs.compose.materialIcons
     implementation libs.gson
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.coroutinesAndroid
@@ -102,8 +104,5 @@ android {
     buildFeatures {
         viewBinding true
         compose true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
     }
 }

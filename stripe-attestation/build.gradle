@@ -1,0 +1,53 @@
+apply from: configs.androidLibrary
+
+dependencies {
+    // Kotlin
+    implementation libs.kotlin.coroutines
+
+    // AndroidX
+    implementation libs.playIntegrity
+
+    // Test
+    testImplementation testLibs.junit
+    testImplementation testLibs.kotlin.annotations
+    testImplementation testLibs.kotlin.coroutines
+    testImplementation testLibs.kotlin.junit
+    testImplementation testLibs.mockito.kotlin
+}
+
+android {
+    defaultConfig {
+        testApplicationId "com.stripe.attestation.test"
+    }
+
+    testOptions {
+        unitTests {
+            returnDefaultValues = true
+            all {
+                maxHeapSize = "1024m"
+            }
+        }
+
+        kotlinOptions {
+            freeCompilerArgs += ["-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"]
+        }
+    }
+
+    kotlinOptions {
+        freeCompilerArgs += [
+                "-opt-in=kotlinx.coroutines.FlowPreview",
+                "-Xcontext-receivers",
+        ]
+        if (gradle.ext.isCi) {
+            kotlinOptions.allWarningsAsErrors = true
+        }
+    }
+}
+
+ext {
+    artifactId = "attestation"
+    artifactName = "attestation"
+    artifactDescrption = "Internal attestation module of the Stripe Android SDK"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"

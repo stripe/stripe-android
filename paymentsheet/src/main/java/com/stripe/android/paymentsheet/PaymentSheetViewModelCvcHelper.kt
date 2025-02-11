@@ -1,32 +1,42 @@
 package com.stripe.android.paymentsheet
 
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 
-internal fun PaymentSheetViewModel.shouldLaunchCvcRecollectionScreen(): Boolean {
-    return requiresCvcRecollection {
-        config.paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Vertical &&
+internal fun PaymentSheetViewModel.shouldLaunchCvcRecollectionScreen(selection: PaymentSelection.Saved): Boolean {
+    return requiresCvcRecollection(selection) {
+        config.paymentMethodLayout != PaymentSheet.PaymentMethodLayout.Horizontal &&
             navigationHandler.currentScreen.value !is PaymentSheetScreen.CvcRecollection
     }
 }
 
-internal fun PaymentSheetViewModel.shouldAttachCvc(): Boolean {
-    return requiresCvcRecollection {
-        config.paymentMethodLayout != PaymentSheet.PaymentMethodLayout.Vertical
+internal fun PaymentSheetViewModel.shouldAttachCvc(selection: PaymentSelection.Saved): Boolean {
+    return requiresCvcRecollection(selection) {
+        config.paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Horizontal
     }
 }
 
 internal fun PaymentSheetViewModel.isCvcRecollectionEnabled(): Boolean {
-    return cvcRecollectionHandler.cvcRecollectionEnabled(
-        stripeIntent = paymentMethodMetadata.value?.stripeIntent,
-        initializationMode = args.initializationMode
-    )
+    return paymentMethodMetadata.value?.run {
+        cvcRecollectionHandler.cvcRecollectionEnabled(
+            stripeIntent = stripeIntent,
+            initializationMode = args.initializationMode
+        )
+    } ?: false
 }
 
-private fun PaymentSheetViewModel.requiresCvcRecollection(extraRequirements: () -> Boolean): Boolean {
-    return cvcRecollectionHandler.requiresCVCRecollection(
-        stripeIntent = paymentMethodMetadata.value?.stripeIntent,
-        paymentSelection = selection.value,
-        initializationMode = args.initializationMode,
-        extraRequirements = extraRequirements
-    )
+private fun PaymentSheetViewModel.requiresCvcRecollection(
+    selection: PaymentSelection.Saved,
+    extraRequirements: () -> Boolean
+): Boolean {
+    return paymentMethodMetadata.value?.run {
+        val requiresCvcRecollection = cvcRecollectionHandler.requiresCVCRecollection(
+            stripeIntent = stripeIntent,
+            paymentMethod = selection.paymentMethod,
+            optionsParams = selection.paymentMethodOptionsParams,
+            initializationMode = args.initializationMode,
+        )
+
+        requiresCvcRecollection && extraRequirements()
+    } ?: false
 }

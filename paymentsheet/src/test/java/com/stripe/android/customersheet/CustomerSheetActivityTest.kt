@@ -29,7 +29,6 @@ import org.robolectric.annotation.Config
 
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal class CustomerSheetActivityTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
@@ -42,6 +41,7 @@ internal class CustomerSheetActivityTest {
     private val intent = contract.createIntent(
         context = context,
         input = CustomerSheetContract.Args(
+            integrationType = CustomerSheetIntegration.Type.CustomerAdapter,
             configuration = CustomerSheet.Configuration(
                 merchantDisplayName = "Example",
                 googlePayEnabled = true,
@@ -126,7 +126,7 @@ internal class CustomerSheetActivityTest {
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             ),
         ) {
-            page.waitForText("····4242")
+            page.waitForText("···· 4242")
         }
     }
 

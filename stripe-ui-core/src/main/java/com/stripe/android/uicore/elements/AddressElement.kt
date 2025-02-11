@@ -60,7 +60,7 @@ open class AddressElement(
         PhoneNumberController.createPhoneNumberController(
             initialValue = rawValuesMap[IdentifierSpec.Phone] ?: "",
             showOptionalLabel = addressType.phoneNumberState == PhoneNumberState.OPTIONAL,
-            acceptAnyInput = true,
+            acceptAnyInput = addressType.phoneNumberState != PhoneNumberState.REQUIRED,
         )
     )
 

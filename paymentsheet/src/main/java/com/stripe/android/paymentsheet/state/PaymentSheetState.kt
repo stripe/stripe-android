@@ -1,9 +1,9 @@
 package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
+import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.parcelize.Parcelize
 
@@ -14,13 +14,20 @@ internal sealed interface PaymentSheetState : Parcelable {
 
     @Parcelize
     data class Full(
-        val config: PaymentSheet.Configuration,
+        val config: CommonConfiguration,
         val customer: CustomerState?,
-        val linkState: LinkState?,
         val paymentSelection: PaymentSelection?,
         val validationError: PaymentSheetLoadingException?,
         val paymentMethodMetadata: PaymentMethodMetadata,
     ) : PaymentSheetState {
+        constructor(state: PaymentElementLoader.State) : this(
+            config = state.config,
+            customer = state.customer,
+            paymentSelection = state.paymentSelection,
+            validationError = state.validationError,
+            paymentMethodMetadata = state.paymentMethodMetadata,
+        )
+
         val showSavedPaymentMethods: Boolean
             get() = (customer != null && customer.paymentMethods.isNotEmpty()) || paymentMethodMetadata.isGooglePayReady
 

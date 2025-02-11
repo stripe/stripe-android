@@ -17,7 +17,8 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.FakeDurationProvider
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.json.JSONException
@@ -525,6 +526,22 @@ class DefaultEventReporterTest {
     }
 
     @Test
+    fun `onDisallowedCardBrandEntered(brand) should fire analytics request with expected event value`() {
+        val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
+            simulateSuccessfulSetup()
+        }
+
+        customEventReporter.onDisallowedCardBrandEntered(CardBrand.AmericanExpress)
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_disallowed_card_brand" &&
+                    req.params["brand"] == "amex"
+            }
+        )
+    }
+
+    @Test
     fun `constructor does not read from PaymentConfiguration`() {
         PaymentConfiguration.clearInstance()
         // Would crash if it tries to read from the uninitialized PaymentConfiguration
@@ -623,12 +640,44 @@ class DefaultEventReporterTest {
     }
 
     @Test
+    fun `Send correct link_mode when selecting Bank payment method type for Instant Debits`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+            simulateSuccessfulSetup(linkMode = LinkMode.LinkPaymentMethod)
+        }
+
+        completeEventReporter.onSelectPaymentMethod("link")
+
+        val argumentCaptor = argumentCaptor<AnalyticsRequest>()
+        verify(analyticsRequestExecutor).executeAsync(argumentCaptor.capture())
+
+        val errorType = argumentCaptor.firstValue.params["link_context"] as String
+        assertThat(errorType).isEqualTo("instant_debits")
+    }
+
+    @Test
+    fun `Send correct link_mode when selecting Bank payment method type for Link Card Brand`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+            simulateSuccessfulSetup(linkMode = LinkMode.LinkCardBrand)
+        }
+
+        completeEventReporter.onSelectPaymentMethod("link")
+
+        val argumentCaptor = argumentCaptor<AnalyticsRequest>()
+        verify(analyticsRequestExecutor).executeAsync(argumentCaptor.capture())
+
+        val errorType = argumentCaptor.firstValue.params["link_context"] as String
+        assertThat(errorType).isEqualTo("link_card_brand")
+    }
+
+    @Test
     fun `Send correct link_context when pressing confirm button for Instant Debits`() {
         val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
             simulateInit()
         }
 
-        val selection = mockUSBankAccountPaymentSelection(instantDebits = true)
+        val selection = mockUSBankAccountPaymentSelection(linkMode = LinkMode.LinkPaymentMethod)
         completeEventReporter.onPressConfirmButton(selection)
 
         val argumentCaptor = argumentCaptor<AnalyticsRequest>()
@@ -639,12 +688,28 @@ class DefaultEventReporterTest {
     }
 
     @Test
+    fun `Send correct link_context when pressing confirm button for Link Card Brand`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        val selection = mockUSBankAccountPaymentSelection(linkMode = LinkMode.LinkCardBrand)
+        completeEventReporter.onPressConfirmButton(selection)
+
+        val argumentCaptor = argumentCaptor<AnalyticsRequest>()
+        verify(analyticsRequestExecutor).executeAsync(argumentCaptor.capture())
+
+        val errorType = argumentCaptor.firstValue.params["link_context"] as String
+        assertThat(errorType).isEqualTo("link_card_brand")
+    }
+
+    @Test
     fun `Send correct link_context when pressing confirm button for Link card payments`() {
         val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
             simulateInit()
         }
 
-        val selection = mockUSBankAccountPaymentSelection(instantDebits = false)
+        val selection = mockUSBankAccountPaymentSelection(linkMode = null)
         completeEventReporter.onPressConfirmButton(selection)
 
         val argumentCaptor = argumentCaptor<AnalyticsRequest>()
@@ -659,7 +724,7 @@ class DefaultEventReporterTest {
             simulateInit()
         }
 
-        val selection = mockUSBankAccountPaymentSelection(instantDebits = true)
+        val selection = mockUSBankAccountPaymentSelection(linkMode = LinkMode.LinkPaymentMethod)
         completeEventReporter.onPaymentSuccess(selection, deferredIntentConfirmationType = null)
 
         val argumentCaptor = argumentCaptor<AnalyticsRequest>()
@@ -670,12 +735,28 @@ class DefaultEventReporterTest {
     }
 
     @Test
+    fun `Send correct link_context when on payment success for Link Card Brand`() {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateInit()
+        }
+
+        val selection = mockUSBankAccountPaymentSelection(linkMode = LinkMode.LinkCardBrand)
+        completeEventReporter.onPaymentSuccess(selection, deferredIntentConfirmationType = null)
+
+        val argumentCaptor = argumentCaptor<AnalyticsRequest>()
+        verify(analyticsRequestExecutor).executeAsync(argumentCaptor.capture())
+
+        val errorType = argumentCaptor.firstValue.params["link_context"] as String
+        assertThat(errorType).isEqualTo("link_card_brand")
+    }
+
+    @Test
     fun `Send correct link_context when on payment success for Link card payments`() {
         val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
             simulateInit()
         }
 
-        val selection = mockUSBankAccountPaymentSelection(instantDebits = false)
+        val selection = mockUSBankAccountPaymentSelection(linkMode = null)
         completeEventReporter.onPaymentSuccess(selection, deferredIntentConfirmationType = null)
 
         val argumentCaptor = argumentCaptor<AnalyticsRequest>()
@@ -733,9 +814,10 @@ class DefaultEventReporterTest {
         linkMode: LinkMode? = LinkMode.LinkPaymentMethod,
         googlePayReady: Boolean = true,
         currency: String? = "usd",
-        initializationMode: PaymentSheet.InitializationMode = PaymentSheet.InitializationMode.PaymentIntent(
-            clientSecret = "cs_example"
-        ),
+        initializationMode: PaymentElementLoader.InitializationMode =
+            PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "cs_example"
+            ),
         requireCvcRecollection: Boolean = false
     ) {
         onInit(configuration, isDeferred = false)
@@ -751,9 +833,9 @@ class DefaultEventReporterTest {
         )
     }
 
-    private fun mockUSBankAccountPaymentSelection(instantDebits: Boolean): PaymentSelection.New.USBankAccount {
+    private fun mockUSBankAccountPaymentSelection(linkMode: LinkMode?): PaymentSelection.New.USBankAccount {
         return PaymentSelection.New.USBankAccount(
-            labelResource = "Test",
+            label = "Test",
             iconResource = 0,
             paymentMethodCreateParams = mock(),
             customerRequestedSave = mock(),
@@ -765,16 +847,10 @@ class DefaultEventReporterTest {
                 saveForFutureUse = false,
             ),
             instantDebits = PaymentSelection.New.USBankAccount.InstantDebitsInfo(
-                paymentMethodId = "pm_123456789",
-            ).takeIf { instantDebits },
-            screenState = USBankAccountFormScreenState.MandateCollection(
-                resultIdentifier = USBankAccountFormScreenState.ResultIdentifier.PaymentMethod("pm_123456789"),
-                intentId = "intent_1234",
-                bankName = "Stripe Bank",
-                last4 = "6789",
-                primaryButtonText = "Continue".resolvableString,
-                mandateText = null,
-            ),
+                paymentMethod = PaymentMethodFactory.instantDebits(),
+                linkMode = linkMode,
+            ).takeIf { it.linkMode != null },
+            screenState = mock(),
         )
     }
 }

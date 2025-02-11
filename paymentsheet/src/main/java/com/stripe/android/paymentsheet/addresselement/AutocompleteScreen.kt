@@ -41,6 +41,7 @@ import com.stripe.android.common.ui.LoadingIndicator
 import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcomponent
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
+import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.stripeColors
@@ -129,16 +130,20 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     TextFieldSection(
                         textFieldController = viewModel.textFieldController,
-                        imeAction = ImeAction.Done,
-                        enabled = true,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .focusRequester(focusRequester)
-                    )
+                    ) {
+                        TextField(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .focusRequester(focusRequester),
+                            textFieldController = viewModel.textFieldController,
+                            imeAction = ImeAction.Done,
+                            enabled = true,
+                        )
+                    }
                 }
                 if (loading) {
                     LoadingIndicator(

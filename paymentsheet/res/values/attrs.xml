@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="stripe_ic_paymentsheet_link_ref" format="reference"/>
+    <attr name="stripe_ic_paymentsheet_sepa_ref" format="reference"/>
+
+    <attr name="stripe_ic_paymentsheet_card_visa_ref" format="reference"/>
+    <attr name="stripe_ic_paymentsheet_card_amex_ref" format="reference"/>
+    <attr name="stripe_ic_paymentsheet_card_discover_ref" format="reference"/>
+    <attr name="stripe_ic_paymentsheet_card_jcb_ref" format="reference"/>
+    <attr name="stripe_ic_paymentsheet_card_dinersclub_ref" format="reference"/>
+    <attr name="stripe_ic_paymentsheet_card_mastercard_ref" format="reference"/>
+    <attr name="stripe_ic_paymentsheet_card_unionpay_ref" format="reference"/>
+    <attr name="stripe_ic_paymentsheet_card_cartes_bancaires_ref" format="reference"/>
+    <attr name="stripe_ic_paymentsheet_card_unknown_ref" format="reference"/>
+</resources>

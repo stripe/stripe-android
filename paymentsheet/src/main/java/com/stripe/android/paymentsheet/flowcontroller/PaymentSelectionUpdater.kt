@@ -1,8 +1,9 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
+import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.common.model.containsVolatileDifferences
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.containsVolatileDifferences
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import javax.inject.Inject
@@ -12,6 +13,7 @@ internal fun interface PaymentSelectionUpdater {
         currentSelection: PaymentSelection?,
         previousConfig: PaymentSheet.Configuration?,
         newState: PaymentSheetState.Full,
+        newConfig: PaymentSheet.Configuration,
     ): PaymentSelection?
 }
 
@@ -21,11 +23,12 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
         currentSelection: PaymentSelection?,
         previousConfig: PaymentSheet.Configuration?,
         newState: PaymentSheetState.Full,
+        newConfig: PaymentSheet.Configuration,
     ): PaymentSelection? {
         return currentSelection?.takeIf { selection ->
             canUseSelection(selection, newState) && previousConfig?.let { previousConfig ->
-                !previousConfig.containsVolatileDifferences(newState.config)
-            } ?: true
+                !previousConfig.asCommonConfiguration().containsVolatileDifferences(newConfig.asCommonConfiguration())
+            } != false
         } ?: newState.paymentSelection
     }
 
@@ -54,7 +57,7 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
                 state.paymentMethodMetadata.isGooglePayReady
             }
             is PaymentSelection.Link -> {
-                state.linkState != null
+                state.paymentMethodMetadata.linkState != null
             }
             is PaymentSelection.ExternalPaymentMethod -> {
                 state.paymentMethodMetadata.isExternalPaymentMethod(selection.type)

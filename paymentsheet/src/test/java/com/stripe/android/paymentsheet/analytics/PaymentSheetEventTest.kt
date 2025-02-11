@@ -4,16 +4,17 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.ui.inline.SignUpConsentAction
+import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
-import com.stripe.android.model.PaymentDetailsFixtures
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
@@ -77,6 +78,8 @@ class PaymentSheetEventTest {
             ),
             "preferred_networks" to null,
             "external_payment_methods" to null,
+            "payment_method_layout" to "horizontal",
+            "card_brand_acceptance" to false,
         )
 
         assertThat(event.params).run {
@@ -138,6 +141,72 @@ class PaymentSheetEventTest {
             ),
             "preferred_networks" to null,
             "external_payment_methods" to listOf("external_paypal", "external_fawry"),
+            "payment_method_layout" to "horizontal",
+            "card_brand_acceptance" to false,
+        )
+
+        assertThat(event.params).run {
+            containsEntry("link_enabled", false)
+            containsEntry("google_pay_enabled", false)
+            containsEntry("is_decoupled", false)
+            containsEntry("mpe_config", expectedConfig)
+        }
+    }
+
+    @Test
+    fun `Init event with vertical mode should return expected params`() {
+        val event = PaymentSheetEvent.Init(
+            mode = EventReporter.Mode.Complete,
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER
+                .copy(paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical),
+            isDeferred = false,
+            linkEnabled = false,
+            googlePaySupported = false,
+        )
+
+        assertThat(
+            event.eventName
+        ).isEqualTo(
+            "mc_complete_init_customer"
+        )
+
+        val expectedConfig = mapOf(
+            "customer" to true,
+            "customer_access_provider" to "legacy",
+            "googlepay" to false,
+            "primary_button_color" to false,
+            "default_billing_details" to false,
+            "allows_delayed_payment_methods" to false,
+            "appearance" to mapOf(
+                "colorsLight" to false,
+                "colorsDark" to false,
+                "corner_radius" to false,
+                "border_width" to false,
+                "font" to false,
+                "size_scale_factor" to false,
+                "primary_button" to mapOf(
+                    "colorsLight" to false,
+                    "colorsDark" to false,
+                    "corner_radius" to false,
+                    "border_width" to false,
+                    "font" to false,
+                ),
+                "usage" to false,
+            ),
+            "payment_method_order" to listOf<String>(),
+            "allows_payment_methods_requiring_shipping_address" to false,
+            "allows_removal_of_last_saved_payment_method" to true,
+            "billing_details_collection_configuration" to mapOf(
+                "attach_defaults" to false,
+                "name" to "Automatic",
+                "email" to "Automatic",
+                "phone" to "Automatic",
+                "address" to "Automatic",
+            ),
+            "preferred_networks" to null,
+            "external_payment_methods" to null,
+            "payment_method_layout" to "vertical",
+            "card_brand_acceptance" to false,
         )
 
         assertThat(event.params).run {
@@ -199,6 +268,8 @@ class PaymentSheetEventTest {
             ),
             "preferred_networks" to null,
             "external_payment_methods" to null,
+            "payment_method_layout" to "horizontal",
+            "card_brand_acceptance" to false,
         )
 
         assertThat(event.params).run {
@@ -210,6 +281,7 @@ class PaymentSheetEventTest {
     }
 
     @Test
+    @Suppress("LongMethod")
     fun `Init event with preferred networks`() {
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
@@ -262,6 +334,8 @@ class PaymentSheetEventTest {
             ),
             "preferred_networks" to "cartes_bancaires, visa",
             "external_payment_methods" to null,
+            "payment_method_layout" to "horizontal",
+            "card_brand_acceptance" to false,
         )
 
         assertThat(event.params).run {
@@ -356,7 +430,7 @@ class PaymentSheetEventTest {
             linkMode = null,
             googlePaySupported = false,
             duration = (5L).seconds,
-            paymentSelection = PaymentSelection.Link,
+            paymentSelection = PaymentSelection.Link(),
             initializationMode = paymentIntentInitializationMode,
             orderedLpms = listOf("card"),
         )
@@ -404,7 +478,7 @@ class PaymentSheetEventTest {
     @Test
     fun `LoadSucceeded initialization mode is correct for setup intents`() {
         val event = createLoadSucceededEvent(
-            initializationMode = PaymentSheet.InitializationMode.SetupIntent(clientSecret = "cs_example")
+            initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(clientSecret = "cs_example")
         )
 
         assertThat(event.params).containsEntry("intent_type", "setup_intent")
@@ -413,7 +487,7 @@ class PaymentSheetEventTest {
     @Test
     fun `LoadSucceeded initialization mode is correct for deferred setup intents`() {
         val event = createLoadSucceededEvent(
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Setup()
                 )
@@ -426,7 +500,7 @@ class PaymentSheetEventTest {
     @Test
     fun `LoadSucceeded initialization mode is correct for deferred payment intents`() {
         val event = createLoadSucceededEvent(
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 50,
@@ -543,7 +617,7 @@ class PaymentSheetEventTest {
     fun `Link payment method event should return expected event`() {
         val linkEvent = PaymentSheetEvent.Payment(
             mode = EventReporter.Mode.Complete,
-            paymentSelection = PaymentSelection.Link,
+            paymentSelection = PaymentSelection.Link(),
             duration = 1.milliseconds,
             result = PaymentSheetEvent.Payment.Result.Success,
             currency = "usd",
@@ -577,12 +651,18 @@ class PaymentSheetEventTest {
         val inlineLinkEvent = PaymentSheetEvent.Payment(
             mode = EventReporter.Mode.Complete,
             paymentSelection = PaymentSelection.New.LinkInline(
-                LinkPaymentDetails.New(
-                    PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first(),
-                    mock(),
-                    mock()
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                paymentMethodOptionsParams = null,
+                paymentMethodExtraParams = null,
+                brand = CardBrand.Visa,
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                input = UserInput.SignUp(
+                    email = "email@email",
+                    phone = "2267007611",
+                    country = "CA",
+                    name = "John Doe",
+                    consentAction = SignUpConsentAction.Checkbox,
                 ),
-                PaymentSelection.CustomerRequestedSave.NoRequest,
             ),
             duration = 1.milliseconds,
             result = PaymentSheetEvent.Payment.Result.Success,
@@ -605,6 +685,7 @@ class PaymentSheetEventTest {
                 "duration" to 0.001F,
                 "is_decoupled" to false,
                 "link_enabled" to false,
+                "selected_lpm" to "card",
                 "google_pay_enabled" to false,
             )
         )
@@ -633,7 +714,7 @@ class PaymentSheetEventTest {
         assertThat(
             newPMEvent.eventName
         ).isEqualTo(
-            "mc_complete_payment_unknown_success"
+            "mc_complete_payment_newpm_success"
         )
         assertThat(
             newPMEvent.params
@@ -674,7 +755,7 @@ class PaymentSheetEventTest {
         assertThat(
             newPMEvent.eventName
         ).isEqualTo(
-            "mc_complete_payment_unknown_failure"
+            "mc_complete_payment_newpm_failure"
         )
         assertThat(
             newPMEvent.params
@@ -804,7 +885,7 @@ class PaymentSheetEventTest {
     fun `Link payment method failure event should return expected event`() {
         val linkEvent = PaymentSheetEvent.Payment(
             mode = EventReporter.Mode.Complete,
-            paymentSelection = PaymentSelection.Link,
+            paymentSelection = PaymentSelection.Link(),
             duration = 1.milliseconds,
             result = PaymentSheetEvent.Payment.Result.Failure(
                 error = PaymentSheetConfirmationError.Stripe(APIException()),
@@ -841,12 +922,18 @@ class PaymentSheetEventTest {
         val inlineLinkEvent = PaymentSheetEvent.Payment(
             mode = EventReporter.Mode.Complete,
             paymentSelection = PaymentSelection.New.LinkInline(
-                LinkPaymentDetails.New(
-                    PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first(),
-                    mock(),
-                    mock()
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                paymentMethodOptionsParams = null,
+                paymentMethodExtraParams = null,
+                brand = CardBrand.Visa,
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                input = UserInput.SignUp(
+                    email = "email@email",
+                    phone = "2267007611",
+                    country = "CA",
+                    name = "John Doe",
+                    consentAction = SignUpConsentAction.Checkbox,
                 ),
-                PaymentSelection.CustomerRequestedSave.NoRequest,
             ),
             duration = 1.milliseconds,
             result = PaymentSheetEvent.Payment.Result.Failure(
@@ -871,6 +958,7 @@ class PaymentSheetEventTest {
                 "duration" to 0.001F,
                 "is_decoupled" to false,
                 "link_enabled" to false,
+                "selected_lpm" to "card",
                 "google_pay_enabled" to false,
                 "error_message" to "apiError",
             )
@@ -1231,6 +1319,8 @@ class PaymentSheetEventTest {
             "billing_details_collection_configuration" to expectedBillingDetailsCollection,
             "preferred_networks" to null,
             "external_payment_methods" to null,
+            "payment_method_layout" to "horizontal",
+            "card_brand_acceptance" to false,
         )
         assertThat(
             PaymentSheetEvent.Init(
@@ -1290,6 +1380,8 @@ class PaymentSheetEventTest {
             "billing_details_collection_configuration" to expectedBillingDetailsCollection,
             "preferred_networks" to null,
             "external_payment_methods" to null,
+            "payment_method_layout" to "automatic",
+            "card_brand_acceptance" to false,
         )
         assertThat(
             PaymentSheetEvent.Init(
@@ -1409,7 +1501,7 @@ class PaymentSheetEventTest {
         )
     }
 
-    private val paymentIntentInitializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+    private val paymentIntentInitializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
         clientSecret = "cs_example"
     )
 
@@ -1435,7 +1527,7 @@ class PaymentSheetEventTest {
         googlePaySupported: Boolean = false,
         duration: Duration = (5L).seconds,
         paymentSelection: PaymentSelection? = null,
-        initializationMode: PaymentSheet.InitializationMode = paymentIntentInitializationMode,
+        initializationMode: PaymentElementLoader.InitializationMode = paymentIntentInitializationMode,
         orderedLpms: List<String> = listOf("card"),
     ): PaymentSheetEvent.LoadSucceeded {
         return PaymentSheetEvent.LoadSucceeded(

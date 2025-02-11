@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSizeIn
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -58,6 +59,7 @@ fun <TDropdownChoice : SingleChoiceDropdownItem> SingleChoiceDropdown(
                 icon = choice.icon,
                 isSelected = choice == currentChoice,
                 currentTextColor = optionTextColor,
+                enabled = choice.enabled,
                 onClick = {
                     onChoiceSelected(choice)
                 }
@@ -72,6 +74,7 @@ private fun Choice(
     icon: Int?,
     isSelected: Boolean,
     currentTextColor: Color,
+    enabled: Boolean,
     onClick: () -> Unit = {}
 ) {
     Row(
@@ -80,8 +83,9 @@ private fun Choice(
         modifier = Modifier
             .fillMaxWidth()
             .requiredSizeIn(minHeight = 48.dp)
-            .clickable { onClick() }
+            .clickable(enabled = enabled) { onClick() }
             .testTag("${TEST_TAG_DROP_DOWN_CHOICE}_$label")
+            .alpha(if (enabled) 1f else ContentAlpha.disabled)
     ) {
         icon?.let { icon ->
             Image(

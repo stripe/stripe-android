@@ -1,7 +1,10 @@
 package com.stripe.android.paymentsheet
 
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onChildren
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.lifecycle.Lifecycle
@@ -19,19 +22,23 @@ import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
+import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.utils.ActivityLaunchObserver
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.assertFailed
 import com.stripe.android.paymentsheet.utils.runFlowControllerTest
+import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST
+import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
+import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
+import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_VIEW_MORE
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
-@OptIn(ExperimentalPaymentMethodLayoutApi::class)
 @RunWith(TestParameterInjector::class)
 internal class FlowControllerTest {
     @get:Rule
@@ -42,15 +49,16 @@ internal class FlowControllerTest {
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
+    private val defaultConfiguration = PaymentSheet.Configuration.Builder("Example, Inc.")
+        .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+        .build()
+
     @Test
     fun testSuccessfulCardPayment(
         @TestParameter integrationType: IntegrationType,
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
-        paymentOptionCallback = { paymentOption ->
-            assertThat(paymentOption?.label).endsWith("4242")
-        },
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
@@ -63,7 +71,7 @@ internal class FlowControllerTest {
         testContext.configureFlowController {
             configureWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = null,
+                configuration = defaultConfiguration,
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -90,9 +98,6 @@ internal class FlowControllerTest {
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
-        paymentOptionCallback = { paymentOption ->
-            assertThat(paymentOption?.label).endsWith("4242")
-        },
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
@@ -133,15 +138,10 @@ internal class FlowControllerTest {
     fun testCardRelaunchesIntoFormPage(
         @TestParameter integrationType: IntegrationType,
     ) {
-        val paymentOptionCallbackCountDownLatch = CountDownLatch(1)
         runFlowControllerTest(
             networkRule = networkRule,
             integrationType = integrationType,
             callConfirmOnPaymentOptionCallback = false,
-            paymentOptionCallback = { paymentOption ->
-                assertThat(paymentOption?.label).endsWith("4242")
-                paymentOptionCallbackCountDownLatch.countDown()
-            },
             resultCallback = ::assertCompleted,
         ) { testContext ->
             networkRule.enqueue(
@@ -169,7 +169,7 @@ internal class FlowControllerTest {
             page.fillOutCardDetails()
 
             page.clickPrimaryButton()
-            assertThat(paymentOptionCallbackCountDownLatch.await(1, TimeUnit.SECONDS)).isTrue()
+            assertThat(testContext.configureCallbackTurbine.awaitItem()?.label).endsWith("4242")
             composeTestRule.waitForIdle()
 
             testContext.flowController.presentPaymentOptions()
@@ -184,15 +184,10 @@ internal class FlowControllerTest {
     fun testCashappRelaunchesIntoListPageWithCashappSelected(
         @TestParameter integrationType: IntegrationType,
     ) {
-        var paymentOptionCallbackCountDownLatch = CountDownLatch(1)
         runFlowControllerTest(
             networkRule = networkRule,
             integrationType = integrationType,
             callConfirmOnPaymentOptionCallback = false,
-            paymentOptionCallback = { paymentOption ->
-                assertThat(paymentOption?.label).isEqualTo("Cash App Pay")
-                paymentOptionCallbackCountDownLatch.countDown()
-            },
             resultCallback = ::assertCompleted,
         ) { testContext ->
             networkRule.enqueue(
@@ -220,15 +215,14 @@ internal class FlowControllerTest {
             page.assertLpmSelected("cashapp")
 
             page.clickPrimaryButton()
-            assertThat(paymentOptionCallbackCountDownLatch.await(1, TimeUnit.SECONDS)).isTrue()
+            assertThat(testContext.configureCallbackTurbine.awaitItem()?.label).endsWith("Cash App Pay")
             composeTestRule.waitForIdle()
 
             testContext.flowController.presentPaymentOptions()
 
             page.assertLpmSelected("cashapp")
-            paymentOptionCallbackCountDownLatch = CountDownLatch(1)
             page.clickPrimaryButton()
-            assertThat(paymentOptionCallbackCountDownLatch.await(1, TimeUnit.SECONDS)).isTrue()
+            assertThat(testContext.configureCallbackTurbine.awaitItem()?.label).endsWith("Cash App Pay")
 
             testContext.markTestSucceeded()
         }
@@ -240,9 +234,6 @@ internal class FlowControllerTest {
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
-        paymentOptionCallback = { paymentOption ->
-            assertThat(paymentOption?.label).endsWith("4242")
-        },
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
@@ -262,7 +253,7 @@ internal class FlowControllerTest {
         testContext.configureFlowController {
             configureWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = null,
+                configuration = defaultConfiguration,
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -290,9 +281,6 @@ internal class FlowControllerTest {
         runFlowControllerTest(
             networkRule = networkRule,
             integrationType = integrationType,
-            paymentOptionCallback = { paymentOption ->
-                assertThat(paymentOption?.label).endsWith("4242")
-            },
             resultCallback = ::assertFailed,
         ) { testContext ->
             networkRule.enqueue(
@@ -305,7 +293,7 @@ internal class FlowControllerTest {
             testContext.configureFlowController {
                 configureWithPaymentIntent(
                     paymentIntentClientSecret = "pi_example_secret_example",
-                    configuration = null,
+                    configuration = defaultConfiguration,
                     callback = { success, error ->
                         assertThat(success).isTrue()
                         assertThat(error).isNull()
@@ -366,7 +354,7 @@ internal class FlowControllerTest {
         scenario.onActivity {
             flowController.configureWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = null,
+                configuration = defaultConfiguration,
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -390,7 +378,7 @@ internal class FlowControllerTest {
         scenario.onActivity {
             flowController.configureWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = null,
+                configuration = defaultConfiguration,
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -429,7 +417,7 @@ internal class FlowControllerTest {
             scenario.onActivity {
                 flowController.configureWithPaymentIntent(
                     paymentIntentClientSecret = paymentIntentClientSecret,
-                    configuration = null,
+                    configuration = defaultConfiguration,
                     callback = { success, error ->
                         assertThat(success).isTrue()
                         assertThat(error).isNull()
@@ -467,9 +455,6 @@ internal class FlowControllerTest {
         networkRule = networkRule,
         integrationType = integrationType,
         createIntentCallback = { _, _ -> CreateIntentResult.Success("pi_example_secret_example") },
-        paymentOptionCallback = { paymentOption ->
-            assertThat(paymentOption?.label).endsWith("4242")
-        },
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
@@ -487,7 +472,7 @@ internal class FlowControllerTest {
                         currency = "usd"
                     )
                 ),
-                configuration = null,
+                configuration = defaultConfiguration,
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -544,9 +529,6 @@ internal class FlowControllerTest {
                 displayMessage = "We don't accept visa"
             )
         },
-        paymentOptionCallback = { paymentOption ->
-            assertThat(paymentOption?.label).endsWith("4242")
-        },
         resultCallback = { result ->
             assertThat(result).isInstanceOf(PaymentSheetResult.Failed::class.java)
             assertThat((result as PaymentSheetResult.Failed).error.message)
@@ -568,7 +550,7 @@ internal class FlowControllerTest {
                         currency = "usd"
                     )
                 ),
-                configuration = null,
+                configuration = defaultConfiguration,
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -603,9 +585,6 @@ internal class FlowControllerTest {
         createIntentCallback = { _, _ ->
             CreateIntentResult.Success(PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
         },
-        paymentOptionCallback = { paymentOption ->
-            assertThat(paymentOption?.label).endsWith("4242")
-        },
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
@@ -623,7 +602,7 @@ internal class FlowControllerTest {
                         currency = "usd"
                     )
                 ),
-                configuration = null,
+                configuration = defaultConfiguration,
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -655,9 +634,6 @@ internal class FlowControllerTest {
         networkRule = networkRule,
         integrationType = integrationType,
         createIntentCallback = { _, _ -> CreateIntentResult.Success("pi_example_secret_example") },
-        paymentOptionCallback = { paymentOption ->
-            assertThat(paymentOption?.label).endsWith("4242")
-        },
         resultCallback = { result ->
             val failureResult = result as? PaymentSheetResult.Failed
             assertThat(failureResult?.error?.message).isEqualTo(
@@ -683,7 +659,7 @@ internal class FlowControllerTest {
                         currency = "cad",
                     )
                 ),
-                configuration = null,
+                configuration = defaultConfiguration,
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
@@ -721,9 +697,6 @@ internal class FlowControllerTest {
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
-        paymentOptionCallback = { paymentOption ->
-            assertThat(paymentOption?.label).endsWith("4242")
-        },
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
@@ -749,8 +722,9 @@ internal class FlowControllerTest {
                     merchantDisplayName = "Merchant, Inc.",
                     customer = PaymentSheet.CustomerConfiguration(
                         id = "cus_1",
-                        ephemeralKeySecret = "123",
+                        ephemeralKeySecret = "ek_123",
                     ),
+                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
                 ),
                 callback = { success, error ->
                     assertThat(success).isTrue()
@@ -765,6 +739,8 @@ internal class FlowControllerTest {
                 .and(hasText("4242", substring = true))
         ).performClick()
 
+        assertThat(testContext.configureCallbackTurbine.awaitItem()?.label).endsWith("4242")
+
         page.fillCvcRecollection("123")
 
         networkRule.enqueue(
@@ -778,5 +754,143 @@ internal class FlowControllerTest {
         composeTestRule
             .onNodeWithText("Confirm")
             .performClick()
+    }
+
+    @Test
+    fun testSavedCardsInVerticalMode(
+        @TestParameter integrationType: IntegrationType,
+    ) = runFlowControllerTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        callConfirmOnPaymentOptionCallback = false,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_cvc_recollection.json")
+        }
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/payment_methods"),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-get-success.json")
+        }
+
+        testContext.configureFlowController {
+            configureWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Merchant, Inc.")
+                    .customer(
+                        PaymentSheet.CustomerConfiguration(
+                            id = "cus_1",
+                            ephemeralKeySecret = "ek_123",
+                        )
+                    )
+                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                    .build(),
+                callback = { success, error ->
+                    assertThat(success).isTrue()
+                    assertThat(error).isNull()
+                    presentPaymentOptions()
+                }
+            )
+        }
+
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT))
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag(TEST_TAG_VIEW_MORE).performClick()
+
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onAllNodes(hasTestTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST))
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+        composeTestRule.onNodeWithTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_pm_67890").performClick()
+
+        testContext.configureCallbackTurbine.expectNoEvents()
+        page.clickPrimaryButton()
+        assertThat(testContext.configureCallbackTurbine.awaitItem()?.label).endsWith("4242")
+        testContext.markTestSucceeded()
+    }
+
+    /**
+     * Tests the default ordering of payment methods when Elements session fetch fails.
+     *
+     * This test verifies that:
+     * 1. When Elements session request fails (400 response)
+     * 2. And a subsequent payment intent fetch succeeds
+     * 3. The payment methods are displayed in the expected default order:
+     *    - Card
+     *    - Afterpay/Clearpay
+     *    - Klarna
+     *    - Affirm
+     *    Note: US Bank Account and Link are excluded based on configuration
+     */
+    @Test
+    fun testDefaultPaymentMethodOrderWithFailedSession(
+        @TestParameter integrationType: IntegrationType,
+    ) = runFlowControllerTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.setResponseCode(400)
+        }
+
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/payment_intents/pi_example"),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-get-requires_payment_method.json")
+        }
+
+        testContext.configureFlowController {
+            configureWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = PaymentSheet.Configuration.Builder("Example, Inc.")
+                    .allowsDelayedPaymentMethods(true)
+                    .allowsPaymentMethodsRequiringShippingAddress(true)
+                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                    .build(),
+                callback = { success, error ->
+                    assertThat(success).isTrue()
+                    assertThat(error).isNull()
+                    presentPaymentOptions()
+                }
+            )
+        }
+
+        val actualTags = composeTestRule
+            .onNodeWithTag(TEST_TAG_LIST, true)
+            .onChildren()
+            .fetchSemanticsNodes()
+            .map { it.config[SemanticsProperties.TestTag] }
+
+        assertThat(actualTags).isEqualTo(
+            listOf(
+                "card",
+                "afterpay_clearpay",
+                "klarna",
+                // "us_bank_account", this is not in the list per configuration
+                "affirm",
+                // "link", this is not in the list per configuration
+            ).map { TEST_TAG_LIST + it }
+        )
+
+        testContext.markTestSucceeded()
     }
 }

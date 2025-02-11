@@ -36,7 +36,7 @@ interface TextFieldController : InputController, SectionFieldComposable {
     val capitalization: KeyboardCapitalization
     val keyboardType: KeyboardType
     override val label: StateFlow<Int?>
-    val visualTransformation: VisualTransformation
+    val visualTransformation: StateFlow<VisualTransformation>
     override val showOptionalLabel: Boolean
     val fieldState: StateFlow<TextFieldState>
     override val fieldValue: StateFlow<String>
@@ -109,7 +109,8 @@ sealed class TextFieldIcon {
         data class Item(
             val id: String,
             override val label: ResolvableString,
-            override val icon: Int
+            override val icon: Int,
+            override val enabled: Boolean = true
         ) : SingleChoiceDropdownItem
     }
 }
@@ -128,8 +129,9 @@ class SimpleTextFieldController(
     override val trailingIcon: StateFlow<TextFieldIcon?> = textFieldConfig.trailingIcon
     override val capitalization: KeyboardCapitalization = textFieldConfig.capitalization
     override val keyboardType: KeyboardType = textFieldConfig.keyboard
-    override val visualTransformation =
-        textFieldConfig.visualTransformation ?: VisualTransformation.None
+    override val visualTransformation = stateFlowOf(
+        value = textFieldConfig.visualTransformation ?: VisualTransformation.None
+    )
 
     override val label = MutableStateFlow(textFieldConfig.label)
     override val debugLabel = textFieldConfig.debugLabel

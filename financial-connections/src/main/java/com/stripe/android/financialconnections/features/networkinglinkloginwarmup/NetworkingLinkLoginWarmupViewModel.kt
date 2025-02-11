@@ -2,7 +2,6 @@ package com.stripe.android.financialconnections.features.networkinglinkloginwarm
 
 import android.os.Bundle
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.financialconnections.R
@@ -13,6 +12,7 @@ import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativ
 import com.stripe.android.financialconnections.domain.DisableNetworking
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.HandleError
+import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.features.common.getBusinessName
 import com.stripe.android.financialconnections.features.common.getRedactedEmail
@@ -28,10 +28,10 @@ import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
+import com.stripe.android.model.EmailSource
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.launch
 
 internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
     @Assisted initialState: NetworkingLinkLoginWarmupState,
@@ -40,7 +40,8 @@ internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
     private val handleError: HandleError,
     private val getOrFetchSync: GetOrFetchSync,
     private val disableNetworking: DisableNetworking,
-    private val navigationManager: NavigationManager
+    private val navigationManager: NavigationManager,
+    private val lookupAccount: LookupAccount,
 ) : FinancialConnectionsViewModel<NetworkingLinkLoginWarmupState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
@@ -50,7 +51,10 @@ internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
             eventTracker.track(PaneLoaded(PANE))
             NetworkingLinkLoginWarmupState.Payload(
                 merchantName = manifest.getBusinessName(),
-                email = requireNotNull(manifest.getRedactedEmail())
+                redactedEmail = requireNotNull(manifest.getRedactedEmail()),
+                email = requireNotNull(manifest.accountholderCustomerEmailAddress),
+                sessionId = manifest.id,
+                verifiedFlow = manifest.appVerificationEnabled
             )
         }.execute { copy(payload = it) }
     }
@@ -82,11 +86,38 @@ internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
                 )
             },
         )
+        onAsync(
+            NetworkingLinkLoginWarmupState::continueAsync,
+            onFail = { error ->
+                handleError(
+                    extraMessage = "Error looking up account",
+                    error = error,
+                    displayErrorScreen = false,
+                    pane = PANE
+                )
+            },
+        )
     }
 
-    fun onContinueClick() = viewModelScope.launch {
-        eventTracker.track(Click("click.continue", PANE))
-        navigationManager.tryNavigateTo(Destination.NetworkingLinkVerification(referrer = PANE))
+    fun onContinueClick() {
+        val payload = stateFlow.value.payload() ?: return
+
+        suspend {
+            eventTracker.track(Click("click.continue", PANE))
+            // Trigger a lookup call to ensure we cache a consumer session for posterior verification.
+            lookupAccount(
+                pane = PANE,
+                email = payload.email,
+                phone = null,
+                phoneCountryCode = null,
+                emailSource = EmailSource.CUSTOMER_OBJECT,
+                sessionId = payload.sessionId,
+                verifiedFlow = payload.verifiedFlow
+            )
+            navigationManager.tryNavigateTo(Destination.NetworkingLinkVerification(referrer = PANE))
+        }.execute {
+            copy(continueAsync = it)
+        }
     }
 
     fun onSecondaryButtonClicked() {
@@ -159,6 +190,7 @@ internal data class NetworkingLinkLoginWarmupState(
     val nextPaneOnDisableNetworking: String? = null,
     val payload: Async<Payload> = Uninitialized,
     val disableNetworkingAsync: Async<FinancialConnectionsSessionManifest> = Uninitialized,
+    val continueAsync: Async<Unit> = Uninitialized,
     val isInstantDebits: Boolean = false,
 ) {
 
@@ -182,6 +214,9 @@ internal data class NetworkingLinkLoginWarmupState(
 
     data class Payload(
         val merchantName: String?,
-        val email: String
+        val email: String,
+        val redactedEmail: String,
+        val verifiedFlow: Boolean,
+        val sessionId: String
     )
 }

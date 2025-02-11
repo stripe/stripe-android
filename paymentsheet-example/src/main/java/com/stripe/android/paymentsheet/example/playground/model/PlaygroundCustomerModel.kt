@@ -15,11 +15,14 @@ class CustomerEphemeralKeyRequest private constructor(
     val paymentMethodSaveFeature: FeatureState?,
     @SerialName("customer_session_payment_method_remove")
     val paymentMethodRemoveFeature: FeatureState?,
+    @SerialName("customer_session_payment_method_remove_last")
+    val paymentMethodRemoveLastFeature: FeatureState?,
     @SerialName("customer_session_payment_method_redisplay")
     val paymentMethodRedisplayFeature: FeatureState?,
     @SerialName("customer_session_payment_method_allow_redisplay_filters")
     val paymentMethodRedisplayFilters: List<AllowRedisplayFilter>?,
-
+    @SerialName("customer_session_payment_method_sync_default")
+    val paymentMethodSyncDefaultFeature: FeatureState?,
 ) {
     @Serializable
     enum class CustomerKeyType {
@@ -32,10 +35,39 @@ class CustomerEphemeralKeyRequest private constructor(
 
     class Builder {
         private var customerType: String? = null
+        private var customerKeyType: CustomerKeyType = CustomerKeyType.Legacy
         private var merchantCountryCode: String? = null
+        private var paymentMethodRemoveFeature: FeatureState = FeatureState.Enabled
+        private var paymentMethodRemoveLastFeature: FeatureState = FeatureState.Enabled
+        private var paymentMethodSyncDefaultFeature: FeatureState = FeatureState.Disabled
+        private var paymentMethodRedisplayFilters: List<AllowRedisplayFilter> = listOf(
+            AllowRedisplayFilter.Unspecified,
+            AllowRedisplayFilter.Limited,
+            AllowRedisplayFilter.Always,
+        )
 
         fun customerType(customerType: String) = apply {
             this.customerType = customerType
+        }
+
+        fun customerKeyType(customerKeyType: CustomerKeyType) = apply {
+            this.customerKeyType = customerKeyType
+        }
+
+        fun paymentMethodRemoveFeature(state: FeatureState) {
+            this.paymentMethodRemoveFeature = state
+        }
+
+        fun paymentMethodRemoveLastFeature(state: FeatureState) {
+            this.paymentMethodRemoveLastFeature = state
+        }
+
+        fun paymentMethodSyncDefaultFeature(state: FeatureState) {
+            this.paymentMethodSyncDefaultFeature = state
+        }
+
+        fun paymentMethodRedisplayFilters(filters: List<AllowRedisplayFilter>) {
+            this.paymentMethodRedisplayFilters = filters
         }
 
         fun merchantCountryCode(merchantCountryCode: String?) = apply {
@@ -45,16 +77,14 @@ class CustomerEphemeralKeyRequest private constructor(
         fun build(): CustomerEphemeralKeyRequest {
             return CustomerEphemeralKeyRequest(
                 customerType = customerType,
-                customerKeyType = CustomerKeyType.Legacy,
+                customerKeyType = customerKeyType,
                 merchantCountryCode = merchantCountryCode,
                 paymentMethodSaveFeature = FeatureState.Enabled,
-                paymentMethodRemoveFeature = FeatureState.Enabled,
+                paymentMethodRemoveFeature = paymentMethodRemoveFeature,
+                paymentMethodRemoveLastFeature = paymentMethodRemoveLastFeature,
+                paymentMethodSyncDefaultFeature = paymentMethodSyncDefaultFeature,
                 paymentMethodRedisplayFeature = FeatureState.Enabled,
-                paymentMethodRedisplayFilters = listOf(
-                    AllowRedisplayFilter.Unspecified,
-                    AllowRedisplayFilter.Limited,
-                    AllowRedisplayFilter.Always,
-                )
+                paymentMethodRedisplayFilters = paymentMethodRedisplayFilters,
             )
         }
     }

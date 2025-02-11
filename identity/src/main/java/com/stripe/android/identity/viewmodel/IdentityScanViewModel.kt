@@ -4,6 +4,8 @@ import android.app.Application
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.camera.scanui.util.asRect
+import com.stripe.android.identity.IdentityVerificationSheet
+import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.FPSTracker
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.ModelPerformanceTracker
@@ -22,7 +24,8 @@ internal abstract class IdentityScanViewModel(
     open val fpsTracker: FPSTracker,
     open val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
     modelPerformanceTracker: ModelPerformanceTracker,
-    laplacianBlurDetector: LaplacianBlurDetector
+    laplacianBlurDetector: LaplacianBlurDetector,
+    private val verificationFlowFinishable: VerificationFlowFinishable
 ) :
     CameraViewModel(
         modelPerformanceTracker,
@@ -39,7 +42,7 @@ internal abstract class IdentityScanViewModel(
      */
     internal val targetScanTypeFlow = MutableStateFlow<IdentityScanState.ScanType?>(null)
 
-    private lateinit var cameraManager: IdentityCameraManager
+    lateinit var cameraManager: IdentityCameraManager
 
     abstract val scanFeedback: StateFlow<Int?>
 
@@ -133,7 +136,12 @@ internal abstract class IdentityScanViewModel(
             viewFinder = cameraManager.requireCameraView().viewFinderWindowView.asRect(),
             lifecycleOwner = lifecycleOwner,
             coroutineScope = viewModelScope,
-            parameters = scanType
+            parameters = scanType,
+            errorHandler = { e ->
+                verificationFlowFinishable.finishWithResult(
+                    IdentityVerificationSheet.VerificationFlowResult.Failed(e)
+                )
+            }
         )
     }
 

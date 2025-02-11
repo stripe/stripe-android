@@ -5,10 +5,11 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
+import com.stripe.android.utils.BankFormScreenStateFactory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
@@ -127,40 +128,21 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
     }
 
     @Test
-    fun handleViewAction_DeletePaymentMethod_deletesPaymentMethod() {
-        var deletedPaymentMethod: PaymentMethod? = null
-        fun onDeletePaymentMethod(paymentMethod: PaymentMethod) {
-            deletedPaymentMethod = paymentMethod
+    fun handleViewAction_EditPaymentMethod_updatesPaymentMethod() {
+        var updatedPaymentMethod: DisplayableSavedPaymentMethod? = null
+        fun onUpdatePaymentMethod(paymentMethod: DisplayableSavedPaymentMethod) {
+            updatedPaymentMethod = paymentMethod
         }
 
-        runScenario(onDeletePaymentMethod = ::onDeletePaymentMethod) {
-            val paymentMethodToDelete = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-            interactor.handleViewAction(
-                SelectSavedPaymentMethodsInteractor.ViewAction.DeletePaymentMethod(
-                    paymentMethodToDelete
-                )
-            )
-
-            assertThat(deletedPaymentMethod).isEqualTo(paymentMethodToDelete)
-        }
-    }
-
-    @Test
-    fun handleViewAction_EditPaymentMethod_editsPaymentMethod() {
-        var editedPaymentMethod: PaymentMethod? = null
-        fun onEditPaymentMethod(paymentMethod: PaymentMethod) {
-            editedPaymentMethod = paymentMethod
-        }
-
-        runScenario(onEditPaymentMethod = ::onEditPaymentMethod) {
-            val paymentMethodToEdit = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        runScenario(onUpdatePaymentMethod = ::onUpdatePaymentMethod) {
+            val paymentMethodToUpdate = PaymentMethodFixtures.displayableCard()
             interactor.handleViewAction(
                 SelectSavedPaymentMethodsInteractor.ViewAction.EditPaymentMethod(
-                    paymentMethodToEdit
+                    paymentMethodToUpdate
                 )
             )
 
-            assertThat(editedPaymentMethod).isEqualTo(paymentMethodToEdit)
+            assertThat(updatedPaymentMethod).isEqualTo(paymentMethodToUpdate)
         }
     }
 
@@ -219,7 +201,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
 
     @Test
     fun selectedPaymentOptionItem_currentSelectionIsLink() {
-        val currentSelectionFlow = MutableStateFlow(PaymentSelection.Link)
+        val currentSelectionFlow = MutableStateFlow(PaymentSelection.Link())
 
         runScenario(
             paymentOptionsItems = MutableStateFlow(
@@ -240,7 +222,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
     @Test
     fun selectedPaymentOptionItem_currentSelectionIsLink_canBeChangedToGooglePay() {
         val currentSelectionFlow: MutableStateFlow<PaymentSelection?> =
-            MutableStateFlow(PaymentSelection.Link)
+            MutableStateFlow(PaymentSelection.Link())
 
         runScenario(
             paymentOptionsItems = MutableStateFlow(
@@ -269,7 +251,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
     @Test
     fun selectedPaymentOptionItem_currentSelectionIsLink_doesNotChangeWhenSelectionBecomesNew() {
         val currentSelectionFlow: MutableStateFlow<PaymentSelection?> =
-            MutableStateFlow(PaymentSelection.Link)
+            MutableStateFlow(PaymentSelection.Link())
 
         runScenario(
             paymentOptionsItems = MutableStateFlow(
@@ -387,7 +369,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
                 }
             }
 
-            currentSelectionFlow.value = PaymentSelection.Link
+            currentSelectionFlow.value = PaymentSelection.Link()
 
             interactor.state.test {
                 awaitItem().run {
@@ -442,13 +424,13 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             currentSelection = PaymentSelection.Saved(paymentMethods[0]),
             nameProvider = { it!!.resolvableString },
             isCbcEligible = true,
-            canRemovePaymentMethods = true,
+            defaultPaymentMethodId = null,
         ).items
     }
 
     private fun newPaymentSelection(): PaymentSelection.New {
         return PaymentSelection.New.USBankAccount(
-            labelResource = "Test",
+            label = "Test",
             iconResource = 0,
             paymentMethodCreateParams = mock(),
             customerRequestedSave = mock(),
@@ -460,14 +442,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
                 saveForFutureUse = false,
             ),
             instantDebits = null,
-            screenState = USBankAccountFormScreenState.SavedAccount(
-                financialConnectionsSessionId = "session_1234",
-                intentId = "intent_1234",
-                bankName = "Stripe Bank",
-                last4 = "6789",
-                primaryButtonText = "Continue".resolvableString,
-                mandateText = null,
-            ),
+            screenState = BankFormScreenStateFactory.createWithSession("session_1234"),
         )
     }
 
@@ -483,8 +458,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
         currentSelection: StateFlow<PaymentSelection?> = MutableStateFlow(null),
         mostRecentlySelectedSavedPaymentMethod: MutableStateFlow<PaymentMethod?> = MutableStateFlow(null),
         onAddCardPressed: () -> Unit = { notImplemented() },
-        onEditPaymentMethod: (PaymentMethod) -> Unit = { notImplemented() },
-        onDeletePaymentMethod: (PaymentMethod) -> Unit = { notImplemented() },
+        onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit = { notImplemented() },
         onPaymentMethodSelected: (PaymentSelection?) -> Unit = { notImplemented() },
         testBlock: suspend TestParams.() -> Unit,
     ) {
@@ -498,8 +472,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             currentSelection = currentSelection,
             mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
             onAddCardPressed = onAddCardPressed,
-            onEditPaymentMethod = onEditPaymentMethod,
-            onDeletePaymentMethod = onDeletePaymentMethod,
+            onUpdatePaymentMethod = onUpdatePaymentMethod,
             onPaymentMethodSelected = onPaymentMethodSelected,
             isLiveMode = true,
         )

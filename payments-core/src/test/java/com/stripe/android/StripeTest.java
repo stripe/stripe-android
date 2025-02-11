@@ -10,6 +10,7 @@ import com.stripe.android.core.AppInfo;
 import com.stripe.android.core.exception.AuthenticationException;
 import com.stripe.android.core.exception.InvalidRequestException;
 import com.stripe.android.core.exception.StripeException;
+import com.stripe.android.core.frauddetection.FraudDetectionDataRepository;
 import com.stripe.android.core.model.StripeFile;
 import com.stripe.android.core.model.StripeFileParams;
 import com.stripe.android.core.model.StripeFilePurpose;
@@ -41,6 +42,7 @@ import com.stripe.android.model.WeChat;
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory;
 import com.stripe.android.networking.StripeApiRepository;
 import com.stripe.android.networking.StripeRepository;
+import com.stripe.android.testing.FakeLogger;
 
 import java.io.File;
 import java.util.HashMap;
@@ -64,6 +66,7 @@ import kotlinx.coroutines.CoroutineDispatcher;
 import kotlinx.coroutines.test.TestCoroutineDispatcher;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.stripe.android.PaymentsFraudDetectionDataRepositoryFactoryKt.DefaultFraudDetectionDataRepository;
 import static com.stripe.android.utils.TestUtils.idleLooper;
 import static java.util.Collections.emptySet;
 import static org.junit.Assert.assertEquals;
@@ -90,7 +93,7 @@ public class StripeTest {
     private final Context context = ApplicationProvider.getApplicationContext();
     @NonNull
     private final FraudDetectionDataRepository defaultFraudDetectionDataRepository =
-            new DefaultFraudDetectionDataRepository(context);
+            DefaultFraudDetectionDataRepository(context);
     @NonNull
     private final Stripe defaultStripe = createStripe();
 

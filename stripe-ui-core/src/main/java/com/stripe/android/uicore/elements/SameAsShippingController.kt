@@ -1,9 +1,6 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusDirection
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -15,7 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class SameAsShippingController(
     initialValue: Boolean
-) : InputController, SectionFieldComposable {
+) : InputController {
     override val label: StateFlow<Int> = stateFlowOf(R.string.stripe_billing_same_as_shipping)
     private val _value = MutableStateFlow(initialValue)
     val value: StateFlow<Boolean> = _value.asStateFlow()
@@ -36,18 +33,5 @@ class SameAsShippingController(
 
     override fun onRawValueChange(rawValue: String) {
         onValueChange(rawValue.toBooleanStrictOrNull() ?: true)
-    }
-
-    @Composable
-    override fun ComposeUI(
-        enabled: Boolean,
-        field: SectionFieldElement,
-        modifier: Modifier,
-        hiddenIdentifiers: Set<IdentifierSpec>,
-        lastTextFieldIdentifier: IdentifierSpec?,
-        nextFocusDirection: FocusDirection,
-        previousFocusDirection: FocusDirection
-    ) {
-        SameAsShippingElementUI(this)
     }
 }

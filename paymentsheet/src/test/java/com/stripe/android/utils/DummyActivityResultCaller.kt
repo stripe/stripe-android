@@ -6,26 +6,38 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.app.ActivityOptionsCompat
+import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.Turbine
 
-class DummyActivityResultCaller : ActivityResultCaller {
+class DummyActivityResultCaller private constructor() : ActivityResultCaller {
+    private val registeredLaunchers = Turbine<ActivityResultLauncher<*>>()
+    private val registerCalls = Turbine<RegisterCall<*, *>>()
+    private val launchCalls = Turbine<Any?>()
+    private val unregisteredLaunchers = Turbine<ActivityResultLauncher<*>>()
 
     override fun <I : Any?, O : Any?> registerForActivityResult(
         contract: ActivityResultContract<I, O>,
         callback: ActivityResultCallback<O>
     ): ActivityResultLauncher<I> {
-        return object : ActivityResultLauncher<I>() {
+        registerCalls.add(RegisterCall(contract, callback))
+
+        val launcher = object : ActivityResultLauncher<I>() {
             override fun launch(input: I, options: ActivityOptionsCompat?) {
-                error("Not implemented")
+                launchCalls.add(input)
             }
 
             override fun unregister() {
-                error("Not implemented")
+                unregisteredLaunchers.add(this)
             }
 
             override fun getContract(): ActivityResultContract<I, *> {
                 error("Not implemented")
             }
         }
+
+        registeredLaunchers.add(launcher)
+
+        return launcher
     }
 
     override fun <I : Any?, O : Any?> registerForActivityResult(
@@ -33,18 +45,75 @@ class DummyActivityResultCaller : ActivityResultCaller {
         registry: ActivityResultRegistry,
         callback: ActivityResultCallback<O>
     ): ActivityResultLauncher<I> {
-        return object : ActivityResultLauncher<I>() {
+        val launcher = object : ActivityResultLauncher<I>() {
             override fun launch(input: I, options: ActivityOptionsCompat?) {
-                error("Not implemented")
+                launchCalls.add(input)
             }
 
             override fun unregister() {
-                error("Not implemented")
+                unregisteredLaunchers.add(this)
             }
 
             override fun getContract(): ActivityResultContract<I, *> {
                 error("Not implemented")
             }
+        }
+
+        registeredLaunchers.add(launcher)
+
+        return launcher
+    }
+
+    data class RegisterCall<I : Any?, O : Any?>(
+        val contract: ActivityResultContract<I, O>,
+        val callback: ActivityResultCallback<O>,
+    )
+
+    class Scenario(
+        val activityResultCaller: ActivityResultCaller,
+        private val registerCalls: ReceiveTurbine<RegisterCall<*, *>>,
+        private val unregisteredLaunchers: ReceiveTurbine<ActivityResultLauncher<*>>,
+        private val launchCalls: ReceiveTurbine<Any?>,
+        private val registeredLaunchers: ReceiveTurbine<ActivityResultLauncher<*>>,
+    ) {
+        suspend fun awaitNextRegisteredLauncher(): ActivityResultLauncher<*> {
+            return registeredLaunchers.awaitItem()
+        }
+
+        suspend fun awaitRegisterCall(): RegisterCall<*, *> {
+            return registerCalls.awaitItem()
+        }
+
+        suspend fun awaitNextUnregisteredLauncher(): ActivityResultLauncher<*> {
+            return unregisteredLaunchers.awaitItem()
+        }
+
+        suspend fun awaitLaunchCall(): Any? {
+            return launchCalls.awaitItem()
+        }
+    }
+
+    companion object {
+        suspend fun test(
+            block: suspend Scenario.() -> Unit
+        ) {
+            val activityResultCaller = DummyActivityResultCaller()
+            Scenario(
+                activityResultCaller = activityResultCaller,
+                registerCalls = activityResultCaller.registerCalls,
+                launchCalls = activityResultCaller.launchCalls,
+                registeredLaunchers = activityResultCaller.registeredLaunchers,
+                unregisteredLaunchers = activityResultCaller.unregisteredLaunchers
+            ).apply {
+                block(this)
+                activityResultCaller.registerCalls.ensureAllEventsConsumed()
+                activityResultCaller.launchCalls.ensureAllEventsConsumed()
+                activityResultCaller.registeredLaunchers.ensureAllEventsConsumed()
+            }
+        }
+
+        fun noOp(): ActivityResultCaller {
+            return DummyActivityResultCaller()
         }
     }
 }

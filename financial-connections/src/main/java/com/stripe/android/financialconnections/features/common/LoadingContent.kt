@@ -75,9 +75,9 @@ internal fun LoadingShimmerEffect(
     val shimmerWidth = screenWidth * SHIMMER_SIZE_MULTIPLIER
 
     val gradient = listOf(
-        colors.backgroundOffset,
+        colors.backgroundSecondary,
         Color.White.copy(alpha = SHIMMER_GRADIENT_ALPHA),
-        colors.backgroundOffset
+        colors.backgroundSecondary,
     )
     val transition = rememberInfiniteTransition(label = "shimmer_transition")
     val translateAnimation = transition.animateFloat(
@@ -116,7 +116,7 @@ internal fun FullScreenGenericLoading() {
 internal fun LoadingSpinner(
     modifier: Modifier = Modifier,
     strokeWidth: Dp = ProgressIndicatorDefaults.StrokeWidth,
-    gradient: Brush = Brush.sweepGradient(listOf(colors.iconWhite, colors.borderBrand))
+    gradient: Brush = Brush.sweepGradient(listOf(colors.background, colors.border)),
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "loading_transition")
     val angle by infiniteTransition.animateFloat(
@@ -223,13 +223,13 @@ private fun LoadingPill(modifier: Modifier = Modifier) {
     ) {
         Text(
             text = stringResource(R.string.stripe_loading_pill_label),
-            color = colors.textWhite,
+            color = Color.White,
             style = typography.bodySmall,
         )
 
         LoadingSpinner(
             strokeWidth = 2.dp,
-            gradient = Brush.sweepGradient(listOf(Color.Transparent, colors.iconWhite)),
+            gradient = Brush.sweepGradient(listOf(Color.Transparent, Color.White)),
             modifier = Modifier.size(16.dp),
         )
     }

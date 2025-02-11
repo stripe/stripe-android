@@ -3,6 +3,7 @@ apply from: configs.androidLibrary
 apply plugin: 'checkstyle'
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 apply plugin: 'kotlinx-serialization'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 apply plugin: 'app.cash.paparazzi'
 apply plugin: 'com.google.devtools.ksp'
 
@@ -22,6 +23,7 @@ dependencies {
     api project(":stripe-core")
     api project(":stripe-ui-core")
     api project(":payments-model")
+    implementation project(":stripe-attestation")
 
     implementation libs.androidx.activity
     implementation libs.androidx.annotation
@@ -33,6 +35,7 @@ dependencies {
     implementation libs.compose.activity
     implementation libs.compose.foundation
     implementation libs.compose.material
+    implementation libs.compose.materialIcons
     implementation libs.compose.navigation
     implementation libs.compose.ui
     implementation libs.compose.uiToolingPreview
@@ -87,12 +90,9 @@ android {
     kotlinOptions {
         freeCompilerArgs += [
                 "-opt-in=kotlin.RequiresOptIn",
-                "-opt-in=androidx.compose.material.ExperimentalMaterialApi"
+                "-opt-in=androidx.compose.material.ExperimentalMaterialApi",
+                "-Xconsistent-data-class-copy-visibility",
         ]
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
     }
 }
 

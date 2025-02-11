@@ -189,7 +189,7 @@ private fun ResendCodeSection(
                 annotationStyles = mapOf(
                     StringAnnotation.CLICKABLE to typography.labelMediumEmphasized
                         .toSpanStyle()
-                        .copy(color = colors.textBrand),
+                        .copy(color = colors.textAction),
                 ),
                 onClickableTextClick = onClickableTextClick,
             )

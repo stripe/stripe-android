@@ -2,7 +2,6 @@ package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardNumberFixtures
-import com.stripe.android.view.AddPaymentMethodActivity
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -171,11 +170,12 @@ class PaymentMethodCreateParamsTest {
 
     @Test
     fun attribution_whenFpxAndProductUsageIsNotEmpty_shouldBeProductUsage() {
+        val expectedProductUsage = "example_product_usage"
         val params = createFpx().copy(
-            productUsage = setOf(AddPaymentMethodActivity.PRODUCT_TOKEN)
+            productUsage = setOf(expectedProductUsage)
         )
         assertEquals(
-            setOf(AddPaymentMethodActivity.PRODUCT_TOKEN),
+            setOf(expectedProductUsage),
             params.attribution
         )
     }
@@ -193,15 +193,16 @@ class PaymentMethodCreateParamsTest {
 
     @Test
     fun attribution_whenCardAndProductUsageIsNotEmpty_shouldBeAttributionPlusProductUsage() {
+        val expectedProductUsage = "example_product_usage"
         val params = PaymentMethodCreateParams.create(
             PaymentMethodCreateParamsFixtures.CARD_WITH_ATTRIBUTION
         ).copy(
-            productUsage = setOf(AddPaymentMethodActivity.PRODUCT_TOKEN)
+            productUsage = setOf(expectedProductUsage)
         )
         assertThat(params.attribution)
             .containsExactly(
                 "CardMultilineWidget",
-                AddPaymentMethodActivity.PRODUCT_TOKEN
+                expectedProductUsage
             )
     }
 
@@ -218,7 +219,7 @@ class PaymentMethodCreateParamsTest {
                 card = PaymentMethodCreateParams.Card(
                     number = CardNumberFixtures.VISA_NO_SPACES,
                     expiryMonth = 12,
-                    expiryYear = 2025,
+                    expiryYear = 2045,
                     cvc = "123",
                     attribution = setOf("CardInputView")
                 ),
@@ -370,7 +371,7 @@ class PaymentMethodCreateParamsTest {
         val card = PaymentMethodCreateParams.Card(
             number = CardNumberFixtures.VISA_NO_SPACES,
             expiryMonth = 12,
-            expiryYear = 2025,
+            expiryYear = 2045,
             cvc = "123",
         )
 

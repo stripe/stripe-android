@@ -1,8 +1,10 @@
 package com.stripe.android.customersheet.data
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.customersheet.CustomerAdapter
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
+import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.customersheet.CustomerSheetFixtures
 import com.stripe.android.customersheet.FakeCustomerAdapter
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
@@ -10,9 +12,9 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
+import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.SetupIntentFactory
@@ -21,7 +23,6 @@ import kotlinx.coroutines.test.runTest
 import kotlin.coroutines.coroutineContext
 import kotlin.test.Test
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 class CustomerAdapterDataSourceTest {
     @Test
     fun `on retrieve payment methods, should complete successfully from adapter`() = runTest {
@@ -61,6 +62,27 @@ class CustomerAdapterDataSourceTest {
         assertThat(failedResult.cause).isInstanceOf(IllegalStateException::class.java)
         assertThat(failedResult.cause.message).isEqualTo("Failed to retrieve!")
         assertThat(failedResult.displayMessage).isEqualTo("Something went wrong!")
+    }
+
+    @Test
+    fun `on retrieve payment methods, should catch and fail if an exception is thrown from adapter`() = runTest {
+        val exception = IllegalStateException("Failed to get payment methods!")
+
+        val dataSource = createCustomerAdapterDataSource(
+            adapter = FakeCustomerAdapter(
+                onPaymentMethods = {
+                    throw exception
+                }
+            )
+        )
+
+        val result = dataSource.retrievePaymentMethods()
+
+        assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<List<PaymentMethod>>>()
+
+        val failedResult = result.asFailure()
+
+        assertThat(failedResult.cause).isEqualTo(exception)
     }
 
     @Test
@@ -106,6 +128,27 @@ class CustomerAdapterDataSourceTest {
     }
 
     @Test
+    fun `on retrieve payment option, should catch and fail if an exception is thrown from adapter`() = runTest {
+        val exception = IllegalStateException("Failed to retrieve saved selection!")
+
+        val dataSource = createCustomerAdapterDataSource(
+            adapter = FakeCustomerAdapter(
+                onGetPaymentOption = {
+                    throw exception
+                }
+            )
+        )
+
+        val result = dataSource.retrieveSavedSelection()
+
+        assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<SavedSelection?>>()
+
+        val failedResult = result.asFailure()
+
+        assertThat(failedResult.cause).isEqualTo(exception)
+    }
+
+    @Test
     fun `on set saved selection, should complete successfully from adapter`() = runTest {
         val dataSource = createCustomerAdapterDataSource(
             adapter = FakeCustomerAdapter(
@@ -117,7 +160,7 @@ class CustomerAdapterDataSourceTest {
 
         val result = dataSource.setSavedSelection(SavedSelection.GooglePay)
 
-        assertThat(result).isInstanceOf<CustomerSheetDataResult.Success<SavedSelection?>>()
+        assertThat(result).isInstanceOf<CustomerSheetDataResult.Success<Unit>>()
     }
 
     @Test
@@ -135,13 +178,34 @@ class CustomerAdapterDataSourceTest {
 
         val result = dataSource.setSavedSelection(SavedSelection.GooglePay)
 
-        assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<SavedSelection?>>()
+        assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<Unit>>()
 
         val failedResult = result.asFailure()
 
         assertThat(failedResult.cause).isInstanceOf(IllegalStateException::class.java)
         assertThat(failedResult.cause.message).isEqualTo("Failed to retrieve!")
         assertThat(failedResult.displayMessage).isEqualTo("Something went wrong!")
+    }
+
+    @Test
+    fun `on set saved selection, should catch and fail if an exception is thrown from adapter`() = runTest {
+        val exception = IllegalStateException("Failed to set selection!")
+
+        val dataSource = createCustomerAdapterDataSource(
+            adapter = FakeCustomerAdapter(
+                onSetSelectedPaymentOption = {
+                    throw exception
+                }
+            )
+        )
+
+        val result = dataSource.setSavedSelection(SavedSelection.GooglePay)
+
+        assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<Unit>>()
+
+        val failedResult = result.asFailure()
+
+        assertThat(failedResult.cause).isEqualTo(exception)
     }
 
     @Test
@@ -189,6 +253,27 @@ class CustomerAdapterDataSourceTest {
     }
 
     @Test
+    fun `on attach payment method, should catch and fail if an exception is thrown from adapter`() = runTest {
+        val exception = IllegalStateException("Failed to attach!")
+
+        val dataSource = createCustomerAdapterDataSource(
+            adapter = FakeCustomerAdapter(
+                onAttachPaymentMethod = {
+                    throw exception
+                }
+            )
+        )
+
+        val result = dataSource.attachPaymentMethod(paymentMethodId = "pm_1")
+
+        assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<PaymentMethod>>()
+
+        val failedResult = result.asFailure()
+
+        assertThat(failedResult.cause).isEqualTo(exception)
+    }
+
+    @Test
     fun `on detach payment method, should complete successfully from adapter`() = runTest {
         val paymentMethod = PaymentMethodFactory.card(id = "pm_1")
         val dataSource = createCustomerAdapterDataSource(
@@ -230,6 +315,27 @@ class CustomerAdapterDataSourceTest {
         assertThat(failedResult.cause).isInstanceOf(IllegalStateException::class.java)
         assertThat(failedResult.cause.message).isEqualTo("Failed to retrieve!")
         assertThat(failedResult.displayMessage).isEqualTo("Something went wrong!")
+    }
+
+    @Test
+    fun `on detach payment method, should catch and fail if an exception is thrown from adapter`() = runTest {
+        val exception = IllegalStateException("Failed to detach!")
+
+        val dataSource = createCustomerAdapterDataSource(
+            adapter = FakeCustomerAdapter(
+                onDetachPaymentMethod = {
+                    throw exception
+                }
+            )
+        )
+
+        val result = dataSource.detachPaymentMethod(paymentMethodId = "pm_1")
+
+        assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<PaymentMethod>>()
+
+        val failedResult = result.asFailure()
+
+        assertThat(failedResult.cause).isEqualTo(exception)
     }
 
     @Test
@@ -280,6 +386,30 @@ class CustomerAdapterDataSourceTest {
         assertThat(failedResult.cause).isInstanceOf(IllegalStateException::class.java)
         assertThat(failedResult.cause.message).isEqualTo("Failed to retrieve!")
         assertThat(failedResult.displayMessage).isEqualTo("Something went wrong!")
+    }
+
+    @Test
+    fun `on update payment method, should catch and fail if an exception is thrown from adapter`() = runTest {
+        val exception = IllegalStateException("Failed to update!")
+
+        val dataSource = createCustomerAdapterDataSource(
+            adapter = FakeCustomerAdapter(
+                onUpdatePaymentMethod = { _, _ ->
+                    throw exception
+                }
+            )
+        )
+
+        val result = dataSource.updatePaymentMethod(
+            paymentMethodId = "pm_1",
+            params = PaymentMethodUpdateParams.createCard(expiryYear = 2028, expiryMonth = 7),
+        )
+
+        assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<PaymentMethod>>()
+
+        val failedResult = result.asFailure()
+
+        assertThat(failedResult.cause).isEqualTo(exception)
     }
 
     @Test
@@ -348,6 +478,27 @@ class CustomerAdapterDataSourceTest {
     }
 
     @Test
+    fun `on fetch setup intent client secret, should catch & fail if exception is thrown from adapter`() = runTest {
+        val exception = IllegalStateException("Failed to update!")
+
+        val dataSource = createCustomerAdapterDataSource(
+            adapter = FakeCustomerAdapter(
+                onSetupIntentClientSecretForCustomerAttach = {
+                    throw exception
+                }
+            )
+        )
+
+        val result = dataSource.retrieveSetupIntentClientSecret()
+
+        assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<String>>()
+
+        val failedResult = result.asFailure()
+
+        assertThat(failedResult.cause).isEqualTo(exception)
+    }
+
+    @Test
     fun `on load customer sheet session, should load properly & report success events`() = runTest {
         val intent = SetupIntentFactory.create()
         val elementsSessionRepository = createElementsSessionRepository(intent)
@@ -365,7 +516,7 @@ class CustomerAdapterDataSourceTest {
             errorReporter = errorReporter,
         )
 
-        val result = dataSource.loadCustomerSheetSession()
+        val result = dataSource.loadCustomerSheetSession(createConfiguration())
 
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Success<CustomerSheetSession>>()
 
@@ -397,7 +548,7 @@ class CustomerAdapterDataSourceTest {
             errorReporter = errorReporter,
         )
 
-        val result = dataSource.loadCustomerSheetSession()
+        val result = dataSource.loadCustomerSheetSession(createConfiguration())
 
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<CustomerSheetSession>>()
 
@@ -425,7 +576,7 @@ class CustomerAdapterDataSourceTest {
             errorReporter = errorReporter,
         )
 
-        val result = dataSource.loadCustomerSheetSession()
+        val result = dataSource.loadCustomerSheetSession(createConfiguration())
 
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<CustomerSheetSession>>()
 
@@ -450,7 +601,7 @@ class CustomerAdapterDataSourceTest {
             ),
         )
 
-        val result = dataSource.loadCustomerSheetSession()
+        val result = dataSource.loadCustomerSheetSession(createConfiguration())
 
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<CustomerSheetSession>>()
 
@@ -492,6 +643,40 @@ class CustomerAdapterDataSourceTest {
             expectedPaymentMethodTypes = listOf("card")
         )
 
+    @Test
+    fun `when 'allowsRemovalOfLastSavedPaymentMethod' is true, 'canRemoveLastPaymentMethod should be true`() =
+        runRemoveLastPaymentMethodPermissionsTest(
+            allowsRemovalOfLastSavedPaymentMethod = true,
+        )
+
+    @Test
+    fun `when 'allowsRemovalOfLastSavedPaymentMethod' is false, 'canRemoveLastPaymentMethod should be false`() =
+        runRemoveLastPaymentMethodPermissionsTest(
+            allowsRemovalOfLastSavedPaymentMethod = false,
+        )
+
+    private fun runRemoveLastPaymentMethodPermissionsTest(
+        allowsRemovalOfLastSavedPaymentMethod: Boolean,
+    ) = runTest {
+        val dataSource = createCustomerAdapterDataSource(
+            adapter = FakeCustomerAdapter(),
+            elementsSessionRepository = createElementsSessionRepository()
+        )
+
+        val result = dataSource.loadCustomerSheetSession(
+            configuration = createConfiguration(
+                allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
+            )
+        )
+
+        assertThat(result).isInstanceOf<CustomerSheetDataResult.Success<*>>()
+
+        val customerSheetSession = result.asSuccess().value
+
+        assertThat(customerSheetSession.permissions.canRemoveLastPaymentMethod)
+            .isEqualTo(allowsRemovalOfLastSavedPaymentMethod)
+    }
+
     private fun runPaymentMethodTypesTest(
         canCreateSetupIntents: Boolean,
         providedPaymentMethodTypes: List<String>?,
@@ -507,11 +692,11 @@ class CustomerAdapterDataSourceTest {
             elementsSessionRepository = elementsSessionRepository
         )
 
-        dataSource.loadCustomerSheetSession()
+        dataSource.loadCustomerSheetSession(createConfiguration())
 
         val initializationMode = elementsSessionRepository.lastParams?.initializationMode
 
-        assertThat(initializationMode).isInstanceOf<PaymentSheet.InitializationMode.DeferredIntent>()
+        assertThat(initializationMode).isInstanceOf<InitializationMode.DeferredIntent>()
 
         val deferredInitializationMode = initializationMode.asDeferred()
 
@@ -543,8 +728,17 @@ class CustomerAdapterDataSourceTest {
         )
     }
 
-    private fun PaymentSheet.InitializationMode?.asDeferred(): PaymentSheet.InitializationMode.DeferredIntent {
-        return this as PaymentSheet.InitializationMode.DeferredIntent
+    @OptIn(ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class)
+    private fun createConfiguration(
+        allowsRemovalOfLastSavedPaymentMethod: Boolean = true,
+    ): CustomerSheet.Configuration {
+        return CustomerSheetFixtures.CONFIG_WITH_EVERYTHING.newBuilder()
+            .allowsRemovalOfLastSavedPaymentMethod(allowsRemovalOfLastSavedPaymentMethod)
+            .build()
+    }
+
+    private fun InitializationMode?.asDeferred(): InitializationMode.DeferredIntent {
+        return this as InitializationMode.DeferredIntent
     }
 
     private fun <T> CustomerSheetDataResult<T>.asSuccess(): CustomerSheetDataResult.Success<T> {

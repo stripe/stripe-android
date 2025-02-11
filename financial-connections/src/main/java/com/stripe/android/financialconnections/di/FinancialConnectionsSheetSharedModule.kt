@@ -1,10 +1,14 @@
 package com.stripe.android.financialconnections.di
 
 import android.app.Application
+import androidx.core.os.LocaleListCompat
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
+import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
+import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.AnalyticsRequestV2Executor
@@ -33,6 +37,7 @@ import com.stripe.android.financialconnections.repository.ConsumerSessionReposit
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepositoryImpl
 import com.stripe.android.financialconnections.repository.RealConsumerSessionRepository
+import com.stripe.android.financialconnections.utils.DefaultFraudDetectionDataRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -41,7 +46,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 import java.util.Locale
 import javax.inject.Named
-import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -64,19 +68,19 @@ import kotlin.coroutines.CoroutineContext
 internal interface FinancialConnectionsSheetSharedModule {
 
     @Binds
-    @Singleton
+    @ActivityRetainedScope
     fun bindsAnalyticsRequestV2Storage(impl: RealAnalyticsRequestV2Storage): AnalyticsRequestV2Storage
 
     @Binds
-    @Singleton
+    @ActivityRetainedScope
     fun bindsAnalyticsRequestV2Executor(impl: DefaultAnalyticsRequestV2Executor): AnalyticsRequestV2Executor
 
     @Binds
-    @Singleton
+    @ActivityRetainedScope
     fun bindsConsumerSessionRepository(impl: RealConsumerSessionRepository): ConsumerSessionRepository
 
     @Binds
-    @Singleton
+    @ActivityRetainedScope
     fun bindsConsumerSessionProvider(impl: RealConsumerSessionRepository): ConsumerSessionProvider
 
     @Binds
@@ -85,7 +89,27 @@ internal interface FinancialConnectionsSheetSharedModule {
     companion object {
 
         @Provides
-        @Singleton
+        @ActivityRetainedScope
+        @IOContext
+        fun provideWorkContext(): CoroutineContext = Dispatchers.IO
+
+        @Provides
+        @ActivityRetainedScope
+        @UIContext
+        fun provideUIContext(): CoroutineContext = Dispatchers.Main
+
+        @Provides
+        @ActivityRetainedScope
+        internal fun provideLogger(@Named(ENABLE_LOGGING) enableLogging: Boolean) =
+            Logger.getInstance(enableLogging)
+
+        @Provides
+        @ActivityRetainedScope
+        internal fun provideLocale() =
+            LocaleListCompat.getAdjustedDefault().takeUnless { it.isEmpty }?.get(0)
+
+        @Provides
+        @ActivityRetainedScope
         internal fun providesApiOptions(
             @Named(PUBLISHABLE_KEY) publishableKey: String,
             @Named(STRIPE_ACCOUNT_ID) stripeAccountId: String?
@@ -95,7 +119,7 @@ internal interface FinancialConnectionsSheetSharedModule {
         )
 
         @Provides
-        @Singleton
+        @ActivityRetainedScope
         internal fun providesJson(): Json = Json {
             coerceInputValues = true
             ignoreUnknownKeys = true
@@ -104,7 +128,7 @@ internal interface FinancialConnectionsSheetSharedModule {
         }
 
         @Provides
-        @Singleton
+        @ActivityRetainedScope
         fun provideStripeNetworkClient(
             @IOContext context: CoroutineContext,
             logger: Logger
@@ -113,8 +137,8 @@ internal interface FinancialConnectionsSheetSharedModule {
             logger = logger
         )
 
-        @Singleton
         @Provides
+        @ActivityRetainedScope
         fun providesAnalyticsTracker(
             context: Application,
             getOrFetchSync: GetOrFetchSync,
@@ -130,7 +154,7 @@ internal interface FinancialConnectionsSheetSharedModule {
         )
 
         @Provides
-        @Singleton
+        @ActivityRetainedScope
         fun providesApiRequestFactory(
             apiVersion: ApiVersion
         ): ApiRequest.Factory = ApiRequest.Factory(
@@ -138,25 +162,25 @@ internal interface FinancialConnectionsSheetSharedModule {
         )
 
         @Provides
-        @Singleton
+        @ActivityRetainedScope
         fun provideConnectionsRepository(
             repository: FinancialConnectionsRepositoryImpl
         ): FinancialConnectionsRepository = repository
 
         @Provides
-        @Singleton
+        @ActivityRetainedScope
         fun provideEventReporter(
             defaultFinancialConnectionsEventReporter: DefaultFinancialConnectionsEventReporter
         ): FinancialConnectionsEventReporter = defaultFinancialConnectionsEventReporter
 
         @Provides
-        @Singleton
+        @ActivityRetainedScope
         internal fun providesAnalyticsRequestExecutor(
             executor: DefaultAnalyticsRequestExecutor
         ): AnalyticsRequestExecutor = executor
 
         @Provides
-        @Singleton
+        @ActivityRetainedScope
         internal fun provideAnalyticsRequestFactory(
             application: Application,
             @Named(PUBLISHABLE_KEY) publishableKey: String
@@ -169,7 +193,7 @@ internal interface FinancialConnectionsSheetSharedModule {
         )
 
         @Provides
-        @Singleton
+        @ActivityRetainedScope
         internal fun providesIsWorkManagerAvailable(
             getOrFetchSync: GetOrFetchSync,
         ): IsWorkManagerAvailable {
@@ -179,9 +203,16 @@ internal interface FinancialConnectionsSheetSharedModule {
         }
 
         @Provides
-        @Singleton
+        @ActivityRetainedScope
         internal fun providesIoDispatcher(): CoroutineDispatcher {
             return Dispatchers.IO
+        }
+
+        @Provides
+        internal fun provideFraudDetectionDataRepository(
+            application: Application,
+        ): FraudDetectionDataRepository {
+            return DefaultFraudDetectionDataRepository(application)
         }
     }
 }

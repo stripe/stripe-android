@@ -1,5 +1,7 @@
 package com.stripe.android.customersheet
 
+import com.stripe.android.common.coroutines.Single
+import com.stripe.android.common.coroutines.awaitWithTimeout
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.IS_LIVE_MODE
@@ -12,33 +14,29 @@ import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.validate
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal interface CustomerSheetLoader {
     suspend fun load(configuration: CustomerSheet.Configuration): Result<CustomerSheetState.Full>
 }
 
-@OptIn(ExperimentalCustomerSheetApi::class)
 internal class DefaultCustomerSheetLoader(
     @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
     private val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
     private val lpmRepository: LpmRepository,
-    private val initializationDataSourceProvider: Deferred<CustomerSheetInitializationDataSource>,
+    private val initializationDataSourceProvider: Single<CustomerSheetInitializationDataSource>,
     private val errorReporter: ErrorReporter,
     private val workContext: CoroutineContext
 ) : CustomerSheetLoader {
@@ -64,7 +62,17 @@ internal class DefaultCustomerSheetLoader(
         configuration: CustomerSheet.Configuration
     ): Result<CustomerSheetState.Full> = workContext.runCatching {
         val initializationDataSource = retrieveInitializationDataSource().getOrThrow()
-        val customerSheetSession = initializationDataSource.loadCustomerSheetSession().toResult().getOrThrow()
+        var customerSheetSession = initializationDataSource
+            .loadCustomerSheetSession(configuration)
+            .toResult()
+            .getOrThrow()
+
+        val filteredPaymentMethods = customerSheetSession.paymentMethods.filter {
+            PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance).isAccepted(it)
+        }
+        customerSheetSession = customerSheetSession.copy(
+            paymentMethods = filteredPaymentMethods
+        )
 
         val metadata = createPaymentMethodMetadata(
             configuration = configuration,
@@ -79,9 +87,9 @@ internal class DefaultCustomerSheetLoader(
     }
 
     private suspend fun retrieveInitializationDataSource(): Result<CustomerSheetInitializationDataSource> {
-        return initializationDataSourceProvider.awaitAsResult(
+        return initializationDataSourceProvider.awaitWithTimeout(
             timeout = 5.seconds,
-            error = {
+            timeoutMessage = {
                 "Couldn't find an instance of InitializationDataSource. " +
                     "Are you instantiating CustomerSheet unconditionally in your app?"
             },
@@ -127,7 +135,7 @@ internal class DefaultCustomerSheetLoader(
         val paymentSelection = customerSheetSession.savedSelection?.let { selection ->
             when (selection) {
                 is SavedSelection.GooglePay -> PaymentSelection.GooglePay
-                is SavedSelection.Link -> PaymentSelection.Link
+                is SavedSelection.Link -> PaymentSelection.Link()
                 is SavedSelection.PaymentMethod -> {
                     paymentMethods.find { paymentMethod ->
                         paymentMethod.id == selection.id
@@ -169,17 +177,5 @@ internal class DefaultCustomerSheetLoader(
         return supportedPaymentMethods.filter {
             supported.contains(it.code)
         }
-    }
-}
-
-private suspend fun <T> Deferred<T>.awaitAsResult(
-    timeout: Duration,
-    error: () -> String,
-): Result<T> {
-    val result = withTimeoutOrNull(timeout) { await() }
-    return if (result != null) {
-        Result.success(result)
-    } else {
-        Result.failure(IllegalStateException(error()))
     }
 }

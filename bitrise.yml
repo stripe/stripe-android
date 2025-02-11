@@ -82,7 +82,7 @@ workflows:
       - script@1:
           timeout: 1200
           inputs:
-            - content: ./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest
+            - content: ./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest --continue
   build-connections-debug:
     envs:
       - BUILD_VARIANT: debug
@@ -103,7 +103,6 @@ workflows:
             - module: financial-connections-example
             - variant: $BUILD_VARIANT
             - build_type: apk
-            - cache_level: all
       - deploy-to-bitrise-io@2:
           inputs:
             - pipeline_intermediate_files: "$BITRISE_APK_PATH:BITRISE_APK_PATH"
@@ -166,69 +165,22 @@ workflows:
                 bash ./scripts/execute_maestro_tests.sh -t $MAESTRO_TAGS
   notify-connections-e2e-failure:
     steps:
+      # Notify all executions.
       - slack@4:
           inputs:
-            - webhook_url: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
-            - webhook_url_on_error: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
+            - webhook_url: $WEBHOOK_SLACK_CONNECTIONS_MOBILE
+            - webhook_url_on_error: $WEBHOOK_SLACK_CONNECTIONS_MOBILE
+      # Notify failures.
+      - slack@4:
+          run_if: '{{ getenv "BITRISEIO_PIPELINE_BUILD_STATUS" | eq "failed" }}'
+          inputs:
+            - webhook_url: $WEBHOOK_SLACK_CUX_BOTS
+            - webhook_url_on_error: $WEBHOOK_SLACK_CUX_BOTS
       - pagerduty@0:
           run_if: '{{ getenv "BITRISEIO_PIPELINE_BUILD_STATUS" | eq "failed" }}'
           inputs:
             - event_description: Android E2E tests failing! $BITRISE_BUILD_URL
             - integration_key: $AUX_PAGERDUTY_INTEGRATION_KEY
-  maestro-paymentsheet:
-    before_run:
-      - start_emulator
-      - prepare_all
-    after_run:
-      - conclude_all
-    steps:
-      - wait-for-android-emulator@1:
-          inputs:
-            - boot_timeout: 600
-      - script@1:
-          title: Execute Maestro tests
-          inputs:
-            - content: |-
-                #!/usr/bin/env bash
-                bash ./scripts/execute_maestro_elements_tests.sh paymentsheet
-      - slack@3:
-          is_always_run: true
-          run_if: .IsBuildFailed
-          inputs:
-            - webhook_url: $WEBHOOK_SLACK_ELEMENTS_MAESTRO
-            - webhook_url_on_error: $WEBHOOK_SLACK_ELEMENTS_MAESTRO
-      - custom-test-results-export@1:
-          inputs:
-            - search_pattern: '*/maestroReport.xml'
-            - test_name: Maestro tests
-      - deploy-to-bitrise-io@2: { }
-  maestro-customersheet:
-    before_run:
-      - start_emulator
-      - prepare_all
-    after_run:
-      - conclude_all
-    steps:
-      - wait-for-android-emulator@1:
-          inputs:
-            - boot_timeout: 600
-      - script@1:
-          title: Execute Maestro tests
-          inputs:
-            - content: |-
-                #!/usr/bin/env bash
-                bash ./scripts/execute_maestro_elements_tests.sh customersheet
-      - slack@3:
-          is_always_run: true
-          run_if: .IsBuildFailed
-          inputs:
-            - webhook_url: $WEBHOOK_SLACK_ELEMENTS_MAESTRO
-            - webhook_url_on_error: $WEBHOOK_SLACK_ELEMENTS_MAESTRO
-      - custom-test-results-export@1:
-          inputs:
-            - search_pattern: '*/maestroReport.xml'
-            - test_name: Maestro tests
-      - deploy-to-bitrise-io@2: { }
   run-instrumentation-tests:
     before_run:
       - start_emulator
@@ -434,6 +386,9 @@ workflows:
                 -no-boot-anim
   prepare_all:
     steps:
+      - script@1:
+          inputs:
+            - content: asdf install ruby 3.2.4
       - activate-ssh-key@4:
           run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
       - git-clone@8: { }
@@ -448,6 +403,10 @@ workflows:
       - script@1:
           inputs:
             - content: echo "STRIPE_EXAMPLE_BACKEND_URL=$STRIPE_EXAMPLE_BACKEND_URL" >> ~/.gradle/gradle.properties; echo "STRIPE_EXAMPLE_PUBLISHABLE_KEY=$STRIPE_EXAMPLE_PUBLISHABLE_KEY" >> ~/.gradle/gradle.properties
+      - activate-build-cache-for-gradle:
+          inputs:
+            - push: 'true'
+            - validation_level: warning
   conclude_all:
     steps:
       - script-runner@0:
@@ -467,4 +426,4 @@ workflows:
 meta:
   bitrise.io:
     stack: linux-docker-android-22.04
-    machine_type_id: elite
+    machine_type_id: g2.linux.large

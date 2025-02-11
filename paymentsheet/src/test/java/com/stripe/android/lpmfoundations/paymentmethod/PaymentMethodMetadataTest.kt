@@ -1,9 +1,10 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ExperimentalCardBrandFilteringApi
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
@@ -728,137 +729,143 @@ internal class PaymentMethodMetadataTest {
         assertThat(metadata.isExternalPaymentMethod("card")).isFalse()
     }
 
+    @OptIn(ExperimentalCardBrandFilteringApi::class)
     @Test
     fun `should create metadata properly with elements session response, payment sheet config, and data specs`() {
-        val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
-            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
-            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-            attachDefaultsToPaymentMethod = true,
-        )
-
+        val billingDetailsCollectionConfiguration = createBillingDetailsCollectionConfiguration()
         val defaultBillingDetails = PaymentSheet.BillingDetails(
             address = PaymentSheet.Address(line1 = "123 Apple Street")
         )
-
         val shippingDetails = AddressDetails(address = PaymentSheet.Address(line1 = "123 Pear Street"))
-
         val linkInlineConfiguration = createLinkInlineConfiguration()
+        val cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.allowed(
+            listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Amex)
+        )
+        val configuration = createPaymentSheetConfiguration(
+            billingDetailsCollectionConfiguration,
+            defaultBillingDetails,
+            shippingDetails,
+            cardBrandAcceptance
+        )
+        val elementsSession = createElementsSession(
+            intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            cardBrandChoice = ElementsSession.CardBrandChoice(
+                eligible = true,
+                preferredNetworks = listOf("cartes_bancaires"),
+            ),
+        )
+
+        val sharedDataSpecs = listOf(SharedDataSpec("card"))
+        val externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC)
 
         val metadata = PaymentMethodMetadata.create(
-            elementsSession = createElementsSession(
-                intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                cardBrandChoice = ElementsSession.CardBrandChoice(
-                    eligible = true,
-                    preferredNetworks = listOf("cartes_bancaires"),
-                ),
-            ),
-            configuration = PaymentSheet.Configuration(
-                merchantDisplayName = "Merchant Inc.",
-                allowsDelayedPaymentMethods = true,
-                allowsPaymentMethodsRequiringShippingAddress = false,
-                paymentMethodOrder = listOf("us_bank_account", "card", "sepa_debit"),
-                billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-                customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_1"),
-                defaultBillingDetails = defaultBillingDetails,
-                shippingDetails = shippingDetails,
-                preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa),
-            ),
-            sharedDataSpecs = listOf(SharedDataSpec("card")),
-            externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
+            elementsSession = elementsSession,
+            configuration = configuration.asCommonConfiguration(),
+            sharedDataSpecs = sharedDataSpecs,
+            externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             isGooglePayReady = false,
             linkInlineConfiguration = linkInlineConfiguration,
+            linkState = null,
         )
 
-        assertThat(metadata).isEqualTo(
-            PaymentMethodMetadata(
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-                allowsDelayedPaymentMethods = true,
-                allowsPaymentMethodsRequiringShippingAddress = false,
-                paymentMethodOrder = listOf("us_bank_account", "card", "sepa_debit"),
-                cbcEligibility = CardBrandChoiceEligibility.Eligible(
-                    preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa)
-                ),
-                merchantName = "Merchant Inc.",
-                defaultBillingDetails = defaultBillingDetails,
-                shippingDetails = shippingDetails,
-                sharedDataSpecs = listOf(SharedDataSpec("card")),
-                externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
+        val expectedMetadata = PaymentMethodMetadata(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+            allowsDelayedPaymentMethods = true,
+            allowsPaymentMethodsRequiringShippingAddress = false,
+            paymentMethodOrder = listOf("us_bank_account", "card", "sepa_debit"),
+            cbcEligibility = CardBrandChoiceEligibility.Eligible(
+                preferredNetworks = listOf(
+                    CardBrand.CartesBancaires,
+                    CardBrand.Visa
+                )
+            ),
+            merchantName = "Merchant Inc.",
+            defaultBillingDetails = defaultBillingDetails,
+            shippingDetails = shippingDetails,
+            sharedDataSpecs = sharedDataSpecs,
+            externalPaymentMethodSpecs = externalPaymentMethodSpecs,
+            customerMetadata = CustomerMetadata(
                 hasCustomerConfiguration = true,
-                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
-                isGooglePayReady = false,
-                linkInlineConfiguration = linkInlineConfiguration,
-                linkMode = null,
-            )
+            ),
+            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+            isGooglePayReady = false,
+            linkInlineConfiguration = linkInlineConfiguration,
+            linkMode = null,
+            linkState = null,
+            cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
+            paymentMethodIncentive = null,
         )
+
+        assertThat(metadata).isEqualTo(expectedMetadata)
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
+    @OptIn(ExperimentalCardBrandFilteringApi::class)
     @Test
     fun `should create metadata properly with elements session response, customer sheet config, and data specs`() {
-        val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
-            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
-            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-            attachDefaultsToPaymentMethod = true,
-        )
-
+        val billingDetailsCollectionConfiguration = createBillingDetailsCollectionConfiguration()
         val defaultBillingDetails = PaymentSheet.BillingDetails(
             address = PaymentSheet.Address(line1 = "123 Apple Street")
         )
+        val cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.allowed(
+            listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Amex)
+        )
 
-        val configuration = CustomerSheet.Configuration.builder(merchantDisplayName = "Merchant Inc.")
-            .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
-            .defaultBillingDetails(defaultBillingDetails)
-            .preferredNetworks(listOf(CardBrand.CartesBancaires, CardBrand.Visa))
-            .paymentMethodOrder(listOf("us_bank_account", "card", "sepa_debit"))
-            .build()
+        val configuration = createCustomerSheetConfiguration(
+            billingDetailsCollectionConfiguration,
+            defaultBillingDetails,
+            cardBrandAcceptance
+        )
+
+        val elementsSession = createElementsSession(
+            intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            cardBrandChoice = ElementsSession.CardBrandChoice(
+                eligible = true,
+                preferredNetworks = listOf("cartes_bancaires")
+            ),
+        )
+
+        val paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(
+            overrideAllowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS,
+        )
 
         val metadata = PaymentMethodMetadata.create(
-            elementsSession = createElementsSession(
-                intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                cardBrandChoice = ElementsSession.CardBrandChoice(
-                    eligible = true,
-                    preferredNetworks = listOf("cartes_bancaires")
-                ),
-            ),
+            elementsSession = elementsSession,
             configuration = configuration,
-            paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(
-                overrideAllowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS,
-            ),
+            paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             sharedDataSpecs = listOf(SharedDataSpec("card")),
             isGooglePayReady = true,
             isFinancialConnectionsAvailable = { false }
         )
 
-        assertThat(metadata).isEqualTo(
-            PaymentMethodMetadata(
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-                allowsDelayedPaymentMethods = true,
-                allowsPaymentMethodsRequiringShippingAddress = false,
-                paymentMethodOrder = listOf("us_bank_account", "card", "sepa_debit"),
-                cbcEligibility = CardBrandChoiceEligibility.Eligible(
-                    preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa)
-                ),
-                merchantName = "Merchant Inc.",
-                defaultBillingDetails = defaultBillingDetails,
-                shippingDetails = null,
-                sharedDataSpecs = listOf(SharedDataSpec("card")),
-                externalPaymentMethodSpecs = listOf(),
+        val expectedMetadata = PaymentMethodMetadata(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+            allowsDelayedPaymentMethods = true,
+            allowsPaymentMethodsRequiringShippingAddress = false,
+            paymentMethodOrder = listOf("us_bank_account", "card", "sepa_debit"),
+            cbcEligibility = CardBrandChoiceEligibility.Eligible(
+                preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa)
+            ),
+            merchantName = "Merchant Inc.",
+            defaultBillingDetails = defaultBillingDetails,
+            shippingDetails = null,
+            sharedDataSpecs = listOf(SharedDataSpec("card")),
+            externalPaymentMethodSpecs = listOf(),
+            customerMetadata = CustomerMetadata(
                 hasCustomerConfiguration = true,
-                isGooglePayReady = true,
-                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(
-                    overrideAllowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS,
-                ),
-                financialConnectionsAvailable = false,
-                linkInlineConfiguration = null,
-                linkMode = null,
-            )
+            ),
+            isGooglePayReady = true,
+            paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
+            financialConnectionsAvailable = false,
+            linkInlineConfiguration = null,
+            linkMode = null,
+            linkState = null,
+            cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
+            paymentMethodIncentive = null,
         )
+
+        assertThat(metadata).isEqualTo(expectedMetadata)
     }
 
     @Test
@@ -867,7 +874,9 @@ internal class PaymentMethodMetadataTest {
             mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                 isPaymentMethodSaveEnabled = true,
                 isPaymentMethodRemoveEnabled = true,
+                canRemoveLastPaymentMethod = true,
                 allowRedisplayOverride = null,
+                isPaymentMethodSetAsDefaultEnabled = false,
             )
         )
 
@@ -880,7 +889,9 @@ internal class PaymentMethodMetadataTest {
             mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                 isPaymentMethodSaveEnabled = false,
                 isPaymentMethodRemoveEnabled = true,
+                canRemoveLastPaymentMethod = true,
                 allowRedisplayOverride = null,
+                isPaymentMethodSetAsDefaultEnabled = false,
             ),
         )
 
@@ -917,11 +928,12 @@ internal class PaymentMethodMetadataTest {
             elementsSession = createElementsSession(
                 mobilePaymentElementComponent = mobilePaymentElementComponent
             ),
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER,
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             sharedDataSpecs = listOf(),
             externalPaymentMethodSpecs = listOf(),
             isGooglePayReady = false,
             linkInlineConfiguration = null,
+            linkState = null,
         )
     }
 
@@ -958,6 +970,7 @@ internal class PaymentMethodMetadataTest {
             linkSettings = null,
             externalPaymentMethodData = null,
             paymentMethodSpecs = null,
+            elementsSessionId = "session_1234"
         )
     }
 
@@ -1301,14 +1314,58 @@ internal class PaymentMethodMetadataTest {
                 ),
                 merchantName = "Merchant Inc.",
                 merchantCountryCode = "CA",
-                shippingValues = mapOf(),
+                shippingDetails = null,
                 flags = mapOf(),
                 cardBrandChoice = LinkConfiguration.CardBrandChoice(
                     eligible = true,
                     preferredNetworks = listOf("cartes_bancaires")
                 ),
                 passthroughModeEnabled = false,
+                useAttestationEndpointsForLink = false,
+                suppress2faModal = false,
+                initializationMode = PaymentSheetFixtures.INITIALIZATION_MODE_PAYMENT_INTENT,
+                elementsSessionId = "session_1234"
             ),
         )
     }
+
+    private fun createBillingDetailsCollectionConfiguration() =
+        PaymentSheet.BillingDetailsCollectionConfiguration(
+            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            attachDefaultsToPaymentMethod = true,
+        )
+
+    @OptIn(ExperimentalCardBrandFilteringApi::class)
+    private fun createCustomerSheetConfiguration(
+        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+        defaultBillingDetails: PaymentSheet.BillingDetails,
+        cardBrandAcceptance: PaymentSheet.CardBrandAcceptance
+    ) = CustomerSheet.Configuration.builder(merchantDisplayName = "Merchant Inc.")
+        .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
+        .defaultBillingDetails(defaultBillingDetails)
+        .preferredNetworks(listOf(CardBrand.CartesBancaires, CardBrand.Visa))
+        .paymentMethodOrder(listOf("us_bank_account", "card", "sepa_debit"))
+        .cardBrandAcceptance(cardBrandAcceptance)
+        .build()
+
+    private fun createPaymentSheetConfiguration(
+        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+        defaultBillingDetails: PaymentSheet.BillingDetails,
+        shippingDetails: AddressDetails,
+        cardBrandAcceptance: PaymentSheet.CardBrandAcceptance
+    ) = PaymentSheet.Configuration(
+        merchantDisplayName = "Merchant Inc.",
+        allowsDelayedPaymentMethods = true,
+        allowsPaymentMethodsRequiringShippingAddress = false,
+        paymentMethodOrder = listOf("us_bank_account", "card", "sepa_debit"),
+        billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+        customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_1"),
+        defaultBillingDetails = defaultBillingDetails,
+        shippingDetails = shippingDetails,
+        preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa),
+        cardBrandAcceptance = cardBrandAcceptance
+    )
 }

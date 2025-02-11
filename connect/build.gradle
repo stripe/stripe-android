@@ -1,0 +1,132 @@
+apply from: configs.androidLibrary
+
+apply plugin: 'com.google.devtools.ksp'
+apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
+apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
+apply plugin: 'dev.drewhamilton.poko'
+
+dependencies {
+    implementation project(':stripe-core')
+
+    // Kotlin
+    implementation libs.kotlin.coroutines
+    implementation libs.kotlin.coroutinesAndroid
+    implementation libs.kotlin.serialization
+
+    // AndroidX
+    implementation libs.androidx.activity
+    implementation libs.androidx.annotation
+    implementation libs.androidx.appCompat
+    implementation libs.androidx.browser
+    implementation libs.androidx.constraintLayout
+    implementation libs.androidx.fragment
+    implementation libs.androidx.lifecycle
+    implementation libs.androidx.savedState
+    implementation libs.androidx.viewModel
+
+    // Compose
+    implementation libs.compose.ui
+    implementation libs.compose.uiViewBinding
+    implementation libs.compose.foundation
+    implementation libs.compose.material
+    implementation libs.compose.activity
+    implementation libs.compose.navigation
+    implementation libs.accompanist.systemUiController
+
+    // Test
+    testImplementation testLibs.androidx.archCore
+    testImplementation testLibs.androidx.composeUi
+    testImplementation testLibs.androidx.core
+    testImplementation testLibs.androidx.fragment
+    testImplementation testLibs.androidx.junit
+    testImplementation testLibs.androidx.junitKtx
+    testImplementation testLibs.androidx.lifecycle
+    testImplementation testLibs.androidx.testRules
+    testImplementation testLibs.hamcrest
+    testImplementation testLibs.junit
+    testImplementation testLibs.json
+    testImplementation testLibs.kotlin.annotations
+    testImplementation testLibs.kotlin.coroutines
+    testImplementation testLibs.kotlin.junit
+    testImplementation testLibs.mockito.core
+    testImplementation testLibs.mockito.inline
+    testImplementation testLibs.mockito.kotlin
+    testImplementation testLibs.robolectric
+    testImplementation testLibs.truth
+
+    androidTestImplementation testLibs.androidx.composeUi
+    androidTestImplementation testLibs.androidx.coreKtx
+    androidTestImplementation testLibs.androidx.junit
+    androidTestImplementation testLibs.androidx.junitKtx
+    androidTestImplementation testLibs.androidx.testRules
+    androidTestImplementation testLibs.androidx.testRunner
+    androidTestImplementation testLibs.androidx.truth
+    androidTestImplementation testLibs.androidx.uiAutomator
+    androidTestImplementation testLibs.espresso.core
+    androidTestImplementation (testLibs.espresso.contrib) {
+        exclude group: 'org.checkerframework', module: 'checker'
+    }
+    androidTestImplementation testLibs.mockito.core
+    androidTestImplementation testLibs.mockito.inline
+    androidTestImplementation testLibs.mockito.kotlin
+    androidTestImplementation libs.leakCanary
+    androidTestImplementation testLibs.leakCanaryInstrumentation
+    androidTestImplementation testLibs.testParameterInjector
+    androidTestImplementation testLibs.truth
+
+    androidTestUtil testLibs.testOrchestrator
+}
+
+android {
+    defaultConfig {
+        testApplicationId "com.stripe.android.connect.test"
+    }
+
+    buildFeatures {
+        compose = true
+        viewBinding true
+    }
+
+    testOptions {
+        unitTests {
+            // Note: without this, all Robolectric tests using assets will fail.
+            includeAndroidResources = true
+            all {
+                maxHeapSize = "1024m"
+            }
+        }
+
+        kotlinOptions {
+            freeCompilerArgs += ["-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"]
+        }
+
+        managedDevices {
+            localDevices {
+                register("pixel2api33") {
+                    device = "Pixel 2"
+                    apiLevel = 33
+                    systemImageSource = "aosp"
+                }
+            }
+        }
+    }
+
+    kotlinOptions {
+        freeCompilerArgs += [
+                "-opt-in=kotlinx.coroutines.FlowPreview",
+                "-Xcontext-receivers",
+        ]
+        if (gradle.ext.isCi) {
+            kotlinOptions.allWarningsAsErrors = true
+        }
+    }
+}
+
+ext {
+    artifactId = "connect"
+    artifactName = "connect"
+    artifactDescrption = "The Connect Embedded Components SDK module of the Stripe Android SDK"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"

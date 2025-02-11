@@ -9,6 +9,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.verticalmode.DisplayablePaymentMethod
 import com.stripe.android.ui.core.elements.SharedDataSpec
 
@@ -72,7 +73,9 @@ internal data class SupportedPaymentMethod(
         subtitle = subtitle,
     )
 
-    fun asFormHeaderInformation(): FormHeaderInformation {
+    fun asFormHeaderInformation(
+        incentive: PaymentMethodIncentive?,
+    ): FormHeaderInformation {
         return FormHeaderInformation(
             displayName = displayName,
             shouldShowIcon = true,
@@ -80,11 +83,13 @@ internal data class SupportedPaymentMethod(
             lightThemeIconUrl = lightThemeIconUrl,
             darkThemeIconUrl = darkThemeIconUrl,
             iconRequiresTinting = iconRequiresTinting,
+            promoBadge = incentive?.displayText,
         )
     }
 
     fun asDisplayablePaymentMethod(
         customerSavedPaymentMethods: List<PaymentMethod>,
+        incentive: PaymentMethodIncentive?,
         onClick: () -> Unit,
     ): DisplayablePaymentMethod {
         fun isTypeAndHasCustomerSavedPaymentMethodsOfType(type: PaymentMethod.Type): Boolean {
@@ -105,6 +110,7 @@ internal data class SupportedPaymentMethod(
             darkThemeIconUrl = darkThemeIconUrl,
             iconRequiresTinting = iconRequiresTinting,
             subtitle = subtitle,
+            promoBadge = incentive?.displayText,
             onClick = onClick,
         )
     }

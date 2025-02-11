@@ -3,10 +3,12 @@ package com.stripe.android.customersheet.ui
 import androidx.annotation.RestrictTo
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -14,27 +16,45 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.BottomSheetLoadingIndicator
+import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.common.ui.PrimaryButton
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.customersheet.CustomerSheetViewAction
+import com.stripe.android.customersheet.CustomerSheetViewModel
 import com.stripe.android.customersheet.CustomerSheetViewState
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.ui.EditPaymentMethod
 import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.paymentsheet.ui.Mandate
 import com.stripe.android.paymentsheet.ui.PaymentElement
-import com.stripe.android.paymentsheet.ui.PaymentSheetScaffold
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodTabLayoutUI
+import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodUI
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
+import com.stripe.android.ui.core.elements.events.CardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.CardNumberCompletedEventReporter
+import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.R as PaymentsCoreR
+
+@Composable
+internal fun CustomerSheetScreen(
+    viewModel: CustomerSheetViewModel,
+) {
+    val viewState by viewModel.viewState.collectAsState()
+
+    CustomerSheetScreen(
+        viewState = viewState,
+        viewActionHandler = viewModel::handleViewAction,
+        paymentMethodNameProvider = viewModel::providePaymentMethodName,
+    )
+}
 
 @Composable
 internal fun CustomerSheetScreen(
@@ -44,12 +64,13 @@ internal fun CustomerSheetScreen(
     viewActionHandler: (CustomerSheetViewAction) -> Unit = {},
     paymentMethodNameProvider: (PaymentMethodCode?) -> ResolvableString,
 ) {
-    PaymentSheetScaffold(
+    BottomSheetScaffold(
         topBar = {
             PaymentSheetTopBar(
                 state = viewState.topBarState {
                     viewActionHandler(CustomerSheetViewAction.OnEditPressed)
                 },
+                canNavigateBack = viewState.canNavigateBack,
                 isEnabled = !viewState.isProcessing,
                 handleBackPressed = {
                     viewActionHandler(
@@ -80,8 +101,8 @@ internal fun CustomerSheetScreen(
                         )
                         PaymentSheetContentPadding()
                     }
-                    is CustomerSheetViewState.EditPaymentMethod -> {
-                        EditPaymentMethod(
+                    is CustomerSheetViewState.UpdatePaymentMethod -> {
+                        UpdatePaymentMethod(
                             viewState = viewState,
                         )
                         PaymentSheetContentPadding()
@@ -120,8 +141,8 @@ internal fun SelectPaymentMethod(
             showLink = false,
             currentSelection = viewState.paymentSelection,
             nameProvider = paymentMethodNameProvider,
-            canRemovePaymentMethods = viewState.canRemovePaymentMethods,
             isCbcEligible = viewState.isCbcEligible,
+            defaultPaymentMethodId = null
         )
 
         SavedPaymentMethodTabLayoutUI(
@@ -132,7 +153,6 @@ internal fun SelectPaymentMethod(
             onAddCardPressed = { viewActionHandler(CustomerSheetViewAction.OnAddCardPressed) },
             onItemSelected = { viewActionHandler(CustomerSheetViewAction.OnItemSelected(it)) },
             onModifyItem = { viewActionHandler(CustomerSheetViewAction.OnModifyItem(it)) },
-            onItemRemoved = { viewActionHandler(CustomerSheetViewAction.OnItemRemoved(it)) },
             modifier = Modifier.padding(bottom = 2.dp),
         )
 
@@ -207,9 +227,15 @@ internal fun AddPaymentMethod(
         DefaultCardNumberCompletedEventReporter(viewActionHandler)
     }
 
+    val disallowedReporter = remember(viewActionHandler) {
+        DefaultCardBrandDisallowedReporter(viewActionHandler)
+    }
+
     if (displayForm) {
         CompositionLocalProvider(
-            LocalCardNumberCompletedEventReporter provides eventReporter
+            LocalCardNumberCompletedEventReporter provides eventReporter,
+            LocalCardBrandDisallowedReporter provides disallowedReporter
+
         ) {
             PaymentElement(
                 enabled = viewState.enabled,
@@ -221,6 +247,7 @@ internal fun AddPaymentMethod(
                 },
                 formArguments = viewState.formArguments,
                 usBankAccountFormArguments = viewState.usBankAccountFormArguments,
+                incentive = null,
                 onFormFieldValuesChanged = {
                     // This only gets emitted if form field values are complete
                     viewActionHandler(CustomerSheetViewAction.OnFormFieldValuesCompleted(it))
@@ -228,6 +255,8 @@ internal fun AddPaymentMethod(
             )
         }
     }
+
+    Spacer(modifier = Modifier.padding(top = 24.dp))
 
     viewState.errorMessage?.let { error ->
         ErrorMessage(
@@ -241,7 +270,11 @@ internal fun AddPaymentMethod(
             mandateText = viewState.mandateText?.resolve(),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp)
+                .padding(
+                    top = viewState.errorMessage?.let {
+                        8.dp
+                    } ?: 0.dp
+                )
                 .padding(horizontal = horizontalPadding),
         )
     }
@@ -272,22 +305,24 @@ internal fun AddPaymentMethod(
 }
 
 @Composable
-private fun EditPaymentMethod(
-    viewState: CustomerSheetViewState.EditPaymentMethod,
+private fun UpdatePaymentMethod(
+    viewState: CustomerSheetViewState.UpdatePaymentMethod,
     modifier: Modifier = Modifier,
 ) {
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
     Column(modifier) {
-        H4Text(
-            text = stringResource(PaymentsCoreR.string.stripe_title_update_card),
-            modifier = Modifier
-                .padding(bottom = 20.dp)
-                .padding(horizontal = horizontalPadding)
-        )
+        viewState.updatePaymentMethodInteractor.screenTitle?.let {
+            H4Text(
+                text = it.resolve(),
+                modifier = Modifier
+                    .padding(bottom = 20.dp)
+                    .padding(horizontal = horizontalPadding)
+            )
+        }
 
-        EditPaymentMethod(
-            interactor = viewState.editPaymentMethodInteractor,
+        UpdatePaymentMethodUI(
+            interactor = viewState.updatePaymentMethodInteractor,
             modifier = modifier,
         )
     }
@@ -304,5 +339,13 @@ private class DefaultCardNumberCompletedEventReporter(
 ) : CardNumberCompletedEventReporter {
     override fun onCardNumberCompleted() {
         viewActionHandler.invoke(CustomerSheetViewAction.OnCardNumberInputCompleted)
+    }
+}
+
+private class DefaultCardBrandDisallowedReporter(
+    private val viewActionHandler: (CustomerSheetViewAction) -> Unit
+) : CardBrandDisallowedReporter {
+    override fun onDisallowedCardBrandEntered(brand: CardBrand) {
+        viewActionHandler.invoke(CustomerSheetViewAction.OnDisallowedCardBrandEntered(brand))
     }
 }

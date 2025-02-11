@@ -17,8 +17,8 @@ internal object PaymentOptionsStateFactory {
         showGooglePay: Boolean,
         showLink: Boolean,
         nameProvider: (PaymentMethodCode?) -> ResolvableString,
-        canRemovePaymentMethods: Boolean,
-        isCbcEligible: Boolean
+        isCbcEligible: Boolean,
+        defaultPaymentMethodId: String?
     ): List<PaymentOptionsItem> {
         return listOfNotNull(
             PaymentOptionsItem.AddCard,
@@ -26,12 +26,12 @@ internal object PaymentOptionsStateFactory {
             PaymentOptionsItem.Link.takeIf { showLink }
         ) + paymentMethods.map {
             PaymentOptionsItem.SavedPaymentMethod(
-                DisplayableSavedPaymentMethod(
+                DisplayableSavedPaymentMethod.create(
                     displayName = nameProvider(it.type?.code),
                     paymentMethod = it,
-                    isCbcEligible = isCbcEligible
+                    isCbcEligible = isCbcEligible,
+                    shouldShowDefaultBadge = it.id != null && it.id == defaultPaymentMethodId
                 ),
-                canRemovePaymentMethods = canRemovePaymentMethods,
             )
         }
     }
@@ -51,8 +51,8 @@ internal object PaymentOptionsStateFactory {
         showLink: Boolean,
         currentSelection: PaymentSelection?,
         nameProvider: (PaymentMethodCode?) -> ResolvableString,
-        canRemovePaymentMethods: Boolean,
-        isCbcEligible: Boolean
+        isCbcEligible: Boolean,
+        defaultPaymentMethodId: String?
     ): PaymentOptionsState {
         val items = createPaymentOptionsList(
             paymentMethods = paymentMethods,
@@ -60,7 +60,7 @@ internal object PaymentOptionsStateFactory {
             showLink = showLink,
             nameProvider = nameProvider,
             isCbcEligible = isCbcEligible,
-            canRemovePaymentMethods = canRemovePaymentMethods,
+            defaultPaymentMethodId = defaultPaymentMethodId
         )
 
         val selectedItem = getSelectedItem(items, currentSelection)
@@ -98,7 +98,7 @@ internal fun PaymentOptionsItem.toPaymentSelection(): PaymentSelection? {
     return when (this) {
         is PaymentOptionsItem.AddCard -> null
         is PaymentOptionsItem.GooglePay -> PaymentSelection.GooglePay
-        is PaymentOptionsItem.Link -> PaymentSelection.Link
+        is PaymentOptionsItem.Link -> PaymentSelection.Link()
         is PaymentOptionsItem.SavedPaymentMethod -> PaymentSelection.Saved(paymentMethod)
     }
 }

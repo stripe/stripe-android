@@ -10,6 +10,7 @@ import android.widget.EditText
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.R
+import com.stripe.android.core.utils.DateUtils
 import com.stripe.android.model.ExpirationDate
 import kotlin.math.min
 import kotlin.properties.Delegates

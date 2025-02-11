@@ -32,7 +32,7 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsScreenshotTest {
         listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             .plus(PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD)
             .map {
-                DisplayableSavedPaymentMethod(
+                DisplayableSavedPaymentMethod.create(
                     displayName = it.card!!.last4!!.resolvableString,
                     paymentMethod = it,
                     isCbcEligible = true
@@ -47,12 +47,11 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsScreenshotTest {
                 paymentMethods = displayableSavedPaymentMethods,
                 currentSelection = displayableSavedPaymentMethods.first(),
                 isEditing = false,
-                canRemove = true,
                 canEdit = true,
             )
         )
         val initialScreen = ManageSavedPaymentMethods(interactor)
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = true)
 
         paparazziRule.snapshot {
             PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
@@ -67,12 +66,11 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsScreenshotTest {
                 paymentMethods = displayableSavedPaymentMethods,
                 currentSelection = null,
                 isEditing = true,
-                canRemove = true,
                 canEdit = true,
             )
         )
         val initialScreen = ManageSavedPaymentMethods(interactor)
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = true)
 
         paparazziRule.snapshot {
             PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)

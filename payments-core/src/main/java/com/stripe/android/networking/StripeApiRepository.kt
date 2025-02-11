@@ -5,7 +5,6 @@ import android.net.http.HttpResponseCache
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.DefaultFraudDetectionDataRepository
-import com.stripe.android.FraudDetectionDataRepository
 import com.stripe.android.Stripe
 import com.stripe.android.StripeApiBeta
 import com.stripe.android.cards.Bin
@@ -23,6 +22,9 @@ import com.stripe.android.core.exception.PermissionException
 import com.stripe.android.core.exception.RateLimitException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.exception.safeAnalyticsMessage
+import com.stripe.android.core.frauddetection.FraudDetectionData
+import com.stripe.android.core.frauddetection.FraudDetectionDataParamsUtils
+import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.model.StripeFile
@@ -50,6 +52,8 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_CLIENT_SECRET
+import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.CreateFinancialConnectionsSessionForDeferredPaymentParams
 import com.stripe.android.model.CreateFinancialConnectionsSessionParams
@@ -75,6 +79,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.Token
 import com.stripe.android.model.TokenParams
 import com.stripe.android.model.parsers.CardMetadataJsonParser
+import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsShareJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionJsonParser
 import com.stripe.android.model.parsers.CustomerJsonParser
@@ -743,6 +748,36 @@ class StripeApiRepository @JvmOverloads internal constructor(
     }
 
     /**
+     * Analytics event: [PaymentAnalyticsEvent.CustomerDetachPaymentMethod]
+     */
+    @Throws(
+        InvalidRequestException::class,
+        APIConnectionException::class,
+        APIException::class,
+        AuthenticationException::class,
+        CardException::class
+    )
+    override suspend fun detachPaymentMethod(
+        customerSessionClientSecret: String,
+        productUsageTokens: Set<String>,
+        paymentMethodId: String,
+        requestOptions: ApiRequest.Options
+    ): Result<PaymentMethod> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = getElementsDetachPaymentMethodUrl(paymentMethodId),
+                options = requestOptions,
+                params = mapOf("customer_session_client_secret" to customerSessionClientSecret),
+            ),
+            jsonParser = PaymentMethodJsonParser()
+        ) {
+            fireAnalyticsRequest(
+                paymentAnalyticsRequestFactory.createDetachPaymentMethod(productUsageTokens)
+            )
+        }
+    }
+
+    /**
      * Retrieve a Customer's [PaymentMethod]s
      *
      * Analytics event: [PaymentAnalyticsEvent.CustomerRetrievePaymentMethods]
@@ -1378,6 +1413,14 @@ class StripeApiRepository @JvmOverloads internal constructor(
         return getApiUrl("payment_methods/%s/detach", paymentMethodId)
     }
 
+    /**
+     * @return `https://api.stripe.com/v1/payment_methods/:id/detach`
+     */
+    @VisibleForTesting
+    internal fun getElementsDetachPaymentMethodUrl(paymentMethodId: String): String {
+        return getApiUrl("elements/payment_methods/%s/detach", paymentMethodId)
+    }
+
     override suspend fun retrieveElementsSession(
         params: ElementsSessionParams,
         options: ApiRequest.Options,
@@ -1433,6 +1476,71 @@ class StripeApiRepository @JvmOverloads internal constructor(
         )
     }
 
+    override suspend fun listPaymentDetails(
+        clientSecret: String,
+        paymentMethodTypes: Set<String>,
+        requestOptions: ApiRequest.Options
+    ): Result<ConsumerPaymentDetails> {
+        return fetchStripeModelResult(
+            apiRequestFactory.createPost(
+                listConsumerPaymentDetailsUrl,
+                requestOptions,
+                mapOf(
+                    "request_surface" to "android_payment_element",
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to clientSecret
+                    ),
+                    "types" to paymentMethodTypes.toList()
+                )
+            ),
+            ConsumerPaymentDetailsJsonParser
+        )
+    }
+
+    override suspend fun deletePaymentDetails(
+        clientSecret: String,
+        paymentDetailsId: String,
+        requestOptions: ApiRequest.Options
+    ): Result<Unit> {
+        return runCatching {
+            makeApiRequest(
+                apiRequestFactory.createDelete(
+                    getConsumerPaymentDetailsUrl(paymentDetailsId),
+                    requestOptions,
+                    mapOf(
+                        "request_surface" to "android_payment_element",
+                        "credentials" to mapOf(
+                            "consumer_session_client_secret" to clientSecret
+                        )
+                    )
+                ),
+                onResponse = {}
+            )
+        }
+    }
+
+    override suspend fun updatePaymentDetails(
+        clientSecret: String,
+        paymentDetailsUpdateParams: ConsumerPaymentDetailsUpdateParams,
+        requestOptions: ApiRequest.Options
+    ): Result<ConsumerPaymentDetails> {
+        return fetchStripeModelResult(
+            apiRequestFactory.createPost(
+                getConsumerPaymentDetailsUrl(paymentDetailsUpdateParams.id),
+                requestOptions,
+                mapOf(
+                    "request_surface" to "android_payment_element",
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to clientSecret
+                    )
+                ).plus(
+                    paymentDetailsUpdateParams.toParamMap()
+                )
+            ),
+            ConsumerPaymentDetailsJsonParser
+        )
+    }
+
     private suspend fun retrieveElementsSession(
         params: ElementsSessionParams,
         options: ApiRequest.Options,
@@ -1447,7 +1555,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
         val parser = ElementsSessionJsonParser(
             params = params,
-            apiKey = options.apiKey
+            isLiveMode = options.apiKeyIsLiveMode
         )
 
         val requestParams = buildMap {
@@ -1456,7 +1564,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             params.locale.let { this["locale"] = it }
             params.customerSessionClientSecret?.let { this["customer_session_client_secret"] = it }
             params.externalPaymentMethods.takeIf { it.isNotEmpty() }?.let { this["external_payment_methods"] = it }
-            params.defaultPaymentMethodId?.let { this["client_default_payment_method"] = it }
+            params.savedPaymentMethodSelectionId?.let { this["client_default_payment_method"] = it }
             (params as? ElementsSessionParams.DeferredIntentType)?.let { type ->
                 this.putAll(type.deferredIntentParams.toQueryParams())
             }

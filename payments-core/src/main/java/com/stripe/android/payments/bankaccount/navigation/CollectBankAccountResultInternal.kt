@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import kotlinx.parcelize.Parcelize
 
@@ -51,8 +52,9 @@ data class CollectBankAccountResponseInternal(
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class InstantDebitsData(
-        val paymentMethodId: String,
+        val paymentMethod: PaymentMethod,
         val last4: String?,
-        val bankName: String?
+        val bankName: String?,
+        val eligibleForIncentive: Boolean,
     ) : StripeModel
 }

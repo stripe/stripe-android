@@ -80,7 +80,7 @@ def create_pr(
 )
     response = github_login.create_pull_request(
         "stripe/stripe-android",
-        "master",
+        @deploy_branch,
         pr_branch,
         pr_title,
         pr_description,

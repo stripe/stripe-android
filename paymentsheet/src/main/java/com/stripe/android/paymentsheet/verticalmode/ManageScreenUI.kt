@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -10,11 +9,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.SelectedBadge
 import com.stripe.android.uicore.utils.collectAsState
 
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
     val horizontalPadding = dimensionResource(
@@ -35,54 +36,46 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = it,
                 isEnabled = true,
-                isClickable = !state.isEditing,
                 isSelected = isSelected,
+                onClick = {
+                    rowOnClick(
+                        isEditing = state.isEditing,
+                        selectPaymentMethod = {
+                            interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(it))
+                        },
+                        updatePaymentMethod = {
+                            interactor.handleViewAction(ManageScreenInteractor.ViewAction.UpdatePaymentMethod(it))
+                        }
+                    )
+                },
                 trailingContent = {
                     TrailingContent(
                         isSelected = isSelected,
                         isEditing = state.isEditing,
-                        isModifiable = it.isModifiable(),
-                        canRemove = state.canRemove,
                         paymentMethod = it,
-                        deletePaymentMethod = { paymentMethod ->
-                            interactor.handleViewAction(
-                                ManageScreenInteractor.ViewAction.DeletePaymentMethod(paymentMethod)
-                            )
-                        },
-                        editPaymentMethod = { paymentMethod ->
-                            interactor.handleViewAction(
-                                ManageScreenInteractor.ViewAction.EditPaymentMethod(paymentMethod)
-                            )
-                        }
                     )
-                },
-                onClick = {
-                    interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(it))
-                },
+                }
             )
         }
     }
 }
 
+private fun rowOnClick(isEditing: Boolean, selectPaymentMethod: () -> Unit, updatePaymentMethod: () -> Unit) {
+    if (isEditing) {
+        updatePaymentMethod()
+    } else {
+        selectPaymentMethod()
+    }
+}
+
 @Composable
 private fun TrailingContent(
-    isSelected: Boolean,
-    isEditing: Boolean,
-    isModifiable: Boolean,
-    canRemove: Boolean,
     paymentMethod: DisplayableSavedPaymentMethod,
-    deletePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
-    editPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    isEditing: Boolean,
+    isSelected: Boolean,
 ) {
-    if (isEditing && isModifiable) {
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            EditIcon(paymentMethod, editPaymentMethod)
-            if (canRemove) {
-                DeleteIcon(paymentMethod, deletePaymentMethod)
-            }
-        }
-    } else if (isEditing && canRemove) {
-        DeleteIcon(paymentMethod, deletePaymentMethod)
+    if (isEditing) {
+        ChevronIcon(paymentMethodId = paymentMethod.paymentMethod.id)
     } else if (isSelected) {
         SelectedBadge()
     }

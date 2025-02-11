@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import android.content.Context
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.injection.INITIAL_VALUES
 import com.stripe.android.core.injection.SHIPPING_VALUES
@@ -33,14 +34,17 @@ internal object FormControllerModule {
             requiresMandate = false,
             /*
              * `FormController` is only used by `AddressElement` now so it does not require a
-             * `LinkConfigurationCoordinator` instance or a callback for reacting to `InlineSignUpViewState` changes.
+             * `LinkConfigurationCoordinator` instance, a callback for reacting to `InlineSignUpViewState` changes, or
+             * initial user input for Link signup.
              */
+            initialLinkUserInput = null,
             linkConfigurationCoordinator = null,
             onLinkInlineSignupStateChanged = {
                 throw IllegalStateException(
                     "`InlineSignUpViewState` updates should not be received by `FormController`!"
                 )
             },
+            cardBrandFilter = DefaultCardBrandFilter
         )
     )
 }

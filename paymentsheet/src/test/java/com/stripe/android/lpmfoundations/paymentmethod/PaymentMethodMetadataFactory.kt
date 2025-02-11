@@ -1,5 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
+import com.stripe.android.CardBrandFilter
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfiguration
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntentFixtures
@@ -7,6 +9,8 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.LpmSerializer
@@ -30,6 +34,10 @@ internal object PaymentMethodMetadataFactory {
         paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
         linkInlineConfiguration: LinkInlineConfiguration? = null,
         linkMode: LinkMode? = LinkMode.LinkPaymentMethod,
+        linkState: LinkState? = null,
+        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+        defaultBillingDetails: PaymentSheet.BillingDetails = PaymentSheet.BillingDetails(),
+        paymentMethodIncentive: PaymentMethodIncentive? = null,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -40,15 +48,20 @@ internal object PaymentMethodMetadataFactory {
             paymentMethodOrder = paymentMethodOrder,
             cbcEligibility = cbcEligibility,
             merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
-            defaultBillingDetails = PaymentSheet.BillingDetails(),
+            defaultBillingDetails = defaultBillingDetails,
             shippingDetails = shippingDetails,
-            hasCustomerConfiguration = hasCustomerConfiguration,
+            customerMetadata = CustomerMetadata(
+                hasCustomerConfiguration = hasCustomerConfiguration
+            ),
             sharedDataSpecs = sharedDataSpecs,
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             isGooglePayReady = isGooglePayReady,
             linkInlineConfiguration = linkInlineConfiguration,
             linkMode = linkMode,
+            linkState = linkState,
+            cardBrandFilter = cardBrandFilter,
+            paymentMethodIncentive = paymentMethodIncentive,
         )
     }
 

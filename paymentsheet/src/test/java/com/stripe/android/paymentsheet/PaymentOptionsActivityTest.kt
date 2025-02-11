@@ -48,9 +48,7 @@ import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import com.stripe.android.view.ActivityStarter
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -90,7 +88,6 @@ internal class PaymentOptionsActivityTest {
 
     @AfterTest
     fun cleanup() {
-        Dispatchers.resetMain()
         WeakMapInjectorRegistry.clear()
     }
 
@@ -410,9 +407,9 @@ internal class PaymentOptionsActivityTest {
     fun `mandate text is shown above primary button when in vertical mode`() {
         val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
             paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
-            config = PAYMENT_OPTIONS_CONTRACT_ARGS.state.config.copy(
+            config = PAYMENT_OPTIONS_CONTRACT_ARGS.configuration.copy(
                 paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
-            )
+            ),
         )
         runActivityScenario(args) { scenario ->
             scenario.onActivity { activity ->
@@ -457,7 +454,6 @@ internal class PaymentOptionsActivityTest {
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
-                editInteractorFactory = mock()
             )
         }
 

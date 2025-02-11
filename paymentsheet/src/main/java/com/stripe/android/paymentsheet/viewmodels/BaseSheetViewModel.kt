@@ -20,10 +20,10 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetAnalyticsListener
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.NavigationHandler
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
-import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.elements.CvcConfig
 import com.stripe.android.ui.core.elements.CvcController
@@ -49,14 +49,16 @@ internal abstract class BaseSheetViewModel(
     val workContext: CoroutineContext = Dispatchers.IO,
     val savedStateHandle: SavedStateHandle,
     val linkHandler: LinkHandler,
-    val editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
     val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     val isCompleteFlow: Boolean,
 ) : ViewModel() {
     private val _paymentMethodMetadata = MutableStateFlow<PaymentMethodMetadata?>(null)
     internal val paymentMethodMetadata: StateFlow<PaymentMethodMetadata?> = _paymentMethodMetadata
 
-    val navigationHandler: NavigationHandler = NavigationHandler(viewModelScope) { poppedScreen ->
+    val navigationHandler: NavigationHandler<PaymentSheetScreen> = NavigationHandler(
+        coroutineScope = viewModelScope,
+        initialScreen = PaymentSheetScreen.Loading,
+    ) { poppedScreen ->
         analyticsListener.reportPaymentSheetHidden(poppedScreen)
     }
 
@@ -140,8 +142,6 @@ internal abstract class BaseSheetViewModel(
     }
 
     abstract fun handlePaymentMethodSelected(selection: PaymentSelection?)
-
-    abstract fun handleConfirmUSBankAccount(paymentSelection: PaymentSelection.New.USBankAccount)
 
     fun updateSelection(selection: PaymentSelection?) {
         when (selection) {

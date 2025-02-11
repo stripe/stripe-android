@@ -5,6 +5,7 @@ import android.app.Application
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Base64
 import androidx.activity.result.ActivityResult
 import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
@@ -14,11 +15,15 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.PrefillDetails
 import com.stripe.android.financialconnections.FinancialConnectionsSheetActivity.Companion.getArgs
 import com.stripe.android.financialconnections.FinancialConnectionsSheetState.AuthFlowStatus
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenNativeAuthFlow
+import com.stripe.android.financialconnections.FinancialConnectionsSheetViewModel.Companion.QUERY_PARAM_PAYMENT_METHOD
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AttestationInitFailed
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AttestationInitSkipped
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ErrorCode
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
@@ -28,14 +33,17 @@ import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetComponent
+import com.stripe.android.financialconnections.di.FinancialConnectionsSingletonSharedComponentHolder
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition.Always
+import com.stripe.android.financialconnections.domain.IntegrityVerdictManager
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowRouter
 import com.stripe.android.financialconnections.exception.AppInitializationError
 import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
+import com.stripe.android.financialconnections.features.error.FinancialConnectionsAttestationError
 import com.stripe.android.financialconnections.features.manualentry.isCustomManualEntryError
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForData
@@ -50,10 +58,12 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
+import com.stripe.android.financialconnections.model.update
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.parcelable
+import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -64,6 +74,8 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     @Named(APPLICATION_ID) private val applicationId: String,
     savedStateHandle: SavedStateHandle,
     private val getOrFetchSync: GetOrFetchSync,
+    private val integrityRequestManager: IntegrityRequestManager,
+    private val integrityVerdictManager: IntegrityVerdictManager,
     private val fetchFinancialConnectionsSession: FetchFinancialConnectionsSession,
     private val fetchFinancialConnectionsSessionForToken: FetchFinancialConnectionsSessionForToken,
     private val logger: Logger,
@@ -72,7 +84,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private val analyticsTracker: FinancialConnectionsAnalyticsTracker,
     private val nativeRouter: NativeAuthFlowRouter,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
-    initialState: FinancialConnectionsSheetState,
+    private val initialState: FinancialConnectionsSheetState,
 ) : FinancialConnectionsViewModel<FinancialConnectionsSheetState>(initialState, nativeAuthFlowCoordinator) {
 
     private val mutex = Mutex()
@@ -82,7 +94,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         if (initialState.initialArgs.isValid()) {
             eventReporter.onPresented(initialState.initialArgs.configuration)
             // avoid re-fetching manifest if already exists (this will happen on process recreations)
-            if (initialState.manifest == null) fetchManifest()
+            if (initialState.manifest == null) {
+                initAuthFlow()
+            }
         } else {
             val result = Failed(
                 IllegalStateException("Invalid configuration provided when instantiating activity")
@@ -104,16 +118,43 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      * Fetches the [FinancialConnectionsSessionManifest] from the Stripe API to get the hosted auth flow URL
      * as well as the success and cancel callback URLs to verify.
      */
-    private fun fetchManifest() {
+    private fun initAuthFlow() {
         viewModelScope.launch {
             kotlin.runCatching {
-                getOrFetchSync(refetchCondition = Always)
+                val attestationInitResult = prepareStandardRequestManager()
+                val syncResponse = getOrFetchSync(
+                    refetchCondition = Always,
+                    supportsAppVerification = attestationInitResult.supportsAppVerification
+                )
+                val pane = syncResponse.manifest.nextPane
+                when (attestationInitResult) {
+                    // We'll just emit failure events to reduce event emissions
+                    AttestationInitResult.Success -> null
+                    AttestationInitResult.Skipped -> AttestationInitSkipped(pane)
+                    is AttestationInitResult.Failure -> AttestationInitFailed(
+                        pane = pane,
+                        error = attestationInitResult.error
+                    )
+                }?.let(analyticsTracker::track)
+                syncResponse
             }.onFailure {
                 finishWithResult(stateFlow.value, Failed(it))
             }.onSuccess {
                 openAuthFlow(it)
             }
         }
+    }
+
+    private suspend fun prepareStandardRequestManager(): AttestationInitResult {
+        // If previously within the application session an integrity check failed
+        // do not initialize the request manager and directly launch the web flow.
+        if (integrityVerdictManager.verdictFailed()) {
+            return AttestationInitResult.Skipped
+        }
+        return integrityRequestManager.prepare().fold(
+            onSuccess = { AttestationInitResult.Success },
+            onFailure = { AttestationInitResult.Failure(it) }
+        )
     }
 
     /**
@@ -127,11 +168,16 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             logNoBrowserAvailableAndFinish()
             return
         }
+
         val manifest = sync.manifest
-        val isInstantDebits = stateFlow.value.isInstantDebits
         val nativeAuthFlowEnabled = nativeRouter.nativeAuthFlowEnabled(manifest)
         nativeRouter.logExposure(manifest)
-        val hostedAuthUrl = buildHostedAuthUrl(manifest.hostedAuthUrl, isInstantDebits)
+
+        val hostedAuthUrl = HostedAuthUrlBuilder.create(
+            args = initialState.initialArgs,
+            manifest = manifest,
+        )
+
         if (hostedAuthUrl == null) {
             finishWithResult(
                 state = stateFlow.value,
@@ -144,7 +190,11 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                     copy(
                         manifest = manifest,
                         webAuthFlowStatus = AuthFlowStatus.NONE,
-                        viewEffect = OpenNativeAuthFlow(initialArgs.configuration, sync)
+                        viewEffect = OpenNativeAuthFlow(
+                            configuration = initialArgs.configuration,
+                            initialSyncResponse = sync,
+                            elementsSessionContext = initialArgs.elementsSessionContext,
+                        )
                     )
                 }
             } else {
@@ -158,18 +208,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-    private fun buildHostedAuthUrl(
-        hostedAuthUrl: String?,
-        isInstantDebits: Boolean
-    ): String? = when (isInstantDebits) {
-        /**
-         * For Instant Debits, add a query parameter to the hosted auth URL so that payment account creation
-         * takes place on the web side of the flow and the payment method ID is returned to the app.
-         */
-        true -> hostedAuthUrl?.let { "$it&return_payment_method=true" }
-        false -> hostedAuthUrl
     }
 
     private fun logNoBrowserAvailableAndFinish() {
@@ -298,10 +336,11 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         viewModelScope.launch {
             kotlin.runCatching {
                 fetchFinancialConnectionsSession(state.sessionSecret)
-            }.onSuccess {
+            }.onSuccess { session ->
+                val updatedSession = session.update(state.manifest)
                 finishWithResult(
                     state = state,
-                    result = Completed(financialConnectionsSession = it)
+                    result = Completed(financialConnectionsSession = updatedSession)
                 )
             }.onFailure { error ->
                 finishWithResult(stateFlow.value, Failed(error))
@@ -321,9 +360,13 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             kotlin.runCatching {
                 fetchFinancialConnectionsSessionForToken(clientSecret = state.sessionSecret)
             }.onSuccess { (las, token) ->
+                val updatedSession = las.update(state.manifest)
                 finishWithResult(
                     state = state,
-                    result = Completed(financialConnectionsSession = las, token = token)
+                    result = Completed(
+                        financialConnectionsSession = updatedSession,
+                        token = token,
+                    )
                 )
             }.onFailure { error ->
                 finishWithResult(stateFlow.value, Failed(error))
@@ -447,16 +490,17 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     }
 
     private fun onSuccessFromInstantDebits(url: Uri) {
-        runCatching { requireNotNull(url.getQueryParameter(QUERY_PARAM_PAYMENT_METHOD_ID)) }
-            .onSuccess { paymentMethodId ->
+        runCatching { url.getEncodedPaymentMethodOrThrow() }
+            .onSuccess { paymentMethod ->
                 withState {
                     finishWithResult(
                         state = it,
                         result = Completed(
                             instantDebits = InstantDebitsResult(
-                                paymentMethodId = paymentMethodId,
+                                encodedPaymentMethod = paymentMethod,
                                 last4 = url.getQueryParameter(QUERY_PARAM_LAST4),
-                                bankName = url.getQueryParameter(QUERY_BANK_NAME)
+                                bankName = url.getQueryParameter(QUERY_BANK_NAME),
+                                eligibleForIncentive = url.getQueryParameter(QUERY_INCENTIVE_ELIGIBLE).toBoolean(),
                             ),
                             financialConnectionsSession = null,
                             token = null
@@ -494,6 +538,12 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         fromNative: Boolean = false,
         @StringRes finishMessage: Int? = null,
     ) {
+        if (result is Failed && result.error is FinancialConnectionsAttestationError) {
+            val error = result.error
+            integrityVerdictManager.setVerdictFailed()
+            switchToWebFlow(error.prefillDetails)
+            return
+        }
         eventReporter.onResult(state.initialArgs.configuration, result)
         // Native emits its own events before finishing.
         if (fromNative.not()) {
@@ -507,6 +557,42 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             }
         }
         setState { copy(viewEffect = FinishWithResult(result, finishMessage)) }
+    }
+
+    /**
+     * On scenarios where native failed mid flow due to attestation errors, switch back to web flow.
+     */
+    private fun switchToWebFlow(prefillDetails: PrefillDetails?) {
+        viewModelScope.launch {
+            val sync = getOrFetchSync()
+            val hostedAuthUrl = HostedAuthUrlBuilder.create(
+                args = initialState.initialArgs,
+                manifest = sync.manifest,
+                prefillDetails = prefillDetails
+            )
+
+            if (hostedAuthUrl != null) {
+                setState {
+                    copy(
+                        manifest = manifest,
+                        // Use intermediate state to prevent the flow from closing in [onResume].
+                        webAuthFlowStatus = AuthFlowStatus.INTERMEDIATE_DEEPLINK,
+                        viewEffect = OpenAuthFlowWithUrl(hostedAuthUrl)
+                    )
+                }
+            } else {
+                finishWithResult(
+                    state = stateFlow.value,
+                    result = Failed(IllegalArgumentException("hostedAuthUrl is required to switch to web flow!"))
+                )
+            }
+        }
+    }
+
+    private sealed class AttestationInitResult(val supportsAppVerification: Boolean) {
+        data object Success : AttestationInitResult(supportsAppVerification = true)
+        data object Skipped : AttestationInitResult(supportsAppVerification = false)
+        data class Failure(val error: Throwable) : AttestationInitResult(supportsAppVerification = false)
     }
 
     companion object {
@@ -524,6 +610,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                     .builder()
                     .application(app)
                     .savedStateHandle(savedStateHandle)
+                    .sharedComponent(FinancialConnectionsSingletonSharedComponentHolder.getComponent(app))
                     .initialState(state)
                     .configuration(state.initialArgs.configuration)
                     .build().viewModel
@@ -531,12 +618,18 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         }
 
         internal const val MAX_ACCOUNTS = 100
-        internal const val QUERY_PARAM_PAYMENT_METHOD_ID = "payment_method_id"
+        internal const val QUERY_PARAM_PAYMENT_METHOD = "payment_method"
         internal const val QUERY_PARAM_LAST4 = "last4"
         internal const val QUERY_BANK_NAME = "bank_name"
+        internal const val QUERY_INCENTIVE_ELIGIBLE = "incentive_eligible"
     }
 
     override fun updateTopAppBar(state: FinancialConnectionsSheetState): TopAppBarStateUpdate? {
         return null
     }
+}
+
+private fun Uri.getEncodedPaymentMethodOrThrow(): String {
+    val encodedPaymentMethod = requireNotNull(getQueryParameter(QUERY_PARAM_PAYMENT_METHOD))
+    return String(Base64.decode(encodedPaymentMethod, 0), Charsets.UTF_8)
 }

@@ -28,6 +28,10 @@
   <string name="stripe_blik_code">BLIK 代码</string>
   <!-- Label for Boleto Payment method Tax ID -->
   <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
+  <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
+  <string name="stripe_card_brand_not_accepted">（未接受）</string>
+  <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
+  <string name="stripe_card_brand_not_accepted_with_brand">%1$s（未接受）</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">继续操作，即表示您授权 %1$s 按照 %2$s 的条款从您的 Cash App 账户中扣取该款项及未来的款项，直至撤销授权。您可以随时在 Cash App 设置中进行修改。</string>
   <!-- Title for the contact information section -->
@@ -58,7 +62,7 @@
   <!-- Klarna mandate text -->
   <string name="stripe_klarna_mandate">继续前往 Klarna 即表示您允许 %1$s 按照他们的条款和 Klarna 的条款从您的 Klarna 账户扣取未来款项。您可以在您的 Klarna 应用程序中随时对其进行修改，也可以联系 %2$s。</string>
   <!-- Klarna pay later copy -->
-  <string name="stripe_klarna_pay_later">用 Klarna 延后支付。</string>
+  <string name="stripe_klarna_pay_later">用 Klarna 先买后付</string>
   <!-- Caption for Phone field on address form -->
   <string name="stripe_konbini_confirmation_number_label">电话</string>
   <!-- Label for name on card field -->

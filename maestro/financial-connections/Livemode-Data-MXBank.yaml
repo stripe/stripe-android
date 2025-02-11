@@ -6,6 +6,9 @@ tags:
 - startRecording: ${'/tmp/test_results/livemode-data-mxbank-' + new Date().getTime()}
 - clearState
 - openLink: stripeconnectionsexample://playground?integration_type=Standalone&experience=FinancialConnections&flow=Data&financial_connections_override_native=native&merchant=live_testing&financial_connections_test_mode=false
+- scrollUntilVisible:
+    element:
+      id: "connect_accounts"
 - tapOn:
     id: "connect_accounts"
 # Wait until the consent button is visible
@@ -19,7 +22,7 @@ tags:
 - tapOn: "Search"
 - inputText: "mx"
 - tapOn:
-    id: "search_result_1"
+    id: "bcinst_NKJdZEPMVNdkLg"
 - tapOn:
     id: "prepane_cta"
 ####### Bypass Chrome on-boarding screen #######
@@ -35,6 +38,10 @@ tags:
     timeout: 60000
 - tapOn:
     id: "done_button"
-- assertVisible: ".*Completed!.*"
-- assertVisible: ".*MX Bank.*"
+- scrollUntilVisible:
+    element:
+      text: ".*Completed!.*"
+- scrollUntilVisible:
+    element:
+      text: ".*MX Bank.*"
 - stopRecording

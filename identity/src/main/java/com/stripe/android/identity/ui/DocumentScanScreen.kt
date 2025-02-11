@@ -26,7 +26,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
@@ -40,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.stripe.android.camera.scanui.CameraView
 import com.stripe.android.identity.R
@@ -66,7 +66,7 @@ internal const val VIEW_FINDER_ASPECT_RATIO = 1f
 internal fun DocumentScanScreen(
     navController: NavController,
     identityViewModel: IdentityViewModel,
-    documentScanViewModel: DocumentScanViewModel
+    documentScanViewModel: DocumentScanViewModel,
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -179,9 +179,9 @@ private fun DocumentCaptureScreen(
     }
 
     val title = if (targetScanType.isNullOrFront()) {
-        stringResource(id = R.string.stripe_front_of_id)
+        stringResource(id = R.string.stripe_front_of_id_document)
     } else {
-        stringResource(id = R.string.stripe_back_of_id)
+        stringResource(id = R.string.stripe_back_of_id_document)
     }
 
     Column(

@@ -48,14 +48,14 @@ internal data class PlaygroundSettings(
     ) { acc, setting: Setting<*> -> setting.lasRequest(acc) }
 
     fun paymentIntentRequest(
-        forceInstantDebits: Boolean = false,
+        linkMode: String? = null,
     ): PaymentIntentBody {
         return settings.toList().fold(
             PaymentIntentBody(testEnvironment = BuildConfig.TEST_ENVIRONMENT)
         ) { acc, setting: Setting<*> ->
             setting.paymentIntentRequest(acc)
         }.copy(
-            forceInstantDebits = forceInstantDebits,
+            linkMode = linkMode,
         )
     }
 
@@ -177,8 +177,11 @@ internal data class PlaygroundSettings(
             ConfirmIntentSetting(),
             NativeSetting(),
             PermissionsSetting(),
+            DynamicAppearanceSetting(),
             EmailSetting(),
+            CustomerIdSetting(),
             StripeAccountIdSetting().takeIf { BuildConfig.TEST_ENVIRONMENT != "edge" },
+            RelinkAuthorizationSetting(),
         )
     }
 }

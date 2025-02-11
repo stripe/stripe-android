@@ -3,9 +3,10 @@ package com.stripe.android.paymentsheet.cvcrecollection
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionData
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import org.junit.Test
 
 class CvcRecollectionHandlerTest {
@@ -13,96 +14,75 @@ class CvcRecollectionHandlerTest {
 
     @Test
     fun testLaunch() {
-        val expected = CvcRecollectionData.fromPaymentSelection(PaymentMethodFixtures.CARD_PAYMENT_METHOD.card)
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
 
-        val paymentSelection = PaymentSelection.Saved(
-            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        )
+        val expected = CvcRecollectionData.fromPaymentSelection(paymentMethod.card)
 
-        handler.launch(paymentSelection) { actual ->
+        handler.launch(paymentMethod) { actual ->
             assertThat(actual).isEqualTo(expected)
         }
     }
 
     @Test
-    fun `saved card payment selection and intent requiring cvc recollection should return true`() {
+    fun `card payment method and intent requiring cvc recollection should return true`() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION
-        val paymentSelection = PaymentSelection.Saved(
-            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        )
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         val response = handler.requiresCVCRecollection(
             stripeIntent = paymentIntent,
-            paymentSelection = paymentSelection,
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("")
+            paymentMethod = paymentMethod,
+            optionsParams = null,
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("")
         )
         assertThat(response).isTrue()
     }
 
     @Test
-    fun `valid card, payment intent and false extraRequirements should return false`() {
+    fun `card payment method and intent not requiring cvc recollection should return false`() {
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+        val response = handler.requiresCVCRecollection(
+            stripeIntent = paymentIntent,
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            optionsParams = null,
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("")
+        )
+        assertThat(response).isFalse()
+    }
+
+    @Test
+    fun `non-card payment method and intent requiring cvc recollection should return false`() {
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+        val response = handler.requiresCVCRecollection(
+            stripeIntent = paymentIntent,
+            paymentMethod = PaymentMethodFixtures.PAYPAL_PAYMENT_METHOD,
+            optionsParams = null,
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("")
+        )
+        assertThat(response).isFalse()
+    }
+
+    @Test
+    fun `card & intent requiring cvc recollection should return false if card is from a wallet`() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION
-        val paymentSelection = PaymentSelection.Saved(
-            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        )
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.run {
+            copy(card = card?.copy(wallet = Wallet.GooglePayWallet(dynamicLast4 = null)))
+        }
         val response = handler.requiresCVCRecollection(
             stripeIntent = paymentIntent,
-            paymentSelection = paymentSelection,
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(""),
-            extraRequirements = { false }
+            paymentMethod = paymentMethod,
+            optionsParams = null,
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("")
         )
         assertThat(response).isFalse()
     }
 
     @Test
-    fun `saved card payment selection and intent not requiring cvc recollection should return false`() {
+    fun `card payment method with deferred init and enabled deferred cvc recollection should return true`() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
-        val paymentSelection = PaymentSelection.Saved(
-            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        )
         val response = handler.requiresCVCRecollection(
             stripeIntent = paymentIntent,
-            paymentSelection = paymentSelection,
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("")
-        )
-        assertThat(response).isFalse()
-    }
-
-    @Test
-    fun `saved non-card payment selection and intent requiring cvc recollection should return false`() {
-        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
-        val paymentSelection = PaymentSelection.Saved(
-            paymentMethod = PaymentMethodFixtures.PAYPAL_PAYMENT_METHOD
-        )
-        val response = handler.requiresCVCRecollection(
-            stripeIntent = paymentIntent,
-            paymentSelection = paymentSelection,
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("")
-        )
-        assertThat(response).isFalse()
-    }
-
-    @Test
-    fun `non-saved payment selection and intent requiring cvc recollection should return true`() {
-        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION
-        val paymentSelection = PaymentSelection.GooglePay
-        val response = handler.requiresCVCRecollection(
-            stripeIntent = paymentIntent,
-            paymentSelection = paymentSelection,
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("")
-        )
-        assertThat(response).isFalse()
-    }
-
-    @Test
-    fun `saved card payment selection with deferred init and enabled deferred cvc recollection should return true`() {
-        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
-        val paymentSelection = PaymentSelection.Saved(
-            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        )
-        val response = handler.requiresCVCRecollection(
-            stripeIntent = paymentIntent,
-            paymentSelection = paymentSelection,
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            optionsParams = null,
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1234,
@@ -116,50 +96,25 @@ class CvcRecollectionHandlerTest {
     }
 
     @Test
-    fun `valid card, deferred init and  and false extraRequirements should return false`() {
+    fun `valid card with non-deferred init and enabled deferred cvc recollection should return false`() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
-        val paymentSelection = PaymentSelection.Saved(
-            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        )
         val response = handler.requiresCVCRecollection(
             stripeIntent = paymentIntent,
-            paymentSelection = paymentSelection,
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                        amount = 1234,
-                        currency = "cad",
-                    ),
-                    requireCvcRecollection = true
-                )
-            ),
-            extraRequirements = { false }
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            optionsParams = null,
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("")
         )
         assertThat(response).isFalse()
     }
 
     @Test
-    fun `valid card selection with non-deferred init and enabled deferred cvc recollection should return false`() {
+    fun `non-card payment method with valid deferred intent should return false`() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
-        val paymentSelection = PaymentSelection.Saved(
-            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        )
         val response = handler.requiresCVCRecollection(
             stripeIntent = paymentIntent,
-            paymentSelection = paymentSelection,
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("")
-        )
-        assertThat(response).isFalse()
-    }
-
-    @Test
-    fun `non-saved card payment selection with valid deferred intent should return false`() {
-        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
-        val paymentSelection = PaymentSelection.GooglePay
-        val response = handler.requiresCVCRecollection(
-            stripeIntent = paymentIntent,
-            paymentSelection = paymentSelection,
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
+            optionsParams = null,
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1234,
@@ -173,15 +128,16 @@ class CvcRecollectionHandlerTest {
     }
 
     @Test
-    fun `saved non-card payment selection with valid deferred intent should return false`() {
+    fun `card & valid deferred intent should return false if card is from a wallet`() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
-        val paymentSelection = PaymentSelection.Saved(
-            paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD
-        )
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.run {
+            copy(card = card?.copy(wallet = Wallet.GooglePayWallet(dynamicLast4 = null)))
+        }
         val response = handler.requiresCVCRecollection(
             stripeIntent = paymentIntent,
-            paymentSelection = paymentSelection,
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            paymentMethod = paymentMethod,
+            optionsParams = null,
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1234,
@@ -200,7 +156,7 @@ class CvcRecollectionHandlerTest {
 
         val response = handler.cvcRecollectionEnabled(
             stripeIntent = paymentIntent,
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1234,
@@ -219,7 +175,7 @@ class CvcRecollectionHandlerTest {
 
         val response = handler.cvcRecollectionEnabled(
             stripeIntent = paymentIntent,
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("")
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("")
         )
         assertThat(response).isTrue()
     }
@@ -230,7 +186,7 @@ class CvcRecollectionHandlerTest {
 
         val response = handler.cvcRecollectionEnabled(
             stripeIntent = paymentIntent,
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1234,
@@ -249,7 +205,7 @@ class CvcRecollectionHandlerTest {
 
         val response = handler.cvcRecollectionEnabled(
             stripeIntent = paymentIntent,
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1234,
@@ -268,7 +224,7 @@ class CvcRecollectionHandlerTest {
 
         val response = handler.cvcRecollectionEnabled(
             stripeIntent = paymentIntent,
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
                     requireCvcRecollection = true
@@ -284,7 +240,7 @@ class CvcRecollectionHandlerTest {
 
         val response = handler.cvcRecollectionEnabled(
             stripeIntent = paymentIntent,
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("")
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("")
         )
         assertThat(response).isFalse()
     }

@@ -27,6 +27,7 @@ import androidx.test.espresso.IdlingPolicies
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.UiSelector
 import com.google.common.truth.Truth.assertThat
 import com.karumi.shot.ScreenshotTest
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG
@@ -43,6 +44,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
+import com.stripe.android.paymentsheet.example.playground.settings.Layout
 import com.stripe.android.paymentsheet.example.playground.settings.LayoutSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.RequireCvcRecollectionDefinition
@@ -503,7 +505,7 @@ internal class PlaygroundTestDriver(
         setup(testParameters)
         launchComplete()
 
-        if (testParameters.playgroundSettingsSnapshot[LayoutSettingsDefinition]) {
+        if (testParameters.playgroundSettingsSnapshot[LayoutSettingsDefinition] != Layout.HORIZONTAL) {
             selectLpmInVerticalMode(testParameters.paymentMethodCode)
         } else {
             clickPaymentSelection()
@@ -761,12 +763,13 @@ internal class PlaygroundTestDriver(
 
     fun confirmUSBankAccount(
         testParameters: TestParameters,
-        afterAuthorization: (Selectors) -> Unit = {},
+        afterAuthorization: (Selectors, FieldPopulator) -> Unit = { _, _ -> },
     ): PlaygroundState? {
         return confirmBankAccount(
             testParameters = testParameters,
-            executeFlow = { doUSBankAccountAuthorization() },
+            executeFlow = { doUSBankAccountAuthorization(testParameters.authorizationAction) },
             afterCollectingBankInfo = afterAuthorization,
+            confirmIntent = true,
         )
     }
 
@@ -776,14 +779,14 @@ internal class PlaygroundTestDriver(
     ) {
         confirmBankAccountInCustomFlow(
             testParameters = testParameters,
-            executeFlow = { doUSBankAccountAuthorization() },
+            executeFlow = { doUSBankAccountAuthorization(testParameters.authorizationAction) },
             afterCollectingBankInfo = afterAuthorization,
         )
     }
 
-    fun confirmInstantDebits(
+    fun confirmLinkBankPayment(
         testParameters: TestParameters,
-        afterAuthorization: (Selectors) -> Unit = {},
+        afterAuthorization: (Selectors, FieldPopulator) -> Unit = { _, _ -> },
     ): PlaygroundState? {
         return confirmBankAccount(
             testParameters = testParameters,
@@ -807,21 +810,23 @@ internal class PlaygroundTestDriver(
     private fun confirmBankAccount(
         testParameters: TestParameters,
         executeFlow: () -> Unit,
-        afterCollectingBankInfo: (Selectors) -> Unit = {},
-        confirmIntent: Boolean = false,
+        afterCollectingBankInfo: (Selectors, FieldPopulator) -> Unit = { _, _ -> },
+        confirmIntent: Boolean,
     ): PlaygroundState? {
         setup(testParameters)
         launchComplete()
 
         clickPaymentSelection()
 
-        FieldPopulator(
+        val populator = FieldPopulator(
             selectors = selectors,
             testParameters = testParameters,
             populateCustomLpmFields = {},
             verifyCustomLpmFields = {},
             values = FieldPopulator.Values(),
-        ).populateFields()
+        )
+
+        populator.populateFields()
 
         // Verify device requirements are met prior to attempting confirmation.  Do this
         // after we have had the chance to capture a screenshot.
@@ -836,7 +841,7 @@ internal class PlaygroundTestDriver(
 
         executeFlow()
 
-        afterCollectingBankInfo(selectors)
+        afterCollectingBankInfo(selectors, populator)
 
         if (confirmIntent) {
             pressBuy()
@@ -1031,7 +1036,7 @@ internal class PlaygroundTestDriver(
     /**
      * Here we wait for PollingActivity to first come into view then wait for it to go away by checking if the Approve payment text is there
      */
-    private fun waitForPollingToFinish(timeout: Duration = 30.seconds) {
+    private fun waitForPollingToFinish(timeout: Duration = 60.seconds) {
         val className =
             "com.stripe.android.paymentsheet.paymentdatacollection.polling.PollingActivity"
         while (currentActivity?.componentName?.className != className) {
@@ -1145,7 +1150,14 @@ internal class PlaygroundTestDriver(
                                 .text(testParameters.isSetupMode),
                             className = "android.widget.TextView",
                             device = device
-                        ) {}.click()
+                        ) {
+                            override fun click() {
+                                if (testParameters.paymentMethodCode == "wechat_pay") {
+                                    wait(5000)
+                                }
+                                super.click()
+                            }
+                        }.click()
                         Log.e("Stripe", "Fail authorization was a text view not a button this time")
                     }
                 }
@@ -1166,6 +1178,70 @@ internal class PlaygroundTestDriver(
                         completeButton.wait(5000)
                         completeButton.click()
                     }
+
+                    is AuthorizeAction.Test3DS2.HSBCHTML -> {
+                        val otpButton = UiAutomatorText("OTP", labelMatchesExactly = true, device = device)
+
+                        otpButton.wait(5000)
+                        otpButton.click()
+
+                        val submitButton = UiAutomatorText("Submit", labelMatchesExactly = true, device = device)
+                        submitButton.wait(5000)
+                        submitButton.click()
+
+                        val enterOTPField = UiAutomatorText("", labelMatchesExactly = true, device = device)
+                        enterOTPField.wait(5000)
+                        enterOTPField.click()
+                        enterOTPField.setText("555555")
+
+                        val otpSubmit = UiAutomatorText("Submit", labelMatchesExactly = true, device = device)
+                        otpSubmit.wait(5000)
+                        otpSubmit.click()
+                    }
+
+                    is AuthorizeAction.Test3DS2.SingleSelect -> {
+                        val completeAuthentication = UiAutomatorText("Complete Authentication", labelMatchesExactly = true, device = device)
+                        completeAuthentication.wait(5000)
+                        completeAuthentication.click()
+
+                        val submitButton = UiAutomatorText("Submit", labelMatchesExactly = true, device = device)
+                        submitButton.wait(5000)
+                        submitButton.click()
+                    }
+
+                    is AuthorizeAction.Test3DS2.MultiSelect -> {
+                        UiSelector().textContains("Complete Authentication")
+                        val completeAuthentication = UiAutomatorText("Complete Authentication", labelMatchesExactly = true, device = device)
+                        completeAuthentication.wait(5000)
+                        device.findObject(UiSelector().textContains("Complete Authentication").index(0)).click()
+                        device.findObject(UiSelector().textContains("Complete Authentication").index(1)).click()
+                        device.findObject(UiSelector().textContains("Complete Authentication").index(2)).click()
+
+                        val submitButton = UiAutomatorText("Submit", labelMatchesExactly = true, device = device)
+                        submitButton.wait(5000)
+                        submitButton.click()
+                    }
+
+                    is AuthorizeAction.Test3DS2.OOB -> {
+                        val completeAuthentication = UiAutomatorText("Complete Authentication", labelMatchesExactly = true, device = device)
+                        completeAuthentication.wait(5000)
+                        completeAuthentication.click()
+                    }
+
+                    is AuthorizeAction.Test3DS2.OTP -> {
+                        val explanationText = UiAutomatorText("For this test", labelMatchesExactly = true, device = device)
+                        explanationText.wait(10000)
+
+                        val enterOTPField = UiAutomatorText("Enter your code below:", labelMatchesExactly = true, className = "android.widget.EditText", device = device)
+                        enterOTPField.wait(5000)
+                        enterOTPField.click()
+                        enterOTPField.setText("424242")
+
+                        val submitButton = UiAutomatorText("Submit", labelMatchesExactly = true, device = device)
+                        submitButton.wait(5000)
+                        submitButton.click()
+                    }
+
                     is AuthorizeAction.AuthorizePayment -> {}
                     is AuthorizeAction.PollingSucceedsAfterDelay -> {
                         waitForPollingToFinish()
@@ -1266,7 +1342,7 @@ internal class PlaygroundTestDriver(
         clickButton("Connect account", composeCanDetach = true)
 
         clickButton("Not now")
-        clickButton("Back to Mobile Example Account")
+        clickButtonWithTag("done_button")
     }
 
     private fun executeEntireInstantDebitsFlow() = with(device) {
@@ -1282,7 +1358,15 @@ internal class PlaygroundTestDriver(
         clickButtonWithTag("done_button")
     }
 
-    private fun doUSBankAccountAuthorization() {
+    private fun doUSBankAccountAuthorization(authAction: AuthorizeAction?) {
+        if (authAction == AuthorizeAction.Cancel) {
+            cancelAchFlowOnLaunch()
+        } else {
+            executeUsBankAccountFlow()
+        }
+    }
+
+    private fun cancelAchFlowOnLaunch() {
         while (currentActivity?.javaClass?.name != FINANCIAL_CONNECTIONS_ACTIVITY) {
             TimeUnit.MILLISECONDS.sleep(250)
         }

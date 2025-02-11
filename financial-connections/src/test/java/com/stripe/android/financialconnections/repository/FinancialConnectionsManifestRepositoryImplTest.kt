@@ -55,8 +55,22 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
 
             // simulates to concurrent accesses to manifest.
             awaitAll(
-                async { repository.getOrSynchronizeFinancialConnectionsSession("", "", None::shouldReFetch) },
-                async { repository.getOrSynchronizeFinancialConnectionsSession("", "", None::shouldReFetch) }
+                async {
+                    repository.getOrSynchronizeFinancialConnectionsSession(
+                        clientSecret = "",
+                        applicationId = "",
+                        supportsAppVerification = false,
+                        reFetchCondition = None::shouldReFetch
+                    )
+                },
+                async {
+                    repository.getOrSynchronizeFinancialConnectionsSession(
+                        clientSecret = "",
+                        applicationId = "",
+                        supportsAppVerification = false,
+                        reFetchCondition = None::shouldReFetch
+                    )
+                }
             )
 
             verify(mockRequestExecutor, times(1)).execute(any(), any<KSerializer<*>>())
@@ -69,7 +83,12 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
             val repository = buildRepository(initialSync = initialSync)
 
             val returnedManifest =
-                repository.getOrSynchronizeFinancialConnectionsSession("", "", None::shouldReFetch)
+                repository.getOrSynchronizeFinancialConnectionsSession(
+                    clientSecret = "",
+                    applicationId = "",
+                    supportsAppVerification = false,
+                    reFetchCondition = None::shouldReFetch
+                )
 
             assertThat(returnedManifest).isEqualTo(initialSync)
             verifyNoInteractions(mockRequestExecutor)

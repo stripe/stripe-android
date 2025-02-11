@@ -4,14 +4,14 @@ import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.paymentsheet.CustomerStateHolder
-import com.stripe.android.paymentsheet.FormHelper
-import com.stripe.android.paymentsheet.LinkInlineHandler
+import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.FormElement
-import com.stripe.android.uicore.utils.mapAsStateFlow
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -24,8 +24,6 @@ internal interface VerticalModeFormInteractor {
     val state: StateFlow<State>
 
     fun handleViewAction(viewAction: ViewAction)
-
-    fun canGoBack(): Boolean
 
     fun close()
 
@@ -52,19 +50,24 @@ internal class DefaultVerticalModeFormInteractor(
     private val usBankAccountArguments: USBankAccountFormArguments,
     private val reportFieldInteraction: (String) -> Unit,
     private val headerInformation: FormHeaderInformation?,
-    private val canGoBackDelegate: () -> Boolean,
     override val isLiveMode: Boolean,
     processing: StateFlow<Boolean>,
+    paymentMethodIncentive: StateFlow<PaymentMethodIncentive?>,
     private val coroutineScope: CoroutineScope,
 ) : VerticalModeFormInteractor {
-    override val state: StateFlow<VerticalModeFormInteractor.State> = processing.mapAsStateFlow { isProcessing ->
+    override val state: StateFlow<VerticalModeFormInteractor.State> = combineAsStateFlow(
+        processing,
+        paymentMethodIncentive,
+    ) { isProcessing, paymentMethodIncentive ->
         VerticalModeFormInteractor.State(
             selectedPaymentMethodCode = selectedPaymentMethodCode,
             isProcessing = isProcessing,
             usBankAccountFormArguments = usBankAccountArguments,
             formArguments = formArguments,
             formElements = formElements,
-            headerInformation = headerInformation,
+            headerInformation = headerInformation?.copy(
+                promoBadge = paymentMethodIncentive?.takeIfMatches(selectedPaymentMethodCode)?.displayText,
+            ),
         )
     }
 
@@ -79,10 +82,6 @@ internal class DefaultVerticalModeFormInteractor(
         }
     }
 
-    override fun canGoBack(): Boolean {
-        return canGoBackDelegate()
-    }
-
     override fun close() {
         coroutineScope.cancel()
     }
@@ -93,11 +92,11 @@ internal class DefaultVerticalModeFormInteractor(
             viewModel: BaseSheetViewModel,
             paymentMethodMetadata: PaymentMethodMetadata,
             customerStateHolder: CustomerStateHolder,
+            bankFormInteractor: BankFormInteractor,
         ): VerticalModeFormInteractor {
             val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-            val formHelper = FormHelper.create(
+            val formHelper = DefaultFormHelper.create(
                 viewModel = viewModel,
-                linkInlineHandler = LinkInlineHandler.create(viewModel, coroutineScope),
                 paymentMethodMetadata = paymentMethodMetadata
             )
             return DefaultVerticalModeFormInteractor(
@@ -109,7 +108,8 @@ internal class DefaultVerticalModeFormInteractor(
                     viewModel = viewModel,
                     paymentMethodMetadata = paymentMethodMetadata,
                     hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
-                    selectedPaymentMethodCode = selectedPaymentMethodCode
+                    selectedPaymentMethodCode = selectedPaymentMethodCode,
+                    bankFormInteractor = bankFormInteractor,
                 ),
                 headerInformation = paymentMethodMetadata.formHeaderInformationForCode(
                     selectedPaymentMethodCode,
@@ -118,8 +118,8 @@ internal class DefaultVerticalModeFormInteractor(
                     },
                 ),
                 isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
-                canGoBackDelegate = { viewModel.navigationHandler.canGoBack },
                 processing = viewModel.processing,
+                paymentMethodIncentive = bankFormInteractor.paymentMethodIncentiveInteractor.displayedIncentive,
                 reportFieldInteraction = viewModel.analyticsListener::reportFieldInteraction,
                 coroutineScope = coroutineScope,
             )

@@ -16,28 +16,29 @@ import com.github.kittinunf.result.Result
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerEphemeralKey
+import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
+import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
 import com.stripe.android.paymentsheet.example.Settings
-import com.stripe.android.paymentsheet.example.playground.PlaygroundState.Companion.asPlaygroundState
-import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
-import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentRequest
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentResponse
 import com.stripe.android.paymentsheet.example.playground.model.CreateSetupIntentRequest
 import com.stripe.android.paymentsheet.example.playground.model.CreateSetupIntentResponse
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyResponse
+import com.stripe.android.paymentsheet.example.playground.network.PlaygroundRequester
 import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CustomEndpointDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
+import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedAppearance
+import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedAppearanceSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
@@ -51,7 +52,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import java.io.IOException
 
-@OptIn(ExperimentalCustomerSheetApi::class)
+@OptIn(ExperimentalCustomerSessionApi::class)
 internal class PaymentSheetPlaygroundViewModel(
     application: Application,
     private val savedStateHandle: SavedStateHandle,
@@ -109,47 +110,17 @@ internal class PaymentSheetPlaygroundViewModel(
 
             playgroundSettingsSnapshot.saveToSharedPreferences(getApplication())
 
-            val requestBody = playgroundSettingsSnapshot.checkoutRequest()
-
-            val apiResponse = Fuel.post(baseUrl + "checkout")
-                .jsonBody(Json.encodeToString(CheckoutRequest.serializer(), requestBody))
-                .suspendable()
-                .awaitModel(CheckoutResponse.serializer())
-            when (apiResponse) {
-                is Result.Failure -> {
+            PlaygroundRequester(playgroundSettingsSnapshot, getApplication()).fetch().fold(
+                onSuccess = { state ->
+                    playgroundSettingsFlow.value = state.snapshot.playgroundSettings()
+                    setPlaygroundState(state)
+                },
+                onFailure = { exception ->
                     status.value = StatusMessage(
-                        "Preparing checkout failed:\n${apiResponse.getException().message}"
+                        "Preparing checkout failed:\n${exception.message}"
                     )
-                }
-
-                is Result.Success -> {
-                    val checkoutResponse = apiResponse.value
-                    println("StripeIntent ${checkoutResponse.intentClientSecret.substringBefore("_secret_")}")
-
-                    // Init PaymentConfiguration with the publishable key returned from the backend,
-                    // which will be used on all Stripe API calls
-                    PaymentConfiguration.init(
-                        getApplication(),
-                        checkoutResponse.publishableKey
-                    )
-
-                    val customerId = checkoutResponse.customerId
-                    val updatedSettings = playgroundSettingsSnapshot.playgroundSettings()
-                    if (
-                        playgroundSettingsSnapshot[CustomerSettingsDefinition] == CustomerType.NEW &&
-                        customerId != null
-                    ) {
-                        println("Customer $customerId")
-                        updatedSettings[CustomerSettingsDefinition] = CustomerType.Existing(customerId)
-                    }
-                    playgroundSettingsFlow.value = updatedSettings
-                    val updatedState = checkoutResponse.asPlaygroundState(
-                        snapshot = updatedSettings.snapshot(),
-                        defaultEndpoint = settings.playgroundBackendUrl
-                    )
-                    setPlaygroundState(updatedState)
-                }
-            }
+                },
+            )
         }
     }
 
@@ -188,11 +159,94 @@ internal class PaymentSheetPlaygroundViewModel(
                 { customerId -> createSetupIntentClientSecret(customerId, customerState.countryCode) }
             } else {
                 null
-            }
+            },
+            paymentMethodTypes = customerState?.supportedPaymentMethodTypes,
         )
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
+    fun createCustomerSessionProvider(
+        playgroundState: PlaygroundState.Customer,
+    ): CustomerSheet.CustomerSessionProvider {
+        return object : CustomerSheet.CustomerSessionProvider() {
+            override suspend fun intentConfiguration(): kotlin.Result<CustomerSheet.IntentConfiguration> {
+                return kotlin.Result.success(
+                    CustomerSheet.IntentConfiguration.Builder()
+                        .paymentMethodTypes(playgroundState.supportedPaymentMethodTypes)
+                        .build()
+                )
+            }
+
+            override suspend fun providesCustomerSessionClientSecret(): kotlin.Result<
+                CustomerSheet.CustomerSessionClientSecret
+                > {
+                val apiResponse = Fuel.post(baseUrl + "customer_ephemeral_key")
+                    .jsonBody(
+                        Json.encodeToString(
+                            CustomerEphemeralKeyRequest.serializer(),
+                            playgroundState.customerEphemeralKeyRequest()
+                        )
+                    )
+                    .suspendable()
+                    .awaitModel(CustomerEphemeralKeyResponse.serializer())
+
+                return when (apiResponse) {
+                    is Result.Failure -> {
+                        val exception = apiResponse.getException()
+
+                        kotlin.Result.failure(exception)
+                    }
+                    is Result.Success -> {
+                        val response = apiResponse.value
+
+                        // Init PaymentConfiguration with the publishable key returned from the backend,
+                        // which will be used on all Stripe API calls
+                        PaymentConfiguration.init(
+                            getApplication(),
+                            response.publishableKey
+                        )
+
+                        if (playgroundState.isNewCustomer) {
+                            playgroundSettingsFlow.value?.let { settings ->
+                                updateSettingsWithExistingCustomerId(settings, response.customerId)
+                            }
+                        }
+
+                        try {
+                            kotlin.Result.success(
+                                CustomerSheet.CustomerSessionClientSecret.create(
+                                    customerId = response.customerId,
+                                    clientSecret = response.customerSessionClientSecret
+                                        ?: throw IllegalStateException(
+                                            "No 'customerSessionClientSecret' was found in backend response!"
+                                        )
+                                )
+                            )
+                        } catch (exception: IllegalStateException) {
+                            kotlin.Result.failure(exception)
+                        }
+                    }
+                }
+            }
+
+            override suspend fun provideSetupIntentClientSecret(customerId: String): kotlin.Result<String> {
+                val request = CreateSetupIntentRequest(
+                    customerId = customerId,
+                    merchantCountryCode = playgroundState.countryCode.value,
+                )
+
+                val apiResponse = Fuel.post(baseUrl + "create_setup_intent")
+                    .jsonBody(Json.encodeToString(CreateSetupIntentRequest.serializer(), request))
+                    .suspendable()
+                    .awaitModel(CreateSetupIntentResponse.serializer())
+
+                return when (apiResponse) {
+                    is Result.Failure -> kotlin.Result.failure(apiResponse.getException())
+                    is Result.Success -> kotlin.Result.success(apiResponse.value.clientSecret)
+                }
+            }
+        }
+    }
+
     private suspend fun fetchEphemeralKey(
         request: CustomerEphemeralKeyRequest,
         isNewCustomer: Boolean,
@@ -247,7 +301,6 @@ internal class PaymentSheetPlaygroundViewModel(
         }
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
     private suspend fun createSetupIntentClientSecret(
         customerId: String,
         country: Country,
@@ -331,7 +384,13 @@ internal class PaymentSheetPlaygroundViewModel(
         status.value = StatusMessage(statusMessage)
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
+    fun onEmbeddedResult(success: Boolean) {
+        if (success) {
+            setPlaygroundState(null)
+            status.value = StatusMessage(SUCCESS_RESULT)
+        }
+    }
+
     fun onCustomerSheetCallback(result: CustomerSheetResult) {
         val statusMessage = when (result) {
             is CustomerSheetResult.Canceled -> {
@@ -354,10 +413,19 @@ internal class PaymentSheetPlaygroundViewModel(
         }
     }
 
-    private fun createIntent(clientSecret: String): CreateIntentResult {
-        // Note: This is not how you'd do this in a real application. Instead, your app would
-        // call your backend and create (and optionally confirm) a payment or setup intent.
-        return CreateIntentResult.Success(clientSecret = clientSecret)
+    private suspend fun createIntent(playgroundState: PlaygroundState): CreateIntentResult {
+        val playgroundSettingsSnapshot = playgroundState.snapshot
+        return PlaygroundRequester(playgroundSettingsSnapshot, getApplication()).fetch().fold(
+            onSuccess = { state ->
+                playgroundSettingsFlow.value = state.snapshot.playgroundSettings()
+                setPlaygroundState(state)
+                val clientSecret = requireNotNull(state.asPaymentState()).clientSecret
+                CreateIntentResult.Success(clientSecret)
+            },
+            onFailure = { exception ->
+                CreateIntentResult.Failure(IllegalStateException(exception))
+            },
+        )
     }
 
     suspend fun createIntentCallback(
@@ -387,7 +455,7 @@ internal class PaymentSheetPlaygroundViewModel(
             }
 
             InitializationType.DeferredClientSideConfirmation -> {
-                createIntent(playgroundState.clientSecret)
+                createIntent(playgroundState)
             }
 
             InitializationType.DeferredServerSideConfirmation,
@@ -490,6 +558,21 @@ internal class PaymentSheetPlaygroundViewModel(
         playgroundSettingsFlow.value?.let { settings ->
             settings[CustomEndpointDefinition] = backendUrl
             playgroundSettingsFlow.value = settings
+            setPlaygroundState(
+                state.value?.let { state ->
+                    val updatedSnapshot = settings.snapshot()
+                    when (state) {
+                        is PlaygroundState.Customer -> state.copy(snapshot = updatedSnapshot)
+                        is PlaygroundState.Payment -> state.copy(snapshot = updatedSnapshot)
+                    }
+                }
+            )
+        }
+    }
+
+    fun updateEmbeddedAppearance(appearanceSetting: EmbeddedAppearanceSettingsDefinition, value: EmbeddedAppearance) {
+        playgroundSettingsFlow.value?.let { settings ->
+            settings[appearanceSetting] = value
             setPlaygroundState(
                 state.value?.let { state ->
                     val updatedSnapshot = settings.snapshot()

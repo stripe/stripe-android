@@ -5,7 +5,6 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasTestTag
@@ -19,11 +18,12 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG
-import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_EDIT_SCREEN_REMOVE_BUTTON
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
+import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import org.json.JSONArray
@@ -57,7 +57,8 @@ internal class CustomerSessionPaymentSheetActivityTest {
                 PaymentMethodFactory.card(last4 = "5544", addCbcNetworks = true),
             ),
             isPaymentMethodRemoveEnabled = true,
-            allowsRemovalOfLastSavedPaymentMethod = true,
+            canRemoveLastPaymentMethodConfig = true,
+            canRemoveLastPaymentMethodServer = true,
         ) {
             composeTestRule.onEditButton().performClick()
 
@@ -66,17 +67,44 @@ internal class CustomerSessionPaymentSheetActivityTest {
         }
 
     @Test
-    fun `When single PM with remove permissions and can remove last PM, should be enabled when editing`() =
+    fun `When single PM with remove permissions and can remove last from sources, should be enabled when editing`() =
         runTest(
             cards = listOf(
                 PaymentMethodFactory.card(last4 = "4242"),
             ),
             isPaymentMethodRemoveEnabled = true,
-            allowsRemovalOfLastSavedPaymentMethod = true,
+            canRemoveLastPaymentMethodConfig = true,
+            canRemoveLastPaymentMethodServer = true,
         ) {
             composeTestRule.onEditButton().performClick()
 
             composeTestRule.onSavedPaymentMethod(last4 = "4242").assertIsEnabled()
+        }
+
+    @Test
+    fun `When single PM with remove permissions and cannot remove last PM from server, edit should not be shown`() =
+        runTest(
+            cards = listOf(
+                PaymentMethodFactory.card(last4 = "4242"),
+            ),
+            isPaymentMethodRemoveEnabled = true,
+            canRemoveLastPaymentMethodConfig = true,
+            canRemoveLastPaymentMethodServer = false,
+        ) {
+            composeTestRule.onEditButton().assertDoesNotExist()
+        }
+
+    @Test
+    fun `When single PM with remove permissions & cannot remove last PM from config, edit should not be shown`() =
+        runTest(
+            cards = listOf(
+                PaymentMethodFactory.card(last4 = "4242"),
+            ),
+            isPaymentMethodRemoveEnabled = true,
+            canRemoveLastPaymentMethodConfig = false,
+            canRemoveLastPaymentMethodServer = true,
+        ) {
+            composeTestRule.onEditButton().assertDoesNotExist()
         }
 
     @Test
@@ -86,7 +114,8 @@ internal class CustomerSessionPaymentSheetActivityTest {
                 PaymentMethodFactory.card(last4 = "4242"),
             ),
             isPaymentMethodRemoveEnabled = true,
-            allowsRemovalOfLastSavedPaymentMethod = false,
+            canRemoveLastPaymentMethodConfig = false,
+            canRemoveLastPaymentMethodServer = false,
         ) {
             composeTestRule.onEditButton().assertDoesNotExist()
         }
@@ -99,24 +128,28 @@ internal class CustomerSessionPaymentSheetActivityTest {
                 PaymentMethodFactory.card(last4 = "5544"),
             ),
             isPaymentMethodRemoveEnabled = false,
-            allowsRemovalOfLastSavedPaymentMethod = true,
+            canRemoveLastPaymentMethodConfig = true,
+            canRemoveLastPaymentMethodServer = false,
         ) {
             composeTestRule.onEditButton().assertDoesNotExist()
         }
 
     @Test
-    fun `When multiple PMs with CBC card but no remove permissions, should allow editing CBC card and disable rest`() =
+    fun `When multiple PMs with CBC card but no remove permissions, should allow editing all PMs`() =
         runTest(
             cards = listOf(
                 PaymentMethodFactory.card(last4 = "4242", addCbcNetworks = true),
                 PaymentMethodFactory.card(last4 = "5544"),
             ),
             isPaymentMethodRemoveEnabled = false,
-            allowsRemovalOfLastSavedPaymentMethod = true,
+            canRemoveLastPaymentMethodConfig = true,
+            canRemoveLastPaymentMethodServer = false,
         ) {
             composeTestRule.onEditButton().performClick()
 
-            composeTestRule.onSavedPaymentMethod(last4 = "5544").assertIsNotEnabled()
+            val nonCbcCard = composeTestRule.onSavedPaymentMethod(last4 = "5544")
+            nonCbcCard.assertIsEnabled()
+            nonCbcCard.assertHasModifyBadge()
 
             val cbcCard = composeTestRule.onSavedPaymentMethod(last4 = "4242")
 
@@ -132,7 +165,8 @@ internal class CustomerSessionPaymentSheetActivityTest {
                 PaymentMethodFactory.card(last4 = "5544"),
             ),
             isPaymentMethodRemoveEnabled = true,
-            allowsRemovalOfLastSavedPaymentMethod = true,
+            canRemoveLastPaymentMethodConfig = true,
+            canRemoveLastPaymentMethodServer = false,
         ) {
             composeTestRule.onEditButton().performClick()
 
@@ -145,17 +179,18 @@ internal class CustomerSessionPaymentSheetActivityTest {
 
             composeTestRule.onModifyBadgeFor(last4 = "4242").performClick()
 
-            composeTestRule.onEditScreenRemoveButton().assertIsEnabled()
+            composeTestRule.onUpdateScreenRemoveButton().assertIsEnabled()
         }
 
     @Test
-    fun `When single CBC card, has remove permissions, and can remove last PM, should be able to remove and edit`() =
+    fun `When single CBC card, has remove permissions, and cannot remove last PM from server, can only edit`() =
         runTest(
             cards = listOf(
                 PaymentMethodFactory.card(last4 = "4242", addCbcNetworks = true),
             ),
             isPaymentMethodRemoveEnabled = true,
-            allowsRemovalOfLastSavedPaymentMethod = true,
+            canRemoveLastPaymentMethodConfig = true,
+            canRemoveLastPaymentMethodServer = false,
         ) {
             composeTestRule.onEditButton().performClick()
 
@@ -166,7 +201,51 @@ internal class CustomerSessionPaymentSheetActivityTest {
 
             composeTestRule.onModifyBadgeFor(last4 = "4242").performClick()
 
-            composeTestRule.onEditScreenRemoveButton().assertIsEnabled()
+            composeTestRule.onUpdateScreenRemoveButton().assertDoesNotExist()
+        }
+
+    @Test
+    fun `When single CBC card, has remove permissions, and cannot remove last PM from config, can only edit`() =
+        runTest(
+            cards = listOf(
+                PaymentMethodFactory.card(last4 = "4242", addCbcNetworks = true),
+            ),
+            isPaymentMethodRemoveEnabled = true,
+            canRemoveLastPaymentMethodConfig = false,
+            canRemoveLastPaymentMethodServer = true,
+        ) {
+            composeTestRule.onEditButton().performClick()
+
+            val cbcCard = composeTestRule.onSavedPaymentMethod(last4 = "4242")
+
+            cbcCard.assertIsEnabled()
+            cbcCard.assertHasModifyBadge()
+
+            composeTestRule.onModifyBadgeFor(last4 = "4242").performClick()
+
+            composeTestRule.onUpdateScreenRemoveButton().assertDoesNotExist()
+        }
+
+    @Test
+    fun `When single CBC card, has remove permissions, and can remove last PM from all sources, can remove and edit`() =
+        runTest(
+            cards = listOf(
+                PaymentMethodFactory.card(last4 = "4242", addCbcNetworks = true),
+            ),
+            isPaymentMethodRemoveEnabled = true,
+            canRemoveLastPaymentMethodConfig = true,
+            canRemoveLastPaymentMethodServer = true,
+        ) {
+            composeTestRule.onEditButton().performClick()
+
+            val cbcCard = composeTestRule.onSavedPaymentMethod(last4 = "4242")
+
+            cbcCard.assertIsEnabled()
+            cbcCard.assertHasModifyBadge()
+
+            composeTestRule.onModifyBadgeFor(last4 = "4242").performClick()
+
+            composeTestRule.onUpdateScreenRemoveButton().assertIsEnabled()
         }
 
     @Test
@@ -176,7 +255,8 @@ internal class CustomerSessionPaymentSheetActivityTest {
                 PaymentMethodFactory.card(last4 = "4242", addCbcNetworks = true),
             ),
             isPaymentMethodRemoveEnabled = false,
-            allowsRemovalOfLastSavedPaymentMethod = true,
+            canRemoveLastPaymentMethodConfig = true,
+            canRemoveLastPaymentMethodServer = false,
         ) {
             composeTestRule.onEditButton().performClick()
 
@@ -187,7 +267,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
 
             composeTestRule.onModifyBadgeFor(last4 = "4242").performClick()
 
-            composeTestRule.onEditScreenRemoveButton().assertDoesNotExist()
+            composeTestRule.onUpdateScreenRemoveButton().assertDoesNotExist()
         }
 
     @Test
@@ -197,7 +277,8 @@ internal class CustomerSessionPaymentSheetActivityTest {
                 PaymentMethodFactory.card(last4 = "4242", addCbcNetworks = true),
             ),
             isPaymentMethodRemoveEnabled = true,
-            allowsRemovalOfLastSavedPaymentMethod = false,
+            canRemoveLastPaymentMethodConfig = false,
+            canRemoveLastPaymentMethodServer = false,
         ) {
             composeTestRule.onEditButton().performClick()
 
@@ -208,13 +289,14 @@ internal class CustomerSessionPaymentSheetActivityTest {
 
             composeTestRule.onModifyBadgeFor(last4 = "4242").performClick()
 
-            composeTestRule.onEditScreenRemoveButton().assertDoesNotExist()
+            composeTestRule.onUpdateScreenRemoveButton().assertDoesNotExist()
         }
 
     private fun runTest(
         cards: List<PaymentMethod>,
         isPaymentMethodRemoveEnabled: Boolean,
-        allowsRemovalOfLastSavedPaymentMethod: Boolean,
+        canRemoveLastPaymentMethodConfig: Boolean,
+        canRemoveLastPaymentMethodServer: Boolean,
         test: (PaymentSheetActivity) -> Unit,
     ) {
         networkRule.enqueue(
@@ -222,7 +304,13 @@ internal class CustomerSessionPaymentSheetActivityTest {
             RequestMatchers.method("GET"),
             RequestMatchers.path("/v1/elements/sessions"),
         ) { response ->
-            response.setBody(createElementsSessionResponse(cards, isPaymentMethodRemoveEnabled))
+            response.setBody(
+                createElementsSessionResponse(
+                    cards = cards,
+                    isPaymentMethodRemoveEnabled = isPaymentMethodRemoveEnabled,
+                    canRemoveLastPaymentMethod = canRemoveLastPaymentMethodServer,
+                )
+            )
         }
 
         val countDownLatch = CountDownLatch(1)
@@ -231,7 +319,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
             PaymentSheetContractV2().createIntent(
                 ApplicationProvider.getApplicationContext(),
                 PaymentSheetContractV2.Args(
-                    initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                         clientSecret = "pi_1234_secret_5678",
                     ),
                     config = PaymentSheet.Configuration(
@@ -240,8 +328,9 @@ internal class CustomerSessionPaymentSheetActivityTest {
                             id = "cus_1",
                             clientSecret = "cuss_1",
                         ),
-                        allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
+                        allowsRemovalOfLastSavedPaymentMethod = canRemoveLastPaymentMethodConfig,
                         preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa),
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
                     ),
                     statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
                 )
@@ -271,9 +360,9 @@ internal class CustomerSessionPaymentSheetActivityTest {
         )
     }
 
-    private fun ComposeTestRule.onEditScreenRemoveButton(): SemanticsNodeInteraction {
+    private fun ComposeTestRule.onUpdateScreenRemoveButton(): SemanticsNodeInteraction {
         return onNode(
-            hasTestTag(PAYMENT_SHEET_EDIT_SCREEN_REMOVE_BUTTON)
+            hasTestTag(UPDATE_PM_REMOVE_BUTTON_TEST_TAG)
         )
     }
 
@@ -300,6 +389,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
         fun createElementsSessionResponse(
             cards: List<PaymentMethod>,
             isPaymentMethodRemoveEnabled: Boolean,
+            canRemoveLastPaymentMethod: Boolean,
         ): String {
             val cardsArray = JSONArray()
 
@@ -310,6 +400,12 @@ internal class CustomerSessionPaymentSheetActivityTest {
             val cardsStringified = cardsArray.toString(2)
 
             val isPaymentMethodRemoveStringified = if (isPaymentMethodRemoveEnabled) {
+                "enabled"
+            } else {
+                "disabled"
+            }
+
+            val canRemoveLastPaymentMethodStringified = if (canRemoveLastPaymentMethod) {
                 "enabled"
             } else {
                 "disabled"
@@ -345,6 +441,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
                           "features": {
                             "payment_method_save": "enabled",
                             "payment_method_remove": "$isPaymentMethodRemoveStringified",
+                            "payment_method_remove_last": "$canRemoveLastPaymentMethodStringified",
                             "payment_method_save_allow_redisplay_override": null
                           }
                         },

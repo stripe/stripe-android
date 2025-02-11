@@ -1,16 +1,19 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
+import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.utils.combineAsStateFlow
-import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -33,14 +36,36 @@ internal interface ManageScreenInteractor {
         val paymentMethods: List<DisplayableSavedPaymentMethod>,
         val currentSelection: DisplayableSavedPaymentMethod?,
         val isEditing: Boolean,
-        val canRemove: Boolean,
         val canEdit: Boolean,
-    )
+    ) {
+        val title: ResolvableString
+            get() {
+                val title = if (isEditing) {
+                    R.string.stripe_paymentsheet_manage_payment_methods
+                } else {
+                    R.string.stripe_paymentsheet_select_your_payment_method
+                }
+
+                return title.resolvableString
+            }
+
+        fun topBarState(interactor: ManageScreenInteractor): PaymentSheetTopBarState {
+            return PaymentSheetTopBarStateFactory.create(
+                isLiveMode = interactor.isLiveMode,
+                editable = PaymentSheetTopBarState.Editable.Maybe(
+                    isEditing = isEditing,
+                    canEdit = canEdit,
+                    onEditIconPressed = {
+                        interactor.handleViewAction(ViewAction.ToggleEdit)
+                    },
+                ),
+            )
+        }
+    }
 
     sealed class ViewAction {
         data class SelectPaymentMethod(val paymentMethod: DisplayableSavedPaymentMethod) : ViewAction()
-        data class DeletePaymentMethod(val paymentMethod: DisplayableSavedPaymentMethod) : ViewAction()
-        data class EditPaymentMethod(val paymentMethod: DisplayableSavedPaymentMethod) : ViewAction()
+        data class UpdatePaymentMethod(val paymentMethod: DisplayableSavedPaymentMethod) : ViewAction()
         data object ToggleEdit : ViewAction()
     }
 }
@@ -50,15 +75,13 @@ internal class DefaultManageScreenInteractor(
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val selection: StateFlow<PaymentSelection?>,
     private val editing: StateFlow<Boolean>,
-    canRemove: StateFlow<Boolean>,
     private val canEdit: StateFlow<Boolean>,
     private val toggleEdit: () -> Unit,
     private val providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString,
     private val onSelectPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
-    private val onDeletePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
-    private val onEditPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val navigateBack: (withDelay: Boolean) -> Unit,
-    override val isLiveMode: Boolean,
+    private val defaultPaymentMethodId: StateFlow<String?>,
     dispatcher: CoroutineContext = Dispatchers.Default,
 ) : ManageScreenInteractor {
 
@@ -67,19 +90,24 @@ internal class DefaultManageScreenInteractor(
     private val hasNavigatedBack: AtomicBoolean = AtomicBoolean(false)
 
     private val displayableSavedPaymentMethods: StateFlow<List<DisplayableSavedPaymentMethod>> =
-        paymentMethods.mapAsStateFlow { paymentMethods ->
+        combineAsStateFlow(paymentMethods, defaultPaymentMethodId) { paymentMethods, defaultPaymentMethodId ->
             paymentMethods.map {
-                it.toDisplayableSavedPaymentMethod(providePaymentMethodName, paymentMethodMetadata)
+                it.toDisplayableSavedPaymentMethod(
+                    providePaymentMethodName,
+                    paymentMethodMetadata,
+                    defaultPaymentMethodId
+                )
             }
         }
+
+    override val isLiveMode: Boolean = paymentMethodMetadata.stripeIntent.isLiveMode
 
     override val state = combineAsStateFlow(
         displayableSavedPaymentMethods,
         selection,
         editing,
-        canRemove,
         canEdit,
-    ) { displayablePaymentMethods, paymentSelection, editing, canRemove, canEdit ->
+    ) { displayablePaymentMethods, paymentSelection, editing, canEdit ->
         val currentSelection = if (editing) {
             null
         } else {
@@ -90,7 +118,6 @@ internal class DefaultManageScreenInteractor(
             paymentMethods = displayablePaymentMethods,
             currentSelection = currentSelection,
             isEditing = editing,
-            canRemove = canRemove,
             canEdit = canEdit,
         )
     }
@@ -117,8 +144,7 @@ internal class DefaultManageScreenInteractor(
         when (viewAction) {
             is ManageScreenInteractor.ViewAction.SelectPaymentMethod ->
                 handlePaymentMethodSelected(viewAction.paymentMethod)
-            is ManageScreenInteractor.ViewAction.DeletePaymentMethod -> onDeletePaymentMethod(viewAction.paymentMethod)
-            is ManageScreenInteractor.ViewAction.EditPaymentMethod -> onEditPaymentMethod(viewAction.paymentMethod)
+            is ManageScreenInteractor.ViewAction.UpdatePaymentMethod -> onUpdatePaymentMethod(viewAction.paymentMethod)
             ManageScreenInteractor.ViewAction.ToggleEdit -> toggleEdit()
         }
     }
@@ -151,16 +177,14 @@ internal class DefaultManageScreenInteractor(
                 selection = viewModel.selection,
                 editing = savedPaymentMethodMutator.editing,
                 canEdit = savedPaymentMethodMutator.canEdit,
-                canRemove = savedPaymentMethodMutator.canRemove,
                 toggleEdit = savedPaymentMethodMutator::toggleEditing,
                 providePaymentMethodName = savedPaymentMethodMutator.providePaymentMethodName,
                 onSelectPaymentMethod = {
                     val savedPmSelection = PaymentSelection.Saved(it.paymentMethod)
-                    viewModel.handlePaymentMethodSelected(savedPmSelection)
+                    viewModel.updateSelection(savedPmSelection)
                     viewModel.eventReporter.onSelectPaymentOption(savedPmSelection)
                 },
-                onDeletePaymentMethod = { savedPaymentMethodMutator.removePaymentMethod(it.paymentMethod) },
-                onEditPaymentMethod = { savedPaymentMethodMutator.modifyPaymentMethod(it.paymentMethod) },
+                onUpdatePaymentMethod = { savedPaymentMethodMutator.updatePaymentMethod(it) },
                 navigateBack = { withDelay ->
                     if (withDelay) {
                         viewModel.navigationHandler.popWithDelay()
@@ -168,7 +192,7 @@ internal class DefaultManageScreenInteractor(
                         viewModel.navigationHandler.pop()
                     }
                 },
-                isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
+                defaultPaymentMethodId = savedPaymentMethodMutator.defaultPaymentMethodId
             )
         }
 
@@ -180,7 +204,7 @@ internal class DefaultManageScreenInteractor(
                 null,
                 is PaymentSelection.ExternalPaymentMethod,
                 PaymentSelection.GooglePay,
-                PaymentSelection.Link,
+                is PaymentSelection.Link,
                 is PaymentSelection.New -> return null
                 is PaymentSelection.Saved -> selection.paymentMethod.id
             }

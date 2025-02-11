@@ -23,6 +23,7 @@ internal class VerticalModeFormHeaderUITest {
                     lightThemeIconUrl = null,
                     darkThemeIconUrl = null,
                     iconRequiresTinting = false,
+                    promoBadge = null,
                 )
             )
         }
@@ -40,6 +41,25 @@ internal class VerticalModeFormHeaderUITest {
                     lightThemeIconUrl = null,
                     darkThemeIconUrl = null,
                     iconRequiresTinting = false,
+                    promoBadge = null,
+                )
+            )
+        }
+    }
+
+    @Test
+    fun testBank() {
+        paparazziRule.snapshot {
+            VerticalModeFormHeaderUI(
+                isEnabled = true,
+                formHeaderInformation = FormHeaderInformation(
+                    displayName = "Bank".resolvableString,
+                    shouldShowIcon = true,
+                    iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
+                    lightThemeIconUrl = null,
+                    darkThemeIconUrl = null,
+                    iconRequiresTinting = false,
+                    promoBadge = "$5",
                 )
             )
         }

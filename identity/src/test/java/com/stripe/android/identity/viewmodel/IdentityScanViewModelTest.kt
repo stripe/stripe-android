@@ -49,6 +49,7 @@ internal class IdentityScanViewModelTest {
         mockFpsTracker,
         mockIdentityAnalyticsRequestFactory,
         mock(),
+        mock(),
         mock()
     ) {
         override val scanFeedback = MutableStateFlow(null)
@@ -56,8 +57,9 @@ internal class IdentityScanViewModelTest {
 
     @Test
     fun testFpsTrackedOnInterimResult() = runBlocking {
+        viewModel.cameraManager = mock()
         viewModel.onInterimResult(
-            IdentityAggregator.InterimResult(mock())
+            IdentityAggregator.InterimResult(mock<IdentityScanState.Initial>())
         )
         verify(mockFpsTracker).trackFrame()
     }

@@ -29,8 +29,25 @@ internal class CustomerStateHolder(
         initialValue = (selection.value as? PaymentSelection.Saved)?.paymentMethod
     )
 
+    val canRemove: StateFlow<Boolean> = customer.mapAsStateFlow { customerState ->
+        customerState?.run {
+            val hasRemovePermissions = customerState.permissions.canRemovePaymentMethods
+            val hasRemoveLastPaymentMethodPermissions = customerState.permissions.canRemoveLastPaymentMethod
+
+            when (paymentMethods.size) {
+                0 -> false
+                1 -> hasRemoveLastPaymentMethodPermissions && hasRemovePermissions
+                else -> hasRemovePermissions
+            }
+        } ?: false
+    }
+
     fun setCustomerState(customerState: CustomerState?) {
         savedStateHandle[SAVED_CUSTOMER] = customerState
+
+        val currentSelection = mostRecentlySelectedSavedPaymentMethod.value
+        val newSelection = customerState?.paymentMethods?.firstOrNull { it.id == currentSelection?.id }
+        updateMostRecentlySelectedSavedPaymentMethod(newSelection)
     }
 
     fun updateMostRecentlySelectedSavedPaymentMethod(paymentMethod: PaymentMethod?) {
@@ -39,7 +56,7 @@ internal class CustomerStateHolder(
 
     companion object {
         const val SAVED_CUSTOMER = "customer_info"
-        private const val SAVED_PM_SELECTION = "saved_selection"
+        const val SAVED_PM_SELECTION = "saved_selection"
 
         fun create(viewModel: BaseSheetViewModel): CustomerStateHolder {
             return CustomerStateHolder(

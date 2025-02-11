@@ -14,7 +14,7 @@ import kotlin.time.Duration.Companion.milliseconds
 internal class NavigationHandlerTest {
     @Test
     fun `currentScreen is initialized to Loading`() = runTest {
-        val navigationHandler = NavigationHandler(this) {}
+        val navigationHandler = NavigationHandler<PaymentSheetScreen>(this, PaymentSheetScreen.Loading) {}
         navigationHandler.currentScreen.test {
             assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.Loading)
             assertThat(navigationHandler.canGoBack).isFalse()
@@ -23,7 +23,7 @@ internal class NavigationHandlerTest {
 
     @Test
     fun `transitionTo removes Loading`() = runTest {
-        val navigationHandler = NavigationHandler(this) {}
+        val navigationHandler = NavigationHandler<PaymentSheetScreen>(this, PaymentSheetScreen.Loading) {}
         navigationHandler.currentScreen.test {
             assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.Loading)
             val newScreen = mock<PaymentSheetScreen>()
@@ -34,8 +34,26 @@ internal class NavigationHandlerTest {
     }
 
     @Test
+    fun `transitionTo works with shouldRemoveInitialScreenOnTransition=false`() = runTest {
+        val navigationHandler = NavigationHandler<PaymentSheetScreen>(
+            coroutineScope = this,
+            initialScreen = PaymentSheetScreen.Loading,
+            shouldRemoveInitialScreenOnTransition = false
+        ) {}
+        navigationHandler.currentScreen.test {
+            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.Loading)
+            val newScreen = mock<PaymentSheetScreen>()
+            navigationHandler.transitionTo(newScreen)
+            assertThat(awaitItem()).isEqualTo(newScreen)
+            assertThat(navigationHandler.canGoBack).isTrue()
+            navigationHandler.pop()
+            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.Loading)
+        }
+    }
+
+    @Test
     fun `transitionTo keeps backstack`() = runTest {
-        val navigationHandler = NavigationHandler(this) {}
+        val navigationHandler = NavigationHandler<PaymentSheetScreen>(this, PaymentSheetScreen.Loading) {}
         navigationHandler.currentScreen.test {
             assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.Loading)
             val screenOne = mock<PaymentSheetScreen>()
@@ -51,7 +69,10 @@ internal class NavigationHandlerTest {
     @Test
     fun `transitionToWithDelay transitions to target screen`() = runTest {
         val testScope = TestScope()
-        val navigationHandler = NavigationHandler(testScope) {}
+        val navigationHandler = NavigationHandler<PaymentSheetScreen>(
+            coroutineScope = testScope,
+            initialScreen = PaymentSheetScreen.Loading,
+        ) {}
         navigationHandler.currentScreen.test {
             assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.Loading)
             val screenOne = mock<PaymentSheetScreen>()
@@ -70,7 +91,10 @@ internal class NavigationHandlerTest {
     @Test
     fun `transitionToWithDelay allows future transitions`() = runTest {
         val testScope = TestScope()
-        val navigationHandler = NavigationHandler(testScope) {}
+        val navigationHandler = NavigationHandler<PaymentSheetScreen>(
+            coroutineScope = testScope,
+            initialScreen = PaymentSheetScreen.Loading,
+        ) {}
         navigationHandler.currentScreen.test {
             assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.Loading)
             val screenOne = mock<PaymentSheetScreen>()
@@ -90,7 +114,10 @@ internal class NavigationHandlerTest {
     @Test
     fun `transitionToWithDelay prevents other navigation actions during delay`() = runTest {
         val testScope = TestScope()
-        val navigationHandler = NavigationHandler(testScope) {}
+        val navigationHandler = NavigationHandler<PaymentSheetScreen>(
+            coroutineScope = testScope,
+            initialScreen = PaymentSheetScreen.Loading,
+        ) {}
         navigationHandler.currentScreen.test {
             assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.Loading)
             val screenOne = mock<PaymentSheetScreen>()
@@ -110,7 +137,7 @@ internal class NavigationHandlerTest {
 
     @Test
     fun `resetTo resets backstack`() = runTest {
-        val navigationHandler = NavigationHandler(this) {}
+        val navigationHandler = NavigationHandler<PaymentSheetScreen>(this, PaymentSheetScreen.Loading) {}
         navigationHandler.currentScreen.test {
             assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.Loading)
             val screenOne = mock<PaymentSheetScreen>()
@@ -129,7 +156,7 @@ internal class NavigationHandlerTest {
 
     @Test
     fun `resetTo calls close on removed screens`() = runTest {
-        val navigationHandler = NavigationHandler(this) {}
+        val navigationHandler = NavigationHandler<PaymentSheetScreen>(this, PaymentSheetScreen.Loading) {}
         navigationHandler.currentScreen.test {
             assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.Loading)
             val screenOne = mock<PaymentSheetScreen>(extraInterfaces = arrayOf(Closeable::class))
@@ -150,7 +177,7 @@ internal class NavigationHandlerTest {
 
     @Test
     fun `resetTo only calls close on removed screens`() = runTest {
-        val navigationHandler = NavigationHandler(this) {}
+        val navigationHandler = NavigationHandler<PaymentSheetScreen>(this, PaymentSheetScreen.Loading) {}
         navigationHandler.currentScreen.test {
             assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.Loading)
             val screenOne = mock<PaymentSheetScreen>(extraInterfaces = arrayOf(Closeable::class))
@@ -174,7 +201,7 @@ internal class NavigationHandlerTest {
         val screenOne = mock<PaymentSheetScreen>()
         val screenTwo = mock<PaymentSheetScreen>()
 
-        val navigationHandler = NavigationHandler(this) {
+        val navigationHandler = NavigationHandler<PaymentSheetScreen>(this, PaymentSheetScreen.Loading) {
             calledPopHandler = true
             assertThat(it).isEqualTo(screenTwo)
         }
@@ -203,7 +230,7 @@ internal class NavigationHandlerTest {
         val screenOne = mock<PaymentSheetScreen>()
         val screenTwo = mock<PaymentSheetScreen>(extraInterfaces = arrayOf(Closeable::class))
 
-        val navigationHandler = NavigationHandler(this) {
+        val navigationHandler = NavigationHandler<PaymentSheetScreen>(this, PaymentSheetScreen.Loading) {
             calledPopHandler = true
             assertThat(it).isEqualTo(screenTwo)
         }
@@ -229,7 +256,10 @@ internal class NavigationHandlerTest {
     @Test
     fun `popWithDelay transitions to target screen`() = runTest {
         val testScope = TestScope()
-        val navigationHandler = NavigationHandler(testScope) {}
+        val navigationHandler = NavigationHandler<PaymentSheetScreen>(
+            coroutineScope = testScope,
+            initialScreen = PaymentSheetScreen.Loading,
+        ) {}
         navigationHandler.currentScreen.test {
             assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.Loading)
             val screenOne = mock<PaymentSheetScreen>()
@@ -249,7 +279,10 @@ internal class NavigationHandlerTest {
     @Test
     fun `popWithDelay allows future transitions`() = runTest {
         val testScope = TestScope()
-        val navigationHandler = NavigationHandler(testScope) {}
+        val navigationHandler = NavigationHandler<PaymentSheetScreen>(
+            coroutineScope = testScope,
+            initialScreen = PaymentSheetScreen.Loading,
+        ) {}
         navigationHandler.currentScreen.test {
             assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.Loading)
             val screenOne = mock<PaymentSheetScreen>()
@@ -271,7 +304,10 @@ internal class NavigationHandlerTest {
     @Test
     fun `popWithDelay prevents other navigation actions during delay`() = runTest {
         val testScope = TestScope()
-        val navigationHandler = NavigationHandler(testScope) {}
+        val navigationHandler = NavigationHandler<PaymentSheetScreen>(
+            coroutineScope = testScope,
+            initialScreen = PaymentSheetScreen.Loading,
+        ) {}
         navigationHandler.currentScreen.test {
             assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.Loading)
             val screenOne = mock<PaymentSheetScreen>()
@@ -292,7 +328,7 @@ internal class NavigationHandlerTest {
 
     @Test
     fun `closeScreens calls close on all closable screens in the backstack`() = runTest {
-        val navigationHandler = NavigationHandler(this) {}
+        val navigationHandler = NavigationHandler<PaymentSheetScreen>(this, PaymentSheetScreen.Loading) {}
         navigationHandler.currentScreen.test {
             assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.Loading)
             val screenOne = mock<PaymentSheetScreen>(extraInterfaces = arrayOf(Closeable::class))
@@ -304,6 +340,24 @@ internal class NavigationHandlerTest {
             navigationHandler.closeScreens()
             verify(screenOne as Closeable).close()
             verify(screenTwo as Closeable).close()
+        }
+    }
+
+    @Test
+    fun `previousScreen value is correct`() = runTest {
+        val navigationHandler = NavigationHandler<PaymentSheetScreen>(this, PaymentSheetScreen.Loading) {}
+        navigationHandler.previousScreen.test {
+            // Initially, there is no previous screen.
+            assertThat(awaitItem()).isNull()
+
+            val screenOne = mock<PaymentSheetScreen>()
+            navigationHandler.transitionTo(screenOne)
+            // The previous screen doesn't get updated here -- Loading is removed from the backstack as part of the
+            // initial loading. The previous screen is still null.
+
+            val screenTwo = mock<PaymentSheetScreen>()
+            navigationHandler.transitionTo(screenTwo)
+            assertThat(awaitItem()).isEqualTo(screenOne)
         }
     }
 }

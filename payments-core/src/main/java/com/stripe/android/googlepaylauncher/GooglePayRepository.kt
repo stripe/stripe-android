@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.annotation.RestrictTo
 import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.google.android.gms.wallet.PaymentsClient
+import com.stripe.android.CardBrandFilter
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
@@ -48,6 +50,7 @@ internal class DefaultGooglePayRepository(
     private val paymentsClientFactory: PaymentsClientFactory = DefaultPaymentsClientFactory(context),
     private val errorReporter: ErrorReporter,
     private val logger: Logger = Logger.noop(),
+    private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
 ) : GooglePayRepository {
 
     @Inject
@@ -56,6 +59,7 @@ internal class DefaultGooglePayRepository(
         googlePayConfig: GooglePayPaymentMethodLauncher.Config,
         logger: Logger,
         errorReporter: ErrorReporter,
+        cardBrandFilter: CardBrandFilter
     ) : this(
         context.applicationContext,
         googlePayConfig.environment,
@@ -64,10 +68,11 @@ internal class DefaultGooglePayRepository(
         googlePayConfig.allowCreditCards,
         DefaultPaymentsClientFactory(context),
         errorReporter,
-        logger
+        logger,
+        cardBrandFilter
     )
 
-    private val googlePayJsonFactory = GooglePayJsonFactory(context)
+    private val googlePayJsonFactory = GooglePayJsonFactory(context, cardBrandFilter = cardBrandFilter)
 
     private val googlePayAvailabilityClient: GooglePayAvailabilityClient by lazy {
         GooglePayRepository.googlePayAvailabilityClientFactory.create(

@@ -28,6 +28,10 @@
   <string name="stripe_blik_code">BLIK-kode</string>
   <!-- Label for Boleto Payment method Tax ID -->
   <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
+  <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
+  <string name="stripe_card_brand_not_accepted">(ikke accepteret)</string>
+  <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
+  <string name="stripe_card_brand_not_accepted_with_brand">%1$s (ikke accepteret)</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">Ved at fortsætte giver du %1$s tilladelse til at debitere din Cash App-konto for denne betaling og fremtidige betalinger i overensstemmelse med %2$ss vilkår, indtil denne tilladelse tilbagekaldes. Du kan til enhver tid ændre dette i dine Cash App-indstillinger.</string>
   <!-- Title for the contact information section -->

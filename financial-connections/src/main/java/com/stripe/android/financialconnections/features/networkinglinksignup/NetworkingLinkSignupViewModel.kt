@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.PermissionException
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.NetworkingNewConsumer
@@ -16,6 +18,7 @@ import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition
+import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.features.common.getBusinessName
@@ -41,6 +44,8 @@ import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.financialconnections.utils.isCancellationError
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.EmailSource.CUSTOMER_OBJECT
+import com.stripe.android.model.EmailSource.USER_ACTION
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.InputController
 import com.stripe.android.uicore.elements.PhoneNumberController
@@ -68,6 +73,8 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
     private val logger: Logger,
     private val presentSheet: PresentSheet,
     private val linkSignupHandler: LinkSignupHandler,
+    private val elementsSessionContext: ElementsSessionContext?,
+    private val handleError: HandleError,
 ) : FinancialConnectionsViewModel<NetworkingLinkSignupState>(initialState, nativeAuthFlowCoordinator) {
 
     private val pane: Pane
@@ -93,16 +100,25 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
 
             eventTracker.track(PaneLoaded(pane))
 
+            val prefillDetails = elementsSessionContext?.prefillDetails
+
+            val initialEmail = (sync.manifest.accountholderCustomerEmailAddress ?: prefillDetails?.email)
+                ?.takeIf { it.isNotBlank() }
+
             NetworkingLinkSignupState.Payload(
                 content = requireNotNull(content),
                 merchantName = sync.manifest.getBusinessName(),
+                sessionId = sync.manifest.id,
+                appVerificationEnabled = sync.manifest.appVerificationEnabled,
+                prefilledEmail = initialEmail,
                 emailController = SimpleTextFieldController(
                     textFieldConfig = EmailConfig(label = R.string.stripe_networking_signup_email_label),
-                    initialValue = sync.manifest.accountholderCustomerEmailAddress,
+                    initialValue = initialEmail,
                     showOptionalLabel = false
                 ),
                 phoneController = PhoneNumberController.createPhoneNumberController(
-                    initialValue = sync.manifest.accountholderPhoneNumber ?: "",
+                    initialValue = sync.manifest.accountholderPhoneNumber ?: prefillDetails?.phone ?: "",
+                    initiallySelectedCountryCode = prefillDetails?.phoneCountryCode,
                 ),
                 isInstantDebits = initialState.isInstantDebits,
             )
@@ -135,11 +151,12 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
                 }
             },
             onFail = { error ->
-                eventTracker.logError(
+                val displayErrorScreen = stateFlow.value.isInstantDebits && error is PermissionException
+                handleError(
                     extraMessage = "Error looking up account",
                     error = error,
-                    logger = logger,
-                    pane = pane
+                    pane = pane,
+                    displayErrorScreen = displayErrorScreen,
                 )
             },
         )
@@ -152,7 +169,7 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
                 val destination = nextPane.destination(referrer = pane)
                 navigationManager.tryNavigateTo(destination)
             },
-            onFail = linkSignupHandler::handleSignupFailure,
+            onFail = { linkSignupHandler.handleSignupFailure(stateFlow.value, it) },
         )
     }
 
@@ -186,7 +203,7 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
     /**
      * @param validEmail valid email, or null if entered email is invalid.
      */
-    private suspend fun onEmailEntered(
+    private fun onEmailEntered(
         validEmail: String?
     ) {
         setState { copy(validEmail = validEmail) }
@@ -194,7 +211,16 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
             logger.debug("VALID EMAIL ADDRESS $validEmail.")
             searchJob += suspend {
                 delay(getLookupDelayMs(validEmail))
-                lookupAccount(validEmail)
+                val payload = stateFlow.value.payload()
+                lookupAccount(
+                    pane = pane,
+                    email = validEmail,
+                    phone = payload?.phoneController?.getLocalNumber(),
+                    phoneCountryCode = payload?.phoneController?.getCountryCode(),
+                    emailSource = if (payload?.prefilledEmail == validEmail) CUSTOMER_OBJECT else USER_ACTION,
+                    sessionId = payload?.sessionId ?: "",
+                    verifiedFlow = payload?.appVerificationEnabled == true
+                )
             }.execute { copy(lookupAccount = if (it.isCancellationError()) Uninitialized else it) }
         } else {
             setState { copy(lookupAccount = Uninitialized) }
@@ -333,13 +359,19 @@ internal data class NetworkingLinkSignupState(
     data class Payload(
         val merchantName: String?,
         val emailController: SimpleTextFieldController,
+        val appVerificationEnabled: Boolean,
+        val prefilledEmail: String?,
         val phoneController: PhoneNumberController,
         val isInstantDebits: Boolean,
         val content: Content,
+        val sessionId: String,
     ) {
 
         val focusEmailField: Boolean
             get() = isInstantDebits && emailController.initialValue.isNullOrBlank()
+
+        val focusPhoneFieldOnShow: Boolean
+            get() = phoneController.initialPhoneNumber.isBlank()
     }
 
     data class Content(

@@ -10,7 +10,6 @@ import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentIntent
@@ -28,8 +27,6 @@ import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsInteractor
-import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
-import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
@@ -42,7 +39,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
@@ -55,15 +51,13 @@ internal class PaymentOptionsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
-    editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory
 ) : BaseSheetViewModel(
-    config = args.state.config,
+    config = args.configuration,
     eventReporter = eventReporter,
     customerRepository = customerRepository,
     workContext = workContext,
     savedStateHandle = savedStateHandle,
     linkHandler = linkHandler,
-    editInteractorFactory = editInteractorFactory,
     cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
     isCompleteFlow = false,
 ) {
@@ -110,7 +104,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 onUserSelection()
             },
             onLinkPressed = {
-                updateSelection(PaymentSelection.Link)
+                updateSelection(PaymentSelection.Link())
                 onUserSelection()
             },
             isSetupIntent = paymentMethodMetadata.stripeIntent is SetupIntent
@@ -134,16 +128,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
 
-        viewModelScope.launch {
-            linkHandler.processingState.collect { processingState ->
-                handleLinkProcessingState(processingState)
-            }
-        }
-
-        // This is bad, but I don't think there's a better option
-        PaymentSheet.FlowController.linkHandler = linkHandler
-
-        linkHandler.setupLink(args.state.linkState)
+        linkHandler.setupLink(args.state.paymentMethodMetadata.linkState)
 
         // After recovering from don't keep activities the paymentMethodMetadata will be saved,
         // calling setPaymentMethodMetadata would require the repository be initialized, which
@@ -162,45 +147,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 customerStateHolder = customerStateHolder,
             )
         )
-    }
-
-    private fun handleLinkProcessingState(processingState: LinkHandler.ProcessingState) {
-        when (processingState) {
-            LinkHandler.ProcessingState.Cancelled -> {
-                onPaymentResult(PaymentResult.Canceled)
-            }
-            is LinkHandler.ProcessingState.PaymentMethodCollected -> {
-                TODO("This can't happen. Will follow up to remodel the states better.")
-            }
-            is LinkHandler.ProcessingState.CompletedWithPaymentResult -> {
-                onPaymentResult(processingState.result)
-            }
-            is LinkHandler.ProcessingState.Error -> {
-                onError(processingState.message?.resolvableString)
-            }
-            LinkHandler.ProcessingState.Launched -> {
-            }
-            is LinkHandler.ProcessingState.PaymentDetailsCollected -> {
-                processingState.paymentSelection?.let {
-                    // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.
-                    updateSelection(it)
-                    onUserSelection()
-                } ?: run {
-                    // Creating Link PaymentDetails failed, fallback to regular checkout.
-                    // paymentSelection is already set to the card parameters from the form.
-                    onUserSelection()
-                }
-            }
-            LinkHandler.ProcessingState.Ready -> {
-                updatePrimaryButtonState(PrimaryButton.State.Ready)
-            }
-            LinkHandler.ProcessingState.Started -> {
-                updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
-            }
-            LinkHandler.ProcessingState.CompleteWithoutLink -> {
-                onUserSelection()
-            }
-        }
     }
 
     override fun onUserCancel() {
@@ -263,12 +209,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
         }
     }
 
-    override fun handleConfirmUSBankAccount(paymentSelection: PaymentSelection.New.USBankAccount) {
-        updateSelection(paymentSelection)
-        eventReporter.onPressConfirmButton(selection.value)
-        onUserSelection()
-    }
-
     override fun clearErrorMessages() {
         _error.value = null
     }
@@ -295,7 +235,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         paymentMethodMetadata: PaymentMethodMetadata,
         customerStateHolder: CustomerStateHolder,
     ): List<PaymentSheetScreen> {
-        if (config.paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Vertical) {
+        if (config.paymentMethodLayout != PaymentSheet.PaymentMethodLayout.Horizontal) {
             return VerticalModeInitialScreenFactory.create(
                 viewModel = this,
                 paymentMethodMetadata = paymentMethodMetadata,
@@ -349,11 +289,11 @@ internal class PaymentOptionsViewModel @Inject constructor(
             val component = DaggerPaymentOptionsViewModelFactoryComponent.builder()
                 .context(application)
                 .productUsage(starterArgs.productUsage)
+                .savedStateHandle(savedStateHandle)
                 .build()
                 .paymentOptionsViewModelSubcomponentBuilder
                 .application(application)
                 .args(starterArgs)
-                .savedStateHandle(savedStateHandle)
                 .build()
 
             return component.viewModel as T

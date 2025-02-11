@@ -14,6 +14,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkFormElement
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
@@ -52,13 +53,16 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
         iconRequiresTinting = true,
     )
 
-    override fun createFormHeaderInformation(customerHasSavedPaymentMethods: Boolean): FormHeaderInformation {
+    override fun createFormHeaderInformation(
+        customerHasSavedPaymentMethods: Boolean,
+        incentive: PaymentMethodIncentive?,
+    ): FormHeaderInformation {
         val displayName = if (customerHasSavedPaymentMethods) {
             PaymentsUiCoreR.string.stripe_paymentsheet_add_new_card
         } else {
             PaymentsUiCoreR.string.stripe_paymentsheet_add_card
         }
-        return createSupportedPaymentMethod().asFormHeaderInformation().copy(
+        return createSupportedPaymentMethod().asFormHeaderInformation(incentive).copy(
             displayName = displayName.resolvableString,
             shouldShowIcon = false,
         )
@@ -87,14 +91,15 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                     identifier = IdentifierSpec.Generic("card_details"),
                     collectName = billingDetailsCollectionConfiguration.collectsName,
                     cbcEligibility = arguments.cbcEligibility,
+                    cardBrandFilter = arguments.cardBrandFilter
                 )
             )
 
             if (billingDetailsCollectionConfiguration.address
                 != PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
             ) {
-                add(
-                    cardBillingElement(
+                addAll(
+                    cardBillingElements(
                         billingDetailsCollectionConfiguration.address.toInternal(),
                         arguments.initialValues,
                         arguments.shippingValues,
@@ -115,6 +120,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                     LinkFormElement(
                         configuration = metadata.linkInlineConfiguration,
                         linkConfigurationCoordinator = arguments.linkConfigurationCoordinator,
+                        initialLinkUserInput = arguments.initialLinkUserInput,
                         onLinkInlineSignupStateChanged = arguments.onLinkInlineSignupStateChanged,
                     )
                 )
@@ -153,7 +159,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
             code = PaymentMethod.Type.Card.code,
             intent = metadata.stripeIntent,
             paymentMethodSaveConsentBehavior = metadata.paymentMethodSaveConsentBehavior,
-            hasCustomerConfiguration = metadata.hasCustomerConfiguration,
+            hasCustomerConfiguration = metadata.customerMetadata.hasCustomerConfiguration,
         )
     }
 }
@@ -174,11 +180,11 @@ internal fun PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectio
     }
 }
 
-private fun cardBillingElement(
+private fun cardBillingElements(
     collectionMode: BillingDetailsCollectionConfiguration.AddressCollectionMode,
     initialValues: Map<IdentifierSpec, String?>,
     shippingValues: Map<IdentifierSpec, String?>?,
-): FormElement {
+): List<FormElement> {
     val sameAsShippingElement =
         shippingValues?.get(IdentifierSpec.SameAsShipping)
             ?.toBooleanStrictOrNull()
@@ -197,12 +203,12 @@ private fun cardBillingElement(
         collectionMode = collectionMode,
     )
 
-    return SectionElement.wrap(
-        listOfNotNull(
+    return listOfNotNull(
+        SectionElement.wrap(
             addressElement,
-            sameAsShippingElement
+            PaymentsUiCoreR.string.stripe_billing_details,
         ),
-        PaymentsUiCoreR.string.stripe_billing_details
+        sameAsShippingElement,
     )
 }
 

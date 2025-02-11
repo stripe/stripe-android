@@ -1,10 +1,13 @@
 package com.stripe.android.view
 
+import android.os.Bundle
 import android.text.TextWatcher
-import android.view.ViewGroup
+import android.widget.LinearLayout
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -42,13 +45,13 @@ import com.stripe.android.testharness.ViewTestUtils
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeCardElementConfigRepository
 import com.stripe.android.utils.TestUtils.idleLooper
+import com.stripe.android.utils.createTestActivityRule
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
@@ -56,7 +59,6 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.TimeUnit
-import kotlin.test.AfterTest
 import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -72,7 +74,9 @@ internal class CardNumberEditTextTest {
         ApplicationProvider.getApplicationContext(),
         R.style.StripeDefaultTheme
     )
-    private val activityScenarioFactory = ActivityScenarioFactory(context)
+
+    @get:Rule
+    val testActivityRule = createTestActivityRule<TestActivity>()
 
     private var completionCallbackInvocations = 0
     private val completionCallback: () -> Unit = { completionCallbackInvocations++ }
@@ -98,11 +102,6 @@ internal class CardNumberEditTextTest {
     ).also {
         it.completionCallback = completionCallback
         it.brandChangeCallback = brandChangeCallback
-    }
-
-    @AfterTest
-    fun cleanup() {
-        Dispatchers.resetMain()
     }
 
     @Test
@@ -691,7 +690,7 @@ internal class CardNumberEditTextTest {
     fun `onDetachedFromWindow() should cancel accountRangeRepositoryJob`() {
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
-        activityScenarioFactory.createAddPaymentMethodActivity()
+        ActivityScenario.launch(TestActivity::class.java)
             .use { activityScenario ->
                 activityScenario.onActivity { activity ->
                     val cardNumberEditText = CardNumberEditText(
@@ -703,16 +702,13 @@ internal class CardNumberEditTextTest {
                         paymentAnalyticsRequestFactory = analyticsRequestFactory
                     )
 
-                    val root = activity.findViewById<ViewGroup>(R.id.add_payment_method_card).also {
-                        it.removeAllViews()
-                        it.addView(cardNumberEditText)
-                    }
+                    activity.layout.addView(cardNumberEditText)
 
                     cardNumberEditText.setText(UNIONPAY_16_NO_SPACES)
                     assertThat(cardNumberEditText.accountRangeService.accountRangeRepositoryJob)
                         .isNotNull()
 
-                    root.removeView(cardNumberEditText)
+                    activity.layout.removeView(cardNumberEditText)
                     assertThat(cardNumberEditText.accountRangeService.accountRangeRepositoryJob)
                         .isNull()
                 }
@@ -1083,9 +1079,7 @@ internal class CardNumberEditTextTest {
             override val viewModelStore: ViewModelStore = store
         }
 
-        val activityScenario = activityScenarioFactory.createAddPaymentMethodActivity()
-
-        activityScenario.use { scenario ->
+        ActivityScenario.launch(TestActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
                 val cardNumberEditText = CardNumberEditText(
                     context = activity,
@@ -1103,10 +1097,7 @@ internal class CardNumberEditTextTest {
                     repository.enqueueNotEligible()
                 }
 
-                activity.findViewById<ViewGroup>(R.id.add_payment_method_card).also {
-                    it.removeAllViews()
-                    it.addView(cardNumberEditText)
-                }
+                activity.layout.addView(cardNumberEditText)
 
                 testDispatcher.scheduler.advanceTimeBy(2_001)
 
@@ -1114,6 +1105,17 @@ internal class CardNumberEditTextTest {
 
                 block(cardNumberEditText)
             }
+        }
+    }
+
+    internal class TestActivity : AppCompatActivity() {
+        lateinit var layout: LinearLayout
+
+        override fun onCreate(savedInstanceState: Bundle?) {
+            super.onCreate(savedInstanceState)
+
+            layout = LinearLayout(this)
+            setContentView(layout)
         }
     }
 

@@ -13,11 +13,13 @@ internal fun StripeThemeForConnections(
     val stripeDefaultColors = StripeThemeDefaults.colors(isDark = false)
     StripeTheme(
         colors = stripeDefaultColors.copy(
+            component = colors.background,
             onComponent = colors.textDefault,
-            componentBorder = colors.border,
+            componentBorder = colors.borderNeutral,
             placeholderText = colors.textSubdued,
+            textCursor = colors.textDefault,
             materialColors = stripeDefaultColors.materialColors.copy(
-                primary = colors.borderBrand,
+                primary = colors.border,
                 error = colors.textCritical,
             )
         ),

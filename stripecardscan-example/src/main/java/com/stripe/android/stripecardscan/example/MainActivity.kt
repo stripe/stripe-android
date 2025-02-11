@@ -14,10 +14,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
-        viewBinding.buttonCardImageVerification.setOnClickListener {
-            startActivity(Intent(this, CardImageVerificationDemoActivity::class.java))
-        }
-
         viewBinding.buttonCardScan.setOnClickListener {
             startActivity(Intent(this, CardScanDemoActivity::class.java))
         }

@@ -1,7 +1,9 @@
 package com.stripe.android.identity.navigation
 
 import android.util.Log
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
@@ -77,6 +79,7 @@ internal fun IdentityNavGraph(
         onNavControllerCreated(navController)
     }
     Scaffold(
+        contentWindowInsets = WindowInsets.systemBars,
         topBar = {
             IdentityTopAppBar(topBarState, onTopBarNavigationClick)
         }
@@ -130,7 +133,7 @@ internal fun IdentityNavGraph(
                 DocumentScanScreen(
                     navController = navController,
                     identityViewModel = identityViewModel,
-                    documentScanViewModel = documentScanViewModel
+                    documentScanViewModel = documentScanViewModel,
                 )
             }
             screen(SelfieWarmupDestination.ROUTE) {

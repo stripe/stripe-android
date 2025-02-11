@@ -3,6 +3,7 @@ package com.stripe.android.lpmfoundations.luxe
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -100,6 +101,7 @@ class FormElementsBuilderTest {
         val context = ApplicationProvider.getApplicationContext<Application>()
         return UiDefinitionFactory.Arguments(
             initialValues = emptyMap(),
+            initialLinkUserInput = null,
             shippingValues = emptyMap(),
             saveForFutureUseInitialValue = false,
             merchantName = "Example Inc.",
@@ -109,6 +111,7 @@ class FormElementsBuilderTest {
             requiresMandate = false,
             linkConfigurationCoordinator = null,
             onLinkInlineSignupStateChanged = { throw AssertionError("Not implemented") },
+            cardBrandFilter = DefaultCardBrandFilter
         )
     }
 }

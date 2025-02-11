@@ -3,6 +3,8 @@ package com.stripe.android.paymentsheet
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.isDisplayed
+import androidx.compose.ui.test.isNotDisplayed
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -45,9 +47,7 @@ internal class VerticalModePage(
 
     fun assertLpmIsSelected(paymentMethodCode: PaymentMethodCode) {
         composeTestRule.onNode(
-            hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodCode").and(
-                hasAnyDescendant(isSelected())
-            )
+            hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodCode").and(isSelected())
         ).assertExists()
     }
 
@@ -74,13 +74,15 @@ internal class VerticalModePage(
     }
 
     fun assertDoesNotHaveSavedPaymentMethods() {
-        composeTestRule.onNodeWithTag(TEST_TAG_SAVED_TEXT).assertDoesNotExist()
+        val savedText = composeTestRule.onNodeWithTag(TEST_TAG_SAVED_TEXT)
+
+        composeTestRule.waitUntil { savedText.isNotDisplayed() }
+        savedText.assertDoesNotExist()
     }
 
     fun assertHasSelectedSavedPaymentMethod(paymentMethodId: String, cardBrand: String? = null) {
         composeTestRule.onNode(
-            hasTestTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId")
-                .and(hasAnyDescendant(isSelected()))
+            hasTestTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId").and(isSelected())
         ).assertExists()
 
         if (cardBrand != null) {
@@ -99,8 +101,11 @@ internal class VerticalModePage(
     }
 
     fun clickSavedPaymentMethod(paymentMethodId: String) {
-        composeTestRule.onNodeWithTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId")
-            .performClick()
+        val savedPaymentMethod = composeTestRule
+            .onNodeWithTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId")
+
+        composeTestRule.waitUntil { savedPaymentMethod.isDisplayed() }
+        savedPaymentMethod.performClick()
     }
 
     fun clickViewMore() {

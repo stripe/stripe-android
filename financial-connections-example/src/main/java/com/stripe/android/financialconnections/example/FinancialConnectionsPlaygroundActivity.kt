@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.example
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -7,9 +8,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -48,6 +52,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.example.Experience.FinancialConnections
 import com.stripe.android.financialconnections.example.Experience.InstantDebits
+import com.stripe.android.financialconnections.example.Experience.LinkCardBrand
 import com.stripe.android.financialconnections.example.FinancialConnectionsPlaygroundViewEffect.OpenForData
 import com.stripe.android.financialconnections.example.FinancialConnectionsPlaygroundViewEffect.OpenForPaymentIntent
 import com.stripe.android.financialconnections.example.FinancialConnectionsPlaygroundViewEffect.OpenForToken
@@ -91,6 +96,9 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         )
 
         setContent {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                window.isNavigationBarContrastEnforced = false
+            }
             FinancialConnectionsExampleTheme {
                 FinancialConnectionsScreen()
             }
@@ -146,13 +154,14 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         state: FinancialConnectionsPlaygroundState,
         paymentSheet: PaymentSheet
     ) {
+        val email = state.settings.get<EmailSetting>().selectedOption
+
         when (integrationType) {
             IntegrationType.Standalone -> {
-                val email = state.settings.get<EmailSetting>().selectedOption
                 launchStandaloneIntegration(email)
             }
             IntegrationType.PaymentElement -> {
-                launchPaymentSheet(paymentSheet)
+                launchPaymentSheet(paymentSheet, email)
             }
         }
     }
@@ -168,12 +177,14 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                     email = email,
                 )
             )
-            InstantDebits -> collectBankAccountForInstantDebitsLauncher.presentWithPaymentIntent(
+            InstantDebits,
+            LinkCardBrand -> collectBankAccountForInstantDebitsLauncher.presentWithPaymentIntent(
                 publishableKey = publishableKey,
                 stripeAccountId = null,
                 clientSecret = paymentIntentSecret,
                 configuration = CollectBankAccountConfiguration.InstantDebits(
                     email = email,
+                    elementsSessionContext = elementsSessionContext,
                 )
             )
         }
@@ -181,21 +192,28 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
 
     private fun OpenForPaymentIntent.launchPaymentSheet(
         paymentSheet: PaymentSheet,
+        email: String,
     ) {
         PaymentConfiguration.init(
             context = this@FinancialConnectionsPlaygroundActivity,
             publishableKey = publishableKey
         )
+
+        val config = PaymentSheet.Configuration(
+            allowsDelayedPaymentMethods = true,
+            merchantDisplayName = "Example, Inc.",
+            customer = PaymentSheet.CustomerConfiguration(
+                id = requireNotNull(customerId),
+                ephemeralKeySecret = requireNotNull(ephemeralKey),
+            ),
+            defaultBillingDetails = PaymentSheet.BillingDetails(
+                email = email.takeIf { it.isNotBlank() },
+            ),
+        )
+
         paymentSheet.presentWithPaymentIntent(
             paymentIntentClientSecret = paymentIntentSecret,
-            configuration = PaymentSheet.Configuration(
-                allowsDelayedPaymentMethods = true,
-                merchantDisplayName = "Example, Inc.",
-                customer = PaymentSheet.CustomerConfiguration(
-                    id = requireNotNull(customerId),
-                    ephemeralKeySecret = requireNotNull(ephemeralKey),
-                )
-            )
+            configuration = config,
         )
     }
 
@@ -212,6 +230,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         }
 
         Scaffold(
+            contentWindowInsets = WindowInsets.systemBars,
             topBar = {
                 PlaygroundTopBar(
                     settings = state.settings,
@@ -316,6 +335,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         val (showMenu, setShowMenu) = remember { mutableStateOf(false) }
         val context = LocalContext.current
         TopAppBar(
+            windowInsets = WindowInsets.statusBars,
             title = { Text("Connections Playground") },
             actions = {
                 IconButton(onClick = { setShowMenu(true) }) {

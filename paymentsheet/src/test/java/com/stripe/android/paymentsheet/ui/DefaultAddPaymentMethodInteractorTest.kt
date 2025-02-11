@@ -3,9 +3,11 @@ package com.stripe.android.paymentsheet.ui
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
@@ -229,6 +231,7 @@ class DefaultAddPaymentMethodInteractorTest {
         initiallySelectedPaymentMethodType: PaymentMethodCode = PaymentMethod.Type.Card.code,
         selection: StateFlow<PaymentSelection?> = MutableStateFlow(null),
         processing: StateFlow<Boolean> = MutableStateFlow(false),
+        incentive: StateFlow<PaymentMethodIncentive?> = MutableStateFlow(null),
         supportedPaymentMethods: List<SupportedPaymentMethod> = emptyList(),
         createFormArguments: (PaymentMethodCode) -> FormArguments = {
             FormArguments(
@@ -238,6 +241,8 @@ class DefaultAddPaymentMethodInteractorTest {
                     preferredNetworks = emptyList(),
                 ),
                 merchantName = "Example, Inc.",
+                hasIntentToSetup = false,
+                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             )
         },
         formElementsForCode: (PaymentMethodCode) -> List<FormElement> = { emptyList() },
@@ -254,6 +259,7 @@ class DefaultAddPaymentMethodInteractorTest {
             initiallySelectedPaymentMethodType = initiallySelectedPaymentMethodType,
             selection = selection,
             processing = processing,
+            incentive = incentive,
             supportedPaymentMethods = supportedPaymentMethods,
             createFormArguments = createFormArguments,
             formElementsForCode = formElementsForCode,

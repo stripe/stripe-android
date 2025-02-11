@@ -2,7 +2,8 @@ package com.stripe.android.paymentsheet
 
 import android.content.res.ColorStateList
 import android.graphics.Color
-import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import org.junit.Test
 import java.lang.IllegalArgumentException
@@ -10,96 +11,13 @@ import kotlin.test.assertFailsWith
 
 class PaymentSheetConfigurationKtxTest {
     @Test
-    fun `'containVolatileDifferences' should return false when no volatile differences are found`() {
-        val changedConfiguration = configuration.copy(
-            merchantDisplayName = "New merchant, Inc.",
-            primaryButtonColor = ColorStateList.valueOf(Color.GREEN),
-            googlePay = PaymentSheet.GooglePayConfiguration(
-                environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                countryCode = "CA",
-                currencyCode = "CAD",
-                amount = 6899,
-                label = "New merchant, Inc.",
-                buttonType = PaymentSheet.GooglePayConfiguration.ButtonType.Plain,
-            ),
-            primaryButtonLabel = "Pay",
-        )
-
-        assertThat(configuration.containsVolatileDifferences(changedConfiguration)).isFalse()
-    }
-
-    @Test
-    fun `'containVolatileDifferences' should return true when volatile differences are found`() {
-        val configWithGooglePayChanges = configuration.copy(
-            googlePay = PaymentSheet.GooglePayConfiguration(
-                environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
-                countryCode = "US",
-                currencyCode = "USD",
-                amount = 6899,
-                label = "New merchant, Inc.",
-                buttonType = PaymentSheet.GooglePayConfiguration.ButtonType.Plain,
-            ),
-        )
-
-        assertThat(configuration.containsVolatileDifferences(configWithGooglePayChanges)).isTrue()
-
-        val configWithBillingDetailsChanges = configuration.copy(
-            defaultBillingDetails = PaymentSheet.BillingDetails(
-                name = "Jenny Richards",
-            ),
-        )
-
-        assertThat(configuration.containsVolatileDifferences(configWithBillingDetailsChanges)).isTrue()
-
-        val configWithShippingDetailsChanges = configuration.copy(
-            shippingDetails = AddressDetails(
-                name = "Jenny Richards",
-            ),
-        )
-
-        assertThat(configuration.containsVolatileDifferences(configWithShippingDetailsChanges)).isTrue()
-
-        val configWithBillingConfigChanges = configuration.copy(
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
-            ),
-        )
-
-        assertThat(configuration.containsVolatileDifferences(configWithBillingConfigChanges)).isTrue()
-
-        val configWithAllowsDelayedPaymentMethodChanges = configuration.copy(
-            allowsDelayedPaymentMethods = true,
-        )
-
-        assertThat(
-            configuration.containsVolatileDifferences(configWithAllowsDelayedPaymentMethodChanges)
-        ).isTrue()
-
-        val configWithAllowsPaymentMethodsRequiringShippingAddressChanges = configuration.copy(
-            allowsPaymentMethodsRequiringShippingAddress = true,
-        )
-
-        assertThat(
-            configuration.containsVolatileDifferences(configWithAllowsPaymentMethodsRequiringShippingAddressChanges)
-        ).isTrue()
-
-        val configWithAllowRemovalOfLastPaymentMethodChanges = configuration.copy(
-            allowsRemovalOfLastSavedPaymentMethod = false,
-        )
-
-        assertThat(
-            configuration.containsVolatileDifferences(configWithAllowRemovalOfLastPaymentMethodChanges)
-        ).isTrue()
-    }
-
-    @Test
     fun `'validate' should fail when ephemeral key secret is blank`() {
         val configWithBlankEphemeralKeySecret = configuration.copy(
             customer = PaymentSheet.CustomerConfiguration(
                 id = "cus_1",
                 ephemeralKeySecret = "   "
             ),
-        )
+        ).asCommonConfiguration()
 
         assertFailsWith(
             IllegalArgumentException::class,
@@ -110,6 +28,40 @@ class PaymentSheetConfigurationKtxTest {
         }
     }
 
+    private fun getConfig(eKey: String): CommonConfiguration {
+        return configuration.copy(
+            customer = PaymentSheet.CustomerConfiguration(
+                id = "cus_1",
+                ephemeralKeySecret = eKey
+            ),
+        ).asCommonConfiguration()
+    }
+
+    @Test
+    fun `'validate' should succeed when ephemeral key secret is of correct format`() {
+        getConfig("ek_askljdlkasfhgasdfjls").validate()
+        getConfig("ek_test_iiuwfhdaiuhasdvkcjn32n").validate()
+    }
+
+    @Test
+    fun `'validate' should fail when ephemeral key secret is of wrong format`() {
+        fun assertFailsWithEphemeralKeySecret(ephemeralKeySecret: String) {
+            assertFailsWith(
+                IllegalArgumentException::class,
+                message = "`ephemeralKeySecret` format does not match expected client secret formatting"
+            ) {
+                getConfig(ephemeralKeySecret).validate()
+            }
+        }
+
+        assertFailsWithEphemeralKeySecret("eph_askjdfhajkshdfjkashdjkfhsakjdhfkjashfd")
+        assertFailsWithEphemeralKeySecret("eph_test_askjdfhajkshdfjkashdjkfhsakjdhfkjashfd")
+        assertFailsWithEphemeralKeySecret("sk_askjdfhajkshdfjkashdjkfhsakjdhfkjashfd")
+        assertFailsWithEphemeralKeySecret("ek_")
+        assertFailsWithEphemeralKeySecret("ek")
+        assertFailsWithEphemeralKeySecret("eeek_aldkfjalskdjflkasjbvdkjds")
+    }
+
     @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
     fun `'validate' should fail when customer client secret key is secret is blank`() {
@@ -118,7 +70,7 @@ class PaymentSheetConfigurationKtxTest {
                 id = "cus_1",
                 clientSecret = "   "
             ),
-        )
+        ).asCommonConfiguration()
 
         assertFailsWith(
             IllegalArgumentException::class,
@@ -137,7 +89,7 @@ class PaymentSheetConfigurationKtxTest {
                 id = "cus_1",
                 clientSecret = "ek_12345"
             ),
-        )
+        ).asCommonConfiguration()
 
         assertFailsWith(
             IllegalArgumentException::class,
@@ -156,7 +108,7 @@ class PaymentSheetConfigurationKtxTest {
                 id = "cus_1",
                 clientSecret = "total_12345"
             ),
-        )
+        ).asCommonConfiguration()
 
         assertFailsWith(
             IllegalArgumentException::class,
@@ -172,7 +124,7 @@ class PaymentSheetConfigurationKtxTest {
             merchantDisplayName = "Merchant, Inc.",
             customer = PaymentSheet.CustomerConfiguration(
                 id = "1",
-                ephemeralKeySecret = "secret",
+                ephemeralKeySecret = "ek_123",
             ),
             googlePay = PaymentSheet.GooglePayConfiguration(
                 environment = PaymentSheet.GooglePayConfiguration.Environment.Test,

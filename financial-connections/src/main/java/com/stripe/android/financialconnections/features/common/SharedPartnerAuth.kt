@@ -280,7 +280,8 @@ private fun PrePaneContent(
                 onContinueClick = onContinueClick,
                 onCancelClick = onCancelClick,
                 status = authenticationStatus,
-                oAuthPrepane = content
+                oAuthPrepane = content,
+                showInModal = showInModal,
             )
         }
     )
@@ -300,8 +301,8 @@ internal fun PrepaneImage(bodyItem: Entry.Image) {
                 .background(
                     brush = Brush.horizontalGradient(
                         colors = listOf(
-                            colors.backgroundOffset,
-                            colors.border,
+                            colors.backgroundSecondary,
+                            colors.borderNeutral,
                         ),
                     )
                 )
@@ -312,7 +313,7 @@ internal fun PrepaneImage(bodyItem: Entry.Image) {
         // left separator
         Box(
             modifier = Modifier
-                .background(color = colors.backgroundOffset)
+                .background(color = colors.backgroundSecondary)
                 .width(8.dp)
                 .fillMaxHeight()
         )
@@ -326,7 +327,7 @@ internal fun PrepaneImage(bodyItem: Entry.Image) {
         // right separator
         Box(
             modifier = Modifier
-                .background(color = colors.backgroundOffset)
+                .background(color = colors.backgroundSecondary)
                 .width(8.dp)
                 .fillMaxHeight()
         )
@@ -336,8 +337,8 @@ internal fun PrepaneImage(bodyItem: Entry.Image) {
                 .background(
                     brush = Brush.horizontalGradient(
                         colors = listOf(
-                            colors.border,
-                            colors.backgroundOffset,
+                            colors.borderNeutral,
+                            colors.backgroundSecondary,
                         ),
                     )
                 )
@@ -353,7 +354,8 @@ private fun PrepaneFooter(
     onContinueClick: () -> Unit,
     onCancelClick: () -> Unit,
     status: Async<AuthenticationStatus>,
-    oAuthPrepane: OauthPrepane
+    oAuthPrepane: OauthPrepane,
+    showInModal: Boolean,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -397,7 +399,13 @@ private fun PrepaneFooter(
                 .fillMaxWidth()
         ) {
             Text(
-                text = stringResource(R.string.stripe_prepane_cancel_cta),
+                text = stringResource(
+                    id = if (showInModal) {
+                        R.string.stripe_prepane_cancel_cta
+                    } else {
+                        R.string.stripe_prepane_choose_different_bank_cta
+                    }
+                ),
                 textAlign = TextAlign.Center
             )
         }
@@ -449,7 +457,7 @@ private fun GifWebView(
             append("</body></html>")
         }
     }
-    val backgroundColor = colors.backgroundOffset.toArgb()
+    val backgroundColor = colors.backgroundSecondary.toArgb()
     AndroidView(
         modifier = modifier.background(Color.Transparent),
         factory = {

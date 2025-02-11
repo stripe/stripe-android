@@ -16,8 +16,10 @@ internal open class FakeCustomerRepository(
     private val onGetPaymentMethods: () -> Result<List<PaymentMethod>> = {
         Result.success(paymentMethods)
     },
-    private val onDetachPaymentMethod: (paymentMethodId: String) -> Result<PaymentMethod> = {
-        Result.failure(NotImplementedError())
+    private val onDetachPaymentMethod: (paymentMethodId: String) -> Result<PaymentMethod> = { paymentMethodId ->
+        paymentMethods.find { it.id == paymentMethodId }?.let {
+            Result.success(it)
+        } ?: Result.failure(IllegalArgumentException("Could not find payment method to remove"))
     },
     private val onAttachPaymentMethod: () -> Result<PaymentMethod> = {
         Result.failure(NotImplementedError())
@@ -28,6 +30,9 @@ internal open class FakeCustomerRepository(
 ) : CustomerRepository {
     private val _detachRequests = Turbine<DetachRequest>()
     val detachRequests: ReceiveTurbine<DetachRequest> = _detachRequests
+
+    private val _updateRequests = Turbine<UpdateRequest>()
+    val updateRequests: ReceiveTurbine<UpdateRequest> = _updateRequests
 
     var error: Throwable? = null
 
@@ -66,11 +71,27 @@ internal open class FakeCustomerRepository(
         customerInfo: CustomerRepository.CustomerInfo,
         paymentMethodId: String,
         params: PaymentMethodUpdateParams
-    ): Result<PaymentMethod> = onUpdatePaymentMethod()
+    ): Result<PaymentMethod> {
+        _updateRequests.add(
+            UpdateRequest(
+                paymentMethodId = paymentMethodId,
+                customerInfo = customerInfo,
+                params = params,
+            )
+        )
+
+        return onUpdatePaymentMethod()
+    }
 
     data class DetachRequest(
         val paymentMethodId: String,
         val customerInfo: CustomerRepository.CustomerInfo,
         val canRemoveDuplicates: Boolean,
+    )
+
+    data class UpdateRequest(
+        val paymentMethodId: String,
+        val customerInfo: CustomerRepository.CustomerInfo,
+        val params: PaymentMethodUpdateParams,
     )
 }

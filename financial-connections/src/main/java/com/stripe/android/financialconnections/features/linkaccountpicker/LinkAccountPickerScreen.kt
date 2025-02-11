@@ -202,7 +202,9 @@ private fun LazyListScope.loadedContent(
     item {
         AnnotatedText(
             text = TextResource.Text(payload.title),
-            defaultStyle = typography.headingXLarge,
+            defaultStyle = typography.headingXLarge.copy(
+                color = colors.textDefault,
+            ),
             onClickableTextClick = {}
         )
         Spacer(modifier = Modifier.size(8.dp))
@@ -275,7 +277,7 @@ private fun SelectNewAccount(
             .clip(shape)
             .border(
                 width = 1.dp,
-                color = colors.border,
+                color = colors.borderNeutral,
                 shape = shape
             )
             .clickableSingle { onClick() }
@@ -315,7 +317,7 @@ fun SelectNewAccountIcon(
             Image(
                 painter = painterResource(R.drawable.stripe_ic_add),
                 modifier = iconModifier,
-                colorFilter = ColorFilter.tint(colors.iconBrand),
+                colorFilter = ColorFilter.tint(colors.iconTint),
                 contentDescription = contentDescription
             )
         }

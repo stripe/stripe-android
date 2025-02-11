@@ -9,28 +9,25 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.CreateIntentCallback
-import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
-import com.stripe.android.paymentsheet.state.PaymentSheetLoader
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.SessionTestRule
-import com.stripe.android.utils.FakePaymentSheetLoader
+import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
-import com.stripe.android.utils.RelayingPaymentSheetLoader
-import kotlinx.coroutines.Dispatchers
+import com.stripe.android.utils.RelayingPaymentElementLoader
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -59,21 +56,18 @@ class FlowControllerConfigurationHandlerTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private lateinit var viewModel: FlowControllerViewModel
 
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(testDispatcher)
+
     @Before
     fun setup() {
-        Dispatchers.setMain(testDispatcher)
-
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
         viewModel = FlowControllerViewModel(
             application = ApplicationProvider.getApplicationContext(),
-            handle = SavedStateHandle()
+            handle = SavedStateHandle(),
+            statusBarColor = null,
         )
-    }
-
-    @After
-    fun after() {
-        Dispatchers.resetMain()
     }
 
     @Test
@@ -84,7 +78,7 @@ class FlowControllerConfigurationHandlerTest {
         val beforeSessionId = AnalyticsRequestFactory.sessionId
         configurationHandler.configure(
             scope = this,
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
@@ -96,7 +90,7 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(configureErrors.awaitItem()).isNull()
         assertThat(viewModel.previousConfigureRequest).isNotNull()
         assertThat(configurationHandler.isConfigured).isTrue()
-        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link)
+        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link())
         assertThat(viewModel.state).isNotNull()
         verify(eventReporter).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
@@ -175,7 +169,7 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(configureErrors.awaitItem()).isNull()
         assertThat(viewModel.previousConfigureRequest).isEqualTo(newConfigureRequest)
         assertThat(configurationHandler.isConfigured).isTrue()
-        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link)
+        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link())
 
         // We're running a new config, so we DO expect an interaction.
         verify(eventReporter).onInit(
@@ -214,7 +208,7 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(configureErrors.awaitItem()).isNull()
         assertThat(viewModel.previousConfigureRequest).isEqualTo(newConfigureRequest)
         assertThat(configurationHandler.isConfigured).isTrue()
-        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link)
+        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link())
 
         // We're running a new config, so we DO expect an interaction.
         verify(eventReporter).onInit(
@@ -230,7 +224,7 @@ class FlowControllerConfigurationHandlerTest {
 
         configurationHandler.configure(
             scope = this,
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(" "),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(" "),
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             initializedViaCompose = false,
         ) { _, error ->
@@ -248,7 +242,7 @@ class FlowControllerConfigurationHandlerTest {
 
         configurationHandler.configure(
             scope = this,
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
@@ -270,7 +264,7 @@ class FlowControllerConfigurationHandlerTest {
 
         configurationHandler.configure(
             scope = this,
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
@@ -294,7 +288,7 @@ class FlowControllerConfigurationHandlerTest {
 
         configurationHandler.configure(
             scope = this,
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY.copy(
@@ -308,7 +302,7 @@ class FlowControllerConfigurationHandlerTest {
         }
 
         assertThat(configureErrors.awaitItem()?.message)
-            .isEqualTo("When a CustomerConfiguration is passed to PaymentSheet, the ephemeralKeySecret cannot be an empty string.")
+            .isEqualTo("Conflicting ephemeralKeySecrets between CustomerConfiguration and CustomerConfiguration.customerAccessType")
     }
 
     @Test
@@ -317,7 +311,7 @@ class FlowControllerConfigurationHandlerTest {
             var onInitCallbacks = 0
 
             val configurationHandler = createConfigurationHandler(
-                FakePaymentSheetLoader(
+                FakePaymentElementLoader(
                     customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
                     delay = 2.seconds,
                 )
@@ -325,7 +319,7 @@ class FlowControllerConfigurationHandlerTest {
             testScope.launch {
                 configurationHandler.configure(
                     scope = this,
-                    initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                         clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
                     ),
                     configuration = PaymentSheet.Configuration("Some name"),
@@ -343,8 +337,8 @@ class FlowControllerConfigurationHandlerTest {
 
     @Test
     fun `Cancels current configure job if new call to configure comes in`() = runTest {
-        val loader = RelayingPaymentSheetLoader()
-        val configurationHandler = createConfigurationHandler(paymentSheetLoader = loader)
+        val loader = RelayingPaymentElementLoader()
+        val configurationHandler = createConfigurationHandler(paymentElementLoader = loader)
 
         val amounts = (0 until 10).map { index ->
             1_000L + index * 200L
@@ -355,7 +349,7 @@ class FlowControllerConfigurationHandlerTest {
         for (amount in amounts) {
             configurationHandler.configure(
                 scope = this,
-                initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+                initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                     intentConfiguration = PaymentSheet.IntentConfiguration(
                         mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                             amount = amount,
@@ -381,14 +375,14 @@ class FlowControllerConfigurationHandlerTest {
 
     @Test
     fun `Cancels current configure job if coroutine scope is canceled`() = runTest {
-        val loader = RelayingPaymentSheetLoader()
-        val configurationHandler = createConfigurationHandler(paymentSheetLoader = loader)
+        val loader = RelayingPaymentElementLoader()
+        val configurationHandler = createConfigurationHandler(paymentElementLoader = loader)
 
         val resultTurbine = Turbine<Unit>()
 
         configurationHandler.configure(
             scope = testScope,
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
             configuration = PaymentSheet.Configuration("Some name"),
@@ -408,12 +402,12 @@ class FlowControllerConfigurationHandlerTest {
     fun `Records configuration failure correctly in view model`() = runTest {
         val resultTurbine = Turbine<Throwable?>()
         val configurationHandler = createConfigurationHandler(
-            paymentSheetLoader = FakePaymentSheetLoader(shouldFail = true),
+            paymentElementLoader = FakePaymentElementLoader(shouldFail = true),
         )
 
         configurationHandler.configure(
             scope = this,
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
             configuration = PaymentSheet.Configuration("Some name"),
@@ -433,7 +427,7 @@ class FlowControllerConfigurationHandlerTest {
 
         configurationHandler.configure(
             scope = this,
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("pi_123_sk_456"),
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("pi_123_sk_456"),
             configuration = PaymentSheet.Configuration("Some name"),
             initializedViaCompose = false,
         ) { _, _ ->
@@ -459,7 +453,7 @@ class FlowControllerConfigurationHandlerTest {
 
         configurationHandler.configure(
             scope = this,
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1234,
@@ -493,7 +487,7 @@ class FlowControllerConfigurationHandlerTest {
 
         configurationHandler.configure(
             scope = this,
-            initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(
                         amount = 1234,
@@ -515,11 +509,11 @@ class FlowControllerConfigurationHandlerTest {
         )
     }
 
-    private fun defaultPaymentSheetLoader(): PaymentSheetLoader {
-        return FakePaymentSheetLoader(
+    private fun defaultPaymentSheetLoader(): PaymentElementLoader {
+        return FakePaymentElementLoader(
             customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            paymentSelection = PaymentSelection.Link,
+            paymentSelection = PaymentSelection.Link(),
             linkState = LinkState(
                 configuration = mock(),
                 loginState = LinkState.LoginState.LoggedIn,
@@ -530,19 +524,19 @@ class FlowControllerConfigurationHandlerTest {
 
     private fun createInitializationMode(
         clientSecret: String = PaymentSheetFixtures.CLIENT_SECRET,
-    ): PaymentSheet.InitializationMode {
-        return PaymentSheet.InitializationMode.PaymentIntent(clientSecret)
+    ): PaymentElementLoader.InitializationMode {
+        return PaymentElementLoader.InitializationMode.PaymentIntent(clientSecret)
     }
 
     private fun createConfigurationHandler(
-        paymentSheetLoader: PaymentSheetLoader = defaultPaymentSheetLoader()
+        paymentElementLoader: PaymentElementLoader = defaultPaymentSheetLoader()
     ): FlowControllerConfigurationHandler {
         return FlowControllerConfigurationHandler(
-            paymentSheetLoader = paymentSheetLoader,
+            paymentElementLoader = paymentElementLoader,
             uiContext = testDispatcher,
             eventReporter = eventReporter,
             viewModel = viewModel,
-            paymentSelectionUpdater = { _, _, newState -> newState.paymentSelection },
+            paymentSelectionUpdater = { _, _, newState, _ -> newState.paymentSelection },
         )
     }
 }

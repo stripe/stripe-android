@@ -6,6 +6,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
@@ -128,15 +129,25 @@ interface CollectBankAccountLauncher {
 }
 
 sealed interface CollectBankAccountConfiguration : Parcelable {
+
     @Parcelize
     data class USBankAccount(
         val name: String,
         val email: String?
     ) : Parcelable, CollectBankAccountConfiguration
 
-    @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
+    data class USBankAccountInternal(
+        val name: String,
+        val email: String?,
+        val elementsSessionContext: ElementsSessionContext?,
+    ) : Parcelable, CollectBankAccountConfiguration
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
     data class InstantDebits(
-        val email: String?
+        val email: String?,
+        val elementsSessionContext: ElementsSessionContext?,
     ) : Parcelable, CollectBankAccountConfiguration
 }

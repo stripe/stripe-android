@@ -5,9 +5,16 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
@@ -57,6 +64,12 @@ internal class CompleteFlowActivity : AppCompatActivity() {
                 }
 
                 Receipt(
+                    modifier = Modifier
+                        .padding(
+                            paddingValues = WindowInsets.systemBars.only(
+                                WindowInsetsSides.Horizontal + WindowInsetsSides.Top
+                            ).asPaddingValues()
+                        ),
                     isLoading = uiState.isProcessing,
                     cartState = uiState.cartState,
                 ) {

@@ -14,7 +14,6 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.paymentsheet.ui.ThrowingEditPaymentMethodViewInteractorFactory
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
@@ -23,15 +22,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import org.mockito.Mockito.mock
+import org.mockito.kotlin.mock
 
-private fun linkHandler(savedStateHandle: SavedStateHandle): LinkHandler {
+private fun linkHandler(): LinkHandler {
     return LinkHandler(
-        linkLauncher = mock(),
         linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-        savedStateHandle = savedStateHandle,
-        linkStore = mock(),
-        linkAnalyticsComponentBuilder = mock(),
     )
 }
 
@@ -47,20 +42,24 @@ internal class FakeBaseSheetViewModel private constructor(
     savedStateHandle = savedStateHandle,
     linkHandler = linkHandler,
     cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
-    editInteractorFactory = ThrowingEditPaymentMethodViewInteractorFactory,
     isCompleteFlow = true,
 ) {
     companion object {
         fun create(
             paymentMethodMetadata: PaymentMethodMetadata,
             initialScreen: PaymentSheetScreen,
+            canGoBack: Boolean,
         ): FakeBaseSheetViewModel {
             val savedStateHandle = SavedStateHandle()
-            val linkHandler = linkHandler(savedStateHandle)
+            val linkHandler = linkHandler()
             return FakeBaseSheetViewModel(savedStateHandle, linkHandler, paymentMethodMetadata).apply {
-                navigationHandler.transitionTo(
-                    initialScreen
-                )
+                if (canGoBack) {
+                    navigationHandler.resetTo(
+                        listOf(mock(), initialScreen)
+                    )
+                } else {
+                    navigationHandler.transitionTo(initialScreen)
+                }
             }.also {
                 if (initialScreen.buyButtonState.value.visible) {
                     it.primaryButtonUiStateSource.update {
@@ -104,10 +103,6 @@ internal class FakeBaseSheetViewModel private constructor(
 
     override fun handlePaymentMethodSelected(selection: PaymentSelection?) {
         // Not yet implemented.
-    }
-
-    override fun handleConfirmUSBankAccount(paymentSelection: PaymentSelection.New.USBankAccount) {
-        throw AssertionError("Not expected.")
     }
 
     override fun onUserCancel() {

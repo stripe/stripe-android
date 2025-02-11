@@ -38,8 +38,10 @@ import com.stripe.android.paymentsheet.example.samples.ui.PADDING
 import com.stripe.android.paymentsheet.example.samples.ui.ROW_START
 import com.stripe.android.paymentsheet.example.samples.ui.SUB_FONT_SIZE
 
+@SuppressWarnings("LongMethod")
 @Composable
 fun Receipt(
+    modifier: Modifier = Modifier,
     isLoading: Boolean,
     cartState: CartState,
     isEditable: Boolean = false,
@@ -48,6 +50,7 @@ fun Receipt(
 ) {
     val scrollState = rememberScrollState()
     Surface(
+        modifier = modifier,
         color = MaterialTheme.colors.background,
     ) {
         Column(

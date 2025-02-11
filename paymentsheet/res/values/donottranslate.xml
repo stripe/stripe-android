@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="stripe_paymentsheet_bank_account_info">%1$s ····%2$s</string>
+    <string name="stripe_paymentsheet_bank_account_last_4">····%1$s</string>
 
-    <string name="stripe_paymentsheet_payment_method_item_card_number">····%1$s</string>
+    <string name="stripe_paymentsheet_payment_method_item_card_number">···· %1$s</string>
 
     <!-- Label indicating the payment intent is in testmode -->
     <string name="stripe_paymentsheet_test_mode_indicator">TEST MODE</string>
@@ -15,5 +17,6 @@
     <string name="stripe_paymentsheet_bacs_support_default_address_line_one">Stripe, 7th Floor The Bower Warehouse</string>
     <string name="stripe_paymentsheet_bacs_support_default_address_line_two">207–211 Old St, London EC1V 9NR</string>
 
+    <string name="stripe_paymentsheet_iban">IBAN</string>
     <string name="stripe_paymentsheet_invalid_deferred_intent_usage">It appears you are reusing an intent on every `createIntentCallback` call. You should either create a brand new intent in `createIntentCallback` or update the existing intent with the new payment method ID.</string>
 </resources>

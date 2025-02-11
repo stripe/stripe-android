@@ -3,12 +3,15 @@ package com.stripe.android.financialconnections.features.networkinglinksignup
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.core.exception.PermissionException
 import com.stripe.android.financialconnections.ApiKeyFixtures.cachedPartnerAccounts
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSessionSignup
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.CoroutineTestRule
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ConsentAgree.analyticsValue
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
@@ -32,11 +35,14 @@ import com.stripe.android.financialconnections.repository.FinancialConnectionsCo
 import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.model.LinkMode
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
@@ -58,6 +64,7 @@ class NetworkingLinkSignupViewModelTest {
     private fun buildViewModel(
         state: NetworkingLinkSignupState,
         signupHandler: LinkSignupHandler = mockLinkSignupHandlerForNetworking(),
+        elementsSessionContext: ElementsSessionContext? = null,
     ) = NetworkingLinkSignupViewModel(
         getOrFetchSync = getOrFetchSync,
         logger = Logger.noop(),
@@ -69,6 +76,8 @@ class NetworkingLinkSignupViewModelTest {
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         presentSheet = mock(),
         linkSignupHandler = signupHandler,
+        elementsSessionContext = elementsSessionContext,
+        handleError = handleError,
     )
 
     @Test
@@ -78,7 +87,7 @@ class NetworkingLinkSignupViewModelTest {
             accountholderCustomerEmailAddress = "test@test.com"
         )
 
-        whenever(getOrFetchSync(any())).thenReturn(
+        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(
             syncResponse().copy(
                 manifest = manifest,
                 text = TextUpdate(
@@ -87,12 +96,70 @@ class NetworkingLinkSignupViewModelTest {
                 )
             )
         )
-        whenever(lookupAccount(any())).thenReturn(ConsumerSessionLookup(exists = false))
+        whenever(
+            lookupAccount(
+                email = any(),
+                phone = any(),
+                phoneCountryCode = any(),
+                emailSource = any(),
+                verifiedFlow = any(),
+                sessionId = any(),
+                pane = any()
+            )
+        ).thenReturn(ConsumerSessionLookup(exists = false))
 
         val viewModel = buildViewModel(NetworkingLinkSignupState())
         val state = viewModel.stateFlow.value
         val payload = requireNotNull(state.payload())
         assertThat(payload.emailController.fieldValue.value).isEqualTo("test@test.com")
+    }
+
+    @Test
+    fun `init - creates controllers with Elements billing details`() = runTest {
+        val manifest = sessionManifest()
+
+        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(
+            syncResponse().copy(
+                manifest = manifest,
+                text = TextUpdate(
+                    consent = null,
+                    networkingLinkSignupPane = networkingLinkSignupPane(),
+                )
+            )
+        )
+        whenever(
+            lookupAccount(
+                email = any(),
+                phone = any(),
+                phoneCountryCode = any(),
+                emailSource = any(),
+                verifiedFlow = any(),
+                sessionId = any(),
+                pane = any()
+            )
+        ).thenReturn(ConsumerSessionLookup(exists = false))
+
+        val viewModel = buildViewModel(
+            state = NetworkingLinkSignupState(),
+            elementsSessionContext = ElementsSessionContext(
+                amount = null,
+                currency = null,
+                linkMode = LinkMode.LinkPaymentMethod,
+                billingDetails = null,
+                prefillDetails = ElementsSessionContext.PrefillDetails(
+                    email = "email@email.com",
+                    phone = "5555555555",
+                    phoneCountryCode = "US",
+                ),
+                incentiveEligibilitySession = null,
+            )
+        )
+
+        val state = viewModel.stateFlow.value
+        val payload = requireNotNull(state.payload())
+        assertThat(payload.emailController.fieldValue.value).isEqualTo("email@email.com")
+        assertThat(payload.phoneController.fieldValue.value).isEqualTo("5555555555")
+        assertThat(payload.phoneController.countryDropdownController.rawFieldValue.value).isEqualTo("US")
     }
 
     @Test
@@ -102,7 +169,7 @@ class NetworkingLinkSignupViewModelTest {
             accountholderCustomerEmailAddress = "",
         )
 
-        whenever(getOrFetchSync(any())).thenReturn(
+        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(
             syncResponse().copy(
                 manifest = manifest.copy(isLinkWithStripe = true),
                 text = TextUpdate(
@@ -125,7 +192,7 @@ class NetworkingLinkSignupViewModelTest {
             accountholderCustomerEmailAddress = "",
         )
 
-        whenever(getOrFetchSync(any())).thenReturn(
+        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(
             syncResponse().copy(
                 manifest = manifest.copy(isLinkWithStripe = false),
                 text = TextUpdate(
@@ -145,7 +212,7 @@ class NetworkingLinkSignupViewModelTest {
     fun `Redirects to save-to-link verification screen if entering returning user email`() = runTest {
         val manifest = sessionManifest()
 
-        whenever(getOrFetchSync(any())).thenReturn(
+        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(
             syncResponse().copy(
                 text = TextUpdate(
                     consent = null,
@@ -154,7 +221,17 @@ class NetworkingLinkSignupViewModelTest {
             )
         )
         whenever(getOrFetchSync().manifest).thenReturn(manifest)
-        whenever(lookupAccount(any())).thenReturn(ConsumerSessionLookup(exists = true))
+        whenever(
+            lookupAccount(
+                email = any(),
+                phone = any(),
+                phoneCountryCode = any(),
+                emailSource = any(),
+                verifiedFlow = any(),
+                sessionId = any(),
+                pane = any()
+            )
+        ).thenReturn(ConsumerSessionLookup(exists = true))
 
         val viewModel = buildViewModel(NetworkingLinkSignupState())
 
@@ -179,7 +256,7 @@ class NetworkingLinkSignupViewModelTest {
             isLinkWithStripe = true,
         )
 
-        whenever(getOrFetchSync(any())).thenReturn(
+        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(
             syncResponse().copy(
                 manifest = manifest,
                 text = TextUpdate(
@@ -189,7 +266,17 @@ class NetworkingLinkSignupViewModelTest {
             )
         )
 
-        whenever(lookupAccount(any())).thenReturn(ConsumerSessionLookup(exists = true))
+        whenever(
+            lookupAccount(
+                email = any(),
+                phone = any(),
+                phoneCountryCode = any(),
+                emailSource = any(),
+                verifiedFlow = any(),
+                sessionId = any(),
+                pane = any()
+            )
+        ).thenReturn(ConsumerSessionLookup(exists = true))
 
         val viewModel = buildViewModel(
             state = NetworkingLinkSignupState(isInstantDebits = true),
@@ -218,7 +305,7 @@ class NetworkingLinkSignupViewModelTest {
     fun `Enables Save To Link button if we encounter a returning user`() = runTest {
         val manifest = sessionManifest()
 
-        whenever(getOrFetchSync(any())).thenReturn(
+        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(
             syncResponse().copy(
                 text = TextUpdate(
                     consent = null,
@@ -227,7 +314,17 @@ class NetworkingLinkSignupViewModelTest {
             )
         )
         whenever(getOrFetchSync().manifest).thenReturn(manifest)
-        whenever(lookupAccount(any())).thenReturn(ConsumerSessionLookup(exists = true))
+        whenever(
+            lookupAccount(
+                email = any(),
+                phone = any(),
+                phoneCountryCode = any(),
+                emailSource = any(),
+                verifiedFlow = any(),
+                sessionId = any(),
+                pane = any()
+            )
+        ).thenReturn(ConsumerSessionLookup(exists = true))
 
         val viewModel = buildViewModel(
             state = NetworkingLinkSignupState(),
@@ -269,7 +366,7 @@ class NetworkingLinkSignupViewModelTest {
             isLinkWithStripe = false,
         )
 
-        whenever(getOrFetchSync(any())).thenReturn(
+        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(
             syncResponse().copy(
                 manifest = manifest,
                 text = TextUpdate(
@@ -294,7 +391,7 @@ class NetworkingLinkSignupViewModelTest {
             isLinkWithStripe = true,
         )
 
-        whenever(getOrFetchSync(any())).thenReturn(
+        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(
             syncResponse().copy(
                 manifest = manifest,
                 text = TextUpdate(
@@ -320,8 +417,18 @@ class NetworkingLinkSignupViewModelTest {
             text = TextUpdate(networkingLinkSignupPane = networkingLinkSignupPane()),
         )
 
-        whenever(getOrFetchSync(any())).thenReturn(syncResponse)
-        whenever(lookupAccount(any())).thenReturn(ConsumerSessionLookup(exists = false))
+        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(syncResponse)
+        whenever(
+            lookupAccount(
+                email = any(),
+                phone = any(),
+                phoneCountryCode = any(),
+                emailSource = any(),
+                verifiedFlow = any(),
+                sessionId = any(),
+                pane = any()
+            )
+        ).thenReturn(ConsumerSessionLookup(exists = false))
 
         val viewModel = buildViewModel(
             state = NetworkingLinkSignupState(isInstantDebits = false),
@@ -354,8 +461,18 @@ class NetworkingLinkSignupViewModelTest {
             text = TextUpdate(linkLoginPane = linkLoginPane()),
         )
 
-        whenever(getOrFetchSync(any())).thenReturn(initialSyncResponse)
-        whenever(lookupAccount(any())).thenReturn(ConsumerSessionLookup(exists = false))
+        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(initialSyncResponse)
+        whenever(
+            lookupAccount(
+                email = any(),
+                phone = any(),
+                phoneCountryCode = any(),
+                emailSource = any(),
+                verifiedFlow = any(),
+                sessionId = any(),
+                pane = any()
+            )
+        ).thenReturn(ConsumerSessionLookup(exists = false))
 
         val viewModel = buildViewModel(
             state = NetworkingLinkSignupState(isInstantDebits = true),
@@ -388,8 +505,18 @@ class NetworkingLinkSignupViewModelTest {
             text = TextUpdate(networkingLinkSignupPane = networkingLinkSignupPane()),
         )
 
-        whenever(getOrFetchSync(any())).thenReturn(syncResponse)
-        whenever(lookupAccount(any())).thenReturn(ConsumerSessionLookup(exists = false))
+        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(syncResponse)
+        whenever(
+            lookupAccount(
+                email = any(),
+                phone = any(),
+                phoneCountryCode = any(),
+                emailSource = any(),
+                verifiedFlow = any(),
+                sessionId = any(),
+                pane = any()
+            )
+        ).thenReturn(ConsumerSessionLookup(exists = false))
 
         val viewModel = buildViewModel(
             state = NetworkingLinkSignupState(isInstantDebits = false),
@@ -422,8 +549,18 @@ class NetworkingLinkSignupViewModelTest {
             text = TextUpdate(linkLoginPane = linkLoginPane()),
         )
 
-        whenever(getOrFetchSync(any())).thenReturn(initialSyncResponse)
-        whenever(lookupAccount(any())).thenReturn(ConsumerSessionLookup(exists = false))
+        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(initialSyncResponse)
+        whenever(
+            lookupAccount(
+                email = any(),
+                phone = any(),
+                phoneCountryCode = any(),
+                emailSource = any(),
+                verifiedFlow = any(),
+                sessionId = any(),
+                pane = any()
+            )
+        ).thenReturn(ConsumerSessionLookup(exists = false))
 
         val viewModel = buildViewModel(
             state = NetworkingLinkSignupState(isInstantDebits = true),
@@ -442,6 +579,133 @@ class NetworkingLinkSignupViewModelTest {
         }
     }
 
+    @Test
+    fun `Navigates to error pane if encountering permission exception in lookup in Instant Debits`() = runTest {
+        val initialSyncResponse = syncResponse().copy(
+            manifest = sessionManifest().copy(
+                accountholderCustomerEmailAddress = "known_user@email.com",
+                isLinkWithStripe = true,
+            ),
+            text = TextUpdate(linkLoginPane = linkLoginPane()),
+        )
+
+        val permissionException = PermissionException(stripeError = StripeError())
+
+        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(initialSyncResponse)
+        whenever(
+            lookupAccount(
+                email = any(),
+                phone = any(),
+                phoneCountryCode = any(),
+                emailSource = any(),
+                verifiedFlow = any(),
+                sessionId = any(),
+                pane = any()
+            )
+        ).then {
+            throw permissionException
+        }
+
+        buildViewModel(
+            state = NetworkingLinkSignupState(isInstantDebits = true),
+            signupHandler = mockLinkSignupHandlerForInstantDebits(failOnSignup = true),
+        )
+
+        delay(300)
+
+        handleError.assertError(
+            extraMessage = "Error looking up account",
+            error = permissionException,
+            pane = LINK_LOGIN,
+            displayErrorScreen = true,
+        )
+    }
+
+    @Test
+    fun `Does not navigate to error pane if encountering non-permission exception in lookup in Instant Debits`() =
+        runTest {
+            val initialSyncResponse = syncResponse().copy(
+                manifest = sessionManifest().copy(
+                    accountholderCustomerEmailAddress = "known_user@email.com",
+                    isLinkWithStripe = true,
+                ),
+                text = TextUpdate(linkLoginPane = linkLoginPane()),
+            )
+
+            val apiException = APIConnectionException()
+
+            whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(initialSyncResponse)
+            whenever(
+                lookupAccount(
+                    email = any(),
+                    phone = any(),
+                    phoneCountryCode = any(),
+                    emailSource = any(),
+                    verifiedFlow = any(),
+                    sessionId = any(),
+                    pane = any()
+                )
+            ).then {
+                throw apiException
+            }
+
+            buildViewModel(
+                state = NetworkingLinkSignupState(isInstantDebits = true),
+                signupHandler = mockLinkSignupHandlerForInstantDebits(failOnSignup = true),
+            )
+
+            delay(300)
+
+            handleError.assertError(
+                extraMessage = "Error looking up account",
+                error = apiException,
+                pane = LINK_LOGIN,
+                displayErrorScreen = false,
+            )
+        }
+
+    @Test
+    fun `Does not navigate to error pane if encountering any exception in lookup in Financial Connections`() = runTest {
+        val initialSyncResponse = syncResponse().copy(
+            manifest = sessionManifest().copy(
+                accountholderCustomerEmailAddress = "known_user@email.com",
+                isLinkWithStripe = false,
+            ),
+            text = TextUpdate(networkingLinkSignupPane = networkingLinkSignupPane()),
+        )
+
+        val permissionException = PermissionException(stripeError = StripeError())
+
+        whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(initialSyncResponse)
+        whenever(
+            lookupAccount(
+                email = any(),
+                phone = any(),
+                phoneCountryCode = any(),
+                emailSource = any(),
+                verifiedFlow = any(),
+                sessionId = any(),
+                pane = any()
+            )
+        ).then {
+            throw permissionException
+        }
+
+        buildViewModel(
+            state = NetworkingLinkSignupState(isInstantDebits = false),
+            signupHandler = mockLinkSignupHandlerForNetworking(failOnSignup = true),
+        )
+
+        delay(300)
+
+        handleError.assertError(
+            extraMessage = "Error looking up account",
+            error = permissionException,
+            pane = NETWORKING_LINK_SIGNUP_PANE,
+            displayErrorScreen = false,
+        )
+    }
+
     private fun mockLinkSignupHandlerForNetworking(
         failOnSignup: Boolean = false,
     ): LinkSignupHandler {
@@ -451,7 +715,7 @@ class NetworkingLinkSignupViewModelTest {
         )
 
         val getOrFetchSync = mock<GetOrFetchSync> {
-            onBlocking { invoke(any()) } doReturn syncResponse().copy(
+            onBlocking { invoke(any(), anyOrNull()) } doReturn syncResponse().copy(
                 manifest = manifest,
                 text = TextUpdate(
                     consent = null,
@@ -476,10 +740,13 @@ class NetworkingLinkSignupViewModelTest {
 
         return LinkSignupHandlerForNetworking(
             getOrFetchSync = getOrFetchSync,
+            consumerRepository = consumerSessionRepository(failOnSignup = false),
             getCachedAccounts = getCachedAccounts,
             saveAccountToLink = saveAccountToLink,
             eventTracker = eventTracker,
             navigationManager = navigationManager,
+            requestIntegrityToken = mock(),
+            applicationId = "test",
             logger = Logger.noop(),
         )
     }
@@ -494,7 +761,7 @@ class NetworkingLinkSignupViewModelTest {
         )
 
         val getOrFetchSync = mock<GetOrFetchSync> {
-            onBlocking { invoke(any()) } doReturn syncResponse().copy(
+            onBlocking { invoke(any(), anyOrNull()) } doReturn syncResponse().copy(
                 manifest = manifest,
                 text = TextUpdate(
                     consent = null,
@@ -503,15 +770,7 @@ class NetworkingLinkSignupViewModelTest {
             )
         }
 
-        val consumerRepository = mock<FinancialConnectionsConsumerSessionRepository> {
-            if (failOnSignup) {
-                onBlocking { signUp(any(), any(), any()) } doAnswer {
-                    throw APIConnectionException()
-                }
-            } else {
-                onBlocking { signUp(any(), any(), any()) } doReturn consumerSessionSignup()
-            }
-        }
+        val consumerRepository = consumerSessionRepository(failOnSignup)
 
         return LinkSignupHandlerForInstantDebits(
             getOrFetchSync = getOrFetchSync,
@@ -521,7 +780,26 @@ class NetworkingLinkSignupViewModelTest {
             },
             navigationManager = navigationManager,
             handleError = handleError,
+            requestIntegrityToken = mock(),
+            applicationId = "test",
         )
+    }
+
+    private fun consumerSessionRepository(failOnSignup: Boolean): FinancialConnectionsConsumerSessionRepository {
+        val consumerRepository = mock<FinancialConnectionsConsumerSessionRepository> {
+            if (failOnSignup) {
+                onBlocking { signUp(any(), any(), any()) } doAnswer {
+                    throw APIConnectionException()
+                }
+                onBlocking { mobileSignUp(any(), any(), any(), any(), any()) } doAnswer {
+                    throw APIConnectionException()
+                }
+            } else {
+                onBlocking { signUp(any(), any(), any()) } doReturn consumerSessionSignup()
+                onBlocking { mobileSignUp(any(), any(), any(), any(), any()) } doReturn consumerSessionSignup()
+            }
+        }
+        return consumerRepository
     }
 
     private fun networkingLinkSignupPane() = NetworkingLinkSignupPane(

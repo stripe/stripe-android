@@ -68,6 +68,7 @@ private fun ExitModalContent(
         Text(
             text = stringResource(R.string.stripe_exit_modal_title),
             style = typography.headingLarge,
+            color = colors.textDefault,
         )
         Spacer(modifier = Modifier.size(8.dp))
         Text(
@@ -100,7 +101,7 @@ private fun ExitModalContent(
 @Preview
 internal fun ExitModalPreview() {
     FinancialConnectionsTheme {
-        Surface(color = colors.backgroundSurface) {
+        Surface(color = colors.background) {
             ExitModalContent(
                 description = TextResource.StringId(R.string.stripe_exit_modal_desc, listOf("MerchantName")),
                 loading = false,

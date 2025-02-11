@@ -14,34 +14,48 @@ import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
-import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CustomEmailType
+import com.stripe.android.model.EmailSource
+import com.stripe.android.model.SharePaymentDetails
+import com.stripe.android.model.SignUpParams
+import com.stripe.android.model.UpdateAvailableIncentives
 import com.stripe.android.model.VerificationType
 import com.stripe.android.model.parsers.AttachConsumerToLinkAccountSessionJsonParser
 import com.stripe.android.model.parsers.ConsumerPaymentDetailsJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionLookupJsonParser
 import com.stripe.android.model.parsers.ConsumerSessionSignupJsonParser
+import com.stripe.android.model.parsers.SharePaymentDetailsJsonParser
+import com.stripe.android.model.parsers.UpdateAvailableIncentivesJsonParser
 import java.util.Locale
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 interface ConsumersApiService {
 
     suspend fun signUp(
-        email: String,
-        phoneNumber: String,
-        country: String,
-        name: String?,
-        locale: Locale?,
-        requestSurface: String,
-        consentAction: ConsumerSignUpConsentAction,
+        params: SignUpParams,
         requestOptions: ApiRequest.Options,
+    ): Result<ConsumerSessionSignup>
+
+    suspend fun mobileSignUp(
+        params: SignUpParams,
+        requestOptions: ApiRequest.Options
     ): Result<ConsumerSessionSignup>
 
     suspend fun lookupConsumerSession(
         email: String,
         requestSurface: String,
         requestOptions: ApiRequest.Options
+    ): ConsumerSessionLookup
+
+    suspend fun mobileLookupConsumerSession(
+        email: String,
+        emailSource: EmailSource,
+        requestSurface: String,
+        verificationToken: String,
+        appId: String,
+        requestOptions: ApiRequest.Options,
+        sessionId: String
     ): ConsumerSessionLookup
 
     suspend fun startConsumerVerification(
@@ -75,6 +89,24 @@ interface ConsumersApiService {
         requestSurface: String,
         requestOptions: ApiRequest.Options,
     ): Result<ConsumerPaymentDetails>
+
+    suspend fun sharePaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentDetailsId: String,
+        expectedPaymentMethodType: String,
+        billingPhone: String?,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options,
+        extraParams: Map<String, Any?>,
+    ): Result<SharePaymentDetails>
+
+    suspend fun updateAvailableIncentives(
+        sessionId: String,
+        paymentDetailsId: String,
+        consumerSessionClientSecret: String,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options,
+    ): Result<UpdateAvailableIncentives>
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -94,13 +126,7 @@ class ConsumersApiServiceImpl(
     )
 
     override suspend fun signUp(
-        email: String,
-        phoneNumber: String,
-        country: String,
-        name: String?,
-        locale: Locale?,
-        requestSurface: String,
-        consentAction: ConsumerSignUpConsentAction,
+        params: SignUpParams,
         requestOptions: ApiRequest.Options,
     ): Result<ConsumerSessionSignup> {
         return executeRequestWithResultParser(
@@ -109,22 +135,26 @@ class ConsumersApiServiceImpl(
             request = apiRequestFactory.createPost(
                 url = consumerAccountsSignUpUrl,
                 options = requestOptions,
-                params = mapOf(
-                    "email_address" to email.lowercase(),
-                    "phone_number" to phoneNumber,
-                    "country" to country,
-                    "country_inferring_method" to "PHONE_NUMBER",
-                    "consent_action" to consentAction.value,
-                    "request_surface" to requestSurface,
-                ).plus(
-                    locale?.let {
-                        mapOf("locale" to it.toLanguageTag())
-                    } ?: emptyMap()
-                ).plus(
-                    name?.let {
-                        mapOf("legal_name" to it)
-                    } ?: emptyMap()
-                ),
+                params = params.toParamMap()
+            ),
+            responseJsonParser = ConsumerSessionSignupJsonParser,
+        )
+    }
+
+    /**
+     * Retrieves the ConsumerSession if the given email is associated with a Link account.
+     */
+    override suspend fun mobileSignUp(
+        params: SignUpParams,
+        requestOptions: ApiRequest.Options
+    ): Result<ConsumerSessionSignup> {
+        return executeRequestWithResultParser(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = apiRequestFactory.createPost(
+                url = consumerMobileSignUpUrl,
+                options = requestOptions,
+                params = params.toParamMap()
             ),
             responseJsonParser = ConsumerSessionSignupJsonParser,
         )
@@ -147,6 +177,37 @@ class ConsumersApiServiceImpl(
                 mapOf(
                     "request_surface" to requestSurface,
                     "email_address" to email.lowercase()
+                )
+            ),
+            responseJsonParser = ConsumerSessionLookupJsonParser()
+        )
+    }
+
+    /**
+     * Retrieves the ConsumerSession if the given email is associated with a Link account.
+     */
+    override suspend fun mobileLookupConsumerSession(
+        email: String,
+        emailSource: EmailSource,
+        requestSurface: String,
+        verificationToken: String,
+        appId: String,
+        requestOptions: ApiRequest.Options,
+        sessionId: String
+    ): ConsumerSessionLookup {
+        return executeRequestWithModelJsonParser(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = apiRequestFactory.createPost(
+                mobileConsumerSessionLookupUrl,
+                requestOptions,
+                mapOf(
+                    "request_surface" to requestSurface,
+                    "email_address" to email.lowercase(),
+                    "android_verification_token" to verificationToken,
+                    "session_id" to sessionId,
+                    "email_source" to emailSource.backendValue,
+                    "app_id" to appId
                 )
             ),
             responseJsonParser = ConsumerSessionLookupJsonParser()
@@ -262,6 +323,61 @@ class ConsumersApiServiceImpl(
         )
     }
 
+    override suspend fun sharePaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentDetailsId: String,
+        expectedPaymentMethodType: String,
+        billingPhone: String?,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options,
+        extraParams: Map<String, Any?>,
+    ): Result<SharePaymentDetails> {
+        return executeRequestWithResultParser(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = apiRequestFactory.createPost(
+                url = sharePaymentDetails,
+                options = requestOptions,
+                params = mapOf(
+                    "request_surface" to requestSurface,
+                    "id" to paymentDetailsId,
+                    "expected_payment_method_type" to expectedPaymentMethodType,
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    ),
+                    "billing_phone" to billingPhone,
+                ) + extraParams,
+            ),
+            responseJsonParser = SharePaymentDetailsJsonParser,
+        )
+    }
+
+    override suspend fun updateAvailableIncentives(
+        sessionId: String,
+        paymentDetailsId: String,
+        consumerSessionClientSecret: String,
+        requestSurface: String,
+        requestOptions: ApiRequest.Options,
+    ): Result<UpdateAvailableIncentives> {
+        return executeRequestWithResultParser(
+            stripeErrorJsonParser = stripeErrorJsonParser,
+            stripeNetworkClient = stripeNetworkClient,
+            request = apiRequestFactory.createPost(
+                url = updateAvailableIncentivesUrl,
+                options = requestOptions,
+                params = mapOf(
+                    "request_surface" to requestSurface,
+                    "session_id" to sessionId,
+                    "payment_details_id" to paymentDetailsId,
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    ),
+                ),
+            ),
+            responseJsonParser = UpdateAvailableIncentivesJsonParser,
+        )
+    }
+
     internal companion object {
 
         /**
@@ -271,10 +387,22 @@ class ConsumersApiServiceImpl(
             getApiUrl("consumers/accounts/sign_up")
 
         /**
+         * @return `https://api.stripe.com/v1/consumers/mobile/sign_up`
+         */
+        internal val consumerMobileSignUpUrl: String =
+            getApiUrl("consumers/mobile/sign_up")
+
+        /**
          * @return `https://api.stripe.com/v1/consumers/sessions/lookup`
          */
         internal val consumerSessionLookupUrl: String =
             getApiUrl("consumers/sessions/lookup")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/mobile/sessions/lookup`
+         */
+        internal val mobileConsumerSessionLookupUrl: String =
+            getApiUrl("consumers/mobile/sessions/lookup")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/sessions/start_verification`
@@ -298,6 +426,16 @@ class ConsumersApiServiceImpl(
          * @return `https://api.stripe.com/v1/consumers/payment_details`
          */
         private val createPaymentDetails: String = getApiUrl("consumers/payment_details")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/payment_details/share`
+         */
+        private val sharePaymentDetails: String = getApiUrl("consumers/payment_details/share")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/incentives/update_available`
+         */
+        private val updateAvailableIncentivesUrl: String = getApiUrl("consumers/incentives/update_available")
 
         private fun getApiUrl(path: String): String {
             return "${ApiRequest.API_HOST}/v1/$path"

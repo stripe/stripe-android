@@ -2,23 +2,17 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>EmptyFunctionBlock:FragmentExamplesFragment.kt$FragmentExamplesFragment.&lt;no name provided>${ }</ID>
-    <ID>EmptyFunctionBlock:FragmentExamplesFragment.kt$FragmentExamplesFragment.&lt;no name provided>${}</ID>
-    <ID>EmptyFunctionBlock:FragmentExamplesFragment.kt$FragmentExamplesFragment.&lt;no name provided>.&lt;no name provided>${ }</ID>
     <ID>EmptyFunctionBlock:SimpleConfirmationActivity.kt$SimpleConfirmationActivity.DropdownItemAdapter.NullFilter${ }</ID>
     <ID>LongMethod:ConnectUSBankAccountActivity.kt$ConnectUSBankAccountActivity$override fun onCreate(savedInstanceState: Bundle?)</ID>
     <ID>LongMethod:GooglePayLauncherComposeActivity.kt$GooglePayLauncherComposeActivity$@Composable private fun GooglePayLauncherScreen()</ID>
     <ID>LongMethod:IDEALPaymentMethodActivity.kt$IDEALPaymentMethodActivity$@Composable private fun IDEALScreen()</ID>
     <ID>LongMethod:ManualUSBankAccountPaymentMethodActivity.kt$ManualUSBankAccountPaymentMethodActivity$@Composable private fun CollectBankScreen()</ID>
     <ID>LongMethod:ManualUSBankAccountPaymentMethodActivity.kt$ManualUSBankAccountPaymentMethodActivity$@Composable private fun VerifyWithMicrodepositScreen()</ID>
-    <ID>MagicNumber:FragmentExamplesFragment.kt$FragmentExamplesFragment$2000L</ID>
     <ID>MagicNumber:KlarnaSourceActivity.kt$KlarnaSourceActivity$1990</ID>
     <ID>MagicNumber:PaymentAuthActivity.kt$PaymentAuthActivity$6</ID>
-    <ID>MagicNumber:PaymentSessionActivity.kt$PaymentSessionActivity$2000L</ID>
     <ID>MagicNumber:SourcesAdapter.kt$SourcesAdapter.ViewHolder$6</ID>
     <ID>MagicNumber:UpiWaitingActivity.kt$UpiWaitingActivity$5000</ID>
     <ID>MaxLineLength:CreateCardSourceActivity.kt$CreateCardSourceActivity$viewBinding.cardWidget</ID>
-    <ID>ThrowingExceptionsWithoutMessageOrCause:PaymentSessionActivity.kt$PaymentSessionActivity.ActivityViewModel.&lt;no name provided>$RuntimeException()</ID>
     <ID>VariableNaming:StripeImageActivity.kt$StripeImageActivity$private val LocalStripeImageLoader = staticCompositionLocalOf&lt;StripeImageLoader> { error("No ImageLoader provided") }</ID>
   </CurrentIssues>
 </SmellBaseline>

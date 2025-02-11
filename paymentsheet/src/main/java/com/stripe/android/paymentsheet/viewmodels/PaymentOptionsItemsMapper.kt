@@ -13,7 +13,6 @@ internal class PaymentOptionsItemsMapper(
     private val customerState: StateFlow<CustomerState?>,
     private val isGooglePayReady: StateFlow<Boolean>,
     private val isLinkEnabled: StateFlow<Boolean?>,
-    private val canRemovePaymentMethods: StateFlow<Boolean>,
     private val nameProvider: (PaymentMethodCode?) -> ResolvableString,
     private val isNotPaymentFlow: Boolean,
     private val isCbcEligible: () -> Boolean
@@ -24,13 +23,14 @@ internal class PaymentOptionsItemsMapper(
             customerState,
             isLinkEnabled,
             isGooglePayReady,
-            canRemovePaymentMethods,
-        ) { customerState, isLinkEnabled, isGooglePayReady, canRemove ->
+        ) { customerState, isLinkEnabled, isGooglePayReady ->
             createPaymentOptionsItems(
                 paymentMethods = customerState?.paymentMethods ?: listOf(),
                 isLinkEnabled = isLinkEnabled,
                 isGooglePayReady = isGooglePayReady,
-                canRemovePaymentMethods = canRemove,
+                defaultPaymentMethodId = (
+                    customerState?.defaultPaymentMethodState as? CustomerState.DefaultPaymentMethodState.Enabled
+                    )?.defaultPaymentMethodId
             ) ?: emptyList()
         }
     }
@@ -40,7 +40,7 @@ internal class PaymentOptionsItemsMapper(
         paymentMethods: List<PaymentMethod>,
         isLinkEnabled: Boolean?,
         isGooglePayReady: Boolean,
-        canRemovePaymentMethods: Boolean,
+        defaultPaymentMethodId: String?
     ): List<PaymentOptionsItem>? {
         if (isLinkEnabled == null) return null
 
@@ -50,7 +50,7 @@ internal class PaymentOptionsItemsMapper(
             showLink = isLinkEnabled && isNotPaymentFlow,
             nameProvider = nameProvider,
             isCbcEligible = isCbcEligible(),
-            canRemovePaymentMethods = canRemovePaymentMethods,
+            defaultPaymentMethodId = defaultPaymentMethodId
         )
     }
 }

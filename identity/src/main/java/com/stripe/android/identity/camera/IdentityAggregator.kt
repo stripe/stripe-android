@@ -48,8 +48,7 @@ internal class IdentityAggregator(
                     ?: IDDetectorTransitioner.DEFAULT_BLUR_THRESHOLD
             )
         }
-    ),
-    statsName = null
+    )
 ) {
     private var isFirstResultReceived = false
 

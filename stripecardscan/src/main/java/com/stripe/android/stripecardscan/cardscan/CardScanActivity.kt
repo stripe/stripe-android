@@ -12,7 +12,6 @@ import android.widget.ImageView
 import androidx.activity.addCallback
 import androidx.annotation.RestrictTo
 import com.stripe.android.camera.CameraPreviewImage
-import com.stripe.android.camera.framework.Stats
 import com.stripe.android.camera.scanui.ScanErrorListener
 import com.stripe.android.camera.scanui.ScanState
 import com.stripe.android.camera.scanui.SimpleScanStateful
@@ -22,16 +21,10 @@ import com.stripe.android.camera.scanui.util.setDrawable
 import com.stripe.android.camera.scanui.util.startAnimation
 import com.stripe.android.stripecardscan.R
 import com.stripe.android.stripecardscan.camera.getScanCameraAdapter
-import com.stripe.android.stripecardscan.cardscan.exception.InvalidStripePublishableKeyException
 import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopState
 import com.stripe.android.stripecardscan.databinding.StripeActivityCardscanBinding
-import com.stripe.android.stripecardscan.framework.api.dto.ScanStatistics
-import com.stripe.android.stripecardscan.framework.api.uploadScanStatsOCR
-import com.stripe.android.stripecardscan.framework.util.AppDetails
-import com.stripe.android.stripecardscan.framework.util.Device
-import com.stripe.android.stripecardscan.framework.util.ScanConfig
 import com.stripe.android.stripecardscan.payment.card.ScannedCard
 import com.stripe.android.stripecardscan.scanui.CancellationReason
 import com.stripe.android.stripecardscan.scanui.ScanActivity
@@ -43,8 +36,6 @@ import com.stripe.android.stripecardscan.scanui.util.show
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import java.util.concurrent.atomic.AtomicBoolean
 
 internal const val INTENT_PARAM_REQUEST = "request"
 internal const val INTENT_PARAM_RESULT = "result"
@@ -89,13 +80,6 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
     private val viewFinderBackground: ViewFinderBackground by lazy {
         viewBinding.cameraView.viewFinderBackgroundView
     }
-
-    private val params: CardScanSheetParams by lazy {
-        intent.getParcelableExtra(INTENT_PARAM_REQUEST)
-            ?: CardScanSheetParams("")
-    }
-
-    private val hasPreviousValidResult = AtomicBoolean(false)
 
     override var scanState: CardScanState? = CardScanState.NotFound
 
@@ -158,7 +142,6 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
                     changeScanState(CardScanState.Correct)
                     cameraAdapter.unbindFromLifecycle(this@CardScanActivity)
                     resultListener.cardScanComplete(ScannedCard(result.pan))
-                    scanStat.trackResult("card_scanned")
                     closeScanner()
                 }.let { }
             }
@@ -169,13 +152,6 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
             override suspend fun onInterimResult(
                 result: MainLoopAggregator.InterimResult
             ) = launch(Dispatchers.Main) {
-                if (
-                    result.state is MainLoopState.OcrFound &&
-                    !hasPreviousValidResult.getAndSet(true)
-                ) {
-                    scanStat.trackResult("ocr_pan_observed")
-                }
-
                 when (result.state) {
                     is MainLoopState.Initial -> changeScanState(CardScanState.NotFound)
                     is MainLoopState.OcrFound -> changeScanState(CardScanState.Found)
@@ -194,12 +170,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
-        if (!ensureValidParams()) {
-            return
-        }
-
         onBackPressedDispatcher.addCallback {
-            runBlocking { scanStat.trackResult("user_canceled") }
             resultListener.userCanceled(CancellationReason.Back)
             closeScanner()
         }
@@ -262,7 +233,10 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
             viewFinder = viewBinding.cameraView.viewFinderWindowView.asRect(),
             lifecycleOwner = this,
             coroutineScope = this,
-            parameters = null
+            parameters = null,
+            errorHandler = { e ->
+                scanErrorListener.onResultFailure(e)
+            }
         )
     }
 
@@ -275,14 +249,6 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
         } else {
             viewBinding.torchButton.setDrawable(R.drawable.stripe_flash_off_dark)
         }
-    }
-
-    private fun ensureValidParams() = when {
-        params.stripePublishableKey.isEmpty() -> {
-            scanFailure(InvalidStripePublishableKeyException("Missing publishable key"))
-            false
-        }
-        else -> true
     }
 
     override fun displayState(newState: CardScanState, previousState: CardScanState?) {
@@ -316,15 +282,6 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
     }
 
     override fun closeScanner() {
-        uploadScanStatsOCR(
-            stripePublishableKey = params.stripePublishableKey,
-            instanceId = Stats.instanceId,
-            scanId = Stats.scanId,
-            device = Device.fromContext(this),
-            appDetails = AppDetails.fromContext(this),
-            scanStatistics = ScanStatistics.fromStats(),
-            scanConfig = ScanConfig(0)
-        )
         super.closeScanner()
     }
 }

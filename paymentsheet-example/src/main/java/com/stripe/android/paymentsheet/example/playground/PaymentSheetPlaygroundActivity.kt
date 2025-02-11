@@ -1,35 +1,22 @@
 package com.stripe.android.paymentsheet.example.playground
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
-import androidx.compose.material.Divider
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,12 +25,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
-import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
@@ -53,7 +39,10 @@ import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBot
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
+import com.stripe.android.paymentsheet.example.playground.activity.getEmbeddedAppearance
+import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundContract
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
+import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedAppearanceSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
@@ -62,6 +51,7 @@ import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
 import com.stripe.android.paymentsheet.model.PaymentOption
+import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
@@ -83,12 +73,20 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         )
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
+    private val embeddedPlaygroundLauncher = registerForActivityResult(EmbeddedPlaygroundContract()) { success ->
+        viewModel.onEmbeddedResult(success)
+    }
+
+    @OptIn(ExperimentalCustomerSessionApi::class)
     @Suppress("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         setContent {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                window.isNavigationBarContrastEnforced = false
+            }
             val paymentSheet = PaymentSheet.Builder(viewModel::onPaymentSheetResult)
                 .externalPaymentMethodConfirmHandler(this)
                 .createIntentCallback(viewModel::createIntentCallback)
@@ -112,14 +110,26 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
             var showCustomEndpointDialog by remember { mutableStateOf(false) }
             val endpoint = playgroundState?.endpoint
 
-            val adapter = remember(playgroundState) {
-                viewModel.createCustomerAdapter(playgroundState)
-            }
+            val customerPlaygroundState = playgroundState?.asCustomerState()
+            val customerSheet = if (customerPlaygroundState?.isUsingCustomerSession == true) {
+                val customerSessionProvider = remember(customerPlaygroundState) {
+                    viewModel.createCustomerSessionProvider(customerPlaygroundState)
+                }
 
-            val customerSheet = rememberCustomerSheet(
-                customerAdapter = adapter,
-                callback = viewModel::onCustomerSheetCallback
-            )
+                rememberCustomerSheet(
+                    customerSessionProvider = customerSessionProvider,
+                    callback = viewModel::onCustomerSheetCallback
+                )
+            } else {
+                val adapter = remember(playgroundState) {
+                    viewModel.createCustomerAdapter(playgroundState)
+                }
+
+                rememberCustomerSheet(
+                    customerAdapter = adapter,
+                    callback = viewModel::onCustomerSheetCallback
+                )
+            }
 
             if (showCustomEndpointDialog) {
                 CustomEndpointDialog(
@@ -193,9 +203,23 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
 
     @Composable
     private fun AppearanceButton() {
+        val settings = viewModel.playgroundSettingsFlow.collectAsState().value
+        val embeddedAppearance = settings?.get(EmbeddedAppearanceSettingsDefinition)?.collectAsState()?.value
+        supportFragmentManager.setFragmentResultListener(
+            AppearanceBottomSheetDialogFragment.REQUEST_KEY,
+            this@PaymentSheetPlaygroundActivity
+        ) { _, bundle ->
+            viewModel.updateEmbeddedAppearance(
+                EmbeddedAppearanceSettingsDefinition,
+                bundle.getEmbeddedAppearance()
+            )
+        }
         Button(
             onClick = {
                 val bottomSheet = AppearanceBottomSheetDialogFragment.newInstance()
+                bottomSheet.arguments = Bundle().apply {
+                    putParcelable(AppearanceBottomSheetDialogFragment.EMBEDDED_KEY, embeddedAppearance)
+                }
                 bottomSheet.show(supportFragmentManager, bottomSheet.tag)
             },
             modifier = Modifier.fillMaxWidth(),
@@ -251,7 +275,6 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         }
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
     @Composable
     private fun PlaygroundStateUi(
         playgroundState: PlaygroundState?,
@@ -263,13 +286,16 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         if (playgroundState == null) {
             return
         }
+        playgroundState.snapshot.setValues()
 
         when (playgroundState) {
             is PlaygroundState.Payment -> {
-                ShippingAddressButton(
-                    addressLauncher = addressLauncher,
-                    playgroundState = playgroundState,
-                )
+                if (playgroundState.displaysShippingAddressButton()) {
+                    ShippingAddressButton(
+                        addressLauncher = addressLauncher,
+                        playgroundState = playgroundState,
+                    )
+                }
 
                 when (playgroundState.integrationType) {
                     PlaygroundConfigurationData.IntegrationType.PaymentSheet -> {
@@ -285,6 +311,13 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
                             playgroundState = playgroundState,
                         )
                     }
+
+                    PlaygroundConfigurationData.IntegrationType.Embedded -> {
+                        EmbeddedUi(
+                            playgroundState = playgroundState,
+                        )
+                    }
+
                     else -> Unit
                 }
             }
@@ -354,7 +387,18 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         )
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
+    @Composable
+    fun EmbeddedUi(
+        playgroundState: PlaygroundState.Payment,
+    ) {
+        BuyButton(
+            buyButtonEnabled = true,
+            onClick = {
+                embeddedPlaygroundLauncher.launch(playgroundState)
+            }
+        )
+    }
+
     @Composable
     fun CustomerSheetUi(
         customerSheet: CustomerSheet,
@@ -434,12 +478,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
             }
         } else {
             paymentSheet.presentWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = playgroundState.checkoutMode.intentConfigurationMode(playgroundState),
-                    paymentMethodTypes = playgroundState.paymentMethodTypes,
-                    paymentMethodConfigurationId = playgroundState.paymentMethodConfigurationId,
-                    requireCvcRecollection = playgroundState.requireCvcRecollectionForDeferred
-                ),
+                intentConfiguration = playgroundState.intentConfiguration(),
                 configuration = playgroundState.paymentSheetConfiguration(),
             )
         }
@@ -465,19 +504,13 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
             }
         } else {
             flowController.configureWithIntentConfiguration(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = playgroundState.checkoutMode.intentConfigurationMode(playgroundState),
-                    paymentMethodTypes = playgroundState.paymentMethodTypes,
-                    paymentMethodConfigurationId = playgroundState.paymentMethodConfigurationId,
-                    requireCvcRecollection = playgroundState.requireCvcRecollectionForDeferred
-                ),
+                intentConfiguration = playgroundState.intentConfiguration(),
                 configuration = playgroundState.paymentSheetConfiguration(),
                 callback = viewModel::onFlowControllerConfigured,
             )
         }
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
     private suspend fun fetchOption(
         customerSheet: CustomerSheet
     ): Result<PaymentOption?> = withContext(Dispatchers.IO) {
@@ -500,57 +533,6 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
                 .putExtra(FawryActivity.EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE, externalPaymentMethodType)
                 .putExtra(FawryActivity.EXTRA_BILLING_DETAILS, billingDetails)
         )
-    }
-}
-
-@Composable
-private fun PlaygroundTheme(
-    content: @Composable ColumnScope.() -> Unit,
-    bottomBarContent: @Composable ColumnScope.() -> Unit,
-) {
-    val colors = if (isSystemInDarkTheme() || AppearanceStore.forceDarkMode) {
-        darkColors()
-    } else {
-        lightColors()
-    }
-    MaterialTheme(
-        typography = MaterialTheme.typography.copy(
-            body1 = MaterialTheme.typography.body1.copy(fontSize = 14.sp)
-        ),
-        colors = colors,
-    ) {
-        Surface(
-            color = MaterialTheme.colors.background,
-        ) {
-            Scaffold(
-                bottomBar = {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(MaterialTheme.colors.surface)
-                            .animateContentSize()
-                    ) {
-                        Divider()
-                        Column(
-                            content = bottomBarContent,
-                            modifier = Modifier
-                                .padding(horizontal = 12.dp, vertical = 8.dp)
-                                .fillMaxWidth()
-                        )
-                    }
-                },
-            ) { paddingValues ->
-                Box(modifier = Modifier.padding(paddingValues)) {
-                    Column(
-                        modifier = Modifier
-                            .verticalScroll(rememberScrollState())
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        content = content,
-                    )
-                }
-            }
-        }
     }
 }
 

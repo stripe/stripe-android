@@ -77,7 +77,7 @@
   <!-- Placeholder for AU BECS BSB number -->
   <string name="stripe_au_becs_bsb_number">Nombor BSB</string>
   <!-- Legal text shown when using AUBECS. -->
-  <string name="stripe_au_becs_mandate">Dengan memberikan butiran akaun bank anda dan mengesahkan pembayaran ini, anda bersetuju dengan Permintaan Debit Terus ini dan &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;perjanjian perkhidmatan Permintaan Debit Terus&lt;/a&gt;, serta memberikan kuasa kepada Stripe Payments Australia Pty Ltd ACN 160 180 343 ID Pengguna Debit Terus bernombor 507156 (“Stripe”) untuk mendebitkan akaun anda melalui Sistem Penjelasan Elektronik Pukal (Bulk Electronic Clearing System, BECS) bagi pihak %s (\"Peniaga\") untuk sebarang amaun yang dikomunikasikan kepada anda secara berasingan oleh Peniaga. Anda memperakui anda merupakan sama ada pemegang akaun atau penandatangan yang dibenarkan bagi akaun yang tersenarai di atas.</string>
+  <string name="stripe_au_becs_mandate">Dengan memberikan butiran akaun bank anda dan mengesahkan pembayaran ini, anda bersetuju dengan Permintaan Debit Terus ini dan &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;perjanjian perkhidmatan Permintaan Debit Terus&lt;/a&gt;, serta memberikan kuasa kepada Stripe Payments Australia Pty Ltd ACN 160 180 343 ID Pengguna Debit Terus bernombor 507156 (“Stripe”) untuk mendebitkan akaun anda melalui Sistem Penjelasan Elektronik Pukal (Bulk Electronic Clearing System, BECS) bagi pihak %s (\"Peniaga\") untuk sebarang amaun yang dikomunikasikan kepada anda secara berasingan oleh Peniaga. Anda memperakui bahawa anda merupakan sama ada pemegang akaun atau penandatangan yang dibenarkan bagi akaun yang tersenarai di atas.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
   <string name="stripe_becs_mandate_acceptance">\n    Dengan memberikan butiran akaun bank anda dan mengesahkan pembayaran ini, anda bersetuju \n    dengan Permintaan Debit Terus ini dan perjanjian perkhidmatan Permintaan Debit Terus, serta \n    memberikan kuasa kepada Stripe Payments Australia Pty Ltd ACN 160 180 343 ID Pengguna \n    Debit Terus bernombor 507156 (“Stripe”) untuk mendebitkan akaun anda melalui Sistem \n    Penjelasan Elektronik Pukal (Bulk Electronic Clearing System, BECS) bagi pihak %1$s (\"Peniaga\") \n    untuk sebarang amaun yang dikomunikasikan kepada anda secara berasingan oleh Peniaga. \n    Anda memperakui bahawa anda merupakan seorang pemegang akaun atau penandatangan yang dibenarkan bagi akaun yang tersenarai di atas.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
@@ -112,11 +112,17 @@
   <string name="stripe_card_declined">Kad anda telah ditolak</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
   <string name="stripe_card_ending_in">%1$s – berakhiran %2$s</string>
+  <!-- Concise details of a saved card. &apos;{card brand} ···· {last 4}&apos; e.g. &apos;VISA ···· 4242&apos; -->
+  <string name="stripe_card_plus_last_4">%1$s ···· %2$s</string>
+  <!-- Concise details of a saved card. &apos;{card brand} ····{last 4}&apos; e.g. &apos;VISA ····4242&apos; -->
+  <string name="stripe_card_with_last_4">%1$s ····%2$s</string>
   <!-- Text for close button -->
   <string name="stripe_close">Tutup</string>
   <!-- Accessibility action for deleting a payment method -->
   <string name="stripe_delete_payment_method">Hapuskan Kaedah Pembayaran</string>
   <string name="stripe_delete_payment_method_prompt_title">Hapuskan kaedah pembayaran?</string>
+  <!-- Error message for card entry form when a user enters a card with a brand that is not accepted. -->
+  <string name="stripe_disallowed_card_brand">%s tidak diterima</string>
   <!-- Done button title -->
   <string name="stripe_done">Selesai</string>
   <!-- Button title to enter editing mode -->
@@ -156,7 +162,7 @@
   <!-- Label for free shipping method -->
   <string name="stripe_price_free">Percuma</string>
   <!-- Error when there is a problem processing the credit card -->
-  <string name="stripe_processing_error">Ada ralat semasa memproses kad anda -- cuba lagi dalam masa beberapa saat</string>
+  <string name="stripe_processing_error">Ada ralat ketika memproses kad anda -- cuba lagi dalam masa beberapa saat</string>
   <!-- Button title for confirmation alert to remove a saved payment method
    Text for remove button -->
   <string name="stripe_remove">Alih Keluar</string>

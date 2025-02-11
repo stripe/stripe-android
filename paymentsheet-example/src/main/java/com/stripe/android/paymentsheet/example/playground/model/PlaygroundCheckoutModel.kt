@@ -38,12 +38,16 @@ class CheckoutRequest private constructor(
     val paymentMethodSaveFeature: FeatureState?,
     @SerialName("customer_session_payment_method_remove")
     val paymentMethodRemoveFeature: FeatureState?,
+    @SerialName("customer_session_payment_method_remove_last")
+    val paymentMethodRemoveLastFeature: FeatureState?,
     @SerialName("customer_session_payment_method_redisplay")
     val paymentMethodRedisplayFeature: FeatureState?,
     @SerialName("customer_session_payment_method_allow_redisplay_filters")
     val paymentMethodRedisplayFilters: List<AllowRedisplayFilter>?,
     @SerialName("customer_session_payment_method_save_allow_redisplay_override")
     val paymentMethodOverrideRedisplay: AllowRedisplayFilter?,
+    @SerialName("customer_session_payment_method_set_as_default")
+    val paymentMethodSetAsDefaultFeature: FeatureState?,
 ) {
     @Serializable
     enum class CustomerKeyType {
@@ -69,6 +73,8 @@ class CheckoutRequest private constructor(
         private var requireCvcRecollection: Boolean? = null
         private var paymentMethodSaveFeature: FeatureState = FeatureState.Enabled
         private var paymentMethodRemoveFeature: FeatureState = FeatureState.Enabled
+        private var paymentMethodRemoveLastFeature: FeatureState = FeatureState.Enabled
+        private var paymentMethodSetAsDefaultFeature: FeatureState = FeatureState.Disabled
         private var paymentMethodRedisplayFeature: FeatureState = FeatureState.Enabled
         private var paymentMethodRedisplayFilters: List<AllowRedisplayFilter> = listOf(
             AllowRedisplayFilter.Unspecified,
@@ -129,6 +135,14 @@ class CheckoutRequest private constructor(
             this.paymentMethodRemoveFeature = state
         }
 
+        fun paymentMethodRemoveLastFeature(state: FeatureState) {
+            this.paymentMethodRemoveLastFeature = state
+        }
+
+        fun paymentMethodSetAsDefaultFeature(state: FeatureState) {
+            this.paymentMethodSetAsDefaultFeature = state
+        }
+
         fun paymentMethodRedisplayFeature(state: FeatureState) {
             this.paymentMethodRedisplayFeature = state
         }
@@ -162,6 +176,8 @@ class CheckoutRequest private constructor(
                 customerSessionComponentName = "mobile_payment_element",
                 paymentMethodSaveFeature = paymentMethodSaveFeature,
                 paymentMethodRemoveFeature = paymentMethodRemoveFeature,
+                paymentMethodSetAsDefaultFeature = paymentMethodSetAsDefaultFeature,
+                paymentMethodRemoveLastFeature = paymentMethodRemoveLastFeature,
                 paymentMethodRedisplayFeature = paymentMethodRedisplayFeature,
                 paymentMethodRedisplayFilters = paymentMethodRedisplayFilters,
                 paymentMethodOverrideRedisplay = paymentMethodOverrideRedisplay,

@@ -8,12 +8,11 @@ import com.stripe.android.financialconnections.repository.api.ProvideApiRequestO
 import dagger.Module
 import dagger.Provides
 import java.util.Locale
-import javax.inject.Singleton
 
 @Module
 internal object FinancialConnectionsSheetModule {
 
-    @Singleton
+    @ActivityRetainedScope
     @Provides
     internal fun providesProvideApiRequestOptions(
         apiRequestOptions: ApiRequest.Options,
@@ -22,7 +21,7 @@ internal object FinancialConnectionsSheetModule {
         return ProvideApiRequestOptions { apiRequestOptions }
     }
 
-    @Singleton
+    @ActivityRetainedScope
     @Provides
     fun providesFinancialConnectionsManifestRepository(
         requestExecutor: FinancialConnectionsRequestExecutor,

@@ -44,9 +44,7 @@
 
         <activity android:name=".activity.CreateCardTokenActivity" />
         <activity android:name=".activity.CreateCardSourceActivity" />
-        <activity android:name=".activity.CustomerSessionActivity" />
         <activity android:name=".activity.CreateCardPaymentMethodActivity" />
-        <activity android:name=".activity.PaymentSessionActivity" />
         <activity android:name=".activity.GooglePayLauncherIntegrationActivity" />
         <activity android:name=".activity.GooglePayLauncherPlaygroundActivity" />
         <activity android:name=".activity.GooglePayLauncherComposeActivity" />
@@ -54,10 +52,7 @@
         <activity android:name=".activity.GooglePayPaymentMethodLauncherComposeActivity" />
         <activity android:name=".activity.PaymentAuthActivity" />
         <activity android:name=".activity.CardBrandChoiceExampleActivity" />
-        <activity android:name=".activity.FragmentExamplesActivity" />
         <activity android:name=".activity.ConfirmSepaDebitActivity" />
-        <activity android:name=".activity.FpxPaymentActivity" />
-        <activity android:name=".activity.NetbankingListPaymentActivity" />
         <activity android:name=".activity.BecsDebitPaymentMethodActivity" />
         <activity android:name=".activity.BacsDebitPaymentMethodActivity" />
         <activity android:name=".activity.MultibancoActivity" />
@@ -88,6 +83,7 @@
         <activity android:name=".activity.SunbitActivity"/>
         <activity android:name=".activity.BillieActivity"/>
         <activity android:name=".activity.SatispayActivity"/>
+        <activity android:name=".activity.CryptoActivity"/>
         <activity android:name=".activity.CardInputWidgetComposeExampleActivity"/>
     </application>
 

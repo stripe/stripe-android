@@ -7,6 +7,9 @@ tags:
 - startRecording: ${'/tmp/test_results/testmode-data-testoauthinstitution-' + new Date().getTime()}
 - clearState
 - openLink: stripeconnectionsexample://playground?integration_type=Standalone&experience=FinancialConnections&flow=Data&financial_connections_override_native=native&merchant=testmode&financial_connections_test_mode=true
+- scrollUntilVisible:
+    element:
+      id: "connect_accounts"
 - tapOn:
     id: "connect_accounts"
 # Wait until the consent button is visible
@@ -16,9 +19,9 @@ tags:
     timeout: 30000
 # Common: web AuthFlow - connect OAuth institution
 - tapOn: "Agree and continue"
-- assertVisible: "Test OAuth Institution"
 # SELECT OAUTH INSTITUTION
-- tapOn: "Test OAuth Institution"
+- tapOn:
+    id: "bcinst_LLQZzmKZMjl0j0"
 - tapOn:
     id: "prepane_cta"
 ####### Bypass Chrome on-boarding screen #######
@@ -37,6 +40,10 @@ tags:
 - assertVisible: "Your accounts were connected."
 - tapOn:
     id: "done_button"
-- assertVisible: ".*Completed!.*"
-- assertVisible: ".*StripeBank.*"
+- scrollUntilVisible:
+    element:
+      text: ".*Completed!.*"
+- scrollUntilVisible:
+    element:
+      text: ".*StripeBank.*"
 - stopRecording

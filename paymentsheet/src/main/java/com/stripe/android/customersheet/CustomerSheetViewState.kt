@@ -2,22 +2,19 @@ package com.stripe.android.customersheet
 
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
-import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.FormElement
 
@@ -28,16 +25,17 @@ internal sealed class CustomerSheetViewState(
 ) {
     abstract fun topBarState(onEditIconPressed: () -> Unit): PaymentSheetTopBarState
 
-    fun shouldDisplayDismissConfirmationModal(
-        isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
-    ): Boolean {
-        return this is AddPaymentMethod &&
-            paymentMethodCode == PaymentMethod.Type.USBankAccount.code &&
-            isFinancialConnectionsAvailable() &&
-            bankAccountResult is CollectBankAccountResultInternal.Completed &&
-            bankAccountResult.response.usBankAccountData
-                ?.financialConnectionsSession
-                ?.paymentAccount is FinancialConnectionsAccount
+    fun shouldDisplayDismissConfirmationModal(): Boolean {
+        return when (this) {
+            is Loading,
+            is UpdatePaymentMethod,
+            is SelectPaymentMethod -> {
+                false
+            }
+            is AddPaymentMethod -> {
+                paymentMethodCode == PaymentMethod.Type.USBankAccount.code && bankAccountSelection != null
+            }
+        }
     }
 
     data class Loading(
@@ -49,7 +47,6 @@ internal sealed class CustomerSheetViewState(
     ) {
         override fun topBarState(onEditIconPressed: () -> Unit): PaymentSheetTopBarState {
             return PaymentSheetTopBarStateFactory.create(
-                hasBackStack = canNavigateBack,
                 isLiveMode = isLiveMode,
                 editable = PaymentSheetTopBarState.Editable.Never,
             )
@@ -82,7 +79,6 @@ internal sealed class CustomerSheetViewState(
 
         override fun topBarState(onEditIconPressed: () -> Unit): PaymentSheetTopBarState {
             return PaymentSheetTopBarStateFactory.create(
-                hasBackStack = canNavigateBack,
                 isLiveMode = isLiveMode,
                 editable = PaymentSheetTopBarState.Editable.Maybe(
                     isEditing = isEditing,
@@ -112,7 +108,7 @@ internal sealed class CustomerSheetViewState(
         val mandateText: ResolvableString? = null,
         val showMandateAbovePrimaryButton: Boolean = false,
         val displayDismissConfirmationModal: Boolean = false,
-        val bankAccountResult: CollectBankAccountResultInternal?,
+        val bankAccountSelection: PaymentSelection.New.USBankAccount?,
         val errorReporter: ErrorReporter,
     ) : CustomerSheetViewState(
         isLiveMode = isLiveMode,
@@ -121,15 +117,14 @@ internal sealed class CustomerSheetViewState(
     ) {
         override fun topBarState(onEditIconPressed: () -> Unit): PaymentSheetTopBarState {
             return PaymentSheetTopBarStateFactory.create(
-                hasBackStack = canNavigateBack,
                 isLiveMode = isLiveMode,
                 editable = PaymentSheetTopBarState.Editable.Never,
             )
         }
     }
 
-    data class EditPaymentMethod(
-        val editPaymentMethodInteractor: ModifiableEditPaymentMethodViewInteractor,
+    data class UpdatePaymentMethod(
+        val updatePaymentMethodInteractor: UpdatePaymentMethodInteractor,
         override val isLiveMode: Boolean,
     ) : CustomerSheetViewState(
         isLiveMode = isLiveMode,
@@ -138,7 +133,6 @@ internal sealed class CustomerSheetViewState(
     ) {
         override fun topBarState(onEditIconPressed: () -> Unit): PaymentSheetTopBarState {
             return PaymentSheetTopBarStateFactory.create(
-                hasBackStack = canNavigateBack,
                 isLiveMode = isLiveMode,
                 editable = PaymentSheetTopBarState.Editable.Never,
             )
