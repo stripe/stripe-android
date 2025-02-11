@@ -165,7 +165,7 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity() {
 
     companion object {
 
-        private const val EXTRA_ARGS = "FinancialConnectionsSheetActivityArgs"
+        internal const val EXTRA_ARGS = "FinancialConnectionsWebviewActivityArgs"
         fun intent(context: Context, args: FinancialConnectionsSheetActivityArgs): Intent {
             return Intent(context, FinancialConnectionsSheetActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
