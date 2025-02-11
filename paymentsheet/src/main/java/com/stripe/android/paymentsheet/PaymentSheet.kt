@@ -1014,7 +1014,11 @@ class PaymentSheet internal constructor(
                      * Additional vertical insets applied to a payment method row.
                      * - Note: Increasing this value increases the height of each row.
                      */
-                    internal val additionalInsetsDp: Float,
+                    internal val additionalVerticalInsetsDp: Float,
+                    /**
+                     * Additional horizontal insets applied to a payment method row.
+                     */
+                    internal val additionalHorizontalInsetsDp: Float,
                 ) : RowStyle() {
                     constructor(
                         context: Context,
@@ -1026,7 +1030,8 @@ class PaymentSheet internal constructor(
                         bottomSeparatorEnabled: Boolean,
                         selectedColor: Color,
                         unselectedColor: Color,
-                        additionalInsetsDp: Int
+                        additionalVerticalInsetsDp: Int,
+                        additionalHorizontalInsetsDp: Int
                     ) : this(
                         separatorThicknessDp = context.getRawValueFromDimenResource(separatorThicknessDp),
                         separatorColor = separatorColor.toArgb(),
@@ -1036,7 +1041,8 @@ class PaymentSheet internal constructor(
                         bottomSeparatorEnabled = bottomSeparatorEnabled,
                         selectedColor = selectedColor.toArgb(),
                         unselectedColor = unselectedColor.toArgb(),
-                        additionalInsetsDp = context.getRawValueFromDimenResource(additionalInsetsDp)
+                        additionalVerticalInsetsDp = context.getRawValueFromDimenResource(additionalVerticalInsetsDp),
+                        additionalHorizontalInsetsDp = context.getRawValueFromDimenResource(additionalHorizontalInsetsDp)
                     )
 
                     override fun hasSeparators() = true
@@ -1052,7 +1058,8 @@ class PaymentSheet internal constructor(
                             bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
                             selectedColor = StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
                             unselectedColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
-                            additionalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalInsetsDp
+                            additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalInsetsDp,
+                            additionalHorizontalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalInsetsDp
                         )
 
                         val defaultDark = FlatWithRadio(
@@ -1064,7 +1071,8 @@ class PaymentSheet internal constructor(
                             bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
                             selectedColor = StripeThemeDefaults.colorsDark.materialColors.primary.toArgb(),
                             unselectedColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
-                            additionalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalInsetsDp
+                            additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalInsetsDp,
+                            additionalHorizontalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalInsetsDp
                         )
                     }
                 }
@@ -1117,7 +1125,11 @@ class PaymentSheet internal constructor(
                      * Additional vertical insets applied to a payment method row.
                      * - Note: Increasing this value increases the height of each row.
                      */
-                    internal val additionalInsetsDp: Float,
+                    internal val additionalVerticalInsetsDp: Float,
+                    /**
+                     * Additional horizontal insets applied to a payment method row.
+                     */
+                    internal val additionalHorizontalInsetsDp: Float,
                 ) : RowStyle() {
                     constructor(
                         context: Context,
@@ -1129,7 +1141,8 @@ class PaymentSheet internal constructor(
                         bottomSeparatorEnabled: Boolean,
                         checkmarkColor: Color,
                         checkmarkInsetDp: Int,
-                        additionalInsetsDp: Int
+                        additionalVerticalInsetsDp: Int,
+                        additionalHorizontalInsetsDp: Int
                     ) : this(
                         separatorThicknessDp = context.getRawValueFromDimenResource(separatorThicknessDp),
                         separatorColor = separatorColor.toArgb(),
@@ -1139,7 +1152,8 @@ class PaymentSheet internal constructor(
                         bottomSeparatorEnabled = bottomSeparatorEnabled,
                         checkmarkColor = checkmarkColor.toArgb(),
                         checkmarkInsetDp = context.getRawValueFromDimenResource(checkmarkInsetDp),
-                        additionalInsetsDp = context.getRawValueFromDimenResource(additionalInsetsDp)
+                        additionalVerticalInsetsDp = context.getRawValueFromDimenResource(additionalVerticalInsetsDp),
+                        additionalHorizontalInsetsDp = context.getRawValueFromDimenResource(additionalHorizontalInsetsDp)
                     )
 
                     override fun hasSeparators() = true
@@ -1155,7 +1169,8 @@ class PaymentSheet internal constructor(
                             bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
                             checkmarkColor = StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
                             checkmarkInsetDp = StripeThemeDefaults.embeddedCommon.checkmarkInsetDp,
-                            additionalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalInsetsDp
+                            additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalInsetsDp,
+                            additionalHorizontalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalInsetsDp,
                         )
 
                         val defaultDark = FlatWithCheckmark(
@@ -1167,7 +1182,8 @@ class PaymentSheet internal constructor(
                             bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
                             checkmarkColor = StripeThemeDefaults.colorsDark.materialColors.primary.toArgb(),
                             checkmarkInsetDp = StripeThemeDefaults.embeddedCommon.checkmarkInsetDp,
-                            additionalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalInsetsDp
+                            additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalInsetsDp,
+                            additionalHorizontalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalInsetsDp
                         )
                     }
                 }
