@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
@@ -14,10 +13,8 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.ui.core.R
 import kotlinx.coroutines.test.TestScope
@@ -128,6 +125,43 @@ class DefaultFormActivityStateHelperTest {
             assertThat(failedState.isEnabled).isTrue()
             assertThat(failedState.isProcessing).isFalse()
             assertThat(failedState.processingState).isEqualTo(PrimaryButtonProcessingState.Idle(null))
+            assertThat(failedState.error).isEqualTo("Something went wrong".resolvableString)
+        }
+    }
+
+    @Test
+    fun `confirming state clears errors`() = testScenario {
+        stateHolder.state.test {
+            awaitAndVerifyInitialState()
+
+            stateHolder.update(confirmationStateComplete(false))
+            val failedState = awaitItem()
+            assertThat(failedState.error).isEqualTo("Something went wrong".resolvableString)
+
+            stateHolder.update(confirmationStateConfirming(PaymentMethodFixtures.CARD_PAYMENT_SELECTION))
+            val confirmingState = awaitItem()
+            assertThat(confirmingState.error).isNull()
+        }
+    }
+
+    @Test
+    fun `canceled result clears errors`() = testScenario {
+        stateHolder.state.test {
+            awaitAndVerifyInitialState()
+
+            stateHolder.update(confirmationStateComplete(false))
+            assertThat(awaitItem().error).isEqualTo("Something went wrong".resolvableString)
+
+            stateHolder.update(
+                ConfirmationHandler.State.Complete(
+                    result = ConfirmationHandler.Result.Canceled(
+                        action = ConfirmationHandler.Result.Canceled.Action.None
+                    )
+                )
+            )
+            val canceledState = awaitItem()
+            assertThat(canceledState.error).isNull()
+            assertThat(canceledState.isProcessing).isFalse()
         }
     }
 
@@ -161,29 +195,5 @@ class DefaultFormActivityStateHelperTest {
         assertThat(initialState.processingState).isEqualTo(PrimaryButtonProcessingState.Idle(null))
         assertThat(initialState.isEnabled).isFalse()
         assertThat(initialState.isProcessing).isFalse()
-    }
-
-    private fun confirmationStateConfirming(selection: PaymentSelection): ConfirmationHandler.State.Confirming {
-        val confirmationOption = selection.toConfirmationOption(
-            configuration = EmbeddedConfirmationStateFixtures.defaultState().configuration.asCommonConfiguration(),
-            linkConfiguration = null
-        )
-        return ConfirmationHandler.State.Confirming(requireNotNull(confirmationOption))
-    }
-
-    private fun confirmationStateComplete(succeeded: Boolean): ConfirmationHandler.State.Complete {
-        val result = if (succeeded) {
-            ConfirmationHandler.Result.Succeeded(
-                PaymentIntentFixtures.PI_SUCCEEDED,
-                null
-            )
-        } else {
-            ConfirmationHandler.Result.Failed(
-                cause = Throwable(),
-                message = "Whoops".resolvableString,
-                type = ConfirmationHandler.Result.Failed.ErrorType.Internal
-            )
-        }
-        return ConfirmationHandler.State.Complete(result)
     }
 }

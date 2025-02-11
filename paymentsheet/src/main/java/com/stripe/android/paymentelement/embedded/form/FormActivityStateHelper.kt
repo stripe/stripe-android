@@ -32,6 +32,7 @@ internal interface FormActivityStateHelper {
         val isEnabled: Boolean,
         val processingState: PrimaryButtonProcessingState,
         val isProcessing: Boolean,
+        val error: ResolvableString? = null,
     )
 }
 
@@ -76,23 +77,30 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
     ): FormActivityStateHelper.State {
         return when (state) {
             is ConfirmationHandler.State.Complete -> {
-                if (state.result is ConfirmationHandler.Result.Succeeded) {
-                    copy(
+                when (state.result) {
+                    is ConfirmationHandler.Result.Succeeded -> copy(
                         processingState = PrimaryButtonProcessingState.Completed,
                         isEnabled = false
                     )
-                } else {
-                    copy(
+                    is ConfirmationHandler.Result.Failed -> copy(
                         processingState = PrimaryButtonProcessingState.Idle(null),
                         isEnabled = selectionHolder.selection.value != null,
-                        isProcessing = false
+                        isProcessing = false,
+                        error = state.result.message
+                    )
+                    is ConfirmationHandler.Result.Canceled -> copy(
+                        processingState = PrimaryButtonProcessingState.Idle(null),
+                        isEnabled = selectionHolder.selection.value != null,
+                        isProcessing = false,
+                        error = null
                     )
                 }
             }
             is ConfirmationHandler.State.Confirming -> copy(
                 processingState = PrimaryButtonProcessingState.Processing,
                 isProcessing = true,
-                isEnabled = false
+                isEnabled = false,
+                error = null
             )
             is ConfirmationHandler.State.Idle -> copy(
                 isProcessing = false,
