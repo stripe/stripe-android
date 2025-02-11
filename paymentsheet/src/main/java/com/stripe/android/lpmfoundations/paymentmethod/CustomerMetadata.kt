@@ -5,5 +5,6 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 internal data class CustomerMetadata(
-    val isPaymentMethodSetAsDefaultEnabled: Boolean
+    val hasCustomerConfiguration: Boolean,
+    val isPaymentMethodSetAsDefaultEnabled: Boolean,
 ) : Parcelable

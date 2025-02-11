@@ -33,6 +33,7 @@ class PaymentOptionsItemsMapperTest {
             nameProvider = { it!!.resolvableString },
             isCbcEligible = { false },
             customerMetadata = CustomerMetadata(
+                hasCustomerConfiguration = false,
                 isPaymentMethodSetAsDefaultEnabled = false
             ),
         )
@@ -66,6 +67,7 @@ class PaymentOptionsItemsMapperTest {
             nameProvider = { it!!.resolvableString },
             isCbcEligible = { false },
             customerMetadata = CustomerMetadata(
+                hasCustomerConfiguration = false,
                 isPaymentMethodSetAsDefaultEnabled = false
             ),
         )

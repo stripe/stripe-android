@@ -786,6 +786,7 @@ internal class PaymentMethodMetadataTest {
             sharedDataSpecs = sharedDataSpecs,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             customerMetadata = CustomerMetadata(
+                hasCustomerConfiguration = true,
                 isPaymentMethodSetAsDefaultEnabled = false,
             ),
             paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
@@ -854,6 +855,7 @@ internal class PaymentMethodMetadataTest {
             sharedDataSpecs = listOf(SharedDataSpec("card")),
             externalPaymentMethodSpecs = listOf(),
             customerMetadata = CustomerMetadata(
+                hasCustomerConfiguration = true,
                 isPaymentMethodSetAsDefaultEnabled = false,
             ),
             isGooglePayReady = true,
