@@ -544,7 +544,7 @@ class DefaultCustomerSheetLoaderTest {
 
     private fun createElementsSession(
         intent: StripeIntent,
-        cardBrandChoice: ElementsSession. CardBrandChoice?,
+        cardBrandChoice: ElementsSession.CardBrandChoice?,
         isPaymentMethodSyncDefaultEnabled: Boolean,
     ): ElementsSession {
         return ElementsSession(
@@ -553,24 +553,24 @@ class DefaultCustomerSheetLoaderTest {
             merchantCountry = null,
             isGooglePayEnabled = false,
             customer = ElementsSession.Customer(
-                    paymentMethods = listOf(),
-                    session = ElementsSession.Customer.Session(
-                        id = "cuss_123",
-                        customerId = "cus_123",
-                        liveMode = false,
-                        apiKey = "123",
-                        apiKeyExpiry = 999999999,
-                        components = ElementsSession.Customer.Components(
-                            mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
-                            customerSheet = ElementsSession.Customer.Components.CustomerSheet.Enabled(
-                                isPaymentMethodRemoveEnabled = false,
-                                canRemoveLastPaymentMethod = true,
-                                isPaymentMethodSyncDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
-                            ),
-                        )
-                    ),
-                    defaultPaymentMethod = null,
+                paymentMethods = listOf(),
+                session = ElementsSession.Customer.Session(
+                    id = "cuss_123",
+                    customerId = "cus_123",
+                    liveMode = false,
+                    apiKey = "123",
+                    apiKeyExpiry = 999999999,
+                    components = ElementsSession.Customer.Components(
+                        mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
+                        customerSheet = ElementsSession.Customer.Components.CustomerSheet.Enabled(
+                            isPaymentMethodRemoveEnabled = false,
+                            canRemoveLastPaymentMethod = true,
+                            isPaymentMethodSyncDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
+                        ),
+                    )
                 ),
+                defaultPaymentMethod = null,
+            ),
             linkSettings = null,
             externalPaymentMethodData = null,
             paymentMethodSpecs = null,

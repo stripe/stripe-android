@@ -301,7 +301,7 @@ internal data class PaymentMethodMetadata(
                 customerMetadata = CustomerMetadata(
                     hasCustomerConfiguration = true,
                     isPaymentMethodSetAsDefaultEnabled =
-                        getDefaultPaymentMethodsEnabledForCustomerSheet(elementsSession),
+                    getDefaultPaymentMethodsEnabledForCustomerSheet(elementsSession),
                 ),
                 sharedDataSpecs = sharedDataSpecs,
                 isGooglePayReady = isGooglePayReady,
