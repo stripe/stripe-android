@@ -1,8 +1,8 @@
 ---
-name: "\U0001F41B SDK Bug Report"
-about: Create a report to help us improve
-title: "[BUG] "
-labels: bug
+name: "⚠️ Critical bug report"
+about: Report issues that prevent the user from completing an action
+title: "[BUG] [P1] "
+labels: bug, P1
 assignees: ''
 
 ---
