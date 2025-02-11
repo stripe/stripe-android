@@ -4,6 +4,7 @@ import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -17,6 +18,15 @@ import com.stripe.android.uicore.elements.TEST_TAG_DROP_DOWN_CHOICE
 internal class EditPage(
     private val composeTestRule: ComposeTestRule
 ) {
+    fun waitUntilVisible() {
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onAllNodes(hasTestTag(UPDATE_PM_SCREEN_TEST_TAG))
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+    }
+
     fun assertIsVisible() {
         composeTestRule
             .onNodeWithTag(UPDATE_PM_SCREEN_TEST_TAG)
