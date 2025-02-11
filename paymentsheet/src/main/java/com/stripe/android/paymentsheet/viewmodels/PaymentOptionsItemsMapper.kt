@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.viewmodels
 
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentOptionsItem
@@ -10,6 +11,7 @@ import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 internal class PaymentOptionsItemsMapper(
+    private val customerMetadata: CustomerMetadata?,
     private val customerState: StateFlow<CustomerState?>,
     private val isGooglePayReady: StateFlow<Boolean>,
     private val isLinkEnabled: StateFlow<Boolean?>,
@@ -28,9 +30,9 @@ internal class PaymentOptionsItemsMapper(
                 paymentMethods = customerState?.paymentMethods ?: listOf(),
                 isLinkEnabled = isLinkEnabled,
                 isGooglePayReady = isGooglePayReady,
-                defaultPaymentMethodId = (
-                    customerState?.defaultPaymentMethodState as? CustomerState.DefaultPaymentMethodState.Enabled
-                    )?.defaultPaymentMethodId
+                defaultPaymentMethodId = customerMetadata?.isPaymentMethodSetAsDefaultEnabled?.let {
+                    customerState?.defaultPaymentMethodId
+                }
             ) ?: emptyList()
         }
     }
