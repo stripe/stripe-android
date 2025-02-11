@@ -68,7 +68,8 @@ internal class LinkContentScreenshotTest {
                         getLinkAccount = { null },
                         onBackPressed = {},
                         moveToWeb = {},
-                        goBack = {}
+                        goBack = {},
+                        changeEmail = {}
                     )
                 }
             }

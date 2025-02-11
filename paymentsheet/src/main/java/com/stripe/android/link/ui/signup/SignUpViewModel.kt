@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.signup
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -40,19 +41,24 @@ internal class SignUpViewModel @Inject constructor(
     private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger,
     private val linkAuth: LinkAuth,
+    private val savedStateHandle: SavedStateHandle,
     private val navigate: (LinkScreen) -> Unit,
     private val navigateAndClearStack: (LinkScreen) -> Unit,
     private val moveToWeb: () -> Unit
 ) : ViewModel() {
+    private val useLinkConfigurationCustomerInfo =
+        savedStateHandle.get<Boolean>(USE_LINK_CONFIGURATION_CUSTOMER_INFO) ?: true
+    private val customerInfo = configuration.customerInfo.takeIf { useLinkConfigurationCustomerInfo }
+
     val emailController = EmailConfig.createController(
-        initialValue = configuration.customerInfo.email
+        initialValue = customerInfo?.email
     )
     val phoneNumberController = PhoneNumberController.createPhoneNumberController(
-        initialValue = configuration.customerInfo.phone.orEmpty(),
-        initiallySelectedCountryCode = configuration.customerInfo.billingCountryCode
+        initialValue = customerInfo?.phone.orEmpty(),
+        initiallySelectedCountryCode = customerInfo?.billingCountryCode
     )
     val nameController = NameConfig.createController(
-        initialValue = configuration.customerInfo.name
+        initialValue = customerInfo?.name
     )
     private val _state = MutableStateFlow(
         value = SignUpScreenState(
@@ -225,6 +231,7 @@ internal class SignUpViewModel @Inject constructor(
     companion object {
         // How long to wait before triggering a call to lookup the email
         internal val LOOKUP_DEBOUNCE = 1.seconds
+        internal const val USE_LINK_CONFIGURATION_CUSTOMER_INFO = "use_link_configuration_customer_info"
 
         fun factory(
             parentComponent: NativeLinkComponent,
@@ -239,6 +246,7 @@ internal class SignUpViewModel @Inject constructor(
                         linkEventsReporter = parentComponent.linkEventsReporter,
                         logger = parentComponent.logger,
                         linkAuth = parentComponent.linkAuth,
+                        savedStateHandle = parentComponent.savedStateHandle,
                         navigate = navigate,
                         navigateAndClearStack = navigateAndClearStack,
                         moveToWeb = moveToWeb

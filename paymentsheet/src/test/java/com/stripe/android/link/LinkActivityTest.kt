@@ -7,6 +7,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -145,6 +146,7 @@ internal class LinkActivityTest {
                 linkAccountManager = linkAccountManager,
                 eventReporter = FakeEventReporter(),
                 linkAttestationCheck = FakeLinkAttestationCheck(),
+                savedStateHandle = SavedStateHandle(),
                 linkConfiguration = TestFactory.LINK_CONFIGURATION,
                 startWithVerificationDialog = use2faDialog,
             )

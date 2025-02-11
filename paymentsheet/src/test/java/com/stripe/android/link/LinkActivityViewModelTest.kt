@@ -25,6 +25,7 @@ import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.attestation.FakeLinkAttestationCheck
 import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentsheet.R
@@ -616,6 +617,26 @@ internal class LinkActivityViewModelTest {
         )
     }
 
+    @Test
+    fun `change email should navigate to email route and update savedStateHandle`() {
+        val navController = navController()
+        val savedStateHandle = SavedStateHandle()
+        val viewModel = createViewModel(
+            navController = navController,
+            savedStateHandle = savedStateHandle
+        )
+
+        viewModel.changeEmail()
+
+        assertThat(savedStateHandle.get<Boolean>(SignUpViewModel.USE_LINK_CONFIGURATION_CUSTOMER_INFO)).isFalse()
+        assertNavigation(
+            navController = navController,
+            screen = LinkScreen.SignUp,
+            clearStack = true,
+            launchSingleTop = false
+        )
+    }
+
     private fun navController(
         screen: LinkScreen? = LinkScreen.Loading
     ): NavHostController {
@@ -681,6 +702,7 @@ internal class LinkActivityViewModelTest {
         navController: NavHostController = navController(),
         linkAttestationCheck: LinkAttestationCheck = FakeLinkAttestationCheck(),
         startWithVerificationDialog: Boolean = false,
+        savedStateHandle: SavedStateHandle = SavedStateHandle(),
         dismissWithResult: (LinkActivityResult) -> Unit = {},
         launchWeb: (LinkConfiguration) -> Unit = {}
     ): LinkActivityViewModel {
@@ -692,6 +714,7 @@ internal class LinkActivityViewModelTest {
             linkAttestationCheck = linkAttestationCheck,
             linkConfiguration = TestFactory.LINK_CONFIGURATION,
             startWithVerificationDialog = startWithVerificationDialog,
+            savedStateHandle = savedStateHandle
         ).apply {
             this.navController = navController
             this.dismissWithResult = dismissWithResult

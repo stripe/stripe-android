@@ -1,5 +1,6 @@
 package com.stripe.android.link.injection
 
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkAccountManager
@@ -21,6 +22,7 @@ internal object LinkViewModelModule {
         eventReporter: EventReporter,
         linkConfiguration: LinkConfiguration,
         linkAttestationCheck: LinkAttestationCheck,
+        savedStateHandle: SavedStateHandle,
         @Named(START_WITH_VERIFICATION_DIALOG) startWithVerificationDialog: Boolean
     ): LinkActivityViewModel {
         return LinkActivityViewModel(
@@ -30,6 +32,7 @@ internal object LinkViewModelModule {
             eventReporter = eventReporter,
             linkConfiguration = linkConfiguration,
             linkAttestationCheck = linkAttestationCheck,
+            savedStateHandle = savedStateHandle,
             startWithVerificationDialog = startWithVerificationDialog
         )
     }

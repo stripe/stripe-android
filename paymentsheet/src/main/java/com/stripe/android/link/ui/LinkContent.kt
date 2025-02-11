@@ -58,7 +58,8 @@ internal fun LinkContent(
     getLinkAccount: () -> LinkAccount?,
     onBackPressed: () -> Unit,
     moveToWeb: () -> Unit,
-    goBack: () -> Unit
+    goBack: () -> Unit,
+    changeEmail: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
     DefaultLinkTheme {
@@ -118,6 +119,7 @@ internal fun LinkContent(
                         },
                         getLinkAccount = getLinkAccount,
                         showBottomSheetContent = onUpdateSheetContent,
+                        changeEmail = changeEmail,
                         hideBottomSheetContent = {
                             onUpdateSheetContent(null)
                         }
@@ -138,7 +140,8 @@ private fun Screens(
     dismissWithResult: (LinkActivityResult) -> Unit,
     showBottomSheetContent: (BottomSheetContent?) -> Unit,
     hideBottomSheetContent: () -> Unit,
-    moveToWeb: () -> Unit
+    moveToWeb: () -> Unit,
+    changeEmail: () -> Unit,
 ) {
     NavHost(
         navController = navController,
@@ -161,6 +164,7 @@ private fun Screens(
                 ?: return@composable dismissWithResult(noLinkAccountResult())
             VerificationRoute(
                 linkAccount = linkAccount,
+                changeEmail = changeEmail,
                 navigateAndClearStack = navigateAndClearStack,
                 goBack = goBack
             )
@@ -220,6 +224,7 @@ private fun SignUpRoute(
 private fun VerificationRoute(
     linkAccount: LinkAccount,
     navigateAndClearStack: (route: LinkScreen) -> Unit,
+    changeEmail: () -> Unit,
     goBack: () -> Unit
 ) {
     val viewModel: VerificationViewModel = linkViewModel { parentComponent ->
@@ -231,9 +236,7 @@ private fun VerificationRoute(
             onVerificationSucceeded = {
                 navigateAndClearStack(LinkScreen.Wallet)
             },
-            onChangeEmailClicked = {
-                navigateAndClearStack(LinkScreen.SignUp)
-            }
+            onChangeEmailClicked = changeEmail
         )
     }
     VerificationScreen(viewModel)

@@ -22,6 +22,7 @@ import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.LinkAppBarState
+import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -35,6 +36,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@SuppressWarnings("TooManyFunctions")
 internal class LinkActivityViewModel @Inject constructor(
     val activityRetainedComponent: NativeLinkComponent,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
@@ -42,6 +44,7 @@ internal class LinkActivityViewModel @Inject constructor(
     val eventReporter: EventReporter,
     private val linkConfiguration: LinkConfiguration,
     private val linkAttestationCheck: LinkAttestationCheck,
+    private val savedStateHandle: SavedStateHandle,
     private val startWithVerificationDialog: Boolean
 ) : ViewModel(), DefaultLifecycleObserver {
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
@@ -173,6 +176,11 @@ internal class LinkActivityViewModel @Inject constructor(
                 )
             )
         }
+    }
+
+    fun changeEmail() {
+        savedStateHandle[SignUpViewModel.USE_LINK_CONFIGURATION_CUSTOMER_INFO] = false
+        navigate(LinkScreen.SignUp, clearStack = true)
     }
 
     fun unregisterActivity() {
