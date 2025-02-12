@@ -33,6 +33,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.utils.DummyActivityResultCaller
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -115,11 +116,42 @@ internal class LinkActivityViewModelTest {
 
         assertThat(vm.dismissWithResult).isNotNull()
         assertThat(vm.navController).isNotNull()
+        assertThat(vm.navListenerJob).isNotNull()
 
         vm.unregisterActivity()
 
-        assertThat(vm.dismissWithResult).isEqualTo(null)
-        assertThat(vm.navController).isEqualTo(null)
+        assertThat(vm.dismissWithResult).isNull()
+        assertThat(vm.navController).isNull()
+        assertThat(vm.navListenerJob).isNull()
+    }
+
+    @Test
+    fun `test that nav listener job is canceled and replaced when navController changes`() = runTest(dispatcher) {
+        val job = Job()
+
+        val vm = createViewModel()
+        vm.navListenerJob = job
+
+        assertThat(vm.navListenerJob).isNotNull()
+        assertThat(job.isCancelled).isFalse()
+
+        vm.navController = navController()
+        assertThat(vm.navListenerJob?.isCancelled).isFalse()
+        assertThat(job).isNotEqualTo(vm.navListenerJob)
+        assertThat(job.isCancelled).isTrue()
+    }
+
+    @Test
+    fun `test that nav listener job is canceled when activity is unregistered`() = runTest(dispatcher) {
+        val job = Job()
+
+        val vm = createViewModel()
+        vm.navListenerJob = job
+
+        vm.unregisterActivity()
+
+        assertThat(vm.navListenerJob).isNull()
+        assertThat(job.isCancelled).isTrue()
     }
 
     @Test
