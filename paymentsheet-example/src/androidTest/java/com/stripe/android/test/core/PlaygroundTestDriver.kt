@@ -784,6 +784,51 @@ internal class PlaygroundTestDriver(
         )
     }
 
+    @OptIn(ExperimentalTestApi::class)
+    fun confirmWithBankAccountInLink(
+        testParameters: TestParameters,
+    ) {
+        setup(testParameters)
+
+        launchComplete()
+
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        // Expect the OTP dialog
+        composeTestRule.waitUntilExactlyOneExists(hasTestTag("OTP-0"))
+
+        composeTestRule
+            .onNodeWithTag("OTP-0")
+            .performTextInput("000000")
+
+        composeTestRule.waitUntilExactlyOneExists(hasTestTag("collapsed_wallet_row_tag"))
+
+        composeTestRule
+            .onNodeWithTag("collapsed_wallet_row_tag")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Test Institution")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("wallet_screen_pay_button")
+            .performClick()
+
+        composeTestRule.waitForIdle()
+
+        // Skips the full screen payment animation in `PaymentSheet`
+        while (currentActivity !is PaymentSheetPlaygroundActivity) {
+            composeTestRule.mainClock.advanceTimeByFrame()
+        }
+
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        teardown()
+    }
+
     fun confirmLinkBankPayment(
         testParameters: TestParameters,
         afterAuthorization: (Selectors, FieldPopulator) -> Unit = { _, _ -> },

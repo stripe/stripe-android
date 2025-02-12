@@ -39,6 +39,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -1064,7 +1065,8 @@ internal class PaymentSheetViewModelTest {
                 useAttestationEndpointsForLink = false,
                 suppress2faModal = false,
                 initializationMode = PaymentSheetFixtures.INITIALIZATION_MODE_PAYMENT_INTENT,
-                elementsSessionId = "session_1234"
+                elementsSessionId = "session_1234",
+                linkMode = LinkMode.LinkPaymentMethod,
             )
 
             val viewModel = createViewModel(

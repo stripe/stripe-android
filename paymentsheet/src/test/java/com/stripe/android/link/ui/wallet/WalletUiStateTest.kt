@@ -155,7 +155,8 @@ class WalletUiStateTest {
         isProcessing: Boolean = false,
         primaryButtonLabel: ResolvableString = LINK_WALLET_PRIMARY_BUTTON_LABEL,
         expiryDateInput: FormFieldEntry = FormFieldEntry(null),
-        cvcInput: FormFieldEntry = FormFieldEntry(null)
+        cvcInput: FormFieldEntry = FormFieldEntry(null),
+        canAddNewPaymentMethod: Boolean = true,
     ): WalletUiState {
         return WalletUiState(
             paymentDetailsList = paymentDetailsList,
@@ -164,7 +165,8 @@ class WalletUiStateTest {
             isProcessing = isProcessing,
             primaryButtonLabel = primaryButtonLabel,
             expiryDateInput = expiryDateInput,
-            cvcInput = cvcInput
+            cvcInput = cvcInput,
+            canAddNewPaymentMethod = canAddNewPaymentMethod,
         )
     }
 }

@@ -26,6 +26,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
@@ -137,6 +138,7 @@ class LinkFormElementTest {
                     clientSecret = "pi_123_secret_123",
                 ),
                 elementsSessionId = "session_1234",
+                linkMode = LinkMode.LinkPaymentMethod,
             ),
         )
     }

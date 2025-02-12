@@ -14,6 +14,7 @@ import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.SharePaymentDetails
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -37,6 +38,7 @@ internal open class FakeLinkAccountManager(
     var createCardPaymentDetailsResult: Result<LinkPaymentDetails> = Result.success(
         value = TestFactory.LINK_NEW_PAYMENT_DETAILS
     )
+    var sharePaymentDetails: Result<SharePaymentDetails> = Result.success(TestFactory.LINK_SHARE_PAYMENT_DETAILS)
     var listPaymentDetailsResult: Result<ConsumerPaymentDetails> = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
     var updatePaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
     var deletePaymentDetailsResult: Result<Unit> = Result.success(Unit)
@@ -144,6 +146,13 @@ internal open class FakeLinkAccountManager(
         paymentMethodCreateParams: PaymentMethodCreateParams
     ): Result<LinkPaymentDetails> {
         return createCardPaymentDetailsResult
+    }
+
+    override suspend fun sharePaymentDetails(
+        paymentDetailsId: String,
+        expectedPaymentMethodType: String
+    ): Result<SharePaymentDetails> {
+        return sharePaymentDetails
     }
 
     override fun setLinkAccountFromLookupResult(lookup: ConsumerSessionLookup, startSession: Boolean): LinkAccount? {
