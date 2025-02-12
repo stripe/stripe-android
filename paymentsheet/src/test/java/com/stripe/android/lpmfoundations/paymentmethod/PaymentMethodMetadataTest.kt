@@ -837,7 +837,8 @@ internal class PaymentMethodMetadataTest {
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             sharedDataSpecs = listOf(SharedDataSpec("card")),
             isGooglePayReady = true,
-            isFinancialConnectionsAvailable = { false }
+            isFinancialConnectionsAvailable = { false },
+            isPaymentMethodSyncDefaultEnabled = false,
         )
 
         val expectedMetadata = PaymentMethodMetadata(

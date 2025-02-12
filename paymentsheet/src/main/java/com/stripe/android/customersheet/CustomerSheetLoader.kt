@@ -15,6 +15,7 @@ import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
+import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
@@ -67,8 +68,13 @@ internal class DefaultCustomerSheetLoader(
             .toResult()
             .getOrThrow()
 
-        val filteredPaymentMethods = customerSheetSession.paymentMethods.filter {
-            PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance).isAccepted(it)
+        val isPaymentMethodSyncDefaultEnabled = getDefaultPaymentMethodsEnabledForCustomerSheet(
+            customerSheetSession.elementsSession
+        )
+
+        val filteredPaymentMethods = customerSheetSession.paymentMethods.filter { paymentMethod ->
+            PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance).isAccepted(paymentMethod) &&
+                !shouldBeFilteredOutForSyncDefaultFeature(isPaymentMethodSyncDefaultEnabled, paymentMethod)
         }
         customerSheetSession = customerSheetSession.copy(
             paymentMethods = filteredPaymentMethods
@@ -77,6 +83,7 @@ internal class DefaultCustomerSheetLoader(
         val metadata = createPaymentMethodMetadata(
             configuration = configuration,
             customerSheetSession = customerSheetSession,
+            isPaymentMethodSyncDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
         )
 
         createCustomerSheetState(
@@ -84,6 +91,18 @@ internal class DefaultCustomerSheetLoader(
             metadata = metadata,
             configuration = configuration,
         )
+    }
+
+    private fun shouldBeFilteredOutForSyncDefaultFeature(
+        isPaymentMethodSyncDefaultEnabled: Boolean,
+        paymentMethod: PaymentMethod,
+    ): Boolean {
+        val paymentMethodTypesSupportedWithSyncDefaultFeature = listOf(
+            PaymentMethod.Type.Card,
+            PaymentMethod.Type.USBankAccount,
+        )
+        return isPaymentMethodSyncDefaultEnabled &&
+            paymentMethodTypesSupportedWithSyncDefaultFeature.contains(paymentMethod.type).not()
     }
 
     private suspend fun retrieveInitializationDataSource(): Result<CustomerSheetInitializationDataSource> {
@@ -104,6 +123,7 @@ internal class DefaultCustomerSheetLoader(
     private suspend fun createPaymentMethodMetadata(
         configuration: CustomerSheet.Configuration,
         customerSheetSession: CustomerSheetSession,
+        isPaymentMethodSyncDefaultEnabled: Boolean,
     ): PaymentMethodMetadata {
         val elementsSession = customerSheetSession.elementsSession
         val sharedDataSpecs = lpmRepository.getSharedDataSpecs(
@@ -122,7 +142,17 @@ internal class DefaultCustomerSheetLoader(
             sharedDataSpecs = sharedDataSpecs,
             isGooglePayReady = isGooglePayReadyAndEnabled,
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
+            isPaymentMethodSyncDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
         )
+    }
+
+    private fun getDefaultPaymentMethodsEnabledForCustomerSheet(elementsSession: ElementsSession): Boolean {
+        return when (val customerSheetComponent = elementsSession.customer?.session?.components?.customerSheet) {
+            is ElementsSession.Customer.Components.CustomerSheet.Enabled ->
+                customerSheetComponent.isPaymentMethodSyncDefaultEnabled
+            ElementsSession.Customer.Components.CustomerSheet.Disabled,
+            null -> false
+        }
     }
 
     private fun createCustomerSheetState(

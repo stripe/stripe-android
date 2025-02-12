@@ -284,6 +284,7 @@ internal data class PaymentMethodMetadata(
             sharedDataSpecs: List<SharedDataSpec>,
             isGooglePayReady: Boolean,
             isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
+            isPaymentMethodSyncDefaultEnabled: Boolean,
         ): PaymentMethodMetadata {
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
@@ -300,8 +301,7 @@ internal data class PaymentMethodMetadata(
                 shippingDetails = null,
                 customerMetadata = CustomerMetadata(
                     hasCustomerConfiguration = true,
-                    isPaymentMethodSetAsDefaultEnabled =
-                    getDefaultPaymentMethodsEnabledForCustomerSheet(elementsSession),
+                    isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
                 ),
                 sharedDataSpecs = sharedDataSpecs,
                 isGooglePayReady = isGooglePayReady,
@@ -354,16 +354,6 @@ internal data class PaymentMethodMetadata(
                 as? ElementsSession.Customer.Components.MobilePaymentElement.Enabled
             return mobilePaymentElement?.isPaymentMethodSetAsDefaultEnabled
                 ?: false
-        }
-
-        private fun getDefaultPaymentMethodsEnabledForCustomerSheet(elementsSession: ElementsSession): Boolean {
-            val customerSheetComponent = elementsSession.customer?.session?.components?.customerSheet
-            return when (customerSheetComponent) {
-                is ElementsSession.Customer.Components.CustomerSheet.Enabled ->
-                    customerSheetComponent.isPaymentMethodSyncDefaultEnabled
-                ElementsSession.Customer.Components.CustomerSheet.Disabled,
-                null -> false
-            }
         }
     }
 }
