@@ -35,15 +35,10 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             paymentMethodMetadata = paymentMethodMetadata,
             selectedPaymentMethodCode = paymentMethodCode,
             hostedSurface = HOSTED_SURFACE_PAYMENT_ELEMENT,
-            setSelection = {
-                embeddedSelectionHolder.set(it)
-            },
-            onMandateTextChanged = { _, _ ->
-            },
-            onUpdatePrimaryButtonUIState = {
-            },
-            onError = {
-            },
+            setSelection = embeddedSelectionHolder::set,
+            onMandateTextChanged = formActivityStateHelper::updateMandate,
+            onUpdatePrimaryButtonUIState = formActivityStateHelper::updatePrimaryButton,
+            onError = formActivityStateHelper::updateError,
         )
 
         return DefaultVerticalModeFormInteractor(

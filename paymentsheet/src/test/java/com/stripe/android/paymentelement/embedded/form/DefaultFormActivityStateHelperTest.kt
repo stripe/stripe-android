@@ -84,7 +84,7 @@ class DefaultFormActivityStateHelperTest {
             assertThat(enabledState.isProcessing).isFalse()
             assertThat(enabledState.isEnabled).isTrue()
 
-            stateHolder.update(confirmationStateConfirming(selection))
+            stateHolder.updateConfirmationState(confirmationStateConfirming(selection))
             val processingState = awaitItem()
             assertThat(processingState.isEnabled).isFalse()
             assertThat(processingState.processingState).isEqualTo(PrimaryButtonProcessingState.Processing)
@@ -96,7 +96,7 @@ class DefaultFormActivityStateHelperTest {
     fun `state updates when confirmation is successful`() = testScenario {
         stateHolder.state.test {
             awaitAndVerifyInitialState()
-            stateHolder.update(confirmationStateComplete(true))
+            stateHolder.updateConfirmationState(confirmationStateComplete(true))
 
             val completedState = awaitItem()
             assertThat(completedState.processingState).isEqualTo(PrimaryButtonProcessingState.Completed)
@@ -114,13 +114,13 @@ class DefaultFormActivityStateHelperTest {
             // State emitted from setting selection
             assertThat(awaitItem().isEnabled).isTrue()
 
-            stateHolder.update(confirmationStateConfirming(selection))
+            stateHolder.updateConfirmationState(confirmationStateConfirming(selection))
             val processingState = awaitItem()
             assertThat(processingState.isProcessing).isTrue()
             assertThat(processingState.isEnabled).isFalse()
             assertThat(processingState.processingState).isEqualTo(PrimaryButtonProcessingState.Processing)
 
-            stateHolder.update(confirmationStateComplete(false))
+            stateHolder.updateConfirmationState(confirmationStateComplete(false))
             val failedState = awaitItem()
             assertThat(failedState.isEnabled).isTrue()
             assertThat(failedState.isProcessing).isFalse()
@@ -134,11 +134,13 @@ class DefaultFormActivityStateHelperTest {
         stateHolder.state.test {
             awaitAndVerifyInitialState()
 
-            stateHolder.update(confirmationStateComplete(false))
+            stateHolder.updateConfirmationState(confirmationStateComplete(false))
             val failedState = awaitItem()
             assertThat(failedState.error).isEqualTo("Something went wrong".resolvableString)
 
-            stateHolder.update(confirmationStateConfirming(PaymentMethodFixtures.CARD_PAYMENT_SELECTION))
+            stateHolder.updateConfirmationState(
+                confirmationStateConfirming(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+            )
             val confirmingState = awaitItem()
             assertThat(confirmingState.error).isNull()
         }
@@ -149,10 +151,10 @@ class DefaultFormActivityStateHelperTest {
         stateHolder.state.test {
             awaitAndVerifyInitialState()
 
-            stateHolder.update(confirmationStateComplete(false))
+            stateHolder.updateConfirmationState(confirmationStateComplete(false))
             assertThat(awaitItem().error).isEqualTo("Something went wrong".resolvableString)
 
-            stateHolder.update(
+            stateHolder.updateConfirmationState(
                 ConfirmationHandler.State.Complete(
                     result = ConfirmationHandler.Result.Canceled(
                         action = ConfirmationHandler.Result.Canceled.Action.None

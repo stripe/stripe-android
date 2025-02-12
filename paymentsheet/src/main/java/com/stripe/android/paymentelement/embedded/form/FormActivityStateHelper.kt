@@ -9,8 +9,10 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentsheet.model.MandateText
 import com.stripe.android.paymentsheet.model.amount
 import com.stripe.android.paymentsheet.model.currency
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.paymentsheet.utils.buyButtonLabel
 import com.stripe.android.ui.core.Amount
@@ -25,7 +27,10 @@ import javax.inject.Singleton
 
 internal interface FormActivityStateHelper {
     val state: StateFlow<State>
-    fun update(confirmationState: ConfirmationHandler.State)
+    fun updateConfirmationState(confirmationState: ConfirmationHandler.State)
+    fun updateMandate(mandateText: ResolvableString?, showAbove: Boolean)
+    fun updatePrimaryButton(callback: (PrimaryButton.UIState?) -> PrimaryButton.UIState?)
+    fun updateError(error: ResolvableString?)
 
     data class State(
         val primaryButtonLabel: ResolvableString,
@@ -33,16 +38,18 @@ internal interface FormActivityStateHelper {
         val processingState: PrimaryButtonProcessingState,
         val isProcessing: Boolean,
         val error: ResolvableString? = null,
+        val mandateText: MandateText? = null,
+        val onClick: (() -> Unit)? = null
     )
 }
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Singleton
 internal class DefaultFormActivityStateHelper @Inject constructor(
-    paymentMethodMetadata: PaymentMethodMetadata,
+    private val paymentMethodMetadata: PaymentMethodMetadata,
     private val selectionHolder: EmbeddedSelectionHolder,
-    configuration: EmbeddedPaymentElement.Configuration,
-    @ViewModelScope coroutineScope: CoroutineScope,
+    private val configuration: EmbeddedPaymentElement.Configuration,
+    @ViewModelScope private val coroutineScope: CoroutineScope,
 ) : FormActivityStateHelper {
     private val _state = MutableStateFlow(
         FormActivityStateHelper.State(
@@ -66,9 +73,62 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
         }
     }
 
-    override fun update(confirmationState: ConfirmationHandler.State) {
+    override fun updateConfirmationState(confirmationState: ConfirmationHandler.State) {
         _state.update {
             it.updateWithConfirmationState(confirmationState)
+        }
+    }
+
+    override fun updateMandate(mandateText: ResolvableString?, showAbove: Boolean) {
+        val mandate = if (mandateText != null) {
+            MandateText(
+                text = mandateText,
+                showAbovePrimaryButton = true
+            )
+        } else {
+            null
+        }
+        _state.update {
+            it.copy(
+                mandateText = mandate
+            )
+        }
+    }
+
+    override fun updateError(error: ResolvableString?) {
+        _state.update {
+            it.copy(
+                error = error
+            )
+        }
+    }
+
+    override fun updatePrimaryButton(callback: (PrimaryButton.UIState?) -> PrimaryButton.UIState?) {
+        val currentFormState = _state.value
+        val newUiState = callback(
+            PrimaryButton.UIState(
+                label = currentFormState.primaryButtonLabel,
+                onClick = currentFormState.onClick ?: {},
+                enabled = currentFormState.isEnabled,
+                lockVisible = true
+            )
+        )
+        if (newUiState != null) {
+            _state.update {
+                it.copy(
+                    isEnabled = newUiState.enabled,
+                    primaryButtonLabel = newUiState.label,
+                    onClick = newUiState.onClick
+                )
+            }
+        } else {
+            _state.update {
+                it.copy(
+                    isEnabled = selectionHolder.selection.value != null,
+                    primaryButtonLabel = primaryButtonLabel(paymentMethodMetadata.stripeIntent, configuration),
+                    onClick = null
+                )
+            }
         }
     }
 

@@ -108,7 +108,7 @@ internal class FormActivityScreenShotTest {
             formActivityStateHelper = stateHolder,
         ).create()
 
-        stateHolder.update(confirmationState)
+        stateHolder.updateConfirmationState(confirmationState)
         val state by stateHolder.state.collectAsState()
 
         ViewModelStoreOwnerContext {

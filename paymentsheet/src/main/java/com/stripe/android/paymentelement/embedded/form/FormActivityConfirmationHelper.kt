@@ -36,7 +36,7 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
         confirmationHandler.register(activityResultCaller, lifecycleOwner)
         lifecycleOwner.lifecycleScope.launch {
             confirmationHandler.state.collectLatest {
-                stateHelper.update(it)
+                stateHelper.updateConfirmationState(it)
             }
         }
     }
