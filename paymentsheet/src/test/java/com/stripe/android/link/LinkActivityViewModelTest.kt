@@ -407,59 +407,31 @@ internal class LinkActivityViewModelTest {
         }
 
     @Test
-    fun `onCreate should dismiss when attestationCheck fails on generic error and startWithVerification is true`() =
-        runTest {
-            val error = Throwable("oops")
-            testAttestationCheckError(
-                attestationCheckResult = LinkAttestationCheck.Result.Error(error),
-                expectedLinkActivityResult = LinkActivityResult.Failed(
-                    error = error,
-                    linkAccountUpdate = LinkAccountUpdate.Value(null)
-                )
-            )
-        }
+    fun `onCreate should open signup when attestation check fails on account error`() = runTest {
+        val error = Throwable("oops")
+        testAttestationCheckError(
+            attestationCheckResult = LinkAttestationCheck.Result.AccountError(error),
+        )
+    }
 
     @Test
-    fun `onCreate should dismiss when attestationCheck fails on account error and startWithVerification is true`() =
-        runTest {
-            val error = Throwable("oops")
-            testAttestationCheckError(
-                attestationCheckResult = LinkAttestationCheck.Result.AccountError(error),
-                expectedLinkActivityResult = LinkActivityResult.Failed(
-                    error = error,
-                    linkAccountUpdate = LinkAccountUpdate.Value(null)
-                )
-            )
-        }
-
-    @Test
-    fun `onCreate should open signup when attsCheck fails on account error and startWithVerification is false`() =
-        runTest {
-            val error = Throwable("oops")
-            testAttestationCheckError(
-                attestationCheckResult = LinkAttestationCheck.Result.AccountError(error),
-                startWithVerificationDialog = false
-            )
-        }
-
-    @Test
-    fun `onCreate should open signup when attsCheck fails on generic error and startWithVerification is false`() =
-        runTest {
-            val error = Throwable("oops")
-            testAttestationCheckError(
-                attestationCheckResult = LinkAttestationCheck.Result.Error(error),
-                startWithVerificationDialog = false
-            )
-        }
+    fun `onCreate should open signup when attestation check fails on generic error`() = runTest {
+        val error = Throwable("oops")
+        testAttestationCheckError(
+            attestationCheckResult = LinkAttestationCheck.Result.Error(error),
+        )
+    }
 
     @Test
     fun `onCreate should launch 2fa when eager launch is enabled`() = runTest {
         val linkAccountManager = FakeLinkAccountManager()
+        val linkAttestationCheck = FakeLinkAttestationCheck()
         linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
         val navController = navController()
 
         val vm = createViewModel(
             linkAccountManager = linkAccountManager,
+            linkAttestationCheck = linkAttestationCheck,
             startWithVerificationDialog = true
         )
         vm.navController = navController
@@ -470,6 +442,7 @@ internal class LinkActivityViewModelTest {
         advanceUntilIdle()
 
         assertThat(vm.linkScreenState.value).isEqualTo(ScreenState.VerificationDialog(TestFactory.LINK_ACCOUNT))
+        linkAttestationCheck.ensureAllEventsConsumed()
     }
 
     @Test
@@ -777,7 +750,6 @@ internal class LinkActivityViewModelTest {
 
     private fun testAttestationCheckError(
         attestationCheckResult: LinkAttestationCheck.Result,
-        startWithVerificationDialog: Boolean = true,
         expectedLinkActivityResult: LinkActivityResult? = null,
     ) = runTest {
         var launchWebConfig: LinkConfiguration? = null
@@ -800,7 +772,7 @@ internal class LinkActivityViewModelTest {
             linkAttestationCheck = linkAttestationCheck,
             linkAccountManager = linkAccountManager,
             linkAccountHolder = linkAccountHolder,
-            startWithVerificationDialog = startWithVerificationDialog,
+            startWithVerificationDialog = false,
             launchWeb = { config ->
                 launchWebConfig = config
             },
@@ -814,30 +786,22 @@ internal class LinkActivityViewModelTest {
 
         advanceUntilIdle()
 
-        if (startWithVerificationDialog.not()) {
-            vm.linkScreenCreated()
-        }
+        vm.linkScreenCreated()
+
+        advanceUntilIdle()
 
         linkAccountManager.awaitLogoutCall()
         assertThat(linkAccountHolder.linkAccount.value).isNull()
         assertThat(launchWebConfig).isNull()
         assertThat(result).isEqualTo(expectedLinkActivityResult)
 
-        if (startWithVerificationDialog) {
-            assertThat(vm.linkScreenState.value).isEqualTo(ScreenState.Loading)
-            verify(navController, times(0)).navigate(
-                any(),
-                any<NavOptionsBuilder.() -> Unit>()
-            )
-        } else {
-            assertThat(vm.linkScreenState.value).isEqualTo(ScreenState.FullScreen)
-            assertNavigation(
-                navController = navController,
-                screen = LinkScreen.SignUp,
-                clearStack = true,
-                launchSingleTop = true
-            )
-        }
+        assertThat(vm.linkScreenState.value).isEqualTo(ScreenState.FullScreen)
+        assertNavigation(
+            navController = navController,
+            screen = LinkScreen.SignUp,
+            clearStack = true,
+            launchSingleTop = true
+        )
     }
 
     private fun createViewModel(

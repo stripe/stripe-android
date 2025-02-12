@@ -206,6 +206,7 @@ internal class LinkActivityViewModel @Inject constructor(
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         viewModelScope.launch {
+            if (startWithVerificationDialog) return@launch updateScreenState()
             val attestationCheckResult = linkAttestationCheck.invoke()
             when (attestationCheckResult) {
                 is LinkAttestationCheck.Result.AttestationFailed -> {
@@ -214,11 +215,9 @@ internal class LinkActivityViewModel @Inject constructor(
                 LinkAttestationCheck.Result.Successful -> {
                     updateScreenState()
                 }
-                is LinkAttestationCheck.Result.Error -> {
-                    handleAccountError(attestationCheckResult.error)
-                }
+                is LinkAttestationCheck.Result.Error,
                 is LinkAttestationCheck.Result.AccountError -> {
-                    handleAccountError(attestationCheckResult.error)
+                    handleAccountError()
                 }
             }
         }
@@ -269,18 +268,9 @@ internal class LinkActivityViewModel @Inject constructor(
         navigate(screen, clearStack = true, launchSingleTop = true)
     }
 
-    private suspend fun handleAccountError(error: Throwable) {
+    private suspend fun handleAccountError() {
         linkAccountManager.logOut()
         linkAccountHolder.set(null)
-        if (startWithVerificationDialog) {
-            dismissWithResult?.invoke(
-                LinkActivityResult.Failed(
-                    error = error,
-                    linkAccountUpdate = linkAccountManager.linkAccountUpdate
-                )
-            )
-            return
-        }
         updateScreenState()
     }
 
