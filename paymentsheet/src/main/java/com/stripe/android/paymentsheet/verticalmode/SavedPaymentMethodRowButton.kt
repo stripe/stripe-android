@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -59,7 +58,6 @@ internal fun SavedPaymentMethodRowButton(
                 colorFilter = null,
                 alignment = Alignment.Center,
                 modifier = Modifier
-                    .padding(4.dp)
                     .height(iconHeight)
                     .width(iconWidth)
                     .testMetadata(displayBrand)
