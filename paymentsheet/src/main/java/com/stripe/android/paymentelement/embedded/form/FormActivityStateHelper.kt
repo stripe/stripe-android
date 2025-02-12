@@ -9,7 +9,6 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.paymentsheet.model.MandateText
 import com.stripe.android.paymentsheet.model.amount
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -38,7 +37,7 @@ internal interface FormActivityStateHelper {
         val processingState: PrimaryButtonProcessingState,
         val isProcessing: Boolean,
         val error: ResolvableString? = null,
-        val mandateText: MandateText? = null
+        val mandateText: ResolvableString? = null
     )
 }
 
@@ -61,6 +60,13 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
     )
     override val state: StateFlow<FormActivityStateHelper.State> = _state
 
+    private var primaryButtonUiState: PrimaryButton.UIState? = PrimaryButton.UIState(
+        label = _state.value.primaryButtonLabel,
+        onClick = {},
+        enabled = _state.value.isEnabled,
+        lockVisible = true
+    )
+
     init {
         coroutineScope.launch {
             selectionHolder.selection.collectLatest { selection ->
@@ -82,11 +88,7 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
     override fun updateMandate(mandateText: ResolvableString?) {
         _state.update {
             it.copy(
-                mandateText = if (mandateText != null) {
-                    MandateText(mandateText, true)
-                } else {
-                    null
-                }
+                mandateText = mandateText
             )
         }
     }
@@ -100,15 +102,8 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
     }
 
     override fun updatePrimaryButton(callback: (PrimaryButton.UIState?) -> PrimaryButton.UIState?) {
-        val currentFormState = _state.value
-        val newUiState = callback(
-            PrimaryButton.UIState(
-                label = currentFormState.primaryButtonLabel,
-                onClick = onClickDelegate.onClickOverride ?: {},
-                enabled = currentFormState.isEnabled,
-                lockVisible = true
-            )
-        )
+        val newUiState = callback(primaryButtonUiState)
+        primaryButtonUiState = newUiState
         if (newUiState != null) {
             onClickDelegate.set(newUiState.onClick)
             _state.update {

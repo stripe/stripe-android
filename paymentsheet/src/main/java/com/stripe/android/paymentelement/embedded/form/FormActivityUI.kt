@@ -79,7 +79,7 @@ internal fun USBankAccountMandate(
 ) {
     state.mandateText?.let {
         Mandate(
-            mandateText = it.text?.resolve(),
+            mandateText = it.resolve(),
             modifier = Modifier
                 .padding(
                     horizontal = dimensionResource(

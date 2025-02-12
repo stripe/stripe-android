@@ -15,7 +15,6 @@ import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
-import com.stripe.android.paymentsheet.model.MandateText
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.ui.core.R
@@ -185,12 +184,7 @@ class DefaultFormActivityStateHelperTest {
             awaitAndVerifyInitialState()
 
             stateHolder.updateMandate("Some new mandate".resolvableString)
-            assertThat(awaitItem().mandateText).isEqualTo(
-                MandateText(
-                    "Some new mandate".resolvableString,
-                    true
-                )
-            )
+            assertThat(awaitItem().mandateText).isEqualTo("Some new mandate".resolvableString)
         }
     }
 
