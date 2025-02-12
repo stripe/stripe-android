@@ -198,7 +198,7 @@ private fun Embedded.RowStyle.startSeparatorInset(): Dp {
 private fun Embedded.RowStyle.endSeparatorInset(): Dp {
     return when (this) {
         is Embedded.RowStyle.FloatingButton -> 0.dp
-        is Embedded.RowStyle.FlatWithRadio -> endSeparatorInsetDp.dp + additionalHorizontalInsetsDp.dp
-        is Embedded.RowStyle.FlatWithCheckmark -> endSeparatorInsetDp.dp + additionalHorizontalInsetsDp.dp
+        is Embedded.RowStyle.FlatWithRadio -> endSeparatorInsetDp.dp
+        is Embedded.RowStyle.FlatWithCheckmark -> endSeparatorInsetDp.dp
     }
 }

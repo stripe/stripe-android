@@ -31,8 +31,8 @@ internal data class EmbeddedContent(
         StripeTheme {
             Column(
                 modifier = Modifier
-                    .background(MaterialTheme.colors.surface)
-                    //.padding(top = 8.dp)
+                    .background(MaterialTheme.colors.background)
+                    .padding(top = 8.dp)
                     .animateContentSize()
             ) {
                 EmbeddedVerticalList()
@@ -45,7 +45,9 @@ internal data class EmbeddedContent(
     private fun EmbeddedVerticalList() {
         PaymentMethodEmbeddedLayoutUI(
             interactor = interactor,
-            modifier = Modifier.padding(bottom = 8.dp),
+            modifier = Modifier
+                .background(MaterialTheme.colors.background)
+                .padding(bottom = 8.dp),
             rowStyle = rowStyle
         )
     }

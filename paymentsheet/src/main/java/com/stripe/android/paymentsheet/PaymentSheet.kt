@@ -1042,7 +1042,9 @@ class PaymentSheet internal constructor(
                         selectedColor = selectedColor.toArgb(),
                         unselectedColor = unselectedColor.toArgb(),
                         additionalVerticalInsetsDp = context.getRawValueFromDimenResource(additionalVerticalInsetsDp),
-                        additionalHorizontalInsetsDp = context.getRawValueFromDimenResource(additionalHorizontalInsetsDp)
+                        additionalHorizontalInsetsDp = context.getRawValueFromDimenResource(
+                            additionalHorizontalInsetsDp
+                        )
                     )
 
                     override fun hasSeparators() = true
@@ -1153,7 +1155,9 @@ class PaymentSheet internal constructor(
                         checkmarkColor = checkmarkColor.toArgb(),
                         checkmarkInsetDp = context.getRawValueFromDimenResource(checkmarkInsetDp),
                         additionalVerticalInsetsDp = context.getRawValueFromDimenResource(additionalVerticalInsetsDp),
-                        additionalHorizontalInsetsDp = context.getRawValueFromDimenResource(additionalHorizontalInsetsDp)
+                        additionalHorizontalInsetsDp = context.getRawValueFromDimenResource(
+                            additionalHorizontalInsetsDp
+                        )
                     )
 
                     override fun hasSeparators() = true
