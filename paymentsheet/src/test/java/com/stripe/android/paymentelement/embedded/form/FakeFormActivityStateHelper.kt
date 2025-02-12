@@ -27,15 +27,15 @@ internal class FakeFormActivityStateHelper : FormActivityStateHelper {
     }
 
     override fun updateMandate(mandateText: ResolvableString?) {
-        // NO-OP
+        error("This should never be called!")
     }
 
     override fun updatePrimaryButton(callback: (PrimaryButton.UIState?) -> PrimaryButton.UIState?) {
-        // NO-OP
+        error("This should never be called!")
     }
 
     override fun updateError(error: ResolvableString?) {
-        // NO-OP
+        error("This should never be called!")
     }
 
     fun validate() {
