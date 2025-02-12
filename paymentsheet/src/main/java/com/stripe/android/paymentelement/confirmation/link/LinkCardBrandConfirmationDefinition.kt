@@ -13,8 +13,9 @@ import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfi
 import com.stripe.android.paymentsheet.R
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
+import javax.inject.Inject
 
-internal class LinkCardBrandConfirmationDefinition(
+internal class LinkCardBrandConfirmationDefinition @Inject constructor(
     private val linkAccountManager: LinkAccountManager,
 ) : ConfirmationDefinition<
     LinkCardBrandConfirmationOption,
