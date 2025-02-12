@@ -14,6 +14,7 @@ internal data class WalletUiState(
     val isProcessing: Boolean,
     val primaryButtonLabel: ResolvableString,
     val hasCompleted: Boolean,
+    val canAddNewPaymentMethod: Boolean,
     val errorMessage: ResolvableString? = null,
     val expiryDateInput: FormFieldEntry = FormFieldEntry(null),
     val cvcInput: FormFieldEntry = FormFieldEntry(null),

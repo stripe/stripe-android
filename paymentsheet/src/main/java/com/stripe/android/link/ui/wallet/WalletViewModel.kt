@@ -21,7 +21,7 @@ import com.stripe.android.link.ui.completePaymentButtonLabel
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
-import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.elements.CardDetailsUtil.createExpiryDateFormFieldValues
@@ -56,7 +56,9 @@ internal class WalletViewModel @Inject constructor(
             selectedItem = null,
             isProcessing = false,
             hasCompleted = false,
-            primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent)
+            primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent),
+            // TODO(tillh-stripe) Update this as soon as adding bank accounts is supported
+            canAddNewPaymentMethod = stripeIntent.paymentMethodTypes.contains(Card.code),
         )
     )
 
@@ -339,7 +341,7 @@ private fun WalletUiState.toPaymentMethodCreateParams(): PaymentMethodCreatePara
     val expiryDateValues = createExpiryDateFormFieldValues(expiryDateInput)
     return FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
         fieldValuePairs = expiryDateValues,
-        code = PaymentMethod.Type.Card.code,
+        code = Card.code,
         requiresMandate = false
     )
 }

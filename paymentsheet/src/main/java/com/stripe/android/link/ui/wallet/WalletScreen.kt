@@ -424,10 +424,12 @@ private fun ExpandedPaymentDetails(
             )
         }
 
-        AddPaymentMethodRow(
-            isEnabled = isEnabled,
-            onAddNewPaymentMethodClick = onAddNewPaymentMethodClick
-        )
+        if (uiState.canAddNewPaymentMethod) {
+            AddPaymentMethodRow(
+                isEnabled = isEnabled,
+                onAddNewPaymentMethodClick = onAddNewPaymentMethodClick
+            )
+        }
     }
 }
 
