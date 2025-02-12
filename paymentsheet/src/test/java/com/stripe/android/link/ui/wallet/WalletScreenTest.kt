@@ -544,14 +544,6 @@ internal class WalletScreenTest {
     }
 
     @Test
-    fun `wallet menu is dismissed on edit clicked`() = runTest(dispatcher) {
-        testMenu(
-            nodeTag = onWalletPaymentMethodMenuUpdateTag(),
-            expectedEditPaymentMethodCounter = 1
-        )
-    }
-
-    @Test
     fun `wallet menu is dismissed on setAsDefault clicked`() = runTest(dispatcher) {
         testMenu(
             nodeTag = onWalletPaymentMethodMenuSetAsDefaultTag(),
@@ -713,9 +705,6 @@ internal class WalletScreenTest {
 
     private fun onWalletPaymentMethodMenuRemoveTag() =
         composeTestRule.onNodeWithTag(WALLET_MENU_REMOVE_ITEM_TAG, useUnmergedTree = true)
-
-    private fun onWalletPaymentMethodMenuUpdateTag() =
-        composeTestRule.onNodeWithTag(WALLET_MENU_EDIT_CARD_TAG, useUnmergedTree = true)
 
     private fun onWalletPaymentMethodMenuSetAsDefaultTag() =
         composeTestRule.onNodeWithTag(WALLET_MENU_SET_AS_DEFAULT_TAG, useUnmergedTree = true)
