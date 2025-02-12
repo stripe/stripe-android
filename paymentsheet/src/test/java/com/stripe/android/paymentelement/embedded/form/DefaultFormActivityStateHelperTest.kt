@@ -15,6 +15,8 @@ import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
+import com.stripe.android.paymentsheet.model.MandateText
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.ui.core.R
 import kotlinx.coroutines.test.TestScope
@@ -164,6 +166,64 @@ class DefaultFormActivityStateHelperTest {
             val canceledState = awaitItem()
             assertThat(canceledState.error).isNull()
             assertThat(canceledState.isProcessing).isFalse()
+        }
+    }
+
+    @Test
+    fun `updateError updates error`() = testScenario {
+        stateHolder.state.test {
+            awaitAndVerifyInitialState()
+
+            stateHolder.updateError("Something went wrong".resolvableString)
+            assertThat(awaitItem().error).isEqualTo("Something went wrong".resolvableString)
+        }
+    }
+
+    @Test
+    fun `updateMandate updates mandateText`() = testScenario {
+        stateHolder.state.test {
+            awaitAndVerifyInitialState()
+
+            stateHolder.updateMandate("Some new mandate".resolvableString)
+            assertThat(awaitItem().mandateText).isEqualTo(
+                MandateText(
+                    "Some new mandate".resolvableString,
+                    true
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `updatePrimaryButton updates primary button state`() = testScenario {
+        stateHolder.state.test {
+            awaitAndVerifyInitialState()
+
+            stateHolder.updatePrimaryButton {
+                PrimaryButton.UIState(
+                    label = "Do something".resolvableString,
+                    onClick = {},
+                    enabled = true,
+                    lockVisible = true
+                )
+            }
+
+            val updateState = awaitItem()
+            assertThat(updateState.isEnabled).isTrue()
+            assertThat(updateState.primaryButtonLabel).isEqualTo("Do something".resolvableString)
+            assertThat(updateState.onClick).isNotNull()
+
+            stateHolder.updatePrimaryButton { null }
+
+            val nullState = awaitItem()
+            assertThat(nullState.isEnabled).isFalse()
+            assertThat(nullState.primaryButtonLabel).isEqualTo(
+                resolvableString(
+                    id = R.string.stripe_pay_button_amount,
+                    formatArgs = arrayOf("$10.99")
+                )
+            )
+            assertThat(nullState.onClick).isNull()
         }
     }
 

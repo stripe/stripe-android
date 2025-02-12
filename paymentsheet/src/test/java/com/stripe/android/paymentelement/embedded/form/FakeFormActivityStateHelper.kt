@@ -26,7 +26,7 @@ internal class FakeFormActivityStateHelper : FormActivityStateHelper {
         updateTurbine.add(confirmationState)
     }
 
-    override fun updateMandate(mandateText: ResolvableString?, showAbove: Boolean) {
+    override fun updateMandate(mandateText: ResolvableString?) {
         // NO-OP
     }
 

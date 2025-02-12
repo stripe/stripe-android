@@ -36,7 +36,9 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             selectedPaymentMethodCode = paymentMethodCode,
             hostedSurface = HOSTED_SURFACE_PAYMENT_ELEMENT,
             setSelection = embeddedSelectionHolder::set,
-            onMandateTextChanged = formActivityStateHelper::updateMandate,
+            onMandateTextChanged = { mandateText, _ ->
+                formActivityStateHelper.updateMandate(mandateText)
+            },
             onUpdatePrimaryButtonUIState = formActivityStateHelper::updatePrimaryButton,
             onError = formActivityStateHelper::updateError,
         )

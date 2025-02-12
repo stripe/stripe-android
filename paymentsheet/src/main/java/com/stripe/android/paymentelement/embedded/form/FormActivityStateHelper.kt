@@ -28,7 +28,7 @@ import javax.inject.Singleton
 internal interface FormActivityStateHelper {
     val state: StateFlow<State>
     fun updateConfirmationState(confirmationState: ConfirmationHandler.State)
-    fun updateMandate(mandateText: ResolvableString?, showAbove: Boolean)
+    fun updateMandate(mandateText: ResolvableString?)
     fun updatePrimaryButton(callback: (PrimaryButton.UIState?) -> PrimaryButton.UIState?)
     fun updateError(error: ResolvableString?)
 
@@ -79,7 +79,7 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
         }
     }
 
-    override fun updateMandate(mandateText: ResolvableString?, showAbove: Boolean) {
+    override fun updateMandate(mandateText: ResolvableString?) {
         val mandate = if (mandateText != null) {
             MandateText(
                 text = mandateText,
