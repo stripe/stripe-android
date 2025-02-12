@@ -33,7 +33,6 @@ import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -42,7 +41,6 @@ import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.ProvideTextStyle
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
@@ -148,8 +146,7 @@ internal fun CompatTextField(
     maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     minLines: Int = 1,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    shape: Shape =
-        MaterialTheme.shapes.small.copy(bottomEnd = ZeroCornerSize, bottomStart = ZeroCornerSize),
+    shape: Shape = TextFieldDefaults.TextFieldShape,
     colors: TextFieldColors = TextFieldDefaults.textFieldColors()
 ) {
     // If color is not provided via the text style, use content color as a default
@@ -162,7 +159,6 @@ internal fun CompatTextField(
     BasicTextField(
         value = value,
         modifier = modifier
-            .background(colors.backgroundColor(enabled).value, shape)
             .indicatorLine(enabled, isError, interactionSource, colors)
             .defaultErrorSemantics(isError, stringResource(ComposeUiR.string.default_error_message))
             .defaultMinSize(
@@ -196,6 +192,7 @@ internal fun CompatTextField(
                 isError = isError,
                 interactionSource = interactionSource,
                 colors = colors,
+                shape = shape,
                 contentPadding = if (label == null) {
                     TextFieldDefaults.textFieldWithoutLabelPadding()
                 } else {
@@ -207,7 +204,7 @@ internal fun CompatTextField(
 }
 
 /**
- * Implementation of the [TextField] and [OutlinedTextField]
+ * Implementation of the [CompatTextField]
  */
 @Composable
 @Suppress("CyclomaticComplexMethod", "LongMethod")
@@ -216,14 +213,15 @@ internal fun CommonDecorationBox(
     innerTextField: @Composable () -> Unit,
     visualTransformation: VisualTransformation,
     label: @Composable (() -> Unit)?,
-    placeholder: @Composable (() -> Unit)? = null,
-    leadingIcon: @Composable (() -> Unit)? = null,
-    trailingIcon: @Composable (() -> Unit)? = null,
-    singleLine: Boolean = false,
-    enabled: Boolean = true,
-    isError: Boolean = false,
+    placeholder: @Composable (() -> Unit)?,
+    leadingIcon: @Composable (() -> Unit)?,
+    trailingIcon: @Composable (() -> Unit)?,
+    singleLine: Boolean,
+    enabled: Boolean,
+    isError: Boolean,
     interactionSource: InteractionSource,
     contentPadding: PaddingValues,
+    shape: Shape,
     colors: TextFieldColors,
 ) {
     val transformedText = remember(value, visualTransformation) {
@@ -296,22 +294,25 @@ internal fun CommonDecorationBox(
                 null
             }
 
-        val leadingIconColor = colors.leadingIconColor(enabled, isError).value
+        val leadingIconColor = colors.leadingIconColor(enabled, isError, interactionSource).value
         val decoratedLeading: @Composable (() -> Unit)? = leadingIcon?.let {
             @Composable {
                 Decoration(contentColor = leadingIconColor, content = it)
             }
         }
 
-        val trailingIconColor = colors.trailingIconColor(enabled, isError).value
+        val trailingIconColor = colors.trailingIconColor(enabled, isError, interactionSource).value
         val decoratedTrailing: @Composable (() -> Unit)? = trailingIcon?.let {
             @Composable {
                 Decoration(contentColor = trailingIconColor, content = it)
             }
         }
 
+        val backgroundModifier =
+            Modifier.background(colors.backgroundColor(enabled).value, shape)
+
         TextFieldLayout(
-            modifier = Modifier,
+            modifier = backgroundModifier,
             textField = innerTextField,
             placeholder = decoratedPlaceholder,
             label = decoratedLabel,
