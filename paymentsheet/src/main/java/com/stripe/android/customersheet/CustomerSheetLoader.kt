@@ -74,7 +74,7 @@ internal class DefaultCustomerSheetLoader(
 
         val filteredPaymentMethods = customerSheetSession.paymentMethods.filter { paymentMethod ->
             PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance).isAccepted(paymentMethod) &&
-                !shouldBeFilteredOutForSyncDefaultFeature(isPaymentMethodSyncDefaultEnabled, paymentMethod)
+                (!isPaymentMethodSyncDefaultEnabled || isSupportedBySyncDefaultFeature(paymentMethod))
         }
         customerSheetSession = customerSheetSession.copy(
             paymentMethods = filteredPaymentMethods
@@ -93,16 +93,14 @@ internal class DefaultCustomerSheetLoader(
         )
     }
 
-    private fun shouldBeFilteredOutForSyncDefaultFeature(
-        isPaymentMethodSyncDefaultEnabled: Boolean,
+    private fun isSupportedBySyncDefaultFeature(
         paymentMethod: PaymentMethod,
     ): Boolean {
         val paymentMethodTypesSupportedWithSyncDefaultFeature = listOf(
             PaymentMethod.Type.Card,
             PaymentMethod.Type.USBankAccount,
         )
-        return isPaymentMethodSyncDefaultEnabled &&
-            paymentMethodTypesSupportedWithSyncDefaultFeature.contains(paymentMethod.type).not()
+        return paymentMethodTypesSupportedWithSyncDefaultFeature.contains(paymentMethod.type)
     }
 
     private suspend fun retrieveInitializationDataSource(): Result<CustomerSheetInitializationDataSource> {

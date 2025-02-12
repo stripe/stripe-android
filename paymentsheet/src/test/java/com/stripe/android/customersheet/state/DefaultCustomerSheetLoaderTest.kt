@@ -234,7 +234,6 @@ class DefaultCustomerSheetLoaderTest {
         )
         val loader = createCustomerSheetLoader(
             paymentMethods = expectedPaymentMethods.plus(sepaPaymentMethod),
-            // Setting a saved selection here so we can validate that it is not used.
             isPaymentMethodSyncDefaultEnabled = true,
         )
 
