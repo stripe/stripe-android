@@ -3,7 +3,9 @@ package com.stripe.android.financialconnections.model
 import android.os.Parcelable
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.model.serializers.EnumIgnoreUnknownSerializer
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
+import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -67,6 +69,14 @@ data class FinancialConnectionsAccount(
     @SerialName("permissions")
     val permissions: List<Permissions>? = null,
 ) : StripeModel, Parcelable, PaymentAccount() {
+
+    // "object" field is needed by stripe.js, so this is included here for serialization.
+    @IgnoredOnParcel
+    @SerialName("object")
+    @Required
+    @SuppressWarnings("VariableNaming")
+    var `object`: String = OBJECT_NEW // var instead of val to include for serialization
+        private set
 
     /**
      * The category of the account.

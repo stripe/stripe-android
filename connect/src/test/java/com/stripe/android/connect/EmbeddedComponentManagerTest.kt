@@ -7,6 +7,7 @@ import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import junit.framework.TestCase.assertFalse
 import kotlinx.coroutines.async
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -124,7 +125,27 @@ class EmbeddedComponentManagerTest {
         }
         advanceUntilIdle()
         val expected = arrayOf(Uri.parse("content://test"))
-        EmbeddedComponentManager.chooseFileResultFlow.emit(expected) // Simulate a file being chosen.
+        // Simulate a file being chosen.
+        EmbeddedComponentManager.chooseFileResultFlow.emit(
+            EmbeddedComponentManager.ActivityResult(testActivity, expected)
+        )
+        val actual = resultAsync.await()
+
+        assertThat(actual).isEqualTo(expected)
+    }
+
+    @Test
+    fun `presentFinancialConnections returns correct result`() = runTest {
+        EmbeddedComponentManager.onActivityCreate(testActivity)
+        val resultAsync = async {
+            embeddedComponentManager.presentFinancialConnections(testActivity, "secret", "id")
+        }
+        advanceUntilIdle()
+        val expected = FinancialConnectionsSheetResult.Canceled
+        // Simulate financial connections
+        EmbeddedComponentManager.financialConnectionsResults.emit(
+            EmbeddedComponentManager.ActivityResult(testActivity, expected)
+        )
         val actual = resultAsync.await()
 
         assertThat(actual).isEqualTo(expected)

@@ -29,3 +29,10 @@ internal data class SecureWebViewMessage(
     val id: String,
     val url: String
 )
+
+@Serializable
+internal data class OpenFinancialConnectionsMessage(
+    val id: String,
+    val clientSecret: String,
+    val connectedAccountId: String,
+)
