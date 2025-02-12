@@ -12,7 +12,8 @@ internal fun List<PaymentMethod>.filterToSupportedPaymentMethods(
     )
 
     return this.filter { paymentMethod ->
-        !isSyncDefaultPaymentMethodFeatureEnabled || paymentMethodTypesSupportedWithSyncDefaultFeature.contains(paymentMethod.type)
+        !isSyncDefaultPaymentMethodFeatureEnabled ||
+            paymentMethodTypesSupportedWithSyncDefaultFeature.contains(paymentMethod.type)
     }
 }
 
