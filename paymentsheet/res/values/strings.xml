@@ -161,6 +161,8 @@
   <string name="stripe_sign_up_terms_alternative"><![CDATA[By providing your email, you agree to create a Link account and save your payment info to Link, according to the <terms>Link Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[By providing your phone number, you agree to create a Link account and save your payment info to Link, according to the <terms>Link Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
+  <!-- Message for a deactivated account in the signup flow. -->
+  <string name="stripe_signup_deactivated_account_message">Your account has been deactivated</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">Something went wrong</string>
   <!-- Button text on a screen asking the user to approve a payment -->
@@ -173,8 +175,6 @@
   <string name="stripe_upi_polling_payment_failed_message">Please go back and select another payment method</string>
   <!-- Text on a screen that indicates a payment has failed -->
   <string name="stripe_upi_polling_payment_failed_title">Payment failed</string>
-  <!-- Message for a deactivated account in the signup flow. -->
-  <string name="stripe_signup_deactivated_account_message">Your account has been deactivated</string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="stripe_verification_change_email">Change email</string>
   <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
