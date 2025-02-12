@@ -205,7 +205,6 @@ internal class LinkActivityViewModel @Inject constructor(
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
-        if (linkScreenState.value != ScreenState.Loading) return
         viewModelScope.launch {
             val attestationCheckResult = linkAttestationCheck.invoke()
             when (attestationCheckResult) {
