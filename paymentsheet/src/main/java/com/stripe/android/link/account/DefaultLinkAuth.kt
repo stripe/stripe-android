@@ -24,6 +24,7 @@ internal class DefaultLinkAuth @Inject constructor(
         name: String?,
         consentAction: SignUpConsentAction
     ): LinkAuthResult {
+        return LinkAuthResult.AccountError(Throwable("oops"))
         val signupResult = if (linkGate.useAttestationEndpoints) {
             mobileSignUp(
                 email = email,
@@ -49,6 +50,7 @@ internal class DefaultLinkAuth @Inject constructor(
         emailSource: EmailSource,
         startSession: Boolean
     ): LinkAuthResult {
+        return LinkAuthResult.AccountError(Throwable("oops"))
         val lookupResult = if (linkGate.useAttestationEndpoints) {
             mobileLookUp(
                 email = email,

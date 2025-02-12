@@ -3,6 +3,7 @@ package com.stripe.android.link.injection
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.paymentelement.confirmation.DefaultConfirmationHandler
@@ -19,6 +20,7 @@ internal object LinkViewModelModule {
         component: NativeLinkComponent,
         defaultConfirmationHandlerFactory: DefaultConfirmationHandler.Factory,
         linkAccountManager: LinkAccountManager,
+        linkAccountHolder: LinkAccountHolder,
         eventReporter: EventReporter,
         linkConfiguration: LinkConfiguration,
         linkAttestationCheck: LinkAttestationCheck,
@@ -29,6 +31,7 @@ internal object LinkViewModelModule {
             activityRetainedComponent = component,
             confirmationHandlerFactory = defaultConfirmationHandlerFactory,
             linkAccountManager = linkAccountManager,
+            linkAccountHolder = linkAccountHolder,
             eventReporter = eventReporter,
             linkConfiguration = linkConfiguration,
             linkAttestationCheck = linkAttestationCheck,

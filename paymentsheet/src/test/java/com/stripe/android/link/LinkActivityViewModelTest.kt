@@ -22,6 +22,7 @@ import androidx.savedstate.SavedStateRegistryOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.account.FakeLinkAccountManager
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.attestation.FakeLinkAttestationCheck
 import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.model.AccountStatus
@@ -35,6 +36,7 @@ import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.utils.DummyActivityResultCaller
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -405,6 +407,52 @@ internal class LinkActivityViewModelTest {
         }
 
     @Test
+    fun `onCreate should dismiss when attestationCheck fails on generic error and startWithVerification is true`() =
+        runTest {
+            val error = Throwable("oops")
+            testAttestationCheckError(
+                attestationCheckResult = LinkAttestationCheck.Result.Error(error),
+                expectedLinkActivityResult = LinkActivityResult.Failed(
+                    error = error,
+                    linkAccountUpdate = LinkAccountUpdate.Value(null)
+                )
+            )
+        }
+
+    @Test
+    fun `onCreate should dismiss when attestationCheck fails on account error and startWithVerification is true`() =
+        runTest {
+            val error = Throwable("oops")
+            testAttestationCheckError(
+                attestationCheckResult = LinkAttestationCheck.Result.AccountError(error),
+                expectedLinkActivityResult = LinkActivityResult.Failed(
+                    error = error,
+                    linkAccountUpdate = LinkAccountUpdate.Value(null)
+                )
+            )
+        }
+
+    @Test
+    fun `onCreate should open signup when attsCheck fails on account error and startWithVerification is false`() =
+        runTest {
+            val error = Throwable("oops")
+            testAttestationCheckError(
+                attestationCheckResult = LinkAttestationCheck.Result.AccountError(error),
+                startWithVerificationDialog = false
+            )
+        }
+
+    @Test
+    fun `onCreate should open signup when attsCheck fails on generic error and startWithVerification is false`() =
+        runTest {
+            val error = Throwable("oops")
+            testAttestationCheckError(
+                attestationCheckResult = LinkAttestationCheck.Result.Error(error),
+                startWithVerificationDialog = false
+            )
+        }
+
+    @Test
     fun `onCreate should launch 2fa when eager launch is enabled`() = runTest {
         val linkAccountManager = FakeLinkAccountManager()
         linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
@@ -727,8 +775,74 @@ internal class LinkActivityViewModelTest {
         }
     }
 
+    private fun testAttestationCheckError(
+        attestationCheckResult: LinkAttestationCheck.Result,
+        startWithVerificationDialog: Boolean = true,
+        expectedLinkActivityResult: LinkActivityResult? = null,
+    ) = runTest {
+        var launchWebConfig: LinkConfiguration? = null
+        var result: LinkActivityResult? = null
+        val navController = navController()
+        val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+        val linkAccountManager = FakeLinkAccountManager(
+            linkAccountHolder = linkAccountHolder,
+            accountStatusOverride = linkAccountHolder.linkAccount.map {
+                it?.accountStatus ?: AccountStatus.SignedOut
+            }
+        )
+        val linkAttestationCheck = FakeLinkAttestationCheck()
+
+        linkAttestationCheck.result = attestationCheckResult
+        linkAccountHolder.set(TestFactory.LINK_ACCOUNT)
+        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
+
+        val vm = createViewModel(
+            linkAttestationCheck = linkAttestationCheck,
+            linkAccountManager = linkAccountManager,
+            linkAccountHolder = linkAccountHolder,
+            startWithVerificationDialog = startWithVerificationDialog,
+            launchWeb = { config ->
+                launchWebConfig = config
+            },
+            dismissWithResult = {
+                result = it
+            }
+        )
+        vm.navController = navController
+
+        vm.onCreate(mock())
+
+        advanceUntilIdle()
+
+        if (startWithVerificationDialog.not()) {
+            vm.linkScreenCreated()
+        }
+
+        linkAccountManager.awaitLogoutCall()
+        assertThat(linkAccountHolder.linkAccount.value).isNull()
+        assertThat(launchWebConfig).isNull()
+        assertThat(result).isEqualTo(expectedLinkActivityResult)
+
+        if (startWithVerificationDialog) {
+            assertThat(vm.linkScreenState.value).isEqualTo(ScreenState.Loading)
+            verify(navController, times(0)).navigate(
+                any(),
+                any<NavOptionsBuilder.() -> Unit>()
+            )
+        } else {
+            assertThat(vm.linkScreenState.value).isEqualTo(ScreenState.FullScreen)
+            assertNavigation(
+                navController = navController,
+                screen = LinkScreen.SignUp,
+                clearStack = true,
+                launchSingleTop = true
+            )
+        }
+    }
+
     private fun createViewModel(
         linkAccountManager: FakeLinkAccountManager = FakeLinkAccountManager(),
+        linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
         confirmationHandler: ConfirmationHandler = FakeConfirmationHandler(),
         eventReporter: EventReporter = FakeEventReporter(),
         navController: NavHostController = navController(),
@@ -740,6 +854,7 @@ internal class LinkActivityViewModelTest {
     ): LinkActivityViewModel {
         return LinkActivityViewModel(
             linkAccountManager = linkAccountManager,
+            linkAccountHolder = linkAccountHolder,
             activityRetainedComponent = FakeNativeLinkComponent(),
             eventReporter = eventReporter,
             confirmationHandlerFactory = { confirmationHandler },
