@@ -140,7 +140,7 @@ private fun RowButtonOuterContent(
                 isSelected = isSelected,
                 contentPaddingValues = PaddingValues(
                     horizontal = 0.dp,
-                    vertical = contentPaddingValues + style.additionalInsetsDp.dp
+                    vertical = contentPaddingValues + style.additionalVerticalInsetsDp.dp
                 ),
                 verticalArrangement = Arrangement.Center,
                 trailingContent = trailingContent,
@@ -156,7 +156,7 @@ private fun RowButtonOuterContent(
                 isSelected = isSelected,
                 contentPaddingValues = PaddingValues(
                     horizontal = 0.dp,
-                    vertical = contentPaddingValues + style.additionalInsetsDp.dp
+                    vertical = contentPaddingValues + style.additionalVerticalInsetsDp.dp
                 ),
                 verticalArrangement = Arrangement.Center,
                 onClick = onClick,
@@ -210,6 +210,7 @@ private fun RowButtonRadioOuterContent(
     Row(
         modifier = modifier
             .background(MaterialTheme.stripeColors.component)
+            .padding(horizontal = style.additionalHorizontalInsetsDp.dp)
     ) {
         RadioButton(
             selected = isSelected,
@@ -246,7 +247,8 @@ private fun RowButtonCheckmarkOuterContent(
 ) {
     Row(
         modifier = modifier
-            .background(MaterialTheme.stripeColors.component),
+            .background(MaterialTheme.stripeColors.component)
+            .padding(horizontal = style.additionalHorizontalInsetsDp.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(
