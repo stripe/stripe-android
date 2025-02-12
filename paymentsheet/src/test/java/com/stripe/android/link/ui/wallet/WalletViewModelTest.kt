@@ -380,7 +380,7 @@ class WalletViewModelTest {
             override suspend fun updatePaymentDetails(
                 updateParams: ConsumerPaymentDetailsUpdateParams
             ): Result<ConsumerPaymentDetails> {
-                delay(1.seconds)
+                delay(CARD_PROCESSING_DELAY)
                 return super.updatePaymentDetails(updateParams)
             }
         }
@@ -400,7 +400,7 @@ class WalletViewModelTest {
 
         assertThat(viewModel.uiState.value.cardBeingUpdated).isEqualTo(card1.id)
 
-        advanceUntilIdle()
+        dispatcher.scheduler.advanceTimeBy(CARD_PROCESSING_COMPLETION_TIME)
 
         assertThat(linkAccountManager.updatePaymentDetailsCalls).containsExactly(
             ConsumerPaymentDetailsUpdateParams(
@@ -507,6 +507,11 @@ class WalletViewModelTest {
             navigateAndClearStack = navigateAndClearStack,
             dismissWithResult = dismissWithResult
         )
+    }
+
+    companion object {
+        private val CARD_PROCESSING_DELAY = 1.seconds
+        private val CARD_PROCESSING_COMPLETION_TIME = 1.1.seconds
     }
 }
 
