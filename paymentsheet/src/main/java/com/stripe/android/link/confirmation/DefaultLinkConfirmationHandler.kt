@@ -7,12 +7,15 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.confirmation.link.LinkCardBrandConfirmationOption
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import javax.inject.Inject
@@ -112,9 +115,13 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         linkAccount: LinkAccount,
         cvc: String?
     ): ConfirmationHandler.Args {
-        return ConfirmationHandler.Args(
-            intent = configuration.stripeIntent,
-            confirmationOption = PaymentMethodConfirmationOption.New(
+        val confirmationOption = if (paymentDetails.useLinkCardBrandConfirmation) {
+            LinkCardBrandConfirmationOption(
+                paymentDetailsId = paymentDetails.id,
+                expectedPaymentMethodType = computeExpectedPaymentMethodType(),
+            )
+        } else {
+            PaymentMethodConfirmationOption.New(
                 createParams = createPaymentMethodCreateParams(
                     selectedPaymentDetails = paymentDetails,
                     linkAccount = linkAccount,
@@ -122,7 +129,12 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                 ),
                 optionsParams = null,
                 shouldSave = false
-            ),
+            )
+        }
+
+        return ConfirmationHandler.Args(
+            intent = configuration.stripeIntent,
+            confirmationOption = confirmationOption,
             appearance = PaymentSheet.Appearance(),
             initializationMode = configuration.initializationMode,
             shippingDetails = configuration.shippingDetails
@@ -170,6 +182,20 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
             consumerSessionClientSecret = linkAccount.clientSecret,
             extraParams = cvc?.let { mapOf("card" to mapOf("cvc" to cvc)) },
         )
+    }
+
+    private val ConsumerPaymentDetails.PaymentDetails.useLinkCardBrandConfirmation: Boolean
+        get() = type == ConsumerPaymentDetails.BankAccount.TYPE && configuration.passthroughModeEnabled
+
+    private fun computeExpectedPaymentMethodType(): String {
+        val canAcceptACH = USBankAccount.code in configuration.stripeIntent.paymentMethodTypes
+        val isLinkCardBrand = configuration.linkMode == LinkMode.LinkCardBrand
+
+        return if (isLinkCardBrand && !canAcceptACH) {
+            ConsumerPaymentDetails.Card.TYPE
+        } else {
+            ConsumerPaymentDetails.BankAccount.TYPE
+        }
     }
 
     class Factory @Inject constructor(

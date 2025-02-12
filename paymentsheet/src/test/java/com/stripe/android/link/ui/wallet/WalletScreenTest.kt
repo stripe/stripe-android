@@ -582,7 +582,8 @@ internal class WalletScreenTest {
                 selectedItem = paymentDetails.firstOrNull(),
                 isProcessing = false,
                 hasCompleted = false,
-                primaryButtonLabel = "Buy".resolvableString
+                primaryButtonLabel = "Buy".resolvableString,
+                canAddNewPaymentMethod = true,
             ),
             isExpanded = true,
             onItemSelected = {},

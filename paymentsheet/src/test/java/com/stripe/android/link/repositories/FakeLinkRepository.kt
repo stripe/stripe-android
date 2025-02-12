@@ -19,6 +19,7 @@ internal open class FakeLinkRepository : LinkRepository {
     var mobileConsumerSignUpResult = Result.success(TestFactory.CONSUMER_SESSION_SIGN_UP)
     var createCardPaymentDetailsResult = Result.success(TestFactory.LINK_NEW_PAYMENT_DETAILS)
     var shareCardPaymentDetailsResult = Result.success(TestFactory.LINK_NEW_PAYMENT_DETAILS)
+    var sharePaymentDetails = Result.success(TestFactory.LINK_SHARE_PAYMENT_DETAILS)
     var logOutResult = Result.success(TestFactory.CONSUMER_SESSION)
     var startVerificationResult = Result.success(TestFactory.CONSUMER_SESSION)
     var confirmVerificationResult = Result.success(TestFactory.CONSUMER_SESSION)
@@ -102,6 +103,12 @@ internal open class FakeLinkRepository : LinkRepository {
         last4: String,
         consumerSessionClientSecret: String
     ) = shareCardPaymentDetailsResult
+
+    override suspend fun sharePaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentDetailsId: String,
+        expectedPaymentMethodType: String
+    ) = sharePaymentDetails
 
     override suspend fun logOut(
         consumerSessionClientSecret: String,

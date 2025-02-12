@@ -90,6 +90,7 @@ internal class DefaultEmbeddedContentHelperTest {
             savedStateHandle = savedStateHandle,
             eventReporter = mock(),
             workContext = Dispatchers.Unconfined,
+            uiContext = Dispatchers.Unconfined,
             customerRepository = FakeCustomerRepository(),
             selectionHolder = selectionHolder,
             embeddedWalletsHelper = { stateFlowOf(null) },

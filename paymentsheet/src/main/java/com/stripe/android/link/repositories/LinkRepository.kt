@@ -10,6 +10,7 @@ import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.model.StripeIntent
 
 /**
@@ -75,6 +76,12 @@ internal interface LinkRepository {
         last4: String,
         consumerSessionClientSecret: String,
     ): Result<LinkPaymentDetails>
+
+    suspend fun sharePaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentDetailsId: String,
+        expectedPaymentMethodType: String,
+    ): Result<SharePaymentDetails>
 
     suspend fun logOut(
         consumerSessionClientSecret: String,

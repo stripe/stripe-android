@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded.content
 import android.os.Parcelable
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
@@ -54,6 +55,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val eventReporter: EventReporter,
     @IOContext private val workContext: CoroutineContext,
+    @UIContext private val uiContext: CoroutineContext,
     private val customerRepository: CustomerRepository,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val embeddedWalletsHelper: EmbeddedWalletsHelper,
@@ -194,6 +196,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             eventReporter = eventReporter,
             coroutineScope = coroutineScope,
             workContext = workContext,
+            uiContext = uiContext,
             customerRepository = customerRepository,
             selection = selectionHolder.selection,
             clearSelection = {

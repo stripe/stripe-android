@@ -41,6 +41,8 @@ import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
+import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
+import com.stripe.android.paymentelement.confirmation.link.LinkCardBrandConfirmationDefinition
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -52,6 +54,7 @@ import com.stripe.attestation.IntegrityRequestManager
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import dagger.multibindings.IntoSet
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
@@ -204,5 +207,16 @@ internal interface NativeLinkModule {
         fun provideIntegrityStandardRequestManager(
             context: Application
         ): IntegrityRequestManager = createIntegrityStandardRequestManager(context)
+
+        @JvmSuppressWildcards
+        @Provides
+        @IntoSet
+        fun providesLinkCardBrandConfirmationDefinition(
+            linkAccountManager: DefaultLinkAccountManager
+        ): ConfirmationDefinition<*, *, *, *> {
+            return LinkCardBrandConfirmationDefinition(
+                linkAccountManager = linkAccountManager,
+            )
+        }
     }
 }

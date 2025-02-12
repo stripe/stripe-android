@@ -21,11 +21,13 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 internal class SavedPaymentMethodMutator(
@@ -33,6 +35,7 @@ internal class SavedPaymentMethodMutator(
     private val eventReporter: EventReporter,
     private val coroutineScope: CoroutineScope,
     private val workContext: CoroutineContext,
+    private val uiContext: CoroutineContext,
     private val customerRepository: CustomerRepository,
     private val selection: StateFlow<PaymentSelection?>,
     private val clearSelection: () -> Unit,
@@ -169,7 +172,7 @@ internal class SavedPaymentMethodMutator(
         )
     }
 
-    private fun removeDeletedPaymentMethodFromState(paymentMethodId: String) {
+    private suspend fun removeDeletedPaymentMethodFromState(paymentMethodId: String) {
         val currentCustomer = customerStateHolder.customer.value ?: return
 
         customerStateHolder.setCustomerState(
@@ -184,7 +187,9 @@ internal class SavedPaymentMethodMutator(
             clearSelection()
         }
 
-        postPaymentMethodRemoveActions()
+        withContext(uiContext) {
+            postPaymentMethodRemoveActions()
+        }
     }
 
     fun updatePaymentMethod(displayableSavedPaymentMethod: DisplayableSavedPaymentMethod) {
@@ -206,7 +211,7 @@ internal class SavedPaymentMethodMutator(
         val result = removePaymentMethodInternal(paymentMethodId)
 
         if (result.isSuccess) {
-            coroutineScope.launch(workContext) {
+            coroutineScope.launch(uiContext) {
                 prePaymentMethodRemoveActions()
                 removeDeletedPaymentMethodFromState(paymentMethodId = paymentMethodId)
             }
@@ -241,23 +246,25 @@ internal class SavedPaymentMethodMutator(
                 productUsageTokens = setOf("PaymentSheet"),
             )
         ).onSuccess { updatedMethod ->
-            customerStateHolder.updateMostRecentlySelectedSavedPaymentMethod(updatedMethod)
-            customerStateHolder.setCustomerState(
-                currentCustomer.copy(
-                    paymentMethods = currentCustomer.paymentMethods.map { savedMethod ->
-                        val savedId = savedMethod.id
-                        val updatedId = updatedMethod.id
+            withContext(uiContext) {
+                customerStateHolder.updateMostRecentlySelectedSavedPaymentMethod(updatedMethod)
+                customerStateHolder.setCustomerState(
+                    currentCustomer.copy(
+                        paymentMethods = currentCustomer.paymentMethods.map { savedMethod ->
+                            val savedId = savedMethod.id
+                            val updatedId = updatedMethod.id
 
-                        if (updatedId != null && savedId != null && updatedId == savedId) {
-                            updatedMethod
-                        } else {
-                            savedMethod
+                            if (updatedId != null && savedId != null && updatedId == savedId) {
+                                updatedMethod
+                            } else {
+                                savedMethod
+                            }
                         }
-                    }
+                    )
                 )
-            )
 
-            navigationPop()
+                navigationPop()
+            }
 
             eventReporter.onUpdatePaymentMethodSucceeded(
                 selectedBrand = brand
@@ -273,7 +280,9 @@ internal class SavedPaymentMethodMutator(
     companion object {
         private suspend fun popWithDelay(viewModel: BaseSheetViewModel) {
             viewModel.navigationHandler.pop()
-            delay(PaymentMethodRemovalDelayMillis)
+            withContext(viewModel.workContext) {
+                delay(PaymentMethodRemovalDelayMillis)
+            }
         }
 
         private suspend fun navigateBackOnPaymentMethodRemoved(viewModel: BaseSheetViewModel) {
@@ -354,6 +363,7 @@ internal class SavedPaymentMethodMutator(
                 eventReporter = viewModel.eventReporter,
                 coroutineScope = viewModel.viewModelScope,
                 workContext = viewModel.workContext,
+                uiContext = Dispatchers.Main,
                 customerRepository = viewModel.customerRepository,
                 selection = viewModel.selection,
                 customerStateHolder = viewModel.customerStateHolder,
