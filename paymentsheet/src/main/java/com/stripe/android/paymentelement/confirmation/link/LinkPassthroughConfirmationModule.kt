@@ -6,11 +6,11 @@ import dagger.Module
 import dagger.multibindings.IntoSet
 
 @Module
-internal interface LinkCardBrandConfirmationModule {
+internal interface LinkPassthroughConfirmationModule {
     @JvmSuppressWildcards
     @Binds
     @IntoSet
-    fun bindsLinkCardBrandConfirmationDefinition(
-        definition: LinkCardBrandConfirmationDefinition,
+    fun bindsLinkPassthroughConfirmationDefinition(
+        definition: LinkPassthroughConfirmationDefinition,
     ): ConfirmationDefinition<*, *, *, *>
 }

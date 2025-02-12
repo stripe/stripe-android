@@ -16,7 +16,7 @@ import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmationModule
-import com.stripe.android.paymentelement.confirmation.link.LinkCardBrandConfirmationModule
+import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import dagger.BindsInstance
@@ -35,7 +35,7 @@ internal annotation class NativeLinkScope
         LinkViewModelModule::class,
         ApplicationIdModule::class,
         DefaultConfirmationModule::class,
-        LinkCardBrandConfirmationModule::class,
+        LinkPassthroughConfirmationModule::class,
     ]
 )
 internal interface NativeLinkComponent {
