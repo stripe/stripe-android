@@ -329,7 +329,7 @@ class CustomerSessionCustomerSheetActivityTest {
             savedPaymentMethodsPage.onModifyBadgeFor(last4 = "1001").performClick()
 
             editPage.setCardBrand("Visa")
-            editPage.update()
+            editPage.update(waitUntilComplete = false)
 
             enqueueUpdatePaymentMethod(id = "pm_1")
 

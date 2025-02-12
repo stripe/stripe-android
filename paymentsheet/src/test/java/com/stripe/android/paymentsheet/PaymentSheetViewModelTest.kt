@@ -328,6 +328,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     @Suppress("LongMethod")
     fun `modifyPaymentMethod should use loaded customer info when modifying payment methods`() = runTest {
+        Dispatchers.setMain(testDispatcher)
         val paymentMethods = listOf(CARD_WITH_NETWORKS_PAYMENT_METHOD)
 
         val customerRepository = spy(
@@ -410,6 +411,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     @Suppress("LongMethod")
     fun `modifyPaymentMethod updates payment methods and sends event on successful update`() = runTest {
+        Dispatchers.setMain(testDispatcher)
         val paymentMethods = PaymentMethodFixtures.createCards(5)
 
         val firstPaymentMethod = paymentMethods.first()

@@ -8,6 +8,7 @@ import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.NetworkTypeDetector
 import com.stripe.android.core.utils.ContextUtils.packageInfo
@@ -125,5 +126,10 @@ internal interface EmbeddedCommonModule {
         ): CustomerStateHolder {
             return CustomerStateHolder(savedStateHandle, selectionHolder.selection)
         }
+
+        @Provides
+        @Singleton
+        @UIContext
+        fun provideUiContext(): CoroutineContext = Dispatchers.Main
     }
 }

@@ -11,11 +11,13 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ExperimentalCardBrandFilteringApi
-import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.PaymentMethod
+import com.stripe.android.network.CardPaymentMethodDetails
+import com.stripe.android.network.PaymentMethodDetails
+import com.stripe.android.network.UsBankPaymentMethodDetails
+import com.stripe.android.network.setupPaymentMethodDetachResponse
+import com.stripe.android.network.setupPaymentMethodUpdateResponse
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
@@ -24,10 +26,7 @@ import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentConfigurationTestRule
-import com.stripe.android.testing.PaymentMethodFactory
-import com.stripe.android.testing.PaymentMethodFactory.update
 import org.json.JSONArray
-import org.json.JSONObject
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -169,7 +168,7 @@ internal class VerticalModePaymentSheetActivityTest {
         networkSetup = {
             setupElementsSessionsResponse()
             setupV1PaymentMethodsResponse(card1, card2)
-            setupPaymentMethodDetachResponse("pm_12345")
+            networkRule.setupPaymentMethodDetachResponse("pm_12345")
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -184,6 +183,7 @@ internal class VerticalModePaymentSheetActivityTest {
         editPage.waitUntilVisible()
         editPage.clickRemove()
         managePage.waitUntilVisible()
+        managePage.waitUntilGone("pm_12345")
         managePage.clickDone()
         Espresso.pressBack()
 
@@ -198,8 +198,8 @@ internal class VerticalModePaymentSheetActivityTest {
         networkSetup = {
             setupElementsSessionsResponse()
             setupV1PaymentMethodsResponse(card1, card2)
-            setupPaymentMethodDetachResponse("pm_12345")
-            setupPaymentMethodDetachResponse("pm_67890")
+            networkRule.setupPaymentMethodDetachResponse("pm_12345")
+            networkRule.setupPaymentMethodDetachResponse("pm_67890")
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -228,7 +228,7 @@ internal class VerticalModePaymentSheetActivityTest {
         networkSetup = {
             setupElementsSessionsResponse()
             setupV1PaymentMethodsResponse(card1)
-            setupPaymentMethodDetachResponse("pm_12345")
+            networkRule.setupPaymentMethodDetachResponse("pm_12345")
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -249,7 +249,7 @@ internal class VerticalModePaymentSheetActivityTest {
         networkSetup = {
             setupElementsSessionsResponse(isCbcEligible = true)
             setupV1PaymentMethodsResponse(card1.copy(addCbcNetworks = true), card2.copy(addCbcNetworks = true))
-            setupPaymentMethodUpdateResponse(paymentMethodDetails = card1, cardBrand = "visa")
+            networkRule.setupPaymentMethodUpdateResponse(paymentMethodDetails = card1, cardBrand = "visa")
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -610,72 +610,6 @@ internal class VerticalModePaymentSheetActivityTest {
             }
             """.trimIndent()
             response.setBody(body)
-        }
-    }
-
-    private fun setupPaymentMethodDetachResponse(paymentMethodId: String) {
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("POST"),
-            path("/v1/payment_methods/$paymentMethodId/detach"),
-        ) { response ->
-            response.setResponseCode(200)
-        }
-    }
-
-    private fun setupPaymentMethodUpdateResponse(paymentMethodDetails: CardPaymentMethodDetails, cardBrand: String) {
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("POST"),
-            path("/v1/payment_methods/${paymentMethodDetails.id}"),
-            bodyPart(urlEncode("card[networks][preferred]"), cardBrand)
-        ) { response ->
-            response.setBody(
-                paymentMethodDetails.createJson { originalCard ->
-                    originalCard.copy(
-                        card = originalCard.card!!.copy(
-                            displayBrand = cardBrand
-                        )
-                    )
-                }.toString(2)
-            )
-        }
-    }
-
-    sealed interface PaymentMethodDetails {
-        val id: String
-        val type: String
-
-        fun createJson(transform: (PaymentMethod) -> PaymentMethod = { it }): JSONObject
-    }
-
-    private data class CardPaymentMethodDetails(
-        override val id: String,
-        val last4: String,
-        val addCbcNetworks: Boolean = false,
-        val brand: CardBrand = CardBrand.Visa
-    ) : PaymentMethodDetails {
-        override val type: String = "card"
-
-        override fun createJson(transform: (PaymentMethod) -> PaymentMethod): JSONObject {
-            val card = PaymentMethodFactory.card(
-                id = id
-            ).update(
-                last4 = last4,
-                addCbcNetworks = addCbcNetworks,
-                brand = brand
-            )
-            return PaymentMethodFactory.convertCardToJson(transform(card))
-        }
-    }
-
-    private data class UsBankPaymentMethodDetails(
-        override val id: String,
-    ) : PaymentMethodDetails {
-        override val type: String = "us_bank_account"
-
-        override fun createJson(transform: (PaymentMethod) -> PaymentMethod): JSONObject {
-            return PaymentMethodFactory.convertUsBankAccountToJson(PaymentMethodFactory.usBankAccount().copy(id = id))
         }
     }
 }
