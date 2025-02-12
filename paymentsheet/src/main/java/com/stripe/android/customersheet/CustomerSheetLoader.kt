@@ -8,6 +8,8 @@ import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.customersheet.data.CustomerSheetInitializationDataSource
 import com.stripe.android.customersheet.data.CustomerSheetSession
 import com.stripe.android.customersheet.util.CustomerSheetHacks
+import com.stripe.android.customersheet.util.filterToSupportedPaymentMethods
+import com.stripe.android.customersheet.util.getDefaultPaymentMethodsEnabledForCustomerSheet
 import com.stripe.android.customersheet.util.sortPaymentMethods
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
@@ -15,7 +17,6 @@ import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
-import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
@@ -73,9 +74,9 @@ internal class DefaultCustomerSheetLoader(
         )
 
         val filteredPaymentMethods = customerSheetSession.paymentMethods.filter { paymentMethod ->
-            PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance).isAccepted(paymentMethod) &&
-                (!isPaymentMethodSyncDefaultEnabled || isSupportedBySyncDefaultFeature(paymentMethod))
-        }
+            PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance).isAccepted(paymentMethod)
+        }.filterToSupportedPaymentMethods(isPaymentMethodSyncDefaultEnabled)
+
         customerSheetSession = customerSheetSession.copy(
             paymentMethods = filteredPaymentMethods
         )
@@ -91,16 +92,6 @@ internal class DefaultCustomerSheetLoader(
             metadata = metadata,
             configuration = configuration,
         )
-    }
-
-    private fun isSupportedBySyncDefaultFeature(
-        paymentMethod: PaymentMethod,
-    ): Boolean {
-        val paymentMethodTypesSupportedWithSyncDefaultFeature = listOf(
-            PaymentMethod.Type.Card,
-            PaymentMethod.Type.USBankAccount,
-        )
-        return paymentMethodTypesSupportedWithSyncDefaultFeature.contains(paymentMethod.type)
     }
 
     private suspend fun retrieveInitializationDataSource(): Result<CustomerSheetInitializationDataSource> {
@@ -142,15 +133,6 @@ internal class DefaultCustomerSheetLoader(
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             isPaymentMethodSyncDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
         )
-    }
-
-    private fun getDefaultPaymentMethodsEnabledForCustomerSheet(elementsSession: ElementsSession): Boolean {
-        return when (val customerSheetComponent = elementsSession.customer?.session?.components?.customerSheet) {
-            is ElementsSession.Customer.Components.CustomerSheet.Enabled ->
-                customerSheetComponent.isPaymentMethodSyncDefaultEnabled
-            ElementsSession.Customer.Components.CustomerSheet.Disabled,
-            null -> false
-        }
     }
 
     private fun createCustomerSheetState(
