@@ -59,7 +59,6 @@ internal fun SavedPaymentMethodRowButton(
                 colorFilter = null,
                 alignment = Alignment.Center,
                 modifier = Modifier
-                    .padding(4.dp)
                     .height(iconHeight)
                     .width(iconWidth)
                     .testMetadata(displayBrand)
