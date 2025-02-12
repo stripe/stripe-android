@@ -211,7 +211,7 @@ class DefaultFormActivityStateHelperTest {
             val updateState = awaitItem()
             assertThat(updateState.isEnabled).isTrue()
             assertThat(updateState.primaryButtonLabel).isEqualTo("Do something".resolvableString)
-            assertThat(updateState.onClick).isNotNull()
+            assertThat(onClickOverrideDelegate.onClickOverride).isNotNull()
 
             stateHolder.updatePrimaryButton { null }
 
@@ -223,13 +223,14 @@ class DefaultFormActivityStateHelperTest {
                     formatArgs = arrayOf("$10.99")
                 )
             )
-            assertThat(nullState.onClick).isNull()
+            assertThat(onClickOverrideDelegate.onClickOverride).isNull()
         }
     }
 
     private class Scenario(
         val selectionHolder: EmbeddedSelectionHolder,
-        val stateHolder: FormActivityStateHelper
+        val stateHolder: FormActivityStateHelper,
+        val onClickOverrideDelegate: OnClickOverrideDelegate
     )
 
     private fun testScenario(
@@ -239,16 +240,19 @@ class DefaultFormActivityStateHelperTest {
     ) = runTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = stripeIntent)
         val selectionHolder = EmbeddedSelectionHolder(SavedStateHandle())
+        val onClickOverrideDelegate = OnClickDelegateOverrideImpl()
         val stateHolder = DefaultFormActivityStateHelper(
             paymentMethodMetadata = paymentMethodMetadata,
             selectionHolder = selectionHolder,
             configuration = config,
-            coroutineScope = TestScope(UnconfinedTestDispatcher())
+            coroutineScope = TestScope(UnconfinedTestDispatcher()),
+            onClickDelegate = onClickOverrideDelegate
         )
 
         Scenario(
             selectionHolder = selectionHolder,
-            stateHolder = stateHolder
+            stateHolder = stateHolder,
+            onClickOverrideDelegate = onClickOverrideDelegate
         ).block()
     }
 

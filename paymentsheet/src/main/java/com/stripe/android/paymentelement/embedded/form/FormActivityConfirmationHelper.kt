@@ -28,6 +28,7 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
     private val configuration: EmbeddedPaymentElement.Configuration,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val stateHelper: FormActivityStateHelper,
+    private val onClickDelegate: OnClickOverrideDelegate,
     lifecycleOwner: LifecycleOwner,
     activityResultCaller: ActivityResultCaller
 ) : FormActivityConfirmationHelper {
@@ -42,8 +43,12 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
     }
 
     override fun confirm() {
-        confirmationArgs()?.let { args ->
-            confirmationHandler.start(args)
+        if (onClickDelegate.onClickOverride != null) {
+            onClickDelegate.onClickOverride?.invoke()
+        } else {
+            confirmationArgs()?.let { args ->
+                confirmationHandler.start(args)
+            }
         }
     }
 

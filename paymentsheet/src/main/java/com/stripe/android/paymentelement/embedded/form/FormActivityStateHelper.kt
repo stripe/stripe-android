@@ -38,8 +38,7 @@ internal interface FormActivityStateHelper {
         val processingState: PrimaryButtonProcessingState,
         val isProcessing: Boolean,
         val error: ResolvableString? = null,
-        val mandateText: MandateText? = null,
-        val onClick: (() -> Unit)? = null
+        val mandateText: MandateText? = null
     )
 }
 
@@ -49,6 +48,7 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val configuration: EmbeddedPaymentElement.Configuration,
+    private val onClickDelegate: OnClickOverrideDelegate,
     @ViewModelScope coroutineScope: CoroutineScope,
 ) : FormActivityStateHelper {
     private val _state = MutableStateFlow(
@@ -80,17 +80,13 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
     }
 
     override fun updateMandate(mandateText: ResolvableString?) {
-        val mandate = if (mandateText != null) {
-            MandateText(
-                text = mandateText,
-                showAbovePrimaryButton = true
-            )
-        } else {
-            null
-        }
         _state.update {
             it.copy(
-                mandateText = mandate
+                mandateText = if (mandateText != null) {
+                    MandateText(mandateText, true)
+                } else {
+                    null
+                }
             )
         }
     }
@@ -108,25 +104,25 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
         val newUiState = callback(
             PrimaryButton.UIState(
                 label = currentFormState.primaryButtonLabel,
-                onClick = currentFormState.onClick ?: {},
+                onClick = onClickDelegate.onClickOverride ?: {},
                 enabled = currentFormState.isEnabled,
                 lockVisible = true
             )
         )
         if (newUiState != null) {
+            onClickDelegate.set(newUiState.onClick)
             _state.update {
                 it.copy(
                     isEnabled = newUiState.enabled,
                     primaryButtonLabel = newUiState.label,
-                    onClick = newUiState.onClick
                 )
             }
         } else {
+            onClickDelegate.clear()
             _state.update {
                 it.copy(
                     isEnabled = selectionHolder.selection.value != null,
                     primaryButtonLabel = primaryButtonLabel(paymentMethodMetadata.stripeIntent, configuration),
-                    onClick = null
                 )
             }
         }

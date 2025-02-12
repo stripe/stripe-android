@@ -125,7 +125,7 @@ internal fun FormActivityPrimaryButton(
             label = state.primaryButtonLabel.resolve(),
             locked = true,
             enabled = state.isEnabled,
-            onClick = state.onClick ?: onClick,
+            onClick = onClick,
             onProcessingCompleted = onProcessingCompleted,
             processingState = state.processingState
         )

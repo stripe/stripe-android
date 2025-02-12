@@ -104,7 +104,8 @@ internal class FormActivityScreenShotTest {
             paymentMethodMetadata = paymentMethodMetadata,
             selectionHolder = selectionHolder,
             configuration = EmbeddedConfirmationStateFixtures.defaultState().configuration,
-            coroutineScope = TestScope(UnconfinedTestDispatcher())
+            coroutineScope = TestScope(UnconfinedTestDispatcher()),
+            onClickDelegate = OnClickDelegateOverrideImpl()
         )
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
