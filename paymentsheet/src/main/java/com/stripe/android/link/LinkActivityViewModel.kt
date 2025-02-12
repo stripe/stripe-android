@@ -2,6 +2,7 @@ package com.stripe.android.link
 
 import android.app.Application
 import androidx.activity.result.ActivityResultCaller
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
@@ -28,6 +29,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -64,6 +66,8 @@ internal class LinkActivityViewModel @Inject constructor(
     val linkAccount: LinkAccount?
         get() = linkAccountManager.linkAccount.value
 
+    @VisibleForTesting
+    internal var navListenerJob: Job? = null
     var navController: NavHostController? = null
         set(value) {
             listenToNavController(value)
@@ -105,8 +109,10 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     private fun listenToNavController(navController: NavHostController?) {
-        viewModelScope.launch {
-            navController?.currentBackStackEntryFlow?.collectLatest { entry ->
+        cancelNavListenerJob()
+        navController ?: return
+        navListenerJob = viewModelScope.launch {
+            navController.currentBackStackEntryFlow.collectLatest { entry ->
                 val route = entry.destination.route
                 _linkAppBarState.update {
                     it.copy(
@@ -184,9 +190,15 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     fun unregisterActivity() {
+        cancelNavListenerJob()
         navController = null
         dismissWithResult = null
         launchWebFlow = null
+    }
+
+    private fun cancelNavListenerJob() {
+        navListenerJob?.cancel()
+        navListenerJob = null
     }
 
     override fun onCreate(owner: LifecycleOwner) {
