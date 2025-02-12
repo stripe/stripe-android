@@ -523,7 +523,9 @@ internal class WalletScreenTest {
         dispatcher.scheduler.advanceTimeBy(1.1.seconds)
 
         onWalletPaymentMethodRowLoadingIndicator().assertDoesNotExist()
-        onWalletPayButton().assertExists()
+        onWalletPayButton()
+            .assertExists()
+            .assertIsEnabled()
     }
 
     @Test
