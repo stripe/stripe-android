@@ -2,7 +2,6 @@ package com.stripe.android.paymentelement.embedded.manage
 
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
@@ -15,8 +14,8 @@ import dagger.Component
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import javax.inject.Singleton
-import kotlin.coroutines.CoroutineContext
 
 @Component(
     modules = [
@@ -79,8 +78,8 @@ internal interface ManageModule {
         @Provides
         @Singleton
         @ViewModelScope
-        fun provideViewModelScope(@IOContext ioContext: CoroutineContext): CoroutineScope {
-            return CoroutineScope(ioContext)
+        fun provideViewModelScope(): CoroutineScope {
+            return CoroutineScope(Dispatchers.Main)
         }
     }
 }

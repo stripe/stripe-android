@@ -36,6 +36,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.Subcomponent
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.plus
 import javax.inject.Named
 import javax.inject.Singleton
@@ -125,8 +126,8 @@ internal interface FormActivityViewModelModule {
         @Provides
         @Singleton
         @ViewModelScope
-        fun provideViewModelScope(@IOContext ioContext: CoroutineContext): CoroutineScope {
-            return CoroutineScope(ioContext)
+        fun provideViewModelScope(): CoroutineScope {
+            return CoroutineScope(Dispatchers.Main)
         }
 
         @Provides

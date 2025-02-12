@@ -39,6 +39,7 @@ import dagger.Component
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.plus
 import javax.inject.Named
 import javax.inject.Singleton
@@ -168,8 +169,8 @@ internal interface EmbeddedPaymentElementViewModelModule {
         @Provides
         @Singleton
         @ViewModelScope
-        fun provideViewModelScope(@IOContext workContext: CoroutineContext): CoroutineScope {
-            return CoroutineScope(workContext)
+        fun provideViewModelScope(): CoroutineScope {
+            return CoroutineScope(Dispatchers.Main)
         }
 
         @Provides
