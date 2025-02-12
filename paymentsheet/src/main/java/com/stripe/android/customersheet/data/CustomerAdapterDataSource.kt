@@ -7,7 +7,6 @@ import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.customersheet.DefaultPaymentMethodState
 import com.stripe.android.customersheet.map
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.ElementsSession
@@ -67,8 +66,8 @@ internal class CustomerAdapterDataSource @Inject constructor(
                     // Always `true` for `Adapter` use case
                     canRemovePaymentMethods = true,
                 ),
-                // Default payment methods are a customer sessions-only feature.
-                defaultPaymentMethodState = DefaultPaymentMethodState.Disabled,
+                // Default payment methods are a customer sessions-only feature, so this value is unused.
+                defaultPaymentMethodId = null,
             )
         }.toCustomerSheetDataResult()
     }

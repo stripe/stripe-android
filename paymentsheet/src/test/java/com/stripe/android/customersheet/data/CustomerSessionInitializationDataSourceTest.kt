@@ -4,7 +4,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetFixtures
-import com.stripe.android.customersheet.DefaultPaymentMethodState
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.ElementsSession
@@ -55,7 +54,7 @@ class CustomerSessionInitializationDataSourceTest {
         )
         assertThat(customerSheetSession.permissions.canRemovePaymentMethods).isTrue()
         assertThat(customerSheetSession.permissions.canRemoveLastPaymentMethod).isTrue()
-        assertThat(customerSheetSession.defaultPaymentMethodState).isEqualTo(DefaultPaymentMethodState.Disabled)
+        assertThat(customerSheetSession.defaultPaymentMethodId).isNull()
     }
 
     @Test
@@ -97,7 +96,7 @@ class CustomerSessionInitializationDataSourceTest {
     }
 
     @Test
-    fun `on load, should have enabled default PM state if component is enabled`() = runTest {
+    fun `on load, should use customer default PM if default PM feature is enabled`() = runTest {
         val expectedDefaultPaymentMethodId = "pm_123"
         val dataSource = createInitializationDataSource(
             elementsSessionManager = FakeCustomerSessionElementsSessionManager(
@@ -114,10 +113,7 @@ class CustomerSessionInitializationDataSourceTest {
 
         val customerSheetSession = result.asSuccess().value
 
-        assertThat(customerSheetSession.defaultPaymentMethodState).isInstanceOf<DefaultPaymentMethodState.Enabled>()
-        val defaultPaymentMethodState =
-            customerSheetSession.defaultPaymentMethodState as DefaultPaymentMethodState.Enabled
-        assertThat(defaultPaymentMethodState.defaultPaymentMethodId).isEqualTo(expectedDefaultPaymentMethodId)
+        assertThat(customerSheetSession.defaultPaymentMethodId).isEqualTo(expectedDefaultPaymentMethodId)
     }
 
     @Test

@@ -3,7 +3,6 @@ package com.stripe.android.customersheet.data
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.customersheet.DefaultPaymentMethodState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
@@ -57,21 +56,9 @@ internal class CustomerSessionInitializationDataSource @Inject constructor(
                             is ElementsSession.Customer.Components.CustomerSheet.Disabled -> false
                         }
                     ),
-                    defaultPaymentMethodState = getDefaultPaymentMethodState(customer),
+                    defaultPaymentMethodId = customer.defaultPaymentMethod,
                 )
             }.toCustomerSheetDataResult()
-        }
-    }
-
-    private fun getDefaultPaymentMethodState(customer: ElementsSession.Customer): DefaultPaymentMethodState {
-        val component = customer.session.components.customerSheet
-        return if (
-            component is ElementsSession.Customer.Components.CustomerSheet.Enabled &&
-            component.isPaymentMethodSyncDefaultEnabled
-        ) {
-            DefaultPaymentMethodState.Enabled(customer.defaultPaymentMethod)
-        } else {
-            DefaultPaymentMethodState.Disabled
         }
     }
 }

@@ -115,13 +115,13 @@ internal class DefaultCustomerSheetLoader(
             if (isLiveModeProvider()) GooglePayEnvironment.Production else GooglePayEnvironment.Test
         ).isReady().first()
 
-        return PaymentMethodMetadata.create(
+        return PaymentMethodMetadata.createForCustomerSheet(
             elementsSession = elementsSession,
             configuration = configuration,
             paymentMethodSaveConsentBehavior = customerSheetSession.paymentMethodSaveConsentBehavior,
             sharedDataSpecs = sharedDataSpecs,
             isGooglePayReady = isGooglePayReadyAndEnabled,
-            isFinancialConnectionsAvailable = isFinancialConnectionsAvailable
+            isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
         )
     }
 
@@ -132,7 +132,7 @@ internal class DefaultCustomerSheetLoader(
     ): CustomerSheetState.Full {
         val paymentMethods = customerSheetSession.paymentMethods
 
-        val paymentSelection = getPaymentSelection(customerSheetSession, paymentMethods)
+        val paymentSelection = getPaymentSelection(customerSheetSession, metadata, paymentMethods)
 
         val sortedPaymentMethods = sortPaymentMethods(
             paymentMethods = customerSheetSession.paymentMethods,
@@ -156,22 +156,22 @@ internal class DefaultCustomerSheetLoader(
 
     private fun getPaymentSelection(
         customerSheetSession: CustomerSheetSession,
+        metadata: PaymentMethodMetadata,
         paymentMethods: List<PaymentMethod>
     ): PaymentSelection? {
-        return when (val defaultPaymentMethodState = customerSheetSession.defaultPaymentMethodState) {
-            is DefaultPaymentMethodState.Enabled ->
-                useDefaultPaymentMethodAsPaymentSelection(paymentMethods, defaultPaymentMethodState)
-            is DefaultPaymentMethodState.Disabled ->
-                useLocalSelectionAsPaymentSelection(customerSheetSession, paymentMethods)
+        return if (metadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true) {
+            useDefaultPaymentMethodAsPaymentSelection(paymentMethods, customerSheetSession.defaultPaymentMethodId)
+        } else {
+            useLocalSelectionAsPaymentSelection(customerSheetSession, paymentMethods)
         }
     }
 
     private fun useDefaultPaymentMethodAsPaymentSelection(
         paymentMethods: List<PaymentMethod>,
-        defaultPaymentMethodState: DefaultPaymentMethodState.Enabled
+        defaultPaymentMethodId: String?,
     ): PaymentSelection? {
         return paymentMethods.find { paymentMethod ->
-            paymentMethod.id == defaultPaymentMethodState.defaultPaymentMethodId
+            paymentMethod.id == defaultPaymentMethodId
         }?.let { PaymentSelection.Saved(it) }
     }
 
