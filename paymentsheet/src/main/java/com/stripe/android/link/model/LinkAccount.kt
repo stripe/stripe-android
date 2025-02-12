@@ -12,7 +12,7 @@ import kotlinx.parcelize.Parcelize
 internal class LinkAccount(private val consumerSession: ConsumerSession) : Parcelable {
 
     @IgnoredOnParcel
-    val redactedPhoneNumber = consumerSession.redactedPhoneNumber
+    val redactedPhoneNumber = consumerSession.redactedFormattedPhoneNumber.replace("*", "•")
 
     @IgnoredOnParcel
     val clientSecret = consumerSession.clientSecret
