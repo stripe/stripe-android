@@ -193,7 +193,7 @@ internal class CustomerSheetViewModel(
             isLiveMode = isLiveModeProvider(),
             canRemovePaymentMethods = customerState.canRemove,
             primaryButtonVisible = primaryButtonVisible,
-            isGooglePayEnabled = paymentMethodMetadata?.isGooglePayReady == true,
+            showGooglePay = shouldShowGooglePay(paymentMethodMetadata),
             isEditing = userCanEditAndIsEditing,
             isProcessing = selectionConfirmationState.isConfirming,
             errorMessage = selectionConfirmationState.error,
@@ -1220,7 +1220,7 @@ internal class CustomerSheetViewModel(
             isModifiable(method, cbcEligibility)
         }
 
-        val canShowSavedPaymentMethods = paymentMethods.isNotEmpty() || metadata?.isGooglePayReady == true
+        val canShowSavedPaymentMethods = paymentMethods.isNotEmpty() || shouldShowGooglePay(metadata)
     }
 
     private data class SelectionConfirmationState(
@@ -1228,8 +1228,13 @@ internal class CustomerSheetViewModel(
         val error: String?,
     )
 
-    private companion object {
+    internal companion object {
         const val REMOVAL_TRANSITION_DELAY = 50L
+
+        fun shouldShowGooglePay(paymentMethodMetadata: PaymentMethodMetadata?): Boolean {
+            return paymentMethodMetadata?.isGooglePayReady == true &&
+                paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled != true
+        }
     }
 
     class Factory(

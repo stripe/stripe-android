@@ -84,7 +84,7 @@ internal class CustomerSheetScreenshotTest {
         isLiveMode = false,
         isProcessing = false,
         isEditing = false,
-        isGooglePayEnabled = false,
+        showGooglePay = false,
         primaryButtonVisible = false,
         canEdit = true,
         canRemovePaymentMethods = true,
@@ -200,7 +200,7 @@ internal class CustomerSheetScreenshotTest {
                         savedPaymentMethods.first()
                     ),
                     isEditing = true,
-                    isGooglePayEnabled = true,
+                    showGooglePay = true,
                     errorMessage = "This is an error message.",
                 ),
                 paymentMethodNameProvider = {
@@ -218,7 +218,7 @@ internal class CustomerSheetScreenshotTest {
                 viewState = selectPaymentMethodViewState.copy(
                     title = "Screenshot testing",
                     paymentSelection = PaymentSelection.GooglePay,
-                    isGooglePayEnabled = true,
+                    showGooglePay = true,
                     errorMessage = "This is an error message.",
                 ),
                 paymentMethodNameProvider = { it!!.resolvableString },
@@ -239,7 +239,7 @@ internal class CustomerSheetScreenshotTest {
                     paymentSelection = PaymentSelection.Saved(
                         PaymentMethodFixtures.US_BANK_ACCOUNT
                     ),
-                    isGooglePayEnabled = false,
+                    showGooglePay = false,
                     primaryButtonVisible = true,
                     mandateText = "Some mandate text.".resolvableString
                 ),
