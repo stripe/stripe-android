@@ -32,6 +32,7 @@ internal class FakeCustomerSheetLoader(
         canRemovePaymentMethods = true,
         canRemoveLastPaymentMethod = true,
     ),
+    private val isPaymentMethodSyncDefaultEnabled: Boolean = false,
 ) : CustomerSheetLoader {
 
     override suspend fun load(configuration: CustomerSheet.Configuration): Result<CustomerSheetState.Full> {
@@ -48,6 +49,7 @@ internal class FakeCustomerSheetLoader(
                         financialConnectionsAvailable = financialConnectionsAvailable,
                         paymentMethodOrder = configuration.paymentMethodOrder,
                         isGooglePayReady = isGooglePayAvailable,
+                        isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
                     ),
                     supportedPaymentMethods = supportedPaymentMethods,
                     customerPaymentMethods = customerPaymentMethods,

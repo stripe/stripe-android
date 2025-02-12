@@ -1268,7 +1268,7 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.viewState.test {
-            assertThat(awaitViewState<SelectPaymentMethod>().isGooglePayEnabled).isFalse()
+            assertThat(awaitViewState<SelectPaymentMethod>().showGooglePay).isFalse()
         }
     }
 
@@ -1286,7 +1286,47 @@ class CustomerSheetViewModelTest {
         )
 
         viewModel.viewState.test {
-            assertThat(awaitViewState<SelectPaymentMethod>().isGooglePayEnabled).isTrue()
+            assertThat(awaitViewState<SelectPaymentMethod>().showGooglePay).isTrue()
+        }
+    }
+
+    @Test
+    fun `When default PM feature enabled, then Google Pay should not be shown`() = runTest(testDispatcher) {
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
+                googlePayEnabled = true,
+            ),
+            customerSheetLoader = FakeCustomerSheetLoader(
+                customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
+                isGooglePayAvailable = true,
+                isPaymentMethodSyncDefaultEnabled = true,
+            ),
+        )
+
+        viewModel.viewState.test {
+            assertThat(awaitViewState<SelectPaymentMethod>().showGooglePay).isFalse()
+        }
+    }
+
+    @Test
+    fun `When default PM feature enabled and no saved PMs, then initial screen is add payment method`() = runTest(testDispatcher) {
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
+                googlePayEnabled = true,
+            ),
+            customerSheetLoader = FakeCustomerSheetLoader(
+                customerPaymentMethods = emptyList(),
+                isGooglePayAvailable = true,
+                isPaymentMethodSyncDefaultEnabled = true,
+            ),
+        )
+
+        viewModel.viewState.test {
+            assertThat(awaitItem()).isInstanceOf(AddPaymentMethod::class.java)
         }
     }
 

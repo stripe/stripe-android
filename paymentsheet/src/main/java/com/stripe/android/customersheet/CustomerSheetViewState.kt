@@ -60,7 +60,7 @@ internal sealed class CustomerSheetViewState(
         override val isLiveMode: Boolean,
         override val isProcessing: Boolean,
         val isEditing: Boolean,
-        val isGooglePayEnabled: Boolean,
+        val showGooglePay: Boolean,
         val primaryButtonVisible: Boolean,
         val canEdit: Boolean,
         val canRemovePaymentMethods: Boolean,
