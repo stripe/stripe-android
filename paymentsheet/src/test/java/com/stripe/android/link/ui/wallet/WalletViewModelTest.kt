@@ -400,7 +400,7 @@ class WalletViewModelTest {
 
         assertThat(viewModel.uiState.value.cardBeingUpdated).isEqualTo(card1.id)
 
-        dispatcher.scheduler.advanceTimeBy(1.1.seconds)
+        advanceUntilIdle()
 
         assertThat(linkAccountManager.updatePaymentDetailsCalls).containsExactly(
             ConsumerPaymentDetailsUpdateParams(

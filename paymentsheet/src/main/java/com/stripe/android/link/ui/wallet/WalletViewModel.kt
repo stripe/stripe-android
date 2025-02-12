@@ -74,7 +74,13 @@ internal class WalletViewModel @Inject constructor(
     )
 
     init {
-        loadPaymentDetails()
+        _uiState.update {
+            it.setProcessing()
+        }
+
+        viewModelScope.launch {
+            loadPaymentDetails(selectedItemId = null)
+        }
 
         viewModelScope.launch {
             expiryDateController.formFieldValue.collectLatest { input ->
@@ -93,17 +99,7 @@ internal class WalletViewModel @Inject constructor(
         }
     }
 
-    private fun loadPaymentDetails() {
-        _uiState.update {
-            it.setProcessing()
-        }
-
-        viewModelScope.launch {
-            loadPaymentDetailsHelper(selectedItemId = null)
-        }
-    }
-
-    private suspend fun loadPaymentDetailsHelper(selectedItemId: String?) {
+    private suspend fun loadPaymentDetails(selectedItemId: String?) {
         linkAccountManager.listPaymentDetails(
             paymentMethodTypes = stripeIntent.supportedPaymentMethodTypes(linkAccount)
         ).fold(
@@ -245,7 +241,7 @@ internal class WalletViewModel @Inject constructor(
             linkAccountManager.deletePaymentDetails(item.id)
                 .fold(
                     onSuccess = {
-                        loadPaymentDetailsHelper(selectedItemId = uiState.value.selectedItem?.id)
+                        loadPaymentDetails(selectedItemId = uiState.value.selectedItem?.id)
                     },
                     onFailure = { error ->
                         updateErrorMessageAndStopProcessing(
