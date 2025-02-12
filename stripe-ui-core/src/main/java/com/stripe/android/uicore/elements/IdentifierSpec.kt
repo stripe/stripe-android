@@ -80,6 +80,7 @@ data class IdentifierSpec(
 
         // Unique extracting functionality
         val SaveForFutureUse = IdentifierSpec("save_for_future_use")
+        val SetAsDefaultPaymentMethod = IdentifierSpec("set_as_default_payment_method")
         val OneLineAddress = IdentifierSpec("address")
         val SameAsShipping = IdentifierSpec("same_as_shipping", ignoreField = true)
 

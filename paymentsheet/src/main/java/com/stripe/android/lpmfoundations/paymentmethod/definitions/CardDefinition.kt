@@ -21,6 +21,7 @@ import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
+import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.PhoneNumberController
@@ -68,6 +69,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
         )
     }
 
+    @Suppress("LongMethod")
     override fun createFormElements(
         metadata: PaymentMethodMetadata,
         arguments: UiDefinitionFactory.Arguments,
@@ -109,8 +111,18 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
 
             val canChangeSaveForFutureUsage = saveForFutureUsageIsChangeable(metadata)
 
+            val saveForFutureUseElement =
+                SaveForFutureUseElement(arguments.saveForFutureUseInitialValue, arguments.merchantName)
+            val isSaveForFutureUseCheckedFlow = saveForFutureUseElement.controller.saveForFutureUse
+
             if (canChangeSaveForFutureUsage) {
-                add(SaveForFutureUseElement(arguments.saveForFutureUseInitialValue, arguments.merchantName))
+                add(saveForFutureUseElement)
+                add(
+                    SetAsDefaultPaymentMethodElement(
+                        initialValue = false,
+                        shouldShowElementFlow = isSaveForFutureUseCheckedFlow
+                    )
+                )
             }
 
             val signupMode = if (

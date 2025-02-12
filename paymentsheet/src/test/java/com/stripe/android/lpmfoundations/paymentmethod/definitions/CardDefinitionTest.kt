@@ -15,6 +15,8 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.ui.core.elements.MandateTextElement
+import com.stripe.android.ui.core.elements.SaveForFutureUseElement
+import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
@@ -84,7 +86,7 @@ class CardDefinitionTest {
     }
 
     @Test
-    fun `createFormElements returns save_for_future_use`() {
+    fun `createFormElements returns save_for_future_use and set_as_default_payment_method`() {
         val formElements = CardDefinition.formElements(
             PaymentMethodMetadataFactory.create(
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -93,9 +95,38 @@ class CardDefinitionTest {
                 hasCustomerConfiguration = true,
             )
         )
-        assertThat(formElements).hasSize(2)
+        assertThat(formElements).hasSize(3)
         assertThat(formElements[0].identifier.v1).isEqualTo("card_details")
         assertThat(formElements[1].identifier.v1).isEqualTo("save_for_future_use")
+        assertThat(formElements[2].identifier.v1).isEqualTo("set_as_default_payment_method")
+    }
+
+    @Test
+    fun `set_as_default_payment_method shown or hidden correctly when save_for_future_use checked and unchecked`() {
+        val formElements = CardDefinition.formElements(
+            PaymentMethodMetadataFactory.create(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+                ),
+                hasCustomerConfiguration = true,
+            )
+        )
+
+        val saveForFutureUseElement = formElements[1] as SaveForFutureUseElement
+        val saveForFutureUseController = saveForFutureUseElement.controller
+        val setAsDefaultPaymentMethodElement = formElements[2] as SetAsDefaultPaymentMethodElement
+
+        saveForFutureUseController.onValueChange(true)
+
+        assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isTrue()
+
+        saveForFutureUseController.onValueChange(false)
+
+        assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isFalse()
+
+        saveForFutureUseController.onValueChange(true)
+
+        assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isTrue()
     }
 
     @Test

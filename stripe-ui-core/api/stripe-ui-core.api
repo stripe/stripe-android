@@ -140,6 +140,7 @@ public final class com/stripe/android/uicore/elements/IdentifierSpec$Companion {
 	public final fun getPreferredCardBrand ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getSameAsShipping ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getSaveForFutureUse ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
+	public final fun getSetAsDefaultPaymentMethod ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getSortingCode ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getState ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getUpi ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
