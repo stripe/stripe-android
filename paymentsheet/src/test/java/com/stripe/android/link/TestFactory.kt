@@ -15,6 +15,7 @@ import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.IncentiveEligibilitySession
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -156,7 +157,8 @@ internal object TestFactory {
         useAttestationEndpointsForLink = false,
         suppress2faModal = false,
         initializationMode = PaymentSheetFixtures.INITIALIZATION_MODE_PAYMENT_INTENT,
-        elementsSessionId = "session_1234"
+        elementsSessionId = "session_1234",
+        linkMode = LinkMode.LinkPaymentMethod,
     )
 
     val LINK_WALLET_PRIMARY_BUTTON_LABEL = Amount(

@@ -38,7 +38,7 @@ internal open class FakeLinkAccountManager(
     var createCardPaymentDetailsResult: Result<LinkPaymentDetails> = Result.success(
         value = TestFactory.LINK_NEW_PAYMENT_DETAILS
     )
-    var shareLinkCardBrand: Result<SharePaymentDetails> = Result.success(TestFactory.LINK_SHARE_PAYMENT_DETAILS)
+    var sharePaymentDetails: Result<SharePaymentDetails> = Result.success(TestFactory.LINK_SHARE_PAYMENT_DETAILS)
     var listPaymentDetailsResult: Result<ConsumerPaymentDetails> = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
     var updatePaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
     var deletePaymentDetailsResult: Result<Unit> = Result.success(Unit)
@@ -148,8 +148,11 @@ internal open class FakeLinkAccountManager(
         return createCardPaymentDetailsResult
     }
 
-    override suspend fun shareLinkCardBrand(paymentDetailsId: String): Result<SharePaymentDetails> {
-        return shareLinkCardBrand
+    override suspend fun sharePaymentDetails(
+        paymentDetailsId: String,
+        expectedPaymentMethodType: String
+    ): Result<SharePaymentDetails> {
+        return sharePaymentDetails
     }
 
     override fun setLinkAccountFromLookupResult(lookup: ConsumerSessionLookup, startSession: Boolean): LinkAccount? {

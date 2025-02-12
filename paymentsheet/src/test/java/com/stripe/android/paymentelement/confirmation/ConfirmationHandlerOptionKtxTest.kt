@@ -462,7 +462,8 @@ class ConfirmationHandlerOptionKtxTest {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "pi_123_secret_123",
             ),
-            elementsSessionId = "session_1234"
+            elementsSessionId = "session_1234",
+            linkMode = LinkMode.LinkPaymentMethod,
         )
     }
 }
