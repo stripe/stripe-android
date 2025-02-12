@@ -49,7 +49,7 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val configuration: EmbeddedPaymentElement.Configuration,
-    @ViewModelScope private val coroutineScope: CoroutineScope,
+    @ViewModelScope coroutineScope: CoroutineScope,
 ) : FormActivityStateHelper {
     private val _state = MutableStateFlow(
         FormActivityStateHelper.State(
