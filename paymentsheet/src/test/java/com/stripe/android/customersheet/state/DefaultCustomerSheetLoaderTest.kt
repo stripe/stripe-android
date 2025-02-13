@@ -226,6 +226,24 @@ class DefaultCustomerSheetLoaderTest {
     }
 
     @Test
+    fun `when default payment method feature is enabled, sepa PMs are filtered out`() = runTest {
+        val sepaPaymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD
+        val expectedPaymentMethods = listOf(
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            PaymentMethodFixtures.US_BANK_ACCOUNT
+        )
+        val loader = createCustomerSheetLoader(
+            paymentMethods = expectedPaymentMethods.plus(sepaPaymentMethod),
+            isPaymentMethodSyncDefaultEnabled = true,
+        )
+
+        val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
+
+        val state = loader.load(config).getOrThrow()
+        assertThat(state.customerPaymentMethods).containsExactlyElementsIn(expectedPaymentMethods).inOrder()
+    }
+
+    @Test
     fun `When the FC unavailable, flag disabled, us bank not in intent, then us bank account is not available`() = runTest {
         val loader = createCustomerSheetLoader(
             isFinancialConnectionsAvailable = { false },
