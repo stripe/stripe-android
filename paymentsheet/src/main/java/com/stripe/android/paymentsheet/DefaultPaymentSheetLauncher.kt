@@ -8,10 +8,8 @@ import androidx.activity.result.ActivityResultRegistry
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.paymentelement.AnalyticManager
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
@@ -47,14 +45,14 @@ internal class DefaultPaymentSheetLauncher(
             }
         )
         lifecycleOwner.lifecycleScope.launch {
-            lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+//            lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 AnalyticManager.events.collect { event ->
                     withContext(Dispatchers.Default) {
                         AnalyticEventInterceptor.analyticEventCallback
                             ?.onEvent(event)
                     }
                 }
-            }
+//            }
         }
     }
 

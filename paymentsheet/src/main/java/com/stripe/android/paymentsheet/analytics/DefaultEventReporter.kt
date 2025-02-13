@@ -139,7 +139,7 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     override fun onShowNewPaymentOptions() {
         CoroutineScope(workContext).launch {
-            AnalyticManager.emit(AnalyticEvent.PresentedSheet())
+            AnalyticManager.produceEvent(AnalyticEvent.PresentedSheet())
         }
         fireEvent(
             PaymentSheetEvent.ShowNewPaymentOptions(

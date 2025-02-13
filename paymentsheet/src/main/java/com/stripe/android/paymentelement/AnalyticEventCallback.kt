@@ -1,8 +1,8 @@
 package com.stripe.android.paymentelement
 
 import dev.drewhamilton.poko.Poko
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
 
 /**
  * Called when an analytic event is emitted.
@@ -58,10 +58,10 @@ abstract class AnalyticEvent internal constructor() {
 
 @OptIn(ExperimentalAnalyticEventCallbackApi::class)
 internal object AnalyticManager {
-    private val _events = MutableSharedFlow<AnalyticEvent>()
-    val events = _events.asSharedFlow()
+    private val _events = Channel<AnalyticEvent>(Channel.BUFFERED)
+    val events = _events.receiveAsFlow()
 
-    suspend fun emit(event: AnalyticEvent) {
-        _events.emit(event)
+    suspend fun produceEvent(event: AnalyticEvent) {
+        _events.send(event)
     }
 }
