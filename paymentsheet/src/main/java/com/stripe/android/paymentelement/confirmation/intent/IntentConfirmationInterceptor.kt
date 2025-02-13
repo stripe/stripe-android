@@ -109,6 +109,10 @@ internal class InvalidDeferredIntentUsageException : StripeException() {
     """.trimIndent()
 }
 
+internal class CreateIntentCallbackFailureException(override val cause: Throwable?) : StripeException() {
+    override fun analyticsValue(): String = "merchantReturnedCreateIntentCallbackFailure"
+}
+
 internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     private val stripeRepository: StripeRepository,
     private val errorReporter: ErrorReporter,
@@ -338,7 +342,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
 
             is CreateIntentResult.Failure -> {
                 NextStep.Fail(
-                    cause = result.cause,
+                    cause = CreateIntentCallbackFailureException(result.cause),
                     message = result.displayMessage?.resolvableString
                         ?: resolvableString(GENERIC_STRIPE_MESSAGE),
                 )
