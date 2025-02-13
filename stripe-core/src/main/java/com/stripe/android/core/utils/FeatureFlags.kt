@@ -46,6 +46,7 @@ class FeatureFlag(
         overrideEnabledValue = null
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed interface Flag {
         data object Enabled : Flag
         data object Disabled : Flag
