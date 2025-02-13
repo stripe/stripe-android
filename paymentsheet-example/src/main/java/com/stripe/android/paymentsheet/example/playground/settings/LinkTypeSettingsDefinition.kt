@@ -52,7 +52,7 @@ internal object LinkTypeSettingsDefinition :
                 checkoutRequestBuilder.linkMode("attest")
             }
             LinkType.Web -> {
-                checkoutRequestBuilder.linkMode("web")
+                checkoutRequestBuilder.linkMode(null)
             }
         }
     }
