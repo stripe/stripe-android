@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -11,8 +10,7 @@ import com.stripe.android.uicore.utils.collectAsState
 internal const val SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG = "SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG"
 
 @Composable
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun SetAsDefaultPaymentMethodElementUI(
+internal fun SetAsDefaultPaymentMethodElementUI(
     enabled: Boolean,
     element: SetAsDefaultPaymentMethodElement,
     modifier: Modifier = Modifier,
