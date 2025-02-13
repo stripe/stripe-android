@@ -60,19 +60,15 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
     )
     override val state: StateFlow<FormActivityStateHelper.State> = _state
 
-    private var primaryButtonUiState: PrimaryButton.UIState? = PrimaryButton.UIState(
-        label = _state.value.primaryButtonLabel,
-        onClick = {},
-        enabled = _state.value.isEnabled,
-        lockVisible = true
-    )
+    private var usBankAccountFormPrimaryButtonUiState: PrimaryButton.UIState? = null
 
     init {
         coroutineScope.launch {
             selectionHolder.selection.collectLatest { selection ->
                 _state.update { currentState ->
                     currentState.copy(
-                        isEnabled = selection != null && !currentState.isProcessing
+                        isEnabled = usBankAccountFormPrimaryButtonUiState?.enabled
+                            ?: (selection != null && !currentState.isProcessing)
                     )
                 }
             }
@@ -102,8 +98,8 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
     }
 
     override fun updatePrimaryButton(callback: (PrimaryButton.UIState?) -> PrimaryButton.UIState?) {
-        val newUiState = callback(primaryButtonUiState)
-        primaryButtonUiState = newUiState
+        val newUiState = callback(usBankAccountFormPrimaryButtonUiState)
+        usBankAccountFormPrimaryButtonUiState = newUiState
         if (newUiState != null) {
             onClickDelegate.set(newUiState.onClick)
             _state.update {
