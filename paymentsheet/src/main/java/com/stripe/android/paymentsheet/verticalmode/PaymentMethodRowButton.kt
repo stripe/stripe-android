@@ -139,8 +139,8 @@ private fun RowButtonOuterContent(
             RowButtonCheckmarkOuterContent(
                 isSelected = isSelected,
                 contentPaddingValues = PaddingValues(
-                    horizontal = 0.dp,
-                    vertical = contentPaddingValues + style.additionalInsetsDp.dp
+                    horizontal = style.horizontalInsetsDp.dp,
+                    vertical = contentPaddingValues + style.additionalVerticalInsetsDp.dp
                 ),
                 verticalArrangement = Arrangement.Center,
                 trailingContent = trailingContent,
@@ -155,8 +155,8 @@ private fun RowButtonOuterContent(
                 isEnabled = isEnabled,
                 isSelected = isSelected,
                 contentPaddingValues = PaddingValues(
-                    horizontal = 0.dp,
-                    vertical = contentPaddingValues + style.additionalInsetsDp.dp
+                    horizontal = style.horizontalInsetsDp.dp,
+                    vertical = contentPaddingValues + style.additionalVerticalInsetsDp.dp
                 ),
                 verticalArrangement = Arrangement.Center,
                 onClick = onClick,
@@ -210,6 +210,7 @@ private fun RowButtonRadioOuterContent(
     Row(
         modifier = modifier
             .background(MaterialTheme.stripeColors.component)
+            .padding(contentPaddingValues)
     ) {
         RadioButton(
             selected = isSelected,
@@ -224,7 +225,6 @@ private fun RowButtonRadioOuterContent(
         Spacer(Modifier.width(12.dp))
         Column(
             modifier = Modifier
-                .padding(contentPaddingValues)
                 .align(Alignment.CenterVertically),
             verticalArrangement = verticalArrangement,
         ) {
@@ -246,12 +246,12 @@ private fun RowButtonCheckmarkOuterContent(
 ) {
     Row(
         modifier = modifier
-            .background(MaterialTheme.stripeColors.component),
+            .background(MaterialTheme.stripeColors.component)
+            .padding(contentPaddingValues),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(
-            modifier = Modifier.padding(contentPaddingValues),
-            verticalArrangement = verticalArrangement,
+            verticalArrangement = verticalArrangement
         ) {
             content()
             Row {
