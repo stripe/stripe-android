@@ -8,6 +8,7 @@ import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
+import com.stripe.android.lpmfoundations.paymentmethod.IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
@@ -69,22 +70,16 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
         )
     }
 
-    @Suppress("LongMethod")
     override fun createFormElements(
         metadata: PaymentMethodMetadata,
         arguments: UiDefinitionFactory.Arguments,
     ): List<FormElement> {
         val billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration
         return buildList {
-            val contactInformationElement = contactInformationElement(
-                initialValues = arguments.initialValues,
-                collectEmail = billingDetailsCollectionConfiguration.collectsEmail,
-                collectPhone = billingDetailsCollectionConfiguration.collectsPhone,
+            addContactInformationElement(
+                arguments = arguments,
+                billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
             )
-
-            if (contactInformationElement != null) {
-                add(contactInformationElement)
-            }
 
             add(
                 CardDetailsSectionElement(
@@ -97,33 +92,18 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                 )
             )
 
-            if (billingDetailsCollectionConfiguration.address
-                != PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
-            ) {
-                addAll(
-                    cardBillingElements(
-                        billingDetailsCollectionConfiguration.address.toInternal(),
-                        arguments.initialValues,
-                        arguments.shippingValues,
-                    )
-                )
-            }
+            addCardBillingElements(
+                arguments = arguments,
+                billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
+            )
 
             val canChangeSaveForFutureUsage = saveForFutureUsageIsChangeable(metadata)
 
-            val saveForFutureUseElement =
-                SaveForFutureUseElement(arguments.saveForFutureUseInitialValue, arguments.merchantName)
-            val isSaveForFutureUseCheckedFlow = saveForFutureUseElement.controller.saveForFutureUse
-
-            if (canChangeSaveForFutureUsage) {
-                add(saveForFutureUseElement)
-                add(
-                    SetAsDefaultPaymentMethodElement(
-                        initialValue = false,
-                        shouldShowElementFlow = isSaveForFutureUseCheckedFlow
-                    )
-                )
-            }
+            addSavePaymentOptionElements(
+                canChangeSaveForFutureUsage = canChangeSaveForFutureUsage,
+                metadata = metadata,
+                arguments = arguments,
+            )
 
             val signupMode = if (
                 metadata.linkInlineConfiguration != null && arguments.linkConfigurationCoordinator != null
@@ -173,6 +153,69 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
             paymentMethodSaveConsentBehavior = metadata.paymentMethodSaveConsentBehavior,
             hasCustomerConfiguration = metadata.customerMetadata?.hasCustomerConfiguration ?: false,
         )
+    }
+
+    private fun MutableList<FormElement>.addContactInformationElement(
+        arguments: UiDefinitionFactory.Arguments,
+        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+    ): Boolean {
+        val contactInformationElement = contactInformationElement(
+            initialValues = arguments.initialValues,
+            collectEmail = billingDetailsCollectionConfiguration.collectsEmail,
+            collectPhone = billingDetailsCollectionConfiguration.collectsPhone,
+        )
+
+        return if (contactInformationElement != null) {
+            add(contactInformationElement)
+        } else {
+            false
+        }
+    }
+
+    private fun MutableList<FormElement>.addCardBillingElements(
+        arguments: UiDefinitionFactory.Arguments,
+        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+    ): Boolean {
+        return if (billingDetailsCollectionConfiguration.address
+            != PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+        ) {
+            addAll(
+                cardBillingElements(
+                    billingDetailsCollectionConfiguration.address.toInternal(),
+                    arguments.initialValues,
+                    arguments.shippingValues,
+                )
+            )
+        } else {
+            false
+        }
+    }
+
+    private fun MutableList<FormElement>.addSavePaymentOptionElements(
+        canChangeSaveForFutureUsage: Boolean,
+        metadata: PaymentMethodMetadata,
+        arguments: UiDefinitionFactory.Arguments,
+    ): Boolean {
+        val saveForFutureUseElement =
+            SaveForFutureUseElement(arguments.saveForFutureUseInitialValue, arguments.merchantName)
+        val isSaveForFutureUseCheckedFlow = saveForFutureUseElement.controller.saveForFutureUse
+        val isSetAsDefaultPaymentMethodEnabled = metadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
+            ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
+
+        if (canChangeSaveForFutureUsage) {
+            add(saveForFutureUseElement)
+        }
+
+        if (canChangeSaveForFutureUsage && isSetAsDefaultPaymentMethodEnabled) {
+            add(
+                SetAsDefaultPaymentMethodElement(
+                    initialValue = false,
+                    shouldShowElementFlow = isSaveForFutureUseCheckedFlow
+                )
+            )
+        }
+
+        return true
     }
 }
 
