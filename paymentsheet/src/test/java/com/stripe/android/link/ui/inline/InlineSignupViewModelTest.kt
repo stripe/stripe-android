@@ -25,7 +25,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -510,16 +509,18 @@ class InlineSignupViewModelTest {
         type: ConsumerSession.VerificationSession.SessionType,
         state: ConsumerSession.VerificationSession.SessionState
     ): ConsumerSession {
-        val verificationSession = mock<ConsumerSession.VerificationSession>()
-        whenever(verificationSession.type).thenReturn(type)
-        whenever(verificationSession.state).thenReturn(state)
+        val verificationSession = ConsumerSession.VerificationSession(
+            type = type,
+            state = state,
+        )
         val verificationSessions = listOf(verificationSession)
 
-        val consumerSession = mock<ConsumerSession>()
-        whenever(consumerSession.verificationSessions).thenReturn(verificationSessions)
-        whenever(consumerSession.clientSecret).thenReturn("secret")
-        whenever(consumerSession.emailAddress).thenReturn("email")
-        return consumerSession
+        return ConsumerSession(
+            emailAddress = "email",
+            redactedFormattedPhoneNumber = "********55",
+            redactedPhoneNumber = "(***) ***-**55",
+            verificationSessions = verificationSessions,
+        )
     }
 
     private fun stripeIntent(
