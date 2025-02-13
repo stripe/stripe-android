@@ -15,22 +15,22 @@ import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 import javax.inject.Inject
 
-internal class LinkCardBrandConfirmationDefinition @Inject constructor(
+internal class LinkPassthroughConfirmationDefinition @Inject constructor(
     private val linkAccountManager: LinkAccountManager,
 ) : ConfirmationDefinition<
-    LinkCardBrandConfirmationOption,
-    LinkCardBrandConfirmationDefinition.Launcher,
-    LinkCardBrandConfirmationDefinition.LauncherArguments,
-    LinkCardBrandConfirmationDefinition.Result,
+    LinkPassthroughConfirmationOption,
+    LinkPassthroughConfirmationDefinition.Launcher,
+    LinkPassthroughConfirmationDefinition.LauncherArguments,
+    LinkPassthroughConfirmationDefinition.Result,
     > {
-    override val key: String = "LinkCardBrand"
+    override val key: String = "LinkPassthrough"
 
-    override fun option(confirmationOption: ConfirmationHandler.Option): LinkCardBrandConfirmationOption? {
-        return confirmationOption as? LinkCardBrandConfirmationOption
+    override fun option(confirmationOption: ConfirmationHandler.Option): LinkPassthroughConfirmationOption? {
+        return confirmationOption as? LinkPassthroughConfirmationOption
     }
 
     override suspend fun action(
-        confirmationOption: LinkCardBrandConfirmationOption,
+        confirmationOption: LinkPassthroughConfirmationOption,
         confirmationParameters: ConfirmationDefinition.Parameters
     ): ConfirmationDefinition.Action<LauncherArguments> {
         return createPaymentMethodConfirmationOption(confirmationOption).fold(
@@ -61,14 +61,14 @@ internal class LinkCardBrandConfirmationDefinition @Inject constructor(
     override fun launch(
         launcher: Launcher,
         arguments: LauncherArguments,
-        confirmationOption: LinkCardBrandConfirmationOption,
+        confirmationOption: LinkPassthroughConfirmationOption,
         confirmationParameters: ConfirmationDefinition.Parameters,
     ) {
         launcher.onResult(Result(arguments.nextConfirmationOption))
     }
 
     override fun toResult(
-        confirmationOption: LinkCardBrandConfirmationOption,
+        confirmationOption: LinkPassthroughConfirmationOption,
         confirmationParameters: ConfirmationDefinition.Parameters,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         result: Result,
@@ -80,7 +80,7 @@ internal class LinkCardBrandConfirmationDefinition @Inject constructor(
     }
 
     private suspend fun createPaymentMethodConfirmationOption(
-        confirmationOption: LinkCardBrandConfirmationOption,
+        confirmationOption: LinkPassthroughConfirmationOption,
     ): kotlin.Result<PaymentMethodConfirmationOption> {
         return linkAccountManager.sharePaymentDetails(
             paymentDetailsId = confirmationOption.paymentDetailsId,
