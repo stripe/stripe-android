@@ -35,7 +35,7 @@ internal val Neutral900 = Color(0xff21252C)
 
 // Attention
 internal val Attention50 = Color(0xFFFEF9DA)
-internal val Attention50Dark = Color(0xFF400A00)
+internal val Attention100Dark = Color(0xFF302514)
 internal val Attention300 = Color(0xFFF7870F)
 
 // Feedback
