@@ -18,7 +18,7 @@ import com.stripe.android.customersheet.data.CustomerSheetSession
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.customersheet.util.getDefaultPaymentMethodsEnabledForCustomerSheet
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.CardBrandAcceptance
@@ -127,17 +127,17 @@ class CustomerSheet internal constructor(
      * a persisted payment option selection.
      */
     suspend fun retrievePaymentOptionSelection(): CustomerSheetResult {
-        val request = viewModel.configureRequest
+        val configuration = (viewModel.configureRequest
             ?: return CustomerSheetResult.Failed(
                 IllegalStateException(
                     "Must call `configure` first before attempting to fetch the saved payment option!"
                 )
-            )
+            )).configuration
 
         return coroutineScope {
             val customerSheetSession =
                 CustomerSheetHacks.initializationDataSource.await().loadCustomerSheetSession(
-                    request.configuration
+                    configuration
                 )
 
             return@coroutineScope customerSheetSession.toResult().fold(
@@ -147,8 +147,7 @@ class CustomerSheet internal constructor(
                     )) {
                         useDefaultPaymentMethodFromBackend(loadedCustomerSheetSession)
                     } else {
-                        // TODO: ensure we're not loading elements/session AGAIN here.
-                        useLocalUserSelection(request)
+                        useLocalUserSelection(configuration, loadedCustomerSheetSession.paymentMethods)
                     }
                 },
             onFailure = { cause ->
@@ -173,25 +172,24 @@ class CustomerSheet internal constructor(
         )
     }
 
-    private suspend fun useLocalUserSelection(request: CustomerSheetConfigureRequest): CustomerSheetResult {
+    private suspend fun useLocalUserSelection(
+        configuration: Configuration,
+        paymentMethods: List<PaymentMethod>,
+    ): CustomerSheetResult {
         return coroutineScope {
             val savedSelectionDeferred = async {
                 CustomerSheetHacks.savedSelectionDataSource.await().retrieveSavedSelection().toResult()
             }
-            val paymentMethodsDeferred = async {
-                CustomerSheetHacks.paymentMethodDataSource.await().retrievePaymentMethods().toResult()
-            }
             val savedSelection = savedSelectionDeferred.await()
-            val paymentMethods = paymentMethodsDeferred.await()
 
             val selection = savedSelection.map { selection ->
                 selection?.toPaymentOption()
             }.mapCatching { paymentOption ->
                 paymentOption?.toPaymentSelection {
-                    paymentMethods.getOrNull()?.find {
+                    paymentMethods.find {
                         it.id == paymentOption.id
                     }
-                }?.toPaymentOptionSelection(paymentOptionFactory, request.configuration.googlePayEnabled)
+                }?.toPaymentOptionSelection(paymentOptionFactory, configuration.googlePayEnabled)
             }
             return@coroutineScope selection.fold(
                 onSuccess = {
