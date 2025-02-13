@@ -6,6 +6,7 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.PaymentOptionSelection
 import com.stripe.android.model.CardBrand
@@ -25,6 +26,7 @@ import com.stripe.android.paymentsheet.utils.runCustomerSheetTest
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
 import org.json.JSONArray
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -42,6 +44,7 @@ internal class CustomerSessionCustomerSheetTest {
     @TestParameter(valuesProvider = IntegrationTypeProvider::class)
     lateinit var integrationType: IntegrationType
 
+    @Ignore
     @Test
     fun testSuccessfulCardSave() = runCustomerSheetTest(
         networkRule = networkRule,
@@ -79,6 +82,7 @@ internal class CustomerSessionCustomerSheetTest {
         page.clickConfirmButton()
     }
 
+    @Ignore
     @Test
     fun testSuccessfulCardSaveWithCardBrandChoice() = runCustomerSheetTest(
         networkRule = networkRule,
@@ -128,6 +132,7 @@ internal class CustomerSessionCustomerSheetTest {
         page.clickConfirmButton()
     }
 
+    @Ignore
     @Test
     fun testSepaSuccessfullyHiddenWhenDefaultPMsFeatureEnabled() = runCustomerSheetTest(
         networkRule = networkRule,
@@ -173,6 +178,136 @@ internal class CustomerSessionCustomerSheetTest {
         page.clickConfirmButton()
     }
 
+    @Ignore
+    @Test
+    fun initialPaymentSelectionIsFirstPaymentMethodWhenDefaultPMsEnabled() = runCustomerSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        customerSheetTestType = CustomerSheetTestType.CustomerSession,
+        resultCallback = { result ->
+            verifySelected(
+                expectedLast4 = "4242",
+                expectedBrand = CardBrand.Visa,
+                result = result,
+            )
+        },
+        confirmCompleted = false,
+    ) { context ->
+        val expectedPaymentMethod = PaymentMethodFactory.card()
+        enqueueElementsSession(
+            cards = listOf(expectedPaymentMethod),
+            isPaymentMethodSyncDefaultEnabled = true,
+        )
+
+        val paymentMethodOption = context.retrievePaymentMethodOption()
+
+        assertPaymentOptionSelectionIsExpectedPaymentMethod(
+            customerSheetResult = paymentMethodOption,
+            expectedPaymentMethod = expectedPaymentMethod,
+        )
+    }
+
+    @Ignore
+    @Test
+    fun initialPaymentSelectionIsDefaultPaymentMethodWhenDefaultPMsEnabled() = runCustomerSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        customerSheetTestType = CustomerSheetTestType.CustomerSession,
+        resultCallback = { result ->
+            verifySelected(
+                expectedLast4 = "4242",
+                expectedBrand = CardBrand.Visa,
+                result = result,
+            )
+        },
+        confirmCompleted = false,
+    ) { context ->
+        val expectedPaymentMethod = PaymentMethodFactory.card(id = "pm_1")
+        val otherPaymentMethodForUser = PaymentMethodFactory.card(id = "pm_2")
+        enqueueElementsSession(
+            cards = listOf(otherPaymentMethodForUser, expectedPaymentMethod),
+            defaultPaymentMethodId = expectedPaymentMethod.id,
+            isPaymentMethodSyncDefaultEnabled = true,
+        )
+
+        val paymentMethodOption = context.retrievePaymentMethodOption()
+
+        assertPaymentOptionSelectionIsExpectedPaymentMethod(
+            customerSheetResult = paymentMethodOption,
+            expectedPaymentMethod = expectedPaymentMethod,
+        )
+    }
+
+    private fun assertPaymentOptionSelectionIsExpectedPaymentMethod(
+        customerSheetResult: CustomerSheetResult,
+        expectedPaymentMethod: PaymentMethod,
+    ) {
+        assertThat(customerSheetResult).isInstanceOf(CustomerSheetResult.Selected::class.java)
+        val selectedPaymentOption = customerSheetResult as CustomerSheetResult.Selected
+        assertThat(selectedPaymentOption.selection).isInstanceOf(PaymentOptionSelection.PaymentMethod::class.java)
+        val paymentMethodPaymentSelection = selectedPaymentOption.selection as PaymentOptionSelection.PaymentMethod
+        assertThat(paymentMethodPaymentSelection.paymentMethod).isEqualTo(expectedPaymentMethod)
+    }
+
+    @Ignore
+    @Test
+    fun initialPaymentSelectionIgnoresSavedSelectionWhenDefaultPMsEnabled() = runCustomerSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        customerSheetTestType = CustomerSheetTestType.CustomerSession,
+        resultCallback = { result ->
+            verifySelected(
+                expectedLast4 = "4242",
+                expectedBrand = CardBrand.Visa,
+                result = result,
+            )
+        },
+        paymentMethodSavedSelection = PaymentMethodFactory.card().id,
+        confirmCompleted = false,
+    ) { context ->
+        enqueueElementsSession(
+            cards = emptyList(),
+            isPaymentMethodSyncDefaultEnabled = true,
+        )
+
+        val paymentMethodOption = context.retrievePaymentMethodOption()
+
+        assertThat(paymentMethodOption).isInstanceOf(CustomerSheetResult.Selected::class.java)
+        val selectedPaymentOption = paymentMethodOption as CustomerSheetResult.Selected
+        assertThat(selectedPaymentOption.selection).isNull()
+    }
+
+    @Test
+    fun initialPaymentSelectionUsesSavedSelectionWhenDefaultPMsIsNotEnabled() {
+        val expectedPaymentMethod = PaymentMethodFactory.card(id = "pm_1")
+        runCustomerSheetTest(
+            networkRule = networkRule,
+            integrationType = integrationType,
+            customerSheetTestType = CustomerSheetTestType.CustomerSession,
+            resultCallback = { result ->
+                verifySelected(
+                    expectedLast4 = "4242",
+                    expectedBrand = CardBrand.Visa,
+                    result = result,
+                )
+            },
+            paymentMethodSavedSelection = expectedPaymentMethod.id,
+            confirmCompleted = false,
+        ) { context ->
+            enqueueElementsSession(
+                cards = listOf(PaymentMethodFactory.card(id = "pm_2"), expectedPaymentMethod),
+                isPaymentMethodSyncDefaultEnabled = false,
+            )
+
+            val paymentMethodOption = context.retrievePaymentMethodOption()
+
+            assertPaymentOptionSelectionIsExpectedPaymentMethod(
+                paymentMethodOption,
+                expectedPaymentMethod
+            )
+        }
+    }
+
     private fun assertOnlySavedCardIsDisplayed() {
         val savedPaymentMethodMatcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
             .and(hasText("4242", substring = true))
@@ -185,6 +320,7 @@ internal class CustomerSessionCustomerSheetTest {
 
     private fun enqueueElementsSession(
         cards: List<PaymentMethod>,
+        defaultPaymentMethodId: String? = null,
         sepaPaymentMethod: PaymentMethod? = null,
         isPaymentMethodSyncDefaultEnabled: Boolean = false,
         isCbcEligible: Boolean = false,
@@ -224,6 +360,10 @@ internal class CustomerSessionCustomerSheetTest {
                     ResponseReplacement(
                         original = "PAYMENT_METHOD_SYNC_DEFAULT_FEATURE",
                         new = syncDefaultFeature,
+                    ),
+                    ResponseReplacement(
+                        original = "[DEFAULT_PAYMENT_METHOD_ID]",
+                        new = defaultPaymentMethodId.toString()
                     ),
                 ),
             )

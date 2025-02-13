@@ -24,9 +24,11 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.CardBrandAcceptance
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.utils.AnimationConstants
 import dev.drewhamilton.poko.Poko
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.parcelize.Parcelize
@@ -147,24 +149,27 @@ class CustomerSheet internal constructor(
                     )) {
                         useDefaultPaymentMethodFromBackend(loadedCustomerSheetSession)
                     } else {
+                        val savedSelection = loadedCustomerSheetSession.savedSelection
                         useLocalUserSelection(
                             configuration,
+                            savedSelection,
                             loadedCustomerSheetSession.paymentMethods
                         )
                     }
                 },
             onFailure = { _ ->
                 // TODO: add comment about how if we don't know whether default PMs are enabled, we need to act as though they are not.
-                useLocalUserSelection(configuration, paymentMethods = emptyList())
+                useLocalUserSelection(configuration, null, paymentMethods = emptyList())
                 },
             )
         }
     }
 
     private fun useDefaultPaymentMethodFromBackend(loadedCustomerSheetSession: CustomerSheetSession): CustomerSheetResult.Selected {
-        val defaultPaymentMethod = loadedCustomerSheetSession.paymentMethods.find { paymentMethod ->
+        val paymentMethods = loadedCustomerSheetSession.paymentMethods
+        val defaultPaymentMethod = paymentMethods.find { paymentMethod ->
             paymentMethod.id == loadedCustomerSheetSession.defaultPaymentMethodId
-        }
+        } ?: paymentMethods.firstOrNull()
 
         return CustomerSheetResult.Selected(
             defaultPaymentMethod?.let {
@@ -178,13 +183,12 @@ class CustomerSheet internal constructor(
 
     private suspend fun useLocalUserSelection(
         configuration: Configuration,
+        customerSessionSavedSelection: SavedSelection?,
         paymentMethods: List<PaymentMethod>,
     ): CustomerSheetResult {
         return coroutineScope {
-            val savedSelectionDeferred = async {
-                CustomerSheetHacks.savedSelectionDataSource.await().retrieveSavedSelection().toResult()
-            }
-            val savedSelection = savedSelectionDeferred.await()
+            val savedSelection = customerSessionSavedSelection?.let { Result.success(it) } ?:
+            loadSavedSelection().await()
 
             val selection = savedSelection.map { selection ->
                 selection?.toPaymentOption()
@@ -203,6 +207,15 @@ class CustomerSheet internal constructor(
                     CustomerSheetResult.Failed(cause)
                 }
             )
+        }
+    }
+
+    private suspend fun loadSavedSelection(): Deferred<Result<SavedSelection?>> {
+        return coroutineScope {
+            val savedSelectionDeferred = async {
+                CustomerSheetHacks.savedSelectionDataSource.await().retrieveSavedSelection().toResult()
+            }
+            return@coroutineScope savedSelectionDeferred
         }
     }
 

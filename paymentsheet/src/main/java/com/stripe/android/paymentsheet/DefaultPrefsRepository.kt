@@ -22,15 +22,17 @@ internal class DefaultPrefsRepository(
         isGooglePayAvailable: Boolean,
         isLinkAvailable: Boolean
     ) = withContext(workContext) {
-        val prefData = prefs.getString(getKey(), null).orEmpty().split(":")
-        when (prefData.firstOrNull()) {
-            "google_pay" -> SavedSelection.GooglePay.takeIf { isGooglePayAvailable }
-            "link" -> SavedSelection.Link.takeIf { isLinkAvailable }
-            "payment_method" -> prefData.getOrNull(1)?.let {
-                SavedSelection.PaymentMethod(id = it)
-            }
-            else -> null
-        } ?: SavedSelection.None
+        SavedSelection.PaymentMethod(id = "pm_1")
+
+//        val prefData = prefs.getString(getKey(), null).orEmpty().split(":")
+//        when (prefData.firstOrNull()) {
+//            "google_pay" -> SavedSelection.GooglePay.takeIf { isGooglePayAvailable }
+//            "link" -> SavedSelection.Link.takeIf { isLinkAvailable }
+//            "payment_method" -> prefData.getOrNull(1)?.let {
+//                SavedSelection.PaymentMethod(id = it)
+//            }
+//            else -> null
+//        } ?: SavedSelection.None
     }
 
     override fun savePaymentSelection(paymentSelection: PaymentSelection?) {

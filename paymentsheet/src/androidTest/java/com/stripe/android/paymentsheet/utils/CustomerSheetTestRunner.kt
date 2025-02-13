@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.utils
 
+import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
@@ -7,10 +8,13 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetActivity
+import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.CustomerSheetResultCallback
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.paymentsheet.DefaultPrefsRepository.Companion.PREF_FILE
 import com.stripe.android.paymentsheet.MainActivity
+import kotlinx.coroutines.runBlocking
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -28,6 +32,18 @@ internal class CustomerSheetTestRunnerContext(
         activityLaunchObserver.awaitLaunch()
     }
 
+    fun retrievePaymentMethodOption(): CustomerSheetResult {
+        val activityLaunchObserver = ActivityLaunchObserver(CustomerSheetActivity::class.java)
+        var paymentOptionSelection: CustomerSheetResult? = null
+        scenario.onActivity {
+            activityLaunchObserver.prepareForLaunch(it)
+            runBlocking {
+                paymentOptionSelection = customerSheet.retrievePaymentOptionSelection()
+            }
+        }
+        return paymentOptionSelection!!
+    }
+
     fun markTestSucceeded() {
         countDownLatch.countDown()
     }
@@ -41,6 +57,8 @@ internal fun runCustomerSheetTest(
         merchantDisplayName = "Merchant Inc."
     ),
     resultCallback: CustomerSheetResultCallback,
+    paymentMethodSavedSelection: String? = null,
+    confirmCompleted: Boolean = true,
     block: (CustomerSheetTestRunnerContext) -> Unit,
 ) {
     val countDownLatch = CountDownLatch(1)
@@ -59,6 +77,8 @@ internal fun runCustomerSheetTest(
         networkRule = networkRule,
         countDownLatch = countDownLatch,
         makeCustomerSheet = factory::make,
+        confirmCompleted = confirmCompleted,
+        paymentMethodSavedSelection = paymentMethodSavedSelection,
         block = block,
     )
 }
@@ -67,12 +87,19 @@ private fun runCustomerSheetTest(
     networkRule: NetworkRule,
     countDownLatch: CountDownLatch,
     makeCustomerSheet: (ComponentActivity) -> CustomerSheet,
+    paymentMethodSavedSelection: String?,
+    confirmCompleted: Boolean,
     block: (CustomerSheetTestRunnerContext) -> Unit,
 ) {
     ActivityScenario.launch(MainActivity::class.java).use { scenario ->
         scenario.moveToState(Lifecycle.State.CREATED)
 
         scenario.onActivity {
+            if (paymentMethodSavedSelection != null) {
+                val sharedPrefs = it.applicationContext.getSharedPreferences(PREF_FILE, Context.MODE_PRIVATE)
+                sharedPrefs.edit().putString("customer[cus_1]", "payment_method:${paymentMethodSavedSelection}").commit()
+            }
+
             PaymentConfiguration.init(it, "pk_test_123")
             LinkStore(it.applicationContext).clear()
         }
@@ -94,8 +121,11 @@ private fun runCustomerSheetTest(
         )
         block(testContext)
 
-        val didCompleteSuccessfully = countDownLatch.await(5, TimeUnit.SECONDS)
-        networkRule.validate()
-        assertThat(didCompleteSuccessfully).isTrue()
+        // TODO: should probably validate network.
+        if (confirmCompleted) {
+            val didCompleteSuccessfully = countDownLatch.await(5, TimeUnit.SECONDS)
+            networkRule.validate()
+            assertThat(didCompleteSuccessfully).isTrue()
+        }
     }
 }

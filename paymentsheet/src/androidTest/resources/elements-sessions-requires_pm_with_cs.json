@@ -35,7 +35,7 @@
         }
       }
     },
-    "default_payment_method": null
+    "default_payment_method": [DEFAULT_PAYMENT_METHOD_ID]
   },
   "payment_method_preference": {
     "object": "payment_method_preference",

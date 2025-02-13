@@ -32,7 +32,7 @@ class TestRules private constructor(
             val chain = RuleChain.emptyRuleChain()
                 .around(DetectLeaksAfterTestSuccess())
                 .around(composeTestRule)
-                .around(RetryRule(5))
+//                .around(RetryRule(5))
                 .around(networkRule)
 
             return TestRules(chain, composeTestRule, networkRule)
