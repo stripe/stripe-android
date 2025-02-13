@@ -147,11 +147,15 @@ class CustomerSheet internal constructor(
                     )) {
                         useDefaultPaymentMethodFromBackend(loadedCustomerSheetSession)
                     } else {
-                        useLocalUserSelection(configuration, loadedCustomerSheetSession.paymentMethods)
+                        useLocalUserSelection(
+                            configuration,
+                            loadedCustomerSheetSession.paymentMethods
+                        )
                     }
                 },
-            onFailure = { cause ->
-                CustomerSheetResult.Failed(cause)
+            onFailure = { _ ->
+                // TODO: add comment about how if we don't know whether default PMs are enabled, we need to act as though they are not.
+                useLocalUserSelection(configuration, paymentMethods = emptyList())
                 },
             )
         }
