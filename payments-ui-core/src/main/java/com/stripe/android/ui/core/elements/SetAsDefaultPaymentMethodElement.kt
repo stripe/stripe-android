@@ -20,7 +20,8 @@ data class SetAsDefaultPaymentMethodElement(
     override val identifier: IdentifierSpec = IdentifierSpec.SetAsDefaultPaymentMethod
 
     override val controller: SetAsDefaultPaymentMethodController = SetAsDefaultPaymentMethodController(
-        setAsDefaultPaymentMethodInitialValue = initialValue
+        setAsDefaultPaymentMethodInitialValue = initialValue,
+        shouldShowElementFlow = shouldShowElementFlow,
     )
     override val allowsUserInteraction: Boolean = true
 
