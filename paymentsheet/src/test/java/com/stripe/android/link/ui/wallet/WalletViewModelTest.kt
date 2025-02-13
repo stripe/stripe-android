@@ -109,20 +109,6 @@ class WalletViewModelTest {
     }
 
     @Test
-    fun `viewmodel should open card edit screen when onEditPaymentMethodClicked`() = runTest(dispatcher) {
-        var navScreen: LinkScreen? = null
-        fun navigate(screen: LinkScreen) {
-            navScreen = screen
-        }
-
-        val vm = createViewModel(navigate = ::navigate)
-
-        vm.onEditPaymentMethodClicked(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD)
-
-        assertThat(navScreen).isEqualTo(LinkScreen.CardEdit)
-    }
-
-    @Test
     fun `viewmodel should open payment method screen when onAddNewPaymentMethodClicked`() = runTest(dispatcher) {
         var navScreen: LinkScreen? = null
         fun navigate(screen: LinkScreen) {

@@ -555,11 +555,9 @@ internal class WalletScreenTest {
         nodeTag: SemanticsNodeInteraction,
         expectedRemovedCounter: Int = 0,
         expectedSetAsDefaultCounter: Int = 0,
-        expectedEditPaymentMethodCounter: Int = 0
     ) {
         var onSetDefaultCounter = 0
         var onRemoveClickedCounter = 0
-        var onEditPaymentMethodClickedCounter = 0
         composeTestRule.setContent {
             var sheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
             Box {
@@ -569,9 +567,6 @@ internal class WalletScreenTest {
                     },
                     onRemoveClicked = {
                         onRemoveClickedCounter += 1
-                    },
-                    onEditPaymentMethodClicked = {
-                        onEditPaymentMethodClickedCounter += 1
                     },
                     showBottomSheetContent = {
                         sheetContent = it
@@ -602,14 +597,12 @@ internal class WalletScreenTest {
         onWalletPaymentMethodMenu().assertDoesNotExist()
         assertThat(onSetDefaultCounter).isEqualTo(expectedSetAsDefaultCounter)
         assertThat(onRemoveClickedCounter).isEqualTo(expectedRemovedCounter)
-        assertThat(onEditPaymentMethodClickedCounter).isEqualTo(expectedEditPaymentMethodCounter)
     }
 
     @Composable
     private fun TestWalletBody(
         onRemoveClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
         onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
-        onEditPaymentMethodClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
         showBottomSheetContent: (BottomSheetContent?) -> Unit,
         hideBottomSheetContent: () -> Unit
     ) {
@@ -632,7 +625,6 @@ internal class WalletScreenTest {
             onPayAnotherWayClicked = {},
             onRemoveClicked = onRemoveClicked,
             onSetDefaultClicked = onSetDefaultClicked,
-            onEditPaymentMethodClicked = onEditPaymentMethodClicked,
             showBottomSheetContent = showBottomSheetContent,
             hideBottomSheetContent = hideBottomSheetContent,
             onAddNewPaymentMethodClicked = {},
