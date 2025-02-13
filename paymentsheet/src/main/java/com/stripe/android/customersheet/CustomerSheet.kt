@@ -144,6 +144,7 @@ class CustomerSheet internal constructor(
                     if (isSyncDefaultEnabled(loadedCustomerSheetSession)) {
                         useDefaultPaymentMethodFromBackend(loadedCustomerSheetSession)
                     } else {
+                        // TODO: ensure we're not loading elements/session AGAIN here.
                         useLocalUserSelection(request)
                     }
                 },
