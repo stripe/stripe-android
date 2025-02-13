@@ -221,6 +221,29 @@ class DefaultFormActivityStateHelperTest {
         }
     }
 
+    @Test
+    fun `selection update to null does not emit event if primaryButtonUiState is not null`() = testScenario {
+        stateHolder.state.test {
+            awaitAndVerifyInitialState()
+
+            stateHolder.updatePrimaryButton {
+                PrimaryButton.UIState(
+                    label = "Do something".resolvableString,
+                    onClick = {},
+                    enabled = true,
+                    lockVisible = true
+                )
+            }
+
+            val updateState = awaitItem()
+            assertThat(updateState.isEnabled).isTrue()
+
+            selectionHolder.set(null)
+
+            expectNoEvents()
+        }
+    }
+
     private class Scenario(
         val selectionHolder: EmbeddedSelectionHolder,
         val stateHolder: FormActivityStateHelper,
