@@ -73,7 +73,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
 }
 
 internal class DefaultPaymentMethodVerticalLayoutInteractor(
-    paymentMethodMetadata: PaymentMethodMetadata,
+    private val paymentMethodMetadata: PaymentMethodMetadata,
     processing: StateFlow<Boolean>,
     temporarySelection: StateFlow<PaymentMethodCode?>,
     selection: StateFlow<PaymentSelection?>,
@@ -227,19 +227,13 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         } else {
             null
         }
-        val selectionCode = temporarySelectionCode ?: (mostRecentSelection as? PaymentSelection.New).code()
-        val mandate = if (selectionCode != null) {
-            (formTypeForCode(selectionCode) as? FormType.MandateOnly)?.mandate
-        } else {
-            null
-        }
         PaymentMethodVerticalLayoutInteractor.State(
             displayablePaymentMethods = displayablePaymentMethods,
             isProcessing = isProcessing,
             selection = temporarySelection ?: mostRecentSelection?.asVerticalSelection(),
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
             availableSavedPaymentMethodAction = action,
-            mandate = mandate,
+            mandate = getMandate(temporarySelectionCode, mostRecentSelection),
         )
     }
 
@@ -424,6 +418,16 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             ),
             selectedPaymentMethodCode,
         )
+    }
+
+    private fun getMandate(temporarySelectionCode: String?, selection: PaymentSelection?): ResolvableString? {
+        val selectionCode = temporarySelectionCode ?: (selection as? PaymentSelection.New).code()
+        return if (selectionCode != null) {
+            (formTypeForCode(selectionCode) as? FormType.MandateOnly)?.mandate
+        } else {
+            val savedSelection = selection as? PaymentSelection.Saved?
+            savedSelection?.mandateText(paymentMethodMetadata.merchantName, paymentMethodMetadata.hasIntentToSetup())
+        }
     }
 }
 

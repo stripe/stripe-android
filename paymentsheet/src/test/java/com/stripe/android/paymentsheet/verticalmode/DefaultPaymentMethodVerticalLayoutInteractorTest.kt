@@ -27,6 +27,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import com.stripe.android.paymentsheet.R as PaymentSheetR
+import com.stripe.android.ui.core.R as StripeUiCoreR
 
 @Suppress("LargeClass")
 class DefaultPaymentMethodVerticalLayoutInteractorTest {
@@ -1122,6 +1123,33 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 assertThat(awaitItem().mandate).isNull()
                 temporarySelectionSource.value = null
                 assertThat(awaitItem().mandate).isEqualTo("Foobar".resolvableString)
+            }
+        }
+    }
+
+    @Test
+    fun savedSelectionUpdatesMandate() {
+        val paymentMethodTypes = listOf("card", "sepa_debit")
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = paymentMethodTypes
+            )
+        )
+        runScenario(
+            paymentMethodMetadata = paymentMethodMetadata,
+        ) {
+            interactor.state.test {
+                assertThat(awaitItem().mandate).isNull()
+                selectionSource.value = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
+                assertThat(awaitItem().mandate)
+                    .isEqualTo(
+                        resolvableString(
+                            id = StripeUiCoreR.string.stripe_sepa_mandate,
+                            paymentMethodMetadata.merchantName
+                        )
+                    )
+                selectionSource.value = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+                assertThat(awaitItem().mandate).isNull()
             }
         }
     }
