@@ -11,6 +11,7 @@ import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -276,6 +277,7 @@ class CustomerSheetTest {
             val countDownLatch = CountDownLatch(1)
 
             scenario.onActivity {
+                PaymentConfiguration.init(it, "pk_test_123")
                 Scenario(
                     activityScenario = scenario,
                     activity = it,
