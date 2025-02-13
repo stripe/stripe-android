@@ -139,7 +139,7 @@ private fun RowButtonOuterContent(
             RowButtonCheckmarkOuterContent(
                 isSelected = isSelected,
                 contentPaddingValues = PaddingValues(
-                    horizontal = 0.dp,
+                    horizontal = style.additionalHorizontalInsetsDp.dp,
                     vertical = contentPaddingValues + style.additionalVerticalInsetsDp.dp
                 ),
                 verticalArrangement = Arrangement.Center,
@@ -155,7 +155,7 @@ private fun RowButtonOuterContent(
                 isEnabled = isEnabled,
                 isSelected = isSelected,
                 contentPaddingValues = PaddingValues(
-                    horizontal = 0.dp,
+                    horizontal = style.additionalHorizontalInsetsDp.dp,
                     vertical = contentPaddingValues + style.additionalVerticalInsetsDp.dp
                 ),
                 verticalArrangement = Arrangement.Center,
@@ -210,7 +210,7 @@ private fun RowButtonRadioOuterContent(
     Row(
         modifier = modifier
             .background(MaterialTheme.stripeColors.component)
-            .padding(horizontal = style.additionalHorizontalInsetsDp.dp)
+            .padding(contentPaddingValues)
     ) {
         RadioButton(
             selected = isSelected,
@@ -225,7 +225,6 @@ private fun RowButtonRadioOuterContent(
         Spacer(Modifier.width(12.dp))
         Column(
             modifier = Modifier
-                .padding(contentPaddingValues)
                 .align(Alignment.CenterVertically),
             verticalArrangement = verticalArrangement,
         ) {
@@ -248,12 +247,11 @@ private fun RowButtonCheckmarkOuterContent(
     Row(
         modifier = modifier
             .background(MaterialTheme.stripeColors.component)
-            .padding(horizontal = style.additionalHorizontalInsetsDp.dp),
+            .padding(contentPaddingValues),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(
-            modifier = Modifier.padding(contentPaddingValues),
-            verticalArrangement = verticalArrangement,
+            verticalArrangement = verticalArrangement
         ) {
             content()
             Row {

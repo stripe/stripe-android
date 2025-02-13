@@ -725,10 +725,10 @@ private fun EmbeddedPicker(
     }
     Divider()
 
-    IncrementDecrementItem("additionalHorizontalInsetsDp", embeddedAppearance.additionalHorizontalInsets) {
+    IncrementDecrementItem("additionalHorizontalInsetsDp", embeddedAppearance.additionalHorizontalInsetsDp) {
         updateEmbedded(
             embeddedAppearance.copy(
-                additionalHorizontalInsets = it
+                additionalHorizontalInsetsDp = it
             )
         )
     }
