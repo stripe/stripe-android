@@ -685,27 +685,27 @@ public final class com/stripe/android/paymentelement/confirmation/gpay/GooglePay
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/paymentelement/confirmation/link/LinkCardBrandConfirmationDefinition$Result$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/confirmation/link/LinkCardBrandConfirmationDefinition$Result;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentelement/confirmation/link/LinkCardBrandConfirmationDefinition$Result;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/paymentelement/confirmation/link/LinkCardBrandConfirmationOption$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/confirmation/link/LinkCardBrandConfirmationOption;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/paymentelement/confirmation/link/LinkCardBrandConfirmationOption;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public final class com/stripe/android/paymentelement/confirmation/link/LinkConfirmationOption$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/confirmation/link/LinkConfirmationOption;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/paymentelement/confirmation/link/LinkConfirmationOption;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentelement/confirmation/link/LinkPassthroughConfirmationDefinition$Result$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/confirmation/link/LinkPassthroughConfirmationDefinition$Result;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentelement/confirmation/link/LinkPassthroughConfirmationDefinition$Result;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentelement/confirmation/link/LinkPassthroughConfirmationOption$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/confirmation/link/LinkPassthroughConfirmationOption;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentelement/confirmation/link/LinkPassthroughConfirmationOption;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
