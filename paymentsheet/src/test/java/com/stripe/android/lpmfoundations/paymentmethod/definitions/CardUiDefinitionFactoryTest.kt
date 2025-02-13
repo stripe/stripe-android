@@ -3,12 +3,16 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
+import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.ui.core.FormUI
+import com.stripe.android.ui.core.elements.SaveForFutureUseElement
+import com.stripe.android.uicore.elements.IdentifierSpec
 import org.junit.Rule
 import org.junit.Test
 
@@ -85,6 +89,33 @@ class CardUiDefinitionFactoryTest {
                         isPaymentMethodSetAsDefaultEnabled = false,
                     ),
                 )
+            )
+        }
+    }
+
+    @Test
+    fun testCardWithSaveForLaterAndSetAsDefaultShown() {
+        val formElements = CardDefinition.formElements(
+            metadata = metadata.copy(
+                customerMetadata = CustomerMetadata(
+                    hasCustomerConfiguration = true,
+                    isPaymentMethodSetAsDefaultEnabled = true,
+                ),
+            )
+        )
+
+        val saveForFutureUseElement = formElements.first {
+            it.identifier == IdentifierSpec.SaveForFutureUse
+        } as SaveForFutureUseElement
+
+        saveForFutureUseElement.controller.onValueChange(true)
+
+        paparazziRule.snapshot {
+            FormUI(
+                hiddenIdentifiers = emptySet(),
+                enabled = true,
+                elements = formElements,
+                lastTextFieldIdentifier = null,
             )
         }
     }
