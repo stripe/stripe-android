@@ -716,7 +716,7 @@ private fun EmbeddedPicker(
     }
     Divider()
 
-    IncrementDecrementItem("additionalInsetsDp", embeddedAppearance.additionalVerticalInsetsDp) {
+    IncrementDecrementItem("additionalVerticalInsetsDp", embeddedAppearance.additionalVerticalInsetsDp) {
         updateEmbedded(
             embeddedAppearance.copy(
                 additionalVerticalInsetsDp = it
@@ -725,7 +725,7 @@ private fun EmbeddedPicker(
     }
     Divider()
 
-    IncrementDecrementItem("additionalHorizontalInsetsDp", embeddedAppearance.horizontalInsetsDp) {
+    IncrementDecrementItem("horizontalInsetsDp", embeddedAppearance.horizontalInsetsDp) {
         updateEmbedded(
             embeddedAppearance.copy(
                 horizontalInsetsDp = it
