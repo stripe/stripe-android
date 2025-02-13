@@ -150,7 +150,6 @@ internal class NetworkingSaveToLinkVerificationViewModel @AssistedInject constru
                 consumerSessionClientSecret = payload.consumerSessionClientSecret,
                 selectedAccounts = accounts,
                 shouldPollAccountNumbers = manifest.isDataFlow,
-                isNetworkingRelinkSession = false,
             )
         }
             .onSuccess { eventTracker.track(VerificationSuccess(PANE)) }

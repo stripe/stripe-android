@@ -30,7 +30,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.ArgumentMatchers.eq
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -240,7 +239,6 @@ internal class AccountPickerViewModelTest {
             consumerSessionClientSecret = any(),
             selectedAccounts = any(),
             shouldPollAccountNumbers = any(),
-            isNetworkingRelinkSession = eq(false),
         )
 
         navigationManager.assertNavigatedTo(
@@ -273,7 +271,6 @@ internal class AccountPickerViewModelTest {
             consumerSessionClientSecret = any(),
             selectedAccounts = any(),
             shouldPollAccountNumbers = any(),
-            isNetworkingRelinkSession = eq(false),
         )
 
         navigationManager.assertNavigatedTo(
@@ -315,7 +312,6 @@ internal class AccountPickerViewModelTest {
             consumerSessionClientSecret = consumerSession.clientSecret,
             selectedAccounts = accounts.data.map { CachedPartnerAccount(it.id, it.linkedAccountId) },
             shouldPollAccountNumbers = true,
-            isNetworkingRelinkSession = false,
         )
 
         navigationManager.assertNavigatedTo(

@@ -24,6 +24,7 @@ internal class SaveAccountToLink @Inject constructor(
     private val successContentRepository: SuccessContentRepository,
     private val repository: FinancialConnectionsManifestRepository,
     private val accountsRepository: FinancialConnectionsAccountsRepository,
+    private val isNetworkingRelinkSession: IsNetworkingRelinkSession,
 ) {
 
     suspend fun new(
@@ -35,7 +36,6 @@ internal class SaveAccountToLink @Inject constructor(
     ): FinancialConnectionsSessionManifest {
         return ensureReadyAccounts(
             shouldPollAccountNumbers = shouldPollAccountNumbers,
-            isNetworkingRelinkSession = false,
             partnerAccounts = selectedAccounts,
         ) { selectedAccountIds ->
             repository.postSaveAccountsToLink(
@@ -54,11 +54,9 @@ internal class SaveAccountToLink @Inject constructor(
         consumerSessionClientSecret: String,
         selectedAccounts: List<CachedPartnerAccount>?,
         shouldPollAccountNumbers: Boolean,
-        isNetworkingRelinkSession: Boolean,
     ): FinancialConnectionsSessionManifest {
         return ensureReadyAccounts(
             shouldPollAccountNumbers = shouldPollAccountNumbers,
-            isNetworkingRelinkSession = isNetworkingRelinkSession,
             partnerAccounts = selectedAccounts,
         ) { selectedAccountIds ->
             repository.postSaveAccountsToLink(
@@ -75,7 +73,6 @@ internal class SaveAccountToLink @Inject constructor(
 
     private suspend fun ensureReadyAccounts(
         shouldPollAccountNumbers: Boolean,
-        isNetworkingRelinkSession: Boolean,
         partnerAccounts: List<CachedPartnerAccount>?,
         action: suspend (Set<String>?) -> FinancialConnectionsSessionManifest,
     ): FinancialConnectionsSessionManifest {
@@ -100,11 +97,11 @@ internal class SaveAccountToLink @Inject constructor(
         }.mapCatching {
             action(selectedAccountIds)
         }.onSuccess { manifest ->
-            if (!isNetworkingRelinkSession) {
+            if (!isNetworkingRelinkSession()) {
                 storeSavedToLinkMessage(manifest, selectedAccountIds.size)
             }
         }.onFailure {
-            if (!isNetworkingRelinkSession) {
+            if (!isNetworkingRelinkSession()) {
                 storeFailedToSaveToLinkMessage(selectedAccountIds.size)
             }
         }.getOrThrow()

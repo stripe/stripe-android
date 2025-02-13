@@ -104,7 +104,7 @@ class LinkSignupHandlerForNetworkingTest {
             verificationToken = eq(expectedToken),
             appId = eq("applicationId")
         )
-        verify(saveAccountToLink).existing(any(), any(), any(), any())
+        verify(saveAccountToLink).existing(any(), any(), any())
         assertEquals(expectedPane, result)
     }
 

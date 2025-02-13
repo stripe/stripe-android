@@ -48,7 +48,6 @@ import com.stripe.android.financialconnections.presentation.Async.Loading
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.ConsumerSessionProvider
-import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
 import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.financialconnections.utils.measureTimeMillis
@@ -71,7 +70,6 @@ internal class AccountPickerViewModel @AssistedInject constructor(
     private val logger: Logger,
     private val pollAuthorizationSessionAccounts: PollAuthorizationSessionAccounts,
     private val presentSheet: PresentSheet,
-    private val pendingRepairRepository: CoreAuthorizationPendingNetworkingRepairRepository,
 ) : FinancialConnectionsViewModel<AccountPickerState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
@@ -336,12 +334,10 @@ internal class AccountPickerViewModel @AssistedInject constructor(
             if (manifest.isDataFlow && manifest.canSaveAccountsToLink && consumerSessionClientSecret != null) {
                 // In the data flow, we save accounts to Link in this screen. In the payment flow,
                 // it happens in the AttachPaymentScreen.
-                val isNetworkingRelinkSession = pendingRepairRepository.get() != null
                 saveAccountToLink.existing(
                     consumerSessionClientSecret = consumerSessionClientSecret,
                     selectedAccounts = accountsList.data.toCachedPartnerAccounts(),
                     shouldPollAccountNumbers = manifest.isDataFlow,
-                    isNetworkingRelinkSession = isNetworkingRelinkSession,
                 )
             }
 
