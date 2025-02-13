@@ -9,7 +9,7 @@ import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 /**
- * This is an element that will allow users set a payment method as their default
+ * Element that allows users to set a new payment method as their default.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class SetAsDefaultPaymentMethodElement(
