@@ -15,6 +15,7 @@ import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.ui.core.R
 import kotlinx.coroutines.test.TestScope
@@ -84,7 +85,7 @@ class DefaultFormActivityStateHelperTest {
             assertThat(enabledState.isProcessing).isFalse()
             assertThat(enabledState.isEnabled).isTrue()
 
-            stateHolder.update(confirmationStateConfirming(selection))
+            stateHolder.updateConfirmationState(confirmationStateConfirming(selection))
             val processingState = awaitItem()
             assertThat(processingState.isEnabled).isFalse()
             assertThat(processingState.processingState).isEqualTo(PrimaryButtonProcessingState.Processing)
@@ -96,7 +97,7 @@ class DefaultFormActivityStateHelperTest {
     fun `state updates when confirmation is successful`() = testScenario {
         stateHolder.state.test {
             awaitAndVerifyInitialState()
-            stateHolder.update(confirmationStateComplete(true))
+            stateHolder.updateConfirmationState(confirmationStateComplete(true))
 
             val completedState = awaitItem()
             assertThat(completedState.processingState).isEqualTo(PrimaryButtonProcessingState.Completed)
@@ -114,13 +115,13 @@ class DefaultFormActivityStateHelperTest {
             // State emitted from setting selection
             assertThat(awaitItem().isEnabled).isTrue()
 
-            stateHolder.update(confirmationStateConfirming(selection))
+            stateHolder.updateConfirmationState(confirmationStateConfirming(selection))
             val processingState = awaitItem()
             assertThat(processingState.isProcessing).isTrue()
             assertThat(processingState.isEnabled).isFalse()
             assertThat(processingState.processingState).isEqualTo(PrimaryButtonProcessingState.Processing)
 
-            stateHolder.update(confirmationStateComplete(false))
+            stateHolder.updateConfirmationState(confirmationStateComplete(false))
             val failedState = awaitItem()
             assertThat(failedState.isEnabled).isTrue()
             assertThat(failedState.isProcessing).isFalse()
@@ -134,11 +135,13 @@ class DefaultFormActivityStateHelperTest {
         stateHolder.state.test {
             awaitAndVerifyInitialState()
 
-            stateHolder.update(confirmationStateComplete(false))
+            stateHolder.updateConfirmationState(confirmationStateComplete(false))
             val failedState = awaitItem()
             assertThat(failedState.error).isEqualTo("Something went wrong".resolvableString)
 
-            stateHolder.update(confirmationStateConfirming(PaymentMethodFixtures.CARD_PAYMENT_SELECTION))
+            stateHolder.updateConfirmationState(
+                confirmationStateConfirming(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+            )
             val confirmingState = awaitItem()
             assertThat(confirmingState.error).isNull()
         }
@@ -149,10 +152,10 @@ class DefaultFormActivityStateHelperTest {
         stateHolder.state.test {
             awaitAndVerifyInitialState()
 
-            stateHolder.update(confirmationStateComplete(false))
+            stateHolder.updateConfirmationState(confirmationStateComplete(false))
             assertThat(awaitItem().error).isEqualTo("Something went wrong".resolvableString)
 
-            stateHolder.update(
+            stateHolder.updateConfirmationState(
                 ConfirmationHandler.State.Complete(
                     result = ConfirmationHandler.Result.Canceled(
                         action = ConfirmationHandler.Result.Canceled.Action.None
@@ -165,9 +168,86 @@ class DefaultFormActivityStateHelperTest {
         }
     }
 
+    @Test
+    fun `updateError updates error`() = testScenario {
+        stateHolder.state.test {
+            awaitAndVerifyInitialState()
+
+            stateHolder.updateError("Something went wrong".resolvableString)
+            assertThat(awaitItem().error).isEqualTo("Something went wrong".resolvableString)
+        }
+    }
+
+    @Test
+    fun `updateMandate updates mandateText`() = testScenario {
+        stateHolder.state.test {
+            awaitAndVerifyInitialState()
+
+            stateHolder.updateMandate("Some new mandate".resolvableString)
+            assertThat(awaitItem().mandateText).isEqualTo("Some new mandate".resolvableString)
+        }
+    }
+
+    @Test
+    fun `updatePrimaryButton updates primary button state`() = testScenario {
+        stateHolder.state.test {
+            awaitAndVerifyInitialState()
+
+            stateHolder.updatePrimaryButton {
+                PrimaryButton.UIState(
+                    label = "Do something".resolvableString,
+                    onClick = {},
+                    enabled = true,
+                    lockVisible = true
+                )
+            }
+
+            val updateState = awaitItem()
+            assertThat(updateState.isEnabled).isTrue()
+            assertThat(updateState.primaryButtonLabel).isEqualTo("Do something".resolvableString)
+            assertThat(onClickOverrideDelegate.onClickOverride).isNotNull()
+
+            stateHolder.updatePrimaryButton { null }
+
+            val nullState = awaitItem()
+            assertThat(nullState.isEnabled).isFalse()
+            assertThat(nullState.primaryButtonLabel).isEqualTo(
+                resolvableString(
+                    id = R.string.stripe_pay_button_amount,
+                    formatArgs = arrayOf("$10.99")
+                )
+            )
+            assertThat(onClickOverrideDelegate.onClickOverride).isNull()
+        }
+    }
+
+    @Test
+    fun `selection update to null does not emit event if primaryButtonUiState is not null`() = testScenario {
+        stateHolder.state.test {
+            awaitAndVerifyInitialState()
+
+            stateHolder.updatePrimaryButton {
+                PrimaryButton.UIState(
+                    label = "Do something".resolvableString,
+                    onClick = {},
+                    enabled = true,
+                    lockVisible = true
+                )
+            }
+
+            val updateState = awaitItem()
+            assertThat(updateState.isEnabled).isTrue()
+
+            selectionHolder.set(null)
+
+            expectNoEvents()
+        }
+    }
+
     private class Scenario(
         val selectionHolder: EmbeddedSelectionHolder,
-        val stateHolder: FormActivityStateHelper
+        val stateHolder: FormActivityStateHelper,
+        val onClickOverrideDelegate: OnClickOverrideDelegate
     )
 
     private fun testScenario(
@@ -177,16 +257,19 @@ class DefaultFormActivityStateHelperTest {
     ) = runTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = stripeIntent)
         val selectionHolder = EmbeddedSelectionHolder(SavedStateHandle())
+        val onClickOverrideDelegate = OnClickDelegateOverrideImpl()
         val stateHolder = DefaultFormActivityStateHelper(
             paymentMethodMetadata = paymentMethodMetadata,
             selectionHolder = selectionHolder,
             configuration = config,
-            coroutineScope = TestScope(UnconfinedTestDispatcher())
+            coroutineScope = TestScope(UnconfinedTestDispatcher()),
+            onClickDelegate = onClickOverrideDelegate
         )
 
         Scenario(
             selectionHolder = selectionHolder,
-            stateHolder = stateHolder
+            stateHolder = stateHolder,
+            onClickOverrideDelegate = onClickOverrideDelegate
         ).block()
     }
 

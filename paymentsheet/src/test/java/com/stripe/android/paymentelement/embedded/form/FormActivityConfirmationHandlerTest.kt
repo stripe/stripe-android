@@ -58,6 +58,20 @@ internal class FormActivityConfirmationHandlerTest {
         assertThat(stateHelper.updateTurbine.awaitItem()).isInstanceOf<ConfirmationHandler.State.Complete>()
     }
 
+    @Test
+    fun `calls onClickOverride if provided`() = testScenario {
+        var didCall = false
+        onClickOverrideDelegate.set { didCall = true }
+        formConfirmationHelper.confirm()
+        confirmationHandler.startTurbine.expectNoEvents()
+        assertThat(didCall).isTrue()
+
+        onClickOverrideDelegate.clear()
+        selectionHolder.set(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        formConfirmationHelper.confirm()
+        assertThat(confirmationHandler.startTurbine.awaitItem()).isNotNull()
+    }
+
     private fun testScenario(
         block: suspend Scenario.() -> Unit
     ) = runTest {
@@ -65,6 +79,7 @@ internal class FormActivityConfirmationHandlerTest {
         val selectionHolder = EmbeddedSelectionHolder(SavedStateHandle())
         val embeddedState = EmbeddedConfirmationStateFixtures.defaultState()
         val stateHelper = FakeFormActivityStateHelper()
+        val onClickOverrideDelegate = OnClickDelegateOverrideImpl()
 
         val confirmationHelper = DefaultFormActivityConfirmationHelper(
             initializationMode = embeddedState.initializationMode,
@@ -74,7 +89,8 @@ internal class FormActivityConfirmationHandlerTest {
             selectionHolder = selectionHolder,
             stateHelper = stateHelper,
             lifecycleOwner = TestLifecycleOwner(),
-            activityResultCaller = mock()
+            activityResultCaller = mock(),
+            onClickDelegate = onClickOverrideDelegate
         )
 
         assertThat(confirmationHandler.registerTurbine.awaitItem()).isNotNull()
@@ -84,7 +100,8 @@ internal class FormActivityConfirmationHandlerTest {
             formConfirmationHelper = confirmationHelper,
             confirmationHandler = confirmationHandler,
             selectionHolder = selectionHolder,
-            stateHelper = stateHelper
+            stateHelper = stateHelper,
+            onClickOverrideDelegate = onClickOverrideDelegate
         ).block()
 
         stateHelper.validate()
@@ -94,6 +111,7 @@ internal class FormActivityConfirmationHandlerTest {
         val formConfirmationHelper: FormActivityConfirmationHelper,
         val confirmationHandler: FakeConfirmationHandler,
         val selectionHolder: EmbeddedSelectionHolder,
-        val stateHelper: FakeFormActivityStateHelper
+        val stateHelper: FakeFormActivityStateHelper,
+        val onClickOverrideDelegate: OnClickOverrideDelegate
     )
 }

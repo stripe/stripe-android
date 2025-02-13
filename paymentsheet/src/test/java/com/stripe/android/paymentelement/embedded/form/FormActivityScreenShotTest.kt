@@ -7,6 +7,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
@@ -79,11 +81,22 @@ internal class FormActivityScreenShotTest {
         }
     }
 
+    @Test
+    fun testFormActivity_usBankMandate() {
+        paparazziRule.snapshot {
+            TestFormActivityUi(
+                confirmationState = ConfirmationHandler.State.Idle,
+                usBankMandate = "This is a mandate".resolvableString
+            )
+        }
+    }
+
     @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
     @Composable
     private fun TestFormActivityUi(
         confirmationState: ConfirmationHandler.State,
-        enabled: Boolean = false
+        enabled: Boolean = false,
+        usBankMandate: ResolvableString? = null
     ) {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val selectionHolder = EmbeddedSelectionHolder(SavedStateHandle())
@@ -91,7 +104,8 @@ internal class FormActivityScreenShotTest {
             paymentMethodMetadata = paymentMethodMetadata,
             selectionHolder = selectionHolder,
             configuration = EmbeddedConfirmationStateFixtures.defaultState().configuration,
-            coroutineScope = TestScope(UnconfinedTestDispatcher())
+            coroutineScope = TestScope(UnconfinedTestDispatcher()),
+            onClickDelegate = OnClickDelegateOverrideImpl()
         )
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
@@ -108,7 +122,8 @@ internal class FormActivityScreenShotTest {
             formActivityStateHelper = stateHolder,
         ).create()
 
-        stateHolder.update(confirmationState)
+        stateHolder.updateConfirmationState(confirmationState)
+        stateHolder.updateMandate(usBankMandate)
         val state by stateHolder.state.collectAsState()
 
         ViewModelStoreOwnerContext {

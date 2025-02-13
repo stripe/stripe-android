@@ -19,6 +19,7 @@ import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.ui.ErrorMessage
+import com.stripe.android.paymentsheet.ui.Mandate
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.TestModeBadge
 import com.stripe.android.paymentsheet.utils.DismissKeyboardOnProcessing
@@ -57,6 +58,7 @@ internal fun FormActivityUI(
                     interactor = interactor,
                     showsWalletHeader = false
                 )
+                USBankAccountMandate(state)
                 FormActivityError(state)
                 PaymentSheetContentPadding()
                 FormActivityPrimaryButton(
@@ -67,6 +69,24 @@ internal fun FormActivityUI(
                 PaymentSheetContentPadding()
             },
             scrollState = scrollState
+        )
+    }
+}
+
+@Composable
+internal fun USBankAccountMandate(
+    state: FormActivityStateHelper.State
+) {
+    state.mandateText?.let {
+        Mandate(
+            mandateText = it.resolve(),
+            modifier = Modifier
+                .padding(
+                    horizontal = dimensionResource(
+                        id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal
+                    ),
+                    vertical = 8.dp
+                )
         )
     }
 }

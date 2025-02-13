@@ -145,6 +145,10 @@ internal interface FormActivityViewModelModule {
         ): ConfirmationHandler {
             return confirmationHandlerFactory.create(coroutineScope + ioContext)
         }
+
+        @Provides
+        @Singleton
+        fun provideOnClickOverrideDelegate(): OnClickOverrideDelegate = OnClickDelegateOverrideImpl()
     }
 }
 
