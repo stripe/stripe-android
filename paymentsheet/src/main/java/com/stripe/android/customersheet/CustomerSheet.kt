@@ -16,6 +16,7 @@ import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.data.CustomerSheetSession
 import com.stripe.android.customersheet.util.CustomerSheetHacks
+import com.stripe.android.customersheet.util.getDefaultPaymentMethodsEnabledForCustomerSheet
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
@@ -141,7 +142,9 @@ class CustomerSheet internal constructor(
 
             return@coroutineScope customerSheetSession.toResult().fold(
                 onSuccess = { loadedCustomerSheetSession ->
-                    if (isSyncDefaultEnabled(loadedCustomerSheetSession)) {
+                    if (getDefaultPaymentMethodsEnabledForCustomerSheet(
+                            loadedCustomerSheetSession.elementsSession
+                    )) {
                         useDefaultPaymentMethodFromBackend(loadedCustomerSheetSession)
                     } else {
                         // TODO: ensure we're not loading elements/session AGAIN here.
@@ -168,15 +171,6 @@ class CustomerSheet internal constructor(
                 )
             }
         )
-    }
-
-    // TODO: use default PMs utils.
-    private fun isSyncDefaultEnabled(customerSheetSession: CustomerSheetSession): Boolean {
-        return when (val customerSheetComponent = customerSheetSession.elementsSession.customer?.session?.components?.customerSheet) {
-            is ElementsSession.Customer.Components.CustomerSheet.Enabled -> customerSheetComponent.isPaymentMethodSyncDefaultEnabled
-            ElementsSession.Customer.Components.CustomerSheet.Disabled,
-            null -> false
-        }
     }
 
     private suspend fun useLocalUserSelection(request: CustomerSheetConfigureRequest): CustomerSheetResult {
