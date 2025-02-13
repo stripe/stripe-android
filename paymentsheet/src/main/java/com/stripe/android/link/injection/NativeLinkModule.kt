@@ -40,12 +40,15 @@ import com.stripe.android.link.repositories.LinkApiRepository
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentelement.AnalyticEventCallback
+import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationDefinition
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.paymentsheet.AnalyticEventInterceptor
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.repository.ConsumersApiService
@@ -218,5 +221,10 @@ internal interface NativeLinkModule {
                 linkAccountManager = linkAccountManager,
             )
         }
+
+        @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+        @Provides
+        @NativeLinkScope
+        fun provideAnalyticEventCallback(): AnalyticEventCallback? = AnalyticEventInterceptor.analyticEventCallback
     }
 }

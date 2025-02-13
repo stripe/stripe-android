@@ -23,8 +23,11 @@ import com.stripe.android.link.gate.DefaultLinkGate
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.injection.LinkComponent
+import com.stripe.android.paymentelement.AnalyticEventCallback
+import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
+import com.stripe.android.paymentsheet.AnalyticEventInterceptor
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -176,5 +179,9 @@ internal abstract class PaymentSheetCommonModule {
         fun providesCvcRecollectionInteractorFactory(): CvcRecollectionInteractor.Factory {
             return DefaultCvcRecollectionInteractor.Factory
         }
+
+        @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+        @Provides
+        fun provideAnalyticEventCallback(): AnalyticEventCallback? = AnalyticEventInterceptor.analyticEventCallback
     }
 }

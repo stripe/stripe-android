@@ -1,8 +1,6 @@
 package com.stripe.android.paymentelement
 
 import dev.drewhamilton.poko.Poko
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.receiveAsFlow
 
 /**
  * Called when an analytic event is emitted.
@@ -54,14 +52,4 @@ abstract class AnalyticEvent internal constructor() {
     // User removed a saved payment method
     @Poko
     class RemovedSavedPaymentMethod internal constructor(val paymentMethodType: String) : AnalyticEvent()
-}
-
-@OptIn(ExperimentalAnalyticEventCallbackApi::class)
-internal object AnalyticManager {
-    private val _events = Channel<AnalyticEvent>(Channel.BUFFERED)
-    val events = _events.receiveAsFlow()
-
-    suspend fun produceEvent(event: AnalyticEvent) {
-        _events.send(event)
-    }
 }
