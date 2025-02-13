@@ -270,7 +270,9 @@ private fun PrePaneContent(
                         modifier = Modifier.padding(horizontal = 24.dp),
                         text = TextResource.Text(fromHtml(bodyItem.content)),
                         onClickableTextClick = onClickableTextClick,
-                        defaultStyle = typography.bodyMedium
+                        defaultStyle = typography.bodyMedium.copy(
+                            color = colors.textDefault,
+                        ),
                     )
                 }
             }
@@ -513,7 +515,7 @@ internal fun PartnerAuthDrawerPreview(
     state: SharedPartnerAuthState
 ) {
     FinancialConnectionsPreview {
-        Box(modifier = Modifier.background(Color.White)) {
+        Box(modifier = Modifier.background(colors.background)) {
             SharedPartnerAuthContent(
                 state = state,
                 inModal = true,

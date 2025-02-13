@@ -84,7 +84,7 @@ internal data class FinancialConnectionsColors(
 internal fun ColorsPreview() {
     FinancialConnectionsPreview {
         Column(
-            modifier = Modifier.background(Color.White)
+            modifier = Modifier.background(colors.background)
         ) {
             ColorPreview("background", colors.background)
             ColorPreview("backgroundSecondary", colors.backgroundSecondary)

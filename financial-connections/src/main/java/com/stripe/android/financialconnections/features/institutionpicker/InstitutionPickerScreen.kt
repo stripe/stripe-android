@@ -322,6 +322,7 @@ private fun NoResultsTile(
             onClickableTextClick = { onManualEntryClick() },
             defaultStyle = typography.bodyMedium.copy(
                 textAlign = TextAlign.Center,
+                color = colors.textDefault
             ),
             annotationStyles = mapOf(
                 StringAnnotation.CLICKABLE to typography.bodyMediumEmphasized.toSpanStyle().copy(
