@@ -9,6 +9,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.NoLinkAccountFoundException
@@ -21,6 +23,7 @@ import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
@@ -151,8 +154,7 @@ internal class SignUpViewModel @Inject constructor(
                 onError(null)
             }
             is LinkAuthResult.AccountError -> {
-                updateSignUpState(SignUpState.InputtingPrimaryField)
-                onError(lookupResult.error)
+                lookupResult.handle()
             }
         }
     }
@@ -185,8 +187,7 @@ internal class SignUpViewModel @Inject constructor(
                     linkEventsReporter.onSignupFailure(error = NoLinkAccountFoundException())
                 }
                 is LinkAuthResult.AccountError -> {
-                    updateSignUpState(SignUpState.InputtingPrimaryField)
-                    onError(signupResult.error)
+                    signupResult.handle()
                 }
             }
         }
@@ -203,13 +204,24 @@ internal class SignUpViewModel @Inject constructor(
         }
     }
 
-    private fun onError(error: Throwable?) {
+    private fun LinkAuthResult.AccountError.handle() {
+        updateSignUpState(SignUpState.InputtingPrimaryField)
+        onError(
+            error = error,
+            errorMessage = R.string.stripe_signup_deactivated_account_message.resolvableString
+        )
+    }
+
+    private fun onError(
+        error: Throwable?,
+        errorMessage: ResolvableString? = error?.stripeErrorMessage()
+    ) {
         if (error != null) {
             logger.error("SignUpViewModel Error: ", error)
         }
         updateState {
             it.copy(
-                errorMessage = error?.stripeErrorMessage()
+                errorMessage = errorMessage
             )
         }
     }

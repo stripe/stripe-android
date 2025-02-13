@@ -15,6 +15,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import com.stripe.android.link.LinkActivity.Companion.getArgs
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.linkAccountUpdate
 import com.stripe.android.link.attestation.LinkAttestationCheck
@@ -43,6 +44,7 @@ internal class LinkActivityViewModel @Inject constructor(
     val activityRetainedComponent: NativeLinkComponent,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
     private val linkAccountManager: LinkAccountManager,
+    private val linkAccountHolder: LinkAccountHolder,
     val eventReporter: EventReporter,
     private val linkConfiguration: LinkConfiguration,
     private val linkAttestationCheck: LinkAttestationCheck,
@@ -204,6 +206,7 @@ internal class LinkActivityViewModel @Inject constructor(
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         viewModelScope.launch {
+            if (startWithVerificationDialog) return@launch updateScreenState()
             val attestationCheckResult = linkAttestationCheck.invoke()
             when (attestationCheckResult) {
                 is LinkAttestationCheck.Result.AttestationFailed -> {
@@ -212,9 +215,9 @@ internal class LinkActivityViewModel @Inject constructor(
                 LinkAttestationCheck.Result.Successful -> {
                     updateScreenState()
                 }
-                is LinkAttestationCheck.Result.AccountError,
-                is LinkAttestationCheck.Result.Error -> {
-                    // Display error screen here like web
+                is LinkAttestationCheck.Result.Error,
+                is LinkAttestationCheck.Result.AccountError -> {
+                    handleAccountError()
                 }
             }
         }
@@ -263,6 +266,12 @@ internal class LinkActivityViewModel @Inject constructor(
             }
         }
         navigate(screen, clearStack = true, launchSingleTop = true)
+    }
+
+    private suspend fun handleAccountError() {
+        linkAccountManager.logOut()
+        linkAccountHolder.set(null)
+        updateScreenState()
     }
 
     companion object {

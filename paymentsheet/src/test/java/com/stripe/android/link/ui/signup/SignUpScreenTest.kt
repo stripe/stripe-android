@@ -150,7 +150,7 @@ internal class SignUpScreenTest {
             secondaryFields().assert { assertDoesNotExist() }
             onErrorSection()
                 .assertExists()
-                .assert(hasAnyChild(hasText("Something went wrong")))
+                .assert(hasAnyChild(hasText("Your account has been deactivated")))
         }
 
     @Test
@@ -174,7 +174,7 @@ internal class SignUpScreenTest {
             secondaryFields().assert { assertDoesNotExist() }
             onErrorSection()
                 .assertExists()
-                .assert(hasAnyChild(hasText("Something went wrong")))
+                .assert(hasAnyChild(hasText("Your account has been deactivated")))
         }
 
     @Test

@@ -17,6 +17,7 @@ import androidx.test.espresso.intent.Intents.assertNoUnverifiedIntents
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.account.FakeLinkAccountManager
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.attestation.FakeLinkAttestationCheck
 import com.stripe.android.link.model.AccountStatus
@@ -144,6 +145,7 @@ internal class LinkActivityTest {
                 activityRetainedComponent = FakeNativeLinkComponent(),
                 confirmationHandlerFactory = { FakeConfirmationHandler() },
                 linkAccountManager = linkAccountManager,
+                linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
                 eventReporter = FakeEventReporter(),
                 linkAttestationCheck = FakeLinkAttestationCheck(),
                 savedStateHandle = SavedStateHandle(),

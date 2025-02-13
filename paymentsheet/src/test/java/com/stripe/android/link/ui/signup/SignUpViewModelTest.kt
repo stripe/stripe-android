@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.TestFactory
@@ -20,6 +21,7 @@ import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -187,18 +189,22 @@ internal class SignUpViewModelTest {
     fun `When lookup fails with account error, stay on input remaining fields state`() = runTest(dispatcher) {
         val error = RuntimeException("Lookup failed")
         val linkAuth = FakeLinkAuth()
+        val logger = FakeLogger()
         linkAuth.lookupResult = LinkAuthResult.AccountError(error)
 
         val viewModel = createViewModel(
             prefilledEmail = null,
-            linkAuth = linkAuth
+            linkAuth = linkAuth,
+            logger = logger
         )
 
         viewModel.emailController.onRawValueChange("valid@email.com")
         advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
 
         assertThat(viewModel.state.value.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
-        assertThat(viewModel.state.value.errorMessage).isEqualTo(error.stripeErrorMessage())
+        assertThat(viewModel.state.value.errorMessage)
+            .isEqualTo(R.string.stripe_signup_deactivated_account_message.resolvableString)
+        assertThat(logger.errorLogs).containsExactly("SignUpViewModel Error: " to error)
     }
 
     @Test
@@ -286,7 +292,8 @@ internal class SignUpViewModelTest {
 
         viewModel.performValidSignup()
 
-        assertThat(viewModel.contentState.errorMessage).isEqualTo(exception.stripeErrorMessage())
+        assertThat(viewModel.state.value.errorMessage)
+            .isEqualTo(R.string.stripe_signup_deactivated_account_message.resolvableString)
         assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
         assertThat(logger.errorLogs).isEqualTo(listOf("SignUpViewModel Error: " to exception))
     }
