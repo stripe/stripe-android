@@ -29,7 +29,8 @@
         "customer_sheet": {
           "enabled": true,
           "features": {
-            "payment_method_remove": "PAYMENT_METHOD_REMOVE_FEATURE"
+            "payment_method_remove": "PAYMENT_METHOD_REMOVE_FEATURE",
+            "payment_method_sync_default": "PAYMENT_METHOD_SYNC_DEFAULT_FEATURE"
           }
         }
       }

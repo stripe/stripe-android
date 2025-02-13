@@ -130,7 +130,7 @@ internal class CustomerSheetPage(
         composeTestRule.waitForIdle()
     }
 
-    private fun waitUntil(matcher: SemanticsMatcher) {
+    fun waitUntil(matcher: SemanticsMatcher) {
         waitForIdle()
 
         composeTestRule.waitUntil(5_000) {
