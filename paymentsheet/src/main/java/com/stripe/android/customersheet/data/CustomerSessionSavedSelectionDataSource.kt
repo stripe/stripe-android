@@ -3,6 +3,7 @@ package com.stripe.android.customersheet.data
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import javax.inject.Inject
@@ -10,6 +11,7 @@ import kotlin.coroutines.CoroutineContext
 
 internal class CustomerSessionSavedSelectionDataSource @Inject constructor(
     private val elementsSessionManager: CustomerSessionElementsSessionManager,
+    private val customerRepository: CustomerRepository,
     private val prefsRepositoryFactory: @JvmSuppressWildcards (String) -> PrefsRepository,
     @IOContext private val workContext: CoroutineContext,
 ) : CustomerSheetSavedSelectionDataSource {
@@ -29,16 +31,46 @@ internal class CustomerSessionSavedSelectionDataSource @Inject constructor(
         }
     }
 
-    override suspend fun setSavedSelection(selection: SavedSelection?): CustomerSheetDataResult<Unit> {
+    override suspend fun setSavedSelection(
+        selection: SavedSelection?,
+        shouldSyncDefault: Boolean,
+    ): CustomerSheetDataResult<Unit> {
         return withContext(workContext) {
-            createPrefsRepository().mapCatching { prefsRepository ->
-                val result = prefsRepository.setSavedSelection(selection)
-
-                if (!result) {
-                    throw IOException("Unable to persist payment option $selection")
+            elementsSessionManager.fetchCustomerSessionEphemeralKey().mapCatching { ephemeralKey ->
+                if (shouldSyncDefault) {
+                    saveSelectionToBackend(ephemeralKey, selection)
+                } else {
+                    saveSelectionToPrefs(selection)
                 }
+            }.toCustomerSheetDataResult()
+        }
+    }
+
+    private suspend fun saveSelectionToPrefs(
+        selection: SavedSelection?
+    ) {
+        createPrefsRepository().mapCatching { prefsRepository ->
+            val result = prefsRepository.setSavedSelection(selection)
+
+            if (!result) {
+                throw IOException("Unable to persist payment option $selection")
             }
         }
+    }
+
+    private suspend fun saveSelectionToBackend(
+        ephemeralKey: CachedCustomerEphemeralKey,
+        selection: SavedSelection?
+    ) {
+        val paymentMethodId = (selection as? SavedSelection.PaymentMethod)?.id
+        customerRepository.setDefaultPaymentMethod(
+            paymentMethodId = paymentMethodId,
+            customerInfo = CustomerRepository.CustomerInfo(
+                id = ephemeralKey.customerId,
+                ephemeralKeySecret = ephemeralKey.ephemeralKey,
+                customerSessionClientSecret = ephemeralKey.customerSessionClientSecret,
+            )
+        ).getOrThrow()
     }
 
     private suspend fun createPrefsRepository(): CustomerSheetDataResult<PrefsRepository> {

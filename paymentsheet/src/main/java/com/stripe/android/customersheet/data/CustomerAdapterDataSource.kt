@@ -97,7 +97,10 @@ internal class CustomerAdapterDataSource @Inject constructor(
         }
     }
 
-    override suspend fun setSavedSelection(selection: SavedSelection?) = runCatchingAdapterTask {
+    override suspend fun setSavedSelection(
+        selection: SavedSelection?,
+        shouldSyncDefault: Boolean
+    ) = runCatchingAdapterTask {
         customerAdapter.setSelectedPaymentOption(selection?.toPaymentOption())
     }
 

@@ -14,5 +14,8 @@ internal interface CustomerSheetSavedSelectionDataSource {
      */
     suspend fun retrieveSavedSelection(): CustomerSheetDataResult<SavedSelection?>
 
-    suspend fun setSavedSelection(selection: SavedSelection?): CustomerSheetDataResult<Unit>
+    suspend fun setSavedSelection(
+        selection: SavedSelection?,
+        shouldSyncDefault: Boolean,
+    ): CustomerSheetDataResult<Unit>
 }

@@ -1085,7 +1085,9 @@ internal class CustomerSheetViewModel(
     private fun selectSavedPaymentMethod(savedPaymentSelection: PaymentSelection.Saved?) {
         viewModelScope.launch(workContext) {
             awaitSavedSelectionDataSource().setSavedSelection(
-                savedPaymentSelection?.toSavedSelection()
+                savedPaymentSelection?.toSavedSelection(),
+                shouldSyncDefault =
+                customerState.value.metadata?.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true,
             ).onSuccess {
                 confirmPaymentSelection(
                     paymentSelection = savedPaymentSelection,
@@ -1104,7 +1106,7 @@ internal class CustomerSheetViewModel(
 
     private fun selectGooglePay() {
         viewModelScope.launch(workContext) {
-            awaitSavedSelectionDataSource().setSavedSelection(SavedSelection.GooglePay)
+            awaitSavedSelectionDataSource().setSavedSelection(SavedSelection.GooglePay, shouldSyncDefault = false)
                 .onSuccess {
                     confirmPaymentSelection(
                         paymentSelection = PaymentSelection.GooglePay,

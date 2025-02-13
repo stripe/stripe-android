@@ -186,6 +186,17 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
+    fun testSetDefaultPaymentMethodUrl() {
+        val customerId = "cus_123"
+        val setDefaultPaymentMethodUrl = StripeApiRepository.getSetDefaultPaymentMethodUrl(
+            customerId
+        )
+        assertThat(setDefaultPaymentMethodUrl).isEqualTo(
+            "https://api.stripe.com/v1/elements/customers/$customerId/set_default_payment_method"
+        )
+    }
+
+    @Test
     fun testGetDetachPaymentMethodUrl() {
         val paymentMethodId = "pm_1ETDEa2eZvKYlo2CN5828c52"
         val detachUrl = stripeApiRepository.getDetachPaymentMethodUrl(paymentMethodId)

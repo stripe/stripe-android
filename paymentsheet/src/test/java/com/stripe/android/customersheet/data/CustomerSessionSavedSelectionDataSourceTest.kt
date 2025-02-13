@@ -2,11 +2,14 @@ package com.stripe.android.customersheet.data
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
+import com.stripe.android.model.Customer
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.utils.FakeCustomerRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import org.mockito.Mockito.mock
 import kotlin.coroutines.coroutineContext
 
 class CustomerSessionSavedSelectionDataSourceTest {
@@ -57,7 +60,7 @@ class CustomerSessionSavedSelectionDataSourceTest {
             prefsRepository = prefsRepository
         )
 
-        val result = dataSource.setSavedSelection(SavedSelection.PaymentMethod(id = "pm_1"))
+        val result = dataSource.setSavedSelection(SavedSelection.PaymentMethod(id = "pm_1"), false)
 
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Success<Unit>>()
 
@@ -74,13 +77,13 @@ class CustomerSessionSavedSelectionDataSourceTest {
         val exception = IllegalStateException("Failed to load!")
 
         val elementsSessionManager = FakeCustomerSessionElementsSessionManager(
-            ephemeralKey = Result.failure(exception)
+            ephemeralKey = Result.failure(exception),
         )
         val dataSource = createDataSource(
             elementsSessionManager = elementsSessionManager,
         )
 
-        val result = dataSource.setSavedSelection(SavedSelection.PaymentMethod(id = "pm_1"))
+        val result = dataSource.setSavedSelection(SavedSelection.PaymentMethod(id = "pm_1"), false)
 
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<Unit>>()
 
@@ -89,16 +92,76 @@ class CustomerSessionSavedSelectionDataSourceTest {
         assertThat(failedResult.cause).isEqualTo(exception)
     }
 
+    @Test
+    fun `When default PMs feature is enabled, should set payment method in backend`() = runTest {
+        val customerRepository = FakeCustomerRepository(
+            onSetDefaultPaymentMethod = { Result.success(createCustomer()) }
+        )
+        val elementsSessionManager = FakeCustomerSessionElementsSessionManager(
+            isPaymentMethodSyncDefaultEnabled = true,
+        )
+        val dataSource = createDataSource(
+            customerRepository = customerRepository,
+            elementsSessionManager = elementsSessionManager,
+        )
+        val expectedNewDefaultPaymentMethodId = "pm_1"
+
+        val result = dataSource.setSavedSelection(
+            SavedSelection.PaymentMethod(id = expectedNewDefaultPaymentMethodId),
+            shouldSyncDefault = true
+        )
+
+        assertThat(result).isInstanceOf<CustomerSheetDataResult.Success<Unit>>()
+        val setDefaultRequest = customerRepository.setDefaultPaymentMethodRequests.awaitItem()
+        assertThat(setDefaultRequest.paymentMethodId).isEqualTo(expectedNewDefaultPaymentMethodId)
+    }
+
+    @Test
+    fun `When default PMs feature is enabled and retrieving from the backend fails, getting selection should fail`() =
+        runTest {
+            val expectedException = IllegalStateException("Failed to set payment method!")
+            val customerRepository = FakeCustomerRepository(
+                onSetDefaultPaymentMethod = { Result.failure(expectedException) }
+            )
+            val elementsSessionManager = FakeCustomerSessionElementsSessionManager(
+                isPaymentMethodSyncDefaultEnabled = true,
+            )
+            val dataSource = createDataSource(
+                customerRepository = customerRepository,
+                elementsSessionManager = elementsSessionManager,
+            )
+
+            val result = dataSource.setSavedSelection(
+                SavedSelection.PaymentMethod(id = "pm_1"),
+                shouldSyncDefault = true,
+            )
+
+            assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<Unit>>()
+
+            val failedResult = result.asFailure()
+
+            assertThat(failedResult.cause).isEqualTo(expectedException)
+        }
+
     private suspend fun createDataSource(
         elementsSessionManager: CustomerSessionElementsSessionManager = FakeCustomerSessionElementsSessionManager(),
+        customerRepository: FakeCustomerRepository = FakeCustomerRepository(),
         prefsRepository: PrefsRepository = FakePrefsRepository(),
     ): CustomerSheetSavedSelectionDataSource {
         return CustomerSessionSavedSelectionDataSource(
             elementsSessionManager = elementsSessionManager,
+            customerRepository = customerRepository,
             prefsRepositoryFactory = {
                 prefsRepository
             },
             workContext = coroutineContext
         )
+    }
+
+    private fun createCustomer(): Customer {
+        // Using a mock here, because the Customer constructor is internal. If I make it visible,
+        // we would have to expose the copy function for that class and it doesn't seem worth it, given
+        // that we don't even use this object.
+        return mock()
     }
 }

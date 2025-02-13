@@ -47,6 +47,11 @@ internal interface CustomerRepository {
         params: PaymentMethodUpdateParams
     ): Result<PaymentMethod>
 
+    suspend fun setDefaultPaymentMethod(
+        customerInfo: CustomerInfo,
+        paymentMethodId: String?,
+    ): Result<Customer>
+
     data class CustomerInfo(
         val id: String,
         val ephemeralKeySecret: String,
