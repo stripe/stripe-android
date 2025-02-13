@@ -164,7 +164,8 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
         bottomSeparatorEnabled: Boolean? = null,
         selectedColor: Int? = null,
         unselectedColor: Int? = null,
-        additionalInsetsDp: Float? = null,
+        additionalVerticalInsetsDp: Float? = null,
+        horizontalInsetsDp: Float? = null,
         checkmarkColor: Int? = null,
         checkmarkInsetDp: Float? = null,
         spacingDp: Float? = null
@@ -179,7 +180,9 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                 bottomSeparatorEnabled = bottomSeparatorEnabled ?: StripeThemeDefaults.flat.bottomSeparatorEnabled,
                 selectedColor = selectedColor ?: StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
                 unselectedColor = unselectedColor ?: StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
-                additionalInsetsDp = additionalInsetsDp ?: StripeThemeDefaults.embeddedCommon.additionalInsetsDp
+                additionalVerticalInsetsDp = additionalVerticalInsetsDp
+                    ?: StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp,
+                horizontalInsetsDp = horizontalInsetsDp ?: StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
             )
             Embedded.RowStyle.FlatWithCheckmark::class -> Embedded.RowStyle.FlatWithCheckmark(
                 separatorThicknessDp = separatorThicknessDp ?: StripeThemeDefaults.flat.separatorThickness,
@@ -190,11 +193,14 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                 bottomSeparatorEnabled = bottomSeparatorEnabled ?: StripeThemeDefaults.flat.bottomSeparatorEnabled,
                 checkmarkColor = checkmarkColor ?: StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
                 checkmarkInsetDp = checkmarkInsetDp ?: StripeThemeDefaults.embeddedCommon.checkmarkInsetDp,
-                additionalInsetsDp = additionalInsetsDp ?: StripeThemeDefaults.embeddedCommon.additionalInsetsDp
+                additionalVerticalInsetsDp = additionalVerticalInsetsDp
+                    ?: StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp,
+                horizontalInsetsDp = horizontalInsetsDp ?: StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
             )
             else -> Embedded.RowStyle.FloatingButton(
                 spacingDp = spacingDp ?: StripeThemeDefaults.floating.spacing,
-                additionalInsetsDp = additionalInsetsDp ?: StripeThemeDefaults.embeddedCommon.additionalInsetsDp
+                additionalInsetsDp = additionalVerticalInsetsDp
+                    ?: StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp
             )
         }
     }

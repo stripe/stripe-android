@@ -139,7 +139,7 @@ private fun RowButtonOuterContent(
             RowButtonCheckmarkOuterContent(
                 isSelected = isSelected,
                 contentPaddingValues = PaddingValues(
-                    horizontal = style.additionalHorizontalInsetsDp.dp,
+                    horizontal = style.horizontalInsetsDp.dp,
                     vertical = contentPaddingValues + style.additionalVerticalInsetsDp.dp
                 ),
                 verticalArrangement = Arrangement.Center,
@@ -155,7 +155,7 @@ private fun RowButtonOuterContent(
                 isEnabled = isEnabled,
                 isSelected = isSelected,
                 contentPaddingValues = PaddingValues(
-                    horizontal = style.additionalHorizontalInsetsDp.dp,
+                    horizontal = style.horizontalInsetsDp.dp,
                     vertical = contentPaddingValues + style.additionalVerticalInsetsDp.dp
                 ),
                 verticalArrangement = Arrangement.Center,
