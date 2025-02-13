@@ -2,6 +2,7 @@ package com.stripe.android.link.ui.wallet
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -381,6 +382,7 @@ internal fun CollapsedPaymentDetails(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ExpandedPaymentDetails(
     uiState: WalletUiState,
@@ -433,6 +435,7 @@ private fun ExpandedPaymentDetails(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun PaymentDetailsList(
     uiState: WalletUiState,
@@ -453,11 +456,12 @@ private fun PaymentDetailsList(
         ) { item ->
             PaymentDetailsListItem(
                 modifier = Modifier
+                    .animateItemPlacement()
                     .testTag(WALLET_SCREEN_PAYMENT_METHODS_LIST),
                 paymentDetails = item,
                 enabled = isEnabled,
                 isSelected = uiState.selectedItem?.id == item.id,
-                isUpdating = false,
+                isUpdating = uiState.cardBeingUpdated == item.id,
                 onClick = {
                     onItemSelected(item)
                 },

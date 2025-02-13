@@ -74,7 +74,13 @@ internal class WalletViewModel @Inject constructor(
     )
 
     init {
-        loadPaymentDetails()
+        _uiState.update {
+            it.setProcessing()
+        }
+
+        viewModelScope.launch {
+            loadPaymentDetails(selectedItemId = null)
+        }
 
         viewModelScope.launch {
             expiryDateController.formFieldValue.collectLatest { input ->
@@ -93,28 +99,22 @@ internal class WalletViewModel @Inject constructor(
         }
     }
 
-    private fun loadPaymentDetails(selectedItemId: String? = null) {
-        _uiState.update {
-            it.setProcessing()
-        }
+    private suspend fun loadPaymentDetails(selectedItemId: String?) {
+        linkAccountManager.listPaymentDetails(
+            paymentMethodTypes = stripeIntent.supportedPaymentMethodTypes(linkAccount)
+        ).fold(
+            onSuccess = { response ->
+                _uiState.update {
+                    it.updateWithResponse(response, selectedItemId = selectedItemId)
+                }
 
-        viewModelScope.launch {
-            linkAccountManager.listPaymentDetails(
-                paymentMethodTypes = stripeIntent.supportedPaymentMethodTypes(linkAccount)
-            ).fold(
-                onSuccess = { response ->
-                    _uiState.update {
-                        it.updateWithResponse(response, selectedItemId = selectedItemId)
-                    }
-
-                    if (response.paymentDetails.isEmpty()) {
-                        navigateAndClearStack(LinkScreen.PaymentMethod)
-                    }
-                },
-                // If we can't load the payment details there's nothing to see here
-                onFailure = ::onFatal
-            )
-        }
+                if (response.paymentDetails.isEmpty()) {
+                    navigateAndClearStack(LinkScreen.PaymentMethod)
+                }
+            },
+            // If we can't load the payment details there's nothing to see here
+            onFailure = ::onFatal
+        )
     }
 
     private fun onFatal(fatalError: Throwable) {
@@ -255,7 +255,9 @@ internal class WalletViewModel @Inject constructor(
 
     fun onSetDefaultClicked(item: ConsumerPaymentDetails.PaymentDetails) {
         _uiState.update {
-            it.setProcessing()
+            it.copy(
+                cardBeingUpdated = item.id,
+            )
         }
         viewModelScope.launch {
             val updateParams = ConsumerPaymentDetailsUpdateParams(
@@ -266,7 +268,22 @@ internal class WalletViewModel @Inject constructor(
             linkAccountManager.updatePaymentDetails(updateParams)
                 .fold(
                     onSuccess = {
-                        loadPaymentDetails()
+                        _uiState.update { state ->
+                            state.copy(
+                                paymentDetailsList = state.paymentDetailsList.map { details ->
+                                    when (details) {
+                                        is ConsumerPaymentDetails.BankAccount -> {
+                                            details.copy(isDefault = item.id == details.id)
+                                        }
+                                        is ConsumerPaymentDetails.Card -> {
+                                            details.copy(isDefault = item.id == details.id)
+                                        }
+                                        is ConsumerPaymentDetails.Passthrough -> details
+                                    }
+                                },
+                                cardBeingUpdated = null
+                            )
+                        }
                     },
                     onFailure = { error ->
                         updateErrorMessageAndStopProcessing(
@@ -304,7 +321,8 @@ internal class WalletViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 alertMessage = error.stripeErrorMessage(),
-                isProcessing = false
+                isProcessing = false,
+                cardBeingUpdated = null
             )
         }
     }
