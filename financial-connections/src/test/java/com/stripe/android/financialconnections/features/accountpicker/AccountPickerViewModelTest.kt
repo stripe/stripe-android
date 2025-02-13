@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.features.accountpicker
 
-import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures.authorizationSession
@@ -24,7 +23,6 @@ import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.presentation.withState
 import com.stripe.android.financialconnections.repository.CachedConsumerSession
-import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -66,10 +64,6 @@ internal class AccountPickerViewModelTest {
         saveAccountToLink = saveAccountToLink,
         consumerSessionProvider = { cachedConsumerSession() },
         presentSheet = mock(),
-        pendingRepairRepository = CoreAuthorizationPendingNetworkingRepairRepository(
-            savedStateHandle = SavedStateHandle(),
-            logger = Logger.noop(),
-        ),
     )
 
     @Test

@@ -359,7 +359,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
     ): FinancialConnectionsAuthorizationSession {
         val repairSession = requestExecutor.execute(
             request = apiRequestFactory.createPost(
-                url = "${ApiRequest.API_HOST}/v1/connections/repair_sessions/generate_url",
+                url = generateRepairUrl,
                 options = provideApiRequestOptions(useConsumerPublishableKey = true),
                 params = mapOf(
                     NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
@@ -376,7 +376,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
             flow = repairSession.flow,
             display = repairSession.display,
             _isOAuth = repairSession.isOAuth,
-            nextPane = Pane.SUCCESS, // TODO
+            nextPane = Pane.SUCCESS,
         ).also {
             updateCachedActiveAuthSession("repairAuthorizationSession", it)
         }
@@ -598,5 +598,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
 
         internal const val disableNetworking: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/disable_networking"
+
+        internal const val generateRepairUrl: String =
+            "${ApiRequest.API_HOST}/v1/connections/repair_sessions/generate_url"
     }
 }

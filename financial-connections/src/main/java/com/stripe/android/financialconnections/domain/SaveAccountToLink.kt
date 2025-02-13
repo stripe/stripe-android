@@ -34,10 +34,7 @@ internal class SaveAccountToLink @Inject constructor(
         country: String,
         shouldPollAccountNumbers: Boolean,
     ): FinancialConnectionsSessionManifest {
-        return ensureReadyAccounts(
-            shouldPollAccountNumbers = shouldPollAccountNumbers,
-            partnerAccounts = selectedAccounts,
-        ) { selectedAccountIds ->
+        return ensureReadyAccounts(shouldPollAccountNumbers, selectedAccounts) { selectedAccountIds ->
             repository.postSaveAccountsToLink(
                 clientSecret = configuration.financialConnectionsSessionClientSecret,
                 email = email,
@@ -55,10 +52,7 @@ internal class SaveAccountToLink @Inject constructor(
         selectedAccounts: List<CachedPartnerAccount>?,
         shouldPollAccountNumbers: Boolean,
     ): FinancialConnectionsSessionManifest {
-        return ensureReadyAccounts(
-            shouldPollAccountNumbers = shouldPollAccountNumbers,
-            partnerAccounts = selectedAccounts,
-        ) { selectedAccountIds ->
+        return ensureReadyAccounts(shouldPollAccountNumbers, selectedAccounts) { selectedAccountIds ->
             repository.postSaveAccountsToLink(
                 clientSecret = configuration.financialConnectionsSessionClientSecret,
                 email = null,
