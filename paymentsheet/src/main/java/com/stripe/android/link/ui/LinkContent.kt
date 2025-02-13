@@ -179,19 +179,13 @@ private fun Screens(
             composable(LinkScreen.Wallet.route) {
                 val linkAccount = getLinkAccount()
                     ?: return@composable dismissWithResult(noLinkAccountResult())
-                val viewModel: WalletViewModel = linkViewModel { parentComponent ->
-                    WalletViewModel.factory(
-                        parentComponent = parentComponent,
-                        linkAccount = linkAccount,
-                        navigate = navigate,
-                        navigateAndClearStack = navigateAndClearStack,
-                        dismissWithResult = dismissWithResult
-                    )
-                }
-                WalletScreen(
-                    viewModel = viewModel,
+                WalletRoute(
+                    linkAccount = linkAccount,
+                    navigate = navigate,
+                    navigateAndClearStack = navigateAndClearStack,
                     showBottomSheetContent = showBottomSheetContent,
-                    hideBottomSheetContent = hideBottomSheetContent
+                    hideBottomSheetContent = hideBottomSheetContent,
+                    dismissWithResult = dismissWithResult
                 )
             }
 
@@ -262,6 +256,31 @@ private fun PaymentMethodRoute(
         )
     }
     PaymentMethodScreen(viewModel)
+}
+
+@Composable
+private fun WalletRoute(
+    linkAccount: LinkAccount,
+    navigate: (route: LinkScreen) -> Unit,
+    navigateAndClearStack: (route: LinkScreen) -> Unit,
+    dismissWithResult: (LinkActivityResult) -> Unit,
+    showBottomSheetContent: (BottomSheetContent?) -> Unit,
+    hideBottomSheetContent: () -> Unit,
+) {
+    val viewModel: WalletViewModel = linkViewModel { parentComponent ->
+        WalletViewModel.factory(
+            parentComponent = parentComponent,
+            linkAccount = linkAccount,
+            navigate = navigate,
+            navigateAndClearStack = navigateAndClearStack,
+            dismissWithResult = dismissWithResult
+        )
+    }
+    WalletScreen(
+        viewModel = viewModel,
+        showBottomSheetContent = showBottomSheetContent,
+        hideBottomSheetContent = hideBottomSheetContent
+    )
 }
 
 @Composable
