@@ -5,7 +5,8 @@ import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
-import android.view.LayoutInflater
+import android.view.Gravity
+import android.view.ViewGroup
 import android.webkit.JavascriptInterface
 import android.webkit.PermissionRequest
 import android.webkit.ValueCallback
@@ -16,6 +17,7 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
+import android.widget.ProgressBar
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.core.view.doOnAttach
@@ -31,7 +33,6 @@ import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.StripeEmbeddedComponentListener
 import com.stripe.android.connect.appearance.Appearance
-import com.stripe.android.connect.databinding.StripeConnectWebviewBinding
 import com.stripe.android.connect.toJsonObject
 import com.stripe.android.connect.util.AndroidClock
 import com.stripe.android.connect.webview.serialization.AccountSessionClaimedMessage
@@ -101,8 +102,9 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
     where Props : ComponentProps,
           Listener : StripeEmbeddedComponentListener {
 
-    private var viewBinding: StripeConnectWebviewBinding? = null
-    private val webView get() = viewBinding?.stripeWebView
+    private var containerView: FrameLayout? = null
+    private var webView: WebView? = null
+    private var progressBar: ProgressBar? = null
 
     @VisibleForTesting
     internal val stripeWebViewClient = StripeConnectWebViewClient()
@@ -144,12 +146,33 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
     }
 
     internal fun initializeView(view: FrameLayout) {
-        val viewBinding = StripeConnectWebviewBinding.inflate(
-            LayoutInflater.from(view.context),
-            view
-        )
-            .also { this.viewBinding = it }
-        initializeWebView(viewBinding.stripeWebView)
+        val context = view.context
+        val applicationContext = context.applicationContext
+
+        this.containerView = view
+
+        val webView = WebView(applicationContext)
+            .apply {
+                layoutParams = FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+            }
+        this.webView = webView
+        view.addView(webView)
+
+        val progressBar = ProgressBar(context)
+            .apply {
+                layoutParams = FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                    Gravity.CENTER,
+                )
+            }
+        this.progressBar = progressBar
+        view.addView(progressBar)
+
+        initializeWebView(webView)
         bindViewToController()
     }
 
@@ -220,7 +243,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
     }
 
     private fun bindViewToController() {
-        val view = this.viewBinding?.root ?: return
+        val view = this.containerView ?: return
         val controller = this.controller ?: return
 
         view.doOnAttach {
@@ -281,15 +304,17 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
     }
 
     private fun bindViewState(state: StripeConnectWebViewContainerState) {
-        val viewBinding = this.viewBinding ?: return
+        val containerView = this.containerView ?: return
+        val webView = this.webView ?: return
+        val progressBar = this.progressBar ?: return
+
         logger.debug("Binding view state: $state")
-        viewBinding.root.setBackgroundColor(state.backgroundColor)
-        viewBinding.stripeWebView.setBackgroundColor(state.backgroundColor)
-        viewBinding.stripeWebViewProgressBar.isVisible = state.isNativeLoadingIndicatorVisible
-        viewBinding.stripeWebView.isVisible = !state.isNativeLoadingIndicatorVisible
+        containerView.setBackgroundColor(state.backgroundColor)
+        webView.setBackgroundColor(state.backgroundColor)
+        progressBar.isVisible = state.isNativeLoadingIndicatorVisible
+        webView.isVisible = !state.isNativeLoadingIndicatorVisible
         if (state.isNativeLoadingIndicatorVisible) {
-            viewBinding.stripeWebViewProgressBar.indeterminateTintList =
-                ColorStateList.valueOf(state.nativeLoadingIndicatorColor)
+            progressBar.indeterminateTintList = ColorStateList.valueOf(state.nativeLoadingIndicatorColor)
         }
     }
 

@@ -25,10 +25,10 @@ class PayoutsView private constructor(
         embeddedComponentManager: EmbeddedComponentManager? = null,
         listener: PayoutsListener? = null,
     ) : this(
-        context,
-        attrs,
-        defStyleAttr,
-        StripeConnectWebViewContainerImpl(
+        context = context,
+        attrs = attrs,
+        defStyleAttr = defStyleAttr,
+        webViewContainerBehavior = StripeConnectWebViewContainerImpl(
             embeddedComponent = StripeEmbeddedComponent.PAYOUTS,
             embeddedComponentManager = embeddedComponentManager,
             listener = listener,

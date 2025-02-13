@@ -32,10 +32,10 @@ class AccountOnboardingView private constructor(
         listener: AccountOnboardingListener? = null,
         props: AccountOnboardingProps? = null,
     ) : this(
-        context,
-        attrs,
-        defStyleAttr,
-        StripeConnectWebViewContainerImpl(
+        context = context,
+        attrs = attrs,
+        defStyleAttr = defStyleAttr,
+        webViewContainerBehavior = StripeConnectWebViewContainerImpl(
             embeddedComponent = StripeEmbeddedComponent.ACCOUNT_ONBOARDING,
             embeddedComponentManager = embeddedComponentManager,
             listener = listener,
