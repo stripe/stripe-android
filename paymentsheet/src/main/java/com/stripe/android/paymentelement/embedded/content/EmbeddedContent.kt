@@ -27,7 +27,6 @@ internal data class EmbeddedContent(
         StripeTheme {
             Column(
                 modifier = Modifier
-                    .background(MaterialTheme.colors.surface)
                     .padding(top = 8.dp)
                     .animateContentSize()
             ) {
