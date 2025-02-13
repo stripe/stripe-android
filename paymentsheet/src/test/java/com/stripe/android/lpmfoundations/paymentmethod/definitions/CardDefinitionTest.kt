@@ -86,14 +86,19 @@ class CardDefinitionTest {
     }
 
     @Test
-    fun `createFormElements returns save_for_future_use and set_as_default_payment_method`() {
-        val formElements = CardDefinition.formElements(
-            PaymentMethodMetadataFactory.create(
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
-                ),
-                hasCustomerConfiguration = true,
-            )
+    fun `createFormElements returns save_for_future_use`() {
+        val formElements = getFormElementsWithSaveForFutureUseAndSetAsDefaultPaymentMethod(
+            isPaymentMethodSetAsDefaultEnabled = false,
+        )
+        assertThat(formElements).hasSize(2)
+        assertThat(formElements[0].identifier.v1).isEqualTo("card_details")
+        assertThat(formElements[1].identifier.v1).isEqualTo("save_for_future_use")
+    }
+
+    @Test
+    fun `createFormElements returns set_as_default_payment_method when isPaymentMethodSetAsDefaultEnabled`() {
+        val formElements = getFormElementsWithSaveForFutureUseAndSetAsDefaultPaymentMethod(
+            isPaymentMethodSetAsDefaultEnabled = true,
         )
         assertThat(formElements).hasSize(3)
         assertThat(formElements[0].identifier.v1).isEqualTo("card_details")
@@ -102,14 +107,24 @@ class CardDefinitionTest {
     }
 
     @Test
-    fun `set_as_default_payment_method shown or hidden correctly when save_for_future_use checked and unchecked`() {
-        val formElements = CardDefinition.formElements(
-            PaymentMethodMetadataFactory.create(
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
-                ),
-                hasCustomerConfiguration = true,
-            )
+    fun `set_as_default_payment_method shown correctly when save_for_future_use checked`() {
+        val formElements = getFormElementsWithSaveForFutureUseAndSetAsDefaultPaymentMethod(
+            isPaymentMethodSetAsDefaultEnabled = true,
+        )
+
+        val saveForFutureUseElement = formElements[1] as SaveForFutureUseElement
+        val saveForFutureUseController = saveForFutureUseElement.controller
+        val setAsDefaultPaymentMethodElement = formElements[2] as SetAsDefaultPaymentMethodElement
+
+        saveForFutureUseController.onValueChange(true)
+
+        assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isTrue()
+    }
+
+    @Test
+    fun `set_as_default_payment_method hidden correctly when save_for_future_use unchecked`() {
+        val formElements = getFormElementsWithSaveForFutureUseAndSetAsDefaultPaymentMethod(
+            isPaymentMethodSetAsDefaultEnabled = true,
         )
 
         val saveForFutureUseElement = formElements[1] as SaveForFutureUseElement
@@ -123,10 +138,6 @@ class CardDefinitionTest {
         saveForFutureUseController.onValueChange(false)
 
         assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isFalse()
-
-        saveForFutureUseController.onValueChange(true)
-
-        assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isTrue()
     }
 
     @Test
@@ -207,5 +218,19 @@ class CardDefinitionTest {
 
     private fun FormElement.asMandateTextElement(): MandateTextElement {
         return this as MandateTextElement
+    }
+
+    private fun getFormElementsWithSaveForFutureUseAndSetAsDefaultPaymentMethod(
+        isPaymentMethodSetAsDefaultEnabled: Boolean
+    ): List<FormElement> {
+        return CardDefinition.formElements(
+            PaymentMethodMetadataFactory.create(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+                ),
+                hasCustomerConfiguration = true,
+                isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled
+            )
+        )
     }
 }
