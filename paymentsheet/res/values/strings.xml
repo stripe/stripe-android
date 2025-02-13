@@ -143,8 +143,6 @@
   <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">SEPA debit details cannot be changed.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Total: %s</string>
-  <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
-  <string name="stripe_pm_set_as_default">Set as default payment method</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">Remove bank account ending in %s</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->

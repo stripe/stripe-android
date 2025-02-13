@@ -83,6 +83,9 @@ data class IdentifierSpec(
         val OneLineAddress = IdentifierSpec("address")
         val SameAsShipping = IdentifierSpec("same_as_shipping", ignoreField = true)
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val SetAsDefaultPaymentMethod = IdentifierSpec("set_as_default_payment_method")
+
         val Upi = IdentifierSpec("upi")
         val Vpa = IdentifierSpec("upi[vpa]")
 
