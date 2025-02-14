@@ -10,6 +10,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.model.StripeIntent
 
 /**
  * Factory class for creating [ConfirmPaymentIntentParams] or [ConfirmSetupIntentParams].
@@ -44,13 +45,14 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
 
         fun createFactory(
             clientSecret: String,
+            intent: StripeIntent,
             shipping: ConfirmPaymentIntentParams.Shipping?,
         ) = when {
-            PaymentIntent.ClientSecret.isMatch(clientSecret) -> {
-                ConfirmPaymentIntentParamsFactory(clientSecret, shipping)
+            intent is PaymentIntent && PaymentIntent.ClientSecret.isMatch(clientSecret) -> {
+                ConfirmPaymentIntentParamsFactory(clientSecret, intent, shipping)
             }
-            SetupIntent.ClientSecret.isMatch(clientSecret) -> {
-                ConfirmSetupIntentParamsFactory(clientSecret)
+            intent is SetupIntent && SetupIntent.ClientSecret.isMatch(clientSecret) -> {
+                ConfirmSetupIntentParamsFactory(clientSecret, intent)
             }
             else -> {
                 error("Encountered an invalid client secret \"$clientSecret\"")
@@ -61,6 +63,7 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
 
 internal class ConfirmPaymentIntentParamsFactory(
     private val clientSecret: String,
+    private val intent: PaymentIntent,
     private val shipping: ConfirmPaymentIntentParams.Shipping?
 ) : ConfirmStripeIntentParamsFactory<ConfirmPaymentIntentParams>() {
 
@@ -73,8 +76,7 @@ internal class ConfirmPaymentIntentParamsFactory(
             paymentMethodId = paymentMethodId,
             clientSecret = clientSecret,
             paymentMethodOptions = optionsParams,
-            mandateData = MandateDataParams(MandateDataParams.Type.Online.DEFAULT)
-                .takeIf { paymentMethodType?.requiresMandate == true },
+            mandateData = mandateData(intent, paymentMethodType),
             shipping = shipping
         )
     }
@@ -94,6 +96,7 @@ internal class ConfirmPaymentIntentParamsFactory(
 
 internal class ConfirmSetupIntentParamsFactory(
     private val clientSecret: String,
+    private val intent: SetupIntent,
 ) : ConfirmStripeIntentParamsFactory<ConfirmSetupIntentParams>() {
 
     override fun create(
@@ -104,9 +107,7 @@ internal class ConfirmSetupIntentParamsFactory(
         return ConfirmSetupIntentParams.create(
             paymentMethodId = paymentMethodId,
             clientSecret = clientSecret,
-            mandateData = paymentMethodType?.requiresMandate?.let {
-                MandateDataParams(MandateDataParams.Type.Online.DEFAULT)
-            }
+            mandateData = mandateData(intent, paymentMethodType),
         )
     }
 
@@ -118,5 +119,27 @@ internal class ConfirmSetupIntentParamsFactory(
             paymentMethodCreateParams = createParams,
             clientSecret = clientSecret,
         )
+    }
+}
+
+private fun mandateData(intent: StripeIntent, paymentMethodType: PaymentMethod.Type?): MandateDataParams? {
+    return paymentMethodType?.let { type ->
+        val supportsAddingMandateData = when (intent) {
+            is PaymentIntent -> intent.canSetupFutureUsage()
+            is SetupIntent -> true
+        }
+
+        return MandateDataParams(MandateDataParams.Type.Online.DEFAULT).takeIf {
+            supportsAddingMandateData && type.requiresMandate
+        }
+    }
+}
+
+private fun PaymentIntent.canSetupFutureUsage(): Boolean {
+    return when (setupFutureUsage) {
+        null,
+        StripeIntent.Usage.OneTime -> false
+        StripeIntent.Usage.OnSession,
+        StripeIntent.Usage.OffSession -> true
     }
 }

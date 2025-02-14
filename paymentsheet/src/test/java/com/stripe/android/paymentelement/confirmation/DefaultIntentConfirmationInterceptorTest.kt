@@ -28,6 +28,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
 import kotlinx.coroutines.async
@@ -64,6 +65,7 @@ class DefaultIntentConfirmationInterceptorTest {
 
         val nextStep = interceptor.intercept(
             initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
+            intent = PaymentIntentFactory.create(),
             paymentMethod = paymentMethod,
             paymentMethodOptionsParams = null,
             shippingValues = null,
@@ -90,6 +92,7 @@ class DefaultIntentConfirmationInterceptorTest {
 
         val nextStep = interceptor.intercept(
             initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
+            intent = PaymentIntentFactory.create(),
             paymentMethodCreateParams = createParams,
             shippingValues = null,
             customerRequestedSave = false,
@@ -114,6 +117,7 @@ class DefaultIntentConfirmationInterceptorTest {
                         setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
                     )
                 ),
+                intent = PaymentIntentFactory.create(),
                 initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
                 shippingDetails = null,
             )
@@ -151,6 +155,7 @@ class DefaultIntentConfirmationInterceptorTest {
                     ),
                 ),
             ),
+            intent = PaymentIntentFactory.create(),
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             paymentMethodOptionsParams = null,
             shippingValues = null,
@@ -178,6 +183,7 @@ class DefaultIntentConfirmationInterceptorTest {
 
         interceptor.intercept(
             initializationMode = InitializationMode.DeferredIntent(mock()),
+            intent = PaymentIntentFactory.create(),
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             shippingValues = null,
             customerRequestedSave = false,
@@ -205,6 +211,7 @@ class DefaultIntentConfirmationInterceptorTest {
                     ),
                 ),
             ),
+            intent = PaymentIntentFactory.create(),
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             paymentMethodOptionsParams = null,
             shippingValues = null,
@@ -251,6 +258,7 @@ class DefaultIntentConfirmationInterceptorTest {
                             ),
                         ),
                     ),
+                    intent = PaymentIntentFactory.create(),
                     paymentMethod = paymentMethod,
                     paymentMethodOptionsParams = null,
                     shippingValues = null,
@@ -302,6 +310,7 @@ class DefaultIntentConfirmationInterceptorTest {
 
         val nextStep = interceptor.intercept(
             initializationMode = InitializationMode.DeferredIntent(mock()),
+            intent = PaymentIntentFactory.create(),
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             shippingValues = null,
             customerRequestedSave = false,
@@ -345,6 +354,7 @@ class DefaultIntentConfirmationInterceptorTest {
 
         val nextStep = interceptor.intercept(
             initializationMode = InitializationMode.DeferredIntent(mock()),
+            intent = PaymentIntentFactory.create(),
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             paymentMethodOptionsParams = null,
             shippingValues = null,
@@ -374,6 +384,7 @@ class DefaultIntentConfirmationInterceptorTest {
 
         val nextStep = interceptor.intercept(
             initializationMode = InitializationMode.DeferredIntent(mock()),
+            intent = PaymentIntentFactory.create(),
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             paymentMethodOptionsParams = null,
             shippingValues = null,
@@ -401,6 +412,7 @@ class DefaultIntentConfirmationInterceptorTest {
 
         val nextStep = interceptor.intercept(
             initializationMode = InitializationMode.DeferredIntent(mock()),
+            intent = PaymentIntentFactory.create(),
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             paymentMethodOptionsParams = null,
             shippingValues = null,
@@ -449,6 +461,7 @@ class DefaultIntentConfirmationInterceptorTest {
                     ),
                 ),
             ),
+            intent = PaymentIntentFactory.create(),
             paymentMethod = paymentMethod,
             paymentMethodOptionsParams = null,
             shippingValues = null,
@@ -488,6 +501,7 @@ class DefaultIntentConfirmationInterceptorTest {
                     ),
                 ),
             ),
+            intent = PaymentIntentFactory.create(),
             paymentMethod = paymentMethod,
             paymentMethodOptionsParams = null,
             shippingValues = null,
@@ -534,6 +548,7 @@ class DefaultIntentConfirmationInterceptorTest {
                     ),
                 ),
             ),
+            intent = PaymentIntentFactory.create(),
             paymentMethod = paymentMethod,
             paymentMethodOptionsParams = null,
             shippingValues = null,
@@ -583,6 +598,7 @@ class DefaultIntentConfirmationInterceptorTest {
                         ),
                     ),
                 ),
+                intent = PaymentIntentFactory.create(),
                 paymentMethod = paymentMethod,
                 paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
                     setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
@@ -620,6 +636,7 @@ class DefaultIntentConfirmationInterceptorTest {
                     ),
                 ),
             ),
+            intent = PaymentIntentFactory.create(),
             paymentMethod = paymentMethod,
             paymentMethodOptionsParams = null,
             shippingValues = null,
@@ -661,6 +678,7 @@ class DefaultIntentConfirmationInterceptorTest {
                         ),
                     ),
                 ),
+                intent = PaymentIntentFactory.create(),
                 paymentMethod = paymentMethod,
                 paymentMethodOptionsParams = null,
                 shippingValues = null,

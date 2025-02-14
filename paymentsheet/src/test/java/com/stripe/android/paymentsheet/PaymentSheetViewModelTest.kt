@@ -1002,6 +1002,7 @@ internal class PaymentSheetViewModelTest {
 
             verify(intentConfirmationInterceptor).intercept(
                 initializationMode = any(),
+                intent = any(),
                 paymentMethod = any(),
                 paymentMethodOptionsParams = eq(
                     PaymentMethodOptionsParams.Card(
@@ -1036,6 +1037,7 @@ internal class PaymentSheetViewModelTest {
 
             verify(intentConfirmationInterceptor).intercept(
                 initializationMode = any(),
+                intent = any(),
                 paymentMethod = any(),
                 paymentMethodOptionsParams = eq(
                     PaymentMethodOptionsParams.Card(
@@ -2608,6 +2610,7 @@ internal class PaymentSheetViewModelTest {
 
             verify(interceptor).intercept(
                 initializationMode = any(),
+                intent = any(),
                 paymentMethodCreateParams = any(),
                 paymentMethodOptionsParams = isNull(),
                 shippingValues = isNull(),

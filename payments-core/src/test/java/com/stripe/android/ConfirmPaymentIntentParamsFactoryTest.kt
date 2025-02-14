@@ -3,15 +3,22 @@ package com.stripe.android
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.ConfirmStripeIntentParams
+import com.stripe.android.model.MandateDataParams
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.model.StripeIntent
+import com.stripe.android.testing.PaymentIntentFactory
+import com.stripe.android.testing.PaymentMethodFactory
 import org.junit.Test
 
 class ConfirmPaymentIntentParamsFactoryTest {
 
     private val factory = ConfirmPaymentIntentParamsFactory(
         clientSecret = CLIENT_SECRET,
+        intent = createPaymentIntent(),
         shipping = null,
     )
 
@@ -87,6 +94,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
 
         val factoryWithConfig = ConfirmPaymentIntentParamsFactory(
             clientSecret = CLIENT_SECRET,
+            intent = createPaymentIntent(),
             shipping = shippingDetails,
         )
 
@@ -107,6 +115,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
 
         val factoryWithConfig = ConfirmPaymentIntentParamsFactory(
             clientSecret = CLIENT_SECRET,
+            intent = createPaymentIntent(),
             shipping = shippingDetails,
         )
 
@@ -121,6 +130,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
     fun `create() with saved card and does not require save on confirmation`() {
         val factoryWithConfig = ConfirmPaymentIntentParamsFactory(
             clientSecret = CLIENT_SECRET,
+            intent = createPaymentIntent(),
             shipping = null,
         )
 
@@ -142,6 +152,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
     fun `create() with saved card and requires save on confirmation`() {
         val factoryWithConfig = ConfirmPaymentIntentParamsFactory(
             clientSecret = CLIENT_SECRET,
+            intent = createPaymentIntent(),
             shipping = null,
         )
 
@@ -157,6 +168,66 @@ class ConfirmPaymentIntentParamsFactoryTest {
                 setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
             )
         )
+    }
+
+    @Test
+    fun `create() without SFU should not contain any mandate data`() = mandateDataTest(
+        setupFutureUsage = null,
+        expectedMandateDataParams = null,
+    )
+
+    @Test
+    fun `create() with 'OneTime' SFU should not contain any mandate data`() = mandateDataTest(
+        setupFutureUsage = StripeIntent.Usage.OneTime,
+        expectedMandateDataParams = null,
+    )
+
+    @Test
+    fun `create() with 'OnSession' SFU should contain any mandate data`() = mandateDataTest(
+        setupFutureUsage = StripeIntent.Usage.OnSession,
+        expectedMandateDataParams = MandateDataParams(MandateDataParams.Type.Online.DEFAULT),
+    )
+
+    @Test
+    fun `create() with 'OffSession' SFU should contain any mandate data`() = mandateDataTest(
+        setupFutureUsage = StripeIntent.Usage.OffSession,
+        expectedMandateDataParams = MandateDataParams(MandateDataParams.Type.Online.DEFAULT),
+    )
+
+    private fun mandateDataTest(
+        setupFutureUsage: StripeIntent.Usage?,
+        expectedMandateDataParams: MandateDataParams?
+    ) {
+        val factoryWithConfig = ConfirmPaymentIntentParamsFactory(
+            clientSecret = CLIENT_SECRET,
+            intent = createPaymentIntent(
+                setupFutureUsage = setupFutureUsage,
+            ),
+            shipping = null,
+        )
+
+        val result = factoryWithConfig.create(
+            paymentMethod = PaymentMethodFactory.cashAppPay(),
+            optionsParams = null,
+        )
+
+        assertThat(result).isInstanceOf(ConfirmPaymentIntentParams::class.java)
+
+        val params = result.asConfirmPaymentIntentParams()
+
+        assertThat(params.mandateData).isEqualTo(expectedMandateDataParams)
+    }
+
+    private fun createPaymentIntent(
+        setupFutureUsage: StripeIntent.Usage? = null,
+    ): PaymentIntent {
+        return PaymentIntentFactory.create(
+            setupFutureUsage = setupFutureUsage,
+        )
+    }
+
+    private fun ConfirmStripeIntentParams.asConfirmPaymentIntentParams(): ConfirmPaymentIntentParams {
+        return this as ConfirmPaymentIntentParams
     }
 
     private companion object {

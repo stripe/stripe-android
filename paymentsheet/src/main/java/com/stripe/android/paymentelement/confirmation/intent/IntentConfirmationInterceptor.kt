@@ -74,6 +74,7 @@ internal interface IntentConfirmationInterceptor {
 
     suspend fun intercept(
         initializationMode: PaymentElementLoader.InitializationMode,
+        intent: StripeIntent,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
@@ -82,6 +83,7 @@ internal interface IntentConfirmationInterceptor {
 
     suspend fun intercept(
         initializationMode: PaymentElementLoader.InitializationMode,
+        intent: StripeIntent,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
@@ -128,6 +130,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
 
     override suspend fun intercept(
         initializationMode: PaymentElementLoader.InitializationMode,
+        intent: StripeIntent,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
@@ -135,6 +138,11 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     ): NextStep {
         return when (initializationMode) {
             is PaymentElementLoader.InitializationMode.DeferredIntent -> {
+                /*
+                 * We don't pass the created intent in `DeferredIntent` mode because we rely on the created intent
+                 * from the merchant through `CreateIntentCallback`. The intent passed through here is created from
+                 * `PaymentSheet.Configuration` in order to populate `Payment Element` data.
+                 */
                 handleDeferredIntent(
                     intentConfiguration = initializationMode.intentConfiguration,
                     shippingValues = shippingValues,
@@ -147,6 +155,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             is PaymentElementLoader.InitializationMode.PaymentIntent -> {
                 createConfirmStep(
                     clientSecret = initializationMode.clientSecret,
+                    intent = intent,
                     shippingValues = shippingValues,
                     paymentMethodCreateParams = paymentMethodCreateParams,
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
@@ -156,6 +165,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             is PaymentElementLoader.InitializationMode.SetupIntent -> {
                 createConfirmStep(
                     clientSecret = initializationMode.clientSecret,
+                    intent = intent,
                     shippingValues = shippingValues,
                     paymentMethodCreateParams = paymentMethodCreateParams,
                 )
@@ -165,6 +175,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
 
     override suspend fun intercept(
         initializationMode: PaymentElementLoader.InitializationMode,
+        intent: StripeIntent,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
@@ -184,6 +195,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             is PaymentElementLoader.InitializationMode.PaymentIntent -> {
                 createConfirmStep(
                     clientSecret = initializationMode.clientSecret,
+                    intent = intent,
                     shippingValues = shippingValues,
                     paymentMethod = paymentMethod,
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
@@ -194,6 +206,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             is PaymentElementLoader.InitializationMode.SetupIntent -> {
                 createConfirmStep(
                     clientSecret = initializationMode.clientSecret,
+                    intent = intent,
                     shippingValues = shippingValues,
                     paymentMethod = paymentMethod,
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
@@ -375,6 +388,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 DeferredIntentValidator.validate(intent, intentConfiguration, allowsManualConfirmation)
                 createConfirmStep(
                     clientSecret,
+                    intent,
                     shippingValues,
                     paymentMethod,
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
@@ -398,6 +412,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
 
     private fun createConfirmStep(
         clientSecret: String,
+        intent: StripeIntent,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
@@ -405,6 +420,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     ): NextStep.Confirm {
         val factory = ConfirmStripeIntentParamsFactory.createFactory(
             clientSecret = clientSecret,
+            intent = intent,
             shipping = shippingValues,
         )
 
@@ -420,12 +436,14 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
 
     private fun createConfirmStep(
         clientSecret: String,
+        intent: StripeIntent,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
     ): NextStep.Confirm {
         val paramsFactory = ConfirmStripeIntentParamsFactory.createFactory(
             clientSecret = clientSecret,
+            intent = intent,
             shipping = shippingValues,
         )
 

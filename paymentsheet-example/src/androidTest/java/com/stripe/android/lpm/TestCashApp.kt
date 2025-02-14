@@ -10,6 +10,8 @@ import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
+import com.stripe.android.paymentsheet.example.playground.settings.InitializationTypeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_ERROR_TEXT_TEST_TAG
 import com.stripe.android.test.core.AuthorizeAction
@@ -85,6 +87,16 @@ internal class TestCashApp : BasePlaygroundTest() {
     fun testCashAppPayInCustomFlow() {
         testDriver.confirmCustom(
             testParameters = testParameters,
+        )
+    }
+
+    @Test
+    fun testCashAppPayDeferredCscWithSfu() {
+        testDriver.confirmNewOrGuestComplete(
+            testParameters = testParameters.copyPlaygroundSettings { settings ->
+                settings[InitializationTypeSettingsDefinition] = InitializationType.DeferredClientSideConfirmation
+                settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT_WITH_SETUP
+            },
         )
     }
 }
