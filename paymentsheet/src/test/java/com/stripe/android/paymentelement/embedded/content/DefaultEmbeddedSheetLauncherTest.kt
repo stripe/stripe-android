@@ -70,6 +70,15 @@ internal class DefaultEmbeddedSheetLauncherTest {
     }
 
     @Test
+    fun `launchForm is not launched again when the sheet is already open`() = testScenario {
+        val code = "test_code"
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
+        val state = EmbeddedConfirmationStateFixtures.defaultState()
+        sheetStateHolder.sheetIsOpen = true
+        sheetLauncher.launchForm(code, paymentMethodMetadata, false, state)
+    }
+
+    @Test
     fun `formActivityLauncher clears selection holder and invokes callback on complete result`() = testScenario {
         sheetStateHolder.sheetIsOpen = true
         selectionHolder.setTemporary("test_code")
@@ -111,6 +120,14 @@ internal class DefaultEmbeddedSheetLauncherTest {
 
         assertThat(launchCall).isEqualTo(expectedArgs)
         assertThat(sheetStateHolder.sheetIsOpen).isTrue()
+    }
+
+    @Test
+    fun `launchManage is not launched again when the sheet is already open`() = testScenario {
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
+        val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
+        sheetStateHolder.sheetIsOpen = true
+        sheetLauncher.launchManage(paymentMethodMetadata, customerState, PaymentSelection.GooglePay)
     }
 
     @Test
