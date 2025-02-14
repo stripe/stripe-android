@@ -47,16 +47,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.editableText
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.Logger
 import com.stripe.android.uicore.BuildConfig
@@ -67,6 +72,7 @@ import com.stripe.android.uicore.moveFocusSafely
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.autofill
 import com.stripe.android.uicore.utils.collectAsState
+import com.stripe.android.uicore.utils.formatExpirationDateForAccessibility
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -123,6 +129,7 @@ fun TextFieldSection(
  * attribute of [textFieldController] is also taken into account to decide if the UI should be
  * enabled.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 @Suppress("LongMethod")
 fun TextField(
@@ -166,6 +173,10 @@ fun TextField(
         mutableStateOf<TextRange?>(null)
     }
 
+    val context = LocalContext.current
+
+    val isExpiryDate = (textFieldController as? SimpleTextFieldController)?.textFieldConfig is DateConfig
+
     TextFieldUi(
         value = TextFieldValue(
             text = value,
@@ -207,7 +218,13 @@ fun TextField(
             )
             .focusRequester(focusRequester)
             .semantics {
-                this.contentDescription = contentDescription
+                if (isExpiryDate) {
+                    this.editableText = AnnotatedString("")
+                    this.contentDescription = formatExpirationDateForAccessibility(Locale.current, value)
+                        .resolve(context)
+                } else {
+                    this.contentDescription = contentDescription
+                }
             },
         enabled = enabled && textFieldController.enabled,
         label = label?.let {
@@ -268,6 +285,11 @@ internal fun TextFieldUi(
                         )
                     } else {
                         it
+                    },
+                    modifier = if (it == stringResource(R.string.stripe_expiration_date_hint)){
+                        Modifier.clearAndSetSemantics {}
+                    } else {
+                        Modifier
                     }
                 )
             }

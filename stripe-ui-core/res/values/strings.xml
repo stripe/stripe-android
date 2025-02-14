@@ -70,4 +70,12 @@
   <string name="stripe_invalid_expiry_month">Your card\'s expiration month is invalid.</string>
   <!-- String to describe an invalid year in expiry date. -->
   <string name="stripe_invalid_expiry_year">Your card\'s expiration year is invalid.</string>
+  <!-- String to describe an empty expiration date text field. -->
+  <string name="stripe_expiration_date_empty_content_description">Expiration date. Two digit month and two digit year, empty</string>
+  <!-- String to describe an expiration date text field with complete month and empty year. -->
+  <string name="stripe_expiration_date_month_complete_content_description">Expiration date. %s and two digit year, empty</string>
+  <!-- String to describe an expiration date text field with complete month and incomplete year. -->
+  <string name="stripe_expiration_date_year_incomplete_content_description">Expiration date. %s and two digit year, incomplete</string>
+  <!-- String to describe an complete expiration date text field. -->
+  <string name="stripe_expiration_date_content_description">Expiration date. %s %s</string>
 </resources>
