@@ -1,5 +1,6 @@
 package com.stripe.android.uicore.utils
 
+import android.content.Context
 import androidx.compose.ui.text.intl.Locale as ComposeLocale
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -22,26 +23,17 @@ internal fun formatExpirationDateForAccessibility(locale: ComposeLocale, input: 
 
     try {
         val javaLocale= JavaLocale(locale.language, locale.region)
-        if (month != null && year == null) {
-            if (month in 1..12) {
-                val monthName =
-                    SimpleDateFormat("MM", javaLocale).parse("$month")?.let {
-                        SimpleDateFormat("MMMM", javaLocale).format(it)
-                    }
+        if (month != null) {
+            val monthName = SimpleDateFormat("MM", javaLocale).parse("$month")?.let {
+                SimpleDateFormat("MMMM", javaLocale).format(it)
+            }
 
+            if (year == null) {
                 return resolvableString(
                     R.string.stripe_expiration_date_month_complete_content_description,
                     monthName
                 )
-            }
-        }
-
-        if (month != null && year != null) {
-            if (month in 1..12) {
-                val monthName =
-                    SimpleDateFormat("MM", javaLocale).parse("$month")?.let {
-                        SimpleDateFormat("MMMM", javaLocale).format(it)
-                    }
+            } else {
                 return if (year <= 9) {
                     resolvableString(
                         R.string.stripe_expiration_date_year_incomplete_content_description,
