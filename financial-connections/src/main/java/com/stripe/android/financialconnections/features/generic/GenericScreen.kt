@@ -127,7 +127,8 @@ internal fun GenericBody(
                             text = TextResource.Text(fromHtml(entry.text)),
                             onClickableTextClick = onClickableTextClick,
                             defaultStyle = font.copy(
-                                textAlign = entry.alignment.toComposeTextAlign()
+                                textAlign = entry.alignment.toComposeTextAlign(),
+                                color = colors.textDefault,
                             ),
                             modifier = Modifier.padding(horizontal = 24.dp),
                         )
