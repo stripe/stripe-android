@@ -286,7 +286,7 @@ internal fun TextFieldUi(
                     } else {
                         it
                     },
-                    modifier = if (it == stringResource(R.string.stripe_expiration_date_hint)){
+                    modifier = if (it == stringResource(R.string.stripe_expiration_date_hint)) {
                         Modifier.clearAndSetSemantics {}
                     } else {
                         Modifier
