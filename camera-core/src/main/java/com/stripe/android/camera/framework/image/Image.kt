@@ -88,13 +88,6 @@ fun cropCameraPreviewToSquare(
     previewBounds: Rect,
     viewFinder: Rect
 ): Bitmap {
-    require(
-        viewFinder.left >= previewBounds.left &&
-            viewFinder.right <= previewBounds.right &&
-            viewFinder.top >= previewBounds.top &&
-            viewFinder.bottom <= previewBounds.bottom
-    ) { "Card finder is outside preview image bounds" }
-
     val visiblePreview = getVisiblePreview(previewBounds)
     val squareViewFinder = maxAspectRatioInSize(visiblePreview, 1F).centerOn(viewFinder)
 
