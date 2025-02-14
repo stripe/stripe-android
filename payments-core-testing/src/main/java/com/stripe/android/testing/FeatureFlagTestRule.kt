@@ -23,7 +23,11 @@ class FeatureFlagTestRule(
         }
     }
 
-    fun setEnabled(isEnabled: Boolean) {
-        featureFlag.setEnabled(isEnabled)
+    fun setEnabled(isEnabled: Boolean?) {
+        if (isEnabled != null) {
+            featureFlag.setEnabled(isEnabled)
+            return
+        }
+        featureFlag.reset()
     }
 }
