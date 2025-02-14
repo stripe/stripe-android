@@ -224,7 +224,6 @@ internal interface NativeLinkModule {
 
         @OptIn(ExperimentalAnalyticEventCallbackApi::class)
         @Provides
-        @NativeLinkScope
         fun provideAnalyticEventCallback(): AnalyticEventCallback? = AnalyticEventInterceptor.analyticEventCallback
     }
 }
