@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 
 internal object LinkTypeSettingsDefinition :
     PlaygroundSettingDefinition<LinkType>,
@@ -35,6 +36,23 @@ internal object LinkTypeSettingsDefinition :
             LinkType.Web -> {
                 FeatureFlags.nativeLinkEnabled.setEnabled(false)
                 FeatureFlags.nativeLinkAttestationEnabled.setEnabled(false)
+            }
+        }
+    }
+
+    override fun configure(
+        value: LinkType,
+        checkoutRequestBuilder: CheckoutRequest.Builder,
+    ) {
+        when (value) {
+            LinkType.Native -> {
+                checkoutRequestBuilder.linkMode("native")
+            }
+            LinkType.NativeAttest -> {
+                checkoutRequestBuilder.linkMode("attest")
+            }
+            LinkType.Web -> {
+                checkoutRequestBuilder.linkMode("web")
             }
         }
     }
