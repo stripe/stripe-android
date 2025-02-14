@@ -20,7 +20,7 @@ class CustomerSessionSavedSelectionDataSourceTest {
             prefsRepository = prefsRepository
         )
 
-        val result = dataSource.retrieveSavedSelection()
+        val result = dataSource.retrieveSavedSelection(null)
 
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Success<SavedSelection?>>()
 
@@ -40,7 +40,7 @@ class CustomerSessionSavedSelectionDataSourceTest {
             elementsSessionManager = elementsSessionManager,
         )
 
-        val result = dataSource.retrieveSavedSelection()
+        val result = dataSource.retrieveSavedSelection(null)
 
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<SavedSelection?>>()
 
@@ -87,6 +87,41 @@ class CustomerSessionSavedSelectionDataSourceTest {
         val failedResult = result.asFailure()
 
         assertThat(failedResult.cause).isEqualTo(exception)
+    }
+
+    @Test
+    fun `On failed to get elements session, should fail to get selection`() = runTest {
+        val exception = IllegalStateException("Failed to load!")
+
+        val elementsSessionManager = FakeCustomerSessionElementsSessionManager(
+            elementsSession = Result.failure(exception),
+        )
+        val dataSource = createDataSource(
+            elementsSessionManager = elementsSessionManager,
+        )
+
+        val result = dataSource.retrieveSavedSelection(elementsSession = null)
+
+        assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<Unit>>()
+
+        val failedResult = result.asFailure()
+
+        assertThat(failedResult.cause).isEqualTo(exception)
+    }
+
+    @Test
+    fun `When default payment methods enabled, should get selection from backend`() {
+        // TODO: implement test.
+    }
+
+    @Test
+    fun `When default payment methods enabled and no default PM, should return null selection`() {
+        // TODO: implement test.
+    }
+
+    @Test
+    fun `When elements session passed to retrieveSavedSelection, should not re-query elements session`() {
+        // TODO: implement test.
     }
 
     private suspend fun createDataSource(
