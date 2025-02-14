@@ -36,10 +36,6 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
         get() = savedStateHandle[PREVIOUS_CONFIGURATION_KEY]
         set(value) = savedStateHandle.set(PREVIOUS_CONFIGURATION_KEY, value)
 
-    private var previousPaymentMethodMetadata: PaymentMethodMetadata?
-        get() = savedStateHandle[PREVIOUS_PAYMENT_METHOD_METADATA_KEY]
-        set(value) = savedStateHandle.set(PREVIOUS_PAYMENT_METHOD_METADATA_KEY, value)
-
     override fun choose(
         paymentMethodMetadata: PaymentMethodMetadata,
         paymentMethods: List<PaymentMethod>?,
@@ -56,7 +52,6 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
         } ?: newSelection
 
         previousConfiguration = newConfiguration
-        previousPaymentMethodMetadata = paymentMethodMetadata
 
         return result
     }
@@ -98,25 +93,12 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
         previousSelection: PaymentSelection.New,
         paymentMethodMetadata: PaymentMethodMetadata,
     ): Boolean {
-        val previousPaymentMethodMetadata = previousPaymentMethodMetadata
-        if (previousPaymentMethodMetadata == null) {
-            return true
-        }
-        val previousFormType = formHelperFactory.create(coroutineScope, previousPaymentMethodMetadata) {}
-            .formTypeForCode(previousSelection.paymentMethodType)
         val newFormType = formHelperFactory.create(coroutineScope, paymentMethodMetadata) {}
             .formTypeForCode(previousSelection.paymentMethodType)
-        if (previousFormType == newFormType) {
-            return true
-        }
-        if (newFormType == FormHelper.FormType.Empty) {
-            return true
-        }
-        return false
+        return newFormType != FormHelper.FormType.UserInteractionRequired
     }
 
     companion object {
         const val PREVIOUS_CONFIGURATION_KEY = "DefaultEmbeddedSelectionChooser_PREVIOUS_CONFIGURATION_KEY"
-        const val PREVIOUS_PAYMENT_METHOD_METADATA_KEY = "DefaultEmbeddedSelectionChooser_PAYMENT_METHOD_METADATA"
     }
 }
