@@ -221,6 +221,7 @@ internal class EmbeddedPlaygroundActivity : AppCompatActivity(), ExternalPayment
         when (result) {
             is EmbeddedPaymentElement.Result.Canceled -> {
                 Log.d("EmbeddedPlayground", "Canceled")
+                Toast.makeText(this, "Payment Canceled.", Toast.LENGTH_LONG).show()
             }
             is EmbeddedPaymentElement.Result.Completed -> {
                 Log.d("EmbeddedPlayground", "Complete")
