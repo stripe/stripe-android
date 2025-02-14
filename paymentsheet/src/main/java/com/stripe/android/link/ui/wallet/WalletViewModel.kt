@@ -305,11 +305,6 @@ internal class WalletViewModel @Inject constructor(
         }
     }
 
-    @SuppressWarnings("UnusedParameter")
-    fun onEditPaymentMethodClicked(item: ConsumerPaymentDetails.PaymentDetails) {
-        navigate(LinkScreen.CardEdit)
-    }
-
     private fun updateErrorMessageAndStopProcessing(
         error: Throwable,
         loggerMessage: String

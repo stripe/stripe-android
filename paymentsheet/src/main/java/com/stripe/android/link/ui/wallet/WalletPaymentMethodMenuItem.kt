@@ -19,11 +19,6 @@ internal sealed class WalletPaymentMethodMenuItem(
         isDestructive = true
     )
 
-    data object EditCard : WalletPaymentMethodMenuItem(
-        text = R.string.stripe_wallet_update_card.resolvableString,
-        testTag = WALLET_MENU_EDIT_CARD_TAG,
-    )
-
     data object SetAsDefault : WalletPaymentMethodMenuItem(
         text = R.string.stripe_wallet_set_as_default.resolvableString,
         testTag = WALLET_MENU_SET_AS_DEFAULT_TAG,
@@ -36,6 +31,5 @@ internal sealed class WalletPaymentMethodMenuItem(
 }
 
 internal const val WALLET_MENU_REMOVE_ITEM_TAG = "WALLET_MENU_REMOVE_ITEM_TAG"
-internal const val WALLET_MENU_EDIT_CARD_TAG = "WALLET_MENU_EDIT_CARD_TAG"
 internal const val WALLET_MENU_SET_AS_DEFAULT_TAG = "WALLET_MENU_SET_AS_DEFAULT_TAG"
 internal const val WALLET_MENU_CANCEL_TAG = "WALLET_MENU_CANCEL_TAG"

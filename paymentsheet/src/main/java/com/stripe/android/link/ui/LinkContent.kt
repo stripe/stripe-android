@@ -31,7 +31,6 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
-import com.stripe.android.link.ui.cardedit.CardEditScreen
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodScreen
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodViewModel
 import com.stripe.android.link.ui.signup.SignUpScreen
@@ -187,10 +186,6 @@ private fun Screens(
                     hideBottomSheetContent = hideBottomSheetContent,
                     dismissWithResult = dismissWithResult
                 )
-            }
-
-            composable(LinkScreen.CardEdit.route) {
-                CardEditScreen()
             }
 
             composable(LinkScreen.PaymentMethod.route) {

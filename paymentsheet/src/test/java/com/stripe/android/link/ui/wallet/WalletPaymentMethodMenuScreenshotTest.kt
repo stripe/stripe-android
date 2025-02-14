@@ -75,7 +75,6 @@ internal class WalletPaymentMethodMenuScreenshotTest {
             DefaultLinkTheme {
                 WalletPaymentMethodMenu(
                     paymentDetails = paymentDetails,
-                    onEditClick = {},
                     onCancelClick = {},
                     onRemoveClick = {},
                     onSetDefaultClick = {}
