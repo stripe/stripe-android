@@ -4,11 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
-import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -16,7 +13,6 @@ import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser.Companion.PREVIOUS_CONFIGURATION_KEY
-import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser.Companion.PREVIOUS_PAYMENT_METHOD_METADATA_KEY
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.PaymentMethodFactory
@@ -26,7 +22,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
-import com.stripe.android.ui.core.R as StripeUiCoreR
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class DefaultEmbeddedSelectionChooserTest {
@@ -48,21 +43,14 @@ internal class DefaultEmbeddedSelectionChooserTest {
 
     @Test
     fun `Can use existing payment selection if it's still supported`() = runScenario {
-        val previousSelection = PaymentSelection.New.GenericPaymentMethod(
-            label = "Sofort".resolvableString,
-            iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_klarna,
-            lightThemeIconUrl = null,
-            darkThemeIconUrl = null,
-            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.SOFORT,
-            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
-        )
+        val previousSelection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION
 
         val paymentMethod = PaymentMethodFixtures.createCard()
         val newSelection = PaymentSelection.Saved(paymentMethod)
         val selection = chooser.choose(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                    paymentMethodTypes = listOf("card", "sofort")
+                    paymentMethodTypes = listOf("card", "cashapp")
                 )
             ),
             paymentMethods = PaymentMethodFixtures.createCards(3) + paymentMethod,
@@ -194,20 +182,17 @@ internal class DefaultEmbeddedSelectionChooserTest {
     }
 
     @Test
-    fun `PaymentSelection is not preserved when form type changes`() = runScenario {
+    fun `PaymentSelection is not preserved when form type is user interaction required`() = runScenario {
         val previousSelection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION
 
-        storePreviousChooseState(
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                    paymentMethodTypes = listOf("card", "cashapp"),
-                )
-            ),
-        )
+        storePreviousChooseState()
         val selection = chooser.choose(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodTypes = listOf("card", "cashapp"),
+                ),
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
                 ),
             ),
             paymentMethods = emptyList(),
@@ -219,16 +204,29 @@ internal class DefaultEmbeddedSelectionChooserTest {
     }
 
     @Test
-    fun `PaymentSelection is preserved when form type changes to empty`() = runScenario {
+    fun `PaymentSelection is preserved when form type changes to mandate`() = runScenario {
         val previousSelection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION
 
-        storePreviousChooseState(
+        storePreviousChooseState()
+        val selection = chooser.choose(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodTypes = listOf("card", "cashapp"),
                 ),
-            )
+            ),
+            paymentMethods = emptyList(),
+            previousSelection = previousSelection,
+            newSelection = null,
+            newConfiguration = defaultConfiguration,
         )
+        assertThat(selection).isEqualTo(previousSelection)
+    }
+
+    @Test
+    fun `PaymentSelection is preserved when form type changes to empty`() = runScenario {
+        val previousSelection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION
+
+        storePreviousChooseState()
         val selection = chooser.choose(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
@@ -247,13 +245,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
     fun `PaymentSelection is preserved when form type stays the same`() = runScenario {
         val previousSelection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION
 
-        storePreviousChooseState(
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
-                    paymentMethodTypes = listOf("card", "cashapp"),
-                ),
-            )
-        )
+        storePreviousChooseState()
         val selection = chooser.choose(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
@@ -269,13 +261,12 @@ internal class DefaultEmbeddedSelectionChooserTest {
     }
 
     @Test
-    fun `previousConfig and previousPaymentMethodMetadata is set when calling choose`() = runScenario {
+    fun `previousConfig is set when calling choose`() = runScenario {
         val previousSelection = PaymentSelection.GooglePay
         val paymentMethod = PaymentMethodFixtures.createCard()
         val newSelection = PaymentSelection.Saved(paymentMethod)
 
         assertThat(savedStateHandle.get<CommonConfiguration>(PREVIOUS_CONFIGURATION_KEY)).isNull()
-        assertThat(savedStateHandle.get<PaymentMethodMetadata>(PREVIOUS_PAYMENT_METHOD_METADATA_KEY)).isNull()
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(isGooglePayReady = true)
         val selection = chooser.choose(
             paymentMethodMetadata = paymentMethodMetadata,
@@ -287,8 +278,6 @@ internal class DefaultEmbeddedSelectionChooserTest {
         assertThat(selection).isEqualTo(previousSelection)
         assertThat(savedStateHandle.get<CommonConfiguration>(PREVIOUS_CONFIGURATION_KEY))
             .isEqualTo(defaultConfiguration)
-        assertThat(savedStateHandle.get<PaymentMethodMetadata>(PREVIOUS_PAYMENT_METHOD_METADATA_KEY))
-            .isEqualTo(paymentMethodMetadata)
     }
 
     private fun runScenario(
@@ -312,10 +301,8 @@ internal class DefaultEmbeddedSelectionChooserTest {
 
     private fun Scenario.storePreviousChooseState(
         configuration: CommonConfiguration = defaultConfiguration,
-        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(isGooglePayReady = true),
     ) {
         savedStateHandle[PREVIOUS_CONFIGURATION_KEY] = configuration
-        savedStateHandle[PREVIOUS_PAYMENT_METHOD_METADATA_KEY] = paymentMethodMetadata
     }
 
     private class Scenario(
