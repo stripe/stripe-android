@@ -84,6 +84,7 @@ internal fun PrimaryButton(
     label: String,
     locked: Boolean,
     enabled: Boolean,
+    modifier: Modifier = Modifier,
     processingState: PrimaryButtonProcessingState = PrimaryButtonProcessingState.Idle(null),
     onProcessingCompleted: () -> Unit = {},
     onClick: () -> Unit,
@@ -115,7 +116,7 @@ internal fun PrimaryButton(
         LocalContentAlpha provides if (enabled) ContentAlpha.high else ContentAlpha.disabled,
     ) {
         Box(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center,
         ) {
             TextButton(
