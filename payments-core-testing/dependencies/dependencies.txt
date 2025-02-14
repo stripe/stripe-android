@@ -782,11 +782,11 @@
 |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.9.0 (*)
 |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0 (*)
 |         \--- org.jetbrains.kotlin:kotlin-stdlib:2.0.0 -> 2.0.21 (*)
-+--- app.cash.turbine:turbine:1.1.0
-|    \--- app.cash.turbine:turbine-jvm:1.1.0
-|         +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0 -> 1.9.0 (*)
-|         +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.22 -> 2.0.21 (*)
-|         \--- org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0 -> 1.9.0 (*)
++--- app.cash.turbine:turbine:1.2.0
+|    \--- app.cash.turbine:turbine-jvm:1.2.0
+|         +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0 (*)
+|         +--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21 (*)
+|         \--- org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0 (*)
 \--- com.squareup.leakcanary:leakcanary-android-instrumentation:2.14
      +--- com.squareup.leakcanary:leakcanary-android-core:2.14
      |    +--- com.squareup.leakcanary:shark-android:2.14
