@@ -13,6 +13,7 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -796,20 +797,28 @@ internal class PlaygroundTestDriver(
         composeTestRule.waitForIdle()
 
         // Expect the OTP dialog
-        composeTestRule.waitUntilExactlyOneExists(hasTestTag("OTP-0"))
+        composeTestRule.waitUntilExactlyOneExists(
+            matcher = hasTestTag("OTP-0"),
+            timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds,
+        )
 
         composeTestRule
             .onNodeWithTag("OTP-0")
             .performTextInput("000000")
 
-        composeTestRule.waitUntilExactlyOneExists(hasTestTag("collapsed_wallet_row_tag"))
+        composeTestRule.waitUntilExactlyOneExists(
+            matcher = hasTestTag("collapsed_wallet_row_tag"),
+            timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds,
+        )
 
         composeTestRule
             .onNodeWithTag("collapsed_wallet_row_tag")
             .performClick()
 
+        // We might have more than one bank account
         composeTestRule
-            .onNodeWithText("Test Institution")
+            .onAllNodesWithText("Test Institution")
+            .onFirst()
             .performClick()
 
         composeTestRule
