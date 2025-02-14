@@ -143,60 +143,61 @@ private fun Screens(
     moveToWeb: () -> Unit,
     changeEmail: () -> Unit,
 ) {
-    NavHost(
-        navController = navController,
-        startDestination = LinkScreen.Loading.route
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
     ) {
-        composable(LinkScreen.Loading.route) {
-            Loader()
-        }
+        NavHost(
+            modifier = Modifier
+                .matchParentSize(),
+            navController = navController,
+            startDestination = LinkScreen.Loading.route,
+        ) {
+            composable(LinkScreen.Loading.route) {
+                Loader()
+            }
 
-        composable(LinkScreen.SignUp.route) {
-            SignUpRoute(
-                navigate = navigate,
-                navigateAndClearStack = navigateAndClearStack,
-                moveToWeb = moveToWeb
-            )
-        }
+            composable(LinkScreen.SignUp.route) {
+                SignUpRoute(
+                    navigate = navigate,
+                    navigateAndClearStack = navigateAndClearStack,
+                    moveToWeb = moveToWeb
+                )
+            }
 
-        composable(LinkScreen.Verification.route) {
-            val linkAccount = getLinkAccount()
-                ?: return@composable dismissWithResult(noLinkAccountResult())
-            VerificationRoute(
-                linkAccount = linkAccount,
-                changeEmail = changeEmail,
-                navigateAndClearStack = navigateAndClearStack,
-                goBack = goBack
-            )
-        }
+            composable(LinkScreen.Verification.route) {
+                val linkAccount = getLinkAccount()
+                    ?: return@composable dismissWithResult(noLinkAccountResult())
+                VerificationRoute(
+                    linkAccount = linkAccount,
+                    changeEmail = changeEmail,
+                    navigateAndClearStack = navigateAndClearStack,
+                    goBack = goBack
+                )
+            }
 
-        composable(LinkScreen.Wallet.route) {
-            val linkAccount = getLinkAccount()
-                ?: return@composable dismissWithResult(noLinkAccountResult())
-            val viewModel: WalletViewModel = linkViewModel { parentComponent ->
-                WalletViewModel.factory(
-                    parentComponent = parentComponent,
+            composable(LinkScreen.Wallet.route) {
+                val linkAccount = getLinkAccount()
+                    ?: return@composable dismissWithResult(noLinkAccountResult())
+                WalletRoute(
                     linkAccount = linkAccount,
                     navigate = navigate,
                     navigateAndClearStack = navigateAndClearStack,
+                    showBottomSheetContent = showBottomSheetContent,
+                    hideBottomSheetContent = hideBottomSheetContent,
                     dismissWithResult = dismissWithResult
                 )
             }
-            WalletScreen(
-                viewModel = viewModel,
-                showBottomSheetContent = showBottomSheetContent,
-                hideBottomSheetContent = hideBottomSheetContent
-            )
-        }
 
-        composable(LinkScreen.CardEdit.route) {
-            CardEditScreen()
-        }
+            composable(LinkScreen.CardEdit.route) {
+                CardEditScreen()
+            }
 
-        composable(LinkScreen.PaymentMethod.route) {
-            val linkAccount = getLinkAccount()
-                ?: return@composable dismissWithResult(noLinkAccountResult())
-            PaymentMethodRoute(linkAccount = linkAccount, dismissWithResult = dismissWithResult)
+            composable(LinkScreen.PaymentMethod.route) {
+                val linkAccount = getLinkAccount()
+                    ?: return@composable dismissWithResult(noLinkAccountResult())
+                PaymentMethodRoute(linkAccount = linkAccount, dismissWithResult = dismissWithResult)
+            }
         }
     }
 }
@@ -255,6 +256,31 @@ private fun PaymentMethodRoute(
         )
     }
     PaymentMethodScreen(viewModel)
+}
+
+@Composable
+private fun WalletRoute(
+    linkAccount: LinkAccount,
+    navigate: (route: LinkScreen) -> Unit,
+    navigateAndClearStack: (route: LinkScreen) -> Unit,
+    dismissWithResult: (LinkActivityResult) -> Unit,
+    showBottomSheetContent: (BottomSheetContent?) -> Unit,
+    hideBottomSheetContent: () -> Unit,
+) {
+    val viewModel: WalletViewModel = linkViewModel { parentComponent ->
+        WalletViewModel.factory(
+            parentComponent = parentComponent,
+            linkAccount = linkAccount,
+            navigate = navigate,
+            navigateAndClearStack = navigateAndClearStack,
+            dismissWithResult = dismissWithResult
+        )
+    }
+    WalletScreen(
+        viewModel = viewModel,
+        showBottomSheetContent = showBottomSheetContent,
+        hideBottomSheetContent = hideBottomSheetContent
+    )
 }
 
 @Composable
