@@ -42,13 +42,6 @@ fun determineViewFinderCrop(
     previewBounds: Rect,
     viewFinder: Rect
 ): Rect {
-    require(
-        viewFinder.left >= previewBounds.left &&
-            viewFinder.right <= previewBounds.right &&
-            viewFinder.top >= previewBounds.top &&
-            viewFinder.bottom <= previewBounds.bottom
-    ) { "View finder $viewFinder is outside preview image bounds $previewBounds" }
-
     // Scale the cardFinder to match the full image
     return previewBounds
         .projectRegionOfInterest(
@@ -74,13 +67,6 @@ fun cropCameraPreviewToViewFinder(
     previewBounds: Rect,
     viewFinder: Rect
 ): Bitmap {
-    require(
-        viewFinder.left >= previewBounds.left &&
-            viewFinder.right <= previewBounds.right &&
-            viewFinder.top >= previewBounds.top &&
-            viewFinder.bottom <= previewBounds.bottom
-    ) { "View finder $viewFinder is outside preview image bounds $previewBounds" }
-
     return cameraPreviewImage.crop(
         determineViewFinderCrop(cameraPreviewImage.size(), previewBounds, viewFinder)
     )
