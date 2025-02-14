@@ -16,13 +16,10 @@ import com.android.ide.common.rendering.api.SessionParams
 import com.android.resources.NightMode
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.financialconnections.getMetadata
 import com.stripe.android.financialconnections.ui.LocalTopAppBarHost
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.utils.TimeZoneRule
-import org.junit.After
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -60,16 +57,6 @@ class PaparazziSampleScreenshotTest {
         // Needed to shrink the screenshot to the height of the composable
         renderingMode = SessionParams.RenderingMode.SHRINK,
     )
-
-    @Before
-    fun before() {
-        FeatureFlags.financialConnectionsDarkMode.setEnabled(true)
-    }
-
-    @After
-    fun after() {
-        FeatureFlags.financialConnectionsDarkMode.setEnabled(false)
-    }
 
     @Test
     fun preview_tests(
