@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## XX.XX.XX - 20XX-XX-XX
+### CardScan
+* [FIXED][10181](https://github.com/stripe/stripe-android/pull/10181) Attempted to fix a crash that happened on some devices with odd camera-to-screen ratios
 
 ## 21.4.2 - 2025-02-10
 Bug fixes and improvements.
