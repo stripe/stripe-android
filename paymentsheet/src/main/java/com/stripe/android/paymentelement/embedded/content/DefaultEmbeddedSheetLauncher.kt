@@ -94,6 +94,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             )
             return
         }
+        if (sheetStateHolder.sheetIsOpen) return
         sheetStateHolder.sheetIsOpen = true
         selectionHolder.setTemporary(code)
         val args = FormContract.Args(
@@ -112,6 +113,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         customerState: CustomerState,
         selection: PaymentSelection?,
     ) {
+        if (sheetStateHolder.sheetIsOpen) return
         sheetStateHolder.sheetIsOpen = true
         val args = ManageContract.Args(
             paymentMethodMetadata = paymentMethodMetadata,
