@@ -28,6 +28,10 @@
   <string name="stripe_blik_code">BLIK 코드</string>
   <!-- Label for Boleto Payment method Tax ID -->
   <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
+  <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
+  <string name="stripe_card_brand_not_accepted">(허용되지 않음)</string>
+  <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
+  <string name="stripe_card_brand_not_accepted_with_brand">%1$s(허용되지 않음)</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">계속하면 이 승인이 취소될 때까지 %2$s의 약관에 따라 이 결제 및 향후 결제에 대해 %1$s이(가) Cash App 계좌에서 인출하도록 승인하는 것입니다. 이는 Cash App 설정에서 언제든지 변경할 수 있습니다.</string>
   <!-- Title for the contact information section -->

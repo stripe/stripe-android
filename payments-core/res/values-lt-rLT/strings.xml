@@ -71,15 +71,15 @@
   <!-- Pay over time with Affirm copy -->
   <string name="stripe_affirm_buy_now_pay_later">Mokėkite vėliau naudodami &lt;img src=\"affirm\"&gt;.</string>
   <!-- Pay over time with Affirm copy without using logo image within text. -->
-  <string name="stripe_affirm_buy_now_pay_later_plaintext">Mokėkite vėliau naudodami „Affirm“.</string>
+  <string name="stripe_affirm_buy_now_pay_later_plaintext">Mokėkite vėliau naudodami \"Affirm\".</string>
   <!-- Label for Name on account field on form -->
   <string name="stripe_au_becs_account_name">Sąskaitos turėtojo vardas ir pavardė</string>
   <!-- Placeholder for AU BECS BSB number -->
   <string name="stripe_au_becs_bsb_number">BSB numeris</string>
   <!-- Legal text shown when using AUBECS. -->
-  <string name="stripe_au_becs_mandate">Pateikdami savo banko sąskaitos duomenis ir patvirtindami šį mokėjimą, jūs sutinkate su šiuo tiesioginio debeto prašymu ir &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;tiesioginio debeto prašymo paslaugų sutartimi&lt;/a&gt; bei įgaliojate „Stripe Payments Australia Pty Ltd“, ACN 160 180 343, tiesioginio debeto naudotojo ID numeris 507156 (toliau – „Stripe“) nurašyti nuo jūsų sąskaitos per masinę elektroninę tarpuskaitos sistemą (BECS) %s vardu (toliau – „Pardavėjas“) bet kokias sumas, atskirai jums nurodytas Pardavėjo. Jūs patvirtinate, kad esate sąskaitos turėtojas arba įgaliotas pasirašyti minėtą sąskaitą asmuo.</string>
+  <string name="stripe_au_becs_mandate">Pateikdami savo banko sąskaitos duomenis ir patvirtindami šį mokėjimą, jūs sutinkate su šiuo tiesioginio debeto prašymu ir &lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;tiesioginio debeto prašymo paslaugų sutartimi&lt;/a&gt; bei įgaliojate \"Stripe Payments Australia Pty Ltd\", ACN 160 180 343, tiesioginio debeto naudotojo ID numeris 507156 (toliau – \"Stripe\") nurašyti nuo jūsų sąskaitos per masinę elektroninę tarpuskaitos sistemą (BECS) %s vardu (toliau – \"Pardavėjas\") bet kokias sumas, atskirai jums nurodytas Pardavėjo. Jūs patvirtinate, kad esate sąskaitos turėtojas arba įgaliotas pasirašyti minėtą sąskaitą asmuo.</string>
   <!-- BECS Debit Widget - mandate acceptance -->
-  <string name="stripe_becs_mandate_acceptance">\n    Pateikdami banko sąskaitos duomenis ir patvirtindami šį mokėjimą, jūs sutinkate su šia\n    tiesioginio debeto užklausa ir tiesioginio debeto užklausos paslaugų sutartimi bei įgaliojate\n    „Stripe Payments Australia Pty Ltd“, ACN 160 180 343, tiesioginio debeto naudotojo ID numeris 507156,\n    (toliau – „Stripe“) nurašyti nuo jūsų sąskaitos per masinę elektroninę tarpuskaitos sistemą (BECS)\n    %1$s vardu (toliau – „Pardavėjas“) bet kokias sumas, atskirai jums nurodytas\n    Pardavėjo. Jūs patvirtinate, kad esate sąskaitos turėtojas arba įgaliotas\n    pasirašyti minėtą sąskaitą asmuo.\n    </string>
+  <string name="stripe_becs_mandate_acceptance">\n    Pateikdami banko sąskaitos duomenis ir patvirtindami šį mokėjimą, jūs sutinkate su šia\n    tiesioginio debeto užklausa ir tiesioginio debeto užklausos paslaugų sutartimi bei įgaliojate\n    \"Stripe Payments Australia Pty Ltd\", ACN 160 180 343, tiesioginio debeto naudotojo ID numeris 507156,\n    (toliau – \"Stripe\") nurašyti nuo jūsų sąskaitos per masinę elektroninę tarpuskaitos sistemą (BECS)\n    %1$s vardu (toliau – \"Pardavėjas\") bet kokias sumas, atskirai jums nurodytas\n    Pardavėjo. Jūs patvirtinate, kad esate sąskaitos turėtojas arba įgaliotas\n    pasirašyti minėtą sąskaitą asmuo.\n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
   <string name="stripe_becs_widget_account_number">Sąskaitos numeris</string>
   <!-- Error description for incomplete account number -->
@@ -122,7 +122,7 @@
   <string name="stripe_delete_payment_method">Pašalinti mokėjimo būdą?</string>
   <string name="stripe_delete_payment_method_prompt_title">Pašalinti mokėjimo būdą?</string>
   <!-- Error message for card entry form when a user enters a card with a brand that is not accepted. -->
-  <string name="stripe_disallowed_card_brand">„%s“ nepriimama</string>
+  <string name="stripe_disallowed_card_brand">\"%s\" nepriimama</string>
   <!-- Done button title -->
   <string name="stripe_done">Atlikta</string>
   <!-- Button title to enter editing mode -->

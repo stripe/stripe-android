@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- Button prompt to add a bank account as a payment method. -->
+  <string name="stripe_add_bank_account">Żid kont tal-bank</string>
   <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
   <string name="stripe_add_new_payment_method">Żid metodu tal-pagament ġdid</string>
+  <!-- Text for a button that, when tapped, displays another screen where the customer can add a new payment method -->
+  <string name="stripe_add_payment_method">Żid metodu tal-pagament</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_afterpay_subtitle">Ixtri issa jew ħallas iktar tard b\'Afterpay</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
@@ -18,8 +22,14 @@
   <string name="stripe_confirm_close_form_body">L-informazzjoni tal-pagament tiegħek mhux se tiġi merfugħa.</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_title">Trid tagħlaq din il-formola?</string>
+  <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_header">Erfa\' l-informazzjoni tiegħek biex tkun tista\' tħallas f\'pass wieħed grazzi għal Link</string>
+  <!-- Title of the logout action. -->
+  <string name="stripe_log_out">Oħroġ minn Link</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Seħħ żball. Iċċekkja l-konnessjoni tiegħek u erġa\' pprova.</string>
+  <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
+  <string name="stripe_pay_with_link">Ħallas b\'Link</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Meta tkompli tkun qed taqbel li tawtorizza l-pagamenti skont <terms>dar-regoli</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -133,8 +143,24 @@
   <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">Id-dettalji tad-debitu SEPA ma jistgħux jinbidlu.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Total: %s</string>
+  <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
+  <string name="stripe_pm_set_as_default">Qiegħed bħala l-metodu tal-pagament standard</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">Neħħi l-kont tal-bank li jispiċċa b\'%s</string>
+  <!-- Accessibility label for an action or a button that shows a menu. -->
+  <string name="stripe_show_menu">Uri l-menù</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_sign_up">Ingħaqad ma\' Link</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_sign_up_header">Ħlas sigur b\'mossa waħda</string>
+  <!-- Label describing the benefit of signing up for Link. Pay faster at {Merchant Name} and thousands of merchants. e.g, 'Pay faster at Example, Inc. and thousands of merchants.' -->
+  <string name="stripe_sign_up_message">Ħallas lil %s u lil eluf ta\' negozjanti oħra iktar malajr.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_sign_up_terms"><![CDATA[Meta tingħaqad ma\' Link tkun qed taqbel mat-<terms>Termini</terms> u l-<privacy>Politika tal-Privatezza</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative"><![CDATA[Meta tagħti l-indirizz tal-email tiegħek, tkun qed taqbel li toħloq kont Link u li terfa\' l-informazzjoni tal-pagament tiegħek ma\' Link, skont ir-<terms>Regoli</terms> u l-<privacy>Politika tal-Privatezza</privacy> ta\' Link.]]></string>
+  <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Meta tagħti n-numru tal-mowbajl tiegħek, tkun qed taqbel li toħloq kont Link u li terfa\' l-informazzjoni tal-pagament tiegħek ma\' Link, skont ir-<terms>Regoli</terms> u l-<privacy>Politika tal-Privatezza</privacy> ta\' Link.]]></string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">Xi ħaġa marret ħażin</string>
   <!-- Button text on a screen asking the user to approve a payment -->
@@ -147,10 +173,53 @@
   <string name="stripe_upi_polling_payment_failed_message">Jekk jogħġbok mur lura u agħżel metodu tal-pagament ieħor</string>
   <!-- Text on a screen that indicates a payment has failed -->
   <string name="stripe_upi_polling_payment_failed_title">Il-pagament ma rnexxiex</string>
+  <!-- Title for a button that allows the user to use a different email in the signup flow. -->
+  <string name="stripe_verification_change_email">Ibdel l-indirizz tal-email</string>
+  <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
+  <string name="stripe_verification_code_sent">Il-kodiċi ntbagħat</string>
   <!-- Two factor authentication screen heading -->
   <string name="stripe_verification_dialog_header">Ikkonferma li int min qed tgħid li int</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_header">Daħħal il-kodiċi ta\' verifika tiegħek</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_header_inline">Idħol fil-kont Link tiegħek</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_header_prefilled">Uża l-informazzjoni li għandek merfugħa biex tħallas iktar malajr</string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_verification_message">Daħħal il-kodiċi li bgħatna fuq %s biex tuża Link u tħallas bil-metodu tal-pagament standard.</string>
+  <!-- Text of a label for confirming an email address. E.g., 'Not user@example.com?' -->
+  <string name="stripe_verification_not_email">M\'intix %s?</string>
+  <!-- Label for a button that re-sends the a login code when tapped -->
+  <string name="stripe_verification_resend">Erġa\' ibgħat il-kodiċi</string>
   <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
   <string name="stripe_view_more">Uri iktar</string>
+  <!-- Mandate text displayed when paying via Link instant debit. -->
+  <string name="stripe_wallet_bank_account_terms"><![CDATA[Meta tkompli, inti taqbel li tawtorizza l-pagamenti skont dawn <terms>it-termini</terms>.]]></string>
+  <!-- Label for a section displaying payment details. -->
+  <string name="stripe_wallet_collapsed_payment">Pagament</string>
   <!-- Label for identifying the default payment method. -->
   <string name="stripe_wallet_default">Standard</string>
+  <string name="stripe_wallet_expand_accessibility">Ibdel l-għażla</string>
+  <!-- Title for a section listing one or more payment methods. -->
+  <string name="stripe_wallet_expanded_title">Metodi tal-pagament</string>
+  <!-- Accessibility description for Passthrough payment method -->
+  <string name="stripe_wallet_passthrough_description">Passthrough</string>
+  <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
+  <string name="stripe_wallet_pay_another_way">Ħallas mod ieħor</string>
+  <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
+  <string name="stripe_wallet_recollect_cvc_error">Għal raġunijiet ta\' sigurtà, jekk jogħġbok erġa\' daħħal il-kodiċi tas-sigurtà tal-karta tiegħek.</string>
+  <!-- Title of confirmation prompt when removing a linked bank account. -->
+  <string name="stripe_wallet_remove_account_confirmation">Żgur li tixtieq tneħħi dal-kont marbut?</string>
+  <!-- Title of confirmation prompt when removing a saved card. -->
+  <string name="stripe_wallet_remove_card_confirmation">Żgur li tixtieq tneħħi dil-karta?</string>
+  <!-- Title for a button that when tapped removes a linked bank account. -->
+  <string name="stripe_wallet_remove_linked_account">Neħħi l-kont marbut</string>
+  <!-- Label for a button or menu item that sets a payment method as default when tapped. -->
+  <string name="stripe_wallet_set_as_default">Qiegħed bħala standard</string>
+  <!-- Label shown when a payment method cannot be used for the current transaction. -->
+  <string name="stripe_wallet_unavailable">Mhux disponibbli għal dix-xirja</string>
+  <!-- Title for a button that when tapped, presents a screen for updating a card. Also the heading the screen itself. -->
+  <string name="stripe_wallet_update_card">Aġġorna l-karta</string>
+  <!-- A text notice shown when the user selects an expired card. -->
+  <string name="stripe_wallet_update_expired_card_error">Dil-karta skadiet. Aġġorna d-dettalji tal-karta tiegħek jew agħżel metodu tal-pagament ieħor.</string>
 </resources>
