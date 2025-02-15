@@ -6,6 +6,7 @@ import android.os.Parcelable
 import android.util.Log
 import androidx.compose.runtime.Stable
 import androidx.core.content.edit
+import com.stripe.android.core.utils.FeatureFlag
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.paymentelement.EmbeddedPaymentElement

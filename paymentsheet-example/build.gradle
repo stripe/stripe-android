@@ -101,7 +101,7 @@ shot {
 android {
     defaultConfig {
         applicationId "com.stripe.android.paymentsheet.example"
-        versionCode 14
+        versionCode 11
 
         testInstrumentationRunner "com.karumi.shot.ShotTestRunner"
 

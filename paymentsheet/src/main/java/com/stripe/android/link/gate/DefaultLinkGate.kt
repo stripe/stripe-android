@@ -8,28 +8,22 @@ import javax.inject.Inject
 internal class DefaultLinkGate @Inject constructor(
     private val configuration: LinkConfiguration
 ) : LinkGate {
+
     override val useNativeLink: Boolean
         get() {
-            if (configuration.stripeIntent.isLiveMode) {
-                return useAttestationEndpoints
-            }
-            return when (FeatureFlags.nativeLinkEnabled.value) {
-                FeatureFlag.Flag.Disabled -> false
-                FeatureFlag.Flag.Enabled -> true
-                FeatureFlag.Flag.NotSet -> useAttestationEndpoints
-            }
+            return configuration.useAttestationEndpointsForLink
+//            if (configuration.stripeIntent.isLiveMode) {
+//                return configuration.useAttestationEndpointsForLink
+//            }
+//            return when (FeatureFlags.nativeLinkEnabled.value) {
+//                FeatureFlag.Flag.Disabled -> false
+//                FeatureFlag.Flag.Enabled, FeatureFlag.Flag.NotSet -> true
+//            }
         }
 
     override val useAttestationEndpoints: Boolean
         get() {
-            if (configuration.stripeIntent.isLiveMode) {
-                return configuration.useAttestationEndpointsForLink
-            }
-            return when (FeatureFlags.nativeLinkAttestationEnabled.value) {
-                FeatureFlag.Flag.Disabled -> false
-                FeatureFlag.Flag.Enabled -> true
-                FeatureFlag.Flag.NotSet -> configuration.useAttestationEndpointsForLink
-            }
+            return configuration.useAttestationEndpointsForLink
         }
 
     override val suppress2faModal: Boolean

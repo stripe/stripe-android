@@ -24,9 +24,6 @@ class FeatureFlag(
 
     val value: Flag
         get() {
-            if (BuildConfig.DEBUG.not()) {
-                return Flag.NotSet
-            }
             return when (overrideEnabledValue) {
                 true -> Flag.Enabled
                 false -> Flag.Disabled

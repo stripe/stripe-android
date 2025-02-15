@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.model
 
+import com.stripe.android.core.utils.FeatureFlag
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.serialization.SerialName
