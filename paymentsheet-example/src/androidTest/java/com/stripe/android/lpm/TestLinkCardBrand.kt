@@ -13,7 +13,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.CurrencySetti
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.LinkMode
-import com.stripe.android.paymentsheet.example.playground.settings.LinkTypeSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.LinkModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TEST_TAG_ACCOUNT_DETAILS
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
@@ -34,7 +34,7 @@ internal class TestLinkCardBrand : BasePlaygroundTest() {
         settings[CurrencySettingsDefinition] = Currency.USD
         settings[AutomaticPaymentMethodsSettingsDefinition] = false
         settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.On
-        settings[LinkTypeSettingsDefinition] = LinkMode.Test
+        settings[LinkModeSettingsDefinition] = LinkMode.Test
         settings[SupportedPaymentMethodsSettingsDefinition] = "card"
     }
 

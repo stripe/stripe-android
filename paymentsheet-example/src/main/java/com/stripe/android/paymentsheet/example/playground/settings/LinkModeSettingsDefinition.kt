@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.example.playground.settings
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 
-internal object LinkTypeSettingsDefinition :
+internal object LinkModeSettingsDefinition :
     PlaygroundSettingDefinition<LinkMode>,
     PlaygroundSettingDefinition.Saveable<LinkMode> by EnumSaveable(
         key = "LinkMode",
