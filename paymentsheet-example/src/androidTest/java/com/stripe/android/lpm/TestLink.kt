@@ -6,8 +6,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.LinkSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.LinkType
+import com.stripe.android.paymentsheet.example.playground.settings.LinkMode
 import com.stripe.android.paymentsheet.example.playground.settings.LinkTypeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.test.core.TestParameters
@@ -20,7 +19,7 @@ internal class TestLink : BasePlaygroundTest() {
     private val linkNewUser = TestParameters.create(
         paymentMethodCode = "card",
     ) { settings ->
-        settings[LinkSettingsDefinition] = true
+        settings[LinkTypeSettingsDefinition] = LinkMode.Test
     }
 
     @Test
@@ -47,7 +46,7 @@ internal class TestLink : BasePlaygroundTest() {
         ) { settings ->
             settings[SupportedPaymentMethodsSettingsDefinition] = if (passthroughMode) "card" else "card,link"
             settings[CountrySettingsDefinition] = Country.US
-            settings[LinkTypeSettingsDefinition] = LinkType.Native
+            settings[LinkTypeSettingsDefinition] = LinkMode.Native
             settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.On
         }
     }

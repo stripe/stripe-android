@@ -9,10 +9,7 @@ internal class DefaultLinkGate @Inject constructor(
 ) : LinkGate {
     override val useNativeLink: Boolean
         get() {
-//            if (configuration.stripeIntent.isLiveMode.not()) {
-//                return true
-//            }
-            return false
+            return useAttestationEndpoints
         }
 
     override val useAttestationEndpoints: Boolean
