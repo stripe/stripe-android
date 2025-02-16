@@ -136,6 +136,7 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
+            appId = "com.app.id"
         ).get(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "client_secret",
@@ -168,6 +169,7 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
+            appId = "com.app.id"
         ).get(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
@@ -200,6 +202,7 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
+            appId = "com.app.id"
         ).get(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
@@ -237,6 +240,7 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
+            appId = "com.app.id"
         )
 
         repository.get(
@@ -258,6 +262,7 @@ internal class ElementsSessionRepositoryTest {
                     customerSessionClientSecret = "customer_session_client_secret",
                     externalPaymentMethods = emptyList(),
                     savedPaymentMethodSelectionId = null,
+                    appId = "com.app.id"
                 )
             ),
             options = any()
@@ -281,6 +286,7 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
+            appId = "com.app.id"
         )
 
         repository.get(
@@ -298,6 +304,7 @@ internal class ElementsSessionRepositoryTest {
                     clientSecret = "client_secret",
                     externalPaymentMethods = emptyList(),
                     savedPaymentMethodSelectionId = "pm_123",
+                    appId = "com.app.id"
                 )
             ),
             options = any()
@@ -308,6 +315,7 @@ internal class ElementsSessionRepositoryTest {
         stripeRepository,
         { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
         testDispatcher,
+        appId = "com.app.id"
     )
 
     private inline fun <T> withLocale(locale: Locale, block: () -> T): T {

@@ -29,7 +29,6 @@ import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.createTestActivityRule
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
@@ -56,12 +55,6 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
     @get:Rule
     val paymentConfigurationTestRule = PaymentConfigurationTestRule(
         context = application,
-    )
-
-    @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.nativeLinkEnabled,
-        isEnabled = false
     )
 
     @Test
@@ -132,8 +125,6 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
     private fun test(
         test: suspend PaymentElementConfirmationTestActivity.() -> Unit
     ) = runTest(UnconfinedTestDispatcher()) {
-        featureFlagTestRule.setEnabled(nativeLinkEnabled)
-
         val countDownLatch = CountDownLatch(1)
 
         ActivityScenario.launch<PaymentElementConfirmationTestActivity>(

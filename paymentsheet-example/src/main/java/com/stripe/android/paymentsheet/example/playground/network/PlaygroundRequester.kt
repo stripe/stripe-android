@@ -46,6 +46,7 @@ internal class PlaygroundRequester(
 
             is Result.Success -> {
                 val checkoutResponse = apiResponse.value
+                println("TOLUWANI => ${checkoutResponse.publishableKey}")
                 println("StripeIntent ${checkoutResponse.intentClientSecret.substringBefore("_secret_")}")
 
                 // Init PaymentConfiguration with the publishable key returned from the backend,
