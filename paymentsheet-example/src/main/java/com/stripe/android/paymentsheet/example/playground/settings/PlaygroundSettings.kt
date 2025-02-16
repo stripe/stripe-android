@@ -426,7 +426,6 @@ internal class PlaygroundSettings private constructor(
             CustomerSessionOverrideRedisplaySettingsDefinition,
             CustomerSettingsDefinition,
             CheckoutModeSettingsDefinition,
-            LinkSettingsDefinition,
             LinkTypeSettingsDefinition,
             CountrySettingsDefinition,
             CurrencySettingsDefinition,
