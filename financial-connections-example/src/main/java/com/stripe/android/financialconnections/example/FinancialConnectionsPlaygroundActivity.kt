@@ -170,7 +170,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         when (experience) {
             FinancialConnections -> collectBankAccountForAchLauncher.presentWithPaymentIntent(
                 publishableKey = publishableKey,
-                stripeAccountId = null,
+                stripeAccountId = stripeAccountId,
                 clientSecret = paymentIntentSecret,
                 configuration = CollectBankAccountConfiguration.USBankAccount(
                     name = "Sample name",
@@ -180,7 +180,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
             InstantDebits,
             LinkCardBrand -> collectBankAccountForInstantDebitsLauncher.presentWithPaymentIntent(
                 publishableKey = publishableKey,
-                stripeAccountId = null,
+                stripeAccountId = stripeAccountId,
                 clientSecret = paymentIntentSecret,
                 configuration = CollectBankAccountConfiguration.InstantDebits(
                     email = email,
@@ -196,7 +196,8 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
     ) {
         PaymentConfiguration.init(
             context = this@FinancialConnectionsPlaygroundActivity,
-            publishableKey = publishableKey
+            publishableKey = publishableKey,
+            stripeAccountId = stripeAccountId,
         )
 
         val config = PaymentSheet.Configuration(
