@@ -16,6 +16,7 @@ import com.stripe.android.link.RealLinkConfigurationCoordinator
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.gate.DefaultLinkGate
 import com.stripe.android.link.gate.LinkGate
+import com.stripe.android.link.injection.ApplicationIdModule
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
@@ -53,6 +54,7 @@ import kotlin.coroutines.CoroutineContext
         GooglePayLauncherModule::class,
         ExtendedPaymentElementConfirmationModule::class,
         EmbeddedCommonModule::class,
+        ApplicationIdModule::class
     ],
 )
 internal interface EmbeddedPaymentElementViewModelComponent {

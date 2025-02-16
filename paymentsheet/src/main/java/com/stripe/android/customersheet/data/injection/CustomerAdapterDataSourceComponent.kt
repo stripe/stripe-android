@@ -9,6 +9,7 @@ import com.stripe.android.customersheet.data.CustomerSheetIntentDataSource
 import com.stripe.android.customersheet.data.CustomerSheetPaymentMethodDataSource
 import com.stripe.android.customersheet.data.CustomerSheetSavedSelectionDataSource
 import com.stripe.android.customersheet.injection.CustomerSheetDataCommonModule
+import com.stripe.android.link.injection.ApplicationIdModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
@@ -23,6 +24,7 @@ import javax.inject.Singleton
         StripeRepositoryModule::class,
         CoroutineContextModule::class,
         CoreCommonModule::class,
+        ApplicationIdModule::class
     ]
 )
 internal interface CustomerAdapterDataSourceComponent {
