@@ -2370,7 +2370,7 @@ internal class StripeApiRepositoryTest {
             params = ElementsSessionParams.PaymentIntentType(
                 clientSecret = "client_secret",
                 externalPaymentMethods = emptyList(),
-                appId = "com.app.id"
+                appId = APP_ID
             ),
             options = DEFAULT_OPTIONS,
         )
@@ -2386,7 +2386,7 @@ internal class StripeApiRepositoryTest {
             assertThat(this["type"]).isEqualTo("payment_intent")
             assertThat(this["locale"]).isEqualTo("en-US")
             assertThat(this["client_secret"]).isEqualTo("client_secret")
-            assertThat(this["mobile_app_id"]).isEqualTo("com.app.id")
+            assertThat(this["mobile_app_id"]).isEqualTo(APP_ID)
         }
     }
 
@@ -2405,7 +2405,7 @@ internal class StripeApiRepositoryTest {
                 params = ElementsSessionParams.PaymentIntentType(
                     clientSecret = "client_secret",
                     externalPaymentMethods = externalPaymentMethods,
-                    appId = "com.app.id"
+                    appId = APP_ID
                 ),
                 options = DEFAULT_OPTIONS,
             )
@@ -2422,7 +2422,7 @@ internal class StripeApiRepositoryTest {
                 assertThat(this["locale"]).isEqualTo("en-US")
                 assertThat(this["client_secret"]).isEqualTo("client_secret")
                 assertThat(this["external_payment_methods"]).isEqualTo(externalPaymentMethods)
-                assertThat(this["mobile_app_id"]).isEqualTo("com.app.id")
+                assertThat(this["mobile_app_id"]).isEqualTo(APP_ID)
             }
         }
 
@@ -2441,7 +2441,7 @@ internal class StripeApiRepositoryTest {
                 params = ElementsSessionParams.PaymentIntentType(
                     clientSecret = "client_secret",
                     externalPaymentMethods = externalPaymentMethods,
-                    appId = "com.app.id"
+                    appId = APP_ID
                 ),
                 options = DEFAULT_OPTIONS,
             )
@@ -2458,7 +2458,7 @@ internal class StripeApiRepositoryTest {
                 assertThat(this["locale"]).isEqualTo("en-US")
                 assertThat(this["client_secret"]).isEqualTo("client_secret")
                 assertThat(this["external_payment_methods"]).isNull()
-                assertThat(this["mobile_app_id"]).isEqualTo("com.app.id")
+                assertThat(this["mobile_app_id"]).isEqualTo(APP_ID)
             }
         }
 
@@ -2477,7 +2477,7 @@ internal class StripeApiRepositoryTest {
                 clientSecret = "client_secret",
                 customerSessionClientSecret = null,
                 externalPaymentMethods = emptyList(),
-                appId = "com.app.id"
+                appId = APP_ID
             ),
             options = DEFAULT_OPTIONS,
         )
@@ -2493,7 +2493,7 @@ internal class StripeApiRepositoryTest {
             assertThat(this["type"]).isEqualTo("payment_intent")
             assertThat(this["locale"]).isEqualTo("en-US")
             assertThat(this["customer_session_client_secret"]).isNull()
-            assertThat(this["mobile_app_id"]).isEqualTo("com.app.id")
+            assertThat(this["mobile_app_id"]).isEqualTo(APP_ID)
         }
     }
 
@@ -2512,7 +2512,7 @@ internal class StripeApiRepositoryTest {
                 clientSecret = "client_secret",
                 customerSessionClientSecret = "customer_session_client_secret",
                 externalPaymentMethods = emptyList(),
-                appId = "com.app.id"
+                appId = APP_ID
             ),
             options = DEFAULT_OPTIONS,
         )
@@ -2528,7 +2528,7 @@ internal class StripeApiRepositoryTest {
             assertThat(this["type"]).isEqualTo("payment_intent")
             assertThat(this["locale"]).isEqualTo("en-US")
             assertThat(this["customer_session_client_secret"]).isEqualTo("customer_session_client_secret")
-            assertThat(this["mobile_app_id"]).isEqualTo("com.app.id")
+            assertThat(this["mobile_app_id"]).isEqualTo(APP_ID)
         }
     }
 
@@ -2546,7 +2546,7 @@ internal class StripeApiRepositoryTest {
             params = ElementsSessionParams.SetupIntentType(
                 clientSecret = "client_secret",
                 externalPaymentMethods = emptyList(),
-                appId = "com.app.id"
+                appId = APP_ID
             ),
             options = DEFAULT_OPTIONS,
         )
@@ -2563,7 +2563,7 @@ internal class StripeApiRepositoryTest {
             assertThat(this["type"]).isEqualTo("setup_intent")
             assertThat(this["locale"]).isEqualTo("en-US")
             assertThat(this["client_secret"]).isEqualTo("client_secret")
-            assertThat(this["mobile_app_id"]).isEqualTo("com.app.id")
+            assertThat(this["mobile_app_id"]).isEqualTo(APP_ID)
         }
     }
 
@@ -2582,7 +2582,7 @@ internal class StripeApiRepositoryTest {
                 clientSecret = "client_secret",
                 externalPaymentMethods = emptyList(),
                 savedPaymentMethodSelectionId = "pm_123",
-                appId = "com.app.id"
+                appId = APP_ID
             ),
             options = DEFAULT_OPTIONS,
         )
@@ -2598,7 +2598,7 @@ internal class StripeApiRepositoryTest {
             assertThat(this["type"]).isEqualTo("payment_intent")
             assertThat(this["locale"]).isEqualTo("en-US")
             assertThat(this["client_default_payment_method"]).isEqualTo("pm_123")
-            assertThat(this["mobile_app_id"]).isEqualTo("com.app.id")
+            assertThat(this["mobile_app_id"]).isEqualTo(APP_ID)
         }
     }
 
@@ -2617,7 +2617,7 @@ internal class StripeApiRepositoryTest {
                 clientSecret = "client_secret",
                 savedPaymentMethodSelectionId = null,
                 externalPaymentMethods = emptyList(),
-                appId = "com.app.id"
+                appId = APP_ID
             ),
             options = DEFAULT_OPTIONS,
         )
@@ -2633,7 +2633,7 @@ internal class StripeApiRepositoryTest {
             assertThat(this["type"]).isEqualTo("payment_intent")
             assertThat(this["locale"]).isEqualTo("en-US")
             assertThat(this["client_default_payment_method"]).isNull()
-            assertThat(this["mobile_app_id"]).isEqualTo("com.app.id")
+            assertThat(this["mobile_app_id"]).isEqualTo(APP_ID)
         }
     }
 
@@ -2661,7 +2661,7 @@ internal class StripeApiRepositoryTest {
                     onBehalfOf = null,
                 ),
                 externalPaymentMethods = emptyList(),
-                appId = "com.app.id"
+                appId = APP_ID
             ),
             options = DEFAULT_OPTIONS,
         )
@@ -2677,7 +2677,7 @@ internal class StripeApiRepositoryTest {
         with(params) {
             assertThat(this["type"]).isEqualTo("deferred_intent")
             assertThat(this["locale"]).isEqualTo("en-US")
-            assertThat(this["mobile_app_id"]).isEqualTo("com.app.id")
+            assertThat(this["mobile_app_id"]).isEqualTo(APP_ID)
             assertThat(this["deferred_intent[mode]"]).isEqualTo("payment")
             assertThat(this["deferred_intent[amount]"]).isEqualTo(2000L)
             assertThat(this["deferred_intent[currency]"]).isEqualTo("usd")
@@ -2909,5 +2909,6 @@ internal class StripeApiRepositoryTest {
         private val DEFAULT_OPTIONS = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
 
         private val DEFAULT_API_REQUEST_FACTORY = ApiRequest.Factory()
+        private const val APP_ID = "com.app.id"
     }
 }
