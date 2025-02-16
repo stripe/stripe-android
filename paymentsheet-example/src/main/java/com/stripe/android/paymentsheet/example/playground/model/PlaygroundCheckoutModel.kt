@@ -24,6 +24,8 @@ class CheckoutRequest private constructor(
     val automaticPaymentMethods: Boolean?,
     @SerialName("use_link")
     val useLink: Boolean?,
+    @SerialName("link_mode")
+    val linkMode: String?,
     @SerialName("merchant_country_code")
     val merchantCountryCode: String?,
     @SerialName("supported_payment_methods")
@@ -67,6 +69,7 @@ class CheckoutRequest private constructor(
         private var setShippingAddress: Boolean? = null
         private var automaticPaymentMethods: Boolean? = null
         private var useLink: Boolean? = null
+        private var linkMode: String? = null
         private var merchantCountryCode: String? = null
         private var supportedPaymentMethods: List<String>? = null
         private var paymentMethodConfigurationId: String? = null
@@ -113,6 +116,10 @@ class CheckoutRequest private constructor(
 
         fun useLink(useLink: Boolean?) = apply {
             this.useLink = useLink
+        }
+
+        fun linkMode(linkMode: String?) = apply {
+            this.linkMode = linkMode
         }
 
         fun merchantCountryCode(merchantCountryCode: String?) = apply {
@@ -169,6 +176,7 @@ class CheckoutRequest private constructor(
                 setShippingAddress = setShippingAddress,
                 automaticPaymentMethods = automaticPaymentMethods,
                 useLink = useLink,
+                linkMode = linkMode,
                 merchantCountryCode = merchantCountryCode,
                 supportedPaymentMethods = supportedPaymentMethods,
                 paymentMethodConfigurationId = paymentMethodConfigurationId,

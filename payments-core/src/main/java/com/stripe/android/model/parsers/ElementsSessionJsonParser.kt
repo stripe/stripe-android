@@ -140,6 +140,7 @@ internal class ElementsSessionJsonParser(
         json: JSONObject?,
         linkFundingSources: JSONArray?,
     ): ElementsSession.LinkSettings {
+        println("TOLUWANI => $json")
         val disableLinkSignup = json?.optBoolean(FIELD_DISABLE_LINK_SIGNUP) ?: false
         val linkPassthroughModeEnabled = json?.optBoolean(FIELD_LINK_PASSTHROUGH_MODE_ENABLED) ?: false
         val useLinkAttestationEndpoints = json?.optBoolean(FIELD_USE_LINK_ATTESTATION_ENDPOINTS) ?: false

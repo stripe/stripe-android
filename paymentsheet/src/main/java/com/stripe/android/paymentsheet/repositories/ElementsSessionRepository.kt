@@ -4,6 +4,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.di.APPLICATION_ID
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.link.injection.APPLICATION_ID
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
