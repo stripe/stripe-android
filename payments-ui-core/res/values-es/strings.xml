@@ -105,6 +105,8 @@
   <string name="stripe_scan_card">Escanear tarjeta</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Al facilitarnos la información del pago y al confirmar este pago, autorizas a (A) %s y a Stripe, nuestro proveedor de servicios de pago, a enviar instrucciones a tu banco para adeudar tu cuenta y (B) a tu banco para efectuar los adeudos en tu cuenta siguiendo dichas instrucciones. Como parte de tus derechos, estás legitimado al rembolso por parte de tu banco en los términos y condiciones del contrato suscrito con este. La solicitud del reembolso deberá efectuarse dentro de las ocho semanas posteriores a la fecha de adeudo en cuenta. Tus derechos se explican en una declaración que puedes obtener en tu banco. Aceptas recibir notificaciones sobre próximos adeudos con hasta dos días de antelación a que estos ocurran.</string>
+  <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
+  <string name="stripe_set_as_default_payment_method">Establecer como método de pago predeterminado</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Configurar</string>
   <!-- Label for UPI ID number field on form -->

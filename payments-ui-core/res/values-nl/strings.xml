@@ -105,6 +105,8 @@
   <string name="stripe_scan_card">Betaalkaart scannen</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Door je betaalgegevens op te geven en deze betaling te bevestigen geef je toestemming aan (A) %s en Stripe, onze betaaldienstverlener, een opdracht te sturen aan je bank om je rekening te debiteren en aan (B) je bank om je rekening te debiteren conform deze opdracht. Je hebt het recht op terugbetaling door je bank conform de met je bank overeengekomen voorwaarden. Een verzoek tot terugbetaling moet worden ingediend binnen 8 weken vanaf de datum waarop je rekening is gedebiteerd. Je rechten worden uitgelegd in een verklaring die je kunt opvragen bij je bank. Je stemt ermee in dat je minstens 2 dagen voor de uitvoering van toekomstige debiteringen hierover op de hoogte wordt gesteld.</string>
+  <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
+  <string name="stripe_set_as_default_payment_method">Instellen als standaardbetaalmethode</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Instellen</string>
   <!-- Label for UPI ID number field on form -->

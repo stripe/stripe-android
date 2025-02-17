@@ -32,7 +32,7 @@
   <!-- Button to complete with test data -->
   <string name="stripe_complete_with_test_data">Užpildyti bandymo duomenimis</string>
   <!-- Description for complete button on test mode -->
-  <string name="stripe_complete_with_test_data_details">Sutaupykite laiko pasirinkdami norimą rezultatą ir atitinkamai automatiškai užbaigdami pildymo procesą. Mobilusis SDK grąžins būseną „Baigta“.</string>
+  <string name="stripe_complete_with_test_data_details">Sutaupykite laiko pasirinkdami norimą rezultatą ir atitinkamai automatiškai užbaigdami pildymo procesą. Mobilusis SDK grąžins būseną \"Baigta\".</string>
   <!-- Line1 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body1">Nepavyko užfiksuoti aukštos kokybės vaizdo.</string>
   <!-- Line2 body text of error screen when live capture fails -->
@@ -51,9 +51,9 @@
   <!-- Content description for cloud icon -->
   <string name="stripe_description_cloud">debesies piktograma</string>
   <!-- Content description for create_identity_verification icon -->
-  <string name="stripe_description_create_identity_verification">„create_identity_verification“ piktograma</string>
+  <string name="stripe_description_create_identity_verification">\"create_identity_verification\" piktograma</string>
   <!-- Content description for dispute_protection icon -->
-  <string name="stripe_description_dispute_protection">„dispute_protection“ piktograma</string>
+  <string name="stripe_description_dispute_protection">\"dispute_protection\" piktograma</string>
   <!-- Content description for document icon -->
   <string name="stripe_description_document">dokumento piktograma</string>
   <!-- Content description for ellipsis icon -->
@@ -75,7 +75,7 @@
   <!-- Content description for the icon for privacy policy -->
   <string name="stripe_description_privacy_policy">privatumo politikos piktograma</string>
   <!-- Content description for stripe logo -->
-  <string name="stripe_description_stripe_logo">„Stripe“ logotipas</string>
+  <string name="stripe_description_stripe_logo">\"Stripe\" logotipas</string>
   <!-- Content description for the icon for estimated time to complete verification -->
   <string name="stripe_description_time_estimate">numatomo laiko patvirtinimui atlikti piktograma</string>
   <!-- Content description for wallet icon -->
