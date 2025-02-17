@@ -1,0 +1,97 @@
+apply from: configs.androidLibrary
+
+apply plugin: 'checkstyle'
+apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
+apply plugin: 'kotlinx-serialization'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
+apply plugin: 'app.cash.paparazzi'
+apply plugin: 'com.google.devtools.ksp'
+
+android {
+    defaultConfig {
+        testApplicationId "com.stripe.android.form.test"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
+}
+
+dependencies {
+    api project(":stripe-core")
+    api project(":stripe-ui-core")
+    implementation project(":payments-core")
+    api project(":payments-model")
+
+    implementation libs.androidx.activity
+    implementation libs.androidx.annotation
+    implementation libs.androidx.appCompat
+    implementation libs.androidx.browser
+    implementation libs.androidx.lifecycle
+    implementation libs.androidx.savedState
+    implementation libs.androidx.viewModel
+    implementation libs.compose.activity
+    implementation libs.compose.foundation
+    implementation libs.compose.material
+    implementation libs.compose.materialIcons
+    implementation libs.compose.navigation
+    implementation libs.compose.ui
+    implementation libs.compose.uiToolingPreview
+    implementation libs.showkaseAnnotation
+    implementation libs.dagger
+    implementation libs.kotlin.coroutines
+    implementation libs.kotlin.coroutinesAndroid
+    implementation libs.kotlin.serialization
+
+    debugImplementation libs.compose.uiTestManifest
+    debugImplementation libs.compose.uiTooling
+    debugImplementation libs.showkase
+
+    ksp libs.daggerCompiler
+
+    kspDebug libs.showkaseProcessor
+
+    testImplementation testLibs.androidx.archCore
+    testImplementation testLibs.androidx.core
+    testImplementation testLibs.androidx.fragment
+    testImplementation testLibs.androidx.junit
+    testImplementation testLibs.json
+    testImplementation testLibs.junit
+    testImplementation testLibs.kotlin.annotations
+    testImplementation testLibs.kotlin.coroutines
+    testImplementation testLibs.kotlin.junit
+    testImplementation testLibs.mockito.core
+    testImplementation testLibs.mockito.inline
+    testImplementation testLibs.mockito.kotlin
+    testImplementation testLibs.robolectric
+    testImplementation testLibs.testParameterInjector
+    testImplementation testLibs.turbine
+    testImplementation testLibs.truth
+
+    androidTestImplementation testLibs.androidx.composeUi
+    androidTestImplementation testLibs.androidx.testRules
+    androidTestImplementation testLibs.androidx.testRunner
+    androidTestImplementation testLibs.espresso.core
+    androidTestImplementation testLibs.espresso.intents
+    androidTestImplementation testLibs.truth
+
+    kspAndroidTest libs.showkaseProcessor
+
+    androidTestUtil testLibs.testOrchestrator
+}
+
+android {
+    buildFeatures {
+        compose true
+    }
+
+    kotlinOptions {
+        freeCompilerArgs += [
+                "-opt-in=kotlin.RequiresOptIn",
+                "-opt-in=androidx.compose.material.ExperimentalMaterialApi",
+                "-Xconsistent-data-class-copy-visibility",
+        ]
+    }
+}
