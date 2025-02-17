@@ -1,11 +1,11 @@
 package com.stripe.android.link.injection
 
+import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.gate.LinkGate
-import com.stripe.android.link.injection.NativeLinkComponent.Builder
 import dagger.BindsInstance
 import dagger.Subcomponent
 import javax.inject.Scope
