@@ -6,6 +6,7 @@ import android.content.res.Resources
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.RealUserFacingLogger
@@ -16,7 +17,6 @@ import com.stripe.android.link.RealLinkConfigurationCoordinator
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.gate.DefaultLinkGate
 import com.stripe.android.link.gate.LinkGate
-import com.stripe.android.link.injection.ApplicationIdModule
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi

@@ -1,4 +1,4 @@
-package com.stripe.android.link.injection
+package com.stripe.android.common.di
 
 import android.app.Application
 import dagger.Module
@@ -15,3 +15,5 @@ internal object ApplicationIdModule {
         return application.packageName
     }
 }
+
+internal const val APPLICATION_ID = "application_id"

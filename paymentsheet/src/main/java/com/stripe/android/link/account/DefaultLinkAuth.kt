@@ -1,8 +1,8 @@
 package com.stripe.android.link.account
 
+import com.stripe.android.common.di.APPLICATION_ID
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.link.gate.LinkGate
-import com.stripe.android.link.injection.APPLICATION_ID
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.model.EmailSource
