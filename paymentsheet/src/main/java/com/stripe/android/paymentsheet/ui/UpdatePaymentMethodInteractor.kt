@@ -15,6 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
@@ -27,6 +28,7 @@ internal interface UpdatePaymentMethodInteractor {
     val isExpiredCard: Boolean
     val isModifiablePaymentMethod: Boolean
     val hasValidBrandChoices: Boolean
+    val shouldShowSetAsDefaultCheckbox: Boolean
 
     val state: StateFlow<State>
 
@@ -35,6 +37,7 @@ internal interface UpdatePaymentMethodInteractor {
         val status: Status,
         val cardBrandChoice: CardBrandChoice,
         val cardBrandHasBeenChanged: Boolean,
+        val setAsDefaultCheckboxChecked: Boolean,
     )
 
     enum class Status {
@@ -51,6 +54,7 @@ internal interface UpdatePaymentMethodInteractor {
         data class BrandChoiceChanged(val cardBrandChoice: CardBrandChoice) : ViewAction()
         data object BrandChoiceOptionsDismissed : ViewAction()
         data object SaveButtonPressed : ViewAction()
+        data class SetAsDefaultCheckboxChanged(val isChecked: Boolean) : ViewAction()
     }
 
     companion object {
@@ -74,10 +78,11 @@ internal typealias PaymentMethodUpdateOperation = suspend (
 ) -> Result<PaymentMethod>
 
 internal class DefaultUpdatePaymentMethodInteractor(
-    private val isLiveMode: Boolean,
+    isLiveMode: Boolean,
     override val canRemove: Boolean,
     override val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     override val cardBrandFilter: CardBrandFilter,
+    shouldShowSetAsDefaultCheckbox: Boolean,
     private val removeExecutor: PaymentMethodRemoveOperation,
     private val updateExecutor: PaymentMethodUpdateOperation,
     private val onBrandChoiceOptionsShown: (CardBrand) -> Unit,
@@ -89,7 +94,15 @@ internal class DefaultUpdatePaymentMethodInteractor(
     private val status = MutableStateFlow(UpdatePaymentMethodInteractor.Status.Idle)
     private val cardBrandChoice = MutableStateFlow(getInitialCardBrandChoice())
     private val cardBrandHasBeenChanged = MutableStateFlow(false)
+    private val setAsDefaultCheckboxChecked = MutableStateFlow(false)
     private val savedCardBrand = MutableStateFlow(getInitialCardBrandChoice())
+
+    // We don't yet support setting SEPA payment methods as defaults, so we hide the checkbox for now.
+    override val shouldShowSetAsDefaultCheckbox = (
+        shouldShowSetAsDefaultCheckbox &&
+            displayableSavedPaymentMethod.savedPaymentMethod !is SavedPaymentMethod.SepaDebit
+        )
+
     override val hasValidBrandChoices = hasValidBrandChoices()
     override val isExpiredCard = paymentMethodIsExpiredCard()
     override val screenTitle: ResolvableString? = UpdatePaymentMethodInteractor.screenTitle(
@@ -108,12 +121,14 @@ internal class DefaultUpdatePaymentMethodInteractor(
         status,
         cardBrandChoice,
         cardBrandHasBeenChanged,
-    ) { error, status, cardBrandChoice, cardBrandHasBeenChanged ->
+        setAsDefaultCheckboxChecked,
+    ) { error, status, cardBrandChoice, cardBrandHasBeenChanged, setAsDefaultCheckboxChecked ->
         UpdatePaymentMethodInteractor.State(
             error = error,
             status = status,
             cardBrandChoice = cardBrandChoice,
             cardBrandHasBeenChanged = cardBrandHasBeenChanged,
+            setAsDefaultCheckboxChecked = setAsDefaultCheckboxChecked,
         )
     }
     override val state = _state
@@ -130,6 +145,9 @@ internal class DefaultUpdatePaymentMethodInteractor(
             UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed -> savePaymentMethod()
             is UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged -> onBrandChoiceChanged(
                 viewAction.cardBrandChoice
+            )
+            is UpdatePaymentMethodInteractor.ViewAction.SetAsDefaultCheckboxChanged -> onSetAsDefaultCheckboxChanged(
+                isChecked = viewAction.isChecked
             )
         }
     }
@@ -170,6 +188,10 @@ internal class DefaultUpdatePaymentMethodInteractor(
         this.cardBrandHasBeenChanged.value = cardBrandChoice != savedCardBrand.value
 
         onBrandChoiceOptionsDismissed(cardBrandChoice.brand)
+    }
+
+    private fun onSetAsDefaultCheckboxChanged(isChecked: Boolean) {
+        setAsDefaultCheckboxChecked.update { isChecked }
     }
 
     private fun getInitialCardBrandChoice(): CardBrandChoice {

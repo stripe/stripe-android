@@ -65,6 +65,12 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
                     selectedBrand = it
                 )
             },
+            shouldShowSetAsDefaultCheckbox = (
+                paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true &&
+                    !displayableSavedPaymentMethod.isDefaultPaymentMethod(
+                        defaultPaymentMethodId = customerStateHolder.customer.value?.defaultPaymentMethodId
+                    )
+                ),
         )
     }
 }
