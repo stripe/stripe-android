@@ -529,11 +529,10 @@ class CustomerAdapterDataSourceTest {
         assertThat(customerSheetSession.paymentMethodSaveConsentBehavior).isEqualTo(
             PaymentMethodSaveConsentBehavior.Legacy
         )
-
-        assertThat(errorReporter.getLoggedErrors()).containsExactly(
-            ErrorReporter.SuccessEvent.CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_SUCCESS.eventName,
-            ErrorReporter.SuccessEvent.CUSTOMER_SHEET_PAYMENT_METHODS_LOAD_SUCCESS.eventName,
-        )
+        assertThat(errorReporter.awaitCall().errorEvent)
+            .isEqualTo(ErrorReporter.SuccessEvent.CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_SUCCESS)
+        assertThat(errorReporter.awaitCall().errorEvent)
+            .isEqualTo(ErrorReporter.SuccessEvent.CUSTOMER_SHEET_PAYMENT_METHODS_LOAD_SUCCESS)
     }
 
     @Test
@@ -556,10 +555,10 @@ class CustomerAdapterDataSourceTest {
 
         assertThat(failureResult.cause).isInstanceOf<IllegalStateException>()
         assertThat(failureResult.cause.message).isEqualTo("Failed to load!")
-        assertThat(errorReporter.getLoggedErrors()).containsExactly(
-            ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_FAILURE.eventName,
-            ErrorReporter.SuccessEvent.CUSTOMER_SHEET_PAYMENT_METHODS_LOAD_SUCCESS.eventName,
-        )
+        assertThat(errorReporter.awaitCall().errorEvent)
+            .isEqualTo(ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_FAILURE)
+        assertThat(errorReporter.awaitCall().errorEvent)
+            .isEqualTo(ErrorReporter.SuccessEvent.CUSTOMER_SHEET_PAYMENT_METHODS_LOAD_SUCCESS)
     }
 
     @Test
@@ -584,10 +583,10 @@ class CustomerAdapterDataSourceTest {
 
         assertThat(failureResult.cause).isInstanceOf<IllegalStateException>()
         assertThat(failureResult.cause.message).isEqualTo("Failed to load!")
-        assertThat(errorReporter.getLoggedErrors()).containsExactly(
-            ErrorReporter.SuccessEvent.CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_SUCCESS.eventName,
-            ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_PAYMENT_METHODS_LOAD_FAILURE.eventName
-        )
+        assertThat(errorReporter.awaitCall().errorEvent)
+            .isEqualTo(ErrorReporter.SuccessEvent.CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_SUCCESS)
+        assertThat(errorReporter.awaitCall().errorEvent)
+            .isEqualTo(ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_PAYMENT_METHODS_LOAD_FAILURE)
     }
 
     @Test

@@ -271,9 +271,10 @@ class DefaultIntentConfirmationInterceptorTest {
 
             assertThat(nextStep).isInstanceOf<IntentConfirmationInterceptor.NextStep.Complete>()
 
-            assertThat(errorReporter.getLoggedErrors()).containsExactly(
-                ErrorReporter.SuccessEvent.FOUND_CREATE_INTENT_CALLBACK_WHILE_POLLING.eventName,
+            assertThat(errorReporter.awaitCall().errorEvent).isEqualTo(
+                ErrorReporter.SuccessEvent.FOUND_CREATE_INTENT_CALLBACK_WHILE_POLLING,
             )
+            errorReporter.ensureAllEventsConsumed()
         }
     }
 
@@ -710,9 +711,10 @@ class DefaultIntentConfirmationInterceptorTest {
             assertThat(failedStep.cause.message).isEqualTo(CREATE_INTENT_CALLBACK_MESSAGE)
             assertThat(failedStep.message).isEqualTo(userMessage)
 
-            assertThat(errorReporter.getLoggedErrors()).containsExactly(
-                ErrorReporter.ExpectedErrorEvent.CREATE_INTENT_CALLBACK_NULL.eventName,
+            assertThat(errorReporter.awaitCall().errorEvent).isEqualTo(
+                ErrorReporter.ExpectedErrorEvent.CREATE_INTENT_CALLBACK_NULL,
             )
+            errorReporter.ensureAllEventsConsumed()
         }
     }
 

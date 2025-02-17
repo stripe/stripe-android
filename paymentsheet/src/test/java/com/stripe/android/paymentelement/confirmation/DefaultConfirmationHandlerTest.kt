@@ -149,11 +149,10 @@ class DefaultConfirmationHandlerTest {
             assertThat(failedResult.message).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
             assertThat(failedResult.type).isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.Internal)
 
-            assertThat(errorReporter.getLoggedErrors()).containsExactly(
+            assertThat(errorReporter.awaitCall().errorEvent).isEqualTo(
                 ErrorReporter
                     .UnexpectedErrorEvent
-                    .INTENT_CONFIRMATION_HANDLER_INVALID_PAYMENT_CONFIRMATION_OPTION
-                    .eventName,
+                    .INTENT_CONFIRMATION_HANDLER_INVALID_PAYMENT_CONFIRMATION_OPTION,
             )
         }
     }

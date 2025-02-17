@@ -1668,12 +1668,11 @@ internal class DefaultPaymentElementLoaderTest {
 
             assertThat(exception).isInstanceOf<IllegalStateException>()
 
-            assertThat(errorReporter.getLoggedErrors())
+            assertThat(errorReporter.consumeAllEvents().map { it.errorEvent })
                 .contains(
                     ErrorReporter
                         .UnexpectedErrorEvent
                         .PAYMENT_SHEET_LOADER_ELEMENTS_SESSION_CUSTOMER_NOT_FOUND
-                        .eventName
                 )
         }
 
@@ -1707,12 +1706,11 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(state).isNotNull()
             assertThat(state?.customer).isNull()
 
-            assertThat(errorReporter.getLoggedErrors())
+            assertThat(errorReporter.consumeAllEvents().map { it.errorEvent })
                 .contains(
                     ErrorReporter
                         .UnexpectedErrorEvent
                         .PAYMENT_SHEET_LOADER_ELEMENTS_SESSION_CUSTOMER_NOT_FOUND
-                        .eventName
                 )
         }
 

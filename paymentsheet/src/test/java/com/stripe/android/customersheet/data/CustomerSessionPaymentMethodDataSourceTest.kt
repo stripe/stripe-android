@@ -68,8 +68,8 @@ class CustomerSessionPaymentMethodDataSourceTest {
             "'attach' is not supported for `CustomerSession`!"
         )
 
-        assertThat(errorReporter.getLoggedErrors()).containsExactly(
-            ErrorReporter.UnexpectedErrorEvent.CUSTOMER_SHEET_ATTACH_CALLED_WITH_CUSTOMER_SESSION.eventName
+        assertThat(errorReporter.awaitCall().errorEvent).isEqualTo(
+            ErrorReporter.UnexpectedErrorEvent.CUSTOMER_SHEET_ATTACH_CALLED_WITH_CUSTOMER_SESSION
         )
     }
 

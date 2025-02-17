@@ -61,12 +61,12 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
 
         sheetLauncher.launchForm(code, paymentMethodMetadata, false, null)
-        val loggedErrors = errorReporter.getLoggedErrors()
-        assertThat(loggedErrors.size).isEqualTo(1)
-        assertThat(loggedErrors.first())
+        val loggedError = errorReporter.awaitCall()
+        assertThat(loggedError.errorEvent.eventName)
             .isEqualTo("unexpected_error.embedded.embedded_sheet_launcher.embedded_state_is_null")
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
         assertThat(selectionHolder.temporarySelection.value).isNull()
+        errorReporter.ensureAllEventsConsumed()
     }
 
     @Test

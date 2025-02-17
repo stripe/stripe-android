@@ -5,6 +5,7 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.customersheet.FakeStripeRepository
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -17,7 +18,6 @@ import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.anyString
@@ -32,31 +32,36 @@ import org.robolectric.RobolectricTestRunner
 import java.security.InvalidParameterException
 import kotlin.coroutines.coroutineContext
 
+@SuppressWarnings("LargeClass")
 @RunWith(RobolectricTestRunner::class)
 internal class CustomerRepositoryTest {
     private val testDispatcher = UnconfinedTestDispatcher()
-    private val stripeRepository = mock<StripeRepository>()
-    private val errorReporter = FakeErrorReporter()
+//    private val stripeRepository = mock<StripeRepository>()
+//    private val errorReporter = FakeErrorReporter()
 
-    private val repository = CustomerApiRepository(
-        stripeRepository,
-        { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123") },
-        Logger.getInstance(false),
-        workContext = testDispatcher,
-        errorReporter = errorReporter
-    )
+//    private val repository = CustomerApiRepository(
+//        stripeRepository,
+//        { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123") },
+//        Logger.getInstance(false),
+//        workContext = testDispatcher,
+//        errorReporter = errorReporter
+//    )
 
-    @Before
-    fun clearErrorReporter() {
-        errorReporter.clear()
-    }
+//    @Before
+//    fun clearErrorReporter() {
+//        errorReporter.clear()
+//    }
 
     @Test
     fun `getPaymentMethods() should create expected ListPaymentMethodsParams`() =
         runTest {
+            val stripeRepository = mock<StripeRepository>()
             givenGetPaymentMethodsReturns(
-                Result.success(emptyList())
+                stripeRepository = stripeRepository,
+                result = Result.success(emptyList())
             )
+
+            val repository = createRepository(stripeRepository = stripeRepository)
 
             repository.getPaymentMethods(
                 CustomerRepository.CustomerInfo(
@@ -86,9 +91,13 @@ internal class CustomerRepositoryTest {
     @Test
     fun `getPaymentMethods() should filter unsupported payment method types`() =
         runTest {
+            val stripeRepository = mock<StripeRepository>()
             givenGetPaymentMethodsReturns(
-                Result.success(emptyList())
+                stripeRepository = stripeRepository,
+                result = Result.success(emptyList())
             )
+
+            val repository = createRepository(stripeRepository = stripeRepository)
 
             repository.getPaymentMethods(
                 CustomerRepository.CustomerInfo(
@@ -116,12 +125,10 @@ internal class CustomerRepositoryTest {
     @Test
     fun `getPaymentMethods() should filter cards attached to wallets`() =
         runTest {
-            givenGetPaymentMethodsReturns(
-                Result.success(emptyList())
-            )
+            val stripeRepository = mock<StripeRepository>()
+            givenGetPaymentMethodsReturns(stripeRepository, result = Result.success(emptyList()))
 
             val initialCard = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-
             val mockedReturnPaymentMethods = listOf(
                 initialCard.copy("pm_1"),
                 initialCard.copy(
@@ -166,6 +173,8 @@ internal class CustomerRepositoryTest {
                 }.thenReturn(Result.success(mockedReturnPaymentMethods))
             }
 
+            val repository = createRepository(stripeRepository = stripeRepository)
+
             val result = repository.getPaymentMethods(
                 CustomerRepository.CustomerInfo(
                     id = "customer_id",
@@ -182,8 +191,10 @@ internal class CustomerRepositoryTest {
 
     @Test
     fun `getPaymentsMethods() should keep cards from Link wallet and dedupe them`() = runTest {
+        val stripeRepository = mock<StripeRepository>()
         givenGetPaymentMethodsReturns(
-            Result.success(emptyList())
+            stripeRepository = stripeRepository,
+            result = Result.success(emptyList())
         )
 
         val initialCard = PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -209,6 +220,8 @@ internal class CustomerRepositoryTest {
                 )
             ),
         )
+
+        val repository = createRepository(stripeRepository = stripeRepository)
 
         stripeRepository.stub {
             onBlocking {
@@ -244,8 +257,16 @@ internal class CustomerRepositoryTest {
     @Test
     fun `getPaymentMethods() should return empty list on failure when silent failures`() =
         runTest {
+            val stripeRepository = mock<StripeRepository>()
             givenGetPaymentMethodsReturns(
-                Result.failure(InvalidParameterException("error"))
+                stripeRepository = stripeRepository,
+                result = Result.failure(InvalidParameterException("error"))
+            )
+
+            val errorReporter = FakeErrorReporter()
+            val repository = createRepository(
+                stripeRepository = stripeRepository,
+                errorReporter = errorReporter
             )
 
             val result = repository.getPaymentMethods(
@@ -259,15 +280,24 @@ internal class CustomerRepositoryTest {
             )
 
             assertThat(result.getOrNull()).isEmpty()
-            assertThat(errorReporter.getLoggedErrors())
-                .containsExactly(ErrorReporter.ExpectedErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE.eventName)
+            assertThat(errorReporter.awaitCall().errorEvent)
+                .isEqualTo(ErrorReporter.ExpectedErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE)
+            errorReporter.ensureAllEventsConsumed()
         }
 
     @Test
     fun `getPaymentMethods() should return failure`() =
         runTest {
+            val stripeRepository = mock<StripeRepository>()
             givenGetPaymentMethodsReturns(
-                Result.failure(InvalidParameterException("error"))
+                stripeRepository = stripeRepository,
+                result = Result.failure(InvalidParameterException("error"))
+            )
+
+            val errorReporter = FakeErrorReporter()
+            val repository = createRepository(
+                stripeRepository = stripeRepository,
+                errorReporter = errorReporter
             )
 
             val result = repository.getPaymentMethods(
@@ -282,8 +312,9 @@ internal class CustomerRepositoryTest {
 
             assertThat(result.exceptionOrNull()?.message)
                 .isEqualTo("error")
-            assertThat(errorReporter.getLoggedErrors())
-                .containsExactly(ErrorReporter.ExpectedErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE.eventName)
+            assertThat(errorReporter.awaitCall().errorEvent)
+                .isEqualTo(ErrorReporter.ExpectedErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE)
+            errorReporter.ensureAllEventsConsumed()
         }
 
     @Test
@@ -313,13 +344,13 @@ internal class CustomerRepositoryTest {
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD
             )
-            assertThat(errorReporter.getLoggedErrors())
-                .containsExactly(
-                    // Two successes, one failure
-                    ErrorReporter.ExpectedErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE.eventName,
-                    ErrorReporter.SuccessEvent.GET_SAVED_PAYMENT_METHODS_SUCCESS.eventName,
-                    ErrorReporter.SuccessEvent.GET_SAVED_PAYMENT_METHODS_SUCCESS.eventName,
-                )
+            assertThat(errorReporter.awaitCall().errorEvent)
+                .isEqualTo(ErrorReporter.ExpectedErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE)
+            assertThat(errorReporter.awaitCall().errorEvent)
+                .isEqualTo(ErrorReporter.SuccessEvent.GET_SAVED_PAYMENT_METHODS_SUCCESS)
+            assertThat(errorReporter.awaitCall().errorEvent)
+                .isEqualTo(ErrorReporter.SuccessEvent.GET_SAVED_PAYMENT_METHODS_SUCCESS)
+            errorReporter.ensureAllEventsConsumed()
         }
 
     @Test
@@ -347,24 +378,27 @@ internal class CustomerRepositoryTest {
 
             assertThat(result.exceptionOrNull()?.message)
                 .isEqualTo("Request Failed")
-            assertThat(errorReporter.getLoggedErrors())
-                .containsExactly(
-                    // Two successes, one failure
-                    ErrorReporter.ExpectedErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE.eventName,
-                    ErrorReporter.SuccessEvent.GET_SAVED_PAYMENT_METHODS_SUCCESS.eventName,
-                    ErrorReporter.SuccessEvent.GET_SAVED_PAYMENT_METHODS_SUCCESS.eventName,
-                )
+            assertThat(errorReporter.awaitCall().errorEvent)
+                .isEqualTo(ErrorReporter.ExpectedErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE)
+            assertThat(errorReporter.awaitCall().errorEvent)
+                .isEqualTo(ErrorReporter.SuccessEvent.GET_SAVED_PAYMENT_METHODS_SUCCESS)
+            assertThat(errorReporter.awaitCall().errorEvent)
+                .isEqualTo(ErrorReporter.SuccessEvent.GET_SAVED_PAYMENT_METHODS_SUCCESS)
+            errorReporter.ensureAllEventsConsumed()
         }
 
     @Test
     fun `detachPaymentMethod() should return payment method on success`() =
         runTest {
+            val stripeRepository = mock<StripeRepository>()
             givenDetachPaymentMethodReturns(
-                Result.success(
+                stripeRepository = stripeRepository,
+                result = Result.success(
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD
                 )
             )
 
+            val repository = createRepository(stripeRepository = stripeRepository)
             val result = repository.detachPaymentMethod(
                 customerInfo = CustomerRepository.CustomerInfo(
                     id = "customer_id",
@@ -381,10 +415,13 @@ internal class CustomerRepositoryTest {
     @Test
     fun `detachPaymentMethod() should return exception on failure`() =
         runTest {
+            val stripeRepository = mock<StripeRepository>()
             givenDetachPaymentMethodReturns(
-                Result.failure(InvalidParameterException("error"))
+                stripeRepository = stripeRepository,
+                result = Result.failure(InvalidParameterException("error"))
             )
 
+            val repository = createRepository(stripeRepository = stripeRepository)
             val result = repository.detachPaymentMethod(
                 customerInfo = CustomerRepository.CustomerInfo(
                     id = "customer_id",
@@ -401,12 +438,15 @@ internal class CustomerRepositoryTest {
     @Test
     fun `detachPaymentMethod() should call elements endpoint when customerSessionClientSecret exists`() =
         runTest {
+            val stripeRepository = mock<StripeRepository>()
             givenElementsDetachPaymentMethodReturns(
-                Result.success(
+                stripeRepository = stripeRepository,
+                result = Result.success(
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD
                 )
             )
 
+            val repository = createRepository(stripeRepository = stripeRepository)
             val result = repository.detachPaymentMethod(
                 customerInfo = CustomerRepository.CustomerInfo(
                     id = "customer_id",
@@ -535,12 +575,15 @@ internal class CustomerRepositoryTest {
     @Test
     fun `attachPaymentMethod() should return payment method on success`() =
         runTest {
+            val stripeRepository = mock<StripeRepository>()
             givenAttachPaymentMethodReturns(
-                Result.success(
+                stripeRepository = stripeRepository,
+                result = Result.success(
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD
                 )
             )
 
+            val repository = createRepository(stripeRepository = stripeRepository)
             val result = repository.attachPaymentMethod(
                 CustomerRepository.CustomerInfo(
                     id = "customer_id",
@@ -558,9 +601,11 @@ internal class CustomerRepositoryTest {
     @Test
     fun `attachPaymentMethod() should return failure`() =
         runTest {
+            val stripeRepository = mock<StripeRepository>()
             val error = Result.failure<PaymentMethod>(InvalidParameterException("error"))
-            givenAttachPaymentMethodReturns(error)
+            givenAttachPaymentMethodReturns(stripeRepository, result = error)
 
+            val repository = createRepository(stripeRepository = stripeRepository)
             val result = repository.attachPaymentMethod(
                 CustomerRepository.CustomerInfo(
                     id = "customer_id",
@@ -576,9 +621,11 @@ internal class CustomerRepositoryTest {
     @Test
     fun `updatePaymentMethod() should return payment method on success`() =
         runTest {
+            val stripeRepository = mock<StripeRepository>()
             val success = Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-            givenUpdatePaymentMethodReturns(success)
+            givenUpdatePaymentMethodReturns(stripeRepository, result = success)
 
+            val repository = createRepository(stripeRepository = stripeRepository)
             val result = repository.updatePaymentMethod(
                 CustomerRepository.CustomerInfo(
                     id = "customer_id",
@@ -595,9 +642,11 @@ internal class CustomerRepositoryTest {
     @Test
     fun `updatePaymentMethod() should return failure`() =
         runTest {
+            val stripeRepository = mock<StripeRepository>()
             val error = Result.failure<PaymentMethod>(InvalidParameterException("error"))
-            givenUpdatePaymentMethodReturns(error)
+            givenUpdatePaymentMethodReturns(stripeRepository, result = error)
 
+            val repository = createRepository(stripeRepository = stripeRepository)
             val result = repository.updatePaymentMethod(
                 CustomerRepository.CustomerInfo(
                     id = "customer_id",
@@ -616,7 +665,7 @@ internal class CustomerRepositoryTest {
     ): CustomerApiRepository {
         return CustomerApiRepository(
             workContext = coroutineContext,
-            errorReporter = errorReporter,
+            errorReporter = FakeErrorReporter(),
             stripeRepository = stripeRepository,
             lazyPaymentConfig = { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123") },
             logger = Logger.getInstance(false),
@@ -638,6 +687,7 @@ internal class CustomerRepositoryTest {
     }
 
     private fun givenGetPaymentMethodsReturns(
+        stripeRepository: StripeRepository,
         result: Result<List<PaymentMethod>>
     ) {
         stripeRepository.stub {
@@ -652,6 +702,7 @@ internal class CustomerRepositoryTest {
     }
 
     private fun givenDetachPaymentMethodReturns(
+        stripeRepository: StripeRepository,
         result: Result<PaymentMethod>
     ) {
         stripeRepository.stub {
@@ -666,6 +717,7 @@ internal class CustomerRepositoryTest {
     }
 
     private fun givenElementsDetachPaymentMethodReturns(
+        stripeRepository: StripeRepository,
         result: Result<PaymentMethod>
     ) {
         stripeRepository.stub {
@@ -681,6 +733,7 @@ internal class CustomerRepositoryTest {
     }
 
     private fun givenAttachPaymentMethodReturns(
+        stripeRepository: StripeRepository,
         result: Result<PaymentMethod>
     ) {
         stripeRepository.stub {
@@ -696,6 +749,7 @@ internal class CustomerRepositoryTest {
     }
 
     private fun givenUpdatePaymentMethodReturns(
+        stripeRepository: StripeRepository,
         result: Result<PaymentMethod>
     ) {
         stripeRepository.stub {
@@ -721,6 +775,19 @@ internal class CustomerRepositoryTest {
                 )
             )
         }
+    }
+
+    private fun createRepository(
+        errorReporter: ErrorReporter = FakeErrorReporter(),
+        stripeRepository: StripeRepository = FakeStripeRepository()
+    ): CustomerApiRepository {
+        return CustomerApiRepository(
+            stripeRepository,
+            { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123") },
+            Logger.getInstance(false),
+            workContext = testDispatcher,
+            errorReporter = errorReporter
+        )
     }
 
     private class FakeRemovalStripeRepository(

@@ -72,9 +72,10 @@ class DefaultCustomerSessionElementsSessionManagerTest {
         assertThat(customer?.accessType)
             .isEqualTo(PaymentSheet.CustomerAccessType.CustomerSession(customerSessionClientSecret = "cuss_123"))
 
-        assertThat(errorReporter.getLoggedErrors()).containsExactly(
-            ErrorReporter.SuccessEvent.CUSTOMER_SHEET_CUSTOMER_SESSION_ELEMENTS_SESSION_LOAD_SUCCESS.eventName,
+        assertThat(errorReporter.awaitCall()).isEqualTo(
+            ErrorReporter.SuccessEvent.CUSTOMER_SHEET_CUSTOMER_SESSION_ELEMENTS_SESSION_LOAD_SUCCESS,
         )
+        errorReporter.ensureAllEventsConsumed()
     }
 
     @Test
@@ -98,12 +99,12 @@ class DefaultCustomerSessionElementsSessionManagerTest {
         assertThat(elementsSessionResult.isFailure).isTrue()
         assertThat(elementsSessionResult.exceptionOrNull()).isEqualTo(exception)
 
-        assertThat(errorReporter.getLoggedErrors()).containsExactly(
+        assertThat(errorReporter.awaitCall().errorEvent).isEqualTo(
             ErrorReporter
                 .ExpectedErrorEvent
                 .CUSTOMER_SHEET_CUSTOMER_SESSION_ELEMENTS_SESSION_LOAD_FAILURE
-                .eventName,
         )
+        errorReporter.ensureAllEventsConsumed()
     }
 
     @Test
@@ -327,13 +328,13 @@ class DefaultCustomerSessionElementsSessionManagerTest {
             "`customer` field should be available when using `CustomerSession` in elements/session!"
         )
 
-        assertThat(errorReporter.getLoggedErrors()).containsExactly(
-            ErrorReporter.SuccessEvent.CUSTOMER_SHEET_CUSTOMER_SESSION_ELEMENTS_SESSION_LOAD_SUCCESS.eventName,
-            ErrorReporter
-                .UnexpectedErrorEvent
-                .CUSTOMER_SESSION_ON_CUSTOMER_SHEET_ELEMENTS_SESSION_NO_CUSTOMER_FIELD
-                .eventName
-        )
+        assertThat(errorReporter.awaitCall().errorEvent)
+            .isEqualTo(ErrorReporter.SuccessEvent.CUSTOMER_SHEET_CUSTOMER_SESSION_ELEMENTS_SESSION_LOAD_SUCCESS)
+        assertThat(errorReporter.awaitCall().errorEvent)
+            .isEqualTo(
+                ErrorReporter.UnexpectedErrorEvent.CUSTOMER_SESSION_ON_CUSTOMER_SHEET_ELEMENTS_SESSION_NO_CUSTOMER_FIELD
+            )
+        errorReporter.ensureAllEventsConsumed()
     }
 
     @Test

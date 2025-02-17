@@ -782,9 +782,8 @@ internal class DefaultFlowControllerTest {
             initializationMode = INITIALIZATION_MODE,
         )
 
-        assertThat(errorReporter.getLoggedErrors()).isEmpty()
-
         verify(paymentResultCallback).onPaymentSheetResult(isA<PaymentSheetResult.Failed>())
+        errorReporter.ensureAllEventsConsumed()
     }
 
     @Test
@@ -805,7 +804,7 @@ internal class DefaultFlowControllerTest {
             initializationMode = INITIALIZATION_MODE,
         )
 
-        assertThat(errorReporter.getLoggedErrors()).contains(
+        assertThat(errorReporter.consumeAllEvents().map { it.errorEvent.eventName }).contains(
             "unexpected_error.flow_controller.invalid_payment_selection"
         )
 

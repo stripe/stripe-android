@@ -475,9 +475,9 @@ class DefaultCustomerSheetLoaderTest {
         )
 
         assertThat(
-            errorReporter.getLoggedErrors().first()
+            errorReporter.awaitCall().errorEvent
         ).isEqualTo(
-            ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_ADAPTER_NOT_FOUND.eventName
+            ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_ADAPTER_NOT_FOUND
         )
     }
 

@@ -582,7 +582,7 @@ internal class PaymentSheetViewModelTest {
 
             viewModel.checkout()
 
-            assertThat(errorReporter.getLoggedErrors()).contains(
+            assertThat(errorReporter.consumeAllEvents().map { it.errorEvent.eventName }).contains(
                 "unexpected_error.paymentsheet.no_payment_selection"
             )
 
@@ -604,7 +604,7 @@ internal class PaymentSheetViewModelTest {
             viewModel.updateSelection(PaymentSelection.Link())
             viewModel.checkout()
 
-            assertThat(errorReporter.getLoggedErrors()).contains(
+            assertThat(errorReporter.consumeAllEvents().map { it.errorEvent.eventName }).contains(
                 "unexpected_error.paymentsheet.invalid_payment_selection"
             )
 
