@@ -24,6 +24,7 @@ dependencies {
     api project(":stripe-ui-core")
     implementation project(":payments-core")
     api project(":payments-model")
+    implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.8")
 
     implementation libs.androidx.activity
     implementation libs.androidx.annotation
