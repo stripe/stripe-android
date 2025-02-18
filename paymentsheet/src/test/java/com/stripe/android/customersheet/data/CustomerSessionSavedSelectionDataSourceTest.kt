@@ -230,7 +230,6 @@ class CustomerSessionSavedSelectionDataSourceTest {
         // "failingElementsSessionManager".
     }
 
-
     private suspend fun createDataSource(
         elementsSessionManager: CustomerSessionElementsSessionManager = FakeCustomerSessionElementsSessionManager(),
         customerRepository: FakeCustomerRepository = FakeCustomerRepository(),
