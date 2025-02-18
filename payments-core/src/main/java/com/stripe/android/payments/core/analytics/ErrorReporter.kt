@@ -131,6 +131,12 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         LINK_LOG_OUT_FAILURE(
             eventName = "link.log_out.failure"
         ),
+        LINK_NATIVE_FAILED_TO_GET_INTEGRITY_TOKEN(
+            eventName = "link.native.failed_to_get_integrity_token"
+        ),
+        LINK_NATIVE_FAILED_TO_ATTEST_REQUEST(
+            eventName = "link.native.failed_to_attest_request"
+        ),
         LINK_NATIVE_FAILED_TO_PREPARE_INTEGRITY_MANAGER(
             eventName = "link.native.integrity.preparation_failed"
         ),
@@ -197,9 +203,6 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         LINK_WEB_FAILED_TO_PARSE_RESULT_URI(
             partialEventName = "link.web.result.parsing_failed"
-        ),
-        LINK_NATIVE_FAILED_TO_ATTEST_REQUEST(
-            partialEventName = "link.native.failed_to_attest_request"
         ),
         LINK_NATIVE_FAILED_TO_ATTEST_SIGNUP_REQUEST(
             partialEventName = "link.native.signup.failed_to_attest_request"
