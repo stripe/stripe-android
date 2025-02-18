@@ -48,6 +48,7 @@ internal class BillingDetailsCollectionScreenshotTest {
                 showCheckbox = false,
                 lastTextFieldIdentifier = null,
                 onRemoveAccount = {},
+                enabled = true
             )
         }
     }
@@ -72,6 +73,7 @@ internal class BillingDetailsCollectionScreenshotTest {
                 showCheckbox = false,
                 lastTextFieldIdentifier = null,
                 onRemoveAccount = {},
+                enabled = true,
             )
         }
     }
@@ -99,6 +101,7 @@ internal class BillingDetailsCollectionScreenshotTest {
                 showCheckbox = false,
                 lastTextFieldIdentifier = null,
                 onRemoveAccount = {},
+                enabled = true
             )
         }
     }
@@ -126,6 +129,7 @@ internal class BillingDetailsCollectionScreenshotTest {
                 showCheckbox = false,
                 lastTextFieldIdentifier = null,
                 onRemoveAccount = {},
+                enabled = true
             )
         }
     }
@@ -150,6 +154,32 @@ internal class BillingDetailsCollectionScreenshotTest {
                 showCheckbox = false,
                 lastTextFieldIdentifier = null,
                 onRemoveAccount = {},
+                enabled = true
+            )
+        }
+    }
+
+    @Test
+    fun testFilledDisabled() {
+        paparazzi.snapshot {
+            BankAccountForm(
+                state = BankFormScreenState(isPaymentFlow = true),
+                instantDebits = false,
+                isPaymentFlow = true,
+                formArgs = createFormArguments(),
+                nameController = createNameController("John Doe"),
+                emailController = createEmailController("email@email.com"),
+                phoneController = createPhoneNumberController(),
+                addressController = createAddressController(),
+                sameAsShippingElement = null,
+                saveForFutureUseElement = SaveForFutureUseElement(
+                    initialValue = false,
+                    merchantName = "Test Merchant",
+                ),
+                showCheckbox = false,
+                lastTextFieldIdentifier = null,
+                onRemoveAccount = {},
+                enabled = false
             )
         }
     }
@@ -178,6 +208,7 @@ internal class BillingDetailsCollectionScreenshotTest {
                 showCheckbox = false,
                 lastTextFieldIdentifier = null,
                 onRemoveAccount = {},
+                enabled = true
             )
         }
     }
@@ -206,6 +237,7 @@ internal class BillingDetailsCollectionScreenshotTest {
                 showCheckbox = false,
                 lastTextFieldIdentifier = null,
                 onRemoveAccount = {},
+                enabled = true
             )
         }
     }
