@@ -353,7 +353,7 @@ private fun SuccessIcon(
 ) {
     Icon(
         painterResource(R.drawable.stripe_ic_paymentsheet_googlepay_primary_button_checkmark),
-        modifier =modifier,
+        modifier = modifier,
         tint = PrimaryButtonTheme.colors.onSuccessBackground,
         contentDescription = null
     )
