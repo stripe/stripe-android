@@ -43,6 +43,18 @@ internal class DefaultLinkGateTest {
         assertThat(gate.useNativeLink).isFalse()
     }
 
+    @Test
+    fun `useNativeLink - test mode - returns attestation value when feature flag not set`() {
+        nativeLinkFeatureFlagTestRule.setEnabled(null)
+        attestationFeatureFlagTestRule.setEnabled(true)
+        val gate = gate(isLiveMode = false, useAttestationEndpoints = true)
+        assertThat(gate.useNativeLink).isTrue()
+
+        attestationFeatureFlagTestRule.setEnabled(false)
+        val gateWithoutAttestation = gate(isLiveMode = false, useAttestationEndpoints = false)
+        assertThat(gateWithoutAttestation.useNativeLink).isFalse()
+    }
+
     // useNativeLink tests for live mode
     @Test
     fun `useNativeLink - live mode - returns true when attestation enabled`() {
@@ -56,6 +68,18 @@ internal class DefaultLinkGateTest {
         val gate = gate(isLiveMode = true, useAttestationEndpoints = false)
 
         assertThat(gate.useNativeLink).isFalse()
+    }
+
+    @Test
+    fun `useNativeLink - live mode - returns attestation value when feature flag not set`() {
+        nativeLinkFeatureFlagTestRule.setEnabled(null)
+        attestationFeatureFlagTestRule.setEnabled(true)
+        val gate = gate(isLiveMode = true, useAttestationEndpoints = true)
+        assertThat(gate.useNativeLink).isTrue()
+
+        attestationFeatureFlagTestRule.setEnabled(false)
+        val gateWithoutAttestation = gate(isLiveMode = true, useAttestationEndpoints = false)
+        assertThat(gateWithoutAttestation.useNativeLink).isFalse()
     }
 
     // useAttestationEndpoints tests for test mode
@@ -75,6 +99,16 @@ internal class DefaultLinkGateTest {
         assertThat(gate.useAttestationEndpoints).isFalse()
     }
 
+    @Test
+    fun `useAttestationEndpoints - test mode - returns configuration value when feature flag not set`() {
+        attestationFeatureFlagTestRule.setEnabled(null)
+        val gate = gate(isLiveMode = false, useAttestationEndpoints = true)
+        assertThat(gate.useAttestationEndpoints).isTrue()
+
+        val gateWithoutAttestation = gate(isLiveMode = false, useAttestationEndpoints = false)
+        assertThat(gateWithoutAttestation.useAttestationEndpoints).isFalse()
+    }
+
     // useAttestationEndpoints tests for live mode
     @Test
     fun `useAttestationEndpoints - live mode - returns true when configuration enabled`() {
@@ -88,6 +122,16 @@ internal class DefaultLinkGateTest {
         val gate = gate(isLiveMode = true, useAttestationEndpoints = false)
 
         assertThat(gate.useAttestationEndpoints).isFalse()
+    }
+
+    @Test
+    fun `useAttestationEndpoints - live mode - returns configuration value when feature flag not set`() {
+        attestationFeatureFlagTestRule.setEnabled(null)
+        val gate = gate(isLiveMode = true, useAttestationEndpoints = true)
+        assertThat(gate.useAttestationEndpoints).isTrue()
+
+        val gateWithoutAttestation = gate(isLiveMode = true, useAttestationEndpoints = false)
+        assertThat(gateWithoutAttestation.useAttestationEndpoints).isFalse()
     }
 
     // Feature flag independence tests

@@ -1,7 +1,10 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import android.graphics.Color
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
@@ -137,6 +140,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod? = savedPaymentMethod,
         newPaymentMethods: List<DisplayablePaymentMethod> = paymentMethods
     ) {
+        val scrollState = rememberScrollState()
         PaymentMethodEmbeddedLayoutUI(
             paymentMethods = newPaymentMethods,
             displayedSavedPaymentMethod = displayableSavedPaymentMethod,
@@ -148,7 +152,8 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
             onSelectSavedPaymentMethod = {},
             onManageOneSavedPaymentMethod = {},
             imageLoader = mock(),
-            rowStyle = rowStyle
+            rowStyle = rowStyle,
+            modifier = Modifier.verticalScroll(scrollState),
         )
     }
 

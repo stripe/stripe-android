@@ -1,10 +1,8 @@
 package com.stripe.android.paymentelement.embedded.content
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
@@ -27,7 +25,6 @@ internal data class EmbeddedContent(
         StripeTheme {
             Column(
                 modifier = Modifier
-                    .background(MaterialTheme.colors.surface)
                     .padding(top = 8.dp)
                     .animateContentSize()
             ) {

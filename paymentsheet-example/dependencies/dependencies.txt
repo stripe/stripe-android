@@ -1322,10 +1322,10 @@
 |    +--- com.squareup.okhttp:okhttp:2.7.2
 |    |    \--- com.squareup.okio:okio:1.6.0 -> 3.9.1 (*)
 |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.0 -> 2.0.21 (*)
-+--- com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0
-|    +--- com.squareup.retrofit2:retrofit:2.9.0
++--- com.squareup.retrofit2:converter-kotlinx-serialization:2.11.0
+|    +--- com.squareup.retrofit2:retrofit:2.11.0
 |    |    \--- com.squareup.okhttp3:okhttp:3.14.9 -> 4.12.0 (*)
-|    +--- org.jetbrains.kotlinx:kotlinx-serialization-core:1.5.0 -> 1.7.3 (*)
-|    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.10 -> 1.8.22 (*)
+|    +--- org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.3 -> 1.7.3 (*)
+|    \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.23 -> 2.0.21 (*)
 +--- com.google.zxing:core:3.5.2
 \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.0.21 (*)

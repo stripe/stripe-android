@@ -1575,6 +1575,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
         val requestParams = buildMap {
             this["type"] = params.type
+            this["mobile_app_id"] = params.appId
             params.clientSecret?.let { this["client_secret"] = it }
             params.locale.let { this["locale"] = it }
             params.customerSessionClientSecret?.let { this["customer_session_client_secret"] = it }

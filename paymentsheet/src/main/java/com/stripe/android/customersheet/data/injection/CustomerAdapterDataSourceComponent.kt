@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet.data.injection
 
 import android.app.Application
+import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.customersheet.CustomerAdapter
@@ -23,6 +24,7 @@ import javax.inject.Singleton
         StripeRepositoryModule::class,
         CoroutineContextModule::class,
         CoreCommonModule::class,
+        ApplicationIdModule::class
     ]
 )
 internal interface CustomerAdapterDataSourceComponent {

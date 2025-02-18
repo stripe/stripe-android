@@ -43,6 +43,12 @@ def replace_in_file(filename, pattern, replacement)
   File.write(filename, new_content)
 end
 
+def append_to_file(filename, new_content)
+    puts "> Updating #{filename}"
+    content = File.read(filename)
+    File.write(filename, "#{content}\n#{new_content}\n")
+end
+
 def switch_to_release_branch()
     switch_to_new_branch(release_branch, @deploy_branch)
 end

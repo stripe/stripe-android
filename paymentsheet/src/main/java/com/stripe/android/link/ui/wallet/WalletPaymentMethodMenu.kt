@@ -12,17 +12,12 @@ import com.stripe.android.paymentsheet.R
 internal fun WalletPaymentMethodMenu(
     modifier: Modifier = Modifier,
     paymentDetails: ConsumerPaymentDetails.PaymentDetails,
-    onEditClick: () -> Unit,
     onSetDefaultClick: () -> Unit,
     onRemoveClick: () -> Unit,
     onCancelClick: () -> Unit
 ) {
     val items = remember(paymentDetails) {
         buildList {
-            if (paymentDetails is ConsumerPaymentDetails.Card) {
-                add(WalletPaymentMethodMenuItem.EditCard)
-            }
-
             if (!paymentDetails.isDefault) {
                 add(WalletPaymentMethodMenuItem.SetAsDefault)
             }
@@ -41,7 +36,6 @@ internal fun WalletPaymentMethodMenu(
         items = items,
         onItemPress = { item ->
             when (item) {
-                is WalletPaymentMethodMenuItem.EditCard -> onEditClick()
                 is WalletPaymentMethodMenuItem.SetAsDefault -> onSetDefaultClick()
                 is WalletPaymentMethodMenuItem.RemoveItem -> onRemoveClick()
                 is WalletPaymentMethodMenuItem.Cancel -> onCancelClick()

@@ -2,6 +2,7 @@ package com.stripe.android.customersheet.util
 
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.model.PaymentSelection
 
 internal fun List<PaymentMethod>.filterToSupportedPaymentMethods(
     isSyncDefaultPaymentMethodFeatureEnabled: Boolean,
@@ -24,4 +25,13 @@ internal fun getDefaultPaymentMethodsEnabledForCustomerSheet(elementsSession: El
         ElementsSession.Customer.Components.CustomerSheet.Disabled,
         null -> false
     }
+}
+
+internal fun getDefaultPaymentMethodAsPaymentSelection(
+    paymentMethods: List<PaymentMethod>,
+    defaultPaymentMethodId: String?,
+): PaymentSelection? {
+    return paymentMethods.find { paymentMethod ->
+        paymentMethod.id == defaultPaymentMethodId
+    }?.let { PaymentSelection.Saved(it) }
 }

@@ -16,6 +16,7 @@ sealed interface ElementsSessionParams : Parcelable {
     val expandFields: List<String>
     val savedPaymentMethodSelectionId: String?
     val externalPaymentMethods: List<String>
+    val appId: String
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
@@ -25,6 +26,7 @@ sealed interface ElementsSessionParams : Parcelable {
         override val customerSessionClientSecret: String? = null,
         override val savedPaymentMethodSelectionId: String? = null,
         override val externalPaymentMethods: List<String>,
+        override val appId: String,
     ) : ElementsSessionParams {
 
         override val type: String
@@ -42,6 +44,7 @@ sealed interface ElementsSessionParams : Parcelable {
         override val customerSessionClientSecret: String? = null,
         override val savedPaymentMethodSelectionId: String? = null,
         override val externalPaymentMethods: List<String>,
+        override val appId: String,
     ) : ElementsSessionParams {
 
         override val type: String
@@ -59,6 +62,7 @@ sealed interface ElementsSessionParams : Parcelable {
         override val externalPaymentMethods: List<String>,
         override val savedPaymentMethodSelectionId: String? = null,
         override val customerSessionClientSecret: String? = null,
+        override val appId: String,
     ) : ElementsSessionParams {
 
         override val clientSecret: String?

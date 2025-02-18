@@ -544,14 +544,6 @@ internal class WalletScreenTest {
     }
 
     @Test
-    fun `wallet menu is dismissed on edit clicked`() = runTest(dispatcher) {
-        testMenu(
-            nodeTag = onWalletPaymentMethodMenuUpdateTag(),
-            expectedEditPaymentMethodCounter = 1
-        )
-    }
-
-    @Test
     fun `wallet menu is dismissed on setAsDefault clicked`() = runTest(dispatcher) {
         testMenu(
             nodeTag = onWalletPaymentMethodMenuSetAsDefaultTag(),
@@ -563,11 +555,9 @@ internal class WalletScreenTest {
         nodeTag: SemanticsNodeInteraction,
         expectedRemovedCounter: Int = 0,
         expectedSetAsDefaultCounter: Int = 0,
-        expectedEditPaymentMethodCounter: Int = 0
     ) {
         var onSetDefaultCounter = 0
         var onRemoveClickedCounter = 0
-        var onEditPaymentMethodClickedCounter = 0
         composeTestRule.setContent {
             var sheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
             Box {
@@ -577,9 +567,6 @@ internal class WalletScreenTest {
                     },
                     onRemoveClicked = {
                         onRemoveClickedCounter += 1
-                    },
-                    onEditPaymentMethodClicked = {
-                        onEditPaymentMethodClickedCounter += 1
                     },
                     showBottomSheetContent = {
                         sheetContent = it
@@ -610,14 +597,12 @@ internal class WalletScreenTest {
         onWalletPaymentMethodMenu().assertDoesNotExist()
         assertThat(onSetDefaultCounter).isEqualTo(expectedSetAsDefaultCounter)
         assertThat(onRemoveClickedCounter).isEqualTo(expectedRemovedCounter)
-        assertThat(onEditPaymentMethodClickedCounter).isEqualTo(expectedEditPaymentMethodCounter)
     }
 
     @Composable
     private fun TestWalletBody(
         onRemoveClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
         onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
-        onEditPaymentMethodClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
         showBottomSheetContent: (BottomSheetContent?) -> Unit,
         hideBottomSheetContent: () -> Unit
     ) {
@@ -640,7 +625,6 @@ internal class WalletScreenTest {
             onPayAnotherWayClicked = {},
             onRemoveClicked = onRemoveClicked,
             onSetDefaultClicked = onSetDefaultClicked,
-            onEditPaymentMethodClicked = onEditPaymentMethodClicked,
             showBottomSheetContent = showBottomSheetContent,
             hideBottomSheetContent = hideBottomSheetContent,
             onAddNewPaymentMethodClicked = {},
@@ -713,9 +697,6 @@ internal class WalletScreenTest {
 
     private fun onWalletPaymentMethodMenuRemoveTag() =
         composeTestRule.onNodeWithTag(WALLET_MENU_REMOVE_ITEM_TAG, useUnmergedTree = true)
-
-    private fun onWalletPaymentMethodMenuUpdateTag() =
-        composeTestRule.onNodeWithTag(WALLET_MENU_EDIT_CARD_TAG, useUnmergedTree = true)
 
     private fun onWalletPaymentMethodMenuSetAsDefaultTag() =
         composeTestRule.onNodeWithTag(WALLET_MENU_SET_AS_DEFAULT_TAG, useUnmergedTree = true)

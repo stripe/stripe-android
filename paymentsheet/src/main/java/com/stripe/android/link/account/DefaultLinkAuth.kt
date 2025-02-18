@@ -1,11 +1,13 @@
 package com.stripe.android.link.account
 
+import com.stripe.android.common.di.APPLICATION_ID
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.link.LinkEventException
 import com.stripe.android.link.gate.LinkGate
-import com.stripe.android.link.injection.APPLICATION_ID
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.model.EmailSource
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.attestation.AttestationError
 import com.stripe.attestation.IntegrityRequestManager
 import javax.inject.Inject
@@ -15,6 +17,7 @@ internal class DefaultLinkAuth @Inject constructor(
     private val linkGate: LinkGate,
     private val linkAccountManager: LinkAccountManager,
     private val integrityRequestManager: IntegrityRequestManager,
+    private val errorReporter: ErrorReporter,
     @Named(APPLICATION_ID) private val applicationId: String
 ) : LinkAuth {
     override suspend fun signUp(
@@ -82,6 +85,8 @@ internal class DefaultLinkAuth @Inject constructor(
                 verificationToken = verificationToken,
                 appId = applicationId
             ).getOrThrow()
+        }.onFailure { error ->
+            reportError(error, operation = "signup")
         }
     }
 
@@ -99,7 +104,28 @@ internal class DefaultLinkAuth @Inject constructor(
                 appId = applicationId,
                 startSession = startSession
             ).getOrThrow()
+        }.onFailure { error ->
+            reportError(error, operation = "lookup")
         }
+    }
+
+    private fun reportError(error: Throwable, operation: String) {
+        val errorEvent = when {
+            error.isBackendAttestationError -> {
+                ErrorReporter.ExpectedErrorEvent.LINK_NATIVE_FAILED_TO_ATTEST_REQUEST
+            }
+            error.isIntegrityManagerError -> {
+                ErrorReporter.ExpectedErrorEvent.LINK_NATIVE_FAILED_TO_GET_INTEGRITY_TOKEN
+            }
+            else -> return
+        }
+        errorReporter.report(
+            errorEvent = errorEvent,
+            stripeException = LinkEventException(error),
+            additionalNonPiiParams = mapOf(
+                "operation" to operation
+            )
+        )
     }
 
     private fun Result<LinkAccount?>.toLinkAuthResult(): LinkAuthResult {
@@ -130,13 +156,15 @@ internal class DefaultLinkAuth @Inject constructor(
     }
 
     private val Throwable.isAttestationError: Boolean
-        get() = when (this) {
-            // Stripe backend could not verify the intregrity of the request
-            is APIException -> stripeError?.code == "link_failed_to_attest_request"
-            // Interaction with Integrity API to generate tokens resulted in a failure
-            is AttestationError -> true
-            else -> false
-        }
+        get() = isIntegrityManagerError || isBackendAttestationError
+
+    // Interaction with Integrity API to generate tokens resulted in a failure
+    private val Throwable.isIntegrityManagerError: Boolean
+        get() = this is AttestationError
+
+    // Stripe backend could not verify the integrity of the request
+    private val Throwable.isBackendAttestationError: Boolean
+        get() = this is APIException && stripeError?.code == "link_failed_to_attest_request"
 
     private val Throwable.isAccountError: Boolean
         get() = when (this) {

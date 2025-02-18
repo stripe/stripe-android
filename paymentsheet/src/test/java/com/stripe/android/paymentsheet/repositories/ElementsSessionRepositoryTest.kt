@@ -64,6 +64,7 @@ internal class ElementsSessionRepositoryTest {
         verify(stripeRepository, never()).retrievePaymentIntent(any(), any(), any())
         assertThat(session.stripeIntent).isEqualTo(PaymentIntentFixtures.PI_WITH_SHIPPING)
         assertThat(session.elementsSessionId).isEqualTo("session_1234")
+        assertThat(argumentCaptor.firstValue.appId).isEqualTo(APP_ID)
         assertThat(argumentCaptor.firstValue.locale).isEqualTo(locale.toLanguageTag())
     }
 
@@ -136,6 +137,7 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
+            appId = APP_ID
         ).get(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "client_secret",
@@ -153,6 +155,7 @@ internal class ElementsSessionRepositoryTest {
 
         val defaultLocale = LocaleListCompat.getAdjustedDefault()[0]?.toLanguageTag()
         assertThat(argumentCaptor.firstValue.locale).isEqualTo(defaultLocale)
+        assertThat(argumentCaptor.firstValue.appId)
     }
 
     @Test
@@ -168,6 +171,7 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
+            appId = APP_ID
         ).get(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
@@ -200,6 +204,7 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
+            appId = APP_ID
         ).get(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
@@ -237,6 +242,7 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
+            appId = APP_ID
         )
 
         repository.get(
@@ -258,6 +264,7 @@ internal class ElementsSessionRepositoryTest {
                     customerSessionClientSecret = "customer_session_client_secret",
                     externalPaymentMethods = emptyList(),
                     savedPaymentMethodSelectionId = null,
+                    appId = APP_ID
                 )
             ),
             options = any()
@@ -281,6 +288,7 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
+            appId = APP_ID
         )
 
         repository.get(
@@ -298,6 +306,7 @@ internal class ElementsSessionRepositoryTest {
                     clientSecret = "client_secret",
                     externalPaymentMethods = emptyList(),
                     savedPaymentMethodSelectionId = "pm_123",
+                    appId = APP_ID
                 )
             ),
             options = any()
@@ -308,6 +317,7 @@ internal class ElementsSessionRepositoryTest {
         stripeRepository,
         { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
         testDispatcher,
+        appId = APP_ID
     )
 
     private inline fun <T> withLocale(locale: Locale, block: () -> T): T {
@@ -316,5 +326,9 @@ internal class ElementsSessionRepositoryTest {
         val result = block()
         Locale.setDefault(original)
         return result
+    }
+
+    companion object {
+        private const val APP_ID = "com.app.id"
     }
 }

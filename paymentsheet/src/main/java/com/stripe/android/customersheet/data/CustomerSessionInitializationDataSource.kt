@@ -21,7 +21,9 @@ internal class CustomerSessionInitializationDataSource @Inject constructor(
         return withContext(workContext) {
             elementsSessionManager.fetchElementsSession().mapCatching { customerSessionElementsSession ->
                 val savedSelection = savedSelectionDataSource
-                    .retrieveSavedSelection()
+                    .retrieveSavedSelection(
+                        customerSessionElementsSession = customerSessionElementsSession
+                    )
                     .toResult()
                     .getOrThrow()
 

@@ -557,20 +557,6 @@ internal class LinkActivityViewModelTest {
     }
 
     @Test
-    fun `card edit route has correct app bar config`() {
-        val navController = navController(LinkScreen.CardEdit)
-        val viewModel = createViewModel(
-            navController = navController
-        )
-
-        val appBarState = viewModel.linkAppBarState.value
-        assertThat(appBarState.email).isNull()
-        assertThat(appBarState.showHeader).isFalse()
-        assertThat(appBarState.showOverflowMenu).isFalse()
-        assertThat(appBarState.navigationIcon).isEqualTo(R.drawable.stripe_link_back)
-    }
-
-    @Test
     fun `loading route has correct app bar config`() {
         val navController = navController(LinkScreen.Loading)
         val viewModel = createViewModel(

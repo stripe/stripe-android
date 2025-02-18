@@ -13,6 +13,7 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -33,6 +34,7 @@ import com.karumi.shot.ScreenshotTest
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.paymentelement.embedded.form.EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.BuildConfig
 import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundActivity
@@ -51,6 +53,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.RequireCvcRec
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_ERROR_TEXT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
+import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
 import com.stripe.android.test.core.ui.BrowserUI
 import com.stripe.android.test.core.ui.ComposeButton
@@ -541,6 +544,106 @@ internal class PlaygroundTestDriver(
         return result
     }
 
+    fun confirmEmbedded(
+        testParameters: TestParameters,
+        values: FieldPopulator.Values? = FieldPopulator.Values(),
+        afterAuthorization: (Selectors) -> Unit = {},
+        populateCustomLpmFields: FieldPopulator.() -> Unit = {},
+    ): PlaygroundState? {
+        setup(
+            testParameters.copyPlaygroundSettings { settings ->
+                settings.updateConfigurationData { configurationData ->
+                    configurationData.copy(
+                        integrationType = PlaygroundConfigurationData.IntegrationType.Embedded
+                    )
+                }
+            }
+        )
+        launchEmbedded()
+
+        selectLpmInEmbeddedMode(testParameters.paymentMethodCode)
+
+        if (values != null) {
+            FieldPopulator(
+                selectors,
+                testParameters,
+                populateCustomLpmFields,
+                verifyCustomLpmFields = {},
+                values = values,
+            ).populateFields()
+        }
+
+        // Verify device requirements are met prior to attempting confirmation.  Do this
+        // after we have had the chance to capture a screenshot.
+        verifyDeviceSupportsTestAuthorization(
+            testParameters.authorizationAction,
+            testParameters.useBrowser
+        )
+
+        val result = playgroundState
+
+        if (values != null) {
+            selectors.embeddedFormBuyButton.click()
+        } else {
+            selectors.complete.click()
+        }
+
+        doAuthorization()
+
+        afterAuthorization(selectors)
+
+        teardown()
+
+        return result
+    }
+
+    fun confirmEmbeddedUsBankAccount(
+        testParameters: TestParameters,
+        values: FieldPopulator.Values = FieldPopulator.Values(),
+    ): PlaygroundState? {
+        setup(
+            testParameters.copyPlaygroundSettings { settings ->
+                settings.updateConfigurationData { configurationData ->
+                    configurationData.copy(
+                        integrationType = PlaygroundConfigurationData.IntegrationType.Embedded
+                    )
+                }
+            }
+        )
+        launchEmbedded()
+
+        selectLpmInEmbeddedMode(testParameters.paymentMethodCode)
+
+        FieldPopulator(
+            selectors,
+            testParameters,
+            populateCustomLpmFields = {},
+            verifyCustomLpmFields = {},
+            values = values,
+        ).populateFields()
+
+        // Verify device requirements are met prior to attempting confirmation.  Do this
+        // after we have had the chance to capture a screenshot.
+        verifyDeviceSupportsTestAuthorization(
+            testParameters.authorizationAction,
+            testParameters.useBrowser
+        )
+
+        val result = playgroundState
+
+        selectors.embeddedFormBuyButton.click()
+
+        doUSBankAccountAuthorization(testParameters.authorizationAction)
+
+        selectors.embeddedFormBuyButton.waitForEnabled(requireClickAction = false)
+        selectors.embeddedFormBuyButton.click()
+        finishAfterAuthorization()
+
+        teardown()
+
+        return result
+    }
+
     fun confirmExistingComplete(
         customerId: String?,
         testParameters: TestParameters,
@@ -796,20 +899,28 @@ internal class PlaygroundTestDriver(
         composeTestRule.waitForIdle()
 
         // Expect the OTP dialog
-        composeTestRule.waitUntilExactlyOneExists(hasTestTag("OTP-0"))
+        composeTestRule.waitUntilExactlyOneExists(
+            matcher = hasTestTag("OTP-0"),
+            timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds,
+        )
 
         composeTestRule
             .onNodeWithTag("OTP-0")
             .performTextInput("000000")
 
-        composeTestRule.waitUntilExactlyOneExists(hasTestTag("collapsed_wallet_row_tag"))
+        composeTestRule.waitUntilExactlyOneExists(
+            matcher = hasTestTag("collapsed_wallet_row_tag"),
+            timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds,
+        )
 
         composeTestRule
             .onNodeWithTag("collapsed_wallet_row_tag")
             .performClick()
 
+        // We might have more than one bank account
         composeTestRule
-            .onNodeWithText("Test Institution")
+            .onAllNodesWithText("Test Institution")
+            .onFirst()
             .performClick()
 
         composeTestRule
@@ -1054,6 +1165,33 @@ internal class PlaygroundTestDriver(
         composeTestRule.waitForIdle()
     }
 
+    private fun selectLpmInEmbeddedMode(paymentMethodCode: PaymentMethodCode) {
+        composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+            composeTestRule
+                .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT))
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+
+        composeTestRule.onNode(hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodCode"))
+            .performScrollTo()
+            .performClick()
+
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+    }
+
+    private fun waitUntilPrimaryButtonIsCompleted() {
+        composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+            composeTestRule.onAllNodesWithTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON)
+                .fetchSemanticsNodes()
+                .isEmpty()
+        }
+
+        composeTestRule.waitForIdle()
+        Espresso.onIdle()
+    }
+
     /**
      * Here we wait for an activity different from the playground to be in view.  We
      * don't specifically look for PaymentSheetActivity or PaymentOptionsActivity because
@@ -1153,6 +1291,15 @@ internal class PlaygroundTestDriver(
             // PaymentOptionsActivity is now on screen
             waitForNotPlaygroundActivity()
         }
+    }
+
+    private fun launchEmbedded() {
+        selectors.reload.click()
+        selectors.complete.waitForEnabled()
+        selectors.complete.click()
+
+        // EmbeddedPlaygroundActivity is now on screen.
+        waitForNotPlaygroundActivity()
     }
 
     private fun launchCustomerSheet() {
@@ -1346,6 +1493,10 @@ internal class PlaygroundTestDriver(
         if (isDone) {
             playgroundState?.integrationType?.let { integrationType ->
                 if (integrationType.isPaymentFlow()) {
+                    if (integrationType == PlaygroundConfigurationData.IntegrationType.Embedded) {
+                        waitUntilPrimaryButtonIsCompleted()
+                    }
+
                     waitForPlaygroundActivity()
                     assertThat(resultValue).isEqualTo(SUCCESS_RESULT)
                 } else if (integrationType.isCustomerFlow()) {
