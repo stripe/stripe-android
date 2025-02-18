@@ -77,8 +77,8 @@ class GooglePayRepositoryTest {
             assertEquals(false, awaitItem())
 
             assertEquals(
-                ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_IS_READY_API_CALL.eventName,
-                errorReporter.getLoggedErrors().first(),
+                ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_IS_READY_API_CALL,
+                errorReporter.awaitCall().errorEvent,
             )
 
             cancelAndIgnoreRemainingEvents()

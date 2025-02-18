@@ -793,8 +793,8 @@ class CustomerSheetViewModelTest {
             assertThat(newViewState.savedPaymentMethods).contains(CARD_PAYMENT_METHOD)
         }
 
-        assertThat(errorReporter.getLoggedErrors())
-            .contains(ErrorReporter.SuccessEvent.CUSTOMER_SHEET_PAYMENT_METHODS_REFRESH_SUCCESS.eventName)
+        assertThat(errorReporter.awaitCall())
+            .isEqualTo(ErrorReporter.SuccessEvent.CUSTOMER_SHEET_PAYMENT_METHODS_REFRESH_SUCCESS)
     }
 
     @Test
@@ -819,8 +819,8 @@ class CustomerSheetViewModelTest {
                 assertThat(awaitItem()).isInstanceOf<InternalCustomerSheetResult.Canceled>()
             }
 
-            assertThat(errorReporter.getLoggedErrors())
-                .contains(ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_PAYMENT_METHODS_REFRESH_FAILURE.eventName)
+            assertThat(errorReporter.awaitCall())
+                .isEqualTo(ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_PAYMENT_METHODS_REFRESH_FAILURE)
         }
 
     @Test
@@ -845,8 +845,8 @@ class CustomerSheetViewModelTest {
             assertThat(newViewState.savedPaymentMethods).contains(CARD_PAYMENT_METHOD)
         }
 
-        assertThat(errorReporter.getLoggedErrors())
-            .contains(ErrorReporter.SuccessEvent.CUSTOMER_SHEET_PAYMENT_METHODS_REFRESH_SUCCESS.eventName)
+        assertThat(errorReporter.awaitCall())
+            .isEqualTo(ErrorReporter.SuccessEvent.CUSTOMER_SHEET_PAYMENT_METHODS_REFRESH_SUCCESS)
     }
 
     @Test
@@ -871,8 +871,8 @@ class CustomerSheetViewModelTest {
                 assertThat(awaitItem()).isInstanceOf<InternalCustomerSheetResult.Canceled>()
             }
 
-            assertThat(errorReporter.getLoggedErrors())
-                .contains(ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_PAYMENT_METHODS_REFRESH_FAILURE.eventName)
+            assertThat(errorReporter.awaitCall())
+                .isEqualTo(ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_PAYMENT_METHODS_REFRESH_FAILURE)
         }
 
     @Test

@@ -26,7 +26,6 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -42,28 +41,9 @@ import java.util.Locale
 @Suppress("LargeClass")
 @RunWith(RobolectricTestRunner::class)
 class LinkApiRepositoryTest {
-    private val stripeRepository = mock<StripeRepository>()
-    private val consumersApiService = mock<ConsumersApiService>()
-    private val errorReporter = FakeErrorReporter()
 
     private val paymentIntent = mock<PaymentIntent>().apply {
         whenever(clientSecret).thenReturn("secret")
-    }
-
-    private val linkRepository = LinkApiRepository(
-        application = ApplicationProvider.getApplicationContext(),
-        publishableKeyProvider = { PUBLISHABLE_KEY },
-        stripeAccountIdProvider = { STRIPE_ACCOUNT_ID },
-        stripeRepository = stripeRepository,
-        consumersApiService = consumersApiService,
-        workContext = Dispatchers.IO,
-        locale = Locale.US,
-        errorReporter = errorReporter
-    )
-
-    @Before
-    fun clearErrorReporter() {
-        errorReporter.clear()
     }
 
     @Test
@@ -264,6 +244,9 @@ class LinkApiRepositoryTest {
         val email = "email@stripe.com"
         val consumerKey = "key"
 
+        val consumersApiService = mock<ConsumersApiService>()
+        val linkRepository = linkRepository(consumersApiService)
+
         linkRepository.createCardPaymentDetails(
             paymentMethodCreateParams = cardPaymentMethodCreateParams,
             userEmail = email,
@@ -302,6 +285,9 @@ class LinkApiRepositoryTest {
             val secret = "secret"
             val email = "email@stripe.com"
 
+            val consumersApiService = mock<ConsumersApiService>()
+            val linkRepository = linkRepository(consumersApiService)
+
             linkRepository.createCardPaymentDetails(
                 paymentMethodCreateParams = cardPaymentMethodCreateParams,
                 userEmail = email,
@@ -339,6 +325,9 @@ class LinkApiRepositoryTest {
         val consumerSessionSecret = "consumer_session_secret"
         val email = "email@stripe.com"
         val paymentDetails = PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS
+        val consumersApiService = mock<ConsumersApiService>()
+        val linkRepository = linkRepository(consumersApiService)
+
         whenever(
             consumersApiService.createPaymentDetails(
                 consumerSessionClientSecret = any(),
@@ -386,6 +375,13 @@ class LinkApiRepositoryTest {
 
     @Test
     fun `createPaymentDetails for card catches exception and returns failure`() = runTest {
+        val errorReporter = FakeErrorReporter()
+        val consumersApiService = mock<ConsumersApiService>()
+        val linkRepository = linkRepository(
+            consumersApiService = consumersApiService,
+            errorReporter = errorReporter
+        )
+
         whenever(
             consumersApiService.createPaymentDetails(
                 consumerSessionClientSecret = any(),
@@ -403,17 +399,24 @@ class LinkApiRepositoryTest {
             consumerPublishableKey = null,
             active = false,
         )
-        val loggedErrors = errorReporter.getLoggedErrors()
+        val loggedError = errorReporter.awaitCall()
 
         assertThat(result.isFailure).isTrue()
-        assertThat(loggedErrors.size).isEqualTo(1)
-        assertThat(loggedErrors.first()).isEqualTo(ErrorReporter.ExpectedErrorEvent.LINK_CREATE_CARD_FAILURE.eventName)
+        assertThat(loggedError.errorEvent).isEqualTo(ErrorReporter.ExpectedErrorEvent.LINK_CREATE_CARD_FAILURE)
+        errorReporter.ensureAllEventsConsumed()
     }
 
     @Test
     fun `shareCardPaymentDetails returns LinkPaymentDetails_Saved`() = runTest {
         val consumerSessionSecret = "consumer_session_secret"
         val id = "csmrpd*AYq4D_sXdAAAAOQ0"
+        val consumersApiService = mock<ConsumersApiService>()
+        val stripeRepository = mock<StripeRepository>()
+
+        val linkRepository = linkRepository(
+            consumersApiService = consumersApiService,
+            stripeRepository = stripeRepository
+        )
 
         whenever(
             stripeRepository.sharePaymentDetails(
@@ -455,6 +458,14 @@ class LinkApiRepositoryTest {
     @Test
     fun `when shareCardPaymentDetails fails, an error is reported`() = runTest {
         val consumerSessionSecret = "consumer_session_secret"
+        val errorReporter = FakeErrorReporter()
+        val consumersApiService = mock<ConsumersApiService>()
+        val stripeRepository = mock<StripeRepository>()
+        val linkRepository = linkRepository(
+            consumersApiService = consumersApiService,
+            stripeRepository = stripeRepository,
+            errorReporter = errorReporter
+        )
 
         whenever(
             stripeRepository.sharePaymentDetails(
@@ -471,17 +482,21 @@ class LinkApiRepositoryTest {
             id = "csmrpd*AYq4D_sXdAAAAOQ0",
             last4 = "4242",
         )
-        val loggedErrors = errorReporter.getLoggedErrors()
+        val loggedError = errorReporter.awaitCall()
 
         assertThat(result.isFailure).isTrue()
-        assertThat(loggedErrors.size).isEqualTo(1)
-        assertThat(loggedErrors.first()).isEqualTo(ErrorReporter.ExpectedErrorEvent.LINK_SHARE_CARD_FAILURE.eventName)
+        assertThat(loggedError.errorEvent).isEqualTo(ErrorReporter.ExpectedErrorEvent.LINK_SHARE_CARD_FAILURE)
     }
 
     @Test
     fun `startVerification sends correct parameters`() = runTest {
         val secret = "secret"
         val consumerKey = "key"
+
+        val consumersApiService = mock<ConsumersApiService>()
+
+        val linkRepository = linkRepository(consumersApiService)
+
         linkRepository.startVerification(secret, consumerKey)
 
         verify(consumersApiService).startConsumerVerification(
@@ -498,6 +513,11 @@ class LinkApiRepositoryTest {
     @Test
     fun `startVerification without consumerPublishableKey sends correct parameters`() = runTest {
         val secret = "secret"
+
+        val consumersApiService = mock<ConsumersApiService>()
+
+        val linkRepository = linkRepository(consumersApiService)
+
         linkRepository.startVerification(secret, null)
 
         verify(consumersApiService).startConsumerVerification(
@@ -514,6 +534,11 @@ class LinkApiRepositoryTest {
     @Test
     fun `startVerification returns successful result`() = runTest {
         val consumerSession = mock<ConsumerSession>()
+
+        val consumersApiService = mock<ConsumersApiService>()
+
+        val linkRepository = linkRepository(consumersApiService)
+
         whenever(
             consumersApiService.startConsumerVerification(
                 consumerSessionClientSecret = any(),
@@ -535,6 +560,10 @@ class LinkApiRepositoryTest {
 
     @Test
     fun `startVerification catches exception and returns failure`() = runTest {
+        val consumersApiService = mock<ConsumersApiService>()
+
+        val linkRepository = linkRepository(consumersApiService)
+
         whenever(
             consumersApiService.startConsumerVerification(
                 consumerSessionClientSecret = any(),
@@ -557,6 +586,13 @@ class LinkApiRepositoryTest {
     fun `listPaymentDetails sends correct parameters`() = runTest {
         val secret = "secret"
         val consumerKey = "key"
+
+        val stripeRepository = mock<StripeRepository>()
+
+        val linkRepository = linkRepository(
+            stripeRepository = stripeRepository
+        )
+
         linkRepository.listPaymentDetails(setOf("card"), secret, consumerKey)
 
         verify(stripeRepository).listPaymentDetails(
@@ -569,6 +605,9 @@ class LinkApiRepositoryTest {
     @Test
     fun `listPaymentDetails without consumerPublishableKey sends correct parameters`() = runTest {
         val secret = "secret"
+        val stripeRepository = mock<StripeRepository>()
+        val linkRepository = linkRepository(stripeRepository = stripeRepository)
+
         linkRepository.listPaymentDetails(setOf("card"), secret, null)
 
         verify(stripeRepository).listPaymentDetails(
@@ -582,6 +621,8 @@ class LinkApiRepositoryTest {
     fun `deletePaymentDetails without consumerPublishableKey sends correct parameters`() = runTest {
         val secret = "secret"
         val id = "payment_details_id"
+        val stripeRepository = mock<StripeRepository>()
+        val linkRepository = linkRepository(stripeRepository = stripeRepository)
         linkRepository.deletePaymentDetails(id, secret, null)
 
         verify(stripeRepository).deletePaymentDetails(
@@ -593,6 +634,10 @@ class LinkApiRepositoryTest {
 
     @Test
     fun `deletePaymentDetails returns successful result`() = runTest {
+        val stripeRepository = mock<StripeRepository>()
+        val linkRepository = linkRepository(
+            stripeRepository = stripeRepository
+        )
         whenever(stripeRepository.deletePaymentDetails(any(), any(), any())).thenReturn(Result.success(Unit))
 
         val result = linkRepository.deletePaymentDetails("id", "secret", "key")
@@ -603,6 +648,10 @@ class LinkApiRepositoryTest {
     @Test
     fun `deletePaymentDetails returns error result when repository fails`() = runTest {
         val error = RuntimeException("error")
+        val stripeRepository = mock<StripeRepository>()
+
+        val linkRepository = linkRepository(stripeRepository = stripeRepository)
+
         whenever(stripeRepository.deletePaymentDetails(any(), any(), any()))
             .thenReturn(Result.failure(error))
 
@@ -616,6 +665,11 @@ class LinkApiRepositoryTest {
         val secret = "secret"
         val params = ConsumerPaymentDetailsUpdateParams("id")
         val consumerKey = "key"
+
+        val stripeRepository = mock<StripeRepository>()
+        val linkRepository = linkRepository(
+            stripeRepository = stripeRepository
+        )
 
         linkRepository.updatePaymentDetails(
             params,
@@ -634,6 +688,11 @@ class LinkApiRepositoryTest {
     fun `updatePaymentDetails without consumerPublishableKey sends correct parameters`() = runTest {
         val secret = "secret"
         val params = ConsumerPaymentDetailsUpdateParams("id")
+        val stripeRepository = mock<StripeRepository>()
+
+        val linkRepository = linkRepository(
+            stripeRepository = stripeRepository
+        )
 
         linkRepository.updatePaymentDetails(
             params,
@@ -650,6 +709,12 @@ class LinkApiRepositoryTest {
 
     @Test
     fun `updatePaymentDetails returns successful result`() = runTest {
+        val consumersApiService = mock<ConsumersApiService>()
+        val stripeRepository = mock<StripeRepository>()
+        val linkRepository = linkRepository(
+            consumersApiService = consumersApiService,
+            stripeRepository = stripeRepository
+        )
         whenever(stripeRepository.updatePaymentDetails(any(), any(), any()))
             .thenReturn(Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS))
 
@@ -665,6 +730,12 @@ class LinkApiRepositoryTest {
     @Test
     fun `updatePaymentDetails returns error result when repository fails`() = runTest {
         val error = RuntimeException("error")
+
+        val stripeRepository = mock<StripeRepository>()
+        val linkRepository = linkRepository(
+            stripeRepository = stripeRepository
+        )
+
         whenever(stripeRepository.updatePaymentDetails(any(), any(), any()))
             .thenReturn(Result.failure(error))
 
@@ -678,7 +749,9 @@ class LinkApiRepositoryTest {
     }
 
     private fun linkRepository(
-        consumersApiService: ConsumersApiService = FakeConsumersApiService()
+        consumersApiService: ConsumersApiService = FakeConsumersApiService(),
+        errorReporter: ErrorReporter = FakeErrorReporter(),
+        stripeRepository: StripeRepository = mock<StripeRepository>()
     ): LinkApiRepository {
         return LinkApiRepository(
             application = ApplicationProvider.getApplicationContext(),

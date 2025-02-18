@@ -172,9 +172,10 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
             ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod,
         )
 
-        assertThat(errorReporter.getLoggedErrors()).containsExactly(
-            ErrorReporter.ExpectedErrorEvent.EXTERNAL_PAYMENT_METHOD_CONFIRM_HANDLER_NULL.eventName
+        assertThat(errorReporter.awaitCall().errorEvent).isEqualTo(
+            ErrorReporter.ExpectedErrorEvent.EXTERNAL_PAYMENT_METHOD_CONFIRM_HANDLER_NULL
         )
+        errorReporter.ensureAllEventsConsumed()
     }
 
     @Test
@@ -233,9 +234,10 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
             )
         )
 
-        assertThat(errorReporter.getLoggedErrors()).containsExactly(
-            ErrorReporter.SuccessEvent.EXTERNAL_PAYMENT_METHODS_LAUNCH_SUCCESS.eventName
+        assertThat(errorReporter.awaitCall().errorEvent).isEqualTo(
+            ErrorReporter.SuccessEvent.EXTERNAL_PAYMENT_METHODS_LAUNCH_SUCCESS
         )
+        errorReporter.ensureAllEventsConsumed()
     }
 
     private fun createExternalPaymentMethodConfirmationDefinition(

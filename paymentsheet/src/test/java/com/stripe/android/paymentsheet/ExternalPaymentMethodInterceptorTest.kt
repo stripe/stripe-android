@@ -7,6 +7,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.testing.FakeErrorReporter
+import kotlinx.coroutines.test.runTest
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
@@ -15,7 +16,7 @@ import kotlin.test.Test
 class ExternalPaymentMethodInterceptorTest {
 
     @Test
-    fun `intercept with null external payment confirm handler logs and fails`() {
+    fun `intercept with null external payment confirm handler logs and fails`() = runTest {
         val errorReporter = FakeErrorReporter()
         var paymentResult: PaymentResult? = null
         ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
@@ -29,13 +30,14 @@ class ExternalPaymentMethodInterceptorTest {
         )
 
         assertThat(paymentResult).isInstanceOf<PaymentResult.Failed>()
-        assertThat(errorReporter.getLoggedErrors()).containsExactly(
-            ErrorReporter.ExpectedErrorEvent.EXTERNAL_PAYMENT_METHOD_CONFIRM_HANDLER_NULL.eventName
+        assertThat(errorReporter.awaitCall().errorEvent).isEqualTo(
+            ErrorReporter.ExpectedErrorEvent.EXTERNAL_PAYMENT_METHOD_CONFIRM_HANDLER_NULL
         )
+        errorReporter.ensureAllEventsConsumed()
     }
 
     @Test
-    fun `intercept with null external payment launcher logs and fails`() {
+    fun `intercept with null external payment launcher logs and fails`() = runTest {
         val errorReporter = FakeErrorReporter()
         var paymentResult: PaymentResult? = null
         ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler =
@@ -50,13 +52,14 @@ class ExternalPaymentMethodInterceptorTest {
         )
 
         assertThat(paymentResult).isInstanceOf<PaymentResult.Failed>()
-        assertThat(errorReporter.getLoggedErrors()).containsExactly(
-            ErrorReporter.ExpectedErrorEvent.EXTERNAL_PAYMENT_METHOD_LAUNCHER_NULL.eventName
+        assertThat(errorReporter.awaitCall().errorEvent).isEqualTo(
+            ErrorReporter.ExpectedErrorEvent.EXTERNAL_PAYMENT_METHOD_LAUNCHER_NULL
         )
+        errorReporter.ensureAllEventsConsumed()
     }
 
     @Test
-    fun `intercept with correct params succeeds`() {
+    fun `intercept with correct params succeeds`() = runTest {
         val errorReporter = FakeErrorReporter()
         ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler =
             DefaultExternalPaymentMethodConfirmHandler
@@ -71,9 +74,10 @@ class ExternalPaymentMethodInterceptorTest {
             errorReporter = errorReporter,
         )
 
-        assertThat(errorReporter.getLoggedErrors()).containsExactly(
-            ErrorReporter.SuccessEvent.EXTERNAL_PAYMENT_METHODS_LAUNCH_SUCCESS.eventName
+        assertThat(errorReporter.awaitCall().errorEvent).isEqualTo(
+            ErrorReporter.SuccessEvent.EXTERNAL_PAYMENT_METHODS_LAUNCH_SUCCESS
         )
+        errorReporter.ensureAllEventsConsumed()
     }
 
     object DefaultExternalPaymentMethodConfirmHandler : ExternalPaymentMethodConfirmHandler {

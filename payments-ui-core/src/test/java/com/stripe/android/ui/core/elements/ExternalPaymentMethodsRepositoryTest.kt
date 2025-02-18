@@ -3,73 +3,76 @@ package com.stripe.android.ui.core.elements
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.FakeErrorReporter
-import org.junit.Before
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
 class ExternalPaymentMethodsRepositoryTest {
 
-    val errorReporter = FakeErrorReporter()
-    val externalPaymentMethodsRepository = ExternalPaymentMethodsRepository(errorReporter)
-
-    @Before
-    fun clearErrorReporter() {
-        errorReporter.clear()
-    }
-
     @Test
     fun `externalPaymentMethodData is null, result is empty list`() {
+        val errorReporter = FakeErrorReporter()
+        val externalPaymentMethodsRepository = ExternalPaymentMethodsRepository(errorReporter)
         val externalPaymentMethodData = null
         val expectedEpms = emptyList<ExternalPaymentMethodSpec>()
 
         val actualEpms = externalPaymentMethodsRepository.getExternalPaymentMethodSpecs(externalPaymentMethodData)
 
         assertThat(actualEpms).isEqualTo(expectedEpms)
-        assertThat(errorReporter.getLoggedErrors()).isEmpty()
+        errorReporter.ensureAllEventsConsumed()
     }
 
     @Test
     fun `externalPaymentMethodData is empty string, result is empty list`() {
+        val errorReporter = FakeErrorReporter()
+        val externalPaymentMethodsRepository = ExternalPaymentMethodsRepository(errorReporter)
         val externalPaymentMethodData = ""
         val expectedEpms = emptyList<ExternalPaymentMethodSpec>()
 
         val actualEpms = externalPaymentMethodsRepository.getExternalPaymentMethodSpecs(externalPaymentMethodData)
 
         assertThat(actualEpms).isEqualTo(expectedEpms)
-        assertThat(errorReporter.getLoggedErrors()).isEmpty()
+        errorReporter.ensureAllEventsConsumed()
     }
 
     @Test
-    fun `externalPaymentMethodData is invalid, result is empty list`() {
+    fun `externalPaymentMethodData is invalid, result is empty list`() = runTest {
+        val errorReporter = FakeErrorReporter()
+        val externalPaymentMethodsRepository = ExternalPaymentMethodsRepository(errorReporter)
         val externalPaymentMethodData = "invalid_input!!"
         val expectedEpms = emptyList<ExternalPaymentMethodSpec>()
 
         val actualEpms = externalPaymentMethodsRepository.getExternalPaymentMethodSpecs(externalPaymentMethodData)
 
         assertThat(actualEpms).isEqualTo(expectedEpms)
-        assertThat(errorReporter.getLoggedErrors())
-            .containsExactly(ErrorReporter.UnexpectedErrorEvent.EXTERNAL_PAYMENT_METHOD_SERIALIZATION_FAILURE.eventName)
+        assertThat(errorReporter.awaitCall().errorEvent)
+            .isEqualTo(ErrorReporter.UnexpectedErrorEvent.EXTERNAL_PAYMENT_METHOD_SERIALIZATION_FAILURE)
+        errorReporter.ensureAllEventsConsumed()
     }
 
     @Test
     fun `externalPaymentMethod contains one EPM, result is one EPM`() {
+        val errorReporter = FakeErrorReporter()
+        val externalPaymentMethodsRepository = ExternalPaymentMethodsRepository(errorReporter)
         val externalPaymentMethodData = VENMO_EXTERNAL_PAYMENT_METHOD_DATA
         val expectedEpms = listOf(VENMO_EPM)
 
         val actualEpms = externalPaymentMethodsRepository.getExternalPaymentMethodSpecs(externalPaymentMethodData)
 
         assertThat(actualEpms).isEqualTo(expectedEpms)
-        assertThat(errorReporter.getLoggedErrors()).isEmpty()
+        errorReporter.ensureAllEventsConsumed()
     }
 
     @Test
     fun `externalPaymentMethod contains two EPMs, result is two EPMs`() {
+        val errorReporter = FakeErrorReporter()
+        val externalPaymentMethodsRepository = ExternalPaymentMethodsRepository(errorReporter)
         val externalPaymentMethodData = PAYPAL_AND_VENMO_EXTERNAL_PAYMENT_METHOD_DATA
         val expectedEpms = listOf(VENMO_EPM, PAYPAL_EPM)
 
         val actualEpms = externalPaymentMethodsRepository.getExternalPaymentMethodSpecs(externalPaymentMethodData)
 
         assertThat(actualEpms).isEqualTo(expectedEpms)
-        assertThat(errorReporter.getLoggedErrors()).isEmpty()
+        errorReporter.ensureAllEventsConsumed()
     }
 
     private val VENMO_EPM = ExternalPaymentMethodSpec(

@@ -1,27 +1,46 @@
 package com.stripe.android.testing
 
 import androidx.annotation.RestrictTo
+import app.cash.turbine.Event
+import app.cash.turbine.Turbine
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.payments.core.analytics.ErrorReporter
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class FakeErrorReporter : ErrorReporter {
-
-    private val loggedErrors: MutableList<String> = mutableListOf()
+    private val calls = Turbine<Call>()
 
     override fun report(
         errorEvent: ErrorReporter.ErrorEvent,
         stripeException: StripeException?,
         additionalNonPiiParams: Map<String, String>,
     ) {
-        loggedErrors.add(errorEvent.eventName)
+        calls.add(
+            item = Call(
+                errorEvent = errorEvent,
+                stripeException = stripeException,
+                additionalNonPiiParams = additionalNonPiiParams
+            )
+        )
     }
 
-    fun getLoggedErrors(): List<String> {
-        return loggedErrors.toList()
+    suspend fun awaitCall(): Call {
+        return calls.awaitItem()
     }
 
-    fun clear() {
-        loggedErrors.clear()
+    suspend fun consumeAllEvents(): List<Call> {
+        return calls.cancelAndConsumeRemainingEvents()
+            .filterIsInstance<Event.Item<Call>>()
+            .map { it.value }
     }
+
+    fun ensureAllEventsConsumed() {
+        calls.ensureAllEventsConsumed()
+    }
+
+    data class Call(
+        val errorEvent: ErrorReporter.ErrorEvent,
+        val stripeException: StripeException?,
+        val additionalNonPiiParams: Map<String, String>
+    )
 }

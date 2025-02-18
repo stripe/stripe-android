@@ -72,10 +72,11 @@ internal class DefaultLinkAttestationCheckTest {
 
         assertThat(attestationCheck.invoke())
             .isEqualTo(LinkAttestationCheck.Result.AttestationFailed(error))
-        assertThat(errorReporter.getLoggedErrors())
-            .containsExactly(
-                ErrorReporter.ExpectedErrorEvent.LINK_NATIVE_FAILED_TO_PREPARE_INTEGRITY_MANAGER.eventName
+        assertThat(errorReporter.awaitCall().errorEvent)
+            .isEqualTo(
+                ErrorReporter.ExpectedErrorEvent.LINK_NATIVE_FAILED_TO_PREPARE_INTEGRITY_MANAGER
             )
+        errorReporter.ensureAllEventsConsumed()
     }
 
     @Test

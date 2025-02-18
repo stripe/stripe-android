@@ -11,6 +11,7 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.FakeErrorReporter
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -158,7 +159,7 @@ class WebLinkActivityContractTest {
     }
 
     @Test
-    fun `complete with malformed payment method results in canceled`() {
+    fun `complete with malformed payment method results in canceled`() = runTest {
         val redirectUrl =
             "link-popup://complete?link_status=complete&pm=🤷‍"
         val intent = Intent()
@@ -173,8 +174,9 @@ class WebLinkActivityContractTest {
         assertThat(result).isInstanceOf(LinkActivityResult.Canceled::class.java)
         val canceled = result as LinkActivityResult.Canceled
         assertThat(canceled.reason).isEqualTo(LinkActivityResult.Canceled.Reason.BackPressed)
-        assertThat(errorReporter.getLoggedErrors())
-            .containsExactly(ErrorReporter.UnexpectedErrorEvent.LINK_WEB_FAILED_TO_PARSE_RESULT_URI.eventName)
+        assertThat(errorReporter.awaitCall().errorEvent)
+            .isEqualTo(ErrorReporter.UnexpectedErrorEvent.LINK_WEB_FAILED_TO_PARSE_RESULT_URI)
+        errorReporter.ensureAllEventsConsumed()
     }
 
     private fun contract(
