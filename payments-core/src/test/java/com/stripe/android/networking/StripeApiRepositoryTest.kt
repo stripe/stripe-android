@@ -1504,25 +1504,25 @@ internal class StripeApiRepositoryTest {
 
     @Test
     fun setDefaultPaymentMethod_sendPaymentMethodParameter() = runTest {
-            val stripeResponse = StripeResponse(
-                code = 200,
-                body = "",
-                headers = emptyMap()
-            )
-            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-                .thenReturn(stripeResponse)
+        val stripeResponse = StripeResponse(
+            code = 200,
+            body = "",
+            headers = emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
 
-            val expectedPaymentMethodId = "pm_123"
-            create().setDefaultPaymentMethod(
-                customerId = "cus_123",
-                paymentMethodId = expectedPaymentMethodId,
-                DEFAULT_OPTIONS,
-            )
+        val expectedPaymentMethodId = "pm_123"
+        create().setDefaultPaymentMethod(
+            customerId = "cus_123",
+            paymentMethodId = expectedPaymentMethodId,
+            DEFAULT_OPTIONS,
+        )
 
-            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-            val apiRequest = apiRequestArgumentCaptor.firstValue
-            assertThat(apiRequest.params?.get("payment_method")).isEqualTo(expectedPaymentMethodId)
-        }
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        val apiRequest = apiRequestArgumentCaptor.firstValue
+        assertThat(apiRequest.params?.get("payment_method")).isEqualTo(expectedPaymentMethodId)
+    }
 
     @Test
     fun setDefaultPaymentMethod_sendsNullPaymentMethodAsEmptyString() = runTest {
