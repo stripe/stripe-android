@@ -1,8 +1,8 @@
 package com.stripe.android.customersheet.data
 
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.customersheet.util.getDefaultPaymentMethodsEnabledForCustomerSheet
 import com.stripe.android.customersheet.util.getDefaultPaymentMethodAsPaymentSelection
+import com.stripe.android.customersheet.util.getDefaultPaymentMethodsEnabledForCustomerSheet
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.SavedSelection
@@ -22,8 +22,8 @@ internal class CustomerSessionSavedSelectionDataSource @Inject constructor(
     ): CustomerSheetDataResult<SavedSelection?> {
         return withContext(workContext) {
             val loadedElementsSession = customerSessionElementsSession?.let {
-                    Result.success(it)
-                } ?: elementsSessionManager.fetchElementsSession()
+                Result.success(it)
+            } ?: elementsSessionManager.fetchElementsSession()
             return@withContext loadedElementsSession.fold(
                 onSuccess = {
                     if (getDefaultPaymentMethodsEnabledForCustomerSheet(it.elementsSession)) {

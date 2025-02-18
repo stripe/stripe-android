@@ -157,7 +157,7 @@ class CustomerSessionSavedSelectionDataSourceTest {
 
     @Test
     fun `When elements session passed to retrieveSavedSelection, should not re-query elements session`() = runTest {
-        val existingElementsSession = FakeCustomerSessionElementsSessionManager().fetchElementsSession()
+        val existingElementsSession = FakeCustomerSessionElementsSessionManager().fetchElementsSession().getOrThrow()
         val failingElementsSessionManager = FakeCustomerSessionElementsSessionManager(
             elementsSession = Result.failure(
                 IllegalAccessError("Should not re-query elements session in this test!")
@@ -168,7 +168,7 @@ class CustomerSessionSavedSelectionDataSourceTest {
             elementsSessionManager = failingElementsSessionManager
         )
 
-        val result = dataSource.retrieveSavedSelection(customerSessionElementsSession = existingElementsSession.getOrThrow())
+        val result = dataSource.retrieveSavedSelection(customerSessionElementsSession = existingElementsSession)
 
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Success<SavedSelection?>>()
 
