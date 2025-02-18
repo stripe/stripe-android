@@ -2,7 +2,7 @@
 <resources>
   <string name="stripe_camera_permission_settings_message">โปรดอนุญาตให้เข้าถึงกล้องในการตั้งค่าเพื่อสแกนบัตร</string>
   <string name="stripe_card_scan_instructions">สแกนบัตร</string>
-  <string name="stripe_card_scan_privacy_link_text">เราใช้ Stripe เพื่อยืนยันรายละเอียดบัตรของคุณ ดังนั้น Stripe อาจใช้และจัดเก็บข้อมูลของคุณไว้ตามนโยบายความเป็นส่วนตัวของบริษัท <a href="https://support.stripe.com/questions/stripes-card-image-verification"><u>ดูข้อมูลเพิ่มเติม</u></a></string>
+  <string name="stripe_card_scan_privacy_link_text"><![CDATA[เราใช้ Stripe เพื่อยืนยันรายละเอียดบัตรของคุณ ดังนั้น Stripe อาจใช้และจัดเก็บข้อมูลของคุณไว้ตามนโยบายความเป็นส่วนตัวของบริษัท <a href="https://support.stripe.com/questions/stripes-card-image-verification"><u>ดูข้อมูลเพิ่มเติม</u></a>]]></string>
   <string name="stripe_card_scan_title">จัดตำแหน่งบัตรให้อยู่ในกรอบสี่เหลี่ยมเพื่อสแกน</string>
   <string name="stripe_close_button_description">ปิด</string>
   <string name="stripe_swap_camera_button_description">สลับกล้อง</string>

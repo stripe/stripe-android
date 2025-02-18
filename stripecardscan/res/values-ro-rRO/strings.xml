@@ -2,7 +2,7 @@
 <resources>
   <string name="stripe_camera_permission_settings_message">Permiteți accesul la cameră în setări pentru a scana cardul</string>
   <string name="stripe_card_scan_instructions">Scanați cardul</string>
-  <string name="stripe_card_scan_privacy_link_text">Folosim Stripe pentru a verifica detaliile cardului dvs. Stripe poate utiliza și stoca datele dvs. în conformitate cu politica sa de confidențialitate. <a href="https://support.stripe.com/questions/stripes-card-image-verification"><u>Aflați mai multe</u></a></string>
+  <string name="stripe_card_scan_privacy_link_text"><![CDATA[Folosim Stripe pentru a verifica detaliile cardului dvs. Stripe poate utiliza și stoca datele dvs. în conformitate cu politica sa de confidențialitate. <a href="https://support.stripe.com/questions/stripes-card-image-verification"><u>Aflați mai multe</u></a>]]></string>
   <string name="stripe_card_scan_title">Poziționați cardul în dreptunghi pentru a-l scana</string>
   <string name="stripe_close_button_description">Închidere</string>
   <string name="stripe_swap_camera_button_description">Schimbare cameră</string>

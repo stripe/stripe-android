@@ -2,7 +2,7 @@
 <resources>
   <string name="stripe_camera_permission_settings_message">Kaardi skannimiseks lubage sätetes juurdepääs kaamerale</string>
   <string name="stripe_card_scan_instructions">Skannige oma kaart</string>
-  <string name="stripe_card_scan_privacy_link_text">Kasutame teie kaardi andmete kontrollimiseks Stripe\'i. Stripe võib teie andmeid kasutada ja säilitada vastavalt oma privaatsuspoliitikale. <a href="https://support.stripe.com/questions/stripes-card-image-verification"><u>Lisateave</u></a></string>
+  <string name="stripe_card_scan_privacy_link_text"><![CDATA[Kasutame teie kaardi andmete kontrollimiseks Stripe\'i. Stripe võib teie andmeid kasutada ja säilitada vastavalt oma privaatsuspoliitikale. <a href="https://support.stripe.com/questions/stripes-card-image-verification"><u>Lisateave</u></a>]]></string>
   <string name="stripe_card_scan_title">Skannimiseks paigutage oma kaart ristkülikusse</string>
   <string name="stripe_close_button_description">Sulge</string>
   <string name="stripe_swap_camera_button_description">Kaameravahetus</string>
