@@ -5,13 +5,14 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.R
 import java.text.SimpleDateFormat
+import java.util.Locale
 
 internal fun formatExpirationDateForAccessibility(input: String): ResolvableString {
     if (input.isEmpty()) {
         return resolvableString(R.string.stripe_expiration_date_empty_content_description)
     }
 
-    val locale = AppCompatDelegate.getApplicationLocales()[0] ?: java.util.Locale.getDefault()
+    val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
 
     val canOnlyBeSingleDigitMonth = input.isNotBlank() && !(input[0] == '0' || input[0] == '1')
     val canOnlyBeJanuary = input.length > 1 && input.take(2).toInt() > 12
