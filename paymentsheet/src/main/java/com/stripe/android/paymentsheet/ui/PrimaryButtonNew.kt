@@ -171,9 +171,7 @@ private fun Content(
         ) {
             if (completed) {
                 if (areAnimationsDisabled) {
-                    SideEffect {
-                        onProcessingCompleted()
-                    }
+                    StaticCompleteProcessing(onProcessingCompleted)
                 } else {
                     AnimatedCompleteProcessing(onProcessingCompleted)
                 }
@@ -326,14 +324,36 @@ private fun BoxScope.AnimatedCompleteProcessing(
         }
     }
 
-    Icon(
-        painterResource(R.drawable.stripe_ic_paymentsheet_googlepay_primary_button_checkmark),
+    SuccessIcon(
         modifier = Modifier.align(
             BiasAlignment(
                 horizontalBias = animatedAlignment,
                 verticalBias = CENTER_ALIGNED
             )
         ),
+    )
+}
+
+@Composable
+private fun BoxScope.StaticCompleteProcessing(
+    onAnimationCompleted: () -> Unit
+) {
+    SideEffect {
+        onAnimationCompleted()
+    }
+
+    SuccessIcon(
+        modifier = Modifier.align(Alignment.Center),
+    )
+}
+
+@Composable
+private fun SuccessIcon(
+    modifier: Modifier = Modifier,
+) {
+    Icon(
+        painterResource(R.drawable.stripe_ic_paymentsheet_googlepay_primary_button_checkmark),
+        modifier =modifier,
         tint = PrimaryButtonTheme.colors.onSuccessBackground,
         contentDescription = null
     )
