@@ -90,9 +90,12 @@ internal class CardDetailsController(
     val expirationDateElement = SimpleTextElement(
         IdentifierSpec.Generic("date"),
         SimpleTextFieldController(
-            DateConfig(),
+            textFieldConfig = DateConfig(),
             initialValue = initialValues[IdentifierSpec.CardExpMonth] +
-                initialValues[IdentifierSpec.CardExpYear]?.takeLast(2)
+                initialValues[IdentifierSpec.CardExpYear]?.takeLast(2),
+            overrideContentDescriptionProvider = ::formatExpirationDateForAccessibility,
+            shouldAnnounceFieldValue = false,
+            shouldAnnounceLabel = false
         )
     )
 

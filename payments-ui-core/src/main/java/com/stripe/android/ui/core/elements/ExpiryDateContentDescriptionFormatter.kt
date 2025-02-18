@@ -1,16 +1,17 @@
-package com.stripe.android.uicore.utils
+package com.stripe.android.ui.core.elements
 
+import androidx.appcompat.app.AppCompatDelegate
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.R
 import java.text.SimpleDateFormat
-import androidx.compose.ui.text.intl.Locale as ComposeLocale
-import java.util.Locale as JavaLocale
 
-internal fun formatExpirationDateForAccessibility(locale: ComposeLocale, input: String): ResolvableString {
+internal fun formatExpirationDateForAccessibility(input: String): ResolvableString {
     if (input.isEmpty()) {
         return resolvableString(R.string.stripe_expiration_date_empty_content_description)
     }
+
+    val locale = AppCompatDelegate.getApplicationLocales()[0] ?: java.util.Locale.getDefault()
 
     val canOnlyBeSingleDigitMonth = input.isNotBlank() && !(input[0] == '0' || input[0] == '1')
     val canOnlyBeJanuary = input.length > 1 && input.take(2).toInt() > 12
@@ -21,10 +22,9 @@ internal fun formatExpirationDateForAccessibility(locale: ComposeLocale, input: 
     val year = input.slice(lastIndexOfMonth + 1..input.lastIndex).toIntOrNull()
 
     try {
-        val javaLocale = JavaLocale(locale.language, locale.region)
         if (month != null) {
-            val monthName = SimpleDateFormat("MM", javaLocale).parse("$month")?.let {
-                SimpleDateFormat("MMMM", javaLocale).format(it)
+            val monthName = SimpleDateFormat("MM", locale).parse("$month")?.let {
+                SimpleDateFormat("MMMM", locale).format(it)
             }
 
             return when (year) {

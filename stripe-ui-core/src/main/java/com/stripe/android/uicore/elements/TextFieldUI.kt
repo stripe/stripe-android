@@ -61,7 +61,6 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.Logger
 import com.stripe.android.uicore.BuildConfig
@@ -69,10 +68,10 @@ import com.stripe.android.uicore.LocalInstrumentationTest
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.compat.CompatTextField
 import com.stripe.android.uicore.moveFocusSafely
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.autofill
 import com.stripe.android.uicore.utils.collectAsState
-import com.stripe.android.uicore.utils.formatExpirationDateForAccessibility
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -129,7 +128,6 @@ fun TextFieldSection(
  * attribute of [textFieldController] is also taken into account to decide if the UI should be
  * enabled.
  */
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 @Suppress("LongMethod")
 fun TextField(
@@ -141,6 +139,8 @@ fun TextField(
     nextFocusDirection: FocusDirection = FocusDirection.Next,
     previousFocusDirection: FocusDirection = FocusDirection.Previous,
     focusRequester: FocusRequester = remember { FocusRequester() },
+    shouldAnnounceLabel: Boolean = true,
+    shouldAnnounceFieldValue: Boolean = true
 ) {
     val focusManager = LocalFocusManager.current
     val value by textFieldController.fieldValue.collectAsState()
@@ -174,8 +174,6 @@ fun TextField(
     }
 
     val context = LocalContext.current
-
-    val isExpiryDate = (textFieldController as? SimpleTextFieldController)?.textFieldConfig is DateConfig
 
     TextFieldUi(
         value = TextFieldValue(
@@ -218,19 +216,15 @@ fun TextField(
             )
             .focusRequester(focusRequester)
             .semantics {
-                if (isExpiryDate) {
-                    this.editableText = AnnotatedString("")
-                    this.contentDescription = formatExpirationDateForAccessibility(Locale.current, value)
-                        .resolve(context)
-                } else {
-                    this.contentDescription = contentDescription
-                }
+                this.contentDescription = contentDescription.resolve(context)
+                if (!shouldAnnounceFieldValue) this.editableText = AnnotatedString("")
             },
         enabled = enabled && textFieldController.enabled,
         label = label?.let {
             stringResource(it)
         },
         showOptionalLabel = textFieldController.showOptionalLabel,
+        shouldAnnounceLabel = shouldAnnounceLabel,
         placeholder = placeHolder,
         trailingIcon = trailingIcon,
         shouldShowError = shouldShowError,
@@ -261,6 +255,7 @@ internal fun TextFieldUi(
     trailingIcon: TextFieldIcon?,
     showOptionalLabel: Boolean,
     shouldShowError: Boolean,
+    shouldAnnounceLabel: Boolean,
     modifier: Modifier = Modifier,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
@@ -286,11 +281,7 @@ internal fun TextFieldUi(
                     } else {
                         it
                     },
-                    modifier = if (it == stringResource(R.string.stripe_expiration_date_hint)) {
-                        Modifier.clearAndSetSemantics {}
-                    } else {
-                        Modifier
-                    }
+                    modifier = if (shouldAnnounceLabel) Modifier else Modifier.clearAndSetSemantics {}
                 )
             }
         },
