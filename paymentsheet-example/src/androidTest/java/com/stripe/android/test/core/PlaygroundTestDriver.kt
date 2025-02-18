@@ -583,6 +583,7 @@ internal class PlaygroundTestDriver(
         val result = playgroundState
 
         if (values != null) {
+            selectors.embeddedFormBuyButton.waitForEnabled(requireClickAction = false)
             selectors.embeddedFormBuyButton.click()
         } else {
             selectors.complete.click()

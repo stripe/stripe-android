@@ -2,6 +2,7 @@
 
 package com.stripe.android.paymentsheet.ui
 
+import android.provider.Settings
 import android.widget.Toast
 import androidx.annotation.RestrictTo
 import androidx.compose.animation.AnimatedContent
@@ -34,6 +35,7 @@ import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -60,7 +62,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeTheme
 import kotlinx.coroutines.delay
 
-internal const val PRIMARY_BUTTON_TEST_TAG = "PRIMARY_BUTTON_TEST_TAG"
+const val PRIMARY_BUTTON_TEST_TAG = "PRIMARY_BUTTON_TEST_TAG"
 private const val FADE_ANIMATION_DURATION = 100
 private const val FADE_OUT_ANIMATION_DELAY = 90
 
@@ -92,6 +94,7 @@ internal fun PrimaryButton(
     onClick: () -> Unit,
 ) {
     val isProcessingCompleted = processingState is PrimaryButtonProcessingState.Completed
+    val areAnimationsDisabled = areAnimationsDisabled()
 
     val colors = PrimaryButtonTheme.colors
     val shape = PrimaryButtonTheme.shape
@@ -104,7 +107,7 @@ internal fun PrimaryButton(
         }
     }
 
-    val animatedBackground = if (LocalInspectionMode.current) {
+    val animatedBackground = if (areAnimationsDisabled) {
         background
     } else {
         animateColorAsState(
@@ -140,6 +143,7 @@ internal fun PrimaryButton(
                 Content(
                     label = label,
                     processingState = processingState,
+                    areAnimationsDisabled = areAnimationsDisabled,
                     locked = locked,
                     onProcessingCompleted = onProcessingCompleted,
                 )
@@ -152,16 +156,13 @@ internal fun PrimaryButton(
 private fun Content(
     label: String,
     processingState: PrimaryButtonProcessingState,
+    areAnimationsDisabled: Boolean,
     locked: Boolean,
     onProcessingCompleted: () -> Unit,
 ) {
-    AnimatedContent(
-        targetState = processingState is PrimaryButtonProcessingState.Completed,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(IntrinsicSize.Max),
-        transitionSpec = { fadeAnimation },
-        label = "ContentAnimation",
+    ContentContainer(
+        processingState = processingState,
+        areAnimationsDisabled = areAnimationsDisabled,
     ) { completed ->
         Box(
             modifier = Modifier
@@ -169,7 +170,13 @@ private fun Content(
                 .padding(horizontal = 8.dp)
         ) {
             if (completed) {
-                AnimatedCompleteProcessing(onProcessingCompleted)
+                if (areAnimationsDisabled) {
+                    SideEffect {
+                        onProcessingCompleted()
+                    }
+                } else {
+                    AnimatedCompleteProcessing(onProcessingCompleted)
+                }
             } else {
                 StaticIncompleteProcessing(
                     text = when (processingState) {
@@ -182,6 +189,48 @@ private fun Content(
             }
         }
     }
+}
+
+@Composable
+private fun ContentContainer(
+    processingState: PrimaryButtonProcessingState,
+    areAnimationsDisabled: Boolean,
+    content: @Composable (isCompleted: Boolean) -> Unit
+) {
+    val isCompleteState = processingState is PrimaryButtonProcessingState.Completed
+    val modifier = Modifier
+        .fillMaxWidth()
+        .height(IntrinsicSize.Max)
+
+    if (areAnimationsDisabled) {
+        Box(modifier = modifier) {
+            content(isCompleteState)
+        }
+    } else {
+        AnimatedContent(
+            targetState = isCompleteState,
+            modifier = modifier,
+            transitionSpec = { fadeAnimation },
+            label = "ContentAnimation",
+        ) { completed ->
+            content(completed)
+        }
+    }
+}
+
+@Composable
+private fun areAnimationsDisabled(): Boolean {
+    val context = LocalContext.current
+
+    val animationScale = remember(context) {
+        Settings.Global.getFloat(
+            context.contentResolver,
+            Settings.Global.ANIMATOR_DURATION_SCALE,
+            1f
+        )
+    }
+
+    return LocalInspectionMode.current || animationScale <= 0f
 }
 
 @Composable
