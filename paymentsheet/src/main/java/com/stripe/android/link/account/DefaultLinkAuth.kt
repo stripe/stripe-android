@@ -162,7 +162,7 @@ internal class DefaultLinkAuth @Inject constructor(
     private val Throwable.isIntegrityManagerError: Boolean
         get() = this is AttestationError
 
-    // Interaction with Integrity API to generate tokens resulted in a failure
+    // Stripe backend could not verify the integrity of the request
     private val Throwable.isBackendAttestationError: Boolean
         get() = this is APIException && stripeError?.code == "link_failed_to_attest_request"
 
