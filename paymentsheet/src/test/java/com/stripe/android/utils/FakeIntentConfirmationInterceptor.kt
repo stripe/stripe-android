@@ -8,6 +8,7 @@ import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.channels.Channel
@@ -50,6 +51,7 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
 
     override suspend fun intercept(
         initializationMode: PaymentElementLoader.InitializationMode,
+        intent: StripeIntent,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
@@ -70,6 +72,7 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
 
     override suspend fun intercept(
         initializationMode: PaymentElementLoader.InitializationMode,
+        intent: StripeIntent,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
