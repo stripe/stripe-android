@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_camera_permission_settings_message">Permita acesso à câmera nas configurações para escanear seu cartão</string>
+  <string name="stripe_card_scan_instructions">Escaneie seu cartão</string>
+  <string name="stripe_card_scan_privacy_link_text">Nós usamos a Stripe para verificar os dados do seu cartão. A Stripe poderá usar e armazenar seus dados segundo a política de privacidade da empresa. <a href="https://support.stripe.com/questions/stripes-card-image-verification"><u>Saiba mais</u></a></string>
+  <string name="stripe_card_scan_title">Posicione seu cartão no retângulo para escanear</string>
+  <string name="stripe_close_button_description">Fechar</string>
+  <string name="stripe_swap_camera_button_description">Trocar câmera</string>
+  <!-- Label for the button that toggles the camera's torch -->
+  <string name="stripe_torch_button_description">Lanterna</string>
+</resources>

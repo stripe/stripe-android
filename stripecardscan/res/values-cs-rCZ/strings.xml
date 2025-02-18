@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_camera_permission_settings_message">Povolte v nastavení přístup k fotoaparátu, abyste mohli kartu naskenovat.</string>
+  <string name="stripe_card_scan_instructions">Naskenujte průkaz</string>
+  <string name="stripe_card_scan_privacy_link_text">K ověření údajů o vaší kartě používáme službu Stripe. Společnost Stripe může vaše údaje používat a ukládat v souladu se svými zásadami ochrany osobních údajů. <a href="https://support.stripe.com/questions/stripes-card-image-verification"><u>Další informace</u></a></string>
+  <string name="stripe_card_scan_title">Umístěte průkaz do obdélníku pro skenování.</string>
+  <string name="stripe_close_button_description">Zavřít</string>
+  <string name="stripe_swap_camera_button_description">Přepnout fotoaparát</string>
+  <!-- Label for the button that toggles the camera's torch -->
+  <string name="stripe_torch_button_description">Baterka</string>
+</resources>

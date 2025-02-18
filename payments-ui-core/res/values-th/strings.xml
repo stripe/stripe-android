@@ -105,6 +105,8 @@
   <string name="stripe_scan_card">สแกนบัตร</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">เมื่อให้ข้อมูลการชำระเงินและยืนยันการชำระเงินนี้ หมายความว่าคุณ (ก) อนุญาตให้ %s และ Stripe ซึ่งเป็นผู้ให้บริการชำระเงินส่งคำสั่งให้ธนาคารหักเงินจากบัญชีของคุณ และ (ข) อนุญาตให้ธนาคารหักเงินจากบัญชีตามคำสั่งดังกล่าว คุณมีสิทธิ์รับเงินคืนจากธนาคารภายใต้เงื่อนไขและข้อกำหนดซึ่งระบุไว้ในข้อตกลงที่คุณทำไว้กับธนาคาร โดยจะต้องทำการขอเงินคืนภายใน 8 สัปดาห์นับจากวันที่มีการหักเงินจากบัญชี คุณสามารถดูสิทธิ์ของตัวเองได้ในใบแจ้งยอดบัญชีที่ขอได้จากธนาคาร คุณตกลงที่จะรับการแจ้งเตือนเกี่ยวกับการหักเงินในบัญชีในอนาคตสูงสุดไม่เกิน 2 วันก่อนที่จะถึงวันหักจริง</string>
+  <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
+  <string name="stripe_set_as_default_payment_method">ตั้งเป็นวิธีการชำระเงินเริ่มต้น</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">ตั้งค่า</string>
   <!-- Label for UPI ID number field on form -->

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_camera_permission_settings_message">Tillåt kameraåtkomst i inställningarna för att skanna ditt kort</string>
+  <string name="stripe_card_scan_instructions">Skanna ditt kort</string>
+  <string name="stripe_card_scan_privacy_link_text">Vi använder Stripe för att verifiera dina kortuppgifter. Stripe kan komma att använda och lagra dina uppgifter i enlighet med sin integritetspolicy. <a href="https://support.stripe.com/questions/stripes-card-image-verification"><u>Läs mer</u></a></string>
+  <string name="stripe_card_scan_title">Placera ditt kort i rektangeln för att skanna</string>
+  <string name="stripe_close_button_description">Stäng</string>
+  <string name="stripe_swap_camera_button_description">Byt kamera</string>
+  <!-- Label for the button that toggles the camera's torch -->
+  <string name="stripe_torch_button_description">Ficklampa</string>
+</resources>

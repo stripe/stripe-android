@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_camera_permission_settings_message">Kartınızı taramak için lütfen ayarlardan kamera erişimine izin verin</string>
+  <string name="stripe_card_scan_instructions">Kartınızı Tarayın</string>
+  <string name="stripe_card_scan_privacy_link_text">Stripe kullanarak kart bilgilerinizi doğruluyoruz. Stripe, verilerinizi gizlilik politikasına uygun olarak kullanabilir ve saklayabilir. <a href="https://support.stripe.com/questions/stripes-card-image-verification"><u>Daha fazla bilgi</u></a></string>
+  <string name="stripe_card_scan_title">Taramak için kartınızı dikdörtgenin içine yerleştirin</string>
+  <string name="stripe_close_button_description">Kapat</string>
+  <string name="stripe_swap_camera_button_description">Kamera Değiştirme</string>
+  <!-- Label for the button that toggles the camera's torch -->
+  <string name="stripe_torch_button_description">El feneri</string>
+</resources>

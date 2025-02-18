@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- Button prompt to add a bank account as a payment method. -->
+  <string name="stripe_add_bank_account">Banka hesabı ekle</string>
   <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
   <string name="stripe_add_new_payment_method">Yeni ödeme yöntemi ekle</string>
+  <!-- Text for a button that, when tapped, displays another screen where the customer can add a new payment method -->
+  <string name="stripe_add_payment_method">Ödeme yöntemi ekle</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_afterpay_subtitle">Şimdi satın alın veya daha sonra Afterpay ile ödeyin</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
@@ -18,8 +22,14 @@
   <string name="stripe_confirm_close_form_body">Ödeme bilgileriniz kaydedilmeyecek.</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_title">Bu formu kapatmak istiyor musunuz?</string>
+  <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_header">Link ile tek tıklamayla güvenli ödeme yapmak için bilgilerinizi kaydedin</string>
+  <!-- Title of the logout action. -->
+  <string name="stripe_log_out">Link\'ten çıkış yap</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Bir hata oluştu. Bağlantınızı kontrol edip tekrar deneyin.</string>
+  <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
+  <string name="stripe_pay_with_link">Link ile öde</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Devam ettiğinizde ödemeleri <terms>bu koşullara</terms> göre yetkilendirmeyi kabul etmiş olursunuz.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -135,6 +145,20 @@
   <string name="stripe_paymentsheet_total_amount">Toplam: %s</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">%s ile biten banka hesabını kaldır</string>
+  <!-- Accessibility label for an action or a button that shows a menu. -->
+  <string name="stripe_show_menu">Menüyü göster</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_sign_up">Link\'e katıl</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_sign_up_header">Tek tıklamayla güvenli ödeme</string>
+  <!-- Label describing the benefit of signing up for Link. Pay faster at {Merchant Name} and thousands of merchants. e.g, 'Pay faster at Example, Inc. and thousands of merchants.' -->
+  <string name="stripe_sign_up_message">%s dahil binlerce satıcı için daha hızlı ödeme yapın.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_sign_up_terms"><![CDATA[Link\'e katılarak <terms>Hükümleri</terms> ve <privacy>Gizlilik Politikasını</privacy> kabul etmiş olursunuz.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative"><![CDATA[E-postanızı vererek <terms>Link Şartları</terms> ve <privacy>Gizlilik Politikası</privacy> uyarınca bir Link hesabı oluşturmayı ve ödeme bilgilerinizi Link\'e kaydetmeyi kabul edersiniz.]]></string>
+  <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Telefon numaranızı vererek <terms>Link Şartları</terms> ve <privacy>Gizlilik Politikası</privacy> uyarınca bir Link hesabı oluşturmayı ve ödeme bilgilerinizi Link\'e kaydetmeyi kabul edersiniz.]]></string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">Bir sorun oluştu</string>
   <!-- Button text on a screen asking the user to approve a payment -->
@@ -147,10 +171,53 @@
   <string name="stripe_upi_polling_payment_failed_message">Lütfen geri gidip başka bir ödeme yöntemi seçin</string>
   <!-- Text on a screen that indicates a payment has failed -->
   <string name="stripe_upi_polling_payment_failed_title">Ödeme başarısız oldu</string>
+  <!-- Title for a button that allows the user to use a different email in the signup flow. -->
+  <string name="stripe_verification_change_email">E-posta adresini değiştir</string>
+  <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
+  <string name="stripe_verification_code_sent">Kod gönderildi</string>
   <!-- Two factor authentication screen heading -->
   <string name="stripe_verification_dialog_header">Siz olduğunuzu teyit edin</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_header">Doğrulama kodunuzu girin</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_header_inline">Link hesabınızda oturum açın</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_header_prefilled">Kayıtlı bilgilerinizi kullanarak daha hızlı ödeme yapabilirsiniz</string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_verification_message">Ödemenizde varsayılan olarak Link\'i kullanmak için %s numaralı telefona gönderilen kodu girin</string>
+  <!-- Text of a label for confirming an email address. E.g., 'Not user@example.com?' -->
+  <string name="stripe_verification_not_email">%s doğru değil mi?</string>
+  <!-- Label for a button that re-sends the a login code when tapped -->
+  <string name="stripe_verification_resend">Kodu tekrar gönder</string>
   <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
   <string name="stripe_view_more">Daha fazla göster</string>
+  <!-- Mandate text displayed when paying via Link instant debit. -->
+  <string name="stripe_wallet_bank_account_terms"><![CDATA[Devam ettiğinizde, bu <terms>koşullar</terms>a uygun olarak ödemelere izin vermeyi kabul etmiş olursunuz.]]></string>
+  <!-- Label for a section displaying payment details. -->
+  <string name="stripe_wallet_collapsed_payment">Ödeme</string>
   <!-- Label for identifying the default payment method. -->
   <string name="stripe_wallet_default">Varsayılan</string>
+  <string name="stripe_wallet_expand_accessibility">Seçimi değiştirin</string>
+  <!-- Title for a section listing one or more payment methods. -->
+  <string name="stripe_wallet_expanded_title">Ödeme yöntemleri</string>
+  <!-- Accessibility description for Passthrough payment method -->
+  <string name="stripe_wallet_passthrough_description">Geçiş</string>
+  <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
+  <string name="stripe_wallet_pay_another_way">Başka bir ödeme şekli kullanın</string>
+  <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
+  <string name="stripe_wallet_recollect_cvc_error">Güvenliğinizin sağlanması için lütfen kartınızın güvenlik kodunu tekrar girin.</string>
+  <!-- Title of confirmation prompt when removing a linked bank account. -->
+  <string name="stripe_wallet_remove_account_confirmation">Bu bağlı hesabı kaldırmak istediğinizden emin misiniz?</string>
+  <!-- Title of confirmation prompt when removing a saved card. -->
+  <string name="stripe_wallet_remove_card_confirmation">Bu kartı kaldırmak istediğinizden emin misiniz?</string>
+  <!-- Title for a button that when tapped removes a linked bank account. -->
+  <string name="stripe_wallet_remove_linked_account">Bağlı hesabı kaldır</string>
+  <!-- Label for a button or menu item that sets a payment method as default when tapped. -->
+  <string name="stripe_wallet_set_as_default">Varsayılan olarak ayarla</string>
+  <!-- Label shown when a payment method cannot be used for the current transaction. -->
+  <string name="stripe_wallet_unavailable">Bu satın alım için kullanılamaz</string>
+  <!-- Title for a button that when tapped, presents a screen for updating a card. Also the heading the screen itself. -->
+  <string name="stripe_wallet_update_card">Kartı güncelle</string>
+  <!-- A text notice shown when the user selects an expired card. -->
+  <string name="stripe_wallet_update_expired_card_error">Bu kartın süresi dolmuş. Kart bilgileirnizi güncelleyin veya farklı bir ödeme yöntemi seçin.</string>
 </resources>

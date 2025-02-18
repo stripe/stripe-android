@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_camera_permission_settings_message">Tillad kameraadgang i indstillingerne for at scanne dit kort</string>
+  <string name="stripe_card_scan_instructions">Scan dit kort</string>
+  <string name="stripe_card_scan_privacy_link_text">Vi bruger Stripe til at bekræfte dine kortoplysninger. Stripe kan bruge og gemme dine oplysninger i henhold til selskabets Privatlivspolitik. <a href="https://support.stripe.com/questions/stripes-card-image-verification"><u>Få mere at vide</u></a></string>
+  <string name="stripe_card_scan_title">Placer dit kort indenfor firkanten for at scanne</string>
+  <string name="stripe_close_button_description">Luk</string>
+  <string name="stripe_swap_camera_button_description">Skift kamera</string>
+  <!-- Label for the button that toggles the camera's torch -->
+  <string name="stripe_torch_button_description">Lommelygte</string>
+</resources>
