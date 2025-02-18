@@ -9,9 +9,11 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.setupFutureUsage
 import com.stripe.android.networking.StripeRepository
@@ -113,6 +115,22 @@ internal class InvalidDeferredIntentUsageException : StripeException() {
 
 internal class CreateIntentCallbackFailureException(override val cause: Throwable?) : StripeException() {
     override fun analyticsValue(): String = "merchantReturnedCreateIntentCallbackFailure"
+}
+
+internal class InvalidClientSecretException(
+    val clientSecret: String,
+    val intent: StripeIntent,
+) : StripeException() {
+    private val intentType = when (intent) {
+        is PaymentIntent -> "PaymentIntent"
+        is SetupIntent -> "SetupIntent"
+    }
+
+    override fun analyticsValue(): String = "invalidClientSecretProvided"
+
+    override val message: String = """
+        Encountered an invalid client secret "$clientSecret" for intent type "$intentType"
+    """.trimIndent()
 }
 
 internal class DefaultIntentConfirmationInterceptor @Inject constructor(
@@ -417,12 +435,16 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         isDeferred: Boolean,
-    ): NextStep.Confirm {
+    ): NextStep {
         val factory = ConfirmStripeIntentParamsFactory.createFactory(
             clientSecret = clientSecret,
             intent = intent,
             shipping = shippingValues,
-        )
+        ) ?: run {
+            val exception = InvalidClientSecretException(clientSecret, intent)
+
+            return createFailStep(exception, exception.message)
+        }
 
         val confirmParams = factory.create(
             paymentMethod = paymentMethod,
@@ -440,12 +462,16 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
-    ): NextStep.Confirm {
+    ): NextStep {
         val paramsFactory = ConfirmStripeIntentParamsFactory.createFactory(
             clientSecret = clientSecret,
             intent = intent,
             shipping = shippingValues,
-        )
+        ) ?: run {
+            val exception = InvalidClientSecretException(clientSecret, intent)
+
+            return createFailStep(exception, exception.message)
+        }
 
         val confirmParams = paramsFactory.create(
             paymentMethodCreateParams,
@@ -455,6 +481,20 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         return NextStep.Confirm(
             confirmParams = confirmParams,
             isDeferred = false,
+        )
+    }
+
+    private fun createFailStep(
+        exception: Exception,
+        message: String,
+    ): NextStep.Fail {
+        return NextStep.Fail(
+            cause = exception,
+            message = if (requestOptions.apiKeyIsLiveMode) {
+                PaymentsCoreR.string.stripe_internal_error.resolvableString
+            } else {
+                message.resolvableString
+            }
         )
     }
 

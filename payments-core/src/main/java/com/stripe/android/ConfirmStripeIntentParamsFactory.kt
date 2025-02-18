@@ -54,9 +54,7 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
             intent is SetupIntent && SetupIntent.ClientSecret.isMatch(clientSecret) -> {
                 ConfirmSetupIntentParamsFactory(clientSecret, intent)
             }
-            else -> {
-                error("Encountered an invalid client secret \"$clientSecret\"")
-            }
+            else -> null
         }
     }
 }

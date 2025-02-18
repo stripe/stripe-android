@@ -10,7 +10,7 @@ import org.junit.Test
 
 class ConfirmSetupIntentParamsFactoryTest {
     @Test
-    fun `create() should not contain mandate data`() {
+    fun `create() should contain mandate data`() {
         val factoryWithConfig = ConfirmSetupIntentParamsFactory(
             clientSecret = CLIENT_SECRET,
             intent = SetupIntentFactory.create(),
