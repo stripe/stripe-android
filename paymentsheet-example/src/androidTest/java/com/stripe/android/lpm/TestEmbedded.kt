@@ -55,7 +55,7 @@ internal class TestEmbedded : BasePlaygroundTest() {
                 paymentMethodCode = "us_bank_account",
                 authorizationAction = null,
                 executeInNightlyRun = true,
-            ){ settings ->
+            ) { settings ->
                 settings[CountrySettingsDefinition] = Country.US
                 settings[CurrencySettingsDefinition] = Currency.USD
                 settings[DelayedPaymentMethodsSettingsDefinition] = true

@@ -600,7 +600,7 @@ internal class PlaygroundTestDriver(
     fun confirmEmbeddedUsBankAccount(
         testParameters: TestParameters,
         values: FieldPopulator.Values = FieldPopulator.Values(),
-    ):PlaygroundState? {
+    ): PlaygroundState? {
         setup(
             testParameters.copyPlaygroundSettings { settings ->
                 settings.updateConfigurationData { configurationData ->
@@ -635,6 +635,7 @@ internal class PlaygroundTestDriver(
 
         doUSBankAccountAuthorization(testParameters.authorizationAction)
 
+        selectors.embeddedFormBuyButton.waitForEnabled(requireClickAction = false)
         selectors.embeddedFormBuyButton.click()
         finishAfterAuthorization()
 
