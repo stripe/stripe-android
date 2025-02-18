@@ -12,11 +12,8 @@ class ExpiryDateContentDescriptionFormatterTest {
 
     @Test
     fun `formats correctly for empty input`() {
-        val result = formatExpirationDateForAccessibility("4")
-        val expected = resolvableString(
-            R.string.stripe_expiration_date_month_complete_content_description,
-            "April"
-        )
+        val result = formatExpirationDateForAccessibility("")
+        val expected = resolvableString(R.string.stripe_expiration_date_empty_content_description)
 
         assertThat(result).isEqualTo(expected)
     }
@@ -98,6 +95,16 @@ class ExpiryDateContentDescriptionFormatterTest {
             R.string.stripe_expiration_date_year_incomplete_content_description,
             "décembre"
         )
+
+        assertThat(result).isEqualTo(expected)
+        // Clear FR locale
+        AppCompatDelegate.setApplicationLocales(LocaleListCompat.getEmptyLocaleList())
+    }
+
+    @Test
+    fun `returns input as resolvable string if input is not numeric`() {
+        val result = formatExpirationDateForAccessibility("test")
+        val expected = "test".resolvableString
 
         assertThat(result).isEqualTo(expected)
     }

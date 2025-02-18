@@ -4,6 +4,7 @@
   <CurrentIssues>
     <ID>ConstructorParameterNaming:CardNumberElement.kt$CardNumberElement$val _identifier: IdentifierSpec</ID>
     <ID>ConstructorParameterNaming:CvcElement.kt$CvcElement$val _identifier: IdentifierSpec</ID>
+    <ID>CyclomaticComplexMethod:ExpiryDateContentDescriptionFormatter.kt$internal fun formatExpirationDateForAccessibility(input: String): ResolvableString</ID>
     <ID>CyclomaticComplexMethod:FormItemSpec.kt$FormItemSpecSerializer$override fun selectDeserializer(element: JsonElement): DeserializationStrategy&lt;FormItemSpec></ID>
     <ID>CyclomaticComplexMethod:TransformGoogleToStripeAddress.kt$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun Place.transformGoogleToStripeAddress( context: Context ): com.stripe.android.model.Address</ID>
     <ID>ForbiddenComment:Menu.kt$// TODO: Make sure this gets the rounded corner values</ID>
@@ -56,8 +57,6 @@
     <ID>SpreadOperator:BsbElementUI.kt$( it.errorMessage, *args )</ID>
     <ID>SpreadOperator:MandateTextElement.kt$MandateTextElement$(stringResId, *args.toTypedArray())</ID>
     <ID>SpreadOperator:MandateTextUI.kt$(element.stringResId, *element.args.toTypedArray())</ID>
-    <ID>SwallowedException:ExpiryDateContentDescriptionFormatter.kt$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:ExpiryDateContentDescriptionFormatter.kt$e: Exception</ID>
     <ID>TooGenericExceptionCaught:PlacesClientProxy.kt$DefaultPlacesClientProxy$e: Exception</ID>
     <ID>UtilityClassWithPublicConstructor:FieldValuesToParamsMapConverter.kt$FieldValuesToParamsMapConverter</ID>
   </CurrentIssues>

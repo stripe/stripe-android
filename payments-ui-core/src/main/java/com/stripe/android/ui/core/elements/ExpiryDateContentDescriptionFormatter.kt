@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.R
+import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -12,7 +13,8 @@ internal fun formatExpirationDateForAccessibility(input: String): ResolvableStri
         return resolvableString(R.string.stripe_expiration_date_empty_content_description)
     }
 
-    val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
+    // Check if input is valid integer
+    if (input.toIntOrNull() == null) return input.resolvableString
 
     val canOnlyBeSingleDigitMonth = input.isNotBlank() && !(input[0] == '0' || input[0] == '1')
     val canOnlyBeJanuary = input.length > 1 && input.take(2).toInt() > 12
@@ -24,6 +26,7 @@ internal fun formatExpirationDateForAccessibility(input: String): ResolvableStri
 
     try {
         if (month != null) {
+            val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
             val monthName = SimpleDateFormat("MM", locale).parse("$month")?.let {
                 SimpleDateFormat("MMMM", locale).format(it)
             }
@@ -46,7 +49,8 @@ internal fun formatExpirationDateForAccessibility(input: String): ResolvableStri
         }
 
         return input.resolvableString
-    } catch (e: Exception) {
+    } catch (e: ParseException) {
+        // ParseException should never be thrown so we can ignore but we want to prevent crash in the case it is thrown.
         return input.resolvableString
     }
 }
