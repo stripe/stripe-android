@@ -1,6 +1,5 @@
 package com.stripe.android.link.gate
 
-import com.stripe.android.core.utils.FeatureFlag
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkConfiguration
 import javax.inject.Inject
@@ -10,14 +9,7 @@ internal class DefaultLinkGate @Inject constructor(
 ) : LinkGate {
     override val useNativeLink: Boolean
         get() {
-            if (configuration.stripeIntent.isLiveMode) {
-                return useAttestationEndpoints
-            }
-            return when (FeatureFlags.nativeLinkEnabled.value) {
-                FeatureFlag.Flag.Disabled -> false
-                FeatureFlag.Flag.Enabled -> true
-                FeatureFlag.Flag.NotSet -> useAttestationEndpoints
-            }
+            return useAttestationEndpoints
         }
 
     override val useAttestationEndpoints: Boolean
@@ -25,10 +17,9 @@ internal class DefaultLinkGate @Inject constructor(
             if (configuration.stripeIntent.isLiveMode) {
                 return configuration.useAttestationEndpointsForLink
             }
-            return when (FeatureFlags.nativeLinkAttestationEnabled.value) {
-                FeatureFlag.Flag.Disabled -> false
-                FeatureFlag.Flag.Enabled -> true
-                FeatureFlag.Flag.NotSet -> configuration.useAttestationEndpointsForLink
+            return when (FeatureFlags.suppressNativeLink.isEnabled) {
+                true -> false
+                false -> configuration.useAttestationEndpointsForLink
             }
         }
 

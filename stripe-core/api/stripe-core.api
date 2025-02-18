@@ -341,27 +341,6 @@ public final class com/stripe/android/core/strings/transformations/Replace$Creat
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/core/utils/FeatureFlag$Flag$Disabled : com/stripe/android/core/utils/FeatureFlag$Flag {
-	public static final field INSTANCE Lcom/stripe/android/core/utils/FeatureFlag$Flag$Disabled;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/stripe/android/core/utils/FeatureFlag$Flag$Enabled : com/stripe/android/core/utils/FeatureFlag$Flag {
-	public static final field INSTANCE Lcom/stripe/android/core/utils/FeatureFlag$Flag$Enabled;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/stripe/android/core/utils/FeatureFlag$Flag$NotSet : com/stripe/android/core/utils/FeatureFlag$Flag {
-	public static final field INSTANCE Lcom/stripe/android/core/utils/FeatureFlag$Flag$NotSet;
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public final class com/stripe/android/core/version/StripeSdkVersion {
 	public static final field INSTANCE Lcom/stripe/android/core/version/StripeSdkVersion;
 	public static final field VERSION Ljava/lang/String;

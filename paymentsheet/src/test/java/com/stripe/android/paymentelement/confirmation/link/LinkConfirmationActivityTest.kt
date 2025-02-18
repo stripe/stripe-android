@@ -15,7 +15,6 @@ import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
 import androidx.test.espresso.intent.rule.IntentsRule
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.TestFactory
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -29,7 +28,6 @@ import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.createTestActivityRule
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
@@ -58,12 +56,6 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
         context = application,
     )
 
-    @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.nativeLinkEnabled,
-        isEnabled = false
-    )
-
     @Test
     fun linkSucceeds() = test {
         val paymentMethod = PaymentMethodFactory.card()
@@ -71,9 +63,15 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
         confirmationHandler.state.test {
             awaitItem().assertIdle()
 
+            val configuration = TestFactory.LINK_CONFIGURATION.copy(
+                useAttestationEndpointsForLink = nativeLinkEnabled
+            )
+            val confirmationOption = LINK_CONFIRMATION_OPTION.copy(
+                configuration = configuration
+            )
             confirmationHandler.start(
                 ConfirmationHandler.Args(
-                    confirmationOption = LINK_CONFIRMATION_OPTION,
+                    confirmationOption = confirmationOption,
                     appearance = CONFIRMATION_PARAMETERS.appearance,
                     intent = CONFIRMATION_PARAMETERS.intent,
                     shippingDetails = CONFIRMATION_PARAMETERS.shippingDetails,
@@ -106,7 +104,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
 
             val confirmingWithLink = awaitItem().assertConfirming()
 
-            assertThat(confirmingWithLink.option).isEqualTo(LINK_CONFIRMATION_OPTION)
+            assertThat(confirmingWithLink.option).isEqualTo(confirmationOption)
 
             intendedLinkToBeLaunched()
 
@@ -132,8 +130,6 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
     private fun test(
         test: suspend PaymentElementConfirmationTestActivity.() -> Unit
     ) = runTest(UnconfinedTestDispatcher()) {
-        featureFlagTestRule.setEnabled(nativeLinkEnabled)
-
         val countDownLatch = CountDownLatch(1)
 
         ActivityScenario.launch<PaymentElementConfirmationTestActivity>(
@@ -155,7 +151,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
         resultCode: Int,
         applyToIntent: Intent.() -> Unit,
     ) {
-        if (FeatureFlags.nativeLinkEnabled.isEnabled) {
+        if (nativeLinkEnabled) {
             intending(hasComponent(LINK_ACTIVITY_NAME)).respondWith(
                 Instrumentation.ActivityResult(
                     resultCode,
@@ -186,7 +182,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
     }
 
     private fun intendedLinkToBeLaunched() {
-        if (FeatureFlags.nativeLinkEnabled.isEnabled) {
+        if (nativeLinkEnabled) {
             intended(hasComponent(LINK_ACTIVITY_NAME))
         } else {
             intended(hasComponent(LINK_FOREGROUND_ACTIVITY_NAME))
