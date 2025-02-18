@@ -8,6 +8,7 @@ import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDAT
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RETURN_URL
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_SET_AS_DEFAULT_PAYMENT_METHOD
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_USE_STRIPE_SDK
 import kotlinx.parcelize.Parcelize
 
@@ -118,7 +119,12 @@ constructor(
      * See [receipt_email](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-receipt_email).
      */
     var receiptEmail: String? = null,
-) : ConfirmStripeIntentParams {
+
+    /**
+     * Indicates that this should be the default payment method going forward
+     */
+    var setAsDefaultPaymentMethod: Boolean? = null,
+    ) : ConfirmStripeIntentParams {
     fun shouldSavePaymentMethod(): Boolean {
         return savePaymentMethod == true
     }
@@ -157,6 +163,10 @@ constructor(
         ).plus(
             setupFutureUsage?.let {
                 mapOf(PARAM_SETUP_FUTURE_USAGE to it.code)
+            }.orEmpty()
+        ).plus(
+            setAsDefaultPaymentMethod?.let {
+                mapOf(PARAM_SET_AS_DEFAULT_PAYMENT_METHOD to it)
             }.orEmpty()
         ).plus(
             shipping?.let {
