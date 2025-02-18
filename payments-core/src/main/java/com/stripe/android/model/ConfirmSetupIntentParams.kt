@@ -7,6 +7,7 @@ import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDAT
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RETURN_URL
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_SET_AS_DEFAULT_PAYMENT_METHOD
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_USE_STRIPE_SDK
 import kotlinx.parcelize.Parcelize
 
@@ -48,6 +49,11 @@ constructor(
      * See [mandate_data](https://stripe.com/docs/api/setup_intents/confirm#confirm_setup_intent-mandate_data).
      */
     var mandateData: MandateDataParams? = null,
+
+    /**
+     * Indicates that this should be the default payment method going forward
+     */
+    var setAsDefaultPaymentMethod: Boolean? = null,
 ) : ConfirmStripeIntentParams {
 
     override fun shouldUseStripeSdk(): Boolean {
@@ -73,6 +79,10 @@ constructor(
         ).plus(
             mandateDataParams?.let {
                 mapOf(PARAM_MANDATE_DATA to it)
+            }.orEmpty()
+        ).plus(
+            setAsDefaultPaymentMethod?.let {
+                mapOf(PARAM_SET_AS_DEFAULT_PAYMENT_METHOD to it)
             }.orEmpty()
         ).plus(paymentMethodParamMap)
     }
