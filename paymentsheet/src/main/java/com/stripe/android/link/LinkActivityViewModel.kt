@@ -120,7 +120,7 @@ internal class LinkActivityViewModel @Inject constructor(
                     it.copy(
                         showHeader = showHeaderRoutes.contains(route),
                         showOverflowMenu = route == LinkScreen.Wallet.route,
-                        navigationIcon = if (backIconRoutes.contains(route)) {
+                        navigationIcon = if (route == LinkScreen.PaymentMethod.route) {
                             R.drawable.stripe_link_back
                         } else {
                             R.drawable.stripe_link_close
@@ -279,10 +279,6 @@ internal class LinkActivityViewModel @Inject constructor(
             LinkScreen.Wallet.route,
             LinkScreen.SignUp.route,
             LinkScreen.Verification.route
-        )
-        private val backIconRoutes = setOf(
-            LinkScreen.CardEdit.route,
-            LinkScreen.PaymentMethod.route
         )
 
         fun factory(savedStateHandle: SavedStateHandle? = null): ViewModelProvider.Factory = viewModelFactory {

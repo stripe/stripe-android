@@ -4,6 +4,9 @@
 ### CardScan
 * [FIXED][10181](https://github.com/stripe/stripe-android/pull/10181) Fixed a crash that happened on some devices with odd camera-to-screen ratios
 
+### Financial Connections
+- [ADDED] Financial Connections now supports dark mode and will automatically adapt to the device's theme. [Learn more](https://docs.stripe.com/financial-connections/other-data-powered-products?platform=android#connections-customize-android) about configuring appearance settings.
+
 ## 21.4.2 - 2025-02-10
 Bug fixes and improvements.
 

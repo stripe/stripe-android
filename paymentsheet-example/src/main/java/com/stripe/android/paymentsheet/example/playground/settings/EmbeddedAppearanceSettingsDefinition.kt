@@ -51,7 +51,8 @@ internal data class EmbeddedAppearance(
     val separatorThicknessDp: Float = 1.0f,
     val startSeparatorInset: Float = 0.0f,
     val endSeparatorInset: Float = 0.0f,
-    val additionalInsetsDp: Float = 4.0f,
+    val additionalVerticalInsetsDp: Float = 4.0f,
+    val horizontalInsetsDp: Float = 0.0f,
     val checkmarkInsetsDp: Float = 12.0f,
     val floatingButtonSpacingDp: Float = 12.0f,
     val topSeparatorEnabled: Boolean = true,
@@ -72,7 +73,8 @@ internal data class EmbeddedAppearance(
                 bottomSeparatorEnabled = bottomSeparatorEnabled,
                 selectedColor = selectedColor,
                 unselectedColor = unselectedColor,
-                additionalInsetsDp = additionalInsetsDp
+                additionalVerticalInsetsDp = additionalVerticalInsetsDp,
+                horizontalInsetsDp = horizontalInsetsDp
             )
             EmbeddedRow.FlatWithCheckmark -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark(
                 separatorThicknessDp = separatorThicknessDp,
@@ -83,11 +85,12 @@ internal data class EmbeddedAppearance(
                 bottomSeparatorEnabled = bottomSeparatorEnabled,
                 checkmarkColor = checkmarkColor,
                 checkmarkInsetDp = checkmarkInsetsDp,
-                additionalInsetsDp = additionalInsetsDp
+                additionalVerticalInsetsDp = additionalVerticalInsetsDp,
+                horizontalInsetsDp = horizontalInsetsDp
             )
             EmbeddedRow.FloatingButton -> PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton(
                 spacingDp = floatingButtonSpacingDp,
-                additionalInsetsDp = additionalInsetsDp
+                additionalInsetsDp = additionalVerticalInsetsDp
             )
         }
     }

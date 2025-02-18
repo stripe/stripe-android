@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
@@ -20,7 +21,8 @@ import javax.inject.Singleton
         GooglePayLauncherModule::class,
         CoroutineContextModule::class,
         CoreCommonModule::class,
-        ResourceRepositoryModule::class
+        ResourceRepositoryModule::class,
+        ApplicationIdModule::class
     ]
 )
 internal interface PaymentSheetLauncherComponent {

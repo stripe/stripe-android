@@ -19,9 +19,13 @@ internal class ComposeButton(
         composeTestRule.onNode(matcher).tryPerformScrollTo().performClick()
     }
 
-    fun waitForEnabled(): ComposeButton {
+    fun waitForEnabled(requireClickAction: Boolean = true): ComposeButton {
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
-            val combinedMatcher = matcher.and(isEnabled()).and(hasClickAction())
+            val combinedMatcher = if (requireClickAction) {
+                matcher.and(isEnabled()).and(hasClickAction())
+            } else {
+                matcher.and(isEnabled())
+            }
             composeTestRule.onAllNodes(combinedMatcher).fetchSemanticsNodes().isNotEmpty()
         }
         return this

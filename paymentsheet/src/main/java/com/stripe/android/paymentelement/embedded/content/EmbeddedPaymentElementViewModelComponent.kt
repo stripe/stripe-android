@@ -6,6 +6,7 @@ import android.content.res.Resources
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.RealUserFacingLogger
@@ -53,6 +54,7 @@ import kotlin.coroutines.CoroutineContext
         GooglePayLauncherModule::class,
         ExtendedPaymentElementConfirmationModule::class,
         EmbeddedCommonModule::class,
+        ApplicationIdModule::class
     ],
 )
 internal interface EmbeddedPaymentElementViewModelComponent {

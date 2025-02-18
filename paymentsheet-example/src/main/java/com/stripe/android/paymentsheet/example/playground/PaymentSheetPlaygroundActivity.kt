@@ -391,12 +391,16 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
     fun EmbeddedUi(
         playgroundState: PlaygroundState.Payment,
     ) {
-        BuyButton(
-            buyButtonEnabled = true,
+        Button(
             onClick = {
                 embeddedPlaygroundLauncher.launch(playgroundState)
-            }
-        )
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(CHECKOUT_TEST_TAG),
+        ) {
+            Text("Checkout")
+        }
     }
 
     @Composable

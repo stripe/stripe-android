@@ -175,7 +175,8 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
             bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
             selectedColor = StripeThemeDefaults.colorsLight.materialColors.error.toArgb(),
             unselectedColor = StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
-            additionalInsetsDp = 40f
+            additionalVerticalInsetsDp = 40f,
+            horizontalInsetsDp = 40f
         )
         paparazziRule.snapshot {
             PaymentMethodRowButton(

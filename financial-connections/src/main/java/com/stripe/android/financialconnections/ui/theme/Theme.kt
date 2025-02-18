@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogWindowProvider
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.ui.LocalNavHostController
 
@@ -39,8 +38,8 @@ internal enum class Theme {
     val colors: FinancialConnectionsColors
         @Composable
         get() = when (this) {
-            DefaultLight -> if (useDarkMode) DarkThemeColors else Colors
-            LinkLight -> if (useDarkMode) InstantDebitsDarkModeColors else InstantDebitsColors
+            DefaultLight -> if (isSystemInDarkTheme()) DarkThemeColors else Colors
+            LinkLight -> if (isSystemInDarkTheme()) InstantDebitsDarkModeColors else InstantDebitsColors
         }
 
     val icon: Int
@@ -87,7 +86,7 @@ private val DarkThemeColors = FinancialConnectionsColors(
     icon = Neutral25,
     borderNeutral = Neutral100Dark,
     spinnerNeutral = Neutral200,
-    warningLight = Attention50Dark,
+    warningLight = Attention100Dark,
     warning = Attention300,
     primary = Brand500,
     primaryAccent = Neutral0,
@@ -133,7 +132,7 @@ private val InstantDebitsDarkModeColors = FinancialConnectionsColors(
     icon = Neutral25,
     borderNeutral = Neutral100Dark,
     spinnerNeutral = Neutral200,
-    warningLight = Attention50Dark,
+    warningLight = Attention100Dark,
     warning = Attention300,
     primary = LinkGreen200,
     primaryAccent = LinkGreen900,
@@ -266,7 +265,7 @@ internal fun FinancialConnectionsTheme(
         val window = findWindow()
         val barColor = FinancialConnectionsTheme.colors.borderNeutral
         if (!view.isInEditMode) {
-            val lightNavBar = !useDarkMode
+            val lightNavBar = !isSystemInDarkTheme()
             SideEffect {
                 window?.let { window ->
                     val insets = WindowCompat.getInsetsController(window, view)
@@ -289,10 +288,6 @@ internal fun FinancialConnectionsTheme(
         )
     }
 }
-
-private val useDarkMode: Boolean
-    @Composable
-    get() = FeatureFlags.financialConnectionsDarkMode.isEnabled && isSystemInDarkTheme()
 
 @Composable
 private fun findWindow(): Window? =

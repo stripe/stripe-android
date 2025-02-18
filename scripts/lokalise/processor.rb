@@ -74,7 +74,7 @@ class Processor
             if is_new_android_key
                 existing_key = find_existing_key(value)
 
-                if existing_key.nil?
+                if existing_key.nil? || key_name != existing_key[:key]
                     unsynced_keys << Action.new("create", key, nil)
                 else
                     unsynced_keys << Action.new("update", key, existing_key)

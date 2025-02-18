@@ -8,6 +8,7 @@ MODULES=(
   "stripe-ui-core"
   "stripe-core"
   "identity"
+  "stripecardscan"
 )
 
 #

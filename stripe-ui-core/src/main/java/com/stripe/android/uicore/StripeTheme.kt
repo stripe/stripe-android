@@ -135,7 +135,8 @@ data class EmbeddedFlatStyle(
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class EmbeddedInsets(
     val checkmarkInsetDp: Float,
-    val additionalInsetsDp: Float
+    val additionalVerticalInsetsDp: Float,
+    val horizontalInsetsDp: Float
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -239,7 +240,8 @@ object StripeThemeDefaults {
     )
 
     val embeddedCommon = EmbeddedInsets(
-        additionalInsetsDp = 0.0f,
+        additionalVerticalInsetsDp = 0.0f,
+        horizontalInsetsDp = 0.0f,
         checkmarkInsetDp = 12.0f
     )
 

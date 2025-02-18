@@ -188,7 +188,6 @@ internal class WalletScreenScreenshotTest {
                     onPayAnotherWayClicked = {},
                     onRemoveClicked = {},
                     onSetDefaultClicked = {},
-                    onEditPaymentMethodClicked = {},
                     showBottomSheetContent = {},
                     hideBottomSheetContent = {},
                     onAddNewPaymentMethodClicked = {},

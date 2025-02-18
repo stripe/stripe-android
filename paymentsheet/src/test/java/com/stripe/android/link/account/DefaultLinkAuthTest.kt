@@ -7,30 +7,19 @@ import com.stripe.android.link.FakeIntegrityRequestManager
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.ui.inline.SignUpConsentAction
+import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.attestation.AttestationError
 import com.stripe.attestation.IntegrityRequestManager
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
-import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
 internal class DefaultLinkAuthTest {
 
-    private val dispatcher = UnconfinedTestDispatcher()
-
-    @Before
-    fun before() {
-        Dispatchers.setMain(dispatcher)
-    }
-
-    @After
-    fun cleanup() {
-        Dispatchers.resetMain()
-    }
+    @get:Rule
+    val testRule = CoroutineTestRule()
 
     @Test
     fun `config with attestation enabled successfully signs in`() = runTest {
@@ -68,12 +57,13 @@ internal class DefaultLinkAuthTest {
     }
 
     @Test
-    fun `sign in attempt with attestation failure returns AttestationFailed`() = runTest {
+    fun `sign up attempt with attestation failure returns AttestationFailed`() = runTest {
         val error = APIException(
             stripeError = StripeError(
                 code = "link_failed_to_attest_request"
             )
         )
+        val errorReporter = FakeErrorReporter()
         val linkAccountManager = FakeLinkAccountManager()
         val integrityRequestManager = FakeIntegrityRequestManager()
 
@@ -81,7 +71,8 @@ internal class DefaultLinkAuthTest {
 
         val linkAuth = linkAuth(
             linkAccountManager = linkAccountManager,
-            integrityRequestManager = integrityRequestManager
+            integrityRequestManager = integrityRequestManager,
+            errorReporter = errorReporter
         )
 
         val result = linkAuth.signUp(
@@ -94,18 +85,26 @@ internal class DefaultLinkAuthTest {
 
         integrityRequestManager.awaitRequestTokenCall()
 
+        val errorReport = errorReporter.awaitCall()
+        assertThat(errorReport.errorEvent)
+            .isEqualTo(ErrorReporter.ExpectedErrorEvent.LINK_NATIVE_FAILED_TO_ATTEST_REQUEST)
+        assertThat(errorReport.additionalNonPiiParams)
+            .containsExactly("operation", "signup")
+
         assertThat(result).isEqualTo(LinkAuthResult.AttestationFailed(error))
 
         linkAccountManager.ensureAllEventsConsumed()
         integrityRequestManager.ensureAllEventsConsumed()
+        errorReporter.ensureAllEventsConsumed()
     }
 
     @Test
-    fun `sign in attempt with token fetch failure returns AttestationFailed`() = runTest {
+    fun `sign up attempt with token fetch failure returns AttestationFailed`() = runTest {
         val error = AttestationError(
             errorType = AttestationError.ErrorType.INTERNAL_ERROR,
             message = "oops"
         )
+        val errorReporter = FakeErrorReporter()
         val linkAccountManager = FakeLinkAccountManager()
         val integrityRequestManager = FakeIntegrityRequestManager()
 
@@ -113,7 +112,8 @@ internal class DefaultLinkAuthTest {
 
         val linkAuth = linkAuth(
             linkAccountManager = linkAccountManager,
-            integrityRequestManager = integrityRequestManager
+            integrityRequestManager = integrityRequestManager,
+            errorReporter = errorReporter
         )
 
         val result = linkAuth.signUp(
@@ -126,10 +126,16 @@ internal class DefaultLinkAuthTest {
 
         integrityRequestManager.awaitRequestTokenCall()
 
+        val errorReport = errorReporter.awaitCall()
+        assertThat(errorReport.errorEvent)
+            .isEqualTo(ErrorReporter.ExpectedErrorEvent.LINK_NATIVE_FAILED_TO_GET_INTEGRITY_TOKEN)
+        assertThat(errorReport.additionalNonPiiParams)
+            .containsExactly("operation", "signup")
         assertThat(result).isEqualTo(LinkAuthResult.AttestationFailed(error))
 
         linkAccountManager.ensureAllEventsConsumed()
         integrityRequestManager.ensureAllEventsConsumed()
+        errorReporter.ensureAllEventsConsumed()
     }
 
     @Test
@@ -270,12 +276,14 @@ internal class DefaultLinkAuthTest {
         )
         val linkAccountManager = FakeLinkAccountManager()
         val integrityRequestManager = FakeIntegrityRequestManager()
+        val errorReporter = FakeErrorReporter()
 
         integrityRequestManager.requestResult = Result.failure(error)
 
         val linkAuth = linkAuth(
             linkAccountManager = linkAccountManager,
-            integrityRequestManager = integrityRequestManager
+            integrityRequestManager = integrityRequestManager,
+            errorReporter = errorReporter
         )
 
         val result = linkAuth.lookUp(
@@ -286,10 +294,17 @@ internal class DefaultLinkAuthTest {
 
         integrityRequestManager.awaitRequestTokenCall()
 
+        val errorReport = errorReporter.awaitCall()
+        assertThat(errorReport.errorEvent)
+            .isEqualTo(ErrorReporter.ExpectedErrorEvent.LINK_NATIVE_FAILED_TO_ATTEST_REQUEST)
+        assertThat(errorReport.additionalNonPiiParams)
+            .containsExactly("operation", "lookup")
+
         assertThat(result).isEqualTo(LinkAuthResult.AttestationFailed(error))
 
         linkAccountManager.ensureAllEventsConsumed()
         integrityRequestManager.ensureAllEventsConsumed()
+        errorReporter.ensureAllEventsConsumed()
     }
 
     @Test
@@ -300,12 +315,14 @@ internal class DefaultLinkAuthTest {
         )
         val linkAccountManager = FakeLinkAccountManager()
         val integrityRequestManager = FakeIntegrityRequestManager()
+        val errorReporter = FakeErrorReporter()
 
         integrityRequestManager.requestResult = Result.failure(error)
 
         val linkAuth = linkAuth(
             linkAccountManager = linkAccountManager,
-            integrityRequestManager = integrityRequestManager
+            integrityRequestManager = integrityRequestManager,
+            errorReporter = errorReporter
         )
 
         val result = linkAuth.lookUp(
@@ -316,10 +333,16 @@ internal class DefaultLinkAuthTest {
 
         integrityRequestManager.awaitRequestTokenCall()
 
+        val errorReport = errorReporter.awaitCall()
+        assertThat(errorReport.errorEvent)
+            .isEqualTo(ErrorReporter.ExpectedErrorEvent.LINK_NATIVE_FAILED_TO_GET_INTEGRITY_TOKEN)
+        assertThat(errorReport.additionalNonPiiParams)
+            .containsExactly("operation", "lookup")
         assertThat(result).isEqualTo(LinkAuthResult.AttestationFailed(error))
 
         linkAccountManager.ensureAllEventsConsumed()
         integrityRequestManager.ensureAllEventsConsumed()
+        errorReporter.ensureAllEventsConsumed()
     }
 
     @Test
@@ -472,7 +495,8 @@ internal class DefaultLinkAuthTest {
     private fun linkAuth(
         useAttestationEndpoints: Boolean = true,
         linkAccountManager: FakeLinkAccountManager = FakeLinkAccountManager(),
-        integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager()
+        integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
+        errorReporter: ErrorReporter = FakeErrorReporter()
     ): DefaultLinkAuth {
         return DefaultLinkAuth(
             linkGate = FakeLinkGate().apply {
@@ -480,6 +504,7 @@ internal class DefaultLinkAuthTest {
             },
             linkAccountManager = linkAccountManager,
             integrityRequestManager = integrityRequestManager,
+            errorReporter = errorReporter,
             applicationId = TestFactory.APP_ID
         )
     }

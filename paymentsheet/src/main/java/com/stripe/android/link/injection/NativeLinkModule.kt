@@ -42,7 +42,7 @@ import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
-import com.stripe.android.paymentelement.confirmation.link.LinkCardBrandConfirmationDefinition
+import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationDefinition
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -211,10 +211,10 @@ internal interface NativeLinkModule {
         @JvmSuppressWildcards
         @Provides
         @IntoSet
-        fun providesLinkCardBrandConfirmationDefinition(
+        fun providesLinkPassthroughConfirmationDefinition(
             linkAccountManager: DefaultLinkAccountManager
         ): ConfirmationDefinition<*, *, *, *> {
-            return LinkCardBrandConfirmationDefinition(
+            return LinkPassthroughConfirmationDefinition(
                 linkAccountManager = linkAccountManager,
             )
         }
