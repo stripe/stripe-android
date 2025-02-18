@@ -134,7 +134,7 @@ class CustomerSheet internal constructor(
         return coroutineScope {
             val savedSelectionDeferred = async {
                 CustomerSheetHacks.savedSelectionDataSource.await().retrieveSavedSelection(
-                    null
+                    customerSessionElementsSession = null
                 ).toResult()
             }
             val paymentMethodsDeferred = async {

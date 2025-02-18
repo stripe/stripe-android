@@ -27,7 +27,7 @@ internal fun getDefaultPaymentMethodsEnabledForCustomerSheet(elementsSession: El
     }
 }
 
-internal fun getDefaultPaymentMethod(
+internal fun getDefaultPaymentMethodAsPaymentSelection(
     paymentMethods: List<PaymentMethod>,
     defaultPaymentMethodId: String?,
 ): PaymentSelection? {

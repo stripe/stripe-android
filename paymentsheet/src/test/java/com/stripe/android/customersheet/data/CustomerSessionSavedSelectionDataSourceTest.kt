@@ -100,7 +100,7 @@ class CustomerSessionSavedSelectionDataSourceTest {
             elementsSessionManager = elementsSessionManager,
         )
 
-        val result = dataSource.retrieveSavedSelection(elementsSession = null)
+        val result = dataSource.retrieveSavedSelection(customerSessionElementsSession = null)
 
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<Unit>>()
 

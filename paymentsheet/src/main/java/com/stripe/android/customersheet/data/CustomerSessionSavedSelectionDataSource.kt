@@ -2,7 +2,7 @@ package com.stripe.android.customersheet.data
 
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.util.getDefaultPaymentMethodsEnabledForCustomerSheet
-import com.stripe.android.customersheet.util.getDefaultPaymentMethod
+import com.stripe.android.customersheet.util.getDefaultPaymentMethodAsPaymentSelection
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.SavedSelection
@@ -18,11 +18,12 @@ internal class CustomerSessionSavedSelectionDataSource @Inject constructor(
     @IOContext private val workContext: CoroutineContext,
 ) : CustomerSheetSavedSelectionDataSource {
     override suspend fun retrieveSavedSelection(
-        elementsSession: CustomerSessionElementsSession?,
+        customerSessionElementsSession: CustomerSessionElementsSession?,
     ): CustomerSheetDataResult<SavedSelection?> {
         return withContext(workContext) {
-            val loadedElementsSession =
-                elementsSession?.let { Result.success(it) } ?: elementsSessionManager.fetchElementsSession()
+            val loadedElementsSession = customerSessionElementsSession?.let {
+                    Result.success(it)
+                } ?: elementsSessionManager.fetchElementsSession()
             return@withContext loadedElementsSession.fold(
                 onSuccess = {
                     if (getDefaultPaymentMethodsEnabledForCustomerSheet(it.elementsSession)) {
@@ -41,7 +42,7 @@ internal class CustomerSessionSavedSelectionDataSource @Inject constructor(
     private fun useDefaultPaymentMethodFromBackend(
         customer: ElementsSession.Customer,
     ): CustomerSheetDataResult<SavedSelection?> {
-        val savedSelection = getDefaultPaymentMethod(
+        val savedSelection = getDefaultPaymentMethodAsPaymentSelection(
             paymentMethods = customer.paymentMethods,
             defaultPaymentMethodId = customer.defaultPaymentMethod
         )?.toSavedSelection()

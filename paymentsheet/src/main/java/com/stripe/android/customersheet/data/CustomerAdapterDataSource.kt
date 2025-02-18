@@ -48,8 +48,7 @@ internal class CustomerAdapterDataSource @Inject constructor(
             }
 
             val savedSelectionResult = async {
-                // TODO: add comment.
-                retrieveSavedSelection(elementsSession = null).toResult()
+                retrieveSavedSelection(customerSessionElementsSession = null).toResult()
             }
 
             val elementsSession = elementsSessionResult.await().getOrThrow()
@@ -92,7 +91,9 @@ internal class CustomerAdapterDataSource @Inject constructor(
         customerAdapter.detachPaymentMethod(paymentMethodId)
     }
 
-    override suspend fun retrieveSavedSelection(elementsSession: CustomerSessionElementsSession?) = runCatchingAdapterTask {
+    override suspend fun retrieveSavedSelection(
+        customerSessionElementsSession: CustomerSessionElementsSession?
+    ) = runCatchingAdapterTask {
         customerAdapter.retrieveSelectedPaymentOption().map { result ->
             result?.toSavedSelection()
         }
