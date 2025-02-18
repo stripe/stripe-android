@@ -1184,7 +1184,7 @@ internal class PlaygroundTestDriver(
     private fun waitUntilPrimaryButtonIsCompleted() {
         composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             composeTestRule.onAllNodesWithTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON)
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isEmpty()
         }
 
