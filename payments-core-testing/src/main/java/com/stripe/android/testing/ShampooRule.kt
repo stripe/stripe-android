@@ -1,25 +1,28 @@
-package com.stripe.android.paymentsheet.verticalmode;
+package com.stripe.android.testing
 
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
+import org.junit.rules.TestRule
+import org.junit.runner.Description
+import org.junit.runners.model.Statement
 
-/** Got flaky tests? Shampoo them away. */
-public final class ShampooRule implements TestRule {
-    private final int iterations;
-
-    public ShampooRule(int iterations) {
-        if (iterations < 1) throw new IllegalArgumentException("iterations < 1: " + iterations);
-        this.iterations = iterations;
+/** Got flaky tests? Shampoo them away.  */
+class ShampooRule(private val iterations: Int) : TestRule {
+    init {
+        require(iterations >= 1) { "iterations < 1: $iterations" }
     }
 
-    @Override public Statement apply(final Statement base, Description description) {
-        return new Statement() {
-            @Override public void evaluate() throws Throwable {
-                for (int i = 0; i < iterations; i++) {
-                    base.evaluate();
+    override fun apply(base: Statement, description: Description?): Statement {
+        return object : Statement() {
+            @Throws(Throwable::class)
+            override fun evaluate() {
+                repeat(iterations) { iteration ->
+                    try {
+                        base.evaluate()
+                    } catch (@Suppress("TooGenericExceptionCaught") e: Throwable) {
+                        println("Failed on iteration: $iteration")
+                        throw e
+                    }
                 }
             }
-        };
+        }
     }
 }
