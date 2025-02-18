@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_camera_permission_settings_message">A kártya beolvasásához engedélyezze a kamerához való hozzáférést a beállításokban.</string>
+  <string name="stripe_card_scan_instructions">Olvassa be kártyáját</string>
+  <string name="stripe_card_scan_privacy_link_text"><![CDATA[A Stripe-ot használjuk kártyáadatok ellenőrzésére. A Stripe az adatvédelmi szabályzatának megfelelően használhatja és tárolhatja az Ön adatait. <a href="https://support.stripe.com/questions/stripes-card-image-verification"><u>További tudnivalók</u></a>]]></string>
+  <string name="stripe_card_scan_title">A beolvasáshoz igazítsa kártyáját a téglalapba</string>
+  <string name="stripe_close_button_description">Bezárás</string>
+  <string name="stripe_swap_camera_button_description">Kameracsere</string>
+  <!-- Label for the button that toggles the camera's torch -->
+  <string name="stripe_torch_button_description">Vaku</string>
+</resources>
