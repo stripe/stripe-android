@@ -10,7 +10,6 @@ import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
@@ -592,6 +591,53 @@ internal class PlaygroundTestDriver(
         doAuthorization()
 
         afterAuthorization(selectors)
+
+        teardown()
+
+        return result
+    }
+
+    fun confirmEmbeddedUsBankAccount(
+        testParameters: TestParameters,
+        values: FieldPopulator.Values = FieldPopulator.Values(),
+    ): PlaygroundState? {
+        setup(
+            testParameters.copyPlaygroundSettings { settings ->
+                settings.updateConfigurationData { configurationData ->
+                    configurationData.copy(
+                        integrationType = PlaygroundConfigurationData.IntegrationType.Embedded
+                    )
+                }
+            }
+        )
+        launchEmbedded()
+
+        selectLpmInEmbeddedMode(testParameters.paymentMethodCode)
+
+        FieldPopulator(
+            selectors,
+            testParameters,
+            populateCustomLpmFields = {},
+            verifyCustomLpmFields = {},
+            values = values,
+        ).populateFields()
+
+        // Verify device requirements are met prior to attempting confirmation.  Do this
+        // after we have had the chance to capture a screenshot.
+        verifyDeviceSupportsTestAuthorization(
+            testParameters.authorizationAction,
+            testParameters.useBrowser
+        )
+
+        val result = playgroundState
+
+        selectors.embeddedFormBuyButton.click()
+
+        doUSBankAccountAuthorization(testParameters.authorizationAction)
+
+        selectors.embeddedFormBuyButton.waitForEnabled(requireClickAction = false)
+        selectors.embeddedFormBuyButton.click()
+        finishAfterAuthorization()
 
         teardown()
 

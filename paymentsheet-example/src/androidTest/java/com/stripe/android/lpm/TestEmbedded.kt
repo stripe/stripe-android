@@ -6,6 +6,9 @@ import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
+import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.test.core.TestParameters
 import org.junit.Test
@@ -42,6 +45,22 @@ internal class TestEmbedded : BasePlaygroundTest() {
                 ).joinToString(",")
             },
             values = null, // We don't show the form for cash app.
+        )
+    }
+
+    @Test
+    fun testUsBankAccount() {
+        testDriver.confirmEmbeddedUsBankAccount(
+            testParameters = TestParameters.create(
+                paymentMethodCode = "us_bank_account",
+                authorizationAction = null,
+                executeInNightlyRun = true,
+            ) { settings ->
+                settings[CountrySettingsDefinition] = Country.US
+                settings[CurrencySettingsDefinition] = Currency.USD
+                settings[DelayedPaymentMethodsSettingsDefinition] = true
+                settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
+            },
         )
     }
 }
