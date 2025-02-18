@@ -60,7 +60,7 @@ internal class CustomerSheetPage(
         cardNumber: String = CARD_NUMBER,
     ) {
         replaceText("Card number", cardNumber)
-        replaceText("MM / YY", "$EXPIRY_MONTH/$${EXPIRY_YEAR.substring(startIndex = 2)}")
+        fillExpirationDate("$EXPIRY_MONTH/$${EXPIRY_YEAR.substring(startIndex = 2)}")
         replaceText("CVC", CVC)
         replaceText("ZIP Code", ZIP_CODE)
     }
