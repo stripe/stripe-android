@@ -223,6 +223,7 @@ internal class SavedPaymentMethodMutator(
     suspend fun modifyCardPaymentMethod(
         paymentMethod: PaymentMethod,
         brand: CardBrand,
+        onSuccess: (PaymentMethod) -> Unit = {},
     ): Result<PaymentMethod> {
         // TODO(samer-stripe): Send 'unexpected_error' here
         val currentCustomer = customerStateHolder.customer.value ?: return Result.failure(
@@ -262,6 +263,8 @@ internal class SavedPaymentMethodMutator(
                         }
                     )
                 )
+
+                onSuccess(updatedMethod)
 
                 navigationPop()
             }
