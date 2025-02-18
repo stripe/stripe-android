@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [FIXED][10185](https://github.com/stripe/stripe-android/pull/10185) Improve accessibility for expiration date in `CardDetailsController`.
+
 ## 21.4.1 - 2025-01-28
 
 ### PaymentSheet
