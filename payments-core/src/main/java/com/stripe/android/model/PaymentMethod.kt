@@ -308,7 +308,7 @@ constructor(
             "paypal",
             isReusable = false,
             isVoucher = false,
-            requiresMandate = false,
+            requiresMandate = true,
             hasDelayedSettlement = false,
         ),
         AfterpayClearpay(
