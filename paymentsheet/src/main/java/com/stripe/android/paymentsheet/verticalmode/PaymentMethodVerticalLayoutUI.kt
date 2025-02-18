@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -164,6 +165,7 @@ private fun EditButton(onClick: () -> Unit) {
             .testTag(TEST_TAG_EDIT_SAVED_CARD)
             .clickable(onClick = onClick)
             .padding(4.dp)
+            .fillMaxHeight()
     )
 }
 
@@ -177,6 +179,7 @@ private fun ViewMoreButton(
             .testTag(TEST_TAG_VIEW_MORE)
             .clickable(onClick = onViewMorePaymentMethods)
             .padding(4.dp)
+            .fillMaxHeight()
     ) {
         Text(
             stringResource(id = R.string.stripe_view_more),
