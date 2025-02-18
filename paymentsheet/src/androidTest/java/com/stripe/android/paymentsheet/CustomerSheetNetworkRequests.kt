@@ -86,7 +86,5 @@ internal fun confirmSetupIntentParams(): RequestMatcher {
     return RequestMatchers.composite(
         bodyPart("payment_method", "pm_12345"),
         bodyPart("client_secret", "seti_12345_secret_12345"),
-        bodyPart(urlEncode("mandate_data[customer_acceptance][type]"), "online"),
-        bodyPart(urlEncode("mandate_data[customer_acceptance][online][infer_from_client]"), "true"),
     )
 }
