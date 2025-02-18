@@ -1174,6 +1174,7 @@ public final class com/stripe/android/financialconnections/model/FinancialConnec
 	public final fun getInstitutionName ()Ljava/lang/String;
 	public final fun getLast4 ()Ljava/lang/String;
 	public final fun getLivemode ()Z
+	public final fun getObject ()Ljava/lang/String;
 	public final fun getOwnership ()Ljava/lang/String;
 	public final fun getOwnershipRefresh ()Lcom/stripe/android/financialconnections/model/OwnershipRefresh;
 	public final fun getPermissions ()Ljava/util/List;

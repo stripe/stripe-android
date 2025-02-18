@@ -68,6 +68,7 @@ internal fun USBankAccountForm(
     formArgs: FormArguments,
     usBankAccountFormArgs: USBankAccountFormArguments,
     modifier: Modifier = Modifier,
+    enabled: Boolean
 ) {
     val viewModel = viewModel<USBankAccountFormViewModel>(
         factory = USBankAccountFormViewModel.Factory {
@@ -91,6 +92,7 @@ internal fun USBankAccountForm(
 
     val state by viewModel.currentScreenState.collectAsState()
     val lastTextFieldIdentifier by viewModel.lastTextFieldIdentifier.collectAsState()
+    val isEnabled = !state.isProcessing && enabled
 
     USBankAccountEmitters(
         viewModel = viewModel,
@@ -112,6 +114,7 @@ internal fun USBankAccountForm(
         saveForFutureUseElement = viewModel.saveForFutureUseElement,
         onRemoveAccount = viewModel::reset,
         modifier = modifier,
+        enabled = isEnabled
     )
 }
 
@@ -130,6 +133,7 @@ internal fun BankAccountForm(
     sameAsShippingElement: SameAsShippingElement?,
     saveForFutureUseElement: SaveForFutureUseElement,
     modifier: Modifier = Modifier,
+    enabled: Boolean,
     onRemoveAccount: () -> Unit,
 ) {
     Column(modifier.fillMaxWidth()) {
@@ -137,25 +141,25 @@ internal fun BankAccountForm(
             instantDebits = instantDebits,
             formArgs = formArgs,
             isPaymentFlow = isPaymentFlow,
-            isProcessing = state.isProcessing,
             nameController = nameController,
             emailController = emailController,
             phoneController = phoneController,
             addressController = addressController,
             lastTextFieldIdentifier = lastTextFieldIdentifier,
             sameAsShippingElement = sameAsShippingElement,
+            enabled = enabled
         )
 
         state.linkedBankAccount?.let { linkedBankAccount ->
             AccountDetailsForm(
                 modifier = Modifier.padding(top = 16.dp),
                 showCheckbox = showCheckbox,
-                isProcessing = state.isProcessing,
                 bankName = linkedBankAccount.bankName,
                 last4 = linkedBankAccount.last4,
                 promoBadgeState = state.promoBadgeState,
                 saveForFutureUseElement = saveForFutureUseElement,
                 onRemoveAccount = onRemoveAccount,
+                enabled = enabled
             )
         }
 
@@ -184,7 +188,7 @@ private fun PromoDisclaimer(
 private fun BillingDetailsForm(
     instantDebits: Boolean,
     formArgs: FormArguments,
-    isProcessing: Boolean,
+    enabled: Boolean,
     isPaymentFlow: Boolean,
     nameController: TextFieldController,
     emailController: TextFieldController,
@@ -222,7 +226,7 @@ private fun BillingDetailsForm(
                 ) {
                     TextField(
                         textFieldController = nameController,
-                        enabled = !isProcessing,
+                        enabled = enabled,
                         imeAction = ImeAction.Next,
                     )
                 }
@@ -241,7 +245,7 @@ private fun BillingDetailsForm(
                 ) {
                     TextField(
                         textFieldController = emailController,
-                        enabled = !isProcessing,
+                        enabled = enabled,
                         imeAction = if (lastTextFieldIdentifier == IdentifierSpec.Email) {
                             ImeAction.Done
                         } else {
@@ -253,7 +257,7 @@ private fun BillingDetailsForm(
         }
         if (formArgs.billingDetailsCollectionConfiguration.phone == CollectionMode.Always) {
             PhoneSection(
-                isProcessing = isProcessing,
+                enabled = enabled,
                 phoneController = phoneController,
                 imeAction = if (lastTextFieldIdentifier == IdentifierSpec.Phone) {
                     ImeAction.Done
@@ -265,7 +269,7 @@ private fun BillingDetailsForm(
         }
         if (formArgs.billingDetailsCollectionConfiguration.address == AddressCollectionMode.Full) {
             AddressSection(
-                isProcessing = isProcessing,
+                enabled = enabled,
                 addressController = addressController,
                 lastTextFieldIdentifier = lastTextFieldIdentifier,
                 sameAsShippingElement = sameAsShippingElement,
@@ -278,7 +282,7 @@ private fun BillingDetailsForm(
 @Suppress("SpreadOperator")
 @Composable
 private fun PhoneSection(
-    isProcessing: Boolean,
+    enabled: Boolean,
     phoneController: PhoneNumberController,
     imeAction: ImeAction,
     modifier: Modifier = Modifier,
@@ -306,7 +310,7 @@ private fun PhoneSection(
             error = sectionErrorString,
         ) {
             PhoneNumberElementUI(
-                enabled = !isProcessing,
+                enabled = enabled,
                 controller = phoneController,
                 imeAction = imeAction,
             )
@@ -317,7 +321,7 @@ private fun PhoneSection(
 @Suppress("SpreadOperator")
 @Composable
 private fun AddressSection(
-    isProcessing: Boolean,
+    enabled: Boolean,
     addressController: AddressController,
     lastTextFieldIdentifier: IdentifierSpec?,
     sameAsShippingElement: SameAsShippingElement?,
@@ -346,7 +350,7 @@ private fun AddressSection(
                 error = sectionErrorString,
             ) {
                 AddressElementUI(
-                    enabled = !isProcessing,
+                    enabled = enabled,
                     controller = addressController,
                     hiddenIdentifiers = emptySet(),
                     lastTextFieldIdentifier = lastTextFieldIdentifier,
@@ -363,7 +367,7 @@ private fun AddressSection(
 private fun AccountDetailsForm(
     modifier: Modifier = Modifier,
     showCheckbox: Boolean,
-    isProcessing: Boolean,
+    enabled: Boolean,
     bankName: String?,
     last4: String?,
     promoBadgeState: PromoBadgeState?,
@@ -410,7 +414,7 @@ private fun AccountDetailsForm(
                         color = MaterialTheme.stripeColors.onComponent,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier
-                            .alpha(if (isProcessing) 0.5f else 1f)
+                            .alpha(if (!enabled) 0.5f else 1f)
                             .weight(1f, fill = false),
                     )
 
@@ -423,7 +427,7 @@ private fun AccountDetailsForm(
                 }
 
                 IconButton(
-                    enabled = !isProcessing,
+                    enabled = enabled,
                     onClick = { openDialog = true },
                     modifier = Modifier.size(24.dp),
                 ) {

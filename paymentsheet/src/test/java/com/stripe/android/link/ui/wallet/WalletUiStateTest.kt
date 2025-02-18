@@ -147,6 +147,16 @@ class WalletUiStateTest {
         assertThat(state.primaryButtonState).isEqualTo(PrimaryButtonState.Enabled)
     }
 
+    @Test
+    fun testDisabledButtonStateWhenCardIsBeingUpdated() {
+        val state = walletUiState(
+            selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            cardBeingUpdated = "id"
+        )
+
+        assertThat(state.primaryButtonState).isEqualTo(PrimaryButtonState.Disabled)
+    }
+
     private fun walletUiState(
         paymentDetailsList: List<ConsumerPaymentDetails.PaymentDetails> =
             TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
@@ -155,7 +165,9 @@ class WalletUiStateTest {
         isProcessing: Boolean = false,
         primaryButtonLabel: ResolvableString = LINK_WALLET_PRIMARY_BUTTON_LABEL,
         expiryDateInput: FormFieldEntry = FormFieldEntry(null),
-        cvcInput: FormFieldEntry = FormFieldEntry(null)
+        cvcInput: FormFieldEntry = FormFieldEntry(null),
+        canAddNewPaymentMethod: Boolean = true,
+        cardBeingUpdated: String? = null
     ): WalletUiState {
         return WalletUiState(
             paymentDetailsList = paymentDetailsList,
@@ -164,7 +176,9 @@ class WalletUiStateTest {
             isProcessing = isProcessing,
             primaryButtonLabel = primaryButtonLabel,
             expiryDateInput = expiryDateInput,
-            cvcInput = cvcInput
+            cvcInput = cvcInput,
+            canAddNewPaymentMethod = canAddNewPaymentMethod,
+            cardBeingUpdated = cardBeingUpdated
         )
     }
 }

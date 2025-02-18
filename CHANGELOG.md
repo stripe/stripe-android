@@ -5,6 +5,12 @@
 ### PaymentSheet
 * [FIXED][10185](https://github.com/stripe/stripe-android/pull/10185) Improve accessibility for expiration date in `CardDetailsController`.
 
+### Financial Connections
+- [ADDED] Financial Connections now supports dark mode and will automatically adapt to the device's theme. [Learn more](https://docs.stripe.com/financial-connections/other-data-powered-products?platform=android#connections-customize-android) about configuring appearance settings.
+
+## 21.4.2 - 2025-02-10
+Bug fixes and improvements.
+
 ## 21.4.1 - 2025-01-28
 
 ### PaymentSheet

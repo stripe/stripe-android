@@ -4,6 +4,8 @@ import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.attestation.FakeLinkAttestationCheck
+import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkComponent
@@ -42,6 +44,7 @@ internal class FakeLinkConfigurationCoordinator(
     ),
     private val accountStatus: AccountStatus = AccountStatus.SignedOut,
     private val linkGate: LinkGate = FakeLinkGate(),
+    private val linkAttestationCheck: LinkAttestationCheck = FakeLinkAttestationCheck(),
     private val email: String? = null
 ) : LinkConfigurationCoordinator {
 
@@ -58,6 +61,10 @@ internal class FakeLinkConfigurationCoordinator(
 
     override fun linkGate(configuration: LinkConfiguration): LinkGate {
         return linkGate
+    }
+
+    override fun linkAttestationCheck(configuration: LinkConfiguration): LinkAttestationCheck {
+        return linkAttestationCheck
     }
 
     override suspend fun signInWithUserInput(configuration: LinkConfiguration, userInput: UserInput): Result<Boolean> {

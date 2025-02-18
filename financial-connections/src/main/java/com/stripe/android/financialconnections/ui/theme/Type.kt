@@ -7,10 +7,10 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 
 @Immutable
@@ -34,7 +34,7 @@ internal data class FinancialConnectionsTypography(
 internal fun TypePreview() {
     FinancialConnectionsPreview {
         Column(
-            modifier = Modifier.background(Color.White)
+            modifier = Modifier.background(colors.background)
         ) {
             Text(
                 text = "Heading XLarge",

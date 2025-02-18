@@ -9,6 +9,8 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.analytics.LinkAnalyticsHelper
+import com.stripe.android.link.attestation.FakeLinkAttestationCheck
+import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.AccountStatus
@@ -58,57 +60,63 @@ class LinkHandlerTest {
     }
 
     @Test
-    fun `setupLinkWithEagerLaunch returns true in LoggedIn states`() = runLinkTest {
-        val shouldLaunchEagerly = handler.setupLinkWithEagerLaunch(
-            state = createLinkState(
-                loginState = LinkState.LoginState.LoggedIn,
-                signupMode = LinkSignupMode.AlongsideSaveForFutureUse
-            )
+    fun `setupLinkWithEagerLaunch returns false when attestation check returns AttestationFailed`() {
+        setupLinkWithEagerLaunchTest(
+            attestationCheckResult = LinkAttestationCheck.Result.AttestationFailed(Throwable()),
+            loginState = LinkState.LoginState.LoggedIn,
+            expectedResult = false
         )
-
-        assertThat(shouldLaunchEagerly).isTrue()
     }
 
     @Test
-    fun `setupLinkWithEagerLaunch returns true in NeedsVerification states`() = runLinkTest {
-        val shouldLaunchEagerly = handler.setupLinkWithEagerLaunch(
-            state = createLinkState(
-                loginState = LinkState.LoginState.NeedsVerification,
-                signupMode = LinkSignupMode.AlongsideSaveForFutureUse
-            )
+    fun `setupLinkWithEagerLaunch returns false when attestation check returns Error`() {
+        setupLinkWithEagerLaunchTest(
+            attestationCheckResult = LinkAttestationCheck.Result.Error(Throwable()),
+            loginState = LinkState.LoginState.LoggedIn,
+            expectedResult = false
         )
-
-        assertThat(shouldLaunchEagerly).isTrue()
     }
 
     @Test
-    fun `setupLinkWithEagerLaunch returns false in LoggedOut state`() = runLinkTest {
-        val shouldLaunchEagerly = handler.setupLinkWithEagerLaunch(
-            state = createLinkState(
-                loginState = LinkState.LoginState.LoggedOut,
-                signupMode = LinkSignupMode.AlongsideSaveForFutureUse
-            )
+    fun `setupLinkWithEagerLaunch returns false when attestation check returns AccountError`() {
+        setupLinkWithEagerLaunchTest(
+            attestationCheckResult = LinkAttestationCheck.Result.AccountError(Throwable()),
+            loginState = LinkState.LoginState.LoggedIn,
+            expectedResult = false
         )
+    }
 
-        assertThat(shouldLaunchEagerly).isFalse()
+    @Test
+    fun `setupLinkWithEagerLaunch returns true in LoggedIn states`() {
+        setupLinkWithEagerLaunchTest(
+            loginState = LinkState.LoginState.LoggedIn,
+            expectedResult = true
+        )
+    }
+
+    @Test
+    fun `setupLinkWithEagerLaunch returns true in NeedsVerification states`() {
+        setupLinkWithEagerLaunchTest(
+            loginState = LinkState.LoginState.NeedsVerification,
+            expectedResult = true
+        )
+    }
+
+    @Test
+    fun `setupLinkWithEagerLaunch returns false in LoggedOut state`() {
+        setupLinkWithEagerLaunchTest(
+            loginState = LinkState.LoginState.LoggedOut,
+            expectedResult = false
+        )
     }
 
     @Test
     fun `setupLinkWithEagerLaunch returns false when suppress2faModal is true`() {
-        val linkGate = FakeLinkGate()
-        linkGate.setSuppress2faModal(false)
-        runLinkTest(
-            linkGate = linkGate
-        ) {
-            val shouldLaunchEagerly = handler.setupLinkWithEagerLaunch(
-                state = createLinkState(
-                    loginState = LinkState.LoginState.LoggedOut,
-                    signupMode = LinkSignupMode.AlongsideSaveForFutureUse
-                )
-            )
-
-            assertThat(shouldLaunchEagerly).isFalse()
-        }
+        setupLinkWithEagerLaunchTest(
+            loginState = LinkState.LoginState.LoggedOut,
+            suppress2faModal = true,
+            expectedResult = false
+        )
     }
 
     @Test
@@ -117,6 +125,33 @@ class LinkHandlerTest {
 
         assertThat(shouldLaunchEagerly).isFalse()
     }
+
+    private fun setupLinkWithEagerLaunchTest(
+        attestationCheckResult: LinkAttestationCheck.Result = LinkAttestationCheck.Result.Successful,
+        loginState: LinkState.LoginState = LinkState.LoginState.LoggedIn,
+        suppress2faModal: Boolean = false,
+        expectedResult: Boolean
+    ) {
+        val linkAttestationCheck = FakeLinkAttestationCheck()
+        val linkGate = FakeLinkGate()
+
+        linkGate.setSuppress2faModal(suppress2faModal)
+        linkAttestationCheck.result = attestationCheckResult
+
+        runLinkTest(
+            linkAttestationCheck = linkAttestationCheck,
+            linkGate = linkGate
+        ) {
+            val shouldLaunchEagerly = handler.setupLinkWithEagerLaunch(
+                state = createLinkState(
+                    loginState = loginState,
+                    signupMode = LinkSignupMode.AlongsideSaveForFutureUse
+                )
+            )
+
+            assertThat(shouldLaunchEagerly).isEqualTo(expectedResult)
+        }
+    }
 }
 
 private fun runLinkTest(
@@ -124,11 +159,14 @@ private fun runLinkTest(
     linkConfiguration: LinkConfiguration = defaultLinkConfiguration(),
     attachNewCardToAccountResult: Result<LinkPaymentDetails>? = null,
     linkGate: LinkGate = FakeLinkGate(),
+    linkAttestationCheck: LinkAttestationCheck = FakeLinkAttestationCheck(),
     testBlock: suspend LinkTestData.() -> Unit
 ): Unit = runTest {
     val linkConfigurationCoordinator = mock<LinkConfigurationCoordinator>()
     whenever(linkConfigurationCoordinator.linkGate(linkConfiguration))
         .thenReturn(linkGate)
+    whenever(linkConfigurationCoordinator.linkAttestationCheck(linkConfiguration))
+        .thenReturn(linkAttestationCheck)
     val savedStateHandle = SavedStateHandle()
     val linkAnalyticsHelper = mock<LinkAnalyticsHelper>()
     val linkStore = mock<LinkStore>()

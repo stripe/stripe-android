@@ -48,7 +48,7 @@ internal class CustomerAdapterDataSource @Inject constructor(
             }
 
             val savedSelectionResult = async {
-                retrieveSavedSelection().toResult()
+                retrieveSavedSelection(customerSessionElementsSession = null).toResult()
             }
 
             val elementsSession = elementsSessionResult.await().getOrThrow()
@@ -65,7 +65,9 @@ internal class CustomerAdapterDataSource @Inject constructor(
                     canRemoveLastPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
                     // Always `true` for `Adapter` use case
                     canRemovePaymentMethods = true,
-                )
+                ),
+                // Default payment methods are a customer sessions-only feature, so this value is unused.
+                defaultPaymentMethodId = null,
             )
         }.toCustomerSheetDataResult()
     }
@@ -89,7 +91,9 @@ internal class CustomerAdapterDataSource @Inject constructor(
         customerAdapter.detachPaymentMethod(paymentMethodId)
     }
 
-    override suspend fun retrieveSavedSelection() = runCatchingAdapterTask {
+    override suspend fun retrieveSavedSelection(
+        customerSessionElementsSession: CustomerSessionElementsSession?
+    ) = runCatchingAdapterTask {
         customerAdapter.retrieveSelectedPaymentOption().map { result ->
             result?.toSavedSelection()
         }

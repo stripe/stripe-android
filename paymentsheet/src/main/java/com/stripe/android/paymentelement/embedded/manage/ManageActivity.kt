@@ -109,7 +109,9 @@ internal class ManageActivity : AppCompatActivity() {
         val scrollState = rememberScrollState()
         BottomSheetScaffold(
             topBar = {
-                val topBarState by screen.topBarState().collectAsState()
+                val topBarState by remember(screen) {
+                    screen.topBarState()
+                }.collectAsState()
                 PaymentSheetTopBar(
                     state = topBarState,
                     canNavigateBack = navigator.canGoBack,
@@ -119,7 +121,9 @@ internal class ManageActivity : AppCompatActivity() {
             },
             content = {
                 val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
-                val headerText by screen.title().collectAsState()
+                val headerText by remember(screen) {
+                    screen.title()
+                }.collectAsState()
                 headerText?.let { text ->
                     H4Text(
                         text = text.resolve(),

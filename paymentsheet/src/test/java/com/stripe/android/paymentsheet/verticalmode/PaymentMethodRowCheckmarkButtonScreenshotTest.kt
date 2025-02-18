@@ -175,7 +175,8 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
             bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
             checkmarkColor = StripeThemeDefaults.colorsLight.materialColors.error.toArgb(),
             checkmarkInsetDp = 20f,
-            additionalInsetsDp = 40f
+            additionalVerticalInsetsDp = 40f,
+            horizontalInsetsDp = 40f
         )
         paparazziRule.snapshot {
             PaymentMethodRowButton(

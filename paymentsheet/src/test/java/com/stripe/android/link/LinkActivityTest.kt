@@ -7,6 +7,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -16,14 +17,13 @@ import androidx.test.espresso.intent.Intents.assertNoUnverifiedIntents
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.account.FakeLinkAccountManager
-import com.stripe.android.link.account.FakeLinkAuth
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.gate.FakeLinkGate
+import com.stripe.android.link.attestation.FakeLinkAttestationCheck
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
-import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -145,11 +145,10 @@ internal class LinkActivityTest {
                 activityRetainedComponent = FakeNativeLinkComponent(),
                 confirmationHandlerFactory = { FakeConfirmationHandler() },
                 linkAccountManager = linkAccountManager,
+                linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
                 eventReporter = FakeEventReporter(),
-                integrityRequestManager = FakeIntegrityRequestManager(),
-                linkGate = FakeLinkGate(),
-                errorReporter = FakeErrorReporter(),
-                linkAuth = FakeLinkAuth(),
+                linkAttestationCheck = FakeLinkAttestationCheck(),
+                savedStateHandle = SavedStateHandle(),
                 linkConfiguration = TestFactory.LINK_CONFIGURATION,
                 startWithVerificationDialog = use2faDialog,
             )

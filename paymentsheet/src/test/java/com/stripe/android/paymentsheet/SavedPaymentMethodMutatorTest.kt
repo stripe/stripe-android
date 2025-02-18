@@ -510,7 +510,7 @@ class SavedPaymentMethodMutatorTest {
                         canRemoveLastPaymentMethod = true,
                         canRemoveDuplicates = shouldRemoveDuplicates,
                     ),
-                    defaultPaymentMethodState = CustomerState.DefaultPaymentMethodState.Disabled,
+                    defaultPaymentMethodId = null,
                 )
             )
 
@@ -534,6 +534,7 @@ class SavedPaymentMethodMutatorTest {
         }
     }
 
+    @Suppress("LongMethod")
     private fun runScenario(
         customerRepository: CustomerRepository = FakeCustomerRepository(),
         isCbcEligible: Boolean = false,
@@ -566,6 +567,7 @@ class SavedPaymentMethodMutatorTest {
                 eventReporter = mock(),
                 coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
                 workContext = coroutineContext,
+                uiContext = coroutineContext,
                 customerRepository = customerRepository,
                 selection = selection,
                 clearSelection = { selection.value = null },

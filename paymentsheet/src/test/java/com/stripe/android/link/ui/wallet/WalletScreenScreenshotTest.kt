@@ -124,6 +124,31 @@ internal class WalletScreenScreenshotTest {
         )
     }
 
+    @Test
+    fun testLongExpandedPaymentDetails() {
+        snapshot(
+            state = walletUiState(
+                paymentDetailsList = (1..100).map { index ->
+                    val card = CONSUMER_PAYMENT_DETAILS_CARD
+                    CONSUMER_PAYMENT_DETAILS_CARD.copy(
+                        id = "${card.id}_$index"
+                    )
+                }
+            ),
+            isExpanded = true
+        )
+    }
+
+    @Test
+    fun testCannotAddCreditCard() {
+        snapshot(
+            state = walletUiState(
+                canAddNewPaymentMethod = false,
+            ),
+            isExpanded = true
+        )
+    }
+
     private fun walletUiState(
         paymentDetailsList: List<ConsumerPaymentDetails.PaymentDetails> =
             TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails,
@@ -132,7 +157,8 @@ internal class WalletScreenScreenshotTest {
         isProcessing: Boolean = false,
         expiryDateInput: FormFieldEntry = FormFieldEntry(null),
         cvcInput: FormFieldEntry = FormFieldEntry(null),
-        alertMessage: ResolvableString? = null
+        alertMessage: ResolvableString? = null,
+        canAddNewPaymentMethod: Boolean = true,
     ): WalletUiState {
         return WalletUiState(
             paymentDetailsList = paymentDetailsList,
@@ -142,7 +168,8 @@ internal class WalletScreenScreenshotTest {
             primaryButtonLabel = primaryButtonLabel,
             expiryDateInput = expiryDateInput,
             cvcInput = cvcInput,
-            alertMessage = alertMessage
+            alertMessage = alertMessage,
+            canAddNewPaymentMethod = canAddNewPaymentMethod
         )
     }
 
@@ -161,7 +188,6 @@ internal class WalletScreenScreenshotTest {
                     onPayAnotherWayClicked = {},
                     onRemoveClicked = {},
                     onSetDefaultClicked = {},
-                    onEditPaymentMethodClicked = {},
                     showBottomSheetContent = {},
                     hideBottomSheetContent = {},
                     onAddNewPaymentMethodClicked = {},

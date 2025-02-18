@@ -1,7 +1,9 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
@@ -13,22 +15,26 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
-import com.stripe.android.paymentsheet.analytics.code
-import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.isSaved
+import com.stripe.android.paymentsheet.ui.Mandate
 import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
 import org.jetbrains.annotations.VisibleForTesting
 
-internal const val TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT = "TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT"
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT = "TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT"
+
+internal const val EMBEDDED_MANDATE_TEXT_TEST_TAG = "EMBEDDED_MANDATE"
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
-internal fun PaymentMethodEmbeddedLayoutUI(
+internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
     interactor: PaymentMethodVerticalLayoutInteractor,
+    embeddedViewDisplaysMandateText: Boolean,
     modifier: Modifier = Modifier,
     rowStyle: Embedded.RowStyle
 ) {
@@ -65,6 +71,11 @@ internal fun PaymentMethodEmbeddedLayoutUI(
             .testTag(TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT),
         rowStyle = rowStyle
     )
+
+    EmbeddedMandate(
+        embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
+        mandate = state.mandate,
+    )
 }
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
@@ -74,7 +85,7 @@ internal fun PaymentMethodEmbeddedLayoutUI(
     paymentMethods: List<DisplayablePaymentMethod>,
     displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
     savedPaymentMethodAction: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
-    selection: PaymentSelection?,
+    selection: PaymentMethodVerticalLayoutInteractor.Selection?,
     isEnabled: Boolean,
     onViewMorePaymentMethods: () -> Unit,
     onManageOneSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
@@ -110,11 +121,11 @@ internal fun PaymentMethodEmbeddedLayoutUI(
         }
 
         val selectedIndex = remember(selection, paymentMethods) {
-            if (selection == null || selection.isSaved) {
-                -1
-            } else {
-                val code = selection.code()
+            if (selection is PaymentMethodVerticalLayoutInteractor.Selection.New) {
+                val code = selection.code
                 paymentMethods.indexOfFirst { it.code == code }
+            } else {
+                -1
             }
         }
 
@@ -148,6 +159,21 @@ private fun OptionalEmbeddedDivider(rowStyle: Embedded.RowStyle) {
                 end = rowStyle.endSeparatorInset()
             ),
             startIndent = if (rowStyle.startSeparatorHasDefaultInset()) 32.dp else 0.dp
+        )
+    }
+}
+
+@Composable
+private fun EmbeddedMandate(
+    embeddedViewDisplaysMandateText: Boolean,
+    mandate: ResolvableString?,
+) {
+    if (embeddedViewDisplaysMandateText) {
+        Mandate(
+            mandateText = mandate?.resolve(),
+            modifier = Modifier
+                .padding(bottom = 8.dp)
+                .testTag(EMBEDDED_MANDATE_TEXT_TEST_TAG),
         )
     }
 }

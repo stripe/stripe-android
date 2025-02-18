@@ -11,6 +11,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.model.amount
 import com.stripe.android.paymentsheet.model.currency
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.paymentsheet.utils.buyButtonLabel
 import com.stripe.android.ui.core.Amount
@@ -25,22 +26,28 @@ import javax.inject.Singleton
 
 internal interface FormActivityStateHelper {
     val state: StateFlow<State>
-    fun update(confirmationState: ConfirmationHandler.State)
+    fun updateConfirmationState(confirmationState: ConfirmationHandler.State)
+    fun updateMandate(mandateText: ResolvableString?)
+    fun updatePrimaryButton(callback: (PrimaryButton.UIState?) -> PrimaryButton.UIState?)
+    fun updateError(error: ResolvableString?)
 
     data class State(
         val primaryButtonLabel: ResolvableString,
         val isEnabled: Boolean,
         val processingState: PrimaryButtonProcessingState,
         val isProcessing: Boolean,
+        val error: ResolvableString? = null,
+        val mandateText: ResolvableString? = null
     )
 }
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Singleton
 internal class DefaultFormActivityStateHelper @Inject constructor(
-    paymentMethodMetadata: PaymentMethodMetadata,
+    private val paymentMethodMetadata: PaymentMethodMetadata,
     private val selectionHolder: EmbeddedSelectionHolder,
-    configuration: EmbeddedPaymentElement.Configuration,
+    private val configuration: EmbeddedPaymentElement.Configuration,
+    private val onClickDelegate: OnClickOverrideDelegate,
     @ViewModelScope coroutineScope: CoroutineScope,
 ) : FormActivityStateHelper {
     private val _state = MutableStateFlow(
@@ -53,21 +60,62 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
     )
     override val state: StateFlow<FormActivityStateHelper.State> = _state
 
+    private var usBankAccountFormPrimaryButtonUiState: PrimaryButton.UIState? = null
+
     init {
         coroutineScope.launch {
             selectionHolder.selection.collectLatest { selection ->
                 _state.update { currentState ->
                     currentState.copy(
-                        isEnabled = selection != null && !currentState.isProcessing
+                        isEnabled = usBankAccountFormPrimaryButtonUiState?.enabled
+                            ?: (selection != null && !currentState.isProcessing)
                     )
                 }
             }
         }
     }
 
-    override fun update(confirmationState: ConfirmationHandler.State) {
+    override fun updateConfirmationState(confirmationState: ConfirmationHandler.State) {
         _state.update {
             it.updateWithConfirmationState(confirmationState)
+        }
+    }
+
+    override fun updateMandate(mandateText: ResolvableString?) {
+        _state.update {
+            it.copy(
+                mandateText = mandateText
+            )
+        }
+    }
+
+    override fun updateError(error: ResolvableString?) {
+        _state.update {
+            it.copy(
+                error = error
+            )
+        }
+    }
+
+    override fun updatePrimaryButton(callback: (PrimaryButton.UIState?) -> PrimaryButton.UIState?) {
+        val newUiState = callback(usBankAccountFormPrimaryButtonUiState)
+        usBankAccountFormPrimaryButtonUiState = newUiState
+        if (newUiState != null) {
+            onClickDelegate.set(newUiState.onClick)
+            _state.update {
+                it.copy(
+                    isEnabled = newUiState.enabled,
+                    primaryButtonLabel = newUiState.label,
+                )
+            }
+        } else {
+            onClickDelegate.clear()
+            _state.update {
+                it.copy(
+                    isEnabled = selectionHolder.selection.value != null,
+                    primaryButtonLabel = primaryButtonLabel(paymentMethodMetadata.stripeIntent, configuration),
+                )
+            }
         }
     }
 
@@ -76,23 +124,30 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
     ): FormActivityStateHelper.State {
         return when (state) {
             is ConfirmationHandler.State.Complete -> {
-                if (state.result is ConfirmationHandler.Result.Succeeded) {
-                    copy(
+                when (state.result) {
+                    is ConfirmationHandler.Result.Succeeded -> copy(
                         processingState = PrimaryButtonProcessingState.Completed,
                         isEnabled = false
                     )
-                } else {
-                    copy(
+                    is ConfirmationHandler.Result.Failed -> copy(
                         processingState = PrimaryButtonProcessingState.Idle(null),
                         isEnabled = selectionHolder.selection.value != null,
-                        isProcessing = false
+                        isProcessing = false,
+                        error = state.result.message
+                    )
+                    is ConfirmationHandler.Result.Canceled -> copy(
+                        processingState = PrimaryButtonProcessingState.Idle(null),
+                        isEnabled = selectionHolder.selection.value != null,
+                        isProcessing = false,
+                        error = null
                     )
                 }
             }
             is ConfirmationHandler.State.Confirming -> copy(
                 processingState = PrimaryButtonProcessingState.Processing,
                 isProcessing = true,
-                isEnabled = false
+                isEnabled = false,
+                error = null
             )
             is ConfirmationHandler.State.Idle -> copy(
                 isProcessing = false,

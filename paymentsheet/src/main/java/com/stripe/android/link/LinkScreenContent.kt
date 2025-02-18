@@ -28,7 +28,7 @@ internal fun LinkScreenContent(
         onDismissClicked = viewModel::onDismissVerificationClicked,
         onBackPressed = onBackPressed,
         onLinkScreenScreenCreated = {
-            viewModel.linkScreenScreenCreated()
+            viewModel.linkScreenCreated()
         },
         onNavControllerCreated = { navController ->
             viewModel.navController = navController
@@ -43,6 +43,7 @@ internal fun LinkScreenContent(
         handleViewAction = viewModel::handleViewAction,
         moveToWeb = viewModel::moveToWeb,
         goBack = viewModel::goBack,
+        changeEmail = viewModel::changeEmail
     )
 }
 
@@ -62,6 +63,7 @@ internal fun LinkScreenContentBody(
     handleViewAction: (LinkAction) -> Unit,
     moveToWeb: () -> Unit,
     goBack: () -> Unit,
+    changeEmail: () -> Unit,
 ) {
     when (screenState) {
         ScreenState.FullScreen -> {
@@ -79,6 +81,7 @@ internal fun LinkScreenContentBody(
                 onLinkScreenScreenCreated = onLinkScreenScreenCreated,
                 onNavControllerCreated = onNavControllerCreated,
                 handleViewAction = handleViewAction,
+                changeEmail = changeEmail
             )
         }
         ScreenState.Loading -> Unit

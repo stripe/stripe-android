@@ -1,5 +1,6 @@
 package com.stripe.android.link
 
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.core.Logger
 import com.stripe.android.link.account.FakeLinkAccountManager
@@ -30,5 +31,6 @@ internal class FakeNativeLinkComponent(
         NullCardAccountRangeRepositoryFactory,
     override val viewModel: LinkActivityViewModel = mock(),
     override val errorReporter: ErrorReporter = FakeErrorReporter(),
-    override val linkAuth: LinkAuth = FakeLinkAuth()
+    override val linkAuth: LinkAuth = FakeLinkAuth(),
+    override val savedStateHandle: SavedStateHandle = SavedStateHandle()
 ) : NativeLinkComponent

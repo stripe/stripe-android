@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.signup
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -8,6 +9,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.NoLinkAccountFoundException
@@ -20,6 +23,7 @@ import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
@@ -40,19 +44,24 @@ internal class SignUpViewModel @Inject constructor(
     private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger,
     private val linkAuth: LinkAuth,
+    private val savedStateHandle: SavedStateHandle,
     private val navigate: (LinkScreen) -> Unit,
     private val navigateAndClearStack: (LinkScreen) -> Unit,
     private val moveToWeb: () -> Unit
 ) : ViewModel() {
+    private val useLinkConfigurationCustomerInfo =
+        savedStateHandle.get<Boolean>(USE_LINK_CONFIGURATION_CUSTOMER_INFO) ?: true
+    private val customerInfo = configuration.customerInfo.takeIf { useLinkConfigurationCustomerInfo }
+
     val emailController = EmailConfig.createController(
-        initialValue = configuration.customerInfo.email
+        initialValue = customerInfo?.email
     )
     val phoneNumberController = PhoneNumberController.createPhoneNumberController(
-        initialValue = configuration.customerInfo.phone.orEmpty(),
-        initiallySelectedCountryCode = configuration.customerInfo.billingCountryCode
+        initialValue = customerInfo?.phone.orEmpty(),
+        initiallySelectedCountryCode = customerInfo?.billingCountryCode
     )
     val nameController = NameConfig.createController(
-        initialValue = configuration.customerInfo.name
+        initialValue = customerInfo?.name
     )
     private val _state = MutableStateFlow(
         value = SignUpScreenState(
@@ -145,8 +154,7 @@ internal class SignUpViewModel @Inject constructor(
                 onError(null)
             }
             is LinkAuthResult.AccountError -> {
-                updateSignUpState(SignUpState.InputtingPrimaryField)
-                onError(lookupResult.error)
+                lookupResult.handle()
             }
         }
     }
@@ -179,8 +187,7 @@ internal class SignUpViewModel @Inject constructor(
                     linkEventsReporter.onSignupFailure(error = NoLinkAccountFoundException())
                 }
                 is LinkAuthResult.AccountError -> {
-                    updateSignUpState(SignUpState.InputtingPrimaryField)
-                    onError(signupResult.error)
+                    signupResult.handle()
                 }
             }
         }
@@ -197,13 +204,24 @@ internal class SignUpViewModel @Inject constructor(
         }
     }
 
-    private fun onError(error: Throwable?) {
+    private fun LinkAuthResult.AccountError.handle() {
+        updateSignUpState(SignUpState.InputtingPrimaryField)
+        onError(
+            error = error,
+            errorMessage = R.string.stripe_signup_deactivated_account_message.resolvableString
+        )
+    }
+
+    private fun onError(
+        error: Throwable?,
+        errorMessage: ResolvableString? = error?.stripeErrorMessage()
+    ) {
         if (error != null) {
             logger.error("SignUpViewModel Error: ", error)
         }
         updateState {
             it.copy(
-                errorMessage = error?.stripeErrorMessage()
+                errorMessage = errorMessage
             )
         }
     }
@@ -225,6 +243,7 @@ internal class SignUpViewModel @Inject constructor(
     companion object {
         // How long to wait before triggering a call to lookup the email
         internal val LOOKUP_DEBOUNCE = 1.seconds
+        internal const val USE_LINK_CONFIGURATION_CUSTOMER_INFO = "use_link_configuration_customer_info"
 
         fun factory(
             parentComponent: NativeLinkComponent,
@@ -239,6 +258,7 @@ internal class SignUpViewModel @Inject constructor(
                         linkEventsReporter = parentComponent.linkEventsReporter,
                         logger = parentComponent.logger,
                         linkAuth = parentComponent.linkAuth,
+                        savedStateHandle = parentComponent.savedStateHandle,
                         navigate = navigate,
                         navigateAndClearStack = navigateAndClearStack,
                         moveToWeb = moveToWeb

@@ -24,7 +24,8 @@ internal class EmbeddedContentScreenshotTest {
         val interactor = FakePaymentMethodVerticalLayoutInteractor.create(metadata)
         val content = EmbeddedContent(
             interactor = interactor,
-            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.default
+            embeddedViewDisplaysMandateText = true,
+            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.default,
         )
         paparazziRule.snapshot {
             content.Content()
@@ -34,10 +35,30 @@ internal class EmbeddedContentScreenshotTest {
     @Test
     fun displaysVerticalModeListWithMandate() {
         val metadata = PaymentMethodMetadataFactory.create()
-        val interactor = FakePaymentMethodVerticalLayoutInteractor.create(metadata)
+        val interactor = FakePaymentMethodVerticalLayoutInteractor.create(
+            paymentMethodMetadata = metadata,
+            mandate = "Some mandate".resolvableString,
+        )
         val content = EmbeddedContent(
             interactor = interactor,
+            embeddedViewDisplaysMandateText = true,
+            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.default
+        )
+        paparazziRule.snapshot {
+            content.Content()
+        }
+    }
+
+    @Test
+    fun displaysVerticalModeListWithoutMandate() {
+        val metadata = PaymentMethodMetadataFactory.create()
+        val interactor = FakePaymentMethodVerticalLayoutInteractor.create(
+            paymentMethodMetadata = metadata,
             mandate = "Some mandate".resolvableString,
+        )
+        val content = EmbeddedContent(
+            interactor = interactor,
+            embeddedViewDisplaysMandateText = false,
             rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.default
         )
         paparazziRule.snapshot {

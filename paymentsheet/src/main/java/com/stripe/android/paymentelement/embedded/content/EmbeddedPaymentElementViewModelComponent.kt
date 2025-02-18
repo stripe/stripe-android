@@ -1,10 +1,12 @@
 package com.stripe.android.paymentelement.embedded.content
 
+import android.app.Application
 import android.content.Context
 import android.content.res.Resources
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.RealUserFacingLogger
@@ -38,6 +40,7 @@ import dagger.Component
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.plus
 import javax.inject.Named
 import javax.inject.Singleton
@@ -51,6 +54,7 @@ import kotlin.coroutines.CoroutineContext
         GooglePayLauncherModule::class,
         ExtendedPaymentElementConfirmationModule::class,
         EmbeddedCommonModule::class,
+        ApplicationIdModule::class
     ],
 )
 internal interface EmbeddedPaymentElementViewModelComponent {
@@ -62,7 +66,7 @@ internal interface EmbeddedPaymentElementViewModelComponent {
         fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
 
         @BindsInstance
-        fun context(context: Context): Builder
+        fun application(application: Application): Builder
 
         @BindsInstance
         fun statusBarColor(@Named(STATUS_BAR_COLOR) statusBarColor: Int?): Builder
@@ -131,6 +135,11 @@ internal interface EmbeddedPaymentElementViewModelModule {
 
     companion object {
         @Provides
+        fun providesContext(application: Application): Context {
+            return application
+        }
+
+        @Provides
         @Singleton
         fun providesLinkAccountHolder(savedStateHandle: SavedStateHandle): LinkAccountHolder {
             return LinkAccountHolder(savedStateHandle)
@@ -162,8 +171,8 @@ internal interface EmbeddedPaymentElementViewModelModule {
         @Provides
         @Singleton
         @ViewModelScope
-        fun provideViewModelScope(@IOContext workContext: CoroutineContext): CoroutineScope {
-            return CoroutineScope(workContext)
+        fun provideViewModelScope(): CoroutineScope {
+            return CoroutineScope(Dispatchers.Main)
         }
 
         @Provides

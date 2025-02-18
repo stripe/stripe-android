@@ -22,24 +22,21 @@ import androidx.savedstate.SavedStateRegistryOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.account.FakeLinkAccountManager
-import com.stripe.android.link.account.FakeLinkAuth
-import com.stripe.android.link.account.LinkAuth
-import com.stripe.android.link.account.LinkAuthResult
-import com.stripe.android.link.gate.FakeLinkGate
-import com.stripe.android.link.gate.LinkGate
+import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.attestation.FakeLinkAttestationCheck
+import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.model.AccountStatus
-import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
-import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
-import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.utils.DummyActivityResultCaller
-import com.stripe.attestation.IntegrityRequestManager
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -121,11 +118,42 @@ internal class LinkActivityViewModelTest {
 
         assertThat(vm.dismissWithResult).isNotNull()
         assertThat(vm.navController).isNotNull()
+        assertThat(vm.navListenerJob).isNotNull()
 
         vm.unregisterActivity()
 
-        assertThat(vm.dismissWithResult).isEqualTo(null)
-        assertThat(vm.navController).isEqualTo(null)
+        assertThat(vm.dismissWithResult).isNull()
+        assertThat(vm.navController).isNull()
+        assertThat(vm.navListenerJob).isNull()
+    }
+
+    @Test
+    fun `test that nav listener job is canceled and replaced when navController changes`() = runTest(dispatcher) {
+        val job = Job()
+
+        val vm = createViewModel()
+        vm.navListenerJob = job
+
+        assertThat(vm.navListenerJob).isNotNull()
+        assertThat(job.isCancelled).isFalse()
+
+        vm.navController = navController()
+        assertThat(vm.navListenerJob?.isCancelled).isFalse()
+        assertThat(job).isNotEqualTo(vm.navListenerJob)
+        assertThat(job.isCancelled).isTrue()
+    }
+
+    @Test
+    fun `test that nav listener job is canceled when activity is unregistered`() = runTest(dispatcher) {
+        val job = Job()
+
+        val vm = createViewModel()
+        vm.navListenerJob = job
+
+        vm.unregisterActivity()
+
+        assertThat(vm.navListenerJob).isNull()
+        assertThat(job.isCancelled).isTrue()
     }
 
     @Test
@@ -226,7 +254,7 @@ internal class LinkActivityViewModelTest {
         linkAccountManager.setAccountStatus(AccountStatus.Verified)
 
         vm.onCreate(mock())
-        vm.linkScreenScreenCreated()
+        vm.linkScreenCreated()
 
         advanceUntilIdle()
 
@@ -248,7 +276,7 @@ internal class LinkActivityViewModelTest {
         linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification)
 
         vm.onCreate(mock())
-        vm.linkScreenScreenCreated()
+        vm.linkScreenCreated()
 
         advanceUntilIdle()
 
@@ -270,7 +298,7 @@ internal class LinkActivityViewModelTest {
         linkAccountManager.setAccountStatus(AccountStatus.VerificationStarted)
 
         vm.onCreate(mock())
-        vm.linkScreenScreenCreated()
+        vm.linkScreenCreated()
 
         advanceUntilIdle()
 
@@ -292,7 +320,7 @@ internal class LinkActivityViewModelTest {
         linkAccountManager.setAccountStatus(AccountStatus.SignedOut)
 
         vm.onCreate(mock())
-        vm.linkScreenScreenCreated()
+        vm.linkScreenCreated()
 
         advanceUntilIdle()
 
@@ -314,7 +342,7 @@ internal class LinkActivityViewModelTest {
         linkAccountManager.setAccountStatus(AccountStatus.Error)
 
         vm.onCreate(mock())
-        vm.linkScreenScreenCreated()
+        vm.linkScreenCreated()
 
         advanceUntilIdle()
 
@@ -327,34 +355,25 @@ internal class LinkActivityViewModelTest {
     }
 
     @Test
-    fun `onCreate should launch web when attestation fails and useAttestationEndpoints is enabled`() = runTest {
+    fun `onCreate should launch web when attestation check fails`() = runTest {
         var launchWebConfig: LinkConfiguration? = null
-        val linkAccountManager = FakeLinkAccountManager()
         val navController = navController()
-        val linkGate = FakeLinkGate()
-        val integrityRequestManager = FakeIntegrityRequestManager()
-        val errorReporter = FakeErrorReporter()
-
-        integrityRequestManager.prepareResult = Result.failure(Throwable("oops"))
-        linkGate.setUseAttestationEndpoints(true)
+        val error = Throwable("oops")
+        val linkAttestationCheck = FakeLinkAttestationCheck()
+        linkAttestationCheck.result = LinkAttestationCheck.Result.AttestationFailed(error)
 
         val vm = createViewModel(
-            linkAccountManager = linkAccountManager,
-            linkGate = linkGate,
-            integrityRequestManager = integrityRequestManager,
-            errorReporter = errorReporter,
+            linkAttestationCheck = linkAttestationCheck,
             launchWeb = { config ->
                 launchWebConfig = config
             }
         )
         vm.navController = navController
-        linkAccountManager.setAccountStatus(AccountStatus.Verified)
 
         vm.onCreate(mock())
 
         advanceUntilIdle()
 
-        integrityRequestManager.awaitPrepareCall()
         assertNavigation(
             navController = navController,
             screen = LinkScreen.Loading,
@@ -362,211 +381,57 @@ internal class LinkActivityViewModelTest {
             launchSingleTop = false
         )
         assertThat(launchWebConfig).isNotNull()
-        assertThat(errorReporter.getLoggedErrors())
-            .containsExactly(
-                ErrorReporter.UnexpectedErrorEvent.LINK_NATIVE_FAILED_TO_PREPARE_INTEGRITY_MANAGER.eventName
-            )
-        integrityRequestManager.ensureAllEventsConsumed()
     }
 
     @Test
-    fun `onCreate shouldn't launch web when integrity preparation passes and useAttestationEndpoints is enabled`() =
+    fun `onCreate shouldn't launch web when attestationCheck fails`() =
         runTest {
             var launchWebConfig: LinkConfiguration? = null
-            val linkAccountManager = FakeLinkAccountManager()
             val navController = navController()
-            val linkGate = FakeLinkGate()
-            val integrityRequestManager = FakeIntegrityRequestManager()
-
-            linkGate.setUseAttestationEndpoints(true)
+            val linkAttestationCheck = FakeLinkAttestationCheck()
 
             val vm = createViewModel(
-                linkAccountManager = linkAccountManager,
-                linkGate = linkGate,
-                integrityRequestManager = integrityRequestManager,
+                linkAttestationCheck = linkAttestationCheck,
                 launchWeb = { config ->
                     launchWebConfig = config
                 }
             )
             vm.navController = navController
-            linkAccountManager.setAccountStatus(AccountStatus.Verified)
 
             vm.onCreate(mock())
 
             advanceUntilIdle()
 
-            integrityRequestManager.awaitPrepareCall()
             assertThat(vm.linkScreenState.value).isEqualTo(ScreenState.FullScreen)
             assertThat(launchWebConfig).isNull()
-            integrityRequestManager.ensureAllEventsConsumed()
         }
 
     @Test
-    fun `onCreate should not prepare integrity when useAttestationEndpoints is disabled`() = runTest {
-        var launchWebConfig: LinkConfiguration? = null
-        val linkAccountManager = FakeLinkAccountManager()
-        val navController = navController()
-        val linkGate = FakeLinkGate()
-        val integrityRequestManager = FakeIntegrityRequestManager()
-
-        linkGate.setUseAttestationEndpoints(false)
-
-        val vm = createViewModel(
-            linkAccountManager = linkAccountManager,
-            linkGate = linkGate,
-            integrityRequestManager = integrityRequestManager,
-            launchWeb = { config ->
-                launchWebConfig = config
-            }
-        )
-        vm.navController = navController
-        linkAccountManager.setAccountStatus(AccountStatus.Verified)
-
-        vm.onCreate(mock())
-
-        advanceUntilIdle()
-
-        assertThat(launchWebConfig).isNull()
-        integrityRequestManager.ensureAllEventsConsumed()
-    }
-
-    @Test
-    fun `onCreate should launch web on lookup attestation error`() = runTest {
+    fun `onCreate should open signup when attestation check fails on account error`() = runTest {
         val error = Throwable("oops")
-        var launchWebConfig: LinkConfiguration? = null
-        val linkAccountManager = FakeLinkAccountManager()
-        val navController = navController()
-        val linkAuth = FakeLinkAuth()
-        val errorReporter = FakeErrorReporter()
-
-        val vm = createViewModel(
-            linkAccountManager = linkAccountManager,
-            linkAuth = linkAuth,
-            errorReporter = errorReporter,
-            launchWeb = { config ->
-                launchWebConfig = config
-            }
+        testAttestationCheckError(
+            attestationCheckResult = LinkAttestationCheck.Result.AccountError(error),
         )
-        vm.navController = navController
-        linkAccountManager.setAccountStatus(AccountStatus.Verified)
-        linkAuth.lookupResult = LinkAuthResult.AttestationFailed(error)
-
-        vm.onCreate(mock())
-
-        advanceUntilIdle()
-
-        linkAuth.awaitLookupCall()
-
-        assertNavigation(
-            navController = navController,
-            screen = LinkScreen.Loading,
-            clearStack = true,
-            launchSingleTop = false
-        )
-        assertThat(launchWebConfig).isNotNull()
-        assertThat(errorReporter.getLoggedErrors())
-            .containsExactly(
-                ErrorReporter.UnexpectedErrorEvent.LINK_NATIVE_FAILED_TO_ATTEST_REQUEST.eventName
-            )
-        linkAuth.ensureAllItemsConsumed()
     }
 
     @Test
-    fun `onCreate should not launch web on generic lookup error`() = runTest {
+    fun `onCreate should open signup when attestation check fails on generic error`() = runTest {
         val error = Throwable("oops")
-        var launchWebConfig: LinkConfiguration? = null
-        val linkAccountManager = FakeLinkAccountManager()
-        val navController = navController()
-        val linkAuth = FakeLinkAuth()
-
-        val vm = createViewModel(
-            linkAccountManager = linkAccountManager,
-            linkAuth = linkAuth,
-            launchWeb = { config ->
-                launchWebConfig = config
-            }
+        testAttestationCheckError(
+            attestationCheckResult = LinkAttestationCheck.Result.Error(error),
         )
-        vm.navController = navController
-        linkAccountManager.setAccountStatus(AccountStatus.Verified)
-        linkAuth.lookupResult = LinkAuthResult.Error(error)
-
-        vm.onCreate(mock())
-
-        advanceUntilIdle()
-
-        linkAuth.awaitLookupCall()
-
-        assertThat(vm.linkScreenState.value).isEqualTo(ScreenState.FullScreen)
-        assertThat(launchWebConfig).isNull()
-        linkAuth.ensureAllItemsConsumed()
-    }
-
-    @Test
-    fun `onCreate should lookup with link account email when signed in`() = runTest {
-        val linkAccountManager = FakeLinkAccountManager()
-        val linkGate = FakeLinkGate()
-        val linkAuth = FakeLinkAuth()
-
-        linkAccountManager.setLinkAccount(
-            account = LinkAccount(
-                consumerSession = TestFactory.CONSUMER_SESSION.copy(
-                    emailAddress = "linkaccountmanager@email.com"
-                )
-            )
-        )
-        linkGate.setUseAttestationEndpoints(true)
-
-        val vm = createViewModel(
-            linkAccountManager = linkAccountManager,
-            linkGate = linkGate,
-            linkAuth = linkAuth,
-            launchWeb = {}
-        )
-
-        vm.onCreate(mock())
-
-        advanceUntilIdle()
-
-        val call = linkAuth.awaitLookupCall()
-
-        assertThat(call.email).isEqualTo("linkaccountmanager@email.com")
-    }
-
-    @Test
-    fun `onCreate should lookup with configuration email when not signed in`() = runTest {
-        val linkAccountManager = FakeLinkAccountManager()
-        val linkGate = FakeLinkGate()
-        val linkAuth = FakeLinkAuth()
-
-        linkAccountManager.setLinkAccount(null)
-        linkGate.setUseAttestationEndpoints(true)
-
-        val vm = createViewModel(
-            linkAccountManager = linkAccountManager,
-            linkGate = linkGate,
-            linkAuth = linkAuth,
-            launchWeb = {}
-        )
-
-        vm.onCreate(mock())
-
-        advanceUntilIdle()
-
-        val call = linkAuth.awaitLookupCall()
-
-        assertThat(call.email).isEqualTo(TestFactory.LINK_CONFIGURATION.customerInfo.email)
     }
 
     @Test
     fun `onCreate should launch 2fa when eager launch is enabled`() = runTest {
         val linkAccountManager = FakeLinkAccountManager()
+        val linkAttestationCheck = FakeLinkAttestationCheck()
         linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
         val navController = navController()
-        val linkAuth = FakeLinkAuth()
 
         val vm = createViewModel(
             linkAccountManager = linkAccountManager,
-            linkAuth = linkAuth,
+            linkAttestationCheck = linkAttestationCheck,
             startWithVerificationDialog = true
         )
         vm.navController = navController
@@ -576,10 +441,8 @@ internal class LinkActivityViewModelTest {
 
         advanceUntilIdle()
 
-        linkAuth.awaitLookupCall()
-
         assertThat(vm.linkScreenState.value).isEqualTo(ScreenState.VerificationDialog(TestFactory.LINK_ACCOUNT))
-        linkAuth.ensureAllItemsConsumed()
+        linkAttestationCheck.ensureAllEventsConsumed()
     }
 
     @Test
@@ -587,11 +450,9 @@ internal class LinkActivityViewModelTest {
         val linkAccountManager = FakeLinkAccountManager()
         linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
         val navController = navController()
-        val linkAuth = FakeLinkAuth()
 
         val vm = createViewModel(
             linkAccountManager = linkAccountManager,
-            linkAuth = linkAuth,
             startWithVerificationDialog = true
         )
         vm.navController = navController
@@ -613,12 +474,10 @@ internal class LinkActivityViewModelTest {
         val linkAccountManager = FakeLinkAccountManager()
         linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
         val navController = navController()
-        val linkAuth = FakeLinkAuth()
 
         var activityResult: LinkActivityResult? = null
         val vm = createViewModel(
             linkAccountManager = linkAccountManager,
-            linkAuth = linkAuth,
             startWithVerificationDialog = true,
             dismissWithResult = {
                 activityResult = it
@@ -698,20 +557,6 @@ internal class LinkActivityViewModelTest {
     }
 
     @Test
-    fun `card edit route has correct app bar config`() {
-        val navController = navController(LinkScreen.CardEdit)
-        val viewModel = createViewModel(
-            navController = navController
-        )
-
-        val appBarState = viewModel.linkAppBarState.value
-        assertThat(appBarState.email).isNull()
-        assertThat(appBarState.showHeader).isFalse()
-        assertThat(appBarState.showOverflowMenu).isFalse()
-        assertThat(appBarState.navigationIcon).isEqualTo(R.drawable.stripe_link_back)
-    }
-
-    @Test
     fun `loading route has correct app bar config`() {
         val navController = navController(LinkScreen.Loading)
         val viewModel = createViewModel(
@@ -747,22 +592,110 @@ internal class LinkActivityViewModelTest {
         )
     }
 
+    @Test
+    fun `linkScreenScreenCreated should not navigate when screen is not loading`() = runTest {
+        val linkAccountManager = FakeLinkAccountManager()
+        val navController = navController(screen = LinkScreen.SignUp)
+
+        val vm = createViewModel(linkAccountManager = linkAccountManager)
+        vm.navController = navController
+        linkAccountManager.setAccountStatus(AccountStatus.Verified)
+
+        vm.onCreate(mock())
+        vm.linkScreenCreated()
+
+        advanceUntilIdle()
+
+        verify(navController, times(0)).navigate(
+            any(),
+            any<NavOptionsBuilder.() -> Unit>()
+        )
+    }
+
+    @Test
+    fun `linkScreenScreenCreated should navigate when screen is loading`() = runTest {
+        val linkAccountManager = FakeLinkAccountManager()
+        val navController = navController()
+
+        val vm = createViewModel(linkAccountManager = linkAccountManager)
+        vm.navController = navController
+        linkAccountManager.setAccountStatus(AccountStatus.Verified)
+
+        vm.onCreate(mock())
+        vm.linkScreenCreated()
+
+        advanceUntilIdle()
+
+        assertNavigation(
+            navController = navController,
+            screen = LinkScreen.Wallet,
+            clearStack = true,
+            launchSingleTop = true
+        )
+    }
+
+    @Test
+    fun `linkScreenScreenCreated should navigate when screen is null`() = runTest {
+        val linkAccountManager = FakeLinkAccountManager()
+        val navController = navController(screen = null)
+
+        val vm = createViewModel(linkAccountManager = linkAccountManager)
+        vm.navController = navController
+        linkAccountManager.setAccountStatus(AccountStatus.Verified)
+
+        vm.onCreate(mock())
+        vm.linkScreenCreated()
+
+        advanceUntilIdle()
+
+        assertNavigation(
+            navController = navController,
+            screen = LinkScreen.Wallet,
+            clearStack = true,
+            launchSingleTop = true
+        )
+    }
+
+    @Test
+    fun `change email should navigate to email route and update savedStateHandle`() {
+        val navController = navController()
+        val savedStateHandle = SavedStateHandle()
+        val viewModel = createViewModel(
+            navController = navController,
+            savedStateHandle = savedStateHandle
+        )
+
+        viewModel.changeEmail()
+
+        assertThat(savedStateHandle.get<Boolean>(SignUpViewModel.USE_LINK_CONFIGURATION_CUSTOMER_INFO)).isFalse()
+        assertNavigation(
+            navController = navController,
+            screen = LinkScreen.SignUp,
+            clearStack = true,
+            launchSingleTop = false
+        )
+    }
+
     private fun navController(
-        screen: LinkScreen = LinkScreen.SignUp
+        screen: LinkScreen? = LinkScreen.Loading
     ): NavHostController {
+        val currentBackStackEntry = screen?.let {
+            NavBackStackEntry.create(
+                context = null,
+                destination = NavDestination("").apply {
+                    route = screen.route
+                }
+            )
+        }
         val navController: NavHostController = mock()
         val mockGraph: NavGraph = mock()
         `when`(mockGraph.id).thenReturn(FAKE_GRAPH_ID)
         `when`(navController.graph).thenReturn(mockGraph)
+        `when`(navController.currentBackStackEntry).thenReturn(currentBackStackEntry)
         `when`(navController.currentBackStackEntryFlow).thenReturn(
-            flowOf(
-                NavBackStackEntry.create(
-                    context = null,
-                    destination = NavDestination("").apply {
-                        route = screen.route
-                    }
-                )
-            )
+            currentBackStackEntry?.let {
+                flowOf(it)
+            } ?: flowOf()
         )
         return navController
     }
@@ -801,30 +734,84 @@ internal class LinkActivityViewModelTest {
         }
     }
 
+    private fun testAttestationCheckError(
+        attestationCheckResult: LinkAttestationCheck.Result,
+        expectedLinkActivityResult: LinkActivityResult? = null,
+    ) = runTest {
+        var launchWebConfig: LinkConfiguration? = null
+        var result: LinkActivityResult? = null
+        val navController = navController()
+        val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+        val linkAccountManager = FakeLinkAccountManager(
+            linkAccountHolder = linkAccountHolder,
+            accountStatusOverride = linkAccountHolder.linkAccount.map {
+                it?.accountStatus ?: AccountStatus.SignedOut
+            }
+        )
+        val linkAttestationCheck = FakeLinkAttestationCheck()
+
+        linkAttestationCheck.result = attestationCheckResult
+        linkAccountHolder.set(TestFactory.LINK_ACCOUNT)
+        linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
+
+        val vm = createViewModel(
+            linkAttestationCheck = linkAttestationCheck,
+            linkAccountManager = linkAccountManager,
+            linkAccountHolder = linkAccountHolder,
+            startWithVerificationDialog = false,
+            launchWeb = { config ->
+                launchWebConfig = config
+            },
+            dismissWithResult = {
+                result = it
+            }
+        )
+        vm.navController = navController
+
+        vm.onCreate(mock())
+
+        advanceUntilIdle()
+
+        vm.linkScreenCreated()
+
+        advanceUntilIdle()
+
+        linkAccountManager.awaitLogoutCall()
+        assertThat(linkAccountHolder.linkAccount.value).isNull()
+        assertThat(launchWebConfig).isNull()
+        assertThat(result).isEqualTo(expectedLinkActivityResult)
+
+        assertThat(vm.linkScreenState.value).isEqualTo(ScreenState.FullScreen)
+        assertNavigation(
+            navController = navController,
+            screen = LinkScreen.SignUp,
+            clearStack = true,
+            launchSingleTop = true
+        )
+    }
+
     private fun createViewModel(
         linkAccountManager: FakeLinkAccountManager = FakeLinkAccountManager(),
+        linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
         confirmationHandler: ConfirmationHandler = FakeConfirmationHandler(),
         eventReporter: EventReporter = FakeEventReporter(),
         navController: NavHostController = navController(),
-        integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
-        linkGate: LinkGate = FakeLinkGate(),
-        errorReporter: ErrorReporter = FakeErrorReporter(),
-        linkAuth: LinkAuth = FakeLinkAuth(),
+        linkAttestationCheck: LinkAttestationCheck = FakeLinkAttestationCheck(),
         startWithVerificationDialog: Boolean = false,
+        savedStateHandle: SavedStateHandle = SavedStateHandle(),
         dismissWithResult: (LinkActivityResult) -> Unit = {},
         launchWeb: (LinkConfiguration) -> Unit = {}
     ): LinkActivityViewModel {
         return LinkActivityViewModel(
             linkAccountManager = linkAccountManager,
+            linkAccountHolder = linkAccountHolder,
             activityRetainedComponent = FakeNativeLinkComponent(),
             eventReporter = eventReporter,
             confirmationHandlerFactory = { confirmationHandler },
-            integrityRequestManager = integrityRequestManager,
-            linkGate = linkGate,
-            errorReporter = errorReporter,
-            linkAuth = linkAuth,
+            linkAttestationCheck = linkAttestationCheck,
             linkConfiguration = TestFactory.LINK_CONFIGURATION,
             startWithVerificationDialog = startWithVerificationDialog,
+            savedStateHandle = savedStateHandle
         ).apply {
             this.navController = navController
             this.dismissWithResult = dismissWithResult

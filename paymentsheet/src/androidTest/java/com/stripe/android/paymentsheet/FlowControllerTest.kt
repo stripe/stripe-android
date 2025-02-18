@@ -531,7 +531,7 @@ internal class FlowControllerTest {
         },
         resultCallback = { result ->
             assertThat(result).isInstanceOf(PaymentSheetResult.Failed::class.java)
-            assertThat((result as PaymentSheetResult.Failed).error.message)
+            assertThat((result as PaymentSheetResult.Failed).error.cause?.message)
                 .isEqualTo("We don't accept visa")
         },
     ) { testContext ->

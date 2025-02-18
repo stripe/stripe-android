@@ -32,6 +32,7 @@ import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.PrimaryButtonTag
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
@@ -39,11 +40,13 @@ import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
 @RunWith(AndroidJUnit4::class)
@@ -481,6 +484,51 @@ internal class WalletScreenTest {
     }
 
     @Test
+    fun `pay method row is loading when card is being updated`() = runTest(dispatcher) {
+        val linkAccountManager = object : FakeLinkAccountManager() {
+            override suspend fun updatePaymentDetails(
+                updateParams: ConsumerPaymentDetailsUpdateParams
+            ): Result<ConsumerPaymentDetails> {
+                delay(1.seconds)
+                return super.updatePaymentDetails(updateParams)
+            }
+        }
+        val card1 = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "card1", isDefault = false)
+        val card2 = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "card2", isDefault = true)
+        linkAccountManager.listPaymentDetailsResult = Result.success(
+            ConsumerPaymentDetails(paymentDetails = listOf(card1, card2))
+        )
+
+        val viewModel = createViewModel(linkAccountManager)
+        composeTestRule.setContent {
+            WalletScreen(
+                viewModel = viewModel,
+                showBottomSheetContent = {},
+                hideBottomSheetContent = {}
+            )
+        }
+        composeTestRule.waitForIdle()
+
+        onCollapsedWalletRow()
+            .performClick()
+        composeTestRule.waitForIdle()
+
+        viewModel.onSetDefaultClicked(card1)
+
+        composeTestRule.waitForIdle()
+
+        onWalletPaymentMethodRowLoadingIndicator().assertIsDisplayed()
+        onWalletPayButton().assertIsNotEnabled()
+
+        dispatcher.scheduler.advanceTimeBy(1.1.seconds)
+
+        onWalletPaymentMethodRowLoadingIndicator().assertDoesNotExist()
+        onWalletPayButton()
+            .assertExists()
+            .assertIsEnabled()
+    }
+
+    @Test
     fun `wallet menu is dismissed on cancel clicked`() = runTest(dispatcher) {
         testMenu(
             nodeTag = onWalletPaymentMethodMenuCancelTag()
@@ -496,14 +544,6 @@ internal class WalletScreenTest {
     }
 
     @Test
-    fun `wallet menu is dismissed on edit clicked`() = runTest(dispatcher) {
-        testMenu(
-            nodeTag = onWalletPaymentMethodMenuUpdateTag(),
-            expectedEditPaymentMethodCounter = 1
-        )
-    }
-
-    @Test
     fun `wallet menu is dismissed on setAsDefault clicked`() = runTest(dispatcher) {
         testMenu(
             nodeTag = onWalletPaymentMethodMenuSetAsDefaultTag(),
@@ -515,11 +555,9 @@ internal class WalletScreenTest {
         nodeTag: SemanticsNodeInteraction,
         expectedRemovedCounter: Int = 0,
         expectedSetAsDefaultCounter: Int = 0,
-        expectedEditPaymentMethodCounter: Int = 0
     ) {
         var onSetDefaultCounter = 0
         var onRemoveClickedCounter = 0
-        var onEditPaymentMethodClickedCounter = 0
         composeTestRule.setContent {
             var sheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
             Box {
@@ -529,9 +567,6 @@ internal class WalletScreenTest {
                     },
                     onRemoveClicked = {
                         onRemoveClickedCounter += 1
-                    },
-                    onEditPaymentMethodClicked = {
-                        onEditPaymentMethodClickedCounter += 1
                     },
                     showBottomSheetContent = {
                         sheetContent = it
@@ -562,14 +597,12 @@ internal class WalletScreenTest {
         onWalletPaymentMethodMenu().assertDoesNotExist()
         assertThat(onSetDefaultCounter).isEqualTo(expectedSetAsDefaultCounter)
         assertThat(onRemoveClickedCounter).isEqualTo(expectedRemovedCounter)
-        assertThat(onEditPaymentMethodClickedCounter).isEqualTo(expectedEditPaymentMethodCounter)
     }
 
     @Composable
     private fun TestWalletBody(
         onRemoveClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
         onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
-        onEditPaymentMethodClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit = {},
         showBottomSheetContent: (BottomSheetContent?) -> Unit,
         hideBottomSheetContent: () -> Unit
     ) {
@@ -582,7 +615,8 @@ internal class WalletScreenTest {
                 selectedItem = paymentDetails.firstOrNull(),
                 isProcessing = false,
                 hasCompleted = false,
-                primaryButtonLabel = "Buy".resolvableString
+                primaryButtonLabel = "Buy".resolvableString,
+                canAddNewPaymentMethod = true,
             ),
             isExpanded = true,
             onItemSelected = {},
@@ -591,7 +625,6 @@ internal class WalletScreenTest {
             onPayAnotherWayClicked = {},
             onRemoveClicked = onRemoveClicked,
             onSetDefaultClicked = onSetDefaultClicked,
-            onEditPaymentMethodClicked = onEditPaymentMethodClicked,
             showBottomSheetContent = showBottomSheetContent,
             hideBottomSheetContent = hideBottomSheetContent,
             onAddNewPaymentMethodClicked = {},
@@ -653,6 +686,9 @@ internal class WalletScreenTest {
     private fun onWalletPaymentMethodRowMenuButton() =
         composeTestRule.onAllNodes(hasTestTag(WALLET_PAYMENT_DETAIL_ITEM_MENU_BUTTON), useUnmergedTree = true)
 
+    private fun onWalletPaymentMethodRowLoadingIndicator() =
+        composeTestRule.onNodeWithTag(WALLET_PAYMENT_DETAIL_ITEM_LOADING_INDICATOR, useUnmergedTree = true)
+
     private fun onWalletPaymentMethodMenu() =
         composeTestRule.onNodeWithTag(WALLET_SCREEN_MENU_SHEET_TAG, useUnmergedTree = true)
 
@@ -661,9 +697,6 @@ internal class WalletScreenTest {
 
     private fun onWalletPaymentMethodMenuRemoveTag() =
         composeTestRule.onNodeWithTag(WALLET_MENU_REMOVE_ITEM_TAG, useUnmergedTree = true)
-
-    private fun onWalletPaymentMethodMenuUpdateTag() =
-        composeTestRule.onNodeWithTag(WALLET_MENU_EDIT_CARD_TAG, useUnmergedTree = true)
 
     private fun onWalletPaymentMethodMenuSetAsDefaultTag() =
         composeTestRule.onNodeWithTag(WALLET_MENU_SET_AS_DEFAULT_TAG, useUnmergedTree = true)

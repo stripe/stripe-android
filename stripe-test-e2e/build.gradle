@@ -1,4 +1,5 @@
 apply from: configs.androidApplication
+apply plugin: 'com.google.devtools.ksp'
 
 // Read values from gradle.properties or system environment variable
 def getBackendUrl() {
@@ -40,6 +41,8 @@ android {
 
 dependencies {
     implementation project(':payments')
+
+    ksp libs.moshiKotlinCodegen
 
     testImplementation libs.kotlin.coroutines
     testImplementation libs.kotlin.coroutinesAndroid

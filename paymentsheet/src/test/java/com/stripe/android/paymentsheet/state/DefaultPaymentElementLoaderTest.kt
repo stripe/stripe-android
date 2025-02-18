@@ -131,7 +131,7 @@ internal class DefaultPaymentElementLoaderTest {
                         canRemoveLastPaymentMethod = true,
                         canRemoveDuplicates = false,
                     ),
-                    defaultPaymentMethodState = CustomerState.DefaultPaymentMethodState.Disabled,
+                    defaultPaymentMethodId = null,
                 ),
                 paymentSelection = PaymentSelection.Saved(
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
@@ -141,10 +141,10 @@ internal class DefaultPaymentElementLoaderTest {
                     stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
                     allowsDelayedPaymentMethods = false,
                     sharedDataSpecs = emptyList(),
-                    hasCustomerConfiguration = true,
                     isGooglePayReady = true,
                     linkMode = null,
-                    cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all())
+                    cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all()),
+                    hasCustomerConfiguration = true,
                 ),
             )
         )
@@ -163,7 +163,7 @@ internal class DefaultPaymentElementLoaderTest {
             PaymentSheetFixtures.CONFIG_MINIMUM,
             initializedViaCompose = false,
         ).getOrThrow()
-        assertThat(result.paymentMethodMetadata.customerMetadata.hasCustomerConfiguration).isFalse()
+        assertThat(result.paymentMethodMetadata.customerMetadata?.hasCustomerConfiguration).isFalse()
     }
 
     @Test
@@ -653,7 +653,8 @@ internal class DefaultPaymentElementLoaderTest {
             useAttestationEndpointsForLink = false,
             suppress2faModal = false,
             initializationMode = initializationMode,
-            elementsSessionId = "session_1234"
+            elementsSessionId = "session_1234",
+            linkMode = null,
         )
 
         assertThat(result.paymentMethodMetadata.linkState?.configuration).isEqualTo(expectedLinkConfig)

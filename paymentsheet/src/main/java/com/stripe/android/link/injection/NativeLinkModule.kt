@@ -29,6 +29,8 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.analytics.DefaultLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.attestation.DefaultLinkAttestationCheck
+import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.confirmation.DefaultLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.gate.DefaultLinkGate
@@ -39,6 +41,8 @@ import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
+import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
+import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationDefinition
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -47,11 +51,10 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.repository.ConsumersApiServiceImpl
 import com.stripe.attestation.IntegrityRequestManager
-import com.stripe.attestation.IntegrityStandardRequestManager
-import com.stripe.attestation.RealStandardIntegrityManagerFactory
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import dagger.multibindings.IntoSet
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
@@ -95,6 +98,10 @@ internal interface NativeLinkModule {
     @Binds
     @NativeLinkScope
     fun bindsLinkAuth(linkGate: DefaultLinkAuth): LinkAuth
+
+    @Binds
+    @NativeLinkScope
+    fun bindsLinkAttestationCheck(linkAttestationCheck: DefaultLinkAttestationCheck): LinkAttestationCheck
 
     @SuppressWarnings("TooManyFunctions")
     companion object {
@@ -193,27 +200,23 @@ internal interface NativeLinkModule {
 
         @Provides
         @NativeLinkScope
-        fun providesIntegrityStandardRequestManager(
-            context: Application
-        ): IntegrityRequestManager = IntegrityStandardRequestManager(
-            cloudProjectNumber = 577365562050, // stripe-payments-sdk-prod
-            logError = { message, error ->
-                Logger.getInstance(BuildConfig.DEBUG).error(message, error)
-            },
-            factory = RealStandardIntegrityManagerFactory(context)
-        )
-
-        @Provides
-        @NativeLinkScope
         fun provideEventReporterMode(): EventReporter.Mode = EventReporter.Mode.Custom
 
         @Provides
         @NativeLinkScope
-        @Named(APPLICATION_ID)
-        fun provideApplicationId(
-            application: Application
-        ): String {
-            return application.packageName
+        fun provideIntegrityStandardRequestManager(
+            context: Application
+        ): IntegrityRequestManager = createIntegrityStandardRequestManager(context)
+
+        @JvmSuppressWildcards
+        @Provides
+        @IntoSet
+        fun providesLinkPassthroughConfirmationDefinition(
+            linkAccountManager: DefaultLinkAccountManager
+        ): ConfirmationDefinition<*, *, *, *> {
+            return LinkPassthroughConfirmationDefinition(
+                linkAccountManager = linkAccountManager,
+            )
         }
     }
 }

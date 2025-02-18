@@ -450,6 +450,7 @@ internal object ElementsSessionFixtures {
         paymentMethodRemoveFeature: String? = "enabled",
         paymentMethodRemoveLastFeature: String? = "enabled",
         paymentMethodSetAsDefaultFeature: String = "disabled",
+        paymentMethodSyncDefaultFeature: String = "disabled",
     ): JSONObject {
         return JSONObject(
             """
@@ -543,6 +544,7 @@ internal object ElementsSessionFixtures {
                       "features": {
                         "payment_method_remove": ${paymentMethodRemoveFeature ?: "enabled"},
                         "payment_method_remove_last": ${paymentMethodRemoveLastFeature ?: "enabled"},
+                        "payment_method_sync_default": $paymentMethodSyncDefaultFeature,
                       }
                     },
                     "pricing_table": {
@@ -1570,7 +1572,6 @@ internal object ElementsSessionFixtures {
                     "elements_enable_external_payment_method_azupay": false,
                     "elements_enable_external_payment_method_bankaxept": false,
                     "elements_enable_external_payment_method_benefit": false,
-                    "elements_enable_external_payment_method_billie": false,
                     "elements_enable_external_payment_method_bizum": false,
                     "elements_enable_external_payment_method_bluecode": false,
                     "elements_enable_external_payment_method_bpay": false,
@@ -1596,14 +1597,12 @@ internal object ElementsSessionFixtures {
                     "elements_enable_external_payment_method_iwocapay": false,
                     "elements_enable_external_payment_method_kbc": false,
                     "elements_enable_external_payment_method_knet": false,
-                    "elements_enable_external_payment_method_kriya": false,
                     "elements_enable_external_payment_method_laybuy": false,
                     "elements_enable_external_payment_method_line_pay": false,
                     "elements_enable_external_payment_method_mb_way": false,
                     "elements_enable_external_payment_method_mercado_pago": false,
                     "elements_enable_external_payment_method_merpay": false,
                     "elements_enable_external_payment_method_momo": false,
-                    "elements_enable_external_payment_method_mondu": false,
                     "elements_enable_external_payment_method_mybank": false,
                     "elements_enable_external_payment_method_netbanking": false,
                     "elements_enable_external_payment_method_nexi_pay": false,
@@ -1639,7 +1638,6 @@ internal object ElementsSessionFixtures {
                     "elements_enable_external_payment_method_samsung_pay": false,
                     "elements_enable_external_payment_method_satispay": false,
                     "elements_enable_external_payment_method_scalapay": false,
-                    "elements_enable_external_payment_method_sequra": false,
                     "elements_enable_external_payment_method_sezzle": false,
                     "elements_enable_external_payment_method_skrill": false,
                     "elements_enable_external_payment_method_swish": false,

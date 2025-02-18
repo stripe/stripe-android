@@ -14,17 +14,20 @@ import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.SharePaymentDetails
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 
 internal open class FakeLinkAccountManager(
     val linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+    accountStatusOverride: Flow<AccountStatus>? = null
 ) : LinkAccountManager {
     override val linkAccount: StateFlow<LinkAccount?> = linkAccountHolder.linkAccount
 
     private val _accountStatus = MutableStateFlow(AccountStatus.SignedOut)
-    override val accountStatus: Flow<AccountStatus> = _accountStatus
+    override val accountStatus: Flow<AccountStatus> = accountStatusOverride ?: _accountStatus
 
     var lookupConsumerResult: Result<LinkAccount?> = Result.success(null)
     var mobileLookupConsumerResult: Result<LinkAccount?> = Result.success(TestFactory.LINK_ACCOUNT)
@@ -37,6 +40,7 @@ internal open class FakeLinkAccountManager(
     var createCardPaymentDetailsResult: Result<LinkPaymentDetails> = Result.success(
         value = TestFactory.LINK_NEW_PAYMENT_DETAILS
     )
+    var sharePaymentDetails: Result<SharePaymentDetails> = Result.success(TestFactory.LINK_SHARE_PAYMENT_DETAILS)
     var listPaymentDetailsResult: Result<ConsumerPaymentDetails> = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
     var updatePaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
     var deletePaymentDetailsResult: Result<Unit> = Result.success(Unit)
@@ -58,6 +62,12 @@ internal open class FakeLinkAccountManager(
 
     fun setAccountStatus(status: AccountStatus) {
         _accountStatus.value = status
+    }
+
+    suspend fun setAccountStatus(status: Flow<AccountStatus>) {
+        status.collectLatest {
+            _accountStatus.value = it
+        }
     }
 
     override suspend fun lookupConsumer(email: String, startSession: Boolean): Result<LinkAccount?> {
@@ -144,6 +154,13 @@ internal open class FakeLinkAccountManager(
         paymentMethodCreateParams: PaymentMethodCreateParams
     ): Result<LinkPaymentDetails> {
         return createCardPaymentDetailsResult
+    }
+
+    override suspend fun sharePaymentDetails(
+        paymentDetailsId: String,
+        expectedPaymentMethodType: String
+    ): Result<SharePaymentDetails> {
+        return sharePaymentDetails
     }
 
     override fun setLinkAccountFromLookupResult(lookup: ConsumerSessionLookup, startSession: Boolean): LinkAccount? {

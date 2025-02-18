@@ -96,7 +96,7 @@ class DefaultCustomerSheetLoaderTest {
         assertThat(state.config).isEqualTo(config)
         assertThat(state.paymentMethodMetadata.stripeIntent).isEqualTo(STRIPE_INTENT)
         assertThat(state.paymentMethodMetadata.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
-        assertThat(state.paymentMethodMetadata.customerMetadata.hasCustomerConfiguration).isTrue()
+        assertThat(state.paymentMethodMetadata.customerMetadata?.hasCustomerConfiguration).isTrue()
         assertThat(state.paymentMethodMetadata.isGooglePayReady).isTrue()
         assertThat(state.customerPaymentMethods).containsExactly(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD,
@@ -122,6 +122,7 @@ class DefaultCustomerSheetLoaderTest {
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3"),
             ),
             savedSelection = SavedSelection.PaymentMethod(id = "pm_3"),
+            isPaymentMethodSyncDefaultEnabled = false,
         )
 
         val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
@@ -134,7 +135,7 @@ class DefaultCustomerSheetLoaderTest {
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3"),
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1"),
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
-        )
+        ).inOrder()
         assertThat(state.customerPermissions.canRemovePaymentMethods).isTrue()
         assertThat(state.customerPermissions.canRemoveLastPaymentMethod).isTrue()
         assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
@@ -156,6 +157,7 @@ class DefaultCustomerSheetLoaderTest {
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3"),
             ),
             savedSelection = null,
+            isPaymentMethodSyncDefaultEnabled = false,
         )
 
         val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
@@ -168,13 +170,77 @@ class DefaultCustomerSheetLoaderTest {
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1"),
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3"),
-        )
+        ).inOrder()
         assertThat(state.customerPermissions.canRemovePaymentMethods).isTrue()
         assertThat(state.customerPermissions.canRemoveLastPaymentMethod).isTrue()
         assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
         assertThat(state.paymentSelection).isNull()
         assertThat(state.paymentMethodMetadata.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
         assertThat(state.validationError).isNull()
+    }
+
+    @Test
+    fun `when default payment method feature is enabled and default PM available, default PM is first and selected`() = runTest {
+        val expectedPaymentMethods = listOf(
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1"),
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3")
+        )
+        val defaultPaymentMethod = expectedPaymentMethods[2]
+        val loader = createCustomerSheetLoader(
+            paymentMethods = expectedPaymentMethods,
+            // Setting a saved selection here so we can validate that it is not used.
+            savedSelection = SavedSelection.PaymentMethod(expectedPaymentMethods[1].id!!),
+            isPaymentMethodSyncDefaultEnabled = true,
+            defaultPaymentMethodId = defaultPaymentMethod.id,
+        )
+
+        val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
+
+        val state = loader.load(config).getOrThrow()
+        assertThat(state.customerPaymentMethods).containsExactlyElementsIn(expectedPaymentMethods)
+        assertThat(state.customerPaymentMethods.first()).isEqualTo(defaultPaymentMethod)
+        assertThat(state.paymentSelection).isEqualTo(PaymentSelection.Saved(defaultPaymentMethod))
+    }
+
+    @Test
+    fun `when default payment method feature is enabled and default PM null, PM order is preserved`() = runTest {
+        val expectedPaymentMethods = listOf(
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1"),
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3")
+        )
+        val loader = createCustomerSheetLoader(
+            paymentMethods = expectedPaymentMethods,
+            // Setting a saved selection here so we can validate that it is not used.
+            savedSelection = SavedSelection.PaymentMethod(expectedPaymentMethods[1].id!!),
+            isPaymentMethodSyncDefaultEnabled = true,
+            defaultPaymentMethodId = null,
+        )
+
+        val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
+
+        val state = loader.load(config).getOrThrow()
+        assertThat(state.customerPaymentMethods).containsExactlyElementsIn(expectedPaymentMethods).inOrder()
+        assertThat(state.paymentSelection).isNull()
+    }
+
+    @Test
+    fun `when default payment method feature is enabled, sepa PMs are filtered out`() = runTest {
+        val sepaPaymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD
+        val expectedPaymentMethods = listOf(
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            PaymentMethodFixtures.US_BANK_ACCOUNT
+        )
+        val loader = createCustomerSheetLoader(
+            paymentMethods = expectedPaymentMethods.plus(sepaPaymentMethod),
+            isPaymentMethodSyncDefaultEnabled = true,
+        )
+
+        val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
+
+        val state = loader.load(config).getOrThrow()
+        assertThat(state.customerPaymentMethods).containsExactlyElementsIn(expectedPaymentMethods).inOrder()
     }
 
     @Test
@@ -458,20 +524,16 @@ class DefaultCustomerSheetLoaderTest {
         intent: StripeIntent = STRIPE_INTENT,
         paymentMethods: List<PaymentMethod> = listOf(),
         savedSelection: SavedSelection? = null,
+        isPaymentMethodSyncDefaultEnabled: Boolean = false,
+        defaultPaymentMethodId: String? = null,
         initializationDataSource: CustomerSheetInitializationDataSource = FakeCustomerSheetInitializationDataSource(
             onLoadCustomerSheetSession = {
                 CustomerSheetDataResult.success(
                     CustomerSheetSession(
-                        elementsSession = ElementsSession(
-                            stripeIntent = intent,
-                            linkSettings = null,
-                            customer = null,
-                            externalPaymentMethodData = null,
-                            isGooglePayEnabled = true,
-                            merchantCountry = "US",
-                            paymentMethodSpecs = null,
-                            cardBrandChoice = createCardBrandChoice(isCbcEligible),
-                            elementsSessionId = "session_1234"
+                        elementsSession = createElementsSession(
+                            intent,
+                            createCardBrandChoice(isCbcEligible),
+                            isPaymentMethodSyncDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
                         ),
                         paymentMethods = paymentMethods,
                         savedSelection = savedSelection,
@@ -480,6 +542,7 @@ class DefaultCustomerSheetLoaderTest {
                             canRemovePaymentMethods = true,
                             canRemoveLastPaymentMethod = true,
                         ),
+                        defaultPaymentMethodId = defaultPaymentMethodId,
                     )
                 )
             }
@@ -494,6 +557,42 @@ class DefaultCustomerSheetLoaderTest {
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             lpmRepository = lpmRepository,
             errorReporter = errorReporter,
+        )
+    }
+
+    private fun createElementsSession(
+        intent: StripeIntent,
+        cardBrandChoice: ElementsSession.CardBrandChoice?,
+        isPaymentMethodSyncDefaultEnabled: Boolean,
+    ): ElementsSession {
+        return ElementsSession(
+            stripeIntent = intent,
+            cardBrandChoice = cardBrandChoice,
+            merchantCountry = null,
+            isGooglePayEnabled = false,
+            customer = ElementsSession.Customer(
+                paymentMethods = listOf(),
+                session = ElementsSession.Customer.Session(
+                    id = "cuss_123",
+                    customerId = "cus_123",
+                    liveMode = false,
+                    apiKey = "123",
+                    apiKeyExpiry = 999999999,
+                    components = ElementsSession.Customer.Components(
+                        mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
+                        customerSheet = ElementsSession.Customer.Components.CustomerSheet.Enabled(
+                            isPaymentMethodRemoveEnabled = false,
+                            canRemoveLastPaymentMethod = true,
+                            isPaymentMethodSyncDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
+                        ),
+                    )
+                ),
+                defaultPaymentMethod = null,
+            ),
+            linkSettings = null,
+            externalPaymentMethodData = null,
+            paymentMethodSpecs = null,
+            elementsSessionId = "session_1234"
         )
     }
 

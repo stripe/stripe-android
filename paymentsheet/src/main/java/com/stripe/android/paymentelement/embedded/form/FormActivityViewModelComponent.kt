@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded.form
 
+import android.app.Application
 import android.content.Context
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
@@ -35,6 +36,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.Subcomponent
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.plus
 import javax.inject.Named
 import javax.inject.Singleton
@@ -75,7 +77,7 @@ internal interface FormActivityViewModelComponent {
         fun initializationMode(initializationMode: PaymentElementLoader.InitializationMode): Builder
 
         @BindsInstance
-        fun context(context: Context): Builder
+        fun application(application: Application): Builder
 
         @BindsInstance
         fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
@@ -111,6 +113,11 @@ internal interface FormActivityViewModelModule {
 
     companion object {
         @Provides
+        fun providesContext(application: Application): Context {
+            return application
+        }
+
+        @Provides
         @Singleton
         fun providesLinkAccountHolder(savedStateHandle: SavedStateHandle): LinkAccountHolder {
             return LinkAccountHolder(savedStateHandle)
@@ -119,8 +126,8 @@ internal interface FormActivityViewModelModule {
         @Provides
         @Singleton
         @ViewModelScope
-        fun provideViewModelScope(@IOContext ioContext: CoroutineContext): CoroutineScope {
-            return CoroutineScope(ioContext)
+        fun provideViewModelScope(): CoroutineScope {
+            return CoroutineScope(Dispatchers.Main)
         }
 
         @Provides
@@ -138,6 +145,10 @@ internal interface FormActivityViewModelModule {
         ): ConfirmationHandler {
             return confirmationHandlerFactory.create(coroutineScope + ioContext)
         }
+
+        @Provides
+        @Singleton
+        fun provideOnClickOverrideDelegate(): OnClickOverrideDelegate = OnClickDelegateOverrideImpl()
     }
 }
 

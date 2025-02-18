@@ -14,7 +14,7 @@ internal data class CustomerState(
     val customerSessionClientSecret: String?,
     val paymentMethods: List<PaymentMethod>,
     val permissions: Permissions,
-    val defaultPaymentMethodState: DefaultPaymentMethodState,
+    val defaultPaymentMethodId: String?,
 ) : Parcelable {
     @Parcelize
     data class Permissions(
@@ -62,18 +62,6 @@ internal data class CustomerState(
                 else -> false
             }
 
-            val isSetAsDefaultFeatureEnabled = when (mobilePaymentElementComponent) {
-                ElementsSession.Customer.Components.MobilePaymentElement.Disabled -> false
-                is ElementsSession.Customer.Components.MobilePaymentElement.Enabled ->
-                    mobilePaymentElementComponent.isPaymentMethodSetAsDefaultEnabled
-            }
-
-            val defaultPaymentMethodState = if (isSetAsDefaultFeatureEnabled) {
-                DefaultPaymentMethodState.Enabled(customer.defaultPaymentMethod)
-            } else {
-                DefaultPaymentMethodState.Disabled
-            }
-
             return CustomerState(
                 id = customer.session.customerId,
                 ephemeralKeySecret = customer.session.apiKey,
@@ -87,7 +75,7 @@ internal data class CustomerState(
                     // Should always remove duplicates when using `customer_session`
                     canRemoveDuplicates = true,
                 ),
-                defaultPaymentMethodState = defaultPaymentMethodState
+                defaultPaymentMethodId = customer.defaultPaymentMethod
             )
         }
 
@@ -130,8 +118,8 @@ internal data class CustomerState(
                      */
                     canRemoveDuplicates = false,
                 ),
-                // This is a customer sessions only feature, so it's always disabled when using a legacy ephemeral key.
-                defaultPaymentMethodState = DefaultPaymentMethodState.Disabled
+                // This is a customer sessions only feature, so will always be null when using a legacy ephemeral key.
+                defaultPaymentMethodId = null
             )
         }
     }

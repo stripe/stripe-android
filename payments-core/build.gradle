@@ -47,6 +47,7 @@ dependencies {
     javadocDeps libs.androidx.appCompat
     javadocDeps libs.material
 
+    testImplementation libs.kotlin.serialization
     testImplementation project(':financial-connections')
     testImplementation project(':network-testing')
     testImplementation project(':payments-core-testing')

@@ -2,6 +2,7 @@ package com.stripe.android.link
 
 import android.app.Application
 import androidx.activity.result.ActivityResultCaller
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
@@ -14,24 +15,22 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavHostController
 import com.stripe.android.link.LinkActivity.Companion.getArgs
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.account.LinkAuth
-import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.account.linkAccountUpdate
-import com.stripe.android.link.gate.LinkGate
+import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.injection.DaggerNativeLinkComponent
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.LinkAppBarState
-import com.stripe.android.model.EmailSource
+import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -40,16 +39,16 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@SuppressWarnings("TooManyFunctions")
 internal class LinkActivityViewModel @Inject constructor(
     val activityRetainedComponent: NativeLinkComponent,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
     private val linkAccountManager: LinkAccountManager,
+    private val linkAccountHolder: LinkAccountHolder,
     val eventReporter: EventReporter,
-    private val integrityRequestManager: IntegrityRequestManager,
-    private val linkGate: LinkGate,
-    private val errorReporter: ErrorReporter,
-    private val linkAuth: LinkAuth,
     private val linkConfiguration: LinkConfiguration,
+    private val linkAttestationCheck: LinkAttestationCheck,
+    private val savedStateHandle: SavedStateHandle,
     private val startWithVerificationDialog: Boolean
 ) : ViewModel(), DefaultLifecycleObserver {
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
@@ -69,6 +68,8 @@ internal class LinkActivityViewModel @Inject constructor(
     val linkAccount: LinkAccount?
         get() = linkAccountManager.linkAccount.value
 
+    @VisibleForTesting
+    internal var navListenerJob: Job? = null
     var navController: NavHostController? = null
         set(value) {
             listenToNavController(value)
@@ -110,14 +111,16 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     private fun listenToNavController(navController: NavHostController?) {
-        viewModelScope.launch {
-            navController?.currentBackStackEntryFlow?.collectLatest { entry ->
+        cancelNavListenerJob()
+        navController ?: return
+        navListenerJob = viewModelScope.launch {
+            navController.currentBackStackEntryFlow.collectLatest { entry ->
                 val route = entry.destination.route
                 _linkAppBarState.update {
                     it.copy(
                         showHeader = showHeaderRoutes.contains(route),
                         showOverflowMenu = route == LinkScreen.Wallet.route,
-                        navigationIcon = if (backIconRoutes.contains(route)) {
+                        navigationIcon = if (route == LinkScreen.PaymentMethod.route) {
                             R.drawable.stripe_link_back
                         } else {
                             R.drawable.stripe_link_close
@@ -183,57 +186,50 @@ internal class LinkActivityViewModel @Inject constructor(
         }
     }
 
+    fun changeEmail() {
+        savedStateHandle[SignUpViewModel.USE_LINK_CONFIGURATION_CUSTOMER_INFO] = false
+        navigate(LinkScreen.SignUp, clearStack = true)
+    }
+
     fun unregisterActivity() {
+        cancelNavListenerJob()
         navController = null
         dismissWithResult = null
         launchWebFlow = null
     }
 
+    private fun cancelNavListenerJob() {
+        navListenerJob?.cancel()
+        navListenerJob = null
+    }
+
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         viewModelScope.launch {
-            performAttestationCheck().fold(
-                onSuccess = {
-                    updateScreenState()
-                },
-                onFailure = {
+            if (startWithVerificationDialog) return@launch updateScreenState()
+            val attestationCheckResult = linkAttestationCheck.invoke()
+            when (attestationCheckResult) {
+                is LinkAttestationCheck.Result.AttestationFailed -> {
                     moveToWeb()
                 }
-            )
-        }
-    }
-
-    fun linkScreenScreenCreated() {
-        viewModelScope.launch {
-            navigateToLinkScreen()
-        }
-    }
-
-    private suspend fun performAttestationCheck(): Result<Unit> {
-        if (linkGate.useAttestationEndpoints.not()) return Result.success(Unit)
-        return integrityRequestManager.prepare()
-            .onFailure { error ->
-                errorReporter.report(
-                    errorEvent = ErrorReporter.UnexpectedErrorEvent.LINK_NATIVE_FAILED_TO_PREPARE_INTEGRITY_MANAGER,
-                    stripeException = LinkEventException(error)
-                )
-            }
-            .mapCatching {
-                when (val lookupResult = lookupUser()) {
-                    is LinkAuthResult.AttestationFailed -> {
-                        errorReporter.report(
-                            errorEvent = ErrorReporter.UnexpectedErrorEvent.LINK_NATIVE_FAILED_TO_ATTEST_REQUEST,
-                            stripeException = LinkEventException(lookupResult.error)
-                        )
-                        throw lookupResult.error
-                    }
-                    is LinkAuthResult.Error,
-                    is LinkAuthResult.AccountError,
-                    LinkAuthResult.NoLinkAccountFound,
-                    is LinkAuthResult.Success,
-                    null -> Unit
+                LinkAttestationCheck.Result.Successful -> {
+                    updateScreenState()
+                }
+                is LinkAttestationCheck.Result.Error,
+                is LinkAttestationCheck.Result.AccountError -> {
+                    handleAccountError()
                 }
             }
+        }
+    }
+
+    fun linkScreenCreated() {
+        viewModelScope.launch {
+            val currentRoute = navController?.currentBackStackEntry?.destination?.route
+            if (currentRoute == null || currentRoute == LinkScreen.Loading.route) {
+                navigateToLinkScreen()
+            }
+        }
     }
 
     private suspend fun updateScreenState() {
@@ -272,16 +268,10 @@ internal class LinkActivityViewModel @Inject constructor(
         navigate(screen, clearStack = true, launchSingleTop = true)
     }
 
-    private suspend fun lookupUser(): LinkAuthResult? {
-        val customerEmail = linkAccountManager.linkAccount.value?.email
-            ?: linkConfiguration.customerInfo.email
-            ?: return null
-
-        return linkAuth.lookUp(
-            email = customerEmail,
-            emailSource = EmailSource.CUSTOMER_OBJECT,
-            startSession = false
-        )
+    private suspend fun handleAccountError() {
+        linkAccountManager.logOut()
+        linkAccountHolder.set(null)
+        updateScreenState()
     }
 
     companion object {
@@ -289,10 +279,6 @@ internal class LinkActivityViewModel @Inject constructor(
             LinkScreen.Wallet.route,
             LinkScreen.SignUp.route,
             LinkScreen.Verification.route
-        )
-        private val backIconRoutes = setOf(
-            LinkScreen.CardEdit.route,
-            LinkScreen.PaymentMethod.route
         )
 
         fun factory(savedStateHandle: SavedStateHandle? = null): ViewModelProvider.Factory = viewModelFactory {

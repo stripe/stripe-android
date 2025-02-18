@@ -45,10 +45,6 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: EmbeddedPaymentElement.Configuration,
     ): Result<PaymentElementLoader.State> {
-        if (sheetStateHolder.sheetIsOpen) {
-            return Result.failure(IllegalStateException("Configuring while a sheet is open is not supported."))
-        }
-
         val targetConfiguration = configuration.asCommonConfiguration()
 
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration)
@@ -80,6 +76,10 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
             }
         }
         inFlightRequest = null
+
+        if (sheetStateHolder.sheetIsOpen) {
+            return Result.failure(IllegalStateException("Configuring while a sheet is open is not supported."))
+        }
 
         val supervisorJob = SupervisorJob()
         val coroutineScope = CoroutineScope(supervisorJob)

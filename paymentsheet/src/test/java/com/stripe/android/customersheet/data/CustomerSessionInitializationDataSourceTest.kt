@@ -25,9 +25,10 @@ class CustomerSessionInitializationDataSourceTest {
             elementsSessionManager = FakeCustomerSessionElementsSessionManager(
                 intent = intent,
                 paymentMethods = paymentMethods,
-                customerSheetComponent = ElementsSession.Customer.Components.CustomerSheet.Enabled(
+                customerSheetComponent = createEnabledCustomerSheetComponent(
                     isPaymentMethodRemoveEnabled = true,
                     canRemoveLastPaymentMethod = true,
+                    isPaymentMethodSyncDefaultEnabled = false,
                 ),
             ),
             savedSelectionDataSource = FakeCustomerSheetSavedSelectionDataSource(
@@ -53,13 +54,14 @@ class CustomerSessionInitializationDataSourceTest {
         )
         assertThat(customerSheetSession.permissions.canRemovePaymentMethods).isTrue()
         assertThat(customerSheetSession.permissions.canRemoveLastPaymentMethod).isTrue()
+        assertThat(customerSheetSession.defaultPaymentMethodId).isNull()
     }
 
     @Test
     fun `on load, should have no remove permissions if component has no remove permissions`() = runTest {
         val dataSource = createInitializationDataSource(
             elementsSessionManager = FakeCustomerSessionElementsSessionManager(
-                customerSheetComponent = ElementsSession.Customer.Components.CustomerSheet.Enabled(
+                customerSheetComponent = createEnabledCustomerSheetComponent(
                     isPaymentMethodRemoveEnabled = false,
                     canRemoveLastPaymentMethod = false,
                 ),
@@ -91,6 +93,27 @@ class CustomerSessionInitializationDataSourceTest {
         val customerSheetSession = result.asSuccess().value
 
         assertThat(customerSheetSession.permissions.canRemovePaymentMethods).isFalse()
+    }
+
+    @Test
+    fun `on load, should use customer default PM if default PM feature is enabled`() = runTest {
+        val expectedDefaultPaymentMethodId = "pm_123"
+        val dataSource = createInitializationDataSource(
+            elementsSessionManager = FakeCustomerSessionElementsSessionManager(
+                defaultPaymentMethodId = expectedDefaultPaymentMethodId,
+                customerSheetComponent = createEnabledCustomerSheetComponent(
+                    isPaymentMethodSyncDefaultEnabled = true,
+                )
+            ),
+        )
+
+        val result = dataSource.loadCustomerSheetSession(createConfiguration())
+
+        assertThat(result).isInstanceOf<CustomerSheetDataResult.Success<CustomerSheetSession>>()
+
+        val customerSheetSession = result.asSuccess().value
+
+        assertThat(customerSheetSession.defaultPaymentMethodId).isEqualTo(expectedDefaultPaymentMethodId)
     }
 
     @Test
@@ -197,7 +220,7 @@ class CustomerSessionInitializationDataSourceTest {
                 customerSheetComponent = if (customerSheetComponentIsDisabled) {
                     ElementsSession.Customer.Components.CustomerSheet.Disabled
                 } else {
-                    ElementsSession.Customer.Components.CustomerSheet.Enabled(
+                    createEnabledCustomerSheetComponent(
                         isPaymentMethodRemoveEnabled = true,
                         canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
                     )
@@ -235,6 +258,18 @@ class CustomerSessionInitializationDataSourceTest {
             elementsSessionManager = elementsSessionManager,
             savedSelectionDataSource = savedSelectionDataSource,
             workContext = coroutineContext,
+        )
+    }
+
+    private fun createEnabledCustomerSheetComponent(
+        isPaymentMethodRemoveEnabled: Boolean = true,
+        canRemoveLastPaymentMethod: Boolean = true,
+        isPaymentMethodSyncDefaultEnabled: Boolean = false,
+    ): ElementsSession.Customer.Components.CustomerSheet.Enabled {
+        return ElementsSession.Customer.Components.CustomerSheet.Enabled(
+            isPaymentMethodRemoveEnabled = isPaymentMethodRemoveEnabled,
+            canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
+            isPaymentMethodSyncDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
         )
     }
 }

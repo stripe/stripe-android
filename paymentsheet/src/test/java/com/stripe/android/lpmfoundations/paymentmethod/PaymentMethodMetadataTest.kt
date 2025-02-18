@@ -787,6 +787,7 @@ internal class PaymentMethodMetadataTest {
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             customerMetadata = CustomerMetadata(
                 hasCustomerConfiguration = true,
+                isPaymentMethodSetAsDefaultEnabled = false,
             ),
             paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             isGooglePayReady = false,
@@ -801,6 +802,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @OptIn(ExperimentalCardBrandFilteringApi::class)
+    @Suppress("LongMethod")
     @Test
     fun `should create metadata properly with elements session response, customer sheet config, and data specs`() {
         val billingDetailsCollectionConfiguration = createBillingDetailsCollectionConfiguration()
@@ -829,13 +831,14 @@ internal class PaymentMethodMetadataTest {
             overrideAllowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS,
         )
 
-        val metadata = PaymentMethodMetadata.create(
+        val metadata = PaymentMethodMetadata.createForCustomerSheet(
             elementsSession = elementsSession,
             configuration = configuration,
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             sharedDataSpecs = listOf(SharedDataSpec("card")),
             isGooglePayReady = true,
-            isFinancialConnectionsAvailable = { false }
+            isFinancialConnectionsAvailable = { false },
+            isPaymentMethodSyncDefaultEnabled = false,
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -854,6 +857,7 @@ internal class PaymentMethodMetadataTest {
             externalPaymentMethodSpecs = listOf(),
             customerMetadata = CustomerMetadata(
                 hasCustomerConfiguration = true,
+                isPaymentMethodSetAsDefaultEnabled = false,
             ),
             isGooglePayReady = true,
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
@@ -864,7 +868,6 @@ internal class PaymentMethodMetadataTest {
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             paymentMethodIncentive = null,
         )
-
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
 
@@ -1324,7 +1327,8 @@ internal class PaymentMethodMetadataTest {
                 useAttestationEndpointsForLink = false,
                 suppress2faModal = false,
                 initializationMode = PaymentSheetFixtures.INITIALIZATION_MODE_PAYMENT_INTENT,
-                elementsSessionId = "session_1234"
+                elementsSessionId = "session_1234",
+                linkMode = LinkMode.LinkPaymentMethod,
             ),
         )
     }

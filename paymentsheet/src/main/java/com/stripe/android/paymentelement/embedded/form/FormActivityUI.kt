@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded.form
 
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,12 +12,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.ui.ErrorMessage
+import com.stripe.android.paymentsheet.ui.Mandate
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.TestModeBadge
 import com.stripe.android.paymentsheet.utils.DismissKeyboardOnProcessing
@@ -55,6 +60,8 @@ internal fun FormActivityUI(
                     interactor = interactor,
                     showsWalletHeader = false
                 )
+                USBankAccountMandate(state)
+                FormActivityError(state)
                 PaymentSheetContentPadding()
                 FormActivityPrimaryButton(
                     state = state,
@@ -64,6 +71,42 @@ internal fun FormActivityUI(
                 PaymentSheetContentPadding()
             },
             scrollState = scrollState
+        )
+    }
+}
+
+@Composable
+internal fun USBankAccountMandate(
+    state: FormActivityStateHelper.State
+) {
+    state.mandateText?.let {
+        Mandate(
+            mandateText = it.resolve(),
+            modifier = Modifier
+                .padding(
+                    horizontal = dimensionResource(
+                        id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal
+                    ),
+                    vertical = 8.dp
+                )
+        )
+    }
+}
+
+@Composable
+internal fun FormActivityError(
+    state: FormActivityStateHelper.State
+) {
+    state.error?.let {
+        ErrorMessage(
+            error = it.resolve(),
+            modifier = Modifier
+                .padding(
+                    horizontal = dimensionResource(
+                        id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal
+                    ),
+                    vertical = 8.dp
+                )
         )
     }
 }
@@ -81,6 +124,7 @@ internal fun FormActivityPrimaryButton(
             )
     ) {
         PrimaryButton(
+            modifier = Modifier.testTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON),
             label = state.primaryButtonLabel.resolve(),
             locked = true,
             enabled = state.isEnabled,
@@ -121,3 +165,6 @@ internal fun FormActivityTopBar(
         }
     }
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON = "EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON"

@@ -6,6 +6,7 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import org.mockito.kotlin.doReturn
@@ -64,7 +65,8 @@ internal object LinkTestUtils {
             useAttestationEndpointsForLink = false,
             suppress2faModal = false,
             initializationMode = PaymentSheetFixtures.INITIALIZATION_MODE_PAYMENT_INTENT,
-            elementsSessionId = "session_1234"
+            elementsSessionId = "session_1234",
+            linkMode = LinkMode.LinkPaymentMethod,
         )
     }
 }

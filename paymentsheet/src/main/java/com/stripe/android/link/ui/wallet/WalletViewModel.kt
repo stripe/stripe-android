@@ -21,7 +21,7 @@ import com.stripe.android.link.ui.completePaymentButtonLabel
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
-import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.elements.CardDetailsUtil.createExpiryDateFormFieldValues
@@ -36,11 +36,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.Result
-import kotlin.String
-import kotlin.Throwable
-import kotlin.Unit
-import kotlin.fold
-import kotlin.takeIf
 import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
 internal class WalletViewModel @Inject constructor(
@@ -61,7 +56,9 @@ internal class WalletViewModel @Inject constructor(
             selectedItem = null,
             isProcessing = false,
             hasCompleted = false,
-            primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent)
+            primaryButtonLabel = completePaymentButtonLabel(configuration.stripeIntent),
+            // TODO(tillh-stripe) Update this as soon as adding bank accounts is supported
+            canAddNewPaymentMethod = stripeIntent.paymentMethodTypes.contains(Card.code),
         )
     )
 
@@ -77,7 +74,13 @@ internal class WalletViewModel @Inject constructor(
     )
 
     init {
-        loadPaymentDetails()
+        _uiState.update {
+            it.setProcessing()
+        }
+
+        viewModelScope.launch {
+            loadPaymentDetails(selectedItemId = null)
+        }
 
         viewModelScope.launch {
             expiryDateController.formFieldValue.collectLatest { input ->
@@ -96,28 +99,22 @@ internal class WalletViewModel @Inject constructor(
         }
     }
 
-    private fun loadPaymentDetails(selectedItemId: String? = null) {
-        _uiState.update {
-            it.setProcessing()
-        }
+    private suspend fun loadPaymentDetails(selectedItemId: String?) {
+        linkAccountManager.listPaymentDetails(
+            paymentMethodTypes = stripeIntent.supportedPaymentMethodTypes(linkAccount)
+        ).fold(
+            onSuccess = { response ->
+                _uiState.update {
+                    it.updateWithResponse(response, selectedItemId = selectedItemId)
+                }
 
-        viewModelScope.launch {
-            linkAccountManager.listPaymentDetails(
-                paymentMethodTypes = stripeIntent.supportedPaymentMethodTypes(linkAccount)
-            ).fold(
-                onSuccess = { response ->
-                    _uiState.update {
-                        it.updateWithResponse(response, selectedItemId = selectedItemId)
-                    }
-
-                    if (response.paymentDetails.isEmpty()) {
-                        navigateAndClearStack(LinkScreen.PaymentMethod)
-                    }
-                },
-                // If we can't load the payment details there's nothing to see here
-                onFailure = ::onFatal
-            )
-        }
+                if (response.paymentDetails.isEmpty()) {
+                    navigateAndClearStack(LinkScreen.PaymentMethod)
+                }
+            },
+            // If we can't load the payment details there's nothing to see here
+            onFailure = ::onFatal
+        )
     }
 
     private fun onFatal(fatalError: Throwable) {
@@ -258,7 +255,9 @@ internal class WalletViewModel @Inject constructor(
 
     fun onSetDefaultClicked(item: ConsumerPaymentDetails.PaymentDetails) {
         _uiState.update {
-            it.setProcessing()
+            it.copy(
+                cardBeingUpdated = item.id,
+            )
         }
         viewModelScope.launch {
             val updateParams = ConsumerPaymentDetailsUpdateParams(
@@ -269,7 +268,22 @@ internal class WalletViewModel @Inject constructor(
             linkAccountManager.updatePaymentDetails(updateParams)
                 .fold(
                     onSuccess = {
-                        loadPaymentDetails()
+                        _uiState.update { state ->
+                            state.copy(
+                                paymentDetailsList = state.paymentDetailsList.map { details ->
+                                    when (details) {
+                                        is ConsumerPaymentDetails.BankAccount -> {
+                                            details.copy(isDefault = item.id == details.id)
+                                        }
+                                        is ConsumerPaymentDetails.Card -> {
+                                            details.copy(isDefault = item.id == details.id)
+                                        }
+                                        is ConsumerPaymentDetails.Passthrough -> details
+                                    }
+                                },
+                                cardBeingUpdated = null
+                            )
+                        }
                     },
                     onFailure = { error ->
                         updateErrorMessageAndStopProcessing(
@@ -291,11 +305,6 @@ internal class WalletViewModel @Inject constructor(
         }
     }
 
-    @SuppressWarnings("UnusedParameter")
-    fun onEditPaymentMethodClicked(item: ConsumerPaymentDetails.PaymentDetails) {
-        navigate(LinkScreen.CardEdit)
-    }
-
     private fun updateErrorMessageAndStopProcessing(
         error: Throwable,
         loggerMessage: String
@@ -307,7 +316,8 @@ internal class WalletViewModel @Inject constructor(
         _uiState.update {
             it.copy(
                 alertMessage = error.stripeErrorMessage(),
-                isProcessing = false
+                isProcessing = false,
+                cardBeingUpdated = null
             )
         }
     }
@@ -344,7 +354,7 @@ private fun WalletUiState.toPaymentMethodCreateParams(): PaymentMethodCreatePara
     val expiryDateValues = createExpiryDateFormFieldValues(expiryDateInput)
     return FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
         fieldValuePairs = expiryDateValues,
-        code = PaymentMethod.Type.Card.code,
+        code = Card.code,
         requiresMandate = false
     )
 }

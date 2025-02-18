@@ -1,9 +1,11 @@
 package com.stripe.android.link.ui.signup
 
+import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.TestFactory
@@ -19,6 +21,7 @@ import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -83,6 +86,41 @@ internal class SignUpViewModelTest {
         assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingRemainingFields)
         linkAuth.ensureAllItemsConsumed()
     }
+
+    @Test
+    fun `When USE_LINK_CONFIGURATION_CUSTOMER_INFO is false, controllers should not be prefilled`() =
+        runTest(dispatcher) {
+            testUseLinkConfigurationCustomerInfo(
+                useLinkConfigurationCustomerInfo = false,
+                expectedSignUpState = SignUpState.InputtingPrimaryField,
+                expectedEmail = "",
+                expectedPhoneNumber = "",
+                expectedName = ""
+            )
+        }
+
+    @Test
+    fun `When USE_LINK_CONFIGURATION_CUSTOMER_INFO is true, controllers should be prefilled`() = runTest(dispatcher) {
+        testUseLinkConfigurationCustomerInfo(
+            useLinkConfigurationCustomerInfo = true,
+            expectedSignUpState = SignUpState.InputtingRemainingFields,
+            expectedEmail = CUSTOMER_EMAIL,
+            expectedPhoneNumber = TestFactory.CUSTOMER_PHONE,
+            expectedName = TestFactory.CUSTOMER_NAME
+        )
+    }
+
+    @Test
+    fun `When USE_LINK_CONFIGURATION_CUSTOMER_INFO is not set, controllers should be prefilled`() =
+        runTest(dispatcher) {
+            testUseLinkConfigurationCustomerInfo(
+                useLinkConfigurationCustomerInfo = null,
+                expectedSignUpState = SignUpState.InputtingRemainingFields,
+                expectedEmail = CUSTOMER_EMAIL,
+                expectedPhoneNumber = TestFactory.CUSTOMER_PHONE,
+                expectedName = TestFactory.CUSTOMER_NAME
+            )
+        }
 
     @Test
     fun `When email changes and then reverts to config email, lookup is triggered`() = runTest(dispatcher) {
@@ -151,18 +189,22 @@ internal class SignUpViewModelTest {
     fun `When lookup fails with account error, stay on input remaining fields state`() = runTest(dispatcher) {
         val error = RuntimeException("Lookup failed")
         val linkAuth = FakeLinkAuth()
+        val logger = FakeLogger()
         linkAuth.lookupResult = LinkAuthResult.AccountError(error)
 
         val viewModel = createViewModel(
             prefilledEmail = null,
-            linkAuth = linkAuth
+            linkAuth = linkAuth,
+            logger = logger
         )
 
         viewModel.emailController.onRawValueChange("valid@email.com")
         advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
 
         assertThat(viewModel.state.value.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
-        assertThat(viewModel.state.value.errorMessage).isEqualTo(error.stripeErrorMessage())
+        assertThat(viewModel.state.value.errorMessage)
+            .isEqualTo(R.string.stripe_signup_deactivated_account_message.resolvableString)
+        assertThat(logger.errorLogs).containsExactly("SignUpViewModel Error: " to error)
     }
 
     @Test
@@ -250,7 +292,8 @@ internal class SignUpViewModelTest {
 
         viewModel.performValidSignup()
 
-        assertThat(viewModel.contentState.errorMessage).isEqualTo(exception.stripeErrorMessage())
+        assertThat(viewModel.state.value.errorMessage)
+            .isEqualTo(R.string.stripe_signup_deactivated_account_message.resolvableString)
         assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
         assertThat(logger.errorLogs).isEqualTo(listOf("SignUpViewModel Error: " to exception))
     }
@@ -491,6 +534,32 @@ internal class SignUpViewModelTest {
         onSignUpClick()
     }
 
+    private fun testUseLinkConfigurationCustomerInfo(
+        useLinkConfigurationCustomerInfo: Boolean?,
+        expectedSignUpState: SignUpState = SignUpState.InputtingRemainingFields,
+        expectedEmail: String = CUSTOMER_EMAIL,
+        expectedPhoneNumber: String = TestFactory.CUSTOMER_PHONE,
+        expectedName: String = TestFactory.CUSTOMER_NAME
+    ) {
+        val savedStateHandle = SavedStateHandle()
+            .apply {
+                useLinkConfigurationCustomerInfo?.let {
+                    set(SignUpViewModel.USE_LINK_CONFIGURATION_CUSTOMER_INFO, it)
+                }
+            }
+        val viewModel = createViewModel(
+            prefilledEmail = CUSTOMER_EMAIL,
+            savedStateHandle = savedStateHandle
+        )
+
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertThat(viewModel.contentState.signUpState).isEqualTo(expectedSignUpState)
+        assertThat(viewModel.emailController.fieldValue.value).isEqualTo(expectedEmail)
+        assertThat(viewModel.phoneNumberController.fieldValue.value).isEqualTo(expectedPhoneNumber)
+        assertThat(viewModel.nameController.fieldValue.value).isEqualTo(expectedName)
+    }
+
     private fun createViewModel(
         prefilledEmail: String? = null,
         configuration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
@@ -500,6 +569,7 @@ internal class SignUpViewModelTest {
             lookupResult = LinkAuthResult.NoLinkAccountFound
         },
         logger: Logger = FakeLogger(),
+        savedStateHandle: SavedStateHandle = SavedStateHandle(),
         navigate: (LinkScreen) -> Unit = {},
         navigateAndClearStack: (LinkScreen) -> Unit = {},
         moveToWeb: () -> Unit = {}
@@ -517,6 +587,7 @@ internal class SignUpViewModelTest {
             linkAuth = linkAuth,
             linkEventsReporter = linkEventsReporter,
             logger = logger,
+            savedStateHandle = savedStateHandle,
             navigate = navigate,
             navigateAndClearStack = navigateAndClearStack,
             moveToWeb = moveToWeb,

@@ -7,6 +7,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultShippingAddressSettingsDefinition
@@ -61,6 +62,7 @@ internal data class TestParameters(
         private fun playgroundSettings(block: (PlaygroundSettings) -> Unit = {}): PlaygroundSettings {
             val settings = PlaygroundSettings.createFromDefaults()
             settings[CustomerSettingsDefinition] = CustomerType.NEW
+            settings[CustomerSessionSettingsDefinition] = false
             settings[LinkSettingsDefinition] = false
             settings[CountrySettingsDefinition] = Country.GB
             settings[CurrencySettingsDefinition] = Currency.EUR

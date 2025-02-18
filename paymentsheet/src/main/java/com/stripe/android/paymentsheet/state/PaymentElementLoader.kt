@@ -18,6 +18,7 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
+import com.stripe.android.lpmfoundations.paymentmethod.IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfiguration
@@ -199,6 +200,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val initialPaymentSelection = async {
             retrieveInitialPaymentSelection(
                 savedSelection = savedSelection,
+                metadata = metadata.await(),
                 customer = customer.await(),
                 isGooglePayReady = isGooglePayReady,
             )
@@ -354,8 +356,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 paymentMethods = state.paymentMethods
                     .withDefaultPaymentMethodOrLastUsedPaymentMethodFirst(
                         savedSelection = savedSelection,
-                        defaultPaymentMethodState = state.defaultPaymentMethodState,
-                    ).filter { cardBrandFilter.isAccepted(it) }
+                        defaultPaymentMethodId = state.defaultPaymentMethodId,
+                        isPaymentMethodSetAsDefaultEnabled =
+                        metadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
+                            ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
+                    ).filter { cardBrandFilter.isAccepted(it) },
             )
         }
     }
@@ -532,7 +537,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             useAttestationEndpointsForLink = useAttestationEndpointsForLink,
             suppress2faModal = suppress2faModal,
             elementsSessionId = elementsSession.elementsSessionId,
-            initializationMode = initializationMode
+            initializationMode = initializationMode,
+            linkMode = elementsSession.linkSettings?.linkMode,
         )
     }
 
@@ -562,23 +568,23 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
     private suspend fun retrieveInitialPaymentSelection(
         savedSelection: Deferred<SavedSelection>,
+        metadata: PaymentMethodMetadata,
         customer: CustomerState?,
         isGooglePayReady: Boolean,
     ): PaymentSelection? {
-        val primaryPaymentSelection = when (val defaultPaymentMethodState = customer?.defaultPaymentMethodState) {
-            is CustomerState.DefaultPaymentMethodState.Enabled ->
-                customer.paymentMethods.firstOrNull {
-                    it.id == defaultPaymentMethodState.defaultPaymentMethodId
-                }?.toPaymentSelection()
-            CustomerState.DefaultPaymentMethodState.Disabled, null -> {
-                when (val selection = savedSelection.await()) {
-                    is SavedSelection.GooglePay -> PaymentSelection.GooglePay
-                    is SavedSelection.Link -> PaymentSelection.Link()
-                    is SavedSelection.PaymentMethod -> {
-                        customer?.paymentMethods?.find { it.id == selection.id }?.toPaymentSelection()
-                    }
-                    is SavedSelection.None -> null
+        val isDefaultPaymentMethodEnabled = metadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled ?: false
+        val primaryPaymentSelection = if (isDefaultPaymentMethodEnabled) {
+            customer?.paymentMethods?.firstOrNull {
+                it.id == customer.defaultPaymentMethodId
+            }?.toPaymentSelection()
+        } else {
+            when (val selection = savedSelection.await()) {
+                is SavedSelection.GooglePay -> PaymentSelection.GooglePay
+                is SavedSelection.Link -> PaymentSelection.Link()
+                is SavedSelection.PaymentMethod -> {
+                    customer?.paymentMethods?.find { it.id == selection.id }?.toPaymentSelection()
                 }
+                is SavedSelection.None -> null
             }
         }
 
@@ -753,13 +759,13 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
 private suspend fun List<PaymentMethod>.withDefaultPaymentMethodOrLastUsedPaymentMethodFirst(
     savedSelection: Deferred<SavedSelection>,
-    defaultPaymentMethodState: CustomerState.DefaultPaymentMethodState,
+    isPaymentMethodSetAsDefaultEnabled: Boolean,
+    defaultPaymentMethodId: String?,
 ): List<PaymentMethod> {
-    val primaryPaymentMethodId = when (defaultPaymentMethodState) {
-        is CustomerState.DefaultPaymentMethodState.Enabled -> defaultPaymentMethodState.defaultPaymentMethodId
-        CustomerState.DefaultPaymentMethodState.Disabled -> {
-            (savedSelection.await() as? SavedSelection.PaymentMethod)?.id
-        }
+    val primaryPaymentMethodId = if (isPaymentMethodSetAsDefaultEnabled) {
+        defaultPaymentMethodId
+    } else {
+        (savedSelection.await() as? SavedSelection.PaymentMethod)?.id
     }
 
     val primaryPaymentMethod = this.firstOrNull { it.id == primaryPaymentMethodId }

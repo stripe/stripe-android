@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -24,9 +25,6 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.analytics.code
-import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.isSaved
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
@@ -84,7 +82,7 @@ internal fun PaymentMethodVerticalLayoutUI(
     paymentMethods: List<DisplayablePaymentMethod>,
     displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
     savedPaymentMethodAction: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
-    selection: PaymentSelection?,
+    selection: PaymentMethodVerticalLayoutInteractor.Selection?,
     isEnabled: Boolean,
     onViewMorePaymentMethods: () -> Unit,
     onManageOneSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
@@ -120,11 +118,11 @@ internal fun PaymentMethodVerticalLayoutUI(
         }
 
         val selectedIndex = remember(selection, paymentMethods) {
-            if (selection == null || selection.isSaved) {
-                -1
-            } else {
-                val code = selection.code()
+            if (selection is PaymentMethodVerticalLayoutInteractor.Selection.New) {
+                val code = selection.code
                 paymentMethods.indexOfFirst { it.code == code }
+            } else {
+                -1
             }
         }
 
@@ -167,6 +165,7 @@ private fun EditButton(onClick: () -> Unit) {
             .testTag(TEST_TAG_EDIT_SAVED_CARD)
             .clickable(onClick = onClick)
             .padding(4.dp)
+            .fillMaxHeight()
     )
 }
 
@@ -180,6 +179,7 @@ private fun ViewMoreButton(
             .testTag(TEST_TAG_VIEW_MORE)
             .clickable(onClick = onViewMorePaymentMethods)
             .padding(4.dp)
+            .fillMaxHeight()
     ) {
         Text(
             stringResource(id = R.string.stripe_view_more),

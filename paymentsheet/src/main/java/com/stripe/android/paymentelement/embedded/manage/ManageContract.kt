@@ -20,9 +20,7 @@ internal sealed interface ManageResult : Parcelable {
     ) : ManageResult
 
     @Parcelize
-    data class Cancelled(
-        val customerState: CustomerState?,
-    ) : ManageResult
+    object Error : ManageResult
 
     companion object {
         internal const val EXTRA_RESULT = ActivityStarter.Result.EXTRA
@@ -36,7 +34,7 @@ internal sealed interface ManageResult : Parcelable {
                 BundleCompat.getParcelable(bundle, EXTRA_RESULT, ManageResult::class.java)
             }
 
-            return result ?: Cancelled(customerState = null)
+            return result ?: Error
         }
     }
 }

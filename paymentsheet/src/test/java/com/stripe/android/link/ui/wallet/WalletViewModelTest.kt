@@ -16,6 +16,7 @@ import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.uicore.forms.FormFieldEntry
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -24,6 +25,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.Result
+import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
 @RunWith(RobolectricTestRunner::class)
@@ -52,7 +54,8 @@ class WalletViewModelTest {
                 hasCompleted = false,
                 primaryButtonLabel = TestFactory.LINK_WALLET_PRIMARY_BUTTON_LABEL,
                 expiryDateInput = FormFieldEntry(""),
-                cvcInput = FormFieldEntry("")
+                cvcInput = FormFieldEntry(""),
+                canAddNewPaymentMethod = true,
             )
         )
     }
@@ -103,20 +106,6 @@ class WalletViewModelTest {
         )
 
         assertThat(navScreen).isEqualTo(LinkScreen.PaymentMethod)
-    }
-
-    @Test
-    fun `viewmodel should open card edit screen when onEditPaymentMethodClicked`() = runTest(dispatcher) {
-        var navScreen: LinkScreen? = null
-        fun navigate(screen: LinkScreen) {
-            navScreen = screen
-        }
-
-        val vm = createViewModel(navigate = ::navigate)
-
-        vm.onEditPaymentMethodClicked(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD)
-
-        assertThat(navScreen).isEqualTo(LinkScreen.CardEdit)
     }
 
     @Test
@@ -373,7 +362,14 @@ class WalletViewModelTest {
     fun `onSetDefaultClicked updates payment method as default successfully`() = runTest(dispatcher) {
         val card1 = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "card1", isDefault = false)
         val card2 = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "card2", isDefault = true)
-        val linkAccountManager = WalletLinkAccountManager()
+        val linkAccountManager = object : WalletLinkAccountManager() {
+            override suspend fun updatePaymentDetails(
+                updateParams: ConsumerPaymentDetailsUpdateParams
+            ): Result<ConsumerPaymentDetails> {
+                delay(CARD_PROCESSING_DELAY)
+                return super.updatePaymentDetails(updateParams)
+            }
+        }
         linkAccountManager.listPaymentDetailsResult = Result.success(
             ConsumerPaymentDetails(paymentDetails = listOf(card1, card2))
         )
@@ -386,11 +382,11 @@ class WalletViewModelTest {
 
         val viewModel = createViewModel(linkAccountManager = linkAccountManager)
 
-        linkAccountManager.listPaymentDetailsResult = Result.success(
-            ConsumerPaymentDetails(paymentDetails = listOf(updatedCard1, updatedCard2))
-        )
-
         viewModel.onSetDefaultClicked(card1)
+
+        assertThat(viewModel.uiState.value.cardBeingUpdated).isEqualTo(card1.id)
+
+        dispatcher.scheduler.advanceTimeBy(CARD_PROCESSING_COMPLETION_TIME)
 
         assertThat(linkAccountManager.updatePaymentDetailsCalls).containsExactly(
             ConsumerPaymentDetailsUpdateParams(
@@ -399,10 +395,10 @@ class WalletViewModelTest {
                 cardPaymentMethodCreateParamsMap = null
             )
         )
-
         assertThat(viewModel.uiState.value.paymentDetailsList).containsExactly(updatedCard1, updatedCard2)
-        assertThat(linkAccountManager.listPaymentDetailsCalls.size).isEqualTo(2)
+        assertThat(linkAccountManager.listPaymentDetailsCalls.size).isEqualTo(1)
         assertThat(viewModel.uiState.value.isProcessing).isFalse()
+        assertThat(viewModel.uiState.value.cardBeingUpdated).isNull()
         assertThat(viewModel.uiState.value.alertMessage).isNull()
     }
 
@@ -425,6 +421,7 @@ class WalletViewModelTest {
         viewModel.onSetDefaultClicked(card)
 
         assertThat(viewModel.uiState.value.isProcessing).isFalse()
+        assertThat(viewModel.uiState.value.cardBeingUpdated).isNull()
         assertThat(viewModel.uiState.value.alertMessage).isEqualTo(error.stripeErrorMessage())
         assertThat(logger.errorLogs).contains("WalletViewModel: Failed to set payment method as default" to error)
     }
@@ -497,9 +494,14 @@ class WalletViewModelTest {
             dismissWithResult = dismissWithResult
         )
     }
+
+    companion object {
+        private val CARD_PROCESSING_DELAY = 1.seconds
+        private val CARD_PROCESSING_COMPLETION_TIME = 1.1.seconds
+    }
 }
 
-private class WalletLinkAccountManager : FakeLinkAccountManager() {
+private open class WalletLinkAccountManager : FakeLinkAccountManager() {
     val listPaymentDetailsCalls = arrayListOf<Set<String>>()
     val updatePaymentDetailsCalls = arrayListOf<ConsumerPaymentDetailsUpdateParams>()
     val deletePaymentDetailsCalls = arrayListOf<String>()

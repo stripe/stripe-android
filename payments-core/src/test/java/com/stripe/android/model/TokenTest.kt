@@ -2,6 +2,8 @@ package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.parsers.TokenJsonParser
+import com.stripe.android.model.parsers.TokenSerializer
+import kotlinx.serialization.json.Json
 import org.json.JSONObject
 import java.util.Date
 import kotlin.test.Test
@@ -25,17 +27,31 @@ class TokenTest {
 
     @Test
     fun `BankAccount token is parsed correctly`() {
-        assertThat(TokenFixtures.BANK_TOKEN)
-            .isEqualTo(
-                Token(
-                    id = "btok_9xJAbronBnS9bH",
-                    livemode = false,
-                    created = Date(1484765567L * 1000L),
-                    used = false,
-                    type = Token.Type.BankAccount,
-                    bankAccount = BankAccountFixtures.BANK_ACCOUNT
-                )
+        val expectedToken =
+            Token(
+                id = "btok_9xJAbronBnS9bH",
+                livemode = false,
+                created = Date(1484765567L * 1000L),
+                used = false,
+                type = Token.Type.BankAccount,
+                bankAccount = BankAccountFixtures.BANK_ACCOUNT
             )
+        assertThat(TokenFixtures.BANK_TOKEN)
+            .isEqualTo(expectedToken)
+        assertThat(Json.decodeFromString(TokenSerializer, TokenFixtures.BANK_TOKEN_JSON.toString()))
+            .isEqualTo(expectedToken)
+    }
+
+    @Test
+    fun `TokenSerializer operations are inverse`() {
+        val expected = TokenFixtures.BANK_TOKEN
+        assertThat(
+            Json.decodeFromString(
+                TokenSerializer,
+                Json.encodeToString(TokenSerializer, expected)
+            )
+        )
+            .isEqualTo(expected)
     }
 
     @Test

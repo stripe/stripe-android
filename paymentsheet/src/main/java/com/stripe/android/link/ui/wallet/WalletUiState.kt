@@ -14,6 +14,8 @@ internal data class WalletUiState(
     val isProcessing: Boolean,
     val primaryButtonLabel: ResolvableString,
     val hasCompleted: Boolean,
+    val canAddNewPaymentMethod: Boolean,
+    val cardBeingUpdated: String? = null,
     val errorMessage: ResolvableString? = null,
     val expiryDateInput: FormFieldEntry = FormFieldEntry(null),
     val cvcInput: FormFieldEntry = FormFieldEntry(null),
@@ -34,16 +36,21 @@ internal data class WalletUiState(
             val isMissingCvcInput = cvcInput.isComplete.not()
 
             val disableButton = (isExpired && isMissingExpiryDateInput) ||
-                (requiresCvcRecollection && isMissingCvcInput)
+                (requiresCvcRecollection && isMissingCvcInput) || (cardBeingUpdated != null)
 
-            return if (hasCompleted) {
-                PrimaryButtonState.Completed
-            } else if (isProcessing) {
-                PrimaryButtonState.Processing
-            } else if (disableButton) {
-                PrimaryButtonState.Disabled
-            } else {
-                PrimaryButtonState.Enabled
+            return when {
+                hasCompleted -> {
+                    PrimaryButtonState.Completed
+                }
+                isProcessing -> {
+                    PrimaryButtonState.Processing
+                }
+                disableButton -> {
+                    PrimaryButtonState.Disabled
+                }
+                else -> {
+                    PrimaryButtonState.Enabled
+                }
             }
         }
 
@@ -65,7 +72,8 @@ internal data class WalletUiState(
         return copy(
             paymentDetailsList = response.paymentDetails,
             selectedItem = selectedItem,
-            isProcessing = false
+            isProcessing = false,
+            cardBeingUpdated = null
         )
     }
 }

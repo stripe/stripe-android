@@ -43,6 +43,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.SavedPaymentMethod
+import com.stripe.android.paymentsheet.utils.testMetadata
 import com.stripe.android.uicore.elements.TextFieldColors
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.strings.resolve
@@ -283,12 +284,13 @@ private fun BankAccountTextField(
 private fun UpdatePaymentMethodUi(interactor: UpdatePaymentMethodInteractor) {
     val state by interactor.state.collectAsState()
 
+    val isLoading = state.status == UpdatePaymentMethodInteractor.Status.Updating
     PrimaryButton(
         label = stringResource(id = PaymentSheetR.string.stripe_paymentsheet_save),
-        isLoading = state.status == UpdatePaymentMethodInteractor.Status.Updating,
+        isLoading = isLoading,
         isEnabled = state.cardBrandHasBeenChanged && state.status == UpdatePaymentMethodInteractor.Status.Idle,
         onButtonClick = { interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed) },
-        modifier = Modifier.testTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG)
+        modifier = Modifier.testTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).testMetadata("isLoading=$isLoading")
     )
 }
 

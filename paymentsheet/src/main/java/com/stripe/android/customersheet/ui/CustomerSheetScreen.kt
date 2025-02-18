@@ -137,7 +137,7 @@ internal fun SelectPaymentMethod(
 
         val paymentOptionsState = PaymentOptionsStateFactory.create(
             paymentMethods = viewState.savedPaymentMethods,
-            showGooglePay = viewState.isGooglePayEnabled,
+            showGooglePay = viewState.showGooglePay,
             showLink = false,
             currentSelection = viewState.paymentSelection,
             nameProvider = paymentMethodNameProvider,

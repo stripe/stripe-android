@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
@@ -16,6 +17,7 @@ import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmationModule
+import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import dagger.BindsInstance
@@ -32,7 +34,9 @@ internal annotation class NativeLinkScope
     modules = [
         NativeLinkModule::class,
         LinkViewModelModule::class,
+        ApplicationIdModule::class,
         DefaultConfirmationModule::class,
+        LinkPassthroughConfirmationModule::class,
     ]
 )
 internal interface NativeLinkComponent {
@@ -45,6 +49,7 @@ internal interface NativeLinkComponent {
     val webLinkActivityContract: WebLinkActivityContract
     val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory
     val linkAuth: LinkAuth
+    val savedStateHandle: SavedStateHandle
     val viewModel: LinkActivityViewModel
 
     @Component.Builder
