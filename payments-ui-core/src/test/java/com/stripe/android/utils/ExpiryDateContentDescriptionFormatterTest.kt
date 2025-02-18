@@ -1,5 +1,7 @@
 package com.stripe.android.utils
 
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.ui.core.elements.formatExpirationDateForAccessibility
@@ -83,6 +85,18 @@ class ExpiryDateContentDescriptionFormatterTest {
         val expected = resolvableString(
             R.string.stripe_expiration_date_year_incomplete_content_description,
             "December"
+        )
+
+        assertThat(result).isEqualTo(expected)
+    }
+
+    @Test
+    fun `formats month correctly based on locale`() {
+        AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("FR"))
+        val result = formatExpirationDateForAccessibility("126")
+        val expected = resolvableString(
+            R.string.stripe_expiration_date_year_incomplete_content_description,
+            "décembre"
         )
 
         assertThat(result).isEqualTo(expected)
