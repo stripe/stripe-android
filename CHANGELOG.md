@@ -5,6 +5,9 @@
 ### Financial Connections
 - [ADDED] Financial Connections now supports dark mode and will automatically adapt to the device's theme. [Learn more](https://docs.stripe.com/financial-connections/other-data-powered-products?platform=android#connections-customize-android) about configuring appearance settings.
 
+Dependencies updated in [10199](https://github.com/stripe/stripe-android/pull/10199):
+* Bumped Google Places from 3.3.0 to 3.5.0.
+
 ## 21.4.2 - 2025-02-10
 Bug fixes and improvements.
 
