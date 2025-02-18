@@ -158,6 +158,11 @@ internal class CustomerSheetPage(
             .performTextReplacement(text)
     }
 
+    private fun fillExpirationDate(text: String) {
+        composeTestRule.onNode(hasContentDescription(value = "Expiration date", substring = true))
+            .performTextReplacement(text)
+    }
+
     private fun clickDropdownMenu() {
         waitForIdle()
 
