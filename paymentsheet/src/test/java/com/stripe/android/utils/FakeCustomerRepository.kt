@@ -26,6 +26,9 @@ internal open class FakeCustomerRepository(
     },
     private val onUpdatePaymentMethod: () -> Result<PaymentMethod> = {
         Result.failure(NotImplementedError())
+    },
+    private val onSetDefaultPaymentMethod: () -> Result<Customer> = {
+        Result.failure(NotImplementedError())
     }
 ) : CustomerRepository {
     private val _detachRequests = Turbine<DetachRequest>()
@@ -33,6 +36,9 @@ internal open class FakeCustomerRepository(
 
     private val _updateRequests = Turbine<UpdateRequest>()
     val updateRequests: ReceiveTurbine<UpdateRequest> = _updateRequests
+
+    private val _setDefaultPaymentMethodRequests = Turbine<SetDefaultRequest>()
+    val setDefaultPaymentMethodRequests: ReceiveTurbine<SetDefaultRequest> = _setDefaultPaymentMethodRequests
 
     var error: Throwable? = null
 
@@ -83,6 +89,17 @@ internal open class FakeCustomerRepository(
         return onUpdatePaymentMethod()
     }
 
+    override suspend fun setDefaultPaymentMethod(
+        customerInfo: CustomerRepository.CustomerInfo,
+        paymentMethodId: String?
+    ): Result<Customer> {
+        _setDefaultPaymentMethodRequests.add(
+            SetDefaultRequest(paymentMethodId = paymentMethodId, customerInfo = customerInfo)
+        )
+
+        return onSetDefaultPaymentMethod()
+    }
+
     data class DetachRequest(
         val paymentMethodId: String,
         val customerInfo: CustomerRepository.CustomerInfo,
@@ -93,5 +110,10 @@ internal open class FakeCustomerRepository(
         val paymentMethodId: String,
         val customerInfo: CustomerRepository.CustomerInfo,
         val params: PaymentMethodUpdateParams,
+    )
+
+    data class SetDefaultRequest(
+        val paymentMethodId: String?,
+        val customerInfo: CustomerRepository.CustomerInfo,
     )
 }

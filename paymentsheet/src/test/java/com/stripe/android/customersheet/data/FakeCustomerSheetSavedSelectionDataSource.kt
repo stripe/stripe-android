@@ -15,7 +15,10 @@ internal class FakeCustomerSheetSavedSelectionDataSource(
         return savedSelection
     }
 
-    override suspend fun setSavedSelection(selection: SavedSelection?): CustomerSheetDataResult<Unit> {
+    override suspend fun setSavedSelection(
+        selection: SavedSelection?,
+        shouldSyncDefault: Boolean,
+    ): CustomerSheetDataResult<Unit> {
         return onSetSavedSelection?.invoke(selection) ?: run {
             savedSelection = CustomerSheetDataResult.success(selection)
             CustomerSheetDataResult.success(Unit)
