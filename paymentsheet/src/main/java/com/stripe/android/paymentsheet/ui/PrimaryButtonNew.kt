@@ -45,6 +45,7 @@ import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -59,6 +60,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeTheme
 import kotlinx.coroutines.delay
 
+internal const val PRIMARY_BUTTON_TEST_TAG = "PRIMARY_BUTTON_TEST_TAG"
 private const val FADE_ANIMATION_DURATION = 100
 private const val FADE_OUT_ANIMATION_DELAY = 90
 
@@ -122,6 +124,7 @@ internal fun PrimaryButton(
             TextButton(
                 onClick = onClick,
                 modifier = Modifier
+                    .testTag(PRIMARY_BUTTON_TEST_TAG)
                     .fillMaxWidth()
                     .defaultMinSize(
                         minHeight = dimensionResource(id = R.dimen.stripe_paymentsheet_primary_button_height)
