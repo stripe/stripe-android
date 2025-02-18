@@ -16,6 +16,8 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.callbacks.PAYMENT_ELEMENT_CALLBACK_INSTANCE_ID
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackStorage
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
@@ -75,6 +77,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val configurationHandler: FlowControllerConfigurationHandler,
     private val errorReporter: ErrorReporter,
     @InitializedViaCompose private val initializedViaCompose: Boolean,
+    @Named(PAYMENT_ELEMENT_CALLBACK_INSTANCE_ID) instanceId: String,
 ) : PaymentSheet.FlowController {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private val sepaMandateActivityLauncher: ActivityResultLauncher<SepaMandateContract.Args>
@@ -123,8 +126,7 @@ internal class DefaultFlowController @Inject internal constructor(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
                     activityResultLaunchers.forEach { it.unregister() }
-                    IntentConfirmationInterceptor.createIntentCallback = null
-                    ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
+                    PaymentElementCallbackStorage.remove(instanceId)
                 }
             }
         )
@@ -591,12 +593,16 @@ internal class DefaultFlowController @Inject internal constructor(
             statusBarColor: () -> Int?,
             paymentOptionCallback: PaymentOptionCallback,
             paymentResultCallback: PaymentSheetResultCallback,
+            instanceId: String,
             initializedViaCompose: Boolean,
         ): PaymentSheet.FlowController {
             val flowControllerViewModel = ViewModelProvider(
                 owner = viewModelStoreOwner,
-                factory = FlowControllerViewModel.Factory(statusBarColor())
-            )[FlowControllerViewModel::class.java]
+                factory = FlowControllerViewModel.Factory(statusBarColor(), instanceId),
+            ).get(
+                key = "FlowControllerViewModel(instance = $instanceId)",
+                modelClass = FlowControllerViewModel::class.java
+            )
 
             val flowControllerStateComponent = flowControllerViewModel.flowControllerStateComponent
 

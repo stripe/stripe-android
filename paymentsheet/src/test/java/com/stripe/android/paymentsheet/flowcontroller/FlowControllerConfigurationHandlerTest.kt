@@ -66,6 +66,7 @@ class FlowControllerConfigurationHandlerTest {
         viewModel = FlowControllerViewModel(
             application = ApplicationProvider.getApplicationContext(),
             handle = SavedStateHandle(),
+            instanceId = "PaymentSheet",
             statusBarColor = null,
         )
     }

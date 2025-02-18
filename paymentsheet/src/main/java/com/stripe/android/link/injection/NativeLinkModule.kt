@@ -40,6 +40,7 @@ import com.stripe.android.link.repositories.LinkApiRepository
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentelement.callbacks.PAYMENT_ELEMENT_CALLBACK_INSTANCE_ID
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.link.LinkCardBrandConfirmationDefinition
@@ -148,6 +149,13 @@ internal interface NativeLinkModule {
         @NativeLinkScope
         fun provideDurationProvider(): DurationProvider {
             return DefaultDurationProvider.instance
+        }
+
+        @Named(PAYMENT_ELEMENT_CALLBACK_INSTANCE_ID)
+        @Provides
+        @NativeLinkScope
+        fun providesInstanceId(): String {
+            return "Link"
         }
 
         @Provides

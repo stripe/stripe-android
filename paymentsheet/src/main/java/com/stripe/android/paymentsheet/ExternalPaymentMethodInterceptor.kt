@@ -17,7 +17,6 @@ internal object ExternalPaymentMethodInterceptor {
         externalPaymentMethodLauncher: ActivityResultLauncher<ExternalPaymentMethodInput>?,
         errorReporter: ErrorReporter,
     ) {
-        val externalPaymentMethodConfirmHandler = this.externalPaymentMethodConfirmHandler
         if (externalPaymentMethodConfirmHandler == null) {
             errorReporter.report(
                 ErrorReporter.ExpectedErrorEvent.EXTERNAL_PAYMENT_METHOD_CONFIRM_HANDLER_NULL,

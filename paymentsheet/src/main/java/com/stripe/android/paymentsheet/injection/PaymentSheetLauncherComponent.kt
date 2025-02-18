@@ -5,10 +5,12 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
+import com.stripe.android.paymentelement.callbacks.PAYMENT_ELEMENT_CALLBACK_INSTANCE_ID
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton
@@ -33,6 +35,11 @@ internal interface PaymentSheetLauncherComponent {
 
         @BindsInstance
         fun savedStateHandle(handle: SavedStateHandle): Builder
+
+        @BindsInstance
+        fun instanceId(
+            @Named(PAYMENT_ELEMENT_CALLBACK_INSTANCE_ID) instanceId: String
+        ): Builder
 
         fun build(): PaymentSheetLauncherComponent
     }

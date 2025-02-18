@@ -20,6 +20,8 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackStorage
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
@@ -66,7 +68,10 @@ class PaymentSheet internal constructor(
     ) : this(
         DefaultPaymentSheetLauncher(activity, callback)
     ) {
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
+        setPaymentSheetCallbacks(
+            createIntentCallback = null,
+            externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
+        )
     }
 
     /**
@@ -85,7 +90,10 @@ class PaymentSheet internal constructor(
     ) : this(
         DefaultPaymentSheetLauncher(activity, paymentResultCallback)
     ) {
-        IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+        setPaymentSheetCallbacks(
+            createIntentCallback = createIntentCallback,
+            externalPaymentMethodConfirmHandler = null,
+        )
     }
 
     /**
@@ -107,8 +115,10 @@ class PaymentSheet internal constructor(
     ) : this(
         DefaultPaymentSheetLauncher(activity, paymentResultCallback)
     ) {
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
-        IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+        setPaymentSheetCallbacks(
+            createIntentCallback = createIntentCallback,
+            externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
+        )
     }
 
     /**
@@ -139,7 +149,10 @@ class PaymentSheet internal constructor(
     ) : this(
         DefaultPaymentSheetLauncher(fragment, callback)
     ) {
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
+        setPaymentSheetCallbacks(
+            createIntentCallback = null,
+            externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
+        )
     }
 
     /**
@@ -158,7 +171,10 @@ class PaymentSheet internal constructor(
     ) : this(
         DefaultPaymentSheetLauncher(fragment, paymentResultCallback)
     ) {
-        IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+        setPaymentSheetCallbacks(
+            createIntentCallback = createIntentCallback,
+            externalPaymentMethodConfirmHandler = null,
+        )
     }
 
     /**
@@ -180,8 +196,10 @@ class PaymentSheet internal constructor(
     ) : this(
         DefaultPaymentSheetLauncher(fragment, paymentResultCallback)
     ) {
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
-        IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+        setPaymentSheetCallbacks(
+            createIntentCallback = createIntentCallback,
+            externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
+        )
     }
 
     /**
@@ -236,17 +254,19 @@ class PaymentSheet internal constructor(
          */
         @Composable
         fun build(): PaymentSheet {
-            initializeCallbacks()
-            return rememberPaymentSheet(resultCallback)
+            // Callbacks handled internally
+            return internalRememberPaymentSheet(
+                createIntentCallback = createIntentCallback,
+                externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
+                paymentResultCallback = resultCallback,
+            )
         }
 
         private fun initializeCallbacks() {
-            createIntentCallback?.let {
-                IntentConfirmationInterceptor.createIntentCallback = it
-            }
-            externalPaymentMethodConfirmHandler?.let {
-                ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = it
-            }
+            setPaymentSheetCallbacks(
+                createIntentCallback = createIntentCallback,
+                externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
+            )
         }
     }
 
@@ -2129,17 +2149,20 @@ class PaymentSheet internal constructor(
              */
             @Composable
             fun build(): FlowController {
-                initializeCallbacks()
-                return rememberPaymentSheetFlowController(this)
+                // Callbacks initialized internally
+                return internalRememberPaymentSheetFlowController(
+                    createIntentCallback = createIntentCallback,
+                    externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
+                    paymentOptionCallback = paymentOptionCallback,
+                    paymentResultCallback = resultCallback,
+                )
             }
 
             private fun initializeCallbacks() {
-                createIntentCallback?.let {
-                    IntentConfirmationInterceptor.createIntentCallback = it
-                }
-                externalPaymentMethodConfirmHandler?.let {
-                    ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = it
-                }
+                setPaymentSheetCallbacks(
+                    createIntentCallback = createIntentCallback,
+                    externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
+                )
             }
         }
 
@@ -2203,8 +2226,7 @@ class PaymentSheet internal constructor(
                 paymentOptionCallback: PaymentOptionCallback,
                 paymentResultCallback: PaymentSheetResultCallback
             ): FlowController {
-                ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler =
-                    externalPaymentMethodConfirmHandler
+                setFlowControllerCallbacks(externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler)
                 return FlowControllerFactory(
                     activity,
                     paymentOptionCallback,
@@ -2230,7 +2252,7 @@ class PaymentSheet internal constructor(
                 createIntentCallback: CreateIntentCallback,
                 paymentResultCallback: PaymentSheetResultCallback,
             ): FlowController {
-                IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+                setFlowControllerCallbacks(createIntentCallback = createIntentCallback)
                 return FlowControllerFactory(
                     activity,
                     paymentOptionCallback,
@@ -2261,9 +2283,10 @@ class PaymentSheet internal constructor(
                 createIntentCallback: CreateIntentCallback,
                 paymentResultCallback: PaymentSheetResultCallback,
             ): FlowController {
-                IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
-                ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler =
-                    externalPaymentMethodConfirmHandler
+                setFlowControllerCallbacks(
+                    createIntentCallback = createIntentCallback,
+                    externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
+                )
                 return FlowControllerFactory(
                     activity,
                     paymentOptionCallback,
@@ -2311,8 +2334,7 @@ class PaymentSheet internal constructor(
                 paymentOptionCallback: PaymentOptionCallback,
                 paymentResultCallback: PaymentSheetResultCallback
             ): FlowController {
-                ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler =
-                    externalPaymentMethodConfirmHandler
+                setFlowControllerCallbacks(externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler)
                 return FlowControllerFactory(
                     fragment,
                     paymentOptionCallback,
@@ -2338,7 +2360,7 @@ class PaymentSheet internal constructor(
                 createIntentCallback: CreateIntentCallback,
                 paymentResultCallback: PaymentSheetResultCallback,
             ): FlowController {
-                IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+                setFlowControllerCallbacks(createIntentCallback = createIntentCallback)
                 return FlowControllerFactory(
                     fragment,
                     paymentOptionCallback,
@@ -2369,9 +2391,10 @@ class PaymentSheet internal constructor(
                 externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
                 paymentResultCallback: PaymentSheetResultCallback,
             ): FlowController {
-                ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler =
-                    externalPaymentMethodConfirmHandler
-                IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+                setFlowControllerCallbacks(
+                    createIntentCallback = createIntentCallback,
+                    externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
+                )
                 return FlowControllerFactory(
                     fragment,
                     paymentOptionCallback,
@@ -2382,6 +2405,26 @@ class PaymentSheet internal constructor(
     }
 
     companion object {
+        fun setPaymentSheetCallbacks(
+            createIntentCallback: CreateIntentCallback? = null,
+            externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
+        ) {
+            PaymentElementCallbackStorage[PAYMENT_SHEET_KEY] = PaymentElementCallbacks(
+                createIntentCallback = createIntentCallback,
+                externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
+            )
+        }
+
+        fun setFlowControllerCallbacks(
+            createIntentCallback: CreateIntentCallback? = null,
+            externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
+        ) {
+            PaymentElementCallbackStorage[FLOW_CONTROLLER_KEY] = PaymentElementCallbacks(
+                createIntentCallback = createIntentCallback,
+                externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
+            )
+        }
+
         /**
          * Deletes all persisted authentication state associated with a customer.
          *
@@ -2394,5 +2437,8 @@ class PaymentSheet internal constructor(
         fun resetCustomer(context: Context) {
             LinkStore(context).clear()
         }
+
+        private const val PAYMENT_SHEET_KEY = "PaymentSheet"
+        private const val FLOW_CONTROLLER_KEY = "PaymentSheet"
     }
 }
