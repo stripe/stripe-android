@@ -38,6 +38,7 @@ internal class IntentConfirmationFlowTest {
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 optionsParams = null,
                 shouldSave = false,
+                extraParams = null,
             ),
             confirmationParameters = ConfirmationDefinition.Parameters(
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
@@ -80,6 +81,7 @@ internal class IntentConfirmationFlowTest {
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 optionsParams = null,
                 shouldSave = false,
+                extraParams = null,
             ),
             confirmationParameters = ConfirmationDefinition.Parameters(
                 initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
@@ -258,6 +260,7 @@ internal class IntentConfirmationFlowTest {
             createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             optionsParams = null,
             shouldSave = false,
+            extraParams = null,
         )
 
         val DEFERRED_CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(

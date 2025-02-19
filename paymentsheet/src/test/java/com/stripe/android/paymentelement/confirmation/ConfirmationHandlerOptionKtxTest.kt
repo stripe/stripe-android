@@ -49,6 +49,7 @@ class ConfirmationHandlerOptionKtxTest {
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 optionsParams = PaymentMethodOptionsParams.Card(network = "cartes_bancaires"),
                 shouldSave = false,
+                extraParams = null,
             )
         )
     }
@@ -69,6 +70,7 @@ class ConfirmationHandlerOptionKtxTest {
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 optionsParams = null,
                 shouldSave = false,
+                extraParams = null,
             )
         )
     }
@@ -89,6 +91,7 @@ class ConfirmationHandlerOptionKtxTest {
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 optionsParams = null,
                 shouldSave = true,
+                extraParams = null,
             )
         )
     }
@@ -139,6 +142,7 @@ class ConfirmationHandlerOptionKtxTest {
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 optionsParams = null,
                 shouldSave = false,
+                extraParams = null,
             )
         )
     }

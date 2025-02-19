@@ -173,6 +173,7 @@ internal class LinkInlineSignupConfirmationDefinition(
             optionsParams = PaymentMethodOptionsParams.Card(
                 setupFutureUsage = saveOption.setupFutureUsage,
             ),
+            extraParams = null,
             shouldSave = saveOption.shouldSave(),
         )
     }
@@ -181,6 +182,7 @@ internal class LinkInlineSignupConfirmationDefinition(
         return PaymentMethodConfirmationOption.New(
             createParams = createParams,
             optionsParams = optionsParams,
+            extraParams = null,
             shouldSave = saveOption.shouldSave(),
         )
     }
