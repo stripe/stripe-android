@@ -216,8 +216,8 @@ internal class VerticalModePaymentSheetActivityTest {
         managePage.waitUntilVisible()
         managePage.clickEdit("pm_67890")
         editPage.clickRemove()
+        editPage.waitUntilMissing()
 
-        verticalModePage.waitUntilVisible()
         verticalModePage.assertDoesNotHaveSavedPaymentMethods()
         verticalModePage.assertPrimaryButton(isNotEnabled())
     }
