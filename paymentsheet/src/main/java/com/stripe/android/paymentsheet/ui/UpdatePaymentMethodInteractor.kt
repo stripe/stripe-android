@@ -76,6 +76,9 @@ internal typealias PaymentMethodUpdateOperation = suspend (
     paymentMethod: PaymentMethod,
     brand: CardBrand
 ) -> Result<PaymentMethod>
+internal typealias PaymentMethodSetAsDefaultOperation = suspend (
+    paymentMethod: PaymentMethod
+) -> Result<Unit>
 
 internal class DefaultUpdatePaymentMethodInteractor(
     isLiveMode: Boolean,
@@ -85,6 +88,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     shouldShowSetAsDefaultCheckbox: Boolean,
     private val removeExecutor: PaymentMethodRemoveOperation,
     private val updateCardBrandExecutor: PaymentMethodUpdateOperation,
+    val setDefaultPaymentMethodExecutor: PaymentMethodSetAsDefaultOperation,
     private val onBrandChoiceOptionsShown: (CardBrand) -> Unit,
     private val onBrandChoiceOptionsDismissed: (CardBrand) -> Unit,
     workContext: CoroutineContext = Dispatchers.Default,
