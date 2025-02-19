@@ -255,7 +255,7 @@ internal fun TextFieldUi(
     trailingIcon: TextFieldIcon?,
     showOptionalLabel: Boolean,
     shouldShowError: Boolean,
-    shouldAnnounceLabel: Boolean,
+    shouldAnnounceLabel: Boolean = true,
     modifier: Modifier = Modifier,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
