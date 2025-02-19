@@ -47,6 +47,7 @@ internal data class SharedPartnerAuthState(
                 authenticationStatus !is Success &&
                 // Failures posting institution -> don't allow back navigation
                 payload !is Fail &&
+                // No back navigation after creating the new auth session in the relink flow
                 !isNetworkingRelinkSession
 
     sealed interface ViewEffect {

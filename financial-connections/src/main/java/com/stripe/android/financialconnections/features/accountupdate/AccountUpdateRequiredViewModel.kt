@@ -62,11 +62,7 @@ internal class AccountUpdateRequiredViewModel @AssistedInject constructor(
             val referrer = state.referrer
             when (val type = requireNotNull(state.payload()?.type)) {
                 is Type.Repair -> {
-                    if (type.authorization != null) {
-                        openBankAuthRepair(type.institution, type.authorization, referrer)
-                    } else {
-                        handleUnsupportedRepairAction(referrer)
-                    }
+                    openBankAuthRepair(type.institution, type.authorization, referrer)
                 }
                 is Type.Supportability -> {
                     openPartnerAuth(type.institution, referrer)
@@ -75,23 +71,12 @@ internal class AccountUpdateRequiredViewModel @AssistedInject constructor(
         }
     }
 
-    private fun handleUnsupportedRepairAction(referrer: Pane) {
-        eventTracker.logError(
-            extraMessage = "Updating a repair account, but repairs are not supported in Mobile.",
-            error = UnclassifiedError("UpdateRepairAccountError"),
-            logger = logger,
-            pane = PANE,
-        )
-        // Fall back to the institution picker for now
-        navigationManager.tryNavigateTo(InstitutionPicker(referrer))
-    }
-
     private fun openBankAuthRepair(
         institution: FinancialConnectionsInstitution?,
-        authorization: String,
+        authorization: String?,
         referrer: Pane,
     ) {
-        if (institution != null) {
+        if (institution != null && authorization != null) {
             updateLocalManifest {
                 it.copy(activeInstitution = institution)
             }
@@ -99,6 +84,15 @@ internal class AccountUpdateRequiredViewModel @AssistedInject constructor(
             pendingRepairRepository.set(authorization)
             navigationManager.tryNavigateTo(Destination.BankAuthRepair(referrer))
         } else {
+            val missingAuth = authorization == null
+            val missingInstitution = institution == null
+            eventTracker.logError(
+                extraMessage = "Unable to open repair flow " +
+                    "(missing auth: $missingAuth, missing institution: $missingInstitution).",
+                error = UnclassifiedError("UpdateRepairAccountError"),
+                logger = logger,
+                pane = PANE,
+            )
             // Fall back to the institution picker
             navigationManager.tryNavigateTo(InstitutionPicker(referrer))
         }
