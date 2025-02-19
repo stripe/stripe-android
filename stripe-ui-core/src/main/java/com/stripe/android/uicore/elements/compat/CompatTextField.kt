@@ -127,7 +127,7 @@ import androidx.compose.ui.R as ComposeUiR
  * this text field in different states. See [TextFieldDefaults.textFieldColors]
  */
 @Composable
-internal fun CompatTextField(
+fun CompatTextField(
     value: TextFieldValue,
     onValueChange: (TextFieldValue) -> Unit,
     modifier: Modifier = Modifier,

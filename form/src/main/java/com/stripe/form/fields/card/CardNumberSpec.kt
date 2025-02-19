@@ -22,7 +22,7 @@ import com.stripe.form.FormFieldState
 import com.stripe.form.ValidationResult
 import com.stripe.form.ValueChange
 import com.stripe.form.fields.TextFieldSpec
-import com.stripe.form.parcelableKey
+import com.stripe.form.key
 import com.stripe.form.text.TextSpec
 
 @Stable
@@ -38,8 +38,8 @@ data class CardNumberSpec(
             modifier = modifier,
             spec = TextFieldSpec(
                 state = TextFieldSpec.TextFieldState(
-                    key = state.key,
-                    label = state.label?.invoke(cardNumber),
+                    key = key("cardNumberInput"),
+                    label = state.label,
                     initialValue = TextFieldValue(state.initialValue),
                     validator = {
                         state.validator(it.text)
@@ -64,7 +64,7 @@ data class CardNumberSpec(
                     ),
                     maxLength = state.getCardBrand(cardNumber)
                         .getMaxLengthForCardNumber(cardNumber),
-                    visualTransformation = state.getVisualTransformation(cardNumber),
+                    visualTransformation = state.visualTransformation,
                     readOnly = state.readOnly
                 )
             )
@@ -74,21 +74,19 @@ data class CardNumberSpec(
     @Stable
     data class State(
         val initialValue: String = "",
-        val label: ((String) -> ContentSpec?)? = {
-            TextSpec("Card Number")
-        },
+        val label: ContentSpec? = TextSpec("Card Number"),
         val getCardBrand: (String) -> CardBrand = { CardBrand.Visa },
-        val readOnly: Boolean = true,
-        val getVisualTransformation: (String) -> VisualTransformation = { CardNumberVisualTransformation },
+        val readOnly: Boolean = false,
+        val visualTransformation: VisualTransformation = CardNumberVisualTransformation,
         override val onValueChange: (ValueChange<String>) -> Unit,
         override val validator: (String) -> ValidationResult = { ValidationResult.Valid }
     ) : FormFieldState<String> {
         override val key = KEY
 
-        companion object {
-            val KEY = parcelableKey("cardNumber")
-        }
+    }
 
+    companion object {
+        val KEY = key<String>("cardNumber")
     }
 }
 

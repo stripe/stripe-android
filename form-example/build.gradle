@@ -2,7 +2,6 @@ apply from: configs.androidApplication
 
 apply plugin: 'com.emergetools.android'
 apply plugin: 'com.google.firebase.appdistribution'
-apply plugin: 'com.google.gms.google-services'
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
@@ -37,7 +36,7 @@ android {
 }
 
 dependencies {
-    api("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.8")
+    implementation project(":form")
 
     implementation libs.androidx.activity
     implementation libs.androidx.appCompat
@@ -48,6 +47,7 @@ dependencies {
     implementation libs.compose.materialIcons
     implementation libs.compose.ui
     implementation libs.compose.uiToolingPreview
+    implementation libs.compose.navigation
     implementation libs.loggingInterceptor
     implementation libs.material
     implementation platform('androidx.compose:compose-bom:2024.04.01')

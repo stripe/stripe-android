@@ -18,7 +18,7 @@ import com.stripe.form.ValidationResult
 import com.stripe.form.Validator
 import com.stripe.form.ValueChange
 import com.stripe.form.fields.TextFieldSpec
-import com.stripe.form.parcelableKey
+import com.stripe.form.key
 import com.stripe.form.text.TextSpec
 import java.util.Calendar
 
@@ -35,7 +35,7 @@ data class ExpiryDateSpec(
             modifier = modifier,
             spec = TextFieldSpec(
                 state = TextFieldSpec.TextFieldState(
-                    key = state.key,
+                    key = key("dateInput"),
                     label = TextSpec("MM/YY"),
                     initialValue = TextFieldValue(state.initialValue),
                     validator = {
@@ -47,7 +47,7 @@ data class ExpiryDateSpec(
                             ValueChange(
                                 key = change.key,
                                 value = change.value.text,
-                                isComplete = change.isComplete
+                                isComplete = state.validator(change.value.text).isValid
                             )
                         )
                     },
@@ -68,10 +68,10 @@ data class ExpiryDateSpec(
         override val validator: (String) -> ValidationResult = { ExpiryValidator.validateResult(it) }
     ): FormFieldState<String> {
         override val key = KEY
+    }
 
-        companion object {
-            val KEY = parcelableKey("expiryDate")
-        }
+    companion object {
+        val KEY = key<String>("expiryDate")
     }
 }
 

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -15,17 +16,20 @@ import com.stripe.android.model.CardBrand
 import com.stripe.form.ContentBox
 import com.stripe.form.FormFieldSpec
 import com.stripe.form.FormFieldState
+import com.stripe.form.Key
 import com.stripe.form.ValidationResult
+import com.stripe.form.Validator
 import com.stripe.form.ValueChange
-import com.stripe.form.parcelableKey
+import kotlinx.parcelize.Parcelize
 
 class CardDetailsSpec(
     override val state: State
-) : FormFieldSpec<Any> {
+) : FormFieldSpec<CardDetailsSpec.Output> {
 
     @Composable
     override fun Content(modifier: Modifier) {
         var cardBrand by remember(state) { mutableStateOf(CardBrand.Unknown) }
+        var output by remember { mutableStateOf(Output()) }
         Column(
             modifier = modifier
         ) {
@@ -37,7 +41,7 @@ class CardDetailsSpec(
                         initialValue = state.cardNumber,
                         onValueChange = {
                             cardBrand = CardUtils.getPossibleCardBrand(it.value)
-                            state.onValueChange(it as ValueChange<Any>)
+                            output = output.copy(cardNumberChange = it)
                         },
                         getCardBrand = {
                             cardBrand
@@ -56,7 +60,7 @@ class CardDetailsSpec(
                         state = ExpiryDateSpec.State(
                             initialValue = state.expiryDate,
                             onValueChange = {
-                                state.onValueChange(it as ValueChange<Any>)
+                                output = output.copy(expiryDateChange = it)
                             }
                         )
                     )
@@ -70,7 +74,7 @@ class CardDetailsSpec(
                             initialValue = state.cvc,
                             cardBrand = cardBrand,
                             onValueChange = {
-                                state.onValueChange(it as ValueChange<Any>)
+                                output = output.copy(cvcChange = it)
                             },
                             validator = { ValidationResult.Valid }
                         )
@@ -78,14 +82,41 @@ class CardDetailsSpec(
                 )
             }
         }
+
+        LaunchedEffect(output) {
+            state.onValueChange(
+                ValueChange(
+                    key = state.key,
+                    value = output,
+                    isComplete = state.validator(output).isValid
+                )
+            )
+        }
     }
 
     data class State(
         val cardNumber: String = "",
         val expiryDate: String = "",
         val cvc: String = "",
-        override val key: Parcelable = parcelableKey(""),
-        override val onValueChange: (ValueChange<Any>) -> Unit,
-        override val validator: (Any) -> ValidationResult = { ValidationResult.Valid },
-    ): FormFieldState<Any>
+        override val key: Key<Output>,
+        override val onValueChange: (ValueChange<Output>) -> Unit,
+        override val validator: (Output) -> ValidationResult = { CardDetailsValidator.validateResult(it) },
+    ) : FormFieldState<Output>
+
+    @Parcelize
+    data class Output(
+        val cardNumberChange: ValueChange<String>? = null,
+        val cvcChange: ValueChange<String>? = null,
+        val expiryDateChange: ValueChange<String>? = null
+    ) : Parcelable
+}
+
+private object CardDetailsValidator : Validator<CardDetailsSpec.Output> {
+    override fun validateResult(value: CardDetailsSpec.Output): ValidationResult {
+        val isValid =
+            value.cardNumberChange?.isComplete == true && value.expiryDateChange?.isComplete == true && value.cvcChange?.isComplete == true
+        if (isValid) return ValidationResult.Valid
+        return ValidationResult.Invalid()
+    }
+
 }

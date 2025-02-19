@@ -12,7 +12,7 @@ import com.stripe.form.FormFieldState
 import com.stripe.form.ValidationResult
 import com.stripe.form.ValueChange
 import com.stripe.form.fields.TextFieldSpec
-import com.stripe.form.parcelableKey
+import com.stripe.form.key
 import com.stripe.form.text.ResolvableTextSpec
 import com.stripe.android.R as StripeR
 
@@ -26,7 +26,7 @@ data class CvcSpec(
             modifier = modifier,
             spec = TextFieldSpec(
                 state = TextFieldSpec.TextFieldState(
-                    key = state.key,
+                    key = key("cvcInput"),
                     label = when (state.cardBrand) {
                         CardBrand.AmericanExpress -> {
                             ResolvableTextSpec(StripeR.string.stripe_cvc_amex_hint)
@@ -44,7 +44,7 @@ data class CvcSpec(
                             ValueChange(
                                 key = change.key,
                                 value = change.value.text,
-                                isComplete = change.isComplete
+                                isComplete = state.validator(change.value.text).isValid
                             )
                         )
                     },
@@ -67,6 +67,6 @@ data class CvcSpec(
     }
 
     companion object {
-        val KEY = parcelableKey("cvc")
+        val KEY = key<String>("cvc")
     }
 }
