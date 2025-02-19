@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 21.5.1 - 2025-02-19
+
 ## 21.5.0 - 2025-02-18
 ### CardScan
 * [FIXED][10181](https://github.com/stripe/stripe-android/pull/10181) Fixed a crash that happened on some devices with odd camera-to-screen ratios
