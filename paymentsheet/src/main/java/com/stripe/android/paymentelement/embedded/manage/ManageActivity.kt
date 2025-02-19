@@ -84,14 +84,18 @@ internal class ManageActivity : AppCompatActivity() {
                         finish()
                     }
                 ) {
-                    val screen by manageNavigator.screen.collectAsState()
-                    Box(modifier = Modifier.padding(bottom = 20.dp)) {
-                        ScreenContent(manageNavigator, screen)
-                    }
-                    LaunchedEffect(screen) {
-                        manageNavigator.result.collect { result ->
-                            setManageResult()
-                            finish()
+                    var hasResult by remember { mutableStateOf(false) }
+                    if (!hasResult) {
+                        val screen by manageNavigator.screen.collectAsState()
+                        Box(modifier = Modifier.padding(bottom = 20.dp)) {
+                            ScreenContent(manageNavigator, screen)
+                        }
+                        LaunchedEffect(screen) {
+                            manageNavigator.result.collect { result ->
+                                setManageResult()
+                                finish()
+                                hasResult = true
+                            }
                         }
                     }
                 }
