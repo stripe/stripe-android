@@ -39,4 +39,36 @@ sealed class PaymentMethodExtraParams(
             const val PARAM_CONFIRMED = "confirmed"
         }
     }
+
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class Card(
+        val setAsDefault: Boolean? = null
+    ) : PaymentMethodExtraParams(PaymentMethod.Type.BacsDebit) {
+        override fun createTypeParams(): List<Pair<String, Any?>> {
+            return listOf(
+                PARAM_SET_AS_DEFAULT_PAYMENT_METHOD to setAsDefault?.toString()
+            )
+        }
+
+        internal companion object {
+            const val PARAM_SET_AS_DEFAULT_PAYMENT_METHOD = "set_as_default_payment_method"
+        }
+    }
+
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class USBankAccount(
+        val setAsDefault: Boolean? = null
+    ) : PaymentMethodExtraParams(PaymentMethod.Type.BacsDebit) {
+        override fun createTypeParams(): List<Pair<String, Any?>> {
+            return listOf(
+                PARAM_SET_AS_DEFAULT_PAYMENT_METHOD to setAsDefault?.toString()
+            )
+        }
+
+        internal companion object {
+            const val PARAM_SET_AS_DEFAULT_PAYMENT_METHOD = "set_as_default_payment_method"
+        }
+    }
 }
