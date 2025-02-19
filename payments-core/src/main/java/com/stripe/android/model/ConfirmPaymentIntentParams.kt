@@ -124,7 +124,8 @@ constructor(
      * Indicates that this should be the default payment method going forward
      */
     var setAsDefaultPaymentMethod: Boolean? = null,
-    ) : ConfirmStripeIntentParams {
+
+) : ConfirmStripeIntentParams {
     fun shouldSavePaymentMethod(): Boolean {
         return savePaymentMethod == true
     }
@@ -399,7 +400,7 @@ constructor(
             mandateId: String? = null,
             mandateData: MandateDataParams? = null,
             setupFutureUsage: SetupFutureUsage? = null,
-            shipping: Shipping? = null
+            shipping: Shipping? = null,
         ): ConfirmPaymentIntentParams {
             return ConfirmPaymentIntentParams(
                 clientSecret = clientSecret,
@@ -409,7 +410,7 @@ constructor(
                 mandateId = mandateId,
                 mandateData = mandateData,
                 setupFutureUsage = setupFutureUsage,
-                shipping = shipping
+                shipping = shipping,
             )
         }
 
@@ -441,7 +442,8 @@ constructor(
             mandateData: MandateDataParams? = null,
             setupFutureUsage: SetupFutureUsage? = null,
             shipping: Shipping? = null,
-            paymentMethodOptions: PaymentMethodOptionsParams? = null
+            paymentMethodOptions: PaymentMethodOptionsParams? = null,
+            setAsDefaultPaymentMethod: Boolean? = null,
         ): ConfirmPaymentIntentParams {
             return ConfirmPaymentIntentParams(
                 clientSecret = clientSecret,
@@ -451,7 +453,8 @@ constructor(
                 mandateData = mandateData,
                 setupFutureUsage = setupFutureUsage,
                 shipping = shipping,
-                paymentMethodOptions = paymentMethodOptions
+                paymentMethodOptions = paymentMethodOptions,
+                setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
             )
         }
 
