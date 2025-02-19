@@ -6,6 +6,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
@@ -177,6 +178,13 @@ class ConfirmPaymentIntentParamsFactoryTest {
     )
 
     @Test
+    fun `create() without SFU should contain mandate data for sepa_debit`() = mandateDataTest(
+        setupFutureUsage = null,
+        expectedMandateDataParams = MandateDataParams(MandateDataParams.Type.Online.DEFAULT),
+        paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
+    )
+
+    @Test
     fun `create() with 'OneTime' SFU should not contain any mandate data`() = mandateDataTest(
         setupFutureUsage = StripeIntent.Usage.OneTime,
         expectedMandateDataParams = null,
@@ -196,7 +204,8 @@ class ConfirmPaymentIntentParamsFactoryTest {
 
     private fun mandateDataTest(
         setupFutureUsage: StripeIntent.Usage?,
-        expectedMandateDataParams: MandateDataParams?
+        expectedMandateDataParams: MandateDataParams?,
+        paymentMethod: PaymentMethod = PaymentMethodFactory.cashAppPay(),
     ) {
         val factoryWithConfig = ConfirmPaymentIntentParamsFactory(
             clientSecret = CLIENT_SECRET,
@@ -207,7 +216,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
         )
 
         val result = factoryWithConfig.create(
-            paymentMethod = PaymentMethodFactory.cashAppPay(),
+            paymentMethod = paymentMethod,
             optionsParams = null,
         )
 

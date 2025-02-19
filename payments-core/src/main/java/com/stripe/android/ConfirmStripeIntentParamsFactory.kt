@@ -123,7 +123,7 @@ internal class ConfirmSetupIntentParamsFactory(
 private fun mandateData(intent: StripeIntent, paymentMethodType: PaymentMethod.Type?): MandateDataParams? {
     return paymentMethodType?.let { type ->
         val supportsAddingMandateData = when (intent) {
-            is PaymentIntent -> intent.canSetupFutureUsage()
+            is PaymentIntent -> intent.canSetupFutureUsage() || type.requiresMandateForPaymentIntent
             is SetupIntent -> true
         }
 

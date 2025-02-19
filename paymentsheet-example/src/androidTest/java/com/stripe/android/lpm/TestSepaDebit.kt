@@ -15,6 +15,8 @@ import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.GooglePaySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
+import com.stripe.android.paymentsheet.example.playground.settings.InitializationTypeSettingsDefinition
 import com.stripe.android.test.core.DEFAULT_UI_TIMEOUT
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.test.core.ui.ComposeButton
@@ -30,6 +32,7 @@ internal class TestSepaDebit : BasePlaygroundTest() {
         settings[CountrySettingsDefinition] = Country.FR
         settings[DelayedPaymentMethodsSettingsDefinition] = true
         settings[GooglePaySettingsDefinition] = false
+        settings[InitializationTypeSettingsDefinition] = InitializationType.DeferredClientSideConfirmation
     }.copy(
         authorizationAction = null,
     )
