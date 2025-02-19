@@ -14,6 +14,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
@@ -28,6 +30,7 @@ fun RowElementUI(
 ) {
     val visibleFields = controller.fields.filter { !hiddenIdentifiers.contains(it.identifier) }
     val dividerHeight = remember { mutableStateOf(0.dp) }
+    val layoutDirection = LocalLayoutDirection.current
     // Only draw the row if there are items in the row that are not hidden, otherwise the entire
     // section will fail to draw
     if (visibleFields.isNotEmpty()) {
@@ -35,14 +38,18 @@ fun RowElementUI(
             visibleFields.forEachIndexed { index, field ->
                 val nextFocusDirection = if (index == visibleFields.lastIndex) {
                     FocusDirection.Down
-                } else {
+                } else if (layoutDirection == LayoutDirection.Ltr) {
                     FocusDirection.Right
+                } else {
+                    FocusDirection.Left
                 }
 
                 val previousFocusDirection = if (index == 0) {
                     FocusDirection.Up
-                } else {
+                } else if (layoutDirection == LayoutDirection.Ltr) {
                     FocusDirection.Left
+                } else {
+                    FocusDirection.Right
                 }
 
                 SectionFieldElementUI(

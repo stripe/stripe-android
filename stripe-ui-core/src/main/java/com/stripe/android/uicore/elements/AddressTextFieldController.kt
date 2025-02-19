@@ -9,6 +9,7 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.LayoutDirection
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -47,6 +48,8 @@ class AddressTextFieldController(
     override val fieldValue: StateFlow<String> = _fieldValue.asStateFlow()
 
     override val rawFieldValue: StateFlow<String> = _fieldValue.mapAsStateFlow { config.convertToRaw(it) }
+
+    override val layoutDirection: LayoutDirection? = null
 
     override val contentDescription: StateFlow<String> = _fieldValue.asStateFlow()
 
