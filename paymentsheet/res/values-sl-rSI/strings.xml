@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- Button prompt to add a bank account as a payment method. -->
+  <string name="stripe_add_bank_account">Dodaj bančni račun</string>
   <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
   <string name="stripe_add_new_payment_method">Dodaj nov način plačila</string>
+  <!-- Text for a button that, when tapped, displays another screen where the customer can add a new payment method -->
+  <string name="stripe_add_payment_method">Dodaj način plačila</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_afterpay_subtitle">Kupite zdaj ali pa plačajte pozneje s storitvijo Afterpay</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
@@ -18,8 +22,14 @@
   <string name="stripe_confirm_close_form_body">Vaši podatki o plačilo ne bodo shranjeni.</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_title">Ali želite zapreti ta obrazec?</string>
+  <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_header">Shranite svoje podatke za varno izvedbo plačila z enim klikom s storitvijo Link</string>
+  <!-- Title of the logout action. -->
+  <string name="stripe_log_out">Odjava iz storitve Link</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Prišlo je do napake. Preverite povezavo in poskusite znova.</string>
+  <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
+  <string name="stripe_pay_with_link">Za plačilo uporabi Link</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Če nadaljujete postopek, se strinjate z odobritvijo plačil v skladu s <terms>temi pogoji</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -135,6 +145,20 @@
   <string name="stripe_paymentsheet_total_amount">Skupaj: %s</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">Odstranite bančni račun, ki se konča s števkami %s</string>
+  <!-- Accessibility label for an action or a button that shows a menu. -->
+  <string name="stripe_show_menu">Pokaži meni</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_sign_up">Pridružite se storitvi Link</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_sign_up_header">Varna izvedba plačila z enim klikom</string>
+  <!-- Label describing the benefit of signing up for Link. Pay faster at {Merchant Name} and thousands of merchants. e.g, 'Pay faster at Example, Inc. and thousands of merchants.' -->
+  <string name="stripe_sign_up_message">Plačajte hitreje pri podjetju %s in več tisoč trgovcih.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_sign_up_terms"><![CDATA[Če se pridružite storitvi Link, se strinjate s <terms>pogoji</terms> in <privacy>pravilnikom o zasebnosti</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative"><![CDATA[Če navedete svoj e-poštni naslov, se strinjate z ustvarjanjem računa Link in shranjevanjem podatkov o plačilu v storitev Link v skladu s <terms>pogoji</terms> in <privacy>pravilnikom o zasebnosti storitve Link</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Če navedete svojo telefonsko številko, se strinjate z ustvarjanjem računa Link in shranjevanjem podatkov o plačilu v storitev Link v skladu s <terms>pogoji</terms> in <privacy>pravilnikom o zasebnosti storitve Link</privacy>.]]></string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">Prišlo je do neznane napake</string>
   <!-- Button text on a screen asking the user to approve a payment -->
@@ -147,10 +171,53 @@
   <string name="stripe_upi_polling_payment_failed_message">Vrnite se in izberite drug način plačila</string>
   <!-- Text on a screen that indicates a payment has failed -->
   <string name="stripe_upi_polling_payment_failed_title">Plačilo ni uspelo</string>
+  <!-- Title for a button that allows the user to use a different email in the signup flow. -->
+  <string name="stripe_verification_change_email">Spremeni e-poštni naslov</string>
+  <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
+  <string name="stripe_verification_code_sent">Koda je bila poslana</string>
   <!-- Two factor authentication screen heading -->
   <string name="stripe_verification_dialog_header">Potrdite svojo identiteto</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_header">Vnesite svojo potrditveno kodo</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_header_inline">Vpišite se v svoj račun za Link</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_header_prefilled">Uporabite svoje shranjene podatke za hitrejšo izvedbo plačila</string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_verification_message">Vnesite kodo, ki ste jo prejeli na številko %s, če želite uporabljati Link kot privzeti način plačila.</string>
+  <!-- Text of a label for confirming an email address. E.g., 'Not user@example.com?' -->
+  <string name="stripe_verification_not_email">Niste %s?</string>
+  <!-- Label for a button that re-sends the a login code when tapped -->
+  <string name="stripe_verification_resend">Znova pošlji kodo</string>
   <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
   <string name="stripe_view_more">Prikaži več</string>
+  <!-- Mandate text displayed when paying via Link instant debit. -->
+  <string name="stripe_wallet_bank_account_terms"><![CDATA[Če nadaljujete postopek, se strinjate z odobritvijo plačil v skladu s temi <terms>pogoji</terms>.]]></string>
+  <!-- Label for a section displaying payment details. -->
+  <string name="stripe_wallet_collapsed_payment">Plačilo</string>
   <!-- Label for identifying the default payment method. -->
   <string name="stripe_wallet_default">Privzeto</string>
+  <string name="stripe_wallet_expand_accessibility">Spremenite izbor</string>
+  <!-- Title for a section listing one or more payment methods. -->
+  <string name="stripe_wallet_expanded_title">Načini plačila</string>
+  <!-- Accessibility description for Passthrough payment method -->
+  <string name="stripe_wallet_passthrough_description">Prepustno</string>
+  <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
+  <string name="stripe_wallet_pay_another_way">Plačaj na drugačen način</string>
+  <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
+  <string name="stripe_wallet_recollect_cvc_error">Iz varnostnih razlogov morate znova vnesti varnostno kodo svoje kartice.</string>
+  <!-- Title of confirmation prompt when removing a linked bank account. -->
+  <string name="stripe_wallet_remove_account_confirmation">Ali res želite odstraniti ta povezan račun?</string>
+  <!-- Title of confirmation prompt when removing a saved card. -->
+  <string name="stripe_wallet_remove_card_confirmation">Ali res želite odstraniti to kartico?</string>
+  <!-- Title for a button that when tapped removes a linked bank account. -->
+  <string name="stripe_wallet_remove_linked_account">Odstrani povezan račun</string>
+  <!-- Label for a button or menu item that sets a payment method as default when tapped. -->
+  <string name="stripe_wallet_set_as_default">Nastavi kot privzeti</string>
+  <!-- Label shown when a payment method cannot be used for the current transaction. -->
+  <string name="stripe_wallet_unavailable">Ni na voljo za ta nakup</string>
+  <!-- Title for a button that when tapped, presents a screen for updating a card. Also the heading the screen itself. -->
+  <string name="stripe_wallet_update_card">Posodobi kartico</string>
+  <!-- A text notice shown when the user selects an expired card. -->
+  <string name="stripe_wallet_update_expired_card_error">Ta kartica je potekla. Posodobite podatke o kartici ali izberite drug način plačila.</string>
 </resources>

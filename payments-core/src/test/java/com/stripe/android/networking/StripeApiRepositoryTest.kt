@@ -186,6 +186,17 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
+    fun testSetDefaultPaymentMethodUrl() {
+        val customerId = "cus_123"
+        val setDefaultPaymentMethodUrl = StripeApiRepository.getSetDefaultPaymentMethodUrl(
+            customerId
+        )
+        assertThat(setDefaultPaymentMethodUrl).isEqualTo(
+            "https://api.stripe.com/v1/elements/customers/$customerId/set_default_payment_method"
+        )
+    }
+
+    @Test
     fun testGetDetachPaymentMethodUrl() {
         val paymentMethodId = "pm_1ETDEa2eZvKYlo2CN5828c52"
         val detachUrl = stripeApiRepository.getDetachPaymentMethodUrl(paymentMethodId)
@@ -1489,6 +1500,49 @@ internal class StripeApiRepositoryTest {
             PaymentAnalyticsEvent.TokenCreate,
             productUsage = null
         )
+    }
+
+    @Test
+    fun setDefaultPaymentMethod_sendPaymentMethodParameter() = runTest {
+        val stripeResponse = StripeResponse(
+            code = 200,
+            body = "",
+            headers = emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
+
+        val expectedPaymentMethodId = "pm_123"
+        create().setDefaultPaymentMethod(
+            customerId = "cus_123",
+            paymentMethodId = expectedPaymentMethodId,
+            DEFAULT_OPTIONS,
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        val apiRequest = apiRequestArgumentCaptor.firstValue
+        assertThat(apiRequest.params?.get("payment_method")).isEqualTo(expectedPaymentMethodId)
+    }
+
+    @Test
+    fun setDefaultPaymentMethod_sendsNullPaymentMethodAsEmptyString() = runTest {
+        val stripeResponse = StripeResponse(
+            code = 200,
+            body = "",
+            headers = emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
+
+        create().setDefaultPaymentMethod(
+            customerId = "cus_123",
+            paymentMethodId = null,
+            DEFAULT_OPTIONS,
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        val apiRequest = apiRequestArgumentCaptor.firstValue
+        assertThat(apiRequest.params?.get("payment_method")).isEqualTo("")
     }
 
     @Test

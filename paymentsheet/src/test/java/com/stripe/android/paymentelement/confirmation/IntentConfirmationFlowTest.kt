@@ -83,7 +83,7 @@ internal class IntentConfirmationFlowTest {
             ),
             confirmationParameters = ConfirmationDefinition.Parameters(
                 initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
-                    clientSecret = "pi_123_secret_123",
+                    clientSecret = "seti_123_secret_123",
                 ),
                 intent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
                 shippingDetails = AddressDetails(
@@ -98,16 +98,9 @@ internal class IntentConfirmationFlowTest {
 
         assertThat(launchAction.launcherArguments).isEqualTo(
             IntentConfirmationDefinition.Args.Confirm(
-                confirmNextParams = ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                confirmNextParams = ConfirmSetupIntentParams.create(
                     paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                    clientSecret = "pi_123_secret_123",
-                    shipping = ConfirmPaymentIntentParams.Shipping(
-                        name = "John Doe",
-                        phone = "1234567890",
-                        address = Address(),
-                    ),
-                    savePaymentMethod = null,
-                    setupFutureUsage = null,
+                    clientSecret = "seti_123_secret_123",
                 )
             )
         )

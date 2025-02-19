@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## XX.XX.XX - 20XX-XX-XX
+### CardScan
+* [FIXED][10181](https://github.com/stripe/stripe-android/pull/10181) Fixed a crash that happened on some devices with odd camera-to-screen ratios
 
 ### PaymentSheet
 * [FIXED][10185](https://github.com/stripe/stripe-android/pull/10185) Improve accessibility for expiration date in `CardDetailsController`.

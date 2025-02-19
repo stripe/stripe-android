@@ -105,6 +105,8 @@
   <string name="stripe_scan_card">Scansiona carta</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Fornendo le informazioni di pagamento e confermando questo pagamento, autorizzi (A) %s e Stripe, il nostro fornitore di servizi di pagamento, a inviare istruzioni alla tua banca per l\'addebito sul tuo conto e (B) la tua banca a procedere con tale addebito conformemente alle istruzioni fornite. Tra gli altri diritti, hai anche diritto a un rimborso dalla tua banca in base ai termini e condizioni dell\'accordo sottoscritto con l\'istituto. Un eventuale rimborso va richiesto entro otto settimane a decorrere dalla data di addebito in conto. I tuoi diritti sono consultabili in una dichiarazione che puoi richiedere alla tua banca. Accetti di ricevere una notifica per addebiti futuri fino a 2 giorni prima.</string>
+  <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
+  <string name="stripe_set_as_default_payment_method">Imposta come modalità di pagamento predefinita</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Imposta</string>
   <!-- Label for UPI ID number field on form -->

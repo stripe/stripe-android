@@ -583,6 +583,7 @@ internal class PlaygroundTestDriver(
         val result = playgroundState
 
         if (values != null) {
+            selectors.embeddedFormBuyButton.waitForEnabled(requireClickAction = false)
             selectors.embeddedFormBuyButton.click()
         } else {
             selectors.complete.click()
@@ -1184,7 +1185,7 @@ internal class PlaygroundTestDriver(
     private fun waitUntilPrimaryButtonIsCompleted() {
         composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             composeTestRule.onAllNodesWithTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON)
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isEmpty()
         }
 

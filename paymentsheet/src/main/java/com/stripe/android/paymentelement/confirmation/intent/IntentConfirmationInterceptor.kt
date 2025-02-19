@@ -9,9 +9,11 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.setupFutureUsage
 import com.stripe.android.networking.StripeRepository
@@ -74,6 +76,7 @@ internal interface IntentConfirmationInterceptor {
 
     suspend fun intercept(
         initializationMode: PaymentElementLoader.InitializationMode,
+        intent: StripeIntent,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
@@ -82,6 +85,7 @@ internal interface IntentConfirmationInterceptor {
 
     suspend fun intercept(
         initializationMode: PaymentElementLoader.InitializationMode,
+        intent: StripeIntent,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
@@ -113,6 +117,22 @@ internal class CreateIntentCallbackFailureException(override val cause: Throwabl
     override fun analyticsValue(): String = "merchantReturnedCreateIntentCallbackFailure"
 }
 
+internal class InvalidClientSecretException(
+    val clientSecret: String,
+    val intent: StripeIntent,
+) : StripeException() {
+    private val intentType = when (intent) {
+        is PaymentIntent -> "PaymentIntent"
+        is SetupIntent -> "SetupIntent"
+    }
+
+    override fun analyticsValue(): String = "invalidClientSecretProvided"
+
+    override val message: String = """
+        Encountered an invalid client secret "$clientSecret" for intent type "$intentType"
+    """.trimIndent()
+}
+
 internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     private val stripeRepository: StripeRepository,
     private val errorReporter: ErrorReporter,
@@ -128,6 +148,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
 
     override suspend fun intercept(
         initializationMode: PaymentElementLoader.InitializationMode,
+        intent: StripeIntent,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
@@ -135,6 +156,11 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     ): NextStep {
         return when (initializationMode) {
             is PaymentElementLoader.InitializationMode.DeferredIntent -> {
+                /*
+                 * We don't pass the created intent in `DeferredIntent` mode because we rely on the created intent
+                 * from the merchant through `CreateIntentCallback`. The intent passed through here is created from
+                 * `PaymentSheet.Configuration` in order to populate `Payment Element` data.
+                 */
                 handleDeferredIntent(
                     intentConfiguration = initializationMode.intentConfiguration,
                     shippingValues = shippingValues,
@@ -147,6 +173,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             is PaymentElementLoader.InitializationMode.PaymentIntent -> {
                 createConfirmStep(
                     clientSecret = initializationMode.clientSecret,
+                    intent = intent,
                     shippingValues = shippingValues,
                     paymentMethodCreateParams = paymentMethodCreateParams,
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
@@ -156,6 +183,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             is PaymentElementLoader.InitializationMode.SetupIntent -> {
                 createConfirmStep(
                     clientSecret = initializationMode.clientSecret,
+                    intent = intent,
                     shippingValues = shippingValues,
                     paymentMethodCreateParams = paymentMethodCreateParams,
                 )
@@ -165,6 +193,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
 
     override suspend fun intercept(
         initializationMode: PaymentElementLoader.InitializationMode,
+        intent: StripeIntent,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
@@ -184,6 +213,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             is PaymentElementLoader.InitializationMode.PaymentIntent -> {
                 createConfirmStep(
                     clientSecret = initializationMode.clientSecret,
+                    intent = intent,
                     shippingValues = shippingValues,
                     paymentMethod = paymentMethod,
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
@@ -194,6 +224,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             is PaymentElementLoader.InitializationMode.SetupIntent -> {
                 createConfirmStep(
                     clientSecret = initializationMode.clientSecret,
+                    intent = intent,
                     shippingValues = shippingValues,
                     paymentMethod = paymentMethod,
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
@@ -375,6 +406,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 DeferredIntentValidator.validate(intent, intentConfiguration, allowsManualConfirmation)
                 createConfirmStep(
                     clientSecret,
+                    intent,
                     shippingValues,
                     paymentMethod,
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
@@ -398,15 +430,21 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
 
     private fun createConfirmStep(
         clientSecret: String,
+        intent: StripeIntent,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
         isDeferred: Boolean,
-    ): NextStep.Confirm {
+    ): NextStep {
         val factory = ConfirmStripeIntentParamsFactory.createFactory(
             clientSecret = clientSecret,
+            intent = intent,
             shipping = shippingValues,
-        )
+        ) ?: run {
+            val exception = InvalidClientSecretException(clientSecret, intent)
+
+            return createFailStep(exception, exception.message)
+        }
 
         val confirmParams = factory.create(
             paymentMethod = paymentMethod,
@@ -420,14 +458,20 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
 
     private fun createConfirmStep(
         clientSecret: String,
+        intent: StripeIntent,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
-    ): NextStep.Confirm {
+    ): NextStep {
         val paramsFactory = ConfirmStripeIntentParamsFactory.createFactory(
             clientSecret = clientSecret,
+            intent = intent,
             shipping = shippingValues,
-        )
+        ) ?: run {
+            val exception = InvalidClientSecretException(clientSecret, intent)
+
+            return createFailStep(exception, exception.message)
+        }
 
         val confirmParams = paramsFactory.create(
             paymentMethodCreateParams,
@@ -437,6 +481,20 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         return NextStep.Confirm(
             confirmParams = confirmParams,
             isDeferred = false,
+        )
+    }
+
+    private fun createFailStep(
+        exception: Exception,
+        message: String,
+    ): NextStep.Fail {
+        return NextStep.Fail(
+            cause = exception,
+            message = if (requestOptions.apiKeyIsLiveMode) {
+                PaymentsCoreR.string.stripe_internal_error.resolvableString
+            } else {
+                message.resolvableString
+            }
         )
     }
 

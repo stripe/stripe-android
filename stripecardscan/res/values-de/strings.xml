@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_camera_permission_settings_message">Bitte gestatten Sie den Kamerazugriff in den Einstellungen, um Ihre Karte zu scannen</string>
+  <string name="stripe_card_scan_instructions">Karte scannen</string>
+  <string name="stripe_card_scan_privacy_link_text"><![CDATA[Wir nutzen Stripe, um Ihre Kartenangaben zu verifizieren. Stripe kann im Einklang mit seiner Datenschutzerklärung Ihre Daten verwenden und speichern. <a href="https://support.stripe.com/questions/stripes-card-image-verification"><u>Mehr erfahren</u></a>]]></string>
+  <string name="stripe_card_scan_title">Platzieren Sie Ihre Karte zum Scannen im Rechteck</string>
+  <string name="stripe_close_button_description">Schließen</string>
+  <string name="stripe_swap_camera_button_description">Kamera wechseln</string>
+  <!-- Label for the button that toggles the camera's torch -->
+  <string name="stripe_torch_button_description">Taschenlampe</string>
+</resources>
