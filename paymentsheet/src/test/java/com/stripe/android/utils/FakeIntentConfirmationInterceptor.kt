@@ -7,6 +7,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
@@ -54,6 +55,7 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
         intent: StripeIntent,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
+        paymentMethodExtraParams: PaymentMethodExtraParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         customerRequestedSave: Boolean,
     ): IntentConfirmationInterceptor.NextStep {
@@ -62,6 +64,7 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
                 initializationMode = initializationMode,
                 paymentMethodCreateParams = paymentMethodCreateParams,
                 paymentMethodOptionsParams = paymentMethodOptionsParams,
+                paymentMethodExtraParams = paymentMethodExtraParams,
                 shippingValues = shippingValues,
                 customerRequestedSave = customerRequestedSave,
             )
@@ -75,6 +78,7 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
         intent: StripeIntent,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
+        paymentMethodExtraParams: PaymentMethodExtraParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): IntentConfirmationInterceptor.NextStep {
         _calls.add(
@@ -94,6 +98,7 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
             val initializationMode: PaymentElementLoader.InitializationMode,
             val paymentMethodCreateParams: PaymentMethodCreateParams,
             val paymentMethodOptionsParams: PaymentMethodOptionsParams?,
+            val paymentMethodExtraParams: PaymentMethodExtraParams?,
             val shippingValues: ConfirmPaymentIntentParams.Shipping?,
             val customerRequestedSave: Boolean,
         ) : InterceptCall
