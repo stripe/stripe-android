@@ -90,7 +90,7 @@ internal interface IntentConfirmationInterceptor {
         intent: StripeIntent,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
-        paymentMethodExtraParams: PaymentMethodExtraParams?,
+        paymentMethodExtraParams: PaymentMethodExtraParams? = null,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): NextStep
 
