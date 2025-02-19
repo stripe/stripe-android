@@ -9,6 +9,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
@@ -77,6 +78,38 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
         assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
 
         assertThat(confirmationStateHolder.state?.paymentMethodMetadata).isNotNull()
+    }
+
+    @Test
+    fun `configure sets confirmationState to previousSelection`() = testScenario(
+        selectionChooser = {
+            PaymentSelection.GooglePay
+        },
+    ) {
+        configurationHandler.emit(
+            Result.success(
+                createPaymentElementLoaderState(
+                    paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+                )
+            )
+        )
+
+        selectionHolder.set(PaymentSelection.GooglePay)
+        assertThat(confirmationStateHolder.state).isNull()
+
+        assertThat(
+            configurationCoordinator.configure(
+                PaymentSheet.IntentConfiguration(
+                    PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
+                ),
+                configuration = defaultConfiguration,
+            )
+        ).isInstanceOf<EmbeddedPaymentElement.ConfigureResult.Succeeded>()
+        assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
+
+        assertThat(confirmationStateHolder.state?.paymentMethodMetadata).isNotNull()
+        assertThat(confirmationStateHolder.state?.selection).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(selectionHolder.selection.value).isEqualTo(PaymentSelection.GooglePay)
     }
 
     @Test
@@ -265,6 +298,7 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
     }
 
     private fun testScenario(
+        selectionChooser: (PaymentSelection?) -> PaymentSelection? = { it },
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val confirmationHandler = FakeConfirmationHandler()
@@ -284,7 +318,7 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
             configurationHandler = configurationHandler,
             selectionHolder = selectionHolder,
             selectionChooser = { _, _, _, newSelection, _ ->
-                newSelection
+                selectionChooser(newSelection)
             },
             customerStateHolder = customerStateHolder,
             embeddedContentHelper = embeddedContentHelper,
