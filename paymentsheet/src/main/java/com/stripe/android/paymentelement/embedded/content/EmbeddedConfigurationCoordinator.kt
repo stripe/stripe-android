@@ -10,6 +10,7 @@ import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
@@ -63,6 +64,7 @@ internal class DefaultEmbeddedConfigurationCoordinator @Inject constructor(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: EmbeddedPaymentElement.Configuration,
     ) {
+        configuration.appearance.parseAppearance()
         confirmationStateHolder.state = EmbeddedConfirmationStateHolder.State(
             paymentMethodMetadata = state.paymentMethodMetadata,
             selection = state.paymentSelection,

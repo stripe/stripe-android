@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded.content
 
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
@@ -18,9 +19,13 @@ import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
+import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.StripeThemeDefaults
+import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.test.TestScope
@@ -176,6 +181,41 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
             assertThat(it).isNotNull()
             assertThat(it.rowStyle).isInstanceOf<Embedded.RowStyle.FlatWithRadio>()
         }
+    }
+
+    @Test
+    fun `configure correctly parses appearance`() = testScenario {
+        val configuration = EmbeddedPaymentElement.Configuration
+            .Builder("Example, Inc.")
+            .appearance(
+                PaymentSheet.Appearance(
+                    colorsLight = PaymentSheetAppearance.CrazyAppearance.appearance.colorsLight,
+                )
+            ).build()
+        configurationHandler.emit(Result.success(createPaymentElementLoaderState()))
+
+        assertThat(StripeTheme.colorsLightMutable.componentBorder)
+            .isEqualTo(
+                StripeThemeDefaults.colorsLight.componentBorder
+            )
+
+        configurationCoordinator.configure(
+            intentConfiguration = PaymentSheet.IntentConfiguration(
+                PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
+            ),
+            configuration = configuration
+        )
+
+        assertThat(StripeTheme.colorsLightMutable.componentBorder)
+            .isEqualTo(
+                Color(
+                    PaymentSheetAppearance.CrazyAppearance.appearance.colorsLight.componentBorder
+                )
+            )
+
+        // Reset appearance
+        PaymentSheet.Appearance().parseAppearance()
+        embeddedContentHelper.dataLoadedTurbine.awaitItem()
     }
 
     @Test
