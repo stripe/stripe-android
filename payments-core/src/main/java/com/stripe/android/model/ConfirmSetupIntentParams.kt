@@ -53,7 +53,8 @@ constructor(
     /**
      * Indicates that this should be the default payment method going forward
      */
-    var setAsDefaultPaymentMethod: Boolean? = null,
+    internal val setAsDefaultPaymentMethod: Boolean? = null,
+    
 ) : ConfirmStripeIntentParams {
 
     override fun shouldUseStripeSdk(): Boolean {
