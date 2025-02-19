@@ -558,6 +558,8 @@ internal class CustomerSheetViewModel(
                     },
                     updateExecutor = ::updateExecutor,
                     workContext = workContext,
+                    // This checkbox is never displayed in CustomerSheet.
+                    shouldShowSetAsDefaultCheckbox = false,
                 ),
                 isLiveMode = isLiveModeProvider(),
             )
