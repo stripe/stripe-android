@@ -94,7 +94,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
                 setAsDefault = true
             )
         )
-        assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isEqualTo(true)
+        assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isTrue()
     }
 
     @Test
@@ -108,7 +108,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
                 setAsDefault = false
             )
         )
-        assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isEqualTo(false)
+        assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isFalse()
     }
 
     @Test

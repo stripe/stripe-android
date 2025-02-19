@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.MandateDataParams
+import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.SetupIntentFactory
@@ -30,7 +31,7 @@ class ConfirmSetupIntentParamsFactoryTest {
 
         val params = result.asConfirmSetupIntentParams()
 
-        assertThat(params.setAsDefaultPaymentMethod).isEqualTo(true)
+        assertThat(params.setAsDefaultPaymentMethod).isTrue()
     }
 
     @Test
@@ -43,12 +44,10 @@ class ConfirmSetupIntentParamsFactoryTest {
 
         val params = result.asConfirmSetupIntentParams()
 
-        assertThat(params.setAsDefaultPaymentMethod).isEqualTo(false)
+        assertThat(params.setAsDefaultPaymentMethod).isFalse()
     }
 
-    private fun getConfirmSetupIntentParamsForTesting(
-        extraParams: PaymentMethodExtraParams? = null
-    ) : ConfirmSetupIntentParams {
+    private fun getConfirmSetupIntentParamsForTesting(): ConfirmSetupIntentParams {
         val factoryWithConfig = ConfirmSetupIntentParamsFactory(
             clientSecret = CLIENT_SECRET,
             intent = SetupIntentFactory.create(),
@@ -56,6 +55,21 @@ class ConfirmSetupIntentParamsFactoryTest {
 
         return factoryWithConfig.create(
             paymentMethod = PaymentMethodFactory.cashAppPay(),
+            optionsParams = null,
+            extraParams = null,
+        )
+    }
+
+    private fun getConfirmSetupIntentParamsForTesting(
+        extraParams: PaymentMethodExtraParams
+    ): ConfirmSetupIntentParams {
+        val factoryWithConfig = ConfirmSetupIntentParamsFactory(
+            clientSecret = CLIENT_SECRET,
+            intent = SetupIntentFactory.create(),
+        )
+
+        return factoryWithConfig.create(
+            createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             optionsParams = null,
             extraParams = extraParams,
         )

@@ -216,7 +216,7 @@ internal class IntentConfirmationFlowTest {
 
         assertThat(actualParams).isInstanceOf(ConfirmSetupIntentParams::class.java)
         assertThat((actualParams as ConfirmSetupIntentParams).clientSecret).isEqualTo("seti_123_secret_123")
-        assertThat(actualParams.setAsDefaultPaymentMethod).isEqualTo(true)
+        assertThat(actualParams.toParamMap().get("set_as_default_payment_method")).isEqualTo(true)
     }
 
     @Test
@@ -244,7 +244,7 @@ internal class IntentConfirmationFlowTest {
         assertThat((actualParams as ConfirmPaymentIntentParams).paymentMethodCreateParams)
             .isEqualTo(PaymentMethodCreateParamsFixtures.DEFAULT_CARD)
         assertThat(actualParams.clientSecret).isEqualTo("pi_123_secret_123")
-        assertThat(actualParams.setAsDefaultPaymentMethod).isEqualTo(true)
+        assertThat(actualParams.toParamMap().get("set_as_default_payment_method")).isEqualTo(true)
     }
 
     private fun createIntentConfirmationDefinition(
