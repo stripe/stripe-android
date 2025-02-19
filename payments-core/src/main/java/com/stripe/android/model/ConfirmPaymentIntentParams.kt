@@ -121,7 +121,7 @@ constructor(
     var receiptEmail: String? = null,
 
     /**
-     * Indicates that this should be the default payment method going forward
+     * Indicates that this should be the default payment method going forward.
      */
     internal val setAsDefaultPaymentMethod: Boolean? = null,
 

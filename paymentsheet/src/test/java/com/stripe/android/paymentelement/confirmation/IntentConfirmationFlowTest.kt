@@ -241,7 +241,8 @@ internal class IntentConfirmationFlowTest {
         val actualParams = action.asLaunch().launcherArguments.asConfirm().confirmNextParams
 
         assertThat(actualParams).isInstanceOf(ConfirmPaymentIntentParams::class.java)
-        assertThat((actualParams as ConfirmPaymentIntentParams).paymentMethodCreateParams).isEqualTo(PaymentMethodCreateParamsFixtures.DEFAULT_CARD)
+        assertThat((actualParams as ConfirmPaymentIntentParams).paymentMethodCreateParams)
+            .isEqualTo(PaymentMethodCreateParamsFixtures.DEFAULT_CARD)
         assertThat(actualParams.clientSecret).isEqualTo("pi_123_secret_123")
         assertThat(actualParams.setAsDefaultPaymentMethod).isEqualTo(true)
     }
@@ -285,7 +286,7 @@ internal class IntentConfirmationFlowTest {
     private fun defaultConfirmationDefinitionParams(
         initializationMode: PaymentElementLoader.InitializationMode,
         intent: StripeIntent,
-    ) : ConfirmationDefinition.Parameters {
+    ): ConfirmationDefinition.Parameters {
         return ConfirmationDefinition.Parameters(
             initializationMode = initializationMode,
             intent = intent,

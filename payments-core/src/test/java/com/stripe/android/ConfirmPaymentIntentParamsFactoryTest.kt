@@ -97,7 +97,6 @@ class ConfirmPaymentIntentParamsFactoryTest {
         assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isEqualTo(true)
     }
 
-
     @Test
     fun `create() with new card when setAsDefaultPaymentMethod is false`() {
         val paymentIntentParams = factory.create(
