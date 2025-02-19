@@ -11,7 +11,6 @@ import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillin
 import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.test.core.TestParameters
-import org.junit.Ignore
 import org.junit.Test
 
 internal class TestEmbedded : BasePlaygroundTest() {
@@ -49,13 +48,11 @@ internal class TestEmbedded : BasePlaygroundTest() {
         )
     }
 
-    @Ignore("Ignore until we can investigate why US Bank Account does not progress when clicking the primary button")
     @Test
     fun testUsBankAccount() {
         testDriver.confirmEmbeddedUsBankAccount(
             testParameters = TestParameters.create(
                 paymentMethodCode = "us_bank_account",
-                authorizationAction = null,
                 executeInNightlyRun = true,
             ) { settings ->
                 settings[CountrySettingsDefinition] = Country.US
