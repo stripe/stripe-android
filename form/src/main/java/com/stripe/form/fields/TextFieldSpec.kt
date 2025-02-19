@@ -18,7 +18,7 @@ import com.stripe.form.ContentBox
 import com.stripe.form.ContentSpec
 import com.stripe.form.FormFieldSpec
 import com.stripe.form.FormFieldState
-import com.stripe.form.ParcelableKey
+import com.stripe.form.Key
 import com.stripe.form.ValidationResult
 import com.stripe.form.ValueChange
 
@@ -66,30 +66,29 @@ data class TextFieldSpec(
                 },
                 visualTransformation = state.visualTransformation,
                 isError = validationResult.isValid.not(),
-//                supportingText = {
-//                    when (val result = validationResult) {
-//                        is ValidationResult.Invalid -> {
-//                            result.message?.let {
-//                                ContentBox(
-//                                    modifier = Modifier.fillMaxWidth(),
-//                                    spec = it
-//                                )
-//                            }
-//                        }
-//                        ValidationResult.Valid -> Unit
-//                    }
-//                },
                 keyboardOptions = state.keyboardOptions,
                 readOnly = state.readOnly,
                 enabled = state.enabled
             )
+
+            when (val result = validationResult) {
+                is ValidationResult.Invalid -> {
+                    result.message?.let {
+                        ContentBox(
+                            modifier = Modifier.fillMaxWidth(),
+                            spec = it
+                        )
+                    }
+                }
+                ValidationResult.Valid -> Unit
+            }
         }
     }
 
 
     @Immutable
     data class TextFieldState(
-        override val key: ParcelableKey,
+        override val key: Key<TextFieldValue>,
         val label: ContentSpec?,
         val trailing: ContentSpec? = null,
         val initialValue: TextFieldValue = TextFieldValue(),
