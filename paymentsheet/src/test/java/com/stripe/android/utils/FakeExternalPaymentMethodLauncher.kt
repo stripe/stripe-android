@@ -11,7 +11,7 @@ internal class FakeExternalPaymentMethodLauncher : ActivityResultLauncher<Extern
     private val _calls = Turbine<Launch>()
     val calls: ReceiveTurbine<Launch> = _calls
 
-    override fun launch(input: ExternalPaymentMethodInput?, options: ActivityOptionsCompat?) {
+    override fun launch(input: ExternalPaymentMethodInput, options: ActivityOptionsCompat?) {
         _calls.add(Launch(input))
     }
 
@@ -19,9 +19,8 @@ internal class FakeExternalPaymentMethodLauncher : ActivityResultLauncher<Extern
         throw NotImplementedError("Not used in testing!")
     }
 
-    override fun getContract(): ActivityResultContract<ExternalPaymentMethodInput, *> {
-        throw NotImplementedError("Not used in testing!")
-    }
+    override val contract: ActivityResultContract<ExternalPaymentMethodInput, *>
+        get() = throw NotImplementedError("Not used in testing!")
 
     data class Launch(
         val input: ExternalPaymentMethodInput?,

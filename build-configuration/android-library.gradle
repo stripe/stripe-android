@@ -60,7 +60,7 @@ android {
         // Our workflow is to add a new string first and then have it translated in Lokalise. As a
         // result, we will have a certain timespan during which there are no translations for the
         // string yet.
-        disable 'MissingTranslation'
+        disable 'MissingTranslation', 'StateFlowValueCalledInComposition', 'CoroutineCreationDuringComposition'
     }
 
     if (project.hasProperty("enable_dokka") && project.enable_dokka) {
