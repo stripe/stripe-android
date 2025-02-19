@@ -12,10 +12,10 @@ GEM
       net-http
     json (2.7.2)
     logger (1.6.1)
-    mini_portile2 (2.8.7)
+    mini_portile2 (2.8.8)
     net-http (0.4.1)
       uri
-    nokogiri (1.16.7)
+    nokogiri (1.18.3)
       mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
     octokit (9.1.0)
