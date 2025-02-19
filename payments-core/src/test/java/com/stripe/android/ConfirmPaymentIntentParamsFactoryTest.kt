@@ -7,6 +7,7 @@ import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
+import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
@@ -76,9 +77,39 @@ class ConfirmPaymentIntentParamsFactoryTest {
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 clientSecret = CLIENT_SECRET,
                 setupFutureUsage = null,
+                setAsDefaultPaymentMethod = null,
                 paymentMethodOptions = PaymentMethodOptionsParams.Card()
             )
         )
+    }
+
+    @Test
+    fun `create() with new card when setAsDefaultPaymentMethod is true`() {
+        val paymentIntentParams = factory.create(
+            createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            optionsParams = PaymentMethodOptionsParams.Card(
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+            ),
+            extraParams = PaymentMethodExtraParams.Card(
+                setAsDefault = true
+            )
+        )
+        assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isEqualTo(true)
+    }
+
+
+    @Test
+    fun `create() with new card when setAsDefaultPaymentMethod is false`() {
+        val paymentIntentParams = factory.create(
+            createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            optionsParams = PaymentMethodOptionsParams.Card(
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+            ),
+            extraParams = PaymentMethodExtraParams.Card(
+                setAsDefault = false
+            )
+        )
+        assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isEqualTo(false)
     }
 
     @Test
@@ -215,6 +246,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
         val result = factoryWithConfig.create(
             paymentMethod = PaymentMethodFactory.cashAppPay(),
             optionsParams = null,
+            extraParams = null,
         )
 
         assertThat(result).isInstanceOf(ConfirmPaymentIntentParams::class.java)
