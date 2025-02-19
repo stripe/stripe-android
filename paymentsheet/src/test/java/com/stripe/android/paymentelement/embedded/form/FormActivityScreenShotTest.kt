@@ -112,6 +112,7 @@ internal class FormActivityScreenShotTest {
             embeddedSelectionHolder = selectionHolder,
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory
         )
+        val eventReporter = FakeEventReporter()
         val interactor = EmbeddedFormInteractorFactory(
             paymentMethodMetadata = paymentMethodMetadata,
             paymentMethodCode = "card",
@@ -120,6 +121,7 @@ internal class FormActivityScreenShotTest {
             embeddedFormHelperFactory = formHelperFactory,
             viewModelScope = TestScope(UnconfinedTestDispatcher()),
             formActivityStateHelper = stateHolder,
+            eventReporter = eventReporter
         ).create()
 
         stateHolder.updateConfirmationState(confirmationState)
@@ -129,7 +131,7 @@ internal class FormActivityScreenShotTest {
         ViewModelStoreOwnerContext {
             FormActivityUI(
                 interactor = interactor,
-                eventReporter = FakeEventReporter(),
+                eventReporter = eventReporter,
                 onClick = {},
                 onProcessingCompleted = {},
                 state = state.copy(isEnabled = enabled),
