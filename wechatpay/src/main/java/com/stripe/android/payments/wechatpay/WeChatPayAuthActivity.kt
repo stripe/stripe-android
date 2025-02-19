@@ -43,7 +43,7 @@ internal class WeChatPayAuthActivity : AppCompatActivity(), InvocationHandler {
         }
     }
 
-    override fun onNewIntent(intent: Intent) {
+    override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         reflectionHelper.handleIntent(weChatApi, intent, iWXAPIEventHandler)
         Log.d(TAG, "onNewIntent - callback from IWXAPI")

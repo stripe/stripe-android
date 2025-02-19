@@ -18,8 +18,9 @@ class FakeActivityResultLauncher<I> : ActivityResultLauncher<I>() {
         throw NotImplementedError("Not implemented!")
     }
 
-    override val contract: ActivityResultContract<I, *>
-        get() = throw NotImplementedError("Not implemented!")
+    override fun getContract(): ActivityResultContract<I, *> {
+        throw NotImplementedError("Not implemented!")
+    }
 
     data class Call<I>(
         val input: I,

@@ -48,7 +48,6 @@ dependencies {
     implementation libs.playServicesWallet
     implementation libs.payButtonCompose
     implementation libs.material
-    compileOnly libs.places
 
     // Tooling support (Previews, etc.)
     implementation libs.compose.uiToolingPreview
