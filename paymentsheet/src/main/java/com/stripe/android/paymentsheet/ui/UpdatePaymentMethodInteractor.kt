@@ -166,22 +166,25 @@ internal class DefaultUpdatePaymentMethodInteractor(
 
     private fun savePaymentMethod() {
         coroutineScope.launch {
-
             error.emit(getInitialError())
             status.emit(UpdatePaymentMethodInteractor.Status.Updating)
 
             val newCardBrand = cardBrandChoice.value.brand
-            val updateCardBrandResult = updateCardBrandExecutor(
-                displayableSavedPaymentMethod.paymentMethod,
-                newCardBrand
-            )
+            if (newCardBrand != getInitialCardBrandChoice().brand) {
+                val updateCardBrandResult = updateCardBrandExecutor(
+                    displayableSavedPaymentMethod.paymentMethod,
+                    newCardBrand
+                )
 
-            updateCardBrandResult.onSuccess {
-                savedCardBrand.emit(CardBrandChoice(brand = newCardBrand, enabled = true))
-                cardBrandHasBeenChanged.emit(false)
-            }.onFailure {
-                error.emit(it.stripeErrorMessage())
+                updateCardBrandResult.onSuccess {
+                    savedCardBrand.emit(CardBrandChoice(brand = newCardBrand, enabled = true))
+                    cardBrandHasBeenChanged.emit(false)
+                }.onFailure {
+                    error.emit(it.stripeErrorMessage())
+                }
             }
+
+
             status.emit(UpdatePaymentMethodInteractor.Status.Idle)
         }
     }
