@@ -556,7 +556,7 @@ internal class CustomerSheetViewModel(
                             selectedBrand = it
                         )
                     },
-                    updateExecutor = ::updateExecutor,
+                    updateCardBrandExecutor = ::updateExecutor,
                     workContext = workContext,
                     // This checkbox is never displayed in CustomerSheet.
                     shouldShowSetAsDefaultCheckbox = false,

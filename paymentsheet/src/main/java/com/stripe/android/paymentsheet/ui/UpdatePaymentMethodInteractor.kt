@@ -84,7 +84,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     override val cardBrandFilter: CardBrandFilter,
     shouldShowSetAsDefaultCheckbox: Boolean,
     private val removeExecutor: PaymentMethodRemoveOperation,
-    private val updateExecutor: PaymentMethodUpdateOperation,
+    private val updateCardBrandExecutor: PaymentMethodUpdateOperation,
     private val onBrandChoiceOptionsShown: (CardBrand) -> Unit,
     private val onBrandChoiceOptionsDismissed: (CardBrand) -> Unit,
     workContext: CoroutineContext = Dispatchers.Default,
@@ -166,14 +166,17 @@ internal class DefaultUpdatePaymentMethodInteractor(
 
     private fun savePaymentMethod() {
         coroutineScope.launch {
-            val newCardBrand = cardBrandChoice.value.brand
 
             error.emit(getInitialError())
             status.emit(UpdatePaymentMethodInteractor.Status.Updating)
 
-            val updateResult = updateExecutor(displayableSavedPaymentMethod.paymentMethod, newCardBrand)
+            val newCardBrand = cardBrandChoice.value.brand
+            val updateCardBrandResult = updateCardBrandExecutor(
+                displayableSavedPaymentMethod.paymentMethod,
+                newCardBrand
+            )
 
-            updateResult.onSuccess {
+            updateCardBrandResult.onSuccess {
                 savedCardBrand.emit(CardBrandChoice(brand = newCardBrand, enabled = true))
                 cardBrandHasBeenChanged.emit(false)
             }.onFailure {

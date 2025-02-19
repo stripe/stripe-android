@@ -529,7 +529,7 @@ private fun PreviewUpdatePaymentMethodUI() {
             canRemove = true,
             displayableSavedPaymentMethod = exampleCard,
             removeExecutor = { null },
-            updateExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
+            updateCardBrandExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
             cardBrandFilter = DefaultCardBrandFilter,
             onBrandChoiceOptionsShown = {},
             onBrandChoiceOptionsDismissed = {},

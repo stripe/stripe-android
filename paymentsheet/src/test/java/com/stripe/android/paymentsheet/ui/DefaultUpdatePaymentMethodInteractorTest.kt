@@ -294,7 +294,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             canRemove = canRemove,
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
             removeExecutor = onRemovePaymentMethod,
-            updateExecutor = onSavePaymentMethod,
+            updateCardBrandExecutor = onSavePaymentMethod,
             workContext = UnconfinedTestDispatcher(),
             cardBrandFilter = DefaultCardBrandFilter,
             onBrandChoiceOptionsShown = {},
