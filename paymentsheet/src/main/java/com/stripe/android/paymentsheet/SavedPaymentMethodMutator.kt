@@ -223,7 +223,9 @@ internal class SavedPaymentMethodMutator(
                 customerSessionClientSecret = customer.customerSessionClientSecret,
             ),
             paymentMethodId = paymentMethod.id,
-        ).map {}
+        ).onSuccess {
+            customerStateHolder.setDefaultPaymentMethodId(paymentMethodId = paymentMethod.id)
+        }.map {}
     }
 
     suspend fun removePaymentMethodInEditScreen(paymentMethod: PaymentMethod): Throwable? {
