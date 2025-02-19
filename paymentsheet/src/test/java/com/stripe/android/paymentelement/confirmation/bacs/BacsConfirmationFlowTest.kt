@@ -36,6 +36,7 @@ class BacsConfirmationFlowTest {
                 createParams = BACS_CONFIRMATION_OPTION.createParams,
                 optionsParams = BACS_CONFIRMATION_OPTION.optionsParams,
                 shouldSave = false,
+                extraParams = null,
             ),
             parameters = CONFIRMATION_PARAMETERS,
         ),
