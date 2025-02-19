@@ -139,11 +139,11 @@ class ExternalPaymentMethodProxyActivityTest {
     ) : ActivityResultLauncher<ExternalPaymentMethodInput>() {
         var scenario: ActivityScenario<ExternalPaymentMethodProxyActivity>? = null
 
-        override fun launch(input: ExternalPaymentMethodInput, options: ActivityOptionsCompat?) {
+        override fun launch(input: ExternalPaymentMethodInput?, options: ActivityOptionsCompat?) {
             val contract = ExternalPaymentMethodContract(errorReporter = FakeErrorReporter())
             val scenario: ActivityScenario<ExternalPaymentMethodProxyActivity> =
                 ActivityScenario.launchActivityForResult(
-                    contract.createIntent(context, input)
+                    contract.createIntent(context, input!!)
                 )
 
             this.scenario = scenario
@@ -153,7 +153,8 @@ class ExternalPaymentMethodProxyActivityTest {
             TODO("Not yet implemented")
         }
 
-        override val contract: ActivityResultContract<ExternalPaymentMethodInput, *>
-            get() = TODO("Not yet implemented")
+        override fun getContract(): ActivityResultContract<ExternalPaymentMethodInput, *> {
+            TODO("Not yet implemented")
+        }
     }
 }

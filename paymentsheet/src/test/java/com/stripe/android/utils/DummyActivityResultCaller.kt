@@ -30,8 +30,9 @@ class DummyActivityResultCaller private constructor() : ActivityResultCaller {
                 unregisteredLaunchers.add(this)
             }
 
-            override val contract: ActivityResultContract<I, *>
-                get() = error("Not implemented")
+            override fun getContract(): ActivityResultContract<I, *> {
+                error("Not implemented")
+            }
         }
 
         registeredLaunchers.add(launcher)
@@ -53,8 +54,9 @@ class DummyActivityResultCaller private constructor() : ActivityResultCaller {
                 unregisteredLaunchers.add(this)
             }
 
-            override val contract: ActivityResultContract<I, *>
-                get() = error("Not implemented")
+            override fun getContract(): ActivityResultContract<I, *> {
+                error("Not implemented")
+            }
         }
 
         registeredLaunchers.add(launcher)

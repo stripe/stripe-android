@@ -110,6 +110,7 @@ public final class com/stripe/android/identity/analytics/AnalyticsState$Creator 
 
 public final class com/stripe/android/identity/navigation/ComposableSingletons$IdentityNavGraphKt {
 	public static final field INSTANCE Lcom/stripe/android/identity/navigation/ComposableSingletons$IdentityNavGraphKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function3;
 	public fun <init> ()V
 	public final fun getLambda-1$identity_release ()Lkotlin/jvm/functions/Function3;
 }
@@ -352,6 +353,8 @@ public final class com/stripe/android/identity/networking/models/VerificationPag
 
 public final class com/stripe/android/identity/ui/ComposableSingletons$BottomSheetKt {
 	public static final field INSTANCE Lcom/stripe/android/identity/ui/ComposableSingletons$BottomSheetKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function3;
+	public static field lambda-2 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$identity_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-2$identity_release ()Lkotlin/jvm/functions/Function2;
@@ -359,24 +362,30 @@ public final class com/stripe/android/identity/ui/ComposableSingletons$BottomShe
 
 public final class com/stripe/android/identity/ui/ComposableSingletons$ConsentLinesKt {
 	public static final field INSTANCE Lcom/stripe/android/identity/ui/ComposableSingletons$ConsentLinesKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$identity_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/identity/ui/ComposableSingletons$ConsentScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/identity/ui/ComposableSingletons$ConsentScreenKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$identity_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/identity/ui/ComposableSingletons$ConsentWelcomeHeaderKt {
 	public static final field INSTANCE Lcom/stripe/android/identity/ui/ComposableSingletons$ConsentWelcomeHeaderKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$identity_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/identity/ui/ComposableSingletons$DebugScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/identity/ui/ComposableSingletons$DebugScreenKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function3;
+	public static field lambda-2 Lkotlin/jvm/functions/Function3;
+	public static field lambda-3 Lkotlin/jvm/functions/Function3;
 	public fun <init> ()V
 	public final fun getLambda-1$identity_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-2$identity_release ()Lkotlin/jvm/functions/Function3;
@@ -385,18 +394,21 @@ public final class com/stripe/android/identity/ui/ComposableSingletons$DebugScre
 
 public final class com/stripe/android/identity/ui/ComposableSingletons$DocWarmupScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/identity/ui/ComposableSingletons$DocWarmupScreenKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$identity_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/identity/ui/ComposableSingletons$SelfieScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/identity/ui/ComposableSingletons$SelfieScreenKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function3;
 	public fun <init> ()V
 	public final fun getLambda-1$identity_release ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class com/stripe/android/identity/ui/ComposableSingletons$UploadScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/identity/ui/ComposableSingletons$UploadScreenKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function3;
 	public fun <init> ()V
 	public final fun getLambda-1$identity_release ()Lkotlin/jvm/functions/Function3;
 }

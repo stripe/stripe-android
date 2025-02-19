@@ -2,22 +2,6 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
-Dependencies updated in [9512](https://github.com/stripe/stripe-android/pull/9512):
-* Bumped Android Gradle Plugin from 8.7.1 to 8.8.1.
-* Bumped Androidx Activity from 1.8.2 to 1.9.3.
-* Bumped Androidx Annotation from 1.9.0 to 1.9.1.
-* Bumped Androidx Fragment from 1.8.4 to 1.8.6.
-* Bumped Androidx Lifecycle from 2.8.6 to 2.8.7.
-* Bumped Camerax from 1.3.4 to 1.4.1.
-* Bumped Constraint Layout from 2.1.4 to 2.2.0.
-* Bumped Google Places from 3.3.0 to 3.5.0.
-* Bumped Gson from 2.11.0 to 2.12.1.
-* Bumped Hilt from 2.52 to 2.55.
-* Bumped Kotlin from 2.0.21 to 2.1.10.
-* Bumped Okio from 3.9.1 to 3.10.2.
-* Bumped Play Services Coroutines from 1.7.3 to 1.10.1.
-* Bumped Poko from 0.17.2 to 0.18.2.
-
 ## 21.5.0 - 2025-02-18
 ### CardScan
 * [FIXED][10181](https://github.com/stripe/stripe-android/pull/10181) Fixed a crash that happened on some devices with odd camera-to-screen ratios

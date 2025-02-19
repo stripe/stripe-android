@@ -5,7 +5,7 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.app.ActivityOptionsCompat
 
 internal class FakeActivityResultLauncher<I>(
-    override val contract: ActivityResultContract<I, *>
+    private val contract: ActivityResultContract<I, *>
 ) : ActivityResultLauncher<I>() {
     val launchArgs = mutableListOf<I>()
     var unregisterInvocations = 0
@@ -19,5 +19,9 @@ internal class FakeActivityResultLauncher<I>(
 
     override fun unregister() {
         unregisterInvocations++
+    }
+
+    override fun getContract(): ActivityResultContract<I, *> {
+        return contract
     }
 }

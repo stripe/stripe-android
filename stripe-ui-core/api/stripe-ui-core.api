@@ -91,6 +91,8 @@ public final class com/stripe/android/uicore/elements/AddressType$ShippingExpand
 
 public final class com/stripe/android/uicore/elements/ComposableSingletons$OTPElementUIKt {
 	public static final field INSTANCE Lcom/stripe/android/uicore/elements/ComposableSingletons$OTPElementUIKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public static field lambda-2 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$stripe_ui_core_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda-2$stripe_ui_core_release ()Lkotlin/jvm/functions/Function2;
@@ -98,6 +100,7 @@ public final class com/stripe/android/uicore/elements/ComposableSingletons$OTPEl
 
 public final class com/stripe/android/uicore/elements/ComposableSingletons$TextFieldUIKt {
 	public static final field INSTANCE Lcom/stripe/android/uicore/elements/ComposableSingletons$TextFieldUIKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$stripe_ui_core_release ()Lkotlin/jvm/functions/Function2;
 }
@@ -239,6 +242,7 @@ public final class com/stripe/android/uicore/elements/TextFieldUIKt {
 
 public final class com/stripe/android/uicore/elements/bottomsheet/ComposableSingletons$StripeBottomSheetLayoutKt {
 	public static final field INSTANCE Lcom/stripe/android/uicore/elements/bottomsheet/ComposableSingletons$StripeBottomSheetLayoutKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$stripe_ui_core_release ()Lkotlin/jvm/functions/Function2;
 }
@@ -249,6 +253,8 @@ public final class com/stripe/android/uicore/elements/bottomsheet/StripeBottomSh
 
 public final class com/stripe/android/uicore/image/ComposableSingletons$StripeImageKt {
 	public static final field INSTANCE Lcom/stripe/android/uicore/image/ComposableSingletons$StripeImageKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function3;
+	public static field lambda-2 Lkotlin/jvm/functions/Function3;
 	public fun <init> ()V
 	public final fun getLambda-1$stripe_ui_core_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-2$stripe_ui_core_release ()Lkotlin/jvm/functions/Function3;

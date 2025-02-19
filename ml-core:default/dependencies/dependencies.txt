@@ -1,9 +1,9 @@
 +--- project :ml-core:base
-|    +--- org.jetbrains.kotlin:kotlin-stdlib:2.1.10
+|    +--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21
 |    |    \--- org.jetbrains:annotations:13.0
-|    \--- androidx.annotation:annotation:1.9.1
-|         \--- androidx.annotation:annotation-jvm:1.9.1
-|              \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.24 -> 2.1.10 (*)
+|    \--- androidx.annotation:annotation:1.9.0
+|         \--- androidx.annotation:annotation-jvm:1.9.0
+|              \--- org.jetbrains.kotlin:kotlin-stdlib:1.7.10 -> 2.0.21 (*)
 +--- org.tensorflow:tensorflow-lite-support:0.4.3
 |    +--- org.tensorflow:tensorflow-lite-support-api:0.4.3
 |    |    +--- org.checkerframework:checker-qual:2.5.8
@@ -11,6 +11,6 @@
 |    |    \--- com.google.android.odml:image:1.0.0-beta1
 |    \--- org.tensorflow:tensorflow-lite:2.10.0 -> 2.11.0
 |         \--- org.tensorflow:tensorflow-lite-api:2.11.0
-+--- org.jetbrains.kotlin:kotlin-stdlib:2.1.10 (*)
-+--- androidx.annotation:annotation:1.9.1 (*)
++--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21 (*)
++--- androidx.annotation:annotation:1.9.0 (*)
 \--- org.tensorflow:tensorflow-lite:2.11.0 (*)
