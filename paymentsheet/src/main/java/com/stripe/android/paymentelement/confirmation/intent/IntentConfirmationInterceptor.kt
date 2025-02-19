@@ -12,6 +12,7 @@ import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
@@ -79,6 +80,7 @@ internal interface IntentConfirmationInterceptor {
         intent: StripeIntent,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
+        paymentMethodExtraParams: PaymentMethodExtraParams? = null,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         customerRequestedSave: Boolean,
     ): NextStep
@@ -88,6 +90,7 @@ internal interface IntentConfirmationInterceptor {
         intent: StripeIntent,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
+        paymentMethodExtraParams: PaymentMethodExtraParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): NextStep
 
@@ -151,6 +154,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         intent: StripeIntent,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
+        paymentMethodExtraParams: PaymentMethodExtraParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         customerRequestedSave: Boolean,
     ): NextStep {
@@ -166,6 +170,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     shippingValues = shippingValues,
                     paymentMethodCreateParams = paymentMethodCreateParams,
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
+                    paymentMethodExtraParams = paymentMethodExtraParams,
                     customerRequestedSave = customerRequestedSave,
                 )
             }
@@ -177,6 +182,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     shippingValues = shippingValues,
                     paymentMethodCreateParams = paymentMethodCreateParams,
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
+                    paymentMethodExtraParams = paymentMethodExtraParams,
                 )
             }
 
@@ -186,6 +192,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     intent = intent,
                     shippingValues = shippingValues,
                     paymentMethodCreateParams = paymentMethodCreateParams,
+                    paymentMethodExtraParams = paymentMethodExtraParams,
                 )
             }
         }
@@ -196,6 +203,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         intent: StripeIntent,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
+        paymentMethodExtraParams: PaymentMethodExtraParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): NextStep {
         return when (initializationMode) {
@@ -205,6 +213,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     intentConfiguration = initializationMode.intentConfiguration,
                     paymentMethod = paymentMethod,
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
+                    paymentMethodExtraParams = paymentMethodExtraParams,
                     shippingValues = shippingValues,
                     shouldSavePaymentMethod = paymentMethodOptionsParams?.setupFutureUsage() == offSession,
                 )
@@ -217,6 +226,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     shippingValues = shippingValues,
                     paymentMethod = paymentMethod,
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
+                    paymentMethodExtraParams = paymentMethodExtraParams,
                     isDeferred = false,
                 )
             }
@@ -228,6 +238,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     shippingValues = shippingValues,
                     paymentMethod = paymentMethod,
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
+                    paymentMethodExtraParams = paymentMethodExtraParams,
                     isDeferred = false,
                 )
             }
@@ -238,6 +249,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
+        paymentMethodExtraParams: PaymentMethodExtraParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         customerRequestedSave: Boolean,
     ): NextStep {
@@ -259,6 +271,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     intentConfiguration = intentConfiguration,
                     paymentMethod = paymentMethod,
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
+                    paymentMethodExtraParams = paymentMethodExtraParams,
                     shippingValues = shippingValues,
                     shouldSavePaymentMethod = customerRequestedSave,
                 )
@@ -276,6 +289,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
+        paymentMethodExtraParams: PaymentMethodExtraParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         shouldSavePaymentMethod: Boolean,
     ): NextStep {
@@ -286,6 +300,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     intentConfiguration = intentConfiguration,
                     paymentMethod = paymentMethod,
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
+                    paymentMethodExtraParams = paymentMethodExtraParams,
                     shouldSavePaymentMethod = shouldSavePaymentMethod,
                     shippingValues = shippingValues,
                 )
@@ -348,6 +363,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
+        paymentMethodExtraParams: PaymentMethodExtraParams?,
         shouldSavePaymentMethod: Boolean,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): NextStep {
@@ -366,6 +382,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                         intentConfiguration = intentConfiguration,
                         paymentMethod = paymentMethod,
                         paymentMethodOptionsParams = paymentMethodOptionsParams,
+                        paymentMethodExtraParams = paymentMethodExtraParams,
                         shippingValues = shippingValues,
                     )
                 }
@@ -386,6 +403,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
+        paymentMethodExtraParams: PaymentMethodExtraParams?,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
     ): NextStep {
         return retrieveStripeIntent(clientSecret).mapCatching { intent ->
@@ -410,6 +428,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     shippingValues,
                     paymentMethod,
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
+                    paymentMethodExtraParams = paymentMethodExtraParams,
                     isDeferred = true,
                 )
             }
@@ -434,6 +453,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         paymentMethod: PaymentMethod,
         paymentMethodOptionsParams: PaymentMethodOptionsParams?,
+        paymentMethodExtraParams: PaymentMethodExtraParams?,
         isDeferred: Boolean,
     ): NextStep {
         val factory = ConfirmStripeIntentParamsFactory.createFactory(
@@ -449,6 +469,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         val confirmParams = factory.create(
             paymentMethod = paymentMethod,
             optionsParams = paymentMethodOptionsParams,
+            extraParams = paymentMethodExtraParams,
         )
         return NextStep.Confirm(
             confirmParams = confirmParams,
@@ -462,6 +483,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         paymentMethodCreateParams: PaymentMethodCreateParams,
         paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
+        paymentMethodExtraParams: PaymentMethodExtraParams? = null,
     ): NextStep {
         val paramsFactory = ConfirmStripeIntentParamsFactory.createFactory(
             clientSecret = clientSecret,
@@ -476,6 +498,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         val confirmParams = paramsFactory.create(
             paymentMethodCreateParams,
             paymentMethodOptionsParams,
+            paymentMethodExtraParams,
         )
 
         return NextStep.Confirm(

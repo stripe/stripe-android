@@ -8,6 +8,7 @@ import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
@@ -22,21 +23,25 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
         paymentMethodId: String,
         paymentMethodType: PaymentMethod.Type?,
         optionsParams: PaymentMethodOptionsParams?,
+        extraParams: PaymentMethodExtraParams?,
     ): T
 
     abstract fun create(
         createParams: PaymentMethodCreateParams,
         optionsParams: PaymentMethodOptionsParams? = null,
+        extraParams: PaymentMethodExtraParams? = null,
     ): T
 
     fun create(
         paymentMethod: PaymentMethod,
         optionsParams: PaymentMethodOptionsParams?,
+        extraParams: PaymentMethodExtraParams?,
     ): T {
         return create(
             paymentMethodId = paymentMethod.id.orEmpty(),
             paymentMethodType = paymentMethod.type,
             optionsParams = optionsParams,
+            extraParams = extraParams,
         )
     }
 
@@ -69,6 +74,7 @@ internal class ConfirmPaymentIntentParamsFactory(
         paymentMethodId: String,
         paymentMethodType: PaymentMethod.Type?,
         optionsParams: PaymentMethodOptionsParams?,
+        extraParams: PaymentMethodExtraParams?
     ): ConfirmPaymentIntentParams {
         return ConfirmPaymentIntentParams.createWithPaymentMethodId(
             paymentMethodId = paymentMethodId,
@@ -82,12 +88,14 @@ internal class ConfirmPaymentIntentParamsFactory(
     override fun create(
         createParams: PaymentMethodCreateParams,
         optionsParams: PaymentMethodOptionsParams?,
+        extraParams: PaymentMethodExtraParams?,
     ): ConfirmPaymentIntentParams {
         return ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
             paymentMethodCreateParams = createParams,
             clientSecret = clientSecret,
             paymentMethodOptions = optionsParams,
             shipping = shipping,
+            setAsDefaultPaymentMethod = extraParams?.extractSetAsDefaultPaymentMethodFromExtraParams()
         )
     }
 }
@@ -101,6 +109,7 @@ internal class ConfirmSetupIntentParamsFactory(
         paymentMethodId: String,
         paymentMethodType: PaymentMethod.Type?,
         optionsParams: PaymentMethodOptionsParams?,
+        extraParams: PaymentMethodExtraParams?,
     ): ConfirmSetupIntentParams {
         return ConfirmSetupIntentParams.create(
             paymentMethodId = paymentMethodId,
@@ -112,10 +121,12 @@ internal class ConfirmSetupIntentParamsFactory(
     override fun create(
         createParams: PaymentMethodCreateParams,
         optionsParams: PaymentMethodOptionsParams?,
+        extraParams: PaymentMethodExtraParams?,
     ): ConfirmSetupIntentParams {
         return ConfirmSetupIntentParams.create(
             paymentMethodCreateParams = createParams,
             clientSecret = clientSecret,
+            setAsDefaultPaymentMethod = extraParams?.extractSetAsDefaultPaymentMethodFromExtraParams()
         )
     }
 }
@@ -139,5 +150,13 @@ private fun PaymentIntent.canSetupFutureUsage(): Boolean {
         StripeIntent.Usage.OneTime -> false
         StripeIntent.Usage.OnSession,
         StripeIntent.Usage.OffSession -> true
+    }
+}
+
+private fun PaymentMethodExtraParams.extractSetAsDefaultPaymentMethodFromExtraParams(): Boolean? {
+    return when (this) {
+        is PaymentMethodExtraParams.Card -> this.setAsDefault
+        is PaymentMethodExtraParams.USBankAccount -> this.setAsDefault
+        else -> null
     }
 }

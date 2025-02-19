@@ -69,6 +69,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethod = paymentMethod,
             paymentMethodOptionsParams = null,
             shippingValues = null,
+            paymentMethodExtraParams = null,
         )
 
         val confirmNextStep = nextStep as? IntentConfirmationInterceptor.NextStep.Confirm
@@ -159,6 +160,7 @@ class DefaultIntentConfirmationInterceptorTest {
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             paymentMethodOptionsParams = null,
             shippingValues = null,
+            paymentMethodExtraParams = null,
         )
     }
 
@@ -214,6 +216,7 @@ class DefaultIntentConfirmationInterceptorTest {
             intent = PaymentIntentFactory.create(),
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             paymentMethodOptionsParams = null,
+            paymentMethodExtraParams = null,
             shippingValues = null,
         )
     }
@@ -261,6 +264,7 @@ class DefaultIntentConfirmationInterceptorTest {
                     intent = PaymentIntentFactory.create(),
                     paymentMethod = paymentMethod,
                     paymentMethodOptionsParams = null,
+                    paymentMethodExtraParams = null,
                     shippingValues = null,
                 )
             }
@@ -357,6 +361,7 @@ class DefaultIntentConfirmationInterceptorTest {
             intent = PaymentIntentFactory.create(),
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             paymentMethodOptionsParams = null,
+            paymentMethodExtraParams = null,
             shippingValues = null,
         )
 
@@ -387,6 +392,7 @@ class DefaultIntentConfirmationInterceptorTest {
             intent = PaymentIntentFactory.create(),
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             paymentMethodOptionsParams = null,
+            paymentMethodExtraParams = null,
             shippingValues = null,
         )
 
@@ -415,6 +421,7 @@ class DefaultIntentConfirmationInterceptorTest {
             intent = PaymentIntentFactory.create(),
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             paymentMethodOptionsParams = null,
+            paymentMethodExtraParams = null,
             shippingValues = null,
         )
 
@@ -464,6 +471,7 @@ class DefaultIntentConfirmationInterceptorTest {
             intent = PaymentIntentFactory.create(),
             paymentMethod = paymentMethod,
             paymentMethodOptionsParams = null,
+            paymentMethodExtraParams = null,
             shippingValues = null,
         )
 
@@ -504,6 +512,7 @@ class DefaultIntentConfirmationInterceptorTest {
             intent = PaymentIntentFactory.create(),
             paymentMethod = paymentMethod,
             paymentMethodOptionsParams = null,
+            paymentMethodExtraParams = null,
             shippingValues = null,
         )
 
@@ -551,6 +560,7 @@ class DefaultIntentConfirmationInterceptorTest {
             intent = PaymentIntentFactory.create(),
             paymentMethod = paymentMethod,
             paymentMethodOptionsParams = null,
+            paymentMethodExtraParams = null,
             shippingValues = null,
         )
 
@@ -603,6 +613,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
                     setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
                 ).takeIf { input },
+                paymentMethodExtraParams = null,
                 shippingValues = null,
             )
         }
@@ -639,6 +650,7 @@ class DefaultIntentConfirmationInterceptorTest {
             intent = PaymentIntentFactory.create(),
             paymentMethod = paymentMethod,
             paymentMethodOptionsParams = null,
+            paymentMethodExtraParams = null,
             shippingValues = null,
         )
 
@@ -681,6 +693,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 intent = PaymentIntentFactory.create(),
                 paymentMethod = paymentMethod,
                 paymentMethodOptionsParams = null,
+                paymentMethodExtraParams = null,
                 shippingValues = null,
             )
 
