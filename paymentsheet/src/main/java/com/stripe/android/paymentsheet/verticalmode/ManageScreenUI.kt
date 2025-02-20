@@ -12,7 +12,6 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.ui.SelectedBadge
 import com.stripe.android.uicore.utils.collectAsState
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
@@ -50,7 +49,6 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
                 },
                 trailingContent = {
                     TrailingContent(
-                        isSelected = isSelected,
                         isEditing = state.isEditing,
                         paymentMethod = it,
                     )
@@ -72,12 +70,9 @@ private fun rowOnClick(isEditing: Boolean, selectPaymentMethod: () -> Unit, upda
 private fun TrailingContent(
     paymentMethod: DisplayableSavedPaymentMethod,
     isEditing: Boolean,
-    isSelected: Boolean,
 ) {
     if (isEditing) {
         ChevronIcon(paymentMethodId = paymentMethod.paymentMethod.id)
-    } else if (isSelected) {
-        SelectedBadge()
     }
 }
 
