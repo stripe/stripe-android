@@ -9,7 +9,7 @@ import com.stripe.form.ContentSpec
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class TextSpec(
-    private val text: AnnotatedString
+    val text: AnnotatedString
 ) : ContentSpec {
     constructor(text: String) : this(AnnotatedString(text))
 
