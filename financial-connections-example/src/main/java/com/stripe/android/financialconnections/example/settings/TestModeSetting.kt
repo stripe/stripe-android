@@ -2,8 +2,8 @@ package com.stripe.android.financialconnections.example.settings
 
 import com.stripe.android.financialconnections.example.Experience
 import com.stripe.android.financialconnections.example.Flow
-import com.stripe.android.financialconnections.example.Merchant
 import com.stripe.android.financialconnections.example.data.model.LinkAccountSessionBody
+import com.stripe.android.financialconnections.example.data.model.Merchant
 import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
 
 data class TestModeSetting(
@@ -34,7 +34,7 @@ data class TestModeSetting(
         flow: Flow,
         experience: Experience,
     ): Boolean {
-        return merchant != Merchant.Custom && merchant.canSwitchBetweenTestAndLive
+        return merchant.canSwitchBetweenTestAndLive
     }
 
     override fun convertToValue(value: String): Boolean = value.toBoolean()
