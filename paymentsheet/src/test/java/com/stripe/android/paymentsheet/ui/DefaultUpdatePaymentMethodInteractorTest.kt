@@ -341,6 +341,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
         onRemovePaymentMethod: (PaymentMethod) -> Throwable? = { notImplemented() },
         onUpdateCardBrand: (PaymentMethod, CardBrand) -> Result<PaymentMethod> = { _, _ -> notImplemented() },
+        onSetDefaultPaymentMethod: (PaymentMethod) -> Result<Unit> = { _ -> notImplemented() },
         onUpdateSuccess: () -> Unit = { notImplemented() },
         shouldShowSetAsDefaultCheckbox: Boolean = false,
         testBlock: suspend TestParams.() -> Unit
@@ -351,6 +352,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
             removeExecutor = onRemovePaymentMethod,
             updateCardBrandExecutor = onUpdateCardBrand,
+            setDefaultPaymentMethodExecutor = onSetDefaultPaymentMethod,
             workContext = UnconfinedTestDispatcher(),
             cardBrandFilter = DefaultCardBrandFilter,
             onBrandChoiceOptionsShown = {},

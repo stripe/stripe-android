@@ -557,6 +557,7 @@ internal class CustomerSheetViewModel(
                     },
                     onUpdateSuccess = ::onBackPressed,
                     updateCardBrandExecutor = ::updateCardBrandExecutor,
+                    setDefaultPaymentMethodExecutor = { TODO() },
                     workContext = workContext,
                     // This checkbox is never displayed in CustomerSheet.
                     shouldShowSetAsDefaultCheckbox = false,

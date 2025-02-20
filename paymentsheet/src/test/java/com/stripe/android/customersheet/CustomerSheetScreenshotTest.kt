@@ -350,6 +350,7 @@ internal class CustomerSheetScreenshotTest {
                 displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
                 removeExecutor = { null },
                 updateCardBrandExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
+                setDefaultPaymentMethodExecutor = { _ -> Result.success(Unit) },
                 canRemove = canRemove,
                 isLiveMode = true,
                 cardBrandFilter = DefaultCardBrandFilter,

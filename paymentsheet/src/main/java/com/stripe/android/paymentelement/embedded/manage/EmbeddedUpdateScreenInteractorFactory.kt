@@ -56,6 +56,7 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
                     },
                 )
             },
+            setDefaultPaymentMethodExecutor = { TODO() },
             onBrandChoiceOptionsShown = {
                 eventReporter.onShowPaymentOptionBrands(
                     source = EventReporter.CardBrandChoiceEventSource.Edit,
