@@ -33,6 +33,30 @@ android {
     buildFeatures {
         compose true
     }
+
+    testOptions {
+        unitTests {
+            // Note: without this, all Robolectric tests using assets will fail.
+            includeAndroidResources = true
+            all {
+                maxHeapSize = "1024m"
+            }
+        }
+
+        kotlinOptions {
+            freeCompilerArgs += ["-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"]
+        }
+
+        managedDevices {
+            localDevices {
+                register("pixel2api33") {
+                    device = "Pixel 2"
+                    apiLevel = 33
+                    systemImageSource = "aosp"
+                }
+            }
+        }
+    }
 }
 
 dependencies {
@@ -59,8 +83,31 @@ dependencies {
     debugImplementation libs.compose.uiTooling
     debugImplementation libs.leakCanary
 
+    testImplementation project(':screenshot-testing')
+
+    testImplementation testLibs.androidx.archCore
+    testImplementation testLibs.androidx.composeUi
+    testImplementation testLibs.androidx.core
+    testImplementation testLibs.androidx.fragment
     testImplementation testLibs.androidx.junit
+    testImplementation testLibs.androidx.junitKtx
+    testImplementation testLibs.androidx.lifecycle
+    testImplementation testLibs.androidx.testRules
+    testImplementation testLibs.hamcrest
     testImplementation testLibs.junit
+    testImplementation testLibs.json
+    testImplementation testLibs.kotlin.annotations
+    testImplementation testLibs.kotlin.coroutines
+    testImplementation testLibs.kotlin.junit
+    testImplementation testLibs.mockito.core
+    testImplementation testLibs.mockito.inline
+    testImplementation testLibs.mockito.kotlin
+    testImplementation testLibs.robolectric
+    testImplementation testLibs.truth
+    testImplementation testLibs.turbine
+    testImplementation testLibs.espresso.intents
+
+    testImplementation testLibs.espresso.core
 
     androidTestImplementation testLibs.espresso.core
     androidTestImplementation testLibs.androidx.composeUi

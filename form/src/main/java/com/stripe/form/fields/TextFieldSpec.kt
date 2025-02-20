@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.form.ContentBox
@@ -21,6 +22,7 @@ import com.stripe.form.FormFieldState
 import com.stripe.form.Key
 import com.stripe.form.ValidationResult
 import com.stripe.form.ValueChange
+import java.util.UUID
 
 data class TextFieldSpec(
     override val state: TextFieldState,
@@ -41,6 +43,7 @@ data class TextFieldSpec(
         ) {
             TextField(
                 modifier = Modifier
+                    .testTag(state.testTag)
                     .fillMaxWidth(),
                 value = content,
                 onValueChange = {
@@ -97,6 +100,7 @@ data class TextFieldSpec(
         val maxLength: Int = Int.MAX_VALUE,
         val readOnly: Boolean = false,
         val enabled: Boolean = true,
+        val testTag: String = UUID.randomUUID().toString(),
         override val onValueChange: (ValueChange<TextFieldValue>) -> Unit,
         override val validator: (TextFieldValue) -> ValidationResult = { ValidationResult.Valid },
     ) : FormFieldState<TextFieldValue>
