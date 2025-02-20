@@ -2,6 +2,7 @@ package com.stripe.android.model
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_SET_AS_DEFAULT_PAYMENT_METHOD
 import kotlinx.parcelize.Parcelize
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -37,6 +38,30 @@ sealed class PaymentMethodExtraParams(
 
         internal companion object {
             const val PARAM_CONFIRMED = "confirmed"
+        }
+    }
+
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class Card(
+        val setAsDefault: Boolean? = null
+    ) : PaymentMethodExtraParams(PaymentMethod.Type.Card) {
+        override fun createTypeParams(): List<Pair<String, Any?>> {
+            return listOf(
+                PARAM_SET_AS_DEFAULT_PAYMENT_METHOD to setAsDefault?.toString()
+            )
+        }
+    }
+
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class USBankAccount(
+        val setAsDefault: Boolean? = null
+    ) : PaymentMethodExtraParams(PaymentMethod.Type.USBankAccount) {
+        override fun createTypeParams(): List<Pair<String, Any?>> {
+            return listOf(
+                PARAM_SET_AS_DEFAULT_PAYMENT_METHOD to setAsDefault?.toString()
+            )
         }
     }
 }

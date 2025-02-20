@@ -70,6 +70,7 @@ class IntentConfirmationDefinitionTest {
                     createParams = createParams,
                     optionsParams = null,
                     shouldSave = true,
+                    extraParams = null,
                 ),
                 confirmationParameters = CONFIRMATION_PARAMETERS,
             )
