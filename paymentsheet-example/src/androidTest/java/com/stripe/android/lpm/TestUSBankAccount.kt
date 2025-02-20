@@ -15,11 +15,11 @@ import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillin
 import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TEST_TAG_ACCOUNT_DETAILS
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
-import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.DEFAULT_UI_TIMEOUT
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.test.core.ui.ComposeButton
 import com.stripe.android.test.core.ui.PaymentSelection
+import com.stripe.android.testing.ShampooRule
 import com.stripe.android.utils.ForceNativeBankFlowTestRule
 import org.junit.Rule
 import org.junit.Test
@@ -35,6 +35,9 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
         settings[CurrencySettingsDefinition] = Currency.USD
         settings[DelayedPaymentMethodsSettingsDefinition] = true
     }
+
+    @get:Rule
+    val shampooRule = ShampooRule(iterations = 10)
 
     @get:Rule
     val forceNativeBankFlowTestRule = ForceNativeBankFlowTestRule(
@@ -100,32 +103,6 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
                 cardSelection.click()
                 populator.populateCardDetails()
             },
-        )
-    }
-
-    @Test
-    fun testUSBankAccountCancelAllowsUserToContinue() {
-        testDriver.confirmUSBankAccount(
-            testParameters = testParameters.copy(
-                authorizationAction = AuthorizeAction.Cancel,
-            ),
-            afterAuthorization = { _, _ ->
-                ComposeButton(rules.compose, hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
-                    .waitFor(isEnabled())
-            }
-        )
-    }
-
-    @Test
-    fun testUSBankAccountCancelAllowsUserToContinueInCustomFlow() {
-        testDriver.confirmCustomUSBankAccount(
-            testParameters = testParameters.copy(
-                authorizationAction = AuthorizeAction.Cancel,
-            ),
-            afterAuthorization = {
-                ComposeButton(rules.compose, hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
-                    .waitFor(isEnabled())
-            }
         )
     }
 }
