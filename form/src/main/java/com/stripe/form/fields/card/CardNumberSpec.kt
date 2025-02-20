@@ -48,7 +48,7 @@ data class CardNumberSpec(
                         cardNumber = change.value.text
                         state.onValueChange(
                             ValueChange(
-                                key = change.key,
+                                key = state.key,
                                 value = change.value.text,
                                 isComplete = change.isComplete
                             )

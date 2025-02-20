@@ -1,6 +1,7 @@
 package com.stripe.form.example.ui.theme.cardinput
 
 import androidx.lifecycle.ViewModel
+import com.stripe.form.Key
 import com.stripe.form.ValueChange
 import com.stripe.form.buildForm
 import com.stripe.form.fields.card.CardDetailsSpec
@@ -28,7 +29,7 @@ class CardInputViewModel: ViewModel() {
         }
     }
 
-    private fun onFormValuesChanged(data: Map<Any, ValueChange<*>?>) {
+    private fun onFormValuesChanged(data: Map<Key<*>, ValueChange<*>?>) {
         val output = data.find(key)
 
         _state.update {

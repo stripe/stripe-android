@@ -8,7 +8,7 @@ import kotlinx.parcelize.RawValue
 @Immutable
 @Parcelize
 data class ValueChange<T>(
-    val key: Parcelable,
+    val key: Key<T>,
     val value: @RawValue T,
     val isComplete: Boolean,
 ) : Parcelable

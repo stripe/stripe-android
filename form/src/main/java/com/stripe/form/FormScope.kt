@@ -12,11 +12,11 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 
 class FormScope(
-    private val onValuesChanged: (Map<Any, ValueChange<*>?>) -> Unit
+    private val onValuesChanged: (Map<Key<*>, ValueChange<*>?>) -> Unit
 ) {
     private val fields = mutableListOf<ContentSpec>()
 
-    private var values = mapOf<Any, ValueChange<*>>()
+    private var values = mapOf<Key<*>, ValueChange<*>>()
 
     fun addSpec(
         onCreate: ((ValueChange<*>) -> Unit) -> ContentSpec
@@ -99,7 +99,7 @@ class FormScope(
     }
 
     fun dropdown(
-        key: Key<DropdownSpec.Option>,
+        key: Key<String>,
         options: ImmutableList<DropdownSpec.Option>,
         initialIndex: Int = 0,
     ): ContentSpec {
@@ -130,7 +130,7 @@ class FormScope(
 }
 
 fun buildForm(
-    onValuesChanged: (Map<Any, ValueChange<*>?>) -> Unit,
+    onValuesChanged: (Map<Key<*>, ValueChange<*>?>) -> Unit,
     block: FormScope.() -> Unit
 ): Form {
     val formScope = FormScope(onValuesChanged).apply(block)
