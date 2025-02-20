@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.example.data
 import com.stripe.android.financialconnections.example.BuildConfig
 import com.stripe.android.financialconnections.example.data.model.CreateIntentResponse
 import com.stripe.android.financialconnections.example.data.model.LinkAccountSessionBody
+import com.stripe.android.financialconnections.example.data.model.MerchantsResponse
 import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
 
 class BackendRepository(
@@ -31,4 +32,6 @@ class BackendRepository(
     ): CreateIntentResponse = backendService.createPaymentIntent(
         paymentIntentBody
     )
+
+    suspend fun merchants(): MerchantsResponse = backendService.merchants()
 }
