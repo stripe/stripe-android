@@ -45,6 +45,7 @@ import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -59,6 +60,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import kotlin.coroutines.CoroutineContext
 import kotlin.test.Test
 import com.stripe.android.R as PaymentsCoreR
 
@@ -69,6 +71,7 @@ internal class PaymentOptionsViewModelTest {
     val rule = InstantTaskExecutorRule()
 
     private val testDispatcher = UnconfinedTestDispatcher()
+    private val standardTestDispatcher = StandardTestDispatcher()
 
     private val eventReporter = mock<EventReporter>()
     private val customerRepository = mock<CustomerRepository>()
@@ -655,8 +658,10 @@ internal class PaymentOptionsViewModelTest {
     }
 
     @Test
-    fun `Correctly updates state when removing payment method in edit screen succeeds`() = runTest(testDispatcher) {
-        Dispatchers.setMain(testDispatcher)
+    fun `Correctly updates state when removing payment method in edit screen succeeds`() = runTest(
+        standardTestDispatcher
+    ) {
+        Dispatchers.setMain(standardTestDispatcher)
 
         val cards = PaymentMethodFactory.cards(3)
         val paymentMethodToRemove = cards.first()
@@ -671,6 +676,7 @@ internal class PaymentOptionsViewModelTest {
 
         val viewModel = createViewModel(
             args = args,
+            workContext = standardTestDispatcher,
         )
 
         turbineScope {
@@ -813,7 +819,8 @@ internal class PaymentOptionsViewModelTest {
     private fun createViewModel(
         args: PaymentOptionContract.Args = PAYMENT_OPTION_CONTRACT_ARGS,
         linkState: LinkState? = args.state.paymentMethodMetadata.linkState,
-        linkConfigurationCoordinator: LinkConfigurationCoordinator = FakeLinkConfigurationCoordinator()
+        linkConfigurationCoordinator: LinkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+        workContext: CoroutineContext = testDispatcher,
     ) = TestViewModelFactory.create(linkConfigurationCoordinator) { linkHandler, savedStateHandle ->
         PaymentOptionsViewModel(
             args = args.copy(
@@ -825,7 +832,7 @@ internal class PaymentOptionsViewModelTest {
             ),
             eventReporter = eventReporter,
             customerRepository = customerRepository,
-            workContext = testDispatcher,
+            workContext = workContext,
             savedStateHandle = savedStateHandle,
             linkHandler = linkHandler,
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
