@@ -265,8 +265,6 @@ internal class SavedPaymentMethodMutator(
                 )
 
                 onSuccess(updatedMethod)
-
-                navigationPop()
             }
 
             eventReporter.onUpdatePaymentMethodSucceeded(
@@ -363,7 +361,7 @@ internal class SavedPaymentMethodMutator(
                                     selectedBrand = it
                                 )
                             },
-                            onUpdateSuccess = {},
+                            onUpdateSuccess = viewModel.navigationHandler::pop,
                         )
                     )
                 )

@@ -512,7 +512,6 @@ internal class CustomerSheetViewModel(
                 productUsageTokens = setOf("CustomerSheet"),
             )
         ).onSuccess { updatedMethod ->
-            onBackPressed()
             updatePaymentMethodInState(updatedMethod)
 
             eventReporter.onUpdatePaymentMethodSucceeded(
@@ -559,7 +558,7 @@ internal class CustomerSheetViewModel(
                             selectedBrand = it
                         )
                     },
-                    onUpdateSuccess = {},
+                    onUpdateSuccess = ::onBackPressed,
                     workContext = workContext,
                 ),
                 isLiveMode = isLiveModeProvider(),
