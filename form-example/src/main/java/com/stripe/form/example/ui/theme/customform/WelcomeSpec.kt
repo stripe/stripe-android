@@ -23,18 +23,11 @@ data class WelcomeSpec(
     override fun Content(modifier: Modifier) {
         val infiniteTransition = rememberInfiniteTransition()
 
-        // Creates a child animation of float type as a part of the [InfiniteTransition].
         val color by infiniteTransition.animateColor(
             initialValue = Color.Cyan,
             targetValue = Color.Green,
             animationSpec = infiniteRepeatable(
-                // Infinitely repeating a 5000ms tween animation using default easing curve.
                 animation = tween(5000),
-                // After each iteration of the animation (i.e. every 1000ms), the animation
-                // will
-                // start again from the [initialValue] defined above.
-                // This is the default [RepeatMode]. See [RepeatMode.Reverse] below for an
-                // alternative.
                 repeatMode = RepeatMode.Restart
             ),
             label = "color"
