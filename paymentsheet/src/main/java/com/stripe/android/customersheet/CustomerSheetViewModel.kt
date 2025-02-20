@@ -556,7 +556,7 @@ internal class CustomerSheetViewModel(
                             selectedBrand = it
                         )
                     },
-                    updateExecutor = ::updateExecutor,
+                    updateCardBrandExecutor = ::updateCardBrandExecutor,
                     workContext = workContext,
                     // This checkbox is never displayed in CustomerSheet.
                     shouldShowSetAsDefaultCheckbox = false,
@@ -573,7 +573,7 @@ internal class CustomerSheetViewModel(
         }.failureOrNull()?.cause
     }
 
-    private suspend fun updateExecutor(paymentMethod: PaymentMethod, brand: CardBrand): Result<PaymentMethod> {
+    private suspend fun updateCardBrandExecutor(paymentMethod: PaymentMethod, brand: CardBrand): Result<PaymentMethod> {
         return when (val result = modifyCardPaymentMethod(paymentMethod, brand)) {
             is CustomerSheetDataResult.Success -> Result.success(result.value)
             is CustomerSheetDataResult.Failure -> Result.failure(result.cause)

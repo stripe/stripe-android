@@ -325,7 +325,7 @@ internal class SavedPaymentMethodMutator(
             displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
             canRemove: Boolean,
             performRemove: suspend () -> Throwable?,
-            updateExecutor: suspend (brand: CardBrand) -> Result<PaymentMethod>,
+            updateCardBrandExecutor: suspend (brand: CardBrand) -> Result<PaymentMethod>,
         ) {
             if (displayableSavedPaymentMethod.savedPaymentMethod != SavedPaymentMethod.Unexpected) {
                 val isLiveMode = requireNotNull(viewModel.paymentMethodMetadata.value).stripeIntent.isLiveMode
@@ -339,8 +339,8 @@ internal class SavedPaymentMethodMutator(
                             removeExecutor = { method ->
                                 performRemove()
                             },
-                            updateExecutor = { method, brand ->
-                                updateExecutor(brand)
+                            updateCardBrandExecutor = { method, brand ->
+                                updateCardBrandExecutor(brand)
                             },
                             onBrandChoiceOptionsShown = {
                                 viewModel.eventReporter.onShowPaymentOptionBrands(
@@ -384,13 +384,16 @@ internal class SavedPaymentMethodMutator(
                     navigateBackOnPaymentMethodRemoved(viewModel)
                 },
                 postPaymentMethodRemoveActions = {},
-                onUpdatePaymentMethod = { displayableSavedPaymentMethod, canRemove, performRemove, updateExecutor ->
+                onUpdatePaymentMethod = { displayableSavedPaymentMethod,
+                                          canRemove,
+                                          performRemove,
+                                          updateCardBrandExecutor ->
                     onUpdatePaymentMethod(
                         viewModel = viewModel,
                         displayableSavedPaymentMethod = displayableSavedPaymentMethod,
                         canRemove = canRemove,
                         performRemove = performRemove,
-                        updateExecutor = updateExecutor,
+                        updateCardBrandExecutor = updateCardBrandExecutor,
                     )
                 },
                 navigationPop = viewModel.navigationHandler::pop,

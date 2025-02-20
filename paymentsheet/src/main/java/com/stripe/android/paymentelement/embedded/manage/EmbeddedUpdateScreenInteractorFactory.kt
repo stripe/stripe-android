@@ -43,7 +43,7 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
                 }
                 result
             },
-            updateExecutor = { method, brand ->
+            updateCardBrandExecutor = { method, brand ->
                 savedPaymentMethodMutatorProvider.get().modifyCardPaymentMethod(
                     paymentMethod = method,
                     brand = brand,

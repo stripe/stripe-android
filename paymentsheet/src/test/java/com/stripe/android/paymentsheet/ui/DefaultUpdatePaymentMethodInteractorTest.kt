@@ -165,7 +165,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         var newCardBrand: CardBrand? = null
         val initialPaymentMethod = PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
 
-        fun updateExecutor(paymentMethod: PaymentMethod, brand: CardBrand): Result<PaymentMethod> {
+        fun updateCardBrandExecutor(paymentMethod: PaymentMethod, brand: CardBrand): Result<PaymentMethod> {
             updatedPaymentMethod = paymentMethod
             newCardBrand = brand
 
@@ -174,7 +174,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
 
         runScenario(
             displayableSavedPaymentMethod = initialPaymentMethod.toDisplayableSavedPaymentMethod(),
-            onSavePaymentMethod = ::updateExecutor,
+            onUpdateCardBrand = ::updateCardBrandExecutor,
         ) {
             interactor.state.test {
                 assertThat(awaitItem().cardBrandChoice.brand).isEqualTo(CardBrand.CartesBancaires)
@@ -217,7 +217,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         val updateException = IllegalStateException("Not allowed.")
 
         @Suppress("UnusedParameter")
-        fun updateExecutor(paymentMethod: PaymentMethod, brand: CardBrand): Result<PaymentMethod> {
+        fun updateCardBrandExecutor(paymentMethod: PaymentMethod, brand: CardBrand): Result<PaymentMethod> {
             return Result.failure(updateException)
         }
 
@@ -225,7 +225,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             displayableSavedPaymentMethod = PaymentMethodFixtures
                 .CARD_WITH_NETWORKS_PAYMENT_METHOD
                 .toDisplayableSavedPaymentMethod(),
-            onSavePaymentMethod = ::updateExecutor,
+            onUpdateCardBrand = ::updateCardBrandExecutor,
         ) {
             val originalCardBrand = CardBrand.CartesBancaires
             interactor.state.test {
@@ -285,7 +285,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         canRemove: Boolean = false,
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
         onRemovePaymentMethod: (PaymentMethod) -> Throwable? = { notImplemented() },
-        onSavePaymentMethod: (PaymentMethod, CardBrand) -> Result<PaymentMethod> = { _, _ -> notImplemented() },
+        onUpdateCardBrand: (PaymentMethod, CardBrand) -> Result<PaymentMethod> = { _, _ -> notImplemented() },
         shouldShowSetAsDefaultCheckbox: Boolean = false,
         testBlock: suspend TestParams.() -> Unit
     ) {
@@ -294,7 +294,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             canRemove = canRemove,
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
             removeExecutor = onRemovePaymentMethod,
-            updateExecutor = onSavePaymentMethod,
+            updateCardBrandExecutor = onUpdateCardBrand,
             workContext = UnconfinedTestDispatcher(),
             cardBrandFilter = DefaultCardBrandFilter,
             onBrandChoiceOptionsShown = {},
