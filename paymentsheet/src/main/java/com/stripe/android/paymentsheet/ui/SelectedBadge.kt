@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
@@ -29,6 +30,7 @@ internal fun SelectedBadge(
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
+            .padding(end = 2.dp)
             .clip(CircleShape)
             .size(24.dp)
             .background(MaterialTheme.colors.primary)
