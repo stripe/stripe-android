@@ -23,7 +23,7 @@ import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@Ignore("Tests currently failing, ignoring while we work on a fix so we can merge other PRs..")
+@Ignore("Tests currently failing, ignoring while we work on a fix so we can merge other PRs.")
 @RunWith(AndroidJUnit4::class)
 internal class TestUSBankAccount : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
