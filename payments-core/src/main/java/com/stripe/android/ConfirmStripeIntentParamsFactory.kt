@@ -90,7 +90,7 @@ internal class ConfirmPaymentIntentParamsFactory(
         optionsParams: PaymentMethodOptionsParams?,
         extraParams: PaymentMethodExtraParams?,
     ): ConfirmPaymentIntentParams {
-        return ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+        return ConfirmPaymentIntentParams.createWithSetAsDefaultPaymentMethod(
             paymentMethodCreateParams = createParams,
             clientSecret = clientSecret,
             paymentMethodOptions = optionsParams,
@@ -123,7 +123,7 @@ internal class ConfirmSetupIntentParamsFactory(
         optionsParams: PaymentMethodOptionsParams?,
         extraParams: PaymentMethodExtraParams?,
     ): ConfirmSetupIntentParams {
-        return ConfirmSetupIntentParams.create(
+        return ConfirmSetupIntentParams.createWithSetAsDefaultPaymentMethod(
             paymentMethodCreateParams = createParams,
             clientSecret = clientSecret,
             setAsDefaultPaymentMethod = extraParams?.extractSetAsDefaultPaymentMethodFromExtraParams()

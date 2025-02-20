@@ -77,7 +77,6 @@ class ConfirmPaymentIntentParamsFactoryTest {
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 clientSecret = CLIENT_SECRET,
                 setupFutureUsage = null,
-                setAsDefaultPaymentMethod = null,
                 paymentMethodOptions = PaymentMethodOptionsParams.Card()
             )
         )

@@ -443,9 +443,8 @@ constructor(
             setupFutureUsage: SetupFutureUsage? = null,
             shipping: Shipping? = null,
             paymentMethodOptions: PaymentMethodOptionsParams? = null,
-            setAsDefaultPaymentMethod: Boolean? = null,
         ): ConfirmPaymentIntentParams {
-            return ConfirmPaymentIntentParams(
+            return createWithSetAsDefaultPaymentMethod(
                 clientSecret = clientSecret,
                 paymentMethodCreateParams = paymentMethodCreateParams,
                 savePaymentMethod = savePaymentMethod,
@@ -454,7 +453,7 @@ constructor(
                 setupFutureUsage = setupFutureUsage,
                 shipping = shipping,
                 paymentMethodOptions = paymentMethodOptions,
-                setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
+                setAsDefaultPaymentMethod = null,
             )
         }
 
@@ -539,6 +538,30 @@ constructor(
                 // return_url is no longer used by is still required by the backend
                 // TODO(smaskell): remove this when no longer required
                 returnUrl = "stripe://return_url"
+            )
+        }
+
+        internal fun createWithSetAsDefaultPaymentMethod(
+            paymentMethodCreateParams: PaymentMethodCreateParams,
+            clientSecret: String,
+            savePaymentMethod: Boolean? = null,
+            mandateId: String? = null,
+            mandateData: MandateDataParams? = null,
+            setupFutureUsage: SetupFutureUsage? = null,
+            shipping: Shipping? = null,
+            paymentMethodOptions: PaymentMethodOptionsParams? = null,
+            setAsDefaultPaymentMethod: Boolean?,
+        ): ConfirmPaymentIntentParams {
+            return ConfirmPaymentIntentParams(
+                clientSecret = clientSecret,
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                savePaymentMethod = savePaymentMethod,
+                mandateId = mandateId,
+                mandateData = mandateData,
+                setupFutureUsage = setupFutureUsage,
+                shipping = shipping,
+                paymentMethodOptions = paymentMethodOptions,
+                setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
             )
         }
 
