@@ -213,6 +213,28 @@ class DefaultUpdatePaymentMethodInteractorTest {
     }
 
     @Test
+    fun updatingCardBrand_cardBrandHasNotChanged_doesNotAttemptUpdate() {
+        val initialPaymentMethod = PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
+        var cardBrandUpdateCalled = false
+
+        @Suppress("UnusedParameter")
+        fun updateCardBrandExecutor(paymentMethod: PaymentMethod, brand: CardBrand): Result<PaymentMethod> {
+            cardBrandUpdateCalled = true
+
+            return Result.success(paymentMethod)
+        }
+
+        runScenario(
+            displayableSavedPaymentMethod = initialPaymentMethod.toDisplayableSavedPaymentMethod(),
+            onUpdateCardBrand = ::updateCardBrandExecutor,
+        ) {
+            interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
+
+            assertThat(cardBrandUpdateCalled).isFalse()
+        }
+    }
+
+    @Test
     fun saveButtonClick_failure_displaysError() {
         val updateException = IllegalStateException("Not allowed.")
 
