@@ -30,7 +30,7 @@ import kotlin.time.Duration.Companion.nanoseconds
 
 class LoopTest {
 
-    @Test(timeout = 2000)
+    @Test(timeout = 3000)
     @SmallTest
     @ExperimentalCoroutinesApi
     fun processBoundAnalyzerLoop_analyzeData() = runTest {

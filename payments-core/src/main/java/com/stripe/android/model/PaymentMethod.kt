@@ -176,6 +176,7 @@ constructor(
         @JvmField val isReusable: Boolean,
         @JvmField val isVoucher: Boolean,
         @JvmField val requiresMandate: Boolean,
+        internal val requiresMandateForPaymentIntent: Boolean,
         private val hasDelayedSettlement: Boolean,
         internal val afterRedirectAction: AfterRedirectAction = AfterRedirectAction.None,
     ) : Parcelable {
@@ -184,6 +185,7 @@ constructor(
             isReusable = false,
             isVoucher = false,
             requiresMandate = true,
+            requiresMandateForPaymentIntent = true,
             hasDelayedSettlement = false,
         ),
         Card(
@@ -191,6 +193,7 @@ constructor(
             isReusable = true,
             isVoucher = false,
             requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
         CardPresent(
@@ -198,6 +201,7 @@ constructor(
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
         Fpx(
@@ -205,6 +209,7 @@ constructor(
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
         Ideal(
@@ -212,6 +217,7 @@ constructor(
             isReusable = false,
             isVoucher = false,
             requiresMandate = true,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
         SepaDebit(
@@ -219,6 +225,7 @@ constructor(
             isReusable = false,
             isVoucher = false,
             requiresMandate = true,
+            requiresMandateForPaymentIntent = true,
             hasDelayedSettlement = true,
         ),
         AuBecsDebit(
@@ -226,6 +233,7 @@ constructor(
             isReusable = true,
             isVoucher = false,
             requiresMandate = true,
+            requiresMandateForPaymentIntent = true,
             hasDelayedSettlement = true,
         ),
         BacsDebit(
@@ -233,6 +241,7 @@ constructor(
             isReusable = true,
             isVoucher = false,
             requiresMandate = true,
+            requiresMandateForPaymentIntent = true,
             hasDelayedSettlement = true,
         ),
         Sofort(
@@ -240,6 +249,7 @@ constructor(
             isReusable = false,
             isVoucher = false,
             requiresMandate = true,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = true,
         ),
         Upi(
@@ -247,6 +257,7 @@ constructor(
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
             afterRedirectAction = AfterRedirectAction.Refresh(),
         ),
@@ -255,6 +266,7 @@ constructor(
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
             // We are intentionally polling for P24 even though it uses the redirect trampoline.
             // About 20% of the time, the intent is still in `requires_action` status
@@ -267,6 +279,7 @@ constructor(
             isReusable = false,
             isVoucher = false,
             requiresMandate = true,
+            requiresMandateForPaymentIntent = true,
             hasDelayedSettlement = false,
         ),
         Giropay(
@@ -274,13 +287,15 @@ constructor(
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
         Eps(
             "eps",
             isReusable = false,
             isVoucher = false,
-            requiresMandate = true,
+            requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
         Oxxo(
@@ -288,6 +303,7 @@ constructor(
             isReusable = false,
             isVoucher = true,
             requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = true,
         ),
         Alipay(
@@ -295,6 +311,7 @@ constructor(
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
         GrabPay(
@@ -302,6 +319,7 @@ constructor(
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
         PayPal(
@@ -309,6 +327,7 @@ constructor(
             isReusable = false,
             isVoucher = false,
             requiresMandate = true,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
         AfterpayClearpay(
@@ -316,6 +335,7 @@ constructor(
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
         Netbanking(
@@ -323,6 +343,7 @@ constructor(
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
         Blik(
@@ -330,6 +351,7 @@ constructor(
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
         WeChatPay(
@@ -337,6 +359,7 @@ constructor(
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
             afterRedirectAction = AfterRedirectAction.Refresh(retryCount = MAX_RETRIES),
         ),
@@ -345,6 +368,7 @@ constructor(
             isReusable = false,
             isVoucher = false,
             requiresMandate = true,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
         Affirm(
@@ -352,6 +376,7 @@ constructor(
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
         RevolutPay(
@@ -359,6 +384,7 @@ constructor(
             isReusable = false,
             isVoucher = false,
             requiresMandate = true,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
             afterRedirectAction = AfterRedirectAction.Poll(),
         ),
@@ -367,6 +393,7 @@ constructor(
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
         Billie(
@@ -374,6 +401,7 @@ constructor(
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
         Satispay(
@@ -381,6 +409,7 @@ constructor(
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
         Crypto(
@@ -388,6 +417,7 @@ constructor(
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
         AmazonPay(
@@ -395,6 +425,7 @@ constructor(
             isReusable = false,
             isVoucher = false,
             requiresMandate = true,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
             afterRedirectAction = AfterRedirectAction.Poll(),
         ),
@@ -403,6 +434,7 @@ constructor(
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
         MobilePay(
@@ -410,6 +442,7 @@ constructor(
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
         Multibanco(
@@ -417,6 +450,7 @@ constructor(
             isReusable = false,
             isVoucher = true,
             requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = true,
         ),
         Zip(
@@ -424,6 +458,7 @@ constructor(
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
         USBankAccount(
@@ -431,6 +466,7 @@ constructor(
             isReusable = true,
             isVoucher = false,
             requiresMandate = true,
+            requiresMandateForPaymentIntent = true,
             hasDelayedSettlement = true,
         ),
         CashAppPay(
@@ -438,6 +474,7 @@ constructor(
             isReusable = false,
             isVoucher = false,
             requiresMandate = true,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
             afterRedirectAction = AfterRedirectAction.Refresh(),
         ),
@@ -446,6 +483,7 @@ constructor(
             isReusable = false,
             isVoucher = true,
             requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = true,
         ),
         Konbini(
@@ -453,6 +491,7 @@ constructor(
             isReusable = false,
             isVoucher = true,
             requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = true,
         ),
         Swish(
@@ -460,6 +499,7 @@ constructor(
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
             // We are intentionally polling for Swish even though it uses the redirect trampoline.
             // About 50% of the time, the intent is still in `requires_action` status
@@ -472,6 +512,7 @@ constructor(
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
             // We are intentionally polling for Twint even though it uses the redirect trampoline.
             // About 50% of the time, the intent is still in `requires_action` status

@@ -248,6 +248,36 @@ class DefaultUpdatePaymentMethodInteractorTest {
         }
     }
 
+    @Test
+    fun setAsDefaultCheckbox_hiddenForSepaPm() = runScenario(
+        displayableSavedPaymentMethod =
+        PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD.toDisplayableSavedPaymentMethod(),
+        shouldShowSetAsDefaultCheckbox = true,
+    ) {
+        assertThat(interactor.shouldShowSetAsDefaultCheckbox).isFalse()
+    }
+
+    @Test
+    fun setAsDefaultCheckboxChangedViewAction_updatesState() = runScenario(
+        shouldShowSetAsDefaultCheckbox = true,
+    ) {
+        val expectedInitialCheckedValue = false
+        val expectedUpdatedCheckedValue = true
+        interactor.state.test {
+            assertThat(awaitItem().setAsDefaultCheckboxChecked).isEqualTo(expectedInitialCheckedValue)
+        }
+
+        interactor.handleViewAction(
+            UpdatePaymentMethodInteractor.ViewAction.SetAsDefaultCheckboxChanged(
+                isChecked = expectedUpdatedCheckedValue
+            )
+        )
+
+        interactor.state.test {
+            assertThat(awaitItem().setAsDefaultCheckboxChecked).isEqualTo(expectedUpdatedCheckedValue)
+        }
+    }
+
     private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
 
     private fun runScenario(
@@ -256,6 +286,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
         onRemovePaymentMethod: (PaymentMethod) -> Throwable? = { notImplemented() },
         onSavePaymentMethod: (PaymentMethod, CardBrand) -> Result<PaymentMethod> = { _, _ -> notImplemented() },
+        shouldShowSetAsDefaultCheckbox: Boolean = false,
         testBlock: suspend TestParams.() -> Unit
     ) {
         val interactor = DefaultUpdatePaymentMethodInteractor(
@@ -268,6 +299,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             cardBrandFilter = DefaultCardBrandFilter,
             onBrandChoiceOptionsShown = {},
             onBrandChoiceOptionsDismissed = {},
+            shouldShowSetAsDefaultCheckbox = shouldShowSetAsDefaultCheckbox,
         )
 
         TestParams(interactor).apply { runTest { testBlock() } }

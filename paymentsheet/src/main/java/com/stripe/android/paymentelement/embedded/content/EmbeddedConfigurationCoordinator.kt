@@ -10,6 +10,7 @@ import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
@@ -63,24 +64,24 @@ internal class DefaultEmbeddedConfigurationCoordinator @Inject constructor(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: EmbeddedPaymentElement.Configuration,
     ) {
+        configuration.appearance.parseAppearance()
+        val newPaymentSelection = selectionChooser.choose(
+            paymentMethodMetadata = state.paymentMethodMetadata,
+            paymentMethods = state.customer?.paymentMethods,
+            previousSelection = selectionHolder.selection.value,
+            newSelection = state.paymentSelection,
+            newConfiguration = configuration.asCommonConfiguration(),
+        )
         confirmationStateHolder.state = EmbeddedConfirmationStateHolder.State(
             paymentMethodMetadata = state.paymentMethodMetadata,
-            selection = state.paymentSelection,
+            selection = newPaymentSelection,
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration
             ),
             configuration = configuration,
         )
         customerStateHolder.setCustomerState(state.customer)
-        selectionHolder.set(
-            selectionChooser.choose(
-                paymentMethodMetadata = state.paymentMethodMetadata,
-                paymentMethods = state.customer?.paymentMethods,
-                previousSelection = selectionHolder.selection.value,
-                newSelection = state.paymentSelection,
-                newConfiguration = configuration.asCommonConfiguration(),
-            )
-        )
+        selectionHolder.set(newPaymentSelection)
         embeddedContentHelper.dataLoaded(
             paymentMethodMetadata = state.paymentMethodMetadata,
             rowStyle = configuration.appearance.embeddedAppearance.style,

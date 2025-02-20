@@ -109,6 +109,17 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
         }
     }
 
+    @Test
+    fun updatePaymentMethodScreen_forCard_withSetAsDefaultCheckbox() {
+        paparazziRule.snapshot {
+            PaymentSheetScreenOnUpdatePaymentMethod(
+                paymentMethod = PaymentMethodFactory.visaCard().toDisplayableSavedPaymentMethod(),
+                canRemove = true,
+                shouldShowSetAsDefaultCheckbox = true,
+            )
+        }
+    }
+
     @Composable
     fun PaymentSheetScreenOnUpdatePaymentMethod(
         paymentMethod: DisplayableSavedPaymentMethod,
@@ -117,18 +128,21 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
         initialCardBrand: CardBrand = CardBrand.Unknown,
         isExpiredCard: Boolean = false,
         error: String? = null,
+        shouldShowSetAsDefaultCheckbox: Boolean = false,
     ) {
         val interactor = FakeUpdatePaymentMethodInteractor(
             displayableSavedPaymentMethod = paymentMethod,
             canRemove = canRemove,
             isExpiredCard = isExpiredCard,
             isModifiablePaymentMethod = isModifiablePaymentMethod,
+            shouldShowSetAsDefaultCheckbox = shouldShowSetAsDefaultCheckbox,
             viewActionRecorder = null,
             initialState = UpdatePaymentMethodInteractor.State(
                 error = error?.resolvableString,
                 status = UpdatePaymentMethodInteractor.Status.Idle,
                 cardBrandChoice = CardBrandChoice(brand = initialCardBrand, enabled = true),
                 cardBrandHasBeenChanged = false,
+                setAsDefaultCheckboxChecked = false,
             ),
         )
         val screen = com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.UpdatePaymentMethod(interactor)

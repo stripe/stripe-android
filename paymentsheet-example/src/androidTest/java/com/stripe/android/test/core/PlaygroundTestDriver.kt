@@ -1531,6 +1531,13 @@ internal class PlaygroundTestDriver(
             TimeUnit.MILLISECONDS.sleep(250)
         }
 
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+            composeTestRule
+                .onAllNodesWithText("Agree and continue")
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .size == 1
+        }
+
         clickButton("Agree and continue")
         clickButton("Test Institution")
 
@@ -1545,6 +1552,13 @@ internal class PlaygroundTestDriver(
     private fun executeEntireInstantDebitsFlow() = with(device) {
         while (currentActivity?.javaClass?.name != FINANCIAL_CONNECTIONS_ACTIVITY) {
             TimeUnit.MILLISECONDS.sleep(250)
+        }
+
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+            composeTestRule
+                .onAllNodesWithText("Agree and continue")
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .size == 1
         }
 
         clickButton("Agree and continue")
@@ -1571,7 +1585,7 @@ internal class PlaygroundTestDriver(
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             composeTestRule
                 .onAllNodesWithText("Agree and continue")
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .size == 1
         }
 

@@ -28,6 +28,15 @@ internal class EditPage(
         }
     }
 
+    fun waitUntilMissing() {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            composeTestRule
+                .onAllNodes(hasTestTag(UPDATE_PM_SCREEN_TEST_TAG))
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isEmpty()
+        }
+    }
+
     fun assertIsVisible() {
         composeTestRule
             .onNodeWithTag(UPDATE_PM_SCREEN_TEST_TAG)

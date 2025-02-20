@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.unit.LayoutDirection
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
@@ -625,6 +626,13 @@ internal class CardNumberControllerTest {
             preferredBrands = preferredBrands
         )
         assertThat(result).isEqualTo(CardBrand.Unknown)
+    }
+
+    @Test
+    fun `Controller should always have an Ltr layout`() = runTest {
+        val cardNumberController = createController()
+
+        assertThat(cardNumberController.layoutDirection).isEqualTo(LayoutDirection.Ltr)
     }
 
     private fun createController(

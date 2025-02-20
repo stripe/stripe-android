@@ -6,6 +6,7 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher.Companion.HOSTED_SURFACE_PAYMENT_ELEMENT
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
@@ -20,7 +21,8 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
     private val embeddedSelectionHolder: EmbeddedSelectionHolder,
     private val embeddedFormHelperFactory: EmbeddedFormHelperFactory,
     @ViewModelScope private val viewModelScope: CoroutineScope,
-    private val formActivityStateHelper: FormActivityStateHelper
+    private val formActivityStateHelper: FormActivityStateHelper,
+    private val eventReporter: EventReporter
 ) {
     fun create(): DefaultVerticalModeFormInteractor {
         val formHelper = embeddedFormHelperFactory.create(
@@ -49,8 +51,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             formElements = formHelper.formElementsForCode(paymentMethodCode),
             onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
             usBankAccountArguments = usBankAccountFormArguments,
-            reportFieldInteraction = {
-            },
+            reportFieldInteraction = eventReporter::onPaymentMethodFormInteraction,
             headerInformation = paymentMethodMetadata.formHeaderInformationForCode(
                 code = paymentMethodCode,
                 customerHasSavedPaymentMethods = hasSavedPaymentMethods

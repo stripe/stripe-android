@@ -7,6 +7,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import androidx.compose.ui.unit.LayoutDirection
 import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.asIndividualDigits
 import com.stripe.android.uicore.elements.FieldError
@@ -43,6 +44,8 @@ class CvcController constructor(
     override val label: StateFlow<Int> = _label
 
     override val debugLabel = cvcTextFieldConfig.debugLabel
+
+    override val layoutDirection: LayoutDirection = LayoutDirection.Ltr
 
     @OptIn(ExperimentalComposeUiApi::class)
     override val autofillType: AutofillType = AutofillType.CreditCardSecurityCode

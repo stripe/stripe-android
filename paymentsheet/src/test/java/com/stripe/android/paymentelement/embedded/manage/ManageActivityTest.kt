@@ -151,6 +151,7 @@ internal class ManageActivityTest {
         editPage.waitUntilVisible()
         editPage.setCardBrand("Visa")
         editPage.update()
+        editPage.waitUntilMissing()
         val updatedCbcCard = completedResultPaymentMethods().single()
         assertThat(updatedCbcCard.card?.displayBrand).isEqualTo("visa")
     }

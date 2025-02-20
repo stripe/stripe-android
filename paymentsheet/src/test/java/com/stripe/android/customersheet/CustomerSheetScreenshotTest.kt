@@ -355,6 +355,8 @@ internal class CustomerSheetScreenshotTest {
                 cardBrandFilter = DefaultCardBrandFilter,
                 onBrandChoiceOptionsDismissed = {},
                 onBrandChoiceOptionsShown = {},
+                // This checkbox is never displayed in CustomerSheet.
+                shouldShowSetAsDefaultCheckbox = false,
             ),
             isLiveMode = true,
         )
