@@ -3,10 +3,12 @@ package com.stripe.android.test.core.ui
 import android.content.pm.PackageManager
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -322,11 +324,14 @@ internal class Selectors(
         )
     )
 
-    fun getCardExpiration() = composeTestRule.onNodeWithTextAfterWaiting(
-        InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
-            UiCoreR.string.stripe_expiration_date_hint
-        )
-    )
+    fun getCardExpiration(): SemanticsNodeInteraction {
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+            composeTestRule.onAllNodes(
+                hasContentDescription("Expiration date", true)
+            ).fetchSemanticsNodes().isNotEmpty()
+        }
+        return composeTestRule.onNodeWithContentDescription(label = "Expiration date", substring = true)
+    }
 
     fun getCardCvc() = composeTestRule.onNodeWithTextAfterWaiting(
         InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(

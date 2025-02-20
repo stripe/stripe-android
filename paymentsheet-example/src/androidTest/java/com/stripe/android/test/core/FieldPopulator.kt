@@ -11,11 +11,13 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.test.espresso.Espresso
+import androidx.test.platform.app.InstrumentationRegistry
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
 import com.stripe.android.test.core.ui.Selectors
 import com.stripe.android.ui.core.elements.TranslationId
+import com.stripe.android.ui.core.elements.formatExpirationDateForAccessibility
 import com.stripe.android.core.R as CoreR
 
 internal class FieldPopulator(
@@ -275,11 +277,13 @@ internal class FieldPopulator(
     fun verifyCard() {
         val accessibleCardNumber = values.cardNumber.toCharArray().joinToString(" ")
         val accessibleCvc = values.cardCvc.toCharArray().joinToString(" ")
+        val accessibleExpiryDate = formatExpirationDateForAccessibility(values.cardExpiration)
+            .resolve(InstrumentationRegistry.getInstrumentation().targetContext)
 
         selectors.getCardNumber()
             .ifExistsAssertContentDescriptionEquals(accessibleCardNumber)
         selectors.getCardExpiration()
-            .ifExistsAssertContentDescriptionEquals(values.cardExpiration)
+            .ifExistsAssertContentDescriptionEquals(accessibleExpiryDate)
         selectors.getCardCvc()
             .ifExistsAssertContentDescriptionEquals(accessibleCvc)
     }

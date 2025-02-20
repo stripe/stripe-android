@@ -68,7 +68,6 @@ import com.stripe.android.uicore.LocalInstrumentationTest
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.compat.CompatTextField
 import com.stripe.android.uicore.moveFocusSafely
-import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.autofill
 import com.stripe.android.uicore.utils.collectAsState

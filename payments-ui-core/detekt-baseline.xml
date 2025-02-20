@@ -4,11 +4,10 @@
   <CurrentIssues>
     <ID>ConstructorParameterNaming:CardNumberElement.kt$CardNumberElement$val _identifier: IdentifierSpec</ID>
     <ID>ConstructorParameterNaming:CvcElement.kt$CvcElement$val _identifier: IdentifierSpec</ID>
-    <ID>CyclomaticComplexMethod:ExpiryDateContentDescriptionFormatter.kt$internal fun formatExpirationDateForAccessibility(input: String): ResolvableString</ID>
+    <ID>CyclomaticComplexMethod:ExpiryDateContentDescriptionFormatter.kt$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX) fun formatExpirationDateForAccessibility(input: String): ResolvableString</ID>
     <ID>CyclomaticComplexMethod:FormItemSpec.kt$FormItemSpecSerializer$override fun selectDeserializer(element: JsonElement): DeserializationStrategy&lt;FormItemSpec></ID>
     <ID>CyclomaticComplexMethod:TransformGoogleToStripeAddress.kt$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun Place.transformGoogleToStripeAddress( context: Context ): com.stripe.android.model.Address</ID>
     <ID>ForbiddenComment:Menu.kt$// TODO: Make sure this gets the rounded corner values</ID>
-    <ID>LongMethod:FormUI.kt$@Composable private fun FormUIElement( element: FormElement, index: Int, maxIndex: Int, enabled: Boolean, hiddenIdentifiers: Set&lt;IdentifierSpec>, lastTextFieldIdentifier: IdentifierSpec?, )</ID>
     <ID>LongMethod:Menu.kt$@Suppress("ModifierParameter") @Composable internal fun DropdownMenuContent( expandedStates: MutableTransitionState&lt;Boolean>, transformOriginState: MutableState&lt;TransformOrigin>, initialFirstVisibleItemIndex: Int, modifier: Modifier = Modifier, content: LazyListScope.() -> Unit )</ID>
     <ID>LongMethod:TransformGoogleToStripeAddress.kt$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun Place.transformGoogleToStripeAddress( context: Context ): com.stripe.android.model.Address</ID>
     <ID>LongMethod:TransformGoogleToStripeAddressTest.kt$TransformGoogleToStripeAddressTest$@Test fun `test JP address`()</ID>

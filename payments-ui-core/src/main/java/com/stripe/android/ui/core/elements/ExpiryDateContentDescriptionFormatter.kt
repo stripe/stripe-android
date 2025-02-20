@@ -1,5 +1,6 @@
 package com.stripe.android.ui.core.elements
 
+import androidx.annotation.RestrictTo
 import androidx.appcompat.app.AppCompatDelegate
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -8,7 +9,8 @@ import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-internal fun formatExpirationDateForAccessibility(input: String): ResolvableString {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+fun formatExpirationDateForAccessibility(input: String): ResolvableString {
     if (input.isEmpty()) {
         return resolvableString(R.string.stripe_expiration_date_empty_content_description)
     }
