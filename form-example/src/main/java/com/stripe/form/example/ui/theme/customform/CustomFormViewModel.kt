@@ -2,6 +2,7 @@ package com.stripe.form.example.ui.theme.customform
 
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
+import com.stripe.form.Key
 import com.stripe.form.ValueChange
 import com.stripe.form.buildForm
 import com.stripe.form.fields.DropdownSpec
@@ -20,7 +21,7 @@ class CustomFormViewModel : ViewModel() {
     val nameKey = key<TextFieldValue>("name")
     val sliderKey = key<Float>("slider")
     val checkboxKey = key<Boolean>("check")
-    val dropdownKey = key<DropdownSpec.Option>("drop")
+    val dropdownKey = key<String>("drop")
 
     init {
         val form = buildForm(
@@ -89,7 +90,7 @@ class CustomFormViewModel : ViewModel() {
         }
     }
 
-    private fun onFormValuesChanged(data: Map<Any, ValueChange<*>?>) {
+    private fun onFormValuesChanged(data: Map<Key<*>, ValueChange<*>?>) {
         val nameChange = data.find(nameKey)
         val sliderChange = data.find(sliderKey)
         val checkChange = data.find(checkboxKey)

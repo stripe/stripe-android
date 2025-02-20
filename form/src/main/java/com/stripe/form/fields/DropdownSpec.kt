@@ -22,7 +22,7 @@ import kotlinx.collections.immutable.ImmutableList
 
 data class DropdownSpec(
     override val state: State
-) : FormFieldSpec<DropdownSpec.Option> {
+) : FormFieldSpec<String> {
 
     @Composable
     override fun Content(modifier: Modifier) {
@@ -61,8 +61,8 @@ data class DropdownSpec(
                             state.onValueChange(
                                 ValueChange(
                                     key = state.key,
-                                    value = selectionOption,
-                                    isComplete = state.validator.invoke(selectionOption).isValid
+                                    value = selectionOption.rawValue,
+                                    isComplete = state.validator.invoke(selectionOption.rawValue).isValid
                                 )
                             )
                         }
@@ -76,12 +76,12 @@ data class DropdownSpec(
     }
 
     data class State(
-        override val key: Key<Option>,
+        override val key: Key<String>,
         val options: ImmutableList<Option>,
         val initialIndex: Int = 0,
-        override val onValueChange: (ValueChange<Option>) -> Unit,
-        override val validator: (Option) -> ValidationResult = { ValidationResult.Valid }
-    ) : FormFieldState<Option>
+        override val onValueChange: (ValueChange<String>) -> Unit,
+        override val validator: (String) -> ValidationResult = { ValidationResult.Valid }
+    ) : FormFieldState<String>
 
     data class Option(
         val rawValue: String,

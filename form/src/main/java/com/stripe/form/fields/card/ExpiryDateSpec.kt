@@ -45,7 +45,7 @@ data class ExpiryDateSpec(
                         date = change.value.text
                         state.onValueChange(
                             ValueChange(
-                                key = change.key,
+                                key = state.key,
                                 value = change.value.text,
                                 isComplete = state.validator(change.value.text).isValid
                             )
