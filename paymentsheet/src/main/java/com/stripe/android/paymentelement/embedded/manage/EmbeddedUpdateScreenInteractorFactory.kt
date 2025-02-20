@@ -24,6 +24,7 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
     private val customerStateHolder: CustomerStateHolder,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val eventReporter: EventReporter,
+    private val manageNavigatorProvider: Provider<ManageNavigator>,
 ) : EmbeddedUpdateScreenInteractorFactory {
     override fun createUpdateScreenInteractor(
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod
@@ -73,7 +74,9 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
                     selectedBrand = it
                 )
             },
-            onUpdateSuccess = {},
+            onUpdateSuccess = {
+                manageNavigatorProvider.get().performAction(ManageNavigator.Action.Back)
+            },
         )
     }
 }
