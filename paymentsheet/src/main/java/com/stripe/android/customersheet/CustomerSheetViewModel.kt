@@ -512,7 +512,6 @@ internal class CustomerSheetViewModel(
                 productUsageTokens = setOf("CustomerSheet"),
             )
         ).onSuccess { updatedMethod ->
-            onBackPressed()
             updatePaymentMethodInState(updatedMethod)
 
             eventReporter.onUpdatePaymentMethodSucceeded(
@@ -556,6 +555,7 @@ internal class CustomerSheetViewModel(
                             selectedBrand = it
                         )
                     },
+                    onUpdateSuccess = ::onBackPressed,
                     updateCardBrandExecutor = ::updateCardBrandExecutor,
                     workContext = workContext,
                     // This checkbox is never displayed in CustomerSheet.

@@ -212,8 +212,6 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                     selection = selectionHolder.selection.value,
                 )
             },
-            navigationPop = {
-            },
             isLinkEnabled = stateFlowOf(paymentMethodMetadata.linkState != null),
             isNotPaymentFlow = false,
         )

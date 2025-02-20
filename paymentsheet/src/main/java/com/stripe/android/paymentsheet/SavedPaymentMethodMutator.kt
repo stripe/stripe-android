@@ -55,7 +55,6 @@ internal class SavedPaymentMethodMutator(
         performRemove: suspend () -> Throwable?,
         updateExecutor: suspend (brand: CardBrand) -> Result<PaymentMethod>,
     ) -> Unit,
-    private val navigationPop: () -> Unit,
     isLinkEnabled: StateFlow<Boolean?>,
     isNotPaymentFlow: Boolean,
 ) {
@@ -265,8 +264,6 @@ internal class SavedPaymentMethodMutator(
                 )
 
                 onSuccess(updatedMethod)
-
-                navigationPop()
             }
 
             eventReporter.onUpdatePaymentMethodSucceeded(
@@ -363,6 +360,7 @@ internal class SavedPaymentMethodMutator(
                                         viewModel.customerStateHolder.customer.value?.defaultPaymentMethodId
                                     )
                                 ),
+                            onUpdateSuccess = viewModel.navigationHandler::pop,
                         )
                     )
                 )
@@ -396,7 +394,6 @@ internal class SavedPaymentMethodMutator(
                         updateCardBrandExecutor = updateCardBrandExecutor,
                     )
                 },
-                navigationPop = viewModel.navigationHandler::pop,
                 isLinkEnabled = viewModel.linkHandler.isLinkEnabled,
                 isNotPaymentFlow = !viewModel.isCompleteFlow,
             ).apply {

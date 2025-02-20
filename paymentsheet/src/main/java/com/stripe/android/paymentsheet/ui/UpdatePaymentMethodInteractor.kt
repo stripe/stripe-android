@@ -87,6 +87,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     private val updateCardBrandExecutor: UpdateCardBrandOperation,
     private val onBrandChoiceOptionsShown: (CardBrand) -> Unit,
     private val onBrandChoiceOptionsDismissed: (CardBrand) -> Unit,
+    private val onUpdateSuccess: () -> Unit,
     workContext: CoroutineContext = Dispatchers.Default,
 ) : UpdatePaymentMethodInteractor {
     private val coroutineScope = CoroutineScope(workContext + SupervisorJob())
@@ -171,12 +172,14 @@ internal class DefaultUpdatePaymentMethodInteractor(
 
             val updateCardBrandResult = maybeUpdateCardBrand()
 
-            val errorMessage = getErrorMessageForUpdates(
+            val updateResult = getUpdateResult(
                 updateCardBrandResult = updateCardBrandResult,
             )
 
-            if (errorMessage != null) {
-                error.emit(errorMessage)
+            when (updateResult) {
+                is UpdateResult.Error -> error.emit(updateResult.errorMessage)
+                UpdateResult.Success -> onUpdateSuccess()
+                UpdateResult.NoUpdatesMade -> {}
             }
 
             status.emit(UpdatePaymentMethodInteractor.Status.Idle)
@@ -198,12 +201,16 @@ internal class DefaultUpdatePaymentMethodInteractor(
         }
     }
 
-    private fun getErrorMessageForUpdates(
+    private fun getUpdateResult(
         updateCardBrandResult: Result<PaymentMethod>?,
-    ): ResolvableString? {
+    ): UpdateResult {
         return when {
-            updateCardBrandResult?.isFailure == true -> updateCardBrandResult.exceptionOrNull()?.stripeErrorMessage()
-            else -> null
+            updateCardBrandResult == null -> UpdateResult.NoUpdatesMade
+            updateCardBrandResult.isFailure -> UpdateResult.Error(
+                updateCardBrandResult.exceptionOrNull()?.stripeErrorMessage()
+            )
+            updateCardBrandResult.isSuccess -> UpdateResult.Success
+            else -> UpdateResult.NoUpdatesMade
         }
     }
 
@@ -242,6 +249,12 @@ internal class DefaultUpdatePaymentMethodInteractor(
             CardBrand.fromCode(it)
         }?.filter { cardBrandFilter.isAccepted(it) }
         return (filteredCardBrands?.size ?: 0) > 1
+    }
+
+    sealed class UpdateResult {
+        data class Error(val errorMessage: ResolvableString?) : UpdateResult()
+        data object Success : UpdateResult()
+        data object NoUpdatesMade : UpdateResult()
     }
 }
 

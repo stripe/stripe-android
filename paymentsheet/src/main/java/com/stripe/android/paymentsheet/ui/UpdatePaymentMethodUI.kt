@@ -534,6 +534,7 @@ private fun PreviewUpdatePaymentMethodUI() {
             onBrandChoiceOptionsShown = {},
             onBrandChoiceOptionsDismissed = {},
             shouldShowSetAsDefaultCheckbox = true,
+            onUpdateSuccess = {},
         ),
         modifier = Modifier
     )
