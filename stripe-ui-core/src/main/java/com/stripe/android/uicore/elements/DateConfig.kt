@@ -5,6 +5,7 @@ import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.LayoutDirection
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Error
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Valid
@@ -23,6 +24,7 @@ class DateConfig : TextFieldConfig {
     override val visualTransformation = ExpiryDateVisualTransformation()
     override val trailingIcon: StateFlow<TextFieldIcon?> = MutableStateFlow(null)
     override val loading: StateFlow<Boolean> = MutableStateFlow(false)
+    override val layoutDirection: LayoutDirection = LayoutDirection.Ltr
 
     override fun filter(userTyped: String) = userTyped.filter { it.isDigit() }
 
