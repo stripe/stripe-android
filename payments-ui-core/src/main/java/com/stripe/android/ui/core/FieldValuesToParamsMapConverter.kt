@@ -129,6 +129,14 @@ class FieldValuesToParamsMapConverter {
                 PaymentMethod.Type.BacsDebit.code -> PaymentMethodExtraParams.BacsDebit(
                     confirmed = fieldValuePairsForExtras[IdentifierSpec.BacsDebitConfirmed]?.value?.toBoolean()
                 )
+                PaymentMethod.Type.Card.code -> PaymentMethodExtraParams.Card(
+                    setAsDefault =
+                    fieldValuePairsForExtras[IdentifierSpec.SetAsDefaultPaymentMethod]?.value?.toBoolean()
+                )
+                PaymentMethod.Type.USBankAccount.code -> PaymentMethodExtraParams.USBankAccount(
+                    setAsDefault =
+                    fieldValuePairsForExtras[IdentifierSpec.SetAsDefaultPaymentMethod]?.value?.toBoolean()
+                )
 
                 else -> null
             }

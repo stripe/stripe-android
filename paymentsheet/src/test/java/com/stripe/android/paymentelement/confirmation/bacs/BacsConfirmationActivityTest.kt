@@ -80,6 +80,7 @@ internal class BacsConfirmationActivityTest {
                         createParams = CONFIRMATION_OPTION.createParams,
                         optionsParams = CONFIRMATION_OPTION.optionsParams,
                         shouldSave = false,
+                        extraParams = null,
                     )
                 )
 

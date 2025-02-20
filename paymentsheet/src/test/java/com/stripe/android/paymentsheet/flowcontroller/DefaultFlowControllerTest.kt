@@ -1199,7 +1199,7 @@ internal class DefaultFlowControllerTest {
             )
 
             verify(paymentLauncher).confirm(
-                argWhere { params: ConfirmPaymentIntentParams ->
+                argWhere<ConfirmPaymentIntentParams> { params: ConfirmPaymentIntentParams ->
                     params.paymentMethodId == "pm_123456789"
                 }
             )
@@ -2109,6 +2109,7 @@ internal class DefaultFlowControllerTest {
                 shippingValues = null,
                 paymentMethodCreateParams = card,
                 paymentMethodOptionsParams = null,
+                paymentMethodExtraParams = null,
                 customerRequestedSave = true,
             )
         )
