@@ -12,6 +12,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.LayoutDirection
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Blank
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -35,6 +36,7 @@ interface TextFieldController : InputController, SectionFieldComposable {
     val trailingIcon: StateFlow<TextFieldIcon?>
     val capitalization: KeyboardCapitalization
     val keyboardType: KeyboardType
+    val layoutDirection: LayoutDirection?
     override val label: StateFlow<Int?>
     val visualTransformation: StateFlow<VisualTransformation>
     override val showOptionalLabel: Boolean
@@ -135,6 +137,7 @@ class SimpleTextFieldController(
 
     override val label = MutableStateFlow(textFieldConfig.label)
     override val debugLabel = textFieldConfig.debugLabel
+    override val layoutDirection: LayoutDirection? = textFieldConfig.layoutDirection
 
     @OptIn(ExperimentalComposeUiApi::class)
     override val autofillType: AutofillType? = when (textFieldConfig) {

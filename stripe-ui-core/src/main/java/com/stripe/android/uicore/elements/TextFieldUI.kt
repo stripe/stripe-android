@@ -48,6 +48,7 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -57,6 +58,7 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.Logger
 import com.stripe.android.uicore.BuildConfig
@@ -218,6 +220,7 @@ fun TextField(
         trailingIcon = trailingIcon,
         shouldShowError = shouldShowError,
         visualTransformation = visualTransformation,
+        layoutDirection = textFieldController.layoutDirection,
         keyboardOptions = KeyboardOptions(
             keyboardType = textFieldController.keyboardType,
             capitalization = textFieldController.capitalization,
@@ -230,7 +233,7 @@ fun TextField(
             onDone = {
                 focusManager.clearFocus(true)
             }
-        )
+        ),
     )
 }
 
@@ -246,6 +249,7 @@ internal fun TextFieldUi(
     shouldShowError: Boolean,
     modifier: Modifier = Modifier,
     visualTransformation: VisualTransformation = VisualTransformation.None,
+    layoutDirection: LayoutDirection? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions(),
     onValueChange: (value: TextFieldValue) -> Unit = {},
@@ -253,65 +257,77 @@ internal fun TextFieldUi(
 ) {
     val colors = TextFieldColors(shouldShowError)
 
-    CompatTextField(
-        value = value,
-        onValueChange = onValueChange,
-        modifier = modifier.fillMaxWidth(),
-        enabled = enabled,
-        label = label?.let {
-            {
-                FormLabel(
-                    text = if (showOptionalLabel) {
-                        stringResource(
-                            R.string.stripe_form_label_optional,
-                            it
-                        )
-                    } else {
-                        it
-                    }
-                )
-            }
-        },
-        placeholder = placeholder?.let {
-            {
-                Placeholder(text = it)
-            }
-        },
-        trailingIcon = trailingIcon?.let {
-            {
-                Row {
-                    when (it) {
-                        is TextFieldIcon.Trailing -> {
-                            TrailingIcon(it, loading)
-                        }
+    val layoutDirectionToUse = layoutDirection ?: LocalLayoutDirection.current
 
-                        is TextFieldIcon.MultiTrailing -> {
-                            Row(modifier = Modifier.padding(10.dp)) {
-                                it.staticIcons.forEach {
-                                    TrailingIcon(it, loading)
-                                }
-                                AnimatedIcons(icons = it.animatedIcons, loading = loading)
-                            }
-                        }
-
-                        is TextFieldIcon.Dropdown -> {
-                            TrailingDropdown(
-                                icon = it,
-                                loading = loading,
-                                onDropdownItemClicked = onDropdownItemClicked
+    CompositionLocalProvider(LocalLayoutDirection provides layoutDirectionToUse) {
+        CompatTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = modifier.fillMaxWidth(),
+            enabled = enabled,
+            label = label?.let {
+                {
+                    FormLabel(
+                        text = if (showOptionalLabel) {
+                            stringResource(
+                                R.string.stripe_form_label_optional,
+                                it
                             )
+                        } else {
+                            it
                         }
+                    )
+                }
+            },
+            placeholder = placeholder?.let {
+                {
+                    Placeholder(text = it)
+                }
+            },
+            trailingIcon = trailingIcon?.let { icon ->
+                {
+                    icon.Composable(loading, onDropdownItemClicked)
+                }
+            },
+            isError = shouldShowError,
+            visualTransformation = visualTransformation,
+            keyboardOptions = keyboardOptions,
+            keyboardActions = keyboardActions,
+            singleLine = true,
+            colors = colors
+        )
+    }
+}
+
+@Composable
+private fun TextFieldIcon.Composable(
+    loading: Boolean,
+    onDropdownItemClicked: (item: TextFieldIcon.Dropdown.Item) -> Unit,
+) {
+    Row {
+        when (this@Composable) {
+            is TextFieldIcon.Trailing -> {
+                TrailingIcon(this@Composable, loading)
+            }
+
+            is TextFieldIcon.MultiTrailing -> {
+                Row(modifier = Modifier.padding(10.dp)) {
+                    staticIcons.forEach {
+                        TrailingIcon(it, loading)
                     }
+                    AnimatedIcons(icons = animatedIcons, loading = loading)
                 }
             }
-        },
-        isError = shouldShowError,
-        visualTransformation = visualTransformation,
-        keyboardOptions = keyboardOptions,
-        keyboardActions = keyboardActions,
-        singleLine = true,
-        colors = colors
-    )
+
+            is TextFieldIcon.Dropdown -> {
+                TrailingDropdown(
+                    icon = this@Composable,
+                    loading = loading,
+                    onDropdownItemClicked = onDropdownItemClicked
+                )
+            }
+        }
+    }
 }
 
 @Composable

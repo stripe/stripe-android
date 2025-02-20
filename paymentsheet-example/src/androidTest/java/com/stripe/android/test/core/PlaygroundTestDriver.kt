@@ -1554,6 +1554,13 @@ internal class PlaygroundTestDriver(
             TimeUnit.MILLISECONDS.sleep(250)
         }
 
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+            composeTestRule
+                .onAllNodesWithText("Agree and continue")
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .size == 1
+        }
+
         clickButton("Agree and continue")
         clickButtonWithTag("existing_email-button")
         clickButton("Use test code")
@@ -1578,7 +1585,7 @@ internal class PlaygroundTestDriver(
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             composeTestRule
                 .onAllNodesWithText("Agree and continue")
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .size == 1
         }
 
