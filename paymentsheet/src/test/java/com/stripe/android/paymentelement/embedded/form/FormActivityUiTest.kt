@@ -61,6 +61,7 @@ class FormActivityUiTest {
             coroutineScope = TestScope(UnconfinedTestDispatcher()),
             onClickDelegate = OnClickDelegateOverrideImpl()
         )
+        val eventReporter = FakeEventReporter()
         val interactor = EmbeddedFormInteractorFactory(
             paymentMethodMetadata = paymentMethodMetadata,
             paymentMethodCode = "card",
@@ -68,14 +69,15 @@ class FormActivityUiTest {
             embeddedSelectionHolder = embeddedSelectionHolder,
             embeddedFormHelperFactory = embeddedFormHelperFactory,
             viewModelScope = testScope,
-            formActivityStateHelper = stateHelper
+            formActivityStateHelper = stateHelper,
+            eventReporter = eventReporter
         ).create()
 
         composeRule.setContent {
             val state by stateHelper.state.collectAsState()
             FormActivityUI(
                 interactor = interactor,
-                eventReporter = FakeEventReporter(),
+                eventReporter = eventReporter,
                 onDismissed = {},
                 onClick = {},
                 onProcessingCompleted = {},
