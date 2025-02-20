@@ -336,6 +336,15 @@ internal class SavedPaymentMethodMutator(
                             canRemove = canRemove,
                             displayableSavedPaymentMethod,
                             cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
+                            shouldShowSetAsDefaultCheckbox = (
+                                viewModel
+                                    .paymentMethodMetadata
+                                    .value?.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true &&
+                                    !displayableSavedPaymentMethod.isDefaultPaymentMethod(
+                                        defaultPaymentMethodId =
+                                        viewModel.customerStateHolder.customer.value?.defaultPaymentMethodId
+                                    )
+                                ),
                             removeExecutor = { method ->
                                 performRemove()
                             },
@@ -354,15 +363,7 @@ internal class SavedPaymentMethodMutator(
                                     selectedBrand = it
                                 )
                             },
-                            shouldShowSetAsDefaultCheckbox = (
-                                viewModel
-                                    .paymentMethodMetadata
-                                    .value?.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true &&
-                                    !displayableSavedPaymentMethod.isDefaultPaymentMethod(
-                                        defaultPaymentMethodId =
-                                        viewModel.customerStateHolder.customer.value?.defaultPaymentMethodId
-                                    )
-                                ),
+                            onUpdateSuccess = {},
                         )
                     )
                 )

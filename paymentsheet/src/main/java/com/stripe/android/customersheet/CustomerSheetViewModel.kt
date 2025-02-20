@@ -543,7 +543,10 @@ internal class CustomerSheetViewModel(
                     canRemove = customerState.canRemove,
                     displayableSavedPaymentMethod = paymentMethod,
                     cardBrandFilter = PaymentSheetCardBrandFilter(customerState.configuration.cardBrandAcceptance),
+                    // This checkbox is never displayed in CustomerSheet.
+                    shouldShowSetAsDefaultCheckbox = false,
                     removeExecutor = ::removeExecutor,
+                    updateCardBrandExecutor = ::updateCardBrandExecutor,
                     onBrandChoiceOptionsShown = {
                         eventReporter.onShowPaymentOptionBrands(
                             source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
@@ -556,10 +559,8 @@ internal class CustomerSheetViewModel(
                             selectedBrand = it
                         )
                     },
-                    updateCardBrandExecutor = ::updateCardBrandExecutor,
+                    onUpdateSuccess = {},
                     workContext = workContext,
-                    // This checkbox is never displayed in CustomerSheet.
-                    shouldShowSetAsDefaultCheckbox = false,
                 ),
                 isLiveMode = isLiveModeProvider(),
             )

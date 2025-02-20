@@ -87,6 +87,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     private val updateCardBrandExecutor: UpdateCardBrandOperation,
     private val onBrandChoiceOptionsShown: (CardBrand) -> Unit,
     private val onBrandChoiceOptionsDismissed: (CardBrand) -> Unit,
+    val onUpdateSuccess: () -> Unit,
     workContext: CoroutineContext = Dispatchers.Default,
 ) : UpdatePaymentMethodInteractor {
     private val coroutineScope = CoroutineScope(workContext + SupervisorJob())

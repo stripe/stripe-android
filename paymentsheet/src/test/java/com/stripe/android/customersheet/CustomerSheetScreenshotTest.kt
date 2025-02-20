@@ -347,16 +347,17 @@ internal class CustomerSheetScreenshotTest {
     ): CustomerSheetViewState {
         return CustomerSheetViewState.UpdatePaymentMethod(
             updatePaymentMethodInteractor = DefaultUpdatePaymentMethodInteractor(
-                displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
-                removeExecutor = { null },
-                updateCardBrandExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
-                canRemove = canRemove,
                 isLiveMode = true,
+                canRemove = canRemove,
+                displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
                 cardBrandFilter = DefaultCardBrandFilter,
-                onBrandChoiceOptionsDismissed = {},
-                onBrandChoiceOptionsShown = {},
                 // This checkbox is never displayed in CustomerSheet.
                 shouldShowSetAsDefaultCheckbox = false,
+                removeExecutor = { null },
+                updateCardBrandExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
+                onBrandChoiceOptionsShown = {},
+                onBrandChoiceOptionsDismissed = {},
+                onUpdateSuccess = {},
             ),
             isLiveMode = true,
         )
