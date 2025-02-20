@@ -561,6 +561,7 @@ internal class CustomerSheetViewModel(
                     workContext = workContext,
                     // This checkbox is never displayed in CustomerSheet.
                     shouldShowSetAsDefaultCheckbox = false,
+                    onUpdateSuccess = {},
                 ),
                 isLiveMode = isLiveModeProvider(),
             )

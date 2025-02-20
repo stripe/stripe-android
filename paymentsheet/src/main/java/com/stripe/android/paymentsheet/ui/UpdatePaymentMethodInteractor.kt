@@ -91,6 +91,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     val setDefaultPaymentMethodExecutor: PaymentMethodSetAsDefaultOperation,
     private val onBrandChoiceOptionsShown: (CardBrand) -> Unit,
     private val onBrandChoiceOptionsDismissed: (CardBrand) -> Unit,
+    val onUpdateSuccess: () -> Unit,
     workContext: CoroutineContext = Dispatchers.Default,
 ) : UpdatePaymentMethodInteractor {
     private val coroutineScope = CoroutineScope(workContext + SupervisorJob())
@@ -173,23 +174,64 @@ internal class DefaultUpdatePaymentMethodInteractor(
             error.emit(getInitialError())
             status.emit(UpdatePaymentMethodInteractor.Status.Updating)
 
-            val newCardBrand = cardBrandChoice.value.brand
-            if (newCardBrand != getInitialCardBrandChoice().brand) {
-                val updateCardBrandResult = updateCardBrandExecutor(
-                    displayableSavedPaymentMethod.paymentMethod,
-                    newCardBrand
-                )
+            val updateCardBrandResult = maybeUpdateCardBrand()
+            val setAsDefaultPaymentMethodResult = maybeSetDefaultPaymentMethod()
 
-                updateCardBrandResult.onSuccess {
-                    savedCardBrand.emit(CardBrandChoice(brand = newCardBrand, enabled = true))
-                    cardBrandHasBeenChanged.emit(false)
-                }.onFailure {
-                    error.emit(it.stripeErrorMessage())
-                }
+            val errorMessage = getErrorMessageForUpdates(
+                updateCardBrandResult = updateCardBrandResult,
+                setAsDefaultPaymentMethodResult = setAsDefaultPaymentMethodResult,
+            )
+
+            if (errorMessage == null) {
+                onUpdateSuccess()
+            } else {
+                error.emit(errorMessage)
             }
 
-
             status.emit(UpdatePaymentMethodInteractor.Status.Idle)
+        }
+    }
+
+    private suspend fun maybeUpdateCardBrand(): Result<PaymentMethod>? {
+        val newCardBrand = cardBrandChoice.value.brand
+        return if (newCardBrand != getInitialCardBrandChoice().brand) {
+            updateCardBrandExecutor(
+                displayableSavedPaymentMethod.paymentMethod,
+                newCardBrand
+            ).onSuccess {
+                savedCardBrand.emit(CardBrandChoice(brand = newCardBrand, enabled = true))
+                cardBrandHasBeenChanged.emit(false)
+            }
+        } else {
+            null
+        }
+    }
+
+    private suspend fun maybeSetDefaultPaymentMethod(): Result<Unit>? {
+        return if (setAsDefaultCheckboxChecked.value) {
+            setDefaultPaymentMethodExecutor(displayableSavedPaymentMethod.paymentMethod)
+        } else {
+            null
+        }
+    }
+
+    private fun getErrorMessageForUpdates(
+        updateCardBrandResult: Result<PaymentMethod>?,
+        setAsDefaultPaymentMethodResult: Result<Unit>?
+    ): ResolvableString? {
+        if (
+            updateCardBrandResult == null || setAsDefaultPaymentMethodResult == null ||
+            (updateCardBrandResult.isSuccess && setAsDefaultPaymentMethodResult.isSuccess)
+        ) {
+            return null
+        }
+
+        return if (updateCardBrandResult.isFailure && setAsDefaultPaymentMethodResult.isSuccess) {
+            updateCardBrandResult.exceptionOrNull()?.stripeErrorMessage()
+        } else if (updateCardBrandResult.isSuccess && setAsDefaultPaymentMethodResult.isFailure) {
+            R.string.stripe_paymentsheet_set_default_payment_method_failed_error_message.resolvableString
+        } else {
+            R.string.stripe_paymentsheet_card_updates_failed_error_message.resolvableString
         }
     }
 

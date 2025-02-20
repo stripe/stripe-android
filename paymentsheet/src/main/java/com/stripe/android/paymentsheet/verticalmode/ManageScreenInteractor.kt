@@ -73,7 +73,7 @@ internal interface ManageScreenInteractor {
 internal class DefaultManageScreenInteractor(
     private val paymentMethods: StateFlow<List<PaymentMethod>>,
     private val paymentMethodMetadata: PaymentMethodMetadata,
-    private val selection: StateFlow<PaymentSelection?>,
+    private val selection: StateFlow<PaymentMethod?>,
     private val editing: StateFlow<Boolean>,
     private val canEdit: StateFlow<Boolean>,
     private val toggleEdit: () -> Unit,
@@ -174,7 +174,7 @@ internal class DefaultManageScreenInteractor(
             return DefaultManageScreenInteractor(
                 paymentMethods = customerStateHolder.paymentMethods,
                 paymentMethodMetadata = paymentMethodMetadata,
-                selection = viewModel.selection,
+                selection = customerStateHolder.mostRecentlySelectedSavedPaymentMethod,
                 editing = savedPaymentMethodMutator.editing,
                 canEdit = savedPaymentMethodMutator.canEdit,
                 toggleEdit = savedPaymentMethodMutator::toggleEditing,
@@ -197,18 +197,10 @@ internal class DefaultManageScreenInteractor(
         }
 
         private fun paymentSelectionToDisplayableSavedPaymentMethod(
-            selection: PaymentSelection?,
+            selection: PaymentMethod?,
             displayableSavedPaymentMethods: List<DisplayableSavedPaymentMethod>
         ): DisplayableSavedPaymentMethod? {
-            val currentSelectionId = when (selection) {
-                null,
-                is PaymentSelection.ExternalPaymentMethod,
-                PaymentSelection.GooglePay,
-                is PaymentSelection.Link,
-                is PaymentSelection.New -> return null
-                is PaymentSelection.Saved -> selection.paymentMethod.id
-            }
-            return displayableSavedPaymentMethods.find { it.paymentMethod.id == currentSelectionId }
+            return displayableSavedPaymentMethods.find { it.paymentMethod.id == selection?.id }
         }
     }
 }

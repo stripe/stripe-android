@@ -301,6 +301,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             cardBrandFilter = DefaultCardBrandFilter,
             onBrandChoiceOptionsShown = {},
             onBrandChoiceOptionsDismissed = {},
+            onUpdateSuccess = {},
             shouldShowSetAsDefaultCheckbox = shouldShowSetAsDefaultCheckbox,
         )
 

@@ -76,6 +76,9 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
                         defaultPaymentMethodId = customerStateHolder.customer.value?.defaultPaymentMethodId
                     )
                 ),
+            onUpdateSuccess = {
+                // TODO: navigate back.
+            },
         )
     }
 }

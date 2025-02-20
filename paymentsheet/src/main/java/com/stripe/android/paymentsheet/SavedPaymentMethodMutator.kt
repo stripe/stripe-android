@@ -224,7 +224,7 @@ internal class SavedPaymentMethodMutator(
             ),
             paymentMethodId = paymentMethod.id,
         ).onSuccess {
-            customerStateHolder.setDefaultPaymentMethodId(paymentMethodId = paymentMethod.id)
+            customerStateHolder.setDefaultPaymentMethod(paymentMethod = paymentMethod)
         }.map {}
     }
 
@@ -287,8 +287,6 @@ internal class SavedPaymentMethodMutator(
                 )
 
                 onSuccess(updatedMethod)
-
-                navigationPop()
             }
 
             eventReporter.onUpdatePaymentMethodSucceeded(
@@ -389,6 +387,7 @@ internal class SavedPaymentMethodMutator(
                                         viewModel.customerStateHolder.customer.value?.defaultPaymentMethodId
                                     )
                                 ),
+                            onUpdateSuccess = viewModel.navigationHandler::pop,
                         )
                     )
                 )
