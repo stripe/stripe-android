@@ -325,7 +325,7 @@ internal class SavedPaymentMethodMutator(
             displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
             canRemove: Boolean,
             performRemove: suspend () -> Throwable?,
-            updateCardBrandExecutor: suspend (brand: CardBrand) -> Result<PaymentMethod>,
+            updateExecutor: suspend (brand: CardBrand) -> Result<PaymentMethod>,
         ) {
             if (displayableSavedPaymentMethod.savedPaymentMethod != SavedPaymentMethod.Unexpected) {
                 val isLiveMode = requireNotNull(viewModel.paymentMethodMetadata.value).stripeIntent.isLiveMode
@@ -340,7 +340,7 @@ internal class SavedPaymentMethodMutator(
                                 performRemove()
                             },
                             updateCardBrandExecutor = { method, brand ->
-                                updateCardBrandExecutor(brand)
+                                updateExecutor(brand)
                             },
                             onBrandChoiceOptionsShown = {
                                 viewModel.eventReporter.onShowPaymentOptionBrands(
@@ -384,16 +384,13 @@ internal class SavedPaymentMethodMutator(
                     navigateBackOnPaymentMethodRemoved(viewModel)
                 },
                 postPaymentMethodRemoveActions = {},
-                onUpdatePaymentMethod = { displayableSavedPaymentMethod,
-                                          canRemove,
-                                          performRemove,
-                                          updateCardBrandExecutor ->
+                onUpdatePaymentMethod = { displayableSavedPaymentMethod, canRemove, performRemove, updateExecutor ->
                     onUpdatePaymentMethod(
                         viewModel = viewModel,
                         displayableSavedPaymentMethod = displayableSavedPaymentMethod,
                         canRemove = canRemove,
                         performRemove = performRemove,
-                        updateCardBrandExecutor = updateCardBrandExecutor,
+                        updateExecutor = updateExecutor,
                     )
                 },
                 navigationPop = viewModel.navigationHandler::pop,
