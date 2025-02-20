@@ -185,7 +185,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
 
     private suspend fun maybeUpdateCardBrand(): Result<PaymentMethod>? {
         val newCardBrand = cardBrandChoice.value.brand
-        return if (newCardBrand != getInitialCardBrandChoice().brand) {
+        return if (cardBrandHasBeenChanged.value) {
             updateCardBrandExecutor(
                 displayableSavedPaymentMethod.paymentMethod,
                 newCardBrand
