@@ -16,6 +16,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
@@ -214,6 +215,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         amount: Long = 0L,
         transactionId: String? = null,
         label: String? = null,
+        totalPriceStatus: TotalPriceStatus = TotalPriceStatus.Estimated,
     ) {
         check(skipReadyCheck || isReady) {
             "present() may only be called when Google Pay is available on this device."
@@ -226,7 +228,8 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
                 amount = amount,
                 label = label,
                 transactionId = transactionId,
-                cardBrandFilter = cardBrandFilter
+                cardBrandFilter = cardBrandFilter,
+                totalPriceStatus = totalPriceStatus,
             )
         )
     }
@@ -267,6 +270,28 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
 
         internal val isJcbEnabled: Boolean
             get() = merchantCountryCode.equals(Locale.JAPAN.country, ignoreCase = true)
+    }
+
+    /**
+     * The status of the total price used.
+     */
+    enum class TotalPriceStatus(internal val code: String) {
+        /**
+         * Used for a capability check. Do not use this property if the transaction is
+         * processed in an EEA country.
+         */
+        NotCurrentlyKnown("NOT_CURRENTLY_KNOWN"),
+
+        /**
+         * Total price may adjust based on the details of the response, such as sales tax
+         * collected based on a billing address.
+         */
+        Estimated("ESTIMATED"),
+
+        /**
+         * Total price doesn't change from the amount presented to the shopper.
+         */
+        Final("FINAL")
     }
 
     @Parcelize
