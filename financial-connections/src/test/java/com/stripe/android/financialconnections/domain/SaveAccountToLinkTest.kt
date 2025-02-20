@@ -179,11 +179,43 @@ internal class SaveAccountToLinkTest {
             )
         }
 
+    @Test
+    fun `Doesn't set success message if in networking relink session`() = runTest(testDispatcher) {
+        val accountsRepository = mockAccountsRepository()
+        val attachedPaymentAccountRepository = mock<AttachedPaymentAccountRepository>()
+        val successRepository = SuccessContentRepository(SavedStateHandle())
+
+        whenever(attachedPaymentAccountRepository.get()).thenReturn(
+            State(
+                attachedPaymentAccount = PaymentAccountParams.BankAccount(
+                    accountNumber = "acct_123",
+                    routingNumber = "110000000",
+                )
+            )
+        )
+
+        val saveAccountToLink = makeSaveAccountToLink(
+            accountsRepository = accountsRepository,
+            successRepository = successRepository,
+            attachedPaymentAccountRepository = attachedPaymentAccountRepository,
+            isNetworkingRelinkSession = { true },
+        )
+
+        saveAccountToLink.existing(
+            consumerSessionClientSecret = "cscs_123",
+            selectedAccounts = emptyList(),
+            shouldPollAccountNumbers = true,
+        )
+
+        assertThat(successRepository.get()).isNull()
+    }
+
     private fun makeSaveAccountToLink(
         repository: FinancialConnectionsManifestRepository = mockManifestRepository(),
         accountsRepository: FinancialConnectionsAccountsRepository = mockAccountsRepository(),
         successRepository: SuccessContentRepository = SuccessContentRepository(SavedStateHandle()),
         attachedPaymentAccountRepository: AttachedPaymentAccountRepository = mock(),
+        isNetworkingRelinkSession: IsNetworkingRelinkSession = IsNetworkingRelinkSession { false },
     ): SaveAccountToLink {
         return SaveAccountToLink(
             locale = Locale.getDefault(),
@@ -195,6 +227,7 @@ internal class SaveAccountToLinkTest {
             repository = repository,
             attachedPaymentAccountRepository = attachedPaymentAccountRepository,
             accountsRepository = accountsRepository,
+            isNetworkingRelinkSession = isNetworkingRelinkSession,
         )
     }
 
