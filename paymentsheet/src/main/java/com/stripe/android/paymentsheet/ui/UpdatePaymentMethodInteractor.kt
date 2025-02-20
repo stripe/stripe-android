@@ -72,7 +72,7 @@ internal interface UpdatePaymentMethodInteractor {
 }
 
 internal typealias PaymentMethodRemoveOperation = suspend (paymentMethod: PaymentMethod) -> Throwable?
-internal typealias PaymentMethodUpdateOperation = suspend (
+internal typealias UpdateCardBrandOperation = suspend (
     paymentMethod: PaymentMethod,
     brand: CardBrand
 ) -> Result<PaymentMethod>
@@ -84,7 +84,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     override val cardBrandFilter: CardBrandFilter,
     shouldShowSetAsDefaultCheckbox: Boolean,
     private val removeExecutor: PaymentMethodRemoveOperation,
-    private val updateExecutor: PaymentMethodUpdateOperation,
+    private val updateCardBrandExecutor: UpdateCardBrandOperation,
     private val onBrandChoiceOptionsShown: (CardBrand) -> Unit,
     private val onBrandChoiceOptionsDismissed: (CardBrand) -> Unit,
     workContext: CoroutineContext = Dispatchers.Default,
@@ -171,9 +171,12 @@ internal class DefaultUpdatePaymentMethodInteractor(
             error.emit(getInitialError())
             status.emit(UpdatePaymentMethodInteractor.Status.Updating)
 
-            val updateResult = updateExecutor(displayableSavedPaymentMethod.paymentMethod, newCardBrand)
+            val updateCardBrandResult = updateCardBrandExecutor(
+                displayableSavedPaymentMethod.paymentMethod,
+                newCardBrand
+            )
 
-            updateResult.onSuccess {
+            updateCardBrandResult.onSuccess {
                 savedCardBrand.emit(CardBrandChoice(brand = newCardBrand, enabled = true))
                 cardBrandHasBeenChanged.emit(false)
             }.onFailure {

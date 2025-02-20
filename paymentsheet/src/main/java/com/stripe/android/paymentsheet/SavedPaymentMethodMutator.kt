@@ -339,7 +339,7 @@ internal class SavedPaymentMethodMutator(
                             removeExecutor = { method ->
                                 performRemove()
                             },
-                            updateExecutor = { method, brand ->
+                            updateCardBrandExecutor = { method, brand ->
                                 updateExecutor(brand)
                             },
                             onBrandChoiceOptionsShown = {
