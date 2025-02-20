@@ -529,10 +529,12 @@ private fun PreviewUpdatePaymentMethodUI() {
             canRemove = true,
             displayableSavedPaymentMethod = exampleCard,
             removeExecutor = { null },
-            updateExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
+            updateCardBrandExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
+            setDefaultPaymentMethodExecutor = { _ -> Result.success(Unit) },
             cardBrandFilter = DefaultCardBrandFilter,
             onBrandChoiceOptionsShown = {},
             onBrandChoiceOptionsDismissed = {},
+            onUpdateSuccess = {},
             shouldShowSetAsDefaultCheckbox = true,
         ),
         modifier = Modifier

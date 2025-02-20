@@ -27,7 +27,7 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
         return DefaultManageScreenInteractor(
             paymentMethods = customerStateHolder.paymentMethods,
             paymentMethodMetadata = paymentMethodMetadata,
-            selection = selectionHolder.selection,
+            selection = customerStateHolder.mostRecentlySelectedSavedPaymentMethod,
             editing = savedPaymentMethodMutator.editing,
             canEdit = savedPaymentMethodMutator.canEdit,
             toggleEdit = savedPaymentMethodMutator::toggleEditing,

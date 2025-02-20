@@ -556,10 +556,12 @@ internal class CustomerSheetViewModel(
                             selectedBrand = it
                         )
                     },
-                    updateExecutor = ::updateExecutor,
+                    updateCardBrandExecutor = ::updateExecutor,
+                    setDefaultPaymentMethodExecutor = ::setDefaultPaymentMethodExecutor,
                     workContext = workContext,
                     // This checkbox is never displayed in CustomerSheet.
                     shouldShowSetAsDefaultCheckbox = false,
+                    onUpdateSuccess = {},
                 ),
                 isLiveMode = isLiveModeProvider(),
             )
@@ -578,6 +580,13 @@ internal class CustomerSheetViewModel(
             is CustomerSheetDataResult.Success -> Result.success(result.value)
             is CustomerSheetDataResult.Failure -> Result.failure(result.cause)
         }
+    }
+
+    private suspend fun setDefaultPaymentMethodExecutor(paymentMethod: PaymentMethod): Result<Unit> {
+        return awaitSavedSelectionDataSource().setSavedSelection(
+            selection = paymentMethod.id?.let { SavedSelection.PaymentMethod(id = it) },
+            shouldSyncDefault = true,
+        ).toResult()
     }
 
     private fun removePaymentMethodFromState(paymentMethod: PaymentMethod) {

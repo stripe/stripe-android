@@ -54,7 +54,7 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
                 }
             },
             postPaymentMethodRemoveActions = ::onPaymentMethodRemoved,
-            onUpdatePaymentMethod = { displayableSavedPaymentMethod, _, _, _ ->
+            onUpdatePaymentMethod = { displayableSavedPaymentMethod, _, _, _, _ ->
                 onUpdatePaymentMethod(displayableSavedPaymentMethod)
             },
             navigationPop = {

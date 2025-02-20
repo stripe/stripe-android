@@ -43,7 +43,7 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
                 }
                 result
             },
-            updateExecutor = { method, brand ->
+            updateCardBrandExecutor = { method, brand ->
                 savedPaymentMethodMutatorProvider.get().modifyCardPaymentMethod(
                     paymentMethod = method,
                     brand = brand,
@@ -54,6 +54,9 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
                         }
                     },
                 )
+            },
+            setDefaultPaymentMethodExecutor = { method ->
+                savedPaymentMethodMutatorProvider.get().setDefaultPaymentMethod(method)
             },
             onBrandChoiceOptionsShown = {
                 eventReporter.onShowPaymentOptionBrands(
@@ -73,6 +76,9 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
                         defaultPaymentMethodId = customerStateHolder.customer.value?.defaultPaymentMethodId
                     )
                 ),
+            onUpdateSuccess = {
+                // TODO: navigate back.
+            },
         )
     }
 }
