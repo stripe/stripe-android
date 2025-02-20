@@ -8,6 +8,7 @@ import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
+import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
@@ -83,6 +84,34 @@ class ConfirmPaymentIntentParamsFactoryTest {
     }
 
     @Test
+    fun `create() with new card when setAsDefaultPaymentMethod is true`() {
+        val paymentIntentParams = factory.create(
+            createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            optionsParams = PaymentMethodOptionsParams.Card(
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+            ),
+            extraParams = PaymentMethodExtraParams.Card(
+                setAsDefault = true
+            )
+        )
+        assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isTrue()
+    }
+
+    @Test
+    fun `create() with new card when setAsDefaultPaymentMethod is false`() {
+        val paymentIntentParams = factory.create(
+            createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            optionsParams = PaymentMethodOptionsParams.Card(
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+            ),
+            extraParams = PaymentMethodExtraParams.Card(
+                setAsDefault = false
+            )
+        )
+        assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isFalse()
+    }
+
+    @Test
     fun `create() with saved card and shippingDetails sets shipping field`() {
         val shippingDetails = ConfirmPaymentIntentParams.Shipping(
             name = "Test",
@@ -99,7 +128,11 @@ class ConfirmPaymentIntentParamsFactoryTest {
             shipping = shippingDetails,
         )
 
-        val result = factoryWithConfig.create(PaymentMethodFixtures.CARD_PAYMENT_METHOD, optionsParams = null)
+        val result = factoryWithConfig.create(
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            optionsParams = null,
+            extraParams = null
+        )
         assertThat(result.shipping).isEqualTo(shippingDetails)
     }
 
@@ -140,6 +173,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
             optionsParams = PaymentMethodOptionsParams.Card(
                 setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
             ),
+            extraParams = null,
         )
 
         assertThat(result.paymentMethodOptions).isEqualTo(
@@ -162,6 +196,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
             optionsParams = PaymentMethodOptionsParams.Card(
                 setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
             ),
+            extraParams = null,
         )
 
         assertThat(result.paymentMethodOptions).isEqualTo(
@@ -218,6 +253,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
         val result = factoryWithConfig.create(
             paymentMethod = paymentMethod,
             optionsParams = null,
+            extraParams = null,
         )
 
         assertThat(result).isInstanceOf(ConfirmPaymentIntentParams::class.java)

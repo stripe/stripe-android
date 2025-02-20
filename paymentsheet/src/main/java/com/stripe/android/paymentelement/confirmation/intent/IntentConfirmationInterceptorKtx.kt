@@ -19,6 +19,7 @@ internal suspend fun IntentConfirmationInterceptor.intercept(
                 intent = intent,
                 paymentMethodOptionsParams = confirmationOption.optionsParams,
                 paymentMethodCreateParams = confirmationOption.createParams,
+                paymentMethodExtraParams = confirmationOption.extraParams,
                 shippingValues = shippingDetails?.toConfirmPaymentIntentShipping(),
                 customerRequestedSave = confirmationOption.shouldSave,
             )
@@ -29,6 +30,7 @@ internal suspend fun IntentConfirmationInterceptor.intercept(
                 intent = intent,
                 paymentMethod = confirmationOption.paymentMethod,
                 paymentMethodOptionsParams = confirmationOption.optionsParams,
+                paymentMethodExtraParams = null,
                 shippingValues = shippingDetails?.toConfirmPaymentIntentShipping(),
             )
         }

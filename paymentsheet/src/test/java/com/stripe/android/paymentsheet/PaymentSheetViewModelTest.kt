@@ -1009,6 +1009,7 @@ internal class PaymentSheetViewModelTest {
                         setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
                     )
                 ),
+                paymentMethodExtraParams = isNull(),
                 shippingValues = isNull(),
             )
         }
@@ -1044,6 +1045,7 @@ internal class PaymentSheetViewModelTest {
                         setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
                     )
                 ),
+                paymentMethodExtraParams = isNull(),
                 shippingValues = isNull(),
             )
         }
@@ -2613,6 +2615,7 @@ internal class PaymentSheetViewModelTest {
                 intent = any(),
                 paymentMethodCreateParams = any(),
                 paymentMethodOptionsParams = isNull(),
+                paymentMethodExtraParams = isNull(),
                 shippingValues = isNull(),
                 customerRequestedSave = eq(false),
             )

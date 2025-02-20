@@ -52,6 +52,7 @@ private fun PaymentSelection.New.USBankAccount.toConfirmationOption(): PaymentMe
         PaymentMethodConfirmationOption.New(
             createParams = paymentMethodCreateParams,
             optionsParams = paymentMethodOptionsParams,
+            extraParams = paymentMethodExtraParams,
             shouldSave = customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse,
         )
     }
@@ -88,6 +89,7 @@ private fun PaymentSelection.New.toConfirmationOption(): ConfirmationHandler.Opt
         PaymentMethodConfirmationOption.New(
             createParams = paymentMethodCreateParams,
             optionsParams = paymentMethodOptionsParams,
+            extraParams = paymentMethodExtraParams,
             shouldSave = customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse,
         )
     }

@@ -127,6 +127,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                     linkAccount = linkAccount,
                     cvc = cvc
                 ),
+                extraParams = null,
                 optionsParams = null,
                 shouldSave = false
             )

@@ -8,6 +8,7 @@ import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_MANDAT
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_DATA
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_PAYMENT_METHOD_ID
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_RETURN_URL
+import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_SET_AS_DEFAULT_PAYMENT_METHOD
 import com.stripe.android.model.ConfirmStripeIntentParams.Companion.PARAM_USE_STRIPE_SDK
 import kotlinx.parcelize.Parcelize
 
@@ -118,6 +119,12 @@ constructor(
      * See [receipt_email](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-receipt_email).
      */
     var receiptEmail: String? = null,
+
+    /**
+     * Indicates that this should be the default payment method going forward.
+     */
+    internal val setAsDefaultPaymentMethod: Boolean? = null,
+
 ) : ConfirmStripeIntentParams {
     fun shouldSavePaymentMethod(): Boolean {
         return savePaymentMethod == true
@@ -157,6 +164,10 @@ constructor(
         ).plus(
             setupFutureUsage?.let {
                 mapOf(PARAM_SETUP_FUTURE_USAGE to it.code)
+            }.orEmpty()
+        ).plus(
+            setAsDefaultPaymentMethod?.let {
+                mapOf(PARAM_SET_AS_DEFAULT_PAYMENT_METHOD to it)
             }.orEmpty()
         ).plus(
             shipping?.let {
@@ -389,7 +400,7 @@ constructor(
             mandateId: String? = null,
             mandateData: MandateDataParams? = null,
             setupFutureUsage: SetupFutureUsage? = null,
-            shipping: Shipping? = null
+            shipping: Shipping? = null,
         ): ConfirmPaymentIntentParams {
             return ConfirmPaymentIntentParams(
                 clientSecret = clientSecret,
@@ -399,7 +410,7 @@ constructor(
                 mandateId = mandateId,
                 mandateData = mandateData,
                 setupFutureUsage = setupFutureUsage,
-                shipping = shipping
+                shipping = shipping,
             )
         }
 
@@ -431,9 +442,9 @@ constructor(
             mandateData: MandateDataParams? = null,
             setupFutureUsage: SetupFutureUsage? = null,
             shipping: Shipping? = null,
-            paymentMethodOptions: PaymentMethodOptionsParams? = null
+            paymentMethodOptions: PaymentMethodOptionsParams? = null,
         ): ConfirmPaymentIntentParams {
-            return ConfirmPaymentIntentParams(
+            return createWithSetAsDefaultPaymentMethod(
                 clientSecret = clientSecret,
                 paymentMethodCreateParams = paymentMethodCreateParams,
                 savePaymentMethod = savePaymentMethod,
@@ -441,7 +452,8 @@ constructor(
                 mandateData = mandateData,
                 setupFutureUsage = setupFutureUsage,
                 shipping = shipping,
-                paymentMethodOptions = paymentMethodOptions
+                paymentMethodOptions = paymentMethodOptions,
+                setAsDefaultPaymentMethod = null,
             )
         }
 
@@ -526,6 +538,30 @@ constructor(
                 // return_url is no longer used by is still required by the backend
                 // TODO(smaskell): remove this when no longer required
                 returnUrl = "stripe://return_url"
+            )
+        }
+
+        internal fun createWithSetAsDefaultPaymentMethod(
+            paymentMethodCreateParams: PaymentMethodCreateParams,
+            clientSecret: String,
+            savePaymentMethod: Boolean? = null,
+            mandateId: String? = null,
+            mandateData: MandateDataParams? = null,
+            setupFutureUsage: SetupFutureUsage? = null,
+            shipping: Shipping? = null,
+            paymentMethodOptions: PaymentMethodOptionsParams? = null,
+            setAsDefaultPaymentMethod: Boolean?,
+        ): ConfirmPaymentIntentParams {
+            return ConfirmPaymentIntentParams(
+                clientSecret = clientSecret,
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                savePaymentMethod = savePaymentMethod,
+                mandateId = mandateId,
+                mandateData = mandateData,
+                setupFutureUsage = setupFutureUsage,
+                shipping = shipping,
+                paymentMethodOptions = paymentMethodOptions,
+                setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
             )
         }
 
