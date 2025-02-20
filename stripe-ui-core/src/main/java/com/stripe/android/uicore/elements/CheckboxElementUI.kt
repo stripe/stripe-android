@@ -48,7 +48,7 @@ fun CheckboxElementUI(
                 enabled = isEnabled
             )
             .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.Top
     ) {
         Checkbox(
             checked = isChecked,
@@ -59,8 +59,7 @@ fun CheckboxElementUI(
             H6Text(
                 text = label,
                 modifier = Modifier
-                    .padding(start = 4.dp)
-                    .align(Alignment.CenterVertically)
+                    .padding(start = 4.dp, top = 2.dp)
             )
         }
     }
