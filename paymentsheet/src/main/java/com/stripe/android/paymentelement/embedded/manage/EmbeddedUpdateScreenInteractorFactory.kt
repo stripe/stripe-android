@@ -34,12 +34,6 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
             canRemove = customerStateHolder.canRemove.value,
             displayableSavedPaymentMethod,
             cardBrandFilter = paymentMethodMetadata.cardBrandFilter,
-            shouldShowSetAsDefaultCheckbox = (
-                paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true &&
-                    !displayableSavedPaymentMethod.isDefaultPaymentMethod(
-                        defaultPaymentMethodId = customerStateHolder.customer.value?.defaultPaymentMethodId
-                    )
-                ),
             removeExecutor = { method ->
                 val result = savedPaymentMethodMutatorProvider.get().removePaymentMethodInEditScreen(method)
                 if (result == null) {
@@ -74,6 +68,12 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
                     selectedBrand = it
                 )
             },
+            shouldShowSetAsDefaultCheckbox = (
+                paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true &&
+                    !displayableSavedPaymentMethod.isDefaultPaymentMethod(
+                        defaultPaymentMethodId = customerStateHolder.customer.value?.defaultPaymentMethodId
+                    )
+                ),
             onUpdateSuccess = {
                 manageNavigatorProvider.get().performAction(ManageNavigator.Action.Back)
             },

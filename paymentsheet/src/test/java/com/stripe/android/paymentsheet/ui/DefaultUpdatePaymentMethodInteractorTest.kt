@@ -349,14 +349,14 @@ class DefaultUpdatePaymentMethodInteractorTest {
             isLiveMode = isLiveMode,
             canRemove = canRemove,
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
-            cardBrandFilter = DefaultCardBrandFilter,
-            shouldShowSetAsDefaultCheckbox = shouldShowSetAsDefaultCheckbox,
             removeExecutor = onRemovePaymentMethod,
             updateCardBrandExecutor = onUpdateCardBrand,
+            workContext = UnconfinedTestDispatcher(),
+            cardBrandFilter = DefaultCardBrandFilter,
             onBrandChoiceOptionsShown = {},
             onBrandChoiceOptionsDismissed = {},
+            shouldShowSetAsDefaultCheckbox = shouldShowSetAsDefaultCheckbox,
             onUpdateSuccess = onUpdateSuccess,
-            workContext = UnconfinedTestDispatcher(),
         )
 
         TestParams(interactor).apply { runTest { testBlock() } }
