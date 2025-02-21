@@ -26,6 +26,7 @@ import androidx.compose.material.BadgedBox
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
@@ -35,6 +36,7 @@ import androidx.compose.ui.layout.FixedScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.invisibleToUser
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -59,6 +61,7 @@ private val editIconBackgroundColorDark = Color(0xFF525252)
 // the remove badge on the payment method card.
 internal val SavedPaymentMethodsTopContentPadding = 12.dp
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun SavedPaymentMethodTab(
     modifier: Modifier = Modifier,
@@ -94,7 +97,15 @@ internal fun SavedPaymentMethodTab(
                         selected = isSelected,
                         enabled = isClickable,
                         onClick = onItemSelectedListener,
-                    ),
+                    )
+                    .semantics {
+                        if (!isClickable) {
+                            // This shouldn't be visible for accessibility purposes
+                            // due to it not being clickable, the user should be
+                            // interacting with the badge instead
+                            invisibleToUser()
+                        }
+                    },
             ) {
                 SavedPaymentMethodCard(
                     isSelected = isSelected,
