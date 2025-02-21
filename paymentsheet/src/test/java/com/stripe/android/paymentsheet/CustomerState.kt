@@ -5,8 +5,9 @@ import com.stripe.android.paymentsheet.state.CustomerState
 
 internal fun createCustomerState(
     paymentMethods: List<PaymentMethod>,
-    isRemoveEnabled: Boolean,
-    canRemoveLastPaymentMethod: Boolean,
+    isRemoveEnabled: Boolean = true,
+    canRemoveLastPaymentMethod: Boolean = true,
+    defaultPaymentMethodId: String? = null,
 ): CustomerState {
     return CustomerState(
         id = "cus_1",
@@ -18,6 +19,6 @@ internal fun createCustomerState(
             canRemoveDuplicates = true,
             canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
         ),
-        defaultPaymentMethodId = null,
+        defaultPaymentMethodId = defaultPaymentMethodId,
     )
 }

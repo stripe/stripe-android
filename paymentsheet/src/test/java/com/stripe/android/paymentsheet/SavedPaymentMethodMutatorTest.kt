@@ -493,6 +493,30 @@ class SavedPaymentMethodMutatorTest {
         calledUpdate.ensureAllEventsConsumed()
     }
 
+    @Test
+    fun `setDefaultPaymentMethod updates default payment method on success`() {
+        val customerRepository = FakeCustomerRepository(
+            onSetDefaultPaymentMethod = { Result.success(mock()) }
+        )
+        val paymentMethods = PaymentMethodFixtures.createCards(3)
+
+        runScenario(customerRepository = customerRepository) {
+            customerStateHolder.setCustomerState(
+                createCustomerState(
+                    paymentMethods = paymentMethods,
+                    defaultPaymentMethodId = paymentMethods.first().id,
+                )
+            )
+
+            val newDefaultPaymentMethod = paymentMethods[1]
+            savedPaymentMethodMutator.setDefaultPaymentMethod(newDefaultPaymentMethod)
+
+            customerStateHolder.customer.test {
+                assertThat(awaitItem()?.defaultPaymentMethodId).isEqualTo(newDefaultPaymentMethod.id)
+            }
+        }
+    }
+
     private fun removeDuplicatesTest(shouldRemoveDuplicates: Boolean) {
         val repository = FakeCustomerRepository()
 
@@ -571,9 +595,20 @@ class SavedPaymentMethodMutatorTest {
                 customerStateHolder = customerStateHolder,
                 prePaymentMethodRemoveActions = { prePaymentMethodRemovedTurbine.add(Unit) },
                 postPaymentMethodRemoveActions = { postPaymentMethodRemovedTurbine.add(Unit) },
-                onUpdatePaymentMethod = { displayableSavedPaymentMethod, canRemove, performRemove, updateExecutor ->
+                onUpdatePaymentMethod = {
+                        displayableSavedPaymentMethod,
+                        canRemove,
+                        performRemove,
+                        updateExecutor,
+                        setDefaultPaymentMethodExecutor, ->
                     updatePaymentMethodTurbine.add(
-                        UpdateCall(displayableSavedPaymentMethod, canRemove, performRemove, updateExecutor)
+                        UpdateCall(
+                            displayableSavedPaymentMethod,
+                            canRemove,
+                            performRemove,
+                            updateExecutor,
+                            setDefaultPaymentMethodExecutor
+                        )
                     )
                 },
                 isLinkEnabled = stateFlowOf(false),
@@ -615,5 +650,6 @@ class SavedPaymentMethodMutatorTest {
         val canRemove: Boolean,
         val performRemove: suspend () -> Throwable?,
         val updateExecutor: suspend (brand: CardBrand) -> Result<PaymentMethod>,
+        val setSetDefaultPaymentMethodExecutor: suspend (paymentMethod: PaymentMethod) -> Result<Unit>,
     )
 }
