@@ -351,7 +351,9 @@ class CardFormView @JvmOverloads constructor(
         cardMultilineWidget.setBackgroundResource(R.drawable.stripe_card_form_view_text_input_layout_background)
         cardMultilineWidget.cvcEditText.doAfterTextChanged { cvcText ->
             if (postalCodeContainer.isVisible && cardMultilineWidget.brand.isMaxCvc(cvcText.toString())) {
-                postalCodeView.requestFocus()
+                post {
+                    postalCodeView.requestFocus()
+                }
             }
         }
 
