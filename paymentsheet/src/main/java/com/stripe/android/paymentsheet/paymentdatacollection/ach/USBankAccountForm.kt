@@ -36,8 +36,8 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection.New
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.BankFormScreenState.PromoBadgeState
-import com.stripe.android.paymentsheet.ui.Mandate
 import com.stripe.android.paymentsheet.ui.PromoBadge
+import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
