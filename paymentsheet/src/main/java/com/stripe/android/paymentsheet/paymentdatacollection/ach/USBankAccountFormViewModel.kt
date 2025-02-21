@@ -201,7 +201,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     val saveForFutureUse: StateFlow<Boolean> = saveForFutureUseElement.controller.saveForFutureUse
 
     private val shouldShowElementFlow = saveForFutureUse.mapAsStateFlow {
-        it && args.isSetAsDefaultPaymentMethodEnabled
+        it && args.shouldShowSetAsDefaultCheckbox
     }
 
     val setAsDefaultPaymentMethodElement: SetAsDefaultPaymentMethodElement =
@@ -739,7 +739,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val savedPaymentMethod: PaymentSelection.New.USBankAccount?,
         val shippingDetails: AddressDetails?,
         val hostedSurface: String,
-        val isSetAsDefaultPaymentMethodEnabled: Boolean,
+        val shouldShowSetAsDefaultCheckbox: Boolean,
     )
 
     private companion object {

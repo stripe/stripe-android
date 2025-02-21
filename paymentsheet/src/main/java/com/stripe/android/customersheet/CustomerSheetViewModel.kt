@@ -832,7 +832,7 @@ internal class CustomerSheetViewModel(
             onError = { error ->
                 handleViewAction(CustomerSheetViewAction.OnFormError(error))
             },
-            isPaymentMethodSetAsDefaultEnabled = false,
+            shouldShowSetAsDefaultCheckbox = false,
         )
     }
 
