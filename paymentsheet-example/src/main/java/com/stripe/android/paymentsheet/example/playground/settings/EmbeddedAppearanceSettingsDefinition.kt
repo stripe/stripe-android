@@ -29,8 +29,8 @@ internal object EmbeddedAppearanceSettingsDefinition :
     }
 
     @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-    override fun valueUpdated(value: EmbeddedAppearance, playgroundSettings: PlaygroundSettings) {
-        super.valueUpdated(value, playgroundSettings)
+    override fun setValue(value: EmbeddedAppearance) {
+        super.setValue(value)
         AppearanceStore.state = AppearanceStore.state.copy(
             embeddedAppearance = PaymentSheet.Appearance.Embedded(value.getRow())
         )
