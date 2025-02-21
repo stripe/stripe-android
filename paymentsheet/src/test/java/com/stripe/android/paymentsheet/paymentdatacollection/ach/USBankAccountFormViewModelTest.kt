@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
@@ -1339,7 +1338,6 @@ class USBankAccountFormViewModelTest {
         }
     }
 
-
     @Test
     fun `'setAsDefaultPaymentMethod' hidden correctly when saveForFutureUse unchecked`() = runTest {
         val viewModel = createViewModel(
@@ -1392,7 +1390,8 @@ class USBankAccountFormViewModelTest {
 
             viewModel.setAsDefaultPaymentMethodElement.controller.onValueChange(true)
             skipItems(1)
-            assertThat((awaitItem()?.paymentMethodExtraParams as PaymentMethodExtraParams.USBankAccount).setAsDefault).isTrue()
+            assertThat((awaitItem()?.paymentMethodExtraParams as PaymentMethodExtraParams.USBankAccount).setAsDefault)
+                .isTrue()
 
             viewModel.setAsDefaultPaymentMethodElement.controller.onValueChange(false)
             assertThat((awaitItem()?.paymentMethodExtraParams as PaymentMethodExtraParams.USBankAccount).setAsDefault)
