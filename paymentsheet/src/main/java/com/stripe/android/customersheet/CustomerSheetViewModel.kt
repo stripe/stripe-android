@@ -560,6 +560,12 @@ internal class CustomerSheetViewModel(
                     workContext = workContext,
                     // This checkbox is never displayed in CustomerSheet.
                     shouldShowSetAsDefaultCheckbox = false,
+                    // Should never be called from CustomerSheet, because we don't enable the set as default checkbox.
+                    setDefaultPaymentMethodExecutor = {
+                        Result.failure(
+                            IllegalStateException("Unexpected attempt to update default from CustomerSheet.")
+                        )
+                    },
                 ),
                 isLiveMode = isLiveModeProvider(),
             )

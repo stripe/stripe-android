@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
@@ -76,6 +77,9 @@ internal typealias UpdateCardBrandOperation = suspend (
     paymentMethod: PaymentMethod,
     brand: CardBrand
 ) -> Result<PaymentMethod>
+internal typealias PaymentMethodSetAsDefaultOperation = suspend (
+    paymentMethod: PaymentMethod
+) -> Result<Unit>
 
 internal class DefaultUpdatePaymentMethodInteractor(
     isLiveMode: Boolean,
@@ -85,6 +89,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     shouldShowSetAsDefaultCheckbox: Boolean,
     private val removeExecutor: PaymentMethodRemoveOperation,
     private val updateCardBrandExecutor: UpdateCardBrandOperation,
+    private val setDefaultPaymentMethodExecutor: PaymentMethodSetAsDefaultOperation,
     private val onBrandChoiceOptionsShown: (CardBrand) -> Unit,
     private val onBrandChoiceOptionsDismissed: (CardBrand) -> Unit,
     private val onUpdateSuccess: () -> Unit,
@@ -171,9 +176,11 @@ internal class DefaultUpdatePaymentMethodInteractor(
             status.emit(UpdatePaymentMethodInteractor.Status.Updating)
 
             val updateCardBrandResult = maybeUpdateCardBrand()
+            val setDefaultPaymentMethodResult = maybeSetDefaultPaymentMethod()
 
             val updateResult = getUpdateResult(
                 updateCardBrandResult = updateCardBrandResult,
+                setDefaultPaymentMethodResult = setDefaultPaymentMethodResult,
             )
 
             when (updateResult) {
@@ -201,16 +208,30 @@ internal class DefaultUpdatePaymentMethodInteractor(
         }
     }
 
+    private suspend fun maybeSetDefaultPaymentMethod(): Result<Unit>? {
+        return if (setAsDefaultCheckboxChecked.value) {
+            setDefaultPaymentMethodExecutor(displayableSavedPaymentMethod.paymentMethod)
+        } else {
+            null
+        }
+    }
+
     private fun getUpdateResult(
         updateCardBrandResult: Result<PaymentMethod>?,
+        setDefaultPaymentMethodResult: Result<Unit>?,
     ): UpdateResult {
-        return when {
-            updateCardBrandResult == null -> UpdateResult.NoUpdatesMade
-            updateCardBrandResult.isFailure -> UpdateResult.Error(
-                updateCardBrandResult.exceptionOrNull()?.stripeErrorMessage()
-            )
-            updateCardBrandResult.isSuccess -> UpdateResult.Success
-            else -> UpdateResult.NoUpdatesMade
+        if (updateCardBrandResult == null && setDefaultPaymentMethodResult == null) {
+            return UpdateResult.NoUpdatesMade
+        }
+
+        return if (updateCardBrandResult?.isFailure == true && setDefaultPaymentMethodResult?.isFailure == true) {
+            UpdateResult.Error(setDefaultPaymentMethodErrorMessage)
+        } else if (updateCardBrandResult?.isFailure == true) {
+            UpdateResult.Error(updateCardBrandResult.exceptionOrNull()?.stripeErrorMessage())
+        } else if (setDefaultPaymentMethodResult?.isFailure == true) {
+            UpdateResult.Error(updatesFailedErrorMessage)
+        } else {
+            UpdateResult.Success
         }
     }
 
@@ -255,6 +276,17 @@ internal class DefaultUpdatePaymentMethodInteractor(
         data class Error(val errorMessage: ResolvableString?) : UpdateResult()
         data object Success : UpdateResult()
         data object NoUpdatesMade : UpdateResult()
+    }
+
+    companion object {
+
+        @VisibleForTesting
+        internal val setDefaultPaymentMethodErrorMessage =
+            R.string.stripe_paymentsheet_set_default_payment_method_failed_error_message.resolvableString
+
+        @VisibleForTesting
+        internal val updatesFailedErrorMessage =
+            R.string.stripe_paymentsheet_set_default_payment_method_failed_error_message.resolvableString
     }
 }
 
