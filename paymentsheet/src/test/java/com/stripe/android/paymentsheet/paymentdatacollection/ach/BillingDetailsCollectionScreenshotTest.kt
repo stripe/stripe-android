@@ -12,10 +12,12 @@ import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
+import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.TextFieldController
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Rule
 import org.junit.Test
 
@@ -30,214 +32,137 @@ internal class BillingDetailsCollectionScreenshotTest {
 
     @Test
     fun testEmpty() {
-        paparazzi.snapshot {
-            BankAccountForm(
-                state = BankFormScreenState(isPaymentFlow = true),
-                instantDebits = false,
-                isPaymentFlow = true,
-                formArgs = createFormArguments(),
-                nameController = createNameController(),
-                emailController = createEmailController(),
-                phoneController = createPhoneNumberController(),
-                addressController = createAddressController(),
-                sameAsShippingElement = null,
-                saveForFutureUseElement = SaveForFutureUseElement(
-                    initialValue = false,
-                    merchantName = "Test Merchant",
-                ),
-                showCheckbox = false,
-                lastTextFieldIdentifier = null,
-                onRemoveAccount = {},
-                enabled = true
-            )
-        }
+        testBillingDetailsCollectionScreenShot(
+            bankFormScreenState = BankFormScreenState(isPaymentFlow = true),
+            formArgs = createFormArguments(),
+        )
     }
 
     @Test
     fun testEmptySetupFlow() {
-        paparazzi.snapshot {
-            BankAccountForm(
-                state = BankFormScreenState(isPaymentFlow = false),
-                instantDebits = false,
-                isPaymentFlow = false,
-                formArgs = createFormArguments(),
-                nameController = createNameController(),
-                emailController = createEmailController(),
-                phoneController = createPhoneNumberController(),
-                addressController = createAddressController(),
-                sameAsShippingElement = null,
-                saveForFutureUseElement = SaveForFutureUseElement(
-                    initialValue = false,
-                    merchantName = "Test Merchant",
-                ),
-                showCheckbox = false,
-                lastTextFieldIdentifier = null,
-                onRemoveAccount = {},
-                enabled = true,
-            )
-        }
+        testBillingDetailsCollectionScreenShot(
+            bankFormScreenState = BankFormScreenState(isPaymentFlow = false),
+            instantDebits = false,
+            isPaymentFlow = false,
+            formArgs = createFormArguments(),
+        )
     }
 
     @Test
     fun testPromoDisclaimer() {
-        paparazzi.snapshot {
-            BankAccountForm(
-                state = BankFormScreenState(
-                    isPaymentFlow = true,
-                    promoText = "$5",
-                ),
-                instantDebits = false,
+        testBillingDetailsCollectionScreenShot(
+            bankFormScreenState = BankFormScreenState(
                 isPaymentFlow = true,
-                formArgs = createFormArguments(),
-                nameController = createNameController("John Doe"),
-                emailController = createEmailController("email@email.com"),
-                phoneController = createPhoneNumberController(),
-                addressController = createAddressController(),
-                sameAsShippingElement = null,
-                saveForFutureUseElement = SaveForFutureUseElement(
-                    initialValue = false,
-                    merchantName = "Test Merchant",
-                ),
-                showCheckbox = false,
-                lastTextFieldIdentifier = null,
-                onRemoveAccount = {},
-                enabled = true
-            )
-        }
+                promoText = "$5",
+            ),
+            formArgs = createFormArguments(),
+            nameControllerInitialValue = "John Doe",
+            emailControllerInitialValue = "email@email.com",
+        )
     }
 
     @Test
     fun testPromoDisclaimerSetupFlow() {
-        paparazzi.snapshot {
-            BankAccountForm(
-                state = BankFormScreenState(
-                    isPaymentFlow = false,
-                    promoText = "$5",
-                ),
-                instantDebits = false,
+        testBillingDetailsCollectionScreenShot(
+            bankFormScreenState = BankFormScreenState(
                 isPaymentFlow = false,
-                formArgs = createFormArguments(),
-                nameController = createNameController("John Doe"),
-                emailController = createEmailController("email@email.com"),
-                phoneController = createPhoneNumberController(),
-                addressController = createAddressController(),
-                sameAsShippingElement = null,
-                saveForFutureUseElement = SaveForFutureUseElement(
-                    initialValue = false,
-                    merchantName = "Test Merchant",
-                ),
-                showCheckbox = false,
-                lastTextFieldIdentifier = null,
-                onRemoveAccount = {},
-                enabled = true
-            )
-        }
+                promoText = "$5",
+            ),
+            instantDebits = false,
+            isPaymentFlow = false,
+            formArgs = createFormArguments(),
+            nameControllerInitialValue = "John Doe",
+            emailControllerInitialValue = "email@email.com",
+        )
     }
 
     @Test
     fun testFilled() {
-        paparazzi.snapshot {
-            BankAccountForm(
-                state = BankFormScreenState(isPaymentFlow = true),
-                instantDebits = false,
-                isPaymentFlow = true,
-                formArgs = createFormArguments(),
-                nameController = createNameController("John Doe"),
-                emailController = createEmailController("email@email.com"),
-                phoneController = createPhoneNumberController(),
-                addressController = createAddressController(),
-                sameAsShippingElement = null,
-                saveForFutureUseElement = SaveForFutureUseElement(
-                    initialValue = false,
-                    merchantName = "Test Merchant",
-                ),
-                showCheckbox = false,
-                lastTextFieldIdentifier = null,
-                onRemoveAccount = {},
-                enabled = true
-            )
-        }
+        testBillingDetailsCollectionScreenShot(
+            bankFormScreenState = BankFormScreenState(isPaymentFlow = true),
+            formArgs = createFormArguments(),
+            nameControllerInitialValue = "John Doe",
+            emailControllerInitialValue = "email@email.com",
+        )
     }
 
     @Test
     fun testFilledDisabled() {
-        paparazzi.snapshot {
-            BankAccountForm(
-                state = BankFormScreenState(isPaymentFlow = true),
-                instantDebits = false,
-                isPaymentFlow = true,
-                formArgs = createFormArguments(),
-                nameController = createNameController("John Doe"),
-                emailController = createEmailController("email@email.com"),
-                phoneController = createPhoneNumberController(),
-                addressController = createAddressController(),
-                sameAsShippingElement = null,
-                saveForFutureUseElement = SaveForFutureUseElement(
-                    initialValue = false,
-                    merchantName = "Test Merchant",
-                ),
-                showCheckbox = false,
-                lastTextFieldIdentifier = null,
-                onRemoveAccount = {},
-                enabled = false
-            )
-        }
+        testBillingDetailsCollectionScreenShot(
+            bankFormScreenState = BankFormScreenState(isPaymentFlow = true),
+            formArgs = createFormArguments(),
+            nameControllerInitialValue = "John Doe",
+            emailControllerInitialValue = "email@email.com",
+            enabled = false,
+        )
     }
 
     @Test
     fun testEmptyWithBillingAddress() {
-        paparazzi.snapshot {
-            BankAccountForm(
-                state = BankFormScreenState(isPaymentFlow = true),
-                instantDebits = false,
-                isPaymentFlow = true,
-                formArgs = createFormArguments(
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
-                    ),
+        testBillingDetailsCollectionScreenShot(
+            bankFormScreenState = BankFormScreenState(isPaymentFlow = true),
+            formArgs = createFormArguments(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
                 ),
-                nameController = createNameController(),
-                emailController = createEmailController(),
-                phoneController = createPhoneNumberController(),
-                addressController = createAddressController(),
-                sameAsShippingElement = null,
-                saveForFutureUseElement = SaveForFutureUseElement(
-                    initialValue = false,
-                    merchantName = "Test Merchant",
-                ),
-                showCheckbox = false,
-                lastTextFieldIdentifier = null,
-                onRemoveAccount = {},
-                enabled = true
-            )
-        }
+            ),
+        )
     }
 
     @Test
     fun testFilledWithBillingAddress() {
+        testBillingDetailsCollectionScreenShot(
+            bankFormScreenState = BankFormScreenState(isPaymentFlow = true),
+            formArgs = createFormArguments(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+                ),
+            ),
+            nameControllerInitialValue = "John Doe",
+            emailControllerInitialValue = "email@email.com",
+            fillAddress = true,
+        )
+    }
+
+    private val saveForFutureUseElement = SaveForFutureUseElement(
+        initialValue = false,
+        merchantName = "Test Merchant",
+    )
+
+    private val shouldShowElementFlow = MutableStateFlow(false)
+    private val setAsDefaultPaymentMethodElement = SetAsDefaultPaymentMethodElement(
+        initialValue = false,
+        shouldShowElementFlow = shouldShowElementFlow
+    )
+
+    private fun testBillingDetailsCollectionScreenShot(
+        bankFormScreenState: BankFormScreenState,
+        formArgs: FormArguments,
+        instantDebits: Boolean = false,
+        isPaymentFlow: Boolean = true,
+        nameControllerInitialValue: String? = null,
+        emailControllerInitialValue: String? = null,
+        phoneControllerInitialValue: String = "",
+        fillAddress: Boolean = false,
+        enabled: Boolean = true,
+    ) {
         paparazzi.snapshot {
             BankAccountForm(
-                state = BankFormScreenState(isPaymentFlow = true),
-                formArgs = createFormArguments(
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
-                    ),
-                ),
-                instantDebits = false,
-                isPaymentFlow = true,
-                nameController = createNameController("John Doe"),
-                emailController = createEmailController("email@email.com"),
-                phoneController = createPhoneNumberController(),
-                addressController = createAddressController(fillAddress = true),
+                state = bankFormScreenState,
+                formArgs = formArgs,
+                instantDebits = instantDebits,
+                isPaymentFlow = isPaymentFlow,
+                nameController = createNameController(nameControllerInitialValue),
+                emailController = createEmailController(emailControllerInitialValue),
+                phoneController = createPhoneNumberController(phoneControllerInitialValue),
+                addressController = createAddressController(fillAddress),
                 sameAsShippingElement = null,
-                saveForFutureUseElement = SaveForFutureUseElement(
-                    initialValue = false,
-                    merchantName = "Test Merchant",
-                ),
-                showCheckbox = false,
+                saveForFutureUseElement = saveForFutureUseElement,
+                setAsDefaultPaymentMethodElement = setAsDefaultPaymentMethodElement,
+                showCheckboxes = false,
                 lastTextFieldIdentifier = null,
                 onRemoveAccount = {},
-                enabled = true
+                enabled = enabled
             )
         }
     }
