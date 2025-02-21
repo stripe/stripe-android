@@ -42,7 +42,14 @@ android {
     buildTypes {
         debug {
             firebaseAppDistribution {
-                groups = "financial-connections"
+                appId = "1:527113280969:android:3c57e90cbb8c0397d95c18"
+                groups = "financial-connections-testers"
+            }
+        }
+        release {
+            firebaseAppDistribution {
+                appId = "1:527113280969:android:3c57e90cbb8c0397d95c18"
+                groups = "financial-connections-testers"
             }
         }
     }
