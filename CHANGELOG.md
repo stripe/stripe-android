@@ -27,6 +27,9 @@ Dependencies updated in [9512](https://github.com/stripe/stripe-android/pull/951
 ### CardScan
 * [FIXED][10181](https://github.com/stripe/stripe-android/pull/10181) Fixed a crash that happened on some devices with odd camera-to-screen ratios
 
+### PaymentSheet
+* [FIXED][10185](https://github.com/stripe/stripe-android/pull/10185) Improve accessibility for expiration date in `CardDetailsController`.
+
 ### Financial Connections
 - [ADDED] Financial Connections now supports dark mode and will automatically adapt to the device's theme. [Learn more](https://docs.stripe.com/financial-connections/other-data-powered-products?platform=android#connections-customize-android) about configuring appearance settings.
 

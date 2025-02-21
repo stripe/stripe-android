@@ -4,10 +4,10 @@
   <CurrentIssues>
     <ID>ConstructorParameterNaming:CardNumberElement.kt$CardNumberElement$val _identifier: IdentifierSpec</ID>
     <ID>ConstructorParameterNaming:CvcElement.kt$CvcElement$val _identifier: IdentifierSpec</ID>
+    <ID>CyclomaticComplexMethod:ExpiryDateContentDescriptionFormatter.kt$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX) fun formatExpirationDateForAccessibility(input: String): ResolvableString</ID>
     <ID>CyclomaticComplexMethod:FormItemSpec.kt$FormItemSpecSerializer$override fun selectDeserializer(element: JsonElement): DeserializationStrategy&lt;FormItemSpec></ID>
     <ID>CyclomaticComplexMethod:TransformGoogleToStripeAddress.kt$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun Place.transformGoogleToStripeAddress( context: Context ): com.stripe.android.model.Address</ID>
     <ID>ForbiddenComment:Menu.kt$// TODO: Make sure this gets the rounded corner values</ID>
-    <ID>LongMethod:FormUI.kt$@Composable private fun FormUIElement( element: FormElement, index: Int, maxIndex: Int, enabled: Boolean, hiddenIdentifiers: Set&lt;IdentifierSpec>, lastTextFieldIdentifier: IdentifierSpec?, )</ID>
     <ID>LongMethod:Menu.kt$@Suppress("ModifierParameter") @Composable internal fun DropdownMenuContent( expandedStates: MutableTransitionState&lt;Boolean>, transformOriginState: MutableState&lt;TransformOrigin>, initialFirstVisibleItemIndex: Int, modifier: Modifier = Modifier, content: LazyListScope.() -> Unit )</ID>
     <ID>LongMethod:TransformGoogleToStripeAddress.kt$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun Place.transformGoogleToStripeAddress( context: Context ): com.stripe.android.model.Address</ID>
     <ID>LongMethod:TransformGoogleToStripeAddressTest.kt$TransformGoogleToStripeAddressTest$@Test fun `test JP address`()</ID>
@@ -43,19 +43,15 @@
     <ID>MagicNumber:CardNumberVisualTransformations.kt$CardNumberVisualTransformations.NineteenPanLength.&lt;no name provided>$4</ID>
     <ID>MagicNumber:CardNumberVisualTransformations.kt$CardNumberVisualTransformations.NineteenPanLength.&lt;no name provided>$7</ID>
     <ID>MagicNumber:CardNumberVisualTransformations.kt$CardNumberVisualTransformations.NineteenPanLength.&lt;no name provided>$9</ID>
+    <ID>MagicNumber:ExpiryDateContentDescriptionFormatter.kt$12</ID>
+    <ID>MagicNumber:ExpiryDateContentDescriptionFormatter.kt$2000</ID>
+    <ID>MagicNumber:ExpiryDateContentDescriptionFormatter.kt$9</ID>
     <ID>MagicNumber:IbanConfig.kt$IbanConfig$10</ID>
     <ID>MagicNumber:IbanConfig.kt$IbanConfig$4</ID>
     <ID>MagicNumber:Menu.kt$0.8f</ID>
     <ID>MaxLineLength:AddressElementTest.kt$AddressElementTest$fun</ID>
     <ID>MaxLineLength:AndroidMenu.kt$*</ID>
     <ID>MaxLineLength:CardDetailsControllerTest.kt$CardDetailsControllerTest$fun</ID>
-    <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.AMEX_NO_SPACES)).text)</ID>
-    <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.DINERS_CLUB_14_NO_SPACES)).text)</ID>
-    <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.DINERS_CLUB_16_NO_SPACES)).text)</ID>
-    <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.DISCOVER_NO_SPACES)).text)</ID>
-    <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.JCB_NO_SPACES)).text)</ID>
-    <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.UNIONPAY_NO_SPACES)).text)</ID>
-    <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$Truth.assertThat(cardNumberConfig.visualTransformation.filter(AnnotatedString(CardNumberFixtures.VISA_NO_SPACES)).text)</ID>
     <ID>MaxLineLength:CardNumberControllerTest.kt$CardNumberControllerTest$fun</ID>
     <ID>SpreadOperator:BsbElementUI.kt$( it.errorMessage, *args )</ID>
     <ID>SpreadOperator:MandateTextElement.kt$MandateTextElement$(stringResId, *args.toTypedArray())</ID>

@@ -7,6 +7,7 @@ import android.widget.Button
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
@@ -38,7 +39,7 @@ internal class PaymentSheetPage(
         waitForText("Card number")
 
         replaceText("Card number", "4242424242424242")
-        replaceText("MM / YY", "12/34")
+        fillExpirationDate("12/34")
         replaceText("CVC", "123")
 
         if (fillOutZipCode) {
@@ -106,7 +107,7 @@ internal class PaymentSheetPage(
         waitForText("Card number")
 
         replaceText("Card number", "4000002500001001")
-        replaceText("MM / YY", "12/34")
+        fillExpirationDate("12/34")
         replaceText("CVC", "123")
 
         clickDropdownMenu()
@@ -198,6 +199,11 @@ internal class PaymentSheetPage(
     fun replaceText(label: String, text: String, isLabelSubstring: Boolean = false) {
         composeTestRule.onNode(hasText(label, substring = isLabelSubstring))
             .performScrollTo()
+            .performTextReplacement(text)
+    }
+
+    fun fillExpirationDate(text: String) {
+        composeTestRule.onNode(hasContentDescription(value = "Expiration date", substring = true))
             .performTextReplacement(text)
     }
 
