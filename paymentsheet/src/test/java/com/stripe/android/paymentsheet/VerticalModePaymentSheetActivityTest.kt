@@ -10,7 +10,6 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.model.CardBrand
 import com.stripe.android.network.CardPaymentMethodDetails
 import com.stripe.android.network.PaymentMethodDetails
@@ -34,9 +33,6 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-@OptIn(
-    ExperimentalCardBrandFilteringApi::class,
-)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
 internal class VerticalModePaymentSheetActivityTest {
@@ -423,7 +419,6 @@ internal class VerticalModePaymentSheetActivityTest {
         verticalModePage.assertMandateExists()
     }
 
-    @OptIn(ExperimentalCardBrandFilteringApi::class)
     @Test
     fun `Entering Amex card shows disallowed error when disallowed`() = runTest(
         cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
@@ -510,7 +505,6 @@ internal class VerticalModePaymentSheetActivityTest {
         editPage.assertInDropdownAndEnabled("Cartes Bancaires")
     }
 
-    @OptIn(ExperimentalCardBrandFilteringApi::class)
     private fun runTest(
         primaryButtonLabel: String? = null,
         customer: PaymentSheet.CustomerConfiguration? = null,

@@ -2,7 +2,6 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.os.Parcelable
 import com.stripe.android.CardBrandFilter
-import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.customersheet.CustomerSheet
@@ -316,7 +315,6 @@ internal data class PaymentMethodMetadata(
             )
         }
 
-        @OptIn(ExperimentalCardBrandFilteringApi::class)
         internal fun create(
             configuration: LinkConfiguration,
         ): PaymentMethodMetadata {
