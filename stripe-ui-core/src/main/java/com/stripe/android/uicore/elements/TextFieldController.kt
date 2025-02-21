@@ -14,6 +14,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.LayoutDirection
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Blank
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.combineAsStateFlow
@@ -53,7 +54,7 @@ interface TextFieldController : InputController, SectionFieldComposable {
 
     // This dictates how the accessibility reader reads the text in the field.
     // Default this to _fieldValue to read the field normally
-    val contentDescription: StateFlow<String>
+    val contentDescription: StateFlow<ResolvableString>
 
     @Composable
     override fun ComposeUI(
@@ -63,7 +64,7 @@ interface TextFieldController : InputController, SectionFieldComposable {
         hiddenIdentifiers: Set<IdentifierSpec>,
         lastTextFieldIdentifier: IdentifierSpec?,
         nextFocusDirection: FocusDirection,
-        previousFocusDirection: FocusDirection
+        previousFocusDirection: FocusDirection,
     ) {
         TextField(
             textFieldController = this,
@@ -126,7 +127,10 @@ sealed class TextFieldIcon {
 class SimpleTextFieldController(
     val textFieldConfig: TextFieldConfig,
     override val showOptionalLabel: Boolean = false,
-    override val initialValue: String? = null
+    override val initialValue: String? = null,
+    private val overrideContentDescriptionProvider: ((fieldValue: String) -> ResolvableString)? = null,
+    private val shouldAnnounceLabel: Boolean = true,
+    private val shouldAnnounceFieldValue: Boolean = true
 ) : TextFieldController, SectionFieldErrorController {
     override val trailingIcon: StateFlow<TextFieldIcon?> = textFieldConfig.trailingIcon
     override val capitalization: KeyboardCapitalization = textFieldConfig.capitalization
@@ -156,7 +160,9 @@ class SimpleTextFieldController(
 
     override val rawFieldValue: StateFlow<String> = _fieldValue.mapAsStateFlow { textFieldConfig.convertToRaw(it) }
 
-    override val contentDescription: StateFlow<String> = _fieldValue.asStateFlow()
+    override val contentDescription: StateFlow<ResolvableString> = _fieldValue.mapAsStateFlow {
+        overrideContentDescriptionProvider?.invoke(it) ?: it.resolvableString
+    }
 
     private val _fieldState = MutableStateFlow<TextFieldState>(Blank)
     override val fieldState: StateFlow<TextFieldState> = _fieldState.asStateFlow()
@@ -216,5 +222,31 @@ class SimpleTextFieldController(
 
     override fun onFocusChange(newHasFocus: Boolean) {
         _hasFocus.value = newHasFocus
+    }
+
+    @Composable
+    override fun ComposeUI(
+        enabled: Boolean,
+        field: SectionFieldElement,
+        modifier: Modifier,
+        hiddenIdentifiers: Set<IdentifierSpec>,
+        lastTextFieldIdentifier: IdentifierSpec?,
+        nextFocusDirection: FocusDirection,
+        previousFocusDirection: FocusDirection,
+    ) {
+        TextField(
+            textFieldController = this,
+            enabled = enabled,
+            imeAction = if (lastTextFieldIdentifier == field.identifier) {
+                ImeAction.Done
+            } else {
+                ImeAction.Next
+            },
+            modifier = modifier,
+            nextFocusDirection = nextFocusDirection,
+            previousFocusDirection = previousFocusDirection,
+            shouldAnnounceLabel = shouldAnnounceLabel,
+            shouldAnnounceFieldValue = shouldAnnounceFieldValue
+        )
     }
 }

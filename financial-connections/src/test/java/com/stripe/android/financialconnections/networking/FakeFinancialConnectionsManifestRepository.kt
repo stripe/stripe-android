@@ -48,6 +48,14 @@ internal class FakeFinancialConnectionsManifestRepository : FinancialConnections
         authSessionEvents: List<AuthSessionEvent>
     ): FinancialConnectionsAuthorizationSession = postAuthSessionEvent()
 
+    override suspend fun repairAuthorizationSession(
+        clientSecret: String,
+        coreAuthorization: String,
+        applicationId: String
+    ): FinancialConnectionsAuthorizationSession {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun completeAuthorizationSession(
         clientSecret: String,
         sessionId: String,

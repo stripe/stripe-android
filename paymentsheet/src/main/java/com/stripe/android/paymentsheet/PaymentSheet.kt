@@ -945,6 +945,7 @@ class PaymentSheet internal constructor(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+        @Poko
         class Embedded(
             internal val style: RowStyle
         ) : Parcelable {
@@ -967,6 +968,7 @@ class PaymentSheet internal constructor(
                 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 @ExperimentalEmbeddedPaymentElementApi
                 @Parcelize
+                @Poko
                 class FlatWithRadio(
                     /**
                      * The thickness of the separator line between rows.
@@ -1080,6 +1082,7 @@ class PaymentSheet internal constructor(
                 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 @ExperimentalEmbeddedPaymentElementApi
                 @Parcelize
+                @Poko
                 class FlatWithCheckmark(
                     /**
                      * The thickness of the separator line between rows.
@@ -1191,6 +1194,7 @@ class PaymentSheet internal constructor(
                 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 @ExperimentalEmbeddedPaymentElementApi
                 @Parcelize
+                @Poko
                 class FloatingButton(
                     /**
                      * The spacing between payment method rows

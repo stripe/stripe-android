@@ -10,6 +10,8 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.LayoutDirection
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -51,7 +53,7 @@ class AddressTextFieldController(
 
     override val layoutDirection: LayoutDirection? = null
 
-    override val contentDescription: StateFlow<String> = _fieldValue.asStateFlow()
+    override val contentDescription: StateFlow<ResolvableString> = _fieldValue.mapAsStateFlow { it.resolvableString }
 
     private val _fieldState = MutableStateFlow<TextFieldState>(TextFieldStateConstants.Error.Blank)
     override val fieldState: StateFlow<TextFieldState> = _fieldState.asStateFlow()

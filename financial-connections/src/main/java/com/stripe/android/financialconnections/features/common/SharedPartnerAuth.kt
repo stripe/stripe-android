@@ -197,6 +197,7 @@ private fun SharedPartnerAuthBody(
         state.payload()?.let {
             LoadedContent(
                 showInModal = inModal,
+                isRelinkSession = state.isNetworkingRelinkSession,
                 authenticationStatus = state.authenticationStatus,
                 payload = it,
                 onContinueClick = onContinueClick,
@@ -210,6 +211,7 @@ private fun SharedPartnerAuthBody(
 @Composable
 private fun LoadedContent(
     showInModal: Boolean,
+    isRelinkSession: Boolean,
     authenticationStatus: Async<AuthenticationStatus>,
     payload: SharedPartnerAuthState.Payload,
     onContinueClick: () -> Unit,
@@ -226,6 +228,7 @@ private fun LoadedContent(
                 // is Loading or Success (completing auth after redirect)
                 authenticationStatus = authenticationStatus,
                 showInModal = showInModal,
+                showSecondaryButton = !isRelinkSession,
                 onContinueClick = onContinueClick,
                 onCancelClick = onCancelClick,
                 content = requireNotNull(payload.authSession.display?.text?.oauthPrepane),
@@ -240,6 +243,7 @@ private fun LoadedContent(
 @Composable
 private fun PrePaneContent(
     showInModal: Boolean,
+    showSecondaryButton: Boolean,
     content: OauthPrepane,
     authenticationStatus: Async<AuthenticationStatus>,
     onContinueClick: () -> Unit,
@@ -284,6 +288,7 @@ private fun PrePaneContent(
                 status = authenticationStatus,
                 oAuthPrepane = content,
                 showInModal = showInModal,
+                showSecondaryButton = showSecondaryButton,
             )
         }
     )
@@ -358,6 +363,7 @@ private fun PrepaneFooter(
     status: Async<AuthenticationStatus>,
     oAuthPrepane: OauthPrepane,
     showInModal: Boolean,
+    showSecondaryButton: Boolean,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -391,25 +397,28 @@ private fun PrepaneFooter(
                 }
             }
         }
-        FinancialConnectionsButton(
-            onClick = onCancelClick,
-            type = Type.Secondary,
-            enabled = status !is Loading,
-            modifier = Modifier
-                .semantics { testTagsAsResourceId = true }
-                .testTag("cancel_cta")
-                .fillMaxWidth()
-        ) {
-            Text(
-                text = stringResource(
-                    id = if (showInModal) {
-                        R.string.stripe_prepane_cancel_cta
-                    } else {
-                        R.string.stripe_prepane_choose_different_bank_cta
-                    }
-                ),
-                textAlign = TextAlign.Center
-            )
+
+        if (showSecondaryButton) {
+            FinancialConnectionsButton(
+                onClick = onCancelClick,
+                type = Type.Secondary,
+                enabled = status !is Loading,
+                modifier = Modifier
+                    .semantics { testTagsAsResourceId = true }
+                    .testTag("cancel_cta")
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = stringResource(
+                        id = if (showInModal) {
+                            R.string.stripe_prepane_cancel_cta
+                        } else {
+                            R.string.stripe_prepane_choose_different_bank_cta
+                        }
+                    ),
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }

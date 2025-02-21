@@ -408,7 +408,6 @@ class SavedPaymentMethodMutatorTest {
             updatePaymentMethodTurbine.awaitItem().updateExecutor(CardBrand.CartesBancaires)
 
             assertThat(calledUpdate.awaitItem()).isTrue()
-            assertThat(navigationPopTurbine.awaitItem()).isNotNull()
 
             val paymentMethods = customerStateHolder.paymentMethods.value
             assertThat(paymentMethods).hasSize(1)
@@ -450,7 +449,6 @@ class SavedPaymentMethodMutatorTest {
             )
 
             assertThat(calledUpdate.awaitItem()).isTrue()
-            assertThat(navigationPopTurbine.awaitItem()).isNotNull()
 
             val paymentMethods = customerStateHolder.paymentMethods.value
             assertThat(paymentMethods).hasSize(1)
@@ -493,6 +491,30 @@ class SavedPaymentMethodMutatorTest {
         }
 
         calledUpdate.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `setDefaultPaymentMethod updates default payment method on success`() {
+        val customerRepository = FakeCustomerRepository(
+            onSetDefaultPaymentMethod = { Result.success(mock()) }
+        )
+        val paymentMethods = PaymentMethodFixtures.createCards(3)
+
+        runScenario(customerRepository = customerRepository) {
+            customerStateHolder.setCustomerState(
+                createCustomerState(
+                    paymentMethods = paymentMethods,
+                    defaultPaymentMethodId = paymentMethods.first().id,
+                )
+            )
+
+            val newDefaultPaymentMethod = paymentMethods[1]
+            savedPaymentMethodMutator.setDefaultPaymentMethod(newDefaultPaymentMethod)
+
+            customerStateHolder.customer.test {
+                assertThat(awaitItem()?.defaultPaymentMethodId).isEqualTo(newDefaultPaymentMethod.id)
+            }
+        }
     }
 
     private fun removeDuplicatesTest(shouldRemoveDuplicates: Boolean) {
@@ -552,7 +574,6 @@ class SavedPaymentMethodMutatorTest {
             val postPaymentMethodRemovedTurbine = Turbine<Unit>()
             val prePaymentMethodRemovedTurbine = Turbine<Unit>()
             val updatePaymentMethodTurbine = Turbine<UpdateCall>()
-            val navigationPopTurbine = Turbine<Unit>()
 
             val savedPaymentMethodMutator = SavedPaymentMethodMutator(
                 paymentMethodMetadataFlow = stateFlowOf(
@@ -574,12 +595,22 @@ class SavedPaymentMethodMutatorTest {
                 customerStateHolder = customerStateHolder,
                 prePaymentMethodRemoveActions = { prePaymentMethodRemovedTurbine.add(Unit) },
                 postPaymentMethodRemoveActions = { postPaymentMethodRemovedTurbine.add(Unit) },
-                onUpdatePaymentMethod = { displayableSavedPaymentMethod, canRemove, performRemove, updateExecutor ->
+                onUpdatePaymentMethod = {
+                        displayableSavedPaymentMethod,
+                        canRemove,
+                        performRemove,
+                        updateExecutor,
+                        setDefaultPaymentMethodExecutor, ->
                     updatePaymentMethodTurbine.add(
-                        UpdateCall(displayableSavedPaymentMethod, canRemove, performRemove, updateExecutor)
+                        UpdateCall(
+                            displayableSavedPaymentMethod,
+                            canRemove,
+                            performRemove,
+                            updateExecutor,
+                            setDefaultPaymentMethodExecutor
+                        )
                     )
                 },
-                navigationPop = { navigationPopTurbine.add(Unit) },
                 isLinkEnabled = stateFlowOf(false),
                 isNotPaymentFlow = true,
             )
@@ -591,7 +622,6 @@ class SavedPaymentMethodMutatorTest {
                 prePaymentMethodRemovedTurbine = prePaymentMethodRemovedTurbine,
                 postPaymentMethodRemovedTurbine = postPaymentMethodRemovedTurbine,
                 updatePaymentMethodTurbine = updatePaymentMethodTurbine,
-                navigationPopTurbine = navigationPopTurbine,
                 testScope = this,
             ).apply {
                 block()
@@ -601,7 +631,6 @@ class SavedPaymentMethodMutatorTest {
 
             postPaymentMethodRemovedTurbine.ensureAllEventsConsumed()
             updatePaymentMethodTurbine.ensureAllEventsConsumed()
-            navigationPopTurbine.ensureAllEventsConsumed()
         }
     }
 
@@ -613,7 +642,6 @@ class SavedPaymentMethodMutatorTest {
         val prePaymentMethodRemovedTurbine: ReceiveTurbine<Unit>,
         val postPaymentMethodRemovedTurbine: ReceiveTurbine<Unit>,
         val updatePaymentMethodTurbine: ReceiveTurbine<UpdateCall>,
-        val navigationPopTurbine: ReceiveTurbine<Unit>,
         val testScope: TestScope,
     )
 
@@ -622,5 +650,6 @@ class SavedPaymentMethodMutatorTest {
         val canRemove: Boolean,
         val performRemove: suspend () -> Throwable?,
         val updateExecutor: suspend (brand: CardBrand) -> Result<PaymentMethod>,
+        val setSetDefaultPaymentMethodExecutor: suspend (paymentMethod: PaymentMethod) -> Result<Unit>,
     )
 }

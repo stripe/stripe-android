@@ -2,8 +2,8 @@ package com.stripe.android.financialconnections.example.settings
 
 import com.stripe.android.financialconnections.example.Experience
 import com.stripe.android.financialconnections.example.Flow
-import com.stripe.android.financialconnections.example.Merchant
 import com.stripe.android.financialconnections.example.data.model.LinkAccountSessionBody
+import com.stripe.android.financialconnections.example.data.model.Merchant
 import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
 
 internal data class PrivateKeySetting(
@@ -34,7 +34,7 @@ internal data class PrivateKeySetting(
         flow: Flow,
         experience: Experience,
     ): Boolean {
-        return merchant == Merchant.Custom
+        return merchant.name == "Custom"
     }
 
     override fun convertToString(value: String): String = value

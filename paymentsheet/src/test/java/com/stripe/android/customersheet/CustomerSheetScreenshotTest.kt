@@ -349,7 +349,8 @@ internal class CustomerSheetScreenshotTest {
             updatePaymentMethodInteractor = DefaultUpdatePaymentMethodInteractor(
                 displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
                 removeExecutor = { null },
-                updateExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
+                updateCardBrandExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
+                setDefaultPaymentMethodExecutor = { _ -> Result.success(Unit) },
                 canRemove = canRemove,
                 isLiveMode = true,
                 cardBrandFilter = DefaultCardBrandFilter,
@@ -357,6 +358,7 @@ internal class CustomerSheetScreenshotTest {
                 onBrandChoiceOptionsShown = {},
                 // This checkbox is never displayed in CustomerSheet.
                 shouldShowSetAsDefaultCheckbox = false,
+                onUpdateSuccess = {},
             ),
             isLiveMode = true,
         )

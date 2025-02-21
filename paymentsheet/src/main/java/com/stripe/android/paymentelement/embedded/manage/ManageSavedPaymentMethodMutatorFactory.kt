@@ -54,11 +54,8 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
                 }
             },
             postPaymentMethodRemoveActions = ::onPaymentMethodRemoved,
-            onUpdatePaymentMethod = { displayableSavedPaymentMethod, _, _, _ ->
+            onUpdatePaymentMethod = { displayableSavedPaymentMethod, _, _, _, _ ->
                 onUpdatePaymentMethod(displayableSavedPaymentMethod)
-            },
-            navigationPop = {
-                manageNavigatorProvider.get().performAction(ManageNavigator.Action.Back)
             },
             isLinkEnabled = stateFlowOf(false), // Link is never enabled in the manage screen.
             isNotPaymentFlow = false,

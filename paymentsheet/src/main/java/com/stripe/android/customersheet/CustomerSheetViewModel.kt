@@ -512,7 +512,6 @@ internal class CustomerSheetViewModel(
                 productUsageTokens = setOf("CustomerSheet"),
             )
         ).onSuccess { updatedMethod ->
-            onBackPressed()
             updatePaymentMethodInState(updatedMethod)
 
             eventReporter.onUpdatePaymentMethodSucceeded(
@@ -556,10 +555,17 @@ internal class CustomerSheetViewModel(
                             selectedBrand = it
                         )
                     },
-                    updateExecutor = ::updateExecutor,
+                    onUpdateSuccess = ::onBackPressed,
+                    updateCardBrandExecutor = ::updateCardBrandExecutor,
                     workContext = workContext,
                     // This checkbox is never displayed in CustomerSheet.
                     shouldShowSetAsDefaultCheckbox = false,
+                    // Should never be called from CustomerSheet, because we don't enable the set as default checkbox.
+                    setDefaultPaymentMethodExecutor = {
+                        Result.failure(
+                            IllegalStateException("Unexpected attempt to update default from CustomerSheet.")
+                        )
+                    },
                 ),
                 isLiveMode = isLiveModeProvider(),
             )
@@ -573,7 +579,7 @@ internal class CustomerSheetViewModel(
         }.failureOrNull()?.cause
     }
 
-    private suspend fun updateExecutor(paymentMethod: PaymentMethod, brand: CardBrand): Result<PaymentMethod> {
+    private suspend fun updateCardBrandExecutor(paymentMethod: PaymentMethod, brand: CardBrand): Result<PaymentMethod> {
         return when (val result = modifyCardPaymentMethod(paymentMethod, brand)) {
             is CustomerSheetDataResult.Success -> Result.success(result.value)
             is CustomerSheetDataResult.Failure -> Result.failure(result.cause)

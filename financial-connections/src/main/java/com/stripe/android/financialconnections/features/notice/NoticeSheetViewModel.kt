@@ -144,10 +144,15 @@ internal data class NoticeSheetState(
             sealed interface Type : Parcelable {
 
                 @Parcelize
-                data class Repair(val authorization: String?) : Type
+                data class Repair(
+                    val authorization: String?,
+                    val institution: FinancialConnectionsInstitution?,
+                ) : Type
 
                 @Parcelize
-                data class Supportability(val institution: FinancialConnectionsInstitution?) : Type
+                data class Supportability(
+                    val institution: FinancialConnectionsInstitution?,
+                ) : Type
             }
         }
     }

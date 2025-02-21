@@ -133,7 +133,7 @@ private fun DetailsCannotBeChangedText(
             color = MaterialTheme.stripeColors.subtitle,
             fontWeight = FontWeight.Normal,
             modifier = Modifier
-                .padding(top = 10.dp)
+                .padding(top = 8.dp)
                 .testTag(UPDATE_PM_DETAILS_SUBTITLE_TEST_TAG)
         )
     }
@@ -529,11 +529,13 @@ private fun PreviewUpdatePaymentMethodUI() {
             canRemove = true,
             displayableSavedPaymentMethod = exampleCard,
             removeExecutor = { null },
-            updateExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
+            updateCardBrandExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
+            setDefaultPaymentMethodExecutor = { _ -> Result.success(Unit) },
             cardBrandFilter = DefaultCardBrandFilter,
             onBrandChoiceOptionsShown = {},
             onBrandChoiceOptionsDismissed = {},
             shouldShowSetAsDefaultCheckbox = true,
+            onUpdateSuccess = {},
         ),
         modifier = Modifier
     )

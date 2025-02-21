@@ -7,9 +7,11 @@ import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
+import com.stripe.android.financialconnections.model.AuthorizationRepairResponse
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.network.NetworkConstants
@@ -107,6 +109,12 @@ internal interface FinancialConnectionsManifestRepository {
     suspend fun retrieveAuthorizationSession(
         clientSecret: String,
         sessionId: String
+    ): FinancialConnectionsAuthorizationSession
+
+    suspend fun repairAuthorizationSession(
+        clientSecret: String,
+        coreAuthorization: String,
+        applicationId: String,
     ): FinancialConnectionsAuthorizationSession
 
     /**
@@ -344,6 +352,36 @@ private class FinancialConnectionsManifestRepositoryImpl(
         updateCachedActiveAuthSession("retrieveAuthorizationSession", it)
     }
 
+    override suspend fun repairAuthorizationSession(
+        clientSecret: String,
+        coreAuthorization: String,
+        applicationId: String,
+    ): FinancialConnectionsAuthorizationSession {
+        val repairSession = requestExecutor.execute(
+            request = apiRequestFactory.createPost(
+                url = generateRepairUrl,
+                options = provideApiRequestOptions(useConsumerPublishableKey = true),
+                params = mapOf(
+                    NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+                    "core_authorization" to coreAuthorization,
+                    "return_url" to "auth-redirect/$applicationId",
+                )
+            ),
+            AuthorizationRepairResponse.serializer()
+        )
+
+        return FinancialConnectionsAuthorizationSession(
+            id = repairSession.id,
+            url = repairSession.url,
+            flow = repairSession.flow,
+            display = repairSession.display,
+            _isOAuth = repairSession.isOAuth,
+            nextPane = Pane.SUCCESS,
+        ).also {
+            updateCachedActiveAuthSession("repairAuthorizationSession", it)
+        }
+    }
+
     override suspend fun completeAuthorizationSession(
         clientSecret: String,
         sessionId: String,
@@ -560,5 +598,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
 
         internal const val disableNetworking: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/disable_networking"
+
+        internal const val generateRepairUrl: String =
+            "${ApiRequest.API_HOST}/v1/connections/repair_sessions/generate_url"
     }
 }

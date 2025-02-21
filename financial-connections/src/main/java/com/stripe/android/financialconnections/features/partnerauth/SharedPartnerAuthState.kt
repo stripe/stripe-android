@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
-import com.stripe.android.financialconnections.features.bankauthrepair.BankAuthRepairViewModel
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -18,13 +17,12 @@ internal data class SharedPartnerAuthState(
     val inModal: Boolean = false,
 ) {
 
+    val isNetworkingRelinkSession: Boolean
+        get() = pane == Pane.BANK_AUTH_REPAIR
+
     constructor(args: PartnerAuthViewModel.Args) : this(
         pane = args.pane,
         inModal = args.inModal,
-    )
-
-    constructor(args: BankAuthRepairViewModel.Args) : this(
-        pane = args.pane,
     )
 
     data class Payload(
@@ -48,7 +46,9 @@ internal data class SharedPartnerAuthState(
             authenticationStatus !is Loading &&
                 authenticationStatus !is Success &&
                 // Failures posting institution -> don't allow back navigation
-                payload !is Fail
+                payload !is Fail &&
+                // No back navigation after creating the new auth session in the relink flow
+                !isNetworkingRelinkSession
 
     sealed interface ViewEffect {
         data class OpenPartnerAuth(

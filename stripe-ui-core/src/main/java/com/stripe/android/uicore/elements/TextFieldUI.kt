@@ -47,13 +47,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.editableText
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
@@ -136,6 +140,8 @@ fun TextField(
     nextFocusDirection: FocusDirection = FocusDirection.Next,
     previousFocusDirection: FocusDirection = FocusDirection.Previous,
     focusRequester: FocusRequester = remember { FocusRequester() },
+    shouldAnnounceLabel: Boolean = true,
+    shouldAnnounceFieldValue: Boolean = true
 ) {
     val focusManager = LocalFocusManager.current
     val value by textFieldController.fieldValue.collectAsState()
@@ -167,6 +173,8 @@ fun TextField(
     var composition by remember {
         mutableStateOf<TextRange?>(null)
     }
+
+    val context = LocalContext.current
 
     TextFieldUi(
         value = TextFieldValue(
@@ -209,13 +217,15 @@ fun TextField(
             )
             .focusRequester(focusRequester)
             .semantics {
-                this.contentDescription = contentDescription
+                this.contentDescription = contentDescription.resolve(context)
+                if (!shouldAnnounceFieldValue) this.editableText = AnnotatedString("")
             },
         enabled = enabled && textFieldController.enabled,
         label = label?.let {
             stringResource(it)
         },
         showOptionalLabel = textFieldController.showOptionalLabel,
+        shouldAnnounceLabel = shouldAnnounceLabel,
         placeholder = placeHolder,
         trailingIcon = trailingIcon,
         shouldShowError = shouldShowError,
@@ -247,6 +257,7 @@ internal fun TextFieldUi(
     trailingIcon: TextFieldIcon?,
     showOptionalLabel: Boolean,
     shouldShowError: Boolean,
+    shouldAnnounceLabel: Boolean = true,
     modifier: Modifier = Modifier,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     layoutDirection: LayoutDirection? = null,
@@ -275,7 +286,8 @@ internal fun TextFieldUi(
                             )
                         } else {
                             it
-                        }
+                        },
+                        modifier = if (shouldAnnounceLabel) Modifier else Modifier.clearAndSetSemantics {}
                     )
                 }
             },

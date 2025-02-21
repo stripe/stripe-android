@@ -54,8 +54,8 @@ internal class SavedPaymentMethodMutator(
         canRemove: Boolean,
         performRemove: suspend () -> Throwable?,
         updateExecutor: suspend (brand: CardBrand) -> Result<PaymentMethod>,
+        setDefaultPaymentMethodExecutor: suspend (paymentMethod: PaymentMethod) -> Result<Unit>,
     ) -> Unit,
-    private val navigationPop: () -> Unit,
     isLinkEnabled: StateFlow<Boolean?>,
     isNotPaymentFlow: Boolean,
 ) {
@@ -202,8 +202,27 @@ internal class SavedPaymentMethodMutator(
             },
             { cardBrand ->
                 modifyCardPaymentMethod(paymentMethod, cardBrand)
-            }
+            },
+            ::setDefaultPaymentMethod,
         )
+    }
+
+    internal suspend fun setDefaultPaymentMethod(paymentMethod: PaymentMethod): Result<Unit> {
+        val customer = customerStateHolder.customer.value
+            ?: return Result.failure(
+                IllegalStateException("Unable to set default payment method when customer is null.")
+            )
+
+        return customerRepository.setDefaultPaymentMethod(
+            customerInfo = CustomerRepository.CustomerInfo(
+                id = customer.id,
+                ephemeralKeySecret = customer.ephemeralKeySecret,
+                customerSessionClientSecret = customer.customerSessionClientSecret,
+            ),
+            paymentMethodId = paymentMethod.id,
+        ).onSuccess {
+            customerStateHolder.setDefaultPaymentMethod(paymentMethod = paymentMethod)
+        }.map {}
     }
 
     suspend fun removePaymentMethodInEditScreen(paymentMethod: PaymentMethod): Throwable? {
@@ -265,8 +284,6 @@ internal class SavedPaymentMethodMutator(
                 )
 
                 onSuccess(updatedMethod)
-
-                navigationPop()
             }
 
             eventReporter.onUpdatePaymentMethodSucceeded(
@@ -325,7 +342,8 @@ internal class SavedPaymentMethodMutator(
             displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
             canRemove: Boolean,
             performRemove: suspend () -> Throwable?,
-            updateExecutor: suspend (brand: CardBrand) -> Result<PaymentMethod>,
+            updateCardBrandExecutor: suspend (brand: CardBrand) -> Result<PaymentMethod>,
+            setDefaultPaymentMethodExecutor: suspend (paymentMethod: PaymentMethod) -> Result<Unit>,
         ) {
             if (displayableSavedPaymentMethod.savedPaymentMethod != SavedPaymentMethod.Unexpected) {
                 val isLiveMode = requireNotNull(viewModel.paymentMethodMetadata.value).stripeIntent.isLiveMode
@@ -339,9 +357,10 @@ internal class SavedPaymentMethodMutator(
                             removeExecutor = { method ->
                                 performRemove()
                             },
-                            updateExecutor = { method, brand ->
-                                updateExecutor(brand)
+                            updateCardBrandExecutor = { method, brand ->
+                                updateCardBrandExecutor(brand)
                             },
+                            setDefaultPaymentMethodExecutor = setDefaultPaymentMethodExecutor,
                             onBrandChoiceOptionsShown = {
                                 viewModel.eventReporter.onShowPaymentOptionBrands(
                                     source = EventReporter.CardBrandChoiceEventSource.Edit,
@@ -363,6 +382,7 @@ internal class SavedPaymentMethodMutator(
                                         viewModel.customerStateHolder.customer.value?.defaultPaymentMethodId
                                     )
                                 ),
+                            onUpdateSuccess = viewModel.navigationHandler::pop,
                         )
                     )
                 )
@@ -384,16 +404,20 @@ internal class SavedPaymentMethodMutator(
                     navigateBackOnPaymentMethodRemoved(viewModel)
                 },
                 postPaymentMethodRemoveActions = {},
-                onUpdatePaymentMethod = { displayableSavedPaymentMethod, canRemove, performRemove, updateExecutor ->
+                onUpdatePaymentMethod = { displayableSavedPaymentMethod,
+                                          canRemove,
+                                          performRemove,
+                                          updateCardBrandExecutor,
+                                          setDefaultPaymentMethodExecutor, ->
                     onUpdatePaymentMethod(
                         viewModel = viewModel,
                         displayableSavedPaymentMethod = displayableSavedPaymentMethod,
                         canRemove = canRemove,
                         performRemove = performRemove,
-                        updateExecutor = updateExecutor,
+                        updateCardBrandExecutor = updateCardBrandExecutor,
+                        setDefaultPaymentMethodExecutor = setDefaultPaymentMethodExecutor,
                     )
                 },
-                navigationPop = viewModel.navigationHandler::pop,
                 isLinkEnabled = viewModel.linkHandler.isLinkEnabled,
                 isNotPaymentFlow = !viewModel.isCompleteFlow,
             ).apply {

@@ -213,7 +213,7 @@ internal class PaymentSheetBillingConfigurationTest {
         }
 
         page.replaceText("123 Main Street", "123 Main Road")
-        page.replaceText("MM / YY", "12/34")
+        page.fillExpirationDate("12/34")
 
         // Check that line 1 was not reset to default value
         page.waitForText("123 Main Road")
