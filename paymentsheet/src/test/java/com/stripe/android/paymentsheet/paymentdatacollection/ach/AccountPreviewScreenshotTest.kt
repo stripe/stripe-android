@@ -139,6 +139,8 @@ internal class AccountPreviewScreenshotTest {
 
     @Test
     fun testPaymentFlowWithSaveForFutureUseChecked() {
+        saveForFutureUseElement.controller.onValueChange(true)
+
         takeAccountPreviewScreenShot(
             state = BankFormScreenStateFactory.createWithSession(
                 sessionId = "session_1234",
@@ -147,14 +149,15 @@ internal class AccountPreviewScreenshotTest {
             isPaymentFlow = true,
             enabled = true,
             showCheckboxes = true,
-            beforeSnapshot = {
-                saveForFutureUseElement.controller.onValueChange(true)
-            }
         )
     }
 
     @Test
     fun testPaymentFlowWithBothCheckboxesChecked() {
+        saveForFutureUseElement.controller.onValueChange(true)
+
+        setAsDefaultPaymentMethodElement.controller.onValueChange(true)
+
         takeAccountPreviewScreenShot(
             state = BankFormScreenStateFactory.createWithSession(
                 sessionId = "session_1234",
@@ -163,11 +166,6 @@ internal class AccountPreviewScreenshotTest {
             isPaymentFlow = true,
             enabled = true,
             showCheckboxes = true,
-            beforeSnapshot = {
-                saveForFutureUseElement.controller.onValueChange(true)
-
-                setAsDefaultPaymentMethodElement.controller.onValueChange(true)
-            }
         )
     }
 
@@ -204,10 +202,8 @@ internal class AccountPreviewScreenshotTest {
         fillAddress: Boolean = false,
         enabled: Boolean = true,
         showCheckboxes: Boolean = false,
-        beforeSnapshot: () -> Unit = {},
     ) {
         paparazzi.snapshot {
-            beforeSnapshot()
             BankAccountForm(
                 state = state,
                 instantDebits = instantDebits,

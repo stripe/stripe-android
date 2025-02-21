@@ -1381,15 +1381,13 @@ class USBankAccountFormViewModelTest {
             viewModel.handleCollectBankAccountResult(mockVerifiedBankAccount())
             viewModel.saveForFutureUseElement.controller.onValueChange(true)
 
-            var extraParams = awaitItem()?.paymentMethodExtraParams
-
-            assertThat((extraParams as PaymentMethodExtraParams.USBankAccount).setAsDefault)
+            assertThat((awaitItem()?.paymentMethodExtraParams as PaymentMethodExtraParams.USBankAccount).setAsDefault)
                 .isFalse()
             assertThat(viewModel.setAsDefaultPaymentMethodElement.shouldShowElementFlow.value)
                 .isTrue()
 
             viewModel.setAsDefaultPaymentMethodElement.controller.onValueChange(true)
-            skipItems(1)
+            skipItems(1) // skipping intermediate state for linkedAccount
             assertThat((awaitItem()?.paymentMethodExtraParams as PaymentMethodExtraParams.USBankAccount).setAsDefault)
                 .isTrue()
 
