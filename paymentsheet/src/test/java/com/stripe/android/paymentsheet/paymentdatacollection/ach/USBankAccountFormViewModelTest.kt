@@ -1386,8 +1386,9 @@ class USBankAccountFormViewModelTest {
             assertThat(viewModel.setAsDefaultPaymentMethodElement.shouldShowElementFlow.value)
                 .isTrue()
 
+            assertThat(awaitItem()?.input?.saveForFutureUse).isTrue()
+
             viewModel.setAsDefaultPaymentMethodElement.controller.onValueChange(true)
-            skipItems(1) // skipping intermediate state for linkedAccount
             assertThat((awaitItem()?.paymentMethodExtraParams as PaymentMethodExtraParams.USBankAccount).setAsDefault)
                 .isTrue()
 
