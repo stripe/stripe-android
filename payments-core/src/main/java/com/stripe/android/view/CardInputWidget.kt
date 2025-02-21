@@ -803,13 +803,17 @@ class CardInputWidget @JvmOverloads constructor(
         cardNumberEditText.possibleCardBrandsCallback = this::handlePossibleCardBrandsChanged
 
         expiryDateEditText.completionCallback = {
-            cvcEditText.requestFocus()
+            post {
+                cvcEditText.requestFocus()
+            }
             cardInputListener?.onExpirationComplete()
         }
 
         cvcEditText.completionCallback = {
             if (postalCodeEnabled) {
-                postalCodeEditText.requestFocus()
+                post {
+                    postalCodeEditText.requestFocus()
+                }
             }
         }
 
