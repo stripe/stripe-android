@@ -41,9 +41,9 @@
 |    |    |    |         |         |         +--- org.jetbrains:annotations:23.0.0
 |    |    |    |         |         |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.10.1
 |    |    |    |         |         |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.1 (c)
+|    |    |    |         |         |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.10.1 (c)
 |    |    |    |         |         |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1 (c)
-|    |    |    |         |         |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.10.1 (c)
-|    |    |    |         |         |         |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.10.1 (c)
+|    |    |    |         |         |         |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.10.1 (c)
 |    |    |    |         |         |         \--- org.jetbrains.kotlin:kotlin-stdlib:2.1.0 -> 2.1.10 (*)
 |    |    |    |         |         +--- androidx.lifecycle:lifecycle-livedata:2.8.7 (c)
 |    |    |    |         |         +--- androidx.lifecycle:lifecycle-livedata-core:2.8.7 (c)
@@ -91,20 +91,20 @@
 |    |    +--- jakarta.inject:jakarta.inject-api:2.0.1
 |    |    +--- javax.inject:javax.inject:1
 |    |    \--- org.jspecify:jspecify:1.0.0
-|    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0 -> 1.10.1 (*)
-|    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0 -> 1.10.1 (*)
-|    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3
-|    |    \--- org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.7.3
-|    |         +--- org.jetbrains.kotlinx:kotlinx-serialization-bom:1.7.3
-|    |         |    +--- org.jetbrains.kotlinx:kotlinx-serialization-core:1.7.3 (c)
-|    |         |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.7.3 (c)
-|    |         |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3 (c)
-|    |         |    \--- org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.7.3 (c)
-|    |         +--- org.jetbrains.kotlin:kotlin-stdlib:2.0.20 -> 2.1.10 (*)
-|    |         \--- org.jetbrains.kotlinx:kotlinx-serialization-core:1.7.3
-|    |              \--- org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.7.3
-|    |                   +--- org.jetbrains.kotlinx:kotlinx-serialization-bom:1.7.3 (*)
-|    |                   \--- org.jetbrains.kotlin:kotlin-stdlib:2.0.20 -> 2.1.10 (*)
+|    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1 (*)
+|    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.1 (*)
+|    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0
+|    |    \--- org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.8.0
+|    |         +--- org.jetbrains.kotlinx:kotlinx-serialization-bom:1.8.0
+|    |         |    +--- org.jetbrains.kotlinx:kotlinx-serialization-core:1.8.0 (c)
+|    |         |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.8.0 (c)
+|    |         |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0 (c)
+|    |         |    \--- org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.8.0 (c)
+|    |         +--- org.jetbrains.kotlin:kotlin-stdlib:2.1.0 -> 2.1.10 (*)
+|    |         \--- org.jetbrains.kotlinx:kotlinx-serialization-core:1.8.0
+|    |              \--- org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.8.0
+|    |                   +--- org.jetbrains.kotlinx:kotlinx-serialization-bom:1.8.0 (*)
+|    |                   \--- org.jetbrains.kotlin:kotlin-stdlib:2.1.0 -> 2.1.10 (*)
 |    +--- androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7
 |    |    +--- androidx.lifecycle:lifecycle-viewmodel:2.8.7
 |    |    |    \--- androidx.lifecycle:lifecycle-viewmodel-android:2.8.7
@@ -314,7 +314,7 @@
 |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 -> 2.1.10 (*)
 |    |    \--- androidx.appcompat:appcompat-resources:1.7.0 (c)
 |    +--- androidx.core:core-ktx:1.13.1 (*)
-|    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3 (*)
+|    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0 (*)
 |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.1.10 (*)
 +--- androidx.databinding:viewbinding:8.8.1
 |    \--- androidx.annotation:annotation:1.0.0 -> 1.9.1 (*)
@@ -323,7 +323,7 @@
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.1.10 (*)
 |    +--- androidx.appcompat:appcompat:1.7.0 (*)
 |    +--- androidx.core:core:1.13.1 (*)
-|    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3 (*)
+|    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0 (*)
 |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.1.10 (*)
 +--- project :stripe-ui-core
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.1.10 (*)
@@ -564,9 +564,9 @@
 |    |         +--- androidx.compose.ui:ui-unit:1.6.8 (c)
 |    |         \--- androidx.compose.ui:ui-util:1.6.8 (c)
 |    +--- com.jakewharton:disklrucache:2.0.2
-|    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0 -> 1.10.1 (*)
-|    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0 -> 1.10.1 (*)
-|    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3 (*)
+|    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1 (*)
+|    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.1 (*)
+|    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0 (*)
 |    +--- com.google.dagger:dagger:2.55 (*)
 |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.1.10 (*)
 +--- com.google.accompanist:accompanist-themeadapter-appcompat:0.34.0
@@ -708,8 +708,8 @@
 +--- androidx.compose.material:material-icons-core:1.6.8 (*)
 +--- androidx.compose.ui:ui:1.6.8 (*)
 +--- com.google.dagger:dagger:2.55 (*)
-+--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0 -> 1.10.1 (*)
-+--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0 -> 1.10.1 (*)
++--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1 (*)
++--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.1 (*)
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.10.1
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1 (*)
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.10.1 (*)

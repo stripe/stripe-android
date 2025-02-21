@@ -22,7 +22,6 @@ public synthetic class com/stripe/android/uicore/address/CountryAddressSchema$$s
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/uicore/address/CountryAddressSchema;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/uicore/address/CountryAddressSchema$Companion {
@@ -38,7 +37,6 @@ public synthetic class com/stripe/android/uicore/address/FieldSchema$$serializer
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/uicore/address/FieldSchema;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/uicore/address/FieldSchema$Companion {
@@ -58,7 +56,6 @@ public synthetic class com/stripe/android/uicore/address/StateSchema$$serializer
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/uicore/address/StateSchema;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/uicore/address/StateSchema$Companion {
@@ -111,7 +108,6 @@ public synthetic class com/stripe/android/uicore/elements/IdentifierSpec$$serial
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/uicore/elements/IdentifierSpec;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/uicore/elements/IdentifierSpec$Companion {

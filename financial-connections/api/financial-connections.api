@@ -721,7 +721,6 @@ public synthetic class com/stripe/android/financialconnections/model/AccountHold
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/financialconnections/model/AccountHolder;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/financialconnections/model/AccountHolder$Companion {
@@ -801,7 +800,6 @@ public synthetic class com/stripe/android/financialconnections/model/Balance$$se
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/financialconnections/model/Balance;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/financialconnections/model/Balance$Companion {
@@ -859,7 +857,6 @@ public synthetic class com/stripe/android/financialconnections/model/BalanceRefr
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/financialconnections/model/BalanceRefresh;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/financialconnections/model/BalanceRefresh$BalanceRefreshStatus : java/lang/Enum {
@@ -898,7 +895,6 @@ public synthetic class com/stripe/android/financialconnections/model/BankAccount
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/financialconnections/model/BankAccount;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/financialconnections/model/BankAccount$Companion {
@@ -956,7 +952,6 @@ public synthetic class com/stripe/android/financialconnections/model/CashBalance
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/financialconnections/model/CashBalance;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/financialconnections/model/CashBalance$Companion {
@@ -1022,7 +1017,6 @@ public synthetic class com/stripe/android/financialconnections/model/CreditBalan
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/financialconnections/model/CreditBalance;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/financialconnections/model/CreditBalance$Companion {
@@ -1140,7 +1134,6 @@ public synthetic class com/stripe/android/financialconnections/model/FinancialCo
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccount;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/financialconnections/model/FinancialConnectionsAccount$Category : java/lang/Enum {
@@ -1274,7 +1267,6 @@ public synthetic class com/stripe/android/financialconnections/model/FinancialCo
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/financialconnections/model/FinancialConnectionsAccountList;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/financialconnections/model/FinancialConnectionsAccountList$Companion {
@@ -1341,7 +1333,6 @@ public synthetic class com/stripe/android/financialconnections/model/FinancialCo
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/financialconnections/model/FinancialConnectionsSession$Companion {
@@ -1400,7 +1391,6 @@ public synthetic class com/stripe/android/financialconnections/model/FinancialCo
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession$StatusDetails;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/financialconnections/model/FinancialConnectionsSession$StatusDetails$Cancelled : android/os/Parcelable {
@@ -1428,7 +1418,6 @@ public synthetic class com/stripe/android/financialconnections/model/FinancialCo
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession$StatusDetails$Cancelled;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/financialconnections/model/FinancialConnectionsSession$StatusDetails$Cancelled$Companion {
@@ -1501,7 +1490,6 @@ public synthetic class com/stripe/android/financialconnections/model/GetFinancia
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/financialconnections/model/GetFinancialConnectionsAcccountsParams;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/financialconnections/model/GetFinancialConnectionsAcccountsParams$Creator : android/os/Parcelable$Creator {
@@ -1569,7 +1557,6 @@ public synthetic class com/stripe/android/financialconnections/model/ManualEntry
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/financialconnections/model/ManualEntry;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/financialconnections/model/ManualEntry$Companion {
@@ -1659,7 +1646,6 @@ public synthetic class com/stripe/android/financialconnections/model/OwnershipRe
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/financialconnections/model/OwnershipRefresh;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/financialconnections/model/OwnershipRefresh$Companion {
