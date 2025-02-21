@@ -41,9 +41,7 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
             uiContext = uiContext,
             customerRepository = customerRepository,
             selection = selectionHolder.selection,
-            clearSelection = {
-                selectionHolder.set(null)
-            },
+            setSelection = selectionHolder::set,
             customerStateHolder = customerStateHolder,
             prePaymentMethodRemoveActions = {
                 if (customerStateHolder.paymentMethods.value.size > 1) {
