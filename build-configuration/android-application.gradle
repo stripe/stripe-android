@@ -51,7 +51,7 @@ android {
     }
 
     lintOptions {
-        disable 'StateFlowValueCalledInComposition'
+        disable 'StateFlowValueCalledInComposition', 'FlowOperatorInvokedInComposition'
     }
 
     compileOptions {

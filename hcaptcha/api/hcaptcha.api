@@ -21,7 +21,6 @@ public synthetic class com/stripe/hcaptcha/config/HCaptchaConfig$$serializer : k
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/hcaptcha/config/HCaptchaConfig;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/hcaptcha/config/HCaptchaOrientation$Companion {

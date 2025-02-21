@@ -31,14 +31,14 @@
 |    |    |    |         |    \--- androidx.lifecycle:lifecycle-common-jvm:2.8.7
 |    |    |    |         |         +--- androidx.annotation:annotation:1.8.1 (*)
 |    |    |    |         |         +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 -> 2.1.10 (*)
-|    |    |    |         |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3 -> 1.9.0
-|    |    |    |         |         |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.9.0
+|    |    |    |         |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3 -> 1.10.1
+|    |    |    |         |         |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.10.1
 |    |    |    |         |         |         +--- org.jetbrains:annotations:23.0.0
-|    |    |    |         |         |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.9.0
-|    |    |    |         |         |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0 (c)
-|    |    |    |         |         |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.9.0 (c)
-|    |    |    |         |         |         |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0 (c)
-|    |    |    |         |         |         \--- org.jetbrains.kotlin:kotlin-stdlib:2.0.0 -> 2.1.10 (*)
+|    |    |    |         |         |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.10.1
+|    |    |    |         |         |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.1 (c)
+|    |    |    |         |         |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.10.1 (c)
+|    |    |    |         |         |         |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1 (c)
+|    |    |    |         |         |         \--- org.jetbrains.kotlin:kotlin-stdlib:2.1.0 -> 2.1.10 (*)
 |    |    |    |         |         +--- androidx.lifecycle:lifecycle-livedata:2.8.7 (c)
 |    |    |    |         |         +--- androidx.lifecycle:lifecycle-livedata-core:2.8.7 (c)
 |    |    |    |         |         +--- androidx.lifecycle:lifecycle-livedata-core-ktx:2.8.7 (c)
@@ -58,10 +58,10 @@
 |    |    |    |         |    |         \--- androidx.annotation:annotation:1.1.0 -> 1.8.1 (*)
 |    |    |    |         |    \--- com.google.guava:listenablefuture:1.0
 |    |    |    |         +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 -> 2.1.10 (*)
-|    |    |    |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3 -> 1.9.0
-|    |    |    |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0 (*)
-|    |    |    |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.9.0 (*)
-|    |    |    |         |    \--- org.jetbrains.kotlin:kotlin-stdlib:2.0.0 -> 2.1.10 (*)
+|    |    |    |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3 -> 1.10.1
+|    |    |    |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1 (*)
+|    |    |    |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.10.1 (*)
+|    |    |    |         |    \--- org.jetbrains.kotlin:kotlin-stdlib:2.1.0 -> 2.1.10 (*)
 |    |    |    |         +--- androidx.lifecycle:lifecycle-common:2.8.7 (c)
 |    |    |    |         +--- androidx.lifecycle:lifecycle-livedata:2.8.7 (c)
 |    |    |    |         +--- androidx.lifecycle:lifecycle-livedata-core:2.8.7 (c)
@@ -82,8 +82,8 @@
 |    |    |    \--- androidx.lifecycle:lifecycle-viewmodel-android:2.8.7
 |    |    |         +--- androidx.annotation:annotation:1.8.0 -> 1.8.1 (*)
 |    |    |         +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 -> 2.1.10 (*)
-|    |    |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3 -> 1.9.0 (*)
-|    |    |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3 -> 1.9.0 (*)
+|    |    |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3 -> 1.10.1 (*)
+|    |    |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3 -> 1.10.1 (*)
 |    |    |         +--- androidx.lifecycle:lifecycle-common:2.8.7 (c)
 |    |    |         +--- androidx.lifecycle:lifecycle-livedata:2.8.7 (c)
 |    |    |         +--- androidx.lifecycle:lifecycle-livedata-core:2.8.7 (c)
@@ -124,7 +124,7 @@
 |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 -> 2.1.10 (*)
 |    |    |    |    \--- androidx.savedstate:savedstate-ktx:1.2.1 (c)
 |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 -> 2.1.10 (*)
-|    |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3 -> 1.9.0 (*)
+|    |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3 -> 1.10.1 (*)
 |    |    |    +--- androidx.lifecycle:lifecycle-common:2.8.7 (c)
 |    |    |    +--- androidx.lifecycle:lifecycle-livedata:2.8.7 (c)
 |    |    |    +--- androidx.lifecycle:lifecycle-livedata-core:2.8.7 (c)
@@ -223,7 +223,7 @@
 |    |    |    |    |    +--- androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7 (c)
 |    |    |    |    |    \--- androidx.lifecycle:lifecycle-viewmodel-savedstate:2.8.7 (c)
 |    |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 -> 2.1.10 (*)
-|    |    |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3 -> 1.9.0 (*)
+|    |    |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3 -> 1.10.1 (*)
 |    |    |    |    +--- androidx.lifecycle:lifecycle-common:2.8.7 (c)
 |    |    |    |    +--- androidx.lifecycle:lifecycle-livedata-core:2.8.7 (c)
 |    |    |    |    +--- androidx.lifecycle:lifecycle-livedata-core-ktx:2.8.7 (c)
@@ -309,7 +309,7 @@
 |    +--- androidx.lifecycle:lifecycle-livedata:2.8.7 (*)
 |    +--- androidx.lifecycle:lifecycle-livedata-core-ktx:2.8.7 (*)
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 -> 2.1.10 (*)
-|    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3 -> 1.9.0 (*)
+|    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3 -> 1.10.1 (*)
 |    +--- androidx.lifecycle:lifecycle-livedata:2.8.7 (c)
 |    +--- androidx.lifecycle:lifecycle-livedata-core-ktx:2.8.7 (c)
 |    +--- androidx.lifecycle:lifecycle-runtime:2.8.7 (c)
@@ -329,7 +329,7 @@
 |    |         +--- androidx.annotation:annotation:1.8.0 -> 1.8.1 (*)
 |    |         +--- androidx.lifecycle:lifecycle-runtime:2.8.7 (*)
 |    |         +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 -> 2.1.10 (*)
-|    |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3 -> 1.9.0 (*)
+|    |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3 -> 1.10.1 (*)
 |    |         +--- androidx.lifecycle:lifecycle-common:2.8.7 (c)
 |    |         +--- androidx.lifecycle:lifecycle-livedata:2.8.7 (c)
 |    |         +--- androidx.lifecycle:lifecycle-livedata-core:2.8.7 (c)
@@ -343,7 +343,7 @@
 |    +--- androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1 -> 2.8.7
 |    |    +--- androidx.lifecycle:lifecycle-viewmodel:2.8.7 (*)
 |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 -> 2.1.10 (*)
-|    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3 -> 1.9.0 (*)
+|    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3 -> 1.10.1 (*)
 |    |    +--- androidx.lifecycle:lifecycle-common:2.8.7 (c)
 |    |    +--- androidx.lifecycle:lifecycle-livedata:2.8.7 (c)
 |    |    +--- androidx.lifecycle:lifecycle-livedata-core:2.8.7 (c)
@@ -372,8 +372,8 @@
 |    +--- androidx.savedstate:savedstate-ktx:1.2.1 (*)
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 -> 2.1.10 (*)
 |    \--- androidx.fragment:fragment:1.8.6 (c)
-+--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0 (*)
-+--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0 (*)
++--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1 (*)
++--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.1 (*)
 +--- org.bouncycastle:bcprov-jdk15to18:1.79
 +--- com.nimbusds:nimbus-jose-jwt:9.46
 \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.1.10
