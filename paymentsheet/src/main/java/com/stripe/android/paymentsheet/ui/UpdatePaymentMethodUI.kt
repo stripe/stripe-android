@@ -133,7 +133,7 @@ private fun DetailsCannotBeChangedText(
             color = MaterialTheme.stripeColors.subtitle,
             fontWeight = FontWeight.Normal,
             modifier = Modifier
-                .padding(top = 10.dp)
+                .padding(top = 8.dp)
                 .testTag(UPDATE_PM_DETAILS_SUBTITLE_TEST_TAG)
         )
     }
