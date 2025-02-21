@@ -2,6 +2,7 @@
 
     <application>
         <activity android:name="com.stripe.android.stripe3ds2.views.ChallengeActivity"
+            android:configChanges="orientation|screenSize"
             android:theme="@style/Stripe3DS2Theme"
             android:exported="false" />
     </application>

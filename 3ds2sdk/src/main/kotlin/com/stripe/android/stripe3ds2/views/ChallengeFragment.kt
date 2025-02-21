@@ -367,7 +367,13 @@ internal class ChallengeFragment(
 
             viewModel.onFinish(challengeResult)
         } else {
-            viewModel.onNextScreen(cresData)
+            if (creqData.cancelReason != null) {
+                viewModel.stopTimer()
+
+                viewModel.onFinish(ChallengeResult.Canceled(uiTypeCode, initialUiType, intentData))
+            } else {
+                viewModel.onNextScreen(cresData)
+            }
         }
 
         analyticsDelegate?.didReceiveChallengeResponseWithTransactionId(cresData.serverTransId, uiTypeCode)
