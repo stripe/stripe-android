@@ -18,6 +18,8 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.setupFutureUsage
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentelement.callbacks.PAYMENT_ELEMENT_CALLBACK_INSTANCE_ID
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackStorage
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor.NextStep
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -31,6 +33,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.R as PaymentsCoreR
 
@@ -139,6 +142,7 @@ internal class InvalidClientSecretException(
 internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     private val stripeRepository: StripeRepository,
     private val errorReporter: ErrorReporter,
+    private val intentCreationCallbackProvider: Provider<CreateIntentCallback?>,
     @Named(ALLOWS_MANUAL_CONFIRMATION) private val allowsManualConfirmation: Boolean,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
@@ -355,7 +359,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     }
 
     private fun retrieveCallback(): CreateIntentCallback? {
-        return IntentConfirmationInterceptor.createIntentCallback
+        return intentCreationCallbackProvider.get()
     }
 
     private suspend fun handleDeferredIntentCreationFromPaymentMethod(

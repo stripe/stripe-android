@@ -97,9 +97,7 @@ internal class IntentConfirmationFlowTest {
 
     @Test
     fun `On deferred intent, action should be complete if completing without confirming`() = runTest {
-        val intentConfirmationDefinition = createIntentConfirmationDefinition()
-
-        IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
+        val intentConfirmationDefinition = createIntentConfirmationDefinition { _, _ ->
             CreateIntentResult.Success(
                 clientSecret = "COMPLETE_WITHOUT_CONFIRMING_INTENT"
             )
@@ -120,9 +118,7 @@ internal class IntentConfirmationFlowTest {
 
     @Test
     fun `On deferred intent, action should be confirm if completing intent`() = runTest {
-        val intentConfirmationDefinition = createIntentConfirmationDefinition()
-
-        IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
+        val intentConfirmationDefinition = createIntentConfirmationDefinition { _, _ ->
             CreateIntentResult.Success(
                 clientSecret = "seti_123_secret_123"
             )
@@ -147,9 +143,7 @@ internal class IntentConfirmationFlowTest {
     fun `On deferred intent, action should be fail if failed to create payment method`() = runTest {
         val intentConfirmationDefinition = createIntentConfirmationDefinition(
             createPaymentMethodResult = Result.failure(IllegalStateException("An error occurred!"))
-        )
-
-        IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
+        ) { _, _ ->
             CreateIntentResult.Success(
                 clientSecret = "COMPLETE_WITHOUT_CONFIRMING_INTENT"
             )
@@ -172,9 +166,7 @@ internal class IntentConfirmationFlowTest {
     fun `On deferred intent, action should be fail if failed to retrieve intent`() = runTest {
         val intentConfirmationDefinition = createIntentConfirmationDefinition(
             intentResult = Result.failure(IllegalStateException("An error occurred!"))
-        )
-
-        IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
+        ) { _, _ ->
             CreateIntentResult.Success(
                 clientSecret = "si_123_secret_123"
             )
@@ -251,6 +243,7 @@ internal class IntentConfirmationFlowTest {
         createPaymentMethodResult: Result<PaymentMethod> = Result.success(CARD_PAYMENT_METHOD),
         intentResult: Result<StripeIntent> =
             Result.success(SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD),
+        createIntentCallback: CreateIntentCallback? = null,
     ): IntentConfirmationDefinition {
         return IntentConfirmationDefinition(
             intentConfirmationInterceptor = DefaultIntentConfirmationInterceptor(
@@ -266,6 +259,9 @@ internal class IntentConfirmationFlowTest {
                     retrieveIntent = intentResult,
                 ),
                 errorReporter = FakeErrorReporter(),
+                intentCreationCallbackProvider = {
+                    createIntentCallback
+                },
             ),
             paymentLauncherFactory = {
                 FakePaymentLauncher()

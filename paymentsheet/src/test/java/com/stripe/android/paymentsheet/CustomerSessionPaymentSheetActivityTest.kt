@@ -333,6 +333,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
                         paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
                     ),
                     statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
+                    instanceId = "PaymentSheet",
                 )
             )
         ).use { scenario ->

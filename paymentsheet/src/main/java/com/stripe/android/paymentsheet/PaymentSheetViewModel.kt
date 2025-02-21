@@ -690,6 +690,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 .builder()
                 .application(application)
                 .savedStateHandle(savedStateHandle)
+                .instanceId(instanceId = "PaymentSheet")
                 .build()
                 .paymentSheetViewModelSubcomponentBuilder
                 .paymentSheetViewModelModule(PaymentSheetViewModelModule(starterArgsSupplier()))

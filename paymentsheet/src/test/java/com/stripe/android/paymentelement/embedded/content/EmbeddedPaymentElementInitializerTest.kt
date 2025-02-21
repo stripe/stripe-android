@@ -31,6 +31,7 @@ internal class EmbeddedPaymentElementInitializerTest {
             sheetLauncher = mock(),
             contentHelper = contentHelper,
             lifecycleOwner = lifecycleOwner,
+            instanceId = "EmbeddedPaymentElement",
         )
         Scenario(
             initializer = initializer,
