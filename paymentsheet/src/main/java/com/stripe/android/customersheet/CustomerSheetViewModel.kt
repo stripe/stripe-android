@@ -831,7 +831,8 @@ internal class CustomerSheetViewModel(
             onUpdatePrimaryButtonState = { /* no-op, CustomerSheetScreen does not use PrimaryButton.State */ },
             onError = { error ->
                 handleViewAction(CustomerSheetViewAction.OnFormError(error))
-            }
+            },
+            isPaymentMethodSetAsDefaultEnabled = false,
         )
     }
 
