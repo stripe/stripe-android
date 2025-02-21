@@ -1,12 +1,15 @@
 package com.stripe.android.paymentelement.embedded.manage
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodUI
+import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenUI
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -83,7 +86,10 @@ internal class ManageNavigator private constructor(
 
             @Composable
             override fun Content() {
-                ManageScreenUI(interactor = interactor)
+                Column {
+                    ManageScreenUI(interactor = interactor)
+                    PaymentSheetContentPadding(subtractingExtraPadding = 12.dp)
+                }
             }
 
             override fun close() {
@@ -102,7 +108,10 @@ internal class ManageNavigator private constructor(
 
             @Composable
             override fun Content() {
-                UpdatePaymentMethodUI(interactor = interactor, modifier = Modifier)
+                Column {
+                    UpdatePaymentMethodUI(interactor = interactor, modifier = Modifier)
+                    PaymentSheetContentPadding(subtractingExtraPadding = 16.dp)
+                }
             }
         }
     }
