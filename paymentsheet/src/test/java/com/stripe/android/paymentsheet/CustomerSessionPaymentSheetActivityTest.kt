@@ -395,11 +395,13 @@ internal class CustomerSessionPaymentSheetActivityTest {
             )
         ).use { scenario ->
             scenario.onActivity { activity ->
-                composeTestRule.waitUntil(timeoutMillis = 2_000) {
-                    composeTestRule
-                        .onAllNodes(hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG))
-                        .fetchSemanticsNodes()
-                        .isNotEmpty()
+                if (paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Horizontal) {
+                    composeTestRule.waitUntil(timeoutMillis = 2_000) {
+                        composeTestRule
+                            .onAllNodes(hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG))
+                            .fetchSemanticsNodes()
+                            .isNotEmpty()
+                    }
                 }
 
                 test(activity)
