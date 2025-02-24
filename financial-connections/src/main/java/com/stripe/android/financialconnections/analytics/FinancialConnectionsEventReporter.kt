@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.analytics
 
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 
 /**
@@ -13,10 +12,10 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
  */
 internal interface FinancialConnectionsEventReporter {
 
-    fun onPresented(configuration: FinancialConnectionsSheet.Configuration)
+    fun onPresented()
 
     fun onResult(
-        configuration: FinancialConnectionsSheet.Configuration,
+        session: String,
         financialConnectionsSheetResult: FinancialConnectionsSheetActivityResult
     )
 }
