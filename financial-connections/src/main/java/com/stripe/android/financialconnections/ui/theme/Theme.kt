@@ -235,21 +235,6 @@ internal val TextSelectionColors: TextSelectionColors
         backgroundColor = FinancialConnectionsTheme.colors.textDefault.copy(alpha = 0.4f)
     )
 
-@Immutable
-private object FinancialConnectionsRippleTheme : RippleTheme {
-    @Composable
-    override fun defaultColor() = RippleTheme.defaultRippleColor(
-        contentColor = FinancialConnectionsTheme.colors.textAction,
-        lightTheme = MaterialTheme.colors.isLight,
-    )
-
-    @Composable
-    override fun rippleAlpha() = RippleTheme.defaultRippleAlpha(
-        contentColor = FinancialConnectionsTheme.colors.textAction,
-        lightTheme = MaterialTheme.colors.isLight,
-    )
-}
-
 @Composable
 internal fun FinancialConnectionsTheme(
     theme: Theme = Theme.default,
@@ -280,7 +265,7 @@ internal fun FinancialConnectionsTheme(
                     LocalTextSelectionColors provides TextSelectionColors,
                     LocalTextStyle provides LocalTextStyle.current.toCompat(useDefaultLineHeight = true),
                     LocalRippleConfiguration provides RippleConfiguration(
-                        color = FinancialConnectionsTheme.colors.textBrand
+                        color = FinancialConnectionsTheme.colors.textAction
                     ),
                 ) {
                     content()
