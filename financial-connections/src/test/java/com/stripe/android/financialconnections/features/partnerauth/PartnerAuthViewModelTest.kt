@@ -167,7 +167,6 @@ class PartnerAuthViewModelTest {
         pendingRepairRepository: CoreAuthorizationPendingNetworkingRepairRepository = mock(),
     ): PartnerAuthViewModel {
         return PartnerAuthViewModel(
-            completeAuthorizationSession = mock(),
             createAuthorizationSession = createAuthorizationSession,
             cancelAuthorizationSession = mock(),
             retrieveAuthorizationSession = mock(),

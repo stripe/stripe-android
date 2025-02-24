@@ -27,7 +27,6 @@ import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
-import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition.IfMissingActiveAuthSession
 import com.stripe.android.financialconnections.domain.HandleError
@@ -52,7 +51,6 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.navigation.Destination
-import com.stripe.android.financialconnections.navigation.Destination.AccountPicker
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.destination
@@ -75,7 +73,6 @@ import javax.inject.Named
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.AuthenticationStatus as Status
 
 internal class PartnerAuthViewModel @AssistedInject constructor(
-    private val completeAuthorizationSession: CompleteAuthorizationSession,
     private val createAuthorizationSession: PostAuthorizationSession,
     private val cancelAuthorizationSession: CancelAuthorizationSession,
     private val retrieveAuthorizationSession: RetrieveAuthorizationSession,
@@ -427,23 +424,15 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
                     status = "success"
                 )
             )
+
             requireNotNull(authSession)
-            postAuthSessionEvent(authSession.id, AuthSessionEvent.Success(Date()))
-            val nextPane = if (authSession.isOAuth) {
-                logger.debug("Web AuthFlow completed! waiting for oauth results")
-                val oAuthResults = pollAuthorizationSessionOAuthResults(authSession)
-                logger.debug("OAuth results received! completing session")
-                val updatedSession = completeAuthorizationSession(
-                    authorizationSessionId = authSession.id,
-                    publicToken = oAuthResults.publicToken
-                )
-                logger.debug("Session authorized!")
-                updatedSession.nextPane.destination(referrer = pane)
+            val isNetworkingRelink = pendingRepairRepository.get() != null
+
+            if (isNetworkingRelink) {
+                handleCompletionForNetworkingRelinkSession(authSession)
             } else {
-                AccountPicker(referrer = pane)
+                handleCompletionForAuthSession(authSession)
             }
-            FinancialConnections.emitEvent(Name.INSTITUTION_AUTHORIZED)
-            navigationManager.tryNavigateTo(nextPane)
         }.onFailure {
             eventTracker.logError(
                 extraMessage = "failed authorizing session",
@@ -453,6 +442,32 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
             )
             setState { copy(authenticationStatus = Fail(it)) }
         }
+    }
+
+    private fun handleCompletionForNetworkingRelinkSession(
+        authSession: FinancialConnectionsAuthorizationSession,
+    ) {
+        val nextPane = authSession.nextPane.destination(referrer = pane)
+        navigationManager.tryNavigateTo(nextPane)
+    }
+
+    private suspend fun handleCompletionForAuthSession(
+        authSession: FinancialConnectionsAuthorizationSession,
+    ) {
+        if (authSession.isOAuth) {
+            logger.debug("Web AuthFlow completed! waiting for oauth results")
+            pollAuthorizationSessionOAuthResults(authSession)
+            logger.debug("OAuth results received! completing session")
+        }
+
+        val updatedSession = retrieveAuthorizationSession(
+            authorizationSessionId = authSession.id,
+        )
+        logger.debug("Session updated!")
+
+        FinancialConnections.emitEvent(Name.INSTITUTION_AUTHORIZED)
+        val nextPane = updatedSession.nextPane.destination(referrer = pane)
+        navigationManager.tryNavigateTo(nextPane)
     }
 
     // if clicked uri contains an eventName query param, track click event.

@@ -12,7 +12,6 @@ import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
 import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
-import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
@@ -55,7 +54,6 @@ internal class SupportabilityViewModelTest {
     private val retrieveAuthorizationSession = mock<RetrieveAuthorizationSession>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
     private val pollAuthorizationSessionOAuthResults = mock<PollAuthorizationSessionOAuthResults>()
-    private val completeAuthorizationSession = mock<CompleteAuthorizationSession>()
     private val cancelAuthorizationSession = mock<CancelAuthorizationSession>()
     private val navigationManager = TestNavigationManager()
     private val createAuthorizationSession = mock<PostAuthorizationSession>()
@@ -133,16 +131,15 @@ internal class SupportabilityViewModelTest {
             )
             whenever(pollAuthorizationSessionOAuthResults(activeAuthSession))
                 .thenReturn(mixedOAuthParams)
-            whenever(completeAuthorizationSession(any(), any()))
+            whenever(retrieveAuthorizationSession(any()))
                 .thenReturn(activeAuthSession)
 
             // When
             viewModel.onWebAuthFlowFinished(WebAuthFlowState.Success("stripe://success"))
 
             // Then
-            verify(completeAuthorizationSession).invoke(
+            verify(retrieveAuthorizationSession).invoke(
                 authorizationSessionId = eq(activeAuthSession.id),
-                publicToken = eq(mixedOAuthParams.publicToken)
             )
         }
 
@@ -304,7 +301,6 @@ internal class SupportabilityViewModelTest {
     ): PartnerAuthViewModel {
         return PartnerAuthViewModel(
             navigationManager = TestNavigationManager(),
-            completeAuthorizationSession = completeAuthorizationSession,
             createAuthorizationSession = createAuthorizationSession,
             cancelAuthorizationSession = cancelAuthorizationSession,
             retrieveAuthorizationSession = retrieveAuthorizationSession,

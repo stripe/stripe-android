@@ -85,18 +85,6 @@ internal interface FinancialConnectionsManifestRepository {
         APIConnectionException::class,
         APIException::class
     )
-    suspend fun completeAuthorizationSession(
-        clientSecret: String,
-        sessionId: String,
-        publicToken: String? = null
-    ): FinancialConnectionsAuthorizationSession
-
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
     suspend fun postMarkLinkingMoreAccounts(
         clientSecret: String
     ): FinancialConnectionsSessionManifest
@@ -379,28 +367,6 @@ private class FinancialConnectionsManifestRepositoryImpl(
             nextPane = Pane.SUCCESS,
         ).also {
             updateCachedActiveAuthSession("repairAuthorizationSession", it)
-        }
-    }
-
-    override suspend fun completeAuthorizationSession(
-        clientSecret: String,
-        sessionId: String,
-        publicToken: String?
-    ): FinancialConnectionsAuthorizationSession {
-        val request = apiRequestFactory.createPost(
-            url = FinancialConnectionsRepositoryImpl.authorizeSessionUrl,
-            options = provideApiRequestOptions(useConsumerPublishableKey = true),
-            params = mapOf(
-                NetworkConstants.PARAMS_ID to sessionId,
-                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
-                "public_token" to publicToken
-            ).filter { it.value != null }
-        )
-        return requestExecutor.execute(
-            request,
-            FinancialConnectionsAuthorizationSession.serializer()
-        ).also {
-            updateCachedActiveAuthSession("completeAuthorizationSession", it)
         }
     }
 
