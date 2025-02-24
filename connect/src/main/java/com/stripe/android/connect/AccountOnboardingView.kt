@@ -62,7 +62,11 @@ class AccountOnboardingView private constructor(
             )
             webViewContainerBehavior.setPropsFromXml(props)
         }
-        webViewContainerBehavior.initializeView(this, cacheKey)
+        var xmlCacheKey: String? = null
+        context.withStyledAttributes(attrs, R.styleable.StripeConnectWebViewContainer, defStyleAttr, 0) {
+            xmlCacheKey = getString(R.styleable.StripeConnectWebViewContainer_stripeWebViewCacheKey)
+        }
+        webViewContainerBehavior.initializeView(this, cacheKey ?: xmlCacheKey)
     }
 }
 

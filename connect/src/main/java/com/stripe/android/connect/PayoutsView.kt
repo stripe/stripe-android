@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.widget.FrameLayout
 import androidx.annotation.RestrictTo
+import androidx.core.content.withStyledAttributes
 import com.stripe.android.connect.webview.StripeConnectWebViewContainer
 import com.stripe.android.connect.webview.StripeConnectWebViewContainerImpl
 
@@ -41,7 +42,11 @@ class PayoutsView private constructor(
     )
 
     init {
-        webViewContainerBehavior.initializeView(this, cacheKey)
+        var xmlCacheKey: String? = null
+        context.withStyledAttributes(attrs, R.styleable.StripeConnectWebViewContainer, defStyleAttr, 0) {
+            xmlCacheKey = getString(R.styleable.StripeConnectWebViewContainer_stripeWebViewCacheKey)
+        }
+        webViewContainerBehavior.initializeView(this, cacheKey ?: xmlCacheKey)
     }
 }
 

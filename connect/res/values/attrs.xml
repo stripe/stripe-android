@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <declare-styleable name="StripeConnectWebViewContainer">
+        <attr name="stripeWebViewCacheKey" format="string" />
+    </declare-styleable>
+
     <declare-styleable name="StripeAccountOnboardingView">
         <attr name="stripeFullTermsOfServiceUrl" format="string" />
         <attr name="stripeRecipientTermsOfServiceUrl" format="string" />
