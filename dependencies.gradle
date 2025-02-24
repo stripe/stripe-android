@@ -21,7 +21,7 @@ ext.versions = [
         androidxHilt                : '1.2.0',
         androidxLegacySupport       : '1.0.0',
         androidxLifecycle           : '2.8.7',
-        androidxNavigation          : '2.8.5',
+        androidxNavigation          : '2.8.7',
         androidxPreference          : '1.2.1',
         androidxRecyclerview        : '1.3.2',
         binaryCompatibilityValidator: '0.17.0',
