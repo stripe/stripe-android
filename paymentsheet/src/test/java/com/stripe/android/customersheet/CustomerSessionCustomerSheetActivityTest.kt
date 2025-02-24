@@ -328,10 +328,10 @@ class CustomerSessionCustomerSheetActivityTest {
             savedPaymentMethodsPage.onEditButton().performClickWithKeyboard()
             savedPaymentMethodsPage.onModifyBadgeFor(last4 = "1001").performClickWithKeyboard()
 
+            enqueueUpdatePaymentMethod(id = "pm_1")
+
             editPage.setCardBrand("Visa")
             editPage.update(waitUntilComplete = false)
-
-            enqueueUpdatePaymentMethod(id = "pm_1")
 
             savedPaymentMethodsPage.waitUntilVisible()
             savedPaymentMethodsPage.onSavedPaymentMethod(last4 = "1001").assertExists()
