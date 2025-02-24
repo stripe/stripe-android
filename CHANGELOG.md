@@ -7,6 +7,60 @@ Dependencies updated in [9511](https://github.com/stripe/stripe-android/pull/951
 * Bumped Compose from 1.6.8 to 1.7.6.
 * Bumped Androidx Navigation from 2.7.7 to 2.8.5.
 
+Dependencies updated in [9512](https://github.com/stripe/stripe-android/pull/9512) and [10250](https://github.com/stripe/stripe-android/pull/10250):
+* Bumped Android Gradle Plugin from 8.7.1 to 8.8.1.
+* Bumped Androidx Activity from 1.8.2 to 1.9.3.
+* Bumped Androidx Annotation from 1.9.0 to 1.9.1.
+* Bumped Androidx Fragment from 1.8.4 to 1.8.6.
+* Bumped Androidx Lifecycle from 2.8.6 to 2.8.7.
+* Bumped Camerax from 1.3.4 to 1.4.1.
+* Bumped Constraint Layout from 2.1.4 to 2.2.0.
+* Bumped Google Places from 3.3.0 to 3.5.0.
+* Bumped Gson from 2.11.0 to 2.12.1.
+* Bumped Hilt from 2.52 to 2.55.
+* Bumped Kotlin from 2.0.21 to 2.1.10.
+* Bumped Kotlinx Coroutines from 1.9.0 to 1.10.1.
+* Bumped Kotlinx Serialization from 1.7.3 to 1.8.0.
+* Bumped Okio from 3.9.1 to 3.10.2.
+* Bumped Play Services Coroutines from 1.7.3 to 1.10.1.
+* Bumped Poko from 0.17.2 to 0.18.2.
+
+## 21.5.1 - 2025-02-19
+
+### Payments
+* [FIXED][10211](https://github.com/stripe/stripe-android/pull/10211) Fixed an issue where some LPMs couldn't be confirmed.
+
+## 21.5.0 - 2025-02-18
+### CardScan
+* [FIXED][10181](https://github.com/stripe/stripe-android/pull/10181) Fixed a crash that happened on some devices with odd camera-to-screen ratios
+
+### PaymentSheet
+* [FIXED][10185](https://github.com/stripe/stripe-android/pull/10185) Improve accessibility for expiration date in `CardDetailsController`.
+
+### Financial Connections
+- [ADDED] Financial Connections now supports dark mode and will automatically adapt to the device's theme. [Learn more](https://docs.stripe.com/financial-connections/other-data-powered-products?platform=android#connections-customize-android) about configuring appearance settings.
+
+## 21.4.2 - 2025-02-10
+Bug fixes and improvements.
+
+## 21.4.1 - 2025-01-28
+
+### PaymentSheet
+* [ADDED][10015](https://github.com/stripe/stripe-android/pull/10015) Fixed a bug in `PaymentSheet.FlowController` where the result callback wouldn't be called if a user cancelled confirmation during CVC recollection.
+
+## 21.4.0 - 2025-01-28
+
+### PaymentSheet
+* [ADDED][9937](https://github.com/stripe/stripe-android/pull/9937) Added support for Crypto to PaymentSheet.
+
+## 21.3.2 - 2025-01-21
+
+### Financial Connections
+- [FIXED] Fixes a rare crash that could occur when presenting a bottom sheet.
+
+### PaymentSheet
+- [FIXED][9871](https://github.com/stripe/stripe-android/pull/9871) Fixes issue with autocomplete caused by render loop in text field.
+
 ## 21.3.1 - 2025-01-06
 
 ### PaymentSheet
@@ -52,6 +106,13 @@ Dependencies updated in [9511](https://github.com/stripe/stripe-android/pull/951
 
 ### Basic Integration
 * [REMOVED][9501](https://github.com/stripe/stripe-android/pull/9501) Basic Integration has been removed. [Please use Mobile Payment Element instead](https://docs.stripe.com/payments/mobile/migrating-to-mobile-payment-element-from-basic-integration).
+
+### StripeCardScan
+* [REMOVED][9523](https://github.com/stripe/stripe-android/pull/9523) Card image verification has been removed. [Please use OCR only scanning instead](https://github.com/stripe/stripe-android/tree/master/stripecardscan#credit-card-ocr).
+
+Dependencies updated in [9512](https://github.com/stripe/stripe-android/pull/9512):
+* Bumped Kotlin from 1.9.25 to 2.0.21.
+* Bumped Kotlin Coroutines from 1.8.1 to 1.9.0.
 
 ## 20.53.0 - 2024-10-21
 

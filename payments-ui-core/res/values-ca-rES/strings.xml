@@ -28,6 +28,10 @@
   <string name="stripe_blik_code">Codi BLIK</string>
   <!-- Label for Boleto Payment method Tax ID -->
   <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
+  <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
+  <string name="stripe_card_brand_not_accepted">(no s\'accepta)</string>
+  <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
+  <string name="stripe_card_brand_not_accepted_with_brand">%1$s (no s\'accepta)</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">En continuar, autoritzeu %1$s a carregar aquest pagament i els pagaments futurs al compte de Cash App segons les condicions de %2$s fins que es revoqui l\'autorització. Podeu canviar això en qualsevol moment a la configuració de Cash App.</string>
   <!-- Title for the contact information section -->
@@ -101,6 +105,8 @@
   <string name="stripe_scan_card">Escanejar targeta</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Proporcionant la informació de pagament i confirmant aquest pagament, estàs autoritzant (A) %s i Stripe, el nostre proveïdor de serveis de pagament, a enviar ordres al teu banc per tal de carregar des del teu compte i (B) carregar el teu compte en conformitat amb aquestes ordres. Tens dret a un reembolsament per part del teu banc sota els termes i condicions que s\'hagin acordat amb aquest. El reembolsament s\'ha de sol·licitar en un termini de 8 setmanes des de la data en que es va carregar el compte. Els teus drets estan explicats en un extracte que pots demanar al teu banc. Estàs acceptant rebre notificacions per pròxims dèbits fins a dos dies abans de que es portin a terme.</string>
+  <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
+  <string name="stripe_set_as_default_payment_method">Configura com a mètode de pagament per defecte</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Configuració</string>
   <!-- Label for UPI ID number field on form -->

@@ -9,9 +9,15 @@ import com.stripe.android.connect.util.getContrastingColor
 @OptIn(PrivateBetaConnectSDK::class)
 internal data class StripeConnectWebViewContainerState(
     /**
-     * True if we received the 'pageDidLoad' message.
+     * Non-null if we received the 'pageDidLoad' message,
+     * null otherwise.
      */
-    val receivedPageDidLoad: Boolean = false,
+    val pageViewId: String? = null,
+
+    /**
+     * The time the webview began loading, in milliseconds from midnight, January 1, 1970 UTC.
+     */
+    val didBeginLoadingMillis: Long? = null,
 
     /**
      * True if we received the 'setOnLoaderStart' message.

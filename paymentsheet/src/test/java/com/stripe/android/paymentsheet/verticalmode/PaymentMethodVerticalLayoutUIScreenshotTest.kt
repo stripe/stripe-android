@@ -1,8 +1,10 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.Modifier
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.utils.MockPaymentMethodsFactory
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
@@ -29,17 +31,19 @@ internal class PaymentMethodVerticalLayoutUIScreenshotTest {
     @Test
     fun testSavedAndNewPms() {
         paparazziRule.snapshot {
+            val scrollState = rememberScrollState()
             PaymentMethodVerticalLayoutUI(
                 paymentMethods = paymentMethods,
                 displayedSavedPaymentMethod = savedPaymentMethod,
                 savedPaymentMethodAction =
                 PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
-                selection = PaymentSelection.Saved(savedPaymentMethod.paymentMethod),
+                selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
                 isEnabled = true,
                 onViewMorePaymentMethods = {},
                 onSelectSavedPaymentMethod = {},
                 onManageOneSavedPaymentMethod = {},
                 imageLoader = mock(),
+                modifier = Modifier.verticalScroll(scrollState),
             )
         }
     }
@@ -47,17 +51,19 @@ internal class PaymentMethodVerticalLayoutUIScreenshotTest {
     @Test
     fun testDefault() {
         paparazziRule.snapshot {
+            val scrollState = rememberScrollState()
             PaymentMethodVerticalLayoutUI(
                 paymentMethods = paymentMethods,
                 displayedSavedPaymentMethod = PaymentMethodFixtures.defaultDisplayableCard(),
                 savedPaymentMethodAction =
                 PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
-                selection = PaymentSelection.Saved(savedPaymentMethod.paymentMethod),
+                selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
                 isEnabled = true,
                 onViewMorePaymentMethods = {},
                 onSelectSavedPaymentMethod = {},
                 onManageOneSavedPaymentMethod = {},
                 imageLoader = mock(),
+                modifier = Modifier.verticalScroll(scrollState),
             )
         }
     }
@@ -69,17 +75,19 @@ internal class PaymentMethodVerticalLayoutUIScreenshotTest {
         }
 
         paparazziRule.snapshot {
+            val scrollState = rememberScrollState()
             PaymentMethodVerticalLayoutUI(
                 paymentMethods = paymentMethodsWithBadge,
                 displayedSavedPaymentMethod = savedPaymentMethod,
                 savedPaymentMethodAction =
                 PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
-                selection = PaymentSelection.Saved(savedPaymentMethod.paymentMethod),
+                selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
                 isEnabled = true,
                 onViewMorePaymentMethods = {},
                 onSelectSavedPaymentMethod = {},
                 onManageOneSavedPaymentMethod = {},
                 imageLoader = mock(),
+                modifier = Modifier.verticalScroll(scrollState),
             )
         }
     }

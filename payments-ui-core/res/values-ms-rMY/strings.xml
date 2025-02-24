@@ -28,6 +28,10 @@
   <string name="stripe_blik_code">Kod BLIK</string>
   <!-- Label for Boleto Payment method Tax ID -->
   <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
+  <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
+  <string name="stripe_card_brand_not_accepted">(tidak diterima)</string>
+  <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
+  <string name="stripe_card_brand_not_accepted_with_brand">%1$s (tidak diterima)</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">Dengan meneruskan langkah, anda mengizinkan %1$s untuk mendebitkan akaun Cash App anda bagi pembayaran ini dan pembayaran masa hadapan menurut terma %2$s, sehinggalah keizinan ini dibatalkan. Anda boleh mengubah keizinan ini pada bila-bila masa dalam Tetapan Cash App anda.</string>
   <!-- Title for the contact information section -->
@@ -101,6 +105,8 @@
   <string name="stripe_scan_card">Imbas kad</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Dengan memberikan maklumat pembayaran anda dan mengesahkan pembayaran ini, anda mengizinkan (A) %s dan Stripe, iaitu penyedia khidmat pembayaran kami, untuk menghantar arahan kepada bank untuk mendebitkan akaun anda dan (B) bank anda untuk mendebitkan akaun anda menurut arahan tersebut. Sebagai sebahagian daripada hak anda, anda layak mendapat bayaran balik daripada bank menurut terma dan syarat perjanjian dengan bank anda. Bayaran balik mesti dituntut dalam tempoh 8 minggu mulai tarikh akaun anda didebitkan. Hak anda dijelaskan dalam pernyataan yang boleh anda dapatkan daripada bank anda. Anda bersetuju untuk menerima pemberitahuan bagi debit masa hadapan sehingga 2 hari sebelum debit tersebut dibuat.</string>
+  <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
+  <string name="stripe_set_as_default_payment_method">Tetapkan sebagai kaedah pembayaran tetapan asal</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Sediakan</string>
   <!-- Label for UPI ID number field on form -->

@@ -6,6 +6,7 @@ import androidx.activity.result.ActivityResultRegistry
 import com.stripe.android.link.LinkActivityResult.PaymentMethodObtained
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.injection.LinkAnalyticsComponent
+import com.stripe.android.link.model.LinkAccount
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -52,7 +53,7 @@ internal class LinkPaymentLauncher @Inject internal constructor(
     ) {
         analyticsHelper.onLinkResult(linkActivityResult)
         when (linkActivityResult) {
-            is PaymentMethodObtained, LinkActivityResult.Completed -> {
+            is PaymentMethodObtained, is LinkActivityResult.Completed -> {
                 linkStore.markLinkAsUsed()
             }
             is LinkActivityResult.Canceled, is LinkActivityResult.Failed -> Unit
@@ -72,9 +73,13 @@ internal class LinkPaymentLauncher @Inject internal constructor(
      */
     fun present(
         configuration: LinkConfiguration,
+        linkAccount: LinkAccount?,
+        useLinkExpress: Boolean
     ) {
         val args = LinkActivityContract.Args(
-            configuration,
+            configuration = configuration,
+            linkAccount = linkAccount,
+            startWithVerificationDialog = useLinkExpress
         )
         linkActivityResultLauncher?.launch(args)
         analyticsHelper.onLinkLaunched()

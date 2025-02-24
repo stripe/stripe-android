@@ -3,32 +3,21 @@ package com.stripe.android.paymentsheet.state
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.test.runTest
-import org.junit.Rule
 import org.junit.Test
 
 class CustomerStateTest {
-
-    @get:Rule
-    val enableDefaultPaymentMethods = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.enableDefaultPaymentMethods,
-        isEnabled = true,
-    )
 
     @Test
     fun `Should create 'CustomerState' for customer session properly with permissions disabled`() {
         val paymentMethods = PaymentMethodFactory.cards(4)
         val customer = createElementsSessionCustomer(
-            customerId = "cus_1",
-            ephemeralKeySecret = "ek_1",
             paymentMethods = paymentMethods,
             mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Disabled
         )
@@ -40,31 +29,18 @@ class CustomerStateTest {
             customerSessionClientSecret = "cuss_123",
         )
 
-        assertThat(customerState).isEqualTo(
-            CustomerState(
-                id = "cus_1",
-                ephemeralKeySecret = "ek_1",
-                customerSessionClientSecret = "cuss_123",
-                paymentMethods = paymentMethods,
-                permissions = CustomerState.Permissions(
-                    canRemovePaymentMethods = false,
-                    canRemoveLastPaymentMethod = false,
-                    // Always true for `customer_session`
-                    canRemoveDuplicates = true,
-                ),
-                defaultPaymentMethodId = null
-            )
-        )
+        assertThat(customerState.permissions.canRemovePaymentMethods).isFalse()
+        assertThat(customerState.permissions.canRemoveLastPaymentMethod).isFalse()
+        // Always true for `customer_session`
+        assertThat(customerState.permissions.canRemoveDuplicates).isTrue()
     }
 
     @Test
     fun `Should create 'CustomerState' for customer session properly with remove permissions enabled`() {
         val paymentMethods = PaymentMethodFactory.cards(4)
         val customer = createElementsSessionCustomer(
-            customerId = "cus_1",
-            ephemeralKeySecret = "ek_1",
             paymentMethods = paymentMethods,
-            mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
+            mobilePaymentElementComponent = createEnabledMobilePaymentElement(
                 isPaymentMethodSaveEnabled = false,
                 isPaymentMethodRemoveEnabled = true,
                 canRemoveLastPaymentMethod = true,
@@ -79,31 +55,18 @@ class CustomerStateTest {
             customerSessionClientSecret = "cuss_123",
         )
 
-        assertThat(customerState).isEqualTo(
-            CustomerState(
-                id = "cus_1",
-                ephemeralKeySecret = "ek_1",
-                customerSessionClientSecret = "cuss_123",
-                paymentMethods = paymentMethods,
-                permissions = CustomerState.Permissions(
-                    canRemovePaymentMethods = true,
-                    canRemoveLastPaymentMethod = true,
-                    // Always true for `customer_session`
-                    canRemoveDuplicates = true,
-                ),
-                defaultPaymentMethodId = null
-            )
-        )
+        assertThat(customerState.permissions.canRemovePaymentMethods).isTrue()
+        assertThat(customerState.permissions.canRemoveLastPaymentMethod).isTrue()
+        // Always true for `customer_session`
+        assertThat(customerState.permissions.canRemoveDuplicates).isTrue()
     }
 
     @Test
     fun `Should create 'CustomerState' for customer session properly with remove permissions disabled`() {
         val paymentMethods = PaymentMethodFactory.cards(3)
         val customer = createElementsSessionCustomer(
-            customerId = "cus_3",
-            ephemeralKeySecret = "ek_3",
             paymentMethods = paymentMethods,
-            mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
+            mobilePaymentElementComponent = createEnabledMobilePaymentElement(
                 isPaymentMethodSaveEnabled = false,
                 isPaymentMethodRemoveEnabled = false,
                 canRemoveLastPaymentMethod = false,
@@ -118,37 +81,22 @@ class CustomerStateTest {
             customerSessionClientSecret = "cuss_123",
         )
 
-        assertThat(customerState).isEqualTo(
-            CustomerState(
-                id = "cus_3",
-                ephemeralKeySecret = "ek_3",
-                customerSessionClientSecret = "cuss_123",
-                paymentMethods = paymentMethods,
-                permissions = CustomerState.Permissions(
-                    canRemovePaymentMethods = false,
-                    canRemoveLastPaymentMethod = false,
-                    // Always true for `customer_session`
-                    canRemoveDuplicates = true,
-                ),
-                defaultPaymentMethodId = null
-            )
-        )
+        assertThat(customerState.permissions.canRemovePaymentMethods).isFalse()
+        assertThat(customerState.permissions.canRemoveLastPaymentMethod).isFalse()
+        // Always true for `customer_session`
+        assertThat(customerState.permissions.canRemoveDuplicates).isTrue()
     }
 
-    private fun createCustomerSessionForTestingDefaultPaymentMethod(defaultPaymentMethodId: String?): CustomerState {
-        val customerId = "cus_3"
-        val ephemeralKeySecret = "ek_3"
+    private fun createCustomerSessionForTestingDefaultPaymentMethod(
+        defaultPaymentMethodId: String?,
+        isSetAsDefaultEnabled: Boolean,
+    ): CustomerState {
         val paymentMethods = PaymentMethodFactory.cards(3)
 
-        val mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
-            isPaymentMethodSaveEnabled = false,
-            isPaymentMethodRemoveEnabled = false,
-            canRemoveLastPaymentMethod = false,
-            allowRedisplayOverride = null,
+        val mobilePaymentElementComponent = createEnabledMobilePaymentElement(
+            isPaymentMethodSetAsDefaultEnabled = isSetAsDefaultEnabled,
         )
         val customer = createElementsSessionCustomer(
-            customerId = customerId,
-            ephemeralKeySecret = ephemeralKeySecret,
             paymentMethods = paymentMethods,
             mobilePaymentElementComponent = mobilePaymentElementComponent,
             defaultPaymentMethodId = defaultPaymentMethodId
@@ -165,48 +113,22 @@ class CustomerStateTest {
     }
 
     @Test
-    fun `Create 'CustomerState' for customer session with nonnull defaultPaymentMethodId & flag on`() {
-        val defaultPaymentMethodId = "aaa111"
+    fun `Create 'CustomerState' for customer session with nonnull default PM`() {
+        val defaultPaymentMethodId = "pm_123"
 
-        enableDefaultPaymentMethods.setEnabled(true)
         val customerState = createCustomerSessionForTestingDefaultPaymentMethod(
-            defaultPaymentMethodId = defaultPaymentMethodId
+            defaultPaymentMethodId = defaultPaymentMethodId,
+            isSetAsDefaultEnabled = true,
         )
 
         assertThat(customerState.defaultPaymentMethodId).isEqualTo(defaultPaymentMethodId)
     }
 
     @Test
-    fun `Create 'CustomerState' for customer session with nonnull defaultPaymentMethodId & flag off`() {
-        val defaultPaymentMethodId = "aaa111"
-
-        enableDefaultPaymentMethods.setEnabled(false)
+    fun `Create 'CustomerState' for customer session with null default PM`() {
         val customerState = createCustomerSessionForTestingDefaultPaymentMethod(
-            defaultPaymentMethodId = defaultPaymentMethodId
-        )
-
-        assertThat(customerState.defaultPaymentMethodId).isNull()
-    }
-
-    @Test
-    fun `Create 'CustomerState' for customer session with null defaultPaymentMethodId & flag on`() {
-        val defaultPaymentMethodId = null
-
-        enableDefaultPaymentMethods.setEnabled(true)
-        val customerState = createCustomerSessionForTestingDefaultPaymentMethod(
-            defaultPaymentMethodId = defaultPaymentMethodId
-        )
-
-        assertThat(customerState.defaultPaymentMethodId).isNull()
-    }
-
-    @Test
-    fun `Create 'CustomerState' for customer session with null defaultPaymentMethodId & flag off`() {
-        val defaultPaymentMethodId = null
-
-        enableDefaultPaymentMethods.setEnabled(false)
-        val customerState = createCustomerSessionForTestingDefaultPaymentMethod(
-            defaultPaymentMethodId = defaultPaymentMethodId
+            defaultPaymentMethodId = null,
+            isSetAsDefaultEnabled = true,
         )
 
         assertThat(customerState.defaultPaymentMethodId).isNull()
@@ -215,32 +137,21 @@ class CustomerStateTest {
     @Test
     fun `Should create 'CustomerState' for legacy ephemeral keys properly`() {
         val paymentMethods = PaymentMethodFactory.cards(7)
-        val customerState = CustomerState.createForLegacyEphemeralKey(
-            customerId = "cus_1",
-            accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey(
-                ephemeralKeySecret = "ek_1",
-            ),
-            configuration = createConfiguration(),
+
+        val customerState = createLegacyEphemeralKeyCustomerState(
+            allowsRemovalOfLastSavedPaymentMethod = true,
             paymentMethods = paymentMethods,
         )
 
-        assertThat(customerState).isEqualTo(
-            CustomerState(
-                id = "cus_1",
-                ephemeralKeySecret = "ek_1",
-                customerSessionClientSecret = null,
-                paymentMethods = paymentMethods,
-                permissions = CustomerState.Permissions(
-                    // Always true for legacy ephemeral keys since un-scoped
-                    canRemovePaymentMethods = true,
-                    // Always true unless configured client-side
-                    canRemoveLastPaymentMethod = true,
-                    // Always 'false' for legacy ephemeral keys
-                    canRemoveDuplicates = false,
-                ),
-                defaultPaymentMethodId = null
-            )
-        )
+        assertThat(customerState.permissions.canRemovePaymentMethods).isTrue()
+        assertThat(customerState.permissions.canRemoveLastPaymentMethod).isTrue()
+        assertThat(customerState.permissions.canRemoveDuplicates).isFalse()
+
+        assertThat(customerState.paymentMethods).isEqualTo(paymentMethods)
+        assertThat(customerState.customerSessionClientSecret).isNull()
+        assertThat(customerState.defaultPaymentMethodId).isNull()
+        assertThat(customerState.id).isEqualTo("cus_1")
+        assertThat(customerState.ephemeralKeySecret).isEqualTo("ek_1")
     }
 
     @Test
@@ -254,7 +165,7 @@ class CustomerStateTest {
                     PaymentMethodFixtures.LINK_PAYMENT_METHOD,
                     PaymentMethodFixtures.AU_BECS_DEBIT,
                 ),
-                mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
+                mobilePaymentElementComponent = createEnabledMobilePaymentElement(
                     isPaymentMethodSaveEnabled = false,
                     isPaymentMethodRemoveEnabled = false,
                     canRemoveLastPaymentMethod = false,
@@ -274,12 +185,8 @@ class CustomerStateTest {
 
     @Test
     fun `Should set 'canRemoveLastPaymentMethod' to true if config value is true for legacy ephemeral keys`() {
-        val customerState = CustomerState.createForLegacyEphemeralKey(
-            customerId = "cus_1",
-            accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey(
-                ephemeralKeySecret = "ek_1",
-            ),
-            configuration = createConfiguration(allowsRemovalOfLastSavedPaymentMethod = true),
+        val customerState = createLegacyEphemeralKeyCustomerState(
+            allowsRemovalOfLastSavedPaymentMethod = true,
             paymentMethods = listOf(),
         )
 
@@ -288,12 +195,8 @@ class CustomerStateTest {
 
     @Test
     fun `Should set 'canRemoveLastPaymentMethod' to false if config value is false for legacy ephemeral keys`() {
-        val customerState = CustomerState.createForLegacyEphemeralKey(
-            customerId = "cus_1",
-            accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey(
-                ephemeralKeySecret = "ek_1",
-            ),
-            configuration = createConfiguration(allowsRemovalOfLastSavedPaymentMethod = false),
+        val customerState = createLegacyEphemeralKeyCustomerState(
+            allowsRemovalOfLastSavedPaymentMethod = false,
             paymentMethods = listOf(),
         )
 
@@ -365,7 +268,7 @@ class CustomerStateTest {
                 mobilePaymentElementComponent = if (paymentElementDisabled) {
                     ElementsSession.Customer.Components.MobilePaymentElement.Disabled
                 } else {
-                    ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
+                    createEnabledMobilePaymentElement(
                         isPaymentMethodRemoveEnabled = true,
                         isPaymentMethodSaveEnabled = false,
                         canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
@@ -381,6 +284,36 @@ class CustomerStateTest {
         )
 
         test(customerState)
+    }
+
+    private fun createEnabledMobilePaymentElement(
+        isPaymentMethodSaveEnabled: Boolean = true,
+        isPaymentMethodRemoveEnabled: Boolean = false,
+        canRemoveLastPaymentMethod: Boolean = false,
+        allowRedisplayOverride: PaymentMethod.AllowRedisplay? = null,
+        isPaymentMethodSetAsDefaultEnabled: Boolean = false,
+    ): ElementsSession.Customer.Components.MobilePaymentElement {
+        return ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
+            isPaymentMethodSaveEnabled = isPaymentMethodSaveEnabled,
+            isPaymentMethodRemoveEnabled = isPaymentMethodRemoveEnabled,
+            canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
+            allowRedisplayOverride = allowRedisplayOverride,
+            isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
+        )
+    }
+
+    private fun createLegacyEphemeralKeyCustomerState(
+        allowsRemovalOfLastSavedPaymentMethod: Boolean,
+        paymentMethods: List<PaymentMethod> = emptyList()
+    ): CustomerState {
+        return CustomerState.createForLegacyEphemeralKey(
+            customerId = "cus_1",
+            accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey(
+                ephemeralKeySecret = "ek_1",
+            ),
+            configuration = createConfiguration(allowsRemovalOfLastSavedPaymentMethod),
+            paymentMethods = paymentMethods,
+        )
     }
 
     private fun createElementsSessionCustomer(

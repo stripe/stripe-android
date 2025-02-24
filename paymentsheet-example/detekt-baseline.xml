@@ -9,7 +9,6 @@
     <ID>LongMethod:AppearanceBottomSheetDialogFragment.kt$@Composable private fun Colors( currentAppearance: PaymentSheet.Appearance, updateAppearance: (PaymentSheet.Appearance) -> Unit, )</ID>
     <ID>LongMethod:AppearanceBottomSheetDialogFragment.kt$@Composable private fun EmbeddedPicker( embeddedAppearance: EmbeddedAppearance, updateEmbedded: (EmbeddedAppearance) -> Unit )</ID>
     <ID>LongMethod:AppearanceBottomSheetDialogFragment.kt$@Composable private fun PrimaryButton( currentAppearance: PaymentSheet.Appearance, updateAppearance: (PaymentSheet.Appearance) -> Unit, )</ID>
-    <ID>LongMethod:Receipt.kt$@Composable fun Receipt( isLoading: Boolean, cartState: CartState, isEditable: Boolean = false, onQuantityChanged: (CartProduct.Id, Int) -> Unit = { _, _ -> }, bottomContent: @Composable () -> Unit, )</ID>
     <ID>MagicNumber:AppearanceBottomSheetDialogFragment.kt$16</ID>
     <ID>MagicNumber:AppearanceBottomSheetDialogFragment.kt$33</ID>
     <ID>MagicNumber:CartProduct.kt$100</ID>

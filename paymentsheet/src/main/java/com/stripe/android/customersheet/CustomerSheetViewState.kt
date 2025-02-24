@@ -47,7 +47,6 @@ internal sealed class CustomerSheetViewState(
     ) {
         override fun topBarState(onEditIconPressed: () -> Unit): PaymentSheetTopBarState {
             return PaymentSheetTopBarStateFactory.create(
-                hasBackStack = canNavigateBack,
                 isLiveMode = isLiveMode,
                 editable = PaymentSheetTopBarState.Editable.Never,
             )
@@ -61,7 +60,7 @@ internal sealed class CustomerSheetViewState(
         override val isLiveMode: Boolean,
         override val isProcessing: Boolean,
         val isEditing: Boolean,
-        val isGooglePayEnabled: Boolean,
+        val showGooglePay: Boolean,
         val primaryButtonVisible: Boolean,
         val canEdit: Boolean,
         val canRemovePaymentMethods: Boolean,
@@ -80,7 +79,6 @@ internal sealed class CustomerSheetViewState(
 
         override fun topBarState(onEditIconPressed: () -> Unit): PaymentSheetTopBarState {
             return PaymentSheetTopBarStateFactory.create(
-                hasBackStack = canNavigateBack,
                 isLiveMode = isLiveMode,
                 editable = PaymentSheetTopBarState.Editable.Maybe(
                     isEditing = isEditing,
@@ -119,7 +117,6 @@ internal sealed class CustomerSheetViewState(
     ) {
         override fun topBarState(onEditIconPressed: () -> Unit): PaymentSheetTopBarState {
             return PaymentSheetTopBarStateFactory.create(
-                hasBackStack = canNavigateBack,
                 isLiveMode = isLiveMode,
                 editable = PaymentSheetTopBarState.Editable.Never,
             )
@@ -136,7 +133,6 @@ internal sealed class CustomerSheetViewState(
     ) {
         override fun topBarState(onEditIconPressed: () -> Unit): PaymentSheetTopBarState {
             return PaymentSheetTopBarStateFactory.create(
-                hasBackStack = canNavigateBack,
                 isLiveMode = isLiveMode,
                 editable = PaymentSheetTopBarState.Editable.Never,
             )

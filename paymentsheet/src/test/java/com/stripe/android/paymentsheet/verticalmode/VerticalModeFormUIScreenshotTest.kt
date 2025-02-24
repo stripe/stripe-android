@@ -60,7 +60,7 @@ internal class VerticalModeFormUIScreenshotTest {
                 metadata = metadata,
             )
         )
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = true)
 
         paparazziRule.snapshot {
             ViewModelStoreOwnerContext {
@@ -78,7 +78,7 @@ internal class VerticalModeFormUIScreenshotTest {
                 metadata = metadata,
             )
         )
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = true)
         viewModel.onError("An error occurred.".resolvableString)
 
         paparazziRule.snapshot {
@@ -95,11 +95,10 @@ internal class VerticalModeFormUIScreenshotTest {
             FakeVerticalModeFormInteractor.create(
                 paymentMethodCode = "card",
                 metadata = metadata,
-                canGoBack = false,
             ),
             showsWalletHeader = true,
         )
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
         viewModel.walletsStateSource.value = WalletsState(
             link = WalletsState.Link(
                 email = null,
@@ -121,7 +120,7 @@ internal class VerticalModeFormUIScreenshotTest {
     @Test
     fun fullCardFormWithSaveForLater() {
         val metadata = PaymentMethodMetadataFactory.create(
-            hasCustomerConfiguration = true,
+            hasCustomerConfiguration = true
         )
         val initialScreen = VerticalModeForm(
             FakeVerticalModeFormInteractor.create(
@@ -129,7 +128,7 @@ internal class VerticalModeFormUIScreenshotTest {
                 metadata = metadata,
             )
         )
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = true)
 
         paparazziRule.snapshot {
             ViewModelStoreOwnerContext {
@@ -149,10 +148,9 @@ internal class VerticalModeFormUIScreenshotTest {
             FakeVerticalModeFormInteractor.create(
                 paymentMethodCode = "cashapp",
                 metadata = metadata,
-                canGoBack = false,
             )
         )
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen)
+        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = false)
         viewModel.primaryButtonUiStateSource.update { original ->
             original?.copy(enabled = true)
         }
@@ -184,6 +182,7 @@ internal class VerticalModeFormUIScreenshotTest {
         paymentMethodCode: PaymentMethodCode,
         metadata: PaymentMethodMetadata,
         isProcessing: Boolean = false,
+        showsWalletHeader: Boolean = false,
     ) {
         ViewModelStoreOwnerContext {
             VerticalModeFormUI(
@@ -192,6 +191,7 @@ internal class VerticalModeFormUIScreenshotTest {
                     metadata = metadata,
                     isProcessing = isProcessing,
                 ),
+                showsWalletHeader = showsWalletHeader,
             )
         }
     }

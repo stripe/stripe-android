@@ -28,6 +28,10 @@
   <string name="stripe_blik_code">BLIK kods</string>
   <!-- Label for Boleto Payment method Tax ID -->
   <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
+  <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
+  <string name="stripe_card_brand_not_accepted">(netiek pieņemts)</string>
+  <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
+  <string name="stripe_card_brand_not_accepted_with_brand">%1$s (netiek pieņemts)</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">Turpinot, jūs atļaujat %1$s iekasēt no jūsu Cash App konta par šo un turpmākiem maksājumiem saskaņā ar %2$s noteikumiem, līdz šī atļauja netiek atsaukta. To varat mainīt jebkurā laikā Cash App iestatījumos.</string>
   <!-- Title for the contact information section -->
@@ -101,6 +105,8 @@
   <string name="stripe_scan_card">Skenēt karti</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Norādot savu maksājuma informāciju un apstiprinot šo maksājumu, jūs pilnvarojat A) %s un Stripe (mūsu maksājumu pakalpojumu sniedzēju) nosūtīt rīkojumu jūsu bankai debetēt jūsu kontu un B) jūsu banku debetēt jūsu kontu saskaņā ar šo rīkojumu. Jums ir tiesības pieprasīt naudas līdzekļu atmaksu no jūsu bankas saskaņā ar jūsu bankas konta apkalpošanas līguma noteikumiem un nosacījumiem. Naudas līdzekļu atmaksa jāpieprasa astoņu nedēļu laikā, sākot no jūsu konta debetēšanas datuma. Jūsu tiesības ir paskaidrotas paziņojumā, kuru varat saņemt savā bankā. Jūs piekrītat saņemt paziņojumus par turpmākajiem debeta darījumiem vismaz divas dienas pirms to veikšanas.</string>
+  <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
+  <string name="stripe_set_as_default_payment_method">Iestatīt kā noklusējuma maksājuma veidu</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Iestatīt</string>
   <!-- Label for UPI ID number field on form -->

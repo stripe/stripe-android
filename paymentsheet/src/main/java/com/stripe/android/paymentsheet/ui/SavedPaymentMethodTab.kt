@@ -2,12 +2,14 @@
 
 package com.stripe.android.paymentsheet.ui
 
+import android.content.res.Configuration
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -63,6 +65,7 @@ internal fun SavedPaymentMethodTab(
     viewWidth: Dp,
     isSelected: Boolean,
     shouldShowModifyBadge: Boolean,
+    shouldShowDefaultBadge: Boolean,
     isEnabled: Boolean,
     isClickable: Boolean = isEnabled,
     iconRes: Int,
@@ -110,6 +113,13 @@ internal fun SavedPaymentMethodTab(
                             contentDescription = description.readNumbersAsIndividualDigits()
                         }
                 )
+
+                if (shouldShowDefaultBadge) {
+                    DefaultPaymentMethodLabel(
+                        modifier = Modifier
+                            .padding(top = 4.dp, start = 6.dp, end = 6.dp)
+                    )
+                }
             }
         },
         modifier = modifier
@@ -130,7 +140,7 @@ private fun SavedPaymentMethodBadge(
         ModifyBadge(
             onModifyAccessibilityDescription = onModifyAccessibilityDescription,
             onPressed = { onModifyListener?.invoke() },
-            modifier = Modifier.offset(x = (-14).dp, y = 1.dp),
+            modifier = Modifier.offset(x = (-14).dp, y = 1.dp).focusable(),
         )
     } else if (isSelected) {
         SelectedBadge(
@@ -206,6 +216,7 @@ private fun ModifyBadge(
 }
 
 @Preview(name = "Selected payment option")
+@Preview(name = "Selected payment option", uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun SavedPaymentMethodTabUISelected() {
     StripeTheme {
@@ -213,8 +224,9 @@ private fun SavedPaymentMethodTabUISelected() {
             viewWidth = 100.dp,
             isSelected = true,
             shouldShowModifyBadge = false,
+            shouldShowDefaultBadge = false,
             isEnabled = true,
-            iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
+            iconRes = R.drawable.stripe_ic_paymentsheet_card_visa_ref,
             labelText = "MasterCard",
             description = "MasterCard",
             onItemSelectedListener = {},
@@ -230,8 +242,27 @@ private fun SavedPaymentMethodTabUIModifiable() {
             viewWidth = 100.dp,
             isSelected = false,
             shouldShowModifyBadge = true,
+            shouldShowDefaultBadge = false,
             isEnabled = true,
-            iconRes = R.drawable.stripe_ic_paymentsheet_card_visa,
+            iconRes = R.drawable.stripe_ic_paymentsheet_card_visa_ref,
+            labelText = "MasterCard",
+            description = "MasterCard",
+            onItemSelectedListener = {},
+        )
+    }
+}
+
+@Preview(name = "Default Payment option in modifiable mode")
+@Composable
+private fun DefaultSavedPaymentMethodTabUIModifiable() {
+    StripeTheme {
+        SavedPaymentMethodTab(
+            viewWidth = 100.dp,
+            isSelected = false,
+            shouldShowModifyBadge = true,
+            shouldShowDefaultBadge = true,
+            isEnabled = true,
+            iconRes = R.drawable.stripe_ic_paymentsheet_card_visa_ref,
             labelText = "MasterCard",
             description = "MasterCard",
             onItemSelectedListener = {},

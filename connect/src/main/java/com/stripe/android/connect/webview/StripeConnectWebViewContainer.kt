@@ -33,23 +33,29 @@ import com.stripe.android.connect.StripeEmbeddedComponentListener
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.databinding.StripeConnectWebviewBinding
 import com.stripe.android.connect.toJsonObject
+import com.stripe.android.connect.util.AndroidClock
 import com.stripe.android.connect.webview.serialization.AccountSessionClaimedMessage
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.ConnectJson
+import com.stripe.android.connect.webview.serialization.OpenFinancialConnectionsMessage
 import com.stripe.android.connect.webview.serialization.PageLoadMessage
 import com.stripe.android.connect.webview.serialization.SecureWebViewMessage
+import com.stripe.android.connect.webview.serialization.SetCollectMobileFinancialConnectionsResultPayloadJs
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
 import com.stripe.android.connect.webview.serialization.toJs
 import com.stripe.android.core.Logger
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.put
 
 @PrivateBetaConnectSDK
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -71,14 +77,16 @@ interface StripeConnectWebViewContainer<Listener, Props>
 @OptIn(PrivateBetaConnectSDK::class)
 internal interface StripeConnectWebViewContainerInternal {
     /**
+     * Load the given URL in the WebView.
+     */
+    fun loadUrl(url: String)
+
+    /**
      * Update the appearance of the Connect instance.
      */
     fun updateConnectInstance(appearance: Appearance)
 
-    /**
-     * Load the given URL in the WebView.
-     */
-    fun loadUrl(url: String)
+    fun setCollectMobileFinancialConnectionsResult(id: String, result: FinancialConnectionsSheetResult?)
 }
 
 @OptIn(PrivateBetaConnectSDK::class)
@@ -202,6 +210,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
         this.controller = StripeConnectWebViewContainerController(
             view = this,
             analyticsService = analyticsService,
+            clock = AndroidClock(),
             embeddedComponentManager = embeddedComponentManager,
             embeddedComponent = embeddedComponent,
             listener = listener,
@@ -246,6 +255,27 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
         )
     }
 
+    override fun setCollectMobileFinancialConnectionsResult(
+        id: String,
+        result: FinancialConnectionsSheetResult?
+    ) {
+        val payload = SetCollectMobileFinancialConnectionsResultPayloadJs.from(id, result)
+        callSetterWithSerializableValue(
+            setter = "setCollectMobileFinancialConnectionsResult",
+            value = ConnectJson.encodeToJsonElement(payload).jsonObject
+        )
+    }
+
+    private fun callSetterWithSerializableValue(setter: String, value: JsonElement) {
+        webView?.evaluateSdkJs(
+            "callSetterWithSerializableValue",
+            buildJsonObject {
+                put("setter", setter)
+                put("value", value)
+            }
+        )
+    }
+
     override fun loadUrl(url: String) {
         webView?.loadUrl(url)
     }
@@ -266,7 +296,11 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
     @VisibleForTesting
     internal inner class StripeConnectWebViewClient : WebViewClient() {
         override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
-            controller?.onPageStarted()
+            controller?.onPageStarted(url)
+        }
+
+        override fun onPageFinished(view: WebView?, url: String?) {
+            controller?.onPageFinished()
         }
 
         override fun onReceivedHttpError(
@@ -371,7 +405,10 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
 
         @JavascriptInterface
         fun onSetterFunctionCalled(message: String) {
-            val parsed = ConnectJson.decodeFromString<SetterFunctionCalledMessage>(message)
+            val parsed = tryDeserializeWebMessage<SetterFunctionCalledMessage>(
+                webFunctionName = "onSetterFunctionCalled",
+                message = message,
+            ) ?: return
             logger.debug("Setter function called: $parsed")
 
             controller?.onReceivedSetterFunctionCalled(parsed)
@@ -379,24 +416,50 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
 
         @JavascriptInterface
         fun openSecureWebView(message: String) {
-            val secureWebViewData = ConnectJson.decodeFromString<SecureWebViewMessage>(message)
+            val secureWebViewData = tryDeserializeWebMessage<SecureWebViewMessage>(
+                webFunctionName = "openSecureWebView",
+                message = message,
+            )
             logger.debug("Open secure web view with data: $secureWebViewData")
         }
 
         @JavascriptInterface
         fun pageDidLoad(message: String) {
-            val pageLoadMessage = ConnectJson.decodeFromString<PageLoadMessage>(message)
+            val pageLoadMessage = tryDeserializeWebMessage<PageLoadMessage>(
+                webFunctionName = "pageDidLoad",
+                message = message,
+            ) ?: return
             logger.debug("Page did load: $pageLoadMessage")
 
-            controller?.onReceivedPageDidLoad()
+            controller?.onReceivedPageDidLoad(pageLoadMessage.pageViewId)
         }
 
         @JavascriptInterface
         fun accountSessionClaimed(message: String) {
-            val accountSessionClaimedMessage = ConnectJson.decodeFromString<AccountSessionClaimedMessage>(message)
+            val accountSessionClaimedMessage = tryDeserializeWebMessage<AccountSessionClaimedMessage>(
+                webFunctionName = "accountSessionClaimed",
+                message = message,
+            ) ?: return
             logger.debug("Account session claimed: $accountSessionClaimedMessage")
 
             controller?.onMerchantIdChanged(accountSessionClaimedMessage.merchantId)
+        }
+
+        @JavascriptInterface
+        fun openFinancialConnections(message: String) {
+            val parsed = ConnectJson.decodeFromString<OpenFinancialConnectionsMessage>(message)
+            logger.debug("Open FinancialConnections: $parsed")
+
+            val webView = this@StripeConnectWebViewContainerImpl.webView
+                ?: return
+            val lifecycleScope = webView.findViewTreeLifecycleOwner()?.lifecycleScope
+                ?: return
+            lifecycleScope.launch {
+                controller?.onOpenFinancialConnections(
+                    context = webView.context,
+                    message = parsed,
+                )
+            }
         }
 
         @JavascriptInterface
@@ -404,6 +467,21 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
             return runBlocking {
                 checkNotNull(controller?.fetchClientSecret())
             }
+        }
+    }
+
+    private inline fun <reified T> tryDeserializeWebMessage(
+        webFunctionName: String,
+        message: String,
+    ): T? {
+        return try {
+            ConnectJson.decodeFromString<T>(message)
+        } catch (e: IllegalArgumentException) {
+            controller?.onErrorDeserializingWebMessage(
+                webFunctionName = webFunctionName,
+                error = e,
+            )
+            null
         }
     }
 

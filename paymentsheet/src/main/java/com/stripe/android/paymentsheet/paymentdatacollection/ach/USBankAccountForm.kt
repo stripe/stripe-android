@@ -36,10 +36,12 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection.New
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.BankFormScreenState.PromoBadgeState
-import com.stripe.android.paymentsheet.ui.Mandate
 import com.stripe.android.paymentsheet.ui.PromoBadge
+import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
+import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
+import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElementUI
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.uicore.elements.AddressController
 import com.stripe.android.uicore.elements.AddressElementUI
@@ -68,6 +70,7 @@ internal fun USBankAccountForm(
     formArgs: FormArguments,
     usBankAccountFormArgs: USBankAccountFormArguments,
     modifier: Modifier = Modifier,
+    enabled: Boolean
 ) {
     val viewModel = viewModel<USBankAccountFormViewModel>(
         factory = USBankAccountFormViewModel.Factory {
@@ -85,12 +88,14 @@ internal fun USBankAccountForm(
                 onBehalfOf = usBankAccountFormArgs.onBehalfOf,
                 savedPaymentMethod = usBankAccountFormArgs.draftPaymentSelection as? New.USBankAccount,
                 shippingDetails = usBankAccountFormArgs.shippingDetails,
+                shouldShowSetAsDefaultCheckbox = usBankAccountFormArgs.shouldShowSetAsDefaultCheckbox
             )
         },
     )
 
     val state by viewModel.currentScreenState.collectAsState()
     val lastTextFieldIdentifier by viewModel.lastTextFieldIdentifier.collectAsState()
+    val isEnabled = !state.isProcessing && enabled
 
     USBankAccountEmitters(
         viewModel = viewModel,
@@ -102,7 +107,7 @@ internal fun USBankAccountForm(
         formArgs = formArgs,
         instantDebits = usBankAccountFormArgs.instantDebits,
         isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
-        showCheckbox = usBankAccountFormArgs.showCheckbox,
+        showCheckboxes = usBankAccountFormArgs.showCheckbox,
         nameController = viewModel.nameController,
         emailController = viewModel.emailController,
         phoneController = viewModel.phoneController,
@@ -110,8 +115,10 @@ internal fun USBankAccountForm(
         lastTextFieldIdentifier = lastTextFieldIdentifier,
         sameAsShippingElement = viewModel.sameAsShippingElement,
         saveForFutureUseElement = viewModel.saveForFutureUseElement,
+        setAsDefaultPaymentMethodElement = viewModel.setAsDefaultPaymentMethodElement,
         onRemoveAccount = viewModel::reset,
         modifier = modifier,
+        enabled = isEnabled
     )
 }
 
@@ -121,7 +128,7 @@ internal fun BankAccountForm(
     formArgs: FormArguments,
     instantDebits: Boolean,
     isPaymentFlow: Boolean,
-    showCheckbox: Boolean,
+    showCheckboxes: Boolean,
     nameController: TextFieldController,
     emailController: TextFieldController,
     phoneController: PhoneNumberController,
@@ -129,7 +136,9 @@ internal fun BankAccountForm(
     lastTextFieldIdentifier: IdentifierSpec?,
     sameAsShippingElement: SameAsShippingElement?,
     saveForFutureUseElement: SaveForFutureUseElement,
+    setAsDefaultPaymentMethodElement: SetAsDefaultPaymentMethodElement,
     modifier: Modifier = Modifier,
+    enabled: Boolean,
     onRemoveAccount: () -> Unit,
 ) {
     Column(modifier.fillMaxWidth()) {
@@ -137,25 +146,26 @@ internal fun BankAccountForm(
             instantDebits = instantDebits,
             formArgs = formArgs,
             isPaymentFlow = isPaymentFlow,
-            isProcessing = state.isProcessing,
             nameController = nameController,
             emailController = emailController,
             phoneController = phoneController,
             addressController = addressController,
             lastTextFieldIdentifier = lastTextFieldIdentifier,
             sameAsShippingElement = sameAsShippingElement,
+            enabled = enabled
         )
 
         state.linkedBankAccount?.let { linkedBankAccount ->
             AccountDetailsForm(
                 modifier = Modifier.padding(top = 16.dp),
-                showCheckbox = showCheckbox,
-                isProcessing = state.isProcessing,
+                showCheckboxes = showCheckboxes,
                 bankName = linkedBankAccount.bankName,
                 last4 = linkedBankAccount.last4,
                 promoBadgeState = state.promoBadgeState,
                 saveForFutureUseElement = saveForFutureUseElement,
+                setAsDefaultPaymentMethodElement = setAsDefaultPaymentMethodElement,
                 onRemoveAccount = onRemoveAccount,
+                enabled = enabled
             )
         }
 
@@ -184,7 +194,7 @@ private fun PromoDisclaimer(
 private fun BillingDetailsForm(
     instantDebits: Boolean,
     formArgs: FormArguments,
-    isProcessing: Boolean,
+    enabled: Boolean,
     isPaymentFlow: Boolean,
     nameController: TextFieldController,
     emailController: TextFieldController,
@@ -222,7 +232,7 @@ private fun BillingDetailsForm(
                 ) {
                     TextField(
                         textFieldController = nameController,
-                        enabled = !isProcessing,
+                        enabled = enabled,
                         imeAction = ImeAction.Next,
                     )
                 }
@@ -241,7 +251,7 @@ private fun BillingDetailsForm(
                 ) {
                     TextField(
                         textFieldController = emailController,
-                        enabled = !isProcessing,
+                        enabled = enabled,
                         imeAction = if (lastTextFieldIdentifier == IdentifierSpec.Email) {
                             ImeAction.Done
                         } else {
@@ -253,7 +263,7 @@ private fun BillingDetailsForm(
         }
         if (formArgs.billingDetailsCollectionConfiguration.phone == CollectionMode.Always) {
             PhoneSection(
-                isProcessing = isProcessing,
+                enabled = enabled,
                 phoneController = phoneController,
                 imeAction = if (lastTextFieldIdentifier == IdentifierSpec.Phone) {
                     ImeAction.Done
@@ -265,7 +275,7 @@ private fun BillingDetailsForm(
         }
         if (formArgs.billingDetailsCollectionConfiguration.address == AddressCollectionMode.Full) {
             AddressSection(
-                isProcessing = isProcessing,
+                enabled = enabled,
                 addressController = addressController,
                 lastTextFieldIdentifier = lastTextFieldIdentifier,
                 sameAsShippingElement = sameAsShippingElement,
@@ -278,7 +288,7 @@ private fun BillingDetailsForm(
 @Suppress("SpreadOperator")
 @Composable
 private fun PhoneSection(
-    isProcessing: Boolean,
+    enabled: Boolean,
     phoneController: PhoneNumberController,
     imeAction: ImeAction,
     modifier: Modifier = Modifier,
@@ -306,7 +316,7 @@ private fun PhoneSection(
             error = sectionErrorString,
         ) {
             PhoneNumberElementUI(
-                enabled = !isProcessing,
+                enabled = enabled,
                 controller = phoneController,
                 imeAction = imeAction,
             )
@@ -317,7 +327,7 @@ private fun PhoneSection(
 @Suppress("SpreadOperator")
 @Composable
 private fun AddressSection(
-    isProcessing: Boolean,
+    enabled: Boolean,
     addressController: AddressController,
     lastTextFieldIdentifier: IdentifierSpec?,
     sameAsShippingElement: SameAsShippingElement?,
@@ -346,7 +356,7 @@ private fun AddressSection(
                 error = sectionErrorString,
             ) {
                 AddressElementUI(
-                    enabled = !isProcessing,
+                    enabled = enabled,
                     controller = addressController,
                     hiddenIdentifiers = emptySet(),
                     lastTextFieldIdentifier = lastTextFieldIdentifier,
@@ -362,16 +372,16 @@ private fun AddressSection(
 @Composable
 private fun AccountDetailsForm(
     modifier: Modifier = Modifier,
-    showCheckbox: Boolean,
-    isProcessing: Boolean,
+    showCheckboxes: Boolean,
+    enabled: Boolean,
     bankName: String?,
     last4: String?,
     promoBadgeState: PromoBadgeState?,
     saveForFutureUseElement: SaveForFutureUseElement,
+    setAsDefaultPaymentMethodElement: SetAsDefaultPaymentMethodElement,
     onRemoveAccount: () -> Unit,
 ) {
     var openDialog by rememberSaveable { mutableStateOf(false) }
-    val bankIcon = remember(bankName) { TransformToBankIcon(bankName) }
 
     Column(
         modifier
@@ -383,89 +393,133 @@ private fun AccountDetailsForm(
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        SectionCard(modifier = Modifier.fillMaxWidth()) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 56.dp)
-                    .padding(vertical = 12.dp)
-                    .padding(start = 16.dp)
-                    .padding(end = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Image(
-                        painter = painterResource(bankIcon),
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp),
-                    )
-
-                    Text(
-                        text = "$bankName •••• $last4",
-                        color = MaterialTheme.stripeColors.onComponent,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier
-                            .alpha(if (isProcessing) 0.5f else 1f)
-                            .weight(1f, fill = false),
-                    )
-
-                    promoBadgeState?.let { badgeState ->
-                        PromoBadge(
-                            text = badgeState.promoText,
-                            eligible = badgeState.eligible,
-                        )
-                    }
-                }
-
-                IconButton(
-                    enabled = !isProcessing,
-                    onClick = { openDialog = true },
-                    modifier = Modifier.size(24.dp),
-                ) {
-                    Icon(
-                        painter = painterResource(StripeR.drawable.stripe_ic_clear),
-                        contentDescription = null,
-                    )
-                }
+        BankAccountDetails(
+            enabled = enabled,
+            bankName = bankName,
+            last4 = last4,
+            promoBadgeState = promoBadgeState,
+            onIconButtonClick = {
+                openDialog = true
             }
-        }
-        if (showCheckbox) {
+        )
+        if (showCheckboxes) {
             SaveForFutureUseElementUI(
                 enabled = true,
                 element = saveForFutureUseElement,
                 modifier = Modifier.padding(top = 8.dp)
             )
+
+            SetAsDefaultPaymentMethodElementUI(
+                enabled = true,
+                element = setAsDefaultPaymentMethodElement,
+                modifier = Modifier.padding(top = 8.dp),
+            )
         }
     }
 
     if (openDialog && last4 != null) {
-        SimpleDialogElementUI(
-            titleText = stringResource(
-                id = R.string.stripe_paymentsheet_remove_bank_account_title
-            ),
-            messageText = stringResource(
-                id = R.string.stripe_bank_account_ending_in,
-                last4
-            ),
-            confirmText = stringResource(
-                id = StripeR.string.stripe_remove
-            ),
-            dismissText = stringResource(
-                id = StripeR.string.stripe_cancel
-            ),
-            destructive = true,
-            onConfirmListener = {
+        AccountDetailsRemoveBankDialog(
+            onDismiss = {
                 openDialog = false
+            },
+            onRemoveAccount = {
                 onRemoveAccount()
             },
-            onDismissListener = {
-                openDialog = false
-            }
+            last4 = last4
         )
     }
+}
+
+@Composable
+private fun BankAccountDetails(
+    bankName: String?,
+    enabled: Boolean,
+    last4: String?,
+    promoBadgeState: PromoBadgeState?,
+    onIconButtonClick: () -> Unit,
+) {
+    val bankIcon = remember(bankName) { TransformToBankIcon(bankName) }
+
+    SectionCard(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 56.dp)
+                .padding(vertical = 12.dp)
+                .padding(start = 16.dp)
+                .padding(end = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.weight(1f)
+            ) {
+                Image(
+                    painter = painterResource(bankIcon),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                )
+
+                Text(
+                    text = "$bankName •••• $last4",
+                    color = MaterialTheme.stripeColors.onComponent,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .alpha(if (!enabled) 0.5f else 1f)
+                        .weight(1f, fill = false),
+                )
+
+                promoBadgeState?.let { badgeState ->
+                    PromoBadge(
+                        text = badgeState.promoText,
+                        eligible = badgeState.eligible,
+                    )
+                }
+            }
+
+            IconButton(
+                enabled = enabled,
+                onClick = { onIconButtonClick() },
+                modifier = Modifier.size(24.dp),
+            ) {
+                Icon(
+                    painter = painterResource(StripeR.drawable.stripe_ic_clear),
+                    contentDescription = null,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AccountDetailsRemoveBankDialog(
+    onDismiss: () -> Unit,
+    onRemoveAccount: () -> Unit,
+    last4: String,
+) {
+    SimpleDialogElementUI(
+        titleText = stringResource(
+            id = R.string.stripe_paymentsheet_remove_bank_account_title
+        ),
+        messageText = stringResource(
+            id = R.string.stripe_bank_account_ending_in,
+            last4
+        ),
+        confirmText = stringResource(
+            id = StripeR.string.stripe_remove
+        ),
+        dismissText = stringResource(
+            id = StripeR.string.stripe_cancel
+        ),
+        destructive = true,
+        onConfirmListener = {
+            onDismiss()
+            onRemoveAccount()
+        },
+        onDismissListener = {
+            onDismiss()
+        }
+    )
 }

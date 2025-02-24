@@ -127,6 +127,16 @@ object PaymentMethodFactory {
         )
     }
 
+    fun bacs(): PaymentMethod {
+        return PaymentMethod(
+            id = "pm_1234",
+            created = 123456789L,
+            liveMode = false,
+            type = PaymentMethod.Type.BacsDebit,
+            code = PaymentMethod.Type.BacsDebit.code,
+        )
+    }
+
     fun sepaDebit(): PaymentMethod {
         return PaymentMethod(
             id = "pm_1234",
@@ -213,6 +223,23 @@ object PaymentMethodFactory {
         usBankAccountJson.put("networks", networksJson)
 
         paymentMethodJson.put("us_bank_account", usBankAccountJson)
+
+        return paymentMethodJson
+    }
+
+    fun convertSepaPaymentMethodToJson(paymentMethod: PaymentMethod): JSONObject {
+        val paymentMethodJson = convertGenericPaymentMethodToJson(paymentMethod)
+
+        val sepaDebitJson = JSONObject()
+        // Test values from the SEPA account with the test IBAN we use for e2e tests: DE89370400440532013000
+        sepaDebitJson.put("bank_code", "37040044")
+        sepaDebitJson.put("branch_code", "")
+        sepaDebitJson.put("country", "DE")
+        sepaDebitJson.put("fingerprint", "vifs0Ho7vwRn1Miu")
+        sepaDebitJson.put("last4", "3000")
+
+        paymentMethodJson.put("type", "sepa_debit")
+        paymentMethodJson.put("sepa_debit", sepaDebitJson)
 
         return paymentMethodJson
     }

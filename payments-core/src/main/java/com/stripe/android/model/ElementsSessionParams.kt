@@ -14,8 +14,9 @@ sealed interface ElementsSessionParams : Parcelable {
     val customerSessionClientSecret: String?
     val locale: String?
     val expandFields: List<String>
-    val defaultPaymentMethodId: String?
+    val savedPaymentMethodSelectionId: String?
     val externalPaymentMethods: List<String>
+    val appId: String
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
@@ -23,8 +24,9 @@ sealed interface ElementsSessionParams : Parcelable {
         override val clientSecret: String,
         override val locale: String? = Locale.getDefault().toLanguageTag(),
         override val customerSessionClientSecret: String? = null,
-        override val defaultPaymentMethodId: String? = null,
+        override val savedPaymentMethodSelectionId: String? = null,
         override val externalPaymentMethods: List<String>,
+        override val appId: String,
     ) : ElementsSessionParams {
 
         override val type: String
@@ -40,8 +42,9 @@ sealed interface ElementsSessionParams : Parcelable {
         override val clientSecret: String,
         override val locale: String? = Locale.getDefault().toLanguageTag(),
         override val customerSessionClientSecret: String? = null,
-        override val defaultPaymentMethodId: String? = null,
+        override val savedPaymentMethodSelectionId: String? = null,
         override val externalPaymentMethods: List<String>,
+        override val appId: String,
     ) : ElementsSessionParams {
 
         override val type: String
@@ -57,8 +60,9 @@ sealed interface ElementsSessionParams : Parcelable {
         override val locale: String? = Locale.getDefault().toLanguageTag(),
         val deferredIntentParams: DeferredIntentParams,
         override val externalPaymentMethods: List<String>,
-        override val defaultPaymentMethodId: String? = null,
+        override val savedPaymentMethodSelectionId: String? = null,
         override val customerSessionClientSecret: String? = null,
+        override val appId: String,
     ) : ElementsSessionParams {
 
         override val clientSecret: String?

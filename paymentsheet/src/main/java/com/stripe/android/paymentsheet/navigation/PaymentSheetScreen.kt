@@ -136,7 +136,6 @@ internal sealed interface PaymentSheetScreen {
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return interactor.state.mapAsStateFlow { state ->
                 PaymentSheetTopBarStateFactory.create(
-                    hasBackStack = false,
                     isLiveMode = interactor.isLiveMode,
                     editable = PaymentSheetTopBarState.Editable.Maybe(
                         isEditing = state.isEditing,
@@ -194,7 +193,6 @@ internal sealed interface PaymentSheetScreen {
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
                 PaymentSheetTopBarStateFactory.create(
-                    hasBackStack = true,
                     isLiveMode = interactor.isLiveMode,
                     editable = PaymentSheetTopBarState.Editable.Never,
                 )
@@ -245,7 +243,6 @@ internal sealed interface PaymentSheetScreen {
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
                 PaymentSheetTopBarStateFactory.create(
-                    hasBackStack = false,
                     isLiveMode = interactor.isLiveMode,
                     editable = PaymentSheetTopBarState.Editable.Never,
                 )
@@ -296,7 +293,6 @@ internal sealed interface PaymentSheetScreen {
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
                 PaymentSheetTopBarStateFactory.create(
-                    hasBackStack = false,
                     isLiveMode = interactor.isLiveMode,
                     editable = PaymentSheetTopBarState.Editable.Never,
                 )
@@ -342,7 +338,6 @@ internal sealed interface PaymentSheetScreen {
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return stateFlowOf(
                 PaymentSheetTopBarStateFactory.create(
-                    hasBackStack = interactor.canGoBack(),
                     isLiveMode = interactor.isLiveMode,
                     editable = PaymentSheetTopBarState.Editable.Never,
                 )
@@ -359,7 +354,7 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(modifier: Modifier) {
-            VerticalModeFormUI(interactor, modifier)
+            VerticalModeFormUI(interactor, showsWalletHeader, modifier)
         }
 
         override fun close() {
@@ -379,29 +374,13 @@ internal sealed interface PaymentSheetScreen {
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return interactor.state.mapAsStateFlow { state ->
-                PaymentSheetTopBarStateFactory.create(
-                    hasBackStack = true,
-                    isLiveMode = interactor.isLiveMode,
-                    editable = PaymentSheetTopBarState.Editable.Maybe(
-                        isEditing = state.isEditing,
-                        canEdit = state.canEdit,
-                        onEditIconPressed = {
-                            interactor.handleViewAction(ManageScreenInteractor.ViewAction.ToggleEdit)
-                        },
-                    ),
-                )
+                state.topBarState(interactor)
             }
         }
 
         override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?> {
             return interactor.state.mapAsStateFlow { state ->
-                val title = if (state.isEditing) {
-                    R.string.stripe_paymentsheet_manage_payment_methods
-                } else {
-                    R.string.stripe_paymentsheet_select_your_payment_method
-                }
-
-                title.resolvableString
+                state.title
             }
         }
 
@@ -437,7 +416,6 @@ internal sealed interface PaymentSheetScreen {
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
             return interactor.cvcCompletionState.mapAsStateFlow { complete ->
                 PaymentSheetTopBarStateFactory.create(
-                    hasBackStack = false,
                     isLiveMode = interactor.viewState.value.isTestMode.not(),
                     editable = PaymentSheetTopBarState.Editable.Maybe(
                         isEditing = complete is CvcCompletionState.Incomplete,
@@ -470,15 +448,7 @@ internal sealed interface PaymentSheetScreen {
         override val walletsDividerSpacing: Dp = verticalModeWalletsDividerSpacing
         override val showsMandates: Boolean = false
 
-        override fun topBarState(): StateFlow<PaymentSheetTopBarState?> {
-            return stateFlowOf(
-                PaymentSheetTopBarStateFactory.create(
-                    hasBackStack = true,
-                    isLiveMode = interactor.isLiveMode,
-                    editable = PaymentSheetTopBarState.Editable.Never,
-                )
-            )
-        }
+        override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(interactor.topBarState)
 
         override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?> {
             return stateFlowOf(interactor.screenTitle)

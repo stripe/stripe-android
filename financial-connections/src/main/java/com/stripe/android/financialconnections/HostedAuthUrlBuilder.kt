@@ -14,13 +14,14 @@ internal object HostedAuthUrlBuilder {
     fun create(
         args: FinancialConnectionsSheetActivityArgs,
         manifest: FinancialConnectionsSessionManifest,
+        prefillDetails: PrefillDetails? = args.elementsSessionContext?.prefillDetails,
     ): String? {
         return create(
             hostedAuthUrl = manifest.hostedAuthUrl,
             isInstantDebits = args is FinancialConnectionsSheetActivityArgs.ForInstantDebits,
             linkMode = args.elementsSessionContext?.linkMode,
             billingDetails = args.elementsSessionContext?.billingDetails,
-            prefillDetails = args.elementsSessionContext?.prefillDetails,
+            prefillDetails = prefillDetails,
             incentiveEligibilitySession = args.elementsSessionContext?.incentiveEligibilitySession,
         )
     }
@@ -54,6 +55,9 @@ internal object HostedAuthUrlBuilder {
             phone?.let { queryParams.add("linkMobilePhone=$it") }
             phoneCountryCode?.let { queryParams.add("linkMobilePhoneCountry=$it") }
         }
+
+        // hint for frontend to understand the surface launching the web flow.
+        queryParams.add("launched_by=android_sdk")
 
         return queryParams.joinToString("&")
     }

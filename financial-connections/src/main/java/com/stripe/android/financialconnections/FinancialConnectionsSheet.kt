@@ -10,6 +10,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.LinkMode
 import kotlinx.parcelize.Parcelize
+import java.io.Serializable
 
 /**
  * A drop in class to present the Financial Connections Auth Flow.
@@ -78,7 +79,12 @@ class FinancialConnectionsSheet internal constructor(
             val email: String?,
             val phone: String?,
             val phoneCountryCode: String?,
-        ) : Parcelable
+        ) : Parcelable, Serializable {
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            companion object {
+                private const val serialVersionUID: Long = 626669472462415908L
+            }
+        }
     }
 
     /**

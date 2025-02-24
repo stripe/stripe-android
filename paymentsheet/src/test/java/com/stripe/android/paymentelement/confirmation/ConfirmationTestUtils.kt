@@ -110,6 +110,10 @@ internal fun ConfirmationHandler.Option.asSaved(): PaymentMethodConfirmationOpti
     return this as PaymentMethodConfirmationOption.Saved
 }
 
+internal fun ConfirmationHandler.Option.asNew(): PaymentMethodConfirmationOption.New {
+    return this as PaymentMethodConfirmationOption.New
+}
+
 internal fun ConfirmationDefinition.Result?.asSucceeded(): ConfirmationDefinition.Result.Succeeded {
     return this as ConfirmationDefinition.Result.Succeeded
 }

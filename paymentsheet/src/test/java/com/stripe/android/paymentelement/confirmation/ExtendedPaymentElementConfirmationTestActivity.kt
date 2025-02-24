@@ -23,6 +23,10 @@ import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
+import com.stripe.android.link.LinkConfigurationCoordinator
+import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.gate.DefaultLinkGate
+import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
@@ -34,6 +38,7 @@ import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.utils.FakeDurationProvider
+import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
@@ -114,6 +119,9 @@ internal interface ExtendedPaymentElementConfirmationTestModule {
     @Binds
     fun bindsStripeRepository(repository: StripeApiRepository): StripeRepository
 
+    @Binds
+    fun bindLinkGateFactory(linkGateFactory: DefaultLinkGate.Factory): LinkGate.Factory
+
     companion object {
         @Provides
         fun providesContext(application: Application): Context = application
@@ -159,5 +167,16 @@ internal interface ExtendedPaymentElementConfirmationTestModule {
         @Provides
         @Named(STRIPE_ACCOUNT_ID)
         fun providesStripeAccountId(config: PaymentConfiguration): () -> String? = { config.stripeAccountId }
+
+        @Provides
+        @Singleton
+        fun providesFakeLinkConfigurationCoordinator(): LinkConfigurationCoordinator =
+            FakeLinkConfigurationCoordinator()
+
+        @Provides
+        @Singleton
+        fun providesLinkAccountHolder(savedStateHandle: SavedStateHandle): LinkAccountHolder {
+            return LinkAccountHolder(savedStateHandle)
+        }
     }
 }

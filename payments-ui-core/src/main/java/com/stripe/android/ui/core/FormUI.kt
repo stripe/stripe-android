@@ -25,6 +25,8 @@ import com.stripe.android.ui.core.elements.MandateTextUI
 import com.stripe.android.ui.core.elements.RenderableFormElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
+import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
+import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElementUI
 import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.ui.core.elements.StaticTextElementUI
 import com.stripe.android.uicore.elements.CheckboxFieldElement
@@ -92,6 +94,7 @@ fun FormUI(
     }
 }
 
+@Suppress("CyclomaticComplexMethod", "LongMethod")
 @Composable
 private fun FormUIElement(
     element: FormElement,
@@ -131,6 +134,15 @@ private fun FormUIElement(
             ),
         )
         is SaveForFutureUseElement -> SaveForFutureUseElementUI(
+            modifier = Modifier.formVerticalPadding(
+                maxIndex = maxIndex,
+                index = index,
+                vertical = 4.dp,
+            ),
+            enabled = enabled,
+            element = element,
+        )
+        is SetAsDefaultPaymentMethodElement -> SetAsDefaultPaymentMethodElementUI(
             modifier = Modifier.formVerticalPadding(
                 maxIndex = maxIndex,
                 index = index,

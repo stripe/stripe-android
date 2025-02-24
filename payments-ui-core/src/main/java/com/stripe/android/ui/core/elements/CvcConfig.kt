@@ -15,7 +15,10 @@ class CvcConfig : CardDetailsTextFieldConfig {
     override val debugLabel: String = "cvc"
     override val label: Int = StripeR.string.stripe_cvc_number_hint
     override val keyboard: KeyboardType = KeyboardType.NumberPassword
-    override val visualTransformation: VisualTransformation = VisualTransformation.None
+
+    override fun determineVisualTransformation(number: String, panLength: Int): VisualTransformation {
+        return VisualTransformation.None
+    }
 
     override fun determineState(
         brand: CardBrand,

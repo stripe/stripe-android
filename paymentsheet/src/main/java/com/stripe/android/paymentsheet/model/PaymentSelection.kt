@@ -12,7 +12,7 @@ import androidx.core.content.res.ResourcesCompat
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -22,12 +22,14 @@ import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.BankFormScreenState
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountTextBuilder
 import com.stripe.android.paymentsheet.ui.createCardLabel
 import com.stripe.android.paymentsheet.ui.getCardBrandIcon
 import com.stripe.android.paymentsheet.ui.getLabel
+import com.stripe.android.paymentsheet.ui.getLinkIcon
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
 import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.parcelize.IgnoredOnParcel
@@ -62,7 +64,9 @@ internal sealed class PaymentSelection : Parcelable {
     }
 
     @Parcelize
-    data object Link : PaymentSelection() {
+    data class Link(
+        val useLinkExpress: Boolean = false
+    ) : PaymentSelection() {
 
         override val requiresConfirmation: Boolean
             get() = false
@@ -105,7 +109,7 @@ internal sealed class PaymentSelection : Parcelable {
     ) : PaymentSelection() {
 
         enum class WalletType(val paymentSelection: PaymentSelection) {
-            GooglePay(PaymentSelection.GooglePay), Link(PaymentSelection.Link)
+            GooglePay(PaymentSelection.GooglePay), Link(Link())
         }
 
         val showMandateAbovePrimaryButton: Boolean
@@ -214,25 +218,15 @@ internal sealed class PaymentSelection : Parcelable {
 
         @Parcelize
         data class LinkInline(
-            val linkPaymentDetails: LinkPaymentDetails,
+            override val paymentMethodCreateParams: PaymentMethodCreateParams,
+            val brand: CardBrand,
             override val customerRequestedSave: CustomerRequestedSave,
+            override val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
+            override val paymentMethodExtraParams: PaymentMethodExtraParams? = null,
+            val input: UserInput,
         ) : New() {
             @IgnoredOnParcel
-            private val paymentDetails = linkPaymentDetails.paymentDetails
-
-            @IgnoredOnParcel
-            override val paymentMethodCreateParams = linkPaymentDetails.paymentMethodCreateParams
-
-            @IgnoredOnParcel
-            override val paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
-                setupFutureUsage = customerRequestedSave.setupFutureUsage
-            )
-
-            @IgnoredOnParcel
-            override val paymentMethodExtraParams = null
-
-            @IgnoredOnParcel
-            val label = "···· ${paymentDetails.last4}"
+            val last4: String = paymentMethodCreateParams.cardLast4().orEmpty()
         }
 
         @Parcelize
@@ -317,19 +311,19 @@ internal val PaymentSelection.drawableResourceId: Int
     get() = when (this) {
         is PaymentSelection.ExternalPaymentMethod -> iconResource
         PaymentSelection.GooglePay -> R.drawable.stripe_google_pay_mark
-        PaymentSelection.Link -> R.drawable.stripe_ic_paymentsheet_link
+        is PaymentSelection.Link -> getLinkIcon()
         is PaymentSelection.New.Card -> brand.getCardBrandIcon()
         is PaymentSelection.New.GenericPaymentMethod -> iconResource
-        is PaymentSelection.New.LinkInline -> R.drawable.stripe_ic_paymentsheet_link
+        is PaymentSelection.New.LinkInline -> getLinkIcon()
         is PaymentSelection.New.USBankAccount -> iconResource
         is PaymentSelection.Saved -> getSavedIcon(this)
     }
 
 private fun getSavedIcon(selection: PaymentSelection.Saved): Int {
     return when (val resourceId = selection.paymentMethod.getSavedPaymentMethodIcon()) {
-        R.drawable.stripe_ic_paymentsheet_card_unknown -> {
+        R.drawable.stripe_ic_paymentsheet_card_unknown_ref -> {
             when (selection.walletType) {
-                PaymentSelection.Saved.WalletType.Link -> R.drawable.stripe_ic_paymentsheet_link
+                PaymentSelection.Saved.WalletType.Link -> getLinkIcon()
                 PaymentSelection.Saved.WalletType.GooglePay -> R.drawable.stripe_google_pay_mark
                 else -> resourceId
             }
@@ -342,7 +336,7 @@ internal val PaymentSelection.lightThemeIconUrl: String?
     get() = when (this) {
         is PaymentSelection.ExternalPaymentMethod -> lightThemeIconUrl
         PaymentSelection.GooglePay -> null
-        PaymentSelection.Link -> null
+        is PaymentSelection.Link -> null
         is PaymentSelection.New.Card -> null
         is PaymentSelection.New.GenericPaymentMethod -> lightThemeIconUrl
         is PaymentSelection.New.LinkInline -> null
@@ -354,7 +348,7 @@ internal val PaymentSelection.darkThemeIconUrl: String?
     get() = when (this) {
         is PaymentSelection.ExternalPaymentMethod -> darkThemeIconUrl
         PaymentSelection.GooglePay -> null
-        PaymentSelection.Link -> null
+        is PaymentSelection.Link -> null
         is PaymentSelection.New.Card -> null
         is PaymentSelection.New.GenericPaymentMethod -> darkThemeIconUrl
         is PaymentSelection.New.LinkInline -> null
@@ -366,10 +360,10 @@ internal val PaymentSelection.label: ResolvableString
     get() = when (this) {
         is PaymentSelection.ExternalPaymentMethod -> label
         PaymentSelection.GooglePay -> StripeR.string.stripe_google_pay.resolvableString
-        PaymentSelection.Link -> StripeR.string.stripe_link.resolvableString
+        is PaymentSelection.Link -> StripeR.string.stripe_link.resolvableString
         is PaymentSelection.New.Card -> createCardLabel(last4).orEmpty()
         is PaymentSelection.New.GenericPaymentMethod -> label
-        is PaymentSelection.New.LinkInline -> label.resolvableString
+        is PaymentSelection.New.LinkInline -> createCardLabel(last4).orEmpty()
         is PaymentSelection.New.USBankAccount -> label.resolvableString
         is PaymentSelection.Saved -> getSavedLabel(this).orEmpty()
     }
@@ -388,10 +382,32 @@ internal val PaymentSelection.paymentMethodType: String
     get() = when (this) {
         is PaymentSelection.ExternalPaymentMethod -> type
         PaymentSelection.GooglePay -> "google_pay"
-        PaymentSelection.Link -> "link"
-        is PaymentSelection.New.Card -> paymentMethodCreateParams.typeCode
-        is PaymentSelection.New.GenericPaymentMethod -> paymentMethodCreateParams.typeCode
-        is PaymentSelection.New.LinkInline -> linkPaymentDetails.paymentMethodCreateParams.typeCode
-        is PaymentSelection.New.USBankAccount -> paymentMethodCreateParams.typeCode
+        is PaymentSelection.Link -> "link"
+        is PaymentSelection.New -> paymentMethodCreateParams.typeCode
         is PaymentSelection.Saved -> paymentMethod.type?.name ?: "card"
     }
+
+internal val PaymentSelection.billingDetails: PaymentMethod.BillingDetails?
+    get() = when (this) {
+        is PaymentSelection.ExternalPaymentMethod -> billingDetails
+        PaymentSelection.GooglePay -> null
+        is PaymentSelection.Link -> null
+        is PaymentSelection.New -> paymentMethodCreateParams.billingDetails
+        is PaymentSelection.Saved -> paymentMethod.billingDetails
+    }
+
+internal fun PaymentMethod.BillingDetails.toPaymentSheetBillingDetails(): PaymentSheet.BillingDetails {
+    return PaymentSheet.BillingDetails(
+        address = PaymentSheet.Address(
+            city = address?.city,
+            country = address?.country,
+            line1 = address?.line1,
+            line2 = address?.line2,
+            postalCode = address?.postalCode,
+            state = address?.state
+        ),
+        email = email,
+        name = name,
+        phone = phone
+    )
+}

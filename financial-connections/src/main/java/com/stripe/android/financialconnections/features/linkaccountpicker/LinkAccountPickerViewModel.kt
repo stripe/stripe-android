@@ -277,10 +277,10 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
             selectedAccountIds = accountIds,
             consentAcquired = acquireConsentOnPrimaryCtaClick,
         )
+        val nextPane = response.nextPane ?: SUCCESS
+
         FinancialConnections.emitEvent(name = Name.ACCOUNTS_SELECTED)
-        navigationManager.tryNavigateTo(
-            (response.nextPane ?: SUCCESS).destination(referrer = PANE)
-        )
+        navigationManager.tryNavigateTo(nextPane.destination(referrer = PANE))
     }
 
     private suspend fun handleNonSuccessNextPane(payload: LinkAccountPickerState.Payload, nextPane: Pane?) {
@@ -313,9 +313,22 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
                 // Nothing to log here
             }
         }
-        if (payload.acquireConsentOnPrimaryCtaClick) acceptConsent()
-        // Fall back to the institution picker
-        val destination = nextPane?.destination?.invoke(referrer = PANE) ?: InstitutionPicker(referrer = PANE)
+
+        if (payload.acquireConsentOnPrimaryCtaClick) {
+            acceptConsent()
+        }
+
+        val overrideNextPane = when (nextPane) {
+            PARTNER_AUTH,
+            BANK_AUTH_REPAIR -> {
+                // We don't support these panes here.
+                INSTITUTION_PICKER
+            }
+            null -> INSTITUTION_PICKER
+            else -> nextPane
+        }
+
+        val destination = overrideNextPane.destination(referrer = PANE)
         navigationManager.tryNavigateTo(destination)
     }
 
@@ -376,6 +389,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
                         generic = genericContent,
                         type = Repair(
                             authorization = authorization?.let { payload.partnerToCoreAuths?.getValue(it) },
+                            institution = institution,
                         ),
                     )
                     PARTNER_AUTH -> UpdateRequired(

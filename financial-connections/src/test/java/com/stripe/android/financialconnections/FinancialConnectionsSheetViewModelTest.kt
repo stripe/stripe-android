@@ -101,7 +101,7 @@ class FinancialConnectionsSheetViewModelTest {
                 )
             )
 
-            verify(getOrFetchSync).invoke(refetchCondition = Always, attestationInitialized = true)
+            verify(getOrFetchSync).invoke(refetchCondition = Always, supportsAppVerification = true)
         }
 
     @Test
@@ -115,7 +115,7 @@ class FinancialConnectionsSheetViewModelTest {
                 )
             )
 
-            verify(getOrFetchSync).invoke(refetchCondition = Always, attestationInitialized = false)
+            verify(getOrFetchSync).invoke(refetchCondition = Always, supportsAppVerification = false)
         }
 
     @Test
@@ -443,7 +443,7 @@ class FinancialConnectionsSheetViewModelTest {
         // Then
         withState(viewModel) {
             val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
-            assertThat(viewEffect.url).isEqualTo("${syncResponse.manifest.hostedAuthUrl}")
+            assertThat(viewEffect.url).isEqualTo("${syncResponse.manifest.hostedAuthUrl}&launched_by=android_sdk")
         }
     }
 
@@ -845,6 +845,7 @@ class FinancialConnectionsSheetViewModelTest {
             savedStateHandle = SavedStateHandle(),
             nativeAuthFlowCoordinator = mock(),
             integrityRequestManager = integrityRequestManager,
+            integrityVerdictManager = mock(),
             logger = Logger.noop()
         )
     }

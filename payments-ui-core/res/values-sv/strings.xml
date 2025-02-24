@@ -28,6 +28,10 @@
   <string name="stripe_blik_code">BLIK-kod</string>
   <!-- Label for Boleto Payment method Tax ID -->
   <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
+  <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
+  <string name="stripe_card_brand_not_accepted">(accepteras inte)</string>
+  <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
+  <string name="stripe_card_brand_not_accepted_with_brand">%1$s (accepteras inte)</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">Genom att fortsätta godkänner du att %1$s debiterar ditt Cash App-konto för den här betalningen och framtida betalningar i enlighet med %2$ss villkor, tills detta godkännande återkallas. Du kan när som helst ändra detta i dina Cash App-inställningar.</string>
   <!-- Title for the contact information section -->
@@ -101,6 +105,8 @@
   <string name="stripe_scan_card">Skanna kort</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Genom att tillhandahålla din betalningsinformation och bekräfta denna betalning godkänner du (A) %s och Stripe, vår betaltjänstleverantör, att skicka instruktioner till din bank att debitera ditt konto och (B) din bank att debitera ditt konto i enlighet med dessa instruktioner. Som en del av dina rättigheter har du rätt till återbetalning från din bank enligt villkoren för ditt avtal med din bank. Återbetalning måste krävas inom åtta veckor från det datum då ditt konto debiterades. Dina rättigheter förklaras i ett utdrag som du kan få från din bank. Du godkänner att få aviseringar för framtida debiteringar upp till två dagar innan de inträffar.</string>
+  <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
+  <string name="stripe_set_as_default_payment_method">Ställ in som standardbetalningsmetod</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Konfigurera</string>
   <!-- Label for UPI ID number field on form -->

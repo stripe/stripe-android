@@ -18,10 +18,17 @@ internal class CardNumberConfig(
     override val debugLabel: String = "Card number"
     override val label: Int = StripeR.string.stripe_acc_label_card_number
     override val keyboard: KeyboardType = KeyboardType.NumberPassword
-    override val visualTransformation: VisualTransformation = CardNumberVisualTransformation(' ')
 
     // Hardcoded number of card digits + a buffer entered before we hit the card metadata service in CBC
     private var digitsRequiredToFetchBrands = 9
+
+    override fun determineVisualTransformation(number: String, panLength: Int): VisualTransformation {
+        return when (panLength) {
+            14, 15 -> CardNumberVisualTransformations.FourteenAndFifteenPanLength(SEPARATOR)
+            19 -> CardNumberVisualTransformations.NineteenPanLength(SEPARATOR)
+            else -> CardNumberVisualTransformations.Default(SEPARATOR)
+        }
+    }
 
     override fun determineState(brand: CardBrand, number: String, numberAllowedDigits: Int): TextFieldState {
         val luhnValid = CardUtils.isValidLuhnNumber(number)
@@ -65,4 +72,8 @@ internal class CardNumberConfig(
     override fun convertToRaw(displayName: String): String = displayName
 
     override fun convertFromRaw(rawValue: String): String = rawValue
+
+    private companion object {
+        const val SEPARATOR = ' '
+    }
 }

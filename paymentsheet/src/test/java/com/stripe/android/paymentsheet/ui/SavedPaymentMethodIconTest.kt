@@ -14,20 +14,20 @@ class SavedPaymentMethodIconTest {
     fun `on card payment method, should return proper card brand icon`() {
         assertThat(
             CARD_PAYMENT_METHOD.getSavedPaymentMethodIcon()
-        ).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa)
+        ).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa_ref)
 
         assertThat(
             CARD_PAYMENT_METHOD.copy(
                 card = CARD_PAYMENT_METHOD.card?.copy(brand = CardBrand.MasterCard)
             ).getSavedPaymentMethodIcon()
-        ).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_mastercard)
+        ).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_mastercard_ref)
     }
 
     @Test
     fun `on SEPA payment method, should return proper SEPA icon`() {
         assertThat(
             SEPA_DEBIT_PAYMENT_METHOD.getSavedPaymentMethodIcon()
-        ).isEqualTo(R.drawable.stripe_ic_paymentsheet_sepa)
+        ).isEqualTo(R.drawable.stripe_ic_paymentsheet_sepa_ref)
     }
 
     @Test
@@ -45,7 +45,7 @@ class SavedPaymentMethodIconTest {
                     displayBrand = "cartes_bancaires"
                 )
             ).getSavedPaymentMethodIcon()
-        ).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_cartes_bancaires)
+        ).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_cartes_bancaires_ref)
     }
 
     @Test
@@ -54,6 +54,6 @@ class SavedPaymentMethodIconTest {
             CARD_PAYMENT_METHOD.copy(
                 card = CARD_PAYMENT_METHOD.card?.copy()
             ).getSavedPaymentMethodIcon()
-        ).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa)
+        ).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa_ref)
     }
 }

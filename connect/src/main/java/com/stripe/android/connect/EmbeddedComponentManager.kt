@@ -25,6 +25,8 @@ import com.stripe.android.connect.webview.ChooseFileActivityResultContract
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.toJs
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -36,6 +38,7 @@ import kotlin.coroutines.resume
 
 @PrivateBetaConnectSDK
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@SuppressWarnings("TooManyFunctions")
 class EmbeddedComponentManager(
     private val configuration: Configuration,
     private val fetchClientSecretCallback: FetchClientSecretCallback,
@@ -154,42 +157,85 @@ class EmbeddedComponentManager(
             return true
         }
 
-        val launcher = getLauncher(context, requestPermissionLaunchers, "Error launching camera permission request")
-            ?: return null
+        val (_, launcher) =
+            getLauncher(context, requestPermissionLaunchers, "Error launching camera permission request")
+                ?: return null
         launcher.launch(Manifest.permission.CAMERA)
 
         return permissionsFlow.first()
     }
 
     internal suspend fun chooseFile(context: Context, requestIntent: Intent): Array<Uri>? {
-        val launcher = getLauncher(context, chooseFileLaunchers, "Error choosing file")
+        val (activity, launcher) = getLauncher(context, chooseFileLaunchers, "Error choosing file")
             ?: return null
         launcher.launch(requestIntent)
 
-        return chooseFileResultFlow.first()
+        return chooseFileResultFlow
+            .first { it.activity == activity }
+            .result
+    }
+
+    internal suspend fun presentFinancialConnections(
+        context: Context,
+        clientSecret: String,
+        connectedAccountId: String,
+    ): FinancialConnectionsSheetResult? {
+        val activity = context.findActivityWithErrorHandling()
+            ?: return null
+        val sheet = financialConnectionsSheets[activity]
+        if (sheet == null) {
+            logger.warning(
+                buildString {
+                    append("($loggerTag) Error presenting FinancialConnectionsSheet ")
+                    append("Did you call EmbeddedComponentManager.onActivityCreate in your Activity.onCreate function?")
+                }
+            )
+            if (isDebugBuild) {
+                // crash if in debug mode so that developers are more likely to catch this error.
+                error("You must create the EmbeddedComponent view from an Activity")
+            }
+            return null
+        }
+        sheet.present(
+            FinancialConnectionsSheet.Configuration(
+                financialConnectionsSessionClientSecret = clientSecret,
+                publishableKey = configuration.publishableKey,
+                stripeAccountId = connectedAccountId,
+            )
+        )
+        return financialConnectionsResults
+            .first { it.activity == activity }
+            .result
     }
 
     private fun <I> getLauncher(
         context: Context,
         launchers: Map<Activity, ActivityResultLauncher<I>>,
         errorMessage: String,
-    ): ActivityResultLauncher<I>? {
-        val activity = context.findActivity()
-        if (activity == null) {
-            logger.warning("($loggerTag) You must create the EmbeddedComponent view from an Activity")
-            if (isDebugBuild) {
-                // crash if in debug mode so that developers are more likely to catch this error.
-                error("You must create an AccountOnboardingView from an Activity")
-            }
-        }
+    ): Pair<Activity, ActivityResultLauncher<I>>? {
+        val activity = context.findActivityWithErrorHandling()
+            ?: return null
         val launcher = launchers[activity]
         if (launcher == null) {
             logger.warning(
                 "($loggerTag) $errorMessage " +
                     "Did you call EmbeddedComponentManager.onActivityCreate in your Activity.onCreate function?"
             )
+            return null
         }
-        return launcher
+        return activity to launcher
+    }
+
+    private fun Context.findActivityWithErrorHandling(): Activity? {
+        val activity = findActivity()
+        if (activity == null) {
+            logger.warning("($loggerTag) You must create the EmbeddedComponent view from an Activity")
+            if (isDebugBuild) {
+                // crash if in debug mode so that developers are more likely to catch this error.
+                error("You must create the EmbeddedComponent view from an Activity")
+            }
+        }
+        return activity
     }
 
     internal fun getComponentAnalyticsService(component: StripeEmbeddedComponent): ComponentAnalyticsService {
@@ -226,8 +272,14 @@ class EmbeddedComponentManager(
         private val requestPermissionLaunchers = mutableMapOf<Activity, ActivityResultLauncher<String>>()
 
         @VisibleForTesting
-        internal val chooseFileResultFlow: MutableSharedFlow<Array<Uri>?> = MutableSharedFlow(extraBufferCapacity = 1)
+        internal val chooseFileResultFlow: MutableSharedFlow<ActivityResult<Array<Uri>?>> =
+            MutableSharedFlow(extraBufferCapacity = 1)
         private val chooseFileLaunchers = mutableMapOf<Activity, ActivityResultLauncher<Intent>>()
+
+        @VisibleForTesting
+        internal val financialConnectionsResults: MutableSharedFlow<ActivityResult<FinancialConnectionsSheetResult>> =
+            MutableSharedFlow(extraBufferCapacity = 1)
+        private val financialConnectionsSheets = mutableMapOf<Activity, FinancialConnectionsSheet>()
 
         /**
          * Hooks the [EmbeddedComponentManager] into this activity's lifecycle.
@@ -251,6 +303,7 @@ class EmbeddedComponentManager(
                     // this activity from future callbacks
                     requestPermissionLaunchers.remove(destroyedActivity)
                     chooseFileLaunchers.remove(destroyedActivity)
+                    financialConnectionsSheets.remove(destroyedActivity)
                     if (destroyedActivity == activity) {
                         application.unregisterActivityLifecycleCallbacks(this)
                     }
@@ -288,8 +341,18 @@ class EmbeddedComponentManager(
 
             chooseFileLaunchers[activity] =
                 activity.registerForActivityResult(ChooseFileActivityResultContract()) { result ->
-                    chooseFileResultFlow.tryEmit(result)
+                    chooseFileResultFlow.tryEmit(ActivityResult(activity, result))
+                }
+
+            financialConnectionsSheets[activity] =
+                // Using `FinancialConnectionsSheet.create()` here for both link account and manual entry flows.
+                // Ideally, we'd use `createForBankAccountToken()` for manual entry flows, but we're currently unable
+                // to determine which flow the user is on based on the JS message received.
+                FinancialConnectionsSheet.create(activity) { result ->
+                    financialConnectionsResults.tryEmit(ActivityResult(activity, result))
                 }
         }
     }
+
+    internal class ActivityResult<T>(val activity: Activity, val result: T)
 }

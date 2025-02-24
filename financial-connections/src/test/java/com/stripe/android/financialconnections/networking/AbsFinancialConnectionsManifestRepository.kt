@@ -43,6 +43,14 @@ internal abstract class AbsFinancialConnectionsManifestRepository : FinancialCon
         TODO("Not yet implemented")
     }
 
+    override suspend fun repairAuthorizationSession(
+        clientSecret: String,
+        coreAuthorization: String,
+        applicationId: String
+    ): FinancialConnectionsAuthorizationSession {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun cancelAuthorizationSession(
         clientSecret: String,
         sessionId: String
@@ -94,7 +102,7 @@ internal abstract class AbsFinancialConnectionsManifestRepository : FinancialCon
     override suspend fun getOrSynchronizeFinancialConnectionsSession(
         clientSecret: String,
         applicationId: String,
-        attestationInitialized: Boolean,
+        supportsAppVerification: Boolean,
         reFetchCondition: (SynchronizeSessionResponse) -> Boolean
     ): SynchronizeSessionResponse {
         TODO("Not yet implemented")

@@ -144,6 +144,211 @@ internal object ElementsSessionFixtures {
         """.trimIndent()
     )
 
+    val EXPANDED_PAYMENT_INTENT_WITH_NATIVE_LINK_FLAGS_ENABLED_JSON = JSONObject(
+        """
+        {
+          "business_name": "Mybusiness",
+          "link_settings": {
+            "link_bank_enabled": false,
+            "link_bank_onboarding_enabled": false,
+            "link_mobile_use_attestation_endpoints": true,
+            "link_mobile_suppress_2fa_modal": true
+          },
+          "merchant_country": "US",
+          "payment_method_preference": {
+            "object": "payment_method_preference",
+            "country_code": "US",
+            "ordered_payment_method_types": [
+              "card",
+              "ideal",
+              "sepa_debit",
+              "bancontact",
+              "sofort"
+            ],
+            "payment_intent": {
+              "id": "pi_3JTDhYIyGgrkZxL71IDUGKps",
+              "object": "payment_intent",
+              "amount": 973,
+              "canceled_at": null,
+              "cancellation_reason": null,
+              "capture_method": "automatic",
+              "client_secret": "pi_3JTDhYIyGgrkZxL71IDUGKps_secret_aWuzwD4JvF1HM8XJTdUsXG6Za",
+              "confirmation_method": "automatic",
+              "created": 1630103948,
+              "currency": "eur",
+              "description": null,
+              "last_payment_error": null,
+              "livemode": false,
+              "next_action": null,
+              "payment_method": null,
+              "payment_method_types": [
+                "bancontact",
+                "card",
+                "sepa_debit",
+                "sofort",
+                "ideal"
+              ],
+              "receipt_email": null,
+              "setup_future_usage": null,
+              "shipping": {
+                "address": {
+                  "city": "San Francisco",
+                  "country": "US",
+                  "line1": "510 Townsend St",
+                  "line2": null,
+                  "postal_code": "94102",
+                  "state": "California"
+                },
+                "carrier": null,
+                "name": "Bruno",
+                "phone": null,
+                "tracking_number": null
+              },
+              "source": null,
+              "status": "requires_payment_method"
+            },
+            "type": "payment_intent"
+          }
+        }
+        """.trimIndent()
+    )
+
+    val EXPANDED_PAYMENT_INTENT_WITH_NATIVE_LINK_FLAGS_DISABLED_JSON = JSONObject(
+        """
+        {
+          "business_name": "Mybusiness",
+          "link_settings": {
+            "link_bank_enabled": false,
+            "link_bank_onboarding_enabled": false,
+            "link_mobile_use_attestation_endpoints": false,
+            "link_mobile_suppress_2fa_modal": false
+          },
+          "merchant_country": "US",
+          "payment_method_preference": {
+            "object": "payment_method_preference",
+            "country_code": "US",
+            "ordered_payment_method_types": [
+              "card",
+              "ideal",
+              "sepa_debit",
+              "bancontact",
+              "sofort"
+            ],
+            "payment_intent": {
+              "id": "pi_3JTDhYIyGgrkZxL71IDUGKps",
+              "object": "payment_intent",
+              "amount": 973,
+              "canceled_at": null,
+              "cancellation_reason": null,
+              "capture_method": "automatic",
+              "client_secret": "pi_3JTDhYIyGgrkZxL71IDUGKps_secret_aWuzwD4JvF1HM8XJTdUsXG6Za",
+              "confirmation_method": "automatic",
+              "created": 1630103948,
+              "currency": "eur",
+              "description": null,
+              "last_payment_error": null,
+              "livemode": false,
+              "next_action": null,
+              "payment_method": null,
+              "payment_method_types": [
+                "bancontact",
+                "card",
+                "sepa_debit",
+                "sofort",
+                "ideal"
+              ],
+              "receipt_email": null,
+              "setup_future_usage": null,
+              "shipping": {
+                "address": {
+                  "city": "San Francisco",
+                  "country": "US",
+                  "line1": "510 Townsend St",
+                  "line2": null,
+                  "postal_code": "94102",
+                  "state": "California"
+                },
+                "carrier": null,
+                "name": "Bruno",
+                "phone": null,
+                "tracking_number": null
+              },
+              "source": null,
+              "status": "requires_payment_method"
+            },
+            "type": "payment_intent"
+          }
+        }
+        """.trimIndent()
+    )
+
+    val EXPANDED_PAYMENT_INTENT_WITH_LINK_ATTESTATION_ENDPOINTS_MISSING_JSON = JSONObject(
+        """
+        {
+          "business_name": "Mybusiness",
+          "link_settings": {
+            "link_bank_enabled": false,
+            "link_bank_onboarding_enabled": false
+          },
+          "merchant_country": "US",
+          "payment_method_preference": {
+            "object": "payment_method_preference",
+            "country_code": "US",
+            "ordered_payment_method_types": [
+              "card",
+              "ideal",
+              "sepa_debit",
+              "bancontact",
+              "sofort"
+            ],
+            "payment_intent": {
+              "id": "pi_3JTDhYIyGgrkZxL71IDUGKps",
+              "object": "payment_intent",
+              "amount": 973,
+              "canceled_at": null,
+              "cancellation_reason": null,
+              "capture_method": "automatic",
+              "client_secret": "pi_3JTDhYIyGgrkZxL71IDUGKps_secret_aWuzwD4JvF1HM8XJTdUsXG6Za",
+              "confirmation_method": "automatic",
+              "created": 1630103948,
+              "currency": "eur",
+              "description": null,
+              "last_payment_error": null,
+              "livemode": false,
+              "next_action": null,
+              "payment_method": null,
+              "payment_method_types": [
+                "bancontact",
+                "card",
+                "sepa_debit",
+                "sofort",
+                "ideal"
+              ],
+              "receipt_email": null,
+              "setup_future_usage": null,
+              "shipping": {
+                "address": {
+                  "city": "San Francisco",
+                  "country": "US",
+                  "line1": "510 Townsend St",
+                  "line2": null,
+                  "postal_code": "94102",
+                  "state": "California"
+                },
+                "carrier": null,
+                "name": "Bruno",
+                "phone": null,
+                "tracking_number": null
+              },
+              "source": null,
+              "status": "requires_payment_method"
+            },
+            "type": "payment_intent"
+          }
+        }
+        """.trimIndent()
+    )
+
     val EXPANDED_SETUP_INTENT_JSON = JSONObject(
         """
         {
@@ -239,10 +444,13 @@ internal object ElementsSessionFixtures {
         """.trimIndent()
     )
 
+    @Suppress("LongMethod")
     fun createPaymentIntentWithCustomerSession(
         allowRedisplay: String? = "limited",
         paymentMethodRemoveFeature: String? = "enabled",
         paymentMethodRemoveLastFeature: String? = "enabled",
+        paymentMethodSetAsDefaultFeature: String = "disabled",
+        paymentMethodSyncDefaultFeature: String = "disabled",
     ): JSONObject {
         return JSONObject(
             """
@@ -327,7 +535,8 @@ internal object ElementsSessionFixtures {
                         "payment_method_remove": ${paymentMethodRemoveFeature ?: "enabled"},
                         "payment_method_save": "disabled",
                         "payment_method_remove_last": ${paymentMethodRemoveLastFeature ?: "enabled"},
-                        "payment_method_save_allow_redisplay_override": ${allowRedisplay?.let { "\"$it\""} ?: "null"}
+                        "payment_method_save_allow_redisplay_override": ${allowRedisplay?.let { "\"$it\""} ?: "null"},
+                        "payment_method_set_as_default": $paymentMethodSetAsDefaultFeature,
                       }
                     },
                     "customer_sheet": {
@@ -335,6 +544,7 @@ internal object ElementsSessionFixtures {
                       "features": {
                         "payment_method_remove": ${paymentMethodRemoveFeature ?: "enabled"},
                         "payment_method_remove_last": ${paymentMethodRemoveLastFeature ?: "enabled"},
+                        "payment_method_sync_default": $paymentMethodSyncDefaultFeature,
                       }
                     },
                     "pricing_table": {
@@ -1362,7 +1572,6 @@ internal object ElementsSessionFixtures {
                     "elements_enable_external_payment_method_azupay": false,
                     "elements_enable_external_payment_method_bankaxept": false,
                     "elements_enable_external_payment_method_benefit": false,
-                    "elements_enable_external_payment_method_billie": false,
                     "elements_enable_external_payment_method_bizum": false,
                     "elements_enable_external_payment_method_bluecode": false,
                     "elements_enable_external_payment_method_bpay": false,
@@ -1388,14 +1597,12 @@ internal object ElementsSessionFixtures {
                     "elements_enable_external_payment_method_iwocapay": false,
                     "elements_enable_external_payment_method_kbc": false,
                     "elements_enable_external_payment_method_knet": false,
-                    "elements_enable_external_payment_method_kriya": false,
                     "elements_enable_external_payment_method_laybuy": false,
                     "elements_enable_external_payment_method_line_pay": false,
                     "elements_enable_external_payment_method_mb_way": false,
                     "elements_enable_external_payment_method_mercado_pago": false,
                     "elements_enable_external_payment_method_merpay": false,
                     "elements_enable_external_payment_method_momo": false,
-                    "elements_enable_external_payment_method_mondu": false,
                     "elements_enable_external_payment_method_mybank": false,
                     "elements_enable_external_payment_method_netbanking": false,
                     "elements_enable_external_payment_method_nexi_pay": false,
@@ -1431,7 +1638,6 @@ internal object ElementsSessionFixtures {
                     "elements_enable_external_payment_method_samsung_pay": false,
                     "elements_enable_external_payment_method_satispay": false,
                     "elements_enable_external_payment_method_scalapay": false,
-                    "elements_enable_external_payment_method_sequra": false,
                     "elements_enable_external_payment_method_sezzle": false,
                     "elements_enable_external_payment_method_skrill": false,
                     "elements_enable_external_payment_method_swish": false,

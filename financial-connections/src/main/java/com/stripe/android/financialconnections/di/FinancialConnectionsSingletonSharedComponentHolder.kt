@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.di
 
 import android.app.Application
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.domain.IntegrityVerdictManager
 import com.stripe.attestation.BuildConfig
 import com.stripe.attestation.IntegrityRequestManager
 import com.stripe.attestation.IntegrityStandardRequestManager
@@ -38,7 +39,9 @@ internal object FinancialConnectionsSingletonSharedComponentHolder {
 @Component(modules = [FinancialConnectionsSingletonSharedModule::class])
 internal interface FinancialConnectionsSingletonSharedComponent {
 
-    fun providesIntegrityRequestManager(): IntegrityRequestManager
+    fun integrityRequestManager(): IntegrityRequestManager
+
+    fun integrityVerdictManager(): IntegrityVerdictManager
 
     @Component.Factory
     interface Factory {
@@ -58,4 +61,8 @@ internal class FinancialConnectionsSingletonSharedModule {
         logError = { message, error -> Logger.getInstance(BuildConfig.DEBUG).error(message, error) },
         factory = RealStandardIntegrityManagerFactory(context)
     )
+
+    @Provides
+    @Singleton
+    fun providesIntegrityVerdictManager(): IntegrityVerdictManager = IntegrityVerdictManager()
 }

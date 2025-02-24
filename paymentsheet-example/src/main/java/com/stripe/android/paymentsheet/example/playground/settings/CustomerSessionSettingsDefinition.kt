@@ -4,7 +4,7 @@ import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 
 internal object CustomerSessionSettingsDefinition : BooleanSettingsDefinition(
-    defaultValue = false,
+    defaultValue = true,
     displayName = "Use Customer Session",
     key = "customer_session_enabled"
 ) {

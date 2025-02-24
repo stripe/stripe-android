@@ -1,25 +1,29 @@
 package com.stripe.android.link.ui.signup
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import androidx.navigation.NavHostController
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkScreen
-import com.stripe.android.link.account.LinkAccountManager
+import com.stripe.android.link.NoLinkAccountFoundException
+import com.stripe.android.link.account.LinkAuth
+import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
-import com.stripe.android.link.ui.ErrorMessage
-import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.link.ui.inline.SignUpConsentAction
+import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
@@ -37,20 +41,27 @@ import kotlin.time.Duration.Companion.seconds
 
 internal class SignUpViewModel @Inject constructor(
     private val configuration: LinkConfiguration,
-    private val linkAccountManager: LinkAccountManager,
     private val linkEventsReporter: LinkEventsReporter,
-    private val logger: Logger
+    private val logger: Logger,
+    private val linkAuth: LinkAuth,
+    private val savedStateHandle: SavedStateHandle,
+    private val navigate: (LinkScreen) -> Unit,
+    private val navigateAndClearStack: (LinkScreen) -> Unit,
+    private val moveToWeb: () -> Unit
 ) : ViewModel() {
-    internal var navController: NavHostController? = null
+    private val useLinkConfigurationCustomerInfo =
+        savedStateHandle.get<Boolean>(USE_LINK_CONFIGURATION_CUSTOMER_INFO) ?: true
+    private val customerInfo = configuration.customerInfo.takeIf { useLinkConfigurationCustomerInfo }
+
     val emailController = EmailConfig.createController(
-        initialValue = configuration.customerInfo.email
+        initialValue = customerInfo?.email
     )
     val phoneNumberController = PhoneNumberController.createPhoneNumberController(
-        initialValue = configuration.customerInfo.phone.orEmpty(),
-        initiallySelectedCountryCode = configuration.customerInfo.billingCountryCode
+        initialValue = customerInfo?.phone.orEmpty(),
+        initiallySelectedCountryCode = customerInfo?.billingCountryCode
     )
     val nameController = NameConfig.createController(
-        initialValue = configuration.customerInfo.name
+        initialValue = customerInfo?.name
     )
     private val _state = MutableStateFlow(
         value = SignUpScreenState(
@@ -67,6 +78,7 @@ internal class SignUpViewModel @Inject constructor(
     )
 
     val state: StateFlow<SignUpScreenState> = _state
+    private var emailHasChanged = false
 
     init {
         viewModelScope.launch {
@@ -100,11 +112,49 @@ internal class SignUpViewModel @Inject constructor(
         emailController.formFieldValue.mapLatest { entry ->
             entry.takeIf { it.isComplete }?.value
         }.collectLatest { email ->
+            onError(null)
             delay(LOOKUP_DEBOUNCE)
             if (email != null) {
-                updateSignUpState(SignUpState.InputtingRemainingFields)
+                if (email != configuration.customerInfo.email || emailHasChanged) {
+                    lookupEmail(email)
+                } else {
+                    updateSignUpState(SignUpState.InputtingRemainingFields)
+                }
             } else {
                 updateSignUpState(SignUpState.InputtingPrimaryField)
+            }
+
+            if (email != configuration.customerInfo.email) {
+                emailHasChanged = true
+            }
+        }
+    }
+
+    private suspend fun lookupEmail(email: String) {
+        val lookupResult = linkAuth.lookUp(
+            email = email,
+            emailSource = EmailSource.USER_ACTION,
+            startSession = true
+        )
+
+        when (lookupResult) {
+            is LinkAuthResult.AttestationFailed -> {
+                moveToWeb()
+            }
+            is LinkAuthResult.Error -> {
+                updateSignUpState(SignUpState.InputtingRemainingFields)
+                onError(lookupResult.error)
+            }
+            is LinkAuthResult.Success -> {
+                onAccountFetched(lookupResult.account)
+                linkEventsReporter.onSignupCompleted()
+            }
+            LinkAuthResult.NoLinkAccountFound -> {
+                updateSignUpState(SignUpState.InputtingRemainingFields)
+                onError(null)
+            }
+            is LinkAuthResult.AccountError -> {
+                lookupResult.handle()
             }
         }
     }
@@ -112,48 +162,66 @@ internal class SignUpViewModel @Inject constructor(
     fun onSignUpClick() {
         clearError()
         viewModelScope.launch {
-            linkAccountManager.signUp(
+            val signupResult = linkAuth.signUp(
                 email = emailController.fieldValue.value,
-                phone = phoneNumberController.getE164PhoneNumber(phoneNumberController.fieldValue.value),
+                phoneNumber = phoneNumberController.getE164PhoneNumber(phoneNumberController.fieldValue.value),
                 country = phoneNumberController.getCountryCode(),
                 name = nameController.fieldValue.value,
                 consentAction = SignUpConsentAction.Implied
-            ).fold(
-                onSuccess = {
-                    onAccountFetched(it)
-                    linkEventsReporter.onSignupCompleted()
-                },
-                onFailure = {
-                    onError(it)
-                    linkEventsReporter.onSignupFailure(error = it)
-                }
             )
+
+            when (signupResult) {
+                is LinkAuthResult.AttestationFailed -> {
+                    moveToWeb()
+                }
+                is LinkAuthResult.Error -> {
+                    onError(signupResult.error)
+                    linkEventsReporter.onSignupFailure(error = signupResult.error)
+                }
+                is LinkAuthResult.Success -> {
+                    onAccountFetched(signupResult.account)
+                    linkEventsReporter.onSignupCompleted()
+                }
+                LinkAuthResult.NoLinkAccountFound -> {
+                    onError(NoLinkAccountFoundException())
+                    linkEventsReporter.onSignupFailure(error = NoLinkAccountFoundException())
+                }
+                is LinkAuthResult.AccountError -> {
+                    signupResult.handle()
+                }
+            }
         }
     }
 
     private fun onAccountFetched(linkAccount: LinkAccount?) {
         if (linkAccount?.isVerified == true) {
-            navController?.popBackStack(LinkScreen.Wallet.route, inclusive = false)
+            navigateAndClearStack(LinkScreen.Wallet)
         } else {
-            navController?.navigate(LinkScreen.Verification.route)
+            navigate(LinkScreen.Verification)
             // The sign up screen stays in the back stack.
             // Clean up the state in case the user comes back.
             emailController.onValueChange("")
         }
     }
 
-    private fun onError(error: Throwable) {
-        logger.error("SignUpViewModel Error: ", error)
+    private fun LinkAuthResult.AccountError.handle() {
+        updateSignUpState(SignUpState.InputtingPrimaryField)
+        onError(
+            error = error,
+            errorMessage = R.string.stripe_signup_deactivated_account_message.resolvableString
+        )
+    }
+
+    private fun onError(
+        error: Throwable?,
+        errorMessage: ResolvableString? = error?.stripeErrorMessage()
+    ) {
+        if (error != null) {
+            logger.error("SignUpViewModel Error: ", error)
+        }
         updateState {
             it.copy(
-                errorMessage = when (val errorMessage = error.getErrorMessage()) {
-                    is ErrorMessage.FromResources -> {
-                        errorMessage.stringResId.resolvableString
-                    }
-                    is ErrorMessage.Raw -> {
-                        errorMessage.errorMessage.resolvableString
-                    }
-                }
+                errorMessage = errorMessage
             )
         }
     }
@@ -175,17 +243,25 @@ internal class SignUpViewModel @Inject constructor(
     companion object {
         // How long to wait before triggering a call to lookup the email
         internal val LOOKUP_DEBOUNCE = 1.seconds
+        internal const val USE_LINK_CONFIGURATION_CUSTOMER_INFO = "use_link_configuration_customer_info"
 
         fun factory(
-            parentComponent: NativeLinkComponent
+            parentComponent: NativeLinkComponent,
+            navigate: (LinkScreen) -> Unit,
+            navigateAndClearStack: (LinkScreen) -> Unit,
+            moveToWeb: () -> Unit
         ): ViewModelProvider.Factory {
             return viewModelFactory {
                 initializer {
                     SignUpViewModel(
                         configuration = parentComponent.configuration,
                         linkEventsReporter = parentComponent.linkEventsReporter,
-                        linkAccountManager = parentComponent.linkAccountManager,
-                        logger = parentComponent.logger
+                        logger = parentComponent.logger,
+                        linkAuth = parentComponent.linkAuth,
+                        savedStateHandle = parentComponent.savedStateHandle,
+                        navigate = navigate,
+                        navigateAndClearStack = navigateAndClearStack,
+                        moveToWeb = moveToWeb
                     )
                 }
             }

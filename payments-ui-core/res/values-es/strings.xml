@@ -28,6 +28,10 @@
   <string name="stripe_blik_code">Código BLIK</string>
   <!-- Label for Boleto Payment method Tax ID -->
   <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
+  <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
+  <string name="stripe_card_brand_not_accepted">(no se acepta)</string>
+  <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
+  <string name="stripe_card_brand_not_accepted_with_brand">%1$s (no se acepta)</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">Si continúas, autorizas a %1$s a que cargue en tu cuenta de Cash App este pago y futuros pagos conforme a las condiciones de %2$s hasta que se revoque esta autorización. Puedes cambiarla en cualquier momento en la configuración de Cash App.</string>
   <!-- Title for the contact information section -->
@@ -101,6 +105,8 @@
   <string name="stripe_scan_card">Escanear tarjeta</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Al facilitarnos la información del pago y al confirmar este pago, autorizas a (A) %s y a Stripe, nuestro proveedor de servicios de pago, a enviar instrucciones a tu banco para adeudar tu cuenta y (B) a tu banco para efectuar los adeudos en tu cuenta siguiendo dichas instrucciones. Como parte de tus derechos, estás legitimado al rembolso por parte de tu banco en los términos y condiciones del contrato suscrito con este. La solicitud del reembolso deberá efectuarse dentro de las ocho semanas posteriores a la fecha de adeudo en cuenta. Tus derechos se explican en una declaración que puedes obtener en tu banco. Aceptas recibir notificaciones sobre próximos adeudos con hasta dos días de antelación a que estos ocurran.</string>
+  <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
+  <string name="stripe_set_as_default_payment_method">Establecer como método de pago predeterminado</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Configurar</string>
   <!-- Label for UPI ID number field on form -->

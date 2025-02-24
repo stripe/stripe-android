@@ -90,7 +90,7 @@ internal fun NewPaymentMethodTabLayoutUI(
                     isSelected = index == selectedIndex,
                     isEnabled = isEnabled,
                     iconRequiresTinting = item.iconRequiresTinting,
-                    promoBadge = incentive?.takeIf { it.matches(item.code) }?.displayText,
+                    promoBadge = incentive?.takeIfMatches(item.code)?.displayText,
                     onItemSelectedListener = {
                         onItemSelectedListener(paymentMethods[index])
                     }

@@ -278,7 +278,6 @@ public synthetic class com/stripe/android/connect/appearance/fonts/CustomFontSou
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/connect/appearance/fonts/CustomFontSource;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/connect/appearance/fonts/CustomFontSource$Companion {

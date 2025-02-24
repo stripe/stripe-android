@@ -1,10 +1,13 @@
 package com.stripe.android.financialconnections.features.networkinglinkloginwarmup
 
-import com.stripe.android.financialconnections.ApiKeyFixtures
+import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
+import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
+import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.DisableNetworking
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
@@ -12,6 +15,7 @@ import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.TestNavigationManager
+import com.stripe.android.model.ConsumerSessionLookup
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -34,6 +38,7 @@ class NetworkingLinkLoginWarmupViewModelTest {
     private val disableNetworking = mock<DisableNetworking>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
     private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
+    private val lookupAccount = mock<LookupAccount>()
 
     private fun buildViewModel(
         state: NetworkingLinkLoginWarmupState
@@ -45,6 +50,7 @@ class NetworkingLinkLoginWarmupViewModelTest {
         eventTracker = eventTracker,
         initialState = state,
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
+        lookupAccount = lookupAccount,
     )
 
     @Test
@@ -63,10 +69,44 @@ class NetworkingLinkLoginWarmupViewModelTest {
     }
 
     @Test
-    fun `onContinueClick - navigates to verification pane`() = runTest {
-        val viewModel = buildViewModel(NetworkingLinkLoginWarmupState())
+    fun `onContinueClick - calls lookup to cache session and navigates to verification pane`() = runTest {
+        whenever(getOrFetchSync(any(), anyOrNull())).thenReturn(
+            syncResponse().copy(
+                manifest = sessionManifest().copy(
+                    accountholderCustomerEmailAddress = "test@stripe.com"
+                )
+            )
+        )
+        whenever(
+            lookupAccount(
+                email = anyOrNull(),
+                phone = anyOrNull(),
+                phoneCountryCode = anyOrNull(),
+                emailSource = anyOrNull(),
+                verifiedFlow = anyOrNull(),
+                sessionId = anyOrNull(),
+                pane = anyOrNull()
+            )
+        ).thenReturn(
+            ConsumerSessionLookup(
+                exists = true,
+                errorMessage = null,
+                consumerSession = consumerSession()
+            )
+        )
 
+        val viewModel = buildViewModel(NetworkingLinkLoginWarmupState())
         viewModel.onContinueClick()
+
+        verify(lookupAccount).invoke(
+            email = anyOrNull(),
+            phone = anyOrNull(),
+            phoneCountryCode = anyOrNull(),
+            emailSource = anyOrNull(),
+            verifiedFlow = anyOrNull(),
+            sessionId = anyOrNull(),
+            pane = anyOrNull()
+        )
         navigationManager.assertNavigatedTo(
             destination = Destination.NetworkingLinkVerification,
             pane = Pane.NETWORKING_LINK_LOGIN_WARMUP
@@ -79,7 +119,7 @@ class NetworkingLinkLoginWarmupViewModelTest {
         val viewModel = buildViewModel(NetworkingLinkLoginWarmupState(referrer))
 
         whenever(disableNetworking(clientSuggestedNextPaneOnDisableNetworking = null)).thenReturn(
-            ApiKeyFixtures.sessionManifest().copy(nextPane = Pane.INSTITUTION_PICKER)
+            sessionManifest().copy(nextPane = Pane.INSTITUTION_PICKER)
         )
 
         viewModel.onSecondaryButtonClicked()
@@ -104,7 +144,7 @@ class NetworkingLinkLoginWarmupViewModelTest {
         )
 
         whenever(disableNetworking(clientSuggestedNextPaneOnDisableNetworking = null)).thenReturn(
-            ApiKeyFixtures.sessionManifest().copy(nextPane = Pane.INSTITUTION_PICKER)
+            sessionManifest().copy(nextPane = Pane.INSTITUTION_PICKER)
         )
 
         viewModel.onSecondaryButtonClicked()
@@ -117,7 +157,7 @@ class NetworkingLinkLoginWarmupViewModelTest {
         val expectedNextPane = Pane.INSTITUTION_PICKER
 
         whenever(disableNetworking(clientSuggestedNextPaneOnDisableNetworking = null)).thenReturn(
-            ApiKeyFixtures.sessionManifest().copy(nextPane = expectedNextPane)
+            sessionManifest().copy(nextPane = expectedNextPane)
         )
 
         viewModel.onSecondaryButtonClicked()

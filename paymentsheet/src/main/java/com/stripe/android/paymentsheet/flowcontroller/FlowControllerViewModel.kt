@@ -7,10 +7,13 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 internal class FlowControllerViewModel(
     application: Application,
@@ -39,7 +42,18 @@ internal class FlowControllerViewModel(
             handle[STATE_KEY] = value
         }
 
+    private val flowControllerStateFlow = handle.getStateFlow<DefaultFlowController.State?>(STATE_KEY, null)
     private val restartSession = SessionSavedStateHandler.attachTo(this, handle)
+
+    init {
+        viewModelScope.launch {
+            flowControllerStateFlow.collectLatest { state ->
+                flowControllerStateComponent.linkHandler.setupLink(
+                    state = state?.paymentSheetState?.paymentMethodMetadata?.linkState
+                )
+            }
+        }
+    }
 
     fun resetSession() {
         restartSession()

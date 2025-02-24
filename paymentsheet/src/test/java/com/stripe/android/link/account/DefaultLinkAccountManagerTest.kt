@@ -1,9 +1,10 @@
 package com.stripe.android.link.account
 
+import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.AuthenticationException
-import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.analytics.FakeLinkEventsReporter
@@ -24,15 +25,30 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 
 class DefaultLinkAccountManagerTest {
 
     private val dispatcher = UnconfinedTestDispatcher()
+
+    @Before
+    fun before() {
+        Dispatchers.setMain(dispatcher)
+    }
+
+    @After
+    fun cleanup() {
+        Dispatchers.resetMain()
+    }
 
     @Test
     fun `When cookie exists and network call fails then account status is Error`() = runSuspendTest {
@@ -807,6 +823,151 @@ class DefaultLinkAccountManagerTest {
         assertThat(result.getOrNull()).isEqualTo(TestFactory.CONSUMER_PAYMENT_DETAILS)
     }
 
+    @Test
+    fun `mobileLookup returns link account on success`() = runSuspendTest {
+        val linkRepository = FakeLinkRepository()
+        val accountManager = accountManager(
+            linkRepository = linkRepository
+        )
+
+        val result = accountManager.mobileLookupConsumer(
+            email = TestFactory.CUSTOMER_EMAIL,
+            emailSource = TestFactory.EMAIL_SOURCE,
+            verificationToken = TestFactory.VERIFICATION_TOKEN,
+            appId = TestFactory.APP_ID,
+            startSession = false
+        )
+
+        val call = linkRepository.awaitMobileLookup()
+        assertThat(call.appId).isEqualTo(TestFactory.APP_ID)
+        assertThat(call.email).isEqualTo(TestFactory.CUSTOMER_EMAIL)
+        assertThat(call.emailSource).isEqualTo(TestFactory.EMAIL_SOURCE)
+        assertThat(call.verificationToken).isEqualTo(TestFactory.VERIFICATION_TOKEN)
+        assertThat(call.sessionId).isEqualTo(TestFactory.LINK_CONFIGURATION.elementsSessionId)
+
+        assertThat(result.getOrNull()?.email).isEqualTo(TestFactory.LINK_ACCOUNT.email)
+        assertThat(accountManager.linkAccount.value).isNull()
+
+        linkRepository.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `mobileLookup returns link account and starts session when startSession is true`() = runSuspendTest {
+        val linkRepository = FakeLinkRepository()
+
+        val accountManager = accountManager(
+            linkRepository = linkRepository
+        )
+
+        val result = accountManager.mobileLookupConsumer(
+            email = TestFactory.CUSTOMER_EMAIL,
+            emailSource = TestFactory.EMAIL_SOURCE,
+            verificationToken = TestFactory.VERIFICATION_TOKEN,
+            appId = TestFactory.APP_ID,
+            startSession = true
+        )
+
+        linkRepository.awaitMobileLookup()
+
+        assertThat(result.getOrNull()?.email).isEqualTo(TestFactory.LINK_ACCOUNT.email)
+        assertThat(accountManager.linkAccount.value?.email).isEqualTo(TestFactory.LINK_ACCOUNT.email)
+
+        linkRepository.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `mobileLookup returns error and logs event on failure`() = runSuspendTest {
+        val error = Throwable("oops")
+        val linkRepository = FakeLinkRepository()
+        val linkEventsReporter = AccountManagerEventsReporter()
+
+        linkRepository.mobileLookupConsumerResult = Result.failure(error)
+
+        val accountManager = accountManager(
+            linkRepository = linkRepository,
+            linkEventsReporter = linkEventsReporter
+        )
+
+        val result = accountManager.mobileLookupConsumer(
+            email = TestFactory.CUSTOMER_EMAIL,
+            emailSource = TestFactory.EMAIL_SOURCE,
+            verificationToken = TestFactory.VERIFICATION_TOKEN,
+            appId = TestFactory.APP_ID,
+            startSession = true
+        )
+
+        linkRepository.awaitMobileLookup()
+        val analyticsCall = linkEventsReporter.awaitLookupFailureCall()
+
+        assertThat(result.exceptionOrNull()).isEqualTo(error)
+        assertThat(accountManager.linkAccount.value).isNull()
+        assertThat(analyticsCall).isEqualTo(error)
+
+        linkRepository.ensureAllEventsConsumed()
+        linkEventsReporter.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `mobileSignUp returns link account on success`() = runSuspendTest {
+        val linkRepository = FakeLinkRepository()
+
+        val accountManager = accountManager(
+            linkRepository = linkRepository
+        )
+
+        val result = accountManager.mobileSignUp(
+            email = TestFactory.CUSTOMER_EMAIL,
+            verificationToken = TestFactory.VERIFICATION_TOKEN,
+            appId = TestFactory.APP_ID,
+            country = TestFactory.COUNTRY,
+            phone = TestFactory.CUSTOMER_PHONE,
+            name = TestFactory.CUSTOMER_NAME,
+            consentAction = SignUpConsentAction.Implied
+        )
+
+        val call = linkRepository.awaitMobileSignup()
+        assertThat(call.appId).isEqualTo(TestFactory.APP_ID)
+        assertThat(call.email).isEqualTo(TestFactory.CUSTOMER_EMAIL)
+        assertThat(call.phoneNumber).isEqualTo(TestFactory.CUSTOMER_PHONE)
+        assertThat(call.name).isEqualTo(TestFactory.CUSTOMER_NAME)
+        assertThat(call.country).isEqualTo(TestFactory.COUNTRY)
+        assertThat(call.verificationToken).isEqualTo(TestFactory.VERIFICATION_TOKEN)
+        assertThat(call.consentAction).isEqualTo(ConsumerSignUpConsentAction.Implied)
+
+        assertThat(result.getOrNull()?.email).isEqualTo(TestFactory.LINK_ACCOUNT.email)
+        assertThat(accountManager.linkAccount.value?.email).isEqualTo(TestFactory.LINK_ACCOUNT.email)
+
+        linkRepository.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `mobileSignUp returns error on failure`() = runSuspendTest {
+        val error = Throwable("oops")
+        val linkRepository = FakeLinkRepository()
+        linkRepository.mobileConsumerSignUpResult = Result.failure(error)
+
+        val accountManager = accountManager(
+            linkRepository = linkRepository
+        )
+
+        val result = accountManager.mobileSignUp(
+            email = TestFactory.CUSTOMER_EMAIL,
+            verificationToken = TestFactory.VERIFICATION_TOKEN,
+            appId = TestFactory.APP_ID,
+            country = TestFactory.COUNTRY,
+            phone = TestFactory.CUSTOMER_PHONE,
+            name = TestFactory.CUSTOMER_NAME,
+            consentAction = SignUpConsentAction.Implied
+        )
+
+        linkRepository.awaitMobileSignup()
+
+        assertThat(result.exceptionOrNull()).isEqualTo(error)
+        assertThat(accountManager.linkAccount.value).isNull()
+
+        linkRepository.ensureAllEventsConsumed()
+    }
+
     private fun runSuspendTest(testBody: suspend TestScope.() -> Unit) = runTest(dispatcher) {
         testBody()
     }
@@ -817,26 +978,22 @@ class DefaultLinkAccountManagerTest {
         passthroughModeEnabled: Boolean = false,
         linkRepository: LinkRepository = FakeLinkRepository(),
         linkEventsReporter: LinkEventsReporter = AccountManagerEventsReporter()
-    ) = DefaultLinkAccountManager(
-        config = LinkConfiguration(
-            stripeIntent = stripeIntent,
-            customerInfo = LinkConfiguration.CustomerInfo(
-                name = null,
-                email = customerEmail,
-                phone = null,
-                billingCountryCode = null,
+    ): DefaultLinkAccountManager {
+        val customerInfo = TestFactory.LINK_CONFIGURATION.customerInfo.copy(
+            email = customerEmail,
+        )
+        return DefaultLinkAccountManager(
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+            config = TestFactory.LINK_CONFIGURATION.copy(
+                stripeIntent = stripeIntent,
+                passthroughModeEnabled = passthroughModeEnabled,
+                customerInfo = customerInfo
             ),
-            merchantName = "Merchant",
-            merchantCountryCode = "US",
-            shippingDetails = null,
-            passthroughModeEnabled = passthroughModeEnabled,
-            flags = emptyMap(),
-            cardBrandChoice = null,
-        ),
-        linkRepository,
-        linkEventsReporter,
-        errorReporter = FakeErrorReporter()
-    )
+            linkRepository,
+            linkEventsReporter,
+            errorReporter = FakeErrorReporter()
+        )
+    }
 
     private fun createUserInputWithAction(consentAction: SignUpConsentAction): UserInput.SignUp {
         return UserInput.SignUp(
@@ -850,12 +1007,24 @@ class DefaultLinkAccountManagerTest {
 }
 
 private open class AccountManagerEventsReporter : FakeLinkEventsReporter() {
+    private val lookupFailureTurbine = Turbine<Throwable>()
     override fun onInvalidSessionState(state: LinkEventsReporter.SessionState) = Unit
     override fun onSignupCompleted(isInline: Boolean) = Unit
     override fun onSignupFailure(isInline: Boolean, error: Throwable) = Unit
-    override fun onAccountLookupFailure(error: Throwable) = Unit
+    override fun onAccountLookupFailure(error: Throwable) {
+        lookupFailureTurbine.add(error)
+    }
+
     override fun on2FAStartFailure() = Unit
     override fun on2FAStart() = Unit
     override fun on2FAComplete() = Unit
     override fun on2FAFailure() = Unit
+
+    suspend fun awaitLookupFailureCall(): Throwable {
+        return lookupFailureTurbine.awaitItem()
+    }
+
+    fun ensureAllEventsConsumed() {
+        lookupFailureTurbine.ensureAllEventsConsumed()
+    }
 }

@@ -103,7 +103,7 @@ private fun LocalIcon(
 ) {
     Icon(
         painter = painter,
-        tint = colors.iconBrand,
+        tint = colors.iconTint,
         contentDescription = contentDescription,
         modifier = Modifier.size(iconSize.paddedSize),
     )

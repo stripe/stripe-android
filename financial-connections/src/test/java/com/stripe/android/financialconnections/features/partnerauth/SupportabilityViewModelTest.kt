@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
+import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIException
@@ -24,6 +25,7 @@ import com.stripe.android.financialconnections.model.MixedOAuthParams
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
 import com.stripe.android.financialconnections.presentation.withState
+import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository
 import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.financialconnections.utils.UriUtils
@@ -318,6 +320,11 @@ internal class SupportabilityViewModelTest {
             applicationId = applicationId,
             nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
             presentSheet = mock(),
+            pendingRepairRepository = CoreAuthorizationPendingNetworkingRepairRepository(
+                savedStateHandle = SavedStateHandle(),
+                logger = Logger.noop(),
+            ),
+            repairAuthSession = mock(),
         )
     }
 }

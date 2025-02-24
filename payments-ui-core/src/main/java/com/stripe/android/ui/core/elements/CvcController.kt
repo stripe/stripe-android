@@ -5,6 +5,9 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.LayoutDirection
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.asIndividualDigits
 import com.stripe.android.uicore.elements.FieldError
@@ -30,7 +33,6 @@ class CvcController constructor(
 ) : TextFieldController, SectionFieldErrorController {
     override val capitalization: KeyboardCapitalization = cvcTextFieldConfig.capitalization
     override val keyboardType: KeyboardType = cvcTextFieldConfig.keyboard
-    override val visualTransformation = cvcTextFieldConfig.visualTransformation
 
     private val _label = cardBrandFlow.mapAsStateFlow { cardBrand ->
         if (cardBrand == CardBrand.AmericanExpress) {
@@ -43,17 +45,25 @@ class CvcController constructor(
 
     override val debugLabel = cvcTextFieldConfig.debugLabel
 
+    override val layoutDirection: LayoutDirection = LayoutDirection.Ltr
+
     @OptIn(ExperimentalComposeUiApi::class)
     override val autofillType: AutofillType = AutofillType.CreditCardSecurityCode
 
     private val _fieldValue = MutableStateFlow("")
     override val fieldValue: StateFlow<String> = _fieldValue.asStateFlow()
 
+    override val visualTransformation = _fieldValue.mapAsStateFlow { number ->
+        cvcTextFieldConfig.determineVisualTransformation(number = number, panLength = 0)
+    }
+
     override val rawFieldValue: StateFlow<String> =
         _fieldValue.mapAsStateFlow { cvcTextFieldConfig.convertToRaw(it) }
 
     // This makes the screen reader read out numbers digit by digit
-    override val contentDescription: StateFlow<String> = _fieldValue.mapAsStateFlow { it.asIndividualDigits() }
+    override val contentDescription: StateFlow<ResolvableString> = _fieldValue.mapAsStateFlow {
+        it.asIndividualDigits().resolvableString
+    }
 
     private val _fieldState = combineAsStateFlow(cardBrandFlow, _fieldValue) { brand, fieldValue ->
         cvcTextFieldConfig.determineState(brand, fieldValue, brand.maxCvcLength)

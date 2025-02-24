@@ -8,6 +8,9 @@ import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.customersheet.data.CustomerSheetInitializationDataSource
 import com.stripe.android.customersheet.data.CustomerSheetSession
 import com.stripe.android.customersheet.util.CustomerSheetHacks
+import com.stripe.android.customersheet.util.filterToSupportedPaymentMethods
+import com.stripe.android.customersheet.util.getDefaultPaymentMethodAsPaymentSelection
+import com.stripe.android.customersheet.util.getDefaultPaymentMethodsEnabledForCustomerSheet
 import com.stripe.android.customersheet.util.sortPaymentMethods
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
@@ -67,9 +70,14 @@ internal class DefaultCustomerSheetLoader(
             .toResult()
             .getOrThrow()
 
-        val filteredPaymentMethods = customerSheetSession.paymentMethods.filter {
-            PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance).isAccepted(it)
-        }
+        val isPaymentMethodSyncDefaultEnabled = getDefaultPaymentMethodsEnabledForCustomerSheet(
+            customerSheetSession.elementsSession
+        )
+
+        val filteredPaymentMethods = customerSheetSession.paymentMethods.filter { paymentMethod ->
+            PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance).isAccepted(paymentMethod)
+        }.filterToSupportedPaymentMethods(isPaymentMethodSyncDefaultEnabled)
+
         customerSheetSession = customerSheetSession.copy(
             paymentMethods = filteredPaymentMethods
         )
@@ -77,6 +85,7 @@ internal class DefaultCustomerSheetLoader(
         val metadata = createPaymentMethodMetadata(
             configuration = configuration,
             customerSheetSession = customerSheetSession,
+            isPaymentMethodSyncDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
         )
 
         createCustomerSheetState(
@@ -104,6 +113,7 @@ internal class DefaultCustomerSheetLoader(
     private suspend fun createPaymentMethodMetadata(
         configuration: CustomerSheet.Configuration,
         customerSheetSession: CustomerSheetSession,
+        isPaymentMethodSyncDefaultEnabled: Boolean,
     ): PaymentMethodMetadata {
         val elementsSession = customerSheetSession.elementsSession
         val sharedDataSpecs = lpmRepository.getSharedDataSpecs(
@@ -115,13 +125,14 @@ internal class DefaultCustomerSheetLoader(
             if (isLiveModeProvider()) GooglePayEnvironment.Production else GooglePayEnvironment.Test
         ).isReady().first()
 
-        return PaymentMethodMetadata.create(
+        return PaymentMethodMetadata.createForCustomerSheet(
             elementsSession = elementsSession,
             configuration = configuration,
             paymentMethodSaveConsentBehavior = customerSheetSession.paymentMethodSaveConsentBehavior,
             sharedDataSpecs = sharedDataSpecs,
             isGooglePayReady = isGooglePayReadyAndEnabled,
-            isFinancialConnectionsAvailable = isFinancialConnectionsAvailable
+            isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
+            isPaymentMethodSyncDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
         )
     }
 
@@ -132,20 +143,7 @@ internal class DefaultCustomerSheetLoader(
     ): CustomerSheetState.Full {
         val paymentMethods = customerSheetSession.paymentMethods
 
-        val paymentSelection = customerSheetSession.savedSelection?.let { selection ->
-            when (selection) {
-                is SavedSelection.GooglePay -> PaymentSelection.GooglePay
-                is SavedSelection.Link -> PaymentSelection.Link
-                is SavedSelection.PaymentMethod -> {
-                    paymentMethods.find { paymentMethod ->
-                        paymentMethod.id == selection.id
-                    }?.let {
-                        PaymentSelection.Saved(it)
-                    }
-                }
-                is SavedSelection.None -> null
-            }
-        }
+        val paymentSelection = getPaymentSelection(customerSheetSession, metadata, paymentMethods)
 
         val sortedPaymentMethods = sortPaymentMethods(
             paymentMethods = customerSheetSession.paymentMethods,
@@ -165,6 +163,38 @@ internal class DefaultCustomerSheetLoader(
             validationError = customerSheetSession.elementsSession.stripeIntent.validate(),
             customerPermissions = customerSheetSession.permissions,
         )
+    }
+
+    private fun getPaymentSelection(
+        customerSheetSession: CustomerSheetSession,
+        metadata: PaymentMethodMetadata,
+        paymentMethods: List<PaymentMethod>
+    ): PaymentSelection? {
+        return if (metadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true) {
+            getDefaultPaymentMethodAsPaymentSelection(paymentMethods, customerSheetSession.defaultPaymentMethodId)
+        } else {
+            useLocalSelectionAsPaymentSelection(customerSheetSession, paymentMethods)
+        }
+    }
+
+    private fun useLocalSelectionAsPaymentSelection(
+        customerSheetSession: CustomerSheetSession,
+        paymentMethods: List<PaymentMethod>
+    ): PaymentSelection? {
+        return customerSheetSession.savedSelection?.let { selection ->
+            when (selection) {
+                is SavedSelection.GooglePay -> PaymentSelection.GooglePay
+                is SavedSelection.Link -> PaymentSelection.Link()
+                is SavedSelection.PaymentMethod -> {
+                    paymentMethods.find { paymentMethod ->
+                        paymentMethod.id == selection.id
+                    }?.let {
+                        PaymentSelection.Saved(it)
+                    }
+                }
+                is SavedSelection.None -> null
+            }
+        }
     }
 
     private fun filterSupportedPaymentMethods(

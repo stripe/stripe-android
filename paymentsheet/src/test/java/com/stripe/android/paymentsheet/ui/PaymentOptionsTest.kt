@@ -7,7 +7,9 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsItem
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -25,17 +27,10 @@ class PaymentOptionsTest {
     fun `Navigates to AddAnotherPaymentMethod screen when add card is pressed using new updatePM screen`() {
         var didCallOnAddCardPressed = false
 
-        composeTestRule.setContent {
-            SavedPaymentMethodTabLayoutUI(
-                paymentOptionsItems = listOf(PaymentOptionsItem.AddCard, PaymentOptionsItem.GooglePay),
-                selectedPaymentOptionsItem = PaymentOptionsItem.GooglePay,
-                isEditing = false,
-                isProcessing = false,
-                onAddCardPressed = { didCallOnAddCardPressed = true },
-                onItemSelected = {},
-                onModifyItem = {},
-            )
-        }
+        createTabLayoutUiForTestingClicks(
+            isEditing = false,
+            onAddCardPressed = { didCallOnAddCardPressed = true },
+        )
 
         val label = "+ Add"
         val testTag = "${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_$label"
@@ -53,17 +48,10 @@ class PaymentOptionsTest {
     fun `Updates selection when item is pressed using updatePM screen`() {
         var didCallOnItemSelected = false
 
-        composeTestRule.setContent {
-            SavedPaymentMethodTabLayoutUI(
-                paymentOptionsItems = listOf(PaymentOptionsItem.AddCard, PaymentOptionsItem.GooglePay),
-                selectedPaymentOptionsItem = PaymentOptionsItem.GooglePay,
-                isEditing = false,
-                isProcessing = false,
-                onAddCardPressed = {},
-                onItemSelected = { didCallOnItemSelected = true },
-                onModifyItem = {},
-            )
-        }
+        createTabLayoutUiForTestingClicks(
+            isEditing = false,
+            onItemSelected = { didCallOnItemSelected = true },
+        )
 
         val testTag = "${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_Google Pay"
 
@@ -80,17 +68,10 @@ class PaymentOptionsTest {
     fun `Does not update selection when item is pressed in edit mode, using updatePM screen`() {
         var didCallOnItemSelected = false
 
-        composeTestRule.setContent {
-            SavedPaymentMethodTabLayoutUI(
-                paymentOptionsItems = listOf(PaymentOptionsItem.AddCard, PaymentOptionsItem.GooglePay),
-                selectedPaymentOptionsItem = PaymentOptionsItem.GooglePay,
-                isEditing = true,
-                isProcessing = false,
-                onAddCardPressed = {},
-                onItemSelected = { didCallOnItemSelected = true },
-                onModifyItem = {},
-            )
-        }
+        createTabLayoutUiForTestingClicks(
+            isEditing = true,
+            onItemSelected = { didCallOnItemSelected = true },
+        )
 
         val testTag = "${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_Google Pay"
 
@@ -124,6 +105,73 @@ class PaymentOptionsTest {
         composeTestRule.setContent {
             val itemWidth = rememberItemWidth(maxWidth = 482.dp)
             assertThat(itemWidth.value.roundToInt()).isEqualTo(112)
+        }
+    }
+
+    @Test
+    fun `Default Badge shows when editing`() {
+        createTabLayoutUiForTestingDefaultLabel(
+            isEditing = true
+        )
+
+        composeTestRule.onNodeWithTag(
+            TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL,
+            useUnmergedTree = true
+        ).assertExists()
+    }
+
+    @Test
+    fun `Default Badge hidden when not editing`() {
+        createTabLayoutUiForTestingDefaultLabel(
+            isEditing = false
+        )
+
+        composeTestRule.onNodeWithTag(
+            TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL,
+            useUnmergedTree = true
+        ).assertDoesNotExist()
+    }
+
+    private fun createTabLayoutUiForTestingClicks(
+        isEditing: Boolean,
+        onAddCardPressed: () -> Unit = {},
+        onItemSelected: (PaymentSelection?) -> Unit = {}
+    ) {
+        composeTestRule.setContent {
+            SavedPaymentMethodTabLayoutUI(
+                onAddCardPressed = onAddCardPressed,
+                onItemSelected = onItemSelected,
+                isEditing = isEditing,
+                paymentOptionsItems = listOf(PaymentOptionsItem.AddCard, PaymentOptionsItem.GooglePay),
+                selectedPaymentOptionsItem = PaymentOptionsItem.GooglePay,
+                isProcessing = false,
+                onModifyItem = {},
+            )
+        }
+    }
+
+    private val paymentOptionsItemsWithDefault = listOf(
+        PaymentOptionsItem.SavedPaymentMethod(
+            PaymentMethodFixtures.defaultDisplayableCard()
+        ),
+        PaymentOptionsItem.SavedPaymentMethod(
+            PaymentMethodFixtures.displayableCard()
+        )
+    )
+
+    private fun createTabLayoutUiForTestingDefaultLabel(
+        isEditing: Boolean = false,
+    ) {
+        composeTestRule.setContent {
+            SavedPaymentMethodTabLayoutUI(
+                paymentOptionsItems = paymentOptionsItemsWithDefault,
+                isEditing = isEditing,
+                selectedPaymentOptionsItem = null,
+                onAddCardPressed = {},
+                onItemSelected = {},
+                isProcessing = false,
+                onModifyItem = {},
+            )
         }
     }
 }

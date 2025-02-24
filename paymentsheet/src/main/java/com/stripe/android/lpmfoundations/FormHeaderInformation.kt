@@ -10,4 +10,5 @@ internal data class FormHeaderInformation(
     val lightThemeIconUrl: String?,
     val darkThemeIconUrl: String?,
     val iconRequiresTinting: Boolean,
+    val promoBadge: String?,
 )

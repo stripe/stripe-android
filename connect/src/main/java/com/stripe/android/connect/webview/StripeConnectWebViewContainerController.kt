@@ -18,10 +18,14 @@ import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.StripeEmbeddedComponentListener
 import com.stripe.android.connect.analytics.ComponentAnalyticsService
+import com.stripe.android.connect.analytics.ConnectAnalyticsEvent
+import com.stripe.android.connect.util.Clock
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
+import com.stripe.android.connect.webview.serialization.OpenFinancialConnectionsMessage
 import com.stripe.android.connect.webview.serialization.SetOnLoadError
 import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
+import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage.UnknownValue
 import com.stripe.android.core.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,6 +40,7 @@ import kotlinx.coroutines.withContext
 internal class StripeConnectWebViewContainerController<Listener : StripeEmbeddedComponentListener>(
     private val view: StripeConnectWebViewContainerInternal,
     private val analyticsService: ComponentAnalyticsService,
+    private val clock: Clock,
     private val embeddedComponentManager: EmbeddedComponentManager,
     private val embeddedComponent: StripeEmbeddedComponent,
     private val listener: Listener?,
@@ -43,6 +48,10 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
     private val stripeIntentLauncher: StripeIntentLauncher = StripeIntentLauncherImpl(),
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
 ) : DefaultLifecycleObserver {
+
+    init {
+        analyticsService.track(ConnectAnalyticsEvent.ComponentCreated)
+    }
 
     private val loggerTag = javaClass.simpleName
     private val _stateFlow = MutableStateFlow(StripeConnectWebViewContainerState())
@@ -57,14 +66,38 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
      * Callback to invoke when the view is attached.
      */
     fun onViewAttached() {
+        updateState { copy(didBeginLoadingMillis = clock.millis()) }
         view.loadUrl(embeddedComponentManager.getStripeURL(embeddedComponent))
+
+        analyticsService.track(ConnectAnalyticsEvent.ComponentViewed(stateFlow.value.pageViewId))
     }
 
     /**
      * Callback to invoke when the page started loading.
      */
-    fun onPageStarted() {
+    fun onPageStarted(url: String?) {
         updateState { copy(isNativeLoadingIndicatorVisible = !receivedSetOnLoaderStart) }
+
+        if (url != null) {
+            val pageLoadUrl = Uri.parse(url)
+            val expectedUrl = Uri.parse(embeddedComponentManager.getStripeURL(embeddedComponent))
+            if (
+                pageLoadUrl.scheme != expectedUrl.scheme ||
+                pageLoadUrl.host != expectedUrl.host ||
+                pageLoadUrl.path != expectedUrl.path
+            ) {
+                // expected URL doesn't match what we navigated to
+                analyticsService.track(ConnectAnalyticsEvent.WebErrorUnexpectedNavigation(pageLoadUrl.sanitize()))
+            }
+        }
+    }
+
+    /**
+     * Callback to invoke when the page finished loading.
+     */
+    fun onPageFinished() {
+        val timeToLoad = clock.millis() - (stateFlow.value.didBeginLoadingMillis ?: 0)
+        analyticsService.track(ConnectAnalyticsEvent.WebPageLoaded(timeToLoad))
     }
 
     /**
@@ -92,7 +125,27 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
         // don't send errors for requests that aren't for the main page load
         if (isMainPageLoad) {
             listener?.onLoadError(RuntimeException(errorString)) // TODO - wrap error better
+            analyticsService.track(
+                ConnectAnalyticsEvent.WebErrorPageLoad(
+                    status = httpStatusCode,
+                    error = errorMessage,
+                    url = requestUrl
+                )
+            )
         }
+    }
+
+    fun onErrorDeserializingWebMessage(
+        webFunctionName: String,
+        error: Exception,
+    ) {
+        analyticsService.track(
+            ConnectAnalyticsEvent.WebErrorDeserializeMessage(
+                message = webFunctionName,
+                error = error.javaClass.simpleName,
+                pageViewId = stateFlow.value.pageViewId,
+            )
+        )
     }
 
     /**
@@ -110,8 +163,14 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
     fun shouldOverrideUrlLoading(context: Context, request: WebResourceRequest): Boolean {
         val url = request.url
         return if (url.host?.lowercase() in ALLOWLISTED_HOSTS) {
-            // TODO - add an analytic event here to track this unexpected behavior
-            logger.warning("($loggerTag) Received pop-up for allow-listed host: $url")
+            val sanitizedUrl = url.sanitize()
+            logger.warning("($loggerTag) Received pop-up for allow-listed host: $sanitizedUrl")
+            analyticsService.track(
+                ConnectAnalyticsEvent.ClientError(
+                    errorCode = "unexpected_popup",
+                    errorMessage = "Received pop-up for allow-listed host: $sanitizedUrl"
+                )
+            )
             false // Allow the request to propagate so we open URL in WebView, but this is not an expected operation
         } else if (
             url.scheme.equals("https", ignoreCase = true) || url.scheme.equals("http", ignoreCase = true)
@@ -139,7 +198,7 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
                     embeddedComponentManager.appearanceFlow
                         .collectLatest { appearance ->
                             updateState { copy(appearance = appearance) }
-                            if (stateFlow.value.receivedPageDidLoad) {
+                            if (stateFlow.value.pageViewId != null) {
                                 view.updateConnectInstance(appearance)
                             }
                         }
@@ -177,9 +236,14 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
         if (permissionsRequested.isEmpty()) { // all calls to PermissionRequest must be on the main thread
             withContext(Dispatchers.Main) {
                 request.deny() // no supported permissions were requested, so reject the request
-                // TODO - add an analytic event here to track this unexpected behavior
+                analyticsService.track(
+                    ConnectAnalyticsEvent.ClientError(
+                        errorCode = "unexpected_permissions_request",
+                        errorMessage = "Unexpected permissions '${request.resources.joinToString(",")}' requested"
+                    )
+                )
                 logger.warning(
-                    "($loggerTag) Denying permission - ${request.resources.joinToString()} are not supported"
+                    "($loggerTag) Denying permission - '${request.resources.joinToString(",")}' are not supported"
                 )
             }
             return
@@ -212,12 +276,38 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
         }
     }
 
+    suspend fun onOpenFinancialConnections(
+        context: Context,
+        message: OpenFinancialConnectionsMessage,
+    ) {
+        val result = embeddedComponentManager.presentFinancialConnections(
+            context = context,
+            clientSecret = message.clientSecret,
+            connectedAccountId = message.connectedAccountId,
+        )
+        view.setCollectMobileFinancialConnectionsResult(
+            id = message.id,
+            result = result,
+        )
+    }
+
     /**
      * Callback to invoke upon receiving 'pageDidLoad' message.
      */
-    fun onReceivedPageDidLoad() {
+    fun onReceivedPageDidLoad(pageViewId: String) {
         view.updateConnectInstance(embeddedComponentManager.appearanceFlow.value)
-        updateState { copy(receivedPageDidLoad = true) }
+        updateState { copy(pageViewId = pageViewId) }
+
+        // right now view onAttach and begin load happen at the same time,
+        // so timeToLoad and perceivedTimeToLoad are the same value
+        val timeToLoad = clock.millis() - (stateFlow.value.didBeginLoadingMillis ?: 0)
+        analyticsService.track(
+            ConnectAnalyticsEvent.WebComponentLoaded(
+                pageViewId = pageViewId,
+                timeToLoadMs = timeToLoad,
+                perceivedTimeToLoadMs = timeToLoad,
+            )
+        )
     }
 
     /**
@@ -239,6 +329,14 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
                 listener?.onLoadError(RuntimeException("${value.error.type}: ${value.error.message}"))
             }
             else -> {
+                if (value is UnknownValue) {
+                    analyticsService.track(
+                        ConnectAnalyticsEvent.WebWarnUnrecognizedSetter(
+                            setter = message.setter,
+                            pageViewId = stateFlow.value.pageViewId
+                        )
+                    )
+                }
                 with(listenerDelegate) {
                     listener?.delegate(message)
                 }
@@ -250,6 +348,10 @@ internal class StripeConnectWebViewContainerController<Listener : StripeEmbedded
         update: StripeConnectWebViewContainerState.() -> StripeConnectWebViewContainerState
     ) {
         _stateFlow.value = update(stateFlow.value)
+    }
+
+    private fun Uri.sanitize(): String {
+        return buildUpon().clearQuery().fragment(null).build().toString()
     }
 
     internal companion object {

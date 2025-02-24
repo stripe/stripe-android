@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
 import com.stripe.android.common.model.CommonConfiguration
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -15,7 +14,7 @@ internal data class CustomerState(
     val customerSessionClientSecret: String?,
     val paymentMethods: List<PaymentMethod>,
     val permissions: Permissions,
-    val defaultPaymentMethodId: String?
+    val defaultPaymentMethodId: String?,
 ) : Parcelable {
     @Parcelize
     data class Permissions(
@@ -23,6 +22,15 @@ internal data class CustomerState(
         val canRemoveLastPaymentMethod: Boolean,
         val canRemoveDuplicates: Boolean,
     ) : Parcelable
+
+    @Parcelize
+    sealed class DefaultPaymentMethodState : Parcelable {
+        @Parcelize
+        data class Enabled(val defaultPaymentMethodId: String?) : DefaultPaymentMethodState()
+
+        @Parcelize
+        data object Disabled : DefaultPaymentMethodState()
+    }
 
     internal companion object {
         /**
@@ -67,11 +75,7 @@ internal data class CustomerState(
                     // Should always remove duplicates when using `customer_session`
                     canRemoveDuplicates = true,
                 ),
-                defaultPaymentMethodId = if (FeatureFlags.enableDefaultPaymentMethods.isEnabled) {
-                    customer.defaultPaymentMethod
-                } else {
-                    null
-                }
+                defaultPaymentMethodId = customer.defaultPaymentMethod
             )
         }
 
@@ -114,6 +118,7 @@ internal data class CustomerState(
                      */
                     canRemoveDuplicates = false,
                 ),
+                // This is a customer sessions only feature, so will always be null when using a legacy ephemeral key.
                 defaultPaymentMethodId = null
             )
         }

@@ -22,7 +22,6 @@ public synthetic class com/stripe/android/uicore/address/CountryAddressSchema$$s
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/uicore/address/CountryAddressSchema;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/uicore/address/CountryAddressSchema$Companion {
@@ -38,7 +37,6 @@ public synthetic class com/stripe/android/uicore/address/FieldSchema$$serializer
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/uicore/address/FieldSchema;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/uicore/address/FieldSchema$Companion {
@@ -58,7 +56,6 @@ public synthetic class com/stripe/android/uicore/address/StateSchema$$serializer
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/uicore/address/StateSchema;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/uicore/address/StateSchema$Companion {
@@ -91,8 +88,6 @@ public final class com/stripe/android/uicore/elements/AddressType$ShippingExpand
 
 public final class com/stripe/android/uicore/elements/ComposableSingletons$OTPElementUIKt {
 	public static final field INSTANCE Lcom/stripe/android/uicore/elements/ComposableSingletons$OTPElementUIKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function2;
-	public static field lambda-2 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$stripe_ui_core_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda-2$stripe_ui_core_release ()Lkotlin/jvm/functions/Function2;
@@ -100,7 +95,6 @@ public final class com/stripe/android/uicore/elements/ComposableSingletons$OTPEl
 
 public final class com/stripe/android/uicore/elements/ComposableSingletons$TextFieldUIKt {
 	public static final field INSTANCE Lcom/stripe/android/uicore/elements/ComposableSingletons$TextFieldUIKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$stripe_ui_core_release ()Lkotlin/jvm/functions/Function2;
 }
@@ -114,7 +108,6 @@ public synthetic class com/stripe/android/uicore/elements/IdentifierSpec$$serial
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/uicore/elements/IdentifierSpec;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/uicore/elements/IdentifierSpec$Companion {
@@ -140,6 +133,7 @@ public final class com/stripe/android/uicore/elements/IdentifierSpec$Companion {
 	public final fun getPreferredCardBrand ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getSameAsShipping ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getSaveForFutureUse ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
+	public final fun getSetAsDefaultPaymentMethod ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getSortingCode ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getState ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getUpi ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
@@ -235,13 +229,12 @@ public final class com/stripe/android/uicore/elements/TextFieldStateConstants$Va
 
 public final class com/stripe/android/uicore/elements/TextFieldUIKt {
 	public static final fun AnimatedIcons (Ljava/util/List;ZLandroidx/compose/runtime/Composer;I)V
-	public static final fun TextField-qRf7idA (Lcom/stripe/android/uicore/elements/TextFieldController;ZILandroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;IILandroidx/compose/ui/focus/FocusRequester;Landroidx/compose/runtime/Composer;II)V
+	public static final fun TextField-ZkbtPhE (Lcom/stripe/android/uicore/elements/TextFieldController;ZILandroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;IILandroidx/compose/ui/focus/FocusRequester;ZZLandroidx/compose/runtime/Composer;II)V
 	public static final fun TextFieldSection (Landroidx/compose/ui/Modifier;Lcom/stripe/android/uicore/elements/TextFieldController;ZLjava/lang/Integer;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class com/stripe/android/uicore/elements/bottomsheet/ComposableSingletons$StripeBottomSheetLayoutKt {
 	public static final field INSTANCE Lcom/stripe/android/uicore/elements/bottomsheet/ComposableSingletons$StripeBottomSheetLayoutKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$stripe_ui_core_release ()Lkotlin/jvm/functions/Function2;
 }
@@ -252,8 +245,6 @@ public final class com/stripe/android/uicore/elements/bottomsheet/StripeBottomSh
 
 public final class com/stripe/android/uicore/image/ComposableSingletons$StripeImageKt {
 	public static final field INSTANCE Lcom/stripe/android/uicore/image/ComposableSingletons$StripeImageKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function3;
-	public static field lambda-2 Lkotlin/jvm/functions/Function3;
 	public fun <init> ()V
 	public final fun getLambda-1$stripe_ui_core_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-2$stripe_ui_core_release ()Lkotlin/jvm/functions/Function3;

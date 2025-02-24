@@ -9,11 +9,16 @@ internal class FakeCustomerSheetSavedSelectionDataSource(
         CustomerSheetDataResult.success(null),
     private val onSetSavedSelection: SetSavedSelectionOperation? = null
 ) : CustomerSheetSavedSelectionDataSource {
-    override suspend fun retrieveSavedSelection(): CustomerSheetDataResult<SavedSelection?> {
+    override suspend fun retrieveSavedSelection(
+        customerSessionElementsSession: CustomerSessionElementsSession?
+    ): CustomerSheetDataResult<SavedSelection?> {
         return savedSelection
     }
 
-    override suspend fun setSavedSelection(selection: SavedSelection?): CustomerSheetDataResult<Unit> {
+    override suspend fun setSavedSelection(
+        selection: SavedSelection?,
+        shouldSyncDefault: Boolean,
+    ): CustomerSheetDataResult<Unit> {
         return onSetSavedSelection?.invoke(selection) ?: run {
             savedSelection = CustomerSheetDataResult.success(selection)
             CustomerSheetDataResult.success(Unit)

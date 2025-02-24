@@ -419,13 +419,15 @@ internal class PlaygroundSettings private constructor(
             CustomerSessionSaveSettingsDefinition,
             CustomerSessionRemoveSettingsDefinition,
             CustomerSessionRemoveLastSettingsDefinition,
+            CustomerSessionSetAsDefaultSettingsDefinition,
+            CustomerSessionSyncDefaultSettingsDefinition,
             CustomerSessionRedisplaySettingsDefinition,
             CustomerSessionRedisplayFiltersSettingsDefinition,
             CustomerSessionOverrideRedisplaySettingsDefinition,
             CustomerSettingsDefinition,
             CheckoutModeSettingsDefinition,
             LinkSettingsDefinition,
-            FeatureFlagSettingsDefinition(FeatureFlags.nativeLinkEnabled),
+            LinkTypeSettingsDefinition,
             CountrySettingsDefinition,
             CurrencySettingsDefinition,
             GooglePaySettingsDefinition,
@@ -449,7 +451,7 @@ internal class PlaygroundSettings private constructor(
             LayoutSettingsDefinition,
             CardBrandAcceptanceSettingsDefinition,
             FeatureFlagSettingsDefinition(FeatureFlags.instantDebitsIncentives),
-            FeatureFlagSettingsDefinition(FeatureFlags.enableDefaultPaymentMethods),
+            EmbeddedViewDisplaysMandateSettingDefinition,
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(

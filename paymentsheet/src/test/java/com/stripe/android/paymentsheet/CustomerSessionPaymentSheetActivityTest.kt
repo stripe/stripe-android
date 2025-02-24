@@ -9,15 +9,19 @@ import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.Espresso
 import com.stripe.android.common.ui.performClickWithKeyboard
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers
+import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG
@@ -42,6 +46,10 @@ internal class CustomerSessionPaymentSheetActivityTest {
 
     private val composeTestRule = createAndroidComposeRule<PaymentSheetActivity>()
     private val networkRule = NetworkRule()
+
+    private val verticalModePage = VerticalModePage(composeTestRule)
+    private val managePage = ManagePage(composeTestRule)
+    private val editPage = EditPage(composeTestRule)
 
     @get:Rule
     val ruleChain: RuleChain = RuleChain
@@ -292,11 +300,60 @@ internal class CustomerSessionPaymentSheetActivityTest {
             composeTestRule.onUpdateScreenRemoveButton().assertDoesNotExist()
         }
 
+    @Test
+    fun `Setting default card selects that card in vertical mode`() {
+        val cards = PaymentMethodFixtures.createCards(2)
+        runTest(
+            cards = cards,
+            setAsDefaultFeatureEnabled = true,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+        ) {
+            val originallySelectedPaymentMethodId = cards[0].id!!
+            val newDefaultPaymentMethodId = cards[1].id!!
+            verticalModePage.assertHasSavedPaymentMethods()
+            verticalModePage.assertHasSelectedSavedPaymentMethod(originallySelectedPaymentMethodId)
+            verticalModePage.assertPrimaryButton(isEnabled())
+
+            verticalModePage.clickViewMore()
+            managePage.waitUntilVisible()
+            verticalModePage.assertHasSelectedSavedPaymentMethod(originallySelectedPaymentMethodId)
+            managePage.clickEdit()
+            managePage.clickEdit(newDefaultPaymentMethodId)
+            setDefaultPaymentMethod()
+
+            managePage.waitUntilVisible()
+            managePage.clickDone()
+            verticalModePage.assertHasSelectedSavedPaymentMethod(newDefaultPaymentMethodId)
+            Espresso.pressBack()
+
+            verticalModePage.waitUntilVisible()
+            verticalModePage.assertHasSelectedSavedPaymentMethod(newDefaultPaymentMethodId)
+            verticalModePage.assertPrimaryButton(isEnabled())
+        }
+    }
+
+    private fun setDefaultPaymentMethod() {
+        editPage.waitUntilVisible()
+        editPage.clickSetAsDefaultCheckbox()
+
+        networkRule.enqueue(
+            RequestMatchers.host("api.stripe.com"),
+            RequestMatchers.method("POST"),
+            RequestMatchers.path("/v1/elements/customers/cus_12345/set_default_payment_method"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-customers-set-default-pm.json")
+        }
+
+        editPage.update()
+    }
+
     private fun runTest(
         cards: List<PaymentMethod>,
-        isPaymentMethodRemoveEnabled: Boolean,
-        canRemoveLastPaymentMethodConfig: Boolean,
-        canRemoveLastPaymentMethodServer: Boolean,
+        isPaymentMethodRemoveEnabled: Boolean = true,
+        canRemoveLastPaymentMethodConfig: Boolean = true,
+        canRemoveLastPaymentMethodServer: Boolean = true,
+        setAsDefaultFeatureEnabled: Boolean = false,
+        paymentMethodLayout: PaymentSheet.PaymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         test: (PaymentSheetActivity) -> Unit,
     ) {
         networkRule.enqueue(
@@ -309,6 +366,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
                     cards = cards,
                     isPaymentMethodRemoveEnabled = isPaymentMethodRemoveEnabled,
                     canRemoveLastPaymentMethod = canRemoveLastPaymentMethodServer,
+                    setAsDefaultFeatureEnabled = setAsDefaultFeatureEnabled,
                 )
             )
         }
@@ -330,18 +388,20 @@ internal class CustomerSessionPaymentSheetActivityTest {
                         ),
                         allowsRemovalOfLastSavedPaymentMethod = canRemoveLastPaymentMethodConfig,
                         preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa),
-                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                        paymentMethodLayout = paymentMethodLayout,
                     ),
                     statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
                 )
             )
         ).use { scenario ->
             scenario.onActivity { activity ->
-                composeTestRule.waitUntil(timeoutMillis = 2_000) {
-                    composeTestRule
-                        .onAllNodes(hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG))
-                        .fetchSemanticsNodes()
-                        .isNotEmpty()
+                if (paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Horizontal) {
+                    composeTestRule.waitUntil(timeoutMillis = 2_000) {
+                        composeTestRule
+                            .onAllNodes(hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG))
+                            .fetchSemanticsNodes()
+                            .isNotEmpty()
+                    }
                 }
 
                 test(activity)
@@ -390,6 +450,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
             cards: List<PaymentMethod>,
             isPaymentMethodRemoveEnabled: Boolean,
             canRemoveLastPaymentMethod: Boolean,
+            setAsDefaultFeatureEnabled: Boolean,
         ): String {
             val cardsArray = JSONArray()
 
@@ -399,17 +460,9 @@ internal class CustomerSessionPaymentSheetActivityTest {
 
             val cardsStringified = cardsArray.toString(2)
 
-            val isPaymentMethodRemoveStringified = if (isPaymentMethodRemoveEnabled) {
-                "enabled"
-            } else {
-                "disabled"
-            }
-
-            val canRemoveLastPaymentMethodStringified = if (canRemoveLastPaymentMethod) {
-                "enabled"
-            } else {
-                "disabled"
-            }
+            val isPaymentMethodRemoveStringified = isPaymentMethodRemoveEnabled.toFeatureState()
+            val canRemoveLastPaymentMethodStringified = canRemoveLastPaymentMethod.toFeatureState()
+            val setAsDefaultFeatureEnabledStringified = setAsDefaultFeatureEnabled.toFeatureState()
 
             return """
                 {
@@ -442,7 +495,8 @@ internal class CustomerSessionPaymentSheetActivityTest {
                             "payment_method_save": "enabled",
                             "payment_method_remove": "$isPaymentMethodRemoveStringified",
                             "payment_method_remove_last": "$canRemoveLastPaymentMethodStringified",
-                            "payment_method_save_allow_redisplay_override": null
+                            "payment_method_save_allow_redisplay_override": null,
+                            "payment_method_set_as_default": $setAsDefaultFeatureEnabledStringified
                           }
                         },
                         "customer_sheet": {
@@ -515,6 +569,14 @@ internal class CustomerSessionPaymentSheetActivityTest {
                   "unactivated_payment_method_types": []
                 }
             """.trimIndent()
+        }
+
+        private fun Boolean.toFeatureState(): String {
+            return if (this) {
+                "enabled"
+            } else {
+                "disabled"
+            }
         }
     }
 }

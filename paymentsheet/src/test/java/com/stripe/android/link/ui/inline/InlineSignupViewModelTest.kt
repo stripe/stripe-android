@@ -1,16 +1,19 @@
 package com.stripe.android.link.ui.inline
 
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
-import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.SetupIntent
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.elements.PhoneNumberController
 import kotlinx.coroutines.flow.first
@@ -20,10 +23,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -46,25 +47,12 @@ class InlineSignupViewModelTest {
                 }
             }
             val viewModel = InlineSignupViewModel(
-                config = LinkConfiguration(
-                    stripeIntent = mockStripeIntent(),
-                    merchantName = MERCHANT_NAME,
-                    merchantCountryCode = "US",
-                    customerInfo = LinkConfiguration.CustomerInfo(
-                        email = CUSTOMER_EMAIL,
-                        phone = CUSTOMER_PHONE,
-                        name = CUSTOMER_NAME,
-                        billingCountryCode = CUSTOMER_BILLING_COUNTRY_CODE,
-                    ),
-                    shippingDetails = null,
-                    passthroughModeEnabled = false,
-                    flags = emptyMap(),
-                    cardBrandChoice = null,
-                ),
+                config = TestFactory.LINK_CONFIGURATION,
                 signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
                 linkAccountManager = linkAccountManager,
                 linkEventsReporter = linkEventsReporter,
                 logger = Logger.noop(),
+                initialUserInput = null,
             )
 
             linkAccountManager.lookupConsumerResult = Result.success(null)
@@ -402,54 +390,150 @@ class InlineSignupViewModelTest {
                 )
         }
 
+    @Test
+    fun `Initial sign up input should be populated`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val email = "restored@email.com"
+            val phone = "+19987654321"
+            val country = "CA"
+            val name = "John Doe"
+
+            val viewModel = createViewModel(
+                countryCode = CountryCode.US,
+                prefilledEmail = CUSTOMER_EMAIL,
+                prefilledPhone = "+1$CUSTOMER_PHONE",
+                prefilledName = CUSTOMER_NAME,
+                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+                initialUserInput = UserInput.SignUp(
+                    email = email,
+                    phone = phone,
+                    country = country,
+                    name = name,
+                    consentAction = SignUpConsentAction.CheckboxWithPrefilledEmailAndPhone,
+                ),
+            )
+
+            assertThat(viewModel.emailController.rawFieldValue.value).isEqualTo(email)
+            assertThat(viewModel.phoneController.rawFieldValue.value).isEqualTo(phone)
+            assertThat(viewModel.phoneController.countryDropdownController.rawFieldValue.value).isEqualTo(country)
+            assertThat(viewModel.nameController.rawFieldValue.value).isEqualTo(name)
+
+            val viewState = viewModel.viewState.value
+
+            assertThat(viewState.isExpanded).isTrue()
+            assertThat(viewState.userInput)
+                .isEqualTo(
+                    UserInput.SignUp(
+                        email = email,
+                        phone = phone,
+                        country = country,
+                        name = name,
+                        consentAction = SignUpConsentAction.CheckboxWithPrefilledEmailAndPhone,
+                    )
+                )
+        }
+
+    @Test
+    fun `Initial sign in input with returned lookup should be populated`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val email = "restored@email.com"
+
+            linkAccountManager.lookupConsumerResult = Result.success(
+                LinkAccount(
+                    consumerSession = ConsumerSession(
+                        clientSecret = "sess_123",
+                        emailAddress = "restored@email.com",
+                        redactedPhoneNumber = "**********",
+                        redactedFormattedPhoneNumber = "* *** *** ****"
+                    )
+                )
+            )
+
+            val viewModel = createViewModel(
+                countryCode = CountryCode.US,
+                prefilledEmail = CUSTOMER_EMAIL,
+                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+                initialUserInput = UserInput.SignIn(
+                    email = email,
+                ),
+            )
+
+            assertThat(viewModel.emailController.rawFieldValue.value).isEqualTo(email)
+            assertThat(viewModel.phoneController.rawFieldValue.value).isEqualTo("+1")
+            assertThat(viewModel.nameController.rawFieldValue.value).isEmpty()
+
+            viewModel.viewState.test {
+                val initialViewState = awaitItem()
+
+                assertThat(initialViewState.isExpanded).isTrue()
+                assertThat(initialViewState.userInput).isNull()
+
+                val viewState = awaitItem()
+
+                assertThat(viewState.isExpanded).isTrue()
+                assertThat(viewState.userInput)
+                    .isEqualTo(
+                        UserInput.SignIn(
+                            email = email,
+                        )
+                    )
+            }
+        }
+
     private fun createViewModel(
         countryCode: CountryCode = CountryCode.US,
         prefilledEmail: String? = null,
         prefilledName: String? = null,
         prefilledPhone: String? = null,
         signupMode: LinkSignupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+        initialUserInput: UserInput? = null,
     ) = InlineSignupViewModel(
-        config = LinkConfiguration(
-            stripeIntent = mockStripeIntent(countryCode),
-            merchantName = MERCHANT_NAME,
+        config = TestFactory.LINK_CONFIGURATION.copy(
+            stripeIntent = stripeIntent(countryCode),
             merchantCountryCode = "US",
-            customerInfo = LinkConfiguration.CustomerInfo(
+            customerInfo = TestFactory.LINK_CONFIGURATION.customerInfo.copy(
                 email = prefilledEmail,
-                phone = prefilledPhone,
                 name = prefilledName,
-                billingCountryCode = null,
-            ),
-            shippingDetails = null,
-            passthroughModeEnabled = false,
-            flags = emptyMap(),
-            cardBrandChoice = null,
+                phone = prefilledPhone,
+                billingCountryCode = null
+            )
         ),
         signupMode = signupMode,
         linkAccountManager = linkAccountManager,
         linkEventsReporter = linkEventsReporter,
         logger = Logger.noop(),
+        initialUserInput = initialUserInput,
     )
 
     private fun mockConsumerSessionWithVerificationSession(
         type: ConsumerSession.VerificationSession.SessionType,
         state: ConsumerSession.VerificationSession.SessionState
     ): ConsumerSession {
-        val verificationSession = mock<ConsumerSession.VerificationSession>()
-        whenever(verificationSession.type).thenReturn(type)
-        whenever(verificationSession.state).thenReturn(state)
+        val verificationSession = ConsumerSession.VerificationSession(
+            type = type,
+            state = state,
+        )
         val verificationSessions = listOf(verificationSession)
 
-        val consumerSession = mock<ConsumerSession>()
-        whenever(consumerSession.verificationSessions).thenReturn(verificationSessions)
-        whenever(consumerSession.clientSecret).thenReturn("secret")
-        whenever(consumerSession.emailAddress).thenReturn("email")
-        return consumerSession
+        return ConsumerSession(
+            emailAddress = "email",
+            redactedFormattedPhoneNumber = "********55",
+            redactedPhoneNumber = "(***) ***-**55",
+            verificationSessions = verificationSessions,
+        )
     }
 
-    private fun mockStripeIntent(
+    private fun stripeIntent(
         countryCode: CountryCode = CountryCode.US
-    ): PaymentIntent = mock {
-        on { this.countryCode } doReturn countryCode.value
+    ): StripeIntent {
+        return when (val intent = TestFactory.LINK_CONFIGURATION.stripeIntent) {
+            is PaymentIntent -> {
+                intent.copy(countryCode = countryCode.value)
+            }
+            is SetupIntent -> {
+                intent.copy(countryCode = countryCode.value)
+            }
+        }
     }
 
     private fun PhoneNumberController.selectCanadianPhoneNumber() {
@@ -460,10 +544,8 @@ class InlineSignupViewModelTest {
     }
 
     private companion object {
-        const val MERCHANT_NAME = "merchantName"
         const val CUSTOMER_EMAIL = "customer@email.com"
         const val CUSTOMER_PHONE = "1234567890"
         const val CUSTOMER_NAME = "Customer"
-        const val CUSTOMER_BILLING_COUNTRY_CODE = "US"
     }
 }

@@ -73,7 +73,9 @@ internal data class SupportedPaymentMethod(
         subtitle = subtitle,
     )
 
-    fun asFormHeaderInformation(): FormHeaderInformation {
+    fun asFormHeaderInformation(
+        incentive: PaymentMethodIncentive?,
+    ): FormHeaderInformation {
         return FormHeaderInformation(
             displayName = displayName,
             shouldShowIcon = true,
@@ -81,6 +83,7 @@ internal data class SupportedPaymentMethod(
             lightThemeIconUrl = lightThemeIconUrl,
             darkThemeIconUrl = darkThemeIconUrl,
             iconRequiresTinting = iconRequiresTinting,
+            promoBadge = incentive?.displayText,
         )
     }
 
@@ -107,7 +110,7 @@ internal data class SupportedPaymentMethod(
             darkThemeIconUrl = darkThemeIconUrl,
             iconRequiresTinting = iconRequiresTinting,
             subtitle = subtitle,
-            promoBadge = incentive?.takeIf { it.matches(code) }?.displayText,
+            promoBadge = incentive?.displayText,
             onClick = onClick,
         )
     }

@@ -8,6 +8,7 @@ apply plugin: 'dev.drewhamilton.poko'
 
 dependencies {
     implementation project(':stripe-core')
+    implementation project(':financial-connections')
 
     // Kotlin
     implementation libs.kotlin.coroutines

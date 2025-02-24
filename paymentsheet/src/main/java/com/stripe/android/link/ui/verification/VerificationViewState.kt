@@ -11,5 +11,6 @@ internal data class VerificationViewState(
     val isSendingNewCode: Boolean,
     val didSendNewCode: Boolean,
     val redactedPhoneNumber: String,
-    val email: String
+    val email: String,
+    val isDialog: Boolean
 )

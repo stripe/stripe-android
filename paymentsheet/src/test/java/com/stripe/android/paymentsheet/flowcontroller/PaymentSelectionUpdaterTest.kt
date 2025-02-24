@@ -193,13 +193,13 @@ class PaymentSelectionUpdaterTest {
             iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_paypal,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
-            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.PAYPAL,
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.P24,
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
         )
 
         // Paypal PaymentIntent does not require a mandate, but paypal SetupIntent does
         val newState = mockPaymentSheetStateWithSetupIntent(
-            paymentMethodTypes = listOf("card", "paypal"),
+            paymentMethodTypes = listOf("card", "p24"),
             customerPaymentMethods = PaymentMethodFixtures.createCards(3),
         )
 
@@ -326,10 +326,7 @@ class PaymentSelectionUpdaterTest {
         val existingSelection = PaymentSelection.GooglePay
 
         val newConfig = defaultPaymentSheetConfiguration.copy(
-            customer = PaymentSheet.CustomerConfiguration(
-                id = "id1",
-                ephemeralKeySecret = "ek_123",
-            )
+            defaultBillingDetails = PaymentSheet.BillingDetails(email = "hi-jay@example.com")
         )
         val newState = mockPaymentSheetStateWithPaymentIntent(
             config = newConfig
@@ -361,7 +358,6 @@ class PaymentSelectionUpdaterTest {
             customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                 paymentMethods = customerPaymentMethods
             ),
-            linkState = null,
             paymentSelection = paymentSelection,
             validationError = null,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
@@ -392,7 +388,6 @@ class PaymentSelectionUpdaterTest {
             customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
                 paymentMethods = customerPaymentMethods
             ),
-            linkState = null,
             paymentSelection = paymentSelection,
             validationError = null,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(

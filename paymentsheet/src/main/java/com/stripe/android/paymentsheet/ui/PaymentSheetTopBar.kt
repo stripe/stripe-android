@@ -40,6 +40,7 @@ internal const val SHEET_NAVIGATION_BUTTON_TAG = "SHEET_NAVIGATION_BUTTON_TAG"
 @Composable
 internal fun PaymentSheetTopBar(
     state: PaymentSheetTopBarState?,
+    canNavigateBack: Boolean,
     isEnabled: Boolean,
     handleBackPressed: () -> Unit,
     elevation: Dp = 0.dp,
@@ -47,6 +48,7 @@ internal fun PaymentSheetTopBar(
     if (state != null) {
         PaymentSheetTopBar(
             state = state,
+            canNavigateBack = canNavigateBack,
             isEnabled = isEnabled,
             elevation = elevation,
             onNavigationIconPressed = handleBackPressed,
@@ -57,6 +59,7 @@ internal fun PaymentSheetTopBar(
 @Composable
 internal fun PaymentSheetTopBar(
     state: PaymentSheetTopBarState,
+    canNavigateBack: Boolean,
     isEnabled: Boolean,
     elevation: Dp,
     onNavigationIconPressed: () -> Unit,
@@ -81,9 +84,20 @@ internal fun PaymentSheetTopBar(
                 },
                 modifier = Modifier.testTag(SHEET_NAVIGATION_BUTTON_TAG)
             ) {
+                val icon = if (canNavigateBack) {
+                    R.drawable.stripe_ic_paymentsheet_back
+                } else {
+                    R.drawable.stripe_ic_paymentsheet_close
+                }
+
+                val contentDescription = if (canNavigateBack) {
+                    StripeUiCoreR.string.stripe_back
+                } else {
+                    R.string.stripe_paymentsheet_close
+                }
                 Icon(
-                    painter = painterResource(state.icon),
-                    contentDescription = stringResource(state.contentDescription),
+                    painter = painterResource(icon),
+                    contentDescription = stringResource(contentDescription),
                     tint = tintColor,
                 )
             }
@@ -165,8 +179,6 @@ internal fun TestModeBadge() {
 internal fun PaymentSheetTopBar_Preview() {
     StripeTheme(colors = StripeThemeDefaults.colorsLight.copy(appBarIcon = Color.Red)) {
         val state = PaymentSheetTopBarState(
-            icon = R.drawable.stripe_ic_paymentsheet_back,
-            contentDescription = StripeUiCoreR.string.stripe_back,
             showTestModeLabel = true,
             showEditMenu = true,
             isEditing = false,
@@ -175,6 +187,7 @@ internal fun PaymentSheetTopBar_Preview() {
 
         PaymentSheetTopBar(
             state = state,
+            canNavigateBack = true,
             isEnabled = true,
             elevation = 0.dp,
             onNavigationIconPressed = {},

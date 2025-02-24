@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.di.APPLICATION_ID
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.DeferredIntentParams
@@ -17,6 +18,7 @@ import com.stripe.android.paymentsheet.toDeferredIntentParams
 import kotlinx.coroutines.withContext
 import java.util.Calendar
 import javax.inject.Inject
+import javax.inject.Named
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
@@ -25,7 +27,7 @@ internal interface ElementsSessionRepository {
         initializationMode: PaymentElementLoader.InitializationMode,
         customer: PaymentSheet.CustomerConfiguration?,
         externalPaymentMethods: List<String>,
-        defaultPaymentMethodId: String?,
+        savedPaymentMethodSelectionId: String?,
     ): Result<ElementsSession>
 }
 
@@ -36,6 +38,7 @@ internal class RealElementsSessionRepository @Inject constructor(
     private val stripeRepository: StripeRepository,
     private val lazyPaymentConfig: Provider<PaymentConfiguration>,
     @IOContext private val workContext: CoroutineContext,
+    @Named(APPLICATION_ID) private val appId: String
 ) : ElementsSessionRepository {
 
     // The PaymentConfiguration can change after initialization, so this needs to get a new
@@ -50,12 +53,13 @@ internal class RealElementsSessionRepository @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
         customer: PaymentSheet.CustomerConfiguration?,
         externalPaymentMethods: List<String>,
-        defaultPaymentMethodId: String?,
+        savedPaymentMethodSelectionId: String?,
     ): Result<ElementsSession> {
         val params = initializationMode.toElementsSessionParams(
             customer = customer,
             externalPaymentMethods = externalPaymentMethods,
-            defaultPaymentMethodId = defaultPaymentMethodId,
+            savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
+            appId = appId
         )
 
         val elementsSession = stripeRepository.retrieveElementsSession(
@@ -113,7 +117,8 @@ private fun StripeIntent.withoutWeChatPay(): StripeIntent {
 internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
     customer: PaymentSheet.CustomerConfiguration?,
     externalPaymentMethods: List<String>,
-    defaultPaymentMethodId: String?,
+    savedPaymentMethodSelectionId: String?,
+    appId: String
 ): ElementsSessionParams {
     val customerSessionClientSecret = customer?.toElementSessionParam()
 
@@ -123,7 +128,8 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 clientSecret = clientSecret,
                 customerSessionClientSecret = customerSessionClientSecret,
                 externalPaymentMethods = externalPaymentMethods,
-                defaultPaymentMethodId = defaultPaymentMethodId,
+                savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
+                appId = appId
             )
         }
 
@@ -132,7 +138,8 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 clientSecret = clientSecret,
                 customerSessionClientSecret = customerSessionClientSecret,
                 externalPaymentMethods = externalPaymentMethods,
-                defaultPaymentMethodId = defaultPaymentMethodId,
+                savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
+                appId = appId
             )
         }
 
@@ -141,7 +148,8 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 deferredIntentParams = intentConfiguration.toDeferredIntentParams(),
                 externalPaymentMethods = externalPaymentMethods,
                 customerSessionClientSecret = customerSessionClientSecret,
-                defaultPaymentMethodId = defaultPaymentMethodId,
+                savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
+                appId = appId
             )
         }
     }

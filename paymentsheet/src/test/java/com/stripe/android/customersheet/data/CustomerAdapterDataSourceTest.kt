@@ -96,7 +96,7 @@ class CustomerAdapterDataSourceTest {
             ),
         )
 
-        val result = dataSource.retrieveSavedSelection()
+        val result = dataSource.retrieveSavedSelection(null)
 
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Success<SavedSelection?>>()
 
@@ -116,7 +116,7 @@ class CustomerAdapterDataSourceTest {
             )
         )
 
-        val result = dataSource.retrieveSavedSelection()
+        val result = dataSource.retrieveSavedSelection(null)
 
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<SavedSelection?>>()
 
@@ -139,7 +139,7 @@ class CustomerAdapterDataSourceTest {
             )
         )
 
-        val result = dataSource.retrieveSavedSelection()
+        val result = dataSource.retrieveSavedSelection(null)
 
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<SavedSelection?>>()
 
@@ -158,7 +158,7 @@ class CustomerAdapterDataSourceTest {
             ),
         )
 
-        val result = dataSource.setSavedSelection(SavedSelection.GooglePay)
+        val result = dataSource.setSavedSelection(SavedSelection.GooglePay, false)
 
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Success<Unit>>()
     }
@@ -176,7 +176,7 @@ class CustomerAdapterDataSourceTest {
             )
         )
 
-        val result = dataSource.setSavedSelection(SavedSelection.GooglePay)
+        val result = dataSource.setSavedSelection(SavedSelection.GooglePay, false)
 
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<Unit>>()
 
@@ -199,7 +199,7 @@ class CustomerAdapterDataSourceTest {
             )
         )
 
-        val result = dataSource.setSavedSelection(SavedSelection.GooglePay)
+        val result = dataSource.setSavedSelection(SavedSelection.GooglePay, false)
 
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Failure<Unit>>()
 

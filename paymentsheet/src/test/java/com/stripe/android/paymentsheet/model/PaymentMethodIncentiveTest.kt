@@ -13,8 +13,8 @@ class PaymentMethodIncentiveTest {
             displayText = "$5"
         )
 
-        val matchesLink = paymentMethodIncentive.matches(PaymentMethod.Type.Link.code)
-        assertThat(matchesLink).isTrue()
+        val applicableIncentive = paymentMethodIncentive.takeIfMatches(PaymentMethod.Type.Link.code)
+        assertThat(applicableIncentive).isNotNull()
     }
 
     @Test
@@ -24,8 +24,8 @@ class PaymentMethodIncentiveTest {
             displayText = "$5"
         )
 
-        val matchesLink = paymentMethodIncentive.matches(PaymentMethod.Type.USBankAccount.code)
-        assertThat(matchesLink).isFalse()
+        val applicableIncentive = paymentMethodIncentive.takeIfMatches(PaymentMethod.Type.USBankAccount.code)
+        assertThat(applicableIncentive).isNull()
     }
 
     @Test
@@ -35,10 +35,10 @@ class PaymentMethodIncentiveTest {
             displayText = "$5"
         )
 
-        val matchesAny = PaymentMethod.Type.entries.any {
-            paymentMethodIncentive.matches(it.code)
+        val matches = PaymentMethod.Type.entries.mapNotNull {
+            paymentMethodIncentive.takeIfMatches(it.code)
         }
 
-        assertThat(matchesAny).isFalse()
+        assertThat(matches).isEmpty()
     }
 }

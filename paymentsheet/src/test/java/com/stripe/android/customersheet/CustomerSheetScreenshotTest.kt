@@ -75,6 +75,7 @@ internal class CustomerSheetScreenshotTest {
         onUpdatePrimaryButtonState = { },
         onUpdatePrimaryButtonUIState = { },
         onError = { },
+        shouldShowSetAsDefaultCheckbox = false
     )
 
     private val selectPaymentMethodViewState = CustomerSheetViewState.SelectPaymentMethod(
@@ -84,7 +85,7 @@ internal class CustomerSheetScreenshotTest {
         isLiveMode = false,
         isProcessing = false,
         isEditing = false,
-        isGooglePayEnabled = false,
+        showGooglePay = false,
         primaryButtonVisible = false,
         canEdit = true,
         canRemovePaymentMethods = true,
@@ -200,7 +201,7 @@ internal class CustomerSheetScreenshotTest {
                         savedPaymentMethods.first()
                     ),
                     isEditing = true,
-                    isGooglePayEnabled = true,
+                    showGooglePay = true,
                     errorMessage = "This is an error message.",
                 ),
                 paymentMethodNameProvider = {
@@ -218,7 +219,7 @@ internal class CustomerSheetScreenshotTest {
                 viewState = selectPaymentMethodViewState.copy(
                     title = "Screenshot testing",
                     paymentSelection = PaymentSelection.GooglePay,
-                    isGooglePayEnabled = true,
+                    showGooglePay = true,
                     errorMessage = "This is an error message.",
                 ),
                 paymentMethodNameProvider = { it!!.resolvableString },
@@ -239,7 +240,7 @@ internal class CustomerSheetScreenshotTest {
                     paymentSelection = PaymentSelection.Saved(
                         PaymentMethodFixtures.US_BANK_ACCOUNT
                     ),
-                    isGooglePayEnabled = false,
+                    showGooglePay = false,
                     primaryButtonVisible = true,
                     mandateText = "Some mandate text.".resolvableString
                 ),
@@ -349,12 +350,16 @@ internal class CustomerSheetScreenshotTest {
             updatePaymentMethodInteractor = DefaultUpdatePaymentMethodInteractor(
                 displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
                 removeExecutor = { null },
-                updateExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
+                updateCardBrandExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
+                setDefaultPaymentMethodExecutor = { _ -> Result.success(Unit) },
                 canRemove = canRemove,
                 isLiveMode = true,
                 cardBrandFilter = DefaultCardBrandFilter,
                 onBrandChoiceOptionsDismissed = {},
                 onBrandChoiceOptionsShown = {},
+                // This checkbox is never displayed in CustomerSheet.
+                shouldShowSetAsDefaultCheckbox = false,
+                onUpdateSuccess = {},
             ),
             isLiveMode = true,
         )

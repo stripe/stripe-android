@@ -215,12 +215,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
 
-        viewModelScope.launch {
-            linkHandler.processingState.collect { processingState ->
-                handleLinkProcessingState(processingState)
-            }
-        }
-
         val isDeferred = args.initializationMode is PaymentElementLoader.InitializationMode.DeferredIntent
 
         eventReporter.onInit(
@@ -230,33 +224,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
         viewModelScope.launch(workContext) {
             loadPaymentSheetState()
-        }
-    }
-
-    private fun handleLinkProcessingState(processingState: LinkHandler.ProcessingState) {
-        when (processingState) {
-            is LinkHandler.ProcessingState.PaymentDetailsCollected -> {
-                processingState.paymentSelection?.let {
-                    // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.
-                    updateSelection(it)
-                    checkout(selection.value, CheckoutIdentifier.SheetBottomBuy)
-                } ?: run {
-                    // Link PaymentDetails creating failed, fallback to regular checkout.
-                    // paymentSelection is already set to the card parameters from the form.
-                    checkout(selection.value, CheckoutIdentifier.SheetBottomBuy)
-                }
-            }
-            LinkHandler.ProcessingState.Ready -> {
-                this.checkoutIdentifier = CheckoutIdentifier.SheetBottomBuy
-                viewState.value = PaymentSheetViewState.Reset()
-            }
-            LinkHandler.ProcessingState.Started -> {
-                this.checkoutIdentifier = CheckoutIdentifier.SheetBottomBuy
-                viewState.value = PaymentSheetViewState.StartProcessing
-            }
-            LinkHandler.ProcessingState.CompleteWithoutLink -> {
-                checkout()
-            }
         }
     }
 
@@ -306,7 +273,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
         setPaymentMethodMetadata(state.paymentMethodMetadata)
 
-        linkHandler.setupLink(state.linkState)
+        val shouldLaunchEagerly = linkHandler.setupLinkWithEagerLaunch(state.paymentMethodMetadata.linkState)
 
         val pendingFailedPaymentResult = confirmationHandler.awaitResult()
             as? ConfirmationHandler.Result.Failed
@@ -319,6 +286,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 customerStateHolder = customerStateHolder,
             )
         )
+
+        if (shouldLaunchEagerly) {
+            checkoutWithLinkExpress()
+        }
 
         viewModelScope.launch {
             confirmationHandler.state.collectLatest { state ->
@@ -373,7 +344,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     fun checkoutWithLink() {
-        checkout(PaymentSelection.Link, CheckoutIdentifier.SheetTopWallet)
+        checkout(PaymentSelection.Link(useLinkExpress = false), CheckoutIdentifier.SheetTopWallet)
+    }
+
+    private fun checkoutWithLinkExpress() {
+        checkout(PaymentSelection.Link(useLinkExpress = true), CheckoutIdentifier.SheetTopWallet)
     }
 
     private fun checkout(
@@ -714,10 +689,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             val component = DaggerPaymentSheetLauncherComponent
                 .builder()
                 .application(application)
+                .savedStateHandle(savedStateHandle)
                 .build()
                 .paymentSheetViewModelSubcomponentBuilder
                 .paymentSheetViewModelModule(PaymentSheetViewModelModule(starterArgsSupplier()))
-                .savedStateHandle(savedStateHandle)
                 .build()
 
             return component.viewModel as T

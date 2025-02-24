@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeTestRule
@@ -22,13 +23,18 @@ internal class FormPage(
         if (fillOutCardNumber) {
             replaceText(cardNumber, "4242424242424242")
         }
-        replaceText("MM / YY", "12/34")
+        fillExpirationDate("12/34")
         replaceText("CVC", "123")
         replaceText("ZIP Code", "12345")
     }
 
     private fun replaceText(label: String, text: String) {
         composeTestRule.onNode(hasText(label))
+            .performTextReplacement(text)
+    }
+
+    private fun fillExpirationDate(text: String) {
+        composeTestRule.onNode(hasContentDescription(value = "Expiration date", substring = true))
             .performTextReplacement(text)
     }
 

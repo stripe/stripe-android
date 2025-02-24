@@ -25,6 +25,7 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import com.stripe.android.paymentsheet.InitializedViaCompose
+import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
@@ -47,8 +48,6 @@ import com.stripe.android.paymentsheet.ui.SepaMandateResult
 import com.stripe.android.paymentsheet.utils.canSave
 import com.stripe.android.uicore.utils.AnimationConstants
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
@@ -70,6 +69,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val eventReporter: EventReporter,
     private val viewModel: FlowControllerViewModel,
     private val confirmationHandler: ConfirmationHandler,
+    private val linkHandler: LinkHandler,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     private val configurationHandler: FlowControllerConfigurationHandler,
@@ -123,7 +123,6 @@ internal class DefaultFlowController @Inject internal constructor(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
                     activityResultLaunchers.forEach { it.unregister() }
-                    PaymentSheet.FlowController.linkHandler = null
                     IntentConfirmationInterceptor.createIntentCallback = null
                     ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
                 }
@@ -323,7 +322,7 @@ internal class DefaultFlowController @Inject internal constructor(
         viewModelScope.launch {
             val confirmationOption = paymentSelection?.toConfirmationOption(
                 configuration = state.config,
-                linkConfiguration = state.linkState?.configuration,
+                linkConfiguration = state.paymentMethodMetadata.linkState?.configuration,
             )
 
             confirmationOption?.let { option ->
@@ -427,7 +426,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     is PaymentSelection.Saved -> {
                         when (currentSelection.walletType) {
                             PaymentSelection.Saved.WalletType.GooglePay -> PaymentSelection.GooglePay
-                            PaymentSelection.Saved.WalletType.Link -> PaymentSelection.Link
+                            PaymentSelection.Saved.WalletType.Link -> PaymentSelection.Link()
                             else -> currentSelection
                         }
                     }
@@ -483,7 +482,6 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     internal fun onPaymentResult(
         paymentResult: PaymentResult,
         deferredIntentConfirmationType: DeferredIntentConfirmationType? = null,
@@ -496,10 +494,7 @@ internal class DefaultFlowController @Inject internal constructor(
         val selection = viewModel.paymentSelection
 
         if (paymentResult is PaymentResult.Completed && selection != null && selection.isLink) {
-            GlobalScope.launch {
-                // This usage is intentional. We want the request to be sent without regard for the UI lifecycle.
-                PaymentSheet.FlowController.linkHandler?.logOut()
-            }
+            linkHandler.logOut()
         }
 
         viewModelScope.launch {

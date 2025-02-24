@@ -17,12 +17,14 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.example.data.BackendRepository
 import com.stripe.android.financialconnections.example.data.Settings
+import com.stripe.android.financialconnections.example.data.model.Merchant
 import com.stripe.android.financialconnections.example.settings.ConfirmIntentSetting
 import com.stripe.android.financialconnections.example.settings.EmailSetting
 import com.stripe.android.financialconnections.example.settings.ExperienceSetting
 import com.stripe.android.financialconnections.example.settings.FinancialConnectionsPlaygroundUrlHelper
 import com.stripe.android.financialconnections.example.settings.FlowSetting
 import com.stripe.android.financialconnections.example.settings.IntegrationTypeSetting
+import com.stripe.android.financialconnections.example.settings.MerchantSetting
 import com.stripe.android.financialconnections.example.settings.PlaygroundSettings
 import com.stripe.android.financialconnections.example.settings.StripeAccountIdSetting
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -64,6 +66,22 @@ internal class FinancialConnectionsPlaygroundViewModel(
                         append(event.metadata.toMap().filterValues { it != null })
                     }
                 )
+            }
+        }
+
+        loadMerchants()
+    }
+
+    private fun loadMerchants() {
+        viewModelScope.launch {
+            runCatching {
+                repository.merchants()
+            }.onSuccess { response ->
+                _state.update {
+                    it.updateWithMerchants(response.merchants)
+                }
+            }.onFailure { error ->
+                Log.e("FinancialConnections", "Failed to fetch merchants from backend", error)
             }
         }
     }
@@ -430,30 +448,6 @@ internal class FinancialConnectionsPlaygroundViewModel(
     }
 }
 
-enum class Merchant(
-    val apiValue: String,
-    val canSwitchBetweenTestAndLive: Boolean = true,
-) {
-    Default("default"),
-    PartnerD("partner_d", canSwitchBetweenTestAndLive = false),
-    PartnerF("partner_f", canSwitchBetweenTestAndLive = false),
-    PartnerM("partner_m", canSwitchBetweenTestAndLive = false),
-    PlatformC("strash"),
-    Networking("networking"),
-    LiveTesting("live_testing", canSwitchBetweenTestAndLive = false),
-    TestMode("testmode", canSwitchBetweenTestAndLive = false),
-    NmeDefaultVerification("nme", canSwitchBetweenTestAndLive = true),
-    NmeABAVVerification("nme_abav", canSwitchBetweenTestAndLive = true),
-    NmeSkipVerification("nme_skip", canSwitchBetweenTestAndLive = true),
-    Custom("other");
-
-    companion object {
-        fun fromApiValue(apiValue: String): Merchant {
-            return entries.firstOrNull { it.apiValue == apiValue } ?: Default
-        }
-    }
-}
-
 enum class Flow(val apiValue: String) {
     Data("Data"),
     Token("Token"),
@@ -533,4 +527,20 @@ internal data class FinancialConnectionsPlaygroundState(
     val flow: Flow = settings.get<FlowSetting>().selectedOption
     val stripeAccountId: String? = settings.getOrNull<StripeAccountIdSetting>()?.selectedOption
         ?.takeIf { it.isNotEmpty() }
+
+    fun updateWithMerchants(merchants: List<Merchant>): FinancialConnectionsPlaygroundState {
+        return copy(
+            settings = settings.copy(
+                settings = settings.settings.map { setting ->
+                    if (setting is MerchantSetting) {
+                        MerchantSetting(
+                            merchants = merchants,
+                        )
+                    } else {
+                        setting
+                    }
+                }
+            )
+        )
+    }
 }

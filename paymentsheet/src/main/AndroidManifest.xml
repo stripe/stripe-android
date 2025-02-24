@@ -37,6 +37,12 @@
         <activity
             android:name=".paymentdatacollection.cvcrecollection.CvcRecollectionActivity"
             android:theme="@style/StripePaymentSheetDefaultTheme" />
+        <activity
+            android:name="com.stripe.android.paymentelement.embedded.form.FormActivity"
+            android:theme="@style/StripePaymentSheetDefaultTheme" />
+        <activity
+            android:name="com.stripe.android.paymentelement.embedded.manage.ManageActivity"
+            android:theme="@style/StripePaymentSheetDefaultTheme" />
 
         <activity
             android:name="com.stripe.android.link.LinkActivity"

@@ -18,7 +18,6 @@ import androidx.navigation.navArgument
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerScreen
 import com.stripe.android.financialconnections.features.accountupdate.AccountUpdateRequiredModal
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentScreen
-import com.stripe.android.financialconnections.features.bankauthrepair.BankAuthRepairScreen
 import com.stripe.android.financialconnections.features.consent.ConsentScreen
 import com.stripe.android.financialconnections.features.error.ErrorScreen
 import com.stripe.android.financialconnections.features.exit.ExitModal
@@ -36,6 +35,7 @@ import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthS
 import com.stripe.android.financialconnections.features.reset.ResetScreen
 import com.stripe.android.financialconnections.features.success.SuccessScreen
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.navigation.bottomsheet.LifecycleAwareContent
 import com.stripe.android.financialconnections.navigation.bottomsheet.bottomSheet
 import com.stripe.android.financialconnections.presentation.parentViewModel
 
@@ -109,14 +109,14 @@ internal sealed class Destination(
         route = Pane.PARTNER_AUTH_DRAWER.value,
         closeWithoutConfirmation = false,
         logPaneLaunched = true,
-        composable = { PartnerAuthScreen(inModal = true) }
+        composable = { PartnerAuthScreen(pane = Pane.PARTNER_AUTH, inModal = true) }
     )
 
     data object PartnerAuth : Destination(
         route = Pane.PARTNER_AUTH.value,
         closeWithoutConfirmation = false,
         logPaneLaunched = true,
-        composable = { PartnerAuthScreen(inModal = false) }
+        composable = { PartnerAuthScreen(pane = Pane.PARTNER_AUTH, inModal = false) }
     )
 
     data object AccountPicker : Destination(
@@ -234,7 +234,7 @@ internal sealed class Destination(
         route = Pane.BANK_AUTH_REPAIR.value,
         closeWithoutConfirmation = false,
         logPaneLaunched = true,
-        composable = { BankAuthRepairScreen() }
+        composable = { PartnerAuthScreen(pane = Pane.BANK_AUTH_REPAIR, inModal = false) }
     )
 
     data object ManualEntrySuccess : Destination(
@@ -283,6 +283,10 @@ internal fun NavGraphBuilder.bottomSheet(
         route = destination.fullRoute,
         arguments = destination.arguments,
         deepLinks = deepLinks,
-        content = { destination.Composable(navBackStackEntry = it) }
+        content = { navBackStackEntry ->
+            LifecycleAwareContent(navBackStackEntry) {
+                destination.Composable(navBackStackEntry = navBackStackEntry)
+            }
+        }
     )
 }

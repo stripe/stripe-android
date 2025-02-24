@@ -63,6 +63,7 @@ class VerticalModeInitialScreenFactoryTest {
         val fakeViewModel = FakeBaseSheetViewModel.create(
             paymentMethodMetadata = paymentMethodMetadata,
             initialScreen = PaymentSheetScreen.Loading,
+            canGoBack = false,
         )
 
         val customerStateHolder = CustomerStateHolder(SavedStateHandle(), fakeViewModel.selection)
@@ -78,7 +79,7 @@ class VerticalModeInitialScreenFactoryTest {
                         canRemoveLastPaymentMethod = true,
                         canRemoveDuplicates = true,
                     ),
-                    defaultPaymentMethodId = null
+                    defaultPaymentMethodId = null,
                 )
             )
         }

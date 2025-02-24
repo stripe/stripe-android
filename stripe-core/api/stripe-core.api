@@ -138,7 +138,6 @@ public synthetic class com/stripe/android/core/model/Country$$serializer : kotli
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/core/model/Country;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/core/model/Country$Companion {
@@ -161,7 +160,6 @@ public synthetic class com/stripe/android/core/model/CountryCode$$serializer : k
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/core/model/CountryCode;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/core/model/CountryCode$Creator : android/os/Parcelable$Creator {
@@ -267,7 +265,6 @@ public synthetic class com/stripe/android/core/networking/AnalyticsRequestV2$$se
 	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/core/networking/AnalyticsRequestV2;)V
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/core/networking/ApiRequest$Options$Creator : android/os/Parcelable$Creator {
@@ -339,6 +336,27 @@ public final class com/stripe/android/core/strings/transformations/Replace$Creat
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/core/strings/transformations/Replace;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/core/utils/FeatureFlag$Flag$Disabled : com/stripe/android/core/utils/FeatureFlag$Flag {
+	public static final field INSTANCE Lcom/stripe/android/core/utils/FeatureFlag$Flag$Disabled;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/core/utils/FeatureFlag$Flag$Enabled : com/stripe/android/core/utils/FeatureFlag$Flag {
+	public static final field INSTANCE Lcom/stripe/android/core/utils/FeatureFlag$Flag$Enabled;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/core/utils/FeatureFlag$Flag$NotSet : com/stripe/android/core/utils/FeatureFlag$Flag {
+	public static final field INSTANCE Lcom/stripe/android/core/utils/FeatureFlag$Flag$NotSet;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/core/version/StripeSdkVersion {

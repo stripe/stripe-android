@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.repository
 
 import com.stripe.android.core.Logger
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.BillingDetails
 import com.stripe.android.financialconnections.domain.IsLinkWithStripe
@@ -16,7 +17,9 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction.EnteredPhoneNumberClickedSaveToLink
 import com.stripe.android.model.CustomEmailType
+import com.stripe.android.model.EmailSource
 import com.stripe.android.model.SharePaymentDetails
+import com.stripe.android.model.SignUpParams
 import com.stripe.android.model.UpdateAvailableIncentives
 import com.stripe.android.model.VerificationType
 import com.stripe.android.repository.ConsumersApiService
@@ -28,16 +31,32 @@ internal interface FinancialConnectionsConsumerSessionRepository {
 
     suspend fun getCachedConsumerSession(): CachedConsumerSession?
 
+    suspend fun postConsumerSession(
+        email: String,
+        clientSecret: String
+    ): ConsumerSessionLookup
+
+    suspend fun mobileLookupConsumerSession(
+        email: String,
+        emailSource: EmailSource,
+        verificationToken: String,
+        sessionId: String,
+        appId: String
+    ): ConsumerSessionLookup
+
     suspend fun signUp(
         email: String,
         phoneNumber: String,
         country: String,
     ): ConsumerSessionSignup
 
-    suspend fun lookupConsumerSession(
+    suspend fun mobileSignUp(
         email: String,
-        clientSecret: String
-    ): ConsumerSessionLookup
+        phoneNumber: String,
+        country: String,
+        verificationToken: String,
+        appId: String
+    ): ConsumerSessionSignup
 
     suspend fun startConsumerVerification(
         consumerSessionClientSecret: String,
@@ -72,6 +91,7 @@ internal interface FinancialConnectionsConsumerSessionRepository {
 
     suspend fun updateAvailableIncentives(
         sessionId: String,
+        paymentDetailsId: String,
         consumerSessionClientSecret: String,
     ): Result<UpdateAvailableIncentives>
 
@@ -129,21 +149,41 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
         consumerSessionRepository.provideConsumerSession()
     }
 
-    override suspend fun lookupConsumerSession(
-        email: String,
-        clientSecret: String
-    ): ConsumerSessionLookup = mutex.withLock {
-        postConsumerSession(email, clientSecret).also { lookup ->
-            updateCachedConsumerSessionFromLookup(lookup)
-        }
-    }
-
     override suspend fun signUp(
         email: String,
         phoneNumber: String,
+        country: String
+    ): ConsumerSessionSignup = performSignUp(
+        email = email,
+        phoneNumber = phoneNumber,
+        country = country,
+        signupCall = consumersApiService::signUp
+    )
+
+    override suspend fun mobileSignUp(
+        email: String,
+        phoneNumber: String,
         country: String,
+        verificationToken: String,
+        appId: String
+    ): ConsumerSessionSignup = performSignUp(
+        email = email,
+        phoneNumber = phoneNumber,
+        country = country,
+        verificationToken = verificationToken,
+        appId = appId,
+        signupCall = consumersApiService::mobileSignUp
+    )
+
+    private suspend fun performSignUp(
+        email: String,
+        phoneNumber: String,
+        country: String,
+        verificationToken: String? = null,
+        appId: String? = null,
+        signupCall: suspend (SignUpParams, ApiRequest.Options) -> Result<ConsumerSessionSignup>
     ): ConsumerSessionSignup = mutex.withLock {
-        consumersApiService.signUp(
+        val signUpParams = SignUpParams(
             email = email,
             phoneNumber = phoneNumber,
             country = country,
@@ -152,12 +192,16 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
             amount = elementsSessionContext?.amount,
             currency = elementsSessionContext?.currency,
             incentiveEligibilitySession = elementsSessionContext?.incentiveEligibilitySession,
-            requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
             requestSurface = requestSurface,
             consentAction = EnteredPhoneNumberClickedSaveToLink,
-        ).onSuccess { signup ->
-            updateCachedConsumerSessionFromSignup(signup)
-        }.getOrThrow()
+            verificationToken = verificationToken,
+            appId = appId
+        )
+
+        // Make the API call using the given lambda function
+        signupCall(signUpParams, provideApiRequestOptions(useConsumerPublishableKey = false))
+            .onSuccess { signup -> updateCachedConsumerSessionFromSignup(signup) }
+            .getOrThrow()
     }
 
     override suspend fun startConsumerVerification(
@@ -246,24 +290,46 @@ private class FinancialConnectionsConsumerSessionRepositoryImpl(
 
     override suspend fun updateAvailableIncentives(
         sessionId: String,
+        paymentDetailsId: String,
         consumerSessionClientSecret: String,
     ): Result<UpdateAvailableIncentives> {
         return consumersApiService.updateAvailableIncentives(
             sessionId = sessionId,
+            paymentDetailsId = paymentDetailsId,
             consumerSessionClientSecret = consumerSessionClientSecret,
             requestSurface = requestSurface,
-            requestOptions = provideApiRequestOptions(useConsumerPublishableKey = true),
+            requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
         )
     }
 
-    private suspend fun postConsumerSession(
+    override suspend fun postConsumerSession(
         email: String,
         clientSecret: String
     ): ConsumerSessionLookup = financialConnectionsConsumersApiService.postConsumerSession(
         email = email,
         clientSecret = clientSecret,
         requestSurface = requestSurface,
-    )
+    ).also {
+        updateCachedConsumerSessionFromLookup(it)
+    }
+
+    override suspend fun mobileLookupConsumerSession(
+        email: String,
+        emailSource: EmailSource,
+        verificationToken: String,
+        sessionId: String,
+        appId: String
+    ): ConsumerSessionLookup = consumersApiService.mobileLookupConsumerSession(
+        email = email,
+        emailSource = emailSource,
+        requestSurface = requestSurface,
+        verificationToken = verificationToken,
+        appId = appId,
+        sessionId = sessionId,
+        requestOptions = provideApiRequestOptions(useConsumerPublishableKey = false),
+    ).also {
+        updateCachedConsumerSessionFromLookup(it)
+    }
 
     private fun updateCachedConsumerSession(
         source: String,

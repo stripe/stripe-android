@@ -28,6 +28,10 @@
   <string name="stripe_blik_code">BLIK-kode</string>
   <!-- Label for Boleto Payment method Tax ID -->
   <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
+  <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
+  <string name="stripe_card_brand_not_accepted">(ikkje godteke)</string>
+  <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
+  <string name="stripe_card_brand_not_accepted_with_brand">%1$s (ikkje godteke)</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">Ved å gå vidare gir du %1$s tillating til å debitere Cash App-kontoen din for denne betalinga og framtidige betalingar i samsvar med %2$s sine vilkår, fram til denne autoriseringa blir trekt tilbake. Du kan endre dette når som helst i Cash App-innstillingane.</string>
   <!-- Title for the contact information section -->
@@ -101,6 +105,8 @@
   <string name="stripe_scan_card">Skann kort</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Ved å oppgje betalingsopplysningane dine og bekrefte denne betalinga, autoriserer du (A) %s og Stripe, betalingstenesteleverandøren vår, til å sende instruksjonar til banken din om å debitere kontoen din og (B) banken din om å debitere kontoen din i samsvar med dei instruksjonane. Som ein del av rettane dine har du krav på ein refusjon frå banken din under vilkåra i avtalen din med banken. Ein refusjon må hevdast innan 8 veker frå datoen da kontoen din vart debitert. Rettane dine vert forklart i ei erklæring som du kan få frå banken. Du godtek å take imot varsel for framtidige debetar opptil 2 dagar før dei oppstår.</string>
+  <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
+  <string name="stripe_set_as_default_payment_method">Angi som standard betalingsmåte</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Opprett</string>
   <!-- Label for UPI ID number field on form -->

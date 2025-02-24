@@ -16,7 +16,7 @@ import androidx.test.espresso.intent.rule.IntentsRule
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.utils.FeatureFlags
-import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.TestFactory
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentElementConfirmationTestActivity
@@ -212,21 +212,8 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
         )
 
         val LINK_CONFIRMATION_OPTION = LinkConfirmationOption(
-            configuration = LinkConfiguration(
-                stripeIntent = PAYMENT_INTENT,
-                merchantName = "Merchant, Inc.",
-                merchantCountryCode = "CA",
-                customerInfo = LinkConfiguration.CustomerInfo(
-                    name = "John Doe",
-                    email = "johndoe@email.com",
-                    phone = "+1234567890",
-                    billingCountryCode = "CA",
-                ),
-                shippingDetails = null,
-                passthroughModeEnabled = false,
-                flags = mapOf(),
-                cardBrandChoice = null,
-            ),
+            configuration = TestFactory.LINK_CONFIGURATION,
+            useLinkExpress = true
         )
 
         val CONFIRMATION_PARAMETERS = ConfirmationDefinition.Parameters(

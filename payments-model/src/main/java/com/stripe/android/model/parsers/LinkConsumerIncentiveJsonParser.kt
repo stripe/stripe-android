@@ -9,17 +9,15 @@ import org.json.JSONObject
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object LinkConsumerIncentiveJsonParser : ModelJsonParser<LinkConsumerIncentive> {
 
-    override fun parse(json: JSONObject): LinkConsumerIncentive? {
-        return json.optJSONObject("link_consumer_incentive")?.let { incentive ->
-            val incentiveParams = buildIncentiveParams(
-                json = incentive.getJSONObject("incentive_params"),
-            )
+    override fun parse(json: JSONObject): LinkConsumerIncentive {
+        val incentiveParams = buildIncentiveParams(
+            json = json.getJSONObject("incentive_params"),
+        )
 
-            LinkConsumerIncentive(
-                incentiveParams = incentiveParams,
-                incentiveDisplayText = optString(incentive, "incentive_display_text"),
-            )
-        }
+        return LinkConsumerIncentive(
+            incentiveParams = incentiveParams,
+            incentiveDisplayText = optString(json, "incentive_display_text"),
+        )
     }
 
     private fun buildIncentiveParams(json: JSONObject): LinkConsumerIncentive.IncentiveParams {

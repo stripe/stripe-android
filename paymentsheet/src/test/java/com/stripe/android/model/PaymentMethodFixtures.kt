@@ -54,8 +54,9 @@ internal object PaymentMethodFixtures {
         phone = "123-456-7890"
     )
 
+    const val CARD_ID = "pm_123456789"
     val CARD_PAYMENT_METHOD = PaymentMethod(
-        id = "pm_123456789",
+        id = CARD_ID,
         created = 1550757934255L,
         liveMode = true,
         type = PaymentMethod.Type.Card,
@@ -66,7 +67,7 @@ internal object PaymentMethodFixtures {
     )
 
     val CARD_WITH_NETWORKS_PAYMENT_METHOD = PaymentMethod(
-        id = "pm_123456789",
+        id = CARD_ID,
         created = 1550757934255L,
         liveMode = true,
         type = PaymentMethod.Type.Card,
@@ -77,7 +78,7 @@ internal object PaymentMethodFixtures {
     )
 
     val EXPIRED_CARD_PAYMENT_METHOD = PaymentMethod(
-        id = "pm_123456789",
+        id = CARD_ID,
         created = 1550757934255L,
         liveMode = true,
         type = PaymentMethod.Type.Card,
@@ -132,10 +133,11 @@ internal object PaymentMethodFixtures {
 //        )
 //    )
 
+    const val SEPA_DEBIT_ID = "pm_1FSQaJCR"
     val SEPA_DEBIT_JSON = JSONObject(
         """
         {
-          "id": "pm_1FSQaJCR",
+          "id": "$SEPA_DEBIT_ID",
           "object": "payment_method",
           "billing_details": {
             "address": {
@@ -402,10 +404,11 @@ internal object PaymentMethodFixtures {
 
     val US_BANK_ACCOUNT_VERIFIED = PaymentMethodJsonParser().parse(US_BANK_ACCOUNT_VERIFIED_JSON)
 
+    const val US_BANK_ID = "pm_1Kr4seLu5o3P18ZperrPnk39"
     val US_BANK_ACCOUNT_JSON = JSONObject(
         """
         {
-            "id": "pm_1Kr4seLu5o3P18ZperrPnk39",
+            "id": "$US_BANK_ID",
             "object": "payment_method",
             "us_bank_account": {
                 "account_holder_type": "individual",
@@ -598,7 +601,10 @@ internal object PaymentMethodFixtures {
     }
 
     fun defaultDisplayableCard(): DisplayableSavedPaymentMethod {
-        return CARD_PAYMENT_METHOD.toDisplayableSavedPaymentMethod(shouldShowDefaultBadge = true)
+        return CARD_PAYMENT_METHOD.copy(
+            id = "pm_234567890",
+
+        ).toDisplayableSavedPaymentMethod(shouldShowDefaultBadge = true)
     }
 
     fun PaymentMethod.toDisplayableSavedPaymentMethod(

@@ -103,7 +103,7 @@ internal class VerticalModeFormUITest {
                 LocalCardNumberCompletedEventReporter provides { },
                 LocalCardBrandDisallowedReporter provides { }
             ) {
-                VerticalModeFormUI(interactor)
+                VerticalModeFormUI(interactor, showsWalletHeader = false)
             }
         }
 
@@ -124,10 +124,6 @@ internal class VerticalModeFormUITest {
                 viewActionRecorder.record(viewAction)
             }
 
-            override fun canGoBack(): Boolean {
-                return true
-            }
-
             override fun close() {}
         }
     }
@@ -136,6 +132,7 @@ internal class VerticalModeFormUITest {
         val headerInformation =
             (CardDefinition.uiDefinitionFactory() as UiDefinitionFactory.Simple).createFormHeaderInformation(
                 customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
+                incentive = null,
             )
         return VerticalModeFormInteractor.State(
             selectedPaymentMethodCode = PaymentMethod.Type.Card.code,

@@ -369,6 +369,35 @@ class LinkAccountPickerViewModelTest {
         }
 
     @Test
+    fun `onSelectAccountsClick - falls back to institution picker if next pane isn't supported`() = runTest {
+        val accounts = NetworkedAccountsList(
+            acquireConsentOnPrimaryCtaClick = false,
+            data = listOf(
+                partnerAccount().copy(id = "id1", nextPaneOnSelection = Pane.PARTNER_AUTH)
+            ),
+            display = display(
+                listOf(
+                    NetworkedAccount(id = "id1", allowSelection = true)
+                )
+            )
+        )
+        val selectedAccount = accounts.data.first()
+        whenever(getSync()).thenReturn(syncResponse())
+        whenever(fetchNetworkedAccounts(any())).thenReturn(accounts)
+
+        val viewModel = buildViewModel(LinkAccountPickerState())
+
+        viewModel.onAccountClick(selectedAccount)
+        viewModel.onSelectAccountsClick()
+
+        navigationManager.assertNavigatedTo(
+            destination = Pane.INSTITUTION_PICKER.destination,
+            pane = Pane.LINK_ACCOUNT_PICKER,
+            popUpTo = null,
+        )
+    }
+
+    @Test
     fun `onAccountClick - do not present drawer on click if acquireConsentOnCta is true`() = runTest {
         val accounts = NetworkedAccountsList(
             acquireConsentOnPrimaryCtaClick = true,

@@ -25,7 +25,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,7 +36,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalTextInputService
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -50,6 +48,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.ui.LinkButton
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
@@ -64,14 +63,14 @@ import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType.Complete
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType.Custom
+import com.stripe.android.paymentsheet.utils.DismissKeyboardOnProcessing
+import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.ui.core.elements.H4Text
-import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
-import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
+import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.uicore.elements.LocalAutofillEventReporter
 import com.stripe.android.uicore.getBackgroundColor
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
@@ -86,7 +85,7 @@ internal fun PaymentSheetScreen(
     val contentVisible by viewModel.contentVisible.collectAsState()
     val scrollState = rememberScrollState()
     PaymentSheetScreen(viewModel, scrollState) {
-        AnimatedVisibility(visible = contentVisible) {
+        AnimatedVisibility(visible = contentVisible, modifier = Modifier.fillMaxWidth()) {
             PaymentSheetScreenContent(viewModel, type = Complete, scrollState = scrollState)
         }
     }
@@ -117,7 +116,6 @@ internal fun PaymentSheetScreen(
 private fun PaymentSheetScreen(
     viewModel: BaseSheetViewModel,
     scrollState: ScrollState,
-    contentVisible: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     val processing by viewModel.processing.collectAsState()
@@ -129,7 +127,7 @@ private fun PaymentSheetScreen(
 
     DismissKeyboardOnProcessing(processing)
 
-    PaymentSheetScaffold(
+    BottomSheetScaffold(
         topBar = {
             val currentScreen by viewModel.navigationHandler.currentScreen.collectAsState()
             val topBarState by remember(currentScreen) {
@@ -138,6 +136,7 @@ private fun PaymentSheetScreen(
 
             PaymentSheetTopBar(
                 state = topBarState,
+                canNavigateBack = viewModel.navigationHandler.canGoBack,
                 isEnabled = !processing,
                 handleBackPressed = viewModel::handleBackPressed,
             )
@@ -151,8 +150,7 @@ private fun PaymentSheetScreen(
 
     AnimatedVisibility(
         visible = walletsProcessingState != null &&
-            walletsProcessingState !is WalletsProcessingState.Idle &&
-            contentVisible,
+            walletsProcessingState !is WalletsProcessingState.Idle,
         enter = fadeIn(),
         exit = fadeOut(),
     ) {
@@ -164,19 +162,6 @@ private fun PaymentSheetScreen(
                 .background(MaterialTheme.colors.surface.copy(alpha = 0.9f)),
         ) {
             ProgressOverlay(walletsProcessingState)
-        }
-    }
-}
-
-@Composable
-private fun DismissKeyboardOnProcessing(processing: Boolean) {
-    @Suppress("DEPRECATION")
-    val keyboardController = LocalTextInputService.current
-
-    if (processing) {
-        LaunchedEffect(Unit) {
-            @Suppress("DEPRECATION")
-            keyboardController?.hideSoftwareKeyboard()
         }
     }
 }
@@ -339,7 +324,7 @@ private fun PaymentSheetContent(
         }
 
         Column(modifier = Modifier.fillMaxWidth()) {
-            EventReporterProvider(viewModel) {
+            EventReporterProvider(viewModel.eventReporter) {
                 currentScreen.Content(
                     modifier = Modifier.padding(bottom = 8.dp),
                 )
@@ -433,20 +418,6 @@ internal fun Wallet(
 
         val text = stringResource(state.dividerTextResource)
         WalletsDivider(text)
-    }
-}
-
-@Composable
-private fun EventReporterProvider(
-    viewModel: BaseSheetViewModel,
-    content: @Composable () -> Unit
-) {
-    CompositionLocalProvider(
-        LocalAutofillEventReporter provides viewModel.eventReporter::onAutofill,
-        LocalCardNumberCompletedEventReporter provides viewModel.eventReporter::onCardNumberCompleted,
-        LocalCardBrandDisallowedReporter provides viewModel.eventReporter::onDisallowedCardBrandEntered
-    ) {
-        content()
     }
 }
 

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
-  <string name="stripe_afterpay_clearpay_marketing"><![CDATA[Mokėkite per tam tikrą laikotarpį naudodami „<img/>“]]></string>
+  <string name="stripe_afterpay_clearpay_marketing"><![CDATA[Mokėkite per tam tikrą laikotarpį naudodami \"<img/>\"]]></string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Mokėti <num_installments/> be palūkanų <installment_price/> mokėjimus naudojant <img/>]]></string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_afterpay_clearpay_subtitle">%1$d mokėjimai be palūkanų %2$s</string>
   <!-- Amazon Pay mandate text -->
-  <string name="stripe_amazon_pay_mandate">Patvirtindami savo mokėjimą „Amazon Pay“ leidžiate „%s“ nuskaityti mokestį nuo jūsų „Amazon Pay“ sąskaitos vėlesniems mokėjimams pagal jų sąlygas.</string>
+  <string name="stripe_amazon_pay_mandate">Patvirtindami savo mokėjimą \"Amazon Pay\" leidžiate \"%s\" nuskaityti mokestį nuo jūsų \"Amazon Pay\" sąskaitos vėlesniems mokėjimams pagal jų sąlygas.</string>
   <!-- Text for back button -->
   <string name="stripe_back">Atgal</string>
   <!-- Label for Bacs account number field -->
@@ -17,7 +17,7 @@
   <!-- Title for collected bank account information -->
   <string name="stripe_bacs_bank_account_title">Banko sąskaita</string>
   <!-- Label for confirmation checkbox for bacs mandate. -->
-  <string name="stripe_bacs_confirm_mandate_label">Suprantu, kad „Stripe“ atliks tiesioginio debeto nuskaitymus %s vardu ir patvirtinu, kad esu sąskaitos turėtojas ir vienintelis asmuo, galintis leisti atlikti debeto nuskaitymus nuo šios sąskaitos.</string>
+  <string name="stripe_bacs_confirm_mandate_label">Suprantu, kad \"Stripe\" atliks tiesioginio debeto nuskaitymus %s vardu ir patvirtinu, kad esu sąskaitos turėtojas ir vienintelis asmuo, galintis leisti atlikti debeto nuskaitymus nuo šios sąskaitos.</string>
   <!-- Label for Bacs sort code field -->
   <string name="stripe_bacs_sort_code">Identifikacinis kodas</string>
   <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
@@ -28,8 +28,12 @@
   <string name="stripe_blik_code">BLIK kodas</string>
   <!-- Label for Boleto Payment method Tax ID -->
   <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
+  <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
+  <string name="stripe_card_brand_not_accepted">(nepriimama)</string>
+  <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
+  <string name="stripe_card_brand_not_accepted_with_brand">%1$s (nepriimama)</string>
   <!-- Cash App mandate text -->
-  <string name="stripe_cash_app_pay_mandate">Tęsdami įgaliojate „%1$s“ nurašyti mokestį nuo jūsų „Cash App“ sąskaitos už šį mokėjimą ir būsimuosius mokėjimus pagal „%2$s“ sąlygas, kol šis įgaliojimas bus atšauktas. Galite bet kada tai pakeisti „Cash App“ nuostatose.</string>
+  <string name="stripe_cash_app_pay_mandate">Tęsdami įgaliojate \"%1$s\" nurašyti mokestį nuo jūsų \"Cash App\" sąskaitos už šį mokėjimą ir būsimuosius mokėjimus pagal \"%2$s\" sąlygas, kol šis įgaliojimas bus atšauktas. Galite bet kada tai pakeisti \"Cash App\" nuostatose.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Kontaktinė informacija</string>
   <!-- Text for continue button -->
@@ -56,7 +60,7 @@
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">Pirkite dabar arba mokėkite vėliau naudodami \"Klarna\".</string>
   <!-- Klarna mandate text -->
-  <string name="stripe_klarna_mandate">Pereidami prie „Klarna“ leidžiate „%1$s“ nuskaityti mokestį nuo jūsų „Klarna“ sąskaitos vėlesniems mokėjimams pagal jų ir „Klarna“ sąlygas. Galite bet kada tai pakeisti „Klarna“ programėlėje arba susisiekdami su „%2$s“.</string>
+  <string name="stripe_klarna_mandate">Pereidami prie \"Klarna\" leidžiate \"%1$s\" nuskaityti mokestį nuo jūsų \"Klarna\" sąskaitos vėlesniems mokėjimams pagal jų ir \"Klarna\" sąlygas. Galite bet kada tai pakeisti \"Klarna\" programėlėje arba susisiekdami su \"%2$s\".</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Mokėkite vėliau naudodami \"Klarna\".</string>
   <!-- Caption for Phone field on address form -->
@@ -82,7 +86,7 @@
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS tiesioginis debetas</string>
   <!-- Payment Method type brand name -->
-  <string name="stripe_paymentsheet_payment_method_bacs_debit">„Bacs“ tiesioginis debetas</string>
+  <string name="stripe_paymentsheet_payment_method_bacs_debit">\"Bacs\" tiesioginis debetas</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Kortelė</string>
   <!-- Label for Konbini Payment Method -->
@@ -90,17 +94,19 @@
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA debetas</string>
   <!-- PayPal mandate text -->
-  <string name="stripe_paypal_mandate">Patvirtindami savo mokėjimą „PayPal“ leidžiate „%s“ nuskaityti mokestį nuo jūsų „PayPal“ sąskaitos vėlesniems mokėjimams pagal jų sąlygas.</string>
+  <string name="stripe_paypal_mandate">Patvirtindami savo mokėjimą \"PayPal\" leidžiate \"%s\" nuskaityti mokestį nuo jūsų \"PayPal\" sąskaitos vėlesniems mokėjimams pagal jų sąlygas.</string>
   <!-- Revolut mandate text -->
-  <string name="stripe_revolut_mandate">Patvirtindami savo mokėjimą „RevolutPay“ leidžiate %s nuskaityti mokestį nuo jūsų „RevolutPay“ sąskaitos vėlesniems mokėjimams pagal jų sąlygas.</string>
+  <string name="stripe_revolut_mandate">Patvirtindami savo mokėjimą \"RevolutPay\" leidžiate %s nuskaityti mokestį nuo jūsų \"RevolutPay\" sąskaitos vėlesniems mokėjimams pagal jų sąlygas.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Išsaugoti vėlesniems %s mokėjimams</string>
   <!-- The label of a switch indicating whether to save the user's payment details for future payment -->
-  <string name="stripe_save_payment_details_to_merchant_name">Išsaugoti mokėjimo duomenis „%s” būsimiems pirkimams</string>
+  <string name="stripe_save_payment_details_to_merchant_name">Išsaugoti mokėjimo duomenis \"%s” būsimiems pirkimams</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Nuskaityti kortelę</string>
   <!-- SEPA mandate text -->
-  <string name="stripe_sepa_mandate">Pateikdami mokėjimo duomenis ir patvirtindami šį mokėjimą, leidžiate (A) „%s“ ir „Stripe“ (mūsų mokėjimo paslaugų teikėjui) jūsų bankui siųsti nurodymus nurašyti pinigus iš jūsų sąskaitos ir (B) leidžiate savo bankui, gavus tokius nurodymus, nurašyti pinigus iš jūsų sąskaitos. Pagal jūsų su banku sudarytos sutarties sąlygas turite teisę iš banko reikalauti pinigų grąžinimo. Prašymą grąžinti pinigus turite pateikti per 8 savaites nuo pinigų iš jūsų sąskaitos nurašymo dienos. Jūsų teisės paaiškintos pareiškime, kurį galite gauti iš savo banko. Sutinkate gauti pranešimus apie būsimus nurašymus likus iki 2 dienų iki jų įvykdymo momento.</string>
+  <string name="stripe_sepa_mandate">Pateikdami mokėjimo duomenis ir patvirtindami šį mokėjimą, leidžiate (A) \"%s\" ir \"Stripe\" (mūsų mokėjimo paslaugų teikėjui) jūsų bankui siųsti nurodymus nurašyti pinigus iš jūsų sąskaitos ir (B) leidžiate savo bankui, gavus tokius nurodymus, nurašyti pinigus iš jūsų sąskaitos. Pagal jūsų su banku sudarytos sutarties sąlygas turite teisę iš banko reikalauti pinigų grąžinimo. Prašymą grąžinti pinigus turite pateikti per 8 savaites nuo pinigų iš jūsų sąskaitos nurašymo dienos. Jūsų teisės paaiškintos pareiškime, kurį galite gauti iš savo banko. Sutinkate gauti pranešimus apie būsimus nurašymus likus iki 2 dienų iki jų įvykdymo momento.</string>
+  <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
+  <string name="stripe_set_as_default_payment_method">Nustatyti kaip numatytąjį mokėjimo būdą</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Nustatyti</string>
   <!-- Label for UPI ID number field on form -->

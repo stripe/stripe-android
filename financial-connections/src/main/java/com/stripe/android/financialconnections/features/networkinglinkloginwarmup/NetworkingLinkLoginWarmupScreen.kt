@@ -73,17 +73,18 @@ private fun NetworkingLinkLoginWarmupContent(
     LazyLayout(
         modifier = Modifier
             .fillMaxWidth()
-            .background(color = colors.backgroundSurface),
+            .background(color = colors.background),
         inModal = true,
         verticalArrangement = Arrangement.spacedBy(24.dp),
         lazyListState = lazyListState,
         body = {
             item { HeaderSection() }
-            item { ExistingEmailSection(email = state.payload()?.email ?: "") }
+            item { ExistingEmailSection(email = state.payload()?.redactedEmail ?: "") }
         },
         footer = {
             Footer(
-                loading = state.disableNetworkingAsync is Loading || state.payload() == null,
+                primaryButtonLoading = state.continueAsync is Loading,
+                secondaryButtonLoading = state.disableNetworkingAsync is Loading,
                 secondaryButtonLabel = state.secondaryButtonLabel,
                 onContinueClick = onContinueClick,
                 onSkipClicked = onSkipClicked,
@@ -104,10 +105,12 @@ private fun HeaderSection() {
         Text(
             text = stringResource(R.string.stripe_networking_link_login_warmup_title),
             style = typography.headingLarge,
+            color = colors.textDefault,
         )
         Text(
             text = stringResource(R.string.stripe_networking_link_login_warmup_description),
             style = typography.bodyMedium,
+            color = colors.textDefault,
         )
     }
 }
@@ -115,15 +118,18 @@ private fun HeaderSection() {
 @Composable
 @OptIn(ExperimentalComposeUiApi::class)
 private fun Footer(
-    loading: Boolean,
+    primaryButtonLoading: Boolean,
+    secondaryButtonLoading: Boolean,
     secondaryButtonLabel: Int,
     onContinueClick: () -> Unit,
     onSkipClicked: () -> Unit
 ) {
+    val enableButtons = !primaryButtonLoading && !secondaryButtonLoading
+
     Column {
         FinancialConnectionsButton(
-            loading = false,
-            enabled = loading.not(),
+            loading = primaryButtonLoading,
+            enabled = enableButtons,
             type = Type.Primary,
             onClick = onContinueClick,
             modifier = Modifier
@@ -135,8 +141,8 @@ private fun Footer(
         }
         Spacer(modifier = Modifier.size(16.dp))
         FinancialConnectionsButton(
-            loading = false,
-            enabled = loading.not(),
+            loading = secondaryButtonLoading,
+            enabled = enableButtons,
             type = Type.Secondary,
             onClick = { onSkipClicked() },
             modifier = Modifier
@@ -162,7 +168,7 @@ internal fun ExistingEmailSection(
             .clip(RoundedCornerShape(12.dp))
             .border(
                 width = 1.dp,
-                color = colors.border,
+                color = colors.borderNeutral,
                 shape = RoundedCornerShape(12.dp)
             )
             .padding(horizontal = 16.dp, vertical = 12.dp)

@@ -8,3 +8,9 @@ internal val StripeIntent.currency: String?
         is PaymentIntent -> currency
         else -> null
     }
+
+internal val StripeIntent.amount: Long?
+    get() = when (this) {
+        is PaymentIntent -> amount
+        else -> null
+    }

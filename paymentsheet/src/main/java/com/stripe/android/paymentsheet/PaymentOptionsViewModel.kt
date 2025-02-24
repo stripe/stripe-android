@@ -27,7 +27,6 @@ import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsInteractor
-import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
@@ -40,7 +39,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
@@ -106,7 +104,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 onUserSelection()
             },
             onLinkPressed = {
-                updateSelection(PaymentSelection.Link)
+                updateSelection(PaymentSelection.Link())
                 onUserSelection()
             },
             isSetupIntent = paymentMethodMetadata.stripeIntent is SetupIntent
@@ -130,16 +128,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
 
-        viewModelScope.launch {
-            linkHandler.processingState.collect { processingState ->
-                handleLinkProcessingState(processingState)
-            }
-        }
-
-        // This is bad, but I don't think there's a better option
-        PaymentSheet.FlowController.linkHandler = linkHandler
-
-        linkHandler.setupLink(args.state.linkState)
+        linkHandler.setupLink(args.state.paymentMethodMetadata.linkState)
 
         // After recovering from don't keep activities the paymentMethodMetadata will be saved,
         // calling setPaymentMethodMetadata would require the repository be initialized, which
@@ -158,31 +147,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 customerStateHolder = customerStateHolder,
             )
         )
-    }
-
-    private fun handleLinkProcessingState(processingState: LinkHandler.ProcessingState) {
-        when (processingState) {
-            is LinkHandler.ProcessingState.PaymentDetailsCollected -> {
-                processingState.paymentSelection?.let {
-                    // Link PaymentDetails was created successfully, use it to confirm the Stripe Intent.
-                    updateSelection(it)
-                    onUserSelection()
-                } ?: run {
-                    // Creating Link PaymentDetails failed, fallback to regular checkout.
-                    // paymentSelection is already set to the card parameters from the form.
-                    onUserSelection()
-                }
-            }
-            LinkHandler.ProcessingState.Ready -> {
-                updatePrimaryButtonState(PrimaryButton.State.Ready)
-            }
-            LinkHandler.ProcessingState.Started -> {
-                updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
-            }
-            LinkHandler.ProcessingState.CompleteWithoutLink -> {
-                onUserSelection()
-            }
-        }
     }
 
     override fun onUserCancel() {
@@ -323,13 +287,14 @@ internal class PaymentOptionsViewModel @Inject constructor(
             val starterArgs = starterArgsSupplier()
 
             val component = DaggerPaymentOptionsViewModelFactoryComponent.builder()
+                .application(application)
                 .context(application)
                 .productUsage(starterArgs.productUsage)
+                .savedStateHandle(savedStateHandle)
                 .build()
                 .paymentOptionsViewModelSubcomponentBuilder
                 .application(application)
                 .args(starterArgs)
-                .savedStateHandle(savedStateHandle)
                 .build()
 
             return component.viewModel as T

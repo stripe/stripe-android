@@ -28,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
@@ -139,8 +140,8 @@ private fun RowButtonOuterContent(
             RowButtonCheckmarkOuterContent(
                 isSelected = isSelected,
                 contentPaddingValues = PaddingValues(
-                    horizontal = 0.dp,
-                    vertical = contentPaddingValues + style.additionalInsetsDp.dp
+                    horizontal = style.horizontalInsetsDp.dp,
+                    vertical = contentPaddingValues + style.additionalVerticalInsetsDp.dp
                 ),
                 verticalArrangement = Arrangement.Center,
                 trailingContent = trailingContent,
@@ -155,8 +156,8 @@ private fun RowButtonOuterContent(
                 isEnabled = isEnabled,
                 isSelected = isSelected,
                 contentPaddingValues = PaddingValues(
-                    horizontal = 0.dp,
-                    vertical = contentPaddingValues + style.additionalInsetsDp.dp
+                    horizontal = style.horizontalInsetsDp.dp,
+                    vertical = contentPaddingValues + style.additionalVerticalInsetsDp.dp
                 ),
                 verticalArrangement = Arrangement.Center,
                 onClick = onClick,
@@ -179,8 +180,11 @@ private fun RowButtonFloatingOuterContent(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Card(
-        modifier = modifier
-            .alpha(alpha = if (isEnabled) 1.0F else 0.6F),
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.medium)
+            .then(
+                modifier.alpha(alpha = if (isEnabled) 1.0F else 0.6F)
+            ),
         shape = MaterialTheme.shapes.medium,
         backgroundColor = MaterialTheme.stripeColors.component,
         border = MaterialTheme.getBorderStroke(isSelected),
@@ -210,12 +214,15 @@ private fun RowButtonRadioOuterContent(
     Row(
         modifier = modifier
             .background(MaterialTheme.stripeColors.component)
+            .padding(contentPaddingValues)
     ) {
         RadioButton(
             selected = isSelected,
             onClick = onClick,
             enabled = isEnabled,
-            modifier = Modifier.align(Alignment.CenterVertically).size(20.dp),
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .size(20.dp),
             colors = RadioButtonDefaults.colors(
                 selectedColor = Color(style.selectedColor),
                 unselectedColor = Color(style.unselectedColor)
@@ -224,7 +231,6 @@ private fun RowButtonRadioOuterContent(
         Spacer(Modifier.width(12.dp))
         Column(
             modifier = Modifier
-                .padding(contentPaddingValues)
                 .align(Alignment.CenterVertically),
             verticalArrangement = verticalArrangement,
         ) {
@@ -246,12 +252,12 @@ private fun RowButtonCheckmarkOuterContent(
 ) {
     Row(
         modifier = modifier
-            .background(MaterialTheme.stripeColors.component),
+            .background(MaterialTheme.stripeColors.component)
+            .padding(contentPaddingValues),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(
-            modifier = Modifier.padding(contentPaddingValues),
-            verticalArrangement = verticalArrangement,
+            verticalArrangement = verticalArrangement
         ) {
             content()
             Row {
@@ -266,7 +272,9 @@ private fun RowButtonCheckmarkOuterContent(
             Icon(
                 imageVector = Icons.Filled.Check,
                 contentDescription = null,
-                modifier = Modifier.align(Alignment.CenterVertically).padding(end = style.checkmarkInsetDp.dp),
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .padding(end = style.checkmarkInsetDp.dp),
                 tint = Color(style.checkmarkColor)
             )
         }
@@ -308,7 +316,7 @@ private fun RowButtonInnerContent(
 }
 
 @Composable
-private fun TitleContent(title: String, subtitle: String?, isEnabled: Boolean, contentDescription: String?,) {
+private fun TitleContent(title: String, subtitle: String?, isEnabled: Boolean, contentDescription: String?) {
     val textColor = MaterialTheme.stripeColors.onComponent
 
     Column {
@@ -355,7 +363,9 @@ private fun ButtonPreview() {
                         iconUrl = null,
                         imageLoader = StripeImageLoader(LocalContext.current.applicationContext),
                         iconRequiresTinting = true,
-                        modifier = Modifier.height(22.dp).width(22.dp),
+                        modifier = Modifier
+                            .height(22.dp)
+                            .width(22.dp),
                         contentAlignment = Alignment.Center,
                     )
                 },
@@ -378,7 +388,9 @@ private fun ButtonPreview() {
                         iconUrl = null,
                         imageLoader = StripeImageLoader(LocalContext.current.applicationContext),
                         iconRequiresTinting = true,
-                        modifier = Modifier.height(22.dp).width(22.dp),
+                        modifier = Modifier
+                            .height(22.dp)
+                            .width(22.dp),
                         contentAlignment = Alignment.Center,
                     )
                 },

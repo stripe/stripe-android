@@ -30,6 +30,10 @@ internal object PaymentSheetFixtures {
     internal val PAYMENT_INTENT_CLIENT_SECRET = PaymentIntentClientSecret(CLIENT_SECRET)
     internal val SETUP_INTENT_CLIENT_SECRET = PaymentIntentClientSecret(SETUP_CLIENT_SECRET)
 
+    internal val INITIALIZATION_MODE_PAYMENT_INTENT = PaymentElementLoader.InitializationMode.PaymentIntent(
+        clientSecret = CLIENT_SECRET
+    )
+
     internal val CONFIG_MINIMUM = PaymentSheet.Configuration(
         merchantDisplayName = MERCHANT_DISPLAY_NAME,
         paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
@@ -101,7 +105,7 @@ internal object PaymentSheetFixtures {
             canRemoveLastPaymentMethod = true,
             canRemoveDuplicates = false,
         ),
-        defaultPaymentMethodId = null
+        defaultPaymentMethodId = null,
     )
 
     internal val CONFIG_GOOGLEPAY
@@ -137,7 +141,6 @@ internal object PaymentSheetFixtures {
             customer = EMPTY_CUSTOMER_STATE,
             config = CONFIG_GOOGLEPAY.asCommonConfiguration(),
             paymentSelection = null,
-            linkState = null,
             validationError = null,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         ),
@@ -152,7 +155,7 @@ internal object PaymentSheetFixtures {
         stripeIntent: StripeIntent = state.stripeIntent,
         config: PaymentSheet.Configuration = configuration,
         paymentSelection: PaymentSelection? = state.paymentSelection,
-        linkState: LinkState? = state.linkState,
+        linkState: LinkState? = state.paymentMethodMetadata.linkState,
     ): PaymentOptionContract.Args {
         return copy(
             state = state.copy(
@@ -166,14 +169,14 @@ internal object PaymentSheetFixtures {
                         canRemoveLastPaymentMethod = true,
                         canRemoveDuplicates = false,
                     ),
-                    defaultPaymentMethodId = null
+                    defaultPaymentMethodId = null,
                 ),
                 config = config.asCommonConfiguration(),
                 paymentSelection = paymentSelection,
-                linkState = linkState,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                     stripeIntent = stripeIntent,
                     isGooglePayReady = isGooglePayReady,
+                    linkState = linkState,
                 ),
             ),
             configuration = config,

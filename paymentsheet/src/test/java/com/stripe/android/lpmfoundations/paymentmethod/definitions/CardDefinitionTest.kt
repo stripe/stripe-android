@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.TestFactory
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -14,6 +15,8 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.ui.core.elements.MandateTextElement
+import com.stripe.android.ui.core.elements.SaveForFutureUseElement
+import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
@@ -84,17 +87,57 @@ class CardDefinitionTest {
 
     @Test
     fun `createFormElements returns save_for_future_use`() {
-        val formElements = CardDefinition.formElements(
-            PaymentMethodMetadataFactory.create(
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
-                ),
-                hasCustomerConfiguration = true,
-            )
+        val formElements = getFormElementsWithSaveForFutureUseAndSetAsDefaultPaymentMethod(
+            isPaymentMethodSetAsDefaultEnabled = false,
         )
         assertThat(formElements).hasSize(2)
         assertThat(formElements[0].identifier.v1).isEqualTo("card_details")
         assertThat(formElements[1].identifier.v1).isEqualTo("save_for_future_use")
+    }
+
+    @Test
+    fun `createFormElements returns set_as_default_payment_method when isPaymentMethodSetAsDefaultEnabled`() {
+        val formElements = getFormElementsWithSaveForFutureUseAndSetAsDefaultPaymentMethod(
+            isPaymentMethodSetAsDefaultEnabled = true,
+        )
+        assertThat(formElements).hasSize(3)
+        assertThat(formElements[0].identifier.v1).isEqualTo("card_details")
+        assertThat(formElements[1].identifier.v1).isEqualTo("save_for_future_use")
+        assertThat(formElements[2].identifier.v1).isEqualTo("set_as_default_payment_method")
+    }
+
+    @Test
+    fun `set_as_default_payment_method shown correctly when save_for_future_use checked`() {
+        val formElements = getFormElementsWithSaveForFutureUseAndSetAsDefaultPaymentMethod(
+            isPaymentMethodSetAsDefaultEnabled = true,
+        )
+
+        val saveForFutureUseElement = formElements[1] as SaveForFutureUseElement
+        val saveForFutureUseController = saveForFutureUseElement.controller
+        val setAsDefaultPaymentMethodElement = formElements[2] as SetAsDefaultPaymentMethodElement
+
+        saveForFutureUseController.onValueChange(true)
+
+        assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isTrue()
+    }
+
+    @Test
+    fun `set_as_default_payment_method hidden correctly when save_for_future_use unchecked`() {
+        val formElements = getFormElementsWithSaveForFutureUseAndSetAsDefaultPaymentMethod(
+            isPaymentMethodSetAsDefaultEnabled = true,
+        )
+
+        val saveForFutureUseElement = formElements[1] as SaveForFutureUseElement
+        val saveForFutureUseController = saveForFutureUseElement.controller
+        val setAsDefaultPaymentMethodElement = formElements[2] as SetAsDefaultPaymentMethodElement
+
+        saveForFutureUseController.onValueChange(true)
+
+        assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isTrue()
+
+        saveForFutureUseController.onValueChange(false)
+
+        assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isFalse()
     }
 
     @Test
@@ -158,20 +201,8 @@ class CardDefinitionTest {
     }
 
     private fun createLinkConfiguration(): LinkConfiguration {
-        return LinkConfiguration(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            merchantCountryCode = "Merchant, Inc.",
-            merchantName = "John Doe",
-            customerInfo = LinkConfiguration.CustomerInfo(
-                name = "John Doe",
-                email = "email@email.com",
-                billingCountryCode = "CA",
-                phone = "1234567890"
-            ),
-            flags = mapOf(),
-            passthroughModeEnabled = false,
-            cardBrandChoice = null,
-            shippingDetails = null
+        return TestFactory.LINK_CONFIGURATION.copy(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
         )
     }
 
@@ -187,5 +218,19 @@ class CardDefinitionTest {
 
     private fun FormElement.asMandateTextElement(): MandateTextElement {
         return this as MandateTextElement
+    }
+
+    private fun getFormElementsWithSaveForFutureUseAndSetAsDefaultPaymentMethod(
+        isPaymentMethodSetAsDefaultEnabled: Boolean
+    ): List<FormElement> {
+        return CardDefinition.formElements(
+            PaymentMethodMetadataFactory.create(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+                ),
+                hasCustomerConfiguration = true,
+                isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled
+            )
+        )
     }
 }

@@ -10,10 +10,12 @@ import com.stripe.android.link.analytics.LinkAnalyticsHelper
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeActivityResultRegistry
 import com.stripe.android.utils.RecordingLinkStore
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -24,6 +26,9 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 internal class LinkPaymentLauncherTest {
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
 
     @Test
     fun `register call should register ActivityResultLauncher with ActivityResultRegistry`() {
@@ -65,10 +70,10 @@ internal class LinkPaymentLauncherTest {
 
             linkPaymentLauncher.unregister()
 
-            val unregisterCall = awaitUnregisterCall()
-            assertThat(unregisterCall).isNotNull()
+            val registeredLauncher = awaitNextRegisteredLauncher()
+            val unregisteredLauncher = awaitNextUnregisteredLauncher()
 
-            awaitNextRegisteredLauncher()
+            assertThat(unregisteredLauncher).isEqualTo(registeredLauncher)
         }
     }
 
@@ -82,12 +87,45 @@ internal class LinkPaymentLauncherTest {
             val registerCall = awaitRegisterCall()
             assertThat(registerCall).isNotNull()
 
-            linkPaymentLauncher.present(TestFactory.LINK_CONFIGURATION)
+            linkPaymentLauncher.present(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                linkAccount = TestFactory.LINK_ACCOUNT,
+                useLinkExpress = true
+            )
 
             val launchCall = awaitLaunchCall()
 
-            assertThat(launchCall).isEqualTo(LinkActivityContract.Args(TestFactory.LINK_CONFIGURATION))
+            assertThat(launchCall)
+                .isEqualTo(
+                    LinkActivityContract.Args(
+                        configuration = TestFactory.LINK_CONFIGURATION,
+                        startWithVerificationDialog = true,
+                        linkAccount = TestFactory.LINK_ACCOUNT,
+                    )
+                )
 
+            awaitNextRegisteredLauncher()
+        }
+    }
+
+    @Test
+    fun `present should launch with correct args when useLinkExpress is false`() = runTest {
+        DummyActivityResultCaller.test {
+            val linkPaymentLauncher = createLinkPaymentLauncher()
+
+            linkPaymentLauncher.register(activityResultCaller) {}
+
+            val registerCall = awaitRegisterCall()
+            assertThat(registerCall).isNotNull()
+
+            linkPaymentLauncher.present(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                linkAccount = TestFactory.LINK_ACCOUNT,
+                useLinkExpress = false
+            )
+
+            val launchCall = awaitLaunchCall() as? LinkActivityContract.Args
+            assertThat(launchCall?.startWithVerificationDialog).isFalse()
             awaitNextRegisteredLauncher()
         }
     }
@@ -95,7 +133,9 @@ internal class LinkPaymentLauncherTest {
     @Test
     fun `ActivityResultRegistry callback should handle Completed result correctly`() {
         testActivityResultCallbackWithActivityResultRegistry(
-            linkActivityResult = LinkActivityResult.Completed,
+            linkActivityResult = LinkActivityResult.Completed(
+                linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
+            ),
             expectedMarkAsUsedCalls = 1,
         )
     }
@@ -111,7 +151,9 @@ internal class LinkPaymentLauncherTest {
     @Test
     fun `ActivityResultRegistry callback should handle Canceled result correctly`() {
         testActivityResultCallbackWithActivityResultRegistry(
-            linkActivityResult = LinkActivityResult.Canceled(),
+            linkActivityResult = LinkActivityResult.Canceled(
+                linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
+            ),
             expectedMarkAsUsedCalls = 0,
         )
     }
@@ -119,7 +161,10 @@ internal class LinkPaymentLauncherTest {
     @Test
     fun `ActivityResultRegistry callback should handle Failed result correctly`() {
         testActivityResultCallbackWithActivityResultRegistry(
-            linkActivityResult = LinkActivityResult.Failed(Exception("oops")),
+            linkActivityResult = LinkActivityResult.Failed(
+                error = Exception("oops"),
+                linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
+            ),
             expectedMarkAsUsedCalls = 0,
         )
     }
@@ -127,7 +172,9 @@ internal class LinkPaymentLauncherTest {
     @Test
     fun `ActivityResultCaller callback should handle Completed result correctly`() {
         testActivityResultCallbackWithResultCaller(
-            linkActivityResult = LinkActivityResult.Completed,
+            linkActivityResult = LinkActivityResult.Completed(
+                linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
+            ),
             expectedMarkAsUsedCalls = 1,
         )
     }
@@ -143,7 +190,9 @@ internal class LinkPaymentLauncherTest {
     @Test
     fun `ActivityResultCaller callback should handle Canceled result correctly`() {
         testActivityResultCallbackWithResultCaller(
-            linkActivityResult = LinkActivityResult.Canceled(),
+            linkActivityResult = LinkActivityResult.Canceled(
+                linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
+            ),
             expectedMarkAsUsedCalls = 0,
         )
     }
@@ -151,7 +200,10 @@ internal class LinkPaymentLauncherTest {
     @Test
     fun `ActivityResultCaller callback should handle Failed result correctly`() {
         testActivityResultCallbackWithResultCaller(
-            linkActivityResult = LinkActivityResult.Failed(Exception("oops")),
+            linkActivityResult = LinkActivityResult.Failed(
+                error = Exception("oops"),
+                linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
+            ),
             expectedMarkAsUsedCalls = 0,
         )
     }
@@ -172,7 +224,11 @@ internal class LinkPaymentLauncherTest {
             var callbackParam: LinkActivityResult? = null
             linkPaymentLauncher.register(activityResultRegistry) { callbackParam = it }
 
-            linkPaymentLauncher.present(TestFactory.LINK_CONFIGURATION)
+            linkPaymentLauncher.present(
+                configuration = TestFactory.LINK_CONFIGURATION,
+                linkAccount = TestFactory.LINK_ACCOUNT,
+                useLinkExpress = true
+            )
 
             verifyActivityResultCallback(
                 linkActivityResult = linkActivityResult,
@@ -199,7 +255,11 @@ internal class LinkPaymentLauncherTest {
                 var callbackParam: LinkActivityResult? = null
                 linkPaymentLauncher.register(activityResultCaller) { callbackParam = it }
 
-                linkPaymentLauncher.present(TestFactory.LINK_CONFIGURATION)
+                linkPaymentLauncher.present(
+                    configuration = TestFactory.LINK_CONFIGURATION,
+                    linkAccount = TestFactory.LINK_ACCOUNT,
+                    useLinkExpress = true
+                )
 
                 val registerCall = awaitRegisterCall()
                 registerCall.callback.asCallbackFor<LinkActivityResult>().onActivityResult(linkActivityResult)

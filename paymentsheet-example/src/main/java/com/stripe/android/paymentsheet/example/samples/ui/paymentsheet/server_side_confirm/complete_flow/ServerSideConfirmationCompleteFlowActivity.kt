@@ -5,9 +5,17 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import com.google.android.material.snackbar.Snackbar
 import com.stripe.android.paymentsheet.example.samples.model.toIntentConfiguration
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
@@ -53,29 +61,38 @@ internal class ServerSideConfirmationCompleteFlowActivity : AppCompatActivity() 
                     }
                 }
 
-                if (uiState.isError) {
-                    ErrorScreen(onRetry = viewModel::retry)
-                } else {
-                    Receipt(
-                        isLoading = uiState.isProcessing,
-                        cartState = uiState.cartState,
-                        isEditable = true,
-                        onQuantityChanged = viewModel::updateQuantity,
-                    ) {
-                        SubscriptionToggle(
-                            checked = uiState.cartState.isSubscription,
-                            onCheckedChange = viewModel::updateSubscription,
-                        )
+                Box(
+                    modifier = Modifier
+                        .padding(
+                            paddingValues = WindowInsets.systemBars.only(
+                                WindowInsetsSides.Horizontal + WindowInsetsSides.Top
+                            ).asPaddingValues()
+                        ),
+                ) {
+                    if (uiState.isError) {
+                        ErrorScreen(onRetry = viewModel::retry)
+                    } else {
+                        Receipt(
+                            isLoading = uiState.isProcessing,
+                            cartState = uiState.cartState,
+                            isEditable = true,
+                            onQuantityChanged = viewModel::updateQuantity,
+                        ) {
+                            SubscriptionToggle(
+                                checked = uiState.cartState.isSubscription,
+                                onCheckedChange = viewModel::updateSubscription,
+                            )
 
-                        BuyButton(
-                            buyButtonEnabled = uiState.isBuyButtonEnabled,
-                            onClick = {
-                                paymentSheet.presentWithIntentConfiguration(
-                                    intentConfiguration = uiState.cartState.toIntentConfiguration(),
-                                    configuration = uiState.paymentSheetConfig,
-                                )
-                            }
-                        )
+                            BuyButton(
+                                buyButtonEnabled = uiState.isBuyButtonEnabled,
+                                onClick = {
+                                    paymentSheet.presentWithIntentConfiguration(
+                                        intentConfiguration = uiState.cartState.toIntentConfiguration(),
+                                        configuration = uiState.paymentSheetConfig,
+                                    )
+                                }
+                            )
+                        }
                     }
                 }
             }

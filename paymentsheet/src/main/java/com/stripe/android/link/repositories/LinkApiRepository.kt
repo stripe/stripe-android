@@ -1,6 +1,9 @@
 package com.stripe.android.link.repositories
 
+import android.app.Application
+import com.stripe.android.DefaultFraudDetectionDataRepository
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
@@ -14,7 +17,11 @@ import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction
+import com.stripe.android.model.EmailSource
+import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.SharePaymentDetails
+import com.stripe.android.model.SignUpParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.VerificationType
 import com.stripe.android.networking.StripeRepository
@@ -29,7 +36,9 @@ import kotlin.coroutines.CoroutineContext
 /**
  * Repository that uses [StripeRepository] for Link services.
  */
+@SuppressWarnings("TooManyFunctions")
 internal class LinkApiRepository @Inject constructor(
+    application: Application,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
     private val stripeRepository: StripeRepository,
@@ -38,6 +47,13 @@ internal class LinkApiRepository @Inject constructor(
     private val locale: Locale?,
     private val errorReporter: ErrorReporter,
 ) : LinkRepository {
+
+    private val fraudDetectionDataRepository: FraudDetectionDataRepository =
+        DefaultFraudDetectionDataRepository(application, workContext)
+
+    init {
+        fraudDetectionDataRepository.refresh()
+    }
 
     override suspend fun lookupConsumer(
         email: String,
@@ -53,6 +69,26 @@ internal class LinkApiRepository @Inject constructor(
         }
     }
 
+    override suspend fun mobileLookupConsumer(
+        email: String,
+        emailSource: EmailSource,
+        verificationToken: String,
+        appId: String,
+        sessionId: String
+    ): Result<ConsumerSessionLookup> = withContext(workContext) {
+        runCatching {
+            consumersApiService.mobileLookupConsumerSession(
+                email = email,
+                emailSource = emailSource,
+                requestSurface = REQUEST_SURFACE,
+                verificationToken = verificationToken,
+                appId = appId,
+                requestOptions = buildRequestOptions(),
+                sessionId = sessionId
+            )
+        }
+    }
+
     override suspend fun consumerSignUp(
         email: String,
         phone: String,
@@ -61,17 +97,50 @@ internal class LinkApiRepository @Inject constructor(
         consentAction: ConsumerSignUpConsentAction
     ): Result<ConsumerSessionSignup> = withContext(workContext) {
         consumersApiService.signUp(
-            email = email,
-            phoneNumber = phone,
-            country = country,
-            name = name,
-            locale = locale,
-            amount = null,
-            currency = null,
-            incentiveEligibilitySession = null,
-            consentAction = consentAction,
+            SignUpParams(
+                email = email,
+                phoneNumber = phone,
+                country = country,
+                name = name,
+                locale = locale,
+                amount = null,
+                currency = null,
+                incentiveEligibilitySession = null,
+                consentAction = consentAction,
+                requestSurface = REQUEST_SURFACE
+            ),
             requestOptions = buildRequestOptions(),
-            requestSurface = REQUEST_SURFACE,
+        )
+    }
+
+    override suspend fun mobileSignUp(
+        name: String?,
+        email: String,
+        phoneNumber: String,
+        country: String,
+        consentAction: ConsumerSignUpConsentAction,
+        amount: Long?,
+        currency: String?,
+        incentiveEligibilitySession: IncentiveEligibilitySession?,
+        verificationToken: String,
+        appId: String
+    ): Result<ConsumerSessionSignup> = withContext(workContext) {
+        consumersApiService.mobileSignUp(
+            SignUpParams(
+                email = email,
+                phoneNumber = phoneNumber,
+                country = country,
+                name = name,
+                locale = locale,
+                amount = amount,
+                currency = currency,
+                incentiveEligibilitySession = incentiveEligibilitySession,
+                consentAction = consentAction,
+                requestSurface = REQUEST_SURFACE,
+                verificationToken = verificationToken,
+                appId = appId
+            ),
+            requestOptions = buildRequestOptions(),
         )
     }
 
@@ -140,6 +209,25 @@ internal class LinkApiRepository @Inject constructor(
                 ),
             )
         }
+    }
+
+    override suspend fun sharePaymentDetails(
+        consumerSessionClientSecret: String,
+        paymentDetailsId: String,
+        expectedPaymentMethodType: String,
+    ): Result<SharePaymentDetails> = withContext(workContext) {
+        val fraudParams = fraudDetectionDataRepository.getCached()?.params.orEmpty()
+        val paymentMethodParams = mapOf("expand" to listOf("payment_method"))
+
+        consumersApiService.sharePaymentDetails(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            paymentDetailsId = paymentDetailsId,
+            expectedPaymentMethodType = expectedPaymentMethodType,
+            requestOptions = buildRequestOptions(),
+            requestSurface = REQUEST_SURFACE,
+            extraParams = paymentMethodParams + fraudParams,
+            billingPhone = null,
+        )
     }
 
     override suspend fun logOut(

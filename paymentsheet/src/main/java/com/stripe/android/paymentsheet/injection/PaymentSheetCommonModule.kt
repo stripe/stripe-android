@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
@@ -17,6 +18,9 @@ import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.RealLinkConfigurationCoordinator
+import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.gate.DefaultLinkGate
+import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -48,6 +52,7 @@ import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
+@SuppressWarnings("TooManyFunctions")
 @Module(
     subcomponents = [
         LinkAnalyticsComponent::class,
@@ -56,6 +61,7 @@ import kotlin.coroutines.CoroutineContext
 )
 internal abstract class PaymentSheetCommonModule {
 
+    @Singleton
     @Binds
     abstract fun bindsEventReporter(eventReporter: DefaultEventReporter): EventReporter
 
@@ -90,12 +96,21 @@ internal abstract class PaymentSheetCommonModule {
     abstract fun bindsLinkConfigurationCoordinator(impl: RealLinkConfigurationCoordinator): LinkConfigurationCoordinator
 
     @Binds
+    abstract fun bindLinkGateFactory(linkGateFactory: DefaultLinkGate.Factory): LinkGate.Factory
+
+    @Binds
     abstract fun bindsCardAccountRangeRepositoryFactory(
         defaultCardAccountRangeRepositoryFactory: DefaultCardAccountRangeRepositoryFactory
     ): CardAccountRangeRepository.Factory
 
     @Suppress("TooManyFunctions")
     companion object {
+        @Provides
+        @Singleton
+        fun providesLinkAccountHolder(savedStateHandle: SavedStateHandle): LinkAccountHolder {
+            return LinkAccountHolder(savedStateHandle)
+        }
+
         /**
          * Provides a non-singleton PaymentConfiguration.
          *

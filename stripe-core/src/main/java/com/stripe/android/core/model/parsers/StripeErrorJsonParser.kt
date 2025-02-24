@@ -41,14 +41,14 @@ class StripeErrorJsonParser : ModelJsonParser<StripeError> {
         internal const val MALFORMED_RESPONSE_MESSAGE =
             "An improperly formatted error response was found."
 
-        private const val FIELD_CHARGE = "charge"
-        private const val FIELD_CODE = "code"
-        private const val FIELD_DECLINE_CODE = "decline_code"
-        private const val FIELD_EXTRA_FIELDS = "extra_fields"
-        private const val FIELD_DOC_URL = "doc_url"
-        private const val FIELD_ERROR = "error"
-        private const val FIELD_MESSAGE = "message"
-        private const val FIELD_PARAM = "param"
-        private const val FIELD_TYPE = "type"
+        internal const val FIELD_CHARGE = "charge"
+        internal const val FIELD_CODE = "code"
+        internal const val FIELD_DECLINE_CODE = "decline_code"
+        internal const val FIELD_EXTRA_FIELDS = "extra_fields"
+        internal const val FIELD_DOC_URL = "doc_url"
+        internal const val FIELD_ERROR = "error"
+        internal const val FIELD_MESSAGE = "message"
+        internal const val FIELD_PARAM = "param"
+        internal const val FIELD_TYPE = "type"
     }
 }

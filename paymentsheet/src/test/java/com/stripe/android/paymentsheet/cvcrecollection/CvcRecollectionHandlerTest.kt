@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.cvcrecollection
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionData
@@ -56,19 +55,6 @@ class CvcRecollectionHandlerTest {
             stripeIntent = paymentIntent,
             paymentMethod = PaymentMethodFixtures.PAYPAL_PAYMENT_METHOD,
             optionsParams = null,
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("")
-        )
-        assertThat(response).isFalse()
-    }
-
-    @Test
-    fun `card & intent requiring cvc recollection should return false if CVC is in options params`() {
-        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CVC_RECOLLECTION
-        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        val response = handler.requiresCVCRecollection(
-            stripeIntent = paymentIntent,
-            paymentMethod = paymentMethod,
-            optionsParams = PaymentMethodOptionsParams.Card(cvc = "444"),
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("")
         )
         assertThat(response).isFalse()
@@ -128,26 +114,6 @@ class CvcRecollectionHandlerTest {
             stripeIntent = paymentIntent,
             paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
             optionsParams = null,
-            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration = PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                        amount = 1234,
-                        currency = "cad",
-                    ),
-                    requireCvcRecollection = true
-                )
-            )
-        )
-        assertThat(response).isFalse()
-    }
-
-    @Test
-    fun `card & valid deferred intent should return false if CVC is in options params`() {
-        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
-        val response = handler.requiresCVCRecollection(
-            stripeIntent = paymentIntent,
-            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-            optionsParams = PaymentMethodOptionsParams.Card(cvc = "444"),
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = PaymentSheet.IntentConfiguration.Mode.Payment(

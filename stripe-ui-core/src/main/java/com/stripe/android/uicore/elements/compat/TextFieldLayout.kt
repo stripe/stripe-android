@@ -43,8 +43,8 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.offset
-import kotlin.contracts.ExperimentalContracts
-import kotlin.contracts.contract
+import androidx.compose.ui.util.fastFirst
+import androidx.compose.ui.util.fastFirstOrNull
 import kotlin.math.max
 import kotlin.math.roundToInt
 
@@ -315,11 +315,15 @@ private class TextFieldMeasurePolicy(
     ): Int {
         var remainingWidth = width
         val leadingHeight = measurables.fastFirstOrNull { it.layoutId == LeadingId }?.let {
-            remainingWidth -= it.maxIntrinsicWidth(Constraints.Infinity)
+            remainingWidth = remainingWidth.substractConstraintSafely(
+                it.maxIntrinsicWidth(Constraints.Infinity)
+            )
             intrinsicMeasurer(it, width)
         } ?: 0
         val trailingHeight = measurables.fastFirstOrNull { it.layoutId == TrailingId }?.let {
-            remainingWidth -= it.maxIntrinsicWidth(Constraints.Infinity)
+            remainingWidth = remainingWidth.substractConstraintSafely(
+                it.maxIntrinsicWidth(Constraints.Infinity)
+            )
             intrinsicMeasurer(it, width)
         } ?: 0
 
@@ -345,6 +349,13 @@ private class TextFieldMeasurePolicy(
             paddingValues = paddingValues
         )
     }
+}
+
+private fun Int.substractConstraintSafely(from: Int): Int {
+    if (this == Constraints.Infinity) {
+        return this
+    }
+    return this - from
 }
 
 private fun calculateWidth(
@@ -487,29 +498,6 @@ private fun Placeable.PlacementScope.placeWithoutLabel(
             widthOrZero(leadingPlaceable),
             placeholderVerticalPosition
         )
-    }
-}
-
-@OptIn(ExperimentalContracts::class)
-internal inline fun <T> List<T>.fastFirst(predicate: (T) -> Boolean): T {
-    contract { callsInPlace(predicate) }
-    fastForEach { if (predicate(it)) return it }
-    throw NoSuchElementException("Collection contains no element matching the predicate.")
-}
-
-@OptIn(ExperimentalContracts::class)
-internal inline fun <T> List<T>.fastFirstOrNull(predicate: (T) -> Boolean): T? {
-    contract { callsInPlace(predicate) }
-    fastForEach { if (predicate(it)) return it }
-    return null
-}
-
-@OptIn(ExperimentalContracts::class)
-internal inline fun <T> List<T>.fastForEach(action: (T) -> Unit) {
-    contract { callsInPlace(action) }
-    for (index in indices) {
-        val item = get(index)
-        action(item)
     }
 }
 

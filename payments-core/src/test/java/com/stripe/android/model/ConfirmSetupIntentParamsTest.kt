@@ -68,6 +68,24 @@ class ConfirmSetupIntentParamsTest {
     }
 
     @Test
+    fun toParamMap_withSetAsDefaultPaymentMethod_shouldCreateExpectedMap() {
+        assertThat(
+            ConfirmSetupIntentParams.createWithSetAsDefaultPaymentMethod(
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                clientSecret = CLIENT_SECRET,
+                setAsDefaultPaymentMethod = true
+            ).toParamMap()
+        ).isEqualTo(
+            mapOf(
+                "client_secret" to CLIENT_SECRET,
+                "use_stripe_sdk" to false,
+                "payment_method_data" to PaymentMethodCreateParamsFixtures.DEFAULT_CARD.toParamMap(),
+                "set_as_default_payment_method" to true,
+            )
+        )
+    }
+
+    @Test
     fun toParamMap_withSepaDebitPaymentMethodParams_shouldUseDefaultMandateDataIfNotSpecified() {
         assertThat(
             ConfirmSetupIntentParams.create(

@@ -234,7 +234,7 @@ internal fun LinkFields(
 
     val sectionError by sectionController.error.collectAsState()
 
-    AnimatedVisibility(visible = expanded) {
+    AnimatedVisibility(visible = expanded, modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier.padding(
                 start = 16.dp,

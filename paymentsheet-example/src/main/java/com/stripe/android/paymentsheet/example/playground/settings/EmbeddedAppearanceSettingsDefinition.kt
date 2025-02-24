@@ -29,8 +29,8 @@ internal object EmbeddedAppearanceSettingsDefinition :
     }
 
     @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-    override fun valueUpdated(value: EmbeddedAppearance, playgroundSettings: PlaygroundSettings) {
-        super.valueUpdated(value, playgroundSettings)
+    override fun setValue(value: EmbeddedAppearance) {
+        super.setValue(value)
         AppearanceStore.state = AppearanceStore.state.copy(
             embeddedAppearance = PaymentSheet.Appearance.Embedded(value.getRow())
         )
@@ -49,8 +49,10 @@ internal enum class EmbeddedRow {
 internal data class EmbeddedAppearance(
     val embeddedRowStyle: EmbeddedRow = EmbeddedRow.FlatWithRadio,
     val separatorThicknessDp: Float = 1.0f,
-    val separatorInsetsDp: Float = 0.0f,
-    val additionalInsetsDp: Float = 4.0f,
+    val startSeparatorInset: Float = 0.0f,
+    val endSeparatorInset: Float = 0.0f,
+    val additionalVerticalInsetsDp: Float = 4.0f,
+    val horizontalInsetsDp: Float = 0.0f,
     val checkmarkInsetsDp: Float = 12.0f,
     val floatingButtonSpacingDp: Float = 12.0f,
     val topSeparatorEnabled: Boolean = true,
@@ -65,26 +67,30 @@ internal data class EmbeddedAppearance(
             EmbeddedRow.FlatWithRadio -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio(
                 separatorThicknessDp = separatorThicknessDp,
                 separatorColor = separatorColor,
-                separatorInsetsDp = separatorInsetsDp,
+                startSeparatorInsetDp = startSeparatorInset,
+                endSeparatorInsetDp = endSeparatorInset,
                 topSeparatorEnabled = topSeparatorEnabled,
                 bottomSeparatorEnabled = bottomSeparatorEnabled,
                 selectedColor = selectedColor,
                 unselectedColor = unselectedColor,
-                additionalInsetsDp = additionalInsetsDp
+                additionalVerticalInsetsDp = additionalVerticalInsetsDp,
+                horizontalInsetsDp = horizontalInsetsDp
             )
             EmbeddedRow.FlatWithCheckmark -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark(
                 separatorThicknessDp = separatorThicknessDp,
                 separatorColor = separatorColor,
-                separatorInsetsDp = separatorInsetsDp,
+                startSeparatorInsetDp = startSeparatorInset,
+                endSeparatorInsetDp = endSeparatorInset,
                 topSeparatorEnabled = topSeparatorEnabled,
                 bottomSeparatorEnabled = bottomSeparatorEnabled,
                 checkmarkColor = checkmarkColor,
                 checkmarkInsetDp = checkmarkInsetsDp,
-                additionalInsetsDp = additionalInsetsDp
+                additionalVerticalInsetsDp = additionalVerticalInsetsDp,
+                horizontalInsetsDp = horizontalInsetsDp
             )
             EmbeddedRow.FloatingButton -> PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton(
                 spacingDp = floatingButtonSpacingDp,
-                additionalInsetsDp = additionalInsetsDp
+                additionalInsetsDp = additionalVerticalInsetsDp
             )
         }
     }

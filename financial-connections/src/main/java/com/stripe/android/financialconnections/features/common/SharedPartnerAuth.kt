@@ -197,6 +197,7 @@ private fun SharedPartnerAuthBody(
         state.payload()?.let {
             LoadedContent(
                 showInModal = inModal,
+                isRelinkSession = state.isNetworkingRelinkSession,
                 authenticationStatus = state.authenticationStatus,
                 payload = it,
                 onContinueClick = onContinueClick,
@@ -210,6 +211,7 @@ private fun SharedPartnerAuthBody(
 @Composable
 private fun LoadedContent(
     showInModal: Boolean,
+    isRelinkSession: Boolean,
     authenticationStatus: Async<AuthenticationStatus>,
     payload: SharedPartnerAuthState.Payload,
     onContinueClick: () -> Unit,
@@ -226,6 +228,7 @@ private fun LoadedContent(
                 // is Loading or Success (completing auth after redirect)
                 authenticationStatus = authenticationStatus,
                 showInModal = showInModal,
+                showSecondaryButton = !isRelinkSession,
                 onContinueClick = onContinueClick,
                 onCancelClick = onCancelClick,
                 content = requireNotNull(payload.authSession.display?.text?.oauthPrepane),
@@ -240,6 +243,7 @@ private fun LoadedContent(
 @Composable
 private fun PrePaneContent(
     showInModal: Boolean,
+    showSecondaryButton: Boolean,
     content: OauthPrepane,
     authenticationStatus: Async<AuthenticationStatus>,
     onContinueClick: () -> Unit,
@@ -270,7 +274,9 @@ private fun PrePaneContent(
                         modifier = Modifier.padding(horizontal = 24.dp),
                         text = TextResource.Text(fromHtml(bodyItem.content)),
                         onClickableTextClick = onClickableTextClick,
-                        defaultStyle = typography.bodyMedium
+                        defaultStyle = typography.bodyMedium.copy(
+                            color = colors.textDefault,
+                        ),
                     )
                 }
             }
@@ -280,7 +286,9 @@ private fun PrePaneContent(
                 onContinueClick = onContinueClick,
                 onCancelClick = onCancelClick,
                 status = authenticationStatus,
-                oAuthPrepane = content
+                oAuthPrepane = content,
+                showInModal = showInModal,
+                showSecondaryButton = showSecondaryButton,
             )
         }
     )
@@ -300,8 +308,8 @@ internal fun PrepaneImage(bodyItem: Entry.Image) {
                 .background(
                     brush = Brush.horizontalGradient(
                         colors = listOf(
-                            colors.backgroundOffset,
-                            colors.border,
+                            colors.backgroundSecondary,
+                            colors.borderNeutral,
                         ),
                     )
                 )
@@ -312,7 +320,7 @@ internal fun PrepaneImage(bodyItem: Entry.Image) {
         // left separator
         Box(
             modifier = Modifier
-                .background(color = colors.backgroundOffset)
+                .background(color = colors.backgroundSecondary)
                 .width(8.dp)
                 .fillMaxHeight()
         )
@@ -326,7 +334,7 @@ internal fun PrepaneImage(bodyItem: Entry.Image) {
         // right separator
         Box(
             modifier = Modifier
-                .background(color = colors.backgroundOffset)
+                .background(color = colors.backgroundSecondary)
                 .width(8.dp)
                 .fillMaxHeight()
         )
@@ -336,8 +344,8 @@ internal fun PrepaneImage(bodyItem: Entry.Image) {
                 .background(
                     brush = Brush.horizontalGradient(
                         colors = listOf(
-                            colors.border,
-                            colors.backgroundOffset,
+                            colors.borderNeutral,
+                            colors.backgroundSecondary,
                         ),
                     )
                 )
@@ -353,7 +361,9 @@ private fun PrepaneFooter(
     onContinueClick: () -> Unit,
     onCancelClick: () -> Unit,
     status: Async<AuthenticationStatus>,
-    oAuthPrepane: OauthPrepane
+    oAuthPrepane: OauthPrepane,
+    showInModal: Boolean,
+    showSecondaryButton: Boolean,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -387,19 +397,28 @@ private fun PrepaneFooter(
                 }
             }
         }
-        FinancialConnectionsButton(
-            onClick = onCancelClick,
-            type = Type.Secondary,
-            enabled = status !is Loading,
-            modifier = Modifier
-                .semantics { testTagsAsResourceId = true }
-                .testTag("cancel_cta")
-                .fillMaxWidth()
-        ) {
-            Text(
-                text = stringResource(R.string.stripe_prepane_cancel_cta),
-                textAlign = TextAlign.Center
-            )
+
+        if (showSecondaryButton) {
+            FinancialConnectionsButton(
+                onClick = onCancelClick,
+                type = Type.Secondary,
+                enabled = status !is Loading,
+                modifier = Modifier
+                    .semantics { testTagsAsResourceId = true }
+                    .testTag("cancel_cta")
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = stringResource(
+                        id = if (showInModal) {
+                            R.string.stripe_prepane_cancel_cta
+                        } else {
+                            R.string.stripe_prepane_choose_different_bank_cta
+                        }
+                    ),
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }
@@ -449,7 +468,7 @@ private fun GifWebView(
             append("</body></html>")
         }
     }
-    val backgroundColor = colors.backgroundOffset.toArgb()
+    val backgroundColor = colors.backgroundSecondary.toArgb()
     AndroidView(
         modifier = modifier.background(Color.Transparent),
         factory = {
@@ -505,7 +524,7 @@ internal fun PartnerAuthDrawerPreview(
     state: SharedPartnerAuthState
 ) {
     FinancialConnectionsPreview {
-        Box(modifier = Modifier.background(Color.White)) {
+        Box(modifier = Modifier.background(colors.background)) {
             SharedPartnerAuthContent(
                 state = state,
                 inModal = true,

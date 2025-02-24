@@ -3,10 +3,12 @@ package com.stripe.android.test.core.ui
 import android.content.pm.PackageManager
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -21,6 +23,7 @@ import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TA
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG
 import com.stripe.android.model.PaymentMethod.Type.Blik
 import com.stripe.android.model.PaymentMethod.Type.CashAppPay
+import com.stripe.android.paymentelement.embedded.form.EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON
 import com.stripe.android.paymentsheet.example.playground.RELOAD_TEST_TAG
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
@@ -52,6 +55,7 @@ internal class Selectors(
     val continueButton = BuyButton(composeTestRule)
     val complete = ComposeButton(composeTestRule, hasTestTag(CHECKOUT_TEST_TAG))
     val reload = ComposeButton(composeTestRule, hasTestTag(RELOAD_TEST_TAG))
+    val embeddedFormBuyButton = ComposeButton(composeTestRule, hasTestTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON))
     val multiStepSelect = ComposeButton(
         composeTestRule,
         hasTestTag(PAYMENT_METHOD_SELECTOR_TEST_TAG)
@@ -118,8 +122,8 @@ internal class Selectors(
 
     val googlePayContinueButton = UiAutomatorText(
         "Continue",
-        "android.widget.Button",
-        device
+        className = "android.widget.Button",
+        device = device
     )
 
     val playgroundBuyButton = ComposeButton(composeTestRule, hasTestTag(CHECKOUT_TEST_TAG))
@@ -320,11 +324,14 @@ internal class Selectors(
         )
     )
 
-    fun getCardExpiration() = composeTestRule.onNodeWithTextAfterWaiting(
-        InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(
-            UiCoreR.string.stripe_expiration_date_hint
-        )
-    )
+    fun getCardExpiration(): SemanticsNodeInteraction {
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+            composeTestRule.onAllNodes(
+                hasContentDescription("Expiration date", true)
+            ).fetchSemanticsNodes().isNotEmpty()
+        }
+        return composeTestRule.onNodeWithContentDescription(label = "Expiration date", substring = true)
+    }
 
     fun getCardCvc() = composeTestRule.onNodeWithTextAfterWaiting(
         InstrumentationRegistry.getInstrumentation().targetContext.resources.getString(

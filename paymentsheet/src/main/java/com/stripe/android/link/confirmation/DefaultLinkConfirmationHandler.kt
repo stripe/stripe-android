@@ -3,30 +3,61 @@ package com.stripe.android.link.confirmation
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
-import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.LinkMode
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.model.SetupIntent
+import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationOption
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import javax.inject.Inject
 
 internal class DefaultLinkConfirmationHandler @Inject constructor(
     private val configuration: LinkConfiguration,
     private val logger: Logger,
-    private val confirmationHandler: ConfirmationHandler
+    private val confirmationHandler: ConfirmationHandler,
 ) : LinkConfirmationHandler {
     override suspend fun confirm(
         paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         linkAccount: LinkAccount,
         cvc: String?
     ): Result {
+        return confirm {
+            newConfirmationArgs(
+                paymentDetails = paymentDetails,
+                linkAccount = linkAccount,
+                cvc = cvc
+            )
+        }
+    }
+
+    override suspend fun confirm(
+        paymentDetails: LinkPaymentDetails,
+        linkAccount: LinkAccount,
+        cvc: String?
+    ): Result {
+        return confirm {
+            confirmationArgs(
+                paymentDetails = paymentDetails,
+                linkAccount = linkAccount,
+                cvc = cvc
+            )
+        }
+    }
+
+    private suspend fun confirm(
+        createArgs: () -> ConfirmationHandler.Args
+    ): Result {
         return runCatching {
-            val args = confirmationArgs(paymentDetails, linkAccount, cvc)
+            val args = createArgs()
             confirmationHandler.start(args)
             val result = confirmationHandler.awaitResult()
             transformResult(result)
@@ -58,37 +89,88 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
     }
 
     private fun confirmationArgs(
+        paymentDetails: LinkPaymentDetails,
+        linkAccount: LinkAccount,
+        cvc: String?
+    ): ConfirmationHandler.Args {
+        return when (paymentDetails) {
+            is LinkPaymentDetails.New -> {
+                newConfirmationArgs(
+                    paymentDetails = paymentDetails.paymentDetails,
+                    linkAccount = linkAccount,
+                    cvc = cvc
+                )
+            }
+            is LinkPaymentDetails.Saved -> {
+                savedConfirmationArgs(
+                    paymentDetails = paymentDetails,
+                    cvc = cvc
+                )
+            }
+        }
+    }
+
+    private fun newConfirmationArgs(
         paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         linkAccount: LinkAccount,
         cvc: String?
     ): ConfirmationHandler.Args {
-        return ConfirmationHandler.Args(
-            intent = configuration.stripeIntent,
-            confirmationOption = PaymentMethodConfirmationOption.New(
+        val confirmationOption = if (configuration.passthroughModeEnabled) {
+            LinkPassthroughConfirmationOption(
+                paymentDetailsId = paymentDetails.id,
+                expectedPaymentMethodType = computeExpectedPaymentMethodType(paymentDetails),
+            )
+        } else {
+            PaymentMethodConfirmationOption.New(
                 createParams = createPaymentMethodCreateParams(
                     selectedPaymentDetails = paymentDetails,
                     linkAccount = linkAccount,
                     cvc = cvc
                 ),
+                extraParams = null,
                 optionsParams = null,
                 shouldSave = false
-            ),
+            )
+        }
+
+        return ConfirmationHandler.Args(
+            intent = configuration.stripeIntent,
+            confirmationOption = confirmationOption,
             appearance = PaymentSheet.Appearance(),
-            initializationMode = initializationMode(),
+            initializationMode = configuration.initializationMode,
             shippingDetails = configuration.shippingDetails
         )
     }
 
-    private fun initializationMode(): PaymentElementLoader.InitializationMode {
-        val clientSecret = configuration.stripeIntent.clientSecret ?: throw NO_CLIENT_SECRET_FOUND
-        return when (configuration.stripeIntent) {
-            is PaymentIntent -> {
-                PaymentElementLoader.InitializationMode.PaymentIntent(clientSecret)
-            }
-            is SetupIntent -> {
-                PaymentElementLoader.InitializationMode.SetupIntent(clientSecret)
-            }
-        }
+    private fun savedConfirmationArgs(
+        paymentDetails: LinkPaymentDetails,
+        cvc: String?
+    ): ConfirmationHandler.Args {
+        return ConfirmationHandler.Args(
+            intent = configuration.stripeIntent,
+            confirmationOption = PaymentMethodConfirmationOption.Saved(
+                paymentMethod = PaymentMethod.Builder()
+                    .setId(paymentDetails.paymentDetails.id)
+                    .setCode(paymentDetails.paymentMethodCreateParams.typeCode)
+                    .setCard(
+                        PaymentMethod.Card(
+                            last4 = paymentDetails.paymentDetails.last4,
+                            wallet = Wallet.LinkWallet(paymentDetails.paymentDetails.last4),
+                        )
+                    )
+                    .setType(PaymentMethod.Type.Card)
+                    .build(),
+                optionsParams = PaymentMethodOptionsParams.Card(
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
+                    cvc = cvc?.takeIf {
+                        configuration.passthroughModeEnabled.not()
+                    }
+                )
+            ),
+            appearance = PaymentSheet.Appearance(),
+            initializationMode = configuration.initializationMode,
+            shippingDetails = configuration.shippingDetails
+        )
     }
 
     private fun createPaymentMethodCreateParams(
@@ -103,6 +185,27 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         )
     }
 
+    private fun computeExpectedPaymentMethodType(
+        paymentDetails: ConsumerPaymentDetails.PaymentDetails
+    ): String {
+        return when (paymentDetails) {
+            is ConsumerPaymentDetails.BankAccount -> computeBankAccountExpectedPaymentMethodType()
+            is ConsumerPaymentDetails.Card -> ConsumerPaymentDetails.Card.TYPE
+            is ConsumerPaymentDetails.Passthrough -> ConsumerPaymentDetails.Card.TYPE
+        }
+    }
+
+    private fun computeBankAccountExpectedPaymentMethodType(): String {
+        val canAcceptACH = USBankAccount.code in configuration.stripeIntent.paymentMethodTypes
+        val isLinkCardBrand = configuration.linkMode == LinkMode.LinkCardBrand
+
+        return if (isLinkCardBrand && !canAcceptACH) {
+            ConsumerPaymentDetails.Card.TYPE
+        } else {
+            ConsumerPaymentDetails.BankAccount.TYPE
+        }
+    }
+
     class Factory @Inject constructor(
         private val configuration: LinkConfiguration,
         private val logger: Logger,
@@ -111,12 +214,8 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
             return DefaultLinkConfirmationHandler(
                 confirmationHandler = confirmationHandler,
                 logger = logger,
-                configuration = configuration
+                configuration = configuration,
             )
         }
-    }
-
-    companion object {
-        val NO_CLIENT_SECRET_FOUND = IllegalStateException("No client secret found.")
     }
 }

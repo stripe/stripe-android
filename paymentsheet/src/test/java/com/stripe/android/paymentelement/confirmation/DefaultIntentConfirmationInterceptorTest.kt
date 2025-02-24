@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -14,18 +15,24 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentelement.confirmation.intent.CreateIntentCallbackFailureException
 import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.InvalidDeferredIntentUsageException
 import com.stripe.android.paymentelement.confirmation.intent.intercept
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode
 import com.stripe.android.testing.AbsFakeStripeRepository
+import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
+import kotlinx.coroutines.async
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -36,7 +43,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import java.util.Objects
-import kotlin.test.assertFailsWith
+import com.stripe.android.R as PaymentsCoreR
 
 @RunWith(RobolectricTestRunner::class)
 class DefaultIntentConfirmationInterceptorTest {
@@ -50,6 +57,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeRepository = object : AbsFakeStripeRepository() {},
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            errorReporter = FakeErrorReporter(),
             allowsManualConfirmation = false,
         )
 
@@ -57,9 +65,11 @@ class DefaultIntentConfirmationInterceptorTest {
 
         val nextStep = interceptor.intercept(
             initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
+            intent = PaymentIntentFactory.create(),
             paymentMethod = paymentMethod,
             paymentMethodOptionsParams = null,
             shippingValues = null,
+            paymentMethodExtraParams = null,
         )
 
         val confirmNextStep = nextStep as? IntentConfirmationInterceptor.NextStep.Confirm
@@ -75,6 +85,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeRepository = object : AbsFakeStripeRepository() {},
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            errorReporter = FakeErrorReporter(),
             allowsManualConfirmation = false,
         )
 
@@ -82,6 +93,7 @@ class DefaultIntentConfirmationInterceptorTest {
 
         val nextStep = interceptor.intercept(
             initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
+            intent = PaymentIntentFactory.create(),
             paymentMethodCreateParams = createParams,
             shippingValues = null,
             customerRequestedSave = false,
@@ -106,6 +118,7 @@ class DefaultIntentConfirmationInterceptorTest {
                         setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
                     )
                 ),
+                intent = PaymentIntentFactory.create(),
                 initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
                 shippingDetails = null,
             )
@@ -123,37 +136,38 @@ class DefaultIntentConfirmationInterceptorTest {
         }
 
     @Test
-    fun `Fails if invoked without a confirm callback for existing payment method`() = runTest {
+    fun `Fails if invoked without a confirm callback for existing payment method`() = testNoConfirmCallback(
+        userMessage = CREATE_INTENT_CALLBACK_MESSAGE.resolvableString,
+    ) { errorReporter ->
         val interceptor = DefaultIntentConfirmationInterceptor(
             stripeRepository = object : AbsFakeStripeRepository() {},
-            publishableKeyProvider = { "pk" },
+            publishableKeyProvider = { "pk_test_123" },
             stripeAccountIdProvider = { null },
+            errorReporter = errorReporter,
             allowsManualConfirmation = false,
         )
 
-        val error = assertFailsWith<IllegalStateException> {
-            interceptor.intercept(
-                initializationMode = InitializationMode.DeferredIntent(
-                    intentConfiguration = PaymentSheet.IntentConfiguration(
-                        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                            amount = 1099L,
-                            currency = "usd",
-                        ),
+        interceptor.intercept(
+            initializationMode = InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1099L,
+                        currency = "usd",
                     ),
                 ),
-                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                paymentMethodOptionsParams = null,
-                shippingValues = null,
-            )
-        }
-
-        assertThat(error.message).isEqualTo(
-            "CreateIntentCallback must be implemented when using IntentConfiguration with PaymentSheet"
+            ),
+            intent = PaymentIntentFactory.create(),
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            paymentMethodOptionsParams = null,
+            shippingValues = null,
+            paymentMethodExtraParams = null,
         )
     }
 
     @Test
-    fun `Fails if invoked without a confirm callback for new payment method`() = runTest {
+    fun `Fails if invoked without a confirm callback for new payment method`() = testNoConfirmCallback(
+        userMessage = CREATE_INTENT_CALLBACK_MESSAGE.resolvableString,
+    ) { errorReporter ->
         val interceptor = DefaultIntentConfirmationInterceptor(
             stripeRepository = object : AbsFakeStripeRepository() {
                 override suspend fun createPaymentMethod(
@@ -163,23 +177,116 @@ class DefaultIntentConfirmationInterceptorTest {
                     return Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
                 }
             },
-            publishableKeyProvider = { "pk" },
+            publishableKeyProvider = { "pk_test_123" },
             stripeAccountIdProvider = { null },
+            errorReporter = errorReporter,
             allowsManualConfirmation = false,
         )
 
-        val error = assertFailsWith<IllegalStateException> {
-            interceptor.intercept(
-                initializationMode = InitializationMode.DeferredIntent(mock()),
-                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                shippingValues = null,
-                customerRequestedSave = false,
+        interceptor.intercept(
+            initializationMode = InitializationMode.DeferredIntent(mock()),
+            intent = PaymentIntentFactory.create(),
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            shippingValues = null,
+            customerRequestedSave = false,
+        )
+    }
+
+    @Test
+    fun `Message for live key when error without confirm callback is user friendly`() = testNoConfirmCallback(
+        userMessage = PaymentsCoreR.string.stripe_internal_error.resolvableString
+    ) { errorReporter ->
+        val interceptor = DefaultIntentConfirmationInterceptor(
+            stripeRepository = object : AbsFakeStripeRepository() {},
+            publishableKeyProvider = { "pk_live_123" },
+            stripeAccountIdProvider = { null },
+            errorReporter = errorReporter,
+            allowsManualConfirmation = false,
+        )
+
+        interceptor.intercept(
+            initializationMode = InitializationMode.DeferredIntent(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 1099L,
+                        currency = "usd",
+                    ),
+                ),
+            ),
+            intent = PaymentIntentFactory.create(),
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            paymentMethodOptionsParams = null,
+            paymentMethodExtraParams = null,
+            shippingValues = null,
+        )
+    }
+
+    @Test
+    fun `Succeeds if callback is found before timeout time`() {
+        val dispatcher = StandardTestDispatcher()
+
+        runTest(dispatcher) {
+            val errorReporter = FakeErrorReporter()
+            val paymentMethod = PaymentMethodFactory.card()
+            val interceptor = DefaultIntentConfirmationInterceptor(
+                stripeRepository = object : AbsFakeStripeRepository() {
+                    override suspend fun createPaymentMethod(
+                        paymentMethodCreateParams: PaymentMethodCreateParams,
+                        options: ApiRequest.Options
+                    ): Result<PaymentMethod> {
+                        return Result.success(paymentMethod)
+                    }
+
+                    override suspend fun retrieveStripeIntent(
+                        clientSecret: String,
+                        options: ApiRequest.Options,
+                        expandFields: List<String>
+                    ): Result<StripeIntent> {
+                        return Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
+                    }
+                },
+                publishableKeyProvider = { "pk_live_123" },
+                stripeAccountIdProvider = { null },
+                errorReporter = errorReporter,
+                allowsManualConfirmation = false,
+            )
+
+            val interceptJob = async {
+                interceptor.intercept(
+                    initializationMode = InitializationMode.DeferredIntent(
+                        intentConfiguration = PaymentSheet.IntentConfiguration(
+                            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                                amount = 1099L,
+                                currency = "usd",
+                            ),
+                        ),
+                    ),
+                    intent = PaymentIntentFactory.create(),
+                    paymentMethod = paymentMethod,
+                    paymentMethodOptionsParams = null,
+                    paymentMethodExtraParams = null,
+                    shippingValues = null,
+                )
+            }
+
+            dispatcher.scheduler.advanceTimeBy(1000)
+            assertThat(interceptJob.isActive).isTrue()
+
+            IntentConfirmationInterceptor.createIntentCallback = succeedingCreateIntentCallback(paymentMethod)
+
+            dispatcher.scheduler.advanceTimeBy(1001)
+
+            assertThat(interceptJob.isActive).isFalse()
+            assertThat(interceptJob.isCompleted).isTrue()
+
+            val nextStep = interceptJob.await()
+
+            assertThat(nextStep).isInstanceOf<IntentConfirmationInterceptor.NextStep.Complete>()
+
+            assertThat(errorReporter.getLoggedErrors()).containsExactly(
+                ErrorReporter.SuccessEvent.FOUND_CREATE_INTENT_CALLBACK_WHILE_POLLING.eventName,
             )
         }
-
-        assertThat(error.message).isEqualTo(
-            "CreateIntentCallback must be implemented when using IntentConfiguration with PaymentSheet"
-        )
     }
 
     @Test
@@ -201,11 +308,13 @@ class DefaultIntentConfirmationInterceptorTest {
             },
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            errorReporter = FakeErrorReporter(),
             allowsManualConfirmation = false,
         )
 
         val nextStep = interceptor.intercept(
             initializationMode = InitializationMode.DeferredIntent(mock()),
+            intent = PaymentIntentFactory.create(),
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             shippingValues = null,
             customerRequestedSave = false,
@@ -241,6 +350,7 @@ class DefaultIntentConfirmationInterceptorTest {
             },
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            errorReporter = FakeErrorReporter(),
             allowsManualConfirmation = false,
         )
 
@@ -248,8 +358,10 @@ class DefaultIntentConfirmationInterceptorTest {
 
         val nextStep = interceptor.intercept(
             initializationMode = InitializationMode.DeferredIntent(mock()),
+            intent = PaymentIntentFactory.create(),
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             paymentMethodOptionsParams = null,
+            paymentMethodExtraParams = null,
             shippingValues = null,
         )
 
@@ -267,6 +379,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeRepository = mock(),
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            errorReporter = FakeErrorReporter(),
             allowsManualConfirmation = false,
         )
 
@@ -276,14 +389,16 @@ class DefaultIntentConfirmationInterceptorTest {
 
         val nextStep = interceptor.intercept(
             initializationMode = InitializationMode.DeferredIntent(mock()),
+            intent = PaymentIntentFactory.create(),
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             paymentMethodOptionsParams = null,
+            paymentMethodExtraParams = null,
             shippingValues = null,
         )
 
         assertThat(nextStep).isEqualTo(
             IntentConfirmationInterceptor.NextStep.Fail(
-                cause = TestException("that didn't work…"),
+                cause = CreateIntentCallbackFailureException(TestException("that didn't work…")),
                 message = resolvableString("that didn't work…"),
             )
         )
@@ -295,6 +410,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeRepository = mock(),
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            errorReporter = FakeErrorReporter(),
             allowsManualConfirmation = false,
         )
 
@@ -302,14 +418,16 @@ class DefaultIntentConfirmationInterceptorTest {
 
         val nextStep = interceptor.intercept(
             initializationMode = InitializationMode.DeferredIntent(mock()),
+            intent = PaymentIntentFactory.create(),
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             paymentMethodOptionsParams = null,
+            paymentMethodExtraParams = null,
             shippingValues = null,
         )
 
         assertThat(nextStep).isEqualTo(
             IntentConfirmationInterceptor.NextStep.Fail(
-                cause = TestException(),
+                cause = CreateIntentCallbackFailureException(TestException()),
                 message = resolvableString(R.string.stripe_something_went_wrong),
             )
         )
@@ -335,6 +453,7 @@ class DefaultIntentConfirmationInterceptorTest {
             },
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            errorReporter = FakeErrorReporter(),
             allowsManualConfirmation = false,
         )
 
@@ -349,8 +468,10 @@ class DefaultIntentConfirmationInterceptorTest {
                     ),
                 ),
             ),
+            intent = PaymentIntentFactory.create(),
             paymentMethod = paymentMethod,
             paymentMethodOptionsParams = null,
+            paymentMethodExtraParams = null,
             shippingValues = null,
         )
 
@@ -373,6 +494,7 @@ class DefaultIntentConfirmationInterceptorTest {
             },
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            errorReporter = FakeErrorReporter(),
             allowsManualConfirmation = false,
         )
 
@@ -387,8 +509,10 @@ class DefaultIntentConfirmationInterceptorTest {
                     ),
                 ),
             ),
+            intent = PaymentIntentFactory.create(),
             paymentMethod = paymentMethod,
             paymentMethodOptionsParams = null,
+            paymentMethodExtraParams = null,
             shippingValues = null,
         )
 
@@ -418,6 +542,7 @@ class DefaultIntentConfirmationInterceptorTest {
             },
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            errorReporter = FakeErrorReporter(),
             allowsManualConfirmation = false,
         )
 
@@ -432,8 +557,10 @@ class DefaultIntentConfirmationInterceptorTest {
                     ),
                 ),
             ),
+            intent = PaymentIntentFactory.create(),
             paymentMethod = paymentMethod,
             paymentMethodOptionsParams = null,
+            paymentMethodExtraParams = null,
             shippingValues = null,
         )
 
@@ -459,6 +586,7 @@ class DefaultIntentConfirmationInterceptorTest {
             },
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            errorReporter = FakeErrorReporter(),
             allowsManualConfirmation = false,
         )
 
@@ -480,10 +608,12 @@ class DefaultIntentConfirmationInterceptorTest {
                         ),
                     ),
                 ),
+                intent = PaymentIntentFactory.create(),
                 paymentMethod = paymentMethod,
                 paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
                     setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
                 ).takeIf { input },
+                paymentMethodExtraParams = null,
                 shippingValues = null,
             )
         }
@@ -500,6 +630,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeRepository = stripeRepository,
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            errorReporter = FakeErrorReporter(),
             allowsManualConfirmation = false,
         )
 
@@ -516,8 +647,10 @@ class DefaultIntentConfirmationInterceptorTest {
                     ),
                 ),
             ),
+            intent = PaymentIntentFactory.create(),
             paymentMethod = paymentMethod,
             paymentMethodOptionsParams = null,
+            paymentMethodExtraParams = null,
             shippingValues = null,
         )
 
@@ -540,6 +673,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 ),
                 publishableKeyProvider = { "pk" },
                 stripeAccountIdProvider = { null },
+                errorReporter = FakeErrorReporter(),
                 allowsManualConfirmation = false,
             )
 
@@ -556,8 +690,10 @@ class DefaultIntentConfirmationInterceptorTest {
                         ),
                     ),
                 ),
+                intent = PaymentIntentFactory.create(),
                 paymentMethod = paymentMethod,
                 paymentMethodOptionsParams = null,
+                paymentMethodExtraParams = null,
                 shippingValues = null,
             )
 
@@ -568,6 +704,48 @@ class DefaultIntentConfirmationInterceptorTest {
                 R.string.stripe_paymentsheet_invalid_deferred_intent_usage.resolvableString
             )
         }
+
+    private fun testNoConfirmCallback(
+        userMessage: ResolvableString,
+        interceptCall: suspend (errorReporter: ErrorReporter) -> IntentConfirmationInterceptor.NextStep
+    ) {
+        val errorReporter = FakeErrorReporter()
+        val dispatcher = StandardTestDispatcher()
+
+        runTest(dispatcher) {
+            val interceptJob = async {
+                interceptCall(errorReporter)
+            }
+
+            assertThat(interceptJob.isActive).isTrue()
+
+            dispatcher.scheduler.advanceTimeBy(1000)
+
+            assertThat(interceptJob.isActive).isTrue()
+
+            dispatcher.scheduler.advanceTimeBy(1000)
+
+            assertThat(interceptJob.isActive).isTrue()
+
+            dispatcher.scheduler.advanceTimeBy(1)
+
+            assertThat(interceptJob.isActive).isFalse()
+
+            val nextStep = interceptJob.await()
+
+            assertThat(nextStep).isInstanceOf<IntentConfirmationInterceptor.NextStep.Fail>()
+
+            val failedStep = nextStep.asFail()
+
+            assertThat(failedStep.cause).isInstanceOf<IllegalStateException>()
+            assertThat(failedStep.cause.message).isEqualTo(CREATE_INTENT_CALLBACK_MESSAGE)
+            assertThat(failedStep.message).isEqualTo(userMessage)
+
+            assertThat(errorReporter.getLoggedErrors()).containsExactly(
+                ErrorReporter.ExpectedErrorEvent.CREATE_INTENT_CALLBACK_NULL.eventName,
+            )
+        }
+    }
 
     private fun succeedingCreateIntentCallback(
         expectedPaymentMethod: PaymentMethod,
@@ -594,6 +772,7 @@ class DefaultIntentConfirmationInterceptorTest {
             stripeRepository = object : AbsFakeStripeRepository() {},
             publishableKeyProvider = { "pk" },
             stripeAccountIdProvider = { null },
+            errorReporter = FakeErrorReporter(),
             allowsManualConfirmation = false,
         )
     }
@@ -641,5 +820,10 @@ class DefaultIntentConfirmationInterceptorTest {
         override fun equals(other: Any?): Boolean {
             return other is TestException && other.message == message
         }
+    }
+
+    private companion object {
+        const val CREATE_INTENT_CALLBACK_MESSAGE =
+            "CreateIntentCallback must be implemented when using IntentConfiguration with PaymentSheet"
     }
 }

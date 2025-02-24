@@ -2,8 +2,11 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.os.Parcelable
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.ExperimentalCardBrandFilteringApi
+import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPaymentMethodUiDefinitionFactory
@@ -22,12 +25,15 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.toPaymentMethodIncentive
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.elements.FormElement
 import kotlinx.parcelize.Parcelize
+
+internal const val IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE = false
 
 /**
  * The metadata we need to determine what payment methods are supported, as well as being able to display them.
@@ -46,11 +52,12 @@ internal data class PaymentMethodMetadata(
     val shippingDetails: AddressDetails?,
     val sharedDataSpecs: List<SharedDataSpec>,
     val externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
-    val hasCustomerConfiguration: Boolean,
+    val customerMetadata: CustomerMetadata?,
     val isGooglePayReady: Boolean,
     val linkInlineConfiguration: LinkInlineConfiguration?,
     val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
     val linkMode: LinkMode?,
+    val linkState: LinkState?,
     val paymentMethodIncentive: PaymentMethodIncentive?,
     val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
     val cardBrandFilter: CardBrandFilter,
@@ -178,7 +185,8 @@ internal data class PaymentMethodMetadata(
     ): FormHeaderInformation? {
         return if (isExternalPaymentMethod(code)) {
             getUiDefinitionFactoryForExternalPaymentMethod(code)?.createFormHeaderInformation(
-                customerHasSavedPaymentMethods = customerHasSavedPaymentMethods
+                customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
+                incentive = null,
             )
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
@@ -233,8 +241,15 @@ internal data class PaymentMethodMetadata(
             externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
             isGooglePayReady: Boolean,
             linkInlineConfiguration: LinkInlineConfiguration?,
+            linkState: LinkState?,
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
+            val customerMetadata =
+                CustomerMetadata(
+                    hasCustomerConfiguration = configuration.customer != null,
+                    isPaymentMethodSetAsDefaultEnabled = getDefaultPaymentMethodsEnabled(elementsSession)
+                )
+
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
@@ -249,25 +264,27 @@ internal data class PaymentMethodMetadata(
                 merchantName = configuration.merchantDisplayName,
                 defaultBillingDetails = configuration.defaultBillingDetails,
                 shippingDetails = configuration.shippingDetails,
-                hasCustomerConfiguration = configuration.customer != null,
+                customerMetadata = customerMetadata,
                 sharedDataSpecs = sharedDataSpecs,
                 externalPaymentMethodSpecs = externalPaymentMethodSpecs,
                 paymentMethodSaveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
                 linkInlineConfiguration = linkInlineConfiguration,
                 linkMode = linkSettings?.linkMode,
+                linkState = linkState,
                 paymentMethodIncentive = linkSettings?.linkConsumerIncentive?.toPaymentMethodIncentive(),
                 isGooglePayReady = isGooglePayReady,
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
             )
         }
 
-        internal fun create(
+        internal fun createForCustomerSheet(
             elementsSession: ElementsSession,
             configuration: CustomerSheet.Configuration,
             paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
             sharedDataSpecs: List<SharedDataSpec>,
             isGooglePayReady: Boolean,
             isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
+            isPaymentMethodSyncDefaultEnabled: Boolean,
         ): PaymentMethodMetadata {
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
@@ -282,17 +299,61 @@ internal data class PaymentMethodMetadata(
                 merchantName = configuration.merchantDisplayName,
                 defaultBillingDetails = configuration.defaultBillingDetails,
                 shippingDetails = null,
-                hasCustomerConfiguration = true,
+                customerMetadata = CustomerMetadata(
+                    hasCustomerConfiguration = true,
+                    isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
+                ),
                 sharedDataSpecs = sharedDataSpecs,
                 isGooglePayReady = isGooglePayReady,
                 linkInlineConfiguration = null,
                 financialConnectionsAvailable = isFinancialConnectionsAvailable(),
                 paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
                 linkMode = elementsSession.linkSettings?.linkMode,
+                linkState = null,
                 paymentMethodIncentive = null,
                 externalPaymentMethodSpecs = emptyList(),
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
             )
+        }
+
+        @OptIn(ExperimentalCardBrandFilteringApi::class)
+        internal fun create(
+            configuration: LinkConfiguration,
+        ): PaymentMethodMetadata {
+            return PaymentMethodMetadata(
+                stripeIntent = configuration.stripeIntent,
+                billingDetailsCollectionConfiguration = ConfigurationDefaults.billingDetailsCollectionConfiguration,
+                allowsDelayedPaymentMethods = false,
+                allowsPaymentMethodsRequiringShippingAddress = false,
+                paymentMethodOrder = ConfigurationDefaults.paymentMethodOrder,
+                cbcEligibility = CardBrandChoiceEligibility.create(
+                    isEligible = false,
+                    preferredNetworks = emptyList(),
+                ),
+                merchantName = configuration.merchantName,
+                defaultBillingDetails = null,
+                shippingDetails = null,
+                customerMetadata = CustomerMetadata(
+                    hasCustomerConfiguration = true,
+                    isPaymentMethodSetAsDefaultEnabled = false,
+                ),
+                sharedDataSpecs = emptyList(),
+                externalPaymentMethodSpecs = emptyList(),
+                paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(null),
+                linkInlineConfiguration = null,
+                linkMode = null,
+                linkState = null,
+                paymentMethodIncentive = null,
+                isGooglePayReady = false,
+                cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all())
+            )
+        }
+
+        private fun getDefaultPaymentMethodsEnabled(elementsSession: ElementsSession): Boolean {
+            val mobilePaymentElement = elementsSession.customer?.session?.components?.mobilePaymentElement
+                as? ElementsSession.Customer.Components.MobilePaymentElement.Enabled
+            return mobilePaymentElement?.isPaymentMethodSetAsDefaultEnabled
+                ?: false
         }
     }
 }

@@ -11,8 +11,9 @@ import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateCon
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
+import javax.inject.Inject
 
-internal class BacsConfirmationDefinition(
+internal class BacsConfirmationDefinition @Inject constructor(
     private val bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
 ) : ConfirmationDefinition<
     BacsConfirmationOption,
@@ -82,6 +83,7 @@ internal class BacsConfirmationDefinition(
                 val nextConfirmationOption = PaymentMethodConfirmationOption.New(
                     createParams = confirmationOption.createParams,
                     optionsParams = null,
+                    extraParams = null,
                     shouldSave = false,
                 )
 

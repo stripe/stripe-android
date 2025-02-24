@@ -28,6 +28,10 @@
   <string name="stripe_blik_code">BLIK code</string>
   <!-- Label for Boleto Payment method Tax ID -->
   <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
+  <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
+  <string name="stripe_card_brand_not_accepted">(hindi tinatanggap)</string>
+  <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
+  <string name="stripe_card_brand_not_accepted_with_brand">%1$s (hindi tinatanggap)</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">Sa pagpapatuloy, binibigyan mo ng awtorisasyon ang %1$s na i-debit ang iyong Cash App account para sa pagbabayad na ito at sa mga pagbabayad sa hinaharap alinsunod sa mga tuntunin ng  %2$s, hanggang bawiin mo ang awtorisasyong ito. Maaari mong palitan ito sa anumang oras sa iyong Cash App Settings.</string>
   <!-- Title for the contact information section -->
@@ -101,6 +105,8 @@
   <string name="stripe_scan_card">I-scan ang kard</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Sa pagbibigay ng iyong impormasyon ng pagbabayad at pagkukupirma sa bayad na ito, pinapayagan mo ang (A) %s at ang Stripe, ang ating payment service provider, na magpadala ng mga tagubilin sa iyong bangko para i-debit ang iyong account at (B) ang iyong bangko na i-debit ang iyong account ayon sa mga naturang tuntunin. Bilang bahagi ng iyong mga karapatan, maaari kang makakuha ng refund mula sa iyong bangko sa ilalim ng mga takda at kundisyon ng iyong kasunduan sa iyong bangko. Ang refund ay dapat hingin sa loob ng 8 linggo mula sa petsa na na-debit ang iyong account. Ang iyong mga karapatan ay naipaliwanag sa isang pahayag na maari mong makuha sa iyong bangko. Pumapayag ka na makatanggap ng mga abiso ukol sa mga debit sa hinaharap ng hanggang 2 na araw bago sila maganap.</string>
+  <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
+  <string name="stripe_set_as_default_payment_method">I-set bilang default na paraan ng pagbabayad</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">I-set up</string>
   <!-- Label for UPI ID number field on form -->

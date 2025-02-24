@@ -689,10 +689,19 @@ private fun EmbeddedPicker(
     )
     Divider()
 
-    IncrementDecrementItem("separatorInsetsDp", embeddedAppearance.separatorInsetsDp) {
+    IncrementDecrementItem("startSeparatorInsetDp", embeddedAppearance.startSeparatorInset) {
         updateEmbedded(
             embeddedAppearance.copy(
-                separatorInsetsDp = it
+                startSeparatorInset = it
+            )
+        )
+    }
+    Divider()
+
+    IncrementDecrementItem("endSeparatorInsetDp", embeddedAppearance.endSeparatorInset) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                endSeparatorInset = it
             )
         )
     }
@@ -707,10 +716,19 @@ private fun EmbeddedPicker(
     }
     Divider()
 
-    IncrementDecrementItem("additionalInsetsDp", embeddedAppearance.additionalInsetsDp) {
+    IncrementDecrementItem("additionalVerticalInsetsDp", embeddedAppearance.additionalVerticalInsetsDp) {
         updateEmbedded(
             embeddedAppearance.copy(
-                additionalInsetsDp = it
+                additionalVerticalInsetsDp = it
+            )
+        )
+    }
+    Divider()
+
+    IncrementDecrementItem("horizontalInsetsDp", embeddedAppearance.horizontalInsetsDp) {
+        updateEmbedded(
+            embeddedAppearance.copy(
+                horizontalInsetsDp = it
             )
         )
     }

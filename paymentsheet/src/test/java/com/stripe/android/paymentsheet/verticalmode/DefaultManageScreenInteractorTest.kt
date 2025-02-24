@@ -8,10 +8,12 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -31,6 +33,78 @@ class DefaultManageScreenInteractorTest {
                     assertThat(currentSelection).isNull()
                     assertThat(paymentMethods).hasSize(3)
                 }
+            }
+        }
+    }
+
+    @Test
+    fun hasCorrectTitle() {
+        val initialPaymentMethods = PaymentMethodFixtures.createCards(2)
+        runScenario(initialPaymentMethods, currentSelection = null) {
+            interactor.state.test {
+                assertThat(awaitItem().title)
+                    .isEqualTo(R.string.stripe_paymentsheet_select_your_payment_method.resolvableString)
+                editingSource.value = true
+                assertThat(awaitItem().title)
+                    .isEqualTo(R.string.stripe_paymentsheet_manage_payment_methods.resolvableString)
+            }
+        }
+    }
+
+    @Test
+    fun hasCorrectTobBarState_forLiveMode() {
+        val initialPaymentMethods = PaymentMethodFixtures.createCards(2)
+        runScenario(initialPaymentMethods, currentSelection = null, isLiveMode = true) {
+            interactor.state.map { it.topBarState(interactor) }.test {
+                assertThat(awaitItem().showTestModeLabel).isFalse()
+            }
+        }
+    }
+
+    @Test
+    fun hasCorrectTobBarState_forTestMode() {
+        val initialPaymentMethods = PaymentMethodFixtures.createCards(2)
+        runScenario(initialPaymentMethods, currentSelection = null, isLiveMode = false) {
+            interactor.state.map { it.topBarState(interactor) }.test {
+                assertThat(awaitItem().showTestModeLabel).isTrue()
+            }
+        }
+    }
+
+    @Test
+    fun hasCorrectTobBarState_forEditing() {
+        val initialPaymentMethods = PaymentMethodFixtures.createCards(2)
+        runScenario(initialPaymentMethods, currentSelection = null) {
+            interactor.state.map { it.topBarState(interactor) }.test {
+                awaitItem().run {
+                    assertThat(isEditing).isFalse()
+                    assertThat(showEditMenu).isTrue()
+                }
+                editingSource.value = true
+                awaitItem().run {
+                    assertThat(isEditing).isTrue()
+                    assertThat(showEditMenu).isTrue()
+                }
+                canEditSource.value = false
+                awaitItem().run {
+                    assertThat(showEditMenu).isFalse()
+                }
+            }
+        }
+    }
+
+    @Test
+    fun topBarState_onEditIconPressed_callsToggleEdit() {
+        var hasCalledToggleEdit = false
+        val initialPaymentMethods = PaymentMethodFixtures.createCards(2)
+        runScenario(
+            initialPaymentMethods = initialPaymentMethods,
+            currentSelection = null,
+            toggleEdit = { hasCalledToggleEdit = true },
+        ) {
+            interactor.state.map { it.topBarState(interactor) }.test {
+                awaitItem().onEditIconPressed()
+                assertThat(hasCalledToggleEdit).isTrue()
             }
         }
     }
@@ -249,6 +323,7 @@ class DefaultManageScreenInteractorTest {
     private fun runScenario(
         initialPaymentMethods: List<PaymentMethod>,
         currentSelection: PaymentSelection?,
+        isLiveMode: Boolean = false,
         isEditing: Boolean = false,
         toggleEdit: () -> Unit = { notImplemented() },
         onSelectPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit = { notImplemented() },
@@ -266,7 +341,7 @@ class DefaultManageScreenInteractorTest {
         val interactor = DefaultManageScreenInteractor(
             paymentMethods = paymentMethods,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(isLiveMode = isLiveMode),
                 cbcEligibility = CardBrandChoiceEligibility.Eligible(preferredNetworks = emptyList()),
             ),
             selection = selection,
@@ -277,7 +352,6 @@ class DefaultManageScreenInteractorTest {
             onSelectPaymentMethod = onSelectPaymentMethod,
             onUpdatePaymentMethod = { notImplemented() },
             navigateBack = handleBackPressed,
-            isLiveMode = true,
             defaultPaymentMethodId = defaultPaymentMethodId,
             dispatcher = dispatcher
         )

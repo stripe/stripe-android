@@ -17,10 +17,14 @@ data class LinkAccountSessionBody(
     val permissions: String? = null,
     @SerialName("customer_email")
     val customerEmail: String? = null,
+    @SerialName("customer_id")
+    val customerId: String? = null,
     @SerialName("test_environment")
     val testEnvironment: String? = null,
     @SerialName("test_mode")
     val testMode: Boolean? = null,
     @SerialName("stripe_account_id")
     val stripeAccountId: String? = null,
+    @SerialName("relink_authorization")
+    val relinkAuthorization: String? = null,
 )

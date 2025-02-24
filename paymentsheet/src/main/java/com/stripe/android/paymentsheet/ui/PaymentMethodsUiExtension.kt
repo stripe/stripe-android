@@ -10,29 +10,32 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TransformToBankIcon
 
 @DrawableRes
-internal fun PaymentMethod.getSavedPaymentMethodIcon(forVerticalMode: Boolean = false): Int {
+internal fun PaymentMethod.getSavedPaymentMethodIcon(
+    forVerticalMode: Boolean = false,
+    showNightIcon: Boolean? = null,
+): Int {
     return when (type) {
         PaymentMethod.Type.Card -> {
             val brand = CardBrand.fromCode(card?.displayBrand).takeIf { it != Unknown } ?: card?.brand
-            if (forVerticalMode) { brand?.getCardBrandIconForVerticalMode() } else { brand?.getCardBrandIcon() }
+
+            // Vertical mode icons are the same for light & dark
+            if (forVerticalMode) {
+                brand?.getCardBrandIconForVerticalMode()
+            } else {
+                brand?.getCardBrandIconForHorizontalMode(
+                    showNightIcon = showNightIcon,
+                )
+            }
         }
-        PaymentMethod.Type.SepaDebit -> R.drawable.stripe_ic_paymentsheet_sepa
+        PaymentMethod.Type.SepaDebit -> getSepaIcon(showNightIcon = showNightIcon)
         PaymentMethod.Type.USBankAccount -> usBankAccount?.bankName?.let { TransformToBankIcon(it) }
         else -> null
-    } ?: R.drawable.stripe_ic_paymentsheet_card_unknown
+    } ?: R.drawable.stripe_ic_paymentsheet_card_unknown_ref
 }
 
 @DrawableRes
-internal fun CardBrand.getCardBrandIcon(): Int = when (this) {
-    CardBrand.Visa -> R.drawable.stripe_ic_paymentsheet_card_visa
-    CardBrand.AmericanExpress -> R.drawable.stripe_ic_paymentsheet_card_amex
-    CardBrand.Discover -> R.drawable.stripe_ic_paymentsheet_card_discover
-    CardBrand.JCB -> R.drawable.stripe_ic_paymentsheet_card_jcb
-    CardBrand.DinersClub -> R.drawable.stripe_ic_paymentsheet_card_dinersclub
-    CardBrand.MasterCard -> R.drawable.stripe_ic_paymentsheet_card_mastercard
-    CardBrand.UnionPay -> R.drawable.stripe_ic_paymentsheet_card_unionpay
-    CardBrand.CartesBancaires -> R.drawable.stripe_ic_paymentsheet_card_cartes_bancaires
-    Unknown -> R.drawable.stripe_ic_paymentsheet_card_unknown
+internal fun CardBrand.getCardBrandIcon(): Int {
+    return this.getCardBrandIconRef()
 }
 
 @DrawableRes
@@ -45,7 +48,101 @@ internal fun CardBrand.getCardBrandIconForVerticalMode(): Int = when (this) {
     CardBrand.MasterCard -> com.stripe.payments.model.R.drawable.stripe_ic_mastercard_unpadded
     CardBrand.UnionPay -> com.stripe.payments.model.R.drawable.stripe_ic_unionpay_unpadded
     CardBrand.CartesBancaires -> com.stripe.payments.model.R.drawable.stripe_ic_cartes_bancaires_unpadded
-    Unknown -> R.drawable.stripe_ic_paymentsheet_card_unknown
+    Unknown -> R.drawable.stripe_ic_paymentsheet_card_unknown_ref
+}
+
+@DrawableRes
+internal fun CardBrand.getCardBrandIconForHorizontalMode(
+    showNightIcon: Boolean? = null
+): Int {
+    return getOverridableIcon(
+        showNightIcon = showNightIcon,
+        systemThemeAwareIconRef = getCardBrandIconRef(),
+        nightIcon = getNightIcon(),
+        dayIcon = getDayIcon(),
+    )
+}
+
+@DrawableRes
+private fun CardBrand.getCardBrandIconRef(): Int {
+    return when (this) {
+        CardBrand.Visa -> R.drawable.stripe_ic_paymentsheet_card_visa_ref
+        CardBrand.AmericanExpress -> R.drawable.stripe_ic_paymentsheet_card_amex_ref
+        CardBrand.Discover -> R.drawable.stripe_ic_paymentsheet_card_discover_ref
+        CardBrand.JCB -> R.drawable.stripe_ic_paymentsheet_card_jcb_ref
+        CardBrand.DinersClub -> R.drawable.stripe_ic_paymentsheet_card_dinersclub_ref
+        CardBrand.MasterCard -> R.drawable.stripe_ic_paymentsheet_card_mastercard_ref
+        CardBrand.UnionPay -> R.drawable.stripe_ic_paymentsheet_card_unionpay_ref
+        CardBrand.CartesBancaires -> R.drawable.stripe_ic_paymentsheet_card_cartes_bancaires_ref
+        Unknown -> R.drawable.stripe_ic_paymentsheet_card_unknown_ref
+    }
+}
+
+@DrawableRes
+private fun CardBrand.getNightIcon(): Int {
+    return when (this) {
+        CardBrand.Visa -> R.drawable.stripe_ic_paymentsheet_card_visa_night
+        CardBrand.AmericanExpress -> R.drawable.stripe_ic_paymentsheet_card_amex_night
+        CardBrand.Discover -> R.drawable.stripe_ic_paymentsheet_card_discover_night
+        CardBrand.JCB -> R.drawable.stripe_ic_paymentsheet_card_jcb_night
+        CardBrand.DinersClub -> R.drawable.stripe_ic_paymentsheet_card_dinersclub_night
+        CardBrand.MasterCard -> R.drawable.stripe_ic_paymentsheet_card_mastercard_night
+        CardBrand.UnionPay -> R.drawable.stripe_ic_paymentsheet_card_unionpay_night
+        CardBrand.CartesBancaires -> R.drawable.stripe_ic_paymentsheet_card_cartes_bancaires_night
+        Unknown -> R.drawable.stripe_ic_paymentsheet_card_unknown_night
+    }
+}
+
+@DrawableRes
+private fun CardBrand.getDayIcon(): Int {
+    return when (this) {
+        CardBrand.Visa -> R.drawable.stripe_ic_paymentsheet_card_visa_day
+        CardBrand.AmericanExpress -> R.drawable.stripe_ic_paymentsheet_card_amex_day
+        CardBrand.Discover -> R.drawable.stripe_ic_paymentsheet_card_discover_day
+        CardBrand.JCB -> R.drawable.stripe_ic_paymentsheet_card_jcb_day
+        CardBrand.DinersClub -> R.drawable.stripe_ic_paymentsheet_card_dinersclub_day
+        CardBrand.MasterCard -> R.drawable.stripe_ic_paymentsheet_card_mastercard_day
+        CardBrand.UnionPay -> R.drawable.stripe_ic_paymentsheet_card_unionpay_day
+        CardBrand.CartesBancaires -> R.drawable.stripe_ic_paymentsheet_card_cartes_bancaires_day
+        Unknown -> R.drawable.stripe_ic_paymentsheet_card_unknown_day
+    }
+}
+
+@DrawableRes
+internal fun getLinkIcon(showNightIcon: Boolean? = null): Int {
+    return getOverridableIcon(
+        showNightIcon = showNightIcon,
+        systemThemeAwareIconRef = R.drawable.stripe_ic_paymentsheet_link_ref,
+        nightIcon = R.drawable.stripe_ic_paymentsheet_link_night,
+        dayIcon = R.drawable.stripe_ic_paymentsheet_link_day
+    )
+}
+
+@DrawableRes
+internal fun getSepaIcon(showNightIcon: Boolean? = null): Int {
+    return getOverridableIcon(
+        showNightIcon = showNightIcon,
+        systemThemeAwareIconRef = R.drawable.stripe_ic_paymentsheet_sepa_ref,
+        nightIcon = R.drawable.stripe_ic_paymentsheet_sepa_night,
+        dayIcon = R.drawable.stripe_ic_paymentsheet_sepa_day
+    )
+}
+
+// If you don't want to override the system theme, then leave showNightIcon null.
+@DrawableRes
+private fun getOverridableIcon(
+    showNightIcon: Boolean?,
+    @DrawableRes systemThemeAwareIconRef: Int,
+    @DrawableRes nightIcon: Int,
+    @DrawableRes dayIcon: Int
+): Int {
+    if (showNightIcon == null) {
+        return systemThemeAwareIconRef
+    } else if (showNightIcon) {
+        return nightIcon
+    } else {
+        return dayIcon
+    }
 }
 
 internal fun PaymentMethod.getLabel(): ResolvableString? = when (type) {

@@ -16,7 +16,7 @@ object UpdateAvailableIncentivesJsonParser : ModelJsonParser<UpdateAvailableInce
         }
 
         return incentives?.let {
-            UpdateAvailableIncentives(data = it.filterNotNull())
+            UpdateAvailableIncentives(data = it)
         }
     }
 }

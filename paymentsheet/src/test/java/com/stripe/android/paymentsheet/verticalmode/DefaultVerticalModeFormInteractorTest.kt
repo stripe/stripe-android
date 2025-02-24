@@ -7,6 +7,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor.ViewAction
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -58,19 +59,6 @@ internal class DefaultVerticalModeFormInteractorTest {
         }
     }
 
-    @Test
-    fun `canGoBack calls delegate`() {
-        var canGoBack = false
-        runScenario(
-            selectedPaymentMethodCode = "card",
-            canGoBackDelegate = { canGoBack },
-        ) {
-            assertThat(interactor.canGoBack()).isFalse()
-            canGoBack = true
-            assertThat(interactor.canGoBack()).isTrue()
-        }
-    }
-
     private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
 
     private fun runScenario(
@@ -79,7 +67,6 @@ internal class DefaultVerticalModeFormInteractorTest {
             notImplemented()
         },
         reportFieldInteraction: (String) -> Unit = { notImplemented() },
-        canGoBackDelegate: () -> Boolean = { notImplemented() },
         testBlock: suspend TestParams.() -> Unit,
     ) {
         val formArguments = mock<FormArguments>()
@@ -95,9 +82,9 @@ internal class DefaultVerticalModeFormInteractorTest {
             reportFieldInteraction = reportFieldInteraction,
             headerInformation = null,
             isLiveMode = true,
-            canGoBackDelegate = canGoBackDelegate,
             processing = processing,
             coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
+            paymentMethodIncentive = stateFlowOf(null),
         )
 
         TestParams(

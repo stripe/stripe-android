@@ -169,12 +169,14 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
         val style = FlatWithCheckmark(
             separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
             separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
-            separatorInsetsDp = StripeThemeDefaults.flat.separatorInsets,
+            startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
+            endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
             topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
             bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
             checkmarkColor = StripeThemeDefaults.colorsLight.materialColors.error.toArgb(),
             checkmarkInsetDp = 20f,
-            additionalInsetsDp = 40f
+            additionalVerticalInsetsDp = 40f,
+            horizontalInsetsDp = 40f
         )
         paparazziRule.snapshot {
             PaymentMethodRowButton(

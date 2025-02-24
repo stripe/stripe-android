@@ -1,32 +1,20 @@
 package com.stripe.android.paymentsheet.example.playground
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
-import androidx.compose.material.Divider
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,7 +25,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.rememberCustomerSheet
@@ -93,9 +80,13 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
     @OptIn(ExperimentalCustomerSessionApi::class)
     @Suppress("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         setContent {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                window.isNavigationBarContrastEnforced = false
+            }
             val paymentSheet = PaymentSheet.Builder(viewModel::onPaymentSheetResult)
                 .externalPaymentMethodConfirmHandler(this)
                 .createIntentCallback(viewModel::createIntentCallback)
@@ -400,12 +391,16 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
     fun EmbeddedUi(
         playgroundState: PlaygroundState.Payment,
     ) {
-        BuyButton(
-            buyButtonEnabled = true,
+        Button(
             onClick = {
                 embeddedPlaygroundLauncher.launch(playgroundState)
-            }
-        )
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(CHECKOUT_TEST_TAG),
+        ) {
+            Text("Checkout")
+        }
     }
 
     @Composable
@@ -542,57 +537,6 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
                 .putExtra(FawryActivity.EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE, externalPaymentMethodType)
                 .putExtra(FawryActivity.EXTRA_BILLING_DETAILS, billingDetails)
         )
-    }
-}
-
-@Composable
-private fun PlaygroundTheme(
-    content: @Composable ColumnScope.() -> Unit,
-    bottomBarContent: @Composable ColumnScope.() -> Unit,
-) {
-    val colors = if (isSystemInDarkTheme() || AppearanceStore.forceDarkMode) {
-        darkColors()
-    } else {
-        lightColors()
-    }
-    MaterialTheme(
-        typography = MaterialTheme.typography.copy(
-            body1 = MaterialTheme.typography.body1.copy(fontSize = 14.sp)
-        ),
-        colors = colors,
-    ) {
-        Surface(
-            color = MaterialTheme.colors.background,
-        ) {
-            Scaffold(
-                bottomBar = {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(MaterialTheme.colors.surface)
-                            .animateContentSize()
-                    ) {
-                        Divider()
-                        Column(
-                            content = bottomBarContent,
-                            modifier = Modifier
-                                .padding(horizontal = 12.dp, vertical = 8.dp)
-                                .fillMaxWidth()
-                        )
-                    }
-                },
-            ) { paddingValues ->
-                Box(modifier = Modifier.padding(paddingValues)) {
-                    Column(
-                        modifier = Modifier
-                            .verticalScroll(rememberScrollState())
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        content = content,
-                    )
-                }
-            }
-        }
     }
 }
 

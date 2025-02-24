@@ -270,7 +270,7 @@ private fun PhoneNumberSection(
                         modifier = Modifier
                             .padding(horizontal = 6.dp)
                             .clip(RoundedCornerShape(8.dp))
-                            .background(colors.background)
+                            .background(colors.backgroundSecondary)
                             .padding(vertical = 12.dp, horizontal = 8.dp)
                     )
                 },
@@ -288,7 +288,9 @@ private fun PhoneNumberSection(
 private fun Title(title: String) {
     AnnotatedText(
         text = TextResource.Text(fromHtml(title)),
-        defaultStyle = typography.headingXLarge,
+        defaultStyle = typography.headingXLarge.copy(
+            color = colors.textDefault,
+        ),
         onClickableTextClick = {},
     )
 }
@@ -297,7 +299,9 @@ private fun Title(title: String) {
 private fun Body(body: String) {
     AnnotatedText(
         text = TextResource.Text(fromHtml(body)),
-        defaultStyle = typography.bodyMedium,
+        defaultStyle = typography.bodyMedium.copy(
+            color = colors.textDefault,
+        ),
         onClickableTextClick = {},
     )
 }
@@ -343,7 +347,7 @@ internal fun EmailSection(
                             end = 16.dp,
                             bottom = 8.dp
                         ),
-                    color = colors.iconBrand,
+                    color = colors.iconTint,
                     strokeWidth = 2.dp
                 )
             }

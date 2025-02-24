@@ -1,21 +1,30 @@
 package com.stripe.android.link.model
 
+import android.os.Parcelable
 import com.stripe.android.model.ConsumerSession
+import kotlinx.parcelize.IgnoredOnParcel
+import kotlinx.parcelize.Parcelize
 
 /**
  * Immutable object representing a Link account.
  */
-internal class LinkAccount(private val consumerSession: ConsumerSession) {
+@Parcelize
+internal class LinkAccount(private val consumerSession: ConsumerSession) : Parcelable {
 
-    val redactedPhoneNumber = consumerSession.redactedPhoneNumber
+    @IgnoredOnParcel
+    val redactedPhoneNumber = consumerSession.redactedFormattedPhoneNumber.replace("*", "•")
 
+    @IgnoredOnParcel
     val clientSecret = consumerSession.clientSecret
 
+    @IgnoredOnParcel
     val email = consumerSession.emailAddress
 
+    @IgnoredOnParcel
     val isVerified: Boolean = consumerSession.containsVerifiedSMSSession() ||
         consumerSession.isVerifiedForSignup()
 
+    @IgnoredOnParcel
     val accountStatus = when {
         isVerified -> {
             AccountStatus.Verified

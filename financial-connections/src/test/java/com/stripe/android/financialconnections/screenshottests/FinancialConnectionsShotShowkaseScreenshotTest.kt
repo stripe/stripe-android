@@ -13,6 +13,7 @@ import app.cash.paparazzi.Paparazzi
 import com.airbnb.android.showkase.models.Showkase
 import com.airbnb.android.showkase.models.ShowkaseBrowserComponent
 import com.android.ide.common.rendering.api.SessionParams
+import com.android.resources.NightMode
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.financialconnections.getMetadata
@@ -42,6 +43,12 @@ class PaparazziSampleScreenshotTest {
         PIXEL_C(DeviceConfig.PIXEL_C),
     }
 
+    @Suppress("Unused")
+    enum class SystemAppearance(val nightMode: NightMode) {
+        Light(nightMode = NightMode.NOTNIGHT),
+        Dark(nightMode = NightMode.NIGHT),
+    }
+
     @get:Rule
     val timeZoneRule = TimeZoneRule()
 
@@ -55,10 +62,12 @@ class PaparazziSampleScreenshotTest {
     fun preview_tests(
         @TestParameter(valuesProvider = PreviewProvider::class) componentTestPreview: ComponentTestPreview,
         @TestParameter baseDeviceConfig: BaseDeviceConfig,
+        @TestParameter systemAppearance: SystemAppearance,
     ) {
         paparazzi.unsafeUpdateConfig(
             baseDeviceConfig.deviceConfig.copy(
                 softButtons = false,
+                nightMode = systemAppearance.nightMode,
             )
         )
         paparazzi.snapshot {
@@ -71,7 +80,7 @@ class PaparazziSampleScreenshotTest {
                     Box(
                         modifier = Modifier
                             .wrapContentSize()
-                            .background(FinancialConnectionsTheme.colors.backgroundSurface),
+                            .background(FinancialConnectionsTheme.colors.background),
                     ) {
                         componentTestPreview.Content()
                     }

@@ -185,11 +185,13 @@ private fun ResendCodeSection(
             AnnotatedText(
                 text = TextResource.StringId(R.string.stripe_link_stepup_verification_resend_code),
                 maxLines = 1,
-                defaultStyle = typography.labelMedium,
+                defaultStyle = typography.labelMediumEmphasized.copy(
+                    color = colors.textAction,
+                ),
                 annotationStyles = mapOf(
                     StringAnnotation.CLICKABLE to typography.labelMediumEmphasized
                         .toSpanStyle()
-                        .copy(color = colors.textBrand),
+                        .copy(color = colors.textAction),
                 ),
                 onClickableTextClick = onClickableTextClick,
             )

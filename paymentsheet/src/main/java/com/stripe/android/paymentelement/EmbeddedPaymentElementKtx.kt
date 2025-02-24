@@ -16,7 +16,7 @@ import com.stripe.android.utils.rememberActivity
 /**
  * Creates an [EmbeddedPaymentElement] that is remembered across compositions.
  *
- * This *must* be called unconditionally, as part of the initialization path.
+ * This *must* be called unconditionally as part of the initialization path.
  */
 @ExperimentalEmbeddedPaymentElementApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

@@ -46,7 +46,7 @@ internal fun GenericScreenPreview(
     @PreviewParameter(GenericScreenPreviewParameterProvider::class) state: GenericScreenState
 ) {
     FinancialConnectionsPreview {
-        Surface(color = colors.backgroundSurface) {
+        Surface(color = colors.background) {
             GenericScreen(
                 state = state,
                 onClickableTextClick = {},
@@ -127,7 +127,8 @@ internal fun GenericBody(
                             text = TextResource.Text(fromHtml(entry.text)),
                             onClickableTextClick = onClickableTextClick,
                             defaultStyle = font.copy(
-                                textAlign = entry.alignment.toComposeTextAlign()
+                                textAlign = entry.alignment.toComposeTextAlign(),
+                                color = colors.textDefault,
                             ),
                             modifier = Modifier.padding(horizontal = 24.dp),
                         )
@@ -170,6 +171,7 @@ internal fun GenericHeader(
                 onClickableTextClick = onClickableTextClick,
                 defaultStyle = typography.headingXLarge.copy(
                     textAlign = payload.alignment.toComposeTextAlign(),
+                    color = colors.textDefault,
                 ),
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -181,6 +183,7 @@ internal fun GenericHeader(
                 onClickableTextClick = onClickableTextClick,
                 defaultStyle = typography.bodyMedium.copy(
                     textAlign = payload.alignment.toComposeTextAlign(),
+                    color = colors.textDefault,
                 ),
                 modifier = Modifier.fillMaxWidth(),
             )

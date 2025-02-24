@@ -380,6 +380,7 @@ private object TransformSpecToElementsFactory {
         return TransformSpecToElements(
             UiDefinitionFactory.Arguments(
                 initialValues = mapOf(),
+                initialLinkUserInput = null,
                 saveForFutureUseInitialValue = true,
                 merchantName = "Merchant, Inc.",
                 cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),

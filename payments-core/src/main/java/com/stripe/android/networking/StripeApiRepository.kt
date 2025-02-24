@@ -605,6 +605,21 @@ class StripeApiRepository @JvmOverloads internal constructor(
         }
     }
 
+    override suspend fun setDefaultPaymentMethod(
+        customerId: String,
+        paymentMethodId: String?,
+        options: ApiRequest.Options
+    ): Result<Customer> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = getSetDefaultPaymentMethodUrl(customerId = customerId),
+                options = options,
+                params = mapOf("payment_method" to (paymentMethodId ?: ""))
+            ),
+            jsonParser = CustomerJsonParser()
+        )
+    }
+
     /**
      * Create a [Token] using the input token parameters.
      *
@@ -1560,11 +1575,12 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
         val requestParams = buildMap {
             this["type"] = params.type
+            this["mobile_app_id"] = params.appId
             params.clientSecret?.let { this["client_secret"] = it }
             params.locale.let { this["locale"] = it }
             params.customerSessionClientSecret?.let { this["customer_session_client_secret"] = it }
             params.externalPaymentMethods.takeIf { it.isNotEmpty() }?.let { this["external_payment_methods"] = it }
-            params.defaultPaymentMethodId?.let { this["client_default_payment_method"] = it }
+            params.savedPaymentMethodSelectionId?.let { this["client_default_payment_method"] = it }
             (params as? ElementsSessionParams.DeferredIntentType)?.let { type ->
                 this.putAll(type.deferredIntentParams.toQueryParams())
             }
@@ -2136,6 +2152,16 @@ class StripeApiRepository @JvmOverloads internal constructor(
             paymentMethodId: String,
         ): String {
             return getApiUrl("payment_methods/$paymentMethodId")
+        }
+
+        /**
+         * @return `https://api.stripe.com/v1/elements/customers/:customerId/set_default_payment_method`
+         */
+        @VisibleForTesting
+        internal fun getSetDefaultPaymentMethodUrl(
+            customerId: String,
+        ): String {
+            return getApiUrl("elements/customers/$customerId/set_default_payment_method")
         }
 
         private fun getApiUrl(path: String, vararg args: Any): String {

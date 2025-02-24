@@ -15,13 +15,15 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.PrefillDetails
 import com.stripe.android.financialconnections.FinancialConnectionsSheetActivity.Companion.getArgs
 import com.stripe.android.financialconnections.FinancialConnectionsSheetState.AuthFlowStatus
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenNativeAuthFlow
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewModel.Companion.QUERY_PARAM_PAYMENT_METHOD
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AttestationInitFailed
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AttestationInitSkipped
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ErrorCode
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
@@ -36,10 +38,12 @@ import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsS
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition.Always
+import com.stripe.android.financialconnections.domain.IntegrityVerdictManager
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowRouter
 import com.stripe.android.financialconnections.exception.AppInitializationError
 import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
+import com.stripe.android.financialconnections.features.error.FinancialConnectionsAttestationError
 import com.stripe.android.financialconnections.features.manualentry.isCustomManualEntryError
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForData
@@ -71,6 +75,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val getOrFetchSync: GetOrFetchSync,
     private val integrityRequestManager: IntegrityRequestManager,
+    private val integrityVerdictManager: IntegrityVerdictManager,
     private val fetchFinancialConnectionsSession: FetchFinancialConnectionsSession,
     private val fetchFinancialConnectionsSessionForToken: FetchFinancialConnectionsSessionForToken,
     private val logger: Logger,
@@ -116,11 +121,22 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private fun initAuthFlow() {
         viewModelScope.launch {
             kotlin.runCatching {
-                val attestationInitialized = prepareStandardRequestManager()
-                getOrFetchSync(
+                val attestationInitResult = prepareStandardRequestManager()
+                val syncResponse = getOrFetchSync(
                     refetchCondition = Always,
-                    attestationInitialized = attestationInitialized
+                    supportsAppVerification = attestationInitResult.supportsAppVerification
                 )
+                val pane = syncResponse.manifest.nextPane
+                when (attestationInitResult) {
+                    // We'll just emit failure events to reduce event emissions
+                    AttestationInitResult.Success -> null
+                    AttestationInitResult.Skipped -> AttestationInitSkipped(pane)
+                    is AttestationInitResult.Failure -> AttestationInitFailed(
+                        pane = pane,
+                        error = attestationInitResult.error
+                    )
+                }?.let(analyticsTracker::track)
+                syncResponse
             }.onFailure {
                 finishWithResult(stateFlow.value, Failed(it))
             }.onSuccess {
@@ -129,18 +145,16 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         }
     }
 
-    private suspend fun prepareStandardRequestManager(): Boolean {
-        val result = integrityRequestManager.prepare()
-        result.onFailure {
-            analyticsTracker.track(
-                FinancialConnectionsAnalyticsEvent.Error(
-                    extraMessage = "Failed to warm up the IntegrityStandardRequestManager",
-                    pane = Pane.CONSENT,
-                    exception = it
-                )
-            )
+    private suspend fun prepareStandardRequestManager(): AttestationInitResult {
+        // If previously within the application session an integrity check failed
+        // do not initialize the request manager and directly launch the web flow.
+        if (integrityVerdictManager.verdictFailed()) {
+            return AttestationInitResult.Skipped
         }
-        return result.isSuccess
+        return integrityRequestManager.prepare().fold(
+            onSuccess = { AttestationInitResult.Success },
+            onFailure = { AttestationInitResult.Failure(it) }
+        )
     }
 
     /**
@@ -486,8 +500,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                                 encodedPaymentMethod = paymentMethod,
                                 last4 = url.getQueryParameter(QUERY_PARAM_LAST4),
                                 bankName = url.getQueryParameter(QUERY_BANK_NAME),
-                                // TODO(tillh-stripe): Pull this from the URL
-                                eligibleForIncentive = false,
+                                eligibleForIncentive = url.getQueryParameter(QUERY_INCENTIVE_ELIGIBLE).toBoolean(),
                             ),
                             financialConnectionsSession = null,
                             token = null
@@ -525,6 +538,12 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         fromNative: Boolean = false,
         @StringRes finishMessage: Int? = null,
     ) {
+        if (result is Failed && result.error is FinancialConnectionsAttestationError) {
+            val error = result.error
+            integrityVerdictManager.setVerdictFailed()
+            switchToWebFlow(error.prefillDetails)
+            return
+        }
         eventReporter.onResult(state.initialArgs.configuration, result)
         // Native emits its own events before finishing.
         if (fromNative.not()) {
@@ -538,6 +557,42 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             }
         }
         setState { copy(viewEffect = FinishWithResult(result, finishMessage)) }
+    }
+
+    /**
+     * On scenarios where native failed mid flow due to attestation errors, switch back to web flow.
+     */
+    private fun switchToWebFlow(prefillDetails: PrefillDetails?) {
+        viewModelScope.launch {
+            val sync = getOrFetchSync()
+            val hostedAuthUrl = HostedAuthUrlBuilder.create(
+                args = initialState.initialArgs,
+                manifest = sync.manifest,
+                prefillDetails = prefillDetails
+            )
+
+            if (hostedAuthUrl != null) {
+                setState {
+                    copy(
+                        manifest = manifest,
+                        // Use intermediate state to prevent the flow from closing in [onResume].
+                        webAuthFlowStatus = AuthFlowStatus.INTERMEDIATE_DEEPLINK,
+                        viewEffect = OpenAuthFlowWithUrl(hostedAuthUrl)
+                    )
+                }
+            } else {
+                finishWithResult(
+                    state = stateFlow.value,
+                    result = Failed(IllegalArgumentException("hostedAuthUrl is required to switch to web flow!"))
+                )
+            }
+        }
+    }
+
+    private sealed class AttestationInitResult(val supportsAppVerification: Boolean) {
+        data object Success : AttestationInitResult(supportsAppVerification = true)
+        data object Skipped : AttestationInitResult(supportsAppVerification = false)
+        data class Failure(val error: Throwable) : AttestationInitResult(supportsAppVerification = false)
     }
 
     companion object {
@@ -566,6 +621,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         internal const val QUERY_PARAM_PAYMENT_METHOD = "payment_method"
         internal const val QUERY_PARAM_LAST4 = "last4"
         internal const val QUERY_BANK_NAME = "bank_name"
+        internal const val QUERY_INCENTIVE_ELIGIBLE = "incentive_eligible"
     }
 
     override fun updateTopAppBar(state: FinancialConnectionsSheetState): TopAppBarStateUpdate? {

@@ -37,6 +37,7 @@ import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import kotlin.test.assertEquals
 
 @RunWith(RobolectricTestRunner::class)
 class CardAccountRangeServiceTest {
@@ -91,7 +92,10 @@ class CardAccountRangeServiceTest {
             testDispatcher,
             DefaultStaticCardAccountRanges(),
             object : CardAccountRangeService.AccountRangeResultListener {
-                override fun onAccountRangesResult(accountRanges: List<AccountRange>) {
+                override fun onAccountRangesResult(
+                    accountRanges: List<AccountRange>,
+                    unfilteredAccountRanges: List<AccountRange>
+                ) {
                 }
             },
             isCbcEligible = { isCbcEligible },
@@ -121,7 +125,7 @@ class CardAccountRangeServiceTest {
                 brandInfo = AccountRange.BrandInfo.Mastercard,
             )
 
-            val accountRanges = testBehavior(
+            val (accountRanges, _) = testBehavior(
                 cardNumber = "2",
                 isCbcEligible = false,
             )
@@ -131,7 +135,7 @@ class CardAccountRangeServiceTest {
 
     @Test
     fun `If CBC is enabled, don't return a matched brand until 8 characters are entered`() = runTest {
-        val accountRanges = testBehavior(
+        val (accountRanges, _) = testBehavior(
             cardNumber = "4",
             isCbcEligible = true,
         )
@@ -160,7 +164,7 @@ class CardAccountRangeServiceTest {
             )
         )
 
-        val accountRanges = testBehavior(
+        val (accountRanges, _) = testBehavior(
             cardNumber = "4000 0000",
             isCbcEligible = true,
             mockRemoteCardAccountRangeSource = object : CardAccountRangeSource {
@@ -180,8 +184,8 @@ class CardAccountRangeServiceTest {
         isCbcEligible: Boolean,
         mockRemoteCardAccountRangeSource: CardAccountRangeSource? = null,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
-    ): List<AccountRange> {
-        val completable = CompletableDeferred<List<AccountRange>>()
+    ): Pair<List<AccountRange>, List<AccountRange>> {
+        val completable = CompletableDeferred<Pair<List<AccountRange>, List<AccountRange>>>()
 
         val repository = mockRemoteCardAccountRangeSource?.let {
             createMockRemoteDefaultCardAccountRangeRepository(it)
@@ -193,8 +197,11 @@ class CardAccountRangeServiceTest {
             workContext = testDispatcher,
             staticCardAccountRanges = DefaultStaticCardAccountRanges(),
             accountRangeResultListener = object : CardAccountRangeService.AccountRangeResultListener {
-                override fun onAccountRangesResult(accountRanges: List<AccountRange>) {
-                    completable.complete(accountRanges)
+                override fun onAccountRangesResult(
+                    accountRanges: List<AccountRange>,
+                    unfilteredAccountRanges: List<AccountRange>
+                ) {
+                    completable.complete(Pair(accountRanges, unfilteredAccountRanges))
                 }
             },
             isCbcEligible = { isCbcEligible },
@@ -217,14 +224,17 @@ class CardAccountRangeServiceTest {
             val cardNumber = "2"
 
             // Call testBehavior with the custom CardBrandFilter
-            val accountRanges = testBehavior(
+            val (filteredAccountRanges, unfilteredAccountRanges) = testBehavior(
                 cardNumber = cardNumber,
                 isCbcEligible = false,
                 cardBrandFilter = cardBrandFilter
             )
 
             // Since Mastercard is disallowed, the accountRanges should be empty
-            assertThat(accountRanges).isEmpty()
+            assertThat(filteredAccountRanges).isEmpty()
+            // Even though mastercard is disallowed, it should be in the unfiltered ranges
+            assertEquals(unfilteredAccountRanges.count(), 1)
+            assertEquals(unfilteredAccountRanges.firstOrNull()?.brand, CardBrand.MasterCard)
         }
 
     @Test
@@ -238,14 +248,14 @@ class CardAccountRangeServiceTest {
             val cardNumber = "2"
 
             // Call testBehavior with the custom CardBrandFilter
-            val accountRanges = testBehavior(
+            val (filteredAccountRanges, _) = testBehavior(
                 cardNumber = cardNumber,
                 isCbcEligible = false,
                 cardBrandFilter = cardBrandFilter
             )
 
-            // Since Mastercard is allow, the accountRanges should have contents
-            assertThat(accountRanges).isNotEmpty()
+            // Since Mastercard is allowed, the accountRanges should have contents
+            assertThat(filteredAccountRanges).isNotEmpty()
         }
 
     private fun createMockRemoteDefaultCardAccountRangeRepository(
@@ -274,7 +284,10 @@ class CardAccountRangeServiceTest {
             testDispatcher,
             DefaultStaticCardAccountRanges(),
             object : CardAccountRangeService.AccountRangeResultListener {
-                override fun onAccountRangesResult(accountRanges: List<AccountRange>) {
+                override fun onAccountRangesResult(
+                    accountRanges: List<AccountRange>,
+                    unfilteredAccountRanges: List<AccountRange>
+                ) {
                     val newAccountRange = accountRanges.firstOrNull()
                     panLength = newAccountRange?.panLength
                     latch.countDown()

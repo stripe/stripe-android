@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.wallet
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -80,7 +81,7 @@ internal fun PaymentDetailsListItem(
             ) {
                 PaymentDetails(paymentDetails = paymentDetails)
 
-                if (paymentDetails.isDefault) {
+                AnimatedVisibility(paymentDetails.isDefault) {
                     DefaultTag()
                 }
 
@@ -118,11 +119,15 @@ private fun MenuAndLoader(
     ) {
         if (isUpdating) {
             CircularProgressIndicator(
-                modifier = Modifier.size(24.dp),
+                modifier = Modifier
+                    .testTag(WALLET_PAYMENT_DETAIL_ITEM_LOADING_INDICATOR)
+                    .size(24.dp),
                 strokeWidth = 2.dp
             )
         } else {
             IconButton(
+                modifier = Modifier
+                    .testTag(WALLET_PAYMENT_DETAIL_ITEM_MENU_BUTTON),
                 onClick = onMenuButtonClick,
                 enabled = enabled
             ) {
@@ -259,3 +264,5 @@ private fun RowScope.BankAccountInfo(
 }
 
 internal const val WALLET_PAYMENT_DETAIL_ITEM_RADIO_BUTTON = "wallet_payment_detail_item_radio_button"
+internal const val WALLET_PAYMENT_DETAIL_ITEM_MENU_BUTTON = "wallet_payment_detail_item_menu_button"
+internal const val WALLET_PAYMENT_DETAIL_ITEM_LOADING_INDICATOR = "wallet_payment_detail_item_loading_indicator"

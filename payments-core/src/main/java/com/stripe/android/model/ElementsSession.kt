@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.PaymentMethod.Type.Link
 import kotlinx.parcelize.Parcelize
+import java.util.UUID
 
 private val LinkSupportedFundingSources = setOf("card", "bank_account")
 
@@ -19,6 +20,7 @@ data class ElementsSession(
     val cardBrandChoice: CardBrandChoice?,
     val isGooglePayEnabled: Boolean,
     val sessionsError: Throwable? = null,
+    val elementsSessionId: String,
 ) : StripeModel {
 
     val linkPassthroughModeEnabled: Boolean
@@ -37,6 +39,12 @@ data class ElementsSession(
             return (allowsLink && hasValidFundingSource) || linkPassthroughModeEnabled
         }
 
+    val useAttestationEndpointsForLink: Boolean
+        get() = linkSettings?.useAttestationEndpoints ?: false
+
+    val suppressLink2faModal: Boolean
+        get() = linkSettings?.suppress2faModal ?: false
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class LinkSettings(
@@ -46,6 +54,8 @@ data class ElementsSession(
         val linkFlags: Map<String, Boolean>,
         val disableLinkSignup: Boolean,
         val linkConsumerIncentive: LinkConsumerIncentive?,
+        val useAttestationEndpoints: Boolean,
+        val suppress2faModal: Boolean
     ) : StripeModel
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -91,7 +101,8 @@ data class ElementsSession(
                     val isPaymentMethodSaveEnabled: Boolean,
                     val isPaymentMethodRemoveEnabled: Boolean,
                     val canRemoveLastPaymentMethod: Boolean,
-                    val allowRedisplayOverride: PaymentMethod.AllowRedisplay?
+                    val allowRedisplayOverride: PaymentMethod.AllowRedisplay?,
+                    val isPaymentMethodSetAsDefaultEnabled: Boolean,
                 ) : MobilePaymentElement
             }
 
@@ -106,6 +117,7 @@ data class ElementsSession(
                 data class Enabled(
                     val isPaymentMethodRemoveEnabled: Boolean,
                     val canRemoveLastPaymentMethod: Boolean,
+                    val isPaymentMethodSyncDefaultEnabled: Boolean,
                 ) : CustomerSheet
             }
         }
@@ -116,6 +128,7 @@ data class ElementsSession(
         fun createFromFallback(
             stripeIntent: StripeIntent,
             sessionsError: Throwable?,
+            elementsSessionId: String = UUID.randomUUID().toString(),
         ): ElementsSession {
             return ElementsSession(
                 linkSettings = null,
@@ -127,6 +140,7 @@ data class ElementsSession(
                 cardBrandChoice = null,
                 isGooglePayEnabled = true,
                 sessionsError = sessionsError,
+                elementsSessionId = elementsSessionId
             )
         }
     }

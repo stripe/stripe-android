@@ -47,7 +47,8 @@ constructor(
 
         fun create(
             signupMode: LinkSignupMode,
-            config: LinkConfiguration
+            config: LinkConfiguration,
+            isExpanded: Boolean = false,
         ): InlineSignupViewState {
             val isAlternativeFlow = signupMode == LinkSignupMode.AlongsideSaveForFutureUse
             val customer = config.customerInfo
@@ -89,6 +90,7 @@ constructor(
                 signupMode = signupMode,
                 fields = fields,
                 prefillEligibleFields = prefillEligibleFields,
+                isExpanded = isExpanded,
             )
         }
     }

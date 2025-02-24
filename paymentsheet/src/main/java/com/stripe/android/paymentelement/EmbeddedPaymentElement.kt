@@ -8,7 +8,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.AnnotatedString
-import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
@@ -19,12 +18,15 @@ import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
-import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
-import com.stripe.android.paymentelement.embedded.EmbeddedConfirmationHelper
-import com.stripe.android.paymentelement.embedded.SharedPaymentElementViewModel
+import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.content.EmbeddedConfigurationCoordinator
+import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationHelper
+import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelper
+import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentElementScope
+import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentElementViewModel
+import com.stripe.android.paymentelement.embedded.content.PaymentOptionDisplayDataHolder
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
-import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.uicore.image.rememberDrawablePainter
@@ -32,22 +34,28 @@ import com.stripe.android.uicore.utils.collectAsState
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize
+import javax.inject.Inject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @ExperimentalEmbeddedPaymentElementApi
-class EmbeddedPaymentElement private constructor(
-    private val embeddedConfirmationHelper: EmbeddedConfirmationHelper,
-    private val sharedViewModel: SharedPaymentElementViewModel,
+@EmbeddedPaymentElementScope
+class EmbeddedPaymentElement @Inject internal constructor(
+    private val confirmationHelper: EmbeddedConfirmationHelper,
+    private val contentHelper: EmbeddedContentHelper,
+    private val selectionHolder: EmbeddedSelectionHolder,
+    paymentOptionDisplayDataHolder: PaymentOptionDisplayDataHolder,
+    private val configurationCoordinator: EmbeddedConfigurationCoordinator,
 ) {
+
     /**
      * Contains information about the customer's selected payment option.
      * Use this to display the payment option in your own UI.
      */
-    val paymentOption: StateFlow<PaymentOptionDisplayData?> = sharedViewModel.paymentOption
+    val paymentOption: StateFlow<PaymentOptionDisplayData?> = paymentOptionDisplayDataHolder.paymentOption
 
     /**
-     * Call this method to initialize [EmbeddedPaymentElement] or when the IntentConfiguration values you used to
-     *  initialize [EmbeddedPaymentElement] (amount, currency, etc.) change.
+     * Call this method to configure [EmbeddedPaymentElement] or when the IntentConfiguration values you used to
+     *  configure [EmbeddedPaymentElement] (amount, currency, etc.) change.
      *
      * This ensures the appropriate payment methods are displayed, collect the right fields, etc.
      * - Note: Upon completion, [paymentOption] may become null if it's no longer available.
@@ -56,7 +64,7 @@ class EmbeddedPaymentElement private constructor(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: Configuration,
     ): ConfigureResult {
-        return sharedViewModel.configure(intentConfiguration, configuration)
+        return configurationCoordinator.configure(intentConfiguration, configuration)
     }
 
     /**
@@ -66,24 +74,24 @@ class EmbeddedPaymentElement private constructor(
      */
     @Composable
     fun Content() {
-        val embeddedContent by sharedViewModel.embeddedContent.collectAsState()
+        val embeddedContent by contentHelper.embeddedContent.collectAsState()
         embeddedContent?.Content()
     }
 
     /**
-     * Asynchronously confirms the currently selected payment options.
+     * Asynchronously confirms the currently selected payment option.
      *
      * Results will be delivered to the [ResultCallback] supplied during initialization of [EmbeddedPaymentElement].
      */
     fun confirm() {
-        embeddedConfirmationHelper.confirm()
+        confirmationHelper.confirm()
     }
 
     /**
      * Sets the current [paymentOption] to `null`.
      */
     fun clearPaymentOption() {
-        sharedViewModel.clearPaymentOption()
+        selectionHolder.set(null)
     }
 
     /**
@@ -358,7 +366,7 @@ class EmbeddedPaymentElement private constructor(
     }
 
     /**
-     * The result of an [configure] call.
+     * The result of a [configure] call.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @ExperimentalEmbeddedPaymentElementApi
@@ -404,7 +412,7 @@ class EmbeddedPaymentElement private constructor(
          * - If this is an external payment method, see
          *      https://stripe.com/docs/payments/external-payment-methods?platform=ios#available-external-payment-methods
          *      for possible values.
-         * - If this is Apple Pay, the value is "apple_pay".
+         * - If this is Google Pay, the value is "google_pay".
          */
         val paymentMethodType: String,
 
@@ -482,28 +490,20 @@ class EmbeddedPaymentElement private constructor(
             lifecycleOwner: LifecycleOwner,
             resultCallback: ResultCallback,
         ): EmbeddedPaymentElement {
-            val sharedViewModel = ViewModelProvider(
+            val viewModel = ViewModelProvider(
                 owner = viewModelStoreOwner,
-                factory = SharedPaymentElementViewModel.Factory(statusBarColor)
-            )[SharedPaymentElementViewModel::class.java]
-            lifecycleOwner.lifecycle.addObserver(
-                object : DefaultLifecycleObserver {
-                    override fun onDestroy(owner: LifecycleOwner) {
-                        IntentConfirmationInterceptor.createIntentCallback = null
-                        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
-                    }
-                }
-            )
-            return EmbeddedPaymentElement(
-                embeddedConfirmationHelper = EmbeddedConfirmationHelper(
-                    confirmationHandler = sharedViewModel.confirmationHandler,
-                    resultCallback = resultCallback,
-                    activityResultCaller = activityResultCaller,
-                    lifecycleOwner = lifecycleOwner,
-                    confirmationStateSupplier = { sharedViewModel.confirmationStateHolder.state },
-                ),
-                sharedViewModel = sharedViewModel,
-            )
+                factory = EmbeddedPaymentElementViewModel.Factory(statusBarColor)
+            )[EmbeddedPaymentElementViewModel::class.java]
+
+            val embeddedPaymentElementSubcomponent = viewModel.embeddedPaymentElementSubcomponentBuilder
+                .resultCallback(resultCallback)
+                .activityResultCaller(activityResultCaller)
+                .lifecycleOwner(lifecycleOwner)
+                .build()
+
+            embeddedPaymentElementSubcomponent.initializer.initialize()
+
+            return embeddedPaymentElementSubcomponent.embeddedPaymentElement
         }
     }
 }

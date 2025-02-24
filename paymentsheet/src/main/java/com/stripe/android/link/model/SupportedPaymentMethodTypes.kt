@@ -12,14 +12,14 @@ import com.stripe.android.model.StripeIntent
  * The supported payment methods are read from [StripeIntent.linkFundingSources], and fallback to
  * card only if the list is empty or none of them is valid.
  */
-internal fun StripeIntent.supportedPaymentMethodTypes(linkAccount: LinkAccount) =
+internal fun StripeIntent.supportedPaymentMethodTypes(linkAccount: LinkAccount): Set<String> {
     if (!isLiveMode && linkAccount.email.contains("+multiple_funding_sources@")) {
-        supportedPaymentMethodTypes
-    } else {
-        linkFundingSources.filter { supportedPaymentMethodTypes.contains(it) }
-            .takeIf { it.isNotEmpty() }?.toSet()
-            ?: setOf(ConsumerPaymentDetails.Card.TYPE)
+        return supportedPaymentMethodTypes
     }
+
+    val allowedFundingSources = linkFundingSources.filter { it in supportedPaymentMethodTypes }
+    return allowedFundingSources.toSet().takeIf { it.isNotEmpty() } ?: setOf(ConsumerPaymentDetails.Card.TYPE)
+}
 
 private val supportedPaymentMethodTypes = setOf(
     ConsumerPaymentDetails.Card.TYPE,

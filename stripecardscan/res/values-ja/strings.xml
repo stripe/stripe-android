@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_camera_permission_settings_message">カードを撮影できるように、設定でカメラへのアクセスを許可してください</string>
+  <string name="stripe_card_scan_instructions">カードを撮影する</string>
+  <string name="stripe_card_scan_privacy_link_text"><![CDATA[Stripe を使用して、カード情報を確認します。Stripe はプライバシーポリシーに従ってお客様のデータを使用および保管することがあります。<a href="https://support.stripe.com/questions/stripes-card-image-verification"><u>もっと知る</u></a>]]></string>
+  <string name="stripe_card_scan_title">カードを撮影位置の長方形に置いてください</string>
+  <string name="stripe_close_button_description">閉じる</string>
+  <string name="stripe_swap_camera_button_description">カメラを交換</string>
+  <!-- Label for the button that toggles the camera's torch -->
+  <string name="stripe_torch_button_description">ライト</string>
+</resources>

@@ -1,13 +1,15 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import android.graphics.Color
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.utils.MockPaymentMethodsFactory
@@ -69,7 +71,8 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
                     type = Embedded.RowStyle.FlatWithCheckmark::class,
                     separatorThicknessDp = 5f,
                     separatorColor = Color.CYAN,
-                    separatorInsetsDp = 40f
+                    startSeparatorInset = 40f,
+                    endSeparatorInset = 40f,
                 )
             )
         }
@@ -137,18 +140,20 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod? = savedPaymentMethod,
         newPaymentMethods: List<DisplayablePaymentMethod> = paymentMethods
     ) {
+        val scrollState = rememberScrollState()
         PaymentMethodEmbeddedLayoutUI(
             paymentMethods = newPaymentMethods,
             displayedSavedPaymentMethod = displayableSavedPaymentMethod,
             savedPaymentMethodAction =
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
-            selection = PaymentSelection.Saved(savedPaymentMethod.paymentMethod),
+            selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
             isEnabled = true,
             onViewMorePaymentMethods = {},
             onSelectSavedPaymentMethod = {},
             onManageOneSavedPaymentMethod = {},
             imageLoader = mock(),
-            rowStyle = rowStyle
+            rowStyle = rowStyle,
+            modifier = Modifier.verticalScroll(scrollState),
         )
     }
 
@@ -158,12 +163,14 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
         type: KClass<T>,
         separatorThicknessDp: Float? = null,
         separatorColor: Int? = null,
-        separatorInsetsDp: Float? = null,
+        startSeparatorInset: Float? = null,
+        endSeparatorInset: Float? = null,
         topSeparatorEnabled: Boolean? = null,
         bottomSeparatorEnabled: Boolean? = null,
         selectedColor: Int? = null,
         unselectedColor: Int? = null,
-        additionalInsetsDp: Float? = null,
+        additionalVerticalInsetsDp: Float? = null,
+        horizontalInsetsDp: Float? = null,
         checkmarkColor: Int? = null,
         checkmarkInsetDp: Float? = null,
         spacingDp: Float? = null
@@ -172,26 +179,33 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
             Embedded.RowStyle.FlatWithRadio::class -> Embedded.RowStyle.FlatWithRadio(
                 separatorThicknessDp = separatorThicknessDp ?: StripeThemeDefaults.flat.separatorThickness,
                 separatorColor = separatorColor ?: StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
-                separatorInsetsDp = separatorInsetsDp ?: StripeThemeDefaults.flat.separatorInsets,
+                startSeparatorInsetDp = startSeparatorInset ?: StripeThemeDefaults.flat.separatorInsets,
+                endSeparatorInsetDp = endSeparatorInset ?: StripeThemeDefaults.flat.separatorInsets,
                 topSeparatorEnabled = topSeparatorEnabled ?: StripeThemeDefaults.flat.topSeparatorEnabled,
                 bottomSeparatorEnabled = bottomSeparatorEnabled ?: StripeThemeDefaults.flat.bottomSeparatorEnabled,
                 selectedColor = selectedColor ?: StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
                 unselectedColor = unselectedColor ?: StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
-                additionalInsetsDp = additionalInsetsDp ?: StripeThemeDefaults.embeddedCommon.additionalInsetsDp
+                additionalVerticalInsetsDp = additionalVerticalInsetsDp
+                    ?: StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp,
+                horizontalInsetsDp = horizontalInsetsDp ?: StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
             )
             Embedded.RowStyle.FlatWithCheckmark::class -> Embedded.RowStyle.FlatWithCheckmark(
                 separatorThicknessDp = separatorThicknessDp ?: StripeThemeDefaults.flat.separatorThickness,
                 separatorColor = separatorColor ?: StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
-                separatorInsetsDp = separatorInsetsDp ?: StripeThemeDefaults.flat.separatorInsets,
+                startSeparatorInsetDp = startSeparatorInset ?: StripeThemeDefaults.flat.separatorInsets,
+                endSeparatorInsetDp = endSeparatorInset ?: StripeThemeDefaults.flat.separatorInsets,
                 topSeparatorEnabled = topSeparatorEnabled ?: StripeThemeDefaults.flat.topSeparatorEnabled,
                 bottomSeparatorEnabled = bottomSeparatorEnabled ?: StripeThemeDefaults.flat.bottomSeparatorEnabled,
                 checkmarkColor = checkmarkColor ?: StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
                 checkmarkInsetDp = checkmarkInsetDp ?: StripeThemeDefaults.embeddedCommon.checkmarkInsetDp,
-                additionalInsetsDp = additionalInsetsDp ?: StripeThemeDefaults.embeddedCommon.additionalInsetsDp
+                additionalVerticalInsetsDp = additionalVerticalInsetsDp
+                    ?: StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp,
+                horizontalInsetsDp = horizontalInsetsDp ?: StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
             )
             else -> Embedded.RowStyle.FloatingButton(
                 spacingDp = spacingDp ?: StripeThemeDefaults.floating.spacing,
-                additionalInsetsDp = additionalInsetsDp ?: StripeThemeDefaults.embeddedCommon.additionalInsetsDp
+                additionalInsetsDp = additionalVerticalInsetsDp
+                    ?: StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp
             )
         }
     }

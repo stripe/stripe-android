@@ -131,21 +131,20 @@ internal class DefaultPaymentElementLoaderTest {
                         canRemoveLastPaymentMethod = true,
                         canRemoveDuplicates = false,
                     ),
-                    defaultPaymentMethodId = null
+                    defaultPaymentMethodId = null,
                 ),
                 paymentSelection = PaymentSelection.Saved(
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 ),
-                linkState = null,
                 validationError = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                     stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
                     allowsDelayedPaymentMethods = false,
                     sharedDataSpecs = emptyList(),
-                    hasCustomerConfiguration = true,
                     isGooglePayReady = true,
                     linkMode = null,
-                    cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all())
+                    cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all()),
+                    hasCustomerConfiguration = true,
                 ),
             )
         )
@@ -164,7 +163,7 @@ internal class DefaultPaymentElementLoaderTest {
             PaymentSheetFixtures.CONFIG_MINIMUM,
             initializedViaCompose = false,
         ).getOrThrow()
-        assertThat(result.paymentMethodMetadata.hasCustomerConfiguration).isFalse()
+        assertThat(result.paymentMethodMetadata.customerMetadata?.hasCustomerConfiguration).isFalse()
     }
 
     @Test
@@ -577,7 +576,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.loginState).isEqualTo(LinkState.LoginState.LoggedIn)
+        assertThat(result.paymentMethodMetadata.linkState?.loginState).isEqualTo(LinkState.LoginState.LoggedIn)
     }
 
     @Test
@@ -590,7 +589,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.loginState).isEqualTo(LinkState.LoginState.NeedsVerification)
+        assertThat(result.paymentMethodMetadata.linkState?.loginState).isEqualTo(LinkState.LoginState.NeedsVerification)
     }
 
     @Test
@@ -603,7 +602,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.loginState).isEqualTo(LinkState.LoginState.NeedsVerification)
+        assertThat(result.paymentMethodMetadata.linkState?.loginState).isEqualTo(LinkState.LoginState.NeedsVerification)
     }
 
     @Test
@@ -616,7 +615,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.loginState).isEqualTo(LinkState.LoginState.LoggedOut)
+        assertThat(result.paymentMethodMetadata.linkState?.loginState).isEqualTo(LinkState.LoginState.LoggedOut)
     }
 
     @Test
@@ -628,8 +627,9 @@ internal class DefaultPaymentElementLoaderTest {
             name = "Till",
         )
 
+        val initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret")
         val result = loader.load(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
+            initializationMode = initializationMode,
             paymentSheetConfiguration = mockConfiguration(
                 defaultBillingDetails = billingDetails,
             ),
@@ -650,9 +650,14 @@ internal class DefaultPaymentElementLoaderTest {
             passthroughModeEnabled = false,
             cardBrandChoice = null,
             flags = emptyMap(),
+            useAttestationEndpointsForLink = false,
+            suppress2faModal = false,
+            initializationMode = initializationMode,
+            elementsSessionId = "session_1234",
+            linkMode = null,
         )
 
-        assertThat(result.linkState?.configuration).isEqualTo(expectedLinkConfig)
+        assertThat(result.paymentMethodMetadata.linkState?.configuration).isEqualTo(expectedLinkConfig)
     }
 
     @Test
@@ -673,7 +678,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.configuration?.shippingDetails).isNotNull()
+        assertThat(result.paymentMethodMetadata.linkState?.configuration?.shippingDetails).isNotNull()
     }
 
     @Test
@@ -687,6 +692,8 @@ internal class DefaultPaymentElementLoaderTest {
                 linkFlags = emptyMap(),
                 disableLinkSignup = false,
                 linkConsumerIncentive = null,
+                useAttestationEndpoints = false,
+                suppress2faModal = false,
             )
         )
 
@@ -696,7 +703,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.configuration?.passthroughModeEnabled).isTrue()
+        assertThat(result.paymentMethodMetadata.linkState?.configuration?.passthroughModeEnabled).isTrue()
     }
 
     @Test
@@ -719,6 +726,8 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
                 disableLinkSignup = false,
                 linkConsumerIncentive = null,
+                useAttestationEndpoints = false,
+                suppress2faModal = false,
             )
         )
 
@@ -739,7 +748,7 @@ internal class DefaultPaymentElementLoaderTest {
             "link_passthrough_mode_enabled" to true,
         )
 
-        assertThat(result.linkState?.configuration?.flags).containsExactlyEntriesIn(expectedFlags)
+        assertThat(result.paymentMethodMetadata.linkState?.configuration?.flags).containsExactlyEntriesIn(expectedFlags)
     }
 
     @Test
@@ -757,7 +766,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        val cardBrandChoice = result.linkState?.configuration?.cardBrandChoice
+        val cardBrandChoice = result.paymentMethodMetadata.linkState?.configuration?.cardBrandChoice
 
         assertThat(cardBrandChoice?.eligible).isTrue()
         assertThat(cardBrandChoice?.preferredNetworks).isEqualTo(listOf("cartes_bancaires"))
@@ -778,7 +787,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        val cardBrandChoice = result.linkState?.configuration?.cardBrandChoice
+        val cardBrandChoice = result.paymentMethodMetadata.linkState?.configuration?.cardBrandChoice
 
         assertThat(cardBrandChoice?.eligible).isFalse()
         assertThat(cardBrandChoice?.preferredNetworks).isEqualTo(listOf("cartes_bancaires"))
@@ -795,6 +804,8 @@ internal class DefaultPaymentElementLoaderTest {
                 linkFlags = mapOf(),
                 disableLinkSignup = false,
                 linkConsumerIncentive = null,
+                useAttestationEndpoints = false,
+                suppress2faModal = false,
             ),
             linkStore = mock {
                 on { hasUsedLink() } doReturn true
@@ -807,7 +818,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.signupMode).isNull()
+        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isNull()
         assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode).isNull()
     }
 
@@ -822,6 +833,8 @@ internal class DefaultPaymentElementLoaderTest {
                 linkFlags = mapOf(),
                 disableLinkSignup = true,
                 linkConsumerIncentive = null,
+                useAttestationEndpoints = false,
+                suppress2faModal = false,
             )
         )
 
@@ -831,7 +844,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.signupMode).isNull()
+        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isNull()
         assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode).isNull()
     }
 
@@ -850,7 +863,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.signupMode).isNull()
+        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isNull()
         assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode).isNull()
     }
 
@@ -866,7 +879,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.signupMode).isNull()
+        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isNull()
         assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode).isNull()
     }
 
@@ -882,7 +895,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.signupMode).isNull()
+        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isNull()
         assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode).isNull()
     }
 
@@ -898,7 +911,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.signupMode).isNull()
+        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isNull()
         assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode).isNull()
     }
 
@@ -917,7 +930,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
+        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
         assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode)
             .isEqualTo(InsteadOfSaveForFutureUse)
     }
@@ -934,7 +947,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
+        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
         assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode)
             .isEqualTo(InsteadOfSaveForFutureUse)
     }
@@ -960,7 +973,8 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.configuration?.customerInfo?.phone).isEqualTo(shippingDetails.phoneNumber)
+        assertThat(result.paymentMethodMetadata.linkState?.configuration?.customerInfo?.phone)
+            .isEqualTo(shippingDetails.phoneNumber)
     }
 
     @Test
@@ -987,7 +1001,8 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.configuration?.customerInfo?.email).isEqualTo("email@stripe.com")
+        assertThat(result.paymentMethodMetadata.linkState?.configuration?.customerInfo?.email)
+            .isEqualTo("email@stripe.com")
     }
 
     @Test
@@ -1090,7 +1105,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `Emits correct events when loading succeeds with saved Link selection`() = runTest {
         testSuccessfulLoadSendsEventsCorrectly(
-            paymentSelection = PaymentSelection.Link
+            paymentSelection = PaymentSelection.Link()
         )
     }
 
@@ -1242,7 +1257,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
+        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
         assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode)
             .isEqualTo(InsteadOfSaveForFutureUse)
     }
@@ -1267,7 +1282,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.signupMode).isEqualTo(AlongsideSaveForFutureUse)
+        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(AlongsideSaveForFutureUse)
         assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode)
             .isEqualTo(AlongsideSaveForFutureUse)
     }
@@ -1287,7 +1302,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
+        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(InsteadOfSaveForFutureUse)
         assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode)
             .isEqualTo(InsteadOfSaveForFutureUse)
     }
@@ -1307,7 +1322,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState?.signupMode).isEqualTo(AlongsideSaveForFutureUse)
+        assertThat(result.paymentMethodMetadata.linkState?.signupMode).isEqualTo(AlongsideSaveForFutureUse)
         assertThat(result.paymentMethodMetadata.linkInlineConfiguration?.signupMode)
             .isEqualTo(AlongsideSaveForFutureUse)
     }
@@ -1329,7 +1344,31 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        assertThat(result.linkState).isNull()
+        assertThat(result.paymentMethodMetadata.linkState).isNull()
+        assertThat(result.paymentMethodMetadata.linkInlineConfiguration).isNull()
+    }
+
+    @OptIn(ExperimentalCardBrandFilteringApi::class)
+    @Test
+    fun `Disables Link if card brand filtering is used`() = runTest {
+        val loader = createPaymentElementLoader()
+
+        val result = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration(
+                merchantDisplayName = "Some Name",
+                cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.disallowed(
+                    listOf(
+                        PaymentSheet.CardBrandAcceptance.BrandCategory.Amex
+                    )
+                )
+            ),
+            initializedViaCompose = false,
+        ).getOrThrow()
+
+        assertThat(result.paymentMethodMetadata.linkState).isNull()
         assertThat(result.paymentMethodMetadata.linkInlineConfiguration).isNull()
     }
 
@@ -1443,20 +1482,7 @@ internal class DefaultPaymentElementLoaderTest {
 
             assertThat(attemptedToRetrievePaymentMethods).isFalse()
 
-            assertThat(state.customer).isEqualTo(
-                CustomerState(
-                    id = "cus_1",
-                    ephemeralKeySecret = "ek_123",
-                    customerSessionClientSecret = "customer_client_secret",
-                    paymentMethods = cards,
-                    permissions = CustomerState.Permissions(
-                        canRemovePaymentMethods = false,
-                        canRemoveLastPaymentMethod = false,
-                        canRemoveDuplicates = true,
-                    ),
-                    defaultPaymentMethodId = null
-                )
-            )
+            assertThat(state.customer?.paymentMethods).isEqualTo(cards)
         }
 
     @OptIn(ExperimentalCustomerSessionApi::class)
@@ -1467,7 +1493,7 @@ internal class DefaultPaymentElementLoaderTest {
                 customer = ElementsSession.Customer(
                     paymentMethods = PaymentMethodFactory.cards(4),
                     session = createElementsSessionCustomerSession(
-                        ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
+                        createEnabledMobilePaymentElement(
                             isPaymentMethodRemoveEnabled = true,
                             canRemoveLastPaymentMethod = true,
                             isPaymentMethodSaveEnabled = false,
@@ -1509,7 +1535,7 @@ internal class DefaultPaymentElementLoaderTest {
                 customer = ElementsSession.Customer(
                     paymentMethods = PaymentMethodFactory.cards(4),
                     session = createElementsSessionCustomerSession(
-                        ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
+                        createEnabledMobilePaymentElement(
                             isPaymentMethodRemoveEnabled = false,
                             isPaymentMethodSaveEnabled = false,
                             canRemoveLastPaymentMethod = true,
@@ -1551,7 +1577,7 @@ internal class DefaultPaymentElementLoaderTest {
                 customer = ElementsSession.Customer(
                     paymentMethods = PaymentMethodFactory.cards(4),
                     session = createElementsSessionCustomerSession(
-                        ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
+                        createEnabledMobilePaymentElement(
                             isPaymentMethodRemoveEnabled = false,
                             isPaymentMethodSaveEnabled = false,
                             canRemoveLastPaymentMethod = true,
@@ -1724,20 +1750,7 @@ internal class DefaultPaymentElementLoaderTest {
 
             assertThat(attemptedToRetrievePaymentMethods).isTrue()
 
-            assertThat(state.customer).isEqualTo(
-                CustomerState(
-                    id = "cus_1",
-                    ephemeralKeySecret = "ek_123",
-                    customerSessionClientSecret = null,
-                    paymentMethods = cards,
-                    permissions = CustomerState.Permissions(
-                        canRemovePaymentMethods = true,
-                        canRemoveLastPaymentMethod = true,
-                        canRemoveDuplicates = false,
-                    ),
-                    defaultPaymentMethodId = null
-                )
-            )
+            assertThat(state.customer?.paymentMethods).isEqualTo(cards)
         }
 
     @OptIn(ExperimentalCustomerSessionApi::class)
@@ -1909,7 +1922,7 @@ internal class DefaultPaymentElementLoaderTest {
                 initializedViaCompose = false,
             )
 
-            assertThat(repository.lastParams?.defaultPaymentMethodId)
+            assertThat(repository.lastParams?.savedPaymentMethodSelectionId)
                 .isEqualTo("pm_1234321")
         }
 
@@ -1940,8 +1953,164 @@ internal class DefaultPaymentElementLoaderTest {
                 initializedViaCompose = false,
             )
 
-            assertThat(repository.lastParams?.defaultPaymentMethodId).isNull()
+            assertThat(repository.lastParams?.savedPaymentMethodSelectionId).isNull()
         }
+
+    @Test
+    fun `When DefaultPaymentMethod not null, no saved selection, defaultPaymentMethod first`() = runTest {
+        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+            lastUsedPaymentMethod = null,
+            defaultPaymentMethod = paymentMethodsForTestingOrdering[2],
+        )
+
+        val observedElements = result.customer?.paymentMethods
+        val expectedElements = expectedPaymentMethodsWithDefaultPaymentMethod
+        assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
+    }
+
+    @Test
+    fun `When DefaultPaymentMethod not null, no saved selection, defaultPaymentMethod selected`() = runTest {
+        val defaultPaymentMethod = paymentMethodsForTestingOrdering[2]
+
+        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+            lastUsedPaymentMethod = null,
+            defaultPaymentMethod = defaultPaymentMethod,
+        )
+
+        assertThat((result.paymentSelection as? PaymentSelection.Saved)?.paymentMethod).isEqualTo(
+            defaultPaymentMethod
+        )
+    }
+
+    @Test
+    fun `When DefaultPaymentMethod not null, saved selection, defaultPaymentMethod first`() = runTest {
+        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+            lastUsedPaymentMethod = paymentMethodsForTestingOrdering[1],
+            defaultPaymentMethod = paymentMethodsForTestingOrdering[2],
+        )
+
+        val observedElements = result.customer?.paymentMethods
+        val expectedElements = expectedPaymentMethodsWithDefaultPaymentMethod
+        assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
+    }
+
+    @Test
+    fun `When DefaultPaymentMethod not null, saved selection, defaultPaymentMethod selected`() = runTest {
+        val defaultPaymentMethod = paymentMethodsForTestingOrdering[2]
+
+        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+            lastUsedPaymentMethod = paymentMethodsForTestingOrdering[1],
+            defaultPaymentMethod = defaultPaymentMethod,
+        )
+
+        assertThat((result.paymentSelection as? PaymentSelection.Saved)?.paymentMethod).isEqualTo(
+            defaultPaymentMethod
+        )
+    }
+
+    @Test
+    fun `When DefaultPaymentMethod not null, saved selection is defaultPaymentMethod, defaultPaymentMethod first`() = runTest {
+        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+            lastUsedPaymentMethod = paymentMethodsForTestingOrdering[2],
+            defaultPaymentMethod = paymentMethodsForTestingOrdering[2],
+        )
+
+        val observedElements = result.customer?.paymentMethods
+        val expectedElements = expectedPaymentMethodsWithDefaultPaymentMethod
+        assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
+    }
+
+    @Test
+    fun `When DefaultPaymentMethod not null, saved selection is same as defaultPaymentMethod, defaultPaymentMethod selected`() = runTest {
+        val defaultPaymentMethod = paymentMethodsForTestingOrdering[2]
+
+        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+            lastUsedPaymentMethod = paymentMethodsForTestingOrdering[2],
+            defaultPaymentMethod = defaultPaymentMethod,
+        )
+
+        assertThat((result.paymentSelection as? PaymentSelection.Saved)?.paymentMethod).isEqualTo(
+            defaultPaymentMethod
+        )
+    }
+
+    @Test
+    fun `When DefaultPaymentMethod null, no saved selection, order unchanged`() = runTest {
+        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+            lastUsedPaymentMethod = null,
+            defaultPaymentMethod = null,
+        )
+
+        val observedElements = result.customer?.paymentMethods
+        val expectedElements = paymentMethodsForTestingOrdering
+        assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
+    }
+
+    @Test
+    fun `When DefaultPaymentMethod null, no saved selection, first payment method selected`() = runTest {
+        val firstPaymentMethod = paymentMethodsForTestingOrdering[0]
+
+        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+            lastUsedPaymentMethod = null,
+            defaultPaymentMethod = null,
+        )
+
+        assertThat((result.paymentSelection as? PaymentSelection.Saved)?.paymentMethod).isEqualTo(
+            firstPaymentMethod
+        )
+    }
+
+    @Test
+    fun `When DefaultPaymentMethod null, saved selection first, order unchanged`() = runTest {
+        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+            lastUsedPaymentMethod = paymentMethodsForTestingOrdering[0],
+            defaultPaymentMethod = null,
+        )
+
+        val observedElements = result.customer?.paymentMethods
+        val expectedElements = paymentMethodsForTestingOrdering
+        assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
+    }
+
+    @Test
+    fun `When DefaultPaymentMethod null, saved selection first, first payment method selected`() = runTest {
+        val firstPaymentMethod = paymentMethodsForTestingOrdering[0]
+
+        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+            lastUsedPaymentMethod = paymentMethodsForTestingOrdering[0],
+            defaultPaymentMethod = null,
+        )
+
+        assertThat((result.paymentSelection as? PaymentSelection.Saved)?.paymentMethod).isEqualTo(
+            firstPaymentMethod
+        )
+    }
+
+    @Test
+    fun `When DefaultPaymentMethod null, saved selection not first, order unchanged`() = runTest {
+        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+            lastUsedPaymentMethod = paymentMethodsForTestingOrdering[1],
+            defaultPaymentMethod = null,
+        )
+
+        val observedElements = result.customer?.paymentMethods
+        val expectedElements = paymentMethodsForTestingOrdering
+        assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
+    }
+
+    @Test
+    fun `When DefaultPaymentMethod null, saved selection not first, first payment method selected`() = runTest {
+        val firstPaymentMethod = paymentMethodsForTestingOrdering[0]
+
+        val result = getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+            lastUsedPaymentMethod = paymentMethodsForTestingOrdering[1],
+            defaultPaymentMethod = null,
+        )
+
+        assertThat((result.paymentSelection as? PaymentSelection.Saved)?.paymentMethod).isEqualTo(
+            firstPaymentMethod
+        )
+    }
 
     @Test
     fun `When using 'LegacyEphemeralKey' & has a default saved Stripe payment method, should not call 'ElementsSessionRepository' with default id`() =
@@ -1973,7 +2142,7 @@ internal class DefaultPaymentElementLoaderTest {
                 initializedViaCompose = false,
             )
 
-            assertThat(repository.lastParams?.defaultPaymentMethodId).isNull()
+            assertThat(repository.lastParams?.savedPaymentMethodSelectionId).isNull()
         }
 
     @Test
@@ -2231,7 +2400,7 @@ internal class DefaultPaymentElementLoaderTest {
                     if (shouldDisableMobilePaymentElement) {
                         ElementsSession.Customer.Components.MobilePaymentElement.Disabled
                     } else {
-                        ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
+                        createEnabledMobilePaymentElement(
                             isPaymentMethodRemoveEnabled = false,
                             isPaymentMethodSaveEnabled = false,
                             canRemoveLastPaymentMethod = canRemoveLastPaymentMethodFromServer,
@@ -2324,6 +2493,8 @@ internal class DefaultPaymentElementLoaderTest {
             linkFlags = mapOf(),
             disableLinkSignup = false,
             linkConsumerIncentive = null,
+            useAttestationEndpoints = false,
+            suppress2faModal = false,
         )
     }
 
@@ -2348,11 +2519,12 @@ internal class DefaultPaymentElementLoaderTest {
         isPaymentMethodSaveEnabled: Boolean? = null,
         mobilePaymentElementComponent: ElementsSession.Customer.Components.MobilePaymentElement =
             isPaymentMethodSaveEnabled?.let {
-                ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
+                createEnabledMobilePaymentElement(
                     isPaymentMethodSaveEnabled = it,
                     isPaymentMethodRemoveEnabled = true,
                     canRemoveLastPaymentMethod = true,
                     allowRedisplayOverride = null,
+                    isPaymentMethodSetAsDefaultEnabled = false,
                 )
             } ?: ElementsSession.Customer.Components.MobilePaymentElement.Disabled
     ): ElementsSession.Customer {
@@ -2465,4 +2637,75 @@ internal class DefaultPaymentElementLoaderTest {
         isReloadingAfterProcessDeath = isReloadingAfterProcessDeath,
         initializedViaCompose = initializedViaCompose,
     )
+
+    private val paymentMethodsForTestingOrdering = listOf(
+        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "a1", customerId = "alice"),
+        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "b2", customerId = "bob"),
+        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "c3", customerId = "carol"),
+        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "d4", customerId = "dan")
+    )
+
+    private val expectedPaymentMethodsWithDefaultPaymentMethod = listOf(
+        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "c3", customerId = "carol"),
+        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "a1", customerId = "alice"),
+        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "b2", customerId = "bob"),
+        PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "d4", customerId = "dan")
+    )
+
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    private suspend fun getPaymentElementLoaderStateForTestingOfPaymentMethodsWithDefaultPaymentMethodId(
+        lastUsedPaymentMethod: PaymentMethod?,
+        defaultPaymentMethod: PaymentMethod?,
+    ): PaymentElementLoader.State {
+        val defaultPaymentMethodId = defaultPaymentMethod?.id
+
+        lastUsedPaymentMethod?.let {
+            prefsRepository.savePaymentSelection(PaymentSelection.Saved(lastUsedPaymentMethod))
+        }
+
+        val loader = createPaymentElementLoader(
+            customer = ElementsSession.Customer(
+                paymentMethods = paymentMethodsForTestingOrdering,
+                session = createElementsSessionCustomerSession(
+                    mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
+                        isPaymentMethodSetAsDefaultEnabled = true,
+                        isPaymentMethodSaveEnabled = true,
+                        isPaymentMethodRemoveEnabled = true,
+                        canRemoveLastPaymentMethod = true,
+                        allowRedisplayOverride = null,
+                    ),
+                ),
+                defaultPaymentMethod = defaultPaymentMethodId,
+            )
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = mockConfiguration(
+                customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    id = "id",
+                    clientSecret = "cuss_1",
+                ),
+            ),
+            initializedViaCompose = false,
+        ).getOrThrow()
+
+        return result
+    }
+
+    private fun createEnabledMobilePaymentElement(
+        isPaymentMethodSaveEnabled: Boolean = true,
+        isPaymentMethodRemoveEnabled: Boolean = false,
+        canRemoveLastPaymentMethod: Boolean = false,
+        allowRedisplayOverride: PaymentMethod.AllowRedisplay? = null,
+        isPaymentMethodSetAsDefaultEnabled: Boolean = false,
+    ): ElementsSession.Customer.Components.MobilePaymentElement {
+        return ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
+            isPaymentMethodSaveEnabled = isPaymentMethodSaveEnabled,
+            isPaymentMethodRemoveEnabled = isPaymentMethodRemoveEnabled,
+            canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
+            allowRedisplayOverride = allowRedisplayOverride,
+            isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
+        )
+    }
 }

@@ -20,7 +20,7 @@ internal class FakeElementsSessionRepository(
         val initializationMode: PaymentElementLoader.InitializationMode,
         val customer: PaymentSheet.CustomerConfiguration?,
         val externalPaymentMethods: List<String>,
-        val defaultPaymentMethodId: String?
+        val savedPaymentMethodSelectionId: String?
     )
 
     var lastParams: Params? = null
@@ -29,13 +29,13 @@ internal class FakeElementsSessionRepository(
         initializationMode: PaymentElementLoader.InitializationMode,
         customer: PaymentSheet.CustomerConfiguration?,
         externalPaymentMethods: List<String>,
-        defaultPaymentMethodId: String?,
+        savedPaymentMethodSelectionId: String?,
     ): Result<ElementsSession> {
         lastParams = Params(
             initializationMode = initializationMode,
             customer = customer,
             externalPaymentMethods = externalPaymentMethods,
-            defaultPaymentMethodId = defaultPaymentMethodId,
+            savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
         )
         return if (error != null) {
             Result.failure(error)
@@ -51,6 +51,7 @@ internal class FakeElementsSessionRepository(
                     externalPaymentMethodData = externalPaymentMethodData,
                     customer = sessionsCustomer,
                     cardBrandChoice = cardBrandChoice,
+                    elementsSessionId = "session_1234"
                 )
             )
         }

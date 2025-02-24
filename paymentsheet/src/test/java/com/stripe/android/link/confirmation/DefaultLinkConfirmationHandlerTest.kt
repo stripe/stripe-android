@@ -4,24 +4,43 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationOption
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FakeLogger
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 
 internal class DefaultLinkConfirmationHandlerTest {
     private val dispatcher = UnconfinedTestDispatcher()
+
+    @Before
+    fun setup() {
+        Dispatchers.setMain(dispatcher)
+    }
+
+    @After
+    fun cleanup() {
+        Dispatchers.resetMain()
+    }
 
     @Test
     fun `successful confirmation yields success result`() = runTest(dispatcher) {
@@ -50,10 +69,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             configuration = configuration,
             linkAccount = TestFactory.LINK_ACCOUNT,
             paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
-            cvc = CVC,
-            initMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = configuration.stripeIntent.clientSecret.orEmpty()
-            )
+            cvc = CVC
         )
     }
 
@@ -85,10 +101,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             configuration = configuration,
             linkAccount = TestFactory.LINK_ACCOUNT,
             paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
-            cvc = null,
-            initMode = PaymentElementLoader.InitializationMode.SetupIntent(
-                clientSecret = configuration.stripeIntent.clientSecret.orEmpty()
-            )
+            cvc = null
         )
     }
 
@@ -163,40 +176,245 @@ internal class DefaultLinkConfirmationHandlerTest {
     }
 
     @Test
-    fun `invalid client secret yields error result`() = runTest(dispatcher) {
+    fun `confirm with New LinkPaymentDetails calls uses correct confirmation args`() = runTest(dispatcher) {
+        val configuration = TestFactory.LINK_CONFIGURATION
         val confirmationHandler = FakeConfirmationHandler()
-        val logger = FakeLogger()
         val handler = createHandler(
             confirmationHandler = confirmationHandler,
-            logger = logger,
-            configuration = TestFactory.LINK_CONFIGURATION.copy(
-                stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
-                    clientSecret = null
-                )
+            configuration = configuration
+        )
+
+        confirmationHandler.awaitResultTurbine.add(
+            item = ConfirmationHandler.Result.Succeeded(
+                intent = configuration.stripeIntent,
+                deferredIntentConfirmationType = null
             )
         )
 
-        confirmationHandler.awaitResultTurbine.add(null)
+        val result = handler.confirm(
+            paymentDetails = TestFactory.LINK_NEW_PAYMENT_DETAILS,
+            linkAccount = TestFactory.LINK_ACCOUNT,
+            cvc = CVC
+        )
+
+        assertThat(result).isEqualTo(Result.Succeeded)
+        confirmationHandler.startTurbine.awaitItem().assertConfirmationArgs(
+            configuration = configuration,
+            linkAccount = TestFactory.LINK_ACCOUNT,
+            paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            cvc = CVC
+        )
+    }
+
+    @Test
+    fun `confirm with saved LinkPaymentDetails creates correct confirmation args`() = runTest(dispatcher) {
+        val configuration = TestFactory.LINK_CONFIGURATION
+        val confirmationHandler = FakeConfirmationHandler()
+        val handler = createHandler(
+            confirmationHandler = confirmationHandler,
+            configuration = configuration
+        )
+
+        confirmationHandler.awaitResultTurbine.add(
+            item = ConfirmationHandler.Result.Succeeded(
+                intent = configuration.stripeIntent,
+                deferredIntentConfirmationType = null
+            )
+        )
+
+        val savedPaymentDetails = TestFactory.LINK_SAVED_PAYMENT_DETAILS
+        val result = handler.confirm(
+            paymentDetails = savedPaymentDetails,
+            linkAccount = TestFactory.LINK_ACCOUNT,
+            cvc = CVC
+        )
+
+        assertThat(result).isEqualTo(Result.Succeeded)
+        confirmationHandler.startTurbine.awaitItem().assertSavedConfirmationArgs(
+            configuration = configuration,
+            paymentDetails = TestFactory.LINK_SAVED_PAYMENT_DETAILS,
+            cvc = CVC
+        )
+    }
+
+    @Test
+    fun `confirm with saved LinkPaymentDetails in passthrough mode omits CVC`() = runTest(dispatcher) {
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(passthroughModeEnabled = true)
+        val confirmationHandler = FakeConfirmationHandler()
+        val handler = createHandler(
+            confirmationHandler = confirmationHandler,
+            configuration = configuration
+        )
+
+        confirmationHandler.awaitResultTurbine.add(
+            item = ConfirmationHandler.Result.Succeeded(
+                intent = configuration.stripeIntent,
+                deferredIntentConfirmationType = null
+            )
+        )
 
         val result = handler.confirm(
-            paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            paymentDetails = TestFactory.LINK_SAVED_PAYMENT_DETAILS,
+            linkAccount = TestFactory.LINK_ACCOUNT,
+            cvc = CVC
+        )
+
+        assertThat(result).isEqualTo(Result.Succeeded)
+        confirmationHandler.startTurbine.awaitItem().assertSavedConfirmationArgs(
+            configuration = configuration,
+            paymentDetails = TestFactory.LINK_SAVED_PAYMENT_DETAILS,
+            cvc = null
+        )
+    }
+
+    @Test
+    fun `confirm with card payment details in passthrough mode uses correct confirmation args`() =
+        runTest(dispatcher) {
+            val configuration = TestFactory.LINK_CONFIGURATION.copy(passthroughModeEnabled = true)
+            val confirmationHandler = FakeConfirmationHandler()
+            val handler = createHandler(
+                confirmationHandler = confirmationHandler,
+                configuration = configuration
+            )
+
+            confirmationHandler.awaitResultTurbine.add(
+                item = ConfirmationHandler.Result.Succeeded(
+                    intent = configuration.stripeIntent,
+                    deferredIntentConfirmationType = null
+                )
+            )
+
+            val result = handler.confirm(
+                paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+                linkAccount = TestFactory.LINK_ACCOUNT,
+                cvc = CVC
+            )
+
+            assertThat(result).isEqualTo(Result.Succeeded)
+
+            val args = confirmationHandler.startTurbine.awaitItem()
+            assertThat(args.intent).isEqualTo(configuration.stripeIntent)
+
+            val option = args.confirmationOption as LinkPassthroughConfirmationOption
+            assertThat(option.paymentDetailsId).isEqualTo(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.id)
+            assertThat(option.expectedPaymentMethodType).isEqualTo(ConsumerPaymentDetails.Card.TYPE)
+        }
+
+    @Test
+    fun `confirm with bank account in passthrough mode uses correct confirmation args`() = runTest(dispatcher) {
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(
+            passthroughModeEnabled = true,
+            linkMode = LinkMode.LinkCardBrand
+        )
+        val confirmationHandler = FakeConfirmationHandler()
+        val handler = createHandler(
+            confirmationHandler = confirmationHandler,
+            configuration = configuration
+        )
+
+        confirmationHandler.awaitResultTurbine.add(
+            item = ConfirmationHandler.Result.Succeeded(
+                intent = configuration.stripeIntent,
+                deferredIntentConfirmationType = null
+            )
+        )
+
+        val bankAccount = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
+
+        val result = handler.confirm(
+            paymentDetails = bankAccount,
             linkAccount = TestFactory.LINK_ACCOUNT
         )
 
-        assertThat(result).isEqualTo(Result.Failed(R.string.stripe_something_went_wrong.resolvableString))
-        assertThat(logger.errorLogs)
-            .containsExactly(
-                "DefaultLinkConfirmationHandler: Failed to confirm payment"
-                    to DefaultLinkConfirmationHandler.NO_CLIENT_SECRET_FOUND
-            )
+        assertThat(result).isEqualTo(Result.Succeeded)
+
+        val args = confirmationHandler.startTurbine.awaitItem()
+        assertThat(args.intent).isEqualTo(configuration.stripeIntent)
+
+        val option = args.confirmationOption as LinkPassthroughConfirmationOption
+        assertThat(option.paymentDetailsId).isEqualTo(bankAccount.id)
+        assertThat(option.expectedPaymentMethodType).isEqualTo(ConsumerPaymentDetails.Card.TYPE)
     }
+
+    @Test
+    fun `confirm with bank account and USBankAccount type in passthrough mode uses correct confirmation args`() =
+        runTest(dispatcher) {
+            val configuration = TestFactory.LINK_CONFIGURATION.copy(
+                passthroughModeEnabled = true,
+                linkMode = LinkMode.LinkCardBrand,
+                stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                    paymentMethodTypes = listOf(USBankAccount.code)
+                )
+            )
+            val confirmationHandler = FakeConfirmationHandler()
+            val handler = createHandler(
+                confirmationHandler = confirmationHandler,
+                configuration = configuration
+            )
+
+            confirmationHandler.awaitResultTurbine.add(
+                item = ConfirmationHandler.Result.Succeeded(
+                    intent = configuration.stripeIntent,
+                    deferredIntentConfirmationType = null
+                )
+            )
+
+            val bankAccount = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
+
+            val result = handler.confirm(
+                paymentDetails = bankAccount,
+                linkAccount = TestFactory.LINK_ACCOUNT
+            )
+
+            assertThat(result).isEqualTo(Result.Succeeded)
+
+            val args = confirmationHandler.startTurbine.awaitItem()
+            assertThat(args.intent).isEqualTo(configuration.stripeIntent)
+
+            val option = args.confirmationOption as LinkPassthroughConfirmationOption
+            assertThat(option.paymentDetailsId).isEqualTo(bankAccount.id)
+            assertThat(option.expectedPaymentMethodType).isEqualTo(ConsumerPaymentDetails.BankAccount.TYPE)
+        }
+
+    @Test
+    fun `confirm with passthrough payment details in passthrough mode uses correct confirmation args`() =
+        runTest(dispatcher) {
+            val configuration = TestFactory.LINK_CONFIGURATION.copy(passthroughModeEnabled = true)
+            val confirmationHandler = FakeConfirmationHandler()
+            val handler = createHandler(
+                confirmationHandler = confirmationHandler,
+                configuration = configuration
+            )
+
+            confirmationHandler.awaitResultTurbine.add(
+                item = ConfirmationHandler.Result.Succeeded(
+                    intent = configuration.stripeIntent,
+                    deferredIntentConfirmationType = null
+                )
+            )
+
+            val passthroughDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH
+
+            val result = handler.confirm(
+                paymentDetails = passthroughDetails,
+                linkAccount = TestFactory.LINK_ACCOUNT
+            )
+
+            assertThat(result).isEqualTo(Result.Succeeded)
+
+            val args = confirmationHandler.startTurbine.awaitItem()
+            assertThat(args.intent).isEqualTo(configuration.stripeIntent)
+
+            val option = args.confirmationOption as LinkPassthroughConfirmationOption
+            assertThat(option.paymentDetailsId).isEqualTo(passthroughDetails.id)
+            assertThat(option.expectedPaymentMethodType).isEqualTo(ConsumerPaymentDetails.Card.TYPE)
+        }
 
     private fun ConfirmationHandler.Args.assertConfirmationArgs(
         configuration: LinkConfiguration,
         paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         linkAccount: LinkAccount,
         cvc: String?,
-        initMode: PaymentElementLoader.InitializationMode
     ) {
         assertThat(intent).isEqualTo(configuration.stripeIntent)
         val option = confirmationOption as PaymentMethodConfirmationOption.New
@@ -208,7 +426,22 @@ internal class DefaultLinkConfirmationHandlerTest {
             )
         )
         assertThat(shippingDetails).isEqualTo(configuration.shippingDetails)
-        assertThat(initializationMode).isEqualTo(initMode)
+        assertThat(initializationMode).isEqualTo(configuration.initializationMode)
+    }
+
+    private fun ConfirmationHandler.Args.assertSavedConfirmationArgs(
+        configuration: LinkConfiguration,
+        paymentDetails: LinkPaymentDetails.Saved,
+        cvc: String?,
+    ) {
+        assertThat(intent).isEqualTo(configuration.stripeIntent)
+        val option = confirmationOption as PaymentMethodConfirmationOption.Saved
+        assertThat(option.paymentMethod.id).isEqualTo(paymentDetails.paymentDetails.id)
+
+        val optionsCard = option.optionsParams as? PaymentMethodOptionsParams.Card
+        assertThat(optionsCard?.cvc).isEqualTo(cvc)
+        assertThat(shippingDetails).isEqualTo(configuration.shippingDetails)
+        assertThat(initializationMode).isEqualTo(configuration.initializationMode)
     }
 
     private fun createHandler(

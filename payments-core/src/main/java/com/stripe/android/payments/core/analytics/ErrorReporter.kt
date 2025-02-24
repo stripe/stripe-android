@@ -131,6 +131,15 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         LINK_LOG_OUT_FAILURE(
             eventName = "link.log_out.failure"
         ),
+        LINK_NATIVE_FAILED_TO_GET_INTEGRITY_TOKEN(
+            eventName = "link.native.failed_to_get_integrity_token"
+        ),
+        LINK_NATIVE_FAILED_TO_ATTEST_REQUEST(
+            eventName = "link.native.failed_to_attest_request"
+        ),
+        LINK_NATIVE_FAILED_TO_PREPARE_INTEGRITY_MANAGER(
+            eventName = "link.native.integrity.preparation_failed"
+        ),
         PAYMENT_LAUNCHER_CONFIRMATION_NULL_ARGS(
             eventName = "payments.paymentlauncherconfirmation.null_args"
         ),
@@ -151,6 +160,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         EXTERNAL_PAYMENT_METHOD_LAUNCHER_NULL(
             eventName = "paymentsheet.external_payment_method.launcher_is_null"
+        ),
+        CREATE_INTENT_CALLBACK_NULL(
+            eventName = "paymentsheet.create_intent_callback.is_null"
         ),
     }
 
@@ -189,6 +201,12 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         LINK_ATTACH_CARD_WITH_NULL_ACCOUNT(
             partialEventName = "link.create_new_card.missing_link_account"
         ),
+        LINK_WEB_FAILED_TO_PARSE_RESULT_URI(
+            partialEventName = "link.web.result.parsing_failed"
+        ),
+        LINK_NATIVE_FAILED_TO_ATTEST_SIGNUP_REQUEST(
+            partialEventName = "link.native.signup.failed_to_attest_request"
+        ),
         PAYMENT_SHEET_AUTHENTICATORS_NOT_FOUND(
             partialEventName = "paymentsheet.authenticators.not_found"
         ),
@@ -221,6 +239,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         CUSTOMER_SESSION_ON_CUSTOMER_SHEET_ELEMENTS_SESSION_NO_CUSTOMER_FIELD(
             partialEventName = "customersheet.customer_session.elements_session.no_customer_field"
+        ),
+        EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL(
+            partialEventName = "embedded.embedded_sheet_launcher.embedded_state_is_null"
         ),
         ;
 
@@ -264,6 +285,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         EXTERNAL_PAYMENT_METHODS_LAUNCH_SUCCESS(
             eventName = "paymentsheet.external_payment_method.launch_success"
+        ),
+        FOUND_CREATE_INTENT_CALLBACK_WHILE_POLLING(
+            eventName = "paymentsheet.polling_for_create_intent_callback.found"
         ),
     }
 }

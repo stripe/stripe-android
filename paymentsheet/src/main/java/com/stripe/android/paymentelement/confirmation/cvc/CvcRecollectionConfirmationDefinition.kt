@@ -11,8 +11,9 @@ import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Cvc
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncher
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionResult
+import javax.inject.Inject
 
-internal class CvcRecollectionConfirmationDefinition(
+internal class CvcRecollectionConfirmationDefinition @Inject constructor(
     private val handler: CvcRecollectionHandler,
     private val factory: CvcRecollectionLauncherFactory,
 ) : ConfirmationDefinition<
@@ -31,7 +32,7 @@ internal class CvcRecollectionConfirmationDefinition(
         confirmationOption: PaymentMethodConfirmationOption.Saved,
         confirmationParameters: ConfirmationDefinition.Parameters,
     ): Boolean {
-        return handler.requiresCVCRecollection(
+        return !confirmationOption.optionsParams.hasAlreadyRecollectedCvc() && handler.requiresCVCRecollection(
             stripeIntent = confirmationParameters.intent,
             initializationMode = confirmationParameters.initializationMode,
             paymentMethod = confirmationOption.paymentMethod,
@@ -94,8 +95,15 @@ internal class CvcRecollectionConfirmationDefinition(
                 parameters = confirmationParameters,
             )
             is CvcRecollectionResult.Cancelled -> ConfirmationDefinition.Result.Canceled(
-                action = ConfirmationHandler.Result.Canceled.Action.None,
+                action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
             )
+        }
+    }
+
+    private fun PaymentMethodOptionsParams?.hasAlreadyRecollectedCvc(): Boolean {
+        return when (this) {
+            is PaymentMethodOptionsParams.Card -> cvc != null
+            else -> false
         }
     }
 }

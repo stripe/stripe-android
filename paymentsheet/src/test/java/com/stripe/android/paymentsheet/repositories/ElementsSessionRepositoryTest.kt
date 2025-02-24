@@ -41,6 +41,7 @@ internal class ElementsSessionRepositoryTest {
                 ElementsSession.createFromFallback(
                     stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
                     sessionsError = null,
+                    elementsSessionId = "session_1234"
                 )
             )
         )
@@ -53,7 +54,7 @@ internal class ElementsSessionRepositoryTest {
                 ),
                 customer = null,
                 externalPaymentMethods = emptyList(),
-                defaultPaymentMethodId = null,
+                savedPaymentMethodSelectionId = null,
             ).getOrThrow()
         }
 
@@ -62,6 +63,8 @@ internal class ElementsSessionRepositoryTest {
         verify(stripeRepository).retrieveElementsSession(argumentCaptor.capture(), any())
         verify(stripeRepository, never()).retrievePaymentIntent(any(), any(), any())
         assertThat(session.stripeIntent).isEqualTo(PaymentIntentFixtures.PI_WITH_SHIPPING)
+        assertThat(session.elementsSessionId).isEqualTo("session_1234")
+        assertThat(argumentCaptor.firstValue.appId).isEqualTo(APP_ID)
         assertThat(argumentCaptor.firstValue.locale).isEqualTo(locale.toLanguageTag())
     }
 
@@ -82,7 +85,7 @@ internal class ElementsSessionRepositoryTest {
                     ),
                     customer = null,
                     externalPaymentMethods = emptyList(),
-                    defaultPaymentMethodId = null,
+                    savedPaymentMethodSelectionId = null,
                 ).getOrThrow()
             }
 
@@ -108,7 +111,7 @@ internal class ElementsSessionRepositoryTest {
                     ),
                     customer = null,
                     externalPaymentMethods = emptyList(),
-                    defaultPaymentMethodId = null,
+                    savedPaymentMethodSelectionId = null,
                 ).getOrThrow()
             }
 
@@ -134,13 +137,14 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
+            appId = APP_ID
         ).get(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "client_secret",
             ),
             customer = null,
             externalPaymentMethods = emptyList(),
-            defaultPaymentMethodId = null,
+            savedPaymentMethodSelectionId = null,
         ).getOrThrow()
 
         val argumentCaptor: KArgumentCaptor<ElementsSessionParams> = argumentCaptor()
@@ -151,6 +155,7 @@ internal class ElementsSessionRepositoryTest {
 
         val defaultLocale = LocaleListCompat.getAdjustedDefault()[0]?.toLanguageTag()
         assertThat(argumentCaptor.firstValue.locale).isEqualTo(defaultLocale)
+        assertThat(argumentCaptor.firstValue.appId)
     }
 
     @Test
@@ -166,6 +171,7 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
+            appId = APP_ID
         ).get(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
@@ -177,7 +183,7 @@ internal class ElementsSessionRepositoryTest {
             ),
             customer = null,
             externalPaymentMethods = emptyList(),
-            defaultPaymentMethodId = null,
+            savedPaymentMethodSelectionId = null,
         )
 
         assertThat(session.isSuccess).isTrue()
@@ -198,6 +204,7 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
+            appId = APP_ID
         ).get(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
@@ -210,7 +217,7 @@ internal class ElementsSessionRepositoryTest {
             ),
             customer = null,
             externalPaymentMethods = emptyList(),
-            defaultPaymentMethodId = null,
+            savedPaymentMethodSelectionId = null,
         )
 
         assertThat(session.isSuccess).isTrue()
@@ -235,6 +242,7 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
+            appId = APP_ID
         )
 
         repository.get(
@@ -246,7 +254,7 @@ internal class ElementsSessionRepositoryTest {
                 clientSecret = "customer_session_client_secret"
             ),
             externalPaymentMethods = emptyList(),
-            defaultPaymentMethodId = null,
+            savedPaymentMethodSelectionId = null,
         )
 
         verify(stripeRepository).retrieveElementsSession(
@@ -255,7 +263,8 @@ internal class ElementsSessionRepositoryTest {
                     clientSecret = "client_secret",
                     customerSessionClientSecret = "customer_session_client_secret",
                     externalPaymentMethods = emptyList(),
-                    defaultPaymentMethodId = null,
+                    savedPaymentMethodSelectionId = null,
+                    appId = APP_ID
                 )
             ),
             options = any()
@@ -279,6 +288,7 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
+            appId = APP_ID
         )
 
         repository.get(
@@ -287,7 +297,7 @@ internal class ElementsSessionRepositoryTest {
             ),
             customer = null,
             externalPaymentMethods = emptyList(),
-            defaultPaymentMethodId = "pm_123",
+            savedPaymentMethodSelectionId = "pm_123",
         )
 
         verify(stripeRepository).retrieveElementsSession(
@@ -295,7 +305,8 @@ internal class ElementsSessionRepositoryTest {
                 ElementsSessionParams.PaymentIntentType(
                     clientSecret = "client_secret",
                     externalPaymentMethods = emptyList(),
-                    defaultPaymentMethodId = "pm_123",
+                    savedPaymentMethodSelectionId = "pm_123",
+                    appId = APP_ID
                 )
             ),
             options = any()
@@ -306,6 +317,7 @@ internal class ElementsSessionRepositoryTest {
         stripeRepository,
         { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
         testDispatcher,
+        appId = APP_ID
     )
 
     private inline fun <T> withLocale(locale: Locale, block: () -> T): T {
@@ -314,5 +326,9 @@ internal class ElementsSessionRepositoryTest {
         val result = block()
         Locale.setDefault(original)
         return result
+    }
+
+    companion object {
+        private const val APP_ID = "com.app.id"
     }
 }

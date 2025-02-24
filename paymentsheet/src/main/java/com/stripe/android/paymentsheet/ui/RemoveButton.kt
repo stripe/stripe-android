@@ -31,6 +31,8 @@ import com.stripe.android.uicore.getBorderStrokeWidth
 import com.stripe.android.uicore.getComposeTextStyle
 import com.stripe.android.uicore.stripeShapes
 
+internal const val REMOVE_BUTTON_LOADING = "REMOVE_BUTTON_LOADING"
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 internal fun RemoveButton(
@@ -80,7 +82,8 @@ internal fun RemoveButton(
                         .padding(
                             start = 8.dp,
                             end = 8.dp
-                        ),
+                        )
+                        .testTag(REMOVE_BUTTON_LOADING),
                     color = MaterialTheme.colors.error,
                 )
             }

@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.view.Window
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.Colors
@@ -28,22 +29,22 @@ import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.ui.LocalNavHostController
-import com.stripe.android.uicore.R as StripeUiCoreR
 
 internal enum class Theme {
     DefaultLight,
     LinkLight;
 
     val colors: FinancialConnectionsColors
+        @Composable
         get() = when (this) {
-            DefaultLight -> Colors
-            LinkLight -> InstantDebitsColors
+            DefaultLight -> if (isSystemInDarkTheme()) DarkThemeColors else Colors
+            LinkLight -> if (isSystemInDarkTheme()) InstantDebitsDarkModeColors else InstantDebitsColors
         }
 
     val icon: Int
         get() = when (this) {
             DefaultLight -> R.drawable.stripe_logo
-            LinkLight -> StripeUiCoreR.drawable.stripe_link_logo_bw
+            LinkLight -> R.drawable.stripe_link_logo
         }
 
     companion object {
@@ -52,51 +53,95 @@ internal enum class Theme {
 }
 
 private val Colors = FinancialConnectionsColors(
+    background = Neutral0,
+    backgroundSecondary = Neutral25,
+    backgroundHighlighted = Neutral50,
     textDefault = Neutral800,
     textSubdued = Neutral600,
-    textDisabled = Neutral300,
-    textWhite = Neutral0,
-    textBrand = Brand600,
-    textCritical = Critical500,
-    iconDefault = Neutral700,
-    iconWhite = Neutral0,
-    iconBrand = Brand500,
-    iconCaution = Attention300,
-    iconBackground = Brand50,
-    buttonPrimary = Brand500,
-    buttonSecondary = Neutral25,
-    background = Neutral25,
-    backgroundSurface = Neutral0,
-    backgroundOffset = Neutral50,
-    backgroundBrand = Neutral25,
-    backgroundCaution = Attention50,
-    border = Neutral100,
-    borderBrand = Brand500,
-    contentOnBrand = Neutral0,
+    textCritical = FeedbackCritical600,
+    icon = Neutral700,
+    borderNeutral = Neutral100,
+    spinnerNeutral = Neutral200,
+    warningLight = Attention50,
+    warning = Attention300,
+    primary = Brand500,
+    primaryAccent = Neutral0,
+    textAction = Brand600,
+    textFieldFocused = Brand600,
+    logo = Brand600,
+    iconTint = Brand500,
+    iconBackground = Brand25,
+    spinner = Brand500,
+    border = Brand600,
+)
+
+private val DarkThemeColors = FinancialConnectionsColors(
+    background = Neutral0Dark,
+    backgroundSecondary = Neutral25Dark,
+    backgroundHighlighted = Neutral50Dark,
+    textDefault = Neutral25,
+    textSubdued = Neutral800Dark,
+    textCritical = FeedbackCritical600,
+    icon = Neutral25,
+    borderNeutral = Neutral100Dark,
+    spinnerNeutral = Neutral200,
+    warningLight = Attention100Dark,
+    warning = Attention300,
+    primary = Brand500,
+    primaryAccent = Neutral0,
+    textAction = Brand500,
+    textFieldFocused = Brand600,
+    logo = Neutral0,
+    iconTint = Brand500,
+    iconBackground = Brand25Dark,
+    spinner = Brand500,
+    border = Brand600,
 )
 
 private val InstantDebitsColors = FinancialConnectionsColors(
+    background = Neutral0,
+    backgroundSecondary = Neutral25,
+    backgroundHighlighted = Neutral50,
     textDefault = Neutral800,
     textSubdued = Neutral600,
-    textDisabled = Neutral300,
-    textWhite = Neutral0,
-    textBrand = LinkGreen500,
-    textCritical = Critical500,
-    iconDefault = Neutral700,
-    iconWhite = Neutral0,
-    iconBrand = LinkGreen500,
-    iconCaution = Attention300,
+    textCritical = FeedbackCritical600,
+    icon = Neutral700,
+    borderNeutral = Neutral100,
+    spinnerNeutral = Neutral200,
+    warningLight = Attention50,
+    warning = Attention300,
+    primary = LinkGreen200,
+    primaryAccent = LinkGreen900,
+    textAction = LinkGreen500,
+    textFieldFocused = LinkGreen200,
+    logo = LinkGreen900,
+    iconTint = LinkGreen500,
     iconBackground = LinkGreen50,
-    buttonPrimary = LinkGreen200,
-    buttonSecondary = Neutral25,
-    background = Neutral25,
-    backgroundSurface = Neutral0,
-    backgroundOffset = Neutral50,
-    backgroundBrand = Neutral25,
-    backgroundCaution = Attention50,
-    border = Neutral100,
-    borderBrand = LinkGreen200,
-    contentOnBrand = LinkGreen900,
+    spinner = LinkGreen200,
+    border = LinkGreen200,
+)
+
+private val InstantDebitsDarkModeColors = FinancialConnectionsColors(
+    background = Neutral0Dark,
+    backgroundSecondary = Neutral25Dark,
+    backgroundHighlighted = Neutral50Dark,
+    textDefault = Neutral25,
+    textSubdued = Neutral800Dark,
+    textCritical = FeedbackCritical600,
+    icon = Neutral25,
+    borderNeutral = Neutral100Dark,
+    spinnerNeutral = Neutral200,
+    warningLight = Attention100Dark,
+    warning = Attention300,
+    primary = LinkGreen200,
+    primaryAccent = LinkGreen900,
+    textAction = LinkGreen200,
+    textFieldFocused = Brand600,
+    logo = Neutral0,
+    iconTint = LinkGreen500,
+    iconBackground = LinkGreen50Dark,
+    spinner = LinkGreen200,
+    border = LinkGreen200,
 )
 
 private val lineHeightStyle = LineHeightStyle(
@@ -190,6 +235,21 @@ internal val TextSelectionColors: TextSelectionColors
         backgroundColor = FinancialConnectionsTheme.colors.textDefault.copy(alpha = 0.4f)
     )
 
+@Immutable
+private object FinancialConnectionsRippleTheme : RippleTheme {
+    @Composable
+    override fun defaultColor() = RippleTheme.defaultRippleColor(
+        contentColor = FinancialConnectionsTheme.colors.textAction,
+        lightTheme = MaterialTheme.colors.isLight,
+    )
+
+    @Composable
+    override fun rippleAlpha() = RippleTheme.defaultRippleAlpha(
+        contentColor = FinancialConnectionsTheme.colors.textAction,
+        lightTheme = MaterialTheme.colors.isLight,
+    )
+}
+
 @Composable
 internal fun FinancialConnectionsTheme(
     theme: Theme = Theme.default,
@@ -202,13 +262,14 @@ internal fun FinancialConnectionsTheme(
     ) {
         val view = LocalView.current
         val window = findWindow()
-        val barColor = FinancialConnectionsTheme.colors.border
+        val barColor = FinancialConnectionsTheme.colors.borderNeutral
         if (!view.isInEditMode) {
+            val lightNavBar = !isSystemInDarkTheme()
             SideEffect {
                 window?.let { window ->
                     val insets = WindowCompat.getInsetsController(window, view)
                     window.navigationBarColor = barColor.toArgb()
-                    insets.isAppearanceLightNavigationBars = true
+                    insets.isAppearanceLightNavigationBars = lightNavBar
                 }
             }
         }

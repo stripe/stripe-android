@@ -37,6 +37,7 @@ internal class IntentConfirmationDefinition(
     ): ConfirmationDefinition.Action<Args> {
         val nextStep = intentConfirmationInterceptor.intercept(
             confirmationOption = confirmationOption,
+            intent = confirmationParameters.intent,
             initializationMode = confirmationParameters.initializationMode,
             shippingDetails = confirmationParameters.shippingDetails,
         )

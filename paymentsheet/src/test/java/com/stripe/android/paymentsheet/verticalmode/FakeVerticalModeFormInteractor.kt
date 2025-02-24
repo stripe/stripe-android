@@ -12,16 +12,11 @@ import org.mockito.Mockito.mock
 internal class FakeVerticalModeFormInteractor private constructor(
     initialState: VerticalModeFormInteractor.State,
     override val isLiveMode: Boolean = true,
-    private val canGoBack: Boolean,
 ) : VerticalModeFormInteractor {
     override val state: StateFlow<VerticalModeFormInteractor.State> = stateFlowOf(initialState)
 
     override fun handleViewAction(viewAction: VerticalModeFormInteractor.ViewAction) {
         // No op.
-    }
-
-    override fun canGoBack(): Boolean {
-        return canGoBack
     }
 
     override fun close() {
@@ -33,7 +28,6 @@ internal class FakeVerticalModeFormInteractor private constructor(
             paymentMethodCode: PaymentMethodCode,
             metadata: PaymentMethodMetadata,
             isProcessing: Boolean = false,
-            canGoBack: Boolean = true,
         ): VerticalModeFormInteractor {
             val formArguments = FormArgumentsFactory.create(
                 paymentMethodCode = paymentMethodCode,
@@ -60,7 +54,6 @@ internal class FakeVerticalModeFormInteractor private constructor(
                         customerHasSavedPaymentMethods = false,
                     ),
                 ),
-                canGoBack = canGoBack,
             )
         }
     }

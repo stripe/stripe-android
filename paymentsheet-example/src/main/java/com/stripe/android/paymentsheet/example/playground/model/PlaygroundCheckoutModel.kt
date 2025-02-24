@@ -46,6 +46,8 @@ class CheckoutRequest private constructor(
     val paymentMethodRedisplayFilters: List<AllowRedisplayFilter>?,
     @SerialName("customer_session_payment_method_save_allow_redisplay_override")
     val paymentMethodOverrideRedisplay: AllowRedisplayFilter?,
+    @SerialName("customer_session_payment_method_set_as_default")
+    val paymentMethodSetAsDefaultFeature: FeatureState?,
 ) {
     @Serializable
     enum class CustomerKeyType {
@@ -72,6 +74,7 @@ class CheckoutRequest private constructor(
         private var paymentMethodSaveFeature: FeatureState = FeatureState.Enabled
         private var paymentMethodRemoveFeature: FeatureState = FeatureState.Enabled
         private var paymentMethodRemoveLastFeature: FeatureState = FeatureState.Enabled
+        private var paymentMethodSetAsDefaultFeature: FeatureState = FeatureState.Disabled
         private var paymentMethodRedisplayFeature: FeatureState = FeatureState.Enabled
         private var paymentMethodRedisplayFilters: List<AllowRedisplayFilter> = listOf(
             AllowRedisplayFilter.Unspecified,
@@ -136,6 +139,10 @@ class CheckoutRequest private constructor(
             this.paymentMethodRemoveLastFeature = state
         }
 
+        fun paymentMethodSetAsDefaultFeature(state: FeatureState) {
+            this.paymentMethodSetAsDefaultFeature = state
+        }
+
         fun paymentMethodRedisplayFeature(state: FeatureState) {
             this.paymentMethodRedisplayFeature = state
         }
@@ -169,6 +176,7 @@ class CheckoutRequest private constructor(
                 customerSessionComponentName = "mobile_payment_element",
                 paymentMethodSaveFeature = paymentMethodSaveFeature,
                 paymentMethodRemoveFeature = paymentMethodRemoveFeature,
+                paymentMethodSetAsDefaultFeature = paymentMethodSetAsDefaultFeature,
                 paymentMethodRemoveLastFeature = paymentMethodRemoveLastFeature,
                 paymentMethodRedisplayFeature = paymentMethodRedisplayFeature,
                 paymentMethodRedisplayFilters = paymentMethodRedisplayFilters,

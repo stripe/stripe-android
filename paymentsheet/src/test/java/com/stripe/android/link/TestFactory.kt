@@ -2,16 +2,29 @@ package com.stripe.android.link
 
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
+import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.CvcCheck
+import com.stripe.android.model.EmailSource
+import com.stripe.android.model.IncentiveEligibilitySession
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.SharePaymentDetails
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import org.mockito.kotlin.mock
 
 internal object TestFactory {
@@ -34,6 +47,9 @@ internal object TestFactory {
     const val CUSTOMER_PHONE = "1234567890"
     const val CUSTOMER_BILLING_COUNTRY_CODE = "US"
     const val CUSTOMER_NAME = "Customer"
+    const val AMOUNT = 100L
+    const val CURRENCY = "USD"
+    const val COUNTRY = "US"
 
     val VERIFIED_SESSION = ConsumerSession.VerificationSession(
         type = ConsumerSession.VerificationSession.SessionType.Sms,
@@ -102,6 +118,16 @@ internal object TestFactory {
         originalParams = mock()
     )
 
+    val LINK_SHARE_PAYMENT_DETAILS = SharePaymentDetails(
+        paymentMethodId = "pm_123",
+        encodedPaymentMethod = "{\"id\": \"pm_123\"}",
+    )
+
+    val LINK_SAVED_PAYMENT_DETAILS = LinkPaymentDetails.Saved(
+        paymentDetails = CONSUMER_PAYMENT_DETAILS_CARD,
+        paymentMethodCreateParams = PAYMENT_METHOD_CREATE_PARAMS,
+    )
+
     val LINK_ACCOUNT = LinkAccount(CONSUMER_SESSION)
 
     val CONSUMER_PAYMENT_DETAILS: ConsumerPaymentDetails = ConsumerPaymentDetails(
@@ -112,24 +138,60 @@ internal object TestFactory {
         )
     )
 
+    val LINK_CUSTOMER_INFO = LinkConfiguration.CustomerInfo(
+        name = CUSTOMER_NAME,
+        email = CUSTOMER_EMAIL,
+        phone = CUSTOMER_PHONE,
+        billingCountryCode = CUSTOMER_BILLING_COUNTRY_CODE
+    )
+
     val LINK_CONFIGURATION = LinkConfiguration(
         stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
         merchantName = MERCHANT_NAME,
         merchantCountryCode = "",
-        customerInfo = LinkConfiguration.CustomerInfo(
-            name = CUSTOMER_NAME,
-            email = CUSTOMER_EMAIL,
-            phone = CUSTOMER_PHONE,
-            billingCountryCode = CUSTOMER_BILLING_COUNTRY_CODE
-        ),
+        customerInfo = LINK_CUSTOMER_INFO,
         shippingDetails = null,
         flags = emptyMap(),
         cardBrandChoice = null,
-        passthroughModeEnabled = false
+        passthroughModeEnabled = false,
+        useAttestationEndpointsForLink = false,
+        suppress2faModal = false,
+        initializationMode = PaymentSheetFixtures.INITIALIZATION_MODE_PAYMENT_INTENT,
+        elementsSessionId = "session_1234",
+        linkMode = LinkMode.LinkPaymentMethod,
     )
 
     val LINK_WALLET_PRIMARY_BUTTON_LABEL = Amount(
         requireNotNull(PaymentIntentFixtures.PI_SUCCEEDED.amount),
         requireNotNull(PaymentIntentFixtures.PI_SUCCEEDED.currency)
     ).buildPayButtonLabel()
+
+    val CARD_FORM_ARGS = FormArguments(
+        paymentMethodCode = PaymentMethod.Type.Card.code,
+        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+        merchantName = "Example, Inc.",
+        amount = Amount(1000, "USD"),
+        billingDetails = null,
+        shippingDetails = null,
+        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+        hasIntentToSetup = false,
+        paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+    )
+
+    val CARD_FORM_ELEMENTS = CardDefinition.formElements()
+
+    const val VERIFICATION_TOKEN = "12356edtyf6esrte6r6dtd67"
+    val INCENTIVE_ELIGIBILITY_SESSION = IncentiveEligibilitySession.PaymentIntent("pi_12345")
+    const val APP_ID = "com.stripe.app"
+    const val SESSION_ID = "element_sessions_123"
+    val EMAIL_SOURCE = EmailSource.CUSTOMER_OBJECT
+    val CONSENT_ACTION = ConsumerSignUpConsentAction.Checkbox
+
+    val NATIVE_LINK_ARGS = NativeLinkArgs(
+        configuration = LINK_CONFIGURATION,
+        publishableKey = "",
+        stripeAccountId = "",
+        startWithVerificationDialog = false,
+        linkAccount = LINK_ACCOUNT
+    )
 }

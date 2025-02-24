@@ -12,6 +12,7 @@ import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
+import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.NameConfig
@@ -32,7 +33,143 @@ internal class AccountPreviewScreenshotTest {
             .fillMaxWidth(),
     )
 
-    private val formArguments = FormArguments(
+    @Test
+    fun testPaymentFlow() {
+        takeAccountPreviewScreenShot(
+            state = BankFormScreenStateFactory.createWithSession(
+                sessionId = "session_1234",
+            ),
+            instantDebits = false,
+            isPaymentFlow = true,
+            enabled = true,
+        )
+    }
+
+    @Test
+    fun testPaymentFlowDisabled() {
+        takeAccountPreviewScreenShot(
+            state = BankFormScreenStateFactory.createWithSession(
+                sessionId = "session_1234",
+            ),
+            instantDebits = false,
+            isPaymentFlow = true,
+            enabled = false,
+        )
+    }
+
+    @Test
+    fun testSetupFlow() {
+        takeAccountPreviewScreenShot(
+            state = BankFormScreenStateFactory.createWithSession(
+                sessionId = "session_1234",
+            ),
+            instantDebits = false,
+            isPaymentFlow = false,
+        )
+    }
+
+    @Test
+    fun testWithBillingAddress() {
+        takeAccountPreviewScreenShot(
+            state = BankFormScreenStateFactory.createWithSession(
+                sessionId = "session_1234",
+            ),
+            instantDebits = false,
+            isPaymentFlow = true,
+            formArguments = defaultFormArguments.copy(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                ),
+            ),
+            fillAddress = true,
+        )
+    }
+
+    @Test
+    fun testWithPromoBadge() {
+        takeAccountPreviewScreenShot(
+            state = BankFormScreenStateFactory.createWithSession(
+                sessionId = "session_1234",
+                promoText = "$5",
+            ),
+            instantDebits = true,
+            isPaymentFlow = true,
+        )
+    }
+
+    @Test
+    fun testWithPromoBadgeNextToSuperLongAccountName() {
+        takeAccountPreviewScreenShot(
+            state = BankFormScreenStateFactory.createWithSession(
+                sessionId = "session_1234",
+                promoText = "$5",
+                eligibleForPromo = false,
+                bankName = "SuperDuperUltraLongBankName",
+            ),
+            instantDebits = true,
+            isPaymentFlow = true,
+        )
+    }
+
+    @Test
+    fun testWithIneligiblePromoBadge() {
+        takeAccountPreviewScreenShot(
+            state = BankFormScreenStateFactory.createWithSession(
+                sessionId = "session_1234",
+                promoText = "$5",
+                eligibleForPromo = false,
+            ),
+            instantDebits = true,
+            isPaymentFlow = true,
+        )
+    }
+
+    @Test
+    fun testPaymentFlowWithSaveForFutureUseOnly() {
+        takeAccountPreviewScreenShot(
+            state = BankFormScreenStateFactory.createWithSession(
+                sessionId = "session_1234",
+            ),
+            instantDebits = false,
+            isPaymentFlow = true,
+            enabled = true,
+            showCheckboxes = true,
+        )
+    }
+
+    @Test
+    fun testPaymentFlowWithSaveForFutureUseChecked() {
+        saveForFutureUseElement.controller.onValueChange(true)
+
+        takeAccountPreviewScreenShot(
+            state = BankFormScreenStateFactory.createWithSession(
+                sessionId = "session_1234",
+            ),
+            instantDebits = false,
+            isPaymentFlow = true,
+            enabled = true,
+            showCheckboxes = true,
+        )
+    }
+
+    @Test
+    fun testPaymentFlowWithBothCheckboxesChecked() {
+        saveForFutureUseElement.controller.onValueChange(true)
+
+        setAsDefaultPaymentMethodElement.controller.onValueChange(true)
+
+        takeAccountPreviewScreenShot(
+            state = BankFormScreenStateFactory.createWithSession(
+                sessionId = "session_1234",
+            ),
+            instantDebits = false,
+            isPaymentFlow = true,
+            enabled = true,
+            showCheckboxes = true,
+        )
+    }
+
+    private val defaultFormArguments = FormArguments(
         paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
         merchantName = "Test Merchant",
         amount = null,
@@ -52,144 +189,37 @@ internal class AccountPreviewScreenshotTest {
         merchantName = "Test Merchant",
     )
 
-    @Test
-    fun testPaymentFlow() {
+    private val setAsDefaultPaymentMethodElement = SetAsDefaultPaymentMethodElement(
+        initialValue = false,
+        shouldShowElementFlow = saveForFutureUseElement.controller.saveForFutureUse
+    )
+
+    private fun takeAccountPreviewScreenShot(
+        state: BankFormScreenState,
+        instantDebits: Boolean,
+        isPaymentFlow: Boolean,
+        formArguments: FormArguments = defaultFormArguments,
+        fillAddress: Boolean = false,
+        enabled: Boolean = true,
+        showCheckboxes: Boolean = false,
+    ) {
         paparazzi.snapshot {
             BankAccountForm(
-                state = BankFormScreenStateFactory.createWithSession("session_1234"),
-                instantDebits = false,
-                isPaymentFlow = true,
+                state = state,
+                instantDebits = instantDebits,
+                isPaymentFlow = isPaymentFlow,
                 formArgs = formArguments,
                 nameController = createNameController(),
                 emailController = createEmailController(),
                 phoneController = createPhoneNumberController(),
-                addressController = createAddressController(),
+                addressController = createAddressController(fillAddress = fillAddress),
                 sameAsShippingElement = sameAsShippingElement,
                 saveForFutureUseElement = saveForFutureUseElement,
-                showCheckbox = false,
+                setAsDefaultPaymentMethodElement = setAsDefaultPaymentMethodElement,
+                showCheckboxes = showCheckboxes,
                 lastTextFieldIdentifier = null,
                 onRemoveAccount = {},
-            )
-        }
-    }
-
-    @Test
-    fun testSetupFlow() {
-        paparazzi.snapshot {
-            BankAccountForm(
-                state = BankFormScreenStateFactory.createWithSession("session_1234"),
-                instantDebits = false,
-                isPaymentFlow = false,
-                formArgs = formArguments,
-                nameController = createNameController(),
-                emailController = createEmailController(),
-                phoneController = createPhoneNumberController(),
-                addressController = createAddressController(),
-                sameAsShippingElement = sameAsShippingElement,
-                saveForFutureUseElement = saveForFutureUseElement,
-                showCheckbox = false,
-                lastTextFieldIdentifier = null,
-                onRemoveAccount = {},
-            )
-        }
-    }
-
-    @Test
-    fun testWithBillingAddress() {
-        paparazzi.snapshot {
-            BankAccountForm(
-                state = BankFormScreenStateFactory.createWithSession("session_1234"),
-                instantDebits = false,
-                isPaymentFlow = true,
-                formArgs = formArguments.copy(
-                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-                    ),
-                ),
-                nameController = createNameController(),
-                emailController = createEmailController(),
-                phoneController = createPhoneNumberController(),
-                addressController = createAddressController(fillAddress = true),
-                sameAsShippingElement = sameAsShippingElement,
-                saveForFutureUseElement = saveForFutureUseElement,
-                showCheckbox = false,
-                lastTextFieldIdentifier = null,
-                onRemoveAccount = {},
-            )
-        }
-    }
-
-    @Test
-    fun testWithPromoBadge() {
-        paparazzi.snapshot {
-            BankAccountForm(
-                state = BankFormScreenStateFactory.createWithSession(
-                    sessionId = "session_1234",
-                    promoText = "$5",
-                ),
-                instantDebits = true,
-                isPaymentFlow = true,
-                formArgs = formArguments,
-                nameController = createNameController(),
-                emailController = createEmailController(),
-                phoneController = createPhoneNumberController(),
-                addressController = createAddressController(fillAddress = false),
-                sameAsShippingElement = sameAsShippingElement,
-                saveForFutureUseElement = saveForFutureUseElement,
-                showCheckbox = false,
-                lastTextFieldIdentifier = null,
-                onRemoveAccount = {},
-            )
-        }
-    }
-
-    @Test
-    fun testWithPromoBadgeNextToSuperLongAccountName() {
-        paparazzi.snapshot {
-            BankAccountForm(
-                state = BankFormScreenStateFactory.createWithSession(
-                    sessionId = "session_1234",
-                    promoText = "$5",
-                    eligibleForPromo = false,
-                    bankName = "SuperDuperUltraLongBankName",
-                ),
-                instantDebits = true,
-                isPaymentFlow = true,
-                formArgs = formArguments,
-                nameController = createNameController(),
-                emailController = createEmailController(),
-                phoneController = createPhoneNumberController(),
-                addressController = createAddressController(fillAddress = false),
-                sameAsShippingElement = sameAsShippingElement,
-                saveForFutureUseElement = saveForFutureUseElement,
-                showCheckbox = false,
-                lastTextFieldIdentifier = null,
-                onRemoveAccount = {},
-            )
-        }
-    }
-
-    @Test
-    fun testWithIneligiblePromoBadge() {
-        paparazzi.snapshot {
-            BankAccountForm(
-                state = BankFormScreenStateFactory.createWithSession(
-                    sessionId = "session_1234",
-                    promoText = "$5",
-                    eligibleForPromo = false,
-                ),
-                instantDebits = true,
-                isPaymentFlow = true,
-                formArgs = formArguments,
-                nameController = createNameController(),
-                emailController = createEmailController(),
-                phoneController = createPhoneNumberController(),
-                addressController = createAddressController(fillAddress = false),
-                sameAsShippingElement = sameAsShippingElement,
-                saveForFutureUseElement = saveForFutureUseElement,
-                showCheckbox = false,
-                lastTextFieldIdentifier = null,
-                onRemoveAccount = {},
+                enabled = enabled,
             )
         }
     }

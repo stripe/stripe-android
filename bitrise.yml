@@ -103,7 +103,6 @@ workflows:
             - module: financial-connections-example
             - variant: $BUILD_VARIANT
             - build_type: apk
-            - cache_level: all
       - deploy-to-bitrise-io@2:
           inputs:
             - pipeline_intermediate_files: "$BITRISE_APK_PATH:BITRISE_APK_PATH"
@@ -182,60 +181,6 @@ workflows:
           inputs:
             - event_description: Android E2E tests failing! $BITRISE_BUILD_URL
             - integration_key: $AUX_PAGERDUTY_INTEGRATION_KEY
-  maestro-paymentsheet:
-    before_run:
-      - start_emulator
-      - prepare_all
-    after_run:
-      - conclude_all
-    steps:
-      - wait-for-android-emulator@1:
-          inputs:
-            - boot_timeout: 600
-      - script@1:
-          title: Execute Maestro tests
-          inputs:
-            - content: |-
-                #!/usr/bin/env bash
-                bash ./scripts/execute_maestro_elements_tests.sh paymentsheet
-      - slack@3:
-          is_always_run: true
-          run_if: .IsBuildFailed
-          inputs:
-            - webhook_url: $WEBHOOK_SLACK_ELEMENTS_MAESTRO
-            - webhook_url_on_error: $WEBHOOK_SLACK_ELEMENTS_MAESTRO
-      - custom-test-results-export@1:
-          inputs:
-            - search_pattern: '*/maestroReport.xml'
-            - test_name: Maestro tests
-      - deploy-to-bitrise-io@2: { }
-  maestro-customersheet:
-    before_run:
-      - start_emulator
-      - prepare_all
-    after_run:
-      - conclude_all
-    steps:
-      - wait-for-android-emulator@1:
-          inputs:
-            - boot_timeout: 600
-      - script@1:
-          title: Execute Maestro tests
-          inputs:
-            - content: |-
-                #!/usr/bin/env bash
-                bash ./scripts/execute_maestro_elements_tests.sh customersheet
-      - slack@3:
-          is_always_run: true
-          run_if: .IsBuildFailed
-          inputs:
-            - webhook_url: $WEBHOOK_SLACK_ELEMENTS_MAESTRO
-            - webhook_url_on_error: $WEBHOOK_SLACK_ELEMENTS_MAESTRO
-      - custom-test-results-export@1:
-          inputs:
-            - search_pattern: '*/maestroReport.xml'
-            - test_name: Maestro tests
-      - deploy-to-bitrise-io@2: { }
   run-instrumentation-tests:
     before_run:
       - start_emulator
@@ -278,6 +223,9 @@ workflows:
           timeout: 1200
           inputs:
             - content: ./gradlew paymentsheet-example:executeScreenshotTests -Precord -Pandroid.testInstrumentationRunnerArguments.package=com.stripe.android.screenshot -Dorg.gradle.jvmargs="--add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/java.nio.channels=ALL-UNNAMED --add-exports java.base/sun.nio.ch=ALL-UNNAMED"
+      - script@1:
+          inputs:
+            - content: asdf install ruby 3.2.4
       - script@1:
           title: Check updated screenshots
           inputs:
@@ -382,6 +330,9 @@ workflows:
     steps:
       - script@1:
           inputs:
+            - content: asdf install ruby 3.2.4
+      - script@1:
+          inputs:
             - content: ruby scripts/dependencies/update_transitive_dependencies.rb
       - script@1:
           inputs:
@@ -441,9 +392,6 @@ workflows:
                 -no-boot-anim
   prepare_all:
     steps:
-      - script@1:
-          inputs:
-            - content: asdf install ruby 3.2.4
       - activate-ssh-key@4:
           run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
       - git-clone@8: { }
@@ -481,4 +429,4 @@ workflows:
 meta:
   bitrise.io:
     stack: linux-docker-android-22.04
-    machine_type_id: elite
+    machine_type_id: g2.linux.large

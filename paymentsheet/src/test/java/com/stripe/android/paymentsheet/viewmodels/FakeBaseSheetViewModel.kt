@@ -22,14 +22,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import org.mockito.Mockito.mock
+import org.mockito.kotlin.mock
 
-private fun linkHandler(savedStateHandle: SavedStateHandle): LinkHandler {
+private fun linkHandler(): LinkHandler {
     return LinkHandler(
         linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-        savedStateHandle = savedStateHandle,
-        linkStore = mock(),
-        linkAnalyticsComponentBuilder = mock(),
     )
 }
 
@@ -51,13 +48,18 @@ internal class FakeBaseSheetViewModel private constructor(
         fun create(
             paymentMethodMetadata: PaymentMethodMetadata,
             initialScreen: PaymentSheetScreen,
+            canGoBack: Boolean,
         ): FakeBaseSheetViewModel {
             val savedStateHandle = SavedStateHandle()
-            val linkHandler = linkHandler(savedStateHandle)
+            val linkHandler = linkHandler()
             return FakeBaseSheetViewModel(savedStateHandle, linkHandler, paymentMethodMetadata).apply {
-                navigationHandler.transitionTo(
-                    initialScreen
-                )
+                if (canGoBack) {
+                    navigationHandler.resetTo(
+                        listOf(mock(), initialScreen)
+                    )
+                } else {
+                    navigationHandler.transitionTo(initialScreen)
+                }
             }.also {
                 if (initialScreen.buyButtonState.value.visible) {
                     it.primaryButtonUiStateSource.update {

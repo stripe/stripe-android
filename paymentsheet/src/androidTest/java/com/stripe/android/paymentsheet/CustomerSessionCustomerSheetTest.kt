@@ -1,5 +1,8 @@
 package com.stripe.android.paymentsheet
 
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onAllNodesWithTag
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
@@ -13,6 +16,7 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.paymentsheet.utils.CustomerSheetTestType
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.IntegrationTypeProvider
@@ -124,14 +128,82 @@ internal class CustomerSessionCustomerSheetTest {
         page.clickConfirmButton()
     }
 
+    @Test
+    fun testSepaSuccessfullyHiddenWhenDefaultPMsFeatureEnabled() = runCustomerSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        customerSheetTestType = CustomerSheetTestType.CustomerSession,
+        resultCallback = { result ->
+            verifySelected(
+                expectedLast4 = "4242",
+                expectedBrand = CardBrand.Visa,
+                result = result,
+            )
+        }
+    ) { context ->
+        enqueueElementsSession(
+            cards = listOf(),
+            sepaPaymentMethod = PaymentMethodFactory.sepaDebit(),
+            isPaymentMethodSyncDefaultEnabled = true,
+        )
+
+        context.presentCustomerSheet()
+
+        page.fillOutCardDetails()
+
+        enqueuePaymentMethodCreation()
+        enqueueSetupIntentRetrieval()
+        enqueueSetupIntentConfirmation()
+
+        val paymentMethodId = "pm_12345"
+        enqueueElementsSession(
+            cards = listOf(
+                PaymentMethodFactory.card(id = paymentMethodId).update(
+                    last4 = "4242",
+                    addCbcNetworks = false,
+                    brand = CardBrand.Visa,
+                )
+            ),
+            sepaPaymentMethod = PaymentMethodFactory.sepaDebit(),
+            isPaymentMethodSyncDefaultEnabled = true,
+        )
+
+        page.clickSaveButton()
+        assertOnlySavedCardIsDisplayed()
+
+        context.markTestSucceeded()
+    }
+
+    private fun assertOnlySavedCardIsDisplayed() {
+        val savedPaymentMethodMatcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
+            .and(hasText("4242", substring = true))
+
+        page.waitUntil(savedPaymentMethodMatcher)
+        assertThat(
+            composeTestRule.onAllNodesWithTag(SAVED_PAYMENT_OPTION_TEST_TAG).fetchSemanticsNodes().size
+        ).isEqualTo(1)
+    }
+
     private fun enqueueElementsSession(
         cards: List<PaymentMethod>,
+        sepaPaymentMethod: PaymentMethod? = null,
+        isPaymentMethodSyncDefaultEnabled: Boolean = false,
         isCbcEligible: Boolean = false,
     ) {
-        val cardsArray = JSONArray()
+        val paymentMethodsArray = JSONArray()
 
         cards.forEach { card ->
-            cardsArray.put(PaymentMethodFactory.convertCardToJson(card))
+            paymentMethodsArray.put(PaymentMethodFactory.convertCardToJson(card))
+        }
+
+        sepaPaymentMethod?.let {
+            paymentMethodsArray.put(PaymentMethodFactory.convertSepaPaymentMethodToJson(sepaPaymentMethod))
+        }
+
+        val syncDefaultFeature = if (isPaymentMethodSyncDefaultEnabled) {
+            "enabled"
+        } else {
+            "disabled"
         }
 
         networkRule.enqueue(
@@ -144,11 +216,15 @@ internal class CustomerSessionCustomerSheetTest {
                 replacements = listOf(
                     ResponseReplacement(
                         original = "[PAYMENT_METHODS_HERE]",
-                        new = cardsArray.toString(2),
+                        new = paymentMethodsArray.toString(2),
                     ),
                     ResponseReplacement(
                         original = "CARD_BRAND_CHOICE_ELIGIBILITY",
                         new = isCbcEligible.toString(),
+                    ),
+                    ResponseReplacement(
+                        original = "PAYMENT_METHOD_SYNC_DEFAULT_FEATURE",
+                        new = syncDefaultFeature,
                     ),
                 ),
             )

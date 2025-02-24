@@ -205,7 +205,7 @@ private fun <T> RadioButtonSetting(
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun <T> DropdownSetting(
+internal fun <T> DropdownSetting(
     name: String,
     options: List<PlaygroundSettingDefinition.Displayable.Option<T>>,
     value: T,

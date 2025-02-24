@@ -183,7 +183,10 @@ class CardNumberEditText internal constructor(
         staticCardAccountRanges = staticCardAccountRanges,
         isCbcEligible = { isCbcEligible },
         accountRangeResultListener = object : CardAccountRangeService.AccountRangeResultListener {
-            override fun onAccountRangesResult(accountRanges: List<AccountRange>) {
+            override fun onAccountRangesResult(
+                accountRanges: List<AccountRange>,
+                unfilteredAccountRanges: List<AccountRange>
+            ) {
                 updateLengthFilter()
 
                 val brands = accountRanges.map { it.brand }.distinct()
@@ -191,11 +194,10 @@ class CardNumberEditText internal constructor(
 
                 if (isCbcEligible) {
                     implicitCardBrandForCbc = brands.firstOrNull() ?: CardBrand.Unknown
-                    possibleCardBrands = brands
+                    possibleCardBrands = unfilteredAccountRanges.map { it.brand }.distinct()
                 }
             }
-        },
-        cardBrandFilter = cardBrandFilter
+        }
     )
 
     @JvmSynthetic

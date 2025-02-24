@@ -1,8 +1,10 @@
 package com.stripe.android.link
 
 import android.os.Parcelable
+import com.stripe.android.model.LinkMode
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -15,6 +17,11 @@ internal data class LinkConfiguration(
     val passthroughModeEnabled: Boolean,
     val flags: Map<String, Boolean>,
     val cardBrandChoice: CardBrandChoice?,
+    val useAttestationEndpointsForLink: Boolean,
+    val suppress2faModal: Boolean,
+    val initializationMode: PaymentElementLoader.InitializationMode,
+    val elementsSessionId: String,
+    val linkMode: LinkMode?,
 ) : Parcelable {
     @Parcelize
     data class CustomerInfo(

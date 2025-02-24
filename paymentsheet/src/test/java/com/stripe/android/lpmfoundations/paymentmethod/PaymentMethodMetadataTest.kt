@@ -765,6 +765,7 @@ internal class PaymentMethodMetadataTest {
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             isGooglePayReady = false,
             linkInlineConfiguration = linkInlineConfiguration,
+            linkState = null,
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -784,11 +785,15 @@ internal class PaymentMethodMetadataTest {
             shippingDetails = shippingDetails,
             sharedDataSpecs = sharedDataSpecs,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
-            hasCustomerConfiguration = true,
+            customerMetadata = CustomerMetadata(
+                hasCustomerConfiguration = true,
+                isPaymentMethodSetAsDefaultEnabled = false,
+            ),
             paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             isGooglePayReady = false,
             linkInlineConfiguration = linkInlineConfiguration,
             linkMode = null,
+            linkState = null,
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             paymentMethodIncentive = null,
         )
@@ -797,6 +802,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @OptIn(ExperimentalCardBrandFilteringApi::class)
+    @Suppress("LongMethod")
     @Test
     fun `should create metadata properly with elements session response, customer sheet config, and data specs`() {
         val billingDetailsCollectionConfiguration = createBillingDetailsCollectionConfiguration()
@@ -825,13 +831,14 @@ internal class PaymentMethodMetadataTest {
             overrideAllowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS,
         )
 
-        val metadata = PaymentMethodMetadata.create(
+        val metadata = PaymentMethodMetadata.createForCustomerSheet(
             elementsSession = elementsSession,
             configuration = configuration,
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             sharedDataSpecs = listOf(SharedDataSpec("card")),
             isGooglePayReady = true,
-            isFinancialConnectionsAvailable = { false }
+            isFinancialConnectionsAvailable = { false },
+            isPaymentMethodSyncDefaultEnabled = false,
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -848,16 +855,19 @@ internal class PaymentMethodMetadataTest {
             shippingDetails = null,
             sharedDataSpecs = listOf(SharedDataSpec("card")),
             externalPaymentMethodSpecs = listOf(),
-            hasCustomerConfiguration = true,
+            customerMetadata = CustomerMetadata(
+                hasCustomerConfiguration = true,
+                isPaymentMethodSetAsDefaultEnabled = false,
+            ),
             isGooglePayReady = true,
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             financialConnectionsAvailable = false,
             linkInlineConfiguration = null,
             linkMode = null,
+            linkState = null,
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             paymentMethodIncentive = null,
         )
-
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
 
@@ -869,6 +879,7 @@ internal class PaymentMethodMetadataTest {
                 isPaymentMethodRemoveEnabled = true,
                 canRemoveLastPaymentMethod = true,
                 allowRedisplayOverride = null,
+                isPaymentMethodSetAsDefaultEnabled = false,
             )
         )
 
@@ -883,6 +894,7 @@ internal class PaymentMethodMetadataTest {
                 isPaymentMethodRemoveEnabled = true,
                 canRemoveLastPaymentMethod = true,
                 allowRedisplayOverride = null,
+                isPaymentMethodSetAsDefaultEnabled = false,
             ),
         )
 
@@ -924,6 +936,7 @@ internal class PaymentMethodMetadataTest {
             externalPaymentMethodSpecs = listOf(),
             isGooglePayReady = false,
             linkInlineConfiguration = null,
+            linkState = null,
         )
     }
 
@@ -960,6 +973,7 @@ internal class PaymentMethodMetadataTest {
             linkSettings = null,
             externalPaymentMethodData = null,
             paymentMethodSpecs = null,
+            elementsSessionId = "session_1234"
         )
     }
 
@@ -1310,6 +1324,11 @@ internal class PaymentMethodMetadataTest {
                     preferredNetworks = listOf("cartes_bancaires")
                 ),
                 passthroughModeEnabled = false,
+                useAttestationEndpointsForLink = false,
+                suppress2faModal = false,
+                initializationMode = PaymentSheetFixtures.INITIALIZATION_MODE_PAYMENT_INTENT,
+                elementsSessionId = "session_1234",
+                linkMode = LinkMode.LinkPaymentMethod,
             ),
         )
     }

@@ -193,6 +193,7 @@ class RealCreateInstantDebitsResultTest {
 
         verify(consumerRepository, never()).updateAvailableIncentives(
             sessionId = any(),
+            paymentDetailsId = any(),
             consumerSessionClientSecret = any(),
         )
 
@@ -218,6 +219,7 @@ class RealCreateInstantDebitsResultTest {
         whenever(
             consumerRepository.updateAvailableIncentives(
                 sessionId = eq("pi_123"),
+                paymentDetailsId = eq("ba_1234"),
                 consumerSessionClientSecret = eq("clientSecret"),
             )
         ).thenReturn(
