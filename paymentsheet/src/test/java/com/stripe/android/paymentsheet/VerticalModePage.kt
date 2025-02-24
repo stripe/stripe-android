@@ -21,7 +21,6 @@ import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_TEXT
-import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_VIEW_MORE
 
 internal class VerticalModePage(
     private val composeTestRule: ComposeTestRule

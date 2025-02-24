@@ -16,7 +16,6 @@ import com.stripe.android.network.CardPaymentMethodDetails
 import com.stripe.android.network.PaymentMethodDetails
 import com.stripe.android.network.UsBankPaymentMethodDetails
 import com.stripe.android.network.setupPaymentMethodDetachResponse
-import com.stripe.android.network.setupPaymentMethodUpdateResponse
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
