@@ -143,6 +143,8 @@
   <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">Los datos del débito SEPA no se pueden modificar.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Total: %s</string>
+  <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
+  <string name="stripe_pm_set_as_default">Establecer como método de pago predeterminado</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">Elimina la cuenta bancaria que termina en %s</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
@@ -159,6 +161,8 @@
   <string name="stripe_sign_up_terms_alternative"><![CDATA[Al proporcionar tu correo electrónico, aceptas crear una cuenta de Link y guardar tus datos de pago en Link, conforme a las <terms>Condiciones</terms> y la <privacy>Política de privacidad</privacy> de Link.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Al proporcionar tu número de teléfono, aceptas crear una cuenta de Link y guardar tus datos de pago en Link, conforme a las <terms>Condiciones</terms> y la <privacy>Política de privacidad</privacy> de Link.]]></string>
+  <!-- Message for a deactivated account in the signup flow. -->
+  <string name="stripe_signup_deactivated_account_message">Se desactivó tu cuenta</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">Se produjo un error</string>
   <!-- Button text on a screen asking the user to approve a payment -->

@@ -143,6 +143,8 @@
   <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">无法更改 SEPA 借记详情。</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">合计：%s</string>
+  <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
+  <string name="stripe_pm_set_as_default">设置为默认支付方式</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">移除尾号为 %s 的银行账户</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
@@ -159,6 +161,8 @@
   <string name="stripe_sign_up_terms_alternative"><![CDATA[提供您的电子邮件地址，即表示您同意按照 <terms>Link 条款</terms>和<privacy>隐私政策</privacy>创建 Link 账户并将您的支付信息保存到 Link。]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[提供您的手机号码，即表示您同意按照 <terms>Link 条款</terms>和<privacy>隐私政策</privacy>创建 Link 账户并将您的支付信息保存到 Link。]]></string>
+  <!-- Message for a deactivated account in the signup flow. -->
+  <string name="stripe_signup_deactivated_account_message">您的账户已被禁用</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">出错了</string>
   <!-- Button text on a screen asking the user to approve a payment -->
