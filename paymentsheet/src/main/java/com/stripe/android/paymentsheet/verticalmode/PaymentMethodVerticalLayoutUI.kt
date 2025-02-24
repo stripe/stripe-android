@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -176,13 +177,17 @@ private fun ViewMoreButton(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
+            .focusable()
             .testTag(TEST_TAG_VIEW_MORE)
             .clickable(onClick = onViewMorePaymentMethods)
             .padding(4.dp)
             .fillMaxHeight()
     ) {
         Text(
-            stringResource(id = R.string.stripe_view_more),
+            modifier = Modifier
+                .clickable(onClick = onViewMorePaymentMethods)
+                .focusable(),
+            text = stringResource(id = R.string.stripe_view_more),
             color = MaterialTheme.colors.primary,
             style = MaterialTheme.typography.subtitle1,
             fontWeight = FontWeight.Medium,

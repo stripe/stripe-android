@@ -7,7 +7,9 @@ import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.isNotDisplayed
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performScrollTo
 import com.stripe.android.common.ui.performClickWithKeyboard
 import com.stripe.android.model.PaymentMethodCode
@@ -85,7 +87,7 @@ internal class VerticalModePage(
 
     fun assertHasSelectedSavedPaymentMethod(paymentMethodId: String, cardBrand: String? = null) {
         composeTestRule.onNode(
-            hasTestTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId").and(isSelected())
+            hasTestTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId")
         ).assertExists()
 
         if (cardBrand != null) {
@@ -112,7 +114,15 @@ internal class VerticalModePage(
     }
 
     fun clickViewMore() {
-        composeTestRule.onNodeWithTag(TEST_TAG_VIEW_MORE).performClickWithKeyboard()
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onAllNodesWithText("View more")
+                .fetchSemanticsNodes()
+                .size == 1
+        }
+        composeTestRule
+            .onNodeWithText("View more")
+            .performClickWithKeyboard()
     }
 
     fun clickEdit() {

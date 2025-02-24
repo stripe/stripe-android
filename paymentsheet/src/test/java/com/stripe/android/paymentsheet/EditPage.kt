@@ -74,7 +74,7 @@ internal class EditPage(
     fun assertInDropdownAndEnabled(cardBrand: String) {
         // Click on the dropdown menu to expand it
         composeTestRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
-            .performClick()
+            .performClickWithKeyboard()
 
         // Attempt to find the node with the specified cardBrand,
         // assert that it is present (displayed) and enabled
@@ -84,7 +84,7 @@ internal class EditPage(
 
         // Optionally, close the dropdown menu if it's still open
         composeTestRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
-            .performClick()
+            .performClickWithKeyboard()
     }
 
     fun update(waitUntilComplete: Boolean = true) {
@@ -118,6 +118,6 @@ internal class EditPage(
     fun clickSetAsDefaultCheckbox() {
         composeTestRule.onNodeWithTag(
             UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG
-        ).performClick()
+        ).performClickWithKeyboard()
     }
 }
