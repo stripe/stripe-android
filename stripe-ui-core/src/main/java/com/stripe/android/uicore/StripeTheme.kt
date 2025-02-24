@@ -242,7 +242,7 @@ object StripeThemeDefaults {
     val embeddedCommon = EmbeddedInsets(
         additionalVerticalInsetsDp = 0.0f,
         horizontalInsetsDp = 0.0f,
-        checkmarkInsetDp = 12.0f
+        checkmarkInsetDp = 0.0f
     )
 
     val floating = EmbeddedFloatingStyle(

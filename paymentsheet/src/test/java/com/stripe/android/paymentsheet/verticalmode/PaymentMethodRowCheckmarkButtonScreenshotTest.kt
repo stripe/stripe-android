@@ -1,15 +1,28 @@
 package com.stripe.android.paymentsheet.verticalmode
 
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark
+import com.stripe.android.paymentsheet.ui.PaymentMethodIconFromResource
+import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
+import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.ui.core.R
@@ -35,10 +48,7 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
                 isEnabled = true,
                 isSelected = false,
                 iconContent = {
-                    Image(
-                        painter = painterResource(id = R.drawable.stripe_ic_paymentsheet_pm_card),
-                        contentDescription = null
-                    )
+                    Icon()
                 },
                 title = "**** 4242",
                 subtitle = null,
@@ -57,10 +67,7 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
                 isEnabled = false,
                 isSelected = false,
                 iconContent = {
-                    Image(
-                        painter = painterResource(id = R.drawable.stripe_ic_paymentsheet_pm_card),
-                        contentDescription = null
-                    )
+                    Icon()
                 },
                 title = "**** 4242",
                 subtitle = null,
@@ -79,10 +86,7 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
                 isEnabled = true,
                 isSelected = true,
                 iconContent = {
-                    Image(
-                        painter = painterResource(id = R.drawable.stripe_ic_paymentsheet_pm_card),
-                        contentDescription = null
-                    )
+                    Icon()
                 },
                 title = "**** 4242",
                 subtitle = null,
@@ -101,10 +105,7 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
                 isEnabled = true,
                 isSelected = false,
                 iconContent = {
-                    Image(
-                        painter = painterResource(id = R.drawable.stripe_ic_paymentsheet_pm_card),
-                        contentDescription = null
-                    )
+                    Icon()
                 },
                 title = "**** 4242",
                 subtitle = "Please click me, I'm fancy",
@@ -123,10 +124,7 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
                 isEnabled = true,
                 isSelected = false,
                 iconContent = {
-                    Image(
-                        painter = painterResource(id = R.drawable.stripe_ic_paymentsheet_pm_card),
-                        contentDescription = null
-                    )
+                    Icon()
                 },
                 title = "**** 4242",
                 subtitle = "Please click me, I'm fancy, but I shouldn't extend a a a a a a a a a a a a a a a a " +
@@ -146,10 +144,7 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
                 isEnabled = true,
                 isSelected = false,
                 iconContent = {
-                    Image(
-                        painter = painterResource(id = R.drawable.stripe_ic_paymentsheet_pm_card),
-                        contentDescription = null
-                    )
+                    Icon()
                 },
                 title = "**** 4242",
                 subtitle = null,
@@ -157,7 +152,7 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
                 onClick = {},
                 style = FlatWithCheckmark.defaultLight,
                 trailingContent = {
-                    Text(text = "View more")
+                    TrailingContent()
                 },
                 shouldShowDefaultBadge = false,
             )
@@ -183,10 +178,7 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
                 isEnabled = true,
                 isSelected = false,
                 iconContent = {
-                    Image(
-                        painter = painterResource(id = R.drawable.stripe_ic_paymentsheet_pm_card),
-                        contentDescription = null
-                    )
+                    Icon()
                 },
                 title = "**** 4242",
                 subtitle = null,
@@ -194,9 +186,43 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
                 onClick = {},
                 style = style,
                 trailingContent = {
-                    Text(text = "View more")
+                    TrailingContent()
                 },
                 shouldShowDefaultBadge = false,
+            )
+        }
+    }
+
+    @Composable
+    private fun Icon() {
+        PaymentMethodIconFromResource(
+            iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
+            colorFilter = null,
+            alignment = Alignment.Center,
+            modifier = Modifier
+                .height(iconHeight)
+                .width(iconWidth)
+        )
+    }
+
+    @Composable
+    private fun TrailingContent() {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .testTag(TEST_TAG_VIEW_MORE)
+                .padding(4.dp)
+        ) {
+            Text(
+                stringResource(id = com.stripe.android.paymentsheet.R.string.stripe_view_more),
+                color = MaterialTheme.colors.primary,
+                style = MaterialTheme.typography.subtitle1,
+                fontWeight = FontWeight.Medium,
+            )
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colors.primary,
             )
         }
     }
