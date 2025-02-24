@@ -517,6 +517,31 @@ class SavedPaymentMethodMutatorTest {
         }
     }
 
+    @Test
+    fun `setDefaultPaymentMethod updates selection on success`() {
+        val paymentMethods = PaymentMethodFixtures.createCards(3)
+
+        runScenario(
+            customerRepository = FakeCustomerRepository(
+                onSetDefaultPaymentMethod = { Result.success(mock()) }
+            )
+        ) {
+            customerStateHolder.setCustomerState(
+                createCustomerState(
+                    paymentMethods = paymentMethods,
+                    defaultPaymentMethodId = paymentMethods.first().id,
+                )
+            )
+
+            val newDefaultPaymentMethod = paymentMethods[1]
+            savedPaymentMethodMutator.setDefaultPaymentMethod(newDefaultPaymentMethod)
+
+            selectionSource.test {
+                assertThat(awaitItem()).isEqualTo(PaymentSelection.Saved(newDefaultPaymentMethod))
+            }
+        }
+    }
+
     private fun removeDuplicatesTest(shouldRemoveDuplicates: Boolean) {
         val repository = FakeCustomerRepository()
 
@@ -591,7 +616,7 @@ class SavedPaymentMethodMutatorTest {
                 uiContext = coroutineContext,
                 customerRepository = customerRepository,
                 selection = selection,
-                clearSelection = { selection.value = null },
+                setSelection = { selection.value = it },
                 customerStateHolder = customerStateHolder,
                 prePaymentMethodRemoveActions = { prePaymentMethodRemovedTurbine.add(Unit) },
                 postPaymentMethodRemoveActions = { postPaymentMethodRemovedTurbine.add(Unit) },

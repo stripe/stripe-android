@@ -38,7 +38,7 @@ internal class SavedPaymentMethodMutator(
     private val uiContext: CoroutineContext,
     private val customerRepository: CustomerRepository,
     private val selection: StateFlow<PaymentSelection?>,
-    private val clearSelection: () -> Unit,
+    private val setSelection: (PaymentSelection?) -> Unit,
     private val customerStateHolder: CustomerStateHolder,
     // Actions that should be taken after removing a payment method has succeeded but before we've fully updated our
     // state to reflect that. For example, in our manage payment method screen, we want to navigate back to the
@@ -158,7 +158,7 @@ internal class SavedPaymentMethodMutator(
         if (didRemoveSelectedItem) {
             // Remove the current selection. The new selection will be set when we're computing
             // the next PaymentOptionsState.
-            clearSelection()
+            setSelection(null)
         }
 
         return customerRepository.detachPaymentMethod(
@@ -184,7 +184,7 @@ internal class SavedPaymentMethodMutator(
         )
 
         if ((selection.value as? PaymentSelection.Saved)?.paymentMethod?.id == paymentMethodId) {
-            clearSelection()
+            setSelection(null)
         }
 
         withContext(uiContext) {
@@ -222,6 +222,7 @@ internal class SavedPaymentMethodMutator(
             paymentMethodId = paymentMethod.id,
         ).onSuccess {
             customerStateHolder.setDefaultPaymentMethod(paymentMethod = paymentMethod)
+            setSelection(PaymentSelection.Saved(paymentMethod = paymentMethod))
         }.map {}
     }
 
@@ -398,8 +399,8 @@ internal class SavedPaymentMethodMutator(
                 uiContext = Dispatchers.Main,
                 customerRepository = viewModel.customerRepository,
                 selection = viewModel.selection,
+                setSelection = viewModel::updateSelection,
                 customerStateHolder = viewModel.customerStateHolder,
-                clearSelection = { viewModel.updateSelection(null) },
                 prePaymentMethodRemoveActions = {
                     navigateBackOnPaymentMethodRemoved(viewModel)
                 },

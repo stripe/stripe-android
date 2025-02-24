@@ -199,9 +199,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             uiContext = uiContext,
             customerRepository = customerRepository,
             selection = selectionHolder.selection,
-            clearSelection = {
-                setSelection(null)
-            },
+            setSelection = ::setSelection,
             customerStateHolder = customerStateHolder,
             prePaymentMethodRemoveActions = {},
             postPaymentMethodRemoveActions = {},

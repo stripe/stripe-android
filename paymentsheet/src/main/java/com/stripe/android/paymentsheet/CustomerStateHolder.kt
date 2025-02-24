@@ -54,7 +54,6 @@ internal class CustomerStateHolder(
         val newCustomer = customer.value?.copy(defaultPaymentMethodId = paymentMethod?.id)
 
         savedStateHandle[SAVED_CUSTOMER] = newCustomer
-        updateMostRecentlySelectedSavedPaymentMethod(paymentMethod = paymentMethod)
     }
 
     fun updateMostRecentlySelectedSavedPaymentMethod(paymentMethod: PaymentMethod?) {
