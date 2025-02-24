@@ -243,23 +243,24 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
     }
 
     private fun bindViewToController() {
-        val view = this.containerView ?: return
+        val containerView = this.containerView ?: return
         val controller = this.controller ?: return
 
-        view.doOnAttach {
+        containerView.doOnAttach {
             controller.onViewAttached()
-            val owner = view.findViewTreeLifecycleOwner()
-            if (owner != null) {
-                owner.lifecycle.addObserver(controller)
-                owner.lifecycleScope.launch {
-                    controller.stateFlow.collectLatest(::bindViewState)
-                }
+            val owner = containerView.findViewTreeLifecycleOwner()
+                ?: return@doOnAttach
+
+            owner.lifecycle.addObserver(controller)
+            owner.lifecycleScope.launch {
+                controller.stateFlow.collectLatest(::bindViewState)
+            }
+
+            containerView.doOnDetach {
+                owner.lifecycle.removeObserver(controller)
             }
         }
 
-        view.doOnDetach {
-            view.findViewTreeLifecycleOwner()?.lifecycle?.removeObserver(controller)
-        }
     }
 
     internal fun setPropsFromXml(props: Props) {
