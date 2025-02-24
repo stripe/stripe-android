@@ -75,10 +75,15 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
     ): GooglePayJsonFactory.TransactionInfo {
         return GooglePayJsonFactory.TransactionInfo(
             currencyCode = args.currencyCode,
-            totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
+            totalPriceStatus =
+            if (args.isTotalPriceKnown) {
+                GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated
+            } else {
+                GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.NotCurrentlyKnown
+            },
             countryCode = args.config.merchantCountryCode,
             transactionId = args.transactionId,
-            totalPrice = args.amount,
+            totalPrice = if (args.isTotalPriceKnown) args.amount else null,
             totalPriceLabel = args.label,
             checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
         )
