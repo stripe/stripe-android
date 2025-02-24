@@ -180,14 +180,14 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
         return cacheKey
             ?.let {
                 WEB_VIEW_CACHE[cacheKey].also {
-                    logger.debug("Reusing WebView from cache; cacheKey=$cacheKey")
+                    logger.debug("(StripeConnectWebViewContainer) Reusing WebView from cache; cacheKey=$cacheKey")
                 }
             }
             ?: createWebView(applicationContext, cacheKey)
     }
 
     private fun createWebView(applicationContext: Context, cacheKey: String?): WebView {
-        logger.debug("Creating WebView; cacheKey=$cacheKey")
+        logger.debug("(StripeConnectWebViewContainer) Creating WebView; cacheKey=$cacheKey")
         return WebView(applicationContext)
             .apply {
                 layoutParams = FrameLayout.LayoutParams(
@@ -284,10 +284,14 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
                 owner.lifecycle.removeObserver(controller)
                 this.webViewCacheKey?.let { key ->
                     if (containerView.context.findActivity()?.isFinishing == true) {
-                        logger.debug("Removing WebView from cache; cacheKey=$key")
+                        logger.debug(
+                            "(StripeConnectWebViewContainer) Removing WebView from cache; cacheKey=$key"
+                        )
                         WEB_VIEW_CACHE.remove(key)
                     } else {
-                        logger.debug("Removing WebView from container view; cacheKey=$key")
+                        logger.debug(
+                            "(StripeConnectWebViewContainer) Removing WebView from container view; cacheKey=$key"
+                        )
                         containerView.removeView(this.webView)
                     }
                 }
@@ -341,7 +345,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
         val webView = this.webView ?: return
         val progressBar = this.progressBar ?: return
 
-        logger.debug("Binding view state: $state")
+        logger.debug("(StripeConnectWebViewContainer) Binding view state: $state")
         containerView.setBackgroundColor(state.backgroundColor)
         webView.setBackgroundColor(state.backgroundColor)
         progressBar.isVisible = state.isNativeLoadingIndicatorVisible
@@ -439,25 +443,25 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
     private inner class StripeJsInterface {
         @JavascriptInterface
         fun debug(message: String) {
-            logger.debug("Debug log from JS: $message")
+            logger.debug("(StripeConnectWebViewContainer) Debug log from JS: $message")
         }
 
         @JavascriptInterface
         fun fetchInitComponentProps(): String {
-            logger.debug("InitComponentProps fetched")
+            logger.debug("(StripeConnectWebViewContainer) InitComponentProps fetched")
             return ConnectJson.encodeToString(propsJson ?: JsonObject(emptyMap()))
         }
 
         @JavascriptInterface
         fun log(message: String) {
-            logger.debug("Log from JS: $message")
+            logger.debug("(StripeConnectWebViewContainer) Log from JS: $message")
         }
 
         @JavascriptInterface
         fun fetchInitParams(): String {
             val context = checkNotNull(webView?.context)
             val initialParams = checkNotNull(controller?.getInitialParams(context))
-            logger.debug("InitParams fetched: ${initialParams.toDebugString()}")
+            logger.debug("(StripeConnectWebViewContainer) InitParams fetched: ${initialParams.toDebugString()}")
             return ConnectJson.encodeToString(initialParams)
         }
 
@@ -467,7 +471,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
                 webFunctionName = "onSetterFunctionCalled",
                 message = message,
             ) ?: return
-            logger.debug("Setter function called: $parsed")
+            logger.debug("(StripeConnectWebViewContainer) Setter function called: $parsed")
 
             controller?.onReceivedSetterFunctionCalled(parsed)
         }
@@ -478,7 +482,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
                 webFunctionName = "openSecureWebView",
                 message = message,
             )
-            logger.debug("Open secure web view with data: $secureWebViewData")
+            logger.debug("(StripeConnectWebViewContainer) Open secure web view with data: $secureWebViewData")
         }
 
         @JavascriptInterface
@@ -487,7 +491,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
                 webFunctionName = "pageDidLoad",
                 message = message,
             ) ?: return
-            logger.debug("Page did load: $pageLoadMessage")
+            logger.debug("(StripeConnectWebViewContainer) Page did load: $pageLoadMessage")
 
             controller?.onReceivedPageDidLoad(pageLoadMessage.pageViewId)
         }
@@ -498,7 +502,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
                 webFunctionName = "accountSessionClaimed",
                 message = message,
             ) ?: return
-            logger.debug("Account session claimed: $accountSessionClaimedMessage")
+            logger.debug("(StripeConnectWebViewContainer) Account session claimed: $accountSessionClaimedMessage")
 
             controller?.onMerchantIdChanged(accountSessionClaimedMessage.merchantId)
         }
@@ -506,7 +510,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
         @JavascriptInterface
         fun openFinancialConnections(message: String) {
             val parsed = ConnectJson.decodeFromString<OpenFinancialConnectionsMessage>(message)
-            logger.debug("Open FinancialConnections: $parsed")
+            logger.debug("(StripeConnectWebViewContainer) Open FinancialConnections: $parsed")
 
             val webView = this@StripeConnectWebViewContainerImpl.webView
                 ?: return
@@ -546,7 +550,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
     private fun WebView.evaluateSdkJs(function: String, payload: JsonObject) {
         val command = "$ANDROID_JS_INTERFACE.$function($payload)"
         post {
-            logger.debug("Evaluating JS: $command")
+            logger.debug("(StripeConnectWebViewContainer) Evaluating JS: $command")
             evaluateJavascript(command, null)
         }
     }
