@@ -154,11 +154,11 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
 
         this.containerView = view
 
-        val webView = cacheKey
-            ?.let { WEB_VIEW_CACHE[cacheKey] }
-            ?: createWebView(applicationContext, cacheKey)
-        this.webView = webView
-        this.webViewCacheKey = cacheKey
+        val webView = getOrCreateWebView(applicationContext, cacheKey)
+            .also {
+                this.webView = it
+                this.webViewCacheKey = cacheKey
+            }
         view.addView(webView)
 
         val progressBar = ProgressBar(context)
@@ -176,8 +176,18 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
         bindViewToController()
     }
 
+    private fun getOrCreateWebView(applicationContext: Context, cacheKey: String?): WebView {
+        return cacheKey
+            ?.let {
+                WEB_VIEW_CACHE[cacheKey].also {
+                    logger.debug("Reusing WebView from cache; cacheKey=$cacheKey")
+                }
+            }
+            ?: createWebView(applicationContext, cacheKey)
+    }
+
     private fun createWebView(applicationContext: Context, cacheKey: String?): WebView {
-        logger.debug("Creating WebView")
+        logger.debug("Creating WebView; cacheKey=$cacheKey")
         return WebView(applicationContext)
             .apply {
                 layoutParams = FrameLayout.LayoutParams(
@@ -274,14 +284,15 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
                 owner.lifecycle.removeObserver(controller)
                 this.webViewCacheKey?.let { key ->
                     if (containerView.context.findActivity()?.isFinishing == true) {
+                        logger.debug("Removing WebView from cache; cacheKey=$key")
                         WEB_VIEW_CACHE.remove(key)
                     } else {
+                        logger.debug("Removing WebView from container view; cacheKey=$key")
                         containerView.removeView(this.webView)
                     }
                 }
             }
         }
-
     }
 
     internal fun setPropsFromXml(props: Props) {
