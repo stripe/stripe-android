@@ -284,14 +284,6 @@ public final class com/stripe/android/connect/appearance/fonts/CustomFontSource$
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class com/stripe/android/connect/databinding/StripeConnectWebviewBinding : androidx/viewbinding/ViewBinding {
-	public final field stripeWebView Landroid/webkit/WebView;
-	public final field stripeWebViewProgressBar Landroid/widget/ProgressBar;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/connect/databinding/StripeConnectWebviewBinding;
-	public fun getRoot ()Landroid/view/View;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;)Lcom/stripe/android/connect/databinding/StripeConnectWebviewBinding;
-}
-
 public final class com/stripe/android/connect/databinding/StripeNotBuiltYetBinding : androidx/viewbinding/ViewBinding {
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/connect/databinding/StripeNotBuiltYetBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
