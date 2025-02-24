@@ -179,7 +179,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
     private fun getOrCreateWebView(applicationContext: Context, cacheKey: String?): WebView {
         return cacheKey
             ?.let {
-                WEB_VIEW_CACHE[cacheKey].also {
+                WEB_VIEW_CACHE[cacheKey]?.also {
                     logger.debug("(StripeConnectWebViewContainer) Reusing WebView from cache; cacheKey=$cacheKey")
                 }
             }
