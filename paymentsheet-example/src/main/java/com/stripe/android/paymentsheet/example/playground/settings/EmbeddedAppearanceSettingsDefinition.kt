@@ -53,7 +53,7 @@ internal data class EmbeddedAppearance(
     val endSeparatorInset: Float = 0.0f,
     val additionalVerticalInsetsDp: Float = 4.0f,
     val horizontalInsetsDp: Float = 0.0f,
-    val checkmarkInsetsDp: Float = 12.0f,
+    val checkmarkInsetsDp: Float = 0.0f,
     val floatingButtonSpacingDp: Float = 12.0f,
     val topSeparatorEnabled: Boolean = true,
     val bottomSeparatorEnabled: Boolean = true,
