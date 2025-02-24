@@ -11,7 +11,7 @@ import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 internal class PaymentOptionsItemsMapper(
-    private val customerMetadata: CustomerMetadata?,
+    private val customerMetadata: StateFlow<CustomerMetadata?>,
     private val customerState: StateFlow<CustomerState?>,
     private val isGooglePayReady: StateFlow<Boolean>,
     private val isLinkEnabled: StateFlow<Boolean?>,
@@ -25,7 +25,8 @@ internal class PaymentOptionsItemsMapper(
             customerState,
             isLinkEnabled,
             isGooglePayReady,
-        ) { customerState, isLinkEnabled, isGooglePayReady ->
+            customerMetadata,
+        ) { customerState, isLinkEnabled, isGooglePayReady, customerMetadata ->
             createPaymentOptionsItems(
                 paymentMethods = customerState?.paymentMethods ?: listOf(),
                 isLinkEnabled = isLinkEnabled,
