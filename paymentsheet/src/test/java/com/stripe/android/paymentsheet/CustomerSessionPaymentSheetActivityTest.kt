@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasAnyDescendant
@@ -12,6 +13,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -26,6 +28,7 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
+import com.stripe.android.paymentsheet.ui.TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
 import com.stripe.android.testing.PaymentConfigurationTestRule
@@ -332,6 +335,23 @@ internal class CustomerSessionPaymentSheetActivityTest {
         }
     }
 
+    @Test
+    fun `Default badge displayed in edit mode when set as default feature enabled`() {
+        val cards = PaymentMethodFixtures.createCards(2)
+        runTest(
+            cards = cards,
+            setAsDefaultFeatureEnabled = true,
+            defaultPaymentMethod = cards.first().id,
+        ) {
+            composeTestRule.onEditButton().performClick()
+
+            composeTestRule.onAllNodesWithTag(
+                TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL,
+                useUnmergedTree = true
+            ).assertCountEquals(1)
+        }
+    }
+
     private fun setDefaultPaymentMethod() {
         editPage.waitUntilVisible()
         editPage.clickSetAsDefaultCheckbox()
@@ -354,6 +374,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
         canRemoveLastPaymentMethodServer: Boolean = true,
         setAsDefaultFeatureEnabled: Boolean = false,
         paymentMethodLayout: PaymentSheet.PaymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+        defaultPaymentMethod: String? = null,
         test: (PaymentSheetActivity) -> Unit,
     ) {
         networkRule.enqueue(
@@ -367,6 +388,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
                     isPaymentMethodRemoveEnabled = isPaymentMethodRemoveEnabled,
                     canRemoveLastPaymentMethod = canRemoveLastPaymentMethodServer,
                     setAsDefaultFeatureEnabled = setAsDefaultFeatureEnabled,
+                    defaultPaymentMethod = defaultPaymentMethod,
                 )
             )
         }
@@ -451,6 +473,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
             isPaymentMethodRemoveEnabled: Boolean,
             canRemoveLastPaymentMethod: Boolean,
             setAsDefaultFeatureEnabled: Boolean,
+            defaultPaymentMethod: String?,
         ): String {
             val cardsArray = JSONArray()
 
@@ -505,7 +528,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
                         }
                       }
                     },
-                    "default_payment_method": null
+                    "default_payment_method": $defaultPaymentMethod
                   },
                   "payment_method_preference": {
                     "object": "payment_method_preference",
