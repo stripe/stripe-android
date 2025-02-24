@@ -32,9 +32,11 @@ class PaymentOptionsItemsMapperTest {
             isNotPaymentFlow = true,
             nameProvider = { it!!.resolvableString },
             isCbcEligible = { false },
-            customerMetadata = CustomerMetadata(
-                hasCustomerConfiguration = false,
-                isPaymentMethodSetAsDefaultEnabled = false
+            customerMetadata = MutableStateFlow(
+                CustomerMetadata(
+                    hasCustomerConfiguration = false,
+                    isPaymentMethodSetAsDefaultEnabled = false
+                )
             ),
         )
 
@@ -66,9 +68,11 @@ class PaymentOptionsItemsMapperTest {
             isNotPaymentFlow = false,
             nameProvider = { it!!.resolvableString },
             isCbcEligible = { false },
-            customerMetadata = CustomerMetadata(
-                hasCustomerConfiguration = false,
-                isPaymentMethodSetAsDefaultEnabled = false
+            customerMetadata = MutableStateFlow(
+                CustomerMetadata(
+                    hasCustomerConfiguration = false,
+                    isPaymentMethodSetAsDefaultEnabled = false
+                )
             ),
         )
 

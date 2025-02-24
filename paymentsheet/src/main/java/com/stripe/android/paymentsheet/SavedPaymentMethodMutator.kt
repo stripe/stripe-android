@@ -80,7 +80,7 @@ internal class SavedPaymentMethodMutator(
 
     private val paymentOptionsItemsMapper: PaymentOptionsItemsMapper by lazy {
         PaymentOptionsItemsMapper(
-            customerMetadata = paymentMethodMetadataFlow.value?.customerMetadata,
+            customerMetadata = paymentMethodMetadataFlow.mapAsStateFlow { it?.customerMetadata },
             customerState = customerStateHolder.customer,
             isGooglePayReady = paymentMethodMetadataFlow.mapAsStateFlow { it?.isGooglePayReady == true },
             isLinkEnabled = isLinkEnabled,
