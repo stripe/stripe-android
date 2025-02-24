@@ -18,6 +18,7 @@ class AccountOnboardingView private constructor(
     context: Context,
     attrs: AttributeSet?,
     defStyleAttr: Int,
+    cacheKey: String?,
     webViewContainerBehavior: StripeConnectWebViewContainerImpl<AccountOnboardingListener, AccountOnboardingProps>,
 ) : FrameLayout(context, attrs, defStyleAttr),
     StripeConnectWebViewContainer<AccountOnboardingListener, AccountOnboardingProps> by webViewContainerBehavior {
@@ -31,10 +32,12 @@ class AccountOnboardingView private constructor(
         embeddedComponentManager: EmbeddedComponentManager? = null,
         listener: AccountOnboardingListener? = null,
         props: AccountOnboardingProps? = null,
+        cacheKey: String? = null,
     ) : this(
         context = context,
         attrs = attrs,
         defStyleAttr = defStyleAttr,
+        cacheKey = cacheKey,
         webViewContainerBehavior = StripeConnectWebViewContainerImpl(
             embeddedComponent = StripeEmbeddedComponent.ACCOUNT_ONBOARDING,
             embeddedComponentManager = embeddedComponentManager,
@@ -59,7 +62,7 @@ class AccountOnboardingView private constructor(
             )
             webViewContainerBehavior.setPropsFromXml(props)
         }
-        webViewContainerBehavior.initializeView(this)
+        webViewContainerBehavior.initializeView(this, cacheKey)
     }
 }
 

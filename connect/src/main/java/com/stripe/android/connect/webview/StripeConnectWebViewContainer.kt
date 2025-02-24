@@ -1,6 +1,7 @@
 package com.stripe.android.connect.webview
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.net.Uri
@@ -35,6 +36,7 @@ import com.stripe.android.connect.StripeEmbeddedComponentListener
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.toJsonObject
 import com.stripe.android.connect.util.AndroidClock
+import com.stripe.android.connect.util.findActivity
 import com.stripe.android.connect.webview.serialization.AccountSessionClaimedMessage
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.ConnectJson
@@ -104,6 +106,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
 
     private var containerView: FrameLayout? = null
     private var webView: WebView? = null
+    private var webViewCacheKey: String? = null
     private var progressBar: ProgressBar? = null
 
     @VisibleForTesting
@@ -145,20 +148,17 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
         }
     }
 
-    internal fun initializeView(view: FrameLayout) {
+    internal fun initializeView(view: FrameLayout, cacheKey: String?) {
         val context = view.context
         val applicationContext = context.applicationContext
 
         this.containerView = view
 
-        val webView = WebView(applicationContext)
-            .apply {
-                layoutParams = FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
-            }
+        val webView = cacheKey
+            ?.let { WEB_VIEW_CACHE[cacheKey] }
+            ?: createWebView(applicationContext, cacheKey)
         this.webView = webView
+        this.webViewCacheKey = cacheKey
         view.addView(webView)
 
         val progressBar = ProgressBar(context)
@@ -174,6 +174,20 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
 
         initializeWebView(webView)
         bindViewToController()
+    }
+
+    private fun createWebView(applicationContext: Context, cacheKey: String?): WebView {
+        logger.debug("Creating WebView")
+        return WebView(applicationContext)
+            .apply {
+                layoutParams = FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+                if (cacheKey != null) {
+                    WEB_VIEW_CACHE[cacheKey] = this
+                }
+            }
     }
 
     @VisibleForTesting
@@ -258,6 +272,13 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
 
             containerView.doOnDetach {
                 owner.lifecycle.removeObserver(controller)
+                this.webViewCacheKey?.let { key ->
+                    if (containerView.context.findActivity()?.isFinishing == true) {
+                        WEB_VIEW_CACHE.remove(key)
+                    } else {
+                        containerView.removeView(this.webView)
+                    }
+                }
             }
         }
 
@@ -521,5 +542,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
 
     internal companion object {
         private const val ANDROID_JS_INTERFACE = "Android"
+
+        private val WEB_VIEW_CACHE = mutableMapOf<String, WebView>()
     }
 }

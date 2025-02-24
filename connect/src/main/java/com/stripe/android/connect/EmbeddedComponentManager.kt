@@ -62,6 +62,7 @@ class EmbeddedComponentManager(
         context: Context,
         listener: AccountOnboardingListener? = null,
         props: AccountOnboardingProps? = null,
+        cacheKey: String? = null,
     ): AccountOnboardingView {
         checkContextDuringCreate(context)
         return AccountOnboardingView(
@@ -69,6 +70,7 @@ class EmbeddedComponentManager(
             embeddedComponentManager = this,
             listener = listener,
             props = props,
+            cacheKey = cacheKey,
         )
     }
 
@@ -79,12 +81,14 @@ class EmbeddedComponentManager(
     fun createPayoutsView(
         context: Context,
         listener: PayoutsListener? = null,
+        cacheKey: String? = null,
     ): PayoutsView {
         checkContextDuringCreate(context)
         return PayoutsView(
             context = context,
             embeddedComponentManager = this,
             listener = listener,
+            cacheKey = cacheKey,
         )
     }
 

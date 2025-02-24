@@ -12,6 +12,7 @@ class PayoutsView private constructor(
     context: Context,
     attrs: AttributeSet?,
     defStyleAttr: Int,
+    cacheKey: String?,
     webViewContainerBehavior: StripeConnectWebViewContainerImpl<PayoutsListener, EmptyProps>,
 ) : FrameLayout(context, attrs, defStyleAttr),
     StripeConnectWebViewContainer<PayoutsListener, EmptyProps> by webViewContainerBehavior {
@@ -24,10 +25,12 @@ class PayoutsView private constructor(
         defStyleAttr: Int = 0,
         embeddedComponentManager: EmbeddedComponentManager? = null,
         listener: PayoutsListener? = null,
+        cacheKey: String? = null,
     ) : this(
         context = context,
         attrs = attrs,
         defStyleAttr = defStyleAttr,
+        cacheKey = cacheKey,
         webViewContainerBehavior = StripeConnectWebViewContainerImpl(
             embeddedComponent = StripeEmbeddedComponent.PAYOUTS,
             embeddedComponentManager = embeddedComponentManager,
@@ -38,7 +41,7 @@ class PayoutsView private constructor(
     )
 
     init {
-        webViewContainerBehavior.initializeView(this)
+        webViewContainerBehavior.initializeView(this, cacheKey)
     }
 }
 

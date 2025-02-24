@@ -35,7 +35,8 @@ class AccountOnboardingExampleActivity : BasicExampleComponentActivity() {
         } else {
             embeddedComponentManager.createAccountOnboardingView(
                 context = context,
-                props = props
+                props = props,
+                cacheKey = "AccountOnboardingExampleActivity"
             )
         }
     }
