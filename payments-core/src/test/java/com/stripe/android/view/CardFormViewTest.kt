@@ -188,6 +188,7 @@ internal class CardFormViewTest {
         assertThat(binding.postalCode.hasFocus()).isFalse()
 
         binding.cardMultilineWidget.cvcEditText.append("3")
+        idleLooper()
 
         assertThat(binding.postalCode.hasFocus()).isTrue()
     }
