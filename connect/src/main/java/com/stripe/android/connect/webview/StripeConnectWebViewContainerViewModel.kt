@@ -46,7 +46,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
 
-@Suppress("TooManyFunctions")
 @OptIn(PrivateBetaConnectSDK::class)
 internal class StripeConnectWebViewContainerViewModel(
     private val applicationContext: Context,
@@ -116,7 +115,8 @@ internal class StripeConnectWebViewContainerViewModel(
     }
 
     @VisibleForTesting
-    internal inner class StripeConnectWebViewDelegate : StripeConnectWebView.Delegate {
+    @Suppress("TooManyFunctions")
+    internal inner class StripeConnectWebViewDelegate : Delegate {
         override var propsJson: JsonObject?
             get() = this@StripeConnectWebViewContainerViewModel.propsJson
             set(value) {

@@ -44,6 +44,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.put
 
 @SuppressLint("ViewConstructor")
+@Suppress("TooManyFunctions")
 @OptIn(PrivateBetaConnectSDK::class)
 internal class StripeConnectWebView(
     applicationContext: Context,
@@ -377,7 +378,7 @@ internal class StripeConnectWebView(
     }
 
     private fun WebView.evaluateSdkJs(function: String, payload: JsonObject) {
-        val command = "${ANDROID_JS_INTERFACE}.$function($payload)"
+        val command = "$ANDROID_JS_INTERFACE.$function($payload)"
         post {
             logger.debug("($loggerTag) Evaluating JS: $command")
             evaluateJavascript(command, null)

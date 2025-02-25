@@ -53,6 +53,7 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
+@Suppress("TooManyFunctions")
 @OptIn(PrivateBetaConnectSDK::class)
 @RunWith(RobolectricTestRunner::class)
 class StripeConnectWebViewContainerViewModelTest {
@@ -291,7 +292,7 @@ class StripeConnectWebViewContainerViewModelTest {
     }
 
     @Test
-    fun `onPermissionRequest denies when no supported permissions requested, logs unexpected permissions`() = runTest(testDispatcher) {
+    fun `onPermissionRequest denies when no supported permissions requested`() = runTest(testDispatcher) {
         whenever(mockPermissionRequest.resources) doReturn arrayOf("unsupported_permission")
 
         viewModel.delegate.onPermissionRequest(mockActivity, mockPermissionRequest)

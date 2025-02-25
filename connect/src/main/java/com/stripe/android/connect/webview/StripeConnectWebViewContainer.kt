@@ -150,7 +150,6 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
                 }
             }
 
-
         val viewModelStoreOwner = requireNotNull(context.findActivity() as? ViewModelStoreOwner)
         val viewModelKey = buildString {
             append(embeddedComponent.name)

@@ -16,8 +16,8 @@ public final class com/stripe/android/connect/AccountOnboardingProps$Creator : a
 
 public final class com/stripe/android/connect/AccountOnboardingView : android/widget/FrameLayout, com/stripe/android/connect/webview/StripeConnectWebViewContainer {
 	public static final field $stable I
-	public fun initialize (Lcom/stripe/android/connect/EmbeddedComponentManager;Lcom/stripe/android/connect/AccountOnboardingListener;Lcom/stripe/android/connect/AccountOnboardingProps;)V
-	public synthetic fun initialize (Lcom/stripe/android/connect/EmbeddedComponentManager;Lcom/stripe/android/connect/StripeEmbeddedComponentListener;Lcom/stripe/android/connect/ComponentProps;)V
+	public fun initialize (Landroid/content/Context;Lcom/stripe/android/connect/EmbeddedComponentManager;Lcom/stripe/android/connect/AccountOnboardingListener;Lcom/stripe/android/connect/AccountOnboardingProps;)V
+	public synthetic fun initialize (Landroid/content/Context;Lcom/stripe/android/connect/EmbeddedComponentManager;Lcom/stripe/android/connect/StripeEmbeddedComponentListener;Lcom/stripe/android/connect/ComponentProps;)V
 }
 
 public final class com/stripe/android/connect/BuildConfig {
@@ -45,8 +45,8 @@ public final class com/stripe/android/connect/EmptyProps$Creator : android/os/Pa
 
 public final class com/stripe/android/connect/PayoutsView : android/widget/FrameLayout, com/stripe/android/connect/webview/StripeConnectWebViewContainer {
 	public static final field $stable I
-	public fun initialize (Lcom/stripe/android/connect/EmbeddedComponentManager;Lcom/stripe/android/connect/PayoutsListener;Lcom/stripe/android/connect/EmptyProps;)V
-	public synthetic fun initialize (Lcom/stripe/android/connect/EmbeddedComponentManager;Lcom/stripe/android/connect/StripeEmbeddedComponentListener;Lcom/stripe/android/connect/ComponentProps;)V
+	public fun initialize (Landroid/content/Context;Lcom/stripe/android/connect/EmbeddedComponentManager;Lcom/stripe/android/connect/PayoutsListener;Lcom/stripe/android/connect/EmptyProps;)V
+	public synthetic fun initialize (Landroid/content/Context;Lcom/stripe/android/connect/EmbeddedComponentManager;Lcom/stripe/android/connect/StripeEmbeddedComponentListener;Lcom/stripe/android/connect/ComponentProps;)V
 }
 
 public abstract interface class com/stripe/android/connect/StripeEmbeddedComponentListener {
