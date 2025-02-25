@@ -148,22 +148,22 @@ class EmbeddedComponentManager(
      * This function may result in a permissions pop-up being shown to the user (although this may not always
      * happen, such as when the permission has already granted).
      */
-    internal suspend fun requestCameraPermission(context: Context): Boolean? {
-        if (checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+    internal suspend fun requestCameraPermission(activity: Activity): Boolean? {
+        if (checkSelfPermission(activity, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             logger.debug("($loggerTag) Skipping permission request - CAMERA permission already granted")
             return true
         }
 
         val (_, launcher) =
-            getLauncher(context, requestPermissionLaunchers, "Error launching camera permission request")
+            getLauncher(activity, requestPermissionLaunchers, "Error launching camera permission request")
                 ?: return null
         launcher.launch(Manifest.permission.CAMERA)
 
         return permissionsFlow.first()
     }
 
-    internal suspend fun chooseFile(context: Context, requestIntent: Intent): Array<Uri>? {
-        val (activity, launcher) = getLauncher(context, chooseFileLaunchers, "Error choosing file")
+    internal suspend fun chooseFile(activity: Activity, requestIntent: Intent): Array<Uri>? {
+        val (activity, launcher) = getLauncher(activity, chooseFileLaunchers, "Error choosing file")
             ?: return null
         launcher.launch(requestIntent)
 
@@ -173,12 +173,10 @@ class EmbeddedComponentManager(
     }
 
     internal suspend fun presentFinancialConnections(
-        context: Context,
+        activity: Activity,
         clientSecret: String,
         connectedAccountId: String,
     ): FinancialConnectionsSheetResult? {
-        val activity = context.findActivityWithErrorHandling()
-            ?: return null
         val sheet = financialConnectionsSheets[activity]
         if (sheet == null) {
             logger.warning(
@@ -206,12 +204,10 @@ class EmbeddedComponentManager(
     }
 
     private fun <I> getLauncher(
-        context: Context,
+        activity: Activity,
         launchers: Map<Activity, ActivityResultLauncher<I>>,
         errorMessage: String,
     ): Pair<Activity, ActivityResultLauncher<I>>? {
-        val activity = context.findActivityWithErrorHandling()
-            ?: return null
         val launcher = launchers[activity]
         if (launcher == null) {
             logger.warning(

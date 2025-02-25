@@ -1,6 +1,7 @@
 package com.stripe.android.connect.webview
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -20,6 +21,7 @@ import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.appearance.Appearance
+import com.stripe.android.connect.util.findActivity
 import com.stripe.android.connect.webview.serialization.AccountSessionClaimedMessage
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.ConnectJson
@@ -142,9 +144,13 @@ internal class StripeConnectWebView(
          *
          * An example of where this is called is when the webview requests access to the camera.
          */
-        suspend fun onPermissionRequest(context: Context, request: PermissionRequest)
+        suspend fun onPermissionRequest(activity: Activity, request: PermissionRequest)
 
-        suspend fun onChooseFile(context: Context, filePathCallback: ValueCallback<Array<Uri>>, requestIntent: Intent)
+        suspend fun onChooseFile(
+            activity: Activity,
+            filePathCallback: ValueCallback<Array<Uri>>,
+            requestIntent: Intent
+        )
 
         /**
          * Callback to invoke upon receiving 'onSetterFunctionCalled' message.
@@ -161,7 +167,7 @@ internal class StripeConnectWebView(
          */
         fun onMerchantIdChanged(merchantId: String)
 
-        suspend fun onOpenFinancialConnections(context: Context, message: OpenFinancialConnectionsMessage)
+        suspend fun onOpenFinancialConnections(activity: Activity, message: OpenFinancialConnectionsMessage)
 
         fun onErrorDeserializingWebMessage(webFunctionName: String, error: Throwable)
     }
@@ -215,9 +221,11 @@ internal class StripeConnectWebView(
      */
     internal inner class StripeConnectWebChromeClient : WebChromeClient() {
         override fun onPermissionRequest(request: PermissionRequest) {
+            val activity = findActivity()
+                ?: return request.deny()
             findViewTreeLifecycleOwner()?.lifecycleScope
                 ?.launch {
-                    delegate.onPermissionRequest(context, request)
+                    delegate.onPermissionRequest(activity, request)
                 }
                 ?: return request.deny()
         }
@@ -235,12 +243,14 @@ internal class StripeConnectWebView(
             filePathCallback: ValueCallback<Array<Uri>>,
             fileChooserParams: FileChooserParams
         ): Boolean {
+            val activity = findActivity()
+                ?: return false
             val lifecycleScope = findViewTreeLifecycleOwner()?.lifecycleScope
                 ?: return false
 
             lifecycleScope.launch {
                 delegate.onChooseFile(
-                    context = context,
+                    activity = activity,
                     filePathCallback = filePathCallback,
                     requestIntent = fileChooserParams.createIntent()
                 )
@@ -268,7 +278,6 @@ internal class StripeConnectWebView(
 
         @JavascriptInterface
         fun fetchInitParams(): String {
-            val context = checkNotNull(context)
             val initialParams = delegate.getInitialParams(context)
             logger.debug("(StripeConnectWebViewContainer) InitParams fetched: ${initialParams.toDebugString()}")
             return ConnectJson.encodeToString(initialParams)
@@ -318,13 +327,19 @@ internal class StripeConnectWebView(
 
         @JavascriptInterface
         fun openFinancialConnections(message: String) {
+            val activity = findActivity()
+                ?: return
+
             val parsed = ConnectJson.decodeFromString<OpenFinancialConnectionsMessage>(message)
             logger.debug("(StripeConnectWebViewContainer) Open FinancialConnections: $parsed")
 
             val lifecycleScope = findViewTreeLifecycleOwner()?.lifecycleScope
                 ?: return
             lifecycleScope.launch {
-                delegate.onOpenFinancialConnections(context = context, message = parsed)
+                delegate.onOpenFinancialConnections(
+                    activity = activity,
+                    message = parsed
+                )
             }
         }
 

@@ -1,6 +1,7 @@
 package com.stripe.android.connect.webview
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -201,7 +202,8 @@ internal class StripeConnectWebViewContainerViewModel(
                 )
                 false // Allow the request to propagate so we open URL in WebView, but this is not an expected operation
             } else if (
-                url.scheme.equals("https", ignoreCase = true) || url.scheme.equals("http", ignoreCase = true)
+                url.scheme.equals("https", ignoreCase = true) ||
+                url.scheme.equals("http", ignoreCase = true)
             ) {
                 // open the URL in an external browser for safety and to preserve back navigation
                 logger.debug("($loggerTag) Opening URL in external browser: $url")
@@ -226,7 +228,7 @@ internal class StripeConnectWebViewContainerViewModel(
             return embeddedComponentManager.getInitialParams(context)
         }
 
-        override suspend fun onPermissionRequest(context: Context, request: PermissionRequest) {
+        override suspend fun onPermissionRequest(activity: Activity, request: PermissionRequest) {
             // we only care about camera permissions (audio/video)
             val permissionsRequested = request.resources.filter {
                 it == PermissionRequest.RESOURCE_AUDIO_CAPTURE || it == PermissionRequest.RESOURCE_VIDEO_CAPTURE
@@ -248,7 +250,7 @@ internal class StripeConnectWebViewContainerViewModel(
             }
 
             // all calls to PermissionRequest must be on the main thread
-            val isGranted = embeddedComponentManager.requestCameraPermission(context) ?: return
+            val isGranted = embeddedComponentManager.requestCameraPermission(activity) ?: return
             withContext(Dispatchers.Main) {
                 if (isGranted) {
                     logger.debug("($loggerTag) Granting permission - user accepted permission")
@@ -261,13 +263,13 @@ internal class StripeConnectWebViewContainerViewModel(
         }
 
         override suspend fun onChooseFile(
-            context: Context,
+            activity: Activity,
             filePathCallback: ValueCallback<Array<Uri>>,
             requestIntent: Intent
         ) {
             var result: Array<Uri>? = null
             try {
-                result = embeddedComponentManager.chooseFile(context, requestIntent)
+                result = embeddedComponentManager.chooseFile(activity, requestIntent)
             } finally {
                 // Ensure `filePathCallback` always gets a value.
                 filePathCallback.onReceiveValue(result)
@@ -275,11 +277,11 @@ internal class StripeConnectWebViewContainerViewModel(
         }
 
         override suspend fun onOpenFinancialConnections(
-            context: Context,
+            activity: Activity,
             message: OpenFinancialConnectionsMessage,
         ) {
             val result = embeddedComponentManager.presentFinancialConnections(
-                context = context,
+                activity = activity,
                 clientSecret = message.clientSecret,
                 connectedAccountId = message.connectedAccountId,
             )
