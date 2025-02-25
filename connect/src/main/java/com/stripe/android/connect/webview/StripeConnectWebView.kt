@@ -262,24 +262,24 @@ internal class StripeConnectWebView(
     private inner class StripeJsInterface {
         @JavascriptInterface
         fun debug(message: String) {
-            logger.debug("(StripeConnectWebViewContainer) Debug log from JS: $message")
+            logger.debug("($loggerTag) Debug log from JS: $message")
         }
 
         @JavascriptInterface
         fun fetchInitComponentProps(): String {
-            logger.debug("(StripeConnectWebViewContainer) InitComponentProps fetched")
+            logger.debug("($loggerTag) InitComponentProps fetched")
             return ConnectJson.encodeToString(delegate.propsJson ?: JsonObject(emptyMap()))
         }
 
         @JavascriptInterface
         fun log(message: String) {
-            logger.debug("(StripeConnectWebViewContainer) Log from JS: $message")
+            logger.debug("($loggerTag) Log from JS: $message")
         }
 
         @JavascriptInterface
         fun fetchInitParams(): String {
             val initialParams = delegate.getInitialParams(context)
-            logger.debug("(StripeConnectWebViewContainer) InitParams fetched: ${initialParams.toDebugString()}")
+            logger.debug("($loggerTag) InitParams fetched: ${initialParams.toDebugString()}")
             return ConnectJson.encodeToString(initialParams)
         }
 
@@ -289,7 +289,7 @@ internal class StripeConnectWebView(
                 webFunctionName = "onSetterFunctionCalled",
                 message = message,
             ) ?: return
-            logger.debug("(StripeConnectWebViewContainer) Setter function called: $parsed")
+            logger.debug("($loggerTag) Setter function called: $parsed")
 
             delegate.onReceivedSetterFunctionCalled(parsed)
         }
@@ -300,7 +300,7 @@ internal class StripeConnectWebView(
                 webFunctionName = "openSecureWebView",
                 message = message,
             )
-            logger.debug("(StripeConnectWebViewContainer) Open secure web view with data: $secureWebViewData")
+            logger.debug("($loggerTag) Open secure web view with data: $secureWebViewData")
         }
 
         @JavascriptInterface
@@ -309,7 +309,7 @@ internal class StripeConnectWebView(
                 webFunctionName = "pageDidLoad",
                 message = message,
             ) ?: return
-            logger.debug("(StripeConnectWebViewContainer) Page did load: $pageLoadMessage")
+            logger.debug("($loggerTag) Page did load: $pageLoadMessage")
 
             delegate.onReceivedPageDidLoad(pageLoadMessage.pageViewId)
         }
@@ -320,7 +320,7 @@ internal class StripeConnectWebView(
                 webFunctionName = "accountSessionClaimed",
                 message = message,
             ) ?: return
-            logger.debug("(StripeConnectWebViewContainer) Account session claimed: $accountSessionClaimedMessage")
+            logger.debug("($loggerTag) Account session claimed: $accountSessionClaimedMessage")
 
             delegate.onMerchantIdChanged(accountSessionClaimedMessage.merchantId)
         }
@@ -331,7 +331,7 @@ internal class StripeConnectWebView(
                 ?: return
 
             val parsed = ConnectJson.decodeFromString<OpenFinancialConnectionsMessage>(message)
-            logger.debug("(StripeConnectWebViewContainer) Open FinancialConnections: $parsed")
+            logger.debug("($loggerTag) Open FinancialConnections: $parsed")
 
             val lifecycleScope = findViewTreeLifecycleOwner()?.lifecycleScope
                 ?: return
@@ -379,7 +379,7 @@ internal class StripeConnectWebView(
     private fun WebView.evaluateSdkJs(function: String, payload: JsonObject) {
         val command = "${ANDROID_JS_INTERFACE}.$function($payload)"
         post {
-            logger.debug("(StripeConnectWebViewContainer) Evaluating JS: $command")
+            logger.debug("($loggerTag) Evaluating JS: $command")
             evaluateJavascript(command, null)
         }
     }
