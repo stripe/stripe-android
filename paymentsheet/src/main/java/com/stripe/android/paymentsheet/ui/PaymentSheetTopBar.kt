@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.ui
 import android.graphics.Typeface
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -142,7 +143,7 @@ private fun EditButton(
     }
 
     IconButton(
-        modifier = Modifier.testTag(PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG).padding(end = 10.dp),
+        modifier = Modifier.focusable().testTag(PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG).padding(end = 10.dp),
         enabled = isEnabled,
         onClick = onClick,
     ) {
@@ -152,6 +153,7 @@ private fun EditButton(
             color = tintColor,
             fontSize = editButtonFontSize,
             fontFamily = FontFamily(editButtonTypeface),
+            modifier = Modifier.focusable(),
         )
     }
 }

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isDisplayed
@@ -32,12 +33,67 @@ internal class VerticalModePage(
     }
 
     fun waitUntilVisible() {
+//        composeTestRule.waitUntil {
+//            composeTestRule
+//                .onAllNodesWithText("New payment method") // , useUnmergedTree = true)
+//                .fetchSemanticsNodes()
+//                .isNotEmpty()
+//        }
         composeTestRule.waitUntil {
             composeTestRule
                 .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT))
                 .fetchSemanticsNodes()
                 .isNotEmpty()
         }
+
+//        composeTestRule.waitUntil {
+//            composeTestRule
+//                .onAllNodesWithText("Card")
+//                .fetchSemanticsNodes()
+//                .isNotEmpty()
+//        }
+    }
+
+    fun clickOnCard() {
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onAllNodesWithText("Card")
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+
+        composeTestRule
+            .onNodeWithText("Card")
+            .performScrollTo()
+            .performClickWithKeyboard()
+    }
+
+    fun clickOnNewCard() {
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onAllNodesWithText("New card")
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+
+        composeTestRule
+            .onNodeWithText("New card")
+            .performScrollTo()
+            .performClickWithKeyboard()
+    }
+
+    fun clickOnNewCashApp() {
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onAllNodesWithText("Cash App Pay")
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+
+        composeTestRule
+            .onNodeWithText("Cash App Pay")
+            .performScrollTo()
+            .performClickWithKeyboard()
     }
 
     fun clickOnNewLpm(paymentMethodCode: PaymentMethodCode) {
@@ -50,6 +106,12 @@ internal class VerticalModePage(
         composeTestRule.onNode(
             hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodCode").and(isSelected())
         ).assertExists()
+    }
+
+    fun assertCashAppIsSelected() {
+        composeTestRule
+            .onNodeWithText("Cash App Pay")
+            .assertIsSelected()
     }
 
     fun assertPrimaryButton(matcher: SemanticsMatcher) {
@@ -107,6 +169,14 @@ internal class VerticalModePage(
     fun clickSavedPaymentMethod(paymentMethodId: String) {
         val savedPaymentMethod = composeTestRule
             .onNodeWithTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId")
+
+        composeTestRule.waitUntil { savedPaymentMethod.isDisplayed() }
+        savedPaymentMethod.performClickWithKeyboard()
+    }
+
+    fun clickSavedPaymentMethodWithLast4(last4: String) {
+        val savedPaymentMethod = composeTestRule
+            .onNodeWithText(last4, substring = true, useUnmergedTree = true)
 
         composeTestRule.waitUntil { savedPaymentMethod.isDisplayed() }
         savedPaymentMethod.performClickWithKeyboard()

@@ -38,10 +38,19 @@ internal data class CardPaymentMethodDetails(
 
 internal data class UsBankPaymentMethodDetails(
     override val id: String,
+    val last4: String = "6789",
 ) : PaymentMethodDetails {
     override val type: String = "us_bank_account"
 
     override fun createJson(transform: (PaymentMethod) -> PaymentMethod): JSONObject {
-        return PaymentMethodFactory.convertUsBankAccountToJson(PaymentMethodFactory.usBankAccount().copy(id = id))
+        val base = PaymentMethodFactory.usBankAccount()
+        return PaymentMethodFactory.convertUsBankAccountToJson(
+            base.copy(
+                id = id,
+                usBankAccount = base.usBankAccount?.copy(
+                    last4 = last4,
+                ),
+            )
+        )
     }
 }

@@ -44,7 +44,9 @@ fun CheckboxElementUI(
             .toggleable(
                 value = isChecked,
                 role = Role.Checkbox,
-                onValueChange = onValueChange,
+                onValueChange = {
+                    onValueChange(it)
+                },
                 enabled = isEnabled
             )
             .fillMaxWidth(),

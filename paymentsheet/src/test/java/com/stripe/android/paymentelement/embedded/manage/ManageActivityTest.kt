@@ -74,14 +74,15 @@ internal class ManageActivityTest {
     @Test
     fun `selecting a payment method returns updated selection`() = launch {
         managePage.assertLpmIsNotSelected(PaymentMethodFixtures.CARD_ID)
-        managePage.selectPaymentMethod(PaymentMethodFixtures.CARD_ID)
+        managePage.selectPaymentMethodWithLast4("4242")
         assertCompletedResultSelection(PaymentMethodFixtures.CARD_ID)
     }
 
     @Test
     fun `removing a payment method updates state when the user clicks back`() = launch {
         managePage.clickEdit()
-        managePage.clickEdit(PaymentMethodFixtures.CARD_ID)
+        managePage.selectPaymentMethodWithLast4("4242")
+//        managePage.clickEditForPaymentMethod("···· 4242")
         editPage.waitUntilVisible()
         networkRule.setupPaymentMethodDetachResponse(PaymentMethodFixtures.CARD_ID)
         editPage.clickRemove()
@@ -109,14 +110,16 @@ internal class ManageActivityTest {
         )
     ) {
         managePage.clickEdit()
-        managePage.clickEdit(PaymentMethodFixtures.CARD_ID)
+        managePage.selectPaymentMethodWithLast4("4242")
+//        managePage.clickEdit(PaymentMethodFixtures.CARD_ID)
         editPage.waitUntilVisible()
         networkRule.setupPaymentMethodDetachResponse(PaymentMethodFixtures.CARD_ID)
         editPage.clickRemove()
 
         managePage.waitUntilVisible()
         managePage.waitUntilGone(PaymentMethodFixtures.CARD_ID)
-        managePage.clickEdit(cbcCardId)
+        managePage.selectPaymentMethodWithLast4("1001")
+        // TODO: Here
         editPage.waitUntilVisible()
         networkRule.setupPaymentMethodDetachResponse(cbcCardId)
         editPage.clickRemove()
@@ -129,7 +132,7 @@ internal class ManageActivityTest {
         managePage.waitUntilVisible()
         managePage.assertCardIsVisible(cbcCardId, "cartes_bancaries")
         managePage.clickEdit()
-        managePage.clickEdit(cbcCardId)
+        managePage.selectPaymentMethodWithLast4("1001")
 
         networkRule.setupPaymentMethodUpdateResponse(paymentMethodDetails = cbcCardDetails, cardBrand = "visa")
         editPage.waitUntilVisible()

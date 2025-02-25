@@ -321,13 +321,13 @@ internal class CustomerSessionPaymentSheetActivityTest {
             verticalModePage.assertPrimaryButton(isEnabled())
 
             verticalModePage.clickViewMore()
-            managePage.waitUntilVisible()
+            managePage.waitUntilVisible(customLast4 = cards[0].card!!.last4)
             verticalModePage.assertHasSelectedSavedPaymentMethod(originallySelectedPaymentMethodId)
             managePage.clickEdit()
-            managePage.clickEdit(newDefaultPaymentMethodId)
+            managePage.selectPaymentMethodWithLast4(cards[1].card!!.last4!!) // newDefaultPaymentMethodId)
             setDefaultPaymentMethod()
 
-            managePage.waitUntilVisible()
+            managePage.waitUntilVisible(customLast4 = cards[0].card!!.last4)
             managePage.clickDone()
             verticalModePage.assertHasSelectedSavedPaymentMethod(newDefaultPaymentMethodId)
             Espresso.pressBack()

@@ -60,7 +60,7 @@ fun SimpleDialogElementUI(
                         } else {
                             Color.Unspecified
                         },
-                        style = MaterialTheme.typography.body1
+                        style = MaterialTheme.typography.body1,
                     )
                 }
             },

@@ -179,13 +179,17 @@ private fun ViewMoreButton(
         modifier = Modifier
             .focusable()
             .testTag(TEST_TAG_VIEW_MORE)
-            .clickable(onClick = onViewMorePaymentMethods)
+            .clickable {
+                onViewMorePaymentMethods()
+            }
             .padding(4.dp)
             .fillMaxHeight()
     ) {
         Text(
             modifier = Modifier
-                .clickable(onClick = onViewMorePaymentMethods)
+                .clickable {
+                    onViewMorePaymentMethods()
+                }
                 .focusable(),
             text = stringResource(id = R.string.stripe_view_more),
             color = MaterialTheme.colors.primary,

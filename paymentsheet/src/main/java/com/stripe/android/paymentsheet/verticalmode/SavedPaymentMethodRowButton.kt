@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import android.content.res.Configuration
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
@@ -68,6 +69,7 @@ internal fun SavedPaymentMethodRowButton(
         promoText = null,
         onClick = onClick,
         modifier = modifier
+            .focusable()
             .testTag(
                 "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId"
             ),

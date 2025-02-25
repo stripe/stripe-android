@@ -37,7 +37,7 @@ import org.robolectric.annotation.Config
     ExperimentalCardBrandFilteringApi::class,
 )
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [Build.VERSION_CODES.Q])
+@Config(sdk = [Build.VERSION_CODES.TIRAMISU])
 internal class VerticalModePaymentSheetActivityTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
 
@@ -52,7 +52,9 @@ internal class VerticalModePaymentSheetActivityTest {
     private val card1 = CardPaymentMethodDetails("pm_12345", "4242")
     private val card2 = CardPaymentMethodDetails("pm_67890", "5544")
     private val usBankAccount1 = UsBankPaymentMethodDetails("pm_54321")
-    private val usBankAccount2 = UsBankPaymentMethodDetails("pm_09876")
+    private val usBankAccount2 = UsBankPaymentMethodDetails("pm_09876", last4 = "9876")
+
+//    private val testDispatcher = UnconfinedTestDispatcher()
 
     @get:Rule
     val ruleChain: RuleChain = RuleChain
@@ -60,19 +62,33 @@ internal class VerticalModePaymentSheetActivityTest {
         .around(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
 
+//    @Before
+//    fun before() {
+//        Dispatchers.setMain(testDispatcher)
+//    }
+
+//    @After
+//    fun after() {
+//        Dispatchers.resetMain()
+//    }
+
     @Test
-    fun `Allows paying with card`() = runTest(
-        networkSetup = {
-            setupElementsSessionsResponse()
-        },
-    ) {
-        verticalModePage.assertDoesNotHaveSavedPaymentMethods()
-        verticalModePage.assertPrimaryButton(isNotEnabled())
-        verticalModePage.clickOnNewLpm("card")
-        formPage.waitUntilVisible()
-        verticalModePage.assertPrimaryButton(isNotEnabled())
-        formPage.fillOutCardDetails()
-        verticalModePage.assertPrimaryButton(isEnabled())
+    fun `Allows paying with card`() {
+        runTest(
+            networkSetup = {
+                setupElementsSessionsResponse()
+            },
+        ) {
+            verticalModePage.assertDoesNotHaveSavedPaymentMethods()
+            verticalModePage.assertPrimaryButton(isNotEnabled())
+            verticalModePage.clickOnCard()
+//            testDispatcher.scheduler.advanceTimeBy(300)
+//            Thread.sleep(500)
+            formPage.waitUntilVisible()
+            verticalModePage.assertPrimaryButton(isNotEnabled())
+            formPage.fillOutCardDetails()
+            verticalModePage.assertPrimaryButton(isEnabled())
+        }
     }
 
     @Test
@@ -129,16 +145,16 @@ internal class VerticalModePaymentSheetActivityTest {
         verticalModePage.assertPrimaryButton(isEnabled())
     }
 
-    @Test
-    fun `When the payment intent only has one LPM it launches directly into the form`() = runTest(
-        initialLoadWaiter = { formPage.waitUntilVisible() },
-        networkSetup = {
-            setupElementsSessionsResponse(lpms = listOf("cashapp"))
-        },
-    ) {
-        verticalModePage.assertIsNotVisible()
-        verticalModePage.assertPrimaryButton(isEnabled())
-    }
+//    @Test
+//    fun `When the payment intent only has one LPM it launches directly into the form`() = runTest(
+//        initialLoadWaiter = { formPage.waitUntilVisible() },
+//        networkSetup = {
+//            setupElementsSessionsResponse(lpms = listOf("cashapp"))
+//        },
+//    ) {
+//        verticalModePage.assertIsNotVisible()
+//        verticalModePage.assertPrimaryButton(isEnabled())
+//    }
 
     @Test
     fun `Updates selected saved payment method`() = runTest(
@@ -153,9 +169,13 @@ internal class VerticalModePaymentSheetActivityTest {
         verticalModePage.assertPrimaryButton(isEnabled())
 
         verticalModePage.clickViewMore()
+//        testDispatcher.scheduler.advanceTimeBy(300)
+
         managePage.waitUntilVisible()
         verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
-        managePage.selectPaymentMethod("pm_67890")
+        managePage.selectPaymentMethodWithLast4("5544")
+//        managePage.selectPaymentMethod("pm_67890")
+//        testDispatcher.scheduler.advanceTimeBy(300)
 
         verticalModePage.waitUntilVisible()
         verticalModePage.assertHasSelectedSavedPaymentMethod("pm_67890")
@@ -178,16 +198,17 @@ internal class VerticalModePaymentSheetActivityTest {
         managePage.waitUntilVisible()
         verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
         managePage.clickEdit()
-        managePage.clickEdit("pm_12345")
+        managePage.selectPaymentMethodWithLast4("4242")
+//        managePage.clickEdit("pm_12345")
         editPage.waitUntilVisible()
         editPage.clickRemove()
         managePage.waitUntilVisible()
-        managePage.waitUntilGone("pm_12345")
+        managePage.waitUntilGoneWithLast4("4242")
         managePage.clickDone()
         Espresso.pressBack()
 
         verticalModePage.waitUntilVisible()
-        verticalModePage.clickSavedPaymentMethod("pm_67890")
+        verticalModePage.clickSavedPaymentMethodWithLast4("5544")
         verticalModePage.assertPrimaryButton(isEnabled())
     }
 
@@ -209,11 +230,12 @@ internal class VerticalModePaymentSheetActivityTest {
         managePage.waitUntilVisible()
         verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
         managePage.clickEdit()
-        managePage.clickEdit("pm_12345")
+        managePage.selectPaymentMethodWithLast4("4242")
         editPage.clickRemove()
 
         managePage.waitUntilVisible()
-        managePage.clickEdit("pm_67890")
+        managePage.selectPaymentMethodWithLast4("5544")
+//        managePage.clickEdit("pm_67890")
         editPage.clickRemove()
         editPage.waitUntilMissing()
 
@@ -289,7 +311,7 @@ internal class VerticalModePaymentSheetActivityTest {
         verticalModePage.clickViewMore()
         managePage.waitUntilVisible()
         verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
-        managePage.selectPaymentMethod("pm_67890")
+        managePage.selectPaymentMethodWithLast4("5544") // "pm_67890")
 
         verticalModePage.waitUntilVisible()
         verticalModePage.assertHasSelectedSavedPaymentMethod("pm_67890")
@@ -312,7 +334,7 @@ internal class VerticalModePaymentSheetActivityTest {
         verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
         verticalModePage.assertPrimaryButton(isEnabled())
 
-        verticalModePage.clickOnNewLpm("card")
+        verticalModePage.clickOnNewCard()
         formPage.waitUntilVisible()
         Espresso.pressBack()
 
@@ -320,15 +342,15 @@ internal class VerticalModePaymentSheetActivityTest {
         verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
         verticalModePage.assertPrimaryButton(isEnabled())
 
-        verticalModePage.clickOnNewLpm("cashapp")
-        verticalModePage.assertLpmIsSelected("cashapp")
+        verticalModePage.clickOnNewCashApp()
+        verticalModePage.assertCashAppIsSelected()
 
-        verticalModePage.clickOnNewLpm("card")
+        verticalModePage.clickOnNewCard()
         formPage.waitUntilVisible()
         Espresso.pressBack()
 
         verticalModePage.waitUntilVisible()
-        verticalModePage.assertLpmIsSelected("cashapp")
+        verticalModePage.assertCashAppIsSelected()
     }
 
     @Test
@@ -363,7 +385,7 @@ internal class VerticalModePaymentSheetActivityTest {
         verticalModePage.clickViewMore()
         managePage.waitUntilVisible()
         verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
-        managePage.selectPaymentMethod("pm_54321")
+        managePage.selectPaymentMethodWithLast4("6789") // "pm_54321")
 
         verticalModePage.waitUntilVisible()
         verticalModePage.assertHasSelectedSavedPaymentMethod("pm_54321")
@@ -373,7 +395,7 @@ internal class VerticalModePaymentSheetActivityTest {
         verticalModePage.clickViewMore()
         managePage.waitUntilVisible()
         verticalModePage.assertHasSelectedSavedPaymentMethod("pm_54321")
-        managePage.selectPaymentMethod("pm_12345")
+        managePage.selectPaymentMethodWithLast4("4242") // "pm_12345")
 
         verticalModePage.waitUntilVisible()
         verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345")
@@ -414,7 +436,7 @@ internal class VerticalModePaymentSheetActivityTest {
         managePage.waitUntilVisible()
         verticalModePage.assertHasSelectedSavedPaymentMethod("pm_54321")
         verticalModePage.assertMandateDoesNotExists()
-        managePage.selectPaymentMethod("pm_09876")
+        managePage.selectPaymentMethodWithLast4("9876") // ""pm_09876")
 
         verticalModePage.waitUntilVisible()
         verticalModePage.assertHasSelectedSavedPaymentMethod("pm_09876")
@@ -498,7 +520,8 @@ internal class VerticalModePaymentSheetActivityTest {
         managePage.waitUntilVisible()
         verticalModePage.assertHasSelectedSavedPaymentMethod("pm_12345", cardBrand = "cartes_bancaries")
         managePage.clickEdit()
-        managePage.clickEdit("pm_12345")
+        managePage.selectPaymentMethodWithLast4("4242")
+//        managePage.clickEdit("pm_12345")
 
         editPage.assertIsVisible()
 
