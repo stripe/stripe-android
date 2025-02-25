@@ -4,11 +4,34 @@ import android.app.Application
 import android.os.Build
 import android.os.StrictMode
 import com.stripe.android.PaymentConfiguration
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.net.HttpURLConnection
+import java.net.URL
+import java.util.concurrent.Executors
+import kotlin.time.Duration.Companion.seconds
 
 class ExampleApplication : Application() {
 
     override fun onCreate() {
-        PaymentConfiguration.init(this, Settings(this).publishableKey)
+//        PaymentConfiguration.init(this, Settings(this).publishableKey)
+        GlobalScope.launch(Dispatchers.IO) {
+            try {
+                delay(15.seconds)
+                val url = URL("https://google.com")
+                val connection = url.openConnection() as HttpURLConnection
+                connection.doInput = true
+                connection.connect()
+                val bytes = connection.inputStream.readBytes()
+                println("TOLUWANI => ${String(bytes)}")
+            } catch (e: Exception) {
+                println(e.stackTraceToString())
+            }
+            PaymentConfiguration.init(this@ExampleApplication, Settings(this@ExampleApplication).publishableKey)
+        }
 
         StrictMode.setThreadPolicy(
             StrictMode.ThreadPolicy.Builder()
