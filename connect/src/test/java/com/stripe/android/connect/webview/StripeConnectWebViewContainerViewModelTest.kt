@@ -1,18 +1,17 @@
 package com.stripe.android.connect.webview
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
 import android.webkit.PermissionRequest
-import android.webkit.WebResourceRequest
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.connect.ComponentListenerDelegate
+import com.stripe.android.connect.ComponentEvent
 import com.stripe.android.connect.EmbeddedComponentManager
-import com.stripe.android.connect.PayoutsListener
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.analytics.ComponentAnalyticsService
@@ -29,6 +28,10 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.toCollection
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -52,46 +55,45 @@ import kotlin.test.assertTrue
 
 @OptIn(PrivateBetaConnectSDK::class)
 @RunWith(RobolectricTestRunner::class)
-class StripeConnectWebViewContainerControllerTest {
+class StripeConnectWebViewContainerViewModelTest {
+
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     private val mockContext: Context = mock()
+    private val mockActivity: Activity = mock()
+    private val view: StripeConnectWebView = mock()
     private val mockPermissionRequest: PermissionRequest = mock()
-    private val view: StripeConnectWebViewContainerInternal = mock()
     private val analyticsService: ComponentAnalyticsService = mock()
     private val androidClock: Clock = mock()
     private val embeddedComponentManager: EmbeddedComponentManager = mock()
     private val embeddedComponent: StripeEmbeddedComponent = StripeEmbeddedComponent.PAYOUTS
 
     private val appearanceFlow = MutableStateFlow(Appearance())
-    private val delegateReceivedEvents = mutableListOf<SetterFunctionCalledMessage>()
-    private val listener: PayoutsListener = mock()
-    private val listenerDelegate: ComponentListenerDelegate<PayoutsListener> =
-        ComponentListenerDelegate { delegateReceivedEvents.add(it) }
+    private val receivedComponentEvents = mutableListOf<ComponentEvent>()
 
     private val mockStripeIntentLauncher: StripeIntentLauncher = mock()
     private val mockLogger: Logger = mock()
 
     private val lifecycleOwner = TestLifecycleOwner()
-    private lateinit var controller: StripeConnectWebViewContainerViewModel
+    private lateinit var viewModel: StripeConnectWebViewContainerViewModel
 
     @Before
     fun setup() {
-        Dispatchers.setMain(Dispatchers.Unconfined)
+        Dispatchers.setMain(testDispatcher)
 
         whenever(embeddedComponentManager.appearanceFlow) doReturn appearanceFlow
         whenever(embeddedComponentManager.getStripeURL(any())) doReturn "https://example.com"
         whenever(androidClock.millis()) doReturn -1L
 
-        controller = StripeConnectWebViewContainerViewModel(
-            view = view,
+        viewModel = StripeConnectWebViewContainerViewModel(
+            applicationContext = mockContext,
             analyticsService = analyticsService,
             clock = androidClock,
             embeddedComponentManager = embeddedComponentManager,
             embeddedComponent = embeddedComponent,
-            listener = listener,
-            listenerDelegate = listenerDelegate,
             stripeIntentLauncher = mockStripeIntentLauncher,
             logger = mockLogger,
+            createWebView = { _, _, _ -> view }
         )
     }
 
@@ -102,24 +104,19 @@ class StripeConnectWebViewContainerControllerTest {
 
     @Test
     fun `should load URL when view is attached`() {
-        whenever(embeddedComponentManager.getStripeURL(embeddedComponent)) doReturn
-            "https://connect-js.stripe.com/v1.0/android_webview.html#component=payouts&publicKey=pk_test_123"
+        val url = "https://connect-js.stripe.com/v1.0/android_webview.html#component=payouts&publicKey=pk_test_123"
+        whenever(embeddedComponentManager.getStripeURL(embeddedComponent)) doReturn url
 
-        controller.onViewAttached()
-        verify(view).loadUrl(
-            "https://connect-js.stripe.com/v1.0/android_webview.html#component=payouts&publicKey=pk_test_123"
-        )
+        viewModel.onViewAttached()
+        verify(view).loadUrl(url)
     }
 
     @Test
     fun `shouldOverrideUrlLoading allows request and returns false for allowlisted hosts, logs unexpected pop-up`() {
         val uri = Uri.parse("https://connect-js.stripe.com/allowlisted")
-        val mockRequest = mock<WebResourceRequest> {
-            on { url } doReturn uri
-        }
 
-        controller.onReceivedPageDidLoad("page_view_id")
-        val result = controller.shouldOverrideUrlLoading(mockContext, mockRequest)
+        viewModel.delegate.onReceivedPageDidLoad("page_view_id")
+        val result = viewModel.delegate.shouldOverrideUrlLoading(mockContext, uri)
         assertFalse(result)
         verify(analyticsService).track(
             ConnectAnalyticsEvent.ClientError(
@@ -132,11 +129,7 @@ class StripeConnectWebViewContainerControllerTest {
     @Test
     fun `shouldOverrideUrlLoading launches ChromeCustomTab for https urls`() {
         val uri = Uri.parse("https://example.com/test")
-        val mockRequest = mock<WebResourceRequest> {
-            on { url } doReturn uri
-        }
-
-        val result = controller.shouldOverrideUrlLoading(mockContext, mockRequest)
+        val result = viewModel.delegate.shouldOverrideUrlLoading(mockContext, uri)
 
         assertTrue(result)
         verify(mockStripeIntentLauncher).launchSecureExternalWebTab(mockContext, uri)
@@ -145,11 +138,8 @@ class StripeConnectWebViewContainerControllerTest {
     @Test
     fun `shouldOverrideUrlLoading opens email client for mailto urls`() {
         val uri = Uri.parse("mailto://example@stripe.com")
-        val mockRequest = mock<WebResourceRequest> {
-            on { url } doReturn uri
-        }
 
-        val result = controller.shouldOverrideUrlLoading(mockContext, mockRequest)
+        val result = viewModel.delegate.shouldOverrideUrlLoading(mockContext, uri)
         verify(mockStripeIntentLauncher).launchEmailLink(mockContext, uri)
         assertTrue(result)
     }
@@ -157,96 +147,99 @@ class StripeConnectWebViewContainerControllerTest {
     @Test
     fun `shouldOverrideUrlLoading opens system launcher for non-http urls`() {
         val uri = Uri.parse("stripe://example@stripe.com")
-        val mockRequest = mock<WebResourceRequest> {
-            on { url } doReturn uri
-        }
 
-        val result = controller.shouldOverrideUrlLoading(mockContext, mockRequest)
+        val result = viewModel.delegate.shouldOverrideUrlLoading(mockContext, uri)
         verify(mockStripeIntentLauncher).launchUrlWithSystemHandler(mockContext, uri)
         assertTrue(result)
     }
 
     @Test
-    fun `should bind to appearance changes`() = runTest {
-        assertThat(controller.stateFlow.value.appearance).isNull()
+    fun `should bind to appearance changes`() = runTest(testDispatcher) {
+        assertThat(viewModel.stateFlow.value.appearance).isNull()
 
-        controller.onCreate(lifecycleOwner)
+        viewModel.onCreate(lifecycleOwner)
         val newAppearance = Appearance()
         appearanceFlow.emit(newAppearance)
 
-        assertThat(controller.stateFlow.value.appearance).isEqualTo(newAppearance)
+        assertThat(viewModel.stateFlow.value.appearance).isEqualTo(newAppearance)
     }
 
     @Test
-    fun `should handle SetOnLoaderStart`() = runTest {
+    fun `should handle SetOnLoaderStart`() = runTest(testDispatcher) {
+        collectComponentEvents()
         val message = SetterFunctionCalledMessage(SetOnLoaderStart(""))
-        controller.onPageStarted("https://example.com")
-        controller.onReceivedSetterFunctionCalled(message)
+        viewModel.delegate.onPageStarted("https://example.com")
+        viewModel.delegate.onReceivedSetterFunctionCalled(message)
 
-        val state = controller.stateFlow.value
+        val state = viewModel.stateFlow.value
         assertThat(state.receivedSetOnLoaderStart).isTrue()
         assertThat(state.isNativeLoadingIndicatorVisible).isFalse()
-        verify(listener).onLoaderStart()
+        assertThat(receivedComponentEvents).contains(ComponentEvent.Message(message))
     }
 
     @Test
-    fun `should handle SetOnLoadError`() = runTest {
+    fun `should handle SetOnLoadError`() = runTest(testDispatcher) {
+        collectComponentEvents()
         val message = SetterFunctionCalledMessage(SetOnLoadError(LoadError("", null)))
-        controller.onReceivedSetterFunctionCalled(message)
+        viewModel.delegate.onReceivedSetterFunctionCalled(message)
 
-        verify(listener).onLoadError(any())
+        assertThat(receivedComponentEvents).contains(ComponentEvent.Message(message))
     }
 
     @Test
-    fun `should handle other messages`() = runTest {
+    fun `should handle other messages`() = runTest(testDispatcher) {
+        collectComponentEvents()
         val message = SetterFunctionCalledMessage(
             setter = "foo",
             value = SetterFunctionCalledMessage.UnknownValue(JsonNull)
         )
-        controller.onReceivedSetterFunctionCalled(message)
+        viewModel.delegate.onReceivedSetterFunctionCalled(message)
 
-        assertThat(delegateReceivedEvents).contains(message)
+        assertThat(receivedComponentEvents).contains(ComponentEvent.Message(message))
     }
 
     @Test
-    fun `onReceivedError should forward to listener`() = runTest {
-        controller.onReceivedError(
+    fun `onReceivedError should emit LoadError event`() = runTest(testDispatcher) {
+        collectComponentEvents()
+        viewModel.delegate.onReceivedError(
             requestUrl = "https://stripe.com",
             httpStatusCode = 404,
             errorMessage = "Not Found",
             isMainPageLoad = true
         )
 
-        verify(listener).onLoadError(any())
+        assertThat(receivedComponentEvents[0]).isInstanceOf(ComponentEvent.LoadError::class.java)
     }
 
     @Test
-    fun `onReceivedError should not forward errors outside of main page load to listener`() = runTest {
-        controller.onReceivedError(
+    fun `onReceivedError should not emit events outside of main page load`() = runTest(testDispatcher) {
+        collectComponentEvents()
+
+        viewModel.delegate.onReceivedError(
             requestUrl = "https://stripe.com",
             httpStatusCode = 404,
             errorMessage = "Not Found",
             isMainPageLoad = false
         )
 
-        verify(listener, never()).onLoadError(any())
+        assertThat(receivedComponentEvents).isEmpty()
     }
 
     @Test
-    fun `view should update appearance`() = runTest {
+    fun `view should update appearance`() = runTest(testDispatcher) {
         val appearances = listOf(Appearance(), Appearance(colors = Colors(primary = Color.CYAN)))
-        controller.onCreate(lifecycleOwner)
+        viewModel.onCreate(lifecycleOwner)
 
         // Shouldn't update appearance until pageDidLoad is received.
         verify(view, never()).updateConnectInstance(any())
 
         appearanceFlow.emit(appearances[0])
-        controller.onViewAttached()
-        controller.onPageStarted("https://example.com")
+        viewModel.onViewAttached()
+        viewModel.delegate.onPageStarted("https://example.com")
         verify(view, never()).updateConnectInstance(any())
 
         // Should update appearance when pageDidLoad is received.
-        controller.onReceivedPageDidLoad("page_view_id")
+        viewModel.delegate.onReceivedPageDidLoad("page_view_id")
 
         // Should update again when appearance changes.
         appearanceFlow.emit(appearances[1])
@@ -258,14 +251,14 @@ class StripeConnectWebViewContainerControllerTest {
     }
 
     @Test
-    fun `onChooseFile should delegate to manager`() = runTest {
+    fun `onChooseFile should delegate to manager`() = runTest(testDispatcher) {
         val intent = Intent()
         val expected = arrayOf(Uri.parse("content://path/to/file"))
         var actual: Array<Uri>? = null
-        wheneverBlocking { embeddedComponentManager.chooseFile(mockContext, intent) } doReturn expected
+        wheneverBlocking { embeddedComponentManager.chooseFile(mockActivity, intent) } doReturn expected
 
-        controller.onChooseFile(
-            context = mockContext,
+        viewModel.delegate.onChooseFile(
+            activity = mockActivity,
             filePathCallback = { actual = it },
             requestIntent = intent
         )
@@ -274,7 +267,7 @@ class StripeConnectWebViewContainerControllerTest {
     }
 
     @Test
-    fun `onOpenFinancialConnections should delegate to manager`() = runTest {
+    fun `onOpenFinancialConnections should delegate to manager`() = runTest(testDispatcher) {
         val message = OpenFinancialConnectionsMessage(
             id = "id",
             clientSecret = "client_secret",
@@ -283,13 +276,13 @@ class StripeConnectWebViewContainerControllerTest {
         val expected = FinancialConnectionsSheetResult.Canceled
         wheneverBlocking {
             embeddedComponentManager.presentFinancialConnections(
-                context = mockContext,
+                activity = mockActivity,
                 clientSecret = message.clientSecret,
                 connectedAccountId = message.connectedAccountId,
             )
         } doReturn expected
 
-        controller.onOpenFinancialConnections(mockContext, message)
+        viewModel.delegate.onOpenFinancialConnections(mockActivity, message)
 
         verify(view).setCollectMobileFinancialConnectionsResult(
             id = message.id,
@@ -298,10 +291,10 @@ class StripeConnectWebViewContainerControllerTest {
     }
 
     @Test
-    fun `onPermissionRequest denies when no supported permissions requested, logs unexpected permissions`() = runTest {
+    fun `onPermissionRequest denies when no supported permissions requested, logs unexpected permissions`() = runTest(testDispatcher) {
         whenever(mockPermissionRequest.resources) doReturn arrayOf("unsupported_permission")
 
-        controller.onPermissionRequest(mockContext, mockPermissionRequest)
+        viewModel.delegate.onPermissionRequest(mockActivity, mockPermissionRequest)
 
         verify(mockPermissionRequest).deny()
         verify(analyticsService).track(
@@ -313,34 +306,34 @@ class StripeConnectWebViewContainerControllerTest {
     }
 
     @Test
-    fun `onPermissionRequest requests camera permission when not granted`() = runTest {
+    fun `onPermissionRequest requests camera permission when not granted`() = runTest(testDispatcher) {
         whenever(mockContext.checkPermission(eq(Manifest.permission.CAMERA), any(), any())) doReturn
             PackageManager.PERMISSION_DENIED
 
         whenever(mockPermissionRequest.resources) doReturn arrayOf(PermissionRequest.RESOURCE_VIDEO_CAPTURE)
         wheneverBlocking { embeddedComponentManager.requestCameraPermission(any()) } doReturn true
 
-        controller.onPermissionRequest(mockContext, mockPermissionRequest)
+        viewModel.delegate.onPermissionRequest(mockActivity, mockPermissionRequest)
 
         verify(mockPermissionRequest).grant(arrayOf(PermissionRequest.RESOURCE_VIDEO_CAPTURE))
     }
 
     @Test
-    fun `onPermissionRequest denies permission when camera permission request is rejected`() = runTest {
+    fun `onPermissionRequest denies permission when camera permission request is rejected`() = runTest(testDispatcher) {
         whenever(mockContext.checkPermission(eq(Manifest.permission.CAMERA), any(), any())) doReturn
             PackageManager.PERMISSION_DENIED
 
         whenever(mockPermissionRequest.resources) doReturn arrayOf(PermissionRequest.RESOURCE_VIDEO_CAPTURE)
         wheneverBlocking { embeddedComponentManager.requestCameraPermission(any()) } doReturn false
 
-        controller.onPermissionRequest(mockContext, mockPermissionRequest)
+        viewModel.delegate.onPermissionRequest(mockActivity, mockPermissionRequest)
 
         verify(mockPermissionRequest).deny()
     }
 
     @Test
     fun `onMerchantIdChanged updates analytics service`() {
-        controller.onMerchantIdChanged("merchant_id")
+        viewModel.delegate.onMerchantIdChanged("merchant_id")
         verify(analyticsService).merchantId = "merchant_id"
     }
 
@@ -352,12 +345,12 @@ class StripeConnectWebViewContainerControllerTest {
     @Test
     fun `emit component viewed analytic on view attach`() {
         // page view id is null since we haven't received pageDidLoad yet
-        controller.onViewAttached()
+        viewModel.onViewAttached()
         verify(analyticsService).track(ConnectAnalyticsEvent.ComponentViewed(null))
 
         // once we receive pageDidLoad, we should emit the page view id for subsequent analytics
-        controller.onReceivedPageDidLoad("id123")
-        controller.onViewAttached()
+        viewModel.delegate.onReceivedPageDidLoad("id123")
+        viewModel.onViewAttached()
         verify(analyticsService).track(ConnectAnalyticsEvent.ComponentViewed("id123"))
     }
 
@@ -367,7 +360,7 @@ class StripeConnectWebViewContainerControllerTest {
             embeddedComponentManager.getStripeURL(embeddedComponent)
         ) doReturn "https://stripe.com/test?foo=bar#mytest"
 
-        controller.onPageStarted("https://example.com/test?foo=bar#mytest")
+        viewModel.delegate.onPageStarted("https://example.com/test?foo=bar#mytest")
 
         // when emitting the analytic, we should strip the query params
         verify(analyticsService).track(
@@ -381,7 +374,7 @@ class StripeConnectWebViewContainerControllerTest {
             embeddedComponentManager.getStripeURL(any())
         ) doReturn "https://stripe.com/test?foo=bar#mytest"
 
-        controller.onPageStarted("https://stripe.com/test")
+        viewModel.delegate.onPageStarted("https://stripe.com/test")
 
         // when emitting the analytic, we should strip the query params
         verify(analyticsService, never()).track(
@@ -392,20 +385,20 @@ class StripeConnectWebViewContainerControllerTest {
     @Test
     fun `emit web page loaded analytic on page finished`() {
         whenever(androidClock.millis()) doReturn 100L
-        controller.onViewAttached() // register that the page was attached to capture the start of loading
+        viewModel.onViewAttached() // register that the page was attached to capture the start of loading
 
         whenever(androidClock.millis()) doReturn 200L // difference of 100ms to start of load
-        controller.onPageFinished()
+        viewModel.delegate.onPageFinished("https://stripe.com")
         verify(analyticsService).track(ConnectAnalyticsEvent.WebPageLoaded(100L))
     }
 
     @Test
     fun `emit web component loaded analytic when received pageDidLoad`() {
         whenever(androidClock.millis()) doReturn 100L
-        controller.onViewAttached() // register that the page was attached to capture the start of loading
+        viewModel.onViewAttached() // register that the page was attached to capture the start of loading
 
         whenever(androidClock.millis()) doReturn 200L // difference of 100ms to start of load
-        controller.onReceivedPageDidLoad("pageView123")
+        viewModel.delegate.onReceivedPageDidLoad("pageView123")
         verify(analyticsService).track(
             ConnectAnalyticsEvent.WebComponentLoaded(
                 pageViewId = "pageView123",
@@ -417,7 +410,7 @@ class StripeConnectWebViewContainerControllerTest {
 
     @Test
     fun `emit web page error when main page receives an error`() {
-        controller.onReceivedError(
+        viewModel.delegate.onReceivedError(
             requestUrl = "https://stripe.com",
             httpStatusCode = 404,
             errorMessage = "Not Found",
@@ -434,8 +427,8 @@ class StripeConnectWebViewContainerControllerTest {
 
     @Test
     fun `emit deserialization error on error to deserialize web message`() {
-        controller.onReceivedPageDidLoad("page_view_id")
-        controller.onErrorDeserializingWebMessage(
+        viewModel.delegate.onReceivedPageDidLoad("page_view_id")
+        viewModel.delegate.onErrorDeserializingWebMessage(
             webFunctionName = "onSetterFunctionCalled",
             error = IllegalArgumentException("Unable to deserialize"),
         )
@@ -446,5 +439,11 @@ class StripeConnectWebViewContainerControllerTest {
                 pageViewId = "page_view_id",
             )
         )
+    }
+
+    private fun TestScope.collectComponentEvents() {
+        backgroundScope.launch {
+            viewModel.eventFlow.toCollection(receivedComponentEvents)
+        }
     }
 }

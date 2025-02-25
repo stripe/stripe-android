@@ -7,6 +7,7 @@ import android.content.Intent
 import android.net.Uri
 import android.webkit.PermissionRequest
 import android.webkit.ValueCallback
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -26,6 +27,7 @@ import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.analytics.ComponentAnalyticsService
 import com.stripe.android.connect.analytics.ConnectAnalyticsEvent
 import com.stripe.android.connect.util.Clock
+import com.stripe.android.connect.webview.StripeConnectWebView.Delegate
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.OpenFinancialConnectionsMessage
 import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
@@ -52,6 +54,7 @@ internal class StripeConnectWebViewContainerViewModel(
     private val embeddedComponentManager: EmbeddedComponentManager,
     private val embeddedComponent: StripeEmbeddedComponent,
     private val analyticsService: ComponentAnalyticsService,
+    createWebView: CreateWebView = CreateWebView(::StripeConnectWebView),
     private val stripeIntentLauncher: StripeIntentLauncher = StripeIntentLauncherImpl(),
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
 ) : ViewModel(),
@@ -79,13 +82,11 @@ internal class StripeConnectWebViewContainerViewModel(
      */
     val eventFlow: Flow<ComponentEvent> get() = _eventFlow.asSharedFlow()
 
+    @VisibleForTesting
+    internal val delegate = StripeConnectWebViewDelegate()
+
     @SuppressLint("StaticFieldLeak")
-    val webView: StripeConnectWebView =
-        StripeConnectWebView(
-            applicationContext = applicationContext,
-            delegate = StripeConnectWebViewDelegate(),
-            logger = logger,
-        )
+    val webView: StripeConnectWebView = createWebView(applicationContext, delegate, logger)
 
     /**
      * Callback to invoke when the view is attached.
@@ -114,7 +115,8 @@ internal class StripeConnectWebViewContainerViewModel(
         }
     }
 
-    private inner class StripeConnectWebViewDelegate : StripeConnectWebView.Delegate {
+    @VisibleForTesting
+    internal inner class StripeConnectWebViewDelegate : StripeConnectWebView.Delegate {
         override var propsJson: JsonObject?
             get() = this@StripeConnectWebViewContainerViewModel.propsJson
             set(value) {
@@ -373,4 +375,8 @@ internal class StripeConnectWebViewContainerViewModel(
     ) {
         val analyticsService = embeddedComponentManager.getComponentAnalyticsService(embeddedComponent)
     }
+}
+
+internal fun interface CreateWebView {
+    operator fun invoke(applicationContext: Context, delegate: Delegate, logger: Logger): StripeConnectWebView
 }
