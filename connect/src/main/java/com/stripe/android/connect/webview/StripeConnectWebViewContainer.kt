@@ -66,9 +66,9 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
     where Props : ComponentProps,
           Listener : StripeEmbeddedComponentListener {
 
-    private var controller: StripeConnectWebViewContainerViewModel? = null
+    private var viewModel: StripeConnectWebViewContainerViewModel? = null
     private var containerView: FrameLayout? = null
-    private val webView: WebView? get() = controller?.webView
+    private val webView: WebView? get() = viewModel?.webView
     private var webViewCacheKey: String? = null
     private var progressBar: ProgressBar? = null
 
@@ -109,7 +109,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
         this.containerView = view
         this.webViewCacheKey = cacheKey
 
-        bindViewToController()
+        bindToViewModel()
     }
 
     override fun initialize(
@@ -132,7 +132,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
         listener: Listener?,
         propsJson: JsonObject?,
     ) {
-        if (this.controller != null) {
+        if (this.viewModel != null) {
             throw IllegalStateException("Already initialized")
         }
         this.listener = listener
@@ -174,17 +174,17 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
                 )
             }
         )
-        this.controller = viewModelProvider[viewModelKey, StripeConnectWebViewContainerViewModel::class]
-        bindViewToController()
+        this.viewModel = viewModelProvider[viewModelKey, StripeConnectWebViewContainerViewModel::class]
+        bindToViewModel()
     }
 
-    private fun bindViewToController() {
+    private fun bindToViewModel() {
         val containerView = this.containerView ?: return
-        val controller = this.controller ?: return
+        val viewModel = this.viewModel ?: return
 
-        controller.propsJson = this.propsJson
+        viewModel.propsJson = this.propsJson
 
-        val webView = controller.webView
+        val webView = viewModel.webView
             .apply {
                 layoutParams = FrameLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
@@ -205,18 +205,18 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
         containerView.addView(progressBar)
 
         containerView.doOnAttach {
-            controller.onViewAttached()
+            viewModel.onViewAttached()
             val owner = containerView.findViewTreeLifecycleOwner()
                 ?: return@doOnAttach
 
-            owner.lifecycle.addObserver(controller)
+            owner.lifecycle.addObserver(viewModel)
             owner.lifecycleScope.launch {
-                controller.stateFlow.collectLatest(::bindViewState)
-                controller.eventFlow.collectLatest(::handleEvent)
+                viewModel.stateFlow.collectLatest(::bindViewState)
+                viewModel.eventFlow.collectLatest(::handleEvent)
             }
 
             containerView.doOnDetach {
-                owner.lifecycle.removeObserver(controller)
+                owner.lifecycle.removeObserver(viewModel)
                 logger.debug("(StripeConnectWebViewContainer) Removing WebView from container view")
                 containerView.removeView(webView)
             }
@@ -225,7 +225,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
 
     internal fun setPropsFromXml(props: Props) {
         // Only set props if uninitialized.
-        if (controller == null) {
+        if (viewModel == null) {
             this.propsJson = props.toJsonObject()
         }
     }
