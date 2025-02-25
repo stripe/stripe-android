@@ -111,6 +111,7 @@ internal fun PaymentMethodEmbeddedLayoutUI(
                         savedPaymentMethodAction = savedPaymentMethodAction,
                         onViewMorePaymentMethods = onViewMorePaymentMethods,
                         onManageOneSavedPaymentMethod = { onManageOneSavedPaymentMethod(displayedSavedPaymentMethod) },
+                        addOffset = rowStyle.addTrailingContentOffset()
                     )
                 },
                 onClick = { onSelectSavedPaymentMethod(displayedSavedPaymentMethod) },

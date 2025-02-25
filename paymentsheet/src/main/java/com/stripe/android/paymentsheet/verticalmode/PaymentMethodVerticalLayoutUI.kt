@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -140,14 +142,19 @@ internal fun SavedPaymentMethodTrailingContent(
     savedPaymentMethodAction: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
     onViewMorePaymentMethods: () -> Unit,
     onManageOneSavedPaymentMethod: () -> Unit,
+    addOffset: Boolean = false
 ) {
     when (savedPaymentMethodAction) {
         PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE -> Unit
         PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE -> {
-            EditButton(onClick = onManageOneSavedPaymentMethod)
+            EditButton(
+                addOffset = addOffset,
+                onClick = onManageOneSavedPaymentMethod
+            )
         }
         PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL -> {
             ViewMoreButton(
+                addOffset = addOffset,
                 onViewMorePaymentMethods = onViewMorePaymentMethods
             )
         }
@@ -155,7 +162,10 @@ internal fun SavedPaymentMethodTrailingContent(
 }
 
 @Composable
-private fun EditButton(onClick: () -> Unit) {
+private fun EditButton(
+    addOffset: Boolean,
+    onClick: () -> Unit,
+) {
     Text(
         stringResource(id = com.stripe.android.R.string.stripe_edit),
         color = MaterialTheme.colors.primary,
@@ -165,12 +175,14 @@ private fun EditButton(onClick: () -> Unit) {
             .testTag(TEST_TAG_EDIT_SAVED_CARD)
             .clickable(onClick = onClick)
             .padding(4.dp)
+            .offset(x = if (addOffset) 4.dp else 0.dp)
             .fillMaxHeight()
     )
 }
 
 @Composable
 private fun ViewMoreButton(
+    addOffset: Boolean,
     onViewMorePaymentMethods: () -> Unit,
 ) {
     Row(
@@ -179,6 +191,7 @@ private fun ViewMoreButton(
             .testTag(TEST_TAG_VIEW_MORE)
             .clickable(onClick = onViewMorePaymentMethods)
             .padding(4.dp)
+            .offset(x = if (addOffset) 12.dp else 0.dp)
             .fillMaxHeight()
     ) {
         Text(
@@ -191,6 +204,9 @@ private fun ViewMoreButton(
             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
             tint = MaterialTheme.colors.primary,
+            modifier = Modifier
+                .offset(x = (-2).dp)
+                .size(22.dp)
         )
     }
 }
