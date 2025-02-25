@@ -39,8 +39,8 @@ class EmbeddedComponentManagerFactory @Inject constructor(
             fetchClientSecretCallback = ::fetchClientSecret,
             customFonts = listOf(
                 CustomFontSource(
-                    "fonts/doto.ttf",
-                    "doto",
+                    assetsFilePath = "fonts/doto.ttf",
+                    name = "doto",
                     weight = 1000,
                 )
             )
