@@ -29,7 +29,6 @@ class PayoutsExampleActivity : BasicExampleComponentActivity() {
             ViewPayoutsExampleBinding.inflate(LayoutInflater.from(context)).root
                 .apply {
                     initialize(
-                        context = context,
                         embeddedComponentManager = embeddedComponentManager,
                         listener = listener,
                         props = EmptyProps,

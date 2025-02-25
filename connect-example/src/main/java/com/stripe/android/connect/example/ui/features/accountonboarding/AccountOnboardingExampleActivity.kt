@@ -27,7 +27,6 @@ class AccountOnboardingExampleActivity : BasicExampleComponentActivity() {
             ViewAccountOnboardingExampleBinding.inflate(LayoutInflater.from(context)).root
                 .apply {
                     initialize(
-                        context = context,
                         embeddedComponentManager = embeddedComponentManager,
                         listener = null,
                         props = props,

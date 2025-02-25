@@ -46,7 +46,6 @@ interface StripeConnectWebViewContainer<Listener, Props>
      * through XML layout inflation.
      */
     fun initialize(
-        context: Context,
         embeddedComponentManager: EmbeddedComponentManager,
         listener: Listener?,
         props: Props,
@@ -55,7 +54,7 @@ interface StripeConnectWebViewContainer<Listener, Props>
 
 @OptIn(PrivateBetaConnectSDK::class)
 internal class StripeConnectWebViewContainerImpl<Listener, Props>(
-    context: Context,
+    private val context: Context,
     private val embeddedComponent: StripeEmbeddedComponent,
     embeddedComponentManager: EmbeddedComponentManager?,
     private var listener: Listener?,
@@ -67,6 +66,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
           Listener : StripeEmbeddedComponentListener {
 
     private var viewModel: StripeConnectWebViewContainerViewModel? = null
+
     private var containerView: FrameLayout? = null
     private val webView: WebView? get() = viewModel?.webView
     private var webViewCacheKey: String? = null
@@ -97,7 +97,6 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
     init {
         if (embeddedComponentManager != null) {
             initializeInternal(
-                context = context,
                 embeddedComponentManager = embeddedComponentManager,
                 listener = listener,
                 propsJson = props?.toJsonObject()
@@ -113,13 +112,11 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
     }
 
     override fun initialize(
-        context: Context,
         embeddedComponentManager: EmbeddedComponentManager,
         listener: Listener?,
         props: Props,
     ) {
         initializeInternal(
-            context = context,
             embeddedComponentManager = embeddedComponentManager,
             listener = listener,
             propsJson = props.toJsonObject()
@@ -127,7 +124,6 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
     }
 
     private fun initializeInternal(
-        context: Context,
         embeddedComponentManager: EmbeddedComponentManager,
         listener: Listener?,
         propsJson: JsonObject?,
