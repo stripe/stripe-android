@@ -1,5 +1,7 @@
 package com.stripe.android.connect
 
+import com.stripe.android.connect.webview.serialization.SetOnLoadError
+import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
 
 @PrivateBetaConnectSDK
@@ -16,12 +18,33 @@ interface StripeEmbeddedComponentListener {
 }
 
 @OptIn(PrivateBetaConnectSDK::class)
-internal fun interface ComponentListenerDelegate<Listener : StripeEmbeddedComponentListener> {
-    fun Listener.delegate(message: SetterFunctionCalledMessage)
+internal open class ComponentListenerDelegate<Listener : StripeEmbeddedComponentListener> {
+    open fun Listener.delegateMessage(message: SetterFunctionCalledMessage) {
+        // Implement me.
+    }
 
-    companion object {
-        internal fun <Listener : StripeEmbeddedComponentListener> ignore(): ComponentListenerDelegate<Listener> {
-            return ComponentListenerDelegate { _ -> }
+    fun Listener.delegate(event: ComponentEvent) {
+        when (event) {
+            is ComponentEvent.LoadError -> {
+                onLoadError(event.error)
+            }
+            is ComponentEvent.Message -> {
+                when (val value = event.message.value) {
+                    is SetOnLoaderStart -> onLoaderStart()
+                    is SetOnLoadError -> {
+                        // TODO - wrap error better
+                        onLoadError(RuntimeException("${value.error.type}: ${value.error.message}"))
+                    }
+                    else -> {
+                        delegateMessage(event.message)
+                    }
+                }
+            }
         }
     }
+}
+
+internal sealed interface ComponentEvent {
+    data class LoadError(val error: Throwable) : ComponentEvent
+    data class Message(val message: SetterFunctionCalledMessage) : ComponentEvent
 }

@@ -72,7 +72,7 @@ class StripeConnectWebViewContainerControllerTest {
     private val mockLogger: Logger = mock()
 
     private val lifecycleOwner = TestLifecycleOwner()
-    private lateinit var controller: StripeConnectWebViewContainerController<PayoutsListener>
+    private lateinit var controller: StripeConnectWebViewContainerViewModel
 
     @Before
     fun setup() {
@@ -82,7 +82,7 @@ class StripeConnectWebViewContainerControllerTest {
         whenever(embeddedComponentManager.getStripeURL(any())) doReturn "https://example.com"
         whenever(androidClock.millis()) doReturn -1L
 
-        controller = StripeConnectWebViewContainerController(
+        controller = StripeConnectWebViewContainerViewModel(
             view = view,
             analyticsService = analyticsService,
             clock = androidClock,

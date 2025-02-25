@@ -33,10 +33,10 @@ class PayoutsView private constructor(
         defStyleAttr = defStyleAttr,
         cacheKey = cacheKey,
         webViewContainerBehavior = StripeConnectWebViewContainerImpl(
+            context = context,
             embeddedComponent = StripeEmbeddedComponent.PAYOUTS,
             embeddedComponentManager = embeddedComponentManager,
             listener = listener,
-            listenerDelegate = ComponentListenerDelegate.ignore(),
             props = EmptyProps,
         )
     )

@@ -39,6 +39,7 @@ class AccountOnboardingView private constructor(
         defStyleAttr = defStyleAttr,
         cacheKey = cacheKey,
         webViewContainerBehavior = StripeConnectWebViewContainerImpl(
+            context = context,
             embeddedComponent = StripeEmbeddedComponent.ACCOUNT_ONBOARDING,
             embeddedComponentManager = embeddedComponentManager,
             listener = listener,
@@ -140,8 +141,8 @@ interface AccountOnboardingListener : StripeEmbeddedComponentListener {
 }
 
 @OptIn(PrivateBetaConnectSDK::class)
-internal object AccountOnboardingListenerDelegate : ComponentListenerDelegate<AccountOnboardingListener> {
-    override fun AccountOnboardingListener.delegate(message: SetterFunctionCalledMessage) {
+internal object AccountOnboardingListenerDelegate : ComponentListenerDelegate<AccountOnboardingListener>() {
+    override fun AccountOnboardingListener.delegateMessage(message: SetterFunctionCalledMessage) {
         when (message.value) {
             is SetOnExit -> onExit()
             else -> {
