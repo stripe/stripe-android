@@ -56,6 +56,11 @@ class EmbeddedComponentManager(
 
     /**
      * Create a new [AccountOnboardingView] for inclusion in the view hierarchy.
+     *
+     * @param context The [Context] to use for creating the view.
+     * @param listener Optional [AccountOnboardingListener] to use for handling events from the view.
+     * @param props Optional [AccountOnboardingProps] to use for configuring the view.
+     * @param cacheKey Key to use for caching the internal WebView within an Activity across configuration changes.
      */
     @PrivateBetaConnectSDK
     fun createAccountOnboardingView(
@@ -76,6 +81,10 @@ class EmbeddedComponentManager(
 
     /**
      * Create a new [PayoutsView] for inclusion in the view hierarchy.
+     *
+     * @param context The [Context] to use for creating the view.
+     * @param listener Optional [PayoutsListener] to use for handling events from the view.
+     * @param cacheKey Key to use for caching the internal WebView within an Activity across configuration changes.
      */
     @PrivateBetaConnectSDK
     fun createPayoutsView(
@@ -154,16 +163,15 @@ class EmbeddedComponentManager(
             return true
         }
 
-        val (_, launcher) =
-            getLauncher(activity, requestPermissionLaunchers, "Error launching camera permission request")
-                ?: return null
+        val launcher = getLauncher(activity, requestPermissionLaunchers, "Error launching camera permission request")
+            ?: return null
         launcher.launch(Manifest.permission.CAMERA)
 
         return permissionsFlow.first()
     }
 
     internal suspend fun chooseFile(activity: Activity, requestIntent: Intent): Array<Uri>? {
-        val (activity, launcher) = getLauncher(activity, chooseFileLaunchers, "Error choosing file")
+        val launcher = getLauncher(activity, chooseFileLaunchers, "Error choosing file")
             ?: return null
         launcher.launch(requestIntent)
 
@@ -207,7 +215,7 @@ class EmbeddedComponentManager(
         activity: Activity,
         launchers: Map<Activity, ActivityResultLauncher<I>>,
         errorMessage: String,
-    ): Pair<Activity, ActivityResultLauncher<I>>? {
+    ): ActivityResultLauncher<I>? {
         val launcher = launchers[activity]
         if (launcher == null) {
             logger.warning(
@@ -216,7 +224,7 @@ class EmbeddedComponentManager(
             )
             return null
         }
-        return activity to launcher
+        return launcher
     }
 
     private fun Context.findActivityWithErrorHandling(): Activity? {

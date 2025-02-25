@@ -4,13 +4,12 @@ import android.app.Application
 import android.content.Context
 import android.content.res.ColorStateList
 import android.view.Gravity
+import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
 import android.widget.FrameLayout
 import android.widget.ProgressBar
 import androidx.annotation.RestrictTo
-import androidx.core.view.doOnAttach
-import androidx.core.view.doOnDetach
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
@@ -65,11 +64,13 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
     where Props : ComponentProps,
           Listener : StripeEmbeddedComponentListener {
 
+    private val loggerTag = javaClass.simpleName
+
     private var viewModel: StripeConnectWebViewContainerViewModel? = null
 
     private var containerView: FrameLayout? = null
     private val webView: WebView? get() = viewModel?.webView
-    private var webViewCacheKey: String? = null
+    private var cacheKey: String? = null
     private var progressBar: ProgressBar? = null
 
     /* Notes on initialization
@@ -106,9 +107,9 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
 
     internal fun initializeView(view: FrameLayout, cacheKey: String?) {
         this.containerView = view
-        this.webViewCacheKey = cacheKey
+        this.cacheKey = cacheKey
 
-        bindToViewModel()
+        bindViewModel()
     }
 
     override fun initialize(
@@ -149,9 +150,9 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
         val viewModelStoreOwner = requireNotNull(context.findActivity() as? ViewModelStoreOwner)
         val viewModelKey = buildString {
             append(embeddedComponent.name)
-            if (webViewCacheKey != null) {
+            if (cacheKey != null) {
                 append("-")
-                append(webViewCacheKey)
+                append(cacheKey)
             }
         }
         val viewModelProvider = ViewModelProvider.create(
@@ -170,15 +171,17 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
             }
         )
         this.viewModel = viewModelProvider[viewModelKey, StripeConnectWebViewContainerViewModel::class]
-        bindToViewModel()
+        bindViewModel()
     }
 
-    private fun bindToViewModel() {
+    private fun bindViewModel() {
         val containerView = this.containerView ?: return
         val viewModel = this.viewModel ?: return
 
+        // Sync props to VM.
         viewModel.propsJson = this.propsJson
 
+        // Add VM's WebView.
         val webView = viewModel.webView
             .apply {
                 layoutParams = FrameLayout.LayoutParams(
@@ -188,6 +191,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
             }
         containerView.addView(webView)
 
+        // Add progress bar on top of WebView.
         val progressBar = ProgressBar(containerView.context)
             .apply {
                 layoutParams = FrameLayout.LayoutParams(
@@ -199,23 +203,31 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
         this.progressBar = progressBar
         containerView.addView(progressBar)
 
-        containerView.doOnAttach {
-            viewModel.onViewAttached()
-            val owner = containerView.findViewTreeLifecycleOwner()
-                ?: return@doOnAttach
+        containerView.addOnAttachStateChangeListener(
+            object : View.OnAttachStateChangeListener {
+                override fun onViewAttachedToWindow(v: View) {
+                    viewModel.onViewAttached()
+                    val owner = containerView.findViewTreeLifecycleOwner()
+                        ?: return
 
-            owner.lifecycle.addObserver(viewModel)
-            owner.lifecycleScope.launch {
-                viewModel.stateFlow.collectLatest(::bindViewState)
-                viewModel.eventFlow.collectLatest(::handleEvent)
-            }
+                    // Bind VM's lifecycle to container view's lifecycle.
+                    owner.lifecycle.addObserver(viewModel)
 
-            containerView.doOnDetach {
-                owner.lifecycle.removeObserver(viewModel)
-                logger.debug("(StripeConnectWebViewContainer) Removing WebView from container view")
-                containerView.removeView(webView)
+                    // Handle VM state and events.
+                    owner.lifecycleScope.launch {
+                        viewModel.stateFlow.collectLatest(::bindViewModelState)
+                        viewModel.eventFlow.collectLatest(::handleEvent)
+                    }
+                }
+
+                override fun onViewDetachedFromWindow(v: View) {
+                    // Clean up.
+                    containerView.findViewTreeLifecycleOwner()?.lifecycle?.removeObserver(viewModel)
+                    logger.debug("($loggerTag) Removing WebView from container view")
+                    containerView.removeView(webView)
+                }
             }
-        }
+        )
     }
 
     internal fun setPropsFromXml(props: Props) {
@@ -225,12 +237,12 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
         }
     }
 
-    private fun bindViewState(state: StripeConnectWebViewContainerState) {
+    private fun bindViewModelState(state: StripeConnectWebViewContainerState) {
         val containerView = this.containerView ?: return
         val webView = this.webView ?: return
         val progressBar = this.progressBar ?: return
 
-        logger.debug("(StripeConnectWebViewContainer) Binding view state: $state")
+        logger.debug("($loggerTag) Binding view state: $state")
         containerView.setBackgroundColor(state.backgroundColor)
         webView.setBackgroundColor(state.backgroundColor)
         progressBar.isVisible = state.isNativeLoadingIndicatorVisible

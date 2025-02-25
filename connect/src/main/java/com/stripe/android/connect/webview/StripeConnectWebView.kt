@@ -43,6 +43,9 @@ import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.put
 
+/**
+ * WebView to display a Stripe.js embedded component.
+ */
 @SuppressLint("ViewConstructor")
 @Suppress("TooManyFunctions")
 @OptIn(PrivateBetaConnectSDK::class)
@@ -59,6 +62,8 @@ internal class StripeConnectWebView(
 
     @VisibleForTesting
     internal val stripeWebChromeClient = StripeConnectWebChromeClient()
+
+    private val webViewLifecycleScope get() = findViewTreeLifecycleOwner()?.lifecycleScope
 
     init {
         webViewClient = stripeWebViewClient
@@ -78,8 +83,7 @@ internal class StripeConnectWebView(
     }
 
     fun updateConnectInstance(appearance: Appearance) {
-        val payload =
-            ConnectInstanceJs(appearance = appearance.toJs())
+        val payload = ConnectInstanceJs(appearance = appearance.toJs())
         evaluateSdkJs(
             "updateConnectInstance",
             ConnectJson.encodeToJsonElement(payload).jsonObject
@@ -147,6 +151,9 @@ internal class StripeConnectWebView(
          */
         suspend fun onPermissionRequest(activity: Activity, request: PermissionRequest)
 
+        /**
+         * Callback to invoke upon receiving a file chooser request from the webview.
+         */
         suspend fun onChooseFile(
             activity: Activity,
             filePathCallback: ValueCallback<Array<Uri>>,
@@ -168,8 +175,14 @@ internal class StripeConnectWebView(
          */
         fun onMerchantIdChanged(merchantId: String)
 
+        /**
+         * Callback to invoke upon receiving 'openFinancialConnections' message.
+         */
         suspend fun onOpenFinancialConnections(activity: Activity, message: OpenFinancialConnectionsMessage)
 
+        /**
+         * Callback to invoke upon failing to deserialize a web message.
+         */
         fun onErrorDeserializingWebMessage(webFunctionName: String, error: Throwable)
     }
 
@@ -224,7 +237,7 @@ internal class StripeConnectWebView(
         override fun onPermissionRequest(request: PermissionRequest) {
             val activity = findActivity()
                 ?: return request.deny()
-            findViewTreeLifecycleOwner()?.lifecycleScope
+            webViewLifecycleScope
                 ?.launch {
                     delegate.onPermissionRequest(activity, request)
                 }
@@ -246,7 +259,7 @@ internal class StripeConnectWebView(
         ): Boolean {
             val activity = findActivity()
                 ?: return false
-            val lifecycleScope = findViewTreeLifecycleOwner()?.lifecycleScope
+            val lifecycleScope = webViewLifecycleScope
                 ?: return false
 
             lifecycleScope.launch {
@@ -334,9 +347,7 @@ internal class StripeConnectWebView(
             val parsed = ConnectJson.decodeFromString<OpenFinancialConnectionsMessage>(message)
             logger.debug("($loggerTag) Open FinancialConnections: $parsed")
 
-            val lifecycleScope = findViewTreeLifecycleOwner()?.lifecycleScope
-                ?: return
-            lifecycleScope.launch {
+            webViewLifecycleScope?.launch {
                 delegate.onOpenFinancialConnections(
                     activity = activity,
                     message = parsed
