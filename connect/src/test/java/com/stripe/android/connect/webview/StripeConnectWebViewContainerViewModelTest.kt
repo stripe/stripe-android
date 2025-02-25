@@ -50,6 +50,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.mockito.kotlin.wheneverBlocking
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -87,7 +88,7 @@ class StripeConnectWebViewContainerViewModelTest {
         whenever(androidClock.millis()) doReturn -1L
 
         viewModel = StripeConnectWebViewContainerViewModel(
-            applicationContext = mockContext,
+            application = RuntimeEnvironment.getApplication(),
             analyticsService = analyticsService,
             clock = androidClock,
             embeddedComponentManager = embeddedComponentManager,

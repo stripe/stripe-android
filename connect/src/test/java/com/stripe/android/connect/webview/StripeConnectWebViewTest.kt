@@ -21,7 +21,7 @@ class StripeConnectWebViewTest {
     @Before
     fun setup() {
         webView = StripeConnectWebView(
-            applicationContext = RuntimeEnvironment.getApplication(),
+            application = RuntimeEnvironment.getApplication(),
             delegate = mockDelegate,
             logger = Logger.getInstance(enableLogging = false)
         )

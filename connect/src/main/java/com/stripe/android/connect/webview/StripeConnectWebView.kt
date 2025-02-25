@@ -2,6 +2,7 @@ package com.stripe.android.connect.webview
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -50,10 +51,10 @@ import kotlinx.serialization.json.put
 @Suppress("TooManyFunctions")
 @OptIn(PrivateBetaConnectSDK::class)
 internal class StripeConnectWebView(
-    applicationContext: Context,
+    application: Application,
     private val delegate: Delegate,
     private val logger: Logger,
-) : WebView(applicationContext) {
+) : WebView(application) {
 
     private val loggerTag = javaClass.simpleName
 

@@ -2,6 +2,7 @@ package com.stripe.android.connect.webview
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -46,9 +47,31 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
 
+/**
+ * ViewModel for [StripeConnectWebViewContainer]. Importantly, it also provides a cached WebView instance.
+ * Creating and caching a View in a ViewModel is generally bad practice, but it's necessary in our case to provide
+ * a good experience for both SDK integrators and end users.
+ *
+ * The issue is that the typical View state restoration mechanism does essentially nothing for WebViews. Any time
+ * a WebView is recreated, it loses its state and reloads the page. This would be a bad UX especially for components
+ * with forms.
+ *
+ * As of this writing, the official guidance is to "avoid activity recreation by specifying the configuration changes
+ * handled by your app (rather than by the system)". However, that would likely be infeasible for users wanting to
+ * integrate this SDK into their apps.
+ *
+ * So, the approach here is to:
+ *  1. Create the WebView using the application context in the ViewModel.
+ *  2. Cache the WebView in the ViewModel, which is retained across configuration changes.
+ *  3. Directly handle WebView interactions in the ViewModel itself (as opposed to the WebView's containing view),
+ *     otherwise WebView events may be dropped during View recreation.
+ *  4. Whenever an activity [Context] is needed, find it within the view tree hierarchy.
+ *
+ * @see https://developer.android.com/develop/ui/compose/quick-guides/content/manage-webview-state
+ */
 @OptIn(PrivateBetaConnectSDK::class)
 internal class StripeConnectWebViewContainerViewModel(
-    private val applicationContext: Context,
+    private val application: Application,
     private val clock: Clock,
     private val embeddedComponentManager: EmbeddedComponentManager,
     private val embeddedComponent: StripeEmbeddedComponent,
@@ -77,15 +100,20 @@ internal class StripeConnectWebViewContainerViewModel(
     private val _eventFlow = MutableSharedFlow<ComponentEvent>(extraBufferCapacity = 1)
 
     /**
-     * Flow of events.
+     * Flow of component events.
      */
     val eventFlow: Flow<ComponentEvent> get() = _eventFlow.asSharedFlow()
 
     @VisibleForTesting
     internal val delegate = StripeConnectWebViewDelegate()
 
-    @SuppressLint("StaticFieldLeak")
-    val webView: StripeConnectWebView = createWebView(applicationContext, delegate, logger)
+    @SuppressLint("StaticFieldLeak") // Should be safe because we're using application.
+    val webView: StripeConnectWebView =
+        createWebView(
+            application = application,
+            delegate = delegate,
+            logger = logger
+        )
 
     /**
      * Callback to invoke when the view is attached.
@@ -354,7 +382,7 @@ internal class StripeConnectWebViewContainerViewModel(
             initializer {
                 val baseDependencies = this[BASE_DEPENDENCIES_KEY] as BaseDependencies
                 StripeConnectWebViewContainerViewModel(
-                    applicationContext = this[APPLICATION_KEY] as Context,
+                    application = this[APPLICATION_KEY] as Application,
                     analyticsService = baseDependencies.analyticsService,
                     clock = baseDependencies.clock,
                     embeddedComponentManager = baseDependencies.embeddedComponentManager,
@@ -378,5 +406,5 @@ internal class StripeConnectWebViewContainerViewModel(
 }
 
 internal fun interface CreateWebView {
-    operator fun invoke(applicationContext: Context, delegate: Delegate, logger: Logger): StripeConnectWebView
+    operator fun invoke(application: Application, delegate: Delegate, logger: Logger): StripeConnectWebView
 }

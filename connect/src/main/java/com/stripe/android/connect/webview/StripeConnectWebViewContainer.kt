@@ -69,9 +69,11 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
     private var viewModel: StripeConnectWebViewContainerViewModel? = null
 
     private var containerView: FrameLayout? = null
-    private val webView: WebView? get() = viewModel?.webView
-    private var cacheKey: String? = null
     private var progressBar: ProgressBar? = null
+
+    // See StripeConnectWebViewContainerViewModel for why we're getting a WebView from a ViewModel.
+    private val webView: WebView? get() = viewModel?.webView
+    private var webViewCacheKey: String? = null
 
     /* Notes on initialization
      * -----------------------
@@ -107,7 +109,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
 
     internal fun initializeView(view: FrameLayout, cacheKey: String?) {
         this.containerView = view
-        this.cacheKey = cacheKey
+        this.webViewCacheKey = cacheKey
 
         bindViewModel()
     }
@@ -147,12 +149,21 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
                 }
             }
 
+        this.viewModel = getViewModelFromActivity(embeddedComponentManager)
+        bindViewModel()
+    }
+
+    private fun getViewModelFromActivity(
+        embeddedComponentManager: EmbeddedComponentManager
+    ): StripeConnectWebViewContainerViewModel {
         val viewModelStoreOwner = requireNotNull(context.findActivity() as? ViewModelStoreOwner)
         val viewModelKey = buildString {
             append(embeddedComponent.name)
-            if (cacheKey != null) {
+            append("-")
+            append(embeddedComponentManager)
+            if (webViewCacheKey != null) {
                 append("-")
-                append(cacheKey)
+                append(webViewCacheKey)
             }
         }
         val viewModelProvider = ViewModelProvider.create(
@@ -170,8 +181,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
                 )
             }
         )
-        this.viewModel = viewModelProvider[viewModelKey, StripeConnectWebViewContainerViewModel::class]
-        bindViewModel()
+        return viewModelProvider[viewModelKey, StripeConnectWebViewContainerViewModel::class]
     }
 
     private fun bindViewModel() {
