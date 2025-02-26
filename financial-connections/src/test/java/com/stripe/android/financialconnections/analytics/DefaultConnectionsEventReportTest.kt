@@ -5,7 +5,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.financialconnections.ApiKeyFixtures
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
@@ -39,11 +38,6 @@ class DefaultConnectionsEventReportTest {
         testDispatcher
     )
 
-    private val configuration = FinancialConnectionsSheet.Configuration(
-        ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-        ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
-    )
-
     private val financialConnectionsSession = FinancialConnectionsSession(
         clientSecret = "las_1234567890",
         id = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
@@ -58,11 +52,10 @@ class DefaultConnectionsEventReportTest {
 
     @Test
     fun `onPresented() should fire analytics request with expected event value`() {
-        eventReporter.onPresented(configuration)
+        eventReporter.onPresented()
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == "stripe_android.connections.sheet.presented" &&
-                    req.params["las_client_secret"] == ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET
+                req.params["event"] == "stripe_android.connections.sheet.presented"
             }
         )
     }
@@ -70,7 +63,7 @@ class DefaultConnectionsEventReportTest {
     @Test
     fun `onResult() should fire analytics request with expected event value for success`() {
         eventReporter.onResult(
-            configuration,
+            financialConnectionsSession.id,
             FinancialConnectionsSheetActivityResult.Completed(
                 financialConnectionsSession = financialConnectionsSession
             )
@@ -79,31 +72,34 @@ class DefaultConnectionsEventReportTest {
             argWhere { req ->
                 req.params["event"] == "stripe_android.connections.sheet.closed" &&
                     req.params["session_result"] == "completed" &&
-                    req.params["las_client_secret"] == ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET
+                    req.params["las_id"] == financialConnectionsSession.id
             }
         )
     }
 
     @Test
     fun `onResult() should fire analytics request with expected event value for cancelled`() {
-        eventReporter.onResult(configuration, FinancialConnectionsSheetActivityResult.Canceled)
+        eventReporter.onResult(financialConnectionsSession.id, FinancialConnectionsSheetActivityResult.Canceled)
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "stripe_android.connections.sheet.closed" &&
                     req.params["session_result"] == "cancelled" &&
-                    req.params["las_client_secret"] == ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET
+                    req.params["las_id"] == financialConnectionsSession.id
             }
         )
     }
 
     @Test
     fun `onResult() should fire analytics request with expected event value for failure`() {
-        eventReporter.onResult(configuration, FinancialConnectionsSheetActivityResult.Failed(Exception()))
+        eventReporter.onResult(
+            session = financialConnectionsSession.id,
+            financialConnectionsSheetResult = FinancialConnectionsSheetActivityResult.Failed(Exception()),
+        )
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "stripe_android.connections.sheet.failed" &&
                     req.params["session_result"] == "failure" &&
-                    req.params["las_client_secret"] == ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET
+                    req.params["las_id"] == financialConnectionsSession.id
             }
         )
     }

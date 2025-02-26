@@ -39,6 +39,7 @@ import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.LinkMode
 import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -67,6 +68,7 @@ class FinancialConnectionsSheetViewModelTest {
     )
 
     private val syncResponse = syncResponse()
+    private val sessionId = syncResponse.manifest.id
 
     private val fetchFinancialConnectionsSession = mock<FetchFinancialConnectionsSession>()
     private val browserManager = mock<BrowserManager>()
@@ -86,7 +88,7 @@ class FinancialConnectionsSheetViewModelTest {
         runTest {
             whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
             createViewModel(defaultInitialState.copy(manifest = sessionManifest()))
-            verify(eventReporter).onPresented(configuration)
+            verify(eventReporter).onPresented()
         }
     }
 
@@ -457,9 +459,12 @@ class FinancialConnectionsSheetViewModelTest {
         // When
         viewModel.handleOnNewIntent(Intent("error_url"))
 
+        // A bad workaround for now
+        delay(300)
+
         // Then
         verify(eventReporter)
-            .onResult(eq(configuration), any<Failed>())
+            .onResult(eq(sessionId), any<Failed>())
     }
 
     @Test
@@ -485,7 +490,7 @@ class FinancialConnectionsSheetViewModelTest {
                 assertThat(viewEffect.result).isInstanceOf(Failed::class.java)
             }
             verify(eventReporter)
-                .onResult(eq(configuration), any<Failed>())
+                .onResult(eq(sessionId), any<Failed>())
         }
     }
 
@@ -504,9 +509,12 @@ class FinancialConnectionsSheetViewModelTest {
             // end auth flow
             viewModel.handleOnNewIntent(cancelIntent)
 
+            // A bad workaround for now
+            delay(300)
+
             // Then
             verify(eventReporter)
-                .onResult(configuration, Canceled)
+                .onResult(sessionId, Canceled)
         }
     }
 
@@ -723,7 +731,7 @@ class FinancialConnectionsSheetViewModelTest {
                 assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.ON_EXTERNAL_ACTIVITY)
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isEqualTo(Canceled)
-                verify(eventReporter).onResult(eq(configuration), any<Canceled>())
+                verify(eventReporter).onResult(eq(sessionId), any<Canceled>())
             }
         }
     }
@@ -739,18 +747,23 @@ class FinancialConnectionsSheetViewModelTest {
                 )
             )
 
+            whenever(getOrFetchSync(any(), any())).thenReturn(syncResponse)
+
             // When
             // simulate a config change
             viewModel.onActivityRecreated()
             // auth flow ends (activity received result without new intent received)
             viewModel.onBrowserActivityResult()
 
+            // A bad workaround for now
+            delay(300)
+
             // Then
             withState(viewModel) {
                 assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.ON_EXTERNAL_ACTIVITY)
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isEqualTo(Canceled)
-                verify(eventReporter).onResult(eq(configuration), any<Canceled>())
+                verify(eventReporter).onResult(eq(sessionId), any<Canceled>())
             }
         }
     }
@@ -767,6 +780,8 @@ class FinancialConnectionsSheetViewModelTest {
                     )
                 )
             )
+
+            whenever(getOrFetchSync(any(), any())).thenReturn(syncResponse)
 
             val viewModel = createViewModel(
                 defaultInitialState.copy(
