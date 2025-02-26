@@ -408,6 +408,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     ): NextStep {
         return retrieveStripeIntent(clientSecret).mapCatching { intent ->
             if (intent.isConfirmed) {
+                failIfSetAsDefaultFeatureIsEnabled(paymentMethodExtraParams)
                 NextStep.Complete(isForceSuccess = false)
             } else if (intent.requiresAction()) {
                 val attachedPaymentMethodId = intent.paymentMethodId
@@ -519,6 +520,27 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 message.resolvableString
             }
         )
+    }
+
+    private fun failIfSetAsDefaultFeatureIsEnabled(paymentMethodExtraParams: PaymentMethodExtraParams?) {
+        // Ideally, we would crash anytime the set as default checkbox is shown, rather than just when it is checked.
+        // We could check if it is shown by asserting that setAsDefault != null instead of asserting that it is true.
+        // However, we don't have good end-to-end test coverage of this for now, so if we made a change to start
+        // sending the set as default flag as false more frequently, we could accidentally start failing here more
+        // often as well.
+        val setAsDefaultChecked = when (paymentMethodExtraParams) {
+            is PaymentMethodExtraParams.Card -> paymentMethodExtraParams.setAsDefault == true
+            is PaymentMethodExtraParams.USBankAccount -> paymentMethodExtraParams.setAsDefault == true
+            is PaymentMethodExtraParams.BacsDebit, null -> false
+        }
+
+        if (setAsDefaultChecked && !requestOptions.apiKeyIsLiveMode) {
+            throw IllegalStateException(
+                "(Test-mode only error) The default payment methods feature is not yet supported with deferred " +
+                    "server-side confirmation. Please contact us if you'd like to use this feature via a Github " +
+                    "issue on stripe-android."
+            )
+        }
     }
 
     private companion object {
