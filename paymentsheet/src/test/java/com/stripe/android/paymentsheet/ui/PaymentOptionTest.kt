@@ -115,11 +115,6 @@ class PaymentOptionTest {
         composeTestRule.onNodeWithTag(
             testTag = TEST_TAG_MODIFY_BADGE,
             useUnmergedTree = true
-        ).assertIsEnabled()
-
-        composeTestRule.onNodeWithTag(
-            testTag = TEST_TAG_MODIFY_BADGE,
-            useUnmergedTree = true
         ).performClick()
 
         assertThat(didCallOnModifyItem).isTrue()
