@@ -21,6 +21,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
+import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.Colors
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
@@ -953,7 +954,7 @@ class PaymentSheet internal constructor(
             internal companion object {
                 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
                 val default = Embedded(
-                    style = RowStyle.FlatWithRadio.defaultLight
+                    style = RowStyle.FlatWithRadio.default
                 )
             }
 
@@ -976,12 +977,6 @@ class PaymentSheet internal constructor(
                     internal val separatorThicknessDp: Float,
 
                     /**
-                     * The color of the separator line between rows.
-                     */
-                    @ColorInt
-                    internal val separatorColor: Int,
-
-                    /**
                      * The start inset of the separator line between rows.
                      */
                     internal val startSeparatorInsetDp: Float,
@@ -1001,80 +996,95 @@ class PaymentSheet internal constructor(
                      * Element.
                      */
                     internal val bottomSeparatorEnabled: Boolean,
-                    /**
-                     * The color of the radio button when selected.
-                     */
-                    @ColorInt
-                    internal val selectedColor: Int,
 
-                    /**
-                     * The color of the radio button when unselected.
-                     */
-                    @ColorInt
-                    internal val unselectedColor: Int,
                     /**
                      * Additional vertical insets applied to a payment method row.
                      * - Note: Increasing this value increases the height of each row.
                      */
                     internal val additionalVerticalInsetsDp: Float,
+
                     /**
                      * Horizontal insets applied to a payment method row.
                      */
                     internal val horizontalInsetsDp: Float,
+
+                    /**
+                     * Describes the colors used while the system is in light mode.
+                     */
+                    internal val colorsLight: Colors,
+
+                    /**
+                     * Describes the colors used while the system is in dark mode.
+                     */
+                    internal val colorsDark: Colors
                 ) : RowStyle() {
                     constructor(
                         context: Context,
                         separatorThicknessDp: Int,
-                        separatorColor: Color,
                         startSeparatorInsetDp: Int,
                         endSeparatorInsetDp: Int,
                         topSeparatorEnabled: Boolean,
                         bottomSeparatorEnabled: Boolean,
-                        selectedColor: Color,
-                        unselectedColor: Color,
                         additionalVerticalInsetsDp: Int,
-                        horizontalInsetsDp: Int
+                        horizontalInsetsDp: Int,
+                        colorsLight: Colors,
+                        colorsDark: Colors
                     ) : this(
                         separatorThicknessDp = context.getRawValueFromDimenResource(separatorThicknessDp),
-                        separatorColor = separatorColor.toArgb(),
                         startSeparatorInsetDp = context.getRawValueFromDimenResource(startSeparatorInsetDp),
                         endSeparatorInsetDp = context.getRawValueFromDimenResource(endSeparatorInsetDp),
                         topSeparatorEnabled = topSeparatorEnabled,
                         bottomSeparatorEnabled = bottomSeparatorEnabled,
-                        selectedColor = selectedColor.toArgb(),
-                        unselectedColor = unselectedColor.toArgb(),
                         additionalVerticalInsetsDp = context.getRawValueFromDimenResource(additionalVerticalInsetsDp),
-                        horizontalInsetsDp = context.getRawValueFromDimenResource(horizontalInsetsDp)
+                        horizontalInsetsDp = context.getRawValueFromDimenResource(horizontalInsetsDp),
+                        colorsLight = colorsLight,
+                        colorsDark = colorsDark
                     )
 
                     override fun hasSeparators() = true
                     override fun startSeparatorHasDefaultInset() = true
+                    internal fun getColors(isDark: Boolean): Colors = if (isDark) colorsDark else colorsLight
+
+                    @Parcelize
+                    class Colors(
+                        /**
+                         * The color of the separator line between rows.
+                         */
+                        @ColorInt
+                        internal val separatorColor: Int,
+
+                        /**
+                         * The color of the radio button when selected.
+                         */
+                        @ColorInt
+                        internal val selectedColor: Int,
+
+                        /**
+                         * The color of the radio button when unselected.
+                         */
+                        @ColorInt
+                        internal val unselectedColor: Int,
+                    ) : Parcelable
 
                     internal companion object {
-                        val defaultLight = FlatWithRadio(
+                        val default = FlatWithRadio(
                             separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
-                            separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
                             startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
                             endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
                             topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
                             bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
-                            selectedColor = StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
-                            unselectedColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
                             additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp,
-                            horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
-                        )
-
-                        val defaultDark = FlatWithRadio(
-                            separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
-                            separatorColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
-                            startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
-                            endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
-                            topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
-                            bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
-                            selectedColor = StripeThemeDefaults.colorsDark.materialColors.primary.toArgb(),
-                            unselectedColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
-                            additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp,
-                            horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
+                            horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp,
+                            colorsLight = Colors(
+                                separatorColor = StripeThemeDefaults.radioColorsLight.separatorColor.toArgb(),
+                                selectedColor = StripeThemeDefaults.radioColorsLight.selectedColor.toArgb(),
+                                unselectedColor = StripeThemeDefaults.radioColorsLight.unselectedColor.toArgb()
+                            ),
+                            colorsDark = Colors(
+                                separatorColor = StripeThemeDefaults.radioColorsDark.separatorColor.toArgb(),
+                                selectedColor = StripeThemeDefaults.radioColorsDark.selectedColor.toArgb(),
+                                unselectedColor = StripeThemeDefaults.radioColorsDark.unselectedColor.toArgb()
+                            ),
                         )
                     }
                 }
@@ -1090,12 +1100,6 @@ class PaymentSheet internal constructor(
                     internal val separatorThicknessDp: Float,
 
                     /**
-                     * The color of the separator line between rows.
-                     */
-                    @ColorInt
-                    internal val separatorColor: Int,
-
-                    /**
                      * The start inset of the separator line between rows.
                      */
                     internal val startSeparatorInsetDp: Float,
@@ -1115,78 +1119,95 @@ class PaymentSheet internal constructor(
                      * Element.
                      */
                     internal val bottomSeparatorEnabled: Boolean,
-                    /**
-                     * The color of the checkmark.
-                     */
-                    @ColorInt
-                    internal val checkmarkColor: Int,
+
                     /**
                      * Inset of the checkmark from the end of the row
                      */
                     internal val checkmarkInsetDp: Float,
+
                     /**
                      * Additional vertical insets applied to a payment method row.
                      * - Note: Increasing this value increases the height of each row.
                      */
                     internal val additionalVerticalInsetsDp: Float,
+
                     /**
                      * Horizontal insets applied to a payment method row.
                      */
                     internal val horizontalInsetsDp: Float,
+
+                    /**
+                     * Describes the colors used while the system is in light mode.
+                     */
+                    internal val colorsLight: Colors,
+
+                    /**
+                     * Describes the colors used while the system is in dark mode.
+                     */
+                    internal val colorsDark: Colors
                 ) : RowStyle() {
                     constructor(
                         context: Context,
                         separatorThicknessDp: Int,
-                        separatorColor: Color,
                         startSeparatorInsetDp: Int,
                         endSeparatorInsetDp: Int,
                         topSeparatorEnabled: Boolean,
                         bottomSeparatorEnabled: Boolean,
-                        checkmarkColor: Color,
                         checkmarkInsetDp: Int,
                         additionalVerticalInsetsDp: Int,
-                        horizontalInsetsDp: Int
+                        horizontalInsetsDp: Int,
+                        colorsLight: Colors,
+                        colorsDark: Colors
                     ) : this(
                         separatorThicknessDp = context.getRawValueFromDimenResource(separatorThicknessDp),
-                        separatorColor = separatorColor.toArgb(),
                         startSeparatorInsetDp = context.getRawValueFromDimenResource(startSeparatorInsetDp),
                         endSeparatorInsetDp = context.getRawValueFromDimenResource(endSeparatorInsetDp),
                         topSeparatorEnabled = topSeparatorEnabled,
                         bottomSeparatorEnabled = bottomSeparatorEnabled,
-                        checkmarkColor = checkmarkColor.toArgb(),
                         checkmarkInsetDp = context.getRawValueFromDimenResource(checkmarkInsetDp),
                         additionalVerticalInsetsDp = context.getRawValueFromDimenResource(additionalVerticalInsetsDp),
-                        horizontalInsetsDp = context.getRawValueFromDimenResource(horizontalInsetsDp)
+                        horizontalInsetsDp = context.getRawValueFromDimenResource(horizontalInsetsDp),
+                        colorsLight = colorsLight,
+                        colorsDark = colorsDark
                     )
+
+                    @Parcelize
+                    class Colors(
+                        /**
+                         * The color of the separator line between rows.
+                         */
+                        @ColorInt
+                        internal val separatorColor: Int,
+
+                        /**
+                         * The color of the checkmark.
+                         */
+                        @ColorInt
+                        internal val checkmarkColor: Int,
+                    ) : Parcelable
 
                     override fun hasSeparators() = true
                     override fun startSeparatorHasDefaultInset() = false
+                    internal fun getColors(isDark: Boolean): Colors = if (isDark) colorsDark else colorsLight
 
                     internal companion object {
-                        val defaultLight = FlatWithCheckmark(
+                        val default = FlatWithCheckmark(
                             separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
-                            separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
                             startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
                             endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
                             topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
                             bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
-                            checkmarkColor = StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
                             checkmarkInsetDp = StripeThemeDefaults.embeddedCommon.checkmarkInsetDp,
                             additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp,
                             horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp,
-                        )
-
-                        val defaultDark = FlatWithCheckmark(
-                            separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
-                            separatorColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
-                            startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
-                            endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
-                            topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
-                            bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
-                            checkmarkColor = StripeThemeDefaults.colorsDark.materialColors.primary.toArgb(),
-                            checkmarkInsetDp = StripeThemeDefaults.embeddedCommon.checkmarkInsetDp,
-                            additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp,
-                            horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
+                            colorsLight = Colors(
+                                separatorColor = StripeThemeDefaults.checkmarkColorsLight.separatorColor.toArgb(),
+                                checkmarkColor = StripeThemeDefaults.checkmarkColorsLight.checkmarkColor.toArgb()
+                            ),
+                            colorsDark = Colors(
+                                separatorColor = StripeThemeDefaults.checkmarkColorsDark.separatorColor.toArgb(),
+                                checkmarkColor = StripeThemeDefaults.checkmarkColorsDark.checkmarkColor.toArgb()
+                            )
                         )
                     }
                 }

@@ -178,29 +178,42 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
         return when (type) {
             Embedded.RowStyle.FlatWithRadio::class -> Embedded.RowStyle.FlatWithRadio(
                 separatorThicknessDp = separatorThicknessDp ?: StripeThemeDefaults.flat.separatorThickness,
-                separatorColor = separatorColor ?: StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
                 startSeparatorInsetDp = startSeparatorInset ?: StripeThemeDefaults.flat.separatorInsets,
                 endSeparatorInsetDp = endSeparatorInset ?: StripeThemeDefaults.flat.separatorInsets,
                 topSeparatorEnabled = topSeparatorEnabled ?: StripeThemeDefaults.flat.topSeparatorEnabled,
                 bottomSeparatorEnabled = bottomSeparatorEnabled ?: StripeThemeDefaults.flat.bottomSeparatorEnabled,
-                selectedColor = selectedColor ?: StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
-                unselectedColor = unselectedColor ?: StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
                 additionalVerticalInsetsDp = additionalVerticalInsetsDp
                     ?: StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp,
-                horizontalInsetsDp = horizontalInsetsDp ?: StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
+                horizontalInsetsDp = horizontalInsetsDp ?: StripeThemeDefaults.embeddedCommon.horizontalInsetsDp,
+                colorsLight = Embedded.RowStyle.FlatWithRadio.Colors(
+                    separatorColor = separatorColor ?: StripeThemeDefaults.radioColorsLight.separatorColor.toArgb(),
+                    selectedColor = selectedColor ?: StripeThemeDefaults.radioColorsLight.selectedColor.toArgb(),
+                    unselectedColor = unselectedColor ?: StripeThemeDefaults.radioColorsLight.unselectedColor.toArgb()
+                ),
+                colorsDark = Embedded.RowStyle.FlatWithRadio.Colors(
+                    separatorColor = StripeThemeDefaults.radioColorsDark.separatorColor.toArgb(),
+                    selectedColor = StripeThemeDefaults.radioColorsDark.selectedColor.toArgb(),
+                    unselectedColor = StripeThemeDefaults.radioColorsDark.unselectedColor.toArgb()
+                )
             )
             Embedded.RowStyle.FlatWithCheckmark::class -> Embedded.RowStyle.FlatWithCheckmark(
                 separatorThicknessDp = separatorThicknessDp ?: StripeThemeDefaults.flat.separatorThickness,
-                separatorColor = separatorColor ?: StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
                 startSeparatorInsetDp = startSeparatorInset ?: StripeThemeDefaults.flat.separatorInsets,
                 endSeparatorInsetDp = endSeparatorInset ?: StripeThemeDefaults.flat.separatorInsets,
                 topSeparatorEnabled = topSeparatorEnabled ?: StripeThemeDefaults.flat.topSeparatorEnabled,
                 bottomSeparatorEnabled = bottomSeparatorEnabled ?: StripeThemeDefaults.flat.bottomSeparatorEnabled,
-                checkmarkColor = checkmarkColor ?: StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
                 checkmarkInsetDp = checkmarkInsetDp ?: StripeThemeDefaults.embeddedCommon.checkmarkInsetDp,
                 additionalVerticalInsetsDp = additionalVerticalInsetsDp
                     ?: StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp,
-                horizontalInsetsDp = horizontalInsetsDp ?: StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
+                horizontalInsetsDp = horizontalInsetsDp ?: StripeThemeDefaults.embeddedCommon.horizontalInsetsDp,
+                colorsLight = Embedded.RowStyle.FlatWithCheckmark.Colors(
+                    separatorColor = separatorColor ?: StripeThemeDefaults.checkmarkColorsLight.separatorColor.toArgb(),
+                    checkmarkColor = checkmarkColor ?: StripeThemeDefaults.checkmarkColorsLight.checkmarkColor.toArgb()
+                ),
+                colorsDark = Embedded.RowStyle.FlatWithCheckmark.Colors(
+                    separatorColor = StripeThemeDefaults.checkmarkColorsDark.separatorColor.toArgb(),
+                    checkmarkColor = StripeThemeDefaults.checkmarkColorsDark.checkmarkColor.toArgb()
+                )
             )
             else -> Embedded.RowStyle.FloatingButton(
                 spacingDp = spacingDp ?: StripeThemeDefaults.floating.spacing,

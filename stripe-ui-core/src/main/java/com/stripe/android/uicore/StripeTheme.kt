@@ -126,7 +126,6 @@ data class PrimaryButtonTypography(
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class EmbeddedFlatStyle(
     val separatorThickness: Float,
-    val separatorColor: Color,
     val separatorInsets: Float,
     val topSeparatorEnabled: Boolean,
     val bottomSeparatorEnabled: Boolean
@@ -137,6 +136,17 @@ data class EmbeddedInsets(
     val checkmarkInsetDp: Float,
     val additionalVerticalInsetsDp: Float,
     val horizontalInsetsDp: Float
+)
+
+data class EmbeddedCheckmarkColors(
+    val separatorColor: Color,
+    val checkmarkColor: Color
+)
+
+data class EmbeddedRadioColors(
+    val separatorColor: Color,
+    val selectedColor: Color,
+    val unselectedColor: Color
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -233,10 +243,31 @@ object StripeThemeDefaults {
 
     val flat = EmbeddedFlatStyle(
         separatorThickness = 1.0f,
-        separatorColor = Color(0xFF787880),
         separatorInsets = 0.0f,
         topSeparatorEnabled = true,
         bottomSeparatorEnabled = true
+    )
+
+    val checkmarkColorsLight = EmbeddedCheckmarkColors(
+        separatorColor = colorsLight.componentBorder,
+        checkmarkColor = colorsLight.materialColors.primary
+    )
+
+    val checkmarkColorsDark = EmbeddedCheckmarkColors(
+        separatorColor = colorsDark.componentBorder,
+        checkmarkColor = colorsDark.materialColors.primary
+    )
+
+    val radioColorsLight = EmbeddedRadioColors(
+        selectedColor = colorsLight.materialColors.primary,
+        unselectedColor = colorsLight.componentBorder,
+        separatorColor = colorsLight.componentBorder
+    )
+
+    val radioColorsDark = EmbeddedRadioColors(
+        selectedColor = colorsDark.materialColors.primary,
+        unselectedColor = colorsDark.componentBorder,
+        separatorColor = colorsDark.componentBorder
     )
 
     val embeddedCommon = EmbeddedInsets(

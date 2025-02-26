@@ -196,7 +196,7 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
             .appearance(
                 PaymentSheet.Appearance(
                     embeddedAppearance = Embedded(
-                        Embedded.RowStyle.FlatWithRadio.defaultLight
+                        Embedded.RowStyle.FlatWithRadio.default
                     )
                 )
             ).build()
