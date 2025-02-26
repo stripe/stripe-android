@@ -205,7 +205,7 @@ private fun ViewMoreButton(
             contentDescription = null,
             tint = MaterialTheme.colors.primary,
             modifier = Modifier
-                .offset(x = (-2).dp)
+                .offset(x = (-2).dp, y = 2.dp)
                 .size(22.dp)
         )
     }
