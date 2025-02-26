@@ -191,7 +191,7 @@ private fun ViewMoreButton(
             .testTag(TEST_TAG_VIEW_MORE)
             .clickable(onClick = onViewMorePaymentMethods)
             .padding(start = 4.dp, end = 1.dp, top = 4.dp, bottom = 4.dp)
-            .offset(x = if (addOffset) 12.dp else 0.dp)
+            .offset(x = if (addOffset) 9.dp else 0.dp)
             .fillMaxHeight()
     ) {
         Text(
