@@ -1045,7 +1045,9 @@ class PaymentSheet internal constructor(
                     override fun startSeparatorHasDefaultInset() = true
                     internal fun getColors(isDark: Boolean): Colors = if (isDark) colorsDark else colorsLight
 
+                    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                     @Parcelize
+                    @Poko
                     class Colors(
                         /**
                          * The color of the separator line between rows.
@@ -1171,7 +1173,9 @@ class PaymentSheet internal constructor(
                         colorsDark = colorsDark
                     )
 
+                    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                     @Parcelize
+                    @Poko
                     class Colors(
                         /**
                          * The color of the separator line between rows.
