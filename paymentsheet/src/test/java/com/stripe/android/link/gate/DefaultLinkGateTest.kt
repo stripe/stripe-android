@@ -15,118 +15,24 @@ import org.robolectric.RobolectricTestRunner
 internal class DefaultLinkGateTest {
 
     @get:Rule
-    val nativeLinkFeatureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.nativeLinkEnabled,
+    val suppressNativeLinkFeatureFlagTestRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.suppressNativeLink,
         isEnabled = false
     )
 
-    @get:Rule
-    val attestationFeatureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.nativeLinkAttestationEnabled,
-        isEnabled = false
-    )
-
-    // useNativeLink tests for test mode
+    // useNativeLink tests
     @Test
-    fun `useNativeLink - test mode - returns true when feature flag enabled`() {
-        nativeLinkFeatureFlagTestRule.setEnabled(true)
-        val gate = gate(isLiveMode = false)
-
-        assertThat(gate.useNativeLink).isTrue()
-    }
-
-    @Test
-    fun `useNativeLink - test mode - returns false when feature flag disabled`() {
-        nativeLinkFeatureFlagTestRule.setEnabled(false)
-        val gate = gate(isLiveMode = false)
-
-        assertThat(gate.useNativeLink).isFalse()
-    }
-
-    @Test
-    fun `useNativeLink - test mode - returns attestation value when feature flag not set`() {
-        nativeLinkFeatureFlagTestRule.setEnabled(null)
-        attestationFeatureFlagTestRule.setEnabled(true)
-        val gate = gate(isLiveMode = false, useAttestationEndpoints = true)
+    fun `useNativeLink mirrors useAttestationEndpoints`() {
+        val gate = gate(useAttestationEndpoints = true)
         assertThat(gate.useNativeLink).isTrue()
 
-        attestationFeatureFlagTestRule.setEnabled(false)
-        val gateWithoutAttestation = gate(isLiveMode = false, useAttestationEndpoints = false)
+        val gateWithoutAttestation = gate(useAttestationEndpoints = false)
         assertThat(gateWithoutAttestation.useNativeLink).isFalse()
-    }
-
-    // useNativeLink tests for live mode
-    @Test
-    fun `useNativeLink - live mode - returns true when attestation enabled`() {
-        val gate = gate(isLiveMode = true, useAttestationEndpoints = true)
-
-        assertThat(gate.useNativeLink).isTrue()
-    }
-
-    @Test
-    fun `useNativeLink - live mode - returns false when attestation disabled`() {
-        val gate = gate(isLiveMode = true, useAttestationEndpoints = false)
-
-        assertThat(gate.useNativeLink).isFalse()
-    }
-
-    @Test
-    fun `useNativeLink - live mode - returns attestation value when feature flag not set`() {
-        nativeLinkFeatureFlagTestRule.setEnabled(null)
-        attestationFeatureFlagTestRule.setEnabled(true)
-        val gate = gate(isLiveMode = true, useAttestationEndpoints = true)
-        assertThat(gate.useNativeLink).isTrue()
-
-        attestationFeatureFlagTestRule.setEnabled(false)
-        val gateWithoutAttestation = gate(isLiveMode = true, useAttestationEndpoints = false)
-        assertThat(gateWithoutAttestation.useNativeLink).isFalse()
-    }
-
-    // useAttestationEndpoints tests for test mode
-    @Test
-    fun `useAttestationEndpoints - test mode - returns true when feature flag enabled`() {
-        attestationFeatureFlagTestRule.setEnabled(true)
-        val gate = gate(isLiveMode = false)
-
-        assertThat(gate.useAttestationEndpoints).isTrue()
-    }
-
-    @Test
-    fun `useAttestationEndpoints - test mode - returns false when feature flag disabled`() {
-        attestationFeatureFlagTestRule.setEnabled(false)
-        val gate = gate(isLiveMode = false)
-
-        assertThat(gate.useAttestationEndpoints).isFalse()
-    }
-
-    @Test
-    fun `useAttestationEndpoints - test mode - returns configuration value when feature flag not set`() {
-        attestationFeatureFlagTestRule.setEnabled(null)
-        val gate = gate(isLiveMode = false, useAttestationEndpoints = true)
-        assertThat(gate.useAttestationEndpoints).isTrue()
-
-        val gateWithoutAttestation = gate(isLiveMode = false, useAttestationEndpoints = false)
-        assertThat(gateWithoutAttestation.useAttestationEndpoints).isFalse()
     }
 
     // useAttestationEndpoints tests for live mode
     @Test
-    fun `useAttestationEndpoints - live mode - returns true when configuration enabled`() {
-        val gate = gate(isLiveMode = true, useAttestationEndpoints = true)
-
-        assertThat(gate.useAttestationEndpoints).isTrue()
-    }
-
-    @Test
-    fun `useAttestationEndpoints - live mode - returns false when configuration disabled`() {
-        val gate = gate(isLiveMode = true, useAttestationEndpoints = false)
-
-        assertThat(gate.useAttestationEndpoints).isFalse()
-    }
-
-    @Test
-    fun `useAttestationEndpoints - live mode - returns configuration value when feature flag not set`() {
-        attestationFeatureFlagTestRule.setEnabled(null)
+    fun `useAttestationEndpoints - live mode - returns configuration value directly`() {
         val gate = gate(isLiveMode = true, useAttestationEndpoints = true)
         assertThat(gate.useAttestationEndpoints).isTrue()
 
@@ -134,126 +40,41 @@ internal class DefaultLinkGateTest {
         assertThat(gateWithoutAttestation.useAttestationEndpoints).isFalse()
     }
 
-    // Feature flag independence tests
+    // useAttestationEndpoints tests for test mode
     @Test
-    fun `useNativeLink - test mode - not affected by attestation feature flag`() {
-        nativeLinkFeatureFlagTestRule.setEnabled(true)
-        attestationFeatureFlagTestRule.setEnabled(false)
-        val gate = gate(isLiveMode = false)
+    fun `useAttestationEndpoints - test mode - returns false when suppressNativeLink enabled`() {
+        suppressNativeLinkFeatureFlagTestRule.setEnabled(true)
+        val gate = gate(isLiveMode = false, useAttestationEndpoints = true)
 
-        assertThat(gate.useNativeLink).isTrue()
+        assertThat(gate.useAttestationEndpoints).isFalse()
     }
 
     @Test
-    fun `useAttestationEndpoints - test mode - not affected by native link feature flag`() {
-        attestationFeatureFlagTestRule.setEnabled(true)
-        nativeLinkFeatureFlagTestRule.setEnabled(false)
-        val gate = gate(isLiveMode = false)
-
+    fun `useAttestationEndpoints - test mode - returns configuration value when suppressNativeLink disabled`() {
+        suppressNativeLinkFeatureFlagTestRule.setEnabled(false)
+        val gate = gate(isLiveMode = false, useAttestationEndpoints = true)
         assertThat(gate.useAttestationEndpoints).isTrue()
+
+        val gateWithoutAttestation = gate(isLiveMode = false, useAttestationEndpoints = false)
+        assertThat(gateWithoutAttestation.useAttestationEndpoints).isFalse()
     }
 
+    // suppress2faModal tests
     @Test
-    fun `suppress2faModal - test mode - is true when useNativeLink is false and suppress2faModal is false`() {
-        attestationFeatureFlagTestRule.setEnabled(false)
-        nativeLinkFeatureFlagTestRule.setEnabled(false)
-        val gate = gate(
-            isLiveMode = false,
-            useAttestationEndpoints = false,
-            suppress2faModal = false
-        )
-
+    fun `suppress2faModal - returns true when native link is disabled`() {
+        val gate = gate(useAttestationEndpoints = false, suppress2faModal = false)
         assertThat(gate.suppress2faModal).isTrue()
     }
 
     @Test
-    fun `suppress2faModal - test mode - is true when useNativeLink is true and suppress2faModal is true`() {
-        attestationFeatureFlagTestRule.setEnabled(true)
-        nativeLinkFeatureFlagTestRule.setEnabled(true)
-        val gate = gate(
-            isLiveMode = false,
-            useAttestationEndpoints = true,
-            suppress2faModal = true
-        )
-
+    fun `suppress2faModal - returns true when explicitly configured`() {
+        val gate = gate(useAttestationEndpoints = true, suppress2faModal = true)
         assertThat(gate.suppress2faModal).isTrue()
     }
 
     @Test
-    fun `suppress2faModal - test mode - is true when useNativeLink is false and suppress2faModal is true`() {
-        attestationFeatureFlagTestRule.setEnabled(false)
-        nativeLinkFeatureFlagTestRule.setEnabled(false)
-        val gate = gate(
-            isLiveMode = false,
-            useAttestationEndpoints = false,
-            suppress2faModal = true
-        )
-
-        assertThat(gate.suppress2faModal).isTrue()
-    }
-
-    @Test
-    fun `suppress2faModal - test mode - is true when useNativeLink is true and suppress2faModal is false`() {
-        attestationFeatureFlagTestRule.setEnabled(true)
-        nativeLinkFeatureFlagTestRule.setEnabled(true)
-        val gate = gate(
-            isLiveMode = false,
-            useAttestationEndpoints = true,
-            suppress2faModal = false
-        )
-
-        assertThat(gate.suppress2faModal).isFalse()
-    }
-
-    @Test
-    fun `suppress2faModal - live mode - is true when useNativeLink is false and suppress2faModal is false`() {
-        attestationFeatureFlagTestRule.setEnabled(false)
-        nativeLinkFeatureFlagTestRule.setEnabled(false)
-        val gate = gate(
-            isLiveMode = true,
-            useAttestationEndpoints = false,
-            suppress2faModal = false
-        )
-
-        assertThat(gate.suppress2faModal).isTrue()
-    }
-
-    @Test
-    fun `suppress2faModal - live mode - is true when useNativeLink is true and suppress2faModal is true`() {
-        attestationFeatureFlagTestRule.setEnabled(true)
-        nativeLinkFeatureFlagTestRule.setEnabled(true)
-        val gate = gate(
-            isLiveMode = true,
-            useAttestationEndpoints = true,
-            suppress2faModal = true
-        )
-
-        assertThat(gate.suppress2faModal).isTrue()
-    }
-
-    @Test
-    fun `suppress2faModal - live mode - is true when useNativeLink is false and suppress2faModal is true`() {
-        attestationFeatureFlagTestRule.setEnabled(false)
-        nativeLinkFeatureFlagTestRule.setEnabled(false)
-        val gate = gate(
-            isLiveMode = true,
-            useAttestationEndpoints = false,
-            suppress2faModal = true
-        )
-
-        assertThat(gate.suppress2faModal).isTrue()
-    }
-
-    @Test
-    fun `suppress2faModal - live mode - is true when useNativeLink is true and suppress2faModal is false`() {
-        attestationFeatureFlagTestRule.setEnabled(true)
-        nativeLinkFeatureFlagTestRule.setEnabled(true)
-        val gate = gate(
-            isLiveMode = true,
-            useAttestationEndpoints = true,
-            suppress2faModal = false
-        )
-
+    fun `suppress2faModal - returns false when native link enabled and not explicitly suppressed`() {
+        val gate = gate(useAttestationEndpoints = true, suppress2faModal = false)
         assertThat(gate.suppress2faModal).isFalse()
     }
 
