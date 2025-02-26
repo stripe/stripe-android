@@ -1,16 +1,23 @@
 package com.stripe.android.common.ui
 
+import android.content.Context
+import android.content.ContextWrapper
 import android.os.Build
+import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue.Expanded
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetLayout
 import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetState
@@ -22,10 +29,9 @@ internal fun ElementsBottomSheetLayout(
     state: StripeBottomSheetState,
     modifier: Modifier = Modifier,
     onDismissed: () -> Unit,
+
     content: @Composable () -> Unit,
 ) {
-    @Suppress("DEPRECATION")
-    val systemUiController = rememberSystemUiController()
     val layoutInfo = rememberStripeBottomSheetLayoutInfo(
         scrimColor = Color.Black.copy(alpha = 0.32f),
     )
@@ -42,18 +48,20 @@ internal fun ElementsBottomSheetLayout(
         label = "StatusBarColorAlpha",
     )
 
-    LaunchedEffect(systemUiController, statusBarColorAlpha) {
-        systemUiController.setStatusBarColor(
-            color = layoutInfo.scrimColor.copy(statusBarColorAlpha),
-            darkIcons = false,
+    val context = LocalContext.current
+    DisposableEffect(statusBarColorAlpha) {
+        val activity = context.getActivity()
+        activity?.enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.auto(
+                lightScrim = layoutInfo.scrimColor.toArgb(),
+                darkScrim = layoutInfo.scrimColor.toArgb()
+            ),
+            navigationBarStyle = SystemBarStyle.auto(
+                lightScrim = Color.Transparent.toArgb(),
+                darkScrim = Color.Transparent.toArgb()
+            )
         )
-    }
-
-    LaunchedEffect(systemUiController) {
-        systemUiController.setNavigationBarColor(
-            color = Color.Transparent,
-            darkIcons = false,
-        )
+        onDispose {}
     }
 
     StripeBottomSheetLayout(
@@ -81,3 +89,9 @@ private val isRunningUiTest: Boolean
             Class.forName("androidx.test.InstrumentationRegistry")
         }.isSuccess
     }
+
+private fun Context.getActivity(): ComponentActivity? = when (this) {
+    is ComponentActivity -> this
+    is ContextWrapper -> baseContext.getActivity()
+    else -> null
+}
