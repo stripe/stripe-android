@@ -1,7 +1,6 @@
 package com.stripe.android.customersheet.state
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
@@ -481,7 +480,6 @@ class DefaultCustomerSheetLoaderTest {
         )
     }
 
-    @OptIn(ExperimentalCardBrandFilteringApi::class)
     @Test
     fun `when there are saved cards with disallowed brands they are filtered out`() = runTest {
         val loader = createCustomerSheetLoader(

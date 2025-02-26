@@ -1,12 +1,10 @@
 package com.stripe.android.common.model
 
-import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 
 internal object CommonConfigurationFactory {
-    @OptIn(ExperimentalCardBrandFilteringApi::class)
     fun create(
         merchantDisplayName: String = "Example, Inc.",
         customer: PaymentSheet.CustomerConfiguration? = null,

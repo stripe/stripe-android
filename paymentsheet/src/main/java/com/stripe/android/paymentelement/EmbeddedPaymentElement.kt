@@ -12,7 +12,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
-import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.model.CardBrand
@@ -323,7 +322,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
              * **Note**: This is only a client-side solution.
              * **Note**: Card brand filtering is not currently supported in Link.
              */
-            @ExperimentalCardBrandFilteringApi
             fun cardBrandAcceptance(
                 cardBrandAcceptance: PaymentSheet.CardBrandAcceptance
             ) = apply {
