@@ -263,8 +263,6 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
     }
 
     private fun handleEvent(event: ComponentEvent) {
-        with(listenerDelegate) {
-            listener?.delegate(event)
-        }
+        listener?.let { listenerDelegate.delegate(it, event) }
     }
 }

@@ -45,7 +45,7 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.put
 
 /**
- * WebView to display a Stripe.js embedded component.
+ * WebView to display an embedded Stripe.js component.
  */
 @SuppressLint("ViewConstructor")
 @Suppress("TooManyFunctions")

@@ -17,26 +17,29 @@ interface StripeEmbeddedComponentListener {
     fun onLoadError(error: Throwable) {}
 }
 
+/**
+ * Handles generic component events and delegates others to a component event listener.
+ */
 @OptIn(PrivateBetaConnectSDK::class)
 internal open class ComponentListenerDelegate<Listener : StripeEmbeddedComponentListener> {
-    open fun Listener.delegateMessage(message: SetterFunctionCalledMessage) {
-        // Implement me.
+    open fun delegate(listener: Listener, message: SetterFunctionCalledMessage) {
+        // Override me.
     }
 
-    fun Listener.delegate(event: ComponentEvent) {
+    fun delegate(listener: Listener, event: ComponentEvent) {
         when (event) {
             is ComponentEvent.LoadError -> {
-                onLoadError(event.error)
+                listener.onLoadError(event.error)
             }
             is ComponentEvent.Message -> {
                 when (val value = event.message.value) {
-                    is SetOnLoaderStart -> onLoaderStart()
+                    is SetOnLoaderStart -> listener.onLoaderStart()
                     is SetOnLoadError -> {
                         // TODO - wrap error better
-                        onLoadError(RuntimeException("${value.error.type}: ${value.error.message}"))
+                        listener.onLoadError(RuntimeException("${value.error.type}: ${value.error.message}"))
                     }
                     else -> {
-                        delegateMessage(event.message)
+                        delegate(listener, event.message)
                     }
                 }
             }

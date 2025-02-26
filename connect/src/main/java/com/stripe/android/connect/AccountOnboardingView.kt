@@ -142,9 +142,9 @@ interface AccountOnboardingListener : StripeEmbeddedComponentListener {
 
 @OptIn(PrivateBetaConnectSDK::class)
 internal object AccountOnboardingListenerDelegate : ComponentListenerDelegate<AccountOnboardingListener>() {
-    override fun AccountOnboardingListener.delegateMessage(message: SetterFunctionCalledMessage) {
+    override fun delegate(listener: AccountOnboardingListener, message: SetterFunctionCalledMessage) {
         when (message.value) {
-            is SetOnExit -> onExit()
+            is SetOnExit -> listener.onExit()
             else -> {
                 // Ignore.
             }
