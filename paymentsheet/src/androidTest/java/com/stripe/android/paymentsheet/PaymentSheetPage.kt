@@ -280,8 +280,9 @@ internal class PaymentSheetPage(
     }
 }
 
-fun SemanticsNodeInteraction.assertHasErrorMessage(expectedMessage: String)
-    = assert(SemanticsMatcher("has error '$expectedMessage'") { node ->
-    node.config[SemanticsProperties.Error] == expectedMessage
-})
-
+fun SemanticsNodeInteraction.assertHasErrorMessage(expectedMessage: String) =
+    assert(
+        SemanticsMatcher("has error '$expectedMessage'") { node ->
+            node.config[SemanticsProperties.Error] == expectedMessage
+        }
+    )

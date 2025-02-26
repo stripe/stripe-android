@@ -454,9 +454,13 @@ private fun Modifier.errorSemanticsWithDefault(
     errorMessage: String?,
 ): Modifier = composed {
     val defaultErrorMessage = stringResource(ComposeUiR.string.default_error_message)
-    if (isError) semantics {
-        error(errorMessage ?: defaultErrorMessage)
-    } else this
+    if (isError) {
+        semantics {
+            error(errorMessage ?: defaultErrorMessage)
+        }
+    } else {
+        this
+    }
 }
 
 private const val PlaceholderAnimationDuration = 83
