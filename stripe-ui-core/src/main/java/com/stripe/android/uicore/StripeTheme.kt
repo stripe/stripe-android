@@ -138,11 +138,13 @@ data class EmbeddedInsets(
     val horizontalInsetsDp: Float
 )
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class EmbeddedCheckmarkColors(
     val separatorColor: Color,
     val checkmarkColor: Color
 )
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class EmbeddedRadioColors(
     val separatorColor: Color,
     val selectedColor: Color,
