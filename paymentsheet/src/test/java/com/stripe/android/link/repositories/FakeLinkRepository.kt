@@ -9,6 +9,7 @@ import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.IncentiveEligibilitySession
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 
@@ -101,7 +102,8 @@ internal open class FakeLinkRepository : LinkRepository {
         paymentMethodCreateParams: PaymentMethodCreateParams,
         id: String,
         last4: String,
-        consumerSessionClientSecret: String
+        consumerSessionClientSecret: String,
+        allowRedisplay: PaymentMethod.AllowRedisplay?
     ) = shareCardPaymentDetailsResult
 
     override suspend fun sharePaymentDetails(

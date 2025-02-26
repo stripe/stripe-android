@@ -1046,6 +1046,110 @@ internal class LinkTest {
         page.clickPrimaryButton()
     }
 
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    @Test
+    fun testSuccessfulCardPaymentWithCustomerSessionInPassthroughMode() = runProductIntegrationTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_pm_with_link_and_cs.json")
+        }
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/customers/cus_1"),
+        ) { response ->
+            response.testBodyFromFile("customer-get-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-success.json")
+        }
+
+        testContext.launch(
+            configuration = PaymentSheet.Configuration(
+                merchantDisplayName = "Merchant, Inc.",
+                customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    id = "cus_1",
+                    clientSecret = "cuss_654321",
+                ),
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+            )
+        )
+
+        page.fillOutCardDetails()
+        page.clickOnSaveForFutureUsage()
+
+        closeSoftKeyboard()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-success.json")
+        }
+
+        page.fillOutLinkPhone()
+
+        closeSoftKeyboard()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/accounts/sign_up"),
+        ) { response ->
+            response.testBodyFromFile("consumer-accounts-signup-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/payment_details"),
+        ) { response ->
+            response.testBodyFromFile("consumer-payment-details-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/payment_details/share"),
+            bodyPart("allow_redisplay", "always"),
+        ) { response ->
+            response.testBodyFromFile("consumer-payment-details-share-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            bodyPart(urlEncode("payment_method_options[card][setup_future_usage]"), "off_session"),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/log_out"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-logout-success.json")
+        }
+
+        page.clickPrimaryButton()
+    }
+
     private fun linkInformation(): RequestMatcher {
         return composite(
             bodyPart(

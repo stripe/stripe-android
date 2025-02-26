@@ -240,6 +240,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                             last4 = paymentMethodCreateParams.cardLast4().orEmpty(),
                             consumerSessionClientSecret = account.clientSecret,
                             paymentMethodCreateParams = paymentMethodCreateParams,
+                            allowRedisplay = paymentMethodCreateParams.allowRedisplay,
                         ).getOrThrow()
                     } else {
                         it

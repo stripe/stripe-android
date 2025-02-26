@@ -807,7 +807,9 @@ constructor(
     }
 
     @Parcelize
-    enum class AllowRedisplay(internal val value: String) : StripeModel {
+    enum class AllowRedisplay(
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val value: String
+    ) : StripeModel {
         // Default value for payment methods where `allow_redisplay` was not set.
         UNSPECIFIED("unspecified"),
 

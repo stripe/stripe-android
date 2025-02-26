@@ -15,6 +15,7 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.VerificationType
 import com.stripe.android.networking.StripeRepository
@@ -32,6 +33,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -429,6 +431,7 @@ class LinkApiRepositoryTest {
             consumerSessionClientSecret = consumerSessionSecret,
             id = id,
             last4 = "4242",
+            allowRedisplay = null,
         )
 
         assertThat(result.isSuccess).isTrue()
@@ -470,6 +473,7 @@ class LinkApiRepositoryTest {
             consumerSessionClientSecret = consumerSessionSecret,
             id = "csmrpd*AYq4D_sXdAAAAOQ0",
             last4 = "4242",
+            allowRedisplay = null,
         )
         val loggedErrors = errorReporter.getLoggedErrors()
 
@@ -477,6 +481,22 @@ class LinkApiRepositoryTest {
         assertThat(loggedErrors.size).isEqualTo(1)
         assertThat(loggedErrors.first()).isEqualTo(ErrorReporter.ExpectedErrorEvent.LINK_SHARE_CARD_FAILURE.eventName)
     }
+
+    @Test
+    fun `when shareCardPaymentDetails with allow_redisplay equals null, should have proper extra params`() =
+        allowRedisplayTest(allowRedisplay = null)
+
+    @Test
+    fun `when shareCardPaymentDetails with allow_redisplay equals UNSPECIFIED, should have proper extra params`() =
+        allowRedisplayTest(allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED)
+
+    @Test
+    fun `when shareCardPaymentDetails with allow_redisplay equals LIMITED, should have proper extra params`() =
+        allowRedisplayTest(allowRedisplay = PaymentMethod.AllowRedisplay.LIMITED)
+
+    @Test
+    fun `when shareCardPaymentDetails with allow_redisplay equals ALWAYS, should have proper extra params`() =
+        allowRedisplayTest(allowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS)
 
     @Test
     fun `startVerification sends correct parameters`() = runTest {
@@ -675,6 +695,46 @@ class LinkApiRepositoryTest {
         )
 
         assertThat(result.exceptionOrNull()).isEqualTo(error)
+    }
+
+    private fun allowRedisplayTest(
+        allowRedisplay: PaymentMethod.AllowRedisplay?,
+    ) = runTest {
+        whenever(
+            stripeRepository.sharePaymentDetails(
+                consumerSessionClientSecret = any(),
+                id = any(),
+                extraParams = anyOrNull(),
+                requestOptions = any(),
+            )
+        ).thenReturn(Result.success("pm_123"))
+
+        val result = linkRepository.shareCardPaymentDetails(
+            paymentMethodCreateParams = cardPaymentMethodCreateParams,
+            consumerSessionClientSecret = "consumer_session_secret",
+            id = "csmrpd*AYq4D_sXdAAAAOQ0",
+            last4 = "4242",
+            allowRedisplay = allowRedisplay,
+        )
+
+        assertThat(result).isNotNull()
+
+        val extraParamsCaptor = argumentCaptor<Map<String, Any?>>()
+
+        verify(stripeRepository).sharePaymentDetails(
+            consumerSessionClientSecret = any(),
+            id = any(),
+            extraParams = extraParamsCaptor.capture(),
+            requestOptions = any(),
+        )
+
+        val extraParams = extraParamsCaptor.firstValue
+
+        if (allowRedisplay == null) {
+            assertThat(extraParams).doesNotContainKey("allow_redisplay")
+        } else {
+            assertThat(extraParams).containsEntry("allow_redisplay", allowRedisplay.value)
+        }
     }
 
     private fun linkRepository(
