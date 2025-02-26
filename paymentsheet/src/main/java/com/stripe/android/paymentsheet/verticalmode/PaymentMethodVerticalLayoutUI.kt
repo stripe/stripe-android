@@ -190,8 +190,8 @@ private fun ViewMoreButton(
         modifier = Modifier
             .testTag(TEST_TAG_VIEW_MORE)
             .clickable(onClick = onViewMorePaymentMethods)
-            .padding(start = 4.dp, end = 1.dp, top = 4.dp, bottom = 4.dp)
-            .offset(x = if (addOffset) 9.dp else 0.dp)
+            .padding(start = 4.dp, end = 2.dp, top = 4.dp, bottom = 4.dp)
+            .offset(x = if (addOffset) 10.dp else 0.dp)
             .fillMaxHeight()
     ) {
         Text(
@@ -205,7 +205,7 @@ private fun ViewMoreButton(
             contentDescription = null,
             tint = MaterialTheme.colors.primary,
             modifier = Modifier
-                .offset(x = (-3).dp, y = 2.dp)
+                .offset(x = (-2).dp, y = 2.dp)
                 .size(22.dp)
         )
     }
