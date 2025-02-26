@@ -220,7 +220,7 @@ internal class StripeConnectWebViewContainerViewModel(
             analyticsService.merchantId = merchantId
         }
 
-        override fun shouldOverrideUrlLoading(context: Context, url: Uri): Boolean {
+        override fun shouldOverrideUrlLoading(activity: Activity, url: Uri): Boolean {
             return if (url.host?.lowercase() in ALLOWLISTED_HOSTS) {
                 val sanitizedUrl = url.sanitize()
                 logger.warning("($loggerTag) Received pop-up for allow-listed host: $sanitizedUrl")
@@ -237,14 +237,14 @@ internal class StripeConnectWebViewContainerViewModel(
             ) {
                 // open the URL in an external browser for safety and to preserve back navigation
                 logger.debug("($loggerTag) Opening URL in external browser: $url")
-                stripeIntentLauncher.launchSecureExternalWebTab(context, url)
+                stripeIntentLauncher.launchSecureExternalWebTab(activity, url)
                 true // block the request since we're opening it in a secure external tab
             } else {
                 logger.debug("($loggerTag) Opening non-http/https pop-up request: $url")
                 if (url.scheme.equals("mailto", ignoreCase = true)) {
-                    stripeIntentLauncher.launchEmailLink(context, url)
+                    stripeIntentLauncher.launchEmailLink(activity, url)
                 } else {
-                    stripeIntentLauncher.launchUrlWithSystemHandler(context, url)
+                    stripeIntentLauncher.launchUrlWithSystemHandler(activity, url)
                 }
                 true // block the request since we're opening it via the system handler
             }

@@ -131,7 +131,7 @@ class StripeConnectWebViewContainerViewModelTest {
         val uri = Uri.parse("https://connect-js.stripe.com/allowlisted")
 
         viewModel.delegate.onReceivedPageDidLoad("page_view_id")
-        val result = viewModel.delegate.shouldOverrideUrlLoading(mockContext, uri)
+        val result = viewModel.delegate.shouldOverrideUrlLoading(mockActivity, uri)
         assertFalse(result)
         verify(analyticsService).track(
             ConnectAnalyticsEvent.ClientError(
@@ -144,18 +144,18 @@ class StripeConnectWebViewContainerViewModelTest {
     @Test
     fun `shouldOverrideUrlLoading launches ChromeCustomTab for https urls`() {
         val uri = Uri.parse("https://example.com/test")
-        val result = viewModel.delegate.shouldOverrideUrlLoading(mockContext, uri)
+        val result = viewModel.delegate.shouldOverrideUrlLoading(mockActivity, uri)
 
         assertTrue(result)
-        verify(mockStripeIntentLauncher).launchSecureExternalWebTab(mockContext, uri)
+        verify(mockStripeIntentLauncher).launchSecureExternalWebTab(mockActivity, uri)
     }
 
     @Test
     fun `shouldOverrideUrlLoading opens email client for mailto urls`() {
         val uri = Uri.parse("mailto://example@stripe.com")
 
-        val result = viewModel.delegate.shouldOverrideUrlLoading(mockContext, uri)
-        verify(mockStripeIntentLauncher).launchEmailLink(mockContext, uri)
+        val result = viewModel.delegate.shouldOverrideUrlLoading(mockActivity, uri)
+        verify(mockStripeIntentLauncher).launchEmailLink(mockActivity, uri)
         assertTrue(result)
     }
 
@@ -163,8 +163,8 @@ class StripeConnectWebViewContainerViewModelTest {
     fun `shouldOverrideUrlLoading opens system launcher for non-http urls`() {
         val uri = Uri.parse("stripe://example@stripe.com")
 
-        val result = viewModel.delegate.shouldOverrideUrlLoading(mockContext, uri)
-        verify(mockStripeIntentLauncher).launchUrlWithSystemHandler(mockContext, uri)
+        val result = viewModel.delegate.shouldOverrideUrlLoading(mockActivity, uri)
+        verify(mockStripeIntentLauncher).launchUrlWithSystemHandler(mockActivity, uri)
         assertTrue(result)
     }
 

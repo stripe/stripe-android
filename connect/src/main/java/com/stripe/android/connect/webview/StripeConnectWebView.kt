@@ -141,7 +141,7 @@ internal class StripeConnectWebView(
          * should be loaded in the webview, true otherwise. Returning true has the effect of blocking
          * the webview's navigation to the URL.
          */
-        fun shouldOverrideUrlLoading(context: Context, url: Uri): Boolean
+        fun shouldOverrideUrlLoading(activity: Activity, url: Uri): Boolean
 
         /**
          * Callback to invoke upon receiving a permission request from the webview.
@@ -227,7 +227,9 @@ internal class StripeConnectWebView(
         }
 
         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
-            return delegate.shouldOverrideUrlLoading(view.context, request.url)
+            val activity = view.findActivity()
+                ?: return false
+            return delegate.shouldOverrideUrlLoading(activity, request.url)
         }
     }
 
