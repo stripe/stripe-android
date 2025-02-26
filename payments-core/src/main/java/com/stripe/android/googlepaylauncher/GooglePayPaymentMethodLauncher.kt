@@ -214,6 +214,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         amount: Long = 0L,
         transactionId: String? = null,
         label: String? = null,
+        isTotalPriceKnown: Boolean = true,
     ) {
         check(skipReadyCheck || isReady) {
             "present() may only be called when Google Pay is available on this device."
@@ -224,6 +225,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
                 config = config,
                 currencyCode = currencyCode,
                 amount = amount,
+                isTotalPriceKnown = isTotalPriceKnown,
                 label = label,
                 transactionId = transactionId,
                 cardBrandFilter = cardBrandFilter
