@@ -54,6 +54,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -139,6 +140,7 @@ internal fun CompatTextField(
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
     isError: Boolean = false,
+    errorString: String?,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions(),
@@ -160,7 +162,7 @@ internal fun CompatTextField(
         value = value,
         modifier = modifier
             .indicatorLine(enabled, isError, interactionSource, colors)
-            .defaultErrorSemantics(isError, stringResource(ComposeUiR.string.default_error_message))
+            .errorSemanticsWithDefault(isError, errorString)
             .defaultMinSize(
                 minWidth = TextFieldDefaults.MinWidth,
                 minHeight = TextFieldDefaults.MinHeight
@@ -447,10 +449,15 @@ private object TextFieldTransitionScope {
     }
 }
 
-private fun Modifier.defaultErrorSemantics(
+private fun Modifier.errorSemanticsWithDefault(
     isError: Boolean,
-    defaultErrorMessage: String,
-): Modifier = if (isError) semantics { error(defaultErrorMessage) } else this
+    errorMessage: String?,
+): Modifier = composed {
+    val defaultErrorMessage = stringResource(ComposeUiR.string.default_error_message)
+    if (isError) semantics {
+        error(errorMessage ?: defaultErrorMessage)
+    } else this
+}
 
 private const val PlaceholderAnimationDuration = 83
 private const val PlaceholderAnimationDelayOrDuration = 67

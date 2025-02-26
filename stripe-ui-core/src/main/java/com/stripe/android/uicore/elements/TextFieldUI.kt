@@ -157,6 +157,16 @@ fun TextField(
     val fieldState by textFieldController.fieldState.collectAsState()
     val label by textFieldController.label.collectAsState()
 
+    val error by textFieldController.error.collectAsState()
+    val sectionErrorString = error?.let {
+        it.formatArgs?.let { args ->
+            stringResource(
+                it.errorMessage,
+                *args
+            )
+        } ?: stringResource(it.errorMessage)
+    }
+
     LaunchedEffect(fieldState) {
         // When field is in focus and full, move to next field so the user can keep typing
         if (fieldState == TextFieldStateConstants.Valid.Full && hasFocus.value) {
@@ -229,6 +239,7 @@ fun TextField(
         placeholder = placeHolder,
         trailingIcon = trailingIcon,
         shouldShowError = shouldShowError,
+        errorString = sectionErrorString,
         visualTransformation = visualTransformation,
         layoutDirection = textFieldController.layoutDirection,
         keyboardOptions = KeyboardOptions(
@@ -257,6 +268,7 @@ internal fun TextFieldUi(
     trailingIcon: TextFieldIcon?,
     showOptionalLabel: Boolean,
     shouldShowError: Boolean,
+    errorString: String?,
     shouldAnnounceLabel: Boolean = true,
     modifier: Modifier = Modifier,
     visualTransformation: VisualTransformation = VisualTransformation.None,
@@ -302,6 +314,7 @@ internal fun TextFieldUi(
                 }
             },
             isError = shouldShowError,
+            errorString = errorString,
             visualTransformation = visualTransformation,
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
