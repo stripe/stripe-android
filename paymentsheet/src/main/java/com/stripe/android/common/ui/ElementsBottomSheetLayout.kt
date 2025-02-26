@@ -11,7 +11,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue.Expanded
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -29,7 +28,6 @@ internal fun ElementsBottomSheetLayout(
     state: StripeBottomSheetState,
     modifier: Modifier = Modifier,
     onDismissed: () -> Unit,
-
     content: @Composable () -> Unit,
 ) {
     val layoutInfo = rememberStripeBottomSheetLayoutInfo(
@@ -49,7 +47,7 @@ internal fun ElementsBottomSheetLayout(
     )
 
     val context = LocalContext.current
-    DisposableEffect(statusBarColorAlpha) {
+    LaunchedEffect(statusBarColorAlpha) {
         val activity = context.getActivity()
         activity?.enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.auto(
@@ -61,7 +59,6 @@ internal fun ElementsBottomSheetLayout(
                 darkScrim = Color.Transparent.toArgb()
             )
         )
-        onDispose {}
     }
 
     StripeBottomSheetLayout(
