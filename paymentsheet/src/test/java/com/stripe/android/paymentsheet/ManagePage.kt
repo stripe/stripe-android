@@ -23,14 +23,26 @@ internal class ManagePage(
 ) {
     fun waitUntilVisible(customLast4: String? = null) {
         composeTestRule.waitUntil {
-//            composeTestRule
-//                .onAllNodes(hasTestTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST))
-//                .fetchSemanticsNodes()
-//                .isNotEmpty()
+            // This is just for testing. We'll make this nicer again.
+            val hasCard = composeTestRule.onAllNodesWithText(
+                text = "···· 4242",
+                substring = true,
+                useUnmergedTree = true,
+            ).fetchSemanticsNodes().isNotEmpty()
 
-            composeTestRule.onAllNodesWithText("···· 4242", substring = true, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() ||
-                composeTestRule.onAllNodesWithText("···· 6789", substring = true, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() ||
-                (customLast4 != null && composeTestRule.onAllNodesWithText("···· $customLast4", substring = true, useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty())
+            val hasBank = composeTestRule.onAllNodesWithText(
+                text = "···· 6789",
+                substring = true,
+                useUnmergedTree = true,
+            ).fetchSemanticsNodes().isNotEmpty()
+
+            val hasCustom = customLast4 != null && composeTestRule.onAllNodesWithText(
+                text = "···· $customLast4",
+                substring = true,
+                useUnmergedTree = true,
+            ).fetchSemanticsNodes().isNotEmpty()
+
+            hasCard || hasBank || hasCustom
         }
     }
 

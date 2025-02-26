@@ -119,7 +119,6 @@ internal class ManageActivityTest {
         managePage.waitUntilVisible()
         managePage.waitUntilGone(PaymentMethodFixtures.CARD_ID)
         managePage.selectPaymentMethodWithLast4("1001")
-        // TODO: Here
         editPage.waitUntilVisible()
         networkRule.setupPaymentMethodDetachResponse(cbcCardId)
         editPage.clickRemove()

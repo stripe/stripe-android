@@ -87,7 +87,6 @@ internal class NavigationHandler<T : Any>(
         backStack.update { screens ->
             val modifiableScreens = screens.toMutableList()
 
-            // TODO: API 35 issue
             val lastScreen = modifiableScreens.removeLast()
 
             lastScreen.onClose()
@@ -113,6 +112,8 @@ internal class NavigationHandler<T : Any>(
 
     private fun navigateWithDelay(action: () -> Unit) {
         if (Build.FINGERPRINT == "robolectric") {
+            // This fixes an issue in our tests, but should be revisited to avoid
+            // leaking test code into production code.
             action()
             return
         }
