@@ -52,7 +52,7 @@ import kotlinx.serialization.json.put
 @OptIn(PrivateBetaConnectSDK::class)
 internal class StripeConnectWebView(
     application: Application,
-    private val delegate: Delegate,
+    @property:VisibleForTesting internal val delegate: Delegate,
     private val logger: Logger,
 ) : WebView(application) {
 

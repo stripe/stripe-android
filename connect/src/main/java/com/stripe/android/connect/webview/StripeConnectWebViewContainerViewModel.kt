@@ -76,9 +76,9 @@ internal class StripeConnectWebViewContainerViewModel(
     private val embeddedComponentManager: EmbeddedComponentManager,
     private val embeddedComponent: StripeEmbeddedComponent,
     private val analyticsService: ComponentAnalyticsService,
-    createWebView: CreateWebView = CreateWebView(::StripeConnectWebView),
     private val stripeIntentLauncher: StripeIntentLauncher = StripeIntentLauncherImpl(),
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
+    createWebView: CreateWebView = CreateWebView(::StripeConnectWebView),
 ) : ViewModel(),
     DefaultLifecycleObserver {
 

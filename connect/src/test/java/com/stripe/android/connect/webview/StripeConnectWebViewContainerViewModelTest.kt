@@ -63,7 +63,7 @@ class StripeConnectWebViewContainerViewModelTest {
 
     private val mockContext: Context = mock()
     private val mockActivity: Activity = mock()
-    private val view: StripeConnectWebView = mock()
+    private val webView: StripeConnectWebView = mock()
     private val mockPermissionRequest: PermissionRequest = mock()
     private val analyticsService: ComponentAnalyticsService = mock()
     private val androidClock: Clock = mock()
@@ -95,7 +95,7 @@ class StripeConnectWebViewContainerViewModelTest {
             embeddedComponent = embeddedComponent,
             stripeIntentLauncher = mockStripeIntentLauncher,
             logger = mockLogger,
-            createWebView = { _, _, _ -> view }
+            createWebView = { _, _, _ -> webView }
         )
     }
 
@@ -105,12 +105,25 @@ class StripeConnectWebViewContainerViewModelTest {
     }
 
     @Test
+    fun `WebView delegate is set`() {
+        val viewModel = StripeConnectWebViewContainerViewModel(
+            application = RuntimeEnvironment.getApplication(),
+            analyticsService = analyticsService,
+            clock = androidClock,
+            embeddedComponentManager = embeddedComponentManager,
+            embeddedComponent = embeddedComponent,
+            // Default `createWebView` value
+        )
+        assertThat(viewModel.webView.delegate).isEqualTo(viewModel.delegate)
+    }
+
+    @Test
     fun `should load URL when view is attached`() {
         val url = "https://connect-js.stripe.com/v1.0/android_webview.html#component=payouts&publicKey=pk_test_123"
         whenever(embeddedComponentManager.getStripeURL(embeddedComponent)) doReturn url
 
         viewModel.onViewAttached()
-        verify(view).loadUrl(url)
+        verify(webView).loadUrl(url)
     }
 
     @Test
@@ -233,12 +246,12 @@ class StripeConnectWebViewContainerViewModelTest {
         viewModel.onCreate(lifecycleOwner)
 
         // Shouldn't update appearance until pageDidLoad is received.
-        verify(view, never()).updateConnectInstance(any())
+        verify(webView, never()).updateConnectInstance(any())
 
         appearanceFlow.emit(appearances[0])
         viewModel.onViewAttached()
         viewModel.delegate.onPageStarted("https://example.com")
-        verify(view, never()).updateConnectInstance(any())
+        verify(webView, never()).updateConnectInstance(any())
 
         // Should update appearance when pageDidLoad is received.
         viewModel.delegate.onReceivedPageDidLoad("page_view_id")
@@ -246,9 +259,9 @@ class StripeConnectWebViewContainerViewModelTest {
         // Should update again when appearance changes.
         appearanceFlow.emit(appearances[1])
 
-        inOrder(view) {
-            verify(view).updateConnectInstance(appearances[0])
-            verify(view).updateConnectInstance(appearances[1])
+        inOrder(webView) {
+            verify(webView).updateConnectInstance(appearances[0])
+            verify(webView).updateConnectInstance(appearances[1])
         }
     }
 
@@ -286,7 +299,7 @@ class StripeConnectWebViewContainerViewModelTest {
 
         viewModel.delegate.onOpenFinancialConnections(mockActivity, message)
 
-        verify(view).setCollectMobileFinancialConnectionsResult(
+        verify(webView).setCollectMobileFinancialConnectionsResult(
             id = message.id,
             result = expected,
         )
