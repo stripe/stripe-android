@@ -111,6 +111,7 @@ internal fun PaymentMethodEmbeddedLayoutUI(
                         savedPaymentMethodAction = savedPaymentMethodAction,
                         onViewMorePaymentMethods = onViewMorePaymentMethods,
                         onManageOneSavedPaymentMethod = { onManageOneSavedPaymentMethod(displayedSavedPaymentMethod) },
+                        addPaddingForCheckmarkRow = rowStyle is Embedded.RowStyle.FlatWithCheckmark
                     )
                 },
                 onClick = { onSelectSavedPaymentMethod(displayedSavedPaymentMethod) },

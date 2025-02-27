@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -140,11 +142,15 @@ internal fun SavedPaymentMethodTrailingContent(
     savedPaymentMethodAction: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
     onViewMorePaymentMethods: () -> Unit,
     onManageOneSavedPaymentMethod: () -> Unit,
+    addPaddingForCheckmarkRow: Boolean = false
 ) {
     when (savedPaymentMethodAction) {
         PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE -> Unit
         PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE -> {
-            EditButton(onClick = onManageOneSavedPaymentMethod)
+            EditButton(
+                onClick = onManageOneSavedPaymentMethod,
+                addPaddingForCheckmarkRow = addPaddingForCheckmarkRow
+            )
         }
         PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL -> {
             ViewMoreButton(
@@ -155,7 +161,11 @@ internal fun SavedPaymentMethodTrailingContent(
 }
 
 @Composable
-private fun EditButton(onClick: () -> Unit) {
+private fun EditButton(
+    onClick: () -> Unit,
+    addPaddingForCheckmarkRow: Boolean
+) {
+    val startPadding = if (addPaddingForCheckmarkRow) 12.dp else 4.dp
     Text(
         stringResource(id = com.stripe.android.R.string.stripe_edit),
         color = MaterialTheme.colors.primary,
@@ -164,7 +174,7 @@ private fun EditButton(onClick: () -> Unit) {
         modifier = Modifier
             .testTag(TEST_TAG_EDIT_SAVED_CARD)
             .clickable(onClick = onClick)
-            .padding(4.dp)
+            .padding(start = startPadding, end = 0.dp, top = 4.dp, bottom = 4.dp)
             .fillMaxHeight()
     )
 }
@@ -178,7 +188,8 @@ private fun ViewMoreButton(
         modifier = Modifier
             .testTag(TEST_TAG_VIEW_MORE)
             .clickable(onClick = onViewMorePaymentMethods)
-            .padding(4.dp)
+            .padding(start = 4.dp, end = 0.dp, top = 4.dp, bottom = 4.dp)
+            .offset(x = 9.dp)
             .fillMaxHeight()
     ) {
         Text(
@@ -191,6 +202,9 @@ private fun ViewMoreButton(
             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
             tint = MaterialTheme.colors.primary,
+            modifier = Modifier
+                .offset(x = (-2).dp, y = 2.dp)
+                .size(22.dp)
         )
     }
 }
