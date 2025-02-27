@@ -8,12 +8,15 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
@@ -74,64 +78,109 @@ internal class EmbeddedPlaygroundActivity : AppCompatActivity(), ExternalPayment
         this.playgroundState = initialPlaygroundState
         this.playgroundSettings = initialPlaygroundState.snapshot.playgroundSettings()
 
-        val embeddedBuilder = EmbeddedPaymentElement.Builder(
-            createIntentCallback = { _, _ ->
-                val playgroundState = playgroundState
-                PlaygroundRequester(playgroundState.snapshot, applicationContext).fetch().fold(
-                    onSuccess = { state ->
-                        val clientSecret = requireNotNull(state.asPaymentState()).clientSecret
-                        CreateIntentResult.Success(clientSecret)
-                    },
-                    onFailure = { exception ->
-                        CreateIntentResult.Failure(IllegalStateException(exception))
-                    },
-                )
-            },
-            resultCallback = ::handleEmbeddedResult,
-        ).externalPaymentMethodConfirmHandler(this)
         val embeddedViewDisplaysMandateText =
             initialPlaygroundState.snapshot[EmbeddedViewDisplaysMandateSettingDefinition]
         setContent {
-            val embeddedPaymentElement = rememberEmbeddedPaymentElement(embeddedBuilder)
+            val embeddedBuilderOne = remember {
+                createEmbeddedBuilder(
+                    logMessage = "Creating with first builder!"
+                )
+            }
+            val embeddedBuilderTwo = remember {
+                createEmbeddedBuilder(
+                    logMessage = "Creating with second builder!"
+                )
+            }
+
+            val embeddedPaymentElementOne = rememberEmbeddedPaymentElement(embeddedBuilderOne)
+            val embeddedPaymentElementTwo = rememberEmbeddedPaymentElement(embeddedBuilderTwo)
 
             var loadingState by remember {
                 mutableStateOf(LoadingState.Loading)
             }
 
             val coroutineScope = rememberCoroutineScope()
+            var selectedPaymentElement by remember {
+                mutableStateOf(embeddedPaymentElementOne)
+            }
 
-            fun configure() = coroutineScope.launch {
-                loadingState = LoadingState.Loading
-                val result = embeddedPaymentElement.configure(
-                    intentConfiguration = playgroundState.intentConfiguration(),
-                    configuration = playgroundState.embeddedConfiguration(),
-                )
-                loadingState = when (result) {
-                    is EmbeddedPaymentElement.ConfigureResult.Failed -> LoadingState.Failed
-                    is EmbeddedPaymentElement.ConfigureResult.Succeeded -> LoadingState.Complete
+            val configure = remember {
+                {
+                    coroutineScope.launch {
+                        loadingState = LoadingState.Loading
+
+                        val resultOne = embeddedPaymentElementOne.configure(
+                            intentConfiguration = playgroundState.intentConfiguration(),
+                            configuration = playgroundState.embeddedConfiguration(),
+                        )
+                        val resultTwo = embeddedPaymentElementTwo.configure(
+                            intentConfiguration = playgroundState.intentConfiguration(),
+                            configuration = playgroundState.embeddedConfiguration(),
+                        )
+
+                        loadingState = if (
+                            resultOne is EmbeddedPaymentElement.ConfigureResult.Succeeded &&
+                            resultTwo is EmbeddedPaymentElement.ConfigureResult.Succeeded
+                        ) {
+                            LoadingState.Complete
+                        } else {
+                            LoadingState.Failed
+                        }
+                    }
+
+                    Unit
                 }
             }
 
-            LaunchedEffect(embeddedPaymentElement) {
+            LaunchedEffect(embeddedPaymentElementOne, embeddedPaymentElementTwo) {
                 configure()
             }
 
             PlaygroundTheme(
                 content = {
-                    loadingState.Content(embeddedPaymentElement = embeddedPaymentElement, retry = ::configure)
+                    loadingState.Content(embeddedPaymentElement = selectedPaymentElement, retry = configure)
+                },
+                topBarContent = {
+                    Row(
+                        modifier = Modifier.padding(8.dp).fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            modifier = Modifier.weight(1f),
+                            text = "Embedded One",
+                        )
+
+                        Switch(
+                            modifier = Modifier.weight(1f),
+                            checked = selectedPaymentElement == embeddedPaymentElementTwo,
+                            onCheckedChange = {
+                                selectedPaymentElement = if (it) {
+                                    embeddedPaymentElementTwo
+                                } else {
+                                    embeddedPaymentElementOne
+                                }
+                            },
+                        )
+
+                        Text(
+                            modifier = Modifier.weight(1f),
+                            text = "Embedded Two",
+                        )
+                    }
                 },
                 bottomBarContent = {
-                    val selectedPaymentOption by embeddedPaymentElement.paymentOption.collectAsState()
+                    val selectedPaymentOption by selectedPaymentElement.paymentOption.collectAsState()
 
-                    selectedPaymentOption?.let { selectedPaymentOption ->
+                    selectedPaymentOption?.let { paymentOption ->
                         EmbeddedContentWithSelectedPaymentOption(
-                            embeddedPaymentElement = embeddedPaymentElement,
-                            selectedPaymentOption = selectedPaymentOption,
+                            embeddedPaymentElement = selectedPaymentElement,
+                            selectedPaymentOption = paymentOption,
                             embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
                         )
                     }
 
-                    ModeUi(::configure)
+                    ModeUi(configure)
                 }
             )
         }
@@ -213,6 +262,30 @@ internal class EmbeddedPlaygroundActivity : AppCompatActivity(), ExternalPayment
                 FawryActivity::class.java
             ).putExtra(FawryActivity.EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE, externalPaymentMethodType)
                 .putExtra(FawryActivity.EXTRA_BILLING_DETAILS, billingDetails)
+        )
+    }
+
+    private fun createEmbeddedBuilder(
+        logMessage: String,
+    ): EmbeddedPaymentElement.Builder {
+        return EmbeddedPaymentElement.Builder(
+            createIntentCallback = { _, _ ->
+                lifecycleScope.launch {
+                    Toast.makeText(this@EmbeddedPlaygroundActivity, logMessage, Toast.LENGTH_LONG).show()
+                }
+
+                val playgroundState = playgroundState
+                PlaygroundRequester(playgroundState.snapshot, applicationContext).fetch().fold(
+                    onSuccess = { state ->
+                        val clientSecret = requireNotNull(state.asPaymentState()).clientSecret
+                        CreateIntentResult.Success(clientSecret)
+                    },
+                    onFailure = { exception ->
+                        CreateIntentResult.Failure(IllegalStateException(exception))
+                    },
+                )
+            },
+            resultCallback = ::handleEmbeddedResult,
         )
     }
 

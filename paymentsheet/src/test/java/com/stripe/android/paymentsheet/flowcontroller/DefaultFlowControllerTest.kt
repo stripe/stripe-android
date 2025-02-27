@@ -38,6 +38,8 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.wallets.Wallet
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackStorage
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.createTestConfirmationHandlerFactory
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
@@ -1505,10 +1507,6 @@ internal class DefaultFlowControllerTest {
         )
 
         for ((clientSecret, deferredIntentConfirmationType) in clientSecrets) {
-            IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
-                CreateIntentResult.Success(clientSecret)
-            }
-
             val flowController = createAndConfigureFlowControllerForDeferredIntent()
             val savedSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
@@ -1940,20 +1938,23 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `Clears out CreateIntentCallback when lifecycle owner is destroyed`() {
-        IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
-            error("I’m alive")
-        }
+        PaymentElementCallbackStorage[INSTANCE_ID] = PaymentElementCallbacks(
+            createIntentCallback = { _, _ ->
+                error("I’m alive")
+            },
+            externalPaymentMethodConfirmHandler = null,
+        )
 
         createFlowController()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-        assertThat(IntentConfirmationInterceptor.createIntentCallback).isNotNull()
+        assertThat(PaymentElementCallbackStorage[INSTANCE_ID]?.createIntentCallback).isNotNull()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
-        assertThat(IntentConfirmationInterceptor.createIntentCallback).isNotNull()
+        assertThat(PaymentElementCallbackStorage[INSTANCE_ID]?.createIntentCallback).isNotNull()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        assertThat(IntentConfirmationInterceptor.createIntentCallback).isNull()
+        assertThat(PaymentElementCallbackStorage[INSTANCE_ID]?.createIntentCallback).isNull()
     }
 
     @Test
@@ -2340,6 +2341,7 @@ internal class DefaultFlowControllerTest {
         errorReporter = errorReporter,
         initializedViaCompose = false,
         linkHandler = mock(),
+        instanceId = INSTANCE_ID,
         confirmationHandler = createTestConfirmationHandlerFactory(
             bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
             googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
@@ -2362,6 +2364,7 @@ internal class DefaultFlowControllerTest {
             application = ApplicationProvider.getApplicationContext(),
             handle = SavedStateHandle(),
             statusBarColor = STATUS_BAR_COLOR,
+            instanceId = INSTANCE_ID,
         )
     }
 
@@ -2439,6 +2442,8 @@ internal class DefaultFlowControllerTest {
         private const val BACS_SORT_CODE = "108800"
         private const val BACS_NAME = "John Doe"
         private const val BACS_EMAIL = "johndoe@email.com"
+
+        private const val INSTANCE_ID = "FlowController"
     }
 }
 

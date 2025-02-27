@@ -58,6 +58,7 @@ internal object FormContract : ActivityResultContract<FormContract.Args, FormRes
         val hasSavedPaymentMethods: Boolean,
         val configuration: EmbeddedPaymentElement.Configuration,
         val initializationMode: PaymentElementLoader.InitializationMode,
+        val instanceId: String,
         val statusBarColor: Int?
     ) : Parcelable {
         companion object {
