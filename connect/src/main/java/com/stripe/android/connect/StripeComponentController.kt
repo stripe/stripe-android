@@ -7,9 +7,15 @@ import androidx.lifecycle.ViewModelProvider
 interface StripeComponentController<Listener : StripeEmbeddedComponentListener> {
     var listener: Listener?
 
+    var onDismissListener: OnDismissListener?
+
     fun show()
 
     fun dismiss()
+
+    fun interface OnDismissListener {
+        fun onDismiss()
+    }
 }
 
 @OptIn(PrivateBetaConnectSDK::class)
@@ -33,6 +39,12 @@ internal class StripeComponentControllerImpl<DF, Listener, Props> internal const
             dialogFragment.listener = value
         }
 
+    override var onDismissListener: StripeComponentController.OnDismissListener? = null
+        set(value) {
+            field = value
+            dialogFragment.onDismissListener = value
+        }
+
     init {
         val existingDialogFragment = getExistingDialogFragment()
         if (existingDialogFragment?.isAdded == true) {
@@ -43,6 +55,7 @@ internal class StripeComponentControllerImpl<DF, Listener, Props> internal const
         dialogFragment = (existingDialogFragment ?: createDialogFragment())
             .apply { initialEmbeddedComponentManager = embeddedComponentManager }
         dialogFragment.listener = this.listener
+        dialogFragment.onDismissListener = this.onDismissListener
     }
 
     override fun show() {
