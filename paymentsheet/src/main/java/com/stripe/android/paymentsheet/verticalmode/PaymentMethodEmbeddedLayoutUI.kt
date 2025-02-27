@@ -111,7 +111,7 @@ internal fun PaymentMethodEmbeddedLayoutUI(
                         savedPaymentMethodAction = savedPaymentMethodAction,
                         onViewMorePaymentMethods = onViewMorePaymentMethods,
                         onManageOneSavedPaymentMethod = { onManageOneSavedPaymentMethod(displayedSavedPaymentMethod) },
-                        addPaddingForCheckmarkRow = rowStyle is Embedded.RowStyle.FlatWithCheckmark
+                        addPaddingForCheckmarkRow = rowStyle.addPaddingForCheckmarkRowEditButton()
                     )
                 },
                 onClick = { onSelectSavedPaymentMethod(displayedSavedPaymentMethod) },
@@ -230,5 +230,14 @@ private fun Embedded.RowStyle.endSeparatorInset(): Dp {
         is Embedded.RowStyle.FloatingButton -> 0.dp
         is Embedded.RowStyle.FlatWithRadio -> endSeparatorInsetDp.dp
         is Embedded.RowStyle.FlatWithCheckmark -> endSeparatorInsetDp.dp
+    }
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+private fun Embedded.RowStyle.addPaddingForCheckmarkRowEditButton(): Boolean {
+    return when (this) {
+        is Embedded.RowStyle.FloatingButton,
+        is Embedded.RowStyle.FlatWithRadio -> false
+        is Embedded.RowStyle.FlatWithCheckmark -> true
     }
 }

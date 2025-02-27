@@ -212,7 +212,7 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .padding(start = 4.dp, end = 0.dp, top = 4.dp, bottom = 4.dp)
-                .offset(x = 9.dp)
+                .offset(x = VIEW_MORE_BUTTON_OFFSET.dp)
         ) {
             Text(
                 stringResource(id = com.stripe.android.paymentsheet.R.string.stripe_view_more),
@@ -225,8 +225,8 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
                 contentDescription = null,
                 tint = MaterialTheme.colors.primary,
                 modifier = Modifier
-                    .offset(x = (-2).dp, y = 2.dp)
-                    .size(22.dp)
+                    .offset(x = VIEW_MORE_CHEVRON_X_OFFSET.dp, y = VIEW_MORE_CHEVRON_Y_OFFSET.dp)
+                    .size(VIEW_MORE_CHEVRON_SIZE.dp)
             )
         }
     }

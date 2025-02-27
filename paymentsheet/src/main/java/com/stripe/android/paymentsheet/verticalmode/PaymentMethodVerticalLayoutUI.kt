@@ -189,7 +189,7 @@ private fun ViewMoreButton(
             .testTag(TEST_TAG_VIEW_MORE)
             .clickable(onClick = onViewMorePaymentMethods)
             .padding(start = 4.dp, end = 0.dp, top = 4.dp, bottom = 4.dp)
-            .offset(x = 9.dp)
+            .offset(x = VIEW_MORE_BUTTON_OFFSET.dp)
             .fillMaxHeight()
     ) {
         Text(
@@ -203,8 +203,15 @@ private fun ViewMoreButton(
             contentDescription = null,
             tint = MaterialTheme.colors.primary,
             modifier = Modifier
-                .offset(x = (-2).dp, y = 2.dp)
-                .size(22.dp)
+                .offset(x = VIEW_MORE_CHEVRON_X_OFFSET.dp, y = VIEW_MORE_CHEVRON_Y_OFFSET.dp)
+                .size(VIEW_MORE_CHEVRON_SIZE.dp)
         )
     }
 }
+
+// There is empty space in the KeyboardArrowRight icon so an offset is required to align to the edge of a view
+internal const val VIEW_MORE_BUTTON_OFFSET = 9
+internal const val VIEW_MORE_CHEVRON_SIZE = 22
+// Offsets to position chevron correctly per design requirements
+internal const val VIEW_MORE_CHEVRON_Y_OFFSET = 2
+internal const val VIEW_MORE_CHEVRON_X_OFFSET = -2
