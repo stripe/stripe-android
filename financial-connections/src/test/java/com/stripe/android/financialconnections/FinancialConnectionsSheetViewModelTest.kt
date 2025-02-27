@@ -39,7 +39,6 @@ import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.LinkMode
 import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -58,8 +57,10 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidJUnit4::class)
 class FinancialConnectionsSheetViewModelTest {
 
+    private val testDispatcher = UnconfinedTestDispatcher()
+
     @get:Rule
-    val rule: TestRule = CoroutineTestRule(UnconfinedTestDispatcher())
+    val rule: TestRule = CoroutineTestRule(testDispatcher)
 
     private val eventReporter = mock<FinancialConnectionsEventReporter>()
     private val configuration = FinancialConnectionsSheet.Configuration(
@@ -459,9 +460,6 @@ class FinancialConnectionsSheetViewModelTest {
         // When
         viewModel.handleOnNewIntent(Intent("error_url"))
 
-        // A bad workaround for now
-        delay(300)
-
         // Then
         verify(eventReporter)
             .onResult(eq(sessionId), any<Failed>())
@@ -508,9 +506,6 @@ class FinancialConnectionsSheetViewModelTest {
             // When
             // end auth flow
             viewModel.handleOnNewIntent(cancelIntent)
-
-            // A bad workaround for now
-            delay(300)
 
             // Then
             verify(eventReporter)
@@ -755,9 +750,6 @@ class FinancialConnectionsSheetViewModelTest {
             // auth flow ends (activity received result without new intent received)
             viewModel.onBrowserActivityResult()
 
-            // A bad workaround for now
-            delay(300)
-
             // Then
             withState(viewModel) {
                 assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.ON_EXTERNAL_ACTIVITY)
@@ -861,7 +853,8 @@ class FinancialConnectionsSheetViewModelTest {
             nativeAuthFlowCoordinator = mock(),
             integrityRequestManager = integrityRequestManager,
             integrityVerdictManager = mock(),
-            logger = Logger.noop()
+            logger = Logger.noop(),
+            ioDispatcher = testDispatcher,
         )
     }
 }

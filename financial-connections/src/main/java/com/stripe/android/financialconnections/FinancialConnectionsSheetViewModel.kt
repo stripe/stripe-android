@@ -64,6 +64,8 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.parcelable
 import com.stripe.attestation.IntegrityRequestManager
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -86,6 +88,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private val nativeRouter: NativeAuthFlowRouter,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val initialState: FinancialConnectionsSheetState,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : FinancialConnectionsViewModel<FinancialConnectionsSheetState>(initialState, nativeAuthFlowCoordinator) {
 
     private val mutex = Mutex()
@@ -542,7 +545,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private fun reportResult(result: FinancialConnectionsSheetActivityResult) {
         // We use the global scope to make sure that we can finish sending the event
         // even if the ViewModel is cleared.
-        GlobalScope.launch {
+        GlobalScope.launch(ioDispatcher) {
             val manifest = getOrFetchSync().manifest
             eventReporter.onResult(manifest.id, result)
         }
