@@ -15,7 +15,7 @@ import androidx.appcompat.R as AppCompatR
 /**
  * A [StripeEditText] for CVC input.
  */
-class CvcEditText @JvmOverloads constructor(
+open class CvcEditText @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = AppCompatR.attr.editTextStyle
