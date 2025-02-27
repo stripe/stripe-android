@@ -11,7 +11,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.databinding.StripeFullScreenComponentBinding
 import kotlinx.coroutines.flow.MutableStateFlow

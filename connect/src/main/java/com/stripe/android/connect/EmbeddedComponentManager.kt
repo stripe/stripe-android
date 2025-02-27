@@ -60,6 +60,7 @@ class EmbeddedComponentManager(
      * Returns a controller for presenting the Account Onboarding component full screen.
      *
      * @param activity The [FragmentActivity] to present the component in.
+     * @param title Optional title to display in the toolbar.
      * @param props Optional props to use for configuring the component.
      * @param cacheKey Key to use for caching the internal WebView across configuration changes.
      */
