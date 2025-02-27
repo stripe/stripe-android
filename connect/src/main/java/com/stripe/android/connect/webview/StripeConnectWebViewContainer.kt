@@ -166,8 +166,12 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
 
         // Handle VM state and events.
         lifecycleOwner.lifecycleScope.launch {
-            viewModel.stateFlow.collectLatest(::bindViewModelState)
-            viewModel.eventFlow.collectLatest(::handleEvent)
+            launch {
+                viewModel.stateFlow.collectLatest(::bindViewModelState)
+            }
+            launch {
+                viewModel.eventFlow.collectLatest(::handleEvent)
+            }
         }
 
         viewModel.onViewAttached()
