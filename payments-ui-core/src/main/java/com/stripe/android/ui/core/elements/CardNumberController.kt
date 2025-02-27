@@ -33,7 +33,6 @@ import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventR
 import com.stripe.android.uicore.elements.FieldError
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionFieldElement
-import com.stripe.android.uicore.elements.SectionFieldErrorController
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.elements.TextFieldState
@@ -50,7 +49,7 @@ import kotlinx.coroutines.flow.drop
 import kotlin.coroutines.CoroutineContext
 import com.stripe.android.R as PaymentsCoreR
 
-internal sealed class CardNumberController : TextFieldController, SectionFieldErrorController {
+internal sealed class CardNumberController : TextFieldController {
     abstract val cardBrandFlow: StateFlow<CardBrand>
 
     abstract val selectedCardBrandFlow: StateFlow<CardBrand>

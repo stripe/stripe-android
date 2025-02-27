@@ -11,7 +11,6 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.asIndividualDigits
 import com.stripe.android.uicore.elements.FieldError
-import com.stripe.android.uicore.elements.SectionFieldErrorController
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.elements.TextFieldState
@@ -30,7 +29,7 @@ class CvcController constructor(
     cardBrandFlow: StateFlow<CardBrand>,
     override val initialValue: String? = null,
     override val showOptionalLabel: Boolean = false
-) : TextFieldController, SectionFieldErrorController {
+) : TextFieldController {
     override val capitalization: KeyboardCapitalization = cvcTextFieldConfig.capitalization
     override val keyboardType: KeyboardType = cvcTextFieldConfig.keyboard
 
