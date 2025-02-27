@@ -613,6 +613,7 @@ internal class CardInputWidgetTest {
 
         expiryDateEditText.append("12")
         expiryDateEditText.append("79")
+        idleLooper()
 
         assertThat(cardInputListener.expirationCompleteCalls)
             .isEqualTo(1)
@@ -652,6 +653,9 @@ internal class CardInputWidgetTest {
 
             expiryDateEditText.append("12")
             expiryDateEditText.append("79")
+
+            idleLooper()
+
             assertThat(cvcEditText.hasFocus())
                 .isTrue()
 
@@ -673,6 +677,7 @@ internal class CardInputWidgetTest {
 
             expiryDateEditText.append("12")
             expiryDateEditText.append("79")
+            idleLooper()
             assertThat(cvcEditText.hasFocus())
                 .isTrue()
 
@@ -1178,7 +1183,7 @@ internal class CardInputWidgetTest {
         updateCardNumberAndIdle(VISA_NO_SPACES)
 
         setExpiryDate(12, 2079)
-        setCvcCode(CVC_VALUE_AMEX)
+        WaitForFocusAndSetCvcCode(CVC_VALUE_AMEX)
         clear()
 
         assertThat(cardNumberEditText.fieldText)
@@ -1203,8 +1208,8 @@ internal class CardInputWidgetTest {
         postalCodeEnabled = true
         setCardNumber(VISA_NO_SPACES)
         setExpiryDate(12, 2079)
-        setCvcCode(CVC_VALUE_AMEX)
-        setPostalCode(POSTAL_CODE_VALUE)
+        WaitForFocusAndSetCvcCode(CVC_VALUE_AMEX)
+        WaitForFocusAndSetPostalCode(POSTAL_CODE_VALUE)
         clear()
 
         assertThat(cardNumberEditText.fieldText)
@@ -1220,6 +1225,7 @@ internal class CardInputWidgetTest {
             .isEqualTo(
                 listOf(
                     CardInputListener.FocusField.Cvc,
+                    CardInputListener.FocusField.ExpiryDate,
                     CardInputListener.FocusField.PostalCode,
                     CardInputListener.FocusField.CardNumber
                 )
@@ -1830,6 +1836,16 @@ internal class CardInputWidgetTest {
     private fun CardInputWidget.updateCardNumberAndIdle(cardNumber: String) {
         cardNumberEditText.setText(cardNumber)
         idleLooper()
+    }
+
+    private fun CardInputWidget.WaitForFocusAndSetCvcCode(cvcCode: String?) {
+        idleLooper()
+        setCvcCode(cvcCode)
+    }
+
+    private fun CardInputWidget.WaitForFocusAndSetPostalCode(postalCode: String?) {
+        idleLooper()
+        setPostalCode(postalCode)
     }
 
     private class FakeCardInputListener : CardInputListener {
