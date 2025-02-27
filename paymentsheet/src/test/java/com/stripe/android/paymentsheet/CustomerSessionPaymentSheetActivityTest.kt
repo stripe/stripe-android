@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
+import android.os.Build
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
@@ -14,10 +15,10 @@ import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
+import com.stripe.android.common.ui.performClickWithKeyboard
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -39,11 +40,13 @@ import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalCustomerSessionApi::class)
 @RunWith(RobolectricTestRunner::class)
+@Config(sdk = [Build.VERSION_CODES.Q])
 internal class CustomerSessionPaymentSheetActivityTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
 
@@ -71,7 +74,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
             canRemoveLastPaymentMethodConfig = true,
             canRemoveLastPaymentMethodServer = true,
         ) {
-            composeTestRule.onEditButton().performClick()
+            composeTestRule.onEditButton().performClickWithKeyboard()
 
             composeTestRule.onSavedPaymentMethod(last4 = "4242").assertIsEnabled()
             composeTestRule.onSavedPaymentMethod(last4 = "5544").assertIsEnabled()
@@ -87,7 +90,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
             canRemoveLastPaymentMethodConfig = true,
             canRemoveLastPaymentMethodServer = true,
         ) {
-            composeTestRule.onEditButton().performClick()
+            composeTestRule.onEditButton().performClickWithKeyboard()
 
             composeTestRule.onSavedPaymentMethod(last4 = "4242").assertIsEnabled()
         }
@@ -156,7 +159,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
             canRemoveLastPaymentMethodConfig = true,
             canRemoveLastPaymentMethodServer = false,
         ) {
-            composeTestRule.onEditButton().performClick()
+            composeTestRule.onEditButton().performClickWithKeyboard()
 
             val nonCbcCard = composeTestRule.onSavedPaymentMethod(last4 = "5544")
             nonCbcCard.assertIsEnabled()
@@ -179,7 +182,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
             canRemoveLastPaymentMethodConfig = true,
             canRemoveLastPaymentMethodServer = false,
         ) {
-            composeTestRule.onEditButton().performClick()
+            composeTestRule.onEditButton().performClickWithKeyboard()
 
             composeTestRule.onSavedPaymentMethod(last4 = "5544").assertIsEnabled()
 
@@ -188,7 +191,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
             cbcCard.assertIsEnabled()
             cbcCard.assertHasModifyBadge()
 
-            composeTestRule.onModifyBadgeFor(last4 = "4242").performClick()
+            composeTestRule.onModifyBadgeFor(last4 = "4242").performClickWithKeyboard()
 
             composeTestRule.onUpdateScreenRemoveButton().assertIsEnabled()
         }
@@ -203,14 +206,14 @@ internal class CustomerSessionPaymentSheetActivityTest {
             canRemoveLastPaymentMethodConfig = true,
             canRemoveLastPaymentMethodServer = false,
         ) {
-            composeTestRule.onEditButton().performClick()
+            composeTestRule.onEditButton().performClickWithKeyboard()
 
             val cbcCard = composeTestRule.onSavedPaymentMethod(last4 = "4242")
 
             cbcCard.assertIsEnabled()
             cbcCard.assertHasModifyBadge()
 
-            composeTestRule.onModifyBadgeFor(last4 = "4242").performClick()
+            composeTestRule.onModifyBadgeFor(last4 = "4242").performClickWithKeyboard()
 
             composeTestRule.onUpdateScreenRemoveButton().assertDoesNotExist()
         }
@@ -225,14 +228,14 @@ internal class CustomerSessionPaymentSheetActivityTest {
             canRemoveLastPaymentMethodConfig = false,
             canRemoveLastPaymentMethodServer = true,
         ) {
-            composeTestRule.onEditButton().performClick()
+            composeTestRule.onEditButton().performClickWithKeyboard()
 
             val cbcCard = composeTestRule.onSavedPaymentMethod(last4 = "4242")
 
             cbcCard.assertIsEnabled()
             cbcCard.assertHasModifyBadge()
 
-            composeTestRule.onModifyBadgeFor(last4 = "4242").performClick()
+            composeTestRule.onModifyBadgeFor(last4 = "4242").performClickWithKeyboard()
 
             composeTestRule.onUpdateScreenRemoveButton().assertDoesNotExist()
         }
@@ -247,14 +250,14 @@ internal class CustomerSessionPaymentSheetActivityTest {
             canRemoveLastPaymentMethodConfig = true,
             canRemoveLastPaymentMethodServer = true,
         ) {
-            composeTestRule.onEditButton().performClick()
+            composeTestRule.onEditButton().performClickWithKeyboard()
 
             val cbcCard = composeTestRule.onSavedPaymentMethod(last4 = "4242")
 
             cbcCard.assertIsEnabled()
             cbcCard.assertHasModifyBadge()
 
-            composeTestRule.onModifyBadgeFor(last4 = "4242").performClick()
+            composeTestRule.onModifyBadgeFor(last4 = "4242").performClickWithKeyboard()
 
             composeTestRule.onUpdateScreenRemoveButton().assertIsEnabled()
         }
@@ -269,14 +272,14 @@ internal class CustomerSessionPaymentSheetActivityTest {
             canRemoveLastPaymentMethodConfig = true,
             canRemoveLastPaymentMethodServer = false,
         ) {
-            composeTestRule.onEditButton().performClick()
+            composeTestRule.onEditButton().performClickWithKeyboard()
 
             val cbcCard = composeTestRule.onSavedPaymentMethod(last4 = "4242")
 
             cbcCard.assertIsEnabled()
             cbcCard.assertHasModifyBadge()
 
-            composeTestRule.onModifyBadgeFor(last4 = "4242").performClick()
+            composeTestRule.onModifyBadgeFor(last4 = "4242").performClickWithKeyboard()
 
             composeTestRule.onUpdateScreenRemoveButton().assertDoesNotExist()
         }
@@ -291,14 +294,14 @@ internal class CustomerSessionPaymentSheetActivityTest {
             canRemoveLastPaymentMethodConfig = false,
             canRemoveLastPaymentMethodServer = false,
         ) {
-            composeTestRule.onEditButton().performClick()
+            composeTestRule.onEditButton().performClickWithKeyboard()
 
             val cbcCard = composeTestRule.onSavedPaymentMethod(last4 = "4242")
 
             cbcCard.assertIsEnabled()
             cbcCard.assertHasModifyBadge()
 
-            composeTestRule.onModifyBadgeFor(last4 = "4242").performClick()
+            composeTestRule.onModifyBadgeFor(last4 = "4242").performClickWithKeyboard()
 
             composeTestRule.onUpdateScreenRemoveButton().assertDoesNotExist()
         }
@@ -318,13 +321,13 @@ internal class CustomerSessionPaymentSheetActivityTest {
             verticalModePage.assertPrimaryButton(isEnabled())
 
             verticalModePage.clickViewMore()
-            managePage.waitUntilVisible()
+            managePage.waitUntilVisible(customLast4 = cards[0].card!!.last4)
             verticalModePage.assertHasSelectedSavedPaymentMethod(originallySelectedPaymentMethodId)
             managePage.clickEdit()
-            managePage.clickEdit(newDefaultPaymentMethodId)
+            managePage.selectPaymentMethodWithLast4(cards[1].card!!.last4!!) // newDefaultPaymentMethodId)
             setDefaultPaymentMethod()
 
-            managePage.waitUntilVisible()
+            managePage.waitUntilVisible(customLast4 = cards[0].card!!.last4)
             managePage.clickDone()
             verticalModePage.assertHasSelectedSavedPaymentMethod(newDefaultPaymentMethodId)
             Espresso.pressBack()
@@ -343,7 +346,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
             setAsDefaultFeatureEnabled = true,
             defaultPaymentMethod = cards.first().id,
         ) {
-            composeTestRule.onEditButton().performClick()
+            composeTestRule.onEditButton().performClickWithKeyboard()
 
             composeTestRule.onAllNodesWithTag(
                 TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL,

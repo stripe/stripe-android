@@ -2,6 +2,9 @@ package com.stripe.android.link.ui.wallet
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.VisibilityThreshold
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -41,6 +44,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -446,7 +450,14 @@ private fun PaymentDetailsList(
         ) { item ->
             PaymentDetailsListItem(
                 modifier = Modifier
-                    .animateItemPlacement()
+                    .animateItem(
+                        fadeInSpec = null,
+                        placementSpec = spring(
+                            stiffness = Spring.StiffnessMediumLow,
+                            visibilityThreshold = IntOffset.VisibilityThreshold
+                        ),
+                        fadeOutSpec = null
+                    )
                     .testTag(WALLET_SCREEN_PAYMENT_METHODS_LIST),
                 paymentDetails = item,
                 enabled = isEnabled,

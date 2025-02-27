@@ -169,7 +169,7 @@ internal fun SavedPaymentMethodTabLayoutUI(
                     modifier = Modifier
                         .semantics { testTagsAsResourceId = true }
                         .testTag(item.viewType.name)
-                        .animateItemPlacement(),
+                        .animateItem(fadeInSpec = null, fadeOutSpec = null),
                 )
             }
         }

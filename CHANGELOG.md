@@ -2,6 +2,11 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+Dependencies updated in [9511](https://github.com/stripe/stripe-android/pull/9511):
+* Bumped Accompanist from 0.34.0 to 0.36.0.
+* Bumped Compose from 1.6.8 to 1.7.6.
+* Bumped Androidx Navigation from 2.7.7 to 2.8.5.
+
 Dependencies updated in [9512](https://github.com/stripe/stripe-android/pull/9512) and [10250](https://github.com/stripe/stripe-android/pull/10250):
 * Bumped Android Gradle Plugin from 8.7.1 to 8.8.1.
 * Bumped Androidx Activity from 1.8.2 to 1.9.3.

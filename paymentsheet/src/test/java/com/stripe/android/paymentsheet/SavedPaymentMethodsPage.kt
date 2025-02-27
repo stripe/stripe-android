@@ -7,9 +7,10 @@ import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isFocusable
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
+import com.stripe.android.common.ui.performClickWithKeyboard
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
@@ -55,7 +56,9 @@ class SavedPaymentMethodsPage(private val composeTestRule: ComposeTestRule) {
     }
 
     fun clickRemoveButton() {
-        composeTestRule.onNodeWithTag(UPDATE_PM_REMOVE_BUTTON_TEST_TAG).performClick()
+        composeTestRule.onNode(
+            hasAnyAncestor(hasTestTag(UPDATE_PM_REMOVE_BUTTON_TEST_TAG)).and(isFocusable())
+        ).performClickWithKeyboard()
     }
 
     private fun savedPaymentMethodMatcher(last4: String): SemanticsMatcher {

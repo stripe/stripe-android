@@ -8,11 +8,13 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isFocusable
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
@@ -23,6 +25,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.ui.performClickWithKeyboard
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -130,7 +133,7 @@ internal class PaymentOptionsActivityTest {
                 val usBankAccountLabel = usBankAccount.getLabel()?.resolve(context)
                 composeTestRule
                     .onNodeWithTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_$usBankAccountLabel")
-                    .performClick()
+                    .performClickWithKeyboard()
 
                 pressBack()
             }
@@ -190,7 +193,7 @@ internal class PaymentOptionsActivityTest {
                 // Navigate to "Add Payment Method" fragment
                 composeTestRule
                     .onNodeWithTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_+ Add")
-                    .performClick()
+                    .performClickWithKeyboard()
 
                 assertThat(activity.continueButton.isVisible).isTrue()
 
@@ -238,7 +241,7 @@ internal class PaymentOptionsActivityTest {
             scenario.onActivity {
                 composeTestRule
                     .onNodeWithTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_Google Pay")
-                    .performClick()
+                    .performClickWithKeyboard()
             }
 
             composeTestRule.waitForIdle()
@@ -269,7 +272,7 @@ internal class PaymentOptionsActivityTest {
             it.onActivity {
                 composeTestRule
                     .onNodeWithTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_$label")
-                    .performClick()
+                    .performClickWithKeyboard()
 
                 composeTestRule
                     .onNodeWithText(mandateText)
@@ -277,7 +280,7 @@ internal class PaymentOptionsActivityTest {
 
                 composeTestRule
                     .onNodeWithTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_Google Pay")
-                    .performClick()
+                    .performClickWithKeyboard()
 
                 composeTestRule
                     .onNodeWithText(mandateText)
@@ -334,8 +337,11 @@ internal class PaymentOptionsActivityTest {
         runActivityScenario(args) {
             it.onActivity {
                 composeTestRule
-                    .onNodeWithTag(TEST_TAG_LIST + PaymentMethod.Type.CashAppPay.code)
-                    .performClick()
+                    .onNode(
+                        hasAnyAncestor(hasTestTag(TEST_TAG_LIST + PaymentMethod.Type.CashAppPay.code))
+                            .and(isFocusable())
+                    )
+                    .performClickWithKeyboard()
 
                 composeTestRule.waitForIdle()
             }
