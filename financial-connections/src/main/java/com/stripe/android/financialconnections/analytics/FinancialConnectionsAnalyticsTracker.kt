@@ -109,10 +109,7 @@ internal class FinancialConnectionsAnalyticsTrackerImpl(
     private suspend fun commonParams(): Map<String, String?> {
         val manifest = getOrFetchSync().manifest
         return mapOf(
-            "las_client_secret" to configuration.financialConnectionsSessionClientSecret,
-//            "las_creator_client_secret": this.linkAccountSessionCreatorClientSecret,
-//        "las_creator_type": this.linkAccountSessionCreatorType,
-//        "las_creator_id": this.linkAccountSessionCreatorId,
+            "las_id" to manifest.id,
             "key" to configuration.publishableKey,
             "stripe_account" to configuration.stripeAccountId,
             "navigator_language" to locale.toLanguageTag(),
