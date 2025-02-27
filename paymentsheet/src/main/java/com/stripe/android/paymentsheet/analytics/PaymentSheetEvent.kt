@@ -45,21 +45,28 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         linkMode: LinkMode?,
         override val isDeferred: Boolean,
         override val googlePaySupported: Boolean,
-        requireCvcRecollection: Boolean = false
+        requireCvcRecollection: Boolean = false,
+        hasDefaultPaymentMethod: Boolean? = null,
+        setAsDefaultEnabled: Boolean? = null,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_load_succeeded"
         override val linkEnabled: Boolean = linkMode != null
-        override val additionalParams: Map<String, Any?> = mapOf(
-            FIELD_DURATION to duration?.asSeconds,
-            FIELD_SELECTED_LPM to paymentSelection.defaultAnalyticsValue,
-            FIELD_INTENT_TYPE to initializationMode.defaultAnalyticsValue,
-            FIELD_ORDERED_LPMS to orderedLpms.joinToString(","),
-            FIELD_REQUIRE_CVC_RECOLLECTION to requireCvcRecollection
-        ).plus(
+        override val additionalParams: Map<String, Any?> = buildMap {
+            put(FIELD_DURATION, duration?.asSeconds)
+            put(FIELD_SELECTED_LPM, paymentSelection.defaultAnalyticsValue)
+            put(FIELD_INTENT_TYPE, initializationMode.defaultAnalyticsValue)
+            put(FIELD_ORDERED_LPMS, orderedLpms.joinToString(","))
+            put(FIELD_REQUIRE_CVC_RECOLLECTION, requireCvcRecollection)
             linkMode?.let { mode ->
-                mapOf(FIELD_LINK_MODE to mode.analyticsValue)
-            }.orEmpty()
-        )
+                put(FIELD_LINK_MODE, mode.analyticsValue)
+            }
+            hasDefaultPaymentMethod?.let {
+                put(FIELD_HAS_DEFAULT_PAYMENT_METHOD, it)
+            }
+            setAsDefaultEnabled?.let {
+                put(FIELD_SET_AS_DEFAULT_ENABLED, it)
+            }
+        }
 
         private val PaymentSelection?.defaultAnalyticsValue: String
             get() = when (this) {

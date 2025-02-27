@@ -409,6 +409,37 @@ class PaymentSheetEventTest {
     }
 
     @Test
+    fun `LoadSucceeded event with setAsDefaultPaymentMethod should return expected toString()`() {
+        val event = PaymentSheetEvent.LoadSucceeded(
+            isDeferred = false,
+            linkMode = null,
+            googlePaySupported = false,
+            duration = (5L).seconds,
+            paymentSelection = null,
+            initializationMode = paymentIntentInitializationMode,
+            orderedLpms = listOf("card", "klarna"),
+            hasDefaultPaymentMethod = false,
+            setAsDefaultEnabled = true,
+        )
+
+        assertThat(event.eventName).isEqualTo("mc_load_succeeded")
+        assertThat(event.params).isEqualTo(
+            mapOf(
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
+                "duration" to 5f,
+                "selected_lpm" to "none",
+                "intent_type" to "payment_intent",
+                "ordered_lpms" to "card,klarna",
+                "require_cvc_recollection" to false,
+                "set_as_default_enabled" to true,
+                "has_default_payment_method" to false,
+            )
+        )
+    }
+
+    @Test
     fun `LoadSucceeded event should return 'google_pay' for selected lpm when saved selection is Google Pay`() {
         val event = PaymentSheetEvent.LoadSucceeded(
             isDeferred = false,
