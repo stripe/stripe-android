@@ -1,5 +1,6 @@
 package com.stripe.android.connect
 
+import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -43,6 +44,8 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
             field = value
             componentView?.listener = value
         }
+
+    var onDismissListener: StripeComponentController.OnDismissListener? = null
 
     protected abstract fun createComponentView(
         embeddedComponentManager: EmbeddedComponentManager
@@ -107,6 +110,11 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
         )
+    }
+
+    override fun onDismiss(dialog: DialogInterface) {
+        onDismissListener?.onDismiss()
+        super.onDismiss(dialog)
     }
 
     internal companion object {
