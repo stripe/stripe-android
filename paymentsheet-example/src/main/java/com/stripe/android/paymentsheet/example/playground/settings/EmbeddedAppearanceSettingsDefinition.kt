@@ -57,7 +57,7 @@ internal data class EmbeddedAppearance(
     val floatingButtonSpacingDp: Float = 12.0f,
     val topSeparatorEnabled: Boolean = true,
     val bottomSeparatorEnabled: Boolean = true,
-    val separatorColor: Int = Color(0xFF787880).toArgb(),
+    val separatorColor: Int = Color(0x33787880).toArgb(),
     val selectedColor: Int = Color(0xFF007AFF).toArgb(),
     val unselectedColor: Int = Color(0x33787880).toArgb(),
     val checkmarkColor: Int = Color(0xFF007AFF).toArgb()
@@ -66,27 +66,40 @@ internal data class EmbeddedAppearance(
         return when (embeddedRowStyle) {
             EmbeddedRow.FlatWithRadio -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio(
                 separatorThicknessDp = separatorThicknessDp,
-                separatorColor = separatorColor,
                 startSeparatorInsetDp = startSeparatorInset,
                 endSeparatorInsetDp = endSeparatorInset,
                 topSeparatorEnabled = topSeparatorEnabled,
                 bottomSeparatorEnabled = bottomSeparatorEnabled,
-                selectedColor = selectedColor,
-                unselectedColor = unselectedColor,
                 additionalVerticalInsetsDp = additionalVerticalInsetsDp,
-                horizontalInsetsDp = horizontalInsetsDp
+                horizontalInsetsDp = horizontalInsetsDp,
+                colorsLight = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio.Colors(
+                    separatorColor = separatorColor,
+                    selectedColor = selectedColor,
+                    unselectedColor = unselectedColor
+                ),
+                colorsDark = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio.Colors(
+                    separatorColor = Color(0xFF787880).toArgb(),
+                    selectedColor = Color(0xFF0074D4).toArgb(),
+                    unselectedColor = Color(0xFF787880).toArgb(),
+                )
             )
             EmbeddedRow.FlatWithCheckmark -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark(
                 separatorThicknessDp = separatorThicknessDp,
-                separatorColor = separatorColor,
                 startSeparatorInsetDp = startSeparatorInset,
                 endSeparatorInsetDp = endSeparatorInset,
                 topSeparatorEnabled = topSeparatorEnabled,
                 bottomSeparatorEnabled = bottomSeparatorEnabled,
-                checkmarkColor = checkmarkColor,
                 checkmarkInsetDp = checkmarkInsetsDp,
                 additionalVerticalInsetsDp = additionalVerticalInsetsDp,
-                horizontalInsetsDp = horizontalInsetsDp
+                horizontalInsetsDp = horizontalInsetsDp,
+                colorsLight = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.Colors(
+                    separatorColor = separatorColor,
+                    checkmarkColor = checkmarkColor
+                ),
+                colorsDark = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.Colors(
+                    separatorColor = Color(0xFF787880).toArgb(),
+                    checkmarkColor = Color(0xFF0074D4).toArgb()
+                )
             )
             EmbeddedRow.FloatingButton -> PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton(
                 spacingDp = floatingButtonSpacingDp,
