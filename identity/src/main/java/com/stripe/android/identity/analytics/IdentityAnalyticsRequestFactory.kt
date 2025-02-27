@@ -442,5 +442,6 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val SCREEN_NAME_UNKNOWN = "unknown"
         const val TYPE_SELFIE = "selfie"
         const val TYPE_DOCUMENT = "document"
+        const val SCREEN_NAME_WEB_VIEW = "web_view"
     }
 }

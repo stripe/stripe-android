@@ -51,6 +51,7 @@ import com.stripe.android.identity.ui.OTPScreen
 import com.stripe.android.identity.ui.SelfieScanScreen
 import com.stripe.android.identity.ui.SelfieWarmupScreen
 import com.stripe.android.identity.ui.UploadScreen
+import com.stripe.android.identity.ui.VerificationWebViewScreen
 import com.stripe.android.identity.viewmodel.BottomSheetViewModel
 import com.stripe.android.identity.viewmodel.DocumentScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
@@ -104,6 +105,15 @@ internal fun IdentityNavGraph(
                     fallbackUrlLauncher = fallbackUrlLauncher
                 )
             }
+
+            screen(VerificationWebViewDestination.ROUTE) {
+                VerificationWebViewScreen(
+                    navController = navController,
+                    identityViewModel = identityViewModel,
+                    verificationFlowFinishable = verificationFlowFinishable
+                )
+            }
+
             screen(IndividualWelcomeDestination.ROUTE) {
                 IndividualWelcomeScreen(
                     navController = navController,
