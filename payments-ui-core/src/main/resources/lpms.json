@@ -791,8 +791,8 @@
     "type": "amazon_pay",
     "async": false,
     "selector_icon": {
-      "light_theme_png": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-amazonpay_light-5694f2030b236ad5410b5b7e52bb538c.png",
-      "dark_theme_png": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-amazonpay_dark-9e42e4498e0bee515c423ef66010852f.png"
+      "light_theme_png": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-amazonpay_light@3x-46eb8b8a4a252b78d7b4c3b96d4ed7ae.png",
+      "light_theme_svg": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-amazonpay_light-22cdec0f5f5609554a34fa62fa583f23.svg"
     },
     "fields": [],
     "next_action_spec": {
