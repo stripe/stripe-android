@@ -155,7 +155,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
     }
 
     override fun onViewAttachedToWindow(v: View) {
-        val containerView = v as FrameLayout
+        val containerView = v as ViewGroup
 
         val viewModel = checkNotNull(getViewModelFromViewModelStoreOwner(containerView))
             .also { this.viewModel = it }
@@ -183,7 +183,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
     }
 
     override fun onViewDetachedFromWindow(v: View) {
-        val containerView = v as FrameLayout
+        val containerView = v as ViewGroup
 
         // Clean up.
         viewModel?.let { containerView.findViewTreeLifecycleOwner()?.lifecycle?.removeObserver(it) }
@@ -222,7 +222,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
         return viewModelProvider[viewModelKey, StripeConnectWebViewContainerViewModel::class]
     }
 
-    private fun populateContainerView(containerView: FrameLayout, viewModel: StripeConnectWebViewContainerViewModel) {
+    private fun populateContainerView(containerView: ViewGroup, viewModel: StripeConnectWebViewContainerViewModel) {
         // Sync props to VM.
         viewModel.propsJson = this.propsJson
 
