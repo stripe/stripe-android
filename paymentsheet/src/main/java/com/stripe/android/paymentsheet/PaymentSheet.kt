@@ -964,7 +964,6 @@ class PaymentSheet internal constructor(
 
                 internal abstract fun hasSeparators(): Boolean
                 internal abstract fun startSeparatorHasDefaultInset(): Boolean
-                internal abstract fun addTrailingContentOffset(): Boolean
 
                 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 @ExperimentalEmbeddedPaymentElementApi
@@ -1050,7 +1049,6 @@ class PaymentSheet internal constructor(
 
                     override fun hasSeparators() = true
                     override fun startSeparatorHasDefaultInset() = true
-                    override fun addTrailingContentOffset() = true
 
                     internal companion object {
                         val defaultLight = FlatWithRadio(
@@ -1163,7 +1161,6 @@ class PaymentSheet internal constructor(
 
                     override fun hasSeparators() = true
                     override fun startSeparatorHasDefaultInset() = false
-                    override fun addTrailingContentOffset() = false
 
                     internal companion object {
                         val defaultLight = FlatWithCheckmark(
@@ -1220,7 +1217,6 @@ class PaymentSheet internal constructor(
 
                     override fun hasSeparators() = false
                     override fun startSeparatorHasDefaultInset() = false
-                    override fun addTrailingContentOffset() = false
 
                     internal companion object {
                         val default = FloatingButton(

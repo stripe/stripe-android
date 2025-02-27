@@ -142,19 +142,18 @@ internal fun SavedPaymentMethodTrailingContent(
     savedPaymentMethodAction: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
     onViewMorePaymentMethods: () -> Unit,
     onManageOneSavedPaymentMethod: () -> Unit,
-    addOffset: Boolean = false
+    addPaddingForCheckmarkRow: Boolean = false
 ) {
     when (savedPaymentMethodAction) {
         PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE -> Unit
         PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE -> {
             EditButton(
-                addOffset = addOffset,
-                onClick = onManageOneSavedPaymentMethod
+                onClick = onManageOneSavedPaymentMethod,
+                addPaddingForCheckmarkRow = addPaddingForCheckmarkRow
             )
         }
         PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL -> {
             ViewMoreButton(
-                addOffset = addOffset,
                 onViewMorePaymentMethods = onViewMorePaymentMethods
             )
         }
@@ -163,9 +162,10 @@ internal fun SavedPaymentMethodTrailingContent(
 
 @Composable
 private fun EditButton(
-    addOffset: Boolean,
     onClick: () -> Unit,
+    addPaddingForCheckmarkRow: Boolean
 ) {
+    val startPadding = if (addPaddingForCheckmarkRow) 12.dp else 4.dp
     Text(
         stringResource(id = com.stripe.android.R.string.stripe_edit),
         color = MaterialTheme.colors.primary,
@@ -174,15 +174,13 @@ private fun EditButton(
         modifier = Modifier
             .testTag(TEST_TAG_EDIT_SAVED_CARD)
             .clickable(onClick = onClick)
-            .padding(4.dp)
-            .offset(x = if (addOffset) 4.dp else 0.dp)
+            .padding(start = startPadding, end = 0.dp, top = 4.dp, bottom = 4.dp)
             .fillMaxHeight()
     )
 }
 
 @Composable
 private fun ViewMoreButton(
-    addOffset: Boolean,
     onViewMorePaymentMethods: () -> Unit,
 ) {
     Row(
@@ -190,8 +188,8 @@ private fun ViewMoreButton(
         modifier = Modifier
             .testTag(TEST_TAG_VIEW_MORE)
             .clickable(onClick = onViewMorePaymentMethods)
-            .padding(start = 4.dp, end = 2.dp, top = 4.dp, bottom = 4.dp)
-            .offset(x = if (addOffset) 10.dp else 0.dp)
+            .padding(start = 4.dp, end = 0.dp, top = 4.dp, bottom = 4.dp)
+            .offset(x = 9.dp)
             .fillMaxHeight()
     ) {
         Text(
