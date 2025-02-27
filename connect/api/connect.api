@@ -1,3 +1,15 @@
+public final class com/stripe/android/connect/AccountOnboardingController : com/stripe/android/connect/StripeComponentController {
+	public static final field $stable I
+	public fun dismiss ()V
+	public fun getListener ()Lcom/stripe/android/connect/AccountOnboardingListener;
+	public synthetic fun getListener ()Lcom/stripe/android/connect/StripeEmbeddedComponentListener;
+	public fun getOnDismissListener ()Lcom/stripe/android/connect/StripeComponentController$OnDismissListener;
+	public fun setListener (Lcom/stripe/android/connect/AccountOnboardingListener;)V
+	public synthetic fun setListener (Lcom/stripe/android/connect/StripeEmbeddedComponentListener;)V
+	public fun setOnDismissListener (Lcom/stripe/android/connect/StripeComponentController$OnDismissListener;)V
+	public fun show ()V
+}
+
 public final class com/stripe/android/connect/AccountOnboardingProps$CollectionOptions$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/connect/AccountOnboardingProps$CollectionOptions;
@@ -14,10 +26,14 @@ public final class com/stripe/android/connect/AccountOnboardingProps$Creator : a
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/connect/AccountOnboardingView : android/widget/FrameLayout, com/stripe/android/connect/webview/StripeConnectWebViewContainer {
+public final class com/stripe/android/connect/AccountOnboardingView : com/stripe/android/connect/StripeComponentView, com/stripe/android/connect/webview/StripeConnectWebViewContainer {
 	public static final field $stable I
+	public fun getListener ()Lcom/stripe/android/connect/AccountOnboardingListener;
+	public synthetic fun getListener ()Lcom/stripe/android/connect/StripeEmbeddedComponentListener;
 	public fun initialize (Lcom/stripe/android/connect/EmbeddedComponentManager;Lcom/stripe/android/connect/AccountOnboardingListener;Lcom/stripe/android/connect/AccountOnboardingProps;)V
 	public synthetic fun initialize (Lcom/stripe/android/connect/EmbeddedComponentManager;Lcom/stripe/android/connect/StripeEmbeddedComponentListener;Lcom/stripe/android/connect/ComponentProps;)V
+	public fun setListener (Lcom/stripe/android/connect/AccountOnboardingListener;)V
+	public synthetic fun setListener (Lcom/stripe/android/connect/StripeEmbeddedComponentListener;)V
 }
 
 public final class com/stripe/android/connect/BuildConfig {
@@ -43,10 +59,27 @@ public final class com/stripe/android/connect/EmptyProps$Creator : android/os/Pa
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/connect/PayoutsView : android/widget/FrameLayout, com/stripe/android/connect/webview/StripeConnectWebViewContainer {
+public final class com/stripe/android/connect/PayoutsView : com/stripe/android/connect/StripeComponentView, com/stripe/android/connect/webview/StripeConnectWebViewContainer {
 	public static final field $stable I
+	public fun getListener ()Lcom/stripe/android/connect/PayoutsListener;
+	public synthetic fun getListener ()Lcom/stripe/android/connect/StripeEmbeddedComponentListener;
 	public fun initialize (Lcom/stripe/android/connect/EmbeddedComponentManager;Lcom/stripe/android/connect/PayoutsListener;Lcom/stripe/android/connect/EmptyProps;)V
 	public synthetic fun initialize (Lcom/stripe/android/connect/EmbeddedComponentManager;Lcom/stripe/android/connect/StripeEmbeddedComponentListener;Lcom/stripe/android/connect/ComponentProps;)V
+	public fun setListener (Lcom/stripe/android/connect/PayoutsListener;)V
+	public synthetic fun setListener (Lcom/stripe/android/connect/StripeEmbeddedComponentListener;)V
+}
+
+public abstract interface class com/stripe/android/connect/StripeComponentController {
+	public abstract fun dismiss ()V
+	public abstract fun getListener ()Lcom/stripe/android/connect/StripeEmbeddedComponentListener;
+	public abstract fun getOnDismissListener ()Lcom/stripe/android/connect/StripeComponentController$OnDismissListener;
+	public abstract fun setListener (Lcom/stripe/android/connect/StripeEmbeddedComponentListener;)V
+	public abstract fun setOnDismissListener (Lcom/stripe/android/connect/StripeComponentController$OnDismissListener;)V
+	public abstract fun show ()V
+}
+
+public abstract interface class com/stripe/android/connect/StripeComponentController$OnDismissListener {
+	public abstract fun onDismiss ()V
 }
 
 public abstract interface class com/stripe/android/connect/StripeEmbeddedComponentListener {
