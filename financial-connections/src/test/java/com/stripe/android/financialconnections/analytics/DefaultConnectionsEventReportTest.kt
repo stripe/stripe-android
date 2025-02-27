@@ -92,7 +92,7 @@ class DefaultConnectionsEventReportTest {
     @Test
     fun `onResult() should fire analytics request with expected event value for failure`() {
         eventReporter.onResult(
-            session = financialConnectionsSession.id,
+            sessionId = financialConnectionsSession.id,
             financialConnectionsSheetResult = FinancialConnectionsSheetActivityResult.Failed(Exception()),
         )
         verify(analyticsRequestExecutor).executeAsync(

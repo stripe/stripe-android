@@ -15,7 +15,7 @@ internal interface FinancialConnectionsEventReporter {
     fun onPresented()
 
     fun onResult(
-        session: String,
+        sessionId: String,
         financialConnectionsSheetResult: FinancialConnectionsSheetActivityResult
     )
 }

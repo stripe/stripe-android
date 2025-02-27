@@ -22,7 +22,7 @@ internal class DefaultFinancialConnectionsEventReporter @Inject constructor(
     }
 
     override fun onResult(
-        session: String,
+        sessionId: String,
         financialConnectionsSheetResult: FinancialConnectionsSheetActivityResult
     ) {
         val event = when (financialConnectionsSheetResult) {
@@ -30,7 +30,7 @@ internal class DefaultFinancialConnectionsEventReporter @Inject constructor(
                 Event(
                     Event.Code.SheetClosed,
                     mapOf(
-                        PARAM_SESSION_ID to session,
+                        PARAM_SESSION_ID to sessionId,
                         PARAM_SESSION_RESULT to "completed"
                     )
                 )
@@ -39,7 +39,7 @@ internal class DefaultFinancialConnectionsEventReporter @Inject constructor(
                 Event(
                     Event.Code.SheetClosed,
                     mapOf(
-                        PARAM_SESSION_ID to session,
+                        PARAM_SESSION_ID to sessionId,
                         PARAM_SESSION_RESULT to "cancelled"
                     )
                 )
@@ -48,7 +48,7 @@ internal class DefaultFinancialConnectionsEventReporter @Inject constructor(
                 Event(
                     Event.Code.SheetFailed,
                     mapOf(
-                        PARAM_SESSION_ID to session,
+                        PARAM_SESSION_ID to sessionId,
                         PARAM_SESSION_RESULT to "failure"
                     ).plus(
                         financialConnectionsSheetResult.error
