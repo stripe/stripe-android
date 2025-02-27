@@ -36,7 +36,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [Build.VERSION_CODES.Q])
+@Config(sdk = [Build.VERSION_CODES.TIRAMISU])
 internal class VerticalModeFormUITest {
     @get:Rule
     val composeRule = createComposeRule()
@@ -79,15 +79,17 @@ internal class VerticalModeFormUITest {
         createCardState(customerHasSavedPaymentMethods = false)
     ) {
         formPage.headerIcon.assertDoesNotExist()
-        formPage.title.assertExists()
-        formPage.title.assert(hasText("Add card"))
+        formPage.assertTitle("Add card")
+//        formPage.title.assertExists()
+//        formPage.title.assert(hasText("Add card"))
     }
 
     @Test
     fun testLpmShowsHeader() = runScenario(createKlarnaState()) {
         formPage.headerIcon.assertExists()
-        formPage.title.assertExists()
-        formPage.title.assert(hasText("Klarna"))
+        formPage.assertTitle("Klarna")
+//        formPage.title.assertExists()
+//        formPage.title.assert(hasText("Klarna"))
     }
 
     private fun runScenario(
