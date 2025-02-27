@@ -113,6 +113,7 @@ fun ComponentPickerContent(
                 val onboardingController = remember(embeddedComponentManager, onboardingSettings) {
                     val controller = embeddedComponentManager.createAccountOnboardingController(
                         activity = context,
+                        title = "Account Onboarding",
                         props = onboardingSettings.toProps(),
                         cacheKey = "AccountOnboardingExample"
                     )
