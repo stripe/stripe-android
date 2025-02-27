@@ -1,30 +1,18 @@
 package com.stripe.android.paymentelement.embedded.content
 
-import androidx.lifecycle.SavedStateHandle
+import androidx.activity.result.ActivityResultCaller
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.testing.TestLifecycleOwner
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
-import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
-import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
-import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.state.LinkState
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.CoroutineTestRule
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.mockito.Mockito.mock
@@ -36,153 +24,105 @@ internal class DefaultEmbeddedConfirmationHelperTest {
     val coroutineTestRule = CoroutineTestRule()
 
     @Test
-    fun constructorWiresUpConfirmationHandlerToResultCallback() = testScenario {
-        val exception = IllegalStateException("Test failure.")
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
-            ConfirmationHandler.Result.Failed(
-                cause = exception,
-                message = "Error".resolvableString,
-                type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
-            )
-        )
-        assertThat(resultCallbackTurbine.awaitItem()).isEqualTo(
-            EmbeddedPaymentElement.Result.Failed(exception)
-        )
+    fun `if confirm did start, should not call result callback with failure`() = testScenario(
+        confirmShouldStart = true,
+    ) {
+        confirmationHelper.confirm()
+
+        assertThat(confirmationMediator.confirmTurbine.awaitItem()).isNotNull()
+
+        resultCallbackTurbine.expectNoEvents()
     }
 
     @Test
-    fun `successful confirm clears confirmationState and selection`() = testScenario {
-        assertThat(confirmationStateHolder.state).isNotNull()
-        assertThat(selectionHolder.selection.value).isNotNull()
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
-            ConfirmationHandler.Result.Succeeded(
-                intent = PaymentIntentFixtures.PI_SUCCEEDED,
-                deferredIntentConfirmationType = null,
-            )
-        )
+    fun `if confirm did not start, should call result callback with failure`() = testScenario(
+        confirmShouldStart = false,
+    ) {
+        confirmationHelper.confirm()
+
+        assertThat(confirmationMediator.confirmTurbine.awaitItem()).isNotNull()
+
+        val result = resultCallbackTurbine.awaitItem()
+
+        assertThat(result).isInstanceOf<EmbeddedPaymentElement.Result.Failed>()
+
+        val failedResult = result as EmbeddedPaymentElement.Result.Failed
+
+        assertThat(failedResult.error).isInstanceOf<IllegalStateException>()
+        assertThat(failedResult.error.message).isEqualTo("Not in a state that's confirmable.")
+    }
+
+    @Test
+    fun `on mediator result, should emit through result callback`() = testScenario(
+        result = flowOf(EmbeddedPaymentElement.Result.Completed())
+    ) {
         assertThat(resultCallbackTurbine.awaitItem()).isInstanceOf<EmbeddedPaymentElement.Result.Completed>()
-        assertThat(confirmationStateHolder.state).isNull()
-        assertThat(selectionHolder.selection.value).isNull()
-    }
-
-    @Test
-    fun `cancelled confirm does not clear confirmationState and selection`() = testScenario {
-        assertThat(confirmationStateHolder.state).isNotNull()
-        assertThat(selectionHolder.selection.value).isNotNull()
-        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
-            ConfirmationHandler.Result.Canceled(ConfirmationHandler.Result.Canceled.Action.InformCancellation)
-        )
-        assertThat(resultCallbackTurbine.awaitItem()).isInstanceOf<EmbeddedPaymentElement.Result.Canceled>()
-        assertThat(confirmationStateHolder.state).isNotNull()
-        assertThat(selectionHolder.selection.value).isNotNull()
-    }
-
-    @Test
-    fun confirmCallsResultCallbackWithFailureWhenLoadedStateIsNull() = testScenario(
-        loadedState = null,
-    ) {
-        confirmationHelper.confirm()
-        assertThat(resultCallbackTurbine.awaitItem()).isInstanceOf<EmbeddedPaymentElement.Result.Failed>()
-    }
-
-    @Test
-    fun confirmCallsResultCallbackWithFailureWhenNoSelection() = testScenario(
-        loadedState = defaultLoadedState().copy(selection = null),
-    ) {
-        confirmationHelper.confirm()
-        assertThat(resultCallbackTurbine.awaitItem()).isInstanceOf<EmbeddedPaymentElement.Result.Failed>()
-    }
-
-    @Test
-    fun confirmCallsConfirmationHandlerStart() = testScenario {
-        confirmationHelper.confirm()
-        val args = confirmationHandler.startTurbine.awaitItem()
-        assertThat(args.confirmationOption).isInstanceOf<GooglePayConfirmationOption>()
-    }
-
-    @Test
-    fun confirmCallsConfirmationHandlerStartWithLink() = testScenario(
-        loadedState = defaultLoadedState().copy(
-            selection = PaymentSelection.Link(),
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                linkState = LinkState(
-                    configuration = LinkTestUtils.createLinkConfiguration(),
-                    loginState = LinkState.LoginState.NeedsVerification,
-                    signupMode = null,
-                )
-            )
-        )
-    ) {
-        confirmationHelper.confirm()
-        val args = confirmationHandler.startTurbine.awaitItem()
-        assertThat(args.confirmationOption).isInstanceOf<LinkConfirmationOption>()
-    }
-
-    private fun defaultLoadedState(): EmbeddedConfirmationStateHolder.State {
-        return EmbeddedConfirmationStateHolder.State(
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-            selection = PaymentSelection.GooglePay,
-            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                PaymentSheet.IntentConfiguration(
-                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                        amount = 5000,
-                        currency = "USD",
-                    ),
-                ),
-            ),
-            configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc")
-                .googlePay(
-                    PaymentSheet.GooglePayConfiguration(
-                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                        countryCode = "US",
-                    )
-                )
-                .build()
-        )
     }
 
     private fun testScenario(
-        loadedState: EmbeddedConfirmationStateHolder.State? = defaultLoadedState(),
+        result: Flow<EmbeddedPaymentElement.Result> = flowOf(),
+        confirmShouldStart: Boolean = true,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val resultCallbackTurbine = Turbine<EmbeddedPaymentElement.Result>()
-        val confirmationHandler = FakeConfirmationHandler()
-        val savedStateHandle = SavedStateHandle()
-        val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
-        selectionHolder.set(loadedState?.selection)
-        val confirmationStateHolder = EmbeddedConfirmationStateHolder(
-            savedStateHandle = savedStateHandle,
-            selectionHolder = selectionHolder,
-            coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
+        val confirmationMediator = FakeEmbeddedConfirmationMediator(
+            result = result,
+            confirmShouldStart = confirmShouldStart,
         )
-        confirmationStateHolder.state = loadedState
+
+        val activityResultCaller = mock<ActivityResultCaller>()
+        val lifecycleOwner = TestLifecycleOwner(coroutineDispatcher = Dispatchers.Unconfined)
         val confirmationHelper = DefaultEmbeddedConfirmationHelper(
-            confirmationHandler = confirmationHandler,
+            confirmationMediator = confirmationMediator,
             resultCallback = {
                 resultCallbackTurbine.add(it)
             },
-            activityResultCaller = mock(),
-            lifecycleOwner = TestLifecycleOwner(coroutineDispatcher = Dispatchers.Unconfined),
-            confirmationStateHolder = confirmationStateHolder,
-            selectionHolder = selectionHolder,
+            activityResultCaller = activityResultCaller,
+            lifecycleOwner = lifecycleOwner,
         )
-        assertThat(confirmationHandler.registerTurbine.awaitItem()).isNotNull()
+
+        val registerCall = confirmationMediator.registerTurbine.awaitItem()
+
+        assertThat(registerCall.activityResultCaller).isEqualTo(activityResultCaller)
+        assertThat(registerCall.lifecycleOwner).isEqualTo(lifecycleOwner)
+
         Scenario(
             confirmationHelper = confirmationHelper,
-            confirmationHandler = confirmationHandler,
+            confirmationMediator = confirmationMediator,
             resultCallbackTurbine = resultCallbackTurbine,
-            confirmationStateHolder = confirmationStateHolder,
-            selectionHolder = selectionHolder,
         ).block()
+
+        confirmationMediator.confirmTurbine.ensureAllEventsConsumed()
+        confirmationMediator.registerTurbine.ensureAllEventsConsumed()
         resultCallbackTurbine.ensureAllEventsConsumed()
-        confirmationHandler.validate()
     }
 
     private class Scenario(
         val confirmationHelper: EmbeddedConfirmationHelper,
-        val confirmationHandler: FakeConfirmationHandler,
+        val confirmationMediator: FakeEmbeddedConfirmationMediator,
         val resultCallbackTurbine: ReceiveTurbine<EmbeddedPaymentElement.Result>,
-        val confirmationStateHolder: EmbeddedConfirmationStateHolder,
-        val selectionHolder: EmbeddedSelectionHolder,
     )
+
+    private class FakeEmbeddedConfirmationMediator(
+        override val result: Flow<EmbeddedPaymentElement.Result>,
+        private val confirmShouldStart: Boolean,
+    ) : EmbeddedConfirmationMediator {
+        val registerTurbine: Turbine<RegisterCall> = Turbine()
+        val confirmTurbine: Turbine<Unit> = Turbine()
+
+        override fun register(activityResultCaller: ActivityResultCaller, lifecycleOwner: LifecycleOwner) {
+            registerTurbine.add(RegisterCall(activityResultCaller, lifecycleOwner))
+        }
+
+        override fun confirm(): Boolean {
+            confirmTurbine.add(Unit)
+
+            return confirmShouldStart
+        }
+
+        data class RegisterCall(
+            val activityResultCaller: ActivityResultCaller,
+            val lifecycleOwner: LifecycleOwner,
+        )
+    }
 }

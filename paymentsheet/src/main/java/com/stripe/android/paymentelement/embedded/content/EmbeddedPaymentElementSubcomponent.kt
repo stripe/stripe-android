@@ -47,4 +47,9 @@ internal interface EmbeddedPaymentElementModule {
     fun bindsConfirmationHelper(
         confirmationHelper: DefaultEmbeddedConfirmationHelper
     ): EmbeddedConfirmationHelper
+
+    @Binds
+    fun bindsConfirmationMediator(
+        confirmationMediator: DefaultEmbeddedConfirmationMediator
+    ): EmbeddedConfirmationMediator
 }
