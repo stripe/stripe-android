@@ -211,7 +211,7 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .padding(start = 4.dp, end = 0.dp, top = 4.dp, bottom = 4.dp)
+                .padding(trailingContentPaddingValues(true))
                 .offset(x = VIEW_MORE_BUTTON_OFFSET.dp)
         ) {
             Text(

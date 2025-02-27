@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.offset
@@ -165,7 +166,6 @@ private fun EditButton(
     onClick: () -> Unit,
     addPaddingForCheckmarkRow: Boolean
 ) {
-    val startPadding = if (addPaddingForCheckmarkRow) 12.dp else 4.dp
     Text(
         stringResource(id = com.stripe.android.R.string.stripe_edit),
         color = MaterialTheme.colors.primary,
@@ -174,7 +174,7 @@ private fun EditButton(
         modifier = Modifier
             .testTag(TEST_TAG_EDIT_SAVED_CARD)
             .clickable(onClick = onClick)
-            .padding(start = startPadding, end = 0.dp, top = 4.dp, bottom = 4.dp)
+            .padding(trailingContentPaddingValues(addPaddingForCheckmarkRow))
             .fillMaxHeight()
     )
 }
@@ -188,7 +188,7 @@ private fun ViewMoreButton(
         modifier = Modifier
             .testTag(TEST_TAG_VIEW_MORE)
             .clickable(onClick = onViewMorePaymentMethods)
-            .padding(start = 4.dp, end = 0.dp, top = 4.dp, bottom = 4.dp)
+            .padding(trailingContentPaddingValues())
             .offset(x = VIEW_MORE_BUTTON_OFFSET.dp)
             .fillMaxHeight()
     ) {
@@ -207,6 +207,21 @@ private fun ViewMoreButton(
                 .size(VIEW_MORE_CHEVRON_SIZE.dp)
         )
     }
+}
+
+/**
+ * Padding values with no end padding to allow content to be aligned with end of embedded rows.
+ * Other padding values kept to not decrease clickable area size.
+ * @param addPaddingForCheckmarkRowEdit extra padding is required for [FlatWithCheckmark] row to align with
+ * SPM text
+ */
+internal fun trailingContentPaddingValues(addPaddingForCheckmarkRowEdit: Boolean = false): PaddingValues {
+    return PaddingValues(
+        start = if (addPaddingForCheckmarkRowEdit) 12.dp else 4.dp,
+        end = 0.dp,
+        top = 4.dp,
+        bottom = 4.dp
+    )
 }
 
 // There is empty space in the KeyboardArrowRight icon so an offset is required to align to the edge of a view
