@@ -58,12 +58,11 @@ class EmbeddedComponentManager(
     // Public functions
 
     /**
-     * Present the Account Onboarding component in a full screen [DialogFragment].
+     * Returns a controller for presenting the Account Onboarding component full screen.
      *
-     * @param activity The [FragmentActivity] to present the view in.
-     * @param listener Optional [AccountOnboardingListener] to use for handling events from the view.
-     * @param props Optional [AccountOnboardingProps] to use for configuring the view.
-     * @param cacheKey Key to use for caching the internal WebView within an Activity across configuration changes.
+     * @param activity The [FragmentActivity] to present the component in.
+     * @param props Optional props to use for configuring the component.
+     * @param cacheKey Key to use for caching the internal WebView across configuration changes.
      */
     @PrivateBetaConnectSDK
     fun createAccountOnboardingController(
@@ -83,9 +82,9 @@ class EmbeddedComponentManager(
      * Create a new [AccountOnboardingView] for inclusion in the view hierarchy.
      *
      * @param context The [Context] to use for creating the view.
-     * @param listener Optional [AccountOnboardingListener] to use for handling events from the view.
-     * @param props Optional [AccountOnboardingProps] to use for configuring the view.
-     * @param cacheKey Key to use for caching the internal WebView within an Activity across configuration changes.
+     * @param listener Optional listener to use for handling events from the view.
+     * @param props Optional props to use for configuring the view.
+     * @param cacheKey Key to use for caching the internal WebView across configuration changes.
      */
     @PrivateBetaConnectSDK
     fun createAccountOnboardingView(

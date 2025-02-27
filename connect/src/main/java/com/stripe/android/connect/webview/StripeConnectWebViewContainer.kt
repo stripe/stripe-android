@@ -39,6 +39,9 @@ interface StripeConnectWebViewContainer<Listener, Props>
     where Props : ComponentProps,
           Listener : StripeEmbeddedComponentListener {
 
+    /**
+     * Listener of component events.
+     */
     var listener: Listener?
 
     /**
