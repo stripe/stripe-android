@@ -39,6 +39,8 @@ interface StripeConnectWebViewContainer<Listener, Props>
     where Props : ComponentProps,
           Listener : StripeEmbeddedComponentListener {
 
+    var listener: Listener?
+
     /**
      * Initializes the view. Must be called exactly once if and only if this view was created
      * through XML layout inflation.
@@ -55,7 +57,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
     private val context: Context,
     private val embeddedComponent: StripeEmbeddedComponent,
     private var embeddedComponentManager: EmbeddedComponentManager?,
-    private var listener: Listener?,
+    override var listener: Listener?,
     props: Props?,
     private val listenerDelegate: ComponentListenerDelegate<Listener> = ComponentListenerDelegate(),
     private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
