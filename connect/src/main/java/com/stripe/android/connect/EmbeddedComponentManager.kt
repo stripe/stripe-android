@@ -15,6 +15,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat.checkSelfPermission
+import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.FragmentActivity
 import com.stripe.android.connect.analytics.ComponentAnalyticsService
 import com.stripe.android.connect.analytics.ConnectAnalyticsService
 import com.stripe.android.connect.analytics.DefaultConnectAnalyticsService
@@ -48,11 +50,34 @@ class EmbeddedComponentManager(
     private val _appearanceFlow = MutableStateFlow(appearance)
     internal val appearanceFlow: StateFlow<Appearance> get() = _appearanceFlow.asStateFlow()
 
-    private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
-    private val isDebugBuild: Boolean = BuildConfig.DEBUG
+    private val logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
     private val loggerTag = javaClass.simpleName
 
+    private val isDebugBuild = BuildConfig.DEBUG
+
     // Public functions
+
+    /**
+     * Present the Account Onboarding component in a full screen [DialogFragment].
+     *
+     * @param activity The [FragmentActivity] to present the view in.
+     * @param listener Optional [AccountOnboardingListener] to use for handling events from the view.
+     * @param props Optional [AccountOnboardingProps] to use for configuring the view.
+     * @param cacheKey Key to use for caching the internal WebView within an Activity across configuration changes.
+     */
+    @PrivateBetaConnectSDK
+    fun createAccountOnboardingController(
+        activity: FragmentActivity,
+        props: AccountOnboardingProps? = null,
+        cacheKey: String? = null,
+    ): AccountOnboardingController {
+        return AccountOnboardingController(
+            activity = activity,
+            embeddedComponentManager = this,
+            props = props,
+            cacheKey = cacheKey,
+        )
+    }
 
     /**
      * Create a new [AccountOnboardingView] for inclusion in the view hierarchy.
