@@ -215,7 +215,7 @@ private fun ViewMoreButton(
  * @param addPaddingForCheckmarkRowEdit extra padding is required for [FlatWithCheckmark] row to align with
  * SPM text
  */
-internal fun trailingContentPaddingValues(addPaddingForCheckmarkRowEdit: Boolean = false): PaddingValues {
+private fun trailingContentPaddingValues(addPaddingForCheckmarkRowEdit: Boolean = false): PaddingValues {
     return PaddingValues(
         start = if (addPaddingForCheckmarkRowEdit) 12.dp else 4.dp,
         end = 0.dp,
@@ -225,8 +225,8 @@ internal fun trailingContentPaddingValues(addPaddingForCheckmarkRowEdit: Boolean
 }
 
 // There is empty space in the KeyboardArrowRight icon so an offset is required to align to the edge of a view
-internal const val VIEW_MORE_BUTTON_OFFSET = 9
-internal const val VIEW_MORE_CHEVRON_SIZE = 22
+private const val VIEW_MORE_BUTTON_OFFSET = 9
+private const val VIEW_MORE_CHEVRON_SIZE = 22
 // Offsets to position chevron correctly per design requirements
-internal const val VIEW_MORE_CHEVRON_Y_OFFSET = 2
-internal const val VIEW_MORE_CHEVRON_X_OFFSET = -2
+private const val VIEW_MORE_CHEVRON_Y_OFFSET = 2
+private const val VIEW_MORE_CHEVRON_X_OFFSET = -2
