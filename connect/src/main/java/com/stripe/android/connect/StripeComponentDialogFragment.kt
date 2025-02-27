@@ -9,6 +9,7 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.connect.appearance.Appearance
@@ -76,27 +77,25 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    viewModel.embeddedComponentManager
-                        .collectLatest { embeddedComponentManager ->
-                            embeddedComponentManager?.appearanceFlow?.collectLatest(::bindAppearance)
-                        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.embeddedComponentManager
+                .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
+                .collectLatest { embeddedComponentManager ->
+                    embeddedComponentManager?.appearanceFlow?.collectLatest(::bindAppearance)
                 }
-                launch {
-                    val embeddedComponentManager =
-                        viewModel.embeddedComponentManager.filterNotNull().first()
-                    val componentView = createComponentView(embeddedComponentManager)
-                        .also { this@StripeComponentDialogFragment.componentView = it }
-                    componentView.layoutParams =
-                        ViewGroup.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.MATCH_PARENT
-                        )
-                    binding.root.addView(componentView)
-                }
-            }
+        }
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            val embeddedComponentManager =
+                viewModel.embeddedComponentManager.filterNotNull().first()
+            val componentView = createComponentView(embeddedComponentManager)
+                .also { this@StripeComponentDialogFragment.componentView = it }
+            componentView.layoutParams =
+                ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+            binding.root.addView(componentView)
         }
     }
 
