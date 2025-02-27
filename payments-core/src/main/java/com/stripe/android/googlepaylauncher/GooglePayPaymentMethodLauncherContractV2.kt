@@ -46,8 +46,7 @@ class GooglePayPaymentMethodLauncherContractV2 :
     data class Args internal constructor(
         internal val config: GooglePayPaymentMethodLauncher.Config,
         internal val currencyCode: String,
-        internal val amount: Long,
-        internal val isTotalPriceKnown: Boolean = true,
+        internal val amount: Long? = null,
         internal val label: String? = null,
         internal val transactionId: String? = null,
         internal val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
