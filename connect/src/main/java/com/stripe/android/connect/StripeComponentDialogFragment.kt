@@ -7,13 +7,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.stripe.android.connect.databinding.StripeFullScreenComponentBinding
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
@@ -28,8 +28,16 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
 
     private val viewModel: StripeComponentDialogFragmentViewModel by viewModels()
 
-    protected var props: Props? = null
-    protected var cacheKey: String? = null
+    protected val title: String? get() = arguments?.getString(ARG_TITLE)
+
+    protected val props: Props
+        @Suppress("DEPRECATION")
+        get() = arguments?.getParcelable(ARG_PROPS)!!
+
+    protected val cacheKey: String? get() = arguments?.getString(ARG_CACHE_KEY)
+
+    private var _binding: StripeFullScreenComponentBinding? = null
+    private val binding get() = _binding!!
 
     private var componentView: ComponentView? = null
         set(value) {
@@ -55,23 +63,15 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
         super.onCreate(savedInstanceState)
         setStyle(STYLE_NO_FRAME, R.style.StripeConnectFullScreenDialogStyle)
 
-        val arguments = this.arguments!!
-
-        @Suppress("DEPRECATION")
-        props = arguments.getParcelable(ARG_PROPS)
-        cacheKey = arguments.getString(ARG_CACHE_KEY)
-
         initialEmbeddedComponentManager?.let { viewModel.embeddedComponentManager.value = it }
         initialEmbeddedComponentManager = null
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return FrameLayout(inflater.context).apply {
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-        }
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        val binding = StripeFullScreenComponentBinding.inflate(inflater, container, false)
+            .also { this._binding = it }
+        binding.toolbar.title = title
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -98,7 +98,7 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
                             ViewGroup.LayoutParams.MATCH_PARENT,
                             ViewGroup.LayoutParams.MATCH_PARENT
                         )
-                    (view as ViewGroup).addView(componentView)
+                    binding.root.addView(componentView)
                 }
             }
         }
@@ -112,17 +112,25 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
         )
     }
 
+    override fun onDestroyView() {
+        componentView = null
+        _binding = null
+        super.onDestroyView()
+    }
+
     override fun onDismiss(dialog: DialogInterface) {
         onDismissListener?.onDismiss()
         super.onDismiss(dialog)
     }
 
     internal companion object {
+        private const val ARG_TITLE = "title"
         private const val ARG_PROPS = "props"
         private const val ARG_CACHE_KEY = "cache_key"
 
         fun <DF, Props> newInstance(
             cls: Class<DF>,
+            title: String? = null,
             props: Props? = null,
             cacheKey: String? = null,
         ): DF
@@ -131,6 +139,7 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
             val fragment = cls.getDeclaredConstructor().newInstance()
             return fragment.apply {
                 arguments = Bundle().apply {
+                    putString(ARG_TITLE, title)
                     putParcelable(ARG_PROPS, props)
                     putString(ARG_CACHE_KEY, cacheKey)
                 }

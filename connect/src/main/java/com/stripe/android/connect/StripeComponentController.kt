@@ -44,6 +44,7 @@ internal class StripeComponentControllerImpl<DF, Listener, Props> internal const
     private val cls: Class<DF>,
     private val activity: FragmentActivity,
     private val embeddedComponentManager: EmbeddedComponentManager,
+    private val title: String? = null,
     private val props: Props? = null,
     private val cacheKey: String? = null,
 ) : StripeComponentController<Listener>
@@ -96,6 +97,7 @@ internal class StripeComponentControllerImpl<DF, Listener, Props> internal const
     private fun createDialogFragment(): DF {
         return StripeComponentDialogFragment.newInstance(
             cls = cls,
+            title = title,
             props = props,
             cacheKey = cacheKey,
         )

@@ -67,12 +67,14 @@ class EmbeddedComponentManager(
     @PrivateBetaConnectSDK
     fun createAccountOnboardingController(
         activity: FragmentActivity,
+        title: String? = null,
         props: AccountOnboardingProps? = null,
         cacheKey: String? = null,
     ): AccountOnboardingController {
         return AccountOnboardingController(
             activity = activity,
             embeddedComponentManager = this,
+            title = title,
             props = props,
             cacheKey = cacheKey,
         )
