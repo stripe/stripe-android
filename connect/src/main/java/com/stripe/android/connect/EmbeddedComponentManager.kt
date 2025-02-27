@@ -15,7 +15,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat.checkSelfPermission
-import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentActivity
 import com.stripe.android.connect.analytics.ComponentAnalyticsService
 import com.stripe.android.connect.analytics.ConnectAnalyticsService

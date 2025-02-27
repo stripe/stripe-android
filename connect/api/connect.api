@@ -317,12 +317,14 @@ public final class com/stripe/android/connect/appearance/fonts/CustomFontSource$
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class com/stripe/android/connect/databinding/StripeNotBuiltYetBinding : androidx/viewbinding/ViewBinding {
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/connect/databinding/StripeNotBuiltYetBinding;
+public final class com/stripe/android/connect/databinding/StripeFullScreenComponentBinding : androidx/viewbinding/ViewBinding {
+	public final field divider Landroid/view/View;
+	public final field toolbar Landroidx/appcompat/widget/Toolbar;
+	public static fun bind (Landroid/view/View;)Lcom/stripe/android/connect/databinding/StripeFullScreenComponentBinding;
 	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroidx/constraintlayout/widget/ConstraintLayout;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/connect/databinding/StripeNotBuiltYetBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/connect/databinding/StripeNotBuiltYetBinding;
+	public fun getRoot ()Landroid/widget/LinearLayout;
+	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/connect/databinding/StripeFullScreenComponentBinding;
+	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/connect/databinding/StripeFullScreenComponentBinding;
 }
 
 public final class com/stripe/android/connect/webview/serialization/IntAsRgbHexStringSerializer : kotlinx/serialization/KSerializer {
