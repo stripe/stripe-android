@@ -111,6 +111,10 @@ internal class FakeEventReporter : EventReporter {
     override fun onUpdatePaymentMethodFailed(selectedBrand: CardBrand, error: Throwable) {
     }
 
+    override fun onSetAsDefaultPaymentMethodSucceeded() {}
+
+    override fun onSetAsDefaultPaymentMethodFailed(error: Throwable) {}
+
     override fun onCannotProperlyReturnFromLinkAndOtherLPMs() {
     }
 

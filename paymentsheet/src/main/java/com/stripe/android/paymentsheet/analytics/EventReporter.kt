@@ -179,6 +179,18 @@ internal interface EventReporter {
     )
 
     /**
+     * The customer has successfully set a payment method as the default
+     */
+    fun onSetAsDefaultPaymentMethodSucceeded()
+
+    /**
+     * The customer has failed to set a payment method as the default
+     */
+    fun onSetAsDefaultPaymentMethodFailed(
+        error: Throwable,
+    )
+
+    /**
      * The customer cannot properly return from Link payments or other LPM payments using
      * browser intents.
      *

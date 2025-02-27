@@ -428,20 +428,23 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     }
 
     class UpdatePaymentOptionSucceeded(
-        selectedBrand: CardBrand,
+        selectedBrand: CardBrand?,
+        setAsDefaultPaymentMethod: Boolean?,
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_update_card"
 
-        override val additionalParams: Map<String, Any?> = mapOf(
-            FIELD_SELECTED_CARD_BRAND to selectedBrand.code
-        )
+        override val additionalParams: Map<String, Any?> = buildMap {
+            selectedBrand?.let { put(FIELD_SELECTED_CARD_BRAND, selectedBrand.code) }
+            setAsDefaultPaymentMethod?.let { put(FIELD_SET_AS_DEFAULT, it) }
+        }
     }
 
     class UpdatePaymentOptionFailed(
-        selectedBrand: CardBrand,
+        selectedBrand: CardBrand?,
+        setAsDefaultPaymentMethod: Boolean?,
         error: Throwable,
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,
@@ -449,10 +452,11 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_update_card_failed"
 
-        override val additionalParams: Map<String, Any?> = mapOf(
-            FIELD_SELECTED_CARD_BRAND to selectedBrand.code,
-            FIELD_ERROR_MESSAGE to error.message,
-        ).plus(ErrorReporter.getAdditionalParamsFromError(error))
+        override val additionalParams: Map<String, Any?> = buildMap {
+            selectedBrand?.let { put(FIELD_SELECTED_CARD_BRAND, selectedBrand.code) }
+            setAsDefaultPaymentMethod?.let { put(FIELD_SET_AS_DEFAULT, it) }
+            put(FIELD_ERROR_MESSAGE, error.message)
+        }.plus(ErrorReporter.getAdditionalParamsFromError(error))
     }
 
     class CannotProperlyReturnFromLinkAndLPMs(
@@ -524,6 +528,8 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_HAS_DEFAULT_PAYMENT_METHOD = "has_default_payment_method"
         const val FIELD_SELECTED_CARD_BRAND = "selected_card_brand"
         const val FIELD_SET_AS_DEFAULT = "set_as_default"
+        const val FIELD_SET_AS_DEFAULT_ENABLED = "set_as_default_enabled"
+        const val FIELD_HAS_DEFAULT_PAYMENT_METHOD = "has_default_payment_method"
         const val FIELD_LINK_CONTEXT = "link_context"
         const val FIELD_EXTERNAL_PAYMENT_METHODS = "external_payment_methods"
         const val FIELD_PAYMENT_METHOD_LAYOUT = "payment_method_layout"

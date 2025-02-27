@@ -1320,6 +1320,7 @@ class PaymentSheetEventTest {
     fun `UpdatePaymentOptionSucceeded event should return expected toString()`() {
         val event = PaymentSheetEvent.UpdatePaymentOptionSucceeded(
             selectedBrand = CardBrand.CartesBancaires,
+            setAsDefaultPaymentMethod = null,
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
@@ -1353,6 +1354,7 @@ class PaymentSheetEventTest {
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
+            setAsDefaultPaymentMethod = null,
         )
         assertThat(
             event.eventName
@@ -1364,6 +1366,68 @@ class PaymentSheetEventTest {
         ).isEqualTo(
             mapOf(
                 "selected_card_brand" to "cartes_bancaires",
+                "error_message" to "No network available!",
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
+                "analytics_value" to "apiError",
+                "request_id" to "request_123",
+                "error_type" to "network_error",
+                "error_code" to "error_123",
+            )
+        )
+    }
+
+    @Test
+    fun `UpdatePaymentOptionSucceeded event with setAsDefaultPaymentMethod should return expected toString()`() {
+        val event = PaymentSheetEvent.UpdatePaymentOptionSucceeded(
+            selectedBrand = null,
+            setAsDefaultPaymentMethod = true,
+            isDeferred = false,
+            linkEnabled = false,
+            googlePaySupported = false,
+        )
+        assertThat(
+            event.eventName
+        ).isEqualTo(
+            "mc_update_card"
+        )
+        assertThat(
+            event.params
+        ).isEqualTo(
+            mapOf(
+                "set_as_default" to true,
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
+            )
+        )
+    }
+
+    @Test
+    fun `UpdatePaymentOptionFailed event with setAsDefaultPaymentMethod should return expected toString()`() {
+        val event = PaymentSheetEvent.UpdatePaymentOptionFailed(
+            selectedBrand = null,
+            error = APIException(
+                StripeError(type = "network_error", code = "error_123"),
+                requestId = "request_123",
+                message = "No network available!"
+            ),
+            isDeferred = false,
+            linkEnabled = false,
+            googlePaySupported = false,
+            setAsDefaultPaymentMethod = true,
+        )
+        assertThat(
+            event.eventName
+        ).isEqualTo(
+            "mc_update_card_failed"
+        )
+        assertThat(
+            event.params
+        ).isEqualTo(
+            mapOf(
+                "set_as_default" to true,
                 "error_message" to "No network available!",
                 "is_decoupled" to false,
                 "link_enabled" to false,

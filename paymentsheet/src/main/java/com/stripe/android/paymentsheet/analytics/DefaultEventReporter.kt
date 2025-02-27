@@ -377,6 +377,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.UpdatePaymentOptionSucceeded(
                 selectedBrand = selectedBrand,
+                setAsDefaultPaymentMethod = null,
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
@@ -391,6 +392,34 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.UpdatePaymentOptionFailed(
                 selectedBrand = selectedBrand,
+                setAsDefaultPaymentMethod = null,
+                error = error,
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
+    }
+
+    override fun onSetAsDefaultPaymentMethodSucceeded() {
+        fireEvent(
+            PaymentSheetEvent.UpdatePaymentOptionSucceeded(
+                selectedBrand = null,
+                setAsDefaultPaymentMethod = true,
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
+    }
+
+    override fun onSetAsDefaultPaymentMethodFailed(
+        error: Throwable,
+    ) {
+        fireEvent(
+            PaymentSheetEvent.UpdatePaymentOptionFailed(
+                selectedBrand = null,
+                setAsDefaultPaymentMethod = true,
                 error = error,
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
