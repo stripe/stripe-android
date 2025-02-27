@@ -81,7 +81,9 @@ internal class StripeComponentControllerImpl<DF, Listener, Props> internal const
     }
 
     override fun show() {
-        dialogFragment.show(activity.supportFragmentManager, tag)
+        if (!dialogFragment.isAdded) {
+            dialogFragment.show(activity.supportFragmentManager, tag)
+        }
     }
 
     override fun dismiss() {

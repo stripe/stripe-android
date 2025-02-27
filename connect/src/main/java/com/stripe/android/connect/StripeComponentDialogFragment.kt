@@ -13,6 +13,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.databinding.StripeFullScreenComponentBinding
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -71,6 +72,7 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
         val binding = StripeFullScreenComponentBinding.inflate(inflater, container, false)
             .also { this._binding = it }
         binding.toolbar.title = title
+        binding.toolbar.setNavigationOnClickListener { dismiss() }
         return binding.root
     }
 
@@ -81,11 +83,7 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
                 launch {
                     viewModel.embeddedComponentManager
                         .collectLatest { embeddedComponentManager ->
-                            embeddedComponentManager?.appearanceFlow?.collectLatest { appearance ->
-                                dialog?.window?.setBackgroundDrawable(
-                                    ColorDrawable(appearance.colors.background ?: Color.WHITE)
-                                )
-                            }
+                            embeddedComponentManager?.appearanceFlow?.collectLatest(::bindAppearance)
                         }
                 }
                 launch {
@@ -121,6 +119,19 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
     override fun onDismiss(dialog: DialogInterface) {
         onDismissListener?.onDismiss()
         super.onDismiss(dialog)
+    }
+
+    private fun bindAppearance(appearance: Appearance) {
+        appearance.colors.background?.let {
+            binding.toolbar.setBackgroundColor(it)
+        }
+        appearance.colors.text?.let {
+            binding.toolbar.setTitleTextColor(it)
+            binding.toolbar.navigationIcon?.setTint(it)
+        }
+        appearance.colors.border?.let {
+            binding.divider.setBackgroundColor(it)
+        }
     }
 
     internal companion object {
