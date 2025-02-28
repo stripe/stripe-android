@@ -813,6 +813,7 @@ class PaymentSheetEventTest {
                 "google_pay_enabled" to false,
                 "selected_lpm" to "external_fawry",
                 "error_message" to "externalPaymentMethodError",
+                "error_code" to null,
             )
         )
     }
@@ -940,6 +941,7 @@ class PaymentSheetEventTest {
                 "google_pay_enabled" to false,
                 "selected_lpm" to "card",
                 "error_message" to "apiError",
+                "error_code" to null,
             )
         )
     }
@@ -975,6 +977,7 @@ class PaymentSheetEventTest {
                 "google_pay_enabled" to false,
                 "selected_lpm" to "google_pay",
                 "error_message" to "apiError",
+                "error_code" to null,
             )
         )
     }
@@ -1011,6 +1014,7 @@ class PaymentSheetEventTest {
                 "selected_lpm" to "link",
                 "error_message" to "apiError",
                 "link_context" to "wallet",
+                "error_code" to null,
             )
         )
     }
@@ -1059,6 +1063,7 @@ class PaymentSheetEventTest {
                 "selected_lpm" to "card",
                 "google_pay_enabled" to false,
                 "error_message" to "apiError",
+                "error_code" to null,
             )
         )
     }
