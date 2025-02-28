@@ -1053,7 +1053,7 @@ class PaymentSheet internal constructor(
                     internal companion object {
                         val defaultLight = FlatWithRadio(
                             separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
-                            separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
+                            separatorColor = StripeThemeDefaults.colorsLight.componentDivider.toArgb(),
                             startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
                             endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
                             topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
@@ -1066,7 +1066,7 @@ class PaymentSheet internal constructor(
 
                         val defaultDark = FlatWithRadio(
                             separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
-                            separatorColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
+                            separatorColor = StripeThemeDefaults.colorsDark.componentDivider.toArgb(),
                             startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
                             endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
                             topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
@@ -1165,7 +1165,7 @@ class PaymentSheet internal constructor(
                     internal companion object {
                         val defaultLight = FlatWithCheckmark(
                             separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
-                            separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
+                            separatorColor = StripeThemeDefaults.colorsLight.componentDivider.toArgb(),
                             startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
                             endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
                             topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
@@ -1178,7 +1178,7 @@ class PaymentSheet internal constructor(
 
                         val defaultDark = FlatWithCheckmark(
                             separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
-                            separatorColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
+                            separatorColor = StripeThemeDefaults.colorsDark.componentDivider.toArgb(),
                             startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
                             endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
                             topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,

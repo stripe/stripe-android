@@ -57,7 +57,7 @@ internal data class EmbeddedAppearance(
     val floatingButtonSpacingDp: Float = 12.0f,
     val topSeparatorEnabled: Boolean = true,
     val bottomSeparatorEnabled: Boolean = true,
-    val separatorColor: Int = Color(0xFF787880).toArgb(),
+    val separatorColor: Int = Color(0x33787880).toArgb(),
     val selectedColor: Int = Color(0xFF007AFF).toArgb(),
     val unselectedColor: Int = Color(0x33787880).toArgb(),
     val checkmarkColor: Int = Color(0xFF007AFF).toArgb()

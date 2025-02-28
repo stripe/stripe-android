@@ -126,7 +126,6 @@ data class PrimaryButtonTypography(
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class EmbeddedFlatStyle(
     val separatorThickness: Float,
-    val separatorColor: Color,
     val separatorInsets: Float,
     val topSeparatorEnabled: Boolean,
     val bottomSeparatorEnabled: Boolean
@@ -233,7 +232,6 @@ object StripeThemeDefaults {
 
     val flat = EmbeddedFlatStyle(
         separatorThickness = 1.0f,
-        separatorColor = Color(0xFF787880),
         separatorInsets = 0.0f,
         topSeparatorEnabled = true,
         bottomSeparatorEnabled = true
