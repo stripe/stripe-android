@@ -157,7 +157,10 @@ internal class DefaultEmbeddedConfirmationHelperTest {
         )
         confirmationStateHolder.state = loadedState
         val confirmationHelper = DefaultEmbeddedConfirmationHelper(
-            confirmationHandler = confirmationHandler,
+            confirmationStarter = EmbeddedConfirmationStarter(
+                confirmationHandler = confirmationHandler,
+                coroutineScope = backgroundScope,
+            ),
             resultCallback = {
                 resultCallbackTurbine.add(it)
             },
