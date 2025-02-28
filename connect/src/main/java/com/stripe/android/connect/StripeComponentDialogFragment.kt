@@ -84,6 +84,8 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
                 }
         }
 
+        // The View scaffolding has been created, but not the component view. The Manager may not be available yet, e.g.
+        // after process death, so wait for the VM to provide it.
         viewLifecycleOwner.lifecycleScope.launch {
             val embeddedComponentManager =
                 viewModel.embeddedComponentManager.filterNotNull().first()
