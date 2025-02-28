@@ -6,6 +6,7 @@ import android.webkit.JsResult
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
+import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.annotation.RequiresApi
@@ -28,6 +29,7 @@ import com.stripe.android.camera.CameraPermissionEnsureable
 import android.Manifest
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
+import android.graphics.Bitmap
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
@@ -56,18 +58,20 @@ internal fun VerificationWebViewScreen(
             factory = { context ->
                 WebView(context).apply {
                     settings.apply {
+                        // Essential JavaScript settings for camera functionality
                         javaScriptEnabled = true
                         domStorageEnabled = true
-                        loadWithOverviewMode = true
                         mediaPlaybackRequiresUserGesture = false
                         
-                        // Enable camera access in WebView
-                        setGeolocationEnabled(false)
-                        databaseEnabled = true
-                        setMediaPlaybackRequiresUserGesture(false)
+                        setSupportZoom(false)
                     }
-
+                    
                     webChromeClient = object : WebChromeClient() {
+                        override fun getDefaultVideoPoster(): Bitmap? {
+                            // Return a transparent bitmap to prevent the default play button overlay while video (camera) is loading
+                            return Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+                        }
+
                         override fun onJsBeforeUnload(
                             view: WebView?,
                             url: String?,
