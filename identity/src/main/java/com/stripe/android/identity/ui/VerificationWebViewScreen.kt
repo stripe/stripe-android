@@ -56,27 +56,73 @@ internal fun VerificationWebViewScreen(
                         javaScriptEnabled = true
                         domStorageEnabled = true
                         loadWithOverviewMode = true
-                        setSupportMultipleWindows(true)
-                        javaScriptCanOpenWindowsAutomatically = true
-
-                        // Enable remote debugging
-                        setWebContentsDebuggingEnabled(true)
                     }
 
-                    // Add WebChromeClient for additional debugging
                     webChromeClient = object : android.webkit.WebChromeClient() {
-                        override fun onConsoleMessage(message: android.webkit.ConsoleMessage): Boolean {
-                            android.util.Log.d("VerificationWebView", "Console: ${message.message()} -- From line ${message.lineNumber()} of ${message.sourceId()}")
+                        override fun onConsoleMessage(consoleMessage: android.webkit.ConsoleMessage): Boolean {
+                            android.util.Log.d(
+                                "VerificationWebView",
+                                consoleMessage.message() + " -- From line " +
+                                    consoleMessage.lineNumber() + " of " +
+                                    consoleMessage.sourceId()
+                            )
                             return true
                         }
 
-                        override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                            android.util.Log.d("VerificationWebView", "Loading progress: $newProgress%")
-                            super.onProgressChanged(view, newProgress)
+                        override fun onJsBeforeUnload(
+                            view: WebView?,
+                            url: String?,
+                            message: String?,
+                            result: android.webkit.JsResult
+                        ): Boolean {
+                            result.confirm()
+                            return true
                         }
                     }
 
                     webViewClient = object : WebViewClient() {
+                        override fun shouldOverrideUrlLoading(
+                            view: WebView,
+                            request: WebResourceRequest
+                        ): Boolean {
+                            val url = request.url.toString()
+                            android.util.Log.d("VerificationWebView", "Attempting to load URL: $url")
+
+                            return when {
+                                // Let WebView handle verification URLs
+                                url.startsWith(verificationPage.fallbackUrl) -> {
+                                    when {
+                                        url.contains("/success") -> {
+                                            identityViewModel.identityAnalyticsRequestFactory.verificationSucceeded(
+                                                isFromFallbackUrl = true
+                                            )
+                                            verificationFlowFinishable.finishWithResult(
+                                                IdentityVerificationSheet.VerificationFlowResult.Completed
+                                            )
+                                            true
+                                        }
+                                        url.contains("/canceled") -> {
+                                            identityViewModel.identityAnalyticsRequestFactory.verificationCanceled(
+                                                isFromFallbackUrl = true
+                                            )
+                                            verificationFlowFinishable.finishWithResult(
+                                                IdentityVerificationSheet.VerificationFlowResult.Canceled
+                                            )
+                                            true
+                                        }
+                                        else -> false
+                                    }
+                                }
+                                // Open all other URLs in Custom Tabs
+                                else -> {
+                                    CustomTabsIntent.Builder()
+                                        .build()
+                                        .launchUrl(context, request.url)
+                                    true
+                                }
+                            }
+                        }
+
                         override fun onReceivedError(
                             view: WebView?,
                             request: WebResourceRequest?,
@@ -94,112 +140,7 @@ internal fun VerificationWebViewScreen(
                                 )
                             )
                         }
-
-                        override fun shouldOverrideUrlLoading(
-                            view: WebView?,
-                            request: WebResourceRequest?
-                        ): Boolean {
-                            request?.url?.let { uri ->
-                                val url = uri.toString()
-                                android.util.Log.d("VerificationWebView", "Attempting to load URL: $url")
-                                android.util.Log.d("VerificationWebView", "Fallback URL is: ${verificationPage.fallbackUrl}")
-
-                                // Always open http/https URLs in Custom Tabs unless they're part of the verification flow
-                                if (uri.scheme?.startsWith("http") == true && !url.startsWith(verificationPage.fallbackUrl)) {
-                                    android.util.Log.d("VerificationWebView", "Opening external URL in Custom Tabs: $url")
-                                    try {
-                                        CustomTabsIntent.Builder()
-                                            .build()
-                                            .launchUrl(context, uri)
-                                        return true
-                                    } catch (e: Exception) {
-                                        android.util.Log.e("VerificationWebView", "Error launching Custom Tabs", e)
-                                    }
-                                }
-
-                                // Handle verification flow URLs
-                                if (url.startsWith(verificationPage.fallbackUrl)) {
-                                    android.util.Log.d("VerificationWebView", "Handling verification URL: $url")
-                                    when {
-                                        url.contains("/success") -> {
-                                            android.util.Log.d("VerificationWebView", "Success URL detected")
-                                            identityViewModel.identityAnalyticsRequestFactory.verificationSucceeded(
-                                                isFromFallbackUrl = true
-                                            )
-                                            verificationFlowFinishable.finishWithResult(
-                                                IdentityVerificationSheet.VerificationFlowResult.Completed
-                                            )
-                                            return true
-                                        }
-                                        url.contains("/canceled") -> {
-                                            android.util.Log.d("VerificationWebView", "Canceled URL detected")
-                                            identityViewModel.identityAnalyticsRequestFactory.verificationCanceled(
-                                                isFromFallbackUrl = true
-                                            )
-                                            verificationFlowFinishable.finishWithResult(
-                                                IdentityVerificationSheet.VerificationFlowResult.Canceled
-                                            )
-                                            return true
-                                        }
-                                    }
-                                }
-                            }
-                            return false
-                        }
-
-                        override fun onPageFinished(view: WebView?, url: String?) {
-                            super.onPageFinished(view, url)
-                            android.util.Log.d("VerificationWebView", "Page finished loading: $url")
-
-                            // Enhanced JavaScript to intercept link clicks and ensure logging works
-                            view?.evaluateJavascript("""
-                                (function() {
-                                    if (window.linkClickHandlerInitialized) return;
-                                    window.linkClickHandlerInitialized = true;
-                                    
-                                    function handleLinkClick(event) {
-                                        var link = event.target.closest('a');
-                                        if (link) {
-                                            var href = link.href;
-                                            console.log('Link clicked:', href);
-                                            // Send message to Android
-                                            window.AndroidInterface.onLinkClicked(href);
-                                        }
-                                    }
-                                    
-                                    // Remove any existing listeners to prevent duplicates
-                                    document.removeEventListener('click', handleLinkClick, true);
-                                    // Add the click listener in the capture phase
-                                    document.addEventListener('click', handleLinkClick, true);
-                                    
-                                    console.log('Link click handler initialized');
-                                })();
-                            """.trimIndent()) { result ->
-                                android.util.Log.d("VerificationWebView", "JavaScript initialization result: $result")
-                            }
-                        }
                     }
-
-                    // Add JavaScript interface
-                    addJavascriptInterface(object : Any() {
-                        @android.webkit.JavascriptInterface
-                        fun onLinkClicked(url: String) {
-                            android.util.Log.d("VerificationWebView", "Link clicked (from JS interface): $url")
-                            // Handle the URL on the main thread
-                            android.os.Handler(android.os.Looper.getMainLooper()).post {
-                                if (url.startsWith("http") && !url.startsWith(verificationPage.fallbackUrl)) {
-                                    try {
-                                        android.util.Log.d("VerificationWebView", "Opening URL in Custom Tabs: $url")
-                                        androidx.browser.customtabs.CustomTabsIntent.Builder()
-                                            .build()
-                                            .launchUrl(context, android.net.Uri.parse(url))
-                                    } catch (e: Exception) {
-                                        android.util.Log.e("VerificationWebView", "Error launching Custom Tabs", e)
-                                    }
-                                }
-                            }
-                        }
-                    }, "AndroidInterface")
                 }
             },
             update = { webView ->
