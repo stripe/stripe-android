@@ -38,7 +38,7 @@ constructor(
     private val cashAppPay: CashAppPay? = null,
     private val swish: Swish? = null,
     val billingDetails: PaymentMethod.BillingDetails? = null,
-    private val allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val allowRedisplay: PaymentMethod.AllowRedisplay? = null,
     private val metadata: Map<String, String>? = null,
     private val productUsage: Set<String> = emptySet(),
 
