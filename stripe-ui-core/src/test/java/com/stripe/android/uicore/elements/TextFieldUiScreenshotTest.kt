@@ -34,7 +34,7 @@ class TextFieldUiScreenshotTest {
                 loading = false,
                 placeholder = null,
                 shouldShowError = false,
-                errorString = null,
+                errorMessage = null,
                 showOptionalLabel = false,
                 trailingIcon = null
             )
@@ -51,7 +51,7 @@ class TextFieldUiScreenshotTest {
                 loading = false,
                 placeholder = null,
                 shouldShowError = false,
-                errorString = null,
+                errorMessage = null,
                 showOptionalLabel = false,
                 trailingIcon = null
             )
@@ -68,7 +68,7 @@ class TextFieldUiScreenshotTest {
                 loading = false,
                 placeholder = null,
                 shouldShowError = true,
-                errorString = null,
+                errorMessage = null,
                 showOptionalLabel = false,
                 trailingIcon = null
             )
@@ -85,7 +85,7 @@ class TextFieldUiScreenshotTest {
                 loading = false,
                 placeholder = null,
                 shouldShowError = false,
-                errorString = null,
+                errorMessage = null,
                 showOptionalLabel = true,
                 trailingIcon = null
             )
@@ -102,7 +102,7 @@ class TextFieldUiScreenshotTest {
                 loading = false,
                 placeholder = null,
                 shouldShowError = false,
-                errorString = null,
+                errorMessage = null,
                 showOptionalLabel = false,
                 trailingIcon = TextFieldIcon.Trailing(
                     idRes = R.drawable.stripe_ic_search,
@@ -122,7 +122,7 @@ class TextFieldUiScreenshotTest {
                 loading = false,
                 placeholder = null,
                 shouldShowError = false,
-                errorString = null,
+                errorMessage = null,
                 showOptionalLabel = false,
                 trailingIcon = TextFieldIcon.Dropdown(
                     title = "Select an option".resolvableString,
@@ -154,7 +154,7 @@ class TextFieldUiScreenshotTest {
                 loading = false,
                 placeholder = null,
                 shouldShowError = false,
-                errorString = null,
+                errorMessage = null,
                 showOptionalLabel = false,
                 trailingIcon = TextFieldIcon.Dropdown(
                     title = "Select an option".resolvableString,
@@ -186,7 +186,7 @@ class TextFieldUiScreenshotTest {
                 loading = false,
                 placeholder = null,
                 shouldShowError = false,
-                errorString = null,
+                errorMessage = null,
                 showOptionalLabel = false,
                 trailingIcon = null
             )
@@ -203,7 +203,7 @@ class TextFieldUiScreenshotTest {
                 loading = false,
                 placeholder = null,
                 shouldShowError = false,
-                errorString = null,
+                errorMessage = null,
                 showOptionalLabel = false,
                 trailingIcon = null
             )
@@ -220,7 +220,7 @@ class TextFieldUiScreenshotTest {
                 loading = false,
                 placeholder = "Search for someone...",
                 shouldShowError = false,
-                errorString = null,
+                errorMessage = null,
                 showOptionalLabel = false,
                 trailingIcon = null
             )
@@ -237,7 +237,7 @@ class TextFieldUiScreenshotTest {
                 loading = false,
                 placeholder = "Search for someone...",
                 shouldShowError = false,
-                errorString = null,
+                errorMessage = null,
                 showOptionalLabel = false,
                 trailingIcon = null
             )

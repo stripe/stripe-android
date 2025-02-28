@@ -239,7 +239,7 @@ fun TextField(
         placeholder = placeHolder,
         trailingIcon = trailingIcon,
         shouldShowError = shouldShowError,
-        errorString = sectionErrorString,
+        errorMessage = sectionErrorString,
         visualTransformation = visualTransformation,
         layoutDirection = textFieldController.layoutDirection,
         keyboardOptions = KeyboardOptions(
@@ -268,7 +268,7 @@ internal fun TextFieldUi(
     trailingIcon: TextFieldIcon?,
     showOptionalLabel: Boolean,
     shouldShowError: Boolean,
-    errorString: String?,
+    errorMessage: String?,
     shouldAnnounceLabel: Boolean = true,
     modifier: Modifier = Modifier,
     visualTransformation: VisualTransformation = VisualTransformation.None,
@@ -314,7 +314,7 @@ internal fun TextFieldUi(
                 }
             },
             isError = shouldShowError,
-            errorMessage = errorString,
+            errorMessage = errorMessage,
             visualTransformation = visualTransformation,
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
