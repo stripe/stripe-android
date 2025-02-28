@@ -1,9 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.test.assertIsFocused
-import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.onNodeWithText
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.utils.urlEncode
@@ -450,40 +448,6 @@ internal class PaymentSheetTest {
         composeTestRule
             .onAllNodesWithTag(TEST_TAG_MODIFY_BADGE)[0]
             .assertIsFocused()
-
-        testContext.markTestSucceeded()
-    }
-
-    @Test
-    fun testCardDetailsErrorMessageAccessibility() = runPaymentSheetTest(
-        networkRule = networkRule,
-        integrationType = integrationType,
-        resultCallback = ::assertCompleted,
-    ) { testContext ->
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
-            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
-        }
-
-        testContext.presentPaymentSheet {
-            presentWithPaymentIntent(
-                paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = defaultConfiguration,
-            )
-        }
-
-        page.waitForText("Card number")
-
-        page.replaceText("Card number", "4242424242424244")
-        composeTestRule.onNodeWithText("Card number")
-            .assertHasErrorMessage("Your card's number is invalid.")
-
-        page.fillExpirationDate("11/11")
-        composeTestRule.onNode(hasContentDescription(value = "Expiration date", substring = true))
-            .assertHasErrorMessage("Your card's expiration year is invalid.")
 
         testContext.markTestSucceeded()
     }

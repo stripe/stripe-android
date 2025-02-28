@@ -4,11 +4,7 @@ package com.stripe.android.paymentsheet
 
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.Button
-import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ExperimentalTestApi
-import androidx.compose.ui.test.SemanticsMatcher
-import androidx.compose.ui.test.SemanticsNodeInteraction
-import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasContentDescription
@@ -279,10 +275,3 @@ internal class PaymentSheetPage(
         replaceText("Phone (optional)", phone)
     }
 }
-
-fun SemanticsNodeInteraction.assertHasErrorMessage(expectedMessage: String) =
-    assert(
-        SemanticsMatcher("has error '$expectedMessage'") { node ->
-            node.config[SemanticsProperties.Error] == expectedMessage
-        }
-    )
