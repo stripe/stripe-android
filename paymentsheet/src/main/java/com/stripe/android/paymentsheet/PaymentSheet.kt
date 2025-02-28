@@ -1046,6 +1046,7 @@ class PaymentSheet internal constructor(
                     internal fun getColors(isDark: Boolean): Colors = if (isDark) colorsDark else colorsLight
 
                     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                    @ExperimentalEmbeddedPaymentElementApi
                     @Parcelize
                     @Poko
                     class Colors(
@@ -1174,6 +1175,7 @@ class PaymentSheet internal constructor(
                     )
 
                     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                    @ExperimentalEmbeddedPaymentElementApi
                     @Parcelize
                     @Poko
                     class Colors(
