@@ -231,6 +231,36 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         )
     }
 
+    /**
+     * Present the Google Pay UI without showing pricing labels.
+     * Do not use this function when the transaction is processed in an EEA country.
+     *
+     * An [IllegalStateException] will be thrown if Google Pay is not available or ready for usage.
+     *
+     * @param currencyCode ISO 4217 alphabetic currency code. (e.g. "USD", "EUR")
+     * @param transactionId A unique ID that identifies a transaction attempt. Merchants may use an
+     * existing ID or generate a specific one for Google Pay transaction attempts.
+     * This field is required when you send callbacks to the Google Transaction Events API.
+     */
+    @JvmOverloads
+    fun presentWithUnknownPrice(
+        currencyCode: String,
+        transactionId: String? = null
+    ) {
+        check(skipReadyCheck || isReady) {
+            "present() may only be called when Google Pay is available on this device."
+        }
+
+        activityResultLauncher.launch(
+            GooglePayPaymentMethodLauncherContractV2.Args(
+                config = config,
+                currencyCode = currencyCode,
+                transactionId = transactionId,
+                cardBrandFilter = cardBrandFilter
+            )
+        )
+    }
+
     @Parcelize
     data class Config @JvmOverloads constructor(
         val environment: GooglePayEnvironment,
