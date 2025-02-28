@@ -819,22 +819,10 @@ class PaymentSheetEventTest {
 
     @Test
     fun `New payment method failure event should return expected event`() {
-        val newPMEvent = PaymentSheetEvent.Payment(
-            mode = EventReporter.Mode.Complete,
-            paymentSelection = PaymentSelection.New.Card(
-                PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                mock(),
-                mock()
-            ),
-            duration = 1.milliseconds,
+        val newPMEvent = newCardPaymentMethod(
             result = PaymentSheetEvent.Payment.Result.Failure(
                 error = PaymentSheetConfirmationError.Stripe(APIException()),
-            ),
-            currency = "usd",
-            isDeferred = false,
-            linkEnabled = false,
-            googlePaySupported = false,
-            deferredIntentConfirmationType = null,
+            )
         )
         assertThat(
             newPMEvent.eventName
@@ -852,6 +840,71 @@ class PaymentSheetEventTest {
                 "google_pay_enabled" to false,
                 "selected_lpm" to "card",
                 "error_message" to "apiError",
+                "error_code" to null,
+            )
+        )
+    }
+
+    @Test
+    fun `New payment method failure setAsDefault true event should return expected event`() {
+        val newPMEvent = newCardPaymentMethod(
+            paymentMethodExtraParams = PaymentMethodExtraParams.Card(
+                setAsDefault = true
+            ),
+            result = PaymentSheetEvent.Payment.Result.Failure(
+                error = PaymentSheetConfirmationError.Stripe(APIException()),
+            )
+        )
+        assertThat(
+            newPMEvent.eventName
+        ).isEqualTo(
+            "mc_complete_payment_newpm_failure"
+        )
+        assertThat(
+            newPMEvent.params
+        ).isEqualTo(
+            mapOf(
+                "currency" to "usd",
+                "duration" to 0.001F,
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
+                "selected_lpm" to "card",
+                "error_message" to "apiError",
+                "error_code" to null,
+                "set_as_default" to true,
+            )
+        )
+    }
+
+    @Test
+    fun `New payment method failure setAsDefault false event should return expected event`() {
+        val newPMEvent = newCardPaymentMethod(
+            paymentMethodExtraParams = PaymentMethodExtraParams.Card(
+                setAsDefault = false
+            ),
+            result = PaymentSheetEvent.Payment.Result.Failure(
+                error = PaymentSheetConfirmationError.Stripe(APIException()),
+            )
+        )
+        assertThat(
+            newPMEvent.eventName
+        ).isEqualTo(
+            "mc_complete_payment_newpm_failure"
+        )
+        assertThat(
+            newPMEvent.params
+        ).isEqualTo(
+            mapOf(
+                "currency" to "usd",
+                "duration" to 0.001F,
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
+                "selected_lpm" to "card",
+                "error_message" to "apiError",
+                "error_code" to null,
+                "set_as_default" to false,
             )
         )
     }
