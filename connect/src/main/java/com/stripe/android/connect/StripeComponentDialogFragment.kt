@@ -29,11 +29,15 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
 
     protected val title: String? get() = arguments?.getString(ARG_TITLE)
 
-    protected val props: Props
+    protected val props: Props?
         @Suppress("DEPRECATION")
-        get() = arguments?.getParcelable(ARG_PROPS)!!
+        get() = arguments?.getParcelable(ARG_PROPS)
 
     protected val cacheKey: String? get() = arguments?.getString(ARG_CACHE_KEY)
+
+    protected abstract fun createComponentView(
+        embeddedComponentManager: EmbeddedComponentManager
+    ): ComponentView
 
     private var _binding: StripeFullScreenComponentBinding? = null
     private val binding get() = _binding!!
@@ -53,10 +57,6 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
         }
 
     var onDismissListener: StripeComponentController.OnDismissListener? = null
-
-    protected abstract fun createComponentView(
-        embeddedComponentManager: EmbeddedComponentManager
-    ): ComponentView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
