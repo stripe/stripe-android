@@ -18,6 +18,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.example.databinding.CreateCardPaymentMethodActivityBinding
 import com.stripe.example.databinding.PaymentMethodItemBinding
 
+
 class CreateCardPaymentMethodActivity : AppCompatActivity() {
     private val viewBinding: CreateCardPaymentMethodActivityBinding by lazy {
         CreateCardPaymentMethodActivityBinding.inflate(layoutInflater)
