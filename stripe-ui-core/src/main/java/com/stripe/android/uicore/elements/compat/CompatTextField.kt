@@ -101,6 +101,8 @@ import androidx.compose.ui.R as ComposeUiR
  * container
  * @param isError indicates if the text field's current value is in error state. If set to
  * true, the label, bottom indicator and trailing icon by default will be displayed in error color
+ * @param errorMessage defines what would be announced in TalkBack when the text field is in error.
+ * If not provided, a default error message will be used.
  * @param visualTransformation transforms the visual representation of the input [value].
  * For example, you can use
  * [PasswordVisualTransformation][androidx.compose.ui.text.input.PasswordVisualTransformation] to
@@ -140,7 +142,7 @@ internal fun CompatTextField(
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
     isError: Boolean = false,
-    errorString: String?,
+    errorMessage: String?,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions(),
@@ -162,7 +164,7 @@ internal fun CompatTextField(
         value = value,
         modifier = modifier
             .indicatorLine(enabled, isError, interactionSource, colors)
-            .errorSemanticsWithDefault(isError, errorString)
+            .errorSemanticsWithDefault(isError, errorMessage)
             .defaultMinSize(
                 minWidth = TextFieldDefaults.MinWidth,
                 minHeight = TextFieldDefaults.MinHeight

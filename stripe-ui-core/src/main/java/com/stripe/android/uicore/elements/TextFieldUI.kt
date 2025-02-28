@@ -314,7 +314,7 @@ internal fun TextFieldUi(
                 }
             },
             isError = shouldShowError,
-            errorString = errorString,
+            errorMessage = errorString,
             visualTransformation = visualTransformation,
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
