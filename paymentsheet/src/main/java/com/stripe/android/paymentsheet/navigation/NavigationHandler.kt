@@ -86,7 +86,7 @@ internal class NavigationHandler<T : Any>(
         backStack.update { screens ->
             val modifiableScreens = screens.toMutableList()
 
-            val lastScreen = modifiableScreens.removeLast()
+            val lastScreen = modifiableScreens.removeAt(modifiableScreens.lastIndex)
 
             lastScreen.onClose()
 
