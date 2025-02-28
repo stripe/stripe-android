@@ -20,6 +20,8 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.FormPage
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.ViewActionRecorder
+import com.stripe.android.paymentsheet.assertHasErrorMessage
+import com.stripe.android.paymentsheet.assertHasNoErrorMessage
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
 import com.stripe.android.ui.core.Amount
@@ -88,6 +90,24 @@ internal class VerticalModeFormUITest {
         formPage.headerIcon.assertExists()
         formPage.title.assertExists()
         formPage.title.assert(hasText("Klarna"))
+    }
+
+    @Test
+    fun testCardNumberErrorMessage() = runScenario(createCardState(customerHasSavedPaymentMethods = true)) {
+        formPage.cardNumber.assertHasNoErrorMessage()
+        formPage.fillCardNumber("4242424242424244")
+        formPage.cardNumber.assertHasErrorMessage("Your card's number is invalid.")
+        formPage.fillCardNumber("4242424242424242")
+        formPage.cardNumber.assertHasNoErrorMessage()
+    }
+
+    @Test
+    fun testExpirationDateErrorMessage() = runScenario(createCardState(customerHasSavedPaymentMethods = true)) {
+        formPage.expirationDate.assertHasNoErrorMessage()
+        formPage.expirationDate.performTextReplacement("1111")
+        formPage.expirationDate.assertHasErrorMessage("Your card's expiration year is invalid.")
+        formPage.expirationDate.performTextReplacement("1151")
+        formPage.expirationDate.assertHasNoErrorMessage()
     }
 
     private fun runScenario(
