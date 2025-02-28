@@ -31,13 +31,14 @@ class PayoutsExampleActivity : BasicExampleComponentActivity() {
                     initialize(
                         embeddedComponentManager = embeddedComponentManager,
                         listener = listener,
-                        props = EmptyProps
+                        props = EmptyProps,
                     )
                 }
         } else {
             embeddedComponentManager.createPayoutsView(
                 context = context,
                 listener = listener,
+                cacheKey = "PayoutsExampleActivity"
             )
         }
     }

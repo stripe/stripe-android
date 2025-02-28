@@ -19,6 +19,7 @@ import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.IncentiveEligibilitySession
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.model.SignUpParams
@@ -186,13 +187,18 @@ internal class LinkApiRepository @Inject constructor(
         id: String,
         last4: String,
         consumerSessionClientSecret: String,
+        allowRedisplay: PaymentMethod.AllowRedisplay?,
     ): Result<LinkPaymentDetails> = withContext(workContext) {
+        val allowRedisplayParams = allowRedisplay?.let {
+            mapOf(ALLOW_REDISPLAY_PARAM to it.value)
+        } ?: emptyMap()
+
         stripeRepository.sharePaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
             id = id,
             extraParams = mapOf(
                 "payment_method_options" to extraConfirmationParams(paymentMethodCreateParams.toParamMap()),
-            ),
+            ) + allowRedisplayParams,
             requestOptions = buildRequestOptions(),
         ).onFailure {
             errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_SHARE_CARD_FAILURE, StripeException.create(it))
@@ -350,5 +356,6 @@ internal class LinkApiRepository @Inject constructor(
 
     private companion object {
         const val REQUEST_SURFACE = "android_payment_element"
+        const val ALLOW_REDISPLAY_PARAM = "allow_redisplay"
     }
 }

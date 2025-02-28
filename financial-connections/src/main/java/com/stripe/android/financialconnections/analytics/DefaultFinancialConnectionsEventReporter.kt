@@ -4,7 +4,6 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.utils.filterNotNullValues
 import kotlinx.coroutines.CoroutineScope
@@ -18,17 +17,12 @@ internal class DefaultFinancialConnectionsEventReporter @Inject constructor(
     @IOContext private val workContext: CoroutineContext
 ) : FinancialConnectionsEventReporter {
 
-    override fun onPresented(configuration: FinancialConnectionsSheet.Configuration) {
-        fireEvent(
-            Event(
-                Event.Code.SheetPresented,
-                mapOf(PARAM_CLIENT_SECRET to configuration.financialConnectionsSessionClientSecret)
-            )
-        )
+    override fun onPresented() {
+        fireEvent(Event(Event.Code.SheetPresented))
     }
 
     override fun onResult(
-        configuration: FinancialConnectionsSheet.Configuration,
+        sessionId: String,
         financialConnectionsSheetResult: FinancialConnectionsSheetActivityResult
     ) {
         val event = when (financialConnectionsSheetResult) {
@@ -36,7 +30,7 @@ internal class DefaultFinancialConnectionsEventReporter @Inject constructor(
                 Event(
                     Event.Code.SheetClosed,
                     mapOf(
-                        PARAM_CLIENT_SECRET to configuration.financialConnectionsSessionClientSecret,
+                        PARAM_SESSION_ID to sessionId,
                         PARAM_SESSION_RESULT to "completed"
                     )
                 )
@@ -45,7 +39,7 @@ internal class DefaultFinancialConnectionsEventReporter @Inject constructor(
                 Event(
                     Event.Code.SheetClosed,
                     mapOf(
-                        PARAM_CLIENT_SECRET to configuration.financialConnectionsSessionClientSecret,
+                        PARAM_SESSION_ID to sessionId,
                         PARAM_SESSION_RESULT to "cancelled"
                     )
                 )
@@ -54,7 +48,7 @@ internal class DefaultFinancialConnectionsEventReporter @Inject constructor(
                 Event(
                     Event.Code.SheetFailed,
                     mapOf(
-                        PARAM_CLIENT_SECRET to configuration.financialConnectionsSessionClientSecret,
+                        PARAM_SESSION_ID to sessionId,
                         PARAM_SESSION_RESULT to "failure"
                     ).plus(
                         financialConnectionsSheetResult.error
@@ -102,7 +96,7 @@ internal class DefaultFinancialConnectionsEventReporter @Inject constructor(
     }
 
     internal companion object {
-        const val PARAM_CLIENT_SECRET = "las_client_secret"
+        const val PARAM_SESSION_ID = "las_id"
         const val PARAM_SESSION_RESULT = "session_result"
     }
 }

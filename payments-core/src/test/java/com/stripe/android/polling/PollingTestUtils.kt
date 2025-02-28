@@ -50,7 +50,7 @@ private class FakeStripeRepository(
         options: ApiRequest.Options,
         expandFields: List<String>
     ): Result<PaymentIntent> {
-        val intentStatus = queue.removeFirst()
+        val intentStatus = queue.removeAt(0)
         val paymentIntent = PaymentIntentFactory.create(status = intentStatus)
         return Result.success(paymentIntent)
     }

@@ -26,7 +26,7 @@ import kotlinx.coroutines.flow.asStateFlow
 
 @OptIn(ExperimentalComposeUiApi::class)
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-interface TextFieldController : InputController, SectionFieldComposable {
+interface TextFieldController : InputController, SectionFieldComposable, SectionFieldErrorController {
     fun onValueChange(displayFormatted: String): TextFieldState?
     fun onFocusChange(newHasFocus: Boolean)
     fun onDropdownItemClicked(item: TextFieldIcon.Dropdown.Item) {}
@@ -131,7 +131,7 @@ class SimpleTextFieldController(
     private val overrideContentDescriptionProvider: ((fieldValue: String) -> ResolvableString)? = null,
     private val shouldAnnounceLabel: Boolean = true,
     private val shouldAnnounceFieldValue: Boolean = true
-) : TextFieldController, SectionFieldErrorController {
+) : TextFieldController {
     override val trailingIcon: StateFlow<TextFieldIcon?> = textFieldConfig.trailingIcon
     override val capitalization: KeyboardCapitalization = textFieldConfig.capitalization
     override val keyboardType: KeyboardType = textFieldConfig.keyboard

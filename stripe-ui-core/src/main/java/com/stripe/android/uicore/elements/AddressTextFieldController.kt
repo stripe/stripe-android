@@ -25,7 +25,7 @@ class AddressTextFieldController(
     private val config: TextFieldConfig,
     private val onNavigation: (() -> Unit)? = null,
     override val initialValue: String? = null
-) : TextFieldController, InputController, SectionFieldErrorController, SectionFieldComposable {
+) : TextFieldController, InputController, SectionFieldComposable {
 
     init {
         initialValue?.let { onRawValueChange(it) }
