@@ -642,6 +642,7 @@ internal class CardMultilineWidgetTest {
 
         fullGroup.expiryDateEditText.append("12")
         fullGroup.expiryDateEditText.append("50")
+        idleLooper()
         verify(fullCardListener).onExpirationComplete()
         verify(fullCardListener).onFocusChange(CardInputListener.FocusField.Cvc)
         assertThat(fullGroup.cvcEditText.hasFocus())
@@ -649,6 +650,7 @@ internal class CardMultilineWidgetTest {
 
         noZipGroup.expiryDateEditText.append("12")
         noZipGroup.expiryDateEditText.append("50")
+        idleLooper()
         verify(noZipCardListener).onExpirationComplete()
         verify(noZipCardListener).onFocusChange(CardInputListener.FocusField.Cvc)
         assertThat(noZipGroup.cvcEditText.hasFocus())
@@ -667,6 +669,7 @@ internal class CardMultilineWidgetTest {
         fullGroup.expiryDateEditText.append("12")
         fullGroup.expiryDateEditText.append("50")
         fullGroup.cvcEditText.append(CVC_VALUE_COMMON)
+        idleLooper()
         verify(fullCardListener).onCvcComplete()
         verify(fullCardListener).onFocusChange(CardInputListener.FocusField.PostalCode)
         assertThat(fullGroup.postalCodeEditText.hasFocus())
@@ -676,6 +679,7 @@ internal class CardMultilineWidgetTest {
         noZipGroup.expiryDateEditText.append("12")
         noZipGroup.expiryDateEditText.append("50")
         noZipGroup.cvcEditText.append(CVC_VALUE_COMMON)
+        idleLooper()
         verify(noZipCardListener).onCvcComplete()
         verify(noZipCardListener, never()).onFocusChange(CardInputListener.FocusField.PostalCode)
         assertThat(noZipGroup.cvcEditText.hasFocus())
@@ -689,6 +693,7 @@ internal class CardMultilineWidgetTest {
     fun deleteWhenEmpty_fromExpiry_withPostalCode_shiftsToCardNumber() = runCardMultilineWidgetTest {
         cardMultilineWidget.setCardInputListener(fullCardListener)
         fullGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
+        idleLooper()
 
         assertThat(fullGroup.expiryDateEditText.hasFocus())
             .isTrue()
@@ -709,6 +714,7 @@ internal class CardMultilineWidgetTest {
     fun deleteWhenEmpty_fromExpiry_withoutPostalCode_shiftsToCardNumber() = runCardMultilineWidgetTest {
         noZipCardMultilineWidget.setCardInputListener(noZipCardListener)
         noZipGroup.cardNumberEditText.setText(VISA_WITH_SPACES)
+        idleLooper()
 
         assertThat(noZipGroup.expiryDateEditText.hasFocus())
             .isTrue()
@@ -730,6 +736,7 @@ internal class CardMultilineWidgetTest {
 
         fullGroup.expiryDateEditText.append("12")
         fullGroup.expiryDateEditText.append("50")
+        idleLooper()
 
         assertThat(fullGroup.cvcEditText.hasFocus())
             .isTrue()
@@ -743,6 +750,7 @@ internal class CardMultilineWidgetTest {
 
         noZipGroup.expiryDateEditText.append("12")
         noZipGroup.expiryDateEditText.append("50")
+        idleLooper()
 
         assertThat(noZipGroup.cvcEditText.hasFocus())
             .isTrue()
