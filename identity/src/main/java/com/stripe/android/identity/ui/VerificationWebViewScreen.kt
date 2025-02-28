@@ -24,6 +24,10 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Com
 import com.stripe.android.identity.navigation.navigateToErrorScreenWithDefaultValues
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import com.stripe.android.camera.CameraPermissionEnsureable
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
@@ -55,6 +59,12 @@ internal fun VerificationWebViewScreen(
                         javaScriptEnabled = true
                         domStorageEnabled = true
                         loadWithOverviewMode = true
+                        mediaPlaybackRequiresUserGesture = false
+                        
+                        // Enable camera access in WebView
+                        setGeolocationEnabled(false)
+                        databaseEnabled = true
+                        setMediaPlaybackRequiresUserGesture(false)
                     }
 
                     webChromeClient = object : WebChromeClient() {
@@ -66,6 +76,32 @@ internal fun VerificationWebViewScreen(
                         ): Boolean {
                             result.confirm()
                             return true
+                        }
+
+                        override fun onPermissionRequest(request: android.webkit.PermissionRequest?) {
+                            request?.let { permissionRequest ->
+                                val requestedResources = permissionRequest.resources
+                                if (requestedResources.contains(android.webkit.PermissionRequest.RESOURCE_VIDEO_CAPTURE)) {
+                                    val cameraPermissionEnsureable = context as? CameraPermissionEnsureable
+                                    if (ContextCompat.checkSelfPermission(
+                                            context,
+                                            Manifest.permission.CAMERA
+                                        ) == PackageManager.PERMISSION_GRANTED) {
+                                        permissionRequest.grant(arrayOf(android.webkit.PermissionRequest.RESOURCE_VIDEO_CAPTURE))
+                                    } else {
+                                        cameraPermissionEnsureable?.ensureCameraPermission(
+                                            onCameraReady = {
+                                                permissionRequest.grant(arrayOf(android.webkit.PermissionRequest.RESOURCE_VIDEO_CAPTURE))
+                                            },
+                                            onUserDeniedCameraPermission = {
+                                                permissionRequest.deny()
+                                            }
+                                        )
+                                    }
+                                } else {
+                                    permissionRequest.deny()
+                                }
+                            }
                         }
                     }
 

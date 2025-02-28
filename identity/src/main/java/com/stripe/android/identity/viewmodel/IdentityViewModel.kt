@@ -239,6 +239,8 @@ internal class IdentityViewModel(
     private val _isTfLiteInitialized: MutableLiveData<Boolean> = MutableLiveData(false)
     val isTfLiteInitialized: LiveData<Boolean> = _isTfLiteInitialized
 
+    var pendingPermissionRequest: android.webkit.PermissionRequest? = null
+
     fun initializeTfLite() {
         viewModelScope.launch(workContext) {
             tfLiteInitializer.initialize(
@@ -1758,6 +1760,13 @@ internal class IdentityViewModel(
                 }
             }
         ] = this.value
+    }
+
+    fun onCameraPermissionGranted() {
+        pendingPermissionRequest?.let { request ->
+            request.grant(arrayOf(android.webkit.PermissionRequest.RESOURCE_VIDEO_CAPTURE))
+            pendingPermissionRequest = null
+        }
     }
 
     internal class IdentityViewModelFactory(
