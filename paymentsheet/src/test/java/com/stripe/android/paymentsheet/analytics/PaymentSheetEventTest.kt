@@ -406,7 +406,7 @@ class PaymentSheetEventTest {
     @Test
     fun `LoadSucceeded event with setAsDefaultPaymentMethod should return expected toString()`() {
         val event = createLoadSucceededEvent(
-            paymentSelection = PaymentSelection.GooglePay,
+            paymentSelection = null,
             orderedLpms = listOf("card", "klarna"),
             hasDefaultPaymentMethod = false,
             setAsDefaultEnabled = true,
