@@ -1,30 +1,29 @@
 package com.stripe.android.identity.ui
 
 import android.annotation.SuppressLint
-import android.content.Intent
-import android.net.Uri
+import android.os.Build
+import android.webkit.JsResult
+import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
-import android.webkit.WebSettings
 import android.webkit.WebView
-import android.webkit.WebView.setWebContentsDebuggingEnabled
 import android.webkit.WebViewClient
+import androidx.annotation.RequiresApi
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavController
-import com.stripe.android.identity.IdentityVerificationSheet
+import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
 import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_WEB_VIEW
 import com.stripe.android.identity.navigation.navigateToErrorScreenWithDefaultValues
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.viewmodel.IdentityViewModel
-import androidx.browser.customtabs.CustomTabsIntent
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
@@ -58,22 +57,12 @@ internal fun VerificationWebViewScreen(
                         loadWithOverviewMode = true
                     }
 
-                    webChromeClient = object : android.webkit.WebChromeClient() {
-                        override fun onConsoleMessage(consoleMessage: android.webkit.ConsoleMessage): Boolean {
-                            android.util.Log.d(
-                                "VerificationWebView",
-                                consoleMessage.message() + " -- From line " +
-                                    consoleMessage.lineNumber() + " of " +
-                                    consoleMessage.sourceId()
-                            )
-                            return true
-                        }
-
+                    webChromeClient = object : WebChromeClient() {
                         override fun onJsBeforeUnload(
                             view: WebView?,
                             url: String?,
                             message: String?,
-                            result: android.webkit.JsResult
+                            result: JsResult
                         ): Boolean {
                             result.confirm()
                             return true
@@ -86,34 +75,29 @@ internal fun VerificationWebViewScreen(
                             request: WebResourceRequest
                         ): Boolean {
                             val url = request.url.toString()
-                            android.util.Log.d("VerificationWebView", "Attempting to load URL: $url")
-
+                            
                             return when {
-                                // Let WebView handle verification URLs
                                 url.startsWith(verificationPage.fallbackUrl) -> {
                                     when {
                                         url.contains("/success") -> {
-                                            identityViewModel.identityAnalyticsRequestFactory.verificationSucceeded(
-                                                isFromFallbackUrl = true
-                                            )
+                                            identityViewModel.identityAnalyticsRequestFactory
+                                                .verificationSucceeded(isFromFallbackUrl = true)
                                             verificationFlowFinishable.finishWithResult(
-                                                IdentityVerificationSheet.VerificationFlowResult.Completed
+                                                VerificationFlowResult.Completed
                                             )
                                             true
                                         }
                                         url.contains("/canceled") -> {
-                                            identityViewModel.identityAnalyticsRequestFactory.verificationCanceled(
-                                                isFromFallbackUrl = true
-                                            )
+                                            identityViewModel.identityAnalyticsRequestFactory
+                                                .verificationCanceled(isFromFallbackUrl = true)
                                             verificationFlowFinishable.finishWithResult(
-                                                IdentityVerificationSheet.VerificationFlowResult.Canceled
+                                                VerificationFlowResult.Canceled
                                             )
                                             true
                                         }
                                         else -> false
                                     }
                                 }
-                                // Open all other URLs in Custom Tabs
                                 else -> {
                                     CustomTabsIntent.Builder()
                                         .build()
@@ -123,28 +107,26 @@ internal fun VerificationWebViewScreen(
                             }
                         }
 
+                        @RequiresApi(Build.VERSION_CODES.M)
                         override fun onReceivedError(
                             view: WebView?,
                             request: WebResourceRequest?,
                             error: WebResourceError?
                         ) {
                             super.onReceivedError(view, request, error)
-                            android.util.Log.e("VerificationWebView", "Error loading URL: ${request?.url}, error: ${error?.description}")
+                            val errorMessage = "WebView error: ${error?.description}"
                             identityViewModel.identityAnalyticsRequestFactory.verificationFailed(
                                 isFromFallbackUrl = true,
-                                throwable = IllegalStateException("WebView error: ${error?.description}")
+                                throwable = IllegalStateException(errorMessage)
                             )
                             verificationFlowFinishable.finishWithResult(
-                                IdentityVerificationSheet.VerificationFlowResult.Failed(
-                                    IllegalStateException("WebView error: ${error?.description}")
-                                )
+                                VerificationFlowResult.Failed(IllegalStateException(errorMessage))
                             )
                         }
                     }
                 }
             },
             update = { webView ->
-                android.util.Log.d("VerificationWebView", "Loading initial URL: ${verificationPage.fallbackUrl}")
                 webView.clearCache(true)
                 webView.loadUrl(verificationPage.fallbackUrl)
             }
