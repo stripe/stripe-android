@@ -383,14 +383,9 @@ class PaymentSheetEventTest {
 
     @Test
     fun `LoadSucceeded event should return expected toString()`() {
-        val event = PaymentSheetEvent.LoadSucceeded(
-            isDeferred = false,
-            linkMode = null,
-            googlePaySupported = false,
-            duration = (5L).seconds,
+        val event = createLoadSucceededEvent(
             paymentSelection = null,
-            initializationMode = paymentIntentInitializationMode,
-            orderedLpms = listOf("card", "klarna")
+            orderedLpms = listOf("card", "klarna"),
         )
 
         assertThat(event.eventName).isEqualTo("mc_load_succeeded")
@@ -409,15 +404,35 @@ class PaymentSheetEventTest {
     }
 
     @Test
+    fun `LoadSucceeded event with setAsDefaultPaymentMethod should return expected toString()`() {
+        val event = createLoadSucceededEvent(
+            paymentSelection = null,
+            orderedLpms = listOf("card", "klarna"),
+            hasDefaultPaymentMethod = false,
+            setAsDefaultEnabled = true,
+        )
+
+        assertThat(event.eventName).isEqualTo("mc_load_succeeded")
+        assertThat(event.params).isEqualTo(
+            mapOf(
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
+                "duration" to 5f,
+                "selected_lpm" to "none",
+                "intent_type" to "payment_intent",
+                "ordered_lpms" to "card,klarna",
+                "require_cvc_recollection" to false,
+                "set_as_default_enabled" to true,
+                "has_default_payment_method" to false,
+            )
+        )
+    }
+
+    @Test
     fun `LoadSucceeded event should return 'google_pay' for selected lpm when saved selection is Google Pay`() {
-        val event = PaymentSheetEvent.LoadSucceeded(
-            isDeferred = false,
-            linkMode = null,
-            googlePaySupported = false,
-            duration = (5L).seconds,
+        val event = createLoadSucceededEvent(
             paymentSelection = PaymentSelection.GooglePay,
-            initializationMode = paymentIntentInitializationMode,
-            orderedLpms = listOf("card"),
         )
 
         assertThat(event.params).containsEntry("selected_lpm", "google_pay")
@@ -425,14 +440,8 @@ class PaymentSheetEventTest {
 
     @Test
     fun `LoadSucceeded event should return 'link' for selected lpm when saved selection is Link`() {
-        val event = PaymentSheetEvent.LoadSucceeded(
-            isDeferred = false,
-            linkMode = null,
-            googlePaySupported = false,
-            duration = (5L).seconds,
+        val event = createLoadSucceededEvent(
             paymentSelection = PaymentSelection.Link(),
-            initializationMode = paymentIntentInitializationMode,
-            orderedLpms = listOf("card"),
         )
 
         assertThat(event.params).containsEntry("selected_lpm", "link")
@@ -440,16 +449,10 @@ class PaymentSheetEventTest {
 
     @Test
     fun `LoadSucceeded event should return id for selected lpm when saved selection is a payment method`() {
-        val event = PaymentSheetEvent.LoadSucceeded(
-            isDeferred = false,
-            linkMode = null,
-            googlePaySupported = false,
-            duration = (5L).seconds,
+        val event = createLoadSucceededEvent(
             paymentSelection = PaymentSelection.Saved(
                 paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD
             ),
-            initializationMode = paymentIntentInitializationMode,
-            orderedLpms = listOf("card"),
         )
 
         assertThat(event.params).containsEntry("selected_lpm", "sepa_debit")
@@ -1529,6 +1532,8 @@ class PaymentSheetEventTest {
         paymentSelection: PaymentSelection? = null,
         initializationMode: PaymentElementLoader.InitializationMode = paymentIntentInitializationMode,
         orderedLpms: List<String> = listOf("card"),
+        hasDefaultPaymentMethod: Boolean? = null,
+        setAsDefaultEnabled: Boolean? = null,
     ): PaymentSheetEvent.LoadSucceeded {
         return PaymentSheetEvent.LoadSucceeded(
             isDeferred = isDeferred,
@@ -1538,6 +1543,8 @@ class PaymentSheetEventTest {
             paymentSelection = paymentSelection,
             initializationMode = initializationMode,
             orderedLpms = orderedLpms,
+            hasDefaultPaymentMethod = hasDefaultPaymentMethod,
+            setAsDefaultEnabled = setAsDefaultEnabled,
         )
     }
 }
