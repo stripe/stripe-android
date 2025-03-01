@@ -6,6 +6,7 @@ import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
+import com.stripe.android.link.injection.ApplicationIdModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.BindsInstance

@@ -6,8 +6,7 @@ import com.stripe.android.core.BuildConfig
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object FeatureFlags {
     // Add any feature flags here
-    val nativeLinkEnabled = FeatureFlag("Native Link")
-    val nativeLinkAttestationEnabled = FeatureFlag("Native Link Attestation")
+    val suppressNativeLink = FeatureFlag("Suppress Native Link")
     val instantDebitsIncentives = FeatureFlag("Instant Bank Payments Incentives")
 }
 
@@ -25,30 +24,11 @@ class FeatureFlag(
             false
         }
 
-    val value: Flag
-        get() {
-            if (BuildConfig.DEBUG.not()) {
-                return Flag.NotSet
-            }
-            return when (overrideEnabledValue) {
-                true -> Flag.Enabled
-                false -> Flag.Disabled
-                null -> Flag.NotSet
-            }
-        }
-
     fun setEnabled(isEnabled: Boolean) {
         overrideEnabledValue = isEnabled
     }
 
     fun reset() {
         overrideEnabledValue = null
-    }
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    sealed interface Flag {
-        data object Enabled : Flag
-        data object Disabled : Flag
-        data object NotSet : Flag
     }
 }
