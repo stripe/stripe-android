@@ -39,6 +39,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.ui.getLabel
+import com.stripe.android.testing.RetryRule
 import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
@@ -51,6 +52,7 @@ import com.stripe.android.view.ActivityStarter
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -64,11 +66,13 @@ import kotlin.test.BeforeTest
 @Config(sdk = [Build.VERSION_CODES.Q])
 internal class PaymentOptionsActivityTest {
 
-    @get:Rule
-    val rule = InstantTaskExecutorRule()
+    private val composeTestRule = createEmptyComposeRule()
 
     @get:Rule
-    val composeTestRule = createEmptyComposeRule()
+    val rule = RuleChain.emptyRuleChain()
+        .around(InstantTaskExecutorRule())
+        .around(composeTestRule)
+        .around(RetryRule(3))
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = UnconfinedTestDispatcher()
