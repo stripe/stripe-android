@@ -263,7 +263,7 @@ private fun RowButtonCheckmarkOuterContent(
             content()
             Row {
                 if (trailingContent != null) {
-                    Spacer(Modifier.width(iconWidth + 9.dp))
+                    Spacer(Modifier.width(iconWidth))
                     trailingContent()
                 }
             }
