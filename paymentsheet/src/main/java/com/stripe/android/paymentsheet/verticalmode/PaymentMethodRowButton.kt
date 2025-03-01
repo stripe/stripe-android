@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -81,6 +82,7 @@ internal fun PaymentMethodRowButton(
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 52.dp)
+            .focusable()
             .selectable(
                 selected = isSelected,
                 enabled = isClickable,
@@ -332,7 +334,7 @@ private fun TitleContent(title: String, subtitle: String?, isEnabled: Boolean, c
                 if (contentDescription != null) {
                     this.contentDescription = contentDescription
                 }
-            }
+            }.focusable(),
         )
 
         if (subtitle != null) {

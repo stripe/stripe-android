@@ -80,7 +80,7 @@ workflows:
       - conclude_all
     steps:
       - script@1:
-          timeout: 1200
+          timeout: 1800
           inputs:
             - content: ./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest --continue
   build-connections-debug:

@@ -5,12 +5,12 @@ import android.os.Build
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
-import androidx.compose.ui.test.performClick
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.ui.performClickWithKeyboard
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -58,7 +58,7 @@ internal class SepaMandateActivityTest {
         val intent = sepaMandateContract.createIntent(context, args)
         val scenario = ActivityScenario.launchActivityForResult<SepaMandateActivity>(intent)
         composeRule.onNode(hasTestTag("SEPA_MANDATE_CONTINUE_BUTTON")).assertIsDisplayed()
-        composeRule.onNode(hasTestTag("SEPA_MANDATE_CONTINUE_BUTTON")).performClick()
+        composeRule.onNode(hasTestTag("SEPA_MANDATE_CONTINUE_BUTTON")).performClickWithKeyboard()
         val result = sepaMandateContract.parseResult(
             resultCode = scenario.result.resultCode,
             intent = scenario.result.resultData,
