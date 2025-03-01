@@ -74,6 +74,8 @@ internal fun LinkInlineSignup(
     }
 
     val focusManager = LocalFocusManager.current
+
+    @Suppress("DEPRECATION")
     val textInputService = LocalTextInputService.current
 
     LaunchedEffect(viewState.signUpState) {

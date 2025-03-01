@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.ui
 import android.content.Context
 import android.content.res.Resources
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -329,7 +330,7 @@ private fun UpdatePaymentMethodUi(interactor: UpdatePaymentMethodInteractor) {
         isEnabled = (state.cardBrandHasBeenChanged || state.setAsDefaultCheckboxChecked) &&
             state.status == UpdatePaymentMethodInteractor.Status.Idle,
         onButtonClick = { interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed) },
-        modifier = Modifier.testTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).testMetadata("isLoading=$isLoading")
+        modifier = Modifier.focusable().testTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).testMetadata("isLoading=$isLoading")
     )
 }
 
