@@ -67,7 +67,7 @@
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">By providing your card information, you allow %s to charge your card for future payments in accordance with their terms.</string>
   <!-- Error message displayed when updating a card fails. -->
-  <string name="stripe_paymentsheet_card_updates_failed_error_message">Card was not updated. Please try again.</string>
+  <string name="stripe_paymentsheet_card_updates_failed_error_message">An error occurred. Please try again.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Choose a payment method</string>
   <string name="stripe_paymentsheet_close">Close</string>
@@ -144,9 +144,11 @@
   <!-- Text displayed on manage SEPA debit screen when SEPA debit details are not editable. -->
   <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">SEPA debit details cannot be changed.</string>
   <!-- Error message displayed when setting a default payment method fails. -->
-  <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">Default payment method was not changed. Please try again.</string>
+  <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">Default payment method was not updated. Please try again.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Total: %s</string>
+  <!-- Error message displayed when updating card brand fails. -->
+  <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Card brand was not updated. Please try again.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Set as default payment method</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->

@@ -225,11 +225,11 @@ internal class DefaultUpdatePaymentMethodInteractor(
         }
 
         return if (updateCardBrandResult?.isFailure == true && setDefaultPaymentMethodResult?.isFailure == true) {
-            UpdateResult.Error(setDefaultPaymentMethodErrorMessage)
-        } else if (updateCardBrandResult?.isFailure == true) {
-            UpdateResult.Error(updateCardBrandResult.exceptionOrNull()?.stripeErrorMessage())
-        } else if (setDefaultPaymentMethodResult?.isFailure == true) {
             UpdateResult.Error(updatesFailedErrorMessage)
+        } else if (updateCardBrandResult?.isFailure == true) {
+            UpdateResult.Error(updateCardBrandErrorMessage)
+        } else if (setDefaultPaymentMethodResult?.isFailure == true) {
+            UpdateResult.Error(setDefaultPaymentMethodErrorMessage)
         } else {
             UpdateResult.Success
         }
@@ -285,8 +285,12 @@ internal class DefaultUpdatePaymentMethodInteractor(
             R.string.stripe_paymentsheet_set_default_payment_method_failed_error_message.resolvableString
 
         @VisibleForTesting
-        internal val updatesFailedErrorMessage =
+        internal val updateCardBrandErrorMessage =
             R.string.stripe_paymentsheet_set_default_payment_method_failed_error_message.resolvableString
+
+        @VisibleForTesting
+        internal val updatesFailedErrorMessage =
+            R.string.stripe_paymentsheet_card_updates_failed_error_message.resolvableString
     }
 }
 
