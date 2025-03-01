@@ -26,6 +26,7 @@ import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentConfigurationTestRule
+import com.stripe.android.testing.RetryRule
 import org.json.JSONArray
 import org.junit.Rule
 import org.junit.Test
@@ -60,6 +61,7 @@ internal class VerticalModePaymentSheetActivityTest {
         .outerRule(composeTestRule)
         .around(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
+        .around(RetryRule(3))
 
     @Test
     fun `Allows paying with card`() = runTest(
