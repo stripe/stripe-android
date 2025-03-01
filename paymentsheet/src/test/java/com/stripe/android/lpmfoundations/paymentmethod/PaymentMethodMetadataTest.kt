@@ -1,7 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerSheet
@@ -729,7 +728,7 @@ internal class PaymentMethodMetadataTest {
         assertThat(metadata.isExternalPaymentMethod("card")).isFalse()
     }
 
-    @OptIn(ExperimentalCardBrandFilteringApi::class)
+    @Suppress("LongMethod")
     @Test
     fun `should create metadata properly with elements session response, payment sheet config, and data specs`() {
         val billingDetailsCollectionConfiguration = createBillingDetailsCollectionConfiguration()
@@ -801,7 +800,6 @@ internal class PaymentMethodMetadataTest {
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
 
-    @OptIn(ExperimentalCardBrandFilteringApi::class)
     @Suppress("LongMethod")
     @Test
     fun `should create metadata properly with elements session response, customer sheet config, and data specs`() {
@@ -1342,7 +1340,6 @@ internal class PaymentMethodMetadataTest {
             attachDefaultsToPaymentMethod = true,
         )
 
-    @OptIn(ExperimentalCardBrandFilteringApi::class)
     private fun createCustomerSheetConfiguration(
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
         defaultBillingDetails: PaymentSheet.BillingDetails,

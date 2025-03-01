@@ -1,9 +1,6 @@
-@file:OptIn(ExperimentalCardBrandFilteringApi::class)
-
 package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
-import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.Logger

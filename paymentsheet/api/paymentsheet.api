@@ -1,9 +1,6 @@
 public abstract interface annotation class com/stripe/android/ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi : java/lang/annotation/Annotation {
 }
 
-public abstract interface annotation class com/stripe/android/ExperimentalCardBrandFilteringApi : java/lang/annotation/Annotation {
-}
-
 public final class com/stripe/android/common/model/CommonConfiguration$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/common/model/CommonConfiguration;
