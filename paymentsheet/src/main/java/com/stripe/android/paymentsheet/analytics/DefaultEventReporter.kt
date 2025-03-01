@@ -61,7 +61,9 @@ internal class DefaultEventReporter @Inject internal constructor(
         currency: String?,
         initializationMode: PaymentElementLoader.InitializationMode,
         orderedLpms: List<String>,
-        requireCvcRecollection: Boolean
+        requireCvcRecollection: Boolean,
+        hasDefaultPaymentMethod: Boolean?,
+        setAsDefaultEnabled: Boolean?,
     ) {
         this.currency = currency
         this.linkMode = linkMode
@@ -80,7 +82,9 @@ internal class DefaultEventReporter @Inject internal constructor(
                 googlePaySupported = googlePaySupported,
                 initializationMode = initializationMode,
                 orderedLpms = orderedLpms,
-                requireCvcRecollection = requireCvcRecollection
+                requireCvcRecollection = requireCvcRecollection,
+                hasDefaultPaymentMethod = hasDefaultPaymentMethod,
+                setAsDefaultEnabled = setAsDefaultEnabled,
             )
         )
     }
