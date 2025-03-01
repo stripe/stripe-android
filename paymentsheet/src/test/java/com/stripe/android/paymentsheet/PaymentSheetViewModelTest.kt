@@ -127,8 +127,8 @@ import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
-import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import com.stripe.android.utils.PaymentElementCallbackTestRule
 import com.stripe.android.utils.RecordingLinkPaymentLauncher
 import com.stripe.android.utils.RelayingPaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
@@ -173,7 +173,7 @@ internal class PaymentSheetViewModelTest {
     val sessionRule = SessionTestRule()
 
     @get:Rule
-    val intentConfirmationInterceptorTestRule = IntentConfirmationInterceptorTestRule()
+    val paymentElementCallbackTestRule = PaymentElementCallbackTestRule()
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
@@ -2111,10 +2111,6 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `Sends correct analytics event when using deferred intent with client-side confirmation`() = runTest {
-        IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
-            throw AssertionError("Not expected to be called")
-        }
-
         createViewModelForDeferredIntent()
 
         verify(eventReporter).onInit(
@@ -2125,11 +2121,6 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `Sends correct analytics event when using deferred intent with server-side confirmation`() = runTest {
-        IntentConfirmationInterceptor.createIntentCallback =
-            CreateIntentCallback { _, _ ->
-                throw AssertionError("Not expected to be called")
-            }
-
         createViewModelForDeferredIntent()
 
         verify(eventReporter).onInit(
@@ -2147,10 +2138,6 @@ internal class PaymentSheetViewModelTest {
         )
 
         for ((clientSecret, deferredIntentConfirmationType) in clientSecrets) {
-            IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
-                CreateIntentResult.Success(clientSecret)
-            }
-
             val viewModel = createViewModelForDeferredIntent()
 
             val savedSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
@@ -3277,6 +3264,7 @@ internal class PaymentSheetViewModelTest {
                 savedStateHandle = thisSavedStateHandle,
                 linkHandler = linkHandler,
                 confirmationHandlerFactory = confirmationHandlerFactory ?: createTestConfirmationHandlerFactory(
+                    instanceId = "PaymentSheet",
                     intentConfirmationInterceptor = intentConfirmationInterceptor,
                     savedStateHandle = thisSavedStateHandle,
                     bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,

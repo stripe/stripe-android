@@ -413,6 +413,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
                         paymentMethodLayout = paymentMethodLayout,
                     ),
                     statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
+                    instanceId = "PaymentSheet",
                 )
             )
         ).use { scenario ->

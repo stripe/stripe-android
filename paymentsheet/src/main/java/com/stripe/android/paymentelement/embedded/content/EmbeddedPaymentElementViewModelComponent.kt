@@ -20,6 +20,7 @@ import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
@@ -67,6 +68,11 @@ internal interface EmbeddedPaymentElementViewModelComponent {
 
         @BindsInstance
         fun application(application: Application): Builder
+
+        @BindsInstance
+        fun instanceId(
+            @PaymentElementCallbackIdentifier instanceId: String,
+        ): Builder
 
         @BindsInstance
         fun statusBarColor(@Named(STATUS_BAR_COLOR) statusBarColor: Int?): Builder

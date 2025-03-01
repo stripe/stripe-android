@@ -11,7 +11,8 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -85,9 +86,14 @@ class DefaultPaymentSheetLauncherTest {
 
     @Test
     fun `Clears out CreateIntentCallback when lifecycle owner is destroyed`() {
-        IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
-            error("I’m alive")
-        }
+        val paymentSheetKey = "PaymentSheet"
+
+        PaymentElementCallbackReferences[paymentSheetKey] = PaymentElementCallbacks(
+            createIntentCallback = { _, _ ->
+                error("I’m alive")
+            },
+            externalPaymentMethodConfirmHandler = null,
+        )
 
         val lifecycleOwner = TestLifecycleOwner()
 
@@ -100,21 +106,25 @@ class DefaultPaymentSheetLauncherTest {
         )
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-        assertThat(IntentConfirmationInterceptor.createIntentCallback).isNotNull()
+        assertThat(PaymentElementCallbackReferences[paymentSheetKey]).isNotNull()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
-        assertThat(IntentConfirmationInterceptor.createIntentCallback).isNotNull()
+        assertThat(PaymentElementCallbackReferences[paymentSheetKey]).isNotNull()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        assertThat(IntentConfirmationInterceptor.createIntentCallback).isNull()
+        assertThat(PaymentElementCallbackReferences[paymentSheetKey]).isNull()
     }
 
     @Test
     fun `Clears out externalPaymentMethodConfirmHandler when lifecycle owner is destroyed`() {
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler =
-            ExternalPaymentMethodConfirmHandler { _, _ ->
+        val paymentSheetKey = "PaymentSheet"
+
+        PaymentElementCallbackReferences[paymentSheetKey] = PaymentElementCallbacks(
+            createIntentCallback = null,
+            externalPaymentMethodConfirmHandler = { _, _ ->
                 error("I’m alive")
-            }
+            },
+        )
 
         val lifecycleOwner = TestLifecycleOwner()
 
@@ -127,13 +137,13 @@ class DefaultPaymentSheetLauncherTest {
         )
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-        assertThat(ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler).isNotNull()
+        assertThat(PaymentElementCallbackReferences[paymentSheetKey]?.externalPaymentMethodConfirmHandler).isNotNull()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
-        assertThat(ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler).isNotNull()
+        assertThat(PaymentElementCallbackReferences[paymentSheetKey]?.externalPaymentMethodConfirmHandler).isNotNull()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        assertThat(ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler).isNull()
+        assertThat(PaymentElementCallbackReferences[paymentSheetKey]?.externalPaymentMethodConfirmHandler).isNull()
     }
 
     private class FakeActivityResultRegistry(
