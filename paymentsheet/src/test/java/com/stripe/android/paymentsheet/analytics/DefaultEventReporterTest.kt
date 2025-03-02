@@ -14,6 +14,9 @@ import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.paymentelement.AnalyticEvent
+import com.stripe.android.paymentelement.AnalyticEventCallback
+import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -23,13 +26,16 @@ import com.stripe.android.utils.FakeDurationProvider
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.json.JSONException
 import org.junit.runner.RunWith
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.reset
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.io.IOException
+import javax.inject.Provider
 import kotlin.test.Test
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
@@ -44,6 +50,12 @@ class DefaultEventReporterTest {
         ApplicationProvider.getApplicationContext(),
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )
+
+    @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+    private val analyticEventCallbackProvider = mock<Provider<AnalyticEventCallback?>>()
+
+    @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+    private val analyticEventCallback = mock<AnalyticEventCallback>()
 
     private val configuration: PaymentSheet.Configuration
         get() = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
@@ -142,6 +154,7 @@ class DefaultEventReporterTest {
         )
     }
 
+    @OptIn(ExperimentalAnalyticEventCallbackApi::class)
     @Test
     fun `onShowNewPaymentOptions() should fire analytics request with expected event value`() {
         val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
@@ -149,6 +162,12 @@ class DefaultEventReporterTest {
         }
 
         completeEventReporter.onShowNewPaymentOptions()
+
+        verify(analyticEventCallback).onEvent(
+            argThat { event ->
+                event is AnalyticEvent.PresentedSheet
+            }
+        )
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
@@ -541,6 +560,7 @@ class DefaultEventReporterTest {
         )
     }
 
+    @OptIn(ExperimentalAnalyticEventCallbackApi::class)
     @Test
     fun `constructor does not read from PaymentConfiguration`() {
         PaymentConfiguration.clearInstance()
@@ -550,7 +570,8 @@ class DefaultEventReporterTest {
             analyticsRequestExecutor,
             analyticsRequestFactory,
             durationProvider,
-            testDispatcher
+            analyticEventCallbackProvider,
+            testDispatcher,
         )
     }
 
@@ -765,6 +786,7 @@ class DefaultEventReporterTest {
         assertThat(argumentCaptor.firstValue.params).doesNotContainKey("link_context")
     }
 
+    @OptIn(ExperimentalAnalyticEventCallbackApi::class)
     private fun createEventReporter(
         mode: EventReporter.Mode,
         duration: Duration = 1.seconds,
@@ -775,8 +797,11 @@ class DefaultEventReporterTest {
             analyticsRequestExecutor = analyticsRequestExecutor,
             paymentAnalyticsRequestFactory = analyticsRequestFactory,
             durationProvider = FakeDurationProvider(duration),
+            analyticEventCallbackProvider = analyticEventCallbackProvider,
             workContext = testDispatcher,
         )
+
+        whenever(analyticEventCallbackProvider.get()).thenReturn(analyticEventCallback)
 
         reporter.configure()
 
@@ -785,6 +810,7 @@ class DefaultEventReporterTest {
         return reporter
     }
 
+    @OptIn(ExperimentalAnalyticEventCallbackApi::class)
     private fun createEventReporter(
         mode: EventReporter.Mode,
         durationProvider: DurationProvider,
@@ -795,6 +821,7 @@ class DefaultEventReporterTest {
             analyticsRequestExecutor = analyticsRequestExecutor,
             paymentAnalyticsRequestFactory = analyticsRequestFactory,
             durationProvider = durationProvider,
+            analyticEventCallbackProvider = analyticEventCallbackProvider,
             workContext = testDispatcher,
         )
 

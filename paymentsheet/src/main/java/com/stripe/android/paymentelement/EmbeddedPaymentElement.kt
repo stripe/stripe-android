@@ -114,11 +114,23 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null
             private set
 
+        @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+        internal var analyticEventCallback: AnalyticEventCallback? = null
+            private set
+
         /**
          * Called when a user confirms payment for an external payment method.
          */
         fun externalPaymentMethodConfirmHandler(handler: ExternalPaymentMethodConfirmHandler) = apply {
             this.externalPaymentMethodConfirmHandler = handler
+        }
+
+        /**
+         * Called when an analytic event is emitted.
+         */
+        @ExperimentalAnalyticEventCallbackApi
+        fun analyticEventCallback(callback: AnalyticEventCallback) = apply {
+            analyticEventCallback = callback
         }
     }
 
