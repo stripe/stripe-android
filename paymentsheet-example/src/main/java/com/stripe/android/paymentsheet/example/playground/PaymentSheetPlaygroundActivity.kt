@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.example.playground
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -29,6 +30,8 @@ import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.AnalyticEvent
+import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -77,7 +80,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         viewModel.onEmbeddedResult(success)
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(ExperimentalCustomerSessionApi::class, ExperimentalAnalyticEventCallbackApi::class)
     @Suppress("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -90,6 +93,16 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
             val paymentSheet = PaymentSheet.Builder(viewModel::onPaymentSheetResult)
                 .externalPaymentMethodConfirmHandler(this)
                 .createIntentCallback(viewModel::createIntentCallback)
+                .analyticEventCallback({ event ->
+                    when (event) {
+                        is AnalyticEvent.PresentedSheet -> {
+                            Log.d("AnalyticEvent", "Event: $event")
+                        }
+                        is AnalyticEvent.DisplayedPaymentMethodForm -> {
+                            Log.d("AnalyticEvent", "Event: $event, PM: ${event.paymentMethodType}")
+                        }
+                    }
+                })
                 .build()
             val flowController = PaymentSheet.FlowController.Builder(
                 viewModel::onPaymentSheetResult,
