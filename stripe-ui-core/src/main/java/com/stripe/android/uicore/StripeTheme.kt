@@ -139,6 +139,19 @@ data class EmbeddedInsets(
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class EmbeddedCheckmarkColors(
+    val separatorColor: Color,
+    val checkmarkColor: Color
+)
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class EmbeddedRadioColors(
+    val separatorColor: Color,
+    val selectedColor: Color,
+    val unselectedColor: Color
+)
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class EmbeddedFloatingStyle(
     val spacing: Float
 )
@@ -235,6 +248,28 @@ object StripeThemeDefaults {
         separatorInsets = 0.0f,
         topSeparatorEnabled = true,
         bottomSeparatorEnabled = true
+    )
+
+    val checkmarkColorsLight = EmbeddedCheckmarkColors(
+        separatorColor = colorsLight.componentBorder,
+        checkmarkColor = colorsLight.materialColors.primary
+    )
+
+    val checkmarkColorsDark = EmbeddedCheckmarkColors(
+        separatorColor = colorsDark.componentBorder,
+        checkmarkColor = colorsDark.materialColors.primary
+    )
+
+    val radioColorsLight = EmbeddedRadioColors(
+        selectedColor = colorsLight.materialColors.primary,
+        unselectedColor = colorsLight.componentBorder,
+        separatorColor = colorsLight.componentBorder
+    )
+
+    val radioColorsDark = EmbeddedRadioColors(
+        selectedColor = colorsDark.materialColors.primary,
+        unselectedColor = colorsDark.componentBorder,
+        separatorColor = colorsDark.componentBorder
     )
 
     val embeddedCommon = EmbeddedInsets(
