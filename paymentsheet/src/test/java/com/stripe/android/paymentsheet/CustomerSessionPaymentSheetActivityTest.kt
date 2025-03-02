@@ -333,6 +333,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
                             id = "cus_1",
                             clientSecret = "cuss_1",
                         ),
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
                         allowsRemovalOfLastSavedPaymentMethod = canRemoveLastPaymentMethodConfig,
                         preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa),
                     ),
@@ -438,7 +439,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
                             "payment_method_save": "enabled",
                             "payment_method_remove": "$isPaymentMethodRemoveStringified",
                             "payment_method_remove_last": "$canRemoveLastPaymentMethodStringified",
-                            "payment_method_save_allow_redisplay_override": null,
+                            "payment_method_save_allow_redisplay_override": null
                           }
                         },
                         "customer_sheet": {
