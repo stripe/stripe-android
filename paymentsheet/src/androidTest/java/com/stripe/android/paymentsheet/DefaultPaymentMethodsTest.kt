@@ -46,8 +46,8 @@ internal class DefaultPaymentMethodsTest {
         resultCallback = {},
     ) { testContext ->
         val cards = listOf(
-            PaymentMethodFactory.card(last4 = "4242"),
-            PaymentMethodFactory.card(last4 = "1001")
+            PaymentMethodFactory.card(last4 = "4242", id = "pm_1"),
+            PaymentMethodFactory.card(last4 = "1001", id = "pm_2")
         )
 
         enqueueElementsSessionResponse(
@@ -113,7 +113,10 @@ internal class DefaultPaymentMethodsTest {
         integrationType = integrationType,
         resultCallback = {},
     ) { testContext ->
-        val cards = PaymentMethodFactory.cards(size = 2)
+        val cards = listOf(
+            PaymentMethodFactory.card(last4 = "4242", id = "pm_1"),
+            PaymentMethodFactory.card(last4 = "1001", id = "pm_2")
+        )
 
         enqueueElementsSessionResponse(
             cards = cards,
