@@ -4,9 +4,12 @@ import androidx.annotation.RestrictTo
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -140,11 +143,15 @@ internal fun SavedPaymentMethodTrailingContent(
     savedPaymentMethodAction: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
     onViewMorePaymentMethods: () -> Unit,
     onManageOneSavedPaymentMethod: () -> Unit,
+    addPaddingForCheckmarkRow: Boolean = false
 ) {
     when (savedPaymentMethodAction) {
         PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE -> Unit
         PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE -> {
-            EditButton(onClick = onManageOneSavedPaymentMethod)
+            EditButton(
+                onClick = onManageOneSavedPaymentMethod,
+                addPaddingForCheckmarkRow = addPaddingForCheckmarkRow
+            )
         }
         PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL -> {
             ViewMoreButton(
@@ -155,7 +162,10 @@ internal fun SavedPaymentMethodTrailingContent(
 }
 
 @Composable
-private fun EditButton(onClick: () -> Unit) {
+private fun EditButton(
+    onClick: () -> Unit,
+    addPaddingForCheckmarkRow: Boolean
+) {
     Text(
         stringResource(id = com.stripe.android.R.string.stripe_edit),
         color = MaterialTheme.colors.primary,
@@ -164,7 +174,7 @@ private fun EditButton(onClick: () -> Unit) {
         modifier = Modifier
             .testTag(TEST_TAG_EDIT_SAVED_CARD)
             .clickable(onClick = onClick)
-            .padding(4.dp)
+            .padding(trailingContentPaddingValues(addPaddingForCheckmarkRow))
             .fillMaxHeight()
     )
 }
@@ -178,7 +188,8 @@ private fun ViewMoreButton(
         modifier = Modifier
             .testTag(TEST_TAG_VIEW_MORE)
             .clickable(onClick = onViewMorePaymentMethods)
-            .padding(4.dp)
+            .padding(trailingContentPaddingValues())
+            .offset(x = VIEW_MORE_BUTTON_OFFSET.dp)
             .fillMaxHeight()
     ) {
         Text(
@@ -191,6 +202,31 @@ private fun ViewMoreButton(
             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
             tint = MaterialTheme.colors.primary,
+            modifier = Modifier
+                .offset(x = VIEW_MORE_CHEVRON_X_OFFSET.dp, y = VIEW_MORE_CHEVRON_Y_OFFSET.dp)
+                .size(VIEW_MORE_CHEVRON_SIZE.dp)
         )
     }
 }
+
+/**
+ * Padding values with no end padding to allow content to be aligned with end of embedded rows.
+ * Other padding values kept to not decrease clickable area size.
+ * @param addPaddingForCheckmarkRowEdit extra padding is required for [FlatWithCheckmark] row to align with
+ * SPM text
+ */
+private fun trailingContentPaddingValues(addPaddingForCheckmarkRowEdit: Boolean = false): PaddingValues {
+    return PaddingValues(
+        start = if (addPaddingForCheckmarkRowEdit) 12.dp else 4.dp,
+        end = 0.dp,
+        top = 4.dp,
+        bottom = 4.dp
+    )
+}
+
+// There is empty space in the KeyboardArrowRight icon so an offset is required to align to the edge of a view
+private const val VIEW_MORE_BUTTON_OFFSET = 9
+private const val VIEW_MORE_CHEVRON_SIZE = 22
+// Offsets to position chevron correctly per design requirements
+private const val VIEW_MORE_CHEVRON_Y_OFFSET = 2
+private const val VIEW_MORE_CHEVRON_X_OFFSET = -2
