@@ -3,7 +3,7 @@
 ## XX.XX.XX - 20XX-XX-XX
 
 ### PaymentSheet
-* [ADDED][10202](https://github.com/stripe/stripe-android/pull/10202) Added card brand filtering to specify allowed or blocked card brands. Learn more by visiting the [docs](https://docs.corp.stripe.com/payments/mobile/filter-card-brands?platform=android).
+* [ADDED][10202](https://github.com/stripe/stripe-android/pull/10202) Added card brand filtering to specify allowed or blocked card brands. Learn more by visiting the [docs](https://docs.stripe.com/payments/mobile/filter-card-brands?platform=android).
 
 Dependencies updated in [9512](https://github.com/stripe/stripe-android/pull/9512) and [10250](https://github.com/stripe/stripe-android/pull/10250):
 * Bumped Android Gradle Plugin from 8.7.1 to 8.8.1.
