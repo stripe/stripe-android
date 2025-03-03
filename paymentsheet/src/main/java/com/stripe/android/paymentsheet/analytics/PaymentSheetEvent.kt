@@ -45,21 +45,28 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         linkMode: LinkMode?,
         override val isDeferred: Boolean,
         override val googlePaySupported: Boolean,
-        requireCvcRecollection: Boolean = false
+        requireCvcRecollection: Boolean = false,
+        hasDefaultPaymentMethod: Boolean? = null,
+        setAsDefaultEnabled: Boolean? = null,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_load_succeeded"
         override val linkEnabled: Boolean = linkMode != null
-        override val additionalParams: Map<String, Any?> = mapOf(
-            FIELD_DURATION to duration?.asSeconds,
-            FIELD_SELECTED_LPM to paymentSelection.defaultAnalyticsValue,
-            FIELD_INTENT_TYPE to initializationMode.defaultAnalyticsValue,
-            FIELD_ORDERED_LPMS to orderedLpms.joinToString(","),
-            FIELD_REQUIRE_CVC_RECOLLECTION to requireCvcRecollection
-        ).plus(
+        override val additionalParams: Map<String, Any?> = buildMap {
+            put(FIELD_DURATION, duration?.asSeconds)
+            put(FIELD_SELECTED_LPM, paymentSelection.defaultAnalyticsValue)
+            put(FIELD_INTENT_TYPE, initializationMode.defaultAnalyticsValue)
+            put(FIELD_ORDERED_LPMS, orderedLpms.joinToString(","))
+            put(FIELD_REQUIRE_CVC_RECOLLECTION, requireCvcRecollection)
             linkMode?.let { mode ->
-                mapOf(FIELD_LINK_MODE to mode.analyticsValue)
-            }.orEmpty()
-        )
+                put(FIELD_LINK_MODE, mode.analyticsValue)
+            }
+            setAsDefaultEnabled?.let {
+                put(FIELD_SET_AS_DEFAULT_ENABLED, it)
+            }
+            if (setAsDefaultEnabled == true && hasDefaultPaymentMethod != null) {
+                put(FIELD_HAS_DEFAULT_PAYMENT_METHOD, hasDefaultPaymentMethod)
+            }
+        }
 
         private val PaymentSelection?.defaultAnalyticsValue: String
             get() = when (this) {
@@ -511,6 +518,8 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_ERROR_MESSAGE = "error_message"
         const val FIELD_ERROR_CODE = "error_code"
         const val FIELD_CBC_EVENT_SOURCE = "cbc_event_source"
+        const val FIELD_SET_AS_DEFAULT_ENABLED = "set_as_default_enabled"
+        const val FIELD_HAS_DEFAULT_PAYMENT_METHOD = "has_default_payment_method"
         const val FIELD_SELECTED_CARD_BRAND = "selected_card_brand"
         const val FIELD_LINK_CONTEXT = "link_context"
         const val FIELD_EXTERNAL_PAYMENT_METHODS = "external_payment_methods"

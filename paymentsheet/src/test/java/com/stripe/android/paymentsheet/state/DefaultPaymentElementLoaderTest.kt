@@ -1080,7 +1080,9 @@ internal class DefaultPaymentElementLoaderTest {
             currency = "usd",
             initializationMode = initializationMode,
             orderedLpms = listOf("card", "link"),
-            requireCvcRecollection = false
+            requireCvcRecollection = false,
+            hasDefaultPaymentMethod = null,
+            setAsDefaultEnabled = null,
         )
     }
 
@@ -1135,7 +1137,9 @@ internal class DefaultPaymentElementLoaderTest {
             currency = "usd",
             initializationMode = initializationMode,
             orderedLpms = listOf("card", "link"),
-            requireCvcRecollection = false
+            requireCvcRecollection = false,
+            hasDefaultPaymentMethod = null,
+            setAsDefaultEnabled = null,
         )
     }
 
@@ -2163,7 +2167,9 @@ internal class DefaultPaymentElementLoaderTest {
             currency = "usd",
             initializationMode = DEFAULT_INITIALIZATION_MODE,
             orderedLpms = listOf("card"),
-            requireCvcRecollection = false
+            requireCvcRecollection = false,
+            hasDefaultPaymentMethod = null,
+            setAsDefaultEnabled = null,
         )
     }
 
@@ -2189,7 +2195,9 @@ internal class DefaultPaymentElementLoaderTest {
             currency = "usd",
             initializationMode = DEFAULT_INITIALIZATION_MODE,
             orderedLpms = listOf("card", "link"),
-            requireCvcRecollection = false
+            requireCvcRecollection = false,
+            hasDefaultPaymentMethod = null,
+            setAsDefaultEnabled = null,
         )
     }
 
@@ -2215,7 +2223,9 @@ internal class DefaultPaymentElementLoaderTest {
             currency = "usd",
             initializationMode = DEFAULT_INITIALIZATION_MODE,
             orderedLpms = listOf("card", "link"),
-            requireCvcRecollection = false
+            requireCvcRecollection = false,
+            hasDefaultPaymentMethod = null,
+            setAsDefaultEnabled = null,
         )
     }
 
@@ -2239,7 +2249,9 @@ internal class DefaultPaymentElementLoaderTest {
             currency = "usd",
             initializationMode = DEFAULT_INITIALIZATION_MODE,
             orderedLpms = listOf("card", "link"),
-            requireCvcRecollection = true
+            requireCvcRecollection = true,
+            hasDefaultPaymentMethod = null,
+            setAsDefaultEnabled = null,
         )
     }
 
@@ -2273,7 +2285,9 @@ internal class DefaultPaymentElementLoaderTest {
             currency = "usd",
             initializationMode = initializationMode,
             orderedLpms = listOf("card", "link"),
-            requireCvcRecollection = true
+            requireCvcRecollection = true,
+            hasDefaultPaymentMethod = null,
+            setAsDefaultEnabled = null,
         )
     }
 
@@ -2307,7 +2321,9 @@ internal class DefaultPaymentElementLoaderTest {
             currency = "usd",
             initializationMode = initializationMode,
             orderedLpms = listOf("card", "link"),
-            requireCvcRecollection = false
+            requireCvcRecollection = false,
+            hasDefaultPaymentMethod = null,
+            setAsDefaultEnabled = null,
         )
     }
 
@@ -2477,7 +2493,9 @@ internal class DefaultPaymentElementLoaderTest {
             currency = "usd",
             initializationMode = initializationMode,
             orderedLpms = listOf("card", "link"),
-            requireCvcRecollection = false
+            requireCvcRecollection = false,
+            hasDefaultPaymentMethod = null,
+            setAsDefaultEnabled = null,
         )
     }
 
