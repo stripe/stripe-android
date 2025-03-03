@@ -301,25 +301,23 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val eventName: String =
             formatEventName(mode, "payment_${analyticsValue(paymentSelection)}_${result.analyticsValue}")
 
-        override val additionalParams: Map<String, Any?> =
-            mapOf(
-                FIELD_DURATION to duration?.asSeconds,
-                FIELD_CURRENCY to currency,
-            ) + buildDeferredIntentConfirmationType() + paymentSelection.paymentMethodInfo() + errorInfo()
-
-        private fun buildDeferredIntentConfirmationType(): Map<String, String> {
-            return deferredIntentConfirmationType?.let {
-                mapOf(FIELD_DEFERRED_INTENT_CONFIRMATION_TYPE to it.value)
-            }.orEmpty()
-        }
-
-        private fun errorInfo(): Map<String, String> {
-            return when (result) {
-                is Result.Success -> emptyMap()
-                is Result.Failure -> mapOf(
-                    FIELD_ERROR_MESSAGE to result.error.analyticsValue,
-                    FIELD_ERROR_CODE to result.error.errorCode,
-                ).filterNotNullValues()
+        override val additionalParams: Map<String, Any?> = buildMap {
+            put(FIELD_DURATION, duration?.asSeconds)
+            put(FIELD_CURRENCY, currency)
+            deferredIntentConfirmationType?.let { type ->
+                put(FIELD_DEFERRED_INTENT_CONFIRMATION_TYPE, type.value)
+            }
+            if (result is Result.Failure) {
+                put(FIELD_ERROR_MESSAGE, result.error.analyticsValue)
+                result.error.errorCode?.let { errorCode ->
+                    put(FIELD_ERROR_CODE, errorCode)
+                }
+            }
+            paymentSelection.code()?.let { code ->
+                put(FIELD_SELECTED_LPM, code)
+            }
+            paymentSelection.linkContext()?.let { linkContext ->
+                put(FIELD_LINK_CONTEXT, linkContext)
             }
         }
 
@@ -542,13 +540,6 @@ internal fun PaymentSelection?.code(): String? {
         is PaymentSelection.ExternalPaymentMethod -> type
         null -> null
     }
-}
-
-private fun PaymentSelection?.paymentMethodInfo(): Map<String, String> {
-    return mapOf(
-        PaymentSheetEvent.FIELD_SELECTED_LPM to code(),
-        PaymentSheetEvent.FIELD_LINK_CONTEXT to linkContext(),
-    ).filterNotNullValues()
 }
 
 internal fun PaymentSelection?.linkContext(): String? {
