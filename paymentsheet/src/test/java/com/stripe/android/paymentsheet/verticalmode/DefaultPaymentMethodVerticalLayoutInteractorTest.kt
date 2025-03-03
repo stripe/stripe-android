@@ -525,7 +525,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         interactor.state.test {
             awaitItem().run {
                 assertThat(displayablePaymentMethods.map { it.code })
-                    .isEqualTo(listOf("card", "link", "google_pay", "cashapp"))
+                    .isEqualTo(listOf("link", "google_pay", "card", "cashapp"))
             }
         }
         interactor.showsWalletsHeader.test {
@@ -619,7 +619,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         interactor.state.test {
             awaitItem().run {
                 assertThat(displayablePaymentMethods.map { it.code })
-                    .isEqualTo(listOf("card", "google_pay", "cashapp"))
+                    .isEqualTo(listOf("google_pay", "card", "cashapp"))
             }
         }
         interactor.showsWalletsHeader.test {
@@ -648,7 +648,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         interactor.state.test {
             awaitItem().run {
                 assertThat(displayablePaymentMethods.map { it.code })
-                    .isEqualTo(listOf("card", "link", "cashapp"))
+                    .isEqualTo(listOf("link", "card", "cashapp"))
             }
         }
     }

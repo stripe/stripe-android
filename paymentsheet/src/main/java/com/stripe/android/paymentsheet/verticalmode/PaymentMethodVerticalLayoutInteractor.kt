@@ -326,11 +326,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             }
         }
 
-        val cardIndex = lpms.indexOfFirst { it.code == PaymentMethod.Type.Card.code }
-        val result = lpms.toMutableList()
-        // Add wallets after cards, if cards don't exist, add wallets first.
-        result.addAll(cardIndex + 1, wallets)
-        return result
+        return wallets + lpms
     }
 
     private fun showsWalletsInline(walletsState: WalletsState?): Boolean {
