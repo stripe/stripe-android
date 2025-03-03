@@ -1501,6 +1501,38 @@ class PaymentSheetEventTest {
         )
     }
 
+    private fun newCardPaymentMethod(
+        paymentMethodExtraParams: PaymentMethodExtraParams? = null,
+        result: PaymentSheetEvent.Payment.Result
+    ): PaymentSheetEvent.Payment {
+        return paymentMethodEvent(
+            paymentSelection = PaymentSelection.New.Card(
+                PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                mock(),
+                mock(),
+                paymentMethodExtraParams = paymentMethodExtraParams
+            ),
+            result = result
+        )
+    }
+
+    private fun paymentMethodEvent(
+        paymentSelection: PaymentSelection,
+        result: PaymentSheetEvent.Payment.Result,
+    ): PaymentSheetEvent.Payment {
+        return PaymentSheetEvent.Payment(
+            mode = EventReporter.Mode.Complete,
+            paymentSelection = paymentSelection,
+            duration = 1.milliseconds,
+            result = result,
+            currency = "usd",
+            isDeferred = false,
+            linkEnabled = false,
+            googlePaySupported = false,
+            deferredIntentConfirmationType = null,
+        )
+    }
+
     private val paymentIntentInitializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
         clientSecret = "cs_example"
     )
