@@ -16,6 +16,7 @@ import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmationModule
 import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -62,6 +63,9 @@ internal interface NativeLinkComponent {
 
         @BindsInstance
         fun stripeAccountIdProvider(@Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?): Builder
+
+        @BindsInstance
+        fun instanceId(@PaymentElementCallbackIdentifier instanceId: String): Builder
 
         @BindsInstance
         fun context(context: Context): Builder

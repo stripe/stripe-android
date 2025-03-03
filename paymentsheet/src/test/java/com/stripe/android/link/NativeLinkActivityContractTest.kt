@@ -32,7 +32,7 @@ class NativeLinkActivityContractTest {
 
     @Test
     fun `intent is created correctly`() {
-        val contract = NativeLinkActivityContract()
+        val contract = NativeLinkActivityContract(instanceId = "instance_456")
         val args = LinkActivityContract.Args(
             configuration = TestFactory.LINK_CONFIGURATION,
             startWithVerificationDialog = false,
@@ -52,7 +52,8 @@ class NativeLinkActivityContractTest {
                 publishableKey = "pk_test_abcdefg",
                 stripeAccountId = null,
                 startWithVerificationDialog = false,
-                linkAccount = TestFactory.LINK_ACCOUNT
+                linkAccount = TestFactory.LINK_ACCOUNT,
+                instanceId = "instance_456",
             )
         )
     }
@@ -63,7 +64,7 @@ class NativeLinkActivityContractTest {
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         )
 
-        val contract = NativeLinkActivityContract()
+        val contract = NativeLinkActivityContract(instanceId = "instance_456")
 
         val result = contract.parseResult(
             resultCode = LinkActivity.RESULT_COMPLETE,
@@ -75,7 +76,7 @@ class NativeLinkActivityContractTest {
 
     @Test
     fun `complete with canceled result when result not found`() {
-        val contract = NativeLinkActivityContract()
+        val contract = NativeLinkActivityContract(instanceId = "instance_456")
 
         val result = contract.parseResult(
             resultCode = LinkActivity.RESULT_COMPLETE,
@@ -92,7 +93,7 @@ class NativeLinkActivityContractTest {
 
     @Test
     fun `unknown result code results in canceled`() {
-        val contract = NativeLinkActivityContract()
+        val contract = NativeLinkActivityContract(instanceId = "instance_456")
 
         val result = contract.parseResult(42, Intent())
 
@@ -106,7 +107,7 @@ class NativeLinkActivityContractTest {
 
     @Test
     fun `canceled result code is handled correctly`() {
-        val contract = NativeLinkActivityContract()
+        val contract = NativeLinkActivityContract(instanceId = "instance_456")
 
         val result = contract.parseResult(Activity.RESULT_CANCELED, Intent())
 

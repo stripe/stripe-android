@@ -17,6 +17,7 @@ internal class ExternalPaymentMethodContract(val errorReporter: ErrorReporter) :
             ExternalPaymentMethodProxyActivity::class.java
         )
             .putExtra(ExternalPaymentMethodProxyActivity.EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE, input.type)
+            .putExtra(ExternalPaymentMethodProxyActivity.EXTRA_PAYMENT_ELEMENT_IDENTIFIER, input.instanceId)
             .putExtra(ExternalPaymentMethodProxyActivity.EXTRA_BILLING_DETAILS, input.billingDetails)
     }
 
@@ -50,6 +51,7 @@ internal class ExternalPaymentMethodContract(val errorReporter: ErrorReporter) :
 }
 
 internal data class ExternalPaymentMethodInput(
+    val instanceId: String,
     val type: String,
     val billingDetails: PaymentMethod.BillingDetails?,
 )

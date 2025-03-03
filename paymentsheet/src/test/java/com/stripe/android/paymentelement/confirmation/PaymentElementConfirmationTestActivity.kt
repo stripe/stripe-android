@@ -29,6 +29,7 @@ import com.stripe.android.link.gate.DefaultLinkGate
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.injection.PaymentElementConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -123,6 +124,10 @@ internal interface PaymentElementConfirmationTestModule {
     fun bindLinkGateFactory(linkGateFactory: DefaultLinkGate.Factory): LinkGate.Factory
 
     companion object {
+        @Provides
+        @PaymentElementCallbackIdentifier
+        fun providesInstanceId(): String = "Confirmation"
+
         @Provides
         fun providesContext(application: Application): Context = application
 

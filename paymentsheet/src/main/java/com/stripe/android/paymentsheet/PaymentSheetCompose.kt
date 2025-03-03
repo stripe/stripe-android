@@ -6,11 +6,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.stripe.android.common.ui.UpdateExternalPaymentMethodConfirmHandler
-import com.stripe.android.common.ui.UpdateIntentConfirmationInterceptor
+import com.stripe.android.common.ui.UpdateCallbacks
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.utils.rememberActivity
+import java.util.UUID
 
 /**
  * Creates a [PaymentSheet] that is remembered across compositions.
@@ -22,7 +24,75 @@ import com.stripe.android.utils.rememberActivity
 @Composable
 fun rememberPaymentSheet(
     paymentResultCallback: PaymentSheetResultCallback,
+) = internalRememberPaymentSheet(
+    createIntentCallback = null,
+    externalPaymentMethodConfirmHandler = null,
+    paymentResultCallback = paymentResultCallback,
+)
+
+/**
+ * Creates a [PaymentSheet] that is remembered across compositions. Use this method when you intend
+ * to create the [com.stripe.android.model.PaymentIntent] or [com.stripe.android.model.SetupIntent]
+ * on your server.
+ *
+ * This *must* be called unconditionally, as part of the initialization path.
+ *
+ * @param createIntentCallback Called when the customer confirms the payment or setup.
+ * @param paymentResultCallback Called with the result of the payment after [PaymentSheet] is dismissed.
+ */
+@Composable
+fun rememberPaymentSheet(
+    createIntentCallback: CreateIntentCallback,
+    paymentResultCallback: PaymentSheetResultCallback,
+) = internalRememberPaymentSheet(
+    createIntentCallback = createIntentCallback,
+    externalPaymentMethodConfirmHandler = null,
+    paymentResultCallback = paymentResultCallback,
+)
+
+/**
+ * Creates a [PaymentSheet] that is remembered across compositions. Use this method if you implement any external
+ * payment methods, as specified in your [PaymentSheet.Configuration].
+ *
+ * This *must* be called unconditionally, as part of the initialization path.
+ *
+ * If you intend to create the [com.stripe.android.model.PaymentIntent] or [com.stripe.android.model.SetupIntent] on
+ * your server, include a [createIntentCallback].
+ *
+ * @param createIntentCallback If specified, called when the customer confirms the payment or setup.
+ * @param paymentResultCallback Called with the result of the payment after [PaymentSheet] is dismissed.
+ * @param externalPaymentMethodConfirmHandler Called when a user confirms payment for an external payment method.
+ */
+@Composable
+fun rememberPaymentSheet(
+    createIntentCallback: CreateIntentCallback? = null,
+    externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
+    paymentResultCallback: PaymentSheetResultCallback,
+): PaymentSheet = internalRememberPaymentSheet(
+    createIntentCallback = createIntentCallback,
+    externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
+    paymentResultCallback = paymentResultCallback,
+)
+
+@Composable
+internal fun internalRememberPaymentSheet(
+    createIntentCallback: CreateIntentCallback? = null,
+    externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
+    paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet {
+    val instanceId = rememberSaveable {
+        UUID.randomUUID().toString()
+    }
+
+    val callbacks = remember(createIntentCallback, externalPaymentMethodConfirmHandler) {
+        PaymentElementCallbacks(
+            createIntentCallback = createIntentCallback,
+            externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
+        )
+    }
+
+    UpdateCallbacks(instanceId, callbacks)
+
     val onResult by rememberUpdatedState(newValue = paymentResultCallback::onPaymentSheetResult)
 
     val activityResultLauncher = rememberLauncherForActivityResult(
@@ -44,54 +114,9 @@ fun rememberPaymentSheet(
             application = context.applicationContext as Application,
             lifecycleOwner = lifecycleOwner,
             callback = paymentResultCallback,
+            instanceId = instanceId,
             initializedViaCompose = true,
         )
         PaymentSheet(launcher)
-    }
-}
-
-/**
- * Creates a [PaymentSheet] that is remembered across compositions. Use this method when you intend
- * to create the [com.stripe.android.model.PaymentIntent] or [com.stripe.android.model.SetupIntent]
- * on your server.
- *
- * This *must* be called unconditionally, as part of the initialization path.
- *
- * @param createIntentCallback Called when the customer confirms the payment or setup.
- * @param paymentResultCallback Called with the result of the payment after [PaymentSheet] is dismissed.
- */
-@Composable
-fun rememberPaymentSheet(
-    createIntentCallback: CreateIntentCallback,
-    paymentResultCallback: PaymentSheetResultCallback,
-): PaymentSheet {
-    UpdateIntentConfirmationInterceptor(createIntentCallback)
-    return rememberPaymentSheet(paymentResultCallback)
-}
-
-/**
- * Creates a [PaymentSheet] that is remembered across compositions. Use this method if you implement any external
- * payment methods, as specified in your [PaymentSheet.Configuration].
- *
- * This *must* be called unconditionally, as part of the initialization path.
- *
- * If you intend to create the [com.stripe.android.model.PaymentIntent] or [com.stripe.android.model.SetupIntent] on
- * your server, include a [createIntentCallback].
- *
- * @param createIntentCallback If specified, called when the customer confirms the payment or setup.
- * @param paymentResultCallback Called with the result of the payment after [PaymentSheet] is dismissed.
- * @param externalPaymentMethodConfirmHandler Called when a user confirms payment for an external payment method.
- */
-@Composable
-fun rememberPaymentSheet(
-    createIntentCallback: CreateIntentCallback? = null,
-    externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
-    paymentResultCallback: PaymentSheetResultCallback,
-): PaymentSheet {
-    UpdateExternalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
-    return if (createIntentCallback == null) {
-        rememberPaymentSheet(paymentResultCallback)
-    } else {
-        rememberPaymentSheet(createIntentCallback, paymentResultCallback)
     }
 }

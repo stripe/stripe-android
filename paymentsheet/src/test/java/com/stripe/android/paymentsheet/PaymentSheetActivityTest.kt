@@ -163,7 +163,8 @@ internal class PaymentSheetActivityTest {
                 clientSecret = "pi_1234_secret_5678",
             ),
             config = PaymentSheetFixtures.CONFIG_CUSTOMER,
-            statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR
+            statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
+            instanceId = "PaymentSheet",
         )
     )
 
@@ -996,6 +997,7 @@ internal class PaymentSheetActivityTest {
                 customer = invalidCustomerConfig,
             ),
             statusBarColor = null,
+            instanceId = "PaymentSheet",
         )
 
         val intent = contract.createIntent(context, args)
@@ -1019,6 +1021,7 @@ internal class PaymentSheetActivityTest {
                 merchantDisplayName = "Some name",
             ),
             statusBarColor = null,
+            instanceId = "PaymentSheet",
         )
 
         val intent = contract.createIntent(context, args)
@@ -1165,6 +1168,7 @@ internal class PaymentSheetActivityTest {
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
                 confirmationHandlerFactory = createTestConfirmationHandlerFactory(
+                    instanceId = "PaymentSheet",
                     intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
                     savedStateHandle = savedStateHandle,
                     stripePaymentLauncherAssistedFactory = stripePaymentLauncherAssistedFactory,

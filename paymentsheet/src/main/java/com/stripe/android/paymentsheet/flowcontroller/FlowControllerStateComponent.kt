@@ -5,6 +5,7 @@ import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
@@ -48,6 +49,9 @@ internal interface FlowControllerStateComponent {
 
         @BindsInstance
         fun application(application: Application): Builder
+
+        @BindsInstance
+        fun instanceId(@PaymentElementCallbackIdentifier instanceId: String): Builder
 
         @BindsInstance
         fun flowControllerViewModel(viewModel: FlowControllerViewModel): Builder

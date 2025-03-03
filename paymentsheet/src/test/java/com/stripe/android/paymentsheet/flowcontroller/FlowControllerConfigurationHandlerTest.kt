@@ -9,8 +9,6 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
-import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -20,7 +18,7 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.SessionTestRule
 import com.stripe.android.utils.FakePaymentElementLoader
-import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
+import com.stripe.android.utils.PaymentElementCallbackTestRule
 import com.stripe.android.utils.RelayingPaymentElementLoader
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
@@ -44,7 +42,7 @@ import kotlin.time.Duration.Companion.seconds
 class FlowControllerConfigurationHandlerTest {
 
     @get:Rule
-    val intentConfirmationInterceptorTestRule = IntentConfirmationInterceptorTestRule()
+    val paymentElementCallbackTestRule = PaymentElementCallbackTestRule()
 
     @get:Rule
     val sessionRule = SessionTestRule()
@@ -66,6 +64,7 @@ class FlowControllerConfigurationHandlerTest {
         viewModel = FlowControllerViewModel(
             application = ApplicationProvider.getApplicationContext(),
             handle = SavedStateHandle(),
+            instanceId = "PaymentSheet",
             statusBarColor = null,
         )
     }
@@ -447,10 +446,6 @@ class FlowControllerConfigurationHandlerTest {
         val configureTurbine = Turbine<Throwable?>()
         val configurationHandler = createConfigurationHandler()
 
-        IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
-            throw AssertionError("Not expected to be called")
-        }
-
         configurationHandler.configure(
             scope = this,
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
@@ -479,11 +474,6 @@ class FlowControllerConfigurationHandlerTest {
     fun `Sends correct analytics event when using deferred intent with server-side confirmation`() = runTest {
         val configureTurbine = Turbine<Throwable?>()
         val configurationHandler = createConfigurationHandler()
-
-        IntentConfirmationInterceptor.createIntentCallback =
-            CreateIntentCallback { _, _ ->
-                throw AssertionError("Not expected to be called")
-            }
 
         configurationHandler.configure(
             scope = this,

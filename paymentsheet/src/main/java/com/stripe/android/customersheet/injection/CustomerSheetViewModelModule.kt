@@ -22,6 +22,7 @@ import com.stripe.android.customersheet.CustomerSheetLoader
 import com.stripe.android.customersheet.DefaultCustomerSheetLoader
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.analytics.DefaultCustomerSheetEventReporter
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
@@ -74,6 +75,13 @@ internal interface CustomerSheetViewModelModule {
         @Provides
         fun provideCoroutineContext(): CoroutineContext {
             return Dispatchers.IO
+        }
+
+        @Provides
+        @PaymentElementCallbackIdentifier
+        fun providesInstanceId(): String {
+            // We don't have shared callback dependencies here
+            return "CustomerSheet"
         }
 
         @Provides

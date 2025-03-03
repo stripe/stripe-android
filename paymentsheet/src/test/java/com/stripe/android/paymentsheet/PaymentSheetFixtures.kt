@@ -186,8 +186,9 @@ internal object PaymentSheetFixtures {
     internal val ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
         get() = PaymentSheetContractV2.Args(
             initializationMode = PaymentElementLoader.InitializationMode.SetupIntent("seti_1234_secret_1234"),
-            CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            STATUS_BAR_COLOR
+            config = CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            instanceId = "PaymentSheet",
+            statusBarColor = STATUS_BAR_COLOR,
         )
 
     internal val ARGS_CUSTOMER_WITH_GOOGLEPAY
@@ -195,8 +196,9 @@ internal object PaymentSheetFixtures {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
-            CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            STATUS_BAR_COLOR
+            config = CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            instanceId = "PaymentSheet",
+            statusBarColor = STATUS_BAR_COLOR
         )
 
     internal val ARGS_CUSTOMER_WITHOUT_GOOGLEPAY
@@ -204,8 +206,9 @@ internal object PaymentSheetFixtures {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
-            CONFIG_CUSTOMER,
-            STATUS_BAR_COLOR
+            config = CONFIG_CUSTOMER,
+            instanceId = "PaymentSheet",
+            statusBarColor = STATUS_BAR_COLOR
         )
 
     internal val ARGS_WITHOUT_CUSTOMER
@@ -225,8 +228,9 @@ internal object PaymentSheetFixtures {
                     )
                 )
             ),
-            CONFIG_CUSTOMER,
-            STATUS_BAR_COLOR
+            config = CONFIG_CUSTOMER,
+            instanceId = "PaymentSheet",
+            statusBarColor = STATUS_BAR_COLOR
         )
 
     internal val COMPOSE_FRAGMENT_ARGS

@@ -11,6 +11,8 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.testing.FakeErrorReporter
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -34,13 +36,17 @@ class ExternalPaymentMethodProxyActivityTest {
         val expectedBillingDetails =
             PaymentMethod.BillingDetails(name = "Joe", address = Address(city = "Seattle", line1 = "123 Main St"))
 
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = confirmHandler
-        ExternalPaymentMethodInterceptor.intercept(
-            externalPaymentMethodType = expectedExternalPaymentMethodType,
-            billingDetails = expectedBillingDetails,
-            onPaymentResult = {},
-            externalPaymentMethodLauncher = activityLauncher,
-            errorReporter = FakeErrorReporter(),
+        PaymentElementCallbackReferences["ExternalPaymentMethod"] = PaymentElementCallbacks(
+            createIntentCallback = null,
+            externalPaymentMethodConfirmHandler = confirmHandler,
+        )
+
+        activityLauncher.launch(
+            input = ExternalPaymentMethodInput(
+                instanceId = "ExternalPaymentMethod",
+                type = expectedExternalPaymentMethodType,
+                billingDetails = expectedBillingDetails,
+            )
         )
 
         assertThat(confirmHandler.confirmedType).isEqualTo(expectedExternalPaymentMethodType)
@@ -59,13 +65,17 @@ class ExternalPaymentMethodProxyActivityTest {
             context,
         )
 
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = confirmHandler
-        ExternalPaymentMethodInterceptor.intercept(
-            externalPaymentMethodType = "external_fawry",
-            billingDetails = PaymentMethod.BillingDetails(),
-            onPaymentResult = {},
-            externalPaymentMethodLauncher = activityLauncher,
-            errorReporter = FakeErrorReporter(),
+        PaymentElementCallbackReferences["ExternalPaymentMethod"] = PaymentElementCallbacks(
+            createIntentCallback = null,
+            externalPaymentMethodConfirmHandler = confirmHandler,
+        )
+
+        activityLauncher.launch(
+            input = ExternalPaymentMethodInput(
+                instanceId = "ExternalPaymentMethod",
+                type = "external_fawry",
+                billingDetails = PaymentMethod.BillingDetails(),
+            )
         )
 
         assertThat(confirmHandler.callCount).isEqualTo(1)
@@ -116,6 +126,62 @@ class ExternalPaymentMethodProxyActivityTest {
         )
 
         assertThat(scenario.result).isNotNull()
+    }
+
+    @Test
+    fun `On separate instances, should be able to fetch proper callback`() {
+        val firstConfirmHandler = DefaultExternalPaymentMethodConfirmHandler()
+        val secondConfirmHandler = DefaultExternalPaymentMethodConfirmHandler()
+
+        val activityLauncher = ExternalPaymentMethodActivityResultLauncher(
+            context,
+        )
+
+        PaymentElementCallbackReferences["ExternalPaymentMethodOne"] = PaymentElementCallbacks(
+            createIntentCallback = null,
+            externalPaymentMethodConfirmHandler = firstConfirmHandler,
+        )
+
+        PaymentElementCallbackReferences["ExternalPaymentMethodTwo"] = PaymentElementCallbacks(
+            createIntentCallback = null,
+            externalPaymentMethodConfirmHandler = secondConfirmHandler,
+        )
+
+        activityLauncher.launch(
+            input = ExternalPaymentMethodInput(
+                instanceId = "ExternalPaymentMethodOne",
+                type = "external_paypal",
+                billingDetails = PaymentMethod.BillingDetails(
+                    email = "email@email.com",
+                ),
+            ),
+        )
+
+        activityLauncher.launch(
+            input = ExternalPaymentMethodInput(
+                instanceId = "ExternalPaymentMethodTwo",
+                type = "external_fawry",
+                billingDetails = PaymentMethod.BillingDetails(
+                    email = "email2@email.com",
+                ),
+            ),
+        )
+
+        assertThat(firstConfirmHandler.callCount).isEqualTo(1)
+        assertThat(firstConfirmHandler.confirmedType).isEqualTo("external_paypal")
+        assertThat(firstConfirmHandler.confirmedBillingDetails).isEqualTo(
+            PaymentMethod.BillingDetails(
+                email = "email@email.com",
+            ),
+        )
+
+        assertThat(secondConfirmHandler.callCount).isEqualTo(1)
+        assertThat(secondConfirmHandler.confirmedType).isEqualTo("external_fawry")
+        assertThat(secondConfirmHandler.confirmedBillingDetails).isEqualTo(
+            PaymentMethod.BillingDetails(
+                email = "email2@email.com",
+            ),
+        )
     }
 
     class DefaultExternalPaymentMethodConfirmHandler : ExternalPaymentMethodConfirmHandler {

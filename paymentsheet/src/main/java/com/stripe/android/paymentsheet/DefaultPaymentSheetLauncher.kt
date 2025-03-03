@@ -9,7 +9,7 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.uicore.utils.AnimationConstants
 import org.jetbrains.annotations.TestOnly
@@ -24,14 +24,14 @@ internal class DefaultPaymentSheetLauncher(
     private val lifecycleOwner: LifecycleOwner,
     private val application: Application,
     private val callback: PaymentSheetResultCallback,
+    private val instanceId: String = "PaymentSheet",
     private val initializedViaCompose: Boolean = false,
 ) : PaymentSheetLauncher {
     init {
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
-                    IntentConfirmationInterceptor.createIntentCallback = null
-                    ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
+                    PaymentElementCallbackReferences.remove(instanceId)
                     super.onDestroy(owner)
                 }
             }
@@ -94,6 +94,7 @@ internal class DefaultPaymentSheetLauncher(
             initializationMode = mode,
             config = configuration ?: PaymentSheet.Configuration.default(activity),
             statusBarColor = activity.window?.statusBarColor,
+            instanceId = instanceId,
             initializedViaCompose = initializedViaCompose,
         )
 

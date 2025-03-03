@@ -23,11 +23,15 @@ internal class EmbeddedPaymentElementViewModel @Inject constructor(
         customViewModelScope.cancel()
     }
 
-    class Factory(private val statusBarColor: Int?) : ViewModelProvider.Factory {
+    class Factory(
+        private val instanceId: String,
+        private val statusBarColor: Int?,
+    ) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: KClass<T>, extras: CreationExtras): T {
             val component = DaggerEmbeddedPaymentElementViewModelComponent.builder()
                 .savedStateHandle(extras.createSavedStateHandle())
                 .application(extras.requireApplication())
+                .instanceId(instanceId)
                 .statusBarColor(statusBarColor)
                 .build()
             @Suppress("UNCHECKED_CAST")

@@ -548,6 +548,7 @@ internal class VerticalModePaymentSheetActivityTest {
                             }
                         }
                         .build(),
+                    instanceId = "PaymentSheet",
                     statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
                 )
             )

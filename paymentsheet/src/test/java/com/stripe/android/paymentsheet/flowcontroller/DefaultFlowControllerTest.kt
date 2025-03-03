@@ -36,9 +36,10 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.wallets.Wallet
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.createTestConfirmationHandlerFactory
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
-import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.InvalidDeferredIntentUsageException
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
@@ -46,12 +47,8 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
-import com.stripe.android.paymentsheet.CreateIntentCallback
-import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
-import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
-import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
@@ -92,7 +89,7 @@ import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
-import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
+import com.stripe.android.utils.PaymentElementCallbackTestRule
 import com.stripe.android.utils.RelayingPaymentElementLoader
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -124,7 +121,7 @@ import kotlin.test.Test
 internal class DefaultFlowControllerTest {
 
     @get:Rule
-    val intentConfirmationInterceptorRule = IntentConfirmationInterceptorTestRule()
+    val intentConfirmationInterceptorRule = PaymentElementCallbackTestRule()
 
     private val paymentOptionCallback = mock<PaymentOptionCallback>()
     private val paymentResultCallback = mock<PaymentSheetResultCallback>()
@@ -1464,10 +1461,6 @@ internal class DefaultFlowControllerTest {
         )
 
         for ((clientSecret, deferredIntentConfirmationType) in clientSecrets) {
-            IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
-                CreateIntentResult.Success(clientSecret)
-            }
-
             val flowController = createAndConfigureFlowControllerForDeferredIntent()
             val savedSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
@@ -1899,45 +1892,48 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `Clears out CreateIntentCallback when lifecycle owner is destroyed`() {
-        IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
-            error("I’m alive")
-        }
+        PaymentElementCallbackReferences[INSTANCE_ID] = PaymentElementCallbacks(
+            createIntentCallback = { _, _ ->
+                error("I’m alive")
+            },
+            externalPaymentMethodConfirmHandler = null,
+        )
 
         createFlowController()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-        assertThat(IntentConfirmationInterceptor.createIntentCallback).isNotNull()
+        assertThat(PaymentElementCallbackReferences[INSTANCE_ID]?.createIntentCallback).isNotNull()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
-        assertThat(IntentConfirmationInterceptor.createIntentCallback).isNotNull()
+        assertThat(PaymentElementCallbackReferences[INSTANCE_ID]?.createIntentCallback).isNotNull()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        assertThat(IntentConfirmationInterceptor.createIntentCallback).isNull()
+        assertThat(PaymentElementCallbackReferences[INSTANCE_ID]?.createIntentCallback).isNull()
     }
 
     @Test
     fun `Clears out externalPaymentMethodConfirmHandler when lifecycle owner is destroyed`() {
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler =
-            ExternalPaymentMethodConfirmHandler { _, _ ->
+        PaymentElementCallbackReferences[INSTANCE_ID] = PaymentElementCallbacks(
+            createIntentCallback = null,
+            externalPaymentMethodConfirmHandler = { _, _ ->
                 error("I’m alive")
             }
+        )
 
         createFlowController()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-        assertThat(ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler).isNotNull()
+        assertThat(PaymentElementCallbackReferences[INSTANCE_ID]?.externalPaymentMethodConfirmHandler).isNotNull()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
-        assertThat(ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler).isNotNull()
+        assertThat(PaymentElementCallbackReferences[INSTANCE_ID]?.externalPaymentMethodConfirmHandler).isNotNull()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        assertThat(ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler).isNull()
+        assertThat(PaymentElementCallbackReferences[INSTANCE_ID]?.externalPaymentMethodConfirmHandler).isNull()
     }
 
     @Test
     fun `On external payment error, should report external payment method failure`() = runTest {
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
-
         val eventReporter = FakeEventReporter()
         val flowController = createFlowController(
             eventReporter = eventReporter,
@@ -2299,7 +2295,9 @@ internal class DefaultFlowControllerTest {
         errorReporter = errorReporter,
         initializedViaCompose = false,
         linkHandler = mock(),
+        instanceId = INSTANCE_ID,
         confirmationHandler = createTestConfirmationHandlerFactory(
+            instanceId = "FlowController",
             bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
             googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
             intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
@@ -2321,6 +2319,7 @@ internal class DefaultFlowControllerTest {
             application = ApplicationProvider.getApplicationContext(),
             handle = SavedStateHandle(),
             statusBarColor = STATUS_BAR_COLOR,
+            instanceId = INSTANCE_ID,
         )
     }
 
@@ -2398,6 +2397,8 @@ internal class DefaultFlowControllerTest {
         private const val BACS_SORT_CODE = "108800"
         private const val BACS_NAME = "John Doe"
         private const val BACS_EMAIL = "johndoe@email.com"
+
+        private const val INSTANCE_ID = "FlowController"
     }
 }
 

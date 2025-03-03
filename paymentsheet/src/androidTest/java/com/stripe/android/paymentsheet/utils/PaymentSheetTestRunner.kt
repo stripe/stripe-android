@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.utils
 
-import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import com.google.common.truth.Truth.assertThat
@@ -50,31 +50,41 @@ internal fun runPaymentSheetTest(
     resultCallback: PaymentSheetResultCallback,
     block: (PaymentSheetTestRunnerContext) -> Unit,
 ) {
-    val countDownLatch = CountDownLatch(1)
-
-    val factory = PaymentSheetTestFactory(
-        integrationType = integrationType,
-        createIntentCallback = createIntentCallback,
-        resultCallback = { result ->
-            resultCallback.onPaymentSheetResult(result)
-            countDownLatch.countDown()
-        }
-    )
-
     runPaymentSheetTestInternal(
         networkRule = networkRule,
-        countDownLatch = countDownLatch,
+        integrationType = integrationType,
+        createIntentCallbacks = listOf(createIntentCallback),
         countDownLatchTimeoutSeconds = successTimeoutSeconds,
-        makePaymentSheet = factory::make,
+        resultCallbacks = listOf(resultCallback),
+        block = block,
+    )
+}
+
+internal fun runMultiplePaymentSheetInstancesTest(
+    networkRule: NetworkRule,
+    firstCreateIntentCallback: CreateIntentCallback? = null,
+    secondCreateIntentCallback: CreateIntentCallback? = null,
+    successTimeoutSeconds: Long = 5L,
+    firstResultCallback: PaymentSheetResultCallback,
+    secondResultCallback: PaymentSheetResultCallback,
+    block: (PaymentSheetTestRunnerContext) -> Unit,
+) {
+    runPaymentSheetTestInternal(
+        networkRule = networkRule,
+        integrationType = IntegrationType.Compose,
+        createIntentCallbacks = listOf(firstCreateIntentCallback, secondCreateIntentCallback),
+        countDownLatchTimeoutSeconds = successTimeoutSeconds,
+        resultCallbacks = listOf(firstResultCallback, secondResultCallback),
         block = block,
     )
 }
 
 private fun runPaymentSheetTestInternal(
     networkRule: NetworkRule,
-    countDownLatch: CountDownLatch,
+    integrationType: IntegrationType,
+    createIntentCallbacks: List<CreateIntentCallback?>,
     countDownLatchTimeoutSeconds: Long,
-    makePaymentSheet: (ComponentActivity) -> PaymentSheet,
+    resultCallbacks: List<PaymentSheetResultCallback>,
     block: (PaymentSheetTestRunnerContext) -> Unit,
 ) {
     ActivityScenario.launch(MainActivity::class.java).use { scenario ->
@@ -84,18 +94,57 @@ private fun runPaymentSheetTestInternal(
             LinkStore(it.applicationContext).clear()
         }
 
-        lateinit var paymentSheet: PaymentSheet
-        scenario.onActivity {
-            paymentSheet = makePaymentSheet(it)
+        val paymentSheets = mutableMapOf<PaymentSheet, CountDownLatch>()
+        scenario.onActivity { activity ->
+            when (integrationType) {
+                IntegrationType.Compose -> {
+                    activity.setContent {
+                        resultCallbacks.forEachIndexed { index, resultCallback ->
+                            val countDownLatch = CountDownLatch(1)
+
+                            val factory = PaymentSheetTestFactory(
+                                createIntentCallback = createIntentCallbacks.getOrNull(index),
+                                resultCallback = { result ->
+                                    resultCallback.onPaymentSheetResult(result)
+                                    countDownLatch.countDown()
+                                }
+                            )
+
+                            paymentSheets[factory.make()] = countDownLatch
+                        }
+                    }
+                }
+                IntegrationType.Activity -> {
+                    resultCallbacks.forEachIndexed { index, resultCallback ->
+                        val countDownLatch = CountDownLatch(1)
+
+                        val factory = PaymentSheetTestFactory(
+                            createIntentCallback = createIntentCallbacks.getOrNull(index),
+                            resultCallback = { result ->
+                                resultCallback.onPaymentSheetResult(result)
+                                countDownLatch.countDown()
+                            }
+                        )
+
+                        paymentSheets[factory.make(activity)] = countDownLatch
+                    }
+                }
+            }
         }
 
         scenario.moveToState(Lifecycle.State.RESUMED)
 
-        val testContext = PaymentSheetTestRunnerContext(scenario, paymentSheet, countDownLatch)
-        block(testContext)
+        paymentSheets.forEach { (paymentSheet, countDownLatch) ->
+            scenario.onActivity {
+                LinkStore(it.applicationContext).clear()
+            }
 
-        val didCompleteSuccessfully = countDownLatch.await(countDownLatchTimeoutSeconds, TimeUnit.SECONDS)
-        networkRule.validate()
-        assertThat(didCompleteSuccessfully).isTrue()
+            val testContext = PaymentSheetTestRunnerContext(scenario, paymentSheet, countDownLatch)
+            block(testContext)
+
+            val didCompleteSuccessfully = countDownLatch.await(countDownLatchTimeoutSeconds, TimeUnit.SECONDS)
+            networkRule.validate()
+            assertThat(didCompleteSuccessfully).isTrue()
+        }
     }
 }

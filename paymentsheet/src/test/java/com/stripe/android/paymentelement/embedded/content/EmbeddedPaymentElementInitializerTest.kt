@@ -44,6 +44,7 @@ internal class EmbeddedPaymentElementInitializerTest {
             lifecycleOwner = lifecycleOwner,
             savedStateHandle = SavedStateHandle(),
             eventReporter = eventReporter,
+            instanceId = "EmbeddedPaymentElement",
         )
         Scenario(
             initializer = initializer,

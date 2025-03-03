@@ -10,5 +10,6 @@ internal data class NativeLinkArgs(
     val publishableKey: String,
     val stripeAccountId: String?,
     val startWithVerificationDialog: Boolean,
-    val linkAccount: LinkAccount?
+    val linkAccount: LinkAccount?,
+    val instanceId: String,
 ) : Parcelable

@@ -685,14 +685,16 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             val application = extras.requireApplication()
             val savedStateHandle = extras.createSavedStateHandle()
+            val arguments = starterArgsSupplier()
 
             val component = DaggerPaymentSheetLauncherComponent
                 .builder()
                 .application(application)
                 .savedStateHandle(savedStateHandle)
+                .instanceId(arguments.instanceId)
                 .build()
                 .paymentSheetViewModelSubcomponentBuilder
-                .paymentSheetViewModelModule(PaymentSheetViewModelModule(starterArgsSupplier()))
+                .paymentSheetViewModelModule(PaymentSheetViewModelModule(arguments))
                 .build()
 
             return component.viewModel as T
