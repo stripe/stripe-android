@@ -1,5 +1,6 @@
 package com.stripe.android.lpm
 
+import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.example.playground.settings.Country
@@ -11,10 +12,16 @@ import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillin
 import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.test.core.TestParameters
-import org.junit.Ignore
+import com.stripe.android.utils.ForceNativeBankFlowTestRule
+import org.junit.Rule
 import org.junit.Test
 
 internal class TestEmbedded : BasePlaygroundTest() {
+    @get:Rule
+    val forceNativeBankFlowTestRule = ForceNativeBankFlowTestRule(
+        context = ApplicationProvider.getApplicationContext()
+    )
+
     @Test
     fun testCard() {
         testDriver.confirmEmbedded(
@@ -49,7 +56,6 @@ internal class TestEmbedded : BasePlaygroundTest() {
         )
     }
 
-    @Ignore("Test currently failing, ignoring while we work on a fix so we can merge other PRs.")
     @Test
     fun testUsBankAccount() {
         testDriver.confirmEmbeddedUsBankAccount(
