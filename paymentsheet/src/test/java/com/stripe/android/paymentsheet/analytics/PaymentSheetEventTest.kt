@@ -415,7 +415,44 @@ class PaymentSheetEventTest {
         assertThat(event.params).containsEntry("set_as_default_enabled", true)
         assertThat(event.params).containsEntry("has_default_payment_method", false)
     }
+
+    @Test
+    fun `LoadSucceeded event with setAsDefaultPaymentMethod null should return expected toString()`() {
+        val event = createLoadSucceededEvent(
+            paymentSelection = null,
+            orderedLpms = listOf("card", "klarna"),
+            hasDefaultPaymentMethod = false,
+            setAsDefaultEnabled = null,
         )
+
+        assertThat(event.params).doesNotContainKey("set_as_default_enabled")
+        assertThat(event.params).doesNotContainKey("has_default_payment_method")
+    }
+
+    @Test
+    fun `LoadSucceeded event with setAsDefaultPaymentMethod false should return expected toString()`() {
+        val event = createLoadSucceededEvent(
+            paymentSelection = null,
+            orderedLpms = listOf("card", "klarna"),
+            hasDefaultPaymentMethod = false,
+            setAsDefaultEnabled = false,
+        )
+
+        assertThat(event.params).containsEntry("set_as_default_enabled", false)
+        assertThat(event.params).doesNotContainKey("has_default_payment_method")
+    }
+
+    @Test
+    fun `LoadSucceeded event with hasDefaultPaymentMethod null should return expected toString()`() {
+        val event = createLoadSucceededEvent(
+            paymentSelection = null,
+            orderedLpms = listOf("card", "klarna"),
+            hasDefaultPaymentMethod = null,
+            setAsDefaultEnabled = true,
+        )
+
+        assertThat(event.params).containsEntry("set_as_default_enabled", true)
+        assertThat(event.params).doesNotContainKey("has_default_payment_method")
     }
 
     @Test

@@ -60,11 +60,11 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             linkMode?.let { mode ->
                 put(FIELD_LINK_MODE, mode.analyticsValue)
             }
-            hasDefaultPaymentMethod?.let {
-                put(FIELD_HAS_DEFAULT_PAYMENT_METHOD, it)
-            }
             setAsDefaultEnabled?.let {
                 put(FIELD_SET_AS_DEFAULT_ENABLED, it)
+            }
+            if (setAsDefaultEnabled == true && hasDefaultPaymentMethod != null) {
+                put(FIELD_HAS_DEFAULT_PAYMENT_METHOD, hasDefaultPaymentMethod)
             }
         }
 

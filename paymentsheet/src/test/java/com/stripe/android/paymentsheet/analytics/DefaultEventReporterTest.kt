@@ -128,11 +128,13 @@ class DefaultEventReporterTest {
         val eventReporter = createEventReporter(EventReporter.Mode.Complete)
 
         eventReporter.simulateSuccessfulSetup(
+            setAsDefaultEnabled = true,
             hasDefaultPaymentMethod = true
         )
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
+                req.params["set_as_default_enabled"] == true &&
                 req.params["has_default_payment_method"] == true
             }
         )
@@ -148,7 +150,8 @@ class DefaultEventReporterTest {
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["set_as_default_enabled"] == true
+                req.params["set_as_default_enabled"] == true &&
+                req.params["has_default_payment_method"] == null
             }
         )
     }
@@ -849,8 +852,8 @@ class DefaultEventReporterTest {
                 clientSecret = "cs_example"
             ),
         requireCvcRecollection: Boolean = false,
-        hasDefaultPaymentMethod: Boolean = false,
-        setAsDefaultEnabled: Boolean = false,
+        hasDefaultPaymentMethod: Boolean? = null,
+        setAsDefaultEnabled: Boolean? = null,
     ) {
         onInit(configuration, isDeferred = false)
         onLoadStarted(initializedViaCompose = false)
