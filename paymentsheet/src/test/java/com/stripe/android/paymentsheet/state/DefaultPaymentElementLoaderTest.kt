@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
@@ -97,7 +96,6 @@ internal class DefaultPaymentElementLoaderTest {
         )
     }
 
-    @OptIn(ExperimentalCardBrandFilteringApi::class)
     @Test
     fun `load with configuration should return expected result`() = runTest {
         prefsRepository.savePaymentSelection(
@@ -1348,7 +1346,6 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(result.paymentMethodMetadata.linkInlineConfiguration).isNull()
     }
 
-    @OptIn(ExperimentalCardBrandFilteringApi::class)
     @Test
     fun `Disables Link if card brand filtering is used`() = runTest {
         val loader = createPaymentElementLoader()
@@ -2314,7 +2311,6 @@ internal class DefaultPaymentElementLoaderTest {
         )
     }
 
-    @OptIn(ExperimentalCardBrandFilteringApi::class)
     @Test
     fun `Should filter out saved cards with disallowed brands`() = runTest {
         prefsRepository.savePaymentSelection(null)

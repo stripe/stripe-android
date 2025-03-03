@@ -12,7 +12,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
-import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.account.LinkStore
@@ -825,7 +824,6 @@ class PaymentSheet internal constructor(
              * **Note**: This is only a client-side solution.
              * **Note**: Card brand filtering is not currently supported in Link.
              */
-            @ExperimentalCardBrandFilteringApi
             fun cardBrandAcceptance(
                 cardBrandAcceptance: CardBrandAcceptance
             ) = apply {
@@ -1827,7 +1825,6 @@ class PaymentSheet internal constructor(
          * Card brand categories that can be allowed or disallowed
          */
         @Parcelize
-        @ExperimentalCardBrandFilteringApi
         enum class BrandCategory : Parcelable {
             /**
              * Visa branded cards
@@ -1856,7 +1853,6 @@ class PaymentSheet internal constructor(
              * Accept all card brands supported by Stripe
              */
             @JvmStatic
-            @ExperimentalCardBrandFilteringApi
             fun all(): CardBrandAcceptance = All
 
             /**
@@ -1864,7 +1860,6 @@ class PaymentSheet internal constructor(
              * **Note**: Any card brands that do not map to a `BrandCategory` will be blocked when using an allow list.
              */
             @JvmStatic
-            @ExperimentalCardBrandFilteringApi
             fun allowed(brands: List<BrandCategory>): CardBrandAcceptance =
                 Allowed(brands)
 
@@ -1874,7 +1869,6 @@ class PaymentSheet internal constructor(
              * when using a disallow list.
              */
             @JvmStatic
-            @ExperimentalCardBrandFilteringApi
             fun disallowed(brands: List<BrandCategory>): CardBrandAcceptance =
                 Disallowed(brands)
         }
@@ -1883,13 +1877,11 @@ class PaymentSheet internal constructor(
         internal data object All : CardBrandAcceptance()
 
         @Parcelize
-        @OptIn(ExperimentalCardBrandFilteringApi::class)
         internal data class Allowed(
             val brands: List<BrandCategory>
         ) : CardBrandAcceptance()
 
         @Parcelize
-        @OptIn(ExperimentalCardBrandFilteringApi::class)
         internal data class Disallowed(
             val brands: List<BrandCategory>
         ) : CardBrandAcceptance()
