@@ -182,9 +182,6 @@ internal class FinancialConnectionsRepositoryImpl @Inject constructor(
         private const val authorizationSessionOAuthResultsUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/oauth_results"
 
-        internal const val authorizeSessionUrl: String =
-            "${ApiRequest.API_HOST}/v1/connections/auth_sessions/authorized"
-
         private const val paymentMethodsUrl: String =
             "${ApiRequest.API_HOST}/v1/payment_methods"
     }
