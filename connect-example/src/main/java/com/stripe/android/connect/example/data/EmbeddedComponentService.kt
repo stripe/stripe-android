@@ -8,6 +8,12 @@ import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.fuel.core.awaitResult
 import com.github.kittinunf.result.Result
 import com.stripe.android.connect.example.data.EmbeddedComponentService.Companion.DEFAULT_SERVER_BASE_URL
+import com.stripe.android.connect.example.core.Async
+import com.stripe.android.connect.example.core.Fail
+import com.stripe.android.connect.example.core.Loading
+import com.stripe.android.connect.example.core.Success
+import com.stripe.android.connect.example.core.Uninitialized
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,7 +25,7 @@ import javax.inject.Inject
 interface EmbeddedComponentService {
     val serverBaseUrl: String
     val publishableKey: StateFlow<String?>
-    val accounts: StateFlow<List<Merchant>?>
+    val accounts: StateFlow<Async<List<Merchant>>>
     fun setBackendBaseUrl(url: String)
 
     /**
@@ -54,8 +60,8 @@ class EmbeddedComponentServiceImpl @Inject constructor(
     private val _publishableKey: MutableStateFlow<String?> = MutableStateFlow(null)
     override val publishableKey: StateFlow<String?> = _publishableKey
 
-    private val _accounts: MutableStateFlow<List<Merchant>?> = MutableStateFlow(null)
-    override val accounts: StateFlow<List<Merchant>?> = _accounts
+    private val _accounts: MutableStateFlow<Async<List<Merchant>>> = MutableStateFlow(Uninitialized)
+    override val accounts: StateFlow<Async<List<Merchant>>> = _accounts
 
     override fun setBackendBaseUrl(url: String) {
         serverBaseUrl = if (!url.endsWith("/")) {
@@ -88,19 +94,28 @@ class EmbeddedComponentServiceImpl @Inject constructor(
      */
     override suspend fun getAccounts(): GetAccountsResponse {
         return withContext(Dispatchers.IO) {
-            fuel.get(serverBaseUrl + "app_info")
-                .awaitModel(GetAccountsResponse.serializer())
-                .get()
-                .apply {
-                    _publishableKey.value = publishableKey
-                    _accounts.value = availableMerchants
+            _accounts.value = Loading()
+            try {
+                fuel.get(serverBaseUrl + "app_info")
+                    .awaitModel(GetAccountsResponse.serializer())
+                    .get()
+                    .apply {
+                        _publishableKey.value = publishableKey
+                        _accounts.value = Success(availableMerchants)
 
-                    // if we have no selected merchant, default to the first one
-                    val firstMerchant = availableMerchants.firstOrNull()?.merchantId
-                    if (settingsService.getSelectedMerchant() == null && firstMerchant != null) {
-                        settingsService.setSelectedMerchant(firstMerchant)
+                        // if we have no selected merchant, default to the first one
+                        val firstMerchant = availableMerchants.firstOrNull()?.merchantId
+                        if (settingsService.getSelectedMerchant() == null && firstMerchant != null) {
+                            settingsService.setSelectedMerchant(firstMerchant)
+                        }
                     }
-                }
+            } catch (e: CancellationException) {
+                @Suppress("RethrowCaughtException")
+                throw e
+            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                _accounts.value = Fail(e, _accounts.value())
+                throw e
+            }
         }
     }
 

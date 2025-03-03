@@ -3,7 +3,10 @@ package com.stripe.android.connect.example.ui.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.connect.BuildConfig
+import com.stripe.android.connect.example.core.Async
+import com.stripe.android.connect.example.core.Uninitialized
 import com.stripe.android.connect.example.data.EmbeddedComponentService
+import com.stripe.android.connect.example.data.Merchant
 import com.stripe.android.connect.example.data.OnboardingSettings
 import com.stripe.android.connect.example.data.PresentationSettings
 import com.stripe.android.connect.example.data.SettingsService
@@ -13,6 +16,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
@@ -32,7 +36,33 @@ class SettingsViewModel @Inject constructor(
     val state: StateFlow<SettingsState> = _state.asStateFlow()
 
     init {
-        loadSettings()
+        loadOneTimeSettings()
+
+        viewModelScope.launch {
+            embeddedComponentService.accounts.collectLatest { async ->
+                _state.update { state ->
+                    val accountsFromService = async()
+                    val firstMerchantId = accountsFromService?.firstOrNull()?.merchantId
+                    val selectedAccountId = settingsService.getSelectedMerchant()
+                    if (selectedAccountId == null && firstMerchantId != null) {
+                        settingsService.setSelectedMerchant(firstMerchantId)
+                    }
+                    val otherAccountInput =
+                        if (state.otherAccountInput == null &&
+                            accountsFromService?.none { it.merchantId == selectedAccountId } == true
+                        ) {
+                            selectedAccountId
+                        } else {
+                            state.otherAccountInput
+                        }
+                    state.copy(
+                        otherAccountInput = otherAccountInput,
+                        accountsFromServiceAsync = async,
+                        selectedAccountId = selectedAccountId,
+                    )
+                }
+            }
+        }
 
         viewModelScope.launch {
             _state.map {
@@ -53,21 +83,15 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun onAccountSelected(account: DemoMerchant) {
-        _state.update { it.copy(selectedAccount = account) }
+        _state.update { it.copy(selectedAccountId = account.merchantId) }
     }
 
     fun onOtherAccountInputChanged(otherAccountIdInput: String) {
         _state.update { state ->
-            val updatedAccounts = state.accounts.map { acc ->
-                when (acc) {
-                    is DemoMerchant.Merchant -> acc
-                    is DemoMerchant.Other -> acc.copy(merchantId = otherAccountIdInput)
-                }
-            }
-            val otherAccount = updatedAccounts.filterIsInstance<DemoMerchant.Other>().firstOrNull()
+            val wasOtherPreviouslySelected = state.selectedAccountIsOther
             state.copy(
-                selectedAccount = otherAccount,
-                accounts = updatedAccounts,
+                selectedAccountId = if (wasOtherPreviouslySelected) otherAccountIdInput else state.selectedAccountId,
+                otherAccountInput = otherAccountIdInput,
                 saveEnabled = true,
             )
         }
@@ -117,38 +141,12 @@ class SettingsViewModel @Inject constructor(
 
     // Private functions
 
-    private fun loadSettings() {
+    private fun loadOneTimeSettings() {
         _state.update { state ->
-            val accountsFromService = embeddedComponentService.accounts.value ?: emptyList()
-            val savedAccountId = settingsService.getSelectedMerchant()
-            val selectedAccountIsOther = accountsFromService.none { it.merchantId == savedAccountId }
-
-            // default to the first merchant in the list if we have no accounts selected
-            // and save it for later use
-            val firstMerchantId = accountsFromService.firstOrNull()?.merchantId
-            val selectedAccountId = savedAccountId ?: firstMerchantId ?: ""
-            if (savedAccountId == null && firstMerchantId != null) {
-                settingsService.setSelectedMerchant(firstMerchantId)
-            }
-
-            // Insert an "Other" account in the list assuming that if we don't recognize the saved
-            // account, it's an "Other" account.
-            val otherAccount = DemoMerchant.Other(if (selectedAccountIsOther) selectedAccountId else "")
-            val mergedAccounts = accountsFromService.map {
-                DemoMerchant.Merchant(
-                    displayName = it.displayName,
-                    merchantId = it.merchantId
-                )
-            } + otherAccount
-
-            val selectedAccount = mergedAccounts.firstOrNull { it.merchantId == savedAccountId } ?: otherAccount
             state.copy(
                 serverUrl = embeddedComponentService.serverBaseUrl,
-                selectedAccount = selectedAccount,
-                accounts = mergedAccounts,
                 onboardingSettings = settingsService.getOnboardingSettings(),
                 presentationSettings = settingsService.getPresentationSettings(),
-                saveEnabled = false,
             )
         }
     }
@@ -158,13 +156,36 @@ class SettingsViewModel @Inject constructor(
     data class SettingsState(
         val serverUrl: String,
         val saveEnabled: Boolean = false,
-        val accounts: List<DemoMerchant> = listOf(DemoMerchant.Other()),
-        val selectedAccount: DemoMerchant? = accounts.firstOrNull(),
+        val accountsFromServiceAsync: Async<List<Merchant>> = Uninitialized,
+        val selectedAccountId: String? = null,
+        val otherAccountInput: String? = "",
         val onboardingSettings: OnboardingSettings = OnboardingSettings(),
         val presentationSettings: PresentationSettings = PresentationSettings()
     ) {
         val serverUrlResetEnabled: Boolean
             get() = serverUrl != EmbeddedComponentService.DEFAULT_SERVER_BASE_URL
+
+        val selectedAccountIsOther: Boolean =
+            accountsFromServiceAsync()?.none { it.merchantId == selectedAccountId } == true
+
+        val accounts: List<DemoMerchant> = run {
+            val accountsFromService = accountsFromServiceAsync() ?: emptyList()
+            val otherAccount = DemoMerchant.Other(otherAccountInput ?: "")
+            buildList {
+                accountsFromService.forEach {
+                    add(
+                        DemoMerchant.Merchant(
+                            displayName = it.displayName,
+                            merchantId = it.merchantId
+                        )
+                    )
+                }
+                add(otherAccount)
+            }
+        }
+
+        val selectedAccount: DemoMerchant?
+            get() = accounts.firstOrNull { it.merchantId == selectedAccountId }
 
         sealed interface DemoMerchant {
             val merchantId: String?
