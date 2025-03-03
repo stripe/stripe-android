@@ -111,8 +111,9 @@ internal class InvalidDeferredIntentUsageException : StripeException() {
     override fun analyticsValue(): String = "invalidDeferredIntentUsage"
 
     override val message: String = """
-        It appears you are reusing an intent on every `createIntentCallback` call. You should either create a brand
-        new intent in `createIntentCallback` or update the existing intent with the new payment method ID.
+        The payment method on the intent doesn't match the one provided in the createIntentCallback. When using deferred
+        intent creation, ensure you're either creating a new intent with the correct payment method or updating an
+        existing intent with the new payment method ID.
     """.trimIndent()
 }
 
