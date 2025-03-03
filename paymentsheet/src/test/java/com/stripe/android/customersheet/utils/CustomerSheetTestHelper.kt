@@ -112,6 +112,7 @@ internal object CustomerSheetTestHelper {
             isLiveModeProvider = { isLiveMode },
             logger = Logger.noop(),
             confirmationHandlerFactory = createTestConfirmationHandlerFactory(
+                instanceId = "CustomerSheet",
                 intentConfirmationInterceptor = intentConfirmationInterceptor,
                 paymentConfiguration = paymentConfiguration,
                 bacsMandateConfirmationLauncherFactory = {

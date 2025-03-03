@@ -20,6 +20,7 @@ class ExternalPaymentMethodConfirmationFlowTest {
         confirmationOption = EPM_CONFIRMATION_OPTION,
         parameters = CONFIRMATION_PARAMETERS,
         definition = ExternalPaymentMethodConfirmationDefinition(
+            instanceId = "ExternalPaymentMethod",
             externalPaymentMethodConfirmHandlerProvider = {
                 ExternalPaymentMethodConfirmHandler { _, _ ->
                     error("Not implemented!")
@@ -34,6 +35,7 @@ class ExternalPaymentMethodConfirmationFlowTest {
         confirmationOption = EPM_CONFIRMATION_OPTION,
         parameters = CONFIRMATION_PARAMETERS,
         definition = ExternalPaymentMethodConfirmationDefinition(
+            instanceId = "ExternalPaymentMethod",
             externalPaymentMethodConfirmHandlerProvider = {
                 ExternalPaymentMethodConfirmHandler { _, _ ->
                     error("Not implemented!")

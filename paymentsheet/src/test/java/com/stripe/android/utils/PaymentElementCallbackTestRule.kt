@@ -1,18 +1,18 @@
 package com.stripe.android.utils
 
-import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 
-class IntentConfirmationInterceptorTestRule : TestWatcher() {
+class PaymentElementCallbackTestRule : TestWatcher() {
 
     override fun starting(description: Description) {
         super.starting(description)
-        IntentConfirmationInterceptor.createIntentCallback = null
+        PaymentElementCallbackReferences.clear()
     }
 
     override fun finished(description: Description) {
-        IntentConfirmationInterceptor.createIntentCallback = null
+        PaymentElementCallbackReferences.clear()
         super.finished(description)
     }
 }
