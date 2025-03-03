@@ -4,8 +4,11 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.MandateDataParams
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodExtraParams
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.SetupIntentFactory
 import org.junit.Test
@@ -22,8 +25,9 @@ class ConfirmSetupIntentParamsFactoryTest {
     }
 
     @Test
-    fun `create() should set setAsDefault as true`() {
+    fun `create() should set setAsDefault as true when using create params`() {
         val result = getConfirmSetupIntentParamsForTesting(
+            createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             extraParams = PaymentMethodExtraParams.Card(
                 setAsDefault = true
             )
@@ -35,8 +39,37 @@ class ConfirmSetupIntentParamsFactoryTest {
     }
 
     @Test
-    fun `create() should set setAsDefault as false`() {
+    fun `create() should set setAsDefault as false when using create params`() {
         val result = getConfirmSetupIntentParamsForTesting(
+            createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            extraParams = PaymentMethodExtraParams.Card(
+                setAsDefault = false
+            )
+        )
+
+        val params = result.asConfirmSetupIntentParams()
+
+        assertThat(params.setAsDefaultPaymentMethod).isFalse()
+    }
+
+    @Test
+    fun `create() should set setAsDefault as true when using payment method`() {
+        val result = getConfirmSetupIntentParamsForTesting(
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            extraParams = PaymentMethodExtraParams.Card(
+                setAsDefault = true
+            )
+        )
+
+        val params = result.asConfirmSetupIntentParams()
+
+        assertThat(params.setAsDefaultPaymentMethod).isTrue()
+    }
+
+    @Test
+    fun `create() should set setAsDefault as false when using payment method`() {
+        val result = getConfirmSetupIntentParamsForTesting(
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             extraParams = PaymentMethodExtraParams.Card(
                 setAsDefault = false
             )
@@ -61,6 +94,7 @@ class ConfirmSetupIntentParamsFactoryTest {
     }
 
     private fun getConfirmSetupIntentParamsForTesting(
+        paymentMethod: PaymentMethod,
         extraParams: PaymentMethodExtraParams
     ): ConfirmSetupIntentParams {
         val factoryWithConfig = ConfirmSetupIntentParamsFactory(
@@ -69,7 +103,23 @@ class ConfirmSetupIntentParamsFactoryTest {
         )
 
         return factoryWithConfig.create(
-            createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            paymentMethod = paymentMethod,
+            optionsParams = null,
+            extraParams = extraParams,
+        )
+    }
+
+    private fun getConfirmSetupIntentParamsForTesting(
+        createParams: PaymentMethodCreateParams,
+        extraParams: PaymentMethodExtraParams
+    ): ConfirmSetupIntentParams {
+        val factoryWithConfig = ConfirmSetupIntentParamsFactory(
+            clientSecret = CLIENT_SECRET,
+            intent = SetupIntentFactory.create(),
+        )
+
+        return factoryWithConfig.create(
+            createParams = createParams,
             optionsParams = null,
             extraParams = extraParams,
         )

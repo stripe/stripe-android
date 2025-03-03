@@ -76,12 +76,13 @@ internal class ConfirmPaymentIntentParamsFactory(
         optionsParams: PaymentMethodOptionsParams?,
         extraParams: PaymentMethodExtraParams?
     ): ConfirmPaymentIntentParams {
-        return ConfirmPaymentIntentParams.createWithPaymentMethodId(
+        return ConfirmPaymentIntentParams.createWithSetAsDefaultPaymentMethod(
             paymentMethodId = paymentMethodId,
             clientSecret = clientSecret,
             paymentMethodOptions = optionsParams,
             mandateData = mandateData(intent, paymentMethodType),
-            shipping = shipping
+            shipping = shipping,
+            setAsDefaultPaymentMethod = extraParams?.extractSetAsDefaultPaymentMethodFromExtraParams(),
         )
     }
 
@@ -111,10 +112,11 @@ internal class ConfirmSetupIntentParamsFactory(
         optionsParams: PaymentMethodOptionsParams?,
         extraParams: PaymentMethodExtraParams?,
     ): ConfirmSetupIntentParams {
-        return ConfirmSetupIntentParams.create(
+        return ConfirmSetupIntentParams.createWithSetAsDefaultPaymentMethod(
             paymentMethodId = paymentMethodId,
             clientSecret = clientSecret,
             mandateData = mandateData(intent, paymentMethodType),
+            setAsDefaultPaymentMethod = extraParams?.extractSetAsDefaultPaymentMethodFromExtraParams(),
         )
     }
 

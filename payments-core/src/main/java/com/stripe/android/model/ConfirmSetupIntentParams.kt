@@ -230,5 +230,21 @@ constructor(
                 setAsDefaultPaymentMethod = setAsDefaultPaymentMethod
             )
         }
+
+        internal fun createWithSetAsDefaultPaymentMethod(
+            paymentMethodId: String,
+            clientSecret: String,
+            mandateData: MandateDataParams? = null,
+            mandateId: String? = null,
+            setAsDefaultPaymentMethod: Boolean?,
+        ): ConfirmSetupIntentParams {
+            return ConfirmSetupIntentParams(
+                paymentMethodId = paymentMethodId,
+                clientSecret = clientSecret,
+                mandateId = mandateId,
+                mandateData = mandateData,
+                setAsDefaultPaymentMethod = setAsDefaultPaymentMethod
+            )
+        }
     }
 }
