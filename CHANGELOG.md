@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 21.6.0 - 2025-03-03
+
 ### PaymentSheet
 * [ADDED][10202](https://github.com/stripe/stripe-android/pull/10202) Added card brand filtering to specify allowed or blocked card brands. Learn more by visiting the [docs](https://docs.stripe.com/payments/mobile/filter-card-brands?platform=android).
 
