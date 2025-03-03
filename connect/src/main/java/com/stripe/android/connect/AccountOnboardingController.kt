@@ -1,11 +1,13 @@
 package com.stripe.android.connect
 
+import androidx.annotation.RestrictTo
 import androidx.fragment.app.FragmentActivity
 
 /**
  * Controller for a full screen Account Onboarding component.
  */
 @PrivateBetaConnectSDK
+@RestrictTo(RestrictTo.Scope.LIBRARY)
 class AccountOnboardingController internal constructor(
     activity: FragmentActivity,
     embeddedComponentManager: EmbeddedComponentManager,
