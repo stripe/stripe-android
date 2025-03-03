@@ -1,5 +1,7 @@
 package com.stripe.android.paymentelement.callbacks
 
+import androidx.annotation.VisibleForTesting
+
 internal object PaymentElementCallbackReferences {
     private val instanceCallbackMap = mutableMapOf<String, PaymentElementCallbacks>()
 
@@ -15,6 +17,7 @@ internal object PaymentElementCallbackReferences {
         instanceCallbackMap.remove(key)
     }
 
+    @VisibleForTesting
     fun clear() {
         instanceCallbackMap.clear()
     }

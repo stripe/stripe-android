@@ -2448,7 +2448,7 @@ class PaymentSheet internal constructor(
             createIntentCallback: CreateIntentCallback? = null,
             externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
         ) {
-            PaymentElementCallbackReferences[PAYMENT_SHEET_KEY] = PaymentElementCallbacks(
+            PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER] = PaymentElementCallbacks(
                 createIntentCallback = createIntentCallback,
                 externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
             )
@@ -2458,7 +2458,7 @@ class PaymentSheet internal constructor(
             createIntentCallback: CreateIntentCallback? = null,
             externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
         ) {
-            PaymentElementCallbackReferences[FLOW_CONTROLLER_KEY] = PaymentElementCallbacks(
+            PaymentElementCallbackReferences[FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER] = PaymentElementCallbacks(
                 createIntentCallback = createIntentCallback,
                 externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
             )
@@ -2476,8 +2476,5 @@ class PaymentSheet internal constructor(
         fun resetCustomer(context: Context) {
             LinkStore(context).clear()
         }
-
-        private const val PAYMENT_SHEET_KEY = "PaymentSheet"
-        private const val FLOW_CONTROLLER_KEY = "FlowController"
     }
 }

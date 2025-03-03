@@ -24,7 +24,7 @@ internal class DefaultPaymentSheetLauncher(
     private val lifecycleOwner: LifecycleOwner,
     private val application: Application,
     private val callback: PaymentSheetResultCallback,
-    private val instanceId: String = "PaymentSheet",
+    private val instanceId: String = PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER,
     private val initializedViaCompose: Boolean = false,
 ) : PaymentSheetLauncher {
     init {

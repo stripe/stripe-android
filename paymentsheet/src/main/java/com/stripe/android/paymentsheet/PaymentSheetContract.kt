@@ -84,7 +84,7 @@ class PaymentSheetContract :
                 config: PaymentSheet.Configuration? = null
             ) = Args(
                 clientSecret = PaymentIntentClientSecret(clientSecret),
-                instanceId = "PaymentSheet",
+                instanceId = PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER,
                 config = config,
             )
 
@@ -93,7 +93,7 @@ class PaymentSheetContract :
                 config: PaymentSheet.Configuration? = null
             ) = Args(
                 clientSecret = SetupIntentClientSecret(clientSecret),
-                instanceId = "PaymentSheet",
+                instanceId = PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER,
                 config = config,
             )
         }
