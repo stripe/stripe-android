@@ -69,6 +69,8 @@ internal class ManageNavigator private constructor(
 
         abstract fun title(): StateFlow<ResolvableString?>
 
+        abstract fun isPerformingNetworkOperation(): Boolean
+
         class All(
             private val interactor: ManageScreenInteractor,
         ) : Screen(), Closeable {
@@ -82,6 +84,10 @@ internal class ManageNavigator private constructor(
                 return interactor.state.mapAsStateFlow { state ->
                     state.title
                 }
+            }
+
+            override fun isPerformingNetworkOperation(): Boolean {
+                return false
             }
 
             @Composable
@@ -104,6 +110,10 @@ internal class ManageNavigator private constructor(
 
             override fun title(): StateFlow<ResolvableString?> {
                 return stateFlowOf(interactor.screenTitle)
+            }
+
+            override fun isPerformingNetworkOperation(): Boolean {
+                return interactor.state.value.status.isPerformingNetworkOperation
             }
 
             @Composable

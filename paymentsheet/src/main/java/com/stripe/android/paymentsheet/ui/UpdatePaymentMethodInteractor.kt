@@ -41,10 +41,10 @@ internal interface UpdatePaymentMethodInteractor {
         val setAsDefaultCheckboxChecked: Boolean,
     )
 
-    enum class Status {
-        Idle,
-        Updating,
-        Removing
+    enum class Status(val isPerformingNetworkOperation: Boolean) {
+        Idle(isPerformingNetworkOperation = false),
+        Updating(isPerformingNetworkOperation = true),
+        Removing(isPerformingNetworkOperation = true)
     }
 
     fun handleViewAction(viewAction: ViewAction)
