@@ -12,10 +12,12 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.Intents.intending
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
+import androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra
 import androidx.test.espresso.intent.rule.IntentsRule
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.link.NativeLinkArgs
 import com.stripe.android.link.TestFactory
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -36,6 +38,7 @@ import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.hamcrest.Matchers.allOf
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -55,6 +58,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
 
     @get:Rule
     val paymentConfigurationTestRule = PaymentConfigurationTestRule(
+        publishableKey = PUBLISHABLE_KEY,
         context = application,
     )
 
@@ -187,7 +191,22 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
 
     private fun intendedLinkToBeLaunched() {
         if (FeatureFlags.nativeLinkEnabled.isEnabled) {
-            intended(hasComponent(LINK_ACTIVITY_NAME))
+            intended(
+                allOf(
+                    hasComponent(LINK_ACTIVITY_NAME),
+                    hasExtra(
+                        "native_link_args",
+                        NativeLinkArgs(
+                            configuration = TestFactory.LINK_CONFIGURATION,
+                            publishableKey = PUBLISHABLE_KEY,
+                            stripeAccountId = null,
+                            startWithVerificationDialog = true,
+                            linkAccount = null,
+                            instanceId = "ConfirmationTestIdentifier"
+                        )
+                    )
+                )
+            )
         } else {
             intended(hasComponent(LINK_FOREGROUND_ACTIVITY_NAME))
         }
@@ -235,5 +254,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
 
         const val PAYMENT_CONFIRMATION_LAUNCHER_ACTIVITY_NAME =
             "com.stripe.android.payments.paymentlauncher.PaymentLauncherConfirmationActivity"
+
+        const val PUBLISHABLE_KEY = "pk_123"
     }
 }
