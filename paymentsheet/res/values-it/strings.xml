@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- Button prompt to add a bank account as a payment method. -->
+  <string name="stripe_add_bank_account">Aggiungi conto bancario</string>
   <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
   <string name="stripe_add_new_payment_method">Aggiungi nuova modalità di pagamento</string>
+  <!-- Text for a button that, when tapped, displays another screen where the customer can add a new payment method -->
+  <string name="stripe_add_payment_method">Aggiungi una modalità di pagamento</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_afterpay_subtitle">Paga a rate con Afterpay</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
@@ -18,8 +22,14 @@
   <string name="stripe_confirm_close_form_body">I dati di pagamento non verranno salvati.</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_title">Chiudere il modulo?</string>
+  <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_header">Salva i tuoi dati per pagamenti sicuri con un clic con Link</string>
+  <!-- Title of the logout action. -->
+  <string name="stripe_log_out">Esci da Link</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Si è verificato un errore. Verifica la tua connessione e riprova.</string>
+  <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
+  <string name="stripe_pay_with_link">Paga con Link</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Se continui, accetti di autorizzare i pagamenti conformemente ai <terms>questi termini</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -133,8 +143,26 @@
   <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">Non puoi modificare i dati dell\'addebito SEPA.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Totale: %s</string>
+  <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
+  <string name="stripe_pm_set_as_default">Imposta come metodo di pagamento predefinito</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">Rimuovi conto bancario che termina con %s</string>
+  <!-- Accessibility label for an action or a button that shows a menu. -->
+  <string name="stripe_show_menu">Mostra menu</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_sign_up">Registrati su Link</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_sign_up_header">Pagamento sicuro con un clic</string>
+  <!-- Label describing the benefit of signing up for Link. Pay faster at {Merchant Name} and thousands of merchants. e.g, 'Pay faster at Example, Inc. and thousands of merchants.' -->
+  <string name="stripe_sign_up_message">Paga più velocemente con %s e migliaia di esercenti.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_sign_up_terms"><![CDATA[Creando un account Link, accetti i <terms>Termini</terms> e l\'<privacy>Informativa sulla privacy</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative"><![CDATA[Fornendo il tuo indirizzo email, accetti di creare un account Link e salvare i tuoi dati di pagamento su Link conformemente ai <terms>Termini</terms> e all\'<privacy>Informativa sulla privacy di Link </privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Fornendo il tuo numero di telefono, accetti di creare un account Link e salvare i tuoi dati di pagamento su Link conformemente ai <terms>Termini</terms> e all\'<privacy>Informativa sulla privacy di Link</privacy>.]]></string>
+  <!-- Message for a deactivated account in the signup flow. -->
+  <string name="stripe_signup_deactivated_account_message">Il tuo account è stato disattivato</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">Si è verificato un problema</string>
   <!-- Button text on a screen asking the user to approve a payment -->
@@ -147,10 +175,53 @@
   <string name="stripe_upi_polling_payment_failed_message">Torna indietro e seleziona una diversa modalità di pagamento</string>
   <!-- Text on a screen that indicates a payment has failed -->
   <string name="stripe_upi_polling_payment_failed_title">Pagamento non andato a buon fine</string>
+  <!-- Title for a button that allows the user to use a different email in the signup flow. -->
+  <string name="stripe_verification_change_email">Cambia email</string>
+  <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
+  <string name="stripe_verification_code_sent">Codice inviato</string>
   <!-- Two factor authentication screen heading -->
   <string name="stripe_verification_dialog_header">Verifica la tua identità</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_header">Inserisci il codice di verifica</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_header_inline">Accedi al tuo account Link</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_header_prefilled">Usa le informazioni salvate per pagare più velocemente</string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_verification_message">Inserisci il codice inviato al numero %s per pagare sempre con Link.</string>
+  <!-- Text of a label for confirming an email address. E.g., 'Not user@example.com?' -->
+  <string name="stripe_verification_not_email">Non %s?</string>
+  <!-- Label for a button that re-sends the a login code when tapped -->
+  <string name="stripe_verification_resend">Reinvia codice</string>
   <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
   <string name="stripe_view_more">Visualizza altro</string>
+  <!-- Mandate text displayed when paying via Link instant debit. -->
+  <string name="stripe_wallet_bank_account_terms"><![CDATA[Se continui, accetti di autorizzare i pagamenti conformemente a questi <terms>termini</terms>.]]></string>
+  <!-- Label for a section displaying payment details. -->
+  <string name="stripe_wallet_collapsed_payment">Pagamento</string>
   <!-- Label for identifying the default payment method. -->
   <string name="stripe_wallet_default">Valore predefinito</string>
+  <string name="stripe_wallet_expand_accessibility">Modifica selezione</string>
+  <!-- Title for a section listing one or more payment methods. -->
+  <string name="stripe_wallet_expanded_title">Modalità di pagamento</string>
+  <!-- Accessibility description for Passthrough payment method -->
+  <string name="stripe_wallet_passthrough_description">Pass-through</string>
+  <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
+  <string name="stripe_wallet_pay_another_way">Paga in altro modo</string>
+  <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
+  <string name="stripe_wallet_recollect_cvc_error">Per motivi di sicurezza inserisci di nuovo il codice di sicurezza della tua carta.</string>
+  <!-- Title of confirmation prompt when removing a linked bank account. -->
+  <string name="stripe_wallet_remove_account_confirmation">Rimuovere questo conto collegato?</string>
+  <!-- Title of confirmation prompt when removing a saved card. -->
+  <string name="stripe_wallet_remove_card_confirmation">Rimuovere questa carta?</string>
+  <!-- Title for a button that when tapped removes a linked bank account. -->
+  <string name="stripe_wallet_remove_linked_account">Rimuovi conto collegato</string>
+  <!-- Label for a button or menu item that sets a payment method as default when tapped. -->
+  <string name="stripe_wallet_set_as_default">Imposta come predefinito</string>
+  <!-- Label shown when a payment method cannot be used for the current transaction. -->
+  <string name="stripe_wallet_unavailable">Non disponibile per questo acquisto</string>
+  <!-- Title for a button that when tapped, presents a screen for updating a card. Also the heading the screen itself. -->
+  <string name="stripe_wallet_update_card">Aggiorna carta</string>
+  <!-- A text notice shown when the user selects an expired card. -->
+  <string name="stripe_wallet_update_expired_card_error">La carta è scaduta. Aggiorna i dati della carta o scegli un\'altra modalità di pagamento.</string>
 </resources>

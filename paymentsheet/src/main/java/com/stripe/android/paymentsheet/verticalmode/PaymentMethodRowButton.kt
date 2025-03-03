@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -28,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
@@ -179,8 +181,11 @@ private fun RowButtonFloatingOuterContent(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Card(
-        modifier = modifier
-            .alpha(alpha = if (isEnabled) 1.0F else 0.6F),
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.medium)
+            .then(
+                modifier.alpha(alpha = if (isEnabled) 1.0F else 0.6F)
+            ),
         shape = MaterialTheme.shapes.medium,
         backgroundColor = MaterialTheme.stripeColors.component,
         border = MaterialTheme.getBorderStroke(isSelected),
@@ -216,7 +221,9 @@ private fun RowButtonRadioOuterContent(
             selected = isSelected,
             onClick = onClick,
             enabled = isEnabled,
-            modifier = Modifier.align(Alignment.CenterVertically).size(20.dp),
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .size(20.dp),
             colors = RadioButtonDefaults.colors(
                 selectedColor = Color(style.selectedColor),
                 unselectedColor = Color(style.unselectedColor)
@@ -256,7 +263,7 @@ private fun RowButtonCheckmarkOuterContent(
             content()
             Row {
                 if (trailingContent != null) {
-                    Spacer(Modifier.width(iconWidth + 16.dp))
+                    Spacer(Modifier.width(iconWidth + 9.dp))
                     trailingContent()
                 }
             }
@@ -266,7 +273,10 @@ private fun RowButtonCheckmarkOuterContent(
             Icon(
                 imageVector = Icons.Filled.Check,
                 contentDescription = null,
-                modifier = Modifier.align(Alignment.CenterVertically).padding(end = style.checkmarkInsetDp.dp),
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .padding(end = style.checkmarkInsetDp.dp)
+                    .offset(3.dp),
                 tint = Color(style.checkmarkColor)
             )
         }
@@ -308,7 +318,7 @@ private fun RowButtonInnerContent(
 }
 
 @Composable
-private fun TitleContent(title: String, subtitle: String?, isEnabled: Boolean, contentDescription: String?,) {
+private fun TitleContent(title: String, subtitle: String?, isEnabled: Boolean, contentDescription: String?) {
     val textColor = MaterialTheme.stripeColors.onComponent
 
     Column {
@@ -355,7 +365,9 @@ private fun ButtonPreview() {
                         iconUrl = null,
                         imageLoader = StripeImageLoader(LocalContext.current.applicationContext),
                         iconRequiresTinting = true,
-                        modifier = Modifier.height(22.dp).width(22.dp),
+                        modifier = Modifier
+                            .height(22.dp)
+                            .width(22.dp),
                         contentAlignment = Alignment.Center,
                     )
                 },
@@ -378,7 +390,9 @@ private fun ButtonPreview() {
                         iconUrl = null,
                         imageLoader = StripeImageLoader(LocalContext.current.applicationContext),
                         iconRequiresTinting = true,
-                        modifier = Modifier.height(22.dp).width(22.dp),
+                        modifier = Modifier
+                            .height(22.dp)
+                            .width(22.dp),
                         contentAlignment = Alignment.Center,
                     )
                 },

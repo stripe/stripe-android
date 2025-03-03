@@ -21,6 +21,7 @@ import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountForInstantDebitsLauncher
@@ -40,6 +41,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.BankFormScreenState.ResultIdentifier
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.DaggerUSBankAccountFormComponent
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
+import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -198,6 +200,18 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     val saveForFutureUse: StateFlow<Boolean> = saveForFutureUseElement.controller.saveForFutureUse
 
+    private val shouldShowElementFlow = saveForFutureUse.mapAsStateFlow {
+        it && args.shouldShowSetAsDefaultCheckbox
+    }
+
+    val setAsDefaultPaymentMethodElement: SetAsDefaultPaymentMethodElement =
+        SetAsDefaultPaymentMethodElement(
+            initialValue = false,
+            shouldShowElementFlow = shouldShowElementFlow
+        )
+
+    val setAsDefaultPaymentMethod = setAsDefaultPaymentMethodElement.controller.setAsDefaultPaymentMethod
+
     private val screenStateWithoutSaveForFutureUse = MutableStateFlow(value = determineInitialState())
 
     private val billingDetails = combineAsStateFlow(name, email, phone, address) { name, email, phone, address ->
@@ -221,7 +235,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     val linkedAccount: StateFlow<PaymentSelection.New.USBankAccount?> = combineAsStateFlow(
         currentScreenState,
         billingDetails,
-    ) { state, billingDetails ->
+        setAsDefaultPaymentMethod,
+    ) { state, billingDetails, _ ->
         state.toPaymentSelection(billingDetails)
     }
 
@@ -661,6 +676,9 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 address = billingDetails.address,
                 saveForFutureUse = saveForFutureUse.value,
             ),
+            paymentMethodExtraParams = PaymentMethodExtraParams.USBankAccount(
+                setAsDefault = setAsDefaultPaymentMethod.value
+            )
         )
     }
 
@@ -721,6 +739,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val savedPaymentMethod: PaymentSelection.New.USBankAccount?,
         val shippingDetails: AddressDetails?,
         val hostedSurface: String,
+        val shouldShowSetAsDefaultCheckbox: Boolean,
     )
 
     private companion object {

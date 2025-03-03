@@ -15,6 +15,7 @@ internal class FakeUpdatePaymentMethodInteractor(
     override val isModifiablePaymentMethod: Boolean,
     override val hasValidBrandChoices: Boolean = true,
     override val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+    override val shouldShowSetAsDefaultCheckbox: Boolean,
     val viewActionRecorder: ViewActionRecorder<UpdatePaymentMethodInteractor.ViewAction>?,
     initialState: UpdatePaymentMethodInteractor.State,
 ) : UpdatePaymentMethodInteractor {

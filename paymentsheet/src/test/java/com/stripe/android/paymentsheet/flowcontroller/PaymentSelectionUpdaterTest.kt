@@ -193,13 +193,13 @@ class PaymentSelectionUpdaterTest {
             iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_paypal,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
-            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.PAYPAL,
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.P24,
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
         )
 
         // Paypal PaymentIntent does not require a mandate, but paypal SetupIntent does
         val newState = mockPaymentSheetStateWithSetupIntent(
-            paymentMethodTypes = listOf("card", "paypal"),
+            paymentMethodTypes = listOf("card", "p24"),
             customerPaymentMethods = PaymentMethodFixtures.createCards(3),
         )
 

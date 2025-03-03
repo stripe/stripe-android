@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.ManagePage
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.PaymentConfigurationTestRule
+import com.stripe.android.testing.RetryRule
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import org.junit.Rule
 import org.junit.Test
@@ -51,6 +52,7 @@ internal class ManageActivityTest {
         .outerRule(composeTestRule)
         .around(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
+        .around(RetryRule(3))
 
     @Test
     fun `when launched without args should finish with error result`() {
@@ -151,6 +153,7 @@ internal class ManageActivityTest {
         editPage.waitUntilVisible()
         editPage.setCardBrand("Visa")
         editPage.update()
+        editPage.waitUntilMissing()
         val updatedCbcCard = completedResultPaymentMethods().single()
         assertThat(updatedCbcCard.card?.displayBrand).isEqualTo("visa")
     }

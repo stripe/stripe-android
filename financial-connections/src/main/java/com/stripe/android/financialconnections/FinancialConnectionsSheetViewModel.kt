@@ -64,6 +64,9 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.parcelable
 import com.stripe.attestation.IntegrityRequestManager
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -85,6 +88,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private val nativeRouter: NativeAuthFlowRouter,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val initialState: FinancialConnectionsSheetState,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : FinancialConnectionsViewModel<FinancialConnectionsSheetState>(initialState, nativeAuthFlowCoordinator) {
 
     private val mutex = Mutex()
@@ -92,7 +96,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     init {
         savedStateHandle.registerSavedStateProvider()
         if (initialState.initialArgs.isValid()) {
-            eventReporter.onPresented(initialState.initialArgs.configuration)
+            eventReporter.onPresented()
             // avoid re-fetching manifest if already exists (this will happen on process recreations)
             if (initialState.manifest == null) {
                 initAuthFlow()
@@ -138,7 +142,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 }?.let(analyticsTracker::track)
                 syncResponse
             }.onFailure {
-                finishWithResult(stateFlow.value, Failed(it))
+                finishWithResult(Failed(it))
             }.onSuccess {
                 openAuthFlow(it)
             }
@@ -180,7 +184,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
 
         if (hostedAuthUrl == null) {
             finishWithResult(
-                state = stateFlow.value,
                 result = Failed(IllegalArgumentException("hostedAuthUrl is required!"))
             )
         } else {
@@ -218,10 +221,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             pane = Pane.UNEXPECTED_ERROR,
             error = error
         )
-        finishWithResult(
-            state = stateFlow.value,
-            result = Failed(error)
-        )
+        finishWithResult(Failed(error))
     }
 
     /**
@@ -251,10 +251,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     }
 
     fun onDismissed() {
-        finishWithResult(
-            state = stateFlow.value,
-            result = Canceled
-        )
+        finishWithResult(Canceled)
     }
 
     /**
@@ -268,10 +265,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 val state = stateFlow.value
                 if (state.activityRecreated.not()) {
                     when (state.webAuthFlowStatus) {
-                        AuthFlowStatus.ON_EXTERNAL_ACTIVITY -> finishWithResult(
-                            state = state,
-                            result = Canceled
-                        )
+                        AuthFlowStatus.ON_EXTERNAL_ACTIVITY -> finishWithResult(Canceled)
 
                         AuthFlowStatus.INTERMEDIATE_DEEPLINK -> setState {
                             copy(
@@ -297,10 +291,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 val state = stateFlow.value
                 if (state.activityRecreated) {
                     when (state.webAuthFlowStatus) {
-                        AuthFlowStatus.ON_EXTERNAL_ACTIVITY -> finishWithResult(
-                            state = state,
-                            result = Canceled
-                        )
+                        AuthFlowStatus.ON_EXTERNAL_ACTIVITY -> finishWithResult(Canceled)
 
                         AuthFlowStatus.INTERMEDIATE_DEEPLINK -> setState {
                             copy(
@@ -319,9 +310,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         val result: FinancialConnectionsSheetActivityResult? = activityResult.data
             ?.parcelable(FinancialConnectionsSheetNativeActivity.EXTRA_RESULT)
         if (activityResult.resultCode == Activity.RESULT_OK && result != null) {
-            finishWithResult(stateFlow.value, result, fromNative = true)
+            finishWithResult(result, fromNative = true)
         } else {
-            finishWithResult(stateFlow.value, Canceled, fromNative = true)
+            finishWithResult(Canceled, fromNative = true)
         }
     }
 
@@ -339,11 +330,10 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             }.onSuccess { session ->
                 val updatedSession = session.update(state.manifest)
                 finishWithResult(
-                    state = state,
                     result = Completed(financialConnectionsSession = updatedSession)
                 )
             }.onFailure { error ->
-                finishWithResult(stateFlow.value, Failed(error))
+                finishWithResult(Failed(error))
             }
         }
     }
@@ -362,14 +352,13 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             }.onSuccess { (las, token) ->
                 val updatedSession = las.update(state.manifest)
                 finishWithResult(
-                    state = state,
                     result = Completed(
                         financialConnectionsSession = updatedSession,
                         token = token,
                     )
                 )
             }.onFailure { error ->
-                finishWithResult(stateFlow.value, Failed(error))
+                finishWithResult(Failed(error))
             }
         }
     }
@@ -386,7 +375,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 fetchFinancialConnectionsSession(clientSecret = state.sessionSecret)
             }.onSuccess { session ->
                 finishWithResult(
-                    state = state,
                     result = if (session.isCustomManualEntryError()) {
                         Failed(CustomManualEntryRequiredError())
                     } else {
@@ -394,7 +382,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                     }
                 )
             }.onFailure { error ->
-                finishWithResult(stateFlow.value, Failed(error))
+                finishWithResult(Failed(error))
             }
         }
     }
@@ -442,7 +430,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                     else -> {
                         setState { copy(webAuthFlowStatus = AuthFlowStatus.NONE) }
                         finishWithResult(
-                            state,
                             Failed(Exception("Error processing FinancialConnectionsSheet intent"))
                         )
                     }
@@ -476,7 +463,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private fun onFlowSuccess(state: FinancialConnectionsSheetState, receivedUrl: Uri?) {
         if (receivedUrl == null) {
             finishWithResult(
-                state = state,
                 result = Failed(Exception("Intent url received from web flow is null"))
             )
         } else {
@@ -492,25 +478,22 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private fun onSuccessFromInstantDebits(url: Uri) {
         runCatching { url.getEncodedPaymentMethodOrThrow() }
             .onSuccess { paymentMethod ->
-                withState {
-                    finishWithResult(
-                        state = it,
-                        result = Completed(
-                            instantDebits = InstantDebitsResult(
-                                encodedPaymentMethod = paymentMethod,
-                                last4 = url.getQueryParameter(QUERY_PARAM_LAST4),
-                                bankName = url.getQueryParameter(QUERY_BANK_NAME),
-                                eligibleForIncentive = url.getQueryParameter(QUERY_INCENTIVE_ELIGIBLE).toBoolean(),
-                            ),
-                            financialConnectionsSession = null,
-                            token = null
-                        )
+                finishWithResult(
+                    result = Completed(
+                        instantDebits = InstantDebitsResult(
+                            encodedPaymentMethod = paymentMethod,
+                            last4 = url.getQueryParameter(QUERY_PARAM_LAST4),
+                            bankName = url.getQueryParameter(QUERY_BANK_NAME),
+                            eligibleForIncentive = url.getQueryParameter(QUERY_INCENTIVE_ELIGIBLE).toBoolean(),
+                        ),
+                        financialConnectionsSession = null,
+                        token = null
                     )
-                }
+                )
             }
             .onFailure { error ->
                 logger.error("Could not retrieve payment method parameters from success url", error)
-                finishWithResult(stateFlow.value, Failed(error))
+                finishWithResult(Failed(error))
             }
     }
 
@@ -533,7 +516,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     }
 
     private fun finishWithResult(
-        state: FinancialConnectionsSheetState,
         result: FinancialConnectionsSheetActivityResult,
         fromNative: Boolean = false,
         @StringRes finishMessage: Int? = null,
@@ -544,7 +526,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             switchToWebFlow(error.prefillDetails)
             return
         }
-        eventReporter.onResult(state.initialArgs.configuration, result)
+        reportResult(result)
         // Native emits its own events before finishing.
         if (fromNative.not()) {
             when (result) {
@@ -557,6 +539,16 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             }
         }
         setState { copy(viewEffect = FinishWithResult(result, finishMessage)) }
+    }
+
+    @Suppress("OPT_IN_USAGE")
+    private fun reportResult(result: FinancialConnectionsSheetActivityResult) {
+        // We use the global scope to make sure that we can finish sending the event
+        // even if the ViewModel is cleared.
+        GlobalScope.launch(ioDispatcher) {
+            val manifest = getOrFetchSync().manifest
+            eventReporter.onResult(manifest.id, result)
+        }
     }
 
     /**
@@ -582,7 +574,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 }
             } else {
                 finishWithResult(
-                    state = stateFlow.value,
                     result = Failed(IllegalArgumentException("hostedAuthUrl is required to switch to web flow!"))
                 )
             }

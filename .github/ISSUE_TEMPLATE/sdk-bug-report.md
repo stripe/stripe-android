@@ -1,8 +1,8 @@
 ---
-name: "🐛 SDK Bug Report"
+name: "\U0001F41B SDK Bug Report"
 about: Create a report to help us improve
 title: "[BUG] "
-labels: 'bug'
+labels: bug
 assignees: ''
 
 ---

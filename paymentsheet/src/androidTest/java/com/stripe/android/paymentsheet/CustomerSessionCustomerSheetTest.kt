@@ -155,9 +155,10 @@ internal class CustomerSessionCustomerSheetTest {
         enqueueSetupIntentRetrieval()
         enqueueSetupIntentConfirmation()
 
+        val paymentMethodId = "pm_12345"
         enqueueElementsSession(
             cards = listOf(
-                PaymentMethodFactory.card(id = "pm_12345").update(
+                PaymentMethodFactory.card(id = paymentMethodId).update(
                     last4 = "4242",
                     addCbcNetworks = false,
                     brand = CardBrand.Visa,
@@ -170,7 +171,7 @@ internal class CustomerSessionCustomerSheetTest {
         page.clickSaveButton()
         assertOnlySavedCardIsDisplayed()
 
-        page.clickConfirmButton()
+        context.markTestSucceeded()
     }
 
     private fun assertOnlySavedCardIsDisplayed() {

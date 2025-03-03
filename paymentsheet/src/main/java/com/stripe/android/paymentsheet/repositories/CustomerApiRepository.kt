@@ -172,6 +172,18 @@ internal class CustomerApiRepository @Inject constructor(
             logger.error("Failed to update payment method $paymentMethodId.", it)
         }
 
+    override suspend fun setDefaultPaymentMethod(
+        customerInfo: CustomerRepository.CustomerInfo,
+        paymentMethodId: String?
+    ): Result<Customer> = stripeRepository.setDefaultPaymentMethod(
+        paymentMethodId = paymentMethodId,
+        customerId = customerInfo.id,
+        options = ApiRequest.Options(
+            apiKey = customerInfo.ephemeralKeySecret,
+            stripeAccount = lazyPaymentConfig.get().stripeAccountId,
+        )
+    )
+
     private fun filterPaymentMethods(allPaymentMethods: List<PaymentMethod>): List<PaymentMethod> {
         val paymentMethods = mutableListOf<PaymentMethod>()
 

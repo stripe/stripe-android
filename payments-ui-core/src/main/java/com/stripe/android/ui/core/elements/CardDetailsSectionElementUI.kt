@@ -35,7 +35,7 @@ fun CardDetailsSectionElementUI(
     Column(modifier) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.Bottom,
             modifier = Modifier
                 .fillMaxWidth()
         ) {
@@ -58,7 +58,7 @@ fun CardDetailsSectionElementUI(
             }
         }
         SectionElementUI(
-            modifier = Modifier.padding(top = 8.dp),
+            modifier = Modifier.padding(top = 4.dp),
             enabled = enabled,
             element = SectionElement(
                 IdentifierSpec.Generic("credit_details"),

@@ -19,7 +19,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
-import com.stripe.android.paymentsheet.ui.Mandate
+import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState

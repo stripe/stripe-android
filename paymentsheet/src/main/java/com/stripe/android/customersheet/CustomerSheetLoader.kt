@@ -9,6 +9,7 @@ import com.stripe.android.customersheet.data.CustomerSheetInitializationDataSour
 import com.stripe.android.customersheet.data.CustomerSheetSession
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.customersheet.util.filterToSupportedPaymentMethods
+import com.stripe.android.customersheet.util.getDefaultPaymentMethodAsPaymentSelection
 import com.stripe.android.customersheet.util.getDefaultPaymentMethodsEnabledForCustomerSheet
 import com.stripe.android.customersheet.util.sortPaymentMethods
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
@@ -170,19 +171,10 @@ internal class DefaultCustomerSheetLoader(
         paymentMethods: List<PaymentMethod>
     ): PaymentSelection? {
         return if (metadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true) {
-            useDefaultPaymentMethodAsPaymentSelection(paymentMethods, customerSheetSession.defaultPaymentMethodId)
+            getDefaultPaymentMethodAsPaymentSelection(paymentMethods, customerSheetSession.defaultPaymentMethodId)
         } else {
             useLocalSelectionAsPaymentSelection(customerSheetSession, paymentMethods)
         }
-    }
-
-    private fun useDefaultPaymentMethodAsPaymentSelection(
-        paymentMethods: List<PaymentMethod>,
-        defaultPaymentMethodId: String?,
-    ): PaymentSelection? {
-        return paymentMethods.find { paymentMethod ->
-            paymentMethod.id == defaultPaymentMethodId
-        }?.let { PaymentSelection.Saved(it) }
     }
 
     private fun useLocalSelectionAsPaymentSelection(

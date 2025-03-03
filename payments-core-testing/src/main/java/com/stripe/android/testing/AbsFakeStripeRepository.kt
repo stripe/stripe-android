@@ -311,6 +311,14 @@ abstract class AbsFakeStripeRepository : StripeRepository {
         TODO("Not yet implemented")
     }
 
+    override suspend fun setDefaultPaymentMethod(
+        customerId: String,
+        paymentMethodId: String?,
+        options: ApiRequest.Options
+    ): Result<Customer> {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun logOut(
         consumerSessionClientSecret: String,
         consumerAccountPublishableKey: String?,

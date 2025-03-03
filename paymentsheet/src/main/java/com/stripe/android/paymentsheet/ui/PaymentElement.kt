@@ -127,6 +127,7 @@ internal fun FormElement(
                 formArgs = formArguments,
                 usBankAccountFormArgs = usBankAccountFormArguments,
                 modifier = Modifier.padding(horizontal = horizontalPadding),
+                enabled = enabled
             )
         } else {
             PaymentMethodForm(

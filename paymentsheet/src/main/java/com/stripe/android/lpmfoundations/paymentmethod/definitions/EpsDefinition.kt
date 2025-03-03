@@ -20,7 +20,7 @@ internal object EpsDefinition : PaymentMethodDefinition {
         AddPaymentMethodRequirement.UnsupportedForSetup,
     )
 
-    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = true
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
     override fun uiDefinitionFactory(): UiDefinitionFactory = EpsUiDefinitionFactory
 }

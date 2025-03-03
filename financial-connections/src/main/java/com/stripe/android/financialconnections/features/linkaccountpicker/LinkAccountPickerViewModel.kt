@@ -389,6 +389,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
                         generic = genericContent,
                         type = Repair(
                             authorization = authorization?.let { payload.partnerToCoreAuths?.getValue(it) },
+                            institution = institution,
                         ),
                     )
                     PARTNER_AUTH -> UpdateRequired(

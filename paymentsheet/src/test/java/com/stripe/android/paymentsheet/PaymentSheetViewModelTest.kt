@@ -117,6 +117,8 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
+import com.stripe.android.testing.ResetMockRule
+import com.stripe.android.testing.RetryRule
 import com.stripe.android.testing.SessionTestRule
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -139,6 +141,7 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.Rule
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
@@ -166,15 +169,6 @@ import com.stripe.android.R as PaymentsCoreR
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
 internal class PaymentSheetViewModelTest {
-    @get:Rule
-    val rule = InstantTaskExecutorRule()
-
-    @get:Rule
-    val sessionRule = SessionTestRule()
-
-    @get:Rule
-    val intentConfirmationInterceptorTestRule = IntentConfirmationInterceptorTestRule()
-
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private val eventReporter = mock<EventReporter>()
@@ -195,6 +189,14 @@ internal class PaymentSheetViewModelTest {
     private val cvcRecollectionHandler = FakeCvcRecollectionHandler()
 
     private val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator()
+
+    @get:Rule
+    val rule = RuleChain.emptyRuleChain()
+        .around(InstantTaskExecutorRule())
+        .around(SessionTestRule())
+        .around(IntentConfirmationInterceptorTestRule())
+        .around(ResetMockRule(eventReporter))
+        .around(RetryRule(3))
 
     @BeforeTest
     fun setup() {
@@ -1002,12 +1004,14 @@ internal class PaymentSheetViewModelTest {
 
             verify(intentConfirmationInterceptor).intercept(
                 initializationMode = any(),
+                intent = any(),
                 paymentMethod = any(),
                 paymentMethodOptionsParams = eq(
                     PaymentMethodOptionsParams.Card(
                         setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
                     )
                 ),
+                paymentMethodExtraParams = isNull(),
                 shippingValues = isNull(),
             )
         }
@@ -1036,12 +1040,14 @@ internal class PaymentSheetViewModelTest {
 
             verify(intentConfirmationInterceptor).intercept(
                 initializationMode = any(),
+                intent = any(),
                 paymentMethod = any(),
                 paymentMethodOptionsParams = eq(
                     PaymentMethodOptionsParams.Card(
                         setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
                     )
                 ),
+                paymentMethodExtraParams = isNull(),
                 shippingValues = isNull(),
             )
         }
@@ -2608,8 +2614,10 @@ internal class PaymentSheetViewModelTest {
 
             verify(interceptor).intercept(
                 initializationMode = any(),
+                intent = any(),
                 paymentMethodCreateParams = any(),
                 paymentMethodOptionsParams = isNull(),
+                paymentMethodExtraParams = isNull(),
                 shippingValues = isNull(),
                 customerRequestedSave = eq(false),
             )

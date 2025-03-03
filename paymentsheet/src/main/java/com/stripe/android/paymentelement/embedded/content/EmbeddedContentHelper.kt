@@ -199,20 +199,16 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             uiContext = uiContext,
             customerRepository = customerRepository,
             selection = selectionHolder.selection,
-            clearSelection = {
-                setSelection(null)
-            },
+            setSelection = ::setSelection,
             customerStateHolder = customerStateHolder,
             prePaymentMethodRemoveActions = {},
             postPaymentMethodRemoveActions = {},
-            onUpdatePaymentMethod = { _, _, _, _ ->
+            onUpdatePaymentMethod = { _, _, _, _, _ ->
                 sheetLauncher?.launchManage(
                     paymentMethodMetadata = paymentMethodMetadata,
                     customerState = requireNotNull(customerStateHolder.customer.value),
                     selection = selectionHolder.selection.value,
                 )
-            },
-            navigationPop = {
             },
             isLinkEnabled = stateFlowOf(paymentMethodMetadata.linkState != null),
             isNotPaymentFlow = false,

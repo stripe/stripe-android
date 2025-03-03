@@ -1,18 +1,14 @@
 package com.stripe.android.link.ui
 
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.uicore.stripeColors
-import com.stripe.android.uicore.text.Html
 
 @Composable
 internal fun LinkTerms(
@@ -29,17 +25,10 @@ internal fun LinkTerms(
         stringResource(R.string.stripe_sign_up_terms)
     }
 
-    Html(
-        html = text.replaceHyperlinks(),
-        color = MaterialTheme.stripeColors.placeholderText,
-        style = MaterialTheme.typography.caption.copy(
-            textAlign = textAlign,
-            fontWeight = FontWeight.Normal,
-        ),
+    Mandate(
+        mandateText = text.replaceHyperlinks(),
         modifier = modifier,
-        urlSpanStyle = SpanStyle(
-            color = MaterialTheme.colors.primary
-        )
+        textAlign = textAlign,
     )
 }
 

@@ -464,6 +464,49 @@ class UpdatePaymentMethodUITest {
         }
     }
 
+    @Test
+    fun `When should show set as default checkbox, checkbox is visible and enabled`() {
+        runScenario(
+            shouldShowSetAsDefaultCheckbox = true,
+        ) {
+            val setAsDefaultCheckbox = composeRule.onNodeWithTag(UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG)
+
+            setAsDefaultCheckbox.assertExists()
+            setAsDefaultCheckbox.assertIsEnabled()
+        }
+    }
+
+    @Test
+    fun `When set as default checkbox is checked, save button is visible and enabled`() {
+        runScenario(
+            shouldShowSetAsDefaultCheckbox = true,
+            setAsDefaultCheckboxChecked = true,
+        ) {
+            val setAsDefaultCheckbox = composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG)
+
+            setAsDefaultCheckbox.assertExists()
+            setAsDefaultCheckbox.assertIsEnabled()
+        }
+    }
+
+    @Test
+    fun `Clicking set as default checkbox sends SetDefaultCheckboxChanged view action`() {
+        val initialCheckedValue = false
+        runScenario(
+            shouldShowSetAsDefaultCheckbox = true,
+            setAsDefaultCheckboxChecked = initialCheckedValue,
+        ) {
+            composeRule.onNodeWithTag(UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG).performClick()
+
+            viewActionRecorder.consume(
+                UpdatePaymentMethodInteractor.ViewAction.SetAsDefaultCheckboxChanged(
+                    isChecked = !initialCheckedValue
+                )
+            )
+            assertThat(viewActionRecorder.viewActions).isEmpty()
+        }
+    }
+
     private fun assertExpiryDateEquals(text: String) {
         composeRule.onNodeWithTag(UPDATE_PM_EXPIRY_FIELD_TEST_TAG).assertTextContains(
             text
@@ -485,7 +528,9 @@ class UpdatePaymentMethodUITest {
         canRemove: Boolean = true,
         isModifiablePaymentMethod: Boolean = true,
         hasValidBrandChoices: Boolean = true,
+        setAsDefaultCheckboxChecked: Boolean = false,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+        shouldShowSetAsDefaultCheckbox: Boolean = false,
         testBlock: Scenario.() -> Unit,
     ) {
         val viewActionRecorder = ViewActionRecorder<UpdatePaymentMethodInteractor.ViewAction>()
@@ -497,11 +542,13 @@ class UpdatePaymentMethodUITest {
             cardBrandFilter = cardBrandFilter,
             viewActionRecorder = viewActionRecorder,
             hasValidBrandChoices = hasValidBrandChoices,
+            shouldShowSetAsDefaultCheckbox = shouldShowSetAsDefaultCheckbox,
             initialState = UpdatePaymentMethodInteractor.State(
                 error = errorMessage,
                 status = UpdatePaymentMethodInteractor.Status.Idle,
                 cardBrandChoice = CardBrandChoice(brand = initialCardBrand, enabled = true),
                 cardBrandHasBeenChanged = cardBrandHasBeenChanged,
+                setAsDefaultCheckboxChecked = setAsDefaultCheckboxChecked,
             ),
         )
 

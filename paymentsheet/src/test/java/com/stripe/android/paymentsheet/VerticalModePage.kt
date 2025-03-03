@@ -70,6 +70,9 @@ internal class VerticalModePage(
     }
 
     fun assertHasSavedPaymentMethods() {
+        composeTestRule.waitUntil {
+            composeTestRule.onNodeWithTag(TEST_TAG_SAVED_TEXT).isDisplayed()
+        }
         composeTestRule.onNodeWithTag(TEST_TAG_SAVED_TEXT).assertExists()
     }
 

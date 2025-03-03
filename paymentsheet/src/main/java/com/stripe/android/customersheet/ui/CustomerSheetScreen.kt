@@ -27,13 +27,13 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.ErrorMessage
-import com.stripe.android.paymentsheet.ui.Mandate
 import com.stripe.android.paymentsheet.ui.PaymentElement
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodTabLayoutUI
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodUI
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.ui.core.elements.H4Text
+import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.ui.core.elements.events.CardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.CardNumberCompletedEventReporter

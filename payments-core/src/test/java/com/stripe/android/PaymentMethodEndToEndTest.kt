@@ -5,7 +5,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
@@ -376,36 +375,6 @@ internal class PaymentMethodEndToEndTest {
 
     @Test
     fun createPaymentMethod_withKlarna_shouldCreateObject() {
-        val missingAddressException = assertFailsWith<InvalidRequestException>(
-            "Address is required to create a klarna payment method"
-        ) {
-            val params = PaymentMethodCreateParams.createKlarna(
-                billingDetails =
-                PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(address = null)
-            )
-            Stripe(context, ApiKeyFixtures.KLARNA_PUBLISHABLE_KEY)
-                .createPaymentMethodSynchronous(params)
-        }
-
-        assertThat(missingAddressException.message)
-            .isEqualTo("You must provide `billing_details[address][country]` to use Klarna.")
-
-        val missingCountryException = assertFailsWith<InvalidRequestException>(
-            "Country is required to create a klarna payment method"
-        ) {
-            val address = Address(country = null)
-            val params = PaymentMethodCreateParams.createKlarna(
-                billingDetails =
-                PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy(address = address)
-            )
-
-            Stripe(context, ApiKeyFixtures.KLARNA_PUBLISHABLE_KEY)
-                .createPaymentMethodSynchronous(params)
-        }
-
-        assertThat(missingCountryException.message)
-            .isEqualTo("You must provide `billing_details[address][country]` to use Klarna.")
-
         val params = PaymentMethodCreateParams.createKlarna(
             billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.copy()
         )

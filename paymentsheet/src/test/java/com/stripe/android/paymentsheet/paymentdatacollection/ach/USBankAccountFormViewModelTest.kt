@@ -16,6 +16,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
@@ -74,6 +75,7 @@ class USBankAccountFormViewModelTest {
         shippingDetails = null,
         hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
         linkMode = null,
+        shouldShowSetAsDefaultCheckbox = false,
     )
 
     private val mockCollectBankAccountLauncher = mock<CollectBankAccountLauncher>()
@@ -562,6 +564,18 @@ class USBankAccountFormViewModelTest {
             ),
         )
         assertThat(viewModel.saveForFutureUse.value).isFalse()
+    }
+
+    @Test
+    fun `Doesn't set setAsDefaultPaymentMethod by default`() = runTest {
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(
+                formArgs = defaultArgs.formArgs,
+                showCheckbox = true,
+                shouldShowSetAsDefaultCheckbox = false,
+            ),
+        )
+        assertThat(viewModel.setAsDefaultPaymentMethodElement.controller.setAsDefaultPaymentMethod.value).isFalse()
     }
 
     @Test
@@ -1299,6 +1313,88 @@ class USBankAccountFormViewModelTest {
 
             viewModel.saveForFutureUseElement.controller.onValueChange(false)
             assertThat(awaitItem()?.customerRequestedSave).isEqualTo(CustomerRequestedSave.RequestNoReuse)
+        }
+    }
+
+    @Test
+    fun `'setAsDefaultPaymentMethod' shown correctly when saveForFutureUse checked`() = runTest {
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(
+                showCheckbox = true,
+                shouldShowSetAsDefaultCheckbox = true
+            )
+        )
+
+        viewModel.linkedAccount.test {
+            assertThat(awaitItem()).isNull()
+
+            viewModel.nameController.onValueChange("Some Name")
+            viewModel.emailController.onValueChange("email@email.com")
+            viewModel.handleCollectBankAccountResult(mockVerifiedBankAccount())
+            viewModel.saveForFutureUseElement.controller.onValueChange(true)
+
+            assertThat(viewModel.setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isTrue()
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `'setAsDefaultPaymentMethod' hidden correctly when saveForFutureUse unchecked`() = runTest {
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(
+                showCheckbox = true,
+                shouldShowSetAsDefaultCheckbox = true
+            )
+        )
+
+        viewModel.linkedAccount.test {
+            assertThat(awaitItem()).isNull()
+
+            viewModel.nameController.onValueChange("Some Name")
+            viewModel.emailController.onValueChange("email@email.com")
+            viewModel.handleCollectBankAccountResult(mockVerifiedBankAccount())
+            viewModel.saveForFutureUseElement.controller.onValueChange(true)
+
+            assertThat(viewModel.setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isTrue()
+
+            viewModel.saveForFutureUseElement.controller.onValueChange(false)
+
+            assertThat(viewModel.setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isFalse()
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `Updates result when 'setAsDefaultPaymentMethod' changes after linking account`() = runTest {
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(
+                showCheckbox = true,
+                shouldShowSetAsDefaultCheckbox = true
+            )
+        )
+
+        viewModel.linkedAccount.test {
+            assertThat(awaitItem()).isNull()
+
+            viewModel.nameController.onValueChange("Some Name")
+            viewModel.emailController.onValueChange("email@email.com")
+            viewModel.handleCollectBankAccountResult(mockVerifiedBankAccount())
+            viewModel.saveForFutureUseElement.controller.onValueChange(true)
+
+            assertThat((awaitItem()?.paymentMethodExtraParams as PaymentMethodExtraParams.USBankAccount).setAsDefault)
+                .isFalse()
+            assertThat(viewModel.setAsDefaultPaymentMethodElement.shouldShowElementFlow.value)
+                .isTrue()
+
+            assertThat(awaitItem()?.input?.saveForFutureUse).isTrue()
+
+            viewModel.setAsDefaultPaymentMethodElement.controller.onValueChange(true)
+            assertThat((awaitItem()?.paymentMethodExtraParams as PaymentMethodExtraParams.USBankAccount).setAsDefault)
+                .isTrue()
+
+            viewModel.setAsDefaultPaymentMethodElement.controller.onValueChange(false)
+            assertThat((awaitItem()?.paymentMethodExtraParams as PaymentMethodExtraParams.USBankAccount).setAsDefault)
+                .isFalse()
         }
     }
 

@@ -12,6 +12,7 @@ import com.stripe.android.paymentsheet.ui.REMOVE_BUTTON_LOADING
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_SAVE_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_SCREEN_TEST_TAG
+import com.stripe.android.paymentsheet.ui.UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
 import com.stripe.android.uicore.elements.TEST_TAG_DROP_DOWN_CHOICE
@@ -25,6 +26,15 @@ internal class EditPage(
                 .onAllNodes(hasTestTag(UPDATE_PM_SCREEN_TEST_TAG))
                 .fetchSemanticsNodes()
                 .isNotEmpty()
+        }
+    }
+
+    fun waitUntilMissing() {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            composeTestRule
+                .onAllNodes(hasTestTag(UPDATE_PM_SCREEN_TEST_TAG))
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isEmpty()
         }
     }
 
@@ -100,5 +110,11 @@ internal class EditPage(
                 .fetchSemanticsNodes()
                 .isEmpty()
         }
+    }
+
+    fun clickSetAsDefaultCheckbox() {
+        composeTestRule.onNodeWithTag(
+            UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG
+        ).performClick()
     }
 }

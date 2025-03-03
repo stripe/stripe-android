@@ -8,6 +8,8 @@ import com.google.android.libraries.places.api.net.FetchPhotoRequest
 import com.google.android.libraries.places.api.net.FetchPhotoResponse
 import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.FetchPlaceResponse
+import com.google.android.libraries.places.api.net.FetchResolvedPhotoUriRequest
+import com.google.android.libraries.places.api.net.FetchResolvedPhotoUriResponse
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse
 import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest
@@ -17,6 +19,8 @@ import com.google.android.libraries.places.api.net.IsOpenResponse
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.libraries.places.api.net.SearchByTextRequest
 import com.google.android.libraries.places.api.net.SearchByTextResponse
+import com.google.android.libraries.places.api.net.SearchNearbyRequest
+import com.google.android.libraries.places.api.net.SearchNearbyResponse
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
@@ -197,6 +201,10 @@ class PlacesClientProxyTest {
                 return onFetchPlace()
             }
 
+            override fun fetchResolvedPhotoUri(p0: FetchResolvedPhotoUriRequest): Task<FetchResolvedPhotoUriResponse?> {
+                throw AssertionError("Not expected")
+            }
+
             override fun findAutocompletePredictions(
                 p0: FindAutocompletePredictionsRequest
             ): Task<FindAutocompletePredictionsResponse> {
@@ -215,6 +223,24 @@ class PlacesClientProxyTest {
 
             override fun searchByText(p0: SearchByTextRequest): Task<SearchByTextResponse> {
                 return Tasks.forCanceled()
+            }
+
+            override fun searchNearby(p0: SearchNearbyRequest): Task<SearchNearbyResponse?> {
+                throw AssertionError("Not expected")
+            }
+
+            override fun zzb(
+                p0: FetchPlaceRequest,
+                p1: Int
+            ): Task<*> {
+                throw AssertionError("Not expected")
+            }
+
+            override fun zzd(
+                p0: FindAutocompletePredictionsRequest,
+                p1: Int
+            ): Task<*> {
+                throw AssertionError("Not expected")
             }
         }
         return client

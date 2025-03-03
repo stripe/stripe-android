@@ -105,6 +105,8 @@
   <string name="stripe_scan_card">Ler cartão</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Quando fornecer os seus dados de pagamento e confirmar este pagamento, autoriza (A) %s e a Stripe, o nosso provedor de serviços de pagamentos, a enviar instruções ao seu banco para debitar a sua conta e (B) o seu banco a debitar a sua conta de acordo com essas instruções. Como parte dos seus direitos, tem direito a um reembolso do seu banco de acordo com os termos e condições do seu acordo com o banco. Um reembolso deve ser solicitado até 8 semanas a partir da data na qual a sua conta foi debitada. Os seus direitos são explicados numa declaração que pode obter do seu banco. Aceita receber notificações de futuros débitos até 2 dias antes de serem efetuados.</string>
+  <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
+  <string name="stripe_set_as_default_payment_method">Definir como método de pagamento predefinido</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Configurar</string>
   <!-- Label for UPI ID number field on form -->

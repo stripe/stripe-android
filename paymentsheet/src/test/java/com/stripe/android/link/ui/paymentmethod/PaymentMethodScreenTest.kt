@@ -7,6 +7,7 @@ import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotDisplayed
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onChild
@@ -189,7 +190,9 @@ internal class PaymentMethodScreenTest {
 
     private fun onCvc() = composeTestRule.onNode(hasText("CVC"))
 
-    private fun onExpiryDate() = composeTestRule.onNode(hasText("MM / YY"))
+    private fun onExpiryDate() = composeTestRule.onNode(
+        hasContentDescription(value = "Expiration date", substring = true)
+    )
 
     private fun onZipCode() = composeTestRule.onNode(hasText("ZIP Code"))
 

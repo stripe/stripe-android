@@ -78,6 +78,27 @@ class ConfirmPaymentIntentParamsTest {
     }
 
     @Test
+    fun toParamMap_withSetAsDefaultPaymentMethod_shouldCreateExpectedMap() {
+        val params = ConfirmPaymentIntentParams
+            .createWithSetAsDefaultPaymentMethod(
+                PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                CLIENT_SECRET,
+                setAsDefaultPaymentMethod = true,
+            )
+            .toParamMap()
+
+        assertThat(params)
+            .isEqualTo(
+                mapOf(
+                    "client_secret" to CLIENT_SECRET,
+                    "use_stripe_sdk" to false,
+                    "payment_method_data" to PaymentMethodCreateParamsFixtures.DEFAULT_CARD.toParamMap(),
+                    "set_as_default_payment_method" to true,
+                )
+            )
+    }
+
+    @Test
     fun toParamMap_withPaymentMethodId_shouldCreateExpectedMap() {
         val params = ConfirmPaymentIntentParams
             .createWithPaymentMethodId(PM_ID, CLIENT_SECRET)

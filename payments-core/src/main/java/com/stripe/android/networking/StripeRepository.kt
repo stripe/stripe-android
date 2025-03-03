@@ -130,6 +130,20 @@ interface StripeRepository {
         options: ApiRequest.Options
     ): Result<PaymentMethod>
 
+    /**
+     * Set the customer's default payment method.
+     *
+     * @param customerId Id of the customer to update
+     * @param paymentMethodId Id of the payment method to set as the default. If null, the user's existing default
+     * payment method will be unset.
+     * */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun setDefaultPaymentMethod(
+        customerId: String,
+        paymentMethodId: String?,
+        options: ApiRequest.Options,
+    ): Result<Customer>
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun createToken(
         tokenParams: TokenParams,

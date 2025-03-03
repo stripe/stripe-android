@@ -1,6 +1,10 @@
 package com.stripe.android.paymentsheet
 
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeTestRule
@@ -14,6 +18,9 @@ internal class FormPage(
     private val composeTestRule: ComposeTestRule,
 ) {
     val cardNumber: SemanticsNodeInteraction = nodeWithLabel("Card number")
+    val expirationDate: SemanticsNodeInteraction = composeTestRule.onNode(
+        hasContentDescription(value = "Expiration date", substring = true)
+    )
     val title: SemanticsNodeInteraction = composeTestRule.onNodeWithTag(TEST_TAG_HEADER_TITLE)
     val headerIcon: SemanticsNodeInteraction = composeTestRule.onNodeWithTag(TEST_TAG_ICON_FROM_RES)
 
@@ -22,13 +29,18 @@ internal class FormPage(
         if (fillOutCardNumber) {
             replaceText(cardNumber, "4242424242424242")
         }
-        replaceText("MM / YY", "12/34")
+        fillExpirationDate("12/34")
         replaceText("CVC", "123")
         replaceText("ZIP Code", "12345")
     }
 
     private fun replaceText(label: String, text: String) {
         composeTestRule.onNode(hasText(label))
+            .performTextReplacement(text)
+    }
+
+    private fun fillExpirationDate(text: String) {
+        composeTestRule.onNode(hasContentDescription(value = "Expiration date", substring = true))
             .performTextReplacement(text)
     }
 
@@ -65,3 +77,17 @@ internal class FormPage(
         replaceText(cardNumber, number)
     }
 }
+
+fun SemanticsNodeInteraction.assertHasErrorMessage(expectedMessage: String) =
+    assert(
+        SemanticsMatcher("has error '$expectedMessage'") { node ->
+            node.config[SemanticsProperties.Error] == expectedMessage
+        }
+    )
+
+fun SemanticsNodeInteraction.assertHasNoErrorMessage() =
+    assert(
+        SemanticsMatcher("has no error ") { node ->
+            node.config.contains(SemanticsProperties.Error).not()
+        }
+    )

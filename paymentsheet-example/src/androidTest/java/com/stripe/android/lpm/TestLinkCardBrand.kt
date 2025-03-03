@@ -3,6 +3,7 @@ package com.stripe.android.lpm
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaymentMethodsSettingsDefinition
@@ -20,6 +21,8 @@ import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.DEFAULT_UI_TIMEOUT
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.test.core.ui.ComposeButton
+import com.stripe.android.utils.ForceNativeBankFlowTestRule
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -36,6 +39,11 @@ internal class TestLinkCardBrand : BasePlaygroundTest() {
         settings[LinkSettingsDefinition] = true
         settings[SupportedPaymentMethodsSettingsDefinition] = "card"
     }
+
+    @get:Rule
+    val forceNativeBankFlowTestRule = ForceNativeBankFlowTestRule(
+        context = ApplicationProvider.getApplicationContext()
+    )
 
     @Test
     fun testLinkCardBrandSuccess() {

@@ -28,6 +28,10 @@
   <string name="stripe_blik_code">BLIK 代碼</string>
   <!-- Label for Boleto Payment method Tax ID -->
   <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
+  <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
+  <string name="stripe_card_brand_not_accepted">（未接受）</string>
+  <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
+  <string name="stripe_card_brand_not_accepted_with_brand">%1$s（未接受）</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">繼續操作，即表示您授權 %1$s 按照 %2$s 的條款從您的 Cash App 賬戶中扣取該款項及未來的款項，直至撤銷授權。您可以隨時在 Cash App 設置中進行修改。</string>
   <!-- Title for the contact information section -->
@@ -101,6 +105,8 @@
   <string name="stripe_scan_card">掃描卡</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">提供您的支付方式並確認該付款即表示您授權 (A) %s 與我們的支付服務者 Stripe 向您的銀行發送對您的賬戶進行扣款的指令以及 (B) 您的銀行按照這些指令對您的賬戶進行扣款。根據您與您的銀行協議的條款和條件，您有權從您的銀行得到退款。退款必須在 8 周內申請，從您的賬戶被扣款之日起算。您的權利在結單上有解釋，可從您的銀行獲取。您同意提前 2 天接收後續扣款的通知。</string>
+  <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
+  <string name="stripe_set_as_default_payment_method">設置為預設支付方式</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">設置</string>
   <!-- Label for UPI ID number field on form -->

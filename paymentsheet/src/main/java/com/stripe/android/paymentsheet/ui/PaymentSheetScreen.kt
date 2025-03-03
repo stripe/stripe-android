@@ -69,6 +69,7 @@ import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.ui.core.elements.H4Text
+import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBackgroundColor
 import com.stripe.android.uicore.strings.resolve

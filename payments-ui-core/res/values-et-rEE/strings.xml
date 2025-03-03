@@ -105,6 +105,8 @@
   <string name="stripe_scan_card">Skanni kaart</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Makseteabe esitamise ja käesoleva makse kinnitamisega volitatate (A) ettevõtet %s ja Stripe\'i, meie makseteenuse osutajat, saatma teie panka juhiseid teie konto debiteerimiseks ning (B) oma panka nende juhiste alusel teie kontot debiteerima. Vastavalt teie õigustele, pangaga sõlmitud lepingule ja panga üldtingimustele on teil õigus saada pangalt tagasimakset. Tagasimakse taotlus tuleb esitada 8 nädala jooksul alates teie konto debiteerimise kuupäevast. Teie õigusi selgitatakse avalduses, mille saate oma pangast. Nõustute saama teavitusi tulevaste debiteerimiste kohta kaks päeva enne nende toimumist.</string>
+  <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
+  <string name="stripe_set_as_default_payment_method">Määra vaikimisi makseviisiks</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Seadista</string>
   <!-- Label for UPI ID number field on form -->

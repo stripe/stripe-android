@@ -583,6 +583,7 @@ internal class PlaygroundTestDriver(
         val result = playgroundState
 
         if (values != null) {
+            selectors.embeddedFormBuyButton.waitForEnabled(requireClickAction = false)
             selectors.embeddedFormBuyButton.click()
         } else {
             selectors.complete.click()
@@ -1184,7 +1185,7 @@ internal class PlaygroundTestDriver(
     private fun waitUntilPrimaryButtonIsCompleted() {
         composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             composeTestRule.onAllNodesWithTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON)
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isEmpty()
         }
 
@@ -1530,6 +1531,13 @@ internal class PlaygroundTestDriver(
             TimeUnit.MILLISECONDS.sleep(250)
         }
 
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+            composeTestRule
+                .onAllNodesWithText("Agree and continue")
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .size == 1
+        }
+
         clickButton("Agree and continue")
         clickButton("Test Institution")
 
@@ -1544,6 +1552,13 @@ internal class PlaygroundTestDriver(
     private fun executeEntireInstantDebitsFlow() = with(device) {
         while (currentActivity?.javaClass?.name != FINANCIAL_CONNECTIONS_ACTIVITY) {
             TimeUnit.MILLISECONDS.sleep(250)
+        }
+
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+            composeTestRule
+                .onAllNodesWithText("Agree and continue")
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .size == 1
         }
 
         clickButton("Agree and continue")
@@ -1570,7 +1585,7 @@ internal class PlaygroundTestDriver(
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             composeTestRule
                 .onAllNodesWithText("Agree and continue")
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .size == 1
         }
 

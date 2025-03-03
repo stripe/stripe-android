@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- Button prompt to add a bank account as a payment method. -->
+  <string name="stripe_add_bank_account">Thêm tài khoản ngân hàng</string>
   <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
   <string name="stripe_add_new_payment_method">Thêm phương thức thanh toán mới</string>
+  <!-- Text for a button that, when tapped, displays another screen where the customer can add a new payment method -->
+  <string name="stripe_add_payment_method">Thêm phương thức thanh toán</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_afterpay_subtitle">Mua ngay hoặc thanh toán sau bằng Afterpay</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
@@ -18,8 +22,14 @@
   <string name="stripe_confirm_close_form_body">Thông tin thanh toán của bạn sẽ không lưu lại.</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_title">Bạn có muốn đóng biểu mẫu này không?</string>
+  <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_header">Lưu thông tin của bạn để thanh toán an toàn bằng 1 cú nhấp chuột với Link</string>
+  <!-- Title of the logout action. -->
+  <string name="stripe_log_out">Đăng xuất khỏi Link</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Đã xảy ra lỗi. Hãy kiểm tra kết nối của bạn và thử lại.</string>
+  <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
+  <string name="stripe_pay_with_link">Thanh toán bằng Link</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Bằng việc tiếp tục, bạn đồng ý cho phép thanh toán tuân theo <terms>các điều khoản này</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -133,8 +143,26 @@
   <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">Không thể thay đổi thông tin Ghi nợ SEPA.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Tổng cộng: %s</string>
+  <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
+  <string name="stripe_pm_set_as_default">Đặt làm phương thức thanh toán mặc định</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">Gỡ bỏ tài khoản ngân hàng có đuôi là %s</string>
+  <!-- Accessibility label for an action or a button that shows a menu. -->
+  <string name="stripe_show_menu">Hiển thị trình đơn</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_sign_up">Tham gia Link</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_sign_up_header">Thanh toán bảo mật bằng một cú nhấp chuột</string>
+  <!-- Label describing the benefit of signing up for Link. Pay faster at {Merchant Name} and thousands of merchants. e.g, 'Pay faster at Example, Inc. and thousands of merchants.' -->
+  <string name="stripe_sign_up_message">Thanh toán nhanh hơn tại %s và hàng ngàn người bán.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_sign_up_terms"><![CDATA[Bằng việc tham gia Link, quý vị đồng ý với <terms>Điều khoản</terms> và <privacy>Chính sách Quyền riêng tư</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative"><![CDATA[Bằng việc cung cấp email, bạn đồng ý tạo tài khoản Link và lưu thông tin thanh toán vào Link, theo <terms>Điều khoản</terms> và <privacy>Chính sách Quyền riêng tư của Link</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Bằng việc cung cấp số điện thoại, bạn đồng ý tạo tài khoản Link và lưu thông tin thanh toán vào Link, theo <terms>Điều khoản</terms> và <privacy>Chính sách Quyền riêng tư của Link</privacy>.]]></string>
+  <!-- Message for a deactivated account in the signup flow. -->
+  <string name="stripe_signup_deactivated_account_message">Tài khoản của bạn không còn hoạt động.</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">Đã xảy ra sự cố</string>
   <!-- Button text on a screen asking the user to approve a payment -->
@@ -147,10 +175,53 @@
   <string name="stripe_upi_polling_payment_failed_message">Vui lòng quay lại và chọn phương thức thanh toán khác</string>
   <!-- Text on a screen that indicates a payment has failed -->
   <string name="stripe_upi_polling_payment_failed_title">Thanh toán không thành công</string>
+  <!-- Title for a button that allows the user to use a different email in the signup flow. -->
+  <string name="stripe_verification_change_email">Đổi email</string>
+  <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
+  <string name="stripe_verification_code_sent">Mã đã được gửi</string>
   <!-- Two factor authentication screen heading -->
   <string name="stripe_verification_dialog_header">Xác nhận đó là bạn</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_header">Nhập mã xác minh của bạn</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_header_inline">Đăng nhập vào tài khoản Link của bạn</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_header_prefilled">Sử dụng thông tin đã lưu của bạn để thanh toán nhanh hơn</string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_verification_message">Nhập mã được gửi tới %s để dùng Link làm phương thức thanh toán mặc định.</string>
+  <!-- Text of a label for confirming an email address. E.g., 'Not user@example.com?' -->
+  <string name="stripe_verification_not_email">Không phải %s?</string>
+  <!-- Label for a button that re-sends the a login code when tapped -->
+  <string name="stripe_verification_resend">Gửi lại mã</string>
   <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
   <string name="stripe_view_more">Xem thêm</string>
+  <!-- Mandate text displayed when paying via Link instant debit. -->
+  <string name="stripe_wallet_bank_account_terms"><![CDATA[Bằng việc tiếp tục, quý vị đồng ý xác thực thanh toán tuân theo các <terms>điều khoản</terms> sau.]]></string>
+  <!-- Label for a section displaying payment details. -->
+  <string name="stripe_wallet_collapsed_payment">Thanh toán</string>
   <!-- Label for identifying the default payment method. -->
   <string name="stripe_wallet_default">Mặc định</string>
+  <string name="stripe_wallet_expand_accessibility">Thay đổi lựa chọn</string>
+  <!-- Title for a section listing one or more payment methods. -->
+  <string name="stripe_wallet_expanded_title">Phương thức thanh toán</string>
+  <!-- Accessibility description for Passthrough payment method -->
+  <string name="stripe_wallet_passthrough_description">Passthrough</string>
+  <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
+  <string name="stripe_wallet_pay_another_way">Thanh toán theo cách khác</string>
+  <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
+  <string name="stripe_wallet_recollect_cvc_error">Vì lý do bảo mật, vui lòng nhập lại mã bảo mật của thẻ của bạn.</string>
+  <!-- Title of confirmation prompt when removing a linked bank account. -->
+  <string name="stripe_wallet_remove_account_confirmation">Bạn có chắc chắn muốn gỡ bỏ tài khoản liên kết này không?</string>
+  <!-- Title of confirmation prompt when removing a saved card. -->
+  <string name="stripe_wallet_remove_card_confirmation">Bạn có chắc chắn muốn gỡ bỏ thẻ này không?</string>
+  <!-- Title for a button that when tapped removes a linked bank account. -->
+  <string name="stripe_wallet_remove_linked_account">Xóa tài khoản liên kết</string>
+  <!-- Label for a button or menu item that sets a payment method as default when tapped. -->
+  <string name="stripe_wallet_set_as_default">Đặt làm mặc định</string>
+  <!-- Label shown when a payment method cannot be used for the current transaction. -->
+  <string name="stripe_wallet_unavailable">Không khả dụng cho giao dịch mua hàng này</string>
+  <!-- Title for a button that when tapped, presents a screen for updating a card. Also the heading the screen itself. -->
+  <string name="stripe_wallet_update_card">Cập nhật thẻ</string>
+  <!-- A text notice shown when the user selects an expired card. -->
+  <string name="stripe_wallet_update_expired_card_error">Thẻ này đã hết hạn. Hãy cập nhật thông tin thẻ của bạn hoặc chọn một phương thức thanh toán khác.</string>
 </resources>

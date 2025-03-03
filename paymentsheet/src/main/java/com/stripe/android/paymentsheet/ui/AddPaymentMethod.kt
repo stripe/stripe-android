@@ -104,6 +104,7 @@ internal fun FormFieldValues.transformToPaymentSelection(
                 setupFutureUsage = userRequestedReuse.setupFutureUsage
             ),
             paymentMethodCreateParams = params,
+            paymentMethodExtraParams = extras,
             brand = CardBrand.fromCode(fieldValuePairs[IdentifierSpec.CardBrand]?.value),
             customerRequestedSave = userRequestedReuse,
         )

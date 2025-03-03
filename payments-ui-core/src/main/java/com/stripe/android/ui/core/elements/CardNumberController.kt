@@ -13,6 +13,7 @@ import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.LayoutDirection
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.CardAccountRangeRepository
@@ -20,7 +21,7 @@ import com.stripe.android.cards.CardAccountRangeService
 import com.stripe.android.cards.CardNumber
 import com.stripe.android.cards.DefaultStaticCardAccountRanges
 import com.stripe.android.cards.StaticCardAccountRanges
-import com.stripe.android.core.strings.plus
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
@@ -32,7 +33,6 @@ import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventR
 import com.stripe.android.uicore.elements.FieldError
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionFieldElement
-import com.stripe.android.uicore.elements.SectionFieldErrorController
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.elements.TextFieldState
@@ -49,7 +49,7 @@ import kotlinx.coroutines.flow.drop
 import kotlin.coroutines.CoroutineContext
 import com.stripe.android.R as PaymentsCoreR
 
-internal sealed class CardNumberController : TextFieldController, SectionFieldErrorController {
+internal sealed class CardNumberController : TextFieldController {
     abstract val cardBrandFlow: StateFlow<CardBrand>
 
     abstract val selectedCardBrandFlow: StateFlow<CardBrand>
@@ -104,11 +104,15 @@ internal class DefaultCardNumberController(
         cardTextFieldConfig.determineVisualTransformation(number, panLength)
     }
 
+    override val layoutDirection: LayoutDirection = LayoutDirection.Ltr
+
     override val rawFieldValue: StateFlow<String> =
         _fieldValue.mapAsStateFlow { cardTextFieldConfig.convertToRaw(it) }
 
     // This makes the screen reader read out numbers digit by digit
-    override val contentDescription: StateFlow<String> = _fieldValue.mapAsStateFlow { it.asIndividualDigits() }
+    override val contentDescription: StateFlow<ResolvableString> = _fieldValue.mapAsStateFlow {
+        it.asIndividualDigits().resolvableString
+    }
 
     private val isEligibleForCardBrandChoice = cardBrandChoiceConfig is CardBrandChoiceConfig.Eligible
     private val brandChoices = MutableStateFlow<List<CardBrand>>(listOf())

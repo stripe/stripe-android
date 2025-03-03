@@ -512,7 +512,6 @@ internal class CustomerSheetViewModel(
                 productUsageTokens = setOf("CustomerSheet"),
             )
         ).onSuccess { updatedMethod ->
-            onBackPressed()
             updatePaymentMethodInState(updatedMethod)
 
             eventReporter.onUpdatePaymentMethodSucceeded(
@@ -556,8 +555,17 @@ internal class CustomerSheetViewModel(
                             selectedBrand = it
                         )
                     },
-                    updateExecutor = ::updateExecutor,
+                    onUpdateSuccess = ::onBackPressed,
+                    updateCardBrandExecutor = ::updateCardBrandExecutor,
                     workContext = workContext,
+                    // This checkbox is never displayed in CustomerSheet.
+                    shouldShowSetAsDefaultCheckbox = false,
+                    // Should never be called from CustomerSheet, because we don't enable the set as default checkbox.
+                    setDefaultPaymentMethodExecutor = {
+                        Result.failure(
+                            IllegalStateException("Unexpected attempt to update default from CustomerSheet.")
+                        )
+                    },
                 ),
                 isLiveMode = isLiveModeProvider(),
             )
@@ -571,7 +579,7 @@ internal class CustomerSheetViewModel(
         }.failureOrNull()?.cause
     }
 
-    private suspend fun updateExecutor(paymentMethod: PaymentMethod, brand: CardBrand): Result<PaymentMethod> {
+    private suspend fun updateCardBrandExecutor(paymentMethod: PaymentMethod, brand: CardBrand): Result<PaymentMethod> {
         return when (val result = modifyCardPaymentMethod(paymentMethod, brand)) {
             is CustomerSheetDataResult.Success -> Result.success(result.value)
             is CustomerSheetDataResult.Failure -> Result.failure(result.cause)
@@ -829,7 +837,8 @@ internal class CustomerSheetViewModel(
             onUpdatePrimaryButtonState = { /* no-op, CustomerSheetScreen does not use PrimaryButton.State */ },
             onError = { error ->
                 handleViewAction(CustomerSheetViewAction.OnFormError(error))
-            }
+            },
+            shouldShowSetAsDefaultCheckbox = false,
         )
     }
 
@@ -1085,7 +1094,9 @@ internal class CustomerSheetViewModel(
     private fun selectSavedPaymentMethod(savedPaymentSelection: PaymentSelection.Saved?) {
         viewModelScope.launch(workContext) {
             awaitSavedSelectionDataSource().setSavedSelection(
-                savedPaymentSelection?.toSavedSelection()
+                savedPaymentSelection?.toSavedSelection(),
+                shouldSyncDefault =
+                customerState.value.metadata?.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true,
             ).onSuccess {
                 confirmPaymentSelection(
                     paymentSelection = savedPaymentSelection,
@@ -1104,7 +1115,7 @@ internal class CustomerSheetViewModel(
 
     private fun selectGooglePay() {
         viewModelScope.launch(workContext) {
-            awaitSavedSelectionDataSource().setSavedSelection(SavedSelection.GooglePay)
+            awaitSavedSelectionDataSource().setSavedSelection(SavedSelection.GooglePay, shouldSyncDefault = false)
                 .onSuccess {
                     confirmPaymentSelection(
                         paymentSelection = PaymentSelection.GooglePay,

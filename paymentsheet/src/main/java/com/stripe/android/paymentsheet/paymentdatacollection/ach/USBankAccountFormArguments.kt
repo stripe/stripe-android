@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
+import com.stripe.android.lpmfoundations.paymentmethod.IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
@@ -58,6 +59,7 @@ internal class USBankAccountFormArguments(
     val onUpdatePrimaryButtonUIState: ((PrimaryButton.UIState?) -> (PrimaryButton.UIState?)) -> Unit,
     val onUpdatePrimaryButtonState: (PrimaryButton.State) -> Unit,
     val onError: (ResolvableString?) -> Unit,
+    val shouldShowSetAsDefaultCheckbox: Boolean
 ) {
     companion object {
         fun create(
@@ -101,6 +103,9 @@ internal class USBankAccountFormArguments(
                 onUpdatePrimaryButtonState = viewModel::updatePrimaryButtonState,
                 onError = viewModel::onError,
                 incentive = paymentMethodMetadata.paymentMethodIncentive,
+                shouldShowSetAsDefaultCheckbox =
+                paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
+                    ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
             )
         }
 
@@ -145,6 +150,9 @@ internal class USBankAccountFormArguments(
                 },
                 onError = onError,
                 incentive = paymentMethodMetadata.paymentMethodIncentive,
+                shouldShowSetAsDefaultCheckbox =
+                paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
+                    ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
             )
         }
     }

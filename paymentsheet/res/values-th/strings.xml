@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- Button prompt to add a bank account as a payment method. -->
+  <string name="stripe_add_bank_account">เพิ่มบัญชีธนาคาร</string>
   <!-- Used for accessibility to describe the button on the payment sheet list of options to add a new payment method. -->
   <string name="stripe_add_new_payment_method">เพิ่มวิธีการชำระเงินใหม่</string>
+  <!-- Text for a button that, when tapped, displays another screen where the customer can add a new payment method -->
+  <string name="stripe_add_payment_method">เพิ่มวิธีการชำระเงิน</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
   <string name="stripe_afterpay_subtitle">ซื้อตอนนี้หรือจ่ายทีหลังด้วย Afterpay</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
@@ -18,8 +22,14 @@
   <string name="stripe_confirm_close_form_body">ข้อมูลการชำระเงินของคุณจะไม่ได้รับการบันทึก</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_title">แน่ใจไหมว่าต้องการปิดแบบฟอร์มนี้</string>
+  <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
+  <string name="stripe_inline_sign_up_header">บันทึกข้อมูลของคุณไว้เพื่อการชำระเงินที่ปลอดภัยในคลิกเดียวด้วย Link</string>
+  <!-- Title of the logout action. -->
+  <string name="stripe_log_out">ออกจากระบบ Link</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ ตรวจสอบการเชื่อมต่อของคุณแล้วลองอีกครั้ง</string>
+  <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
+  <string name="stripe_pay_with_link">ชำระเงินด้วย Link</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[การดำเนินการต่อหมายความว่าคุณตกลงที่จะอนุมัติการชำระเงินซึ่งดำเนินการตาม<terms>ข้อกำหนดเหล่านี้</terms>]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -133,8 +143,26 @@
   <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">เปลี่ยนแปลงรายละเอียดการหักบัญชีอัตโนมัติแบบ SEPA ไม่ได้</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">รวม: %s</string>
+  <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
+  <string name="stripe_pm_set_as_default">ตั้งเป็นวิธีการชำระเงินเริ่มต้น</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">ลบบัญชีธนาคารที่ลงท้ายด้วย %s</string>
+  <!-- Accessibility label for an action or a button that shows a menu. -->
+  <string name="stripe_show_menu">แสดงเมนู</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_sign_up">สมัครใช้ Link</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_sign_up_header">การชำระเงินที่ปลอดภัยในคลิกเดียว</string>
+  <!-- Label describing the benefit of signing up for Link. Pay faster at {Merchant Name} and thousands of merchants. e.g, 'Pay faster at Example, Inc. and thousands of merchants.' -->
+  <string name="stripe_sign_up_message">ชำระเงินที่ %s และผู้ค้าอีกนับพันแห่งได้เร็วขึ้น</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_sign_up_terms"><![CDATA[การเข้าร่วม Link หมายถึงคุณยอมรับ<terms>ข้อกำหนด</terms>และ<privacy>นโยบายความเป็นส่วนตัว</privacy>]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative"><![CDATA[การให้อีเมลหมายความว่าคุณยินยอมที่จะสร้างบัญชี Link และบันทึกข้อมูลการชำระเงินไปยัง Link ตาม<terms>ข้อกำหนดของ Link</terms> และ<privacy>นโยบายความเป็นส่วนตัว</privacy>]]></string>
+  <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[การให้หมายเลขโทรศัพท์หมายความว่าคุณยินยอมที่จะสร้างบัญชี Link และบันทึกข้อมูลการชำระเงินไปยัง Link ตาม<terms>ข้อกำหนด</terms> และ<privacy>เงื่อนไข</privacy>ของ Link]]></string>
+  <!-- Message for a deactivated account in the signup flow. -->
+  <string name="stripe_signup_deactivated_account_message">บัญชีของคุณถูกปิดใช้งานแล้ว</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">มีข้อผิดพลาดเกิดขึ้น</string>
   <!-- Button text on a screen asking the user to approve a payment -->
@@ -147,10 +175,53 @@
   <string name="stripe_upi_polling_payment_failed_message">โปรดย้อนกลับและเลือกวิธีการชำระเงินอื่น</string>
   <!-- Text on a screen that indicates a payment has failed -->
   <string name="stripe_upi_polling_payment_failed_title">ชำระเงินไม่สำเร็จ</string>
+  <!-- Title for a button that allows the user to use a different email in the signup flow. -->
+  <string name="stripe_verification_change_email">เปลี่ยนอีเมล</string>
+  <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
+  <string name="stripe_verification_code_sent">ส่งรหัสแล้ว</string>
   <!-- Two factor authentication screen heading -->
   <string name="stripe_verification_dialog_header">ยืนยันว่าเป็นคุณจริงๆ</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_header">ป้อนรหัสยืนยัน</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_header_inline">เข้าสู่ระบบบัญชี Link ของคุณ</string>
+  <!-- Two factor authentication screen heading -->
+  <string name="stripe_verification_header_prefilled">ใช้ข้อมูลที่บันทึกไว้เพื่อให้ชำระเงินได้รวดเร็วขึ้น</string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_verification_message">ป้อนรหัสที่เราส่งให้ที่ %s เพื่อใช้ Link ในการชำระเงินตามค่าเริ่มต้น</string>
+  <!-- Text of a label for confirming an email address. E.g., 'Not user@example.com?' -->
+  <string name="stripe_verification_not_email">หากไม่ใช่ %s</string>
+  <!-- Label for a button that re-sends the a login code when tapped -->
+  <string name="stripe_verification_resend">ส่งรหัสอีกครั้ง</string>
   <!-- Text shown on a button that when tapped opens a user's screen with their payment methods. -->
   <string name="stripe_view_more">ดูเพิ่มเติม</string>
+  <!-- Mandate text displayed when paying via Link instant debit. -->
+  <string name="stripe_wallet_bank_account_terms"><![CDATA[การดำเนินการต่อหมายความว่าคุณตกลงที่จะอนุมัติการชำระเงินซึ่งดำเนินการตาม<terms>ข้อกำหนด</terms>เหล่านี้]]></string>
+  <!-- Label for a section displaying payment details. -->
+  <string name="stripe_wallet_collapsed_payment">การชำระเงิน</string>
   <!-- Label for identifying the default payment method. -->
   <string name="stripe_wallet_default">ค่าเริ่มต้น</string>
+  <string name="stripe_wallet_expand_accessibility">เปลี่ยนการเลือก</string>
+  <!-- Title for a section listing one or more payment methods. -->
+  <string name="stripe_wallet_expanded_title">วิธีการชำระเงิน</string>
+  <!-- Accessibility description for Passthrough payment method -->
+  <string name="stripe_wallet_passthrough_description">การผ่าน</string>
+  <!-- Label of a button that when tapped allows the user to select a different form of payment. -->
+  <string name="stripe_wallet_pay_another_way">ชำระด้วยวิธีอื่น</string>
+  <!-- A text notice shown when the user selects a card that requires re-entering the security code (CVV/CVC). -->
+  <string name="stripe_wallet_recollect_cvc_error">โปรดป้อนรหัสรักษาความปลอดภัยของบัตรอีกครั้งเพื่อความปลอดภัย</string>
+  <!-- Title of confirmation prompt when removing a linked bank account. -->
+  <string name="stripe_wallet_remove_account_confirmation">แน่ใจไหมว่าต้องการนำบัญชีที่ลิงก์นี้ออก</string>
+  <!-- Title of confirmation prompt when removing a saved card. -->
+  <string name="stripe_wallet_remove_card_confirmation">แน่ใจไหมว่าต้องการนำบัตรใบนี้ออก</string>
+  <!-- Title for a button that when tapped removes a linked bank account. -->
+  <string name="stripe_wallet_remove_linked_account">นำบัญชีที่ลิงก์ไว้ออก</string>
+  <!-- Label for a button or menu item that sets a payment method as default when tapped. -->
+  <string name="stripe_wallet_set_as_default">ตั้งเป็นค่าเริ่มต้น</string>
+  <!-- Label shown when a payment method cannot be used for the current transaction. -->
+  <string name="stripe_wallet_unavailable">ใช้กับการซื้อรายการนี้ไม่ได้</string>
+  <!-- Title for a button that when tapped, presents a screen for updating a card. Also the heading the screen itself. -->
+  <string name="stripe_wallet_update_card">อัปเดตบัตร</string>
+  <!-- A text notice shown when the user selects an expired card. -->
+  <string name="stripe_wallet_update_expired_card_error">บัตรใบนี้หมดอายุแล้ว โปรดอัปเดตข้อมูลบัตรหรือเลือกวิธีการชำระเงินอื่น</string>
 </resources>

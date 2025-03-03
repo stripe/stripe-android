@@ -19,8 +19,10 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParams.Companion.getNameFromParams
+import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.model.setupFutureUsage
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
@@ -215,7 +217,9 @@ internal class FormHelperTest {
                     paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
                         setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank,
                     ),
-                    paymentMethodExtraParams = null,
+                    paymentMethodExtraParams = PaymentMethodExtraParams.Card(
+                        setAsDefault = null
+                    ),
                     brand = CardBrand.Visa,
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
                     input = userInput,
@@ -261,7 +265,9 @@ internal class FormHelperTest {
                     paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
                         setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank,
                     ),
-                    paymentMethodExtraParams = null,
+                    paymentMethodExtraParams = PaymentMethodExtraParams.Card(
+                        setAsDefault = null
+                    ),
                     brand = CardBrand.Visa,
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
                 )
@@ -361,7 +367,9 @@ internal class FormHelperTest {
                     paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
                         setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank,
                     ),
-                    paymentMethodExtraParams = null,
+                    paymentMethodExtraParams = PaymentMethodExtraParams.Card(
+                        setAsDefault = null
+                    ),
                     brand = CardBrand.Visa,
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse,
                 )

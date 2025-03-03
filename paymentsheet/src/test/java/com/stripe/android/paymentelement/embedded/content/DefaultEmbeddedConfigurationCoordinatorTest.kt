@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded.content
 
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
@@ -8,6 +9,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
@@ -18,9 +20,13 @@ import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
+import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.StripeThemeDefaults
+import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.test.TestScope
@@ -72,6 +78,38 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
         assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
 
         assertThat(confirmationStateHolder.state?.paymentMethodMetadata).isNotNull()
+    }
+
+    @Test
+    fun `configure sets confirmationState to previousSelection`() = testScenario(
+        selectionChooser = {
+            PaymentSelection.GooglePay
+        },
+    ) {
+        configurationHandler.emit(
+            Result.success(
+                createPaymentElementLoaderState(
+                    paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+                )
+            )
+        )
+
+        selectionHolder.set(PaymentSelection.GooglePay)
+        assertThat(confirmationStateHolder.state).isNull()
+
+        assertThat(
+            configurationCoordinator.configure(
+                PaymentSheet.IntentConfiguration(
+                    PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
+                ),
+                configuration = defaultConfiguration,
+            )
+        ).isInstanceOf<EmbeddedPaymentElement.ConfigureResult.Succeeded>()
+        assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
+
+        assertThat(confirmationStateHolder.state?.paymentMethodMetadata).isNotNull()
+        assertThat(confirmationStateHolder.state?.selection).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(selectionHolder.selection.value).isEqualTo(PaymentSelection.GooglePay)
     }
 
     @Test
@@ -179,6 +217,41 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
     }
 
     @Test
+    fun `configure correctly parses appearance`() = testScenario {
+        val configuration = EmbeddedPaymentElement.Configuration
+            .Builder("Example, Inc.")
+            .appearance(
+                PaymentSheet.Appearance(
+                    colorsLight = PaymentSheetAppearance.CrazyAppearance.appearance.colorsLight,
+                )
+            ).build()
+        configurationHandler.emit(Result.success(createPaymentElementLoaderState()))
+
+        assertThat(StripeTheme.colorsLightMutable.componentBorder)
+            .isEqualTo(
+                StripeThemeDefaults.colorsLight.componentBorder
+            )
+
+        configurationCoordinator.configure(
+            intentConfiguration = PaymentSheet.IntentConfiguration(
+                PaymentSheet.IntentConfiguration.Mode.Payment(5000, "USD"),
+            ),
+            configuration = configuration
+        )
+
+        assertThat(StripeTheme.colorsLightMutable.componentBorder)
+            .isEqualTo(
+                Color(
+                    PaymentSheetAppearance.CrazyAppearance.appearance.colorsLight.componentBorder
+                )
+            )
+
+        // Reset appearance
+        PaymentSheet.Appearance().parseAppearance()
+        embeddedContentHelper.dataLoadedTurbine.awaitItem()
+    }
+
+    @Test
     fun `configure correctly sets customerStateHolder`() = testScenario {
         val configuration = EmbeddedPaymentElement.Configuration
             .Builder("Example, Inc.")
@@ -225,6 +298,7 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
     }
 
     private fun testScenario(
+        selectionChooser: (PaymentSelection?) -> PaymentSelection? = { it },
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val confirmationHandler = FakeConfirmationHandler()
@@ -244,7 +318,7 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
             configurationHandler = configurationHandler,
             selectionHolder = selectionHolder,
             selectionChooser = { _, _, _, newSelection, _ ->
-                newSelection
+                selectionChooser(newSelection)
             },
             customerStateHolder = customerStateHolder,
             embeddedContentHelper = embeddedContentHelper,
