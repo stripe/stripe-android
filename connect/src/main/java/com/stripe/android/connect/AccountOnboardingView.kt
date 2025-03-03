@@ -3,7 +3,6 @@ package com.stripe.android.connect
 import android.content.Context
 import android.os.Parcelable
 import android.util.AttributeSet
-import android.widget.FrameLayout
 import androidx.annotation.RestrictTo
 import androidx.core.content.withStyledAttributes
 import com.stripe.android.connect.webview.StripeConnectWebViewContainer
@@ -20,7 +19,7 @@ class AccountOnboardingView private constructor(
     defStyleAttr: Int,
     cacheKey: String?,
     webViewContainerBehavior: StripeConnectWebViewContainerImpl<AccountOnboardingListener, AccountOnboardingProps>,
-) : FrameLayout(context, attrs, defStyleAttr),
+) : StripeComponentView<AccountOnboardingListener, AccountOnboardingProps>(context, attrs, defStyleAttr),
     StripeConnectWebViewContainer<AccountOnboardingListener, AccountOnboardingProps> by webViewContainerBehavior {
 
     @JvmOverloads
