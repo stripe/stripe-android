@@ -795,6 +795,7 @@ internal class PaymentMethodMetadataTest {
             linkState = null,
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             paymentMethodIncentive = null,
+            sessionId = "elements_session_1234"
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -865,6 +866,7 @@ internal class PaymentMethodMetadataTest {
             linkState = null,
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             paymentMethodIncentive = null,
+            sessionId = "elements_session_1234"
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }

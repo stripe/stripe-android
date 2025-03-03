@@ -8,6 +8,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.BuildConfig
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.stripecardscan.cardscan.CardScanConfiguration
 import com.stripe.android.stripecardscan.cardscan.CardScanSheet
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 
@@ -16,7 +17,7 @@ import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
  *
  */
 internal interface StripeCardScanProxy {
-    fun present()
+    fun present(configuration: CardScanConfiguration)
 
     fun attachCardScanFragment(
         lifecycleOwner: LifecycleOwner,
@@ -72,8 +73,8 @@ internal interface StripeCardScanProxy {
 internal class DefaultStripeCardScanProxy(
     private val cardScanSheet: CardScanSheet
 ) : StripeCardScanProxy {
-    override fun present() {
-        cardScanSheet.present()
+    override fun present(configuration: CardScanConfiguration) {
+        cardScanSheet.present(configuration)
     }
 
     override fun attachCardScanFragment(
@@ -87,7 +88,7 @@ internal class DefaultStripeCardScanProxy(
 }
 
 internal class UnsupportedStripeCardScanProxy(private val errorReporter: ErrorReporter) : StripeCardScanProxy {
-    override fun present() {
+    override fun present(configuration: CardScanConfiguration) {
         val illegalStateException = IllegalStateException(
             "Missing stripecardscan dependency, please add it to your apps build.gradle"
         )

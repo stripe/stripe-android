@@ -16,6 +16,7 @@ class CardDetailsSectionController(
     collectName: Boolean = false,
     cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+    val sessionId: String? = null
 ) : SectionFieldErrorController {
 
     internal val cardDetailsElement = CardDetailsElement(
