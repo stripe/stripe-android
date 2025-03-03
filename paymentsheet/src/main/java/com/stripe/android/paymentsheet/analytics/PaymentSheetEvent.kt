@@ -6,6 +6,7 @@ import com.stripe.android.common.analytics.toAnalyticsValue
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.analyticsValue
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -301,25 +302,24 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val eventName: String =
             formatEventName(mode, "payment_${analyticsValue(paymentSelection)}_${result.analyticsValue}")
 
-        override val additionalParams: Map<String, Any?> =
-            mapOf(
-                FIELD_DURATION to duration?.asSeconds,
-                FIELD_CURRENCY to currency,
-            ) + buildDeferredIntentConfirmationType() + paymentSelection.paymentMethodInfo() + errorInfo()
-
-        private fun buildDeferredIntentConfirmationType(): Map<String, String> {
-            return deferredIntentConfirmationType?.let {
-                mapOf(FIELD_DEFERRED_INTENT_CONFIRMATION_TYPE to it.value)
-            }.orEmpty()
-        }
-
-        private fun errorInfo(): Map<String, String> {
-            return when (result) {
-                is Result.Success -> emptyMap()
-                is Result.Failure -> mapOf(
-                    FIELD_ERROR_MESSAGE to result.error.analyticsValue,
-                    FIELD_ERROR_CODE to result.error.errorCode,
-                ).filterNotNullValues()
+        override val additionalParams: Map<String, Any?> = buildMap {
+            put(FIELD_DURATION, duration?.asSeconds)
+            put(FIELD_CURRENCY, currency)
+            deferredIntentConfirmationType?.let {
+                put(FIELD_DEFERRED_INTENT_CONFIRMATION_TYPE, it.value)
+            }
+            if (result is Result.Failure) {
+                put(FIELD_ERROR_MESSAGE, result.error.analyticsValue)
+                put(FIELD_ERROR_CODE, result.error.errorCode)
+            }
+            paymentSelection.code()?.let {
+                put(FIELD_SELECTED_LPM, it)
+            }
+            paymentSelection.linkContext()?.let {
+                put(FIELD_LINK_CONTEXT, it)
+            }
+            paymentSelection?.getSetAsDefaultPaymentMethodFromPaymentSelection()?.let {
+                put(FIELD_SET_AS_DEFAULT, it)
             }
         }
 
@@ -512,6 +512,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_ERROR_CODE = "error_code"
         const val FIELD_CBC_EVENT_SOURCE = "cbc_event_source"
         const val FIELD_SELECTED_CARD_BRAND = "selected_card_brand"
+        const val FIELD_SET_AS_DEFAULT = "set_as_default"
         const val FIELD_LINK_CONTEXT = "link_context"
         const val FIELD_EXTERNAL_PAYMENT_METHODS = "external_payment_methods"
         const val FIELD_PAYMENT_METHOD_LAYOUT = "payment_method_layout"
@@ -530,6 +531,20 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     }
 }
 
+private fun PaymentSelection.getSetAsDefaultPaymentMethodFromPaymentSelection(): Boolean? {
+    return when (this) {
+        is PaymentSelection.New.Card -> {
+            (this.paymentMethodExtraParams as? PaymentMethodExtraParams.Card)?.setAsDefault
+        }
+        is PaymentSelection.New.USBankAccount -> {
+            (this.paymentMethodExtraParams as? PaymentMethodExtraParams.USBankAccount)?.setAsDefault
+        }
+        else -> {
+            null
+        }
+    }
+}
+
 private val Duration.asSeconds: Float
     get() = toDouble(DurationUnit.SECONDS).toFloat()
 
@@ -542,13 +557,6 @@ internal fun PaymentSelection?.code(): String? {
         is PaymentSelection.ExternalPaymentMethod -> type
         null -> null
     }
-}
-
-private fun PaymentSelection?.paymentMethodInfo(): Map<String, String> {
-    return mapOf(
-        PaymentSheetEvent.FIELD_SELECTED_LPM to code(),
-        PaymentSheetEvent.FIELD_LINK_CONTEXT to linkContext(),
-    ).filterNotNullValues()
 }
 
 internal fun PaymentSelection?.linkContext(): String? {
