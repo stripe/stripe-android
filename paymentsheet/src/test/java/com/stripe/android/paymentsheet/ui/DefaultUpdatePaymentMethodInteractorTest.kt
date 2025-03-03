@@ -314,6 +314,22 @@ class DefaultUpdatePaymentMethodInteractorTest {
     }
 
     @Test
+    fun setAsDefaultCheckbox_shownForCards() = runScenario(
+        displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
+        shouldShowSetAsDefaultCheckbox = true,
+    ) {
+        assertThat(interactor.shouldShowSetAsDefaultCheckbox).isTrue()
+    }
+
+    @Test
+    fun setAsDefaultCheckbox_shownForUsBankAccount() = runScenario(
+        displayableSavedPaymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT.toDisplayableSavedPaymentMethod(),
+        shouldShowSetAsDefaultCheckbox = true,
+    ) {
+        assertThat(interactor.shouldShowSetAsDefaultCheckbox).isTrue()
+    }
+
+    @Test
     fun setAsDefaultCheckboxChangedViewAction_updatesState() = runScenario(
         shouldShowSetAsDefaultCheckbox = true,
     ) {
