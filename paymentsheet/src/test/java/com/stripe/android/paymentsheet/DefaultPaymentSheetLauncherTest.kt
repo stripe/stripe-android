@@ -86,9 +86,7 @@ class DefaultPaymentSheetLauncherTest {
 
     @Test
     fun `Clears out CreateIntentCallback when lifecycle owner is destroyed`() {
-        val paymentSheetKey = "PaymentSheet"
-
-        PaymentElementCallbackReferences[paymentSheetKey] = PaymentElementCallbacks(
+        PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER] = PaymentElementCallbacks(
             createIntentCallback = { _, _ ->
                 error("I’m alive")
             },
@@ -106,20 +104,18 @@ class DefaultPaymentSheetLauncherTest {
         )
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-        assertThat(PaymentElementCallbackReferences[paymentSheetKey]).isNotNull()
+        assertThat(PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER]).isNotNull()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
-        assertThat(PaymentElementCallbackReferences[paymentSheetKey]).isNotNull()
+        assertThat(PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER]).isNotNull()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        assertThat(PaymentElementCallbackReferences[paymentSheetKey]).isNull()
+        assertThat(PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER]).isNull()
     }
 
     @Test
     fun `Clears out externalPaymentMethodConfirmHandler when lifecycle owner is destroyed`() {
-        val paymentSheetKey = "PaymentSheet"
-
-        PaymentElementCallbackReferences[paymentSheetKey] = PaymentElementCallbacks(
+        PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER] = PaymentElementCallbacks(
             createIntentCallback = null,
             externalPaymentMethodConfirmHandler = { _, _ ->
                 error("I’m alive")
@@ -137,13 +133,22 @@ class DefaultPaymentSheetLauncherTest {
         )
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-        assertThat(PaymentElementCallbackReferences[paymentSheetKey]?.externalPaymentMethodConfirmHandler).isNotNull()
+        assertThat(
+            PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER]
+                ?.externalPaymentMethodConfirmHandler
+        ).isNotNull()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
-        assertThat(PaymentElementCallbackReferences[paymentSheetKey]?.externalPaymentMethodConfirmHandler).isNotNull()
+        assertThat(
+            PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER]
+                ?.externalPaymentMethodConfirmHandler
+        ).isNotNull()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        assertThat(PaymentElementCallbackReferences[paymentSheetKey]?.externalPaymentMethodConfirmHandler).isNull()
+        assertThat(
+            PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER]
+                ?.externalPaymentMethodConfirmHandler
+        ).isNull()
     }
 
     private class FakeActivityResultRegistry(

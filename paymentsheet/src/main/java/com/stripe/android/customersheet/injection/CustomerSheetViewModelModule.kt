@@ -80,7 +80,7 @@ internal interface CustomerSheetViewModelModule {
         @Provides
         @PaymentElementCallbackIdentifier
         fun providesInstanceId(): String {
-            // We don't have shared callback dependencies here
+            // We currently do not support multiple instances of Customer Sheet
             return "CustomerSheet"
         }
 

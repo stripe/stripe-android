@@ -126,7 +126,7 @@ internal interface ExtendedPaymentElementConfirmationTestModule {
     companion object {
         @Provides
         @PaymentElementCallbackIdentifier
-        fun providesInstanceId(): String = "ExtendedConfirmation"
+        fun providesInstanceId(): String = "ExtendedConfirmationTestIdentifier"
 
         @Provides
         fun providesContext(application: Application): Context = application
