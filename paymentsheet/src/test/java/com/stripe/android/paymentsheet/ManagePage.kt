@@ -26,6 +26,12 @@ internal class ManagePage(
         }
     }
 
+    fun assertNotVisible() {
+        composeTestRule
+            .onNode(hasTestTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST))
+            .assertDoesNotExist()
+    }
+
     fun selectPaymentMethod(paymentMethodId: String) {
         composeTestRule.onNode(
             hasTestTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId")
