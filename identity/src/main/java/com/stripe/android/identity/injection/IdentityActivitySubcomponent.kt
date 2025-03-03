@@ -52,9 +52,6 @@ internal interface IdentityActivitySubcomponent {
         @BindsInstance
         fun identityViewModelFactory(identityViewModelFactory: ViewModelProvider.Factory): Builder
 
-        @BindsInstance
-        fun fallbackUrlLauncher(fallbackUrlLauncher: FallbackUrlLauncher): Builder
-
         fun build(): IdentityActivitySubcomponent
     }
 }

@@ -106,14 +106,6 @@ internal fun IdentityNavGraph(
                 )
             }
 
-            screen(VerificationWebViewDestination.ROUTE) {
-                VerificationWebViewScreen(
-                    navController = navController,
-                    identityViewModel = identityViewModel,
-                    verificationFlowFinishable = verificationFlowFinishable
-                )
-            }
-
             screen(IndividualWelcomeDestination.ROUTE) {
                 IndividualWelcomeScreen(
                     navController = navController,

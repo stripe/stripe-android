@@ -34,7 +34,6 @@ import android.graphics.Bitmap
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 internal fun VerificationWebViewScreen(
-    navController: NavController,
     identityViewModel: IdentityViewModel,
     verificationFlowFinishable: VerificationFlowFinishable
 ) {
@@ -45,7 +44,9 @@ internal fun VerificationWebViewScreen(
         verificationPageResource = verificationPageState,
         onError = {
             identityViewModel.errorCause.postValue(it)
-            navController.navigateToErrorScreenWithDefaultValues(context)
+            verificationFlowFinishable.finishWithResult(
+                VerificationFlowResult.Failed(it)
+            )
         }
     ) { verificationPage ->
         ScreenTransitionLaunchedEffect(

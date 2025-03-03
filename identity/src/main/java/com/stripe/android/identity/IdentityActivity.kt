@@ -3,7 +3,6 @@ package com.stripe.android.identity
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
@@ -11,15 +10,21 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AlertDialog
-import androidx.browser.customtabs.CustomTabsIntent
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
-import androidx.navigation.NavDestination
 import com.stripe.android.camera.CameraPermissionCheckingActivity
 import com.stripe.android.camera.framework.time.asEpochMillisecondsComparableTimeMark
 import com.stripe.android.core.injection.IOContext
@@ -30,15 +35,8 @@ import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
 import com.stripe.android.identity.injection.DaggerIdentityActivityFallbackComponent
 import com.stripe.android.identity.injection.IdentityActivitySubcomponent
-import com.stripe.android.identity.navigation.ConfirmationDestination
-import com.stripe.android.identity.navigation.ConsentDestination
-import com.stripe.android.identity.navigation.ErrorDestination
-import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_SHOULD_FAIL
-import com.stripe.android.identity.navigation.IdentityNavGraph
-import com.stripe.android.identity.navigation.IndividualWelcomeDestination
-import com.stripe.android.identity.navigation.navigateToFinalErrorScreen
 import com.stripe.android.identity.ui.IdentityTheme
-import com.stripe.android.identity.ui.IdentityTopBarState
+import com.stripe.android.identity.ui.VerificationWebViewScreen
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import javax.inject.Inject
 import javax.inject.Provider
@@ -50,12 +48,9 @@ import kotlin.coroutines.CoroutineContext
 internal class IdentityActivity :
     CameraPermissionCheckingActivity(),
     VerificationFlowFinishable,
-    FallbackUrlLauncher,
     Injectable<Context> {
     @VisibleForTesting
     internal lateinit var navController: NavController
-
-    private lateinit var onBackPressedCallback: IdentityOnBackPressedHandler
 
     @VisibleForTesting
     internal var viewModelFactory: ViewModelProvider.Factory =
@@ -115,7 +110,6 @@ internal class IdentityActivity :
             .appSettingsOpenable(this)
             .verificationFlowFinishable(this)
             .identityViewModelFactory(viewModelFactory)
-            .fallbackUrlLauncher(this)
             .build()
         identityViewModel.retrieveAndBufferVerificationPage()
         identityViewModel.initializeTfLite()
@@ -161,7 +155,7 @@ internal class IdentityActivity :
             },
             onFailure = {
                 identityViewModel.errorCause.postValue(it)
-                navController.navigateToFinalErrorScreen(this)
+                finishWithResult(VerificationFlowResult.Failed(it))
             }
         )
 
@@ -171,36 +165,32 @@ internal class IdentityActivity :
         supportActionBar?.hide()
 
         setContent {
-            var topBarState by remember {
-                mutableStateOf(IdentityTopBarState.GO_BACK)
-            }
             IdentityTheme {
-                IdentityNavGraph(
-                    identityViewModel = identityViewModel,
-                    fallbackUrlLauncher = this,
-                    appSettingsOpenable = this,
-                    cameraPermissionEnsureable = this,
-                    verificationFlowFinishable = this,
-                    documentScanViewModelFactory = subcomponent.documentScanViewModelFactory,
-                    selfieScanViewModelFactory = subcomponent.selfieScanViewModelFactory,
-                    topBarState = topBarState,
-                    onTopBarNavigationClick = {
-                        onBackPressedCallback.handleOnBackPressed()
-                    },
-                ) {
-                    this.navController = it
-                    onBackPressedCallback =
-                        IdentityOnBackPressedHandler(
-                            this,
-                            navController,
-                            identityViewModel
+                Scaffold(
+                    topBar = {
+                        TopAppBar(
+                            title = {
+                                Text(text = applicationInfo.loadLabel(packageManager).toString())
+                            },
+                            navigationIcon = {
+                                IconButton(onClick = {
+                                    finish()
+                                }) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.stripe_close),
+                                        contentDescription = stringResource(id = R.string.stripe_description_close)
+                                    )
+                                }
+                            },
+                            windowInsets = WindowInsets.statusBars
                         )
-                    onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
-
-                    navController.addOnDestinationChangedListener { _, destination, args ->
-                        // Note: args is a Bundle created from arguments in route
-                        onBackPressedCallback.updateState(destination, args)
-                        topBarState = updateTopBarState(destination, args)
+                    }
+                ) { paddingValues ->
+                    Box(modifier = Modifier.padding(paddingValues)) {
+                        VerificationWebViewScreen(
+                            identityViewModel = identityViewModel,
+                            verificationFlowFinishable = this@IdentityActivity
+                        )
                     }
                 }
             }
@@ -236,41 +226,6 @@ internal class IdentityActivity :
     // Identity has its own CameraPermissionDeniedFragment to handle this case.
     override fun showPermissionDeniedDialog() {
         // no-op
-    }
-
-    private fun updateTopBarState(destination: NavDestination, args: Bundle?) =
-        // Toggle the navigation button UI
-        when (destination.route) {
-            ConsentDestination.ROUTE.route -> {
-                IdentityTopBarState.CLOSE
-            }
-
-            ConfirmationDestination.ROUTE.route -> {
-                IdentityTopBarState.CLOSE
-            }
-
-            ErrorDestination.ROUTE.route -> {
-                if (args?.getBoolean(ARG_SHOULD_FAIL, false) == true) {
-                    IdentityTopBarState.CLOSE
-                } else {
-                    IdentityTopBarState.GO_BACK
-                }
-            }
-
-            IndividualWelcomeDestination.ROUTE.route -> {
-                IdentityTopBarState.CLOSE
-            }
-
-            else -> {
-                IdentityTopBarState.GO_BACK
-            }
-        }
-
-    override fun launchFallbackUrl(fallbackUrl: String) {
-        val customTabsIntent = CustomTabsIntent.Builder()
-            .build()
-        customTabsIntent.intent.data = Uri.parse(fallbackUrl)
-        fallbackUrlLauncher.launch(customTabsIntent.intent)
     }
 
     private companion object {
