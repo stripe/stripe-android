@@ -48,12 +48,7 @@ fun CardDetailsSectionElementUI(
             )
             if (controller.isCardScanEnabled && controller.isStripeCardScanAvailable()) {
                 ScanCardButtonUI(enabled = enabled) {
-                    controller.cardDetailsElement.controller.numberElement.controller.onCardScanResult(
-                        it.getParcelableExtra(CardScanActivity.CARD_SCAN_PARCELABLE_NAME)
-                            ?: CardScanSheetResult.Failed(
-                                UnknownScanException("No data in the result intent")
-                            )
-                    )
+                    controller.cardDetailsElement.controller.numberElement.controller.onCardScanResult(it)
                 }
             }
         }

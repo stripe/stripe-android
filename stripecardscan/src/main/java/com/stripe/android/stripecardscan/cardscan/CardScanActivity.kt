@@ -25,6 +25,8 @@ import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopState
 import com.stripe.android.stripecardscan.databinding.StripeActivityCardscanBinding
+import com.stripe.android.stripecardscan.di.CardScanComponent
+import com.stripe.android.stripecardscan.di.DaggerCardScanComponent
 import com.stripe.android.stripecardscan.payment.card.ScannedCard
 import com.stripe.android.stripecardscan.scanui.CancellationReason
 import com.stripe.android.stripecardscan.scanui.ScanActivity
@@ -169,6 +171,12 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
+
+        val component = DaggerCardScanComponent.builder()
+            .application(this.application)
+            .configuration(CardScanConfiguration(""))
+            .build()
+
 
         onBackPressedDispatcher.addCallback {
             resultListener.userCanceled(CancellationReason.Back)

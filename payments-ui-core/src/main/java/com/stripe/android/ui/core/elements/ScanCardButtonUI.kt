@@ -21,21 +21,21 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.stripecardscan.cardscan.CardScanConfiguration
+import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cardscan.CardScanActivity
+import com.stripe.android.ui.core.cardscan.CardScanContract
 
 @Composable
 internal fun ScanCardButtonUI(
     enabled: Boolean,
-    onResult: (intent: Intent) -> Unit
+    onResult: (CardScanSheetResult) -> Unit
 ) {
-    val context = LocalContext.current
-
     val cardScanLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            it.data?.let {
-                onResult(it)
-            }
+        rememberLauncherForActivityResult(CardScanContract()) {
+            onResult(it)
         }
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -45,9 +45,10 @@ internal fun ScanCardButtonUI(
             enabled = enabled,
             onClick = {
                 cardScanLauncher.launch(
-                    Intent(
-                        context,
-                        CardScanActivity::class.java
+                    input = CardScanContract.Args(
+                        configuration = CardScanConfiguration(
+                            sessionId = "sessionId"
+                        )
                     )
                 )
             }
