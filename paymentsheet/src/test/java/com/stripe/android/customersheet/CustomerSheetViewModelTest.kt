@@ -3133,8 +3133,8 @@ class CustomerSheetViewModelTest {
 
             val selectPaymentMethodState = currentState as SelectPaymentMethod
 
-            // Should only include the accepted card payment method and the non-card payment method
-            assertThat(selectPaymentMethodState.savedPaymentMethods).hasSize(2)
+            // Should only include the accepted card payment method
+            assertThat(selectPaymentMethodState.savedPaymentMethods).hasSize(1)
             assertThat(selectPaymentMethodState.savedPaymentMethods)
                 .containsExactly(acceptedCardPaymentMethod)
 
