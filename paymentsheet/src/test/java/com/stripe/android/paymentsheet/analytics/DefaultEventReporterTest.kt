@@ -135,7 +135,7 @@ class DefaultEventReporterTest {
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["set_as_default_enabled"] == true &&
-                req.params["has_default_payment_method"] == true
+                    req.params["has_default_payment_method"] == true
             }
         )
     }
@@ -151,7 +151,7 @@ class DefaultEventReporterTest {
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["set_as_default_enabled"] == true &&
-                req.params["has_default_payment_method"] == null
+                    req.params["has_default_payment_method"] == null
             }
         )
     }
