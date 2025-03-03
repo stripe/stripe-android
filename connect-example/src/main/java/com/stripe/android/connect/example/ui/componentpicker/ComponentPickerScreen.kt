@@ -2,7 +2,6 @@ package com.stripe.android.connect.example.ui.componentpicker
 
 import android.content.Intent
 import android.util.Log
-import androidx.activity.ComponentActivity
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -55,7 +54,6 @@ import com.stripe.android.connect.example.ui.common.ConnectExampleScaffold
 import com.stripe.android.connect.example.ui.common.CustomizeAppearanceIconButton
 import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentLoaderViewModel
 import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentManagerLoader
-import com.stripe.android.connect.example.ui.features.accountonboarding.AccountOnboardingExampleActivity
 import com.stripe.android.connect.example.ui.features.payouts.PayoutsExampleActivity
 import com.stripe.android.connect.example.ui.settings.SettingsViewModel
 import kotlinx.coroutines.launch
@@ -142,11 +140,14 @@ fun ComponentPickerContent(
 
                 ComponentPickerList(
                     onMenuItemClick = { menuItem ->
-                        if (menuItem.activity == AccountOnboardingExampleActivity::class.java) {
-                            onboardingController.show()
-                            return@ComponentPickerList
+                        when (menuItem) {
+                            MenuItem.AccountOnboarding -> {
+                                onboardingController.show()
+                            }
+                            MenuItem.Payouts -> {
+                                context.startActivity(Intent(context, PayoutsExampleActivity::class.java))
+                            }
                         }
-                        context.startActivity(Intent(context, menuItem.activity))
                     },
                 )
             }
@@ -156,8 +157,9 @@ fun ComponentPickerContent(
 
 @Composable
 private fun ComponentPickerList(onMenuItemClick: (MenuItem) -> Unit) {
+    val items = remember { listOf(MenuItem.AccountOnboarding) }
     LazyColumn {
-        items(menuItems) { menuItem ->
+        items(items) { menuItem ->
             MenuRowItem(menuItem, onMenuItemClick)
         }
     }
@@ -212,27 +214,22 @@ private fun LazyItemScope.MenuRowItem(
     }
 }
 
-private data class MenuItem(
+private enum class MenuItem(
     @StringRes val title: Int,
     @StringRes val subtitle: Int,
-    val activity: Class<out ComponentActivity>,
     val isBeta: Boolean = false,
-)
-
-private val menuItems = listOf(
-    MenuItem(
+) {
+    AccountOnboarding(
         title = R.string.account_onboarding,
         subtitle = R.string.account_onboarding_menu_subtitle,
-        activity = AccountOnboardingExampleActivity::class.java,
         isBeta = true,
     ),
-    MenuItem(
+    Payouts(
         title = R.string.payouts,
         subtitle = R.string.payouts_menu_subtitle,
-        activity = PayoutsExampleActivity::class.java,
         isBeta = true,
-    ),
-)
+    )
+}
 
 // Previews
 
