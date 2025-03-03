@@ -530,6 +530,7 @@ class PaymentSheetEventTest {
             googlePaySupported = false,
             deferredIntentConfirmationType = null,
         )
+
         assertThat(
             newPMEvent.eventName
         ).isEqualTo(
@@ -545,6 +546,62 @@ class PaymentSheetEventTest {
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
                 "selected_lpm" to "card",
+            )
+        )
+    }
+
+    @Test
+    fun `New payment method set as default true event should return expected event`() {
+        val newPMEvent = newCardPaymentMethod(
+            paymentMethodExtraParams = PaymentMethodExtraParams.Card(
+                setAsDefault = true
+            ),
+            result = PaymentSheetEvent.Payment.Result.Success,
+        )
+        assertThat(
+            newPMEvent.eventName
+        ).isEqualTo(
+            "mc_complete_payment_newpm_success"
+        )
+        assertThat(
+            newPMEvent.params
+        ).isEqualTo(
+            mapOf(
+                "currency" to "usd",
+                "duration" to 0.001F,
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
+                "selected_lpm" to "card",
+                "set_as_default" to true
+            )
+        )
+    }
+
+    @Test
+    fun `New payment method set as default false event should return expected event`() {
+        val newPMEvent = newCardPaymentMethod(
+            paymentMethodExtraParams = PaymentMethodExtraParams.Card(
+                setAsDefault = false
+            ),
+            result = PaymentSheetEvent.Payment.Result.Success,
+        )
+        assertThat(
+            newPMEvent.eventName
+        ).isEqualTo(
+            "mc_complete_payment_newpm_success"
+        )
+        assertThat(
+            newPMEvent.params
+        ).isEqualTo(
+            mapOf(
+                "currency" to "usd",
+                "duration" to 0.001F,
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
+                "selected_lpm" to "card",
+                "set_as_default" to false,
             )
         )
     }
