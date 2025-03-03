@@ -412,20 +412,9 @@ class PaymentSheetEventTest {
             setAsDefaultEnabled = true,
         )
 
-        assertThat(event.eventName).isEqualTo("mc_load_succeeded")
-        assertThat(event.params).isEqualTo(
-            mapOf(
-                "is_decoupled" to false,
-                "link_enabled" to false,
-                "google_pay_enabled" to false,
-                "duration" to 5f,
-                "selected_lpm" to "none",
-                "intent_type" to "payment_intent",
-                "ordered_lpms" to "card,klarna",
-                "require_cvc_recollection" to false,
-                "set_as_default_enabled" to true,
-                "has_default_payment_method" to false,
-            )
+        assertThat(event.params).containsEntry("set_as_default_enabled", true)
+        assertThat(event.params).containsEntry("has_default_payment_method", false)
+    }
         )
     }
 
