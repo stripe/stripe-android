@@ -1070,9 +1070,13 @@ internal class CustomerSheetViewModel(
                 }?.let {
                     PaymentSelection.Saved(it)
                 } ?: state.currentSelection
-
+                val filteredPaymentMethods = paymentMethods.filter { paymentMethod ->
+                    paymentMethod.card?.let { card ->
+                        PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance).isAccepted(card.brand)
+                    } ?: true
+                }
                 state.copy(
-                    paymentMethods = sortPaymentMethods(paymentMethods, selection as? PaymentSelection.Saved),
+                    paymentMethods = sortPaymentMethods(filteredPaymentMethods, selection as? PaymentSelection.Saved),
                     currentSelection = selection,
                 )
             }
