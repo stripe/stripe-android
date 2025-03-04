@@ -1,5 +1,6 @@
 package com.stripe.android.connect
 
+import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
 
@@ -80,7 +81,8 @@ internal class StripeComponentControllerImpl<DF, Listener, Props> internal const
 
     private val tag: String = cls.name
 
-    private val dialogFragment: DF
+    @VisibleForTesting
+    internal val dialogFragment: DF
 
     override var listener: Listener?
         get() = dialogFragment.listener
