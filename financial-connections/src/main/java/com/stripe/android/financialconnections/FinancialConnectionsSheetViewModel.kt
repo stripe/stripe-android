@@ -546,8 +546,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         // We use the global scope to make sure that we can finish sending the event
         // even if the ViewModel is cleared.
         GlobalScope.launch(ioDispatcher) {
-            val manifest = getOrFetchSync().manifest
-            eventReporter.onResult(manifest.id, result)
+            runCatching { getOrFetchSync().manifest }.onSuccess {
+                eventReporter.onResult(it.id, result)
+            }
         }
     }
 
