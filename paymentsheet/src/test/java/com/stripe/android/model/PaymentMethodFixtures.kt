@@ -502,6 +502,7 @@ internal object PaymentMethodFixtures {
             consentAction = SignUpConsentAction.Checkbox,
         ),
     )
+
 //
 //    val BACS_DEBIT_JSON = JSONObject(
 //        """
