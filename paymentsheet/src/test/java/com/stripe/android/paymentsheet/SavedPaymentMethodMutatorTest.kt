@@ -436,7 +436,9 @@ class SavedPaymentMethodMutatorTest {
             }
         )
 
-        runScenario(customerRepository = customerRepository) {
+        val eventReporter = mock<EventReporter>()
+
+        runScenario(eventReporter = eventReporter, customerRepository = customerRepository) {
             customerStateHolder.setCustomerState(
                 createCustomerState(
                     paymentMethods = listOf(displayableSavedPaymentMethod.paymentMethod),
@@ -457,6 +459,10 @@ class SavedPaymentMethodMutatorTest {
             val paymentMethods = customerStateHolder.paymentMethods.value
             assertThat(paymentMethods).hasSize(1)
             assertThat(paymentMethods.first().card?.brand).isEqualTo(CardBrand.CartesBancaires)
+
+            verify(eventReporter).onUpdatePaymentMethodSucceeded(
+                selectedBrand = CardBrand.CartesBancaires,
+            )
         }
 
         calledUpdate.ensureAllEventsConsumed()
@@ -473,7 +479,9 @@ class SavedPaymentMethodMutatorTest {
             }
         )
 
-        runScenario(customerRepository = customerRepository) {
+        val eventReporter = mock<EventReporter>()
+
+        runScenario(eventReporter = eventReporter, customerRepository = customerRepository) {
             customerStateHolder.setCustomerState(
                 createCustomerState(
                     paymentMethods = listOf(displayableSavedPaymentMethod.paymentMethod),
@@ -492,6 +500,11 @@ class SavedPaymentMethodMutatorTest {
             val paymentMethods = customerStateHolder.paymentMethods.value
             assertThat(paymentMethods).hasSize(1)
             assertThat(paymentMethods.first().card?.brand).isEqualTo(CardBrand.Unknown)
+
+            verify(eventReporter).onUpdatePaymentMethodFailed(
+                selectedBrand = eq(CardBrand.CartesBancaires),
+                error = argThat { message == "Test failure" }
+            )
         }
 
         calledUpdate.ensureAllEventsConsumed()
