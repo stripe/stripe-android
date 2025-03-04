@@ -157,13 +157,16 @@ private fun SetAsDefaultPaymentMethodCheckbox(
 private fun UpdatePaymentMethodButtons(
     interactor: UpdatePaymentMethodInteractor,
 ) {
-    if (interactor.isModifiablePaymentMethod || interactor.shouldShowSetAsDefaultCheckbox) {
+    val shouldShowUpdatePaymentMethodUi =
+        interactor.isModifiablePaymentMethod || interactor.shouldShowSetAsDefaultCheckbox
+
+    if (shouldShowUpdatePaymentMethodUi) {
         Spacer(modifier = Modifier.requiredHeight(32.dp))
         UpdatePaymentMethodUi(interactor)
     }
 
     if (interactor.canRemove) {
-        val spacerHeight = if (interactor.isModifiablePaymentMethod) {
+        val spacerHeight = if (shouldShowUpdatePaymentMethodUi) {
             16.dp
         } else {
             32.dp
