@@ -42,6 +42,8 @@ interface StripeConnectWebViewContainer<Listener, Props>
     /**
      * Listener of component events.
      */
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @set:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     var listener: Listener?
 
     /**
