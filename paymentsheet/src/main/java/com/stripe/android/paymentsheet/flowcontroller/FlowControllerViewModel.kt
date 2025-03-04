@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 internal class FlowControllerViewModel(
     application: Application,
     val handle: SavedStateHandle,
-    instanceId: String,
+    paymentElementCallbackIdentifier: String,
     @ColorInt statusBarColor: Int?,
 ) : AndroidViewModel(application) {
 
@@ -27,7 +27,7 @@ internal class FlowControllerViewModel(
             .builder()
             .application(application)
             .statusBarColor(statusBarColor)
-            .instanceId(instanceId)
+            .paymentElementCallbackIdentifier(paymentElementCallbackIdentifier)
             .flowControllerViewModel(this)
             .build()
 
@@ -63,14 +63,14 @@ internal class FlowControllerViewModel(
 
     class Factory(
         @ColorInt private val statusBarColor: Int?,
-        private val instanceId: String,
+        private val paymentElementCallbackIdentifier: String,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             return FlowControllerViewModel(
                 application = extras.requireApplication(),
                 handle = extras.createSavedStateHandle(),
-                instanceId = instanceId,
+                paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
                 statusBarColor = statusBarColor,
             ) as T
         }

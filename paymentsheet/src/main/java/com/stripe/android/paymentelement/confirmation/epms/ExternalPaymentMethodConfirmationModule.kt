@@ -21,9 +21,10 @@ internal interface ExternalPaymentMethodConfirmationModule {
     companion object {
         @Provides
         fun providesExternalPaymentMethodConfirmHandler(
-            @PaymentElementCallbackIdentifier instanceId: String,
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
         ): ExternalPaymentMethodConfirmHandler? {
-            return PaymentElementCallbackReferences[instanceId]?.externalPaymentMethodConfirmHandler
+            return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]
+                ?.externalPaymentMethodConfirmHandler
         }
     }
 }

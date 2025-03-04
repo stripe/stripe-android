@@ -38,8 +38,8 @@ internal interface PaymentSheetLauncherComponent {
         fun savedStateHandle(handle: SavedStateHandle): Builder
 
         @BindsInstance
-        fun instanceId(
-            @PaymentElementCallbackIdentifier instanceId: String
+        fun paymentElementCallbackIdentifier(
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String
         ): Builder
 
         fun build(): PaymentSheetLauncherComponent

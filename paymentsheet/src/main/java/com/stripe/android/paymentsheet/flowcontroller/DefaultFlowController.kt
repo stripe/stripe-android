@@ -75,7 +75,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val configurationHandler: FlowControllerConfigurationHandler,
     private val errorReporter: ErrorReporter,
     @InitializedViaCompose private val initializedViaCompose: Boolean,
-    @PaymentElementCallbackIdentifier instanceId: String,
+    @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
 ) : PaymentSheet.FlowController {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private val sepaMandateActivityLauncher: ActivityResultLauncher<SepaMandateContract.Args>
@@ -124,7 +124,7 @@ internal class DefaultFlowController @Inject internal constructor(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
                     activityResultLaunchers.forEach { it.unregister() }
-                    PaymentElementCallbackReferences.remove(instanceId)
+                    PaymentElementCallbackReferences.remove(paymentElementCallbackIdentifier)
                 }
             }
         )
@@ -591,14 +591,14 @@ internal class DefaultFlowController @Inject internal constructor(
             statusBarColor: () -> Int?,
             paymentOptionCallback: PaymentOptionCallback,
             paymentResultCallback: PaymentSheetResultCallback,
-            instanceId: String,
+            paymentElementCallbackIdentifier: String,
             initializedViaCompose: Boolean,
         ): PaymentSheet.FlowController {
             val flowControllerViewModel = ViewModelProvider(
                 owner = viewModelStoreOwner,
-                factory = FlowControllerViewModel.Factory(statusBarColor(), instanceId),
+                factory = FlowControllerViewModel.Factory(statusBarColor(), paymentElementCallbackIdentifier),
             ).get(
-                key = "FlowControllerViewModel(instance = $instanceId)",
+                key = "FlowControllerViewModel(instance = $paymentElementCallbackIdentifier)",
                 modelClass = FlowControllerViewModel::class.java
             )
 

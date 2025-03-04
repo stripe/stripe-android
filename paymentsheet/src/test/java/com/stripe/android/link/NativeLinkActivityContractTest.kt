@@ -32,7 +32,7 @@ class NativeLinkActivityContractTest {
 
     @Test
     fun `intent is created correctly`() {
-        val contract = NativeLinkActivityContract(instanceId = "instance_456")
+        val contract = NativeLinkActivityContract(paymentElementCallbackIdentifier = LINK_CALLBACK_TEST_IDENTIFIER)
         val args = LinkActivityContract.Args(
             configuration = TestFactory.LINK_CONFIGURATION,
             startWithVerificationDialog = false,
@@ -53,7 +53,7 @@ class NativeLinkActivityContractTest {
                 stripeAccountId = null,
                 startWithVerificationDialog = false,
                 linkAccount = TestFactory.LINK_ACCOUNT,
-                instanceId = "instance_456",
+                paymentElementCallbackIdentifier = LINK_CALLBACK_TEST_IDENTIFIER,
             )
         )
     }
@@ -64,7 +64,7 @@ class NativeLinkActivityContractTest {
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         )
 
-        val contract = NativeLinkActivityContract(instanceId = "instance_456")
+        val contract = NativeLinkActivityContract(paymentElementCallbackIdentifier = LINK_CALLBACK_TEST_IDENTIFIER)
 
         val result = contract.parseResult(
             resultCode = LinkActivity.RESULT_COMPLETE,
@@ -76,7 +76,7 @@ class NativeLinkActivityContractTest {
 
     @Test
     fun `complete with canceled result when result not found`() {
-        val contract = NativeLinkActivityContract(instanceId = "instance_456")
+        val contract = NativeLinkActivityContract(paymentElementCallbackIdentifier = LINK_CALLBACK_TEST_IDENTIFIER)
 
         val result = contract.parseResult(
             resultCode = LinkActivity.RESULT_COMPLETE,
@@ -93,7 +93,7 @@ class NativeLinkActivityContractTest {
 
     @Test
     fun `unknown result code results in canceled`() {
-        val contract = NativeLinkActivityContract(instanceId = "instance_456")
+        val contract = NativeLinkActivityContract(paymentElementCallbackIdentifier = LINK_CALLBACK_TEST_IDENTIFIER)
 
         val result = contract.parseResult(42, Intent())
 
@@ -107,7 +107,7 @@ class NativeLinkActivityContractTest {
 
     @Test
     fun `canceled result code is handled correctly`() {
-        val contract = NativeLinkActivityContract(instanceId = "instance_456")
+        val contract = NativeLinkActivityContract(paymentElementCallbackIdentifier = LINK_CALLBACK_TEST_IDENTIFIER)
 
         val result = contract.parseResult(Activity.RESULT_CANCELED, Intent())
 
@@ -126,5 +126,9 @@ class NativeLinkActivityContractTest {
         return Intent().apply {
             putExtras(bundle)
         }
+    }
+
+    private companion object {
+        const val LINK_CALLBACK_TEST_IDENTIFIER = "LinkTestIdentifier"
     }
 }

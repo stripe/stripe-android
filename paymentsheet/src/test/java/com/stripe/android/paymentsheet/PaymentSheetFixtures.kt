@@ -26,6 +26,7 @@ internal object PaymentSheetFixtures {
     internal const val CLIENT_SECRET = "pi_1234_secret_1234"
     internal const val DIFFERENT_CLIENT_SECRET = "pi_4321_secret_4321"
     internal const val SETUP_CLIENT_SECRET = "seti_1234_secret_4321"
+    internal const val PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER = "PaymentSheetTestIdentifier"
 
     internal val PAYMENT_INTENT_CLIENT_SECRET = PaymentIntentClientSecret(CLIENT_SECRET)
     internal val SETUP_INTENT_CLIENT_SECRET = PaymentIntentClientSecret(SETUP_CLIENT_SECRET)
@@ -187,7 +188,7 @@ internal object PaymentSheetFixtures {
         get() = PaymentSheetContractV2.Args(
             initializationMode = PaymentElementLoader.InitializationMode.SetupIntent("seti_1234_secret_1234"),
             config = CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            instanceId = "PaymentSheet",
+            paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
             statusBarColor = STATUS_BAR_COLOR,
         )
 
@@ -197,7 +198,7 @@ internal object PaymentSheetFixtures {
                 clientSecret = PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             config = CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            instanceId = "PaymentSheet",
+            paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
             statusBarColor = STATUS_BAR_COLOR
         )
 
@@ -207,7 +208,7 @@ internal object PaymentSheetFixtures {
                 clientSecret = PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             config = CONFIG_CUSTOMER,
-            instanceId = "PaymentSheet",
+            paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
             statusBarColor = STATUS_BAR_COLOR
         )
 
@@ -229,7 +230,7 @@ internal object PaymentSheetFixtures {
                 )
             ),
             config = CONFIG_CUSTOMER,
-            instanceId = "PaymentSheet",
+            paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
             statusBarColor = STATUS_BAR_COLOR
         )
 

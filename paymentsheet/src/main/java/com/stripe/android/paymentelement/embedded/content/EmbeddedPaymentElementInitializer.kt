@@ -16,7 +16,7 @@ internal class EmbeddedPaymentElementInitializer @Inject constructor(
     private val lifecycleOwner: LifecycleOwner,
     private val savedStateHandle: SavedStateHandle,
     private val eventReporter: EventReporter,
-    @PaymentElementCallbackIdentifier private val instanceId: String,
+    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
 ) {
     private var previouslySentDeepLinkEvent: Boolean
         get() = savedStateHandle[PREVIOUSLY_SENT_DEEP_LINK_EVENT] ?: false
@@ -35,7 +35,7 @@ internal class EmbeddedPaymentElementInitializer @Inject constructor(
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
-                    PaymentElementCallbackReferences.remove(instanceId)
+                    PaymentElementCallbackReferences.remove(paymentElementCallbackIdentifier)
                     contentHelper.clearSheetLauncher()
                 }
             }

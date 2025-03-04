@@ -7,10 +7,10 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 
 @Composable
 internal fun UpdateCallbacks(
-    instanceId: String,
+    paymentElementCallbackIdentifier: String,
     paymentElementCallbacks: PaymentElementCallbacks
 ) {
-    LaunchedEffect(instanceId, paymentElementCallbacks) {
-        PaymentElementCallbackReferences[instanceId] = paymentElementCallbacks
+    LaunchedEffect(paymentElementCallbackIdentifier, paymentElementCallbacks) {
+        PaymentElementCallbackReferences[paymentElementCallbackIdentifier] = paymentElementCallbacks
     }
 }

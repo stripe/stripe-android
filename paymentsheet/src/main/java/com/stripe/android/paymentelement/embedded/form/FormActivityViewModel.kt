@@ -34,7 +34,7 @@ internal class FormActivityViewModel @Inject constructor(
                 .initializationMode(args.initializationMode)
                 .statusBarColor(args.statusBarColor)
                 .application(extras.requireApplication())
-                .instanceId(args.instanceId)
+                .paymentElementCallbackIdentifier(args.paymentElementCallbackIdentifier)
                 .savedStateHandle(extras.createSavedStateHandle())
                 .build()
 

@@ -80,7 +80,7 @@ internal fun internalRememberPaymentSheet(
     externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
     paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet {
-    val instanceId = rememberSaveable {
+    val paymentElementCallbackIdentifier = rememberSaveable {
         UUID.randomUUID().toString()
     }
 
@@ -91,7 +91,7 @@ internal fun internalRememberPaymentSheet(
         )
     }
 
-    UpdateCallbacks(instanceId, callbacks)
+    UpdateCallbacks(paymentElementCallbackIdentifier, callbacks)
 
     val onResult by rememberUpdatedState(newValue = paymentResultCallback::onPaymentSheetResult)
 
@@ -114,7 +114,7 @@ internal fun internalRememberPaymentSheet(
             application = context.applicationContext as Application,
             lifecycleOwner = lifecycleOwner,
             callback = paymentResultCallback,
-            instanceId = instanceId,
+            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             initializedViaCompose = true,
         )
         PaymentSheet(launcher)

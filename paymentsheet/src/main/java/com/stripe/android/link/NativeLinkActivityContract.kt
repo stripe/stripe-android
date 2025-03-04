@@ -13,7 +13,7 @@ import javax.inject.Inject
  * Contract used to explicitly launch Link natively.
  */
 internal class NativeLinkActivityContract @Inject constructor(
-    @PaymentElementCallbackIdentifier private val instanceId: String,
+    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
 ) :
     ActivityResultContract<LinkActivityContract.Args, LinkActivityResult>() {
     override fun createIntent(context: Context, input: LinkActivityContract.Args): Intent {
@@ -25,7 +25,7 @@ internal class NativeLinkActivityContract @Inject constructor(
                 stripeAccountId = paymentConfiguration.stripeAccountId,
                 publishableKey = paymentConfiguration.publishableKey,
                 startWithVerificationDialog = input.startWithVerificationDialog,
-                instanceId = instanceId,
+                paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
                 linkAccount = input.linkAccount
             )
         )

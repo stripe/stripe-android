@@ -122,7 +122,7 @@ private fun internalRememberPaymentSheetFlowController(
         "PaymentSheet.FlowController must be created in the context of an Activity"
     }
 
-    val instanceId = rememberSaveable {
+    val paymentElementCallbackIdentifier = rememberSaveable {
         UUID.randomUUID().toString()
     }
 
@@ -132,7 +132,7 @@ private fun internalRememberPaymentSheetFlowController(
             lifecycleOwner = lifecycleOwner,
             activityResultRegistryOwner = activityResultRegistryOwner,
             statusBarColor = { activity.window?.statusBarColor },
-            instanceId = instanceId,
+            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             paymentOptionCallback = paymentOptionCallback,
             paymentResultCallback = paymentResultCallback,
         ).create()
@@ -146,7 +146,7 @@ internal fun internalRememberPaymentSheetFlowController(
     paymentOptionCallback: PaymentOptionCallback,
     paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet.FlowController {
-    val instanceId = rememberSaveable {
+    val paymentElementCallbackIdentifier = rememberSaveable {
         UUID.randomUUID().toString()
     }
 
@@ -157,7 +157,7 @@ internal fun internalRememberPaymentSheetFlowController(
         )
     }
 
-    UpdateCallbacks(instanceId, callbacks)
+    UpdateCallbacks(paymentElementCallbackIdentifier, callbacks)
 
     val viewModelStoreOwner = requireNotNull(LocalViewModelStoreOwner.current) {
         "PaymentSheet.FlowController must be created with access to a ViewModelStoreOwner"
@@ -181,7 +181,7 @@ internal fun internalRememberPaymentSheetFlowController(
             statusBarColor = { activity.window?.statusBarColor },
             paymentOptionCallback = paymentOptionCallback,
             paymentResultCallback = paymentResultCallback,
-            instanceId = instanceId,
+            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             initializedViaCompose = true,
         ).create()
     }

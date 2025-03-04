@@ -51,7 +51,9 @@ internal interface FlowControllerStateComponent {
         fun application(application: Application): Builder
 
         @BindsInstance
-        fun instanceId(@PaymentElementCallbackIdentifier instanceId: String): Builder
+        fun paymentElementCallbackIdentifier(
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String
+        ): Builder
 
         @BindsInstance
         fun flowControllerViewModel(viewModel: FlowControllerViewModel): Builder

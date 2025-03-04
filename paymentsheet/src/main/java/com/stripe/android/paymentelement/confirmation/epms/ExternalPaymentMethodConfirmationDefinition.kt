@@ -17,7 +17,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 
 internal class ExternalPaymentMethodConfirmationDefinition @Inject constructor(
-    @PaymentElementCallbackIdentifier private val instanceId: String,
+    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val externalPaymentMethodConfirmHandlerProvider: Provider<ExternalPaymentMethodConfirmHandler?>,
     private val errorReporter: ErrorReporter,
 ) : ConfirmationDefinition<
@@ -89,7 +89,7 @@ internal class ExternalPaymentMethodConfirmationDefinition @Inject constructor(
 
         launcher.launch(
             ExternalPaymentMethodInput(
-                instanceId = instanceId,
+                paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
                 type = confirmationOption.type,
                 billingDetails = confirmationOption.billingDetails,
             )
