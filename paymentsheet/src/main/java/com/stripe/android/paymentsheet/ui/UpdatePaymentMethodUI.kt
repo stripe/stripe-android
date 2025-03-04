@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import android.content.Context
 import android.content.res.Resources
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -569,12 +570,20 @@ private const val YEAR_2100 = 2100
 
 internal const val UPDATE_PM_EXPIRY_FIELD_TEST_TAG = "update_payment_method_expiry_date"
 internal const val UPDATE_PM_CVC_FIELD_TEST_TAG = "update_payment_method_cvc"
-internal const val UPDATE_PM_REMOVE_BUTTON_TEST_TAG = "update_payment_method_remove_button"
-internal const val UPDATE_PM_SAVE_BUTTON_TEST_TAG = "update_payment_method_save_button"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val UPDATE_PM_REMOVE_BUTTON_TEST_TAG = "update_payment_method_remove_button"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val UPDATE_PM_SAVE_BUTTON_TEST_TAG = "update_payment_method_save_button"
 internal const val UPDATE_PM_ERROR_MESSAGE_TEST_TAG = "update_payment_method_error_message"
 internal const val UPDATE_PM_US_BANK_ACCOUNT_TEST_TAG = "update_payment_method_bank_account_ui"
 internal const val UPDATE_PM_SEPA_DEBIT_TEST_TAG = "update_payment_method_sepa_debit_ui"
 internal const val UPDATE_PM_CARD_TEST_TAG = "update_payment_method_card_ui"
 internal const val UPDATE_PM_DETAILS_SUBTITLE_TEST_TAG = "update_payment_method_subtitle"
-internal const val UPDATE_PM_SCREEN_TEST_TAG = "update_payment_method_screen"
-internal const val UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG = "update_payment_method_set_as_default_checkbox"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val UPDATE_PM_SCREEN_TEST_TAG = "update_payment_method_screen"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG = "update_payment_method_set_as_default_checkbox"

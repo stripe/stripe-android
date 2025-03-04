@@ -1,9 +1,9 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.testing
 
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isSelected
-import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -14,8 +14,8 @@ import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_MANAGE_SCREEN_CHEVR
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
 
-internal class ManagePage(
-    private val composeTestRule: ComposeTestRule
+class ManagePage(
+    private val composeTestRule: AndroidComposeTestRule<*, *>,
 ) {
     fun waitUntilVisible() {
         composeTestRule.waitUntil {

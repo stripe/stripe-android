@@ -1,11 +1,11 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.testing
 
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.stripe.android.paymentsheet.ui.REMOVE_BUTTON_LOADING
@@ -17,8 +17,8 @@ import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
 import com.stripe.android.uicore.elements.TEST_TAG_DROP_DOWN_CHOICE
 
-internal class EditPage(
-    private val composeTestRule: ComposeTestRule
+class EditPage(
+    private val composeTestRule: AndroidComposeTestRule<*, *>
 ) {
     fun waitUntilVisible() {
         composeTestRule.waitUntil {

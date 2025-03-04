@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -76,4 +77,5 @@ private fun TrailingContent(
     }
 }
 
-internal const val TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST = "manage_screen_saved_pms_list"
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST = "manage_screen_saved_pms_list"

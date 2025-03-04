@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.testing
 
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasAnyDescendant
@@ -6,7 +6,7 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.isNotDisplayed
 import androidx.compose.ui.test.isSelected
-import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -21,8 +21,9 @@ import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHO
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_TEXT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_VIEW_MORE
 
-internal class VerticalModePage(
-    private val composeTestRule: ComposeTestRule
+@SuppressWarnings("TooManyFunctions")
+class VerticalModePage(
+    private val composeTestRule: AndroidComposeTestRule<*, *>
 ) {
     fun assertIsNotVisible() {
         composeTestRule

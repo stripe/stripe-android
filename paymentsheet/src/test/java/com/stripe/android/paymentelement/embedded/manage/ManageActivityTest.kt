@@ -17,10 +17,10 @@ import com.stripe.android.network.CardPaymentMethodDetails
 import com.stripe.android.network.setupPaymentMethodDetachResponse
 import com.stripe.android.network.setupPaymentMethodUpdateResponse
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.paymentsheet.EditPage
-import com.stripe.android.paymentsheet.ManagePage
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.testing.EditPage
+import com.stripe.android.testing.ManagePage
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.RetryRule
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
