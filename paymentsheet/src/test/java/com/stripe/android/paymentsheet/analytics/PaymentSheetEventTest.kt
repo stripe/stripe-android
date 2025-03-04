@@ -16,7 +16,6 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.time.Duration
@@ -544,20 +543,8 @@ class PaymentSheetEventTest {
 
     @Test
     fun `New payment method event should return expected event`() {
-        val newPMEvent = PaymentSheetEvent.Payment(
-            mode = EventReporter.Mode.Complete,
-            paymentSelection = PaymentSelection.New.Card(
-                PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                mock(),
-                mock()
-            ),
-            duration = 1.milliseconds,
+        val newPMEvent = newCardPaymentMethod(
             result = PaymentSheetEvent.Payment.Result.Success,
-            currency = "usd",
-            isDeferred = false,
-            linkEnabled = false,
-            googlePaySupported = false,
-            deferredIntentConfirmationType = null,
         )
         assertThat(
             newPMEvent.eventName
@@ -611,16 +598,9 @@ class PaymentSheetEventTest {
 
     @Test
     fun `Saved payment method event should return expected event`() {
-        val savedPMEvent = PaymentSheetEvent.Payment(
-            mode = EventReporter.Mode.Complete,
+        val savedPMEvent = paymentMethodEvent(
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
-            duration = 1.milliseconds,
             result = PaymentSheetEvent.Payment.Result.Success,
-            currency = "usd",
-            isDeferred = false,
-            linkEnabled = false,
-            googlePaySupported = false,
-            deferredIntentConfirmationType = null,
         )
         assertThat(
             savedPMEvent.eventName
@@ -643,16 +623,9 @@ class PaymentSheetEventTest {
 
     @Test
     fun `Google pay payment method event should return expected event`() {
-        val googlePayEvent = PaymentSheetEvent.Payment(
-            mode = EventReporter.Mode.Complete,
+        val googlePayEvent = paymentMethodEvent(
             paymentSelection = PaymentSelection.GooglePay,
-            duration = 1.milliseconds,
             result = PaymentSheetEvent.Payment.Result.Success,
-            currency = "usd",
-            isDeferred = false,
-            linkEnabled = false,
-            googlePaySupported = false,
-            deferredIntentConfirmationType = null,
         )
         assertThat(
             googlePayEvent.eventName
@@ -675,16 +648,9 @@ class PaymentSheetEventTest {
 
     @Test
     fun `Link payment method event should return expected event`() {
-        val linkEvent = PaymentSheetEvent.Payment(
-            mode = EventReporter.Mode.Complete,
+        val linkEvent = paymentMethodEvent(
             paymentSelection = PaymentSelection.Link(),
-            duration = 1.milliseconds,
             result = PaymentSheetEvent.Payment.Result.Success,
-            currency = "usd",
-            isDeferred = false,
-            linkEnabled = false,
-            googlePaySupported = false,
-            deferredIntentConfirmationType = null,
         )
         assertThat(
             linkEvent.eventName
@@ -711,11 +677,6 @@ class PaymentSheetEventTest {
         val inlineLinkEvent = paymentMethodEvent(
             paymentSelection = LINK_INLINE_PAYMENT_SELECTION,
             result = PaymentSheetEvent.Payment.Result.Success,
-            currency = "usd",
-            isDeferred = false,
-            linkEnabled = false,
-            googlePaySupported = false,
-            deferredIntentConfirmationType = null,
         )
         assertThat(
             inlineLinkEvent.eventName
@@ -738,8 +699,7 @@ class PaymentSheetEventTest {
 
     @Test
     fun `External payment method event should return expected event`() {
-        val newPMEvent = PaymentSheetEvent.Payment(
-            mode = EventReporter.Mode.Complete,
+        val newPMEvent = paymentMethodEvent(
             paymentSelection = PaymentSelection.ExternalPaymentMethod(
                 type = "external_fawry",
                 billingDetails = null,
@@ -748,13 +708,7 @@ class PaymentSheetEventTest {
                 lightThemeIconUrl = "some_url",
                 darkThemeIconUrl = null,
             ),
-            duration = 1.milliseconds,
             result = PaymentSheetEvent.Payment.Result.Success,
-            currency = "usd",
-            isDeferred = false,
-            linkEnabled = false,
-            googlePaySupported = false,
-            deferredIntentConfirmationType = null,
         )
         assertThat(
             newPMEvent.eventName
@@ -777,8 +731,7 @@ class PaymentSheetEventTest {
 
     @Test
     fun `External payment method failure event should return expected event`() {
-        val newPMEvent = PaymentSheetEvent.Payment(
-            mode = EventReporter.Mode.Complete,
+        val newPMEvent = paymentMethodEvent(
             paymentSelection = PaymentSelection.ExternalPaymentMethod(
                 type = "external_fawry",
                 billingDetails = null,
@@ -787,15 +740,9 @@ class PaymentSheetEventTest {
                 lightThemeIconUrl = "some_url",
                 darkThemeIconUrl = null,
             ),
-            duration = 1.milliseconds,
             result = PaymentSheetEvent.Payment.Result.Failure(
                 error = PaymentSheetConfirmationError.ExternalPaymentMethod,
             ),
-            currency = "usd",
-            isDeferred = false,
-            linkEnabled = false,
-            googlePaySupported = false,
-            deferredIntentConfirmationType = null,
         )
         assertThat(
             newPMEvent.eventName
@@ -819,22 +766,10 @@ class PaymentSheetEventTest {
 
     @Test
     fun `New payment method failure event should return expected event`() {
-        val newPMEvent = PaymentSheetEvent.Payment(
-            mode = EventReporter.Mode.Complete,
-            paymentSelection = PaymentSelection.New.Card(
-                PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                mock(),
-                mock()
-            ),
-            duration = 1.milliseconds,
+        val newPMEvent = newCardPaymentMethod(
             result = PaymentSheetEvent.Payment.Result.Failure(
                 error = PaymentSheetConfirmationError.Stripe(APIException()),
             ),
-            currency = "usd",
-            isDeferred = false,
-            linkEnabled = false,
-            googlePaySupported = false,
-            deferredIntentConfirmationType = null,
         )
         assertThat(
             newPMEvent.eventName
@@ -893,18 +828,11 @@ class PaymentSheetEventTest {
 
     @Test
     fun `Saved payment method failure event should return expected event`() {
-        val savedPMEvent = PaymentSheetEvent.Payment(
-            mode = EventReporter.Mode.Complete,
+        val savedPMEvent = paymentMethodEvent(
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
-            duration = 1.milliseconds,
             result = PaymentSheetEvent.Payment.Result.Failure(
                 error = PaymentSheetConfirmationError.Stripe(APIException()),
             ),
-            currency = "usd",
-            isDeferred = false,
-            linkEnabled = false,
-            googlePaySupported = false,
-            deferredIntentConfirmationType = null,
         )
         assertThat(
             savedPMEvent.eventName
@@ -928,18 +856,11 @@ class PaymentSheetEventTest {
 
     @Test
     fun `Google pay payment method failure event should return expected event`() {
-        val googlePayEvent = PaymentSheetEvent.Payment(
-            mode = EventReporter.Mode.Complete,
+        val googlePayEvent = paymentMethodEvent(
             paymentSelection = PaymentSelection.GooglePay,
-            duration = 1.milliseconds,
             result = PaymentSheetEvent.Payment.Result.Failure(
                 error = PaymentSheetConfirmationError.Stripe(APIException()),
             ),
-            currency = "usd",
-            isDeferred = false,
-            linkEnabled = false,
-            googlePaySupported = false,
-            deferredIntentConfirmationType = null,
         )
         assertThat(
             googlePayEvent.eventName
@@ -963,18 +884,11 @@ class PaymentSheetEventTest {
 
     @Test
     fun `Link payment method failure event should return expected event`() {
-        val linkEvent = PaymentSheetEvent.Payment(
-            mode = EventReporter.Mode.Complete,
+        val linkEvent = paymentMethodEvent(
             paymentSelection = PaymentSelection.Link(),
-            duration = 1.milliseconds,
             result = PaymentSheetEvent.Payment.Result.Failure(
                 error = PaymentSheetConfirmationError.Stripe(APIException()),
             ),
-            currency = "usd",
-            isDeferred = false,
-            linkEnabled = false,
-            googlePaySupported = false,
-            deferredIntentConfirmationType = null,
         )
         assertThat(
             linkEvent.eventName
@@ -1004,11 +918,6 @@ class PaymentSheetEventTest {
             result = PaymentSheetEvent.Payment.Result.Failure(
                 error = PaymentSheetConfirmationError.Stripe(APIException()),
             ),
-            currency = "usd",
-            isDeferred = false,
-            linkEnabled = false,
-            googlePaySupported = false,
-            deferredIntentConfirmationType = null,
         )
         assertThat(
             inlineLinkEvent.eventName
