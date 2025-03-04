@@ -175,7 +175,7 @@ internal class IdentityActivity :
                         },
                         navigationIcon = {
                             IconButton(onClick = {
-                                finish()
+                                finishWithResult(VerificationFlowResult.Canceled)
                             }) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.stripe_close),
