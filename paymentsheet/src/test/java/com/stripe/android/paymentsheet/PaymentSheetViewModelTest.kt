@@ -3266,7 +3266,7 @@ internal class PaymentSheetViewModelTest {
                 savedStateHandle = thisSavedStateHandle,
                 linkHandler = linkHandler,
                 confirmationHandlerFactory = confirmationHandlerFactory ?: createTestConfirmationHandlerFactory(
-                    instanceId = "PaymentSheet",
+                    instanceId = "PaymentSheetTestIdentifier",
                     intentConfirmationInterceptor = intentConfirmationInterceptor,
                     savedStateHandle = thisSavedStateHandle,
                     bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,

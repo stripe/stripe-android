@@ -32,10 +32,10 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.createTestActivityRule
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
+import com.stripe.android.utils.PaymentElementCallbackTestRule
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -54,19 +54,17 @@ internal class ExternalPaymentMethodConfirmationActivityTest {
     @get:Rule
     val testActivityRule = createTestActivityRule<PaymentElementConfirmationTestActivity>()
 
+    @get:Rule
+    val paymentElementCallbackTestRule = PaymentElementCallbackTestRule()
+
     @Before
     fun setup() {
-        PaymentElementCallbackReferences["Confirmation"] = PaymentElementCallbacks(
+        PaymentElementCallbackReferences["ConfirmationTestIdentifier"] = PaymentElementCallbacks(
             createIntentCallback = null,
             externalPaymentMethodConfirmHandler = { _, _ ->
                 error("Should not be called!")
             }
         )
-    }
-
-    @After
-    fun teardown() {
-        PaymentElementCallbackReferences.remove("Confirmation")
     }
 
     @Test

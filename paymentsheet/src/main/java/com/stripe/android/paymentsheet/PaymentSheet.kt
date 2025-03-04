@@ -254,7 +254,9 @@ class PaymentSheet internal constructor(
          */
         @Composable
         fun build(): PaymentSheet {
-            // Callbacks handled internally
+            /*
+             * Callbacks are initialized & updated internally by the internal composable function
+             */
             return internalRememberPaymentSheet(
                 createIntentCallback = createIntentCallback,
                 externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
@@ -2188,7 +2190,9 @@ class PaymentSheet internal constructor(
              */
             @Composable
             fun build(): FlowController {
-                // Callbacks initialized internally
+                /*
+                 * Callbacks are initialized & updated internally by the internal composable function
+                 */
                 return internalRememberPaymentSheetFlowController(
                     createIntentCallback = createIntentCallback,
                     externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
