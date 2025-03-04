@@ -112,40 +112,6 @@ internal class IdentityActivity :
             .build()
         identityViewModel.retrieveAndBufferVerificationPage()
 
-//        identityViewModel.initializeTfLite()
-//        identityViewModel.registerActivityResultCaller(this)
-//        fallbackUrlLauncher = registerForActivityResult(
-//            ActivityResultContracts.StartActivityForResult()
-//        ) {
-//            identityViewModel.observeForVerificationPage(
-//                this,
-//                onSuccess = {
-//                    finishWithResult(
-//                        if (it.submitted) {
-//                            identityViewModel.identityAnalyticsRequestFactory
-//                                .verificationSucceeded(
-//                                    isFromFallbackUrl = true
-//                                )
-//                            VerificationFlowResult.Completed
-//                        } else {
-//                            identityViewModel.identityAnalyticsRequestFactory
-//                                .verificationCanceled(
-//                                    isFromFallbackUrl = true
-//                                )
-//                            VerificationFlowResult.Canceled
-//                        }
-//                    )
-//                },
-//                onFailure = {
-//                    identityViewModel.identityAnalyticsRequestFactory.verificationFailed(
-//                        isFromFallbackUrl = true,
-//                        throwable = IllegalStateException(it)
-//                    )
-//                    finishWithResult(VerificationFlowResult.Failed(IllegalStateException(it)))
-//                }
-//            )
-//        }
-
         identityViewModel.observeForVerificationPage(
             this,
             onSuccess = {
@@ -158,10 +124,6 @@ internal class IdentityActivity :
                 finishWithResult(VerificationFlowResult.Failed(it))
             }
         )
-
-//        identityViewModel.screenTracker.screenTransitionStart(
-//            startedAt = starterArgs.presentTime.asEpochMillisecondsComparableTimeMark()
-//        )
 
         // Hide default top bar
         supportActionBar?.hide()
