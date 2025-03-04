@@ -1,6 +1,8 @@
 package com.stripe.android.model
 
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.ui.inline.SignUpConsentAction
+import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -486,6 +488,20 @@ internal object PaymentMethodFixtures {
         screenState = BankFormScreenStateFactory.createWithSession("session_1234"),
     )
 
+    val LINK_INLINE_PAYMENT_SELECTION = PaymentSelection.New.LinkInline(
+        paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+        paymentMethodOptionsParams = null,
+        paymentMethodExtraParams = null,
+        brand = CardBrand.Visa,
+        customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+        input = UserInput.SignUp(
+            email = "email@email",
+            phone = "2267007611",
+            country = "CA",
+            name = "John Doe",
+            consentAction = SignUpConsentAction.Checkbox,
+        ),
+    )
 //
 //    val BACS_DEBIT_JSON = JSONObject(
 //        """

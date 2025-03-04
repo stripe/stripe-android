@@ -291,20 +291,7 @@ class ConfirmationHandlerOptionKtxTest {
     @Test
     fun `On new Link inline selection without config, should return null`() {
         assertThat(
-            PaymentSelection.New.LinkInline(
-                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                brand = CardBrand.Visa,
-                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
-                paymentMethodOptionsParams = null,
-                paymentMethodExtraParams = null,
-                input = UserInput.SignUp(
-                    email = "email@email.com",
-                    phone = "1234567890",
-                    name = "John Doe",
-                    country = "CA",
-                    consentAction = SignUpConsentAction.Checkbox,
-                ),
-            ).toConfirmationOption(
+            PaymentMethodFixtures.LINK_INLINE_PAYMENT_SELECTION.toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
             )

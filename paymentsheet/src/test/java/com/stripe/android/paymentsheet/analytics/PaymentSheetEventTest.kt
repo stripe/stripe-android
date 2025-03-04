@@ -4,14 +4,12 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.ui.inline.SignUpConsentAction
-import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
-import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_SELECTION
+import com.stripe.android.model.PaymentMethodFixtures.LINK_INLINE_PAYMENT_SELECTION
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -710,23 +708,8 @@ class PaymentSheetEventTest {
 
     @Test
     fun `Inline Link payment method event should return expected event`() {
-        val inlineLinkEvent = PaymentSheetEvent.Payment(
-            mode = EventReporter.Mode.Complete,
-            paymentSelection = PaymentSelection.New.LinkInline(
-                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                paymentMethodOptionsParams = null,
-                paymentMethodExtraParams = null,
-                brand = CardBrand.Visa,
-                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
-                input = UserInput.SignUp(
-                    email = "email@email",
-                    phone = "2267007611",
-                    country = "CA",
-                    name = "John Doe",
-                    consentAction = SignUpConsentAction.Checkbox,
-                ),
-            ),
-            duration = 1.milliseconds,
+        val inlineLinkEvent = paymentMethodEvent(
+            paymentSelection = LINK_INLINE_PAYMENT_SELECTION,
             result = PaymentSheetEvent.Payment.Result.Success,
             currency = "usd",
             isDeferred = false,
@@ -1016,23 +999,8 @@ class PaymentSheetEventTest {
 
     @Test
     fun `Inline Link payment method failure event should return expected event`() {
-        val inlineLinkEvent = PaymentSheetEvent.Payment(
-            mode = EventReporter.Mode.Complete,
-            paymentSelection = PaymentSelection.New.LinkInline(
-                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                paymentMethodOptionsParams = null,
-                paymentMethodExtraParams = null,
-                brand = CardBrand.Visa,
-                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
-                input = UserInput.SignUp(
-                    email = "email@email",
-                    phone = "2267007611",
-                    country = "CA",
-                    name = "John Doe",
-                    consentAction = SignUpConsentAction.Checkbox,
-                ),
-            ),
-            duration = 1.milliseconds,
+        val inlineLinkEvent = paymentMethodEvent(
+            paymentSelection = LINK_INLINE_PAYMENT_SELECTION,
             result = PaymentSheetEvent.Payment.Result.Failure(
                 error = PaymentSheetConfirmationError.Stripe(APIException()),
             ),
