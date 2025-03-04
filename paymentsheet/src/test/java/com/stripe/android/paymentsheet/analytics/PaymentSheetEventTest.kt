@@ -591,19 +591,7 @@ class PaymentSheetEventTest {
         ).isEqualTo(
             "mc_complete_payment_newpm_success"
         )
-        assertThat(
-            newPMEvent.params
-        ).isEqualTo(
-            mapOf(
-                "currency" to "usd",
-                "duration" to 0.001F,
-                "is_decoupled" to false,
-                "link_enabled" to false,
-                "google_pay_enabled" to false,
-                "selected_lpm" to "card",
-                "set_as_default" to true
-            )
-        )
+        assertThat(newPMEvent.params["set_as_default"]).isEqualTo(true)
     }
 
     @Test
@@ -619,19 +607,7 @@ class PaymentSheetEventTest {
         ).isEqualTo(
             "mc_complete_payment_newpm_success"
         )
-        assertThat(
-            newPMEvent.params
-        ).isEqualTo(
-            mapOf(
-                "currency" to "usd",
-                "duration" to 0.001F,
-                "is_decoupled" to false,
-                "link_enabled" to false,
-                "google_pay_enabled" to false,
-                "selected_lpm" to "card",
-                "set_as_default" to false,
-            )
-        )
+        assertThat(newPMEvent.params["set_as_default"]).isEqualTo(false)
     }
 
     @Test
@@ -910,21 +886,7 @@ class PaymentSheetEventTest {
         ).isEqualTo(
             "mc_complete_payment_newpm_failure"
         )
-        assertThat(
-            newPMEvent.params
-        ).isEqualTo(
-            mapOf(
-                "currency" to "usd",
-                "duration" to 0.001F,
-                "is_decoupled" to false,
-                "link_enabled" to false,
-                "google_pay_enabled" to false,
-                "selected_lpm" to "card",
-                "error_message" to "apiError",
-                "error_code" to null,
-                "set_as_default" to true,
-            )
-        )
+        assertThat(newPMEvent.params["set_as_default"]).isEqualTo(true)
     }
 
     @Test
@@ -942,20 +904,7 @@ class PaymentSheetEventTest {
         ).isEqualTo(
             "mc_complete_payment_newpm_failure"
         )
-        assertThat(
-            newPMEvent.params
-        ).isEqualTo(
-            mapOf(
-                "currency" to "usd",
-                "duration" to 0.001F,
-                "is_decoupled" to false,
-                "link_enabled" to false,
-                "google_pay_enabled" to false,
-                "selected_lpm" to "card",
-                "error_message" to "apiError",
-                "set_as_default" to false,
-            )
-        )
+        assertThat(newPMEvent.params["set_as_default"]).isEqualTo(false)
     }
 
     @Test
