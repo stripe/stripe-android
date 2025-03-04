@@ -200,7 +200,7 @@ private fun IntegrationTypeUI(
                 )
             )
         })
-        StyledClickableText(text = AnnotatedString(stringResource(R.string.use_native)), onClick = {
+        StyledClickableText(text = AnnotatedString(stringResource(R.string.use_webview)), onClick = {
             onSubmissionStateChangedListener(
                 identitySubmissionState.copy(
                     verificationType = VerificationType.DOCUMENT,
@@ -218,7 +218,7 @@ private fun IntegrationTypeUI(
                 )
             )
         })
-        StyledClickableText(text = AnnotatedString(stringResource(R.string.use_web)), onClick = {
+        StyledClickableText(text = AnnotatedString(stringResource(R.string.use_browser)), onClick = {
             onSubmissionStateChangedListener(
                 identitySubmissionState.copy(
                     verificationType = VerificationType.DOCUMENT,

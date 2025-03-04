@@ -10,8 +10,8 @@
     <string name="allowed_types">Allowed document types</string>
     <string name="require_id_number">Require ID number</string>
     <string name="require_matching_selfie">Require matching selfie</string>
-    <string name="use_native">Native</string>
-    <string name="use_web">Web</string>
+    <string name="use_webview">WebView</string>
+    <string name="use_browser">Browser</string>
     <string name="get_link">Link</string>
 
     <string name="identity_example">Identity Example</string>
