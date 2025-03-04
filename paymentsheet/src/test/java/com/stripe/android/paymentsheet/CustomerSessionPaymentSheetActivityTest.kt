@@ -26,9 +26,6 @@ import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentMethodFactory
-import com.stripe.paymentelementtestpages.EditPage
-import com.stripe.paymentelementtestpages.ManagePage
-import com.stripe.paymentelementtestpages.VerticalModePage
 import org.json.JSONArray
 import org.junit.Rule
 import org.junit.Test
