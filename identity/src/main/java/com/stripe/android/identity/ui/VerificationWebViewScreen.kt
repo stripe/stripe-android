@@ -1,12 +1,14 @@
 package com.stripe.android.identity.ui
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.os.Build
 import android.webkit.JsResult
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
-import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.annotation.RequiresApi
@@ -18,18 +20,12 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.navigation.NavController
+import androidx.core.content.ContextCompat
+import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
 import com.stripe.android.identity.VerificationFlowFinishable
-import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_WEB_VIEW
-import com.stripe.android.identity.navigation.navigateToErrorScreenWithDefaultValues
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.viewmodel.IdentityViewModel
-import com.stripe.android.camera.CameraPermissionEnsureable
-import android.Manifest
-import android.content.pm.PackageManager
-import androidx.core.content.ContextCompat
-import android.graphics.Bitmap
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
@@ -49,11 +45,6 @@ internal fun VerificationWebViewScreen(
             )
         }
     ) { verificationPage ->
-        ScreenTransitionLaunchedEffect(
-            identityViewModel = identityViewModel,
-            screenName = SCREEN_NAME_WEB_VIEW
-        )
-
         AndroidView(
             modifier = Modifier.fillMaxSize(),
             factory = { context ->

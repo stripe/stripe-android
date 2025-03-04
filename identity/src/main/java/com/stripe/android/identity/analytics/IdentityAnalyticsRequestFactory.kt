@@ -8,10 +8,8 @@ import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.injection.IdentityCommonModule.Companion.GLOBAL_SCOPE
 import com.stripe.android.identity.injection.IdentityVerificationScope
 import com.stripe.android.identity.networking.IdentityRepository
-import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentExperiment
-import com.stripe.android.identity.states.IdentityScanState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.launch
@@ -120,67 +118,30 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
 
     fun verificationSucceeded(
         isFromFallbackUrl: Boolean,
-        scanType: IdentityScanState.ScanType? = null,
-        requireSelfie: Boolean? = null,
-        docFrontRetryTimes: Int? = null,
-        docBackRetryTimes: Int? = null,
-        selfieRetryTimes: Int? = null,
-        docFrontUploadType: DocumentUploadParam.UploadMethod? = null,
-        docBackUploadType: DocumentUploadParam.UploadMethod? = null,
-        docFrontModelScore: Float? = null,
-        docBackModelScore: Float? = null,
-        selfieModelScore: Float? = null,
-        docFrontBlurScore: Float? = null,
-        docBackBlurScore: Float? = null
     ) = maybeLogExperimentAndSendLog(
         eventName = EVENT_VERIFICATION_SUCCEEDED,
         additionalParams = additionalParamWithEventMetadata(
             PARAM_FROM_FALLBACK_URL to isFromFallbackUrl,
-            PARAM_SCAN_TYPE to scanType?.toParam(),
-            PARAM_REQUIRE_SELFIE to requireSelfie,
-            PARAM_DOC_FRONT_RETRY_TIMES to docFrontRetryTimes,
-            PARAM_DOC_BACK_RETRY_TIMES to docBackRetryTimes,
-            PARAM_SELFIE_RETRY_TIMES to selfieRetryTimes,
-            PARAM_DOC_FRONT_UPLOAD_TYPE to docFrontUploadType?.name,
-            PARAM_DOC_BACK_UPLOAD_TYPE to docBackUploadType?.name,
-            PARAM_DOC_FRONT_MODEL_SCORE to docFrontModelScore,
-            PARAM_DOC_BACK_MODEL_SCORE to docBackModelScore,
-            PARAM_SELFIE_MODEL_SCORE to selfieModelScore,
-            PARAM_DOC_FRONT_BLUR_SCORE to docFrontBlurScore,
-            PARAM_DOC_BACK_BLUR_SCORE to docBackBlurScore
+
         )
     )
 
     fun verificationCanceled(
         isFromFallbackUrl: Boolean,
-        lastScreenName: String? = null,
-        scanType: IdentityScanState.ScanType? = null,
-        requireSelfie: Boolean? = null
     ) = maybeLogExperimentAndSendLog(
         eventName = EVENT_VERIFICATION_CANCELED,
         additionalParams = additionalParamWithEventMetadata(
             PARAM_FROM_FALLBACK_URL to isFromFallbackUrl,
-            PARAM_SCAN_TYPE to scanType?.toParam(),
-            PARAM_REQUIRE_SELFIE to requireSelfie,
-            PARAM_LAST_SCREEN_NAME to lastScreenName
         )
     )
 
     fun verificationFailed(
         isFromFallbackUrl: Boolean,
-        scanType: IdentityScanState.ScanType? = null,
-        requireSelfie: Boolean? = null,
-        docFrontUploadType: DocumentUploadParam.UploadMethod? = null,
-        docBackUploadType: DocumentUploadParam.UploadMethod? = null,
         throwable: Throwable
     ) = maybeLogExperimentAndSendLog(
         eventName = EVENT_VERIFICATION_FAILED,
         additionalParams = additionalParamWithEventMetadata(
             PARAM_FROM_FALLBACK_URL to isFromFallbackUrl,
-            PARAM_SCAN_TYPE to scanType?.toParam(),
-            PARAM_REQUIRE_SELFIE to requireSelfie,
-            PARAM_DOC_FRONT_UPLOAD_TYPE to docFrontUploadType?.name,
-            PARAM_DOC_BACK_UPLOAD_TYPE to docBackUploadType?.name,
             PARAM_ERROR to mapOf(
                 PARAM_EXCEPTION to throwable.javaClass.name,
                 PARAM_STACKTRACE to throwable.stackTrace.toString()
@@ -188,24 +149,11 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         )
     )
 
-    fun screenPresented(
-        scanType: IdentityScanState.ScanType? = null,
-        screenName: String
-    ) = maybeLogExperimentAndSendLog(
-        eventName = EVENT_SCREEN_PRESENTED,
-        additionalParams = additionalParamWithEventMetadata(
-            PARAM_SCAN_TYPE to scanType?.toParam(),
-            PARAM_SCREEN_NAME to screenName
-        )
-    )
-
     fun cameraError(
-        scanType: IdentityScanState.ScanType,
         throwable: Throwable
     ) = maybeLogExperimentAndSendLog(
         eventName = EVENT_CAMERA_ERROR,
         additionalParams = additionalParamWithEventMetadata(
-            PARAM_SCAN_TYPE to scanType.toParam(),
             PARAM_ERROR to mapOf(
                 PARAM_EXCEPTION to throwable.javaClass.name,
                 PARAM_STACKTRACE to throwable.stackTrace.toString()
@@ -221,56 +169,6 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         eventName = EVENT_CAMERA_PERMISSION_GRANTED
     )
 
-    fun documentTimeout(
-        scanType: IdentityScanState.ScanType
-    ) = maybeLogExperimentAndSendLog(
-        eventName = EVENT_DOCUMENT_TIMEOUT,
-        additionalParams = additionalParamWithEventMetadata(
-            PARAM_SCAN_TYPE to scanType.toParam(),
-            PARAM_SIDE to scanType.toSide()
-        )
-    )
-
-    fun selfieTimeout() = maybeLogExperimentAndSendLog(
-        eventName = EVENT_SELFIE_TIMEOUT,
-        additionalParams = additionalParamWithEventMetadata()
-    )
-
-    fun averageFps(type: String, value: Int, frames: Int) = maybeLogExperimentAndSendLog(
-        eventName = EVENT_AVERAGE_FPS,
-        additionalParams = additionalParamWithEventMetadata(
-            PARAM_TYPE to type,
-            PARAM_VALUE to value,
-            PARAM_FRAMES to frames
-        )
-    )
-
-    fun modelPerformance(mlModel: String, preprocess: Long, inference: Long, frames: Int) =
-        maybeLogExperimentAndSendLog(
-            eventName = EVENT_MODEL_PERFORMANCE,
-            additionalParams = additionalParamWithEventMetadata(
-                PARAM_PREPROCESS to preprocess,
-                PARAM_INFERENCE to inference,
-                PARAM_ML_MODEL to mlModel,
-                PARAM_FRAMES to frames
-            )
-        )
-
-    fun timeToScreen(
-        value: Long,
-        networkTime: Long? = null,
-        fromScreenName: String?,
-        toScreenName: String
-    ) = maybeLogExperimentAndSendLog(
-        eventName = EVENT_TIME_TO_SCREEN,
-        additionalParams = additionalParamWithEventMetadata(
-            PARAM_VALUE to value,
-            PARAM_NETWORK_TIME to networkTime,
-            PARAM_FROM_SCREEN_NAME to fromScreenName,
-            PARAM_TO_SCREEN_NAME to toScreenName
-        )
-    )
-
     fun genericError(
         message: String?,
         stackTrace: String
@@ -282,85 +180,11 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         )
     )
 
-    fun imageUpload(
-        value: Long,
-        compressionQuality: Float,
-        scanType: IdentityScanState.ScanType,
-        id: String?,
-        fileName: String?,
-        fileSize: Long
-    ) = maybeLogExperimentAndSendLog(
-        eventName = EVENT_IMAGE_UPLOAD,
-        additionalParams = additionalParamWithEventMetadata(
-            PARAM_VALUE to value,
-            PARAM_COMPRESSION_QUALITY to compressionQuality,
-            PARAM_SCAN_TYPE to scanType.toParam(),
-            PARAM_ID to id,
-            PARAM_FILE_NAME to fileName,
-            PARAM_FILE_SIZE to fileSize
-        )
-    )
-
-    fun mbStatus(
-        required: Boolean,
-        initSuccess: Boolean? = null,
-        initFailedReason: String? = null
-    ) = maybeLogExperimentAndSendLog(
-        eventName = EVENT_MB_STATUS,
-        additionalParamWithEventMetadata(
-            PARAM_REQUIRED to required,
-            PARAM_INIT_SUCCESS to initSuccess,
-            PARAM_INIT_FAILED_REASON to initFailedReason
-        )
-    )
-
-    fun mbError(
-        message: String?,
-        stackTrace: String?
-    ) = maybeLogExperimentAndSendLog(
-        eventName = EVENT_MB_ERROR,
-        additionalParamWithEventMetadata(
-            PARAM_MESSAGE to message,
-            PARAM_STACKTRACE to stackTrace
-        )
-    )
-
-    fun mbCaptureStatus(
-        capturedByMb: Boolean
-    ) = maybeLogExperimentAndSendLog(
-        eventName = EVENT_MB_CAPTURE_STATUS,
-        additionalParamWithEventMetadata(
-            PARAM_CAPTURED_BY_MB to capturedByMb
-        )
-    )
-
-    private fun IdentityScanState.ScanType.toParam(): String =
-        when (this) {
-            IdentityScanState.ScanType.DOC_FRONT -> DOC_FRONT
-            IdentityScanState.ScanType.DOC_BACK -> DOC_BACK
-            IdentityScanState.ScanType.SELFIE -> SELFIE
-        }
-
-    private fun IdentityScanState.ScanType.toSide(): String =
-        when (this) {
-            IdentityScanState.ScanType.DOC_FRONT -> FRONT
-            IdentityScanState.ScanType.DOC_BACK -> BACK
-            else -> {
-                throw IllegalArgumentException("Unknown type: $this")
-            }
-        }
-
     internal companion object {
         const val TAG = "Analytics"
         const val CLIENT_ID = "mobile-identity-sdk"
         const val ORIGIN = "stripe-identity-android"
         const val ID = "id"
-        const val DOC_FRONT = "doc_front"
-        const val DOC_BACK = "doc_front"
-        const val SELFIE = "selfie"
-        const val FRONT = "front"
-        const val BACK = "back"
-
         const val EVENT_SHEET_PRESENTED = "sheet_presented"
         const val EVENT_SHEET_CLOSED = "sheet_closed"
         const val EVENT_VERIFICATION_SUCCEEDED = "verification_succeeded"

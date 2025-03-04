@@ -35,7 +35,6 @@ import com.stripe.android.core.injection.injectWithFallback
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
 import com.stripe.android.identity.injection.DaggerIdentityActivityFallbackComponent
 import com.stripe.android.identity.injection.IdentityActivitySubcomponent
-import com.stripe.android.identity.ui.IdentityTheme
 import com.stripe.android.identity.ui.VerificationWebViewScreen
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import javax.inject.Inject
@@ -69,8 +68,6 @@ internal class IdentityActivity :
     }
 
     private val identityViewModel: IdentityViewModel by viewModels { viewModelFactory }
-
-    private lateinit var fallbackUrlLauncher: ActivityResultLauncher<Intent>
 
     lateinit var subcomponent: IdentityActivitySubcomponent
 
@@ -112,39 +109,40 @@ internal class IdentityActivity :
             .identityViewModelFactory(viewModelFactory)
             .build()
         identityViewModel.retrieveAndBufferVerificationPage()
-        identityViewModel.initializeTfLite()
-        identityViewModel.registerActivityResultCaller(this)
-        fallbackUrlLauncher = registerForActivityResult(
-            ActivityResultContracts.StartActivityForResult()
-        ) {
-            identityViewModel.observeForVerificationPage(
-                this,
-                onSuccess = {
-                    finishWithResult(
-                        if (it.submitted) {
-                            identityViewModel.identityAnalyticsRequestFactory
-                                .verificationSucceeded(
-                                    isFromFallbackUrl = true
-                                )
-                            VerificationFlowResult.Completed
-                        } else {
-                            identityViewModel.identityAnalyticsRequestFactory
-                                .verificationCanceled(
-                                    isFromFallbackUrl = true
-                                )
-                            VerificationFlowResult.Canceled
-                        }
-                    )
-                },
-                onFailure = {
-                    identityViewModel.identityAnalyticsRequestFactory.verificationFailed(
-                        isFromFallbackUrl = true,
-                        throwable = IllegalStateException(it)
-                    )
-                    finishWithResult(VerificationFlowResult.Failed(IllegalStateException(it)))
-                }
-            )
-        }
+
+//        identityViewModel.initializeTfLite()
+//        identityViewModel.registerActivityResultCaller(this)
+//        fallbackUrlLauncher = registerForActivityResult(
+//            ActivityResultContracts.StartActivityForResult()
+//        ) {
+//            identityViewModel.observeForVerificationPage(
+//                this,
+//                onSuccess = {
+//                    finishWithResult(
+//                        if (it.submitted) {
+//                            identityViewModel.identityAnalyticsRequestFactory
+//                                .verificationSucceeded(
+//                                    isFromFallbackUrl = true
+//                                )
+//                            VerificationFlowResult.Completed
+//                        } else {
+//                            identityViewModel.identityAnalyticsRequestFactory
+//                                .verificationCanceled(
+//                                    isFromFallbackUrl = true
+//                                )
+//                            VerificationFlowResult.Canceled
+//                        }
+//                    )
+//                },
+//                onFailure = {
+//                    identityViewModel.identityAnalyticsRequestFactory.verificationFailed(
+//                        isFromFallbackUrl = true,
+//                        throwable = IllegalStateException(it)
+//                    )
+//                    finishWithResult(VerificationFlowResult.Failed(IllegalStateException(it)))
+//                }
+//            )
+//        }
 
         identityViewModel.observeForVerificationPage(
             this,
@@ -159,39 +157,39 @@ internal class IdentityActivity :
             }
         )
 
-        identityViewModel.screenTracker.screenTransitionStart(
-            startedAt = starterArgs.presentTime.asEpochMillisecondsComparableTimeMark()
-        )
+//        identityViewModel.screenTracker.screenTransitionStart(
+//            startedAt = starterArgs.presentTime.asEpochMillisecondsComparableTimeMark()
+//        )
+
+        // Hide default top bar
         supportActionBar?.hide()
 
         setContent {
-            IdentityTheme {
-                Scaffold(
-                    topBar = {
-                        TopAppBar(
-                            title = {
-                                Text(text = applicationInfo.loadLabel(packageManager).toString())
-                            },
-                            navigationIcon = {
-                                IconButton(onClick = {
-                                    finish()
-                                }) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.stripe_close),
-                                        contentDescription = stringResource(id = R.string.stripe_description_close)
-                                    )
-                                }
-                            },
-                            windowInsets = WindowInsets.statusBars
-                        )
-                    }
-                ) { paddingValues ->
-                    Box(modifier = Modifier.padding(paddingValues)) {
-                        VerificationWebViewScreen(
-                            identityViewModel = identityViewModel,
-                            verificationFlowFinishable = this@IdentityActivity
-                        )
-                    }
+            Scaffold(
+                topBar = {
+                    TopAppBar(
+                        title = {
+                            Text(text = applicationInfo.loadLabel(packageManager).toString())
+                        },
+                        navigationIcon = {
+                            IconButton(onClick = {
+                                finish()
+                            }) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.stripe_close),
+                                    contentDescription = stringResource(id = R.string.stripe_description_close)
+                                )
+                            }
+                        },
+                        windowInsets = WindowInsets.statusBars
+                    )
+                }
+            ) { paddingValues ->
+                Box(modifier = Modifier.padding(paddingValues)) {
+                    VerificationWebViewScreen(
+                        identityViewModel = identityViewModel,
+                        verificationFlowFinishable = this@IdentityActivity
+                    )
                 }
             }
         }
