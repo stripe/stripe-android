@@ -1,9 +1,11 @@
 package com.stripe.android.paymentsheet
 
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.customersheet.CustomerSheetActivity
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.PaymentOptionSelection
 import com.stripe.android.model.CardBrand
@@ -28,10 +30,14 @@ import org.junit.runner.RunWith
 
 @RunWith(TestParameterInjector::class)
 internal class CustomerSheetTest {
-    @get:Rule
-    val testRules: TestRules = TestRules.create()
 
-    private val composeTestRule = testRules.compose
+    private val composeTestRule = createAndroidComposeRule<CustomerSheetActivity>()
+
+    @get:Rule
+    val testRules: TestRules = TestRules.create(
+        composeTestRule = composeTestRule
+    )
+
     private val networkRule = testRules.networkRule
 
     private val page: CustomerSheetPage = CustomerSheetPage(composeTestRule)

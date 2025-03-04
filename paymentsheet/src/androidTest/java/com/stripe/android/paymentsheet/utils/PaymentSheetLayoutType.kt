@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.isEnabled
+import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
@@ -11,35 +12,35 @@ import androidx.compose.ui.test.performClick
 import androidx.test.espresso.Espresso
 import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.EditPage
-import com.stripe.android.paymentsheet.ManagePage
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.SavedPaymentMethodsPage
-import com.stripe.android.paymentsheet.VerticalModePage
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL
 import com.stripe.android.paymentsheet.ui.getLabel
+import com.stripe.android.testing.EditPage
+import com.stripe.android.testing.ManagePage
+import com.stripe.android.testing.SavedPaymentMethodsPage
+import com.stripe.android.testing.VerticalModePage
 
 internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentSheet.PaymentMethodLayout) {
 
     abstract fun assertHasSelectedPaymentMethod(
-        composeTestRule: ComposeTestRule,
+        composeTestRule: AndroidComposeTestRule<*, *>,
         context: Context,
         paymentMethod: PaymentMethod
     )
 
     abstract fun setDefaultPaymentMethod(
-        composeTestRule: ComposeTestRule,
+        composeTestRule: AndroidComposeTestRule<*, *>,
         newDefaultPaymentMethod: PaymentMethod
     )
 
     abstract fun assertDefaultPaymentMethodBadgeDisplayed(
-        composeTestRule: ComposeTestRule
+        composeTestRule: AndroidComposeTestRule<*, *>
     )
 
     class Horizontal : PaymentSheetLayoutType(paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal) {
         override fun assertHasSelectedPaymentMethod(
-            composeTestRule: ComposeTestRule,
+            composeTestRule: AndroidComposeTestRule<*, *>,
             context: Context,
             paymentMethod: PaymentMethod,
         ) {
@@ -50,7 +51,7 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
         }
 
         override fun setDefaultPaymentMethod(
-            composeTestRule: ComposeTestRule,
+            composeTestRule: AndroidComposeTestRule<*, *>,
             newDefaultPaymentMethod: PaymentMethod
         ) {
             val savedPaymentMethodsPage = SavedPaymentMethodsPage(composeTestRule)
@@ -72,7 +73,7 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
             savedPaymentMethodsPage.onEditButton().performClick()
         }
 
-        override fun assertDefaultPaymentMethodBadgeDisplayed(composeTestRule: ComposeTestRule) {
+        override fun assertDefaultPaymentMethodBadgeDisplayed(composeTestRule: AndroidComposeTestRule<*, *>) {
             val savedPaymentMethodsPage = SavedPaymentMethodsPage(composeTestRule)
 
             savedPaymentMethodsPage.onEditButton().performClick()
@@ -83,7 +84,7 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
 
     class Vertical : PaymentSheetLayoutType(paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical) {
         override fun assertHasSelectedPaymentMethod(
-            composeTestRule: ComposeTestRule,
+            composeTestRule: AndroidComposeTestRule<*, *>,
             context: Context,
             paymentMethod: PaymentMethod
         ) {
@@ -101,7 +102,7 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
             Espresso.pressBack()
         }
 
-        override fun setDefaultPaymentMethod(composeTestRule: ComposeTestRule, newDefaultPaymentMethod: PaymentMethod) {
+        override fun setDefaultPaymentMethod(composeTestRule: AndroidComposeTestRule<*, *>, newDefaultPaymentMethod: PaymentMethod) {
             val verticalModePage = VerticalModePage(composeTestRule)
             val managePage = ManagePage(composeTestRule)
             val editPage = EditPage(composeTestRule)
@@ -123,7 +124,7 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
             Espresso.pressBack()
         }
 
-        override fun assertDefaultPaymentMethodBadgeDisplayed(composeTestRule: ComposeTestRule) {
+        override fun assertDefaultPaymentMethodBadgeDisplayed(composeTestRule: AndroidComposeTestRule<*, *>) {
             val verticalModePage = VerticalModePage(composeTestRule)
             val managePage = ManagePage(composeTestRule)
 
