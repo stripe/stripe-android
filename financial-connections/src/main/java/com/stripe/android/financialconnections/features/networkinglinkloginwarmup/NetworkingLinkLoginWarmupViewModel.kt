@@ -28,6 +28,7 @@ import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
+import com.stripe.android.financialconnections.repository.ConsumerSessionProvider
 import com.stripe.android.model.EmailSource
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -45,6 +46,7 @@ internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
     private val navigationManager: NavigationManager,
     private val lookupAccount: LookupAccount,
     private val prefillDetails: ElementsSessionContext.PrefillDetails?,
+    private val consumerSessionProvider: ConsumerSessionProvider,
 ) : FinancialConnectionsViewModel<NetworkingLinkLoginWarmupState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
@@ -107,19 +109,25 @@ internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
 
     fun onContinueClick() {
         val payload = stateFlow.value.payload() ?: return
+        val existingConsumerSession = consumerSessionProvider.provideConsumerSession()
 
         suspend {
             eventTracker.track(Click("click.continue", PANE))
-            // Trigger a lookup call to ensure we cache a consumer session for posterior verification.
-            lookupAccount(
-                pane = PANE,
-                email = payload.email,
-                phone = null,
-                phoneCountryCode = null,
-                emailSource = EmailSource.CUSTOMER_OBJECT,
-                sessionId = payload.sessionId,
-                verifiedFlow = payload.verifiedFlow
-            )
+
+            if (existingConsumerSession == null) {
+                // Trigger a lookup call to ensure we cache a consumer session for posterior verification.
+                // Don't do this if we already have a consumer session, which means that we call this same
+                // method in the consent pane.
+                lookupAccount(
+                    pane = PANE,
+                    email = payload.email,
+                    phone = null,
+                    phoneCountryCode = null,
+                    emailSource = EmailSource.CUSTOMER_OBJECT,
+                    sessionId = payload.sessionId,
+                    verifiedFlow = payload.verifiedFlow
+                )
+            }
             navigationManager.tryNavigateTo(Destination.NetworkingLinkVerification(referrer = PANE))
         }.execute {
             copy(continueAsync = it)
