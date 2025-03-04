@@ -28,9 +28,10 @@ internal class FakeEventReporter : EventReporter {
         currency: String?,
         initializationMode: PaymentElementLoader.InitializationMode,
         orderedLpms: List<String>,
-        requireCvcRecollection: Boolean
-    ) {
-    }
+        requireCvcRecollection: Boolean,
+        hasDefaultPaymentMethod: Boolean?,
+        setAsDefaultEnabled: Boolean?
+    ) {}
 
     override fun onLoadFailed(error: Throwable) {
     }

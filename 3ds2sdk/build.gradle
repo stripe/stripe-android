@@ -95,5 +95,10 @@ dependencies {
     testImplementation testLibs.androidx.archCore
 }
 
-// Uncomment to publish locally with `./gradlew publishToMavenLocal`
-// apply from: "${rootDir}/3ds2sdk/publish.gradle"
+ext {
+    artifactId = "stripe-3ds2-android"
+    artifactName = "stripe-3ds2-android"
+    artifactDescrption = "Stripe 3DS2 Android SDK"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"

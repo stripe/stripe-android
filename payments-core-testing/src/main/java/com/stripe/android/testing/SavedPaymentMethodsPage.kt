@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.testing
 
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
@@ -7,7 +7,7 @@ import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG
@@ -16,7 +16,7 @@ import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
 
-class SavedPaymentMethodsPage(private val composeTestRule: ComposeTestRule) {
+class SavedPaymentMethodsPage(private val composeTestRule: AndroidComposeTestRule<*, *>) {
     fun waitUntilVisible() {
         composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule

@@ -546,8 +546,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         // We use the global scope to make sure that we can finish sending the event
         // even if the ViewModel is cleared.
         GlobalScope.launch(ioDispatcher) {
-            val manifest = getOrFetchSync().manifest
-            eventReporter.onResult(manifest.id, result)
+            runCatching { getOrFetchSync().manifest }.onSuccess {
+                eventReporter.onResult(it.id, result)
+            }
         }
     }
 
@@ -556,27 +557,37 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      */
     private fun switchToWebFlow(prefillDetails: PrefillDetails?) {
         viewModelScope.launch {
-            val sync = getOrFetchSync()
-            val hostedAuthUrl = HostedAuthUrlBuilder.create(
-                args = initialState.initialArgs,
-                manifest = sync.manifest,
-                prefillDetails = prefillDetails
-            )
+            runCatching { getOrFetchSync() }.onSuccess { sync ->
+                switchToWebFlow(sync.manifest, prefillDetails)
+            }.onFailure { error ->
+                finishWithResult(Failed(error))
+            }
+        }
+    }
 
-            if (hostedAuthUrl != null) {
-                setState {
-                    copy(
-                        manifest = manifest,
-                        // Use intermediate state to prevent the flow from closing in [onResume].
-                        webAuthFlowStatus = AuthFlowStatus.INTERMEDIATE_DEEPLINK,
-                        viewEffect = OpenAuthFlowWithUrl(hostedAuthUrl)
-                    )
-                }
-            } else {
-                finishWithResult(
-                    result = Failed(IllegalArgumentException("hostedAuthUrl is required to switch to web flow!"))
+    private fun switchToWebFlow(
+        manifest: FinancialConnectionsSessionManifest,
+        prefillDetails: PrefillDetails?,
+    ) {
+        val hostedAuthUrl = HostedAuthUrlBuilder.create(
+            args = initialState.initialArgs,
+            manifest = manifest,
+            prefillDetails = prefillDetails
+        )
+
+        if (hostedAuthUrl != null) {
+            setState {
+                copy(
+                    manifest = manifest,
+                    // Use intermediate state to prevent the flow from closing in [onResume].
+                    webAuthFlowStatus = AuthFlowStatus.INTERMEDIATE_DEEPLINK,
+                    viewEffect = OpenAuthFlowWithUrl(hostedAuthUrl)
                 )
             }
+        } else {
+            finishWithResult(
+                result = Failed(IllegalArgumentException("hostedAuthUrl is required to switch to web flow!"))
+            )
         }
     }
 
