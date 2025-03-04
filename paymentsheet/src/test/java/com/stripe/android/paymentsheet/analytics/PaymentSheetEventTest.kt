@@ -11,6 +11,7 @@ import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_SELECTION
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -1602,10 +1603,7 @@ class PaymentSheetEventTest {
         result: PaymentSheetEvent.Payment.Result
     ): PaymentSheetEvent.Payment {
         return paymentMethodEvent(
-            paymentSelection = PaymentSelection.New.Card(
-                PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                mock(),
-                mock(),
+            paymentSelection = CARD_PAYMENT_SELECTION.copy(
                 paymentMethodExtraParams = paymentMethodExtraParams
             ),
             result = result
