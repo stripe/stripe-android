@@ -32,9 +32,15 @@ import org.jetbrains.annotations.VisibleForTesting
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT = "TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT"
-internal const val TEST_TAG_VIEW_MORE = "TEST_TAG_VIEW_MORE"
-internal const val TEST_TAG_EDIT_SAVED_CARD = "TEST_TAG_VERTICAL_MODE_SAVED_PM_EDIT"
-internal const val TEST_TAG_SAVED_TEXT = "TEST_TAG_SAVED_TEXT"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val TEST_TAG_VIEW_MORE = "TEST_TAG_VIEW_MORE"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val TEST_TAG_EDIT_SAVED_CARD = "TEST_TAG_VERTICAL_MODE_SAVED_PM_EDIT"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val TEST_TAG_SAVED_TEXT = "TEST_TAG_SAVED_TEXT"
 
 @Composable
 internal fun PaymentMethodVerticalLayoutUI(
