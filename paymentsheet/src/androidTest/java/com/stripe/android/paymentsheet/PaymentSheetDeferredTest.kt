@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -10,6 +11,8 @@ import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.IntegrationType
+import com.stripe.android.paymentsheet.utils.PaymentSheetMultipleInstanceTestType
+import com.stripe.android.paymentsheet.utils.PaymentSheetMultipleInstanceTestTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.expectNoResult
@@ -621,90 +624,59 @@ internal class PaymentSheetDeferredTest {
     }
 
     @Test
-    fun testDeferredIntentWithMultipleInstances() {
-        var firstCreateIntentCallbackCalled = false
-        var secondCreateIntentCallbackCalled = false
-
-        runMultiplePaymentSheetInstancesTest(
-            networkRule = networkRule,
-            firstCreateIntentCallback = { _, shouldSavePaymentMethod ->
-                firstCreateIntentCallbackCalled = true
-                assertThat(shouldSavePaymentMethod).isFalse()
-                CreateIntentResult.Success("pi_example_secret_example")
-            },
-            secondCreateIntentCallback = { _, shouldSavePaymentMethod ->
-                secondCreateIntentCallbackCalled = true
-                assertThat(shouldSavePaymentMethod).isFalse()
-                CreateIntentResult.Success("pi_example_secret_example")
-            },
-            firstResultCallback = {
-                assertThat(firstCreateIntentCallbackCalled).isTrue()
-                assertCompleted(it)
-            },
-            secondResultCallback = {
-                assertThat(secondCreateIntentCallbackCalled).isTrue()
-                assertCompleted(it)
-            },
-        ) { testContext ->
-            networkRule.enqueue(
-                method("GET"),
-                path("/v1/elements/sessions"),
-            ) { response ->
-                response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
-            }
-
-            testContext.presentPaymentSheet {
-                presentWithIntentConfiguration(
-                    intentConfiguration = PaymentSheet.IntentConfiguration(
-                        mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                            amount = 5099,
-                            currency = "usd"
-                        )
-                    ),
-                    configuration = defaultConfiguration,
-                )
-            }
-
-            page.fillOutCardDetails()
-
-            networkRule.enqueue(
-                method("POST"),
-                path("/v1/payment_methods"),
-                bodyPart(
-                    "payment_user_agent",
-                    Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
-                ),
-            ) { response ->
-                response.testBodyFromFile("payment-methods-create.json")
-            }
-
-            networkRule.enqueue(
-                method("GET"),
-                path("/v1/payment_intents/pi_example"),
-            ) { response ->
-                response.testBodyFromFile("payment-intent-get-requires_payment_method.json")
-            }
-
-            networkRule.enqueue(
-                method("POST"),
-                path("/v1/payment_intents/pi_example/confirm"),
-                not(
-                    bodyPart(
-                        urlEncode("payment_method_options[card][setup_future_usage]"),
-                        "off_session"
-                    )
-                ),
-                not(
-                    bodyPart(
-                        urlEncode("payment_method_data[payment_user_agent]"),
-                        Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
-                    )
-                ),
-            ) { response ->
-                response.testBodyFromFile("payment-intent-confirm.json")
-            }
-
-            page.clickPrimaryButton()
+    fun testDeferredIntentWithMultipleInstances(
+        @TestParameter(valuesProvider = PaymentSheetMultipleInstanceTestTypeProvider::class)
+        testType: PaymentSheetMultipleInstanceTestType,
+    ) = runMultiplePaymentSheetInstancesTest(
+        networkRule = networkRule,
+        testType = testType,
+        createIntentCallback = { _, _ ->
+            CreateIntentResult.Success(clientSecret = "pi_example_secret_example")
+        },
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
+
+        testContext.presentPaymentSheet {
+            presentWithIntentConfiguration(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 5099,
+                        currency = "usd"
+                    )
+                ),
+                configuration = defaultConfiguration,
+            )
+        }
+
+        page.fillOutCardDetails()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_methods"),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-create.json")
+        }
+
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/payment_intents/pi_example"),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-get-requires_payment_method.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        page.clickPrimaryButton()
     }
 }
