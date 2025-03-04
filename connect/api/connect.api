@@ -57,15 +57,6 @@ public final class com/stripe/android/connect/PayoutsView : com/stripe/android/c
 	public synthetic fun setListener (Lcom/stripe/android/connect/StripeEmbeddedComponentListener;)V
 }
 
-public abstract interface class com/stripe/android/connect/StripeComponentController {
-	public abstract fun dismiss ()V
-	public abstract fun getListener ()Lcom/stripe/android/connect/StripeEmbeddedComponentListener;
-	public abstract fun getOnDismissListener ()Lcom/stripe/android/connect/StripeComponentController$OnDismissListener;
-	public abstract fun setListener (Lcom/stripe/android/connect/StripeEmbeddedComponentListener;)V
-	public abstract fun setOnDismissListener (Lcom/stripe/android/connect/StripeComponentController$OnDismissListener;)V
-	public abstract fun show ()V
-}
-
 public abstract interface class com/stripe/android/connect/StripeComponentController$OnDismissListener {
 	public abstract fun onDismiss ()V
 }

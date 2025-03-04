@@ -1,9 +1,12 @@
 package com.stripe.android.connect
 
+import androidx.annotation.RestrictTo
+
 /**
  * Controller for a full screen component.
  */
 @PrivateBetaConnectSDK
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface StripeComponentController<Listener : StripeEmbeddedComponentListener> {
     /**
      * Listener of component events.
