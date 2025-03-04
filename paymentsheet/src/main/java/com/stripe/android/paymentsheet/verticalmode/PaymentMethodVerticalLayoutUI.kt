@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -164,7 +165,7 @@ private fun EditButton(onClick: () -> Unit) {
         modifier = Modifier
             .testTag(TEST_TAG_EDIT_SAVED_CARD)
             .clickable(onClick = onClick)
-            .padding(4.dp)
+            .padding(vertical = 4.dp)
             .fillMaxHeight()
     )
 }
@@ -178,7 +179,7 @@ private fun ViewMoreButton(
         modifier = Modifier
             .testTag(TEST_TAG_VIEW_MORE)
             .clickable(onClick = onViewMorePaymentMethods)
-            .padding(4.dp)
+            .padding(vertical = 4.dp)
             .fillMaxHeight()
     ) {
         Text(
@@ -188,9 +189,10 @@ private fun ViewMoreButton(
             fontWeight = FontWeight.Medium,
         )
         Icon(
-            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            painter = painterResource(R.drawable.stripe_ic_chevron_right),
             contentDescription = null,
             tint = MaterialTheme.colors.primary,
+            modifier = Modifier.padding(start = 4.dp, top = 2.dp)
         )
     }
 }
