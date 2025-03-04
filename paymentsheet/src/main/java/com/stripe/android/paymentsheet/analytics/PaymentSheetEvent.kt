@@ -427,24 +427,44 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         }
     }
 
+    class SetAsDefaultPaymentMethodSucceeded(
+        override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_set_default_payment_method"
+
+        override val additionalParams: Map<String, Any?> = emptyMap()
+    }
+
+    class SetAsDefaultPaymentMethodFailed(
+        error: Throwable,
+        override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_set_default_payment_method_failed"
+
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_ERROR_MESSAGE to error.message,
+        ).plus(ErrorReporter.getAdditionalParamsFromError(error))
+    }
+
     class UpdatePaymentOptionSucceeded(
-        selectedBrand: CardBrand?,
-        setAsDefaultPaymentMethod: Boolean?,
+        selectedBrand: CardBrand,
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_update_card"
 
-        override val additionalParams: Map<String, Any?> = buildMap {
-            selectedBrand?.let { put(FIELD_SELECTED_CARD_BRAND, selectedBrand.code) }
-            setAsDefaultPaymentMethod?.let { put(FIELD_SET_AS_DEFAULT, it) }
-        }
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_SELECTED_CARD_BRAND to selectedBrand.code
+        )
     }
 
     class UpdatePaymentOptionFailed(
-        selectedBrand: CardBrand?,
-        setAsDefaultPaymentMethod: Boolean?,
+        selectedBrand: CardBrand,
         error: Throwable,
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,
@@ -452,11 +472,10 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_update_card_failed"
 
-        override val additionalParams: Map<String, Any?> = buildMap {
-            selectedBrand?.let { put(FIELD_SELECTED_CARD_BRAND, selectedBrand.code) }
-            setAsDefaultPaymentMethod?.let { put(FIELD_SET_AS_DEFAULT, it) }
-            put(FIELD_ERROR_MESSAGE, error.message)
-        }.plus(ErrorReporter.getAdditionalParamsFromError(error))
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_SELECTED_CARD_BRAND to selectedBrand.code,
+            FIELD_ERROR_MESSAGE to error.message,
+        ).plus(ErrorReporter.getAdditionalParamsFromError(error))
     }
 
     class CannotProperlyReturnFromLinkAndLPMs(

@@ -542,8 +542,7 @@ class DefaultEventReporterTest {
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == "mc_update_card" &&
-                    req.params["set_as_default"] == true
+                req.params["event"] == "mc_set_default_payment_method"
             }
         )
     }
@@ -560,8 +559,7 @@ class DefaultEventReporterTest {
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == "mc_update_card_failed" &&
-                    req.params["set_as_default"] == true &&
+                req.params["event"] == "mc_set_default_payment_method_failed" &&
                     req.params["error_message"] == "No network available!"
             }
         )
