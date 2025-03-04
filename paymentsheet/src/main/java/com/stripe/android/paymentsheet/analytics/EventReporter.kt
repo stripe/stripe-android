@@ -179,12 +179,12 @@ internal interface EventReporter {
     )
 
     /**
-     * The customer has successfully set a payment method as the default
+     * The customer has successfully set a payment method as the default.
      */
     fun onSetAsDefaultPaymentMethodSucceeded()
 
     /**
-     * The customer has failed to set a payment method as the default
+     * The customer has failed to set a payment method as the default.
      */
     fun onSetAsDefaultPaymentMethodFailed(
         error: Throwable,
