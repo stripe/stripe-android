@@ -208,7 +208,7 @@ private fun IntegrationTypeUI(
                 )
             )
         })
-        Spacer(modifier = Modifier.width(40.dp))
+        Spacer(modifier = Modifier.width(15.dp))
 
         RadioButton(selected = identitySubmissionState.integrationType == WEB, onClick = {
             onSubmissionStateChangedListener(
@@ -226,7 +226,7 @@ private fun IntegrationTypeUI(
                 )
             )
         })
-        Spacer(modifier = Modifier.width(40.dp))
+        Spacer(modifier = Modifier.width(15.dp))
 
         RadioButton(selected = identitySubmissionState.integrationType == LINK, onClick = {
             onSubmissionStateChangedListener(
