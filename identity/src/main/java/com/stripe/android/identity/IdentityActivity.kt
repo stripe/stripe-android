@@ -40,6 +40,7 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
+import android.util.Log
 
 /**
  * Host activity to perform Identity verification.
@@ -97,6 +98,7 @@ internal class IdentityActivity :
     @ExperimentalMaterialApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d("IdentitySDK", "IdentityActivity onCreate")
         injectWithFallback(
             starterArgs.injectorKey,
             this.applicationContext
@@ -196,6 +198,7 @@ internal class IdentityActivity :
     }
 
     override fun finishWithResult(result: VerificationFlowResult) {
+        Log.d("IdentitySDK", "IdentityActivity finishWithResult called with result: $result")
         identityViewModel.identityAnalyticsRequestFactory.sheetClosed(
             result.toString()
         )
@@ -203,7 +206,13 @@ internal class IdentityActivity :
             Activity.RESULT_OK,
             Intent().putExtras(result.toBundle())
         )
+        Log.d("IdentitySDK", "IdentityActivity finishing...")
         finish()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d("IdentitySDK", "IdentityActivity onDestroy")
     }
 
     /**

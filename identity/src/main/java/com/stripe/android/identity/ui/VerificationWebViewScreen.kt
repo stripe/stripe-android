@@ -18,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import com.stripe.android.camera.CameraPermissionEnsureable
@@ -34,7 +33,6 @@ internal fun VerificationWebViewScreen(
     verificationFlowFinishable: VerificationFlowFinishable
 ) {
     val verificationPageState by identityViewModel.verificationPage.observeAsState(Resource.loading())
-    val context = LocalContext.current
 
     CheckVerificationPageAndCompose(
         verificationPageResource = verificationPageState,
@@ -54,12 +52,12 @@ internal fun VerificationWebViewScreen(
                         javaScriptEnabled = true
                         domStorageEnabled = true
                         mediaPlaybackRequiresUserGesture = false
-                        
+
                         setSupportZoom(false)
                     }
-                    
+
                     webChromeClient = object : WebChromeClient() {
-                        override fun getDefaultVideoPoster(): Bitmap? {
+                        override fun getDefaultVideoPoster(): Bitmap {
                             // Return a transparent bitmap to prevent the default play button overlay while video (camera) is loading
                             return Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
                         }
@@ -82,7 +80,8 @@ internal fun VerificationWebViewScreen(
                                     if (ContextCompat.checkSelfPermission(
                                             context,
                                             Manifest.permission.CAMERA
-                                        ) == PackageManager.PERMISSION_GRANTED) {
+                                        ) == PackageManager.PERMISSION_GRANTED
+                                    ) {
                                         permissionRequest.grant(arrayOf(android.webkit.PermissionRequest.RESOURCE_VIDEO_CAPTURE))
                                     } else {
                                         cameraPermissionEnsureable?.ensureCameraPermission(
@@ -103,40 +102,23 @@ internal fun VerificationWebViewScreen(
 
                     webViewClient = object : WebViewClient() {
                         override fun shouldOverrideUrlLoading(
-                            view: WebView,
+                            view: WebView?,
                             request: WebResourceRequest
                         ): Boolean {
                             val url = request.url.toString()
-                            
-                            return when {
-                                url.startsWith(verificationPage.fallbackUrl) -> {
-                                    when {
-                                        url.contains("/success") -> {
-                                            identityViewModel.identityAnalyticsRequestFactory
-                                                .verificationSucceeded(isFromFallbackUrl = true)
-                                            verificationFlowFinishable.finishWithResult(
-                                                VerificationFlowResult.Completed
-                                            )
-                                            true
-                                        }
-                                        url.contains("/canceled") -> {
-                                            identityViewModel.identityAnalyticsRequestFactory
-                                                .verificationCanceled(isFromFallbackUrl = true)
-                                            verificationFlowFinishable.finishWithResult(
-                                                VerificationFlowResult.Canceled
-                                            )
-                                            true
-                                        }
-                                        else -> false
-                                    }
-                                }
-                                else -> {
-                                    CustomTabsIntent.Builder()
-                                        .build()
-                                        .launchUrl(context, request.url)
-                                    true
-                                }
+
+                            // Let WebView handle verification URLs internally
+                            if (url.startsWith(verificationPage.fallbackUrl)) {
+                                return false
                             }
+
+                            // Open external URLs in custom tabs
+                            CustomTabsIntent.Builder()
+                                .setShowTitle(true)
+                                .build()
+                                .launchUrl(context, request.url)
+
+                            return true
                         }
 
                         @RequiresApi(Build.VERSION_CODES.M)
@@ -154,6 +136,21 @@ internal fun VerificationWebViewScreen(
                             verificationFlowFinishable.finishWithResult(
                                 VerificationFlowResult.Failed(IllegalStateException(errorMessage))
                             )
+                        }
+
+                        override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
+                            super.doUpdateVisitedHistory(view, url, isReload)
+                            url?.let {
+                                when {
+                                    it.endsWith("/success") -> {
+                                        identityViewModel.identityAnalyticsRequestFactory
+                                            .verificationSucceeded(isFromFallbackUrl = true)
+                                        verificationFlowFinishable.finishWithResult(
+                                            VerificationFlowResult.Completed
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 }
