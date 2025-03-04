@@ -6,6 +6,7 @@ import com.stripe.android.common.analytics.toAnalyticsValue
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.analyticsValue
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -326,6 +327,9 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             paymentSelection.linkContext()?.let { linkContext ->
                 put(FIELD_LINK_CONTEXT, linkContext)
             }
+            paymentSelection?.getSetAsDefaultPaymentMethodFromPaymentSelection()?.let { setAsDefault ->
+                put(FIELD_SET_AS_DEFAULT, setAsDefault)
+            }
         }
 
         sealed interface Result {
@@ -519,6 +523,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_SET_AS_DEFAULT_ENABLED = "set_as_default_enabled"
         const val FIELD_HAS_DEFAULT_PAYMENT_METHOD = "has_default_payment_method"
         const val FIELD_SELECTED_CARD_BRAND = "selected_card_brand"
+        const val FIELD_SET_AS_DEFAULT = "set_as_default"
         const val FIELD_LINK_CONTEXT = "link_context"
         const val FIELD_EXTERNAL_PAYMENT_METHODS = "external_payment_methods"
         const val FIELD_PAYMENT_METHOD_LAYOUT = "payment_method_layout"
@@ -534,6 +539,20 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val VALUE_CARD_BRAND = "brand"
 
         const val MAX_EXTERNAL_PAYMENT_METHODS = 10
+    }
+}
+
+private fun PaymentSelection.getSetAsDefaultPaymentMethodFromPaymentSelection(): Boolean? {
+    return when (this) {
+        is PaymentSelection.New.Card -> {
+            (this.paymentMethodExtraParams as? PaymentMethodExtraParams.Card)?.setAsDefault
+        }
+        is PaymentSelection.New.USBankAccount -> {
+            (this.paymentMethodExtraParams as? PaymentMethodExtraParams.USBankAccount)?.setAsDefault
+        }
+        else -> {
+            null
+        }
     }
 }
 

@@ -9,6 +9,7 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
+import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -578,6 +579,61 @@ class PaymentSheetEventTest {
         )
     }
 
+    fun `New payment method set as default true event should return expected event`() {
+        val newPMEvent = newCardPaymentMethod(
+            paymentMethodExtraParams = PaymentMethodExtraParams.Card(
+                setAsDefault = true
+            ),
+            result = PaymentSheetEvent.Payment.Result.Success,
+        )
+        assertThat(
+            newPMEvent.eventName
+        ).isEqualTo(
+            "mc_complete_payment_newpm_success"
+        )
+        assertThat(
+            newPMEvent.params
+        ).isEqualTo(
+            mapOf(
+                "currency" to "usd",
+                "duration" to 0.001F,
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
+                "selected_lpm" to "card",
+                "set_as_default" to true
+            )
+        )
+    }
+
+    @Test
+    fun `New payment method set as default false event should return expected event`() {
+        val newPMEvent = newCardPaymentMethod(
+            paymentMethodExtraParams = PaymentMethodExtraParams.Card(
+                setAsDefault = false
+            ),
+            result = PaymentSheetEvent.Payment.Result.Success,
+        )
+        assertThat(
+            newPMEvent.eventName
+        ).isEqualTo(
+            "mc_complete_payment_newpm_success"
+        )
+        assertThat(
+            newPMEvent.params
+        ).isEqualTo(
+            mapOf(
+                "currency" to "usd",
+                "duration" to 0.001F,
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
+                "selected_lpm" to "card",
+                "set_as_default" to false,
+            )
+        )
+    }
+
     @Test
     fun `Saved payment method event should return expected event`() {
         val savedPMEvent = PaymentSheetEvent.Payment(
@@ -836,6 +892,68 @@ class PaymentSheetEventTest {
                 "google_pay_enabled" to false,
                 "selected_lpm" to "card",
                 "error_message" to "apiError",
+            )
+        )
+    }
+
+    fun `New payment method failure setAsDefault true event should return expected event`() {
+        val newPMEvent = newCardPaymentMethod(
+            paymentMethodExtraParams = PaymentMethodExtraParams.Card(
+                setAsDefault = true
+            ),
+            result = PaymentSheetEvent.Payment.Result.Failure(
+                error = PaymentSheetConfirmationError.Stripe(APIException()),
+            )
+        )
+        assertThat(
+            newPMEvent.eventName
+        ).isEqualTo(
+            "mc_complete_payment_newpm_failure"
+        )
+        assertThat(
+            newPMEvent.params
+        ).isEqualTo(
+            mapOf(
+                "currency" to "usd",
+                "duration" to 0.001F,
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
+                "selected_lpm" to "card",
+                "error_message" to "apiError",
+                "error_code" to null,
+                "set_as_default" to true,
+            )
+        )
+    }
+
+    @Test
+    fun `New payment method failure setAsDefault false event should return expected event`() {
+        val newPMEvent = newCardPaymentMethod(
+            paymentMethodExtraParams = PaymentMethodExtraParams.Card(
+                setAsDefault = false
+            ),
+            result = PaymentSheetEvent.Payment.Result.Failure(
+                error = PaymentSheetConfirmationError.Stripe(APIException()),
+            )
+        )
+        assertThat(
+            newPMEvent.eventName
+        ).isEqualTo(
+            "mc_complete_payment_newpm_failure"
+        )
+        assertThat(
+            newPMEvent.params
+        ).isEqualTo(
+            mapOf(
+                "currency" to "usd",
+                "duration" to 0.001F,
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
+                "selected_lpm" to "card",
+                "error_message" to "apiError",
+                "set_as_default" to false,
             )
         )
     }
@@ -1527,6 +1645,38 @@ class PaymentSheetEventTest {
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
             )
+        )
+    }
+
+    private fun newCardPaymentMethod(
+        paymentMethodExtraParams: PaymentMethodExtraParams? = null,
+        result: PaymentSheetEvent.Payment.Result
+    ): PaymentSheetEvent.Payment {
+        return paymentMethodEvent(
+            paymentSelection = PaymentSelection.New.Card(
+                PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                mock(),
+                mock(),
+                paymentMethodExtraParams = paymentMethodExtraParams
+            ),
+            result = result
+        )
+    }
+
+    private fun paymentMethodEvent(
+        paymentSelection: PaymentSelection,
+        result: PaymentSheetEvent.Payment.Result,
+    ): PaymentSheetEvent.Payment {
+        return PaymentSheetEvent.Payment(
+            mode = EventReporter.Mode.Complete,
+            paymentSelection = paymentSelection,
+            duration = 1.milliseconds,
+            result = result,
+            currency = "usd",
+            isDeferred = false,
+            linkEnabled = false,
+            googlePaySupported = false,
+            deferredIntentConfirmationType = null,
         )
     }
 
