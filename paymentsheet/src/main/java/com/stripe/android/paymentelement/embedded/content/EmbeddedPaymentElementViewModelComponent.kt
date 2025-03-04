@@ -70,8 +70,8 @@ internal interface EmbeddedPaymentElementViewModelComponent {
         fun application(application: Application): Builder
 
         @BindsInstance
-        fun instanceId(
-            @PaymentElementCallbackIdentifier instanceId: String,
+        fun paymentElementCallbackIdentifier(
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
         ): Builder
 
         @BindsInstance

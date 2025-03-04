@@ -43,7 +43,7 @@ class ExternalPaymentMethodProxyActivityTest {
 
         activityLauncher.launch(
             input = ExternalPaymentMethodInput(
-                instanceId = "ExternalPaymentMethod",
+                paymentElementCallbackIdentifier = "ExternalPaymentMethodTestIdentifier",
                 type = expectedExternalPaymentMethodType,
                 billingDetails = expectedBillingDetails,
             )
@@ -72,7 +72,7 @@ class ExternalPaymentMethodProxyActivityTest {
 
         activityLauncher.launch(
             input = ExternalPaymentMethodInput(
-                instanceId = "ExternalPaymentMethod",
+                paymentElementCallbackIdentifier = "ExternalPaymentMethodTestIdentifier",
                 type = "external_fawry",
                 billingDetails = PaymentMethod.BillingDetails(),
             )
@@ -137,19 +137,19 @@ class ExternalPaymentMethodProxyActivityTest {
             context,
         )
 
-        PaymentElementCallbackReferences["ExternalPaymentMethodOne"] = PaymentElementCallbacks(
+        PaymentElementCallbackReferences["ExternalPaymentMethodTestIdentifierOne"] = PaymentElementCallbacks(
             createIntentCallback = null,
             externalPaymentMethodConfirmHandler = firstConfirmHandler,
         )
 
-        PaymentElementCallbackReferences["ExternalPaymentMethodTwo"] = PaymentElementCallbacks(
+        PaymentElementCallbackReferences["ExternalPaymentMethodTestIdentifierTwo"] = PaymentElementCallbacks(
             createIntentCallback = null,
             externalPaymentMethodConfirmHandler = secondConfirmHandler,
         )
 
         activityLauncher.launch(
             input = ExternalPaymentMethodInput(
-                instanceId = "ExternalPaymentMethodOne",
+                paymentElementCallbackIdentifier = "ExternalPaymentMethodTestIdentifierOne",
                 type = "external_paypal",
                 billingDetails = PaymentMethod.BillingDetails(
                     email = "email@email.com",
@@ -159,7 +159,7 @@ class ExternalPaymentMethodProxyActivityTest {
 
         activityLauncher.launch(
             input = ExternalPaymentMethodInput(
-                instanceId = "ExternalPaymentMethodTwo",
+                paymentElementCallbackIdentifier = "ExternalPaymentMethodTestIdentifierTwo",
                 type = "external_fawry",
                 billingDetails = PaymentMethod.BillingDetails(
                     email = "email2@email.com",

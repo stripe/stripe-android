@@ -24,14 +24,14 @@ internal class ExternalPaymentMethodProxyActivity : AppCompatActivity() {
         savedInstanceState?.getBoolean(HAS_CONFIRM_STARTED_KEY)?.let { hasConfirmStarted = it }
 
         val type = intent.getStringExtra(EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE)
-        val instanceId = intent.getStringExtra(EXTRA_PAYMENT_ELEMENT_IDENTIFIER)
+        val paymentElementCallbackIdentifier = intent.getStringExtra(EXTRA_PAYMENT_ELEMENT_IDENTIFIER)
 
         @Suppress("DEPRECATION")
         val billingDetails = intent.getParcelableExtra<PaymentMethod.BillingDetails>(EXTRA_BILLING_DETAILS)
 
-        if (type != null && !hasConfirmStarted && instanceId != null) {
+        if (type != null && !hasConfirmStarted && paymentElementCallbackIdentifier != null) {
             hasConfirmStarted = true
-            PaymentElementCallbackReferences[instanceId]
+            PaymentElementCallbackReferences[paymentElementCallbackIdentifier]
                 ?.externalPaymentMethodConfirmHandler
                 ?.confirmExternalPaymentMethod(
                     externalPaymentMethodType = type,

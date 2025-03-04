@@ -24,14 +24,14 @@ internal class DefaultPaymentSheetLauncher(
     private val lifecycleOwner: LifecycleOwner,
     private val application: Application,
     private val callback: PaymentSheetResultCallback,
-    private val instanceId: String = PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER,
+    private val paymentElementCallbackIdentifier: String = PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER,
     private val initializedViaCompose: Boolean = false,
 ) : PaymentSheetLauncher {
     init {
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
-                    PaymentElementCallbackReferences.remove(instanceId)
+                    PaymentElementCallbackReferences.remove(paymentElementCallbackIdentifier)
                     super.onDestroy(owner)
                 }
             }
@@ -94,7 +94,7 @@ internal class DefaultPaymentSheetLauncher(
             initializationMode = mode,
             config = configuration ?: PaymentSheet.Configuration.default(activity),
             statusBarColor = activity.window?.statusBarColor,
-            instanceId = instanceId,
+            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             initializedViaCompose = initializedViaCompose,
         )
 

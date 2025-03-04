@@ -25,9 +25,9 @@ internal interface IntentConfirmationModule {
     companion object {
         @Provides
         fun providesCreateIntentCallback(
-            @PaymentElementCallbackIdentifier instanceId: String,
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
         ): CreateIntentCallback? {
-            return PaymentElementCallbackReferences[instanceId]?.createIntentCallback
+            return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.createIntentCallback
         }
 
         @JvmSuppressWildcards

@@ -11,7 +11,7 @@ internal class EmbeddedPaymentElementInitializer @Inject constructor(
     private val sheetLauncher: EmbeddedSheetLauncher,
     private val contentHelper: EmbeddedContentHelper,
     private val lifecycleOwner: LifecycleOwner,
-    @PaymentElementCallbackIdentifier private val instanceId: String,
+    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
 ) {
     fun initialize() {
         contentHelper.setSheetLauncher(sheetLauncher)
@@ -19,7 +19,7 @@ internal class EmbeddedPaymentElementInitializer @Inject constructor(
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
-                    PaymentElementCallbackReferences.remove(instanceId)
+                    PaymentElementCallbackReferences.remove(paymentElementCallbackIdentifier)
                     contentHelper.clearSheetLauncher()
                 }
             }

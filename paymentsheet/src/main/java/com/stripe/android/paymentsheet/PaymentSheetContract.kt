@@ -49,7 +49,7 @@ class PaymentSheetContract :
     data class Args internal constructor(
         internal val clientSecret: ClientSecret,
         internal val config: PaymentSheet.Configuration?,
-        internal val instanceId: String,
+        internal val paymentElementCallbackIdentifier: String,
         @ColorInt internal val statusBarColor: Int? = null,
         @InjectorKey internal val injectorKey: String = DUMMY_INJECTOR_KEY
     ) : ActivityStarter.Args {
@@ -67,7 +67,7 @@ class PaymentSheetContract :
                     }
                 },
                 config = config ?: PaymentSheet.Configuration.default(context),
-                instanceId = instanceId,
+                paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
                 statusBarColor = statusBarColor,
                 initializedViaCompose = false,
             )
@@ -84,7 +84,7 @@ class PaymentSheetContract :
                 config: PaymentSheet.Configuration? = null
             ) = Args(
                 clientSecret = PaymentIntentClientSecret(clientSecret),
-                instanceId = PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER,
+                paymentElementCallbackIdentifier = PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER,
                 config = config,
             )
 
@@ -93,7 +93,7 @@ class PaymentSheetContract :
                 config: PaymentSheet.Configuration? = null
             ) = Args(
                 clientSecret = SetupIntentClientSecret(clientSecret),
-                instanceId = PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER,
+                paymentElementCallbackIdentifier = PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER,
                 config = config,
             )
         }

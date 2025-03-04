@@ -65,7 +65,9 @@ internal interface NativeLinkComponent {
         fun stripeAccountIdProvider(@Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?): Builder
 
         @BindsInstance
-        fun instanceId(@PaymentElementCallbackIdentifier instanceId: String): Builder
+        fun paymentElementCallbackIdentifier(
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String
+        ): Builder
 
         @BindsInstance
         fun context(context: Context): Builder

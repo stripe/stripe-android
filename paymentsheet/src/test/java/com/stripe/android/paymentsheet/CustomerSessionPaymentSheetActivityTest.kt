@@ -335,7 +335,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
                         preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa),
                     ),
                     statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
-                    instanceId = "PaymentSheet",
+                    paymentElementCallbackIdentifier = PaymentSheetFixtures.PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
                 )
             )
         ).use { scenario ->

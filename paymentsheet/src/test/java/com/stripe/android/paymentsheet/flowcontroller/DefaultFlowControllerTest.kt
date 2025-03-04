@@ -2355,9 +2355,9 @@ internal class DefaultFlowControllerTest {
         errorReporter = errorReporter,
         initializedViaCompose = false,
         linkHandler = mock(),
-        instanceId = FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER,
+        paymentElementCallbackIdentifier = FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER,
         confirmationHandler = createTestConfirmationHandlerFactory(
-            instanceId = FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER,
+            paymentElementCallbackIdentifier = FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER,
             bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
             googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
             intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
@@ -2379,7 +2379,7 @@ internal class DefaultFlowControllerTest {
             application = ApplicationProvider.getApplicationContext(),
             handle = SavedStateHandle(),
             statusBarColor = STATUS_BAR_COLOR,
-            instanceId = FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER,
+            paymentElementCallbackIdentifier = FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER,
         )
     }
 

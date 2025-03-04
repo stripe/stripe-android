@@ -26,7 +26,7 @@ import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.utils.RecordingLinkStore
 
 internal fun createTestConfirmationHandlerFactory(
-    instanceId: String,
+    paymentElementCallbackIdentifier: String,
     intentConfirmationInterceptor: IntentConfirmationInterceptor,
     savedStateHandle: SavedStateHandle,
     bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
@@ -62,9 +62,10 @@ internal fun createTestConfirmationHandlerFactory(
                     userFacingLogger = FakeUserFacingLogger(),
                 ),
                 ExternalPaymentMethodConfirmationDefinition(
-                    instanceId = instanceId,
+                    paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
                     externalPaymentMethodConfirmHandlerProvider = {
-                        PaymentElementCallbackReferences[instanceId]?.externalPaymentMethodConfirmHandler
+                        PaymentElementCallbackReferences[paymentElementCallbackIdentifier]
+                            ?.externalPaymentMethodConfirmHandler
                     },
                     errorReporter = errorReporter,
                 ),

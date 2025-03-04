@@ -243,7 +243,7 @@ class ExternalPaymentMethodConfirmationDefinitionTest {
         errorReporter: ErrorReporter = FakeErrorReporter()
     ): ExternalPaymentMethodConfirmationDefinition {
         return ExternalPaymentMethodConfirmationDefinition(
-            instanceId = "ExternalPaymentMethod",
+            paymentElementCallbackIdentifier = "ExternalPaymentMethodTestIdentifier",
             externalPaymentMethodConfirmHandlerProvider = { externalPaymentMethodConfirmHandler },
             errorReporter = errorReporter,
         )

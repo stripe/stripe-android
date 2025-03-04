@@ -202,7 +202,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
                             stripeAccountId = null,
                             startWithVerificationDialog = true,
                             linkAccount = null,
-                            instanceId = "ConfirmationTestIdentifier"
+                            paymentElementCallbackIdentifier = "ConfirmationTestIdentifier"
                         )
                     )
                 )

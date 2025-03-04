@@ -46,7 +46,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     private val sheetStateHolder: SheetStateHolder,
     private val errorReporter: ErrorReporter,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
-    @PaymentElementCallbackIdentifier private val instanceId: String,
+    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     resultCallback: EmbeddedPaymentElement.ResultCallback
 ) : EmbeddedSheetLauncher {
 
@@ -105,7 +105,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             hasSavedPaymentMethods = hasSavedPaymentMethods,
             configuration = embeddedConfirmationState.configuration,
             initializationMode = embeddedConfirmationState.initializationMode,
-            instanceId = instanceId,
+            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor
         )
         formActivityLauncher.launch(args)

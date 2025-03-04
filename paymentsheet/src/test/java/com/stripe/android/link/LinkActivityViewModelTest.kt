@@ -201,7 +201,7 @@ internal class LinkActivityViewModelTest {
             stripeAccountId = null,
             startWithVerificationDialog = false,
             linkAccount = null,
-            instanceId = "LinkNative",
+            paymentElementCallbackIdentifier = "LinkNativeTestIdentifier",
         )
         val savedStateHandle = SavedStateHandle()
         val factory = LinkActivityViewModel.factory(savedStateHandle)

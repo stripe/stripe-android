@@ -538,7 +538,7 @@ internal class VerticalModePaymentSheetActivityTest {
                             }
                         }
                         .build(),
-                    instanceId = "PaymentSheet",
+                    paymentElementCallbackIdentifier = PaymentSheetFixtures.PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
                     statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
                 )
             )

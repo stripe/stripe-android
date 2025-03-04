@@ -78,8 +78,8 @@ internal interface FormActivityViewModelComponent {
         fun initializationMode(initializationMode: PaymentElementLoader.InitializationMode): Builder
 
         @BindsInstance
-        fun instanceId(
-            @PaymentElementCallbackIdentifier instanceId: String,
+        fun paymentElementCallbackIdentifier(
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
         ): Builder
 
         @BindsInstance

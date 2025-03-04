@@ -56,6 +56,7 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherFactory
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
@@ -164,7 +165,7 @@ internal class PaymentSheetActivityTest {
             ),
             config = PaymentSheetFixtures.CONFIG_CUSTOMER,
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
-            instanceId = "PaymentSheet",
+            paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
         )
     )
 
@@ -997,7 +998,7 @@ internal class PaymentSheetActivityTest {
                 customer = invalidCustomerConfig,
             ),
             statusBarColor = null,
-            instanceId = "PaymentSheet",
+            paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
         )
 
         val intent = contract.createIntent(context, args)
@@ -1021,7 +1022,7 @@ internal class PaymentSheetActivityTest {
                 merchantDisplayName = "Some name",
             ),
             statusBarColor = null,
-            instanceId = "PaymentSheet",
+            paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
         )
 
         val intent = contract.createIntent(context, args)
@@ -1168,7 +1169,7 @@ internal class PaymentSheetActivityTest {
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
                 confirmationHandlerFactory = createTestConfirmationHandlerFactory(
-                    instanceId = "PaymentSheet",
+                    paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
                     intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
                     savedStateHandle = savedStateHandle,
                     stripePaymentLauncherAssistedFactory = stripePaymentLauncherAssistedFactory,

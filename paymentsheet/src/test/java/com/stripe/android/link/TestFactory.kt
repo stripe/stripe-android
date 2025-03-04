@@ -193,6 +193,6 @@ internal object TestFactory {
         stripeAccountId = "",
         startWithVerificationDialog = false,
         linkAccount = LINK_ACCOUNT,
-        instanceId = "LinkNative",
+        paymentElementCallbackIdentifier = "LinkNativeTestIdentifier",
     )
 }
