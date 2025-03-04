@@ -11,6 +11,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
@@ -26,7 +27,10 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
-import org.mockito.Mockito.mock
+import org.mockito.kotlin.argThat
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 
 class SavedPaymentMethodMutatorTest {
     @Test
@@ -542,6 +546,84 @@ class SavedPaymentMethodMutatorTest {
         }
     }
 
+    @Test
+    fun `setDefaultPaymentMethod success updateExecutor callback`() {
+        val paymentMethods = PaymentMethodFixtures.createCards(3)
+
+        val calledUpdate = Turbine<Boolean>()
+
+        val customerRepository = FakeCustomerRepository(
+            onSetDefaultPaymentMethod = {
+                calledUpdate.add(true)
+                Result.success(mock())
+            }
+        )
+
+        val eventReporter = mock<EventReporter>()
+
+        runScenario(eventReporter = eventReporter, customerRepository = customerRepository) {
+            customerStateHolder.setCustomerState(
+                createCustomerState(
+                    paymentMethods = paymentMethods,
+                    defaultPaymentMethodId = paymentMethods.first().id,
+                )
+            )
+
+            val newDefaultPaymentMethod = paymentMethods[1]
+            savedPaymentMethodMutator.setDefaultPaymentMethod(newDefaultPaymentMethod)
+
+            assertThat(calledUpdate.awaitItem()).isTrue()
+
+            val defaultPaymentMethodId = customerStateHolder.customer.value?.defaultPaymentMethodId
+
+            assertThat(defaultPaymentMethodId).isEqualTo(newDefaultPaymentMethod.id)
+            verify(eventReporter).onSetAsDefaultPaymentMethodSucceeded()
+        }
+
+        calledUpdate.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `setDefaultPaymentMethod failed updateExecutor callback`() {
+        val paymentMethods = PaymentMethodFixtures.createCards(3)
+
+        val calledUpdate = Turbine<Boolean>()
+
+        val customerRepository = FakeCustomerRepository(
+            onSetDefaultPaymentMethod = {
+                calledUpdate.add(true)
+                Result.failure(IllegalStateException("Test failure"))
+            }
+        )
+
+        val eventReporter = mock<EventReporter>()
+
+        runScenario(eventReporter = eventReporter, customerRepository = customerRepository) {
+            customerStateHolder.setCustomerState(
+                createCustomerState(
+                    paymentMethods = paymentMethods,
+                    defaultPaymentMethodId = paymentMethods.first().id,
+                )
+            )
+
+            val newDefaultPaymentMethod = paymentMethods[1]
+            savedPaymentMethodMutator.setDefaultPaymentMethod(newDefaultPaymentMethod)
+
+            assertThat(calledUpdate.awaitItem()).isTrue()
+
+            val defaultPaymentMethodId = customerStateHolder.customer.value?.defaultPaymentMethodId
+
+            assertThat(defaultPaymentMethodId).isEqualTo(paymentMethods.first().id)
+            verify(eventReporter).onSetAsDefaultPaymentMethodFailed(
+                error = argThat {
+                    message == "Test failure"
+                }
+            )
+        }
+
+        calledUpdate.ensureAllEventsConsumed()
+    }
+
     private fun removeDuplicatesTest(shouldRemoveDuplicates: Boolean) {
         val repository = FakeCustomerRepository()
 
@@ -584,6 +666,7 @@ class SavedPaymentMethodMutatorTest {
     @Suppress("LongMethod")
     private fun runScenario(
         customerRepository: CustomerRepository = FakeCustomerRepository(),
+        eventReporter: EventReporter? = null,
         isCbcEligible: Boolean = false,
         block: suspend Scenario.() -> Unit
     ) {
@@ -610,7 +693,7 @@ class SavedPaymentMethodMutatorTest {
                         }
                     )
                 ),
-                eventReporter = mock(),
+                eventReporter = eventReporter ?: mock(),
                 coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
                 workContext = coroutineContext,
                 uiContext = coroutineContext,
