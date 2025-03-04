@@ -1,11 +1,13 @@
 package com.stripe.android.connect
 
 import android.content.DialogInterface
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -199,16 +201,23 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
     }
 
     private fun bindAppearance(appearance: Appearance) {
-        appearance.colors.background?.let {
-            binding.toolbar.setBackgroundColor(it)
-        }
-        appearance.colors.text?.let {
-            binding.toolbar.setTitleTextColor(it)
-            binding.toolbar.navigationIcon?.setTint(it)
-        }
-        appearance.colors.border?.let {
-            binding.divider.setBackgroundColor(it)
-        }
+        val context = binding.toolbar.context
+
+        val backgroundColor =
+            appearance.colors.background
+                ?: ContextCompat.getColor(context, R.color.stripe_connect_background)
+        dialog?.window?.setBackgroundDrawable(ColorDrawable(backgroundColor))
+        binding.toolbar.setBackgroundColor(backgroundColor)
+
+        val textColor = appearance.colors.text
+            ?: ContextCompat.getColor(context, R.color.stripe_connect_text)
+        binding.toolbar.setTitleTextColor(textColor)
+        binding.toolbar.navigationIcon?.setTint(textColor)
+
+        binding.divider.setBackgroundColor(
+            appearance.colors.border
+                ?: ContextCompat.getColor(context, R.color.stripe_connect_border)
+        )
     }
 
     internal companion object {
