@@ -11,8 +11,8 @@ import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.IntegrationType
-import com.stripe.android.paymentsheet.utils.PaymentSheetMultipleInstanceTestType
-import com.stripe.android.paymentsheet.utils.PaymentSheetMultipleInstanceTestTypeProvider
+import com.stripe.android.paymentsheet.utils.MultipleInstancesTestType
+import com.stripe.android.paymentsheet.utils.MultipleInstancesTestTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.expectNoResult
@@ -625,8 +625,8 @@ internal class PaymentSheetDeferredTest {
 
     @Test
     fun testDeferredIntentWithMultipleInstances(
-        @TestParameter(valuesProvider = PaymentSheetMultipleInstanceTestTypeProvider::class)
-        testType: PaymentSheetMultipleInstanceTestType,
+        @TestParameter(valuesProvider = MultipleInstancesTestTypeProvider::class)
+        testType: MultipleInstancesTestType,
     ) = runMultiplePaymentSheetInstancesTest(
         networkRule = networkRule,
         testType = testType,

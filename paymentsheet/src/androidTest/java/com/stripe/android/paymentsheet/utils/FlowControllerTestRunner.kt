@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.utils
 
-import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import app.cash.turbine.Turbine
@@ -59,7 +59,6 @@ internal fun runFlowControllerTest(
 
     val factory = FlowControllerTestFactory(
         callConfirmOnPaymentOptionCallback = callConfirmOnPaymentOptionCallback,
-        integrationType = integrationType,
         createIntentCallback = createIntentCallback,
         configureCallbackTurbine = configureCallbackTurbine,
         resultCallback = { result ->
@@ -68,22 +67,6 @@ internal fun runFlowControllerTest(
         }
     )
 
-    runFlowControllerTest(
-        networkRule = networkRule,
-        configureCallbackTurbine = configureCallbackTurbine,
-        countDownLatch = countDownLatch,
-        makeFlowController = factory::make,
-        block = block,
-    )
-}
-
-private fun runFlowControllerTest(
-    networkRule: NetworkRule,
-    configureCallbackTurbine: Turbine<PaymentOption?>,
-    countDownLatch: CountDownLatch,
-    makeFlowController: (ComponentActivity) -> PaymentSheet.FlowController,
-    block: suspend (FlowControllerTestRunnerContext) -> Unit,
-) {
     ActivityScenario.launch(MainActivity::class.java).use { scenario ->
         scenario.moveToState(Lifecycle.State.CREATED)
 
@@ -95,7 +78,14 @@ private fun runFlowControllerTest(
         var flowController: PaymentSheet.FlowController? = null
 
         scenario.onActivity { activity ->
-            flowController = makeFlowController(activity)
+            when (integrationType) {
+                IntegrationType.Compose -> activity.setContent {
+                    flowController = factory.make()
+                }
+                IntegrationType.Activity -> {
+                    flowController = factory.make(activity)
+                }
+            }
         }
 
         scenario.moveToState(Lifecycle.State.RESUMED)
@@ -117,5 +107,114 @@ private fun runFlowControllerTest(
         val didCompleteSuccessfully = countDownLatch.await(5, TimeUnit.SECONDS)
         networkRule.validate()
         assertThat(didCompleteSuccessfully).isTrue()
+    }
+}
+
+internal fun runMultipleFlowControllerInstancesTest(
+    networkRule: NetworkRule,
+    testType: MultipleInstancesTestType,
+    callConfirmOnPaymentOptionCallback: Boolean = true,
+    createIntentCallback: CreateIntentCallback,
+    resultCallback: PaymentSheetResultCallback,
+    block: suspend (FlowControllerTestRunnerContext) -> Unit,
+) {
+    var firstCreateIntentCallbackCalled = false
+    var secondCreateIntentCallbackCalled = false
+
+    val countDownLatch = CountDownLatch(1)
+    val configureCallbackTurbine = Turbine<PaymentOption?>()
+
+    val firstFlowControllerFactory = FlowControllerTestFactory(
+        callConfirmOnPaymentOptionCallback = callConfirmOnPaymentOptionCallback,
+        createIntentCallback = { paymentMethod, shouldSavePaymentMethod ->
+            if (testType == MultipleInstancesTestType.RunWithFirst) {
+                firstCreateIntentCallbackCalled = true
+
+                createIntentCallback.onCreateIntent(paymentMethod, shouldSavePaymentMethod)
+            } else {
+                error("Should not have been called!")
+            }
+        },
+        configureCallbackTurbine = configureCallbackTurbine,
+        resultCallback = { result ->
+            if (testType == MultipleInstancesTestType.RunWithFirst) {
+                resultCallback.onPaymentSheetResult(result)
+                countDownLatch.countDown()
+            } else {
+                error("Should not have been called!")
+            }
+        }
+    )
+
+    val secondFlowControllerFactory = FlowControllerTestFactory(
+        callConfirmOnPaymentOptionCallback = callConfirmOnPaymentOptionCallback,
+        createIntentCallback = { paymentMethod, shouldSavePaymentMethod ->
+            if (testType == MultipleInstancesTestType.RunWithSecond) {
+                secondCreateIntentCallbackCalled = true
+
+                createIntentCallback.onCreateIntent(paymentMethod, shouldSavePaymentMethod)
+            } else {
+                error("Should not have been called!")
+            }
+        },
+        configureCallbackTurbine = configureCallbackTurbine,
+        resultCallback = { result ->
+            if (testType == MultipleInstancesTestType.RunWithSecond) {
+                resultCallback.onPaymentSheetResult(result)
+                countDownLatch.countDown()
+            } else {
+                error("Should not have been called!")
+            }
+        }
+    )
+
+    ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+        scenario.moveToState(Lifecycle.State.CREATED)
+        scenario.onActivity {
+            PaymentConfiguration.init(it, "pk_test_123")
+            LinkStore(it.applicationContext).clear()
+        }
+
+        lateinit var firstFlowController: PaymentSheet.FlowController
+        lateinit var secondFlowController: PaymentSheet.FlowController
+
+        scenario.onActivity { activity ->
+            activity.setContent {
+                firstFlowController = firstFlowControllerFactory.make()
+                secondFlowController = secondFlowControllerFactory.make()
+            }
+        }
+
+        scenario.moveToState(Lifecycle.State.RESUMED)
+
+        val flowController = if (testType == MultipleInstancesTestType.RunWithFirst) {
+            firstFlowController
+        } else {
+            secondFlowController
+        }
+
+        val testContext = FlowControllerTestRunnerContext(
+            scenario = scenario,
+            flowController = flowController,
+            configureCallbackTurbine = configureCallbackTurbine,
+            countDownLatch = countDownLatch,
+        )
+        runTest {
+            block(testContext)
+        }
+
+        testContext.configureCallbackTurbine.ensureAllEventsConsumed()
+
+        val didCompleteSuccessfully = countDownLatch.await(5, TimeUnit.SECONDS)
+        networkRule.validate()
+        assertThat(didCompleteSuccessfully).isTrue()
+
+        if (testType == MultipleInstancesTestType.RunWithFirst) {
+            assertThat(firstCreateIntentCallbackCalled).isTrue()
+            assertThat(secondCreateIntentCallbackCalled).isFalse()
+        } else {
+            assertThat(firstCreateIntentCallbackCalled).isFalse()
+            assertThat(secondCreateIntentCallbackCalled).isTrue()
+        }
     }
 }

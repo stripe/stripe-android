@@ -4,7 +4,6 @@ import androidx.activity.compose.setContent
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import com.google.common.truth.Truth.assertThat
-import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.networktesting.NetworkRule
@@ -94,7 +93,7 @@ internal fun runPaymentSheetTest(
 
 internal fun runMultiplePaymentSheetInstancesTest(
     networkRule: NetworkRule,
-    testType: PaymentSheetMultipleInstanceTestType,
+    testType: MultipleInstancesTestType,
     createIntentCallback: CreateIntentCallback,
     successTimeoutSeconds: Long = 5L,
     resultCallback: PaymentSheetResultCallback,
@@ -107,7 +106,7 @@ internal fun runMultiplePaymentSheetInstancesTest(
 
     val firstPaymentSheetFactory = PaymentSheetTestFactory(
         createIntentCallback = { paymentMethod, shouldSavePaymentMethod ->
-            if (testType == PaymentSheetMultipleInstanceTestType.RunWithFirst) {
+            if (testType == MultipleInstancesTestType.RunWithFirst) {
                 firstCreateIntentCallbackCalled = true
 
                 createIntentCallback.onCreateIntent(paymentMethod, shouldSavePaymentMethod)
@@ -116,7 +115,7 @@ internal fun runMultiplePaymentSheetInstancesTest(
             }
         },
         resultCallback = { result ->
-            if (testType == PaymentSheetMultipleInstanceTestType.RunWithFirst) {
+            if (testType == MultipleInstancesTestType.RunWithFirst) {
                 resultCallback.onPaymentSheetResult(result)
                 countDownLatch.countDown()
             } else {
@@ -127,7 +126,7 @@ internal fun runMultiplePaymentSheetInstancesTest(
 
     val secondPaymentSheetFactory = PaymentSheetTestFactory(
         createIntentCallback = { paymentMethod, shouldSavePaymentMethod ->
-            if (testType == PaymentSheetMultipleInstanceTestType.RunWithSecond) {
+            if (testType == MultipleInstancesTestType.RunWithSecond) {
                 secondCreateIntentCallbackCalled = true
 
                 createIntentCallback.onCreateIntent(paymentMethod, shouldSavePaymentMethod)
@@ -136,7 +135,7 @@ internal fun runMultiplePaymentSheetInstancesTest(
             }
         },
         resultCallback = { result ->
-            if (testType == PaymentSheetMultipleInstanceTestType.RunWithSecond) {
+            if (testType == MultipleInstancesTestType.RunWithSecond) {
                 resultCallback.onPaymentSheetResult(result)
                 countDownLatch.countDown()
             } else {
@@ -164,59 +163,25 @@ internal fun runMultiplePaymentSheetInstancesTest(
 
         scenario.moveToState(Lifecycle.State.RESUMED)
 
-        if (testType == PaymentSheetMultipleInstanceTestType.RunWithFirst) {
-            runPaymentSheetInstanceTest(
-                scenario = scenario,
-                networkRule = networkRule,
-                paymentSheet = firstPaymentSheet,
-                countDownLatch = countDownLatch,
-                successTimeoutSeconds = successTimeoutSeconds,
-                block = block,
-            )
-
-            assertThat(firstCreateIntentCallbackCalled).isTrue()
-            assertThat(secondCreateIntentCallbackCalled).isFalse()
+        val paymentSheet = if (testType == MultipleInstancesTestType.RunWithFirst) {
+            firstPaymentSheet
+        } else {
+            secondPaymentSheet
         }
 
-        if (testType == PaymentSheetMultipleInstanceTestType.RunWithSecond) {
-            runPaymentSheetInstanceTest(
-                scenario = scenario,
-                networkRule = networkRule,
-                paymentSheet = secondPaymentSheet,
-                countDownLatch = countDownLatch,
-                successTimeoutSeconds = successTimeoutSeconds,
-                block = block,
-            )
+        val testContext = PaymentSheetTestRunnerContext(scenario, paymentSheet, countDownLatch)
+        block(testContext)
 
+        val didCompleteSuccessfully = countDownLatch.await(successTimeoutSeconds, TimeUnit.SECONDS)
+        networkRule.validate()
+        assertThat(didCompleteSuccessfully).isTrue()
+
+        if (testType == MultipleInstancesTestType.RunWithFirst) {
+            assertThat(firstCreateIntentCallbackCalled).isTrue()
+            assertThat(secondCreateIntentCallbackCalled).isFalse()
+        } else {
             assertThat(firstCreateIntentCallbackCalled).isFalse()
             assertThat(secondCreateIntentCallbackCalled).isTrue()
         }
-    }
-}
-
-private fun runPaymentSheetInstanceTest(
-    scenario: ActivityScenario<MainActivity>,
-    networkRule: NetworkRule,
-    paymentSheet: PaymentSheet,
-    countDownLatch: CountDownLatch,
-    successTimeoutSeconds: Long = 5L,
-    block: (PaymentSheetTestRunnerContext) -> Unit,
-) {
-    val testContext = PaymentSheetTestRunnerContext(scenario, paymentSheet, countDownLatch)
-    block(testContext)
-
-    val didCompleteSuccessfully = countDownLatch.await(successTimeoutSeconds, TimeUnit.SECONDS)
-    networkRule.validate()
-    assertThat(didCompleteSuccessfully).isTrue()
-}
-
-internal enum class PaymentSheetMultipleInstanceTestType {
-    RunWithFirst,
-    RunWithSecond,
-}
-
-internal object PaymentSheetMultipleInstanceTestTypeProvider : TestParameterValuesProvider() {
-    override fun provideValues(context: Context?): List<PaymentSheetMultipleInstanceTestType> {
-        return PaymentSheetMultipleInstanceTestType.entries
     }
 }
