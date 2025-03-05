@@ -1,4 +1,4 @@
-package com.stripe.android.testing
+package com.stripe.paymentelementtestpages
 
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasAnyDescendant
@@ -6,7 +6,7 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.isNotDisplayed
 import androidx.compose.ui.test.isSelected
-import androidx.compose.ui.test.junit4.AndroidComposeTestRule
+import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -23,7 +23,7 @@ import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_VIEW_MORE
 
 @SuppressWarnings("TooManyFunctions")
 class VerticalModePage(
-    private val composeTestRule: AndroidComposeTestRule<*, *>
+    private val composeTestRule: ComposeTestRule
 ) {
     fun assertIsNotVisible() {
         composeTestRule
@@ -92,7 +92,15 @@ class VerticalModePage(
         if (cardBrand != null) {
             composeTestRule.onNode(
                 hasTestTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId")
-                    .and(hasAnyDescendant(hasTestTag(TEST_TAG_ICON_FROM_RES).and(hasTestMetadata(cardBrand)))),
+                    .and(
+                        hasAnyDescendant(
+                            hasTestTag(TEST_TAG_ICON_FROM_RES).and(
+                                hasTestMetadata(
+                                    cardBrand
+                                )
+                            )
+                        )
+                    ),
                 useUnmergedTree = true,
             ).assertExists()
         }

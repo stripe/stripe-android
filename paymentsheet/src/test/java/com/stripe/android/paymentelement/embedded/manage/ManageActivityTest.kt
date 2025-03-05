@@ -19,11 +19,11 @@ import com.stripe.android.network.setupPaymentMethodUpdateResponse
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.testing.EditPage
-import com.stripe.android.testing.ManagePage
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.RetryRule
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.paymentelementtestpages.EditPage
+import com.stripe.paymentelementtestpages.ManagePage
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
