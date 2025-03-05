@@ -12,11 +12,6 @@ dependencies {
     implementation testLibs.mockito.kotlin
     implementation testLibs.turbine
     implementation testLibs.leakCanaryInstrumentation
-    implementation project(':paymentsheet')
-    implementation project(':stripe-ui-core')
-    implementation project(':payments-ui-core')
 
     androidTestImplementation project(':stripe-ui-core') // Resources defined here, but used in payments-core.
-
-    implementation testLibs.androidx.composeUi
 }

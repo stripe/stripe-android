@@ -25,12 +25,12 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.RemoveDialog
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG
-import com.stripe.android.testing.EditPage
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
-import com.stripe.android.testing.SavedPaymentMethodsPage
-import com.stripe.android.testing.SavedPaymentMethodsPage.Companion.assertHasModifyBadge
+import com.stripe.paymentelementtestpages.EditPage
+import com.stripe.paymentelementtestpages.SavedPaymentMethodsPage
+import com.stripe.paymentelementtestpages.SavedPaymentMethodsPage.Companion.assertHasModifyBadge
 import okhttp3.mockwebserver.MockResponse
 import org.json.JSONArray
 import org.junit.After

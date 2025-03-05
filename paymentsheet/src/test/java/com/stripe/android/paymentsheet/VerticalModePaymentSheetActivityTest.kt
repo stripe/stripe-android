@@ -24,11 +24,11 @@ import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.testing.EditPage
-import com.stripe.android.testing.ManagePage
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.RetryRule
-import com.stripe.android.testing.VerticalModePage
+import com.stripe.paymentelementtestpages.EditPage
+import com.stripe.paymentelementtestpages.ManagePage
+import com.stripe.paymentelementtestpages.VerticalModePage
 import org.json.JSONArray
 import org.junit.Rule
 import org.junit.Test
