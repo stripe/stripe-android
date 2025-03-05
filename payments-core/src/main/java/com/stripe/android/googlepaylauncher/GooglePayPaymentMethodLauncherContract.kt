@@ -87,9 +87,10 @@ class GooglePayPaymentMethodLauncherContract :
 private fun GooglePayPaymentMethodLauncherContract.Args.toV2(): GooglePayPaymentMethodLauncherContractV2.Args {
     return GooglePayPaymentMethodLauncherContractV2.Args(
         config = config,
-        currencyCode = currencyCode,
-        amount = amount.toLong(),
-        transactionId = transactionId,
-        cardBrandFilter = DefaultCardBrandFilter
+//        currencyCode = currencyCode,
+//        amount = amount.toLong(),
+//        transactionId = transactionId,
+        cardBrandFilter = DefaultCardBrandFilter,
+        dataRequest = ""
     )
 }

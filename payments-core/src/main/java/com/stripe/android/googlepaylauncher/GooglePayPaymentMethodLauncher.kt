@@ -16,6 +16,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.GooglePayConfig
+import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
@@ -30,6 +32,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
+import org.json.JSONObject
 import java.util.Locale
 
 /**
@@ -58,6 +61,15 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
     analyticsRequestExecutor: AnalyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
 ) {
     private var isReady = false
+
+    private val googlePayJsonFactory = GooglePayJsonFactory(GooglePayConfig(context))
+    private val modificationCallback: (JSONObject) -> JSONObject = {
+        val transactionInfo = it.get("transactionInfo") as JSONObject
+        transactionInfo.put("totalPriceStatus", "NOT_CURRENTLY_KNOWN")
+        transactionInfo.put("totalPrice", null)
+        it.put("transactionInfo", transactionInfo)
+        it
+    }
 
     /**
      * Constructor to be used when launching [GooglePayPaymentMethodLauncher] from an Activity.
@@ -219,15 +231,43 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
             "present() may only be called when Google Pay is available on this device."
         }
 
+        // 1. createPaymentDataRequest from parameters
+        val transactionInfo = GooglePayJsonFactory.TransactionInfo(
+            currencyCode = currencyCode,
+            totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
+            countryCode = config.merchantCountryCode,
+            transactionId = transactionId,
+            totalPrice = amount,
+            totalPriceLabel = label,
+            checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
+        )
+        val dataRequest = googlePayJsonFactory.createPaymentDataRequest(
+            transactionInfo = transactionInfo,
+            merchantInfo = GooglePayJsonFactory.MerchantInfo(
+                merchantName = config.merchantName
+            ),
+            billingAddressParameters = config.billingAddressConfig.convert(),
+            isEmailRequired = config.isEmailRequired,
+            allowCreditCards = config.allowCreditCards
+        )
+        // 2. modify the JSON object with modificationCallback
+        val modifiedDataRequest = modificationCallback(dataRequest)
+
         activityResultLauncher.launch(
+            // receive Args(JSONObjects.toString())
             GooglePayPaymentMethodLauncherContractV2.Args(
                 config = config,
-                currencyCode = currencyCode,
-                amount = amount,
-                label = label,
-                transactionId = transactionId,
-                cardBrandFilter = cardBrandFilter
+                cardBrandFilter = cardBrandFilter,
+                modifiedDataRequest.toString()
             )
+//            GooglePayPaymentMethodLauncherContractV2.Args(
+//                config = config,
+//                currencyCode = currencyCode,
+//                amount = amount,
+//                label = label,
+//                transactionId = transactionId,
+//                cardBrandFilter = cardBrandFilter
+//            )
         )
     }
 
@@ -242,24 +282,24 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
      * existing ID or generate a specific one for Google Pay transaction attempts.
      * This field is required when you send callbacks to the Google Transaction Events API.
      */
-    @JvmOverloads
-    fun presentWithUnknownPrice(
-        currencyCode: String,
-        transactionId: String? = null
-    ) {
-        check(skipReadyCheck || isReady) {
-            "present() may only be called when Google Pay is available on this device."
-        }
-
-        activityResultLauncher.launch(
-            GooglePayPaymentMethodLauncherContractV2.Args(
-                config = config,
-                currencyCode = currencyCode,
-                transactionId = transactionId,
-                cardBrandFilter = cardBrandFilter
-            )
-        )
-    }
+//    @JvmOverloads
+//    fun presentWithUnknownPrice(
+//        currencyCode: String,
+//        transactionId: String? = null
+//    ) {
+//        check(skipReadyCheck || isReady) {
+//            "present() may only be called when Google Pay is available on this device."
+//        }
+//
+//        activityResultLauncher.launch(
+//            GooglePayPaymentMethodLauncherContractV2.Args(
+//                config = config,
+//                currencyCode = currencyCode,
+//                transactionId = transactionId,
+//                cardBrandFilter = cardBrandFilter
+//            )
+//        )
+//    }
 
     @Parcelize
     data class Config @JvmOverloads constructor(

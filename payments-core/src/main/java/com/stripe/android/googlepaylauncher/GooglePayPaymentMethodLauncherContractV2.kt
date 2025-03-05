@@ -44,12 +44,14 @@ class GooglePayPaymentMethodLauncherContractV2 :
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class Args internal constructor(
+        // update these with a string input
         internal val config: GooglePayPaymentMethodLauncher.Config,
-        internal val currencyCode: String,
-        internal val amount: Long? = null,
-        internal val label: String? = null,
-        internal val transactionId: String? = null,
-        internal val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
+//        internal val currencyCode: String,
+//        internal val amount: Long? = null,
+//        internal val label: String? = null,
+//        internal val transactionId: String? = null,
+        internal val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+        internal val dataRequest: String,
     ) : Parcelable {
         internal fun toBundle() = bundleOf(EXTRA_ARGS to this)
 

@@ -11,7 +11,6 @@ import com.google.android.gms.wallet.PaymentData
 import com.google.android.gms.wallet.PaymentDataRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.stripe.android.BuildConfig
-import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.InvalidRequestException
@@ -31,7 +30,7 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
     private val requestOptions: ApiRequest.Options,
     private val args: GooglePayPaymentMethodLauncherContractV2.Args,
     private val stripeRepository: StripeRepository,
-    private val googlePayJsonFactory: GooglePayJsonFactory,
+//    private val googlePayJsonFactory: GooglePayJsonFactory,
     private val googlePayRepository: GooglePayRepository,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -56,45 +55,46 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
         return googlePayRepository.isReady().first()
     }
 
-    @VisibleForTesting
-    fun createPaymentDataRequest(): JSONObject {
-        return googlePayJsonFactory.createPaymentDataRequest(
-            transactionInfo = createTransactionInfo(args),
-            merchantInfo = GooglePayJsonFactory.MerchantInfo(
-                merchantName = args.config.merchantName
-            ),
-            billingAddressParameters = args.config.billingAddressConfig.convert(),
-            isEmailRequired = args.config.isEmailRequired,
-            allowCreditCards = args.config.allowCreditCards
-        )
-    }
-
-    @VisibleForTesting
-    internal fun createTransactionInfo(
-        args: GooglePayPaymentMethodLauncherContractV2.Args
-    ): GooglePayJsonFactory.TransactionInfo {
-        return GooglePayJsonFactory.TransactionInfo(
-            currencyCode = args.currencyCode,
-            totalPriceStatus =
-            if (args.amount != null) {
-                GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated
-            } else {
-                GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.NotCurrentlyKnown
-            },
-            countryCode = args.config.merchantCountryCode,
-            transactionId = args.transactionId,
-            totalPrice = args.amount,
-            totalPriceLabel = args.label,
-            checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
-        )
-    }
+//    @VisibleForTesting
+//    fun createPaymentDataRequest(): JSONObject {
+//        return googlePayJsonFactory.createPaymentDataRequest(
+//            transactionInfo = createTransactionInfo(args),
+//            merchantInfo = GooglePayJsonFactory.MerchantInfo(
+//                merchantName = args.config.merchantName
+//            ),
+//            billingAddressParameters = args.config.billingAddressConfig.convert(),
+//            isEmailRequired = args.config.isEmailRequired,
+//            allowCreditCards = args.config.allowCreditCards
+//        )
+//    }
+//
+//    @VisibleForTesting
+//    internal fun createTransactionInfo(
+//        args: GooglePayPaymentMethodLauncherContractV2.Args
+//    ): GooglePayJsonFactory.TransactionInfo {
+//        return GooglePayJsonFactory.TransactionInfo(
+//            currencyCode = args.currencyCode,
+//            totalPriceStatus =
+//            if (args.amount != null) {
+//                GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated
+//            } else {
+//                GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.NotCurrentlyKnown
+//            },
+//            countryCode = args.config.merchantCountryCode,
+//            transactionId = args.transactionId,
+//            totalPrice = args.amount,
+//            totalPriceLabel = args.label,
+//            checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
+//        )
+//    }
 
     suspend fun loadPaymentData(): Task<PaymentData> {
         check(isReadyToPay()) {
             "Google Pay is unavailable."
         }
         return paymentsClient.loadPaymentData(
-            PaymentDataRequest.fromJson(createPaymentDataRequest().toString())
+//            PaymentDataRequest.fromJson(createPaymentDataRequest().toString())
+            PaymentDataRequest.fromJson(args.dataRequest)
         ).awaitTask()
     }
 
