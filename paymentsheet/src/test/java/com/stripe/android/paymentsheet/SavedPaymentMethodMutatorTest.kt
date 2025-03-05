@@ -436,7 +436,7 @@ class SavedPaymentMethodMutatorTest {
             }
         )
 
-        val eventReporter = mock<EventReporter>()
+        val eventReporter = FakeEventReporter()
 
         runScenario(eventReporter = eventReporter, customerRepository = customerRepository) {
             customerStateHolder.setCustomerState(
@@ -451,9 +451,8 @@ class SavedPaymentMethodMutatorTest {
 
             updatePaymentMethodTurbine.awaitItem().updateExecutor(CardBrand.CartesBancaires)
 
-            verify(eventReporter).onUpdatePaymentMethodSucceeded(
-                selectedBrand = eq(CardBrand.CartesBancaires),
-            )
+            val succeededCall = eventReporter.updatePaymentMethodSucceededCalls.awaitItem()
+            assertThat(succeededCall.selectedBrand).isEqualTo(CardBrand.CartesBancaires)
         }
     }
 
@@ -511,7 +510,7 @@ class SavedPaymentMethodMutatorTest {
             }
         )
 
-        val eventReporter = mock<EventReporter>()
+        val eventReporter = FakeEventReporter()
 
         runScenario(eventReporter = eventReporter, customerRepository = customerRepository) {
             customerStateHolder.setCustomerState(
@@ -527,9 +526,8 @@ class SavedPaymentMethodMutatorTest {
                 brand = CardBrand.CartesBancaires,
             )
 
-            verify(eventReporter).onUpdatePaymentMethodSucceeded(
-                selectedBrand = CardBrand.CartesBancaires,
-            )
+            val succeededCall = eventReporter.updatePaymentMethodSucceededCalls.awaitItem()
+            assertThat(succeededCall.selectedBrand).isEqualTo(CardBrand.CartesBancaires)
         }
     }
 
@@ -576,7 +574,7 @@ class SavedPaymentMethodMutatorTest {
             }
         )
 
-        val eventReporter = mock<EventReporter>()
+        val eventReporter = FakeEventReporter()
 
         runScenario(eventReporter = eventReporter, customerRepository = customerRepository) {
             customerStateHolder.setCustomerState(
@@ -590,10 +588,9 @@ class SavedPaymentMethodMutatorTest {
             savedPaymentMethodMutator.updatePaymentMethod(displayableSavedPaymentMethod)
             updatePaymentMethodTurbine.awaitItem().updateExecutor(CardBrand.CartesBancaires)
 
-            verify(eventReporter).onUpdatePaymentMethodFailed(
-                selectedBrand = eq(CardBrand.CartesBancaires),
-                error = argThat { message == "Test failure" }
-            )
+            val failedCall = eventReporter.updatePaymentMethodFailedCalls.awaitItem()
+            assertThat(failedCall.selectedBrand).isEqualTo(CardBrand.CartesBancaires)
+            assertThat(failedCall.error.message).isEqualTo("Test failure")
         }
     }
 
@@ -656,7 +653,7 @@ class SavedPaymentMethodMutatorTest {
             }
         )
 
-        val eventReporter = mock<EventReporter>()
+        val eventReporter = FakeEventReporter()
 
         runScenario(eventReporter = eventReporter, customerRepository = customerRepository) {
             customerStateHolder.setCustomerState(
@@ -666,10 +663,10 @@ class SavedPaymentMethodMutatorTest {
                 )
             )
 
-            val newDefaultPaymentMethod = paymentMethods[1]
-            savedPaymentMethodMutator.setDefaultPaymentMethod(newDefaultPaymentMethod)
+            savedPaymentMethodMutator.setDefaultPaymentMethod(paymentMethods[1])
 
-            verify(eventReporter).onSetAsDefaultPaymentMethodSucceeded()
+            val succeededCall = eventReporter.setAsDefaultPaymentMethodSucceededCalls.awaitItem()
+            assertThat(succeededCall).isInstanceOf(FakeEventReporter.SetAsDefaultPaymentMethodSucceededCall::class.java)
         }
     }
 
@@ -683,7 +680,7 @@ class SavedPaymentMethodMutatorTest {
             }
         )
 
-        val eventReporter = mock<EventReporter>()
+        val eventReporter = FakeEventReporter()
 
         runScenario(eventReporter = eventReporter, customerRepository = customerRepository) {
             customerStateHolder.setCustomerState(
@@ -693,14 +690,10 @@ class SavedPaymentMethodMutatorTest {
                 )
             )
 
-            val newDefaultPaymentMethod = paymentMethods[1]
-            savedPaymentMethodMutator.setDefaultPaymentMethod(newDefaultPaymentMethod)
+            savedPaymentMethodMutator.setDefaultPaymentMethod(paymentMethods[1])
 
-            verify(eventReporter).onSetAsDefaultPaymentMethodFailed(
-                error = argThat {
-                    message == "Test failure"
-                }
-            )
+            val failedCall = eventReporter.setAsDefaultPaymentMethodFailedCalls.awaitItem()
+            assertThat(failedCall.error.message).isEqualTo("Test failure")
         }
     }
 
