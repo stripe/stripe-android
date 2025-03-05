@@ -1162,9 +1162,6 @@ public final class com/stripe/android/googlepaylauncher/GooglePayPaymentMethodLa
 	public final fun present (Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;)V
 	public static synthetic fun present$default (Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher;Ljava/lang/String;ILjava/lang/String;ILjava/lang/Object;)V
 	public static synthetic fun present$default (Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
-	public final fun presentWithUnknownPrice (Ljava/lang/String;)V
-	public final fun presentWithUnknownPrice (Ljava/lang/String;Ljava/lang/String;)V
-	public static synthetic fun presentWithUnknownPrice$default (Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
 }
 
 public final class com/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$BillingAddressConfig : android/os/Parcelable {
