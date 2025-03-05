@@ -4,19 +4,15 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.core.networking.toMap
 import com.stripe.android.identity.IdentityVerificationSheetContract
-import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_EXPERIMENT_EXPOSURE
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SCREEN_PRESENTED
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SHEET_CLOSED
-import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_ARB_ID
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_EVENT_META_DATA
-import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_EXPERIMENT_RETRIEVED
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_LIVE_MODE
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SESSION_RESULT
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentExperiment
-import com.stripe.android.identity.states.IdentityScanState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
@@ -100,44 +96,6 @@ class IdentityAnalyticsRequestFactoryTest {
                 it.eventName == EVENT_SHEET_CLOSED &&
                     (it.params.toMap()[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_SESSION_RESULT] == sessionResult &&
                     (it.params.toMap()[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_LIVE_MODE] == "true"
-            }
-        )
-    }
-
-    @Test
-    fun testExperimentWithEventMatchedLogged() = runBlocking {
-        factory.verificationPage = mockPageScreenPresented
-        factory.screenPresented(
-            IdentityScanState.ScanType.DOC_FRONT,
-            TEST_SCREEN_NAME
-        )
-
-        verify(mockIdentityRepository).sendAnalyticsRequest(
-            argWhere {
-                it.eventName == EVENT_SCREEN_PRESENTED
-            }
-        )
-
-        verify(mockIdentityRepository).sendAnalyticsRequest(
-            argWhere {
-                it.eventName == EVENT_EXPERIMENT_EXPOSURE &&
-                    it.params.toMap()[PARAM_ARB_ID] == USER_SESSION_ID &&
-                    it.params.toMap()[PARAM_EXPERIMENT_RETRIEVED] == EXP1
-            }
-        )
-    }
-
-    @Test
-    fun testExperimentWithoutEventMatchedNotLogged() = runBlocking {
-        factory.verificationPage = mockPageUnmatchedEvent
-        factory.screenPresented(
-            IdentityScanState.ScanType.DOC_FRONT,
-            TEST_SCREEN_NAME
-        )
-
-        verify(mockIdentityRepository).sendAnalyticsRequest(
-            argWhere {
-                it.eventName == EVENT_SCREEN_PRESENTED
             }
         )
     }

@@ -15,7 +15,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.stripe.android.core.injection.IOContext
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.injection.IdentityActivitySubcomponent
@@ -26,7 +25,6 @@ import com.stripe.android.identity.networking.models.VerificationPage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlin.coroutines.CoroutineContext
 
 /**
  * ViewModel hosted by IdentityActivity, shared across fragments.
@@ -37,8 +35,10 @@ internal class IdentityViewModel(
     private val identityRepository: IdentityRepository,
     internal val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
     savedStateHandle: SavedStateHandle,
-    @IOContext internal val workContext: CoroutineContext
 ) : AndroidViewModel(application) {
+    /**
+     * StateFlow to track camera permissions
+     */
     private val _cameraPermissionGranted = MutableStateFlow(
         savedStateHandle[CAMERA_PERMISSION_GRANTED] ?: false
     )
@@ -191,7 +191,6 @@ internal class IdentityViewModel(
 
     internal class IdentityViewModelFactory(
         private val applicationSupplier: () -> Application,
-        private val workContextSupplier: () -> CoroutineContext,
         private val subcomponentSupplier: () -> IdentityActivitySubcomponent,
     ) : ViewModelProvider.Factory {
 
@@ -206,7 +205,6 @@ internal class IdentityViewModel(
                 subcomponent.identityRepository,
                 subcomponent.identityAnalyticsRequestFactory,
                 savedStateHandle,
-                workContextSupplier()
             ) as T
         }
     }

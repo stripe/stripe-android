@@ -53,7 +53,6 @@ internal class IdentityActivity :
     internal var viewModelFactory: ViewModelProvider.Factory =
         IdentityViewModel.IdentityViewModelFactory(
             { application },
-            { workContext },
             { subcomponent }
         )
 

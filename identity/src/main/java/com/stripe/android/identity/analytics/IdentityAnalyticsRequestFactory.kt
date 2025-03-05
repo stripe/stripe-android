@@ -45,7 +45,6 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         )
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     @Suppress("UNCHECKED_CAST")
     private fun maybeLogExperimentAndSendLog(
         eventName: String,
