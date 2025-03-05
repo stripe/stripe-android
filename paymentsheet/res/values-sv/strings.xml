@@ -66,6 +66,8 @@
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Kortuppgifter kan inte ändras.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Genom att tillhandahålla kortinformationen ger du %s tillåtelse att debitera ditt kort för framtida betalningar enligt deras villkor.</string>
+  <!-- Error message displayed when updating a card fails. -->
+  <string name="stripe_paymentsheet_card_updates_failed_error_message">Kortet uppdaterades inte. Försök igen.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Välj en betalmetod</string>
   <string name="stripe_paymentsheet_close">Stäng</string>
@@ -141,6 +143,8 @@
   <string name="stripe_paymentsheet_select_your_payment_method">Välj din betalningsmetod</string>
   <!-- Text displayed on manage SEPA debit screen when SEPA debit details are not editable. -->
   <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">Uppgifter för SEPA-debitering kan inte ändras.</string>
+  <!-- Error message displayed when setting a default payment method fails. -->
+  <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">Standardbetalningsmetod har inte ändrats. Försök igen.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Totalt: %s</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->

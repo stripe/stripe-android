@@ -66,6 +66,8 @@
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Kartes informāciju nevar mainīt.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Norādot savas kartes informāciju, jūs atļaujat uzņēmumam %s saskaņā ar viņu noteikumiem iekasēt no jūsu kartes turpmākus maksājumus.</string>
+  <!-- Error message displayed when updating a card fails. -->
+  <string name="stripe_paymentsheet_card_updates_failed_error_message">Karte netika atjaunināta. Lūdzu, mēģiniet vēlreiz.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Izvēlēties maksājuma veidu</string>
   <string name="stripe_paymentsheet_close">Aizvērt</string>
@@ -141,6 +143,8 @@
   <string name="stripe_paymentsheet_select_your_payment_method">Izvēlēties savu maksājuma veidu</string>
   <!-- Text displayed on manage SEPA debit screen when SEPA debit details are not editable. -->
   <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">SEPA debeta informāciju nevar mainīt.</string>
+  <!-- Error message displayed when setting a default payment method fails. -->
+  <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">Noklusējuma maksājumu veids netika mainīts. Mēģiniet vēlreiz.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Kopā: %s</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
