@@ -16,16 +16,20 @@ internal class FakeEventReporter : EventReporter {
     val paymentFailureCalls: ReceiveTurbine<PaymentFailureCall> = _paymentFailureCalls
 
     private val _updatePaymentMethodSucceededCalls = Turbine<UpdatePaymentMethodSucceededCall>()
-    val updatePaymentMethodSucceededCalls: ReceiveTurbine<UpdatePaymentMethodSucceededCall> = _updatePaymentMethodSucceededCalls
+    val updatePaymentMethodSucceededCalls: ReceiveTurbine<UpdatePaymentMethodSucceededCall> =
+        _updatePaymentMethodSucceededCalls
 
     private val _updatePaymentMethodFailedCalls = Turbine<UpdatePaymentMethodFailedCall>()
-    val updatePaymentMethodFailedCalls: ReceiveTurbine<UpdatePaymentMethodFailedCall> = _updatePaymentMethodFailedCalls
+    val updatePaymentMethodFailedCalls: ReceiveTurbine<UpdatePaymentMethodFailedCall> =
+        _updatePaymentMethodFailedCalls
 
     private val _setAsDefaultPaymentMethodFailedCalls = Turbine<SetAsDefaultPaymentMethodFailedCall>()
-    val setAsDefaultPaymentMethodFailedCalls: ReceiveTurbine<SetAsDefaultPaymentMethodFailedCall> = _setAsDefaultPaymentMethodFailedCalls
+    val setAsDefaultPaymentMethodFailedCalls: ReceiveTurbine<SetAsDefaultPaymentMethodFailedCall> =
+        _setAsDefaultPaymentMethodFailedCalls
 
     private val _setAsDefaultPaymentMethodSucceededCalls = Turbine<SetAsDefaultPaymentMethodSucceededCall>()
-    val setAsDefaultPaymentMethodSucceededCalls: ReceiveTurbine<SetAsDefaultPaymentMethodSucceededCall> = _setAsDefaultPaymentMethodSucceededCalls
+    val setAsDefaultPaymentMethodSucceededCalls: ReceiveTurbine<SetAsDefaultPaymentMethodSucceededCall> =
+        _setAsDefaultPaymentMethodSucceededCalls
 
     override fun onInit(configuration: PaymentSheet.Configuration, isDeferred: Boolean) {
     }
