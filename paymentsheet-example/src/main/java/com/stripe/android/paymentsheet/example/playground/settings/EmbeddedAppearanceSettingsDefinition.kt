@@ -66,27 +66,40 @@ internal data class EmbeddedAppearance(
         return when (embeddedRowStyle) {
             EmbeddedRow.FlatWithRadio -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio(
                 separatorThicknessDp = separatorThicknessDp,
-                separatorColor = separatorColor,
                 startSeparatorInsetDp = startSeparatorInset,
                 endSeparatorInsetDp = endSeparatorInset,
                 topSeparatorEnabled = topSeparatorEnabled,
                 bottomSeparatorEnabled = bottomSeparatorEnabled,
-                selectedColor = selectedColor,
-                unselectedColor = unselectedColor,
                 additionalVerticalInsetsDp = additionalVerticalInsetsDp,
-                horizontalInsetsDp = horizontalInsetsDp
+                horizontalInsetsDp = horizontalInsetsDp,
+                colorsLight = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio.Colors(
+                    separatorColor = separatorColor,
+                    selectedColor = selectedColor,
+                    unselectedColor = unselectedColor
+                ),
+                colorsDark = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio.Colors(
+                    separatorColor = Color(0x40FFFFFF).toArgb(),
+                    selectedColor = Color(0xFF0074D4).toArgb(),
+                    unselectedColor = Color(0x40FFFFFF).toArgb(),
+                )
             )
             EmbeddedRow.FlatWithCheckmark -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark(
                 separatorThicknessDp = separatorThicknessDp,
-                separatorColor = separatorColor,
                 startSeparatorInsetDp = startSeparatorInset,
                 endSeparatorInsetDp = endSeparatorInset,
                 topSeparatorEnabled = topSeparatorEnabled,
                 bottomSeparatorEnabled = bottomSeparatorEnabled,
-                checkmarkColor = checkmarkColor,
                 checkmarkInsetDp = checkmarkInsetsDp,
                 additionalVerticalInsetsDp = additionalVerticalInsetsDp,
-                horizontalInsetsDp = horizontalInsetsDp
+                horizontalInsetsDp = horizontalInsetsDp,
+                colorsLight = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.Colors(
+                    separatorColor = separatorColor,
+                    checkmarkColor = checkmarkColor
+                ),
+                colorsDark = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.Colors(
+                    separatorColor = Color(0x40FFFFFF).toArgb(),
+                    checkmarkColor = Color(0xFF0074D4).toArgb()
+                )
             )
             EmbeddedRow.FloatingButton -> PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton(
                 spacingDp = floatingButtonSpacingDp,

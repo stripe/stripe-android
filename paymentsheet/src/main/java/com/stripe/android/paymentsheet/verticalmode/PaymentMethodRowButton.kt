@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import android.content.res.Configuration
-import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -212,10 +212,9 @@ private fun RowButtonRadioOuterContent(
     style: RowStyle.FlatWithRadio,
     content: @Composable ColumnScope.() -> Unit,
 ) {
+    val colors = style.getColors(isSystemInDarkTheme())
     Row(
-        modifier = modifier
-            .background(MaterialTheme.stripeColors.component)
-            .padding(contentPaddingValues)
+        modifier = modifier.padding(contentPaddingValues)
     ) {
         RadioButton(
             selected = isSelected,
@@ -225,8 +224,8 @@ private fun RowButtonRadioOuterContent(
                 .align(Alignment.CenterVertically)
                 .size(20.dp),
             colors = RadioButtonDefaults.colors(
-                selectedColor = Color(style.selectedColor),
-                unselectedColor = Color(style.unselectedColor)
+                selectedColor = Color(colors.selectedColor),
+                unselectedColor = Color(colors.unselectedColor)
             )
         )
         Spacer(Modifier.width(ROW_CONTENT_HORIZONTAL_SPACING.dp))
@@ -252,9 +251,7 @@ private fun RowButtonCheckmarkOuterContent(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Row(
-        modifier = modifier
-            .background(MaterialTheme.stripeColors.component)
-            .padding(contentPaddingValues),
+        modifier = modifier.padding(contentPaddingValues),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(
@@ -277,7 +274,7 @@ private fun RowButtonCheckmarkOuterContent(
                     .align(Alignment.CenterVertically)
                     .padding(end = style.checkmarkInsetDp.dp)
                     .offset(3.dp),
-                tint = Color(style.checkmarkColor)
+                tint = Color(style.getColors(isSystemInDarkTheme()).checkmarkColor)
             )
         }
     }

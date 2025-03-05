@@ -46,7 +46,7 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
                 subtitle = null,
                 promoText = null,
                 onClick = {},
-                style = FlatWithCheckmark.defaultLight,
+                style = FlatWithCheckmark.default,
                 shouldShowDefaultBadge = false,
             )
         }
@@ -65,7 +65,7 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
                 subtitle = null,
                 promoText = null,
                 onClick = {},
-                style = FlatWithCheckmark.defaultLight,
+                style = FlatWithCheckmark.default,
                 shouldShowDefaultBadge = false,
             )
         }
@@ -84,7 +84,7 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
                 subtitle = null,
                 promoText = null,
                 onClick = {},
-                style = FlatWithCheckmark.defaultLight,
+                style = FlatWithCheckmark.default,
                 shouldShowDefaultBadge = false,
             )
         }
@@ -103,7 +103,7 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
                 subtitle = "Please click me, I'm fancy",
                 promoText = null,
                 onClick = {},
-                style = FlatWithCheckmark.defaultLight,
+                style = FlatWithCheckmark.default,
                 shouldShowDefaultBadge = false,
             )
         }
@@ -123,7 +123,7 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
                     "forever.",
                 promoText = null,
                 onClick = {},
-                style = FlatWithCheckmark.defaultLight,
+                style = FlatWithCheckmark.default,
                 shouldShowDefaultBadge = false,
             )
         }
@@ -142,7 +142,7 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
                 subtitle = null,
                 promoText = null,
                 onClick = {},
-                style = FlatWithCheckmark.defaultLight,
+                style = FlatWithCheckmark.default,
                 trailingContent = {
                     Text("View more")
                 },
@@ -155,15 +155,21 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
     fun testStyleAppearance() {
         val style = FlatWithCheckmark(
             separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
-            separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
             startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
             endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
             topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
             bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
-            checkmarkColor = StripeThemeDefaults.colorsLight.materialColors.error.toArgb(),
             checkmarkInsetDp = 20f,
             additionalVerticalInsetsDp = 40f,
-            horizontalInsetsDp = 40f
+            horizontalInsetsDp = 40f,
+            colorsLight = FlatWithCheckmark.Colors(
+                separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
+                checkmarkColor = StripeThemeDefaults.colorsLight.materialColors.error.toArgb()
+            ),
+            colorsDark = FlatWithCheckmark.Colors(
+                separatorColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
+                checkmarkColor = StripeThemeDefaults.colorsDark.materialColors.error.toArgb()
+            )
         )
         paparazziRule.snapshot {
             PaymentMethodRowButton(

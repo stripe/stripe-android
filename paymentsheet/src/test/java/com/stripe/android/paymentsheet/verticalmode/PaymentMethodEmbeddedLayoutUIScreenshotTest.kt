@@ -178,31 +178,37 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     ): Embedded.RowStyle {
         return when (type) {
             FlatWithRadio::class -> FlatWithRadio(
-                separatorThicknessDp = separatorThicknessDp ?: FlatWithRadio.defaultLight.separatorThicknessDp,
-                separatorColor = separatorColor ?: FlatWithRadio.defaultLight.separatorColor,
-                startSeparatorInsetDp = startSeparatorInset ?: FlatWithRadio.defaultLight.startSeparatorInsetDp,
-                endSeparatorInsetDp = endSeparatorInset ?: FlatWithRadio.defaultLight.endSeparatorInsetDp,
-                topSeparatorEnabled = topSeparatorEnabled ?: FlatWithRadio.defaultLight.topSeparatorEnabled,
-                bottomSeparatorEnabled = bottomSeparatorEnabled ?: FlatWithRadio.defaultLight.bottomSeparatorEnabled,
-                selectedColor = selectedColor ?: FlatWithRadio.defaultLight.selectedColor,
-                unselectedColor = unselectedColor ?: FlatWithRadio.defaultLight.unselectedColor,
+                separatorThicknessDp = separatorThicknessDp ?: FlatWithRadio.default.separatorThicknessDp,
+                startSeparatorInsetDp = startSeparatorInset ?: FlatWithRadio.default.startSeparatorInsetDp,
+                endSeparatorInsetDp = endSeparatorInset ?: FlatWithRadio.default.endSeparatorInsetDp,
+                topSeparatorEnabled = topSeparatorEnabled ?: FlatWithRadio.default.topSeparatorEnabled,
+                bottomSeparatorEnabled = bottomSeparatorEnabled ?: FlatWithRadio.default.bottomSeparatorEnabled,
                 additionalVerticalInsetsDp = additionalVerticalInsetsDp
-                    ?: FlatWithRadio.defaultLight.additionalVerticalInsetsDp,
-                horizontalInsetsDp = horizontalInsetsDp ?: FlatWithRadio.defaultLight.horizontalInsetsDp
+                    ?: FlatWithRadio.default.additionalVerticalInsetsDp,
+                horizontalInsetsDp = horizontalInsetsDp ?: FlatWithRadio.default.horizontalInsetsDp,
+                colorsLight = FlatWithRadio.Colors(
+                    separatorColor = separatorColor ?: FlatWithRadio.default.colorsLight.separatorColor,
+                    selectedColor = selectedColor ?: FlatWithRadio.default.colorsLight.selectedColor,
+                    unselectedColor = unselectedColor ?: FlatWithRadio.default.colorsLight.unselectedColor
+                ),
+                colorsDark = FlatWithRadio.default.colorsDark
             )
             FlatWithCheckmark::class -> FlatWithCheckmark(
-                separatorThicknessDp = separatorThicknessDp ?: FlatWithCheckmark.defaultLight.separatorThicknessDp,
-                separatorColor = separatorColor ?: FlatWithCheckmark.defaultLight.separatorColor,
-                startSeparatorInsetDp = startSeparatorInset ?: FlatWithCheckmark.defaultLight.startSeparatorInsetDp,
-                endSeparatorInsetDp = endSeparatorInset ?: FlatWithCheckmark.defaultLight.endSeparatorInsetDp,
-                topSeparatorEnabled = topSeparatorEnabled ?: FlatWithCheckmark.defaultLight.topSeparatorEnabled,
+                separatorThicknessDp = separatorThicknessDp ?: FlatWithCheckmark.default.separatorThicknessDp,
+                startSeparatorInsetDp = startSeparatorInset ?: FlatWithCheckmark.default.startSeparatorInsetDp,
+                endSeparatorInsetDp = endSeparatorInset ?: FlatWithCheckmark.default.endSeparatorInsetDp,
+                topSeparatorEnabled = topSeparatorEnabled ?: FlatWithCheckmark.default.topSeparatorEnabled,
                 bottomSeparatorEnabled = bottomSeparatorEnabled
-                    ?: FlatWithCheckmark.defaultLight.bottomSeparatorEnabled,
-                checkmarkColor = checkmarkColor ?: FlatWithCheckmark.defaultLight.checkmarkColor,
-                checkmarkInsetDp = checkmarkInsetDp ?: FlatWithCheckmark.defaultLight.checkmarkInsetDp,
+                    ?: FlatWithCheckmark.default.bottomSeparatorEnabled,
+                checkmarkInsetDp = checkmarkInsetDp ?: FlatWithCheckmark.default.checkmarkInsetDp,
                 additionalVerticalInsetsDp = additionalVerticalInsetsDp
-                    ?: FlatWithCheckmark.defaultLight.additionalVerticalInsetsDp,
-                horizontalInsetsDp = horizontalInsetsDp ?: FlatWithCheckmark.defaultLight.horizontalInsetsDp
+                    ?: FlatWithCheckmark.default.additionalVerticalInsetsDp,
+                horizontalInsetsDp = horizontalInsetsDp ?: FlatWithCheckmark.default.horizontalInsetsDp,
+                colorsLight = FlatWithCheckmark.Colors(
+                    separatorColor = separatorColor ?: FlatWithCheckmark.default.colorsLight.separatorColor,
+                    checkmarkColor = checkmarkColor ?: FlatWithCheckmark.default.colorsLight.checkmarkColor
+                ),
+                colorsDark = FlatWithCheckmark.default.colorsDark
             )
             else -> FloatingButton(
                 spacingDp = spacingDp ?: FloatingButton.default.spacingDp,
