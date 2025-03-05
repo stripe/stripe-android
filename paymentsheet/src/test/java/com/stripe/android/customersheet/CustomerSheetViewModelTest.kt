@@ -1476,7 +1476,7 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             viewModel.handleViewAction(CustomerSheetViewAction.OnItemSelected(PaymentSelection.GooglePay))
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
-            verify(eventReporter).onConfirmPaymentMethodSucceeded("google_pay")
+            verify(eventReporter).onConfirmPaymentMethodSucceeded(eq("google_pay"), eq(false))
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -1502,7 +1502,7 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             viewModel.handleViewAction(CustomerSheetViewAction.OnItemSelected(PaymentSelection.GooglePay))
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
-            verify(eventReporter).onConfirmPaymentMethodFailed("google_pay")
+            verify(eventReporter).onConfirmPaymentMethodFailed(eq("google_pay"), eq(false))
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -1525,7 +1525,70 @@ class CustomerSheetViewModelTest {
                 )
             )
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
-            verify(eventReporter).onConfirmPaymentMethodSucceeded("card")
+            verify(eventReporter).onConfirmPaymentMethodSucceeded(eq("card"), eq(false))
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `When payment selection is confirmed and syncDefaultEnabled true, event is reported`() = runTest(testDispatcher) {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            eventReporter = eventReporter,
+            customerSheetLoader = FakeCustomerSheetLoader(
+                customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
+                isGooglePayAvailable = true,
+                isPaymentMethodSyncDefaultEnabled = true,
+            ),
+        )
+        viewModel.viewState.test {
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnItemSelected(
+                    PaymentSelection.Saved(
+                        CARD_PAYMENT_METHOD,
+                    )
+                )
+            )
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            verify(eventReporter).onConfirmPaymentMethodSucceeded(eq("card"), eq(true))
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `When payment selection errors and syncDefaultEnabled true, event is reported`() = runTest(testDispatcher) {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            savedSelectionDataSource = FakeCustomerSheetSavedSelectionDataSource(
+                onSetSavedSelection = {
+                    CustomerSheetDataResult.failure(
+                        cause = Exception("Unable to set payment option"),
+                        displayMessage = "Something went wrong"
+                    )
+                }
+            ),
+            eventReporter = eventReporter,
+            customerSheetLoader = FakeCustomerSheetLoader(
+                customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
+                isGooglePayAvailable = true,
+                isPaymentMethodSyncDefaultEnabled = true,
+            ),
+        )
+
+        viewModel.viewState.test {
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnItemSelected(
+                    PaymentSelection.Saved(
+                        CARD_PAYMENT_METHOD,
+                    )
+                )
+            )
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            verify(eventReporter).onConfirmPaymentMethodFailed(eq("card"), eq(true))
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -1556,7 +1619,7 @@ class CustomerSheetViewModelTest {
                 )
             )
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
-            verify(eventReporter).onConfirmPaymentMethodFailed("card")
+            verify(eventReporter).onConfirmPaymentMethodFailed(eq("card"), eq(false))
             cancelAndIgnoreRemainingEvents()
         }
     }

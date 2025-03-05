@@ -32,12 +32,18 @@ internal interface CustomerSheetEventReporter {
     /**
      * User attempted to confirm their saved payment method selection and succeeded
      */
-    fun onConfirmPaymentMethodSucceeded(type: String)
+    fun onConfirmPaymentMethodSucceeded(
+        type: String,
+        syncDefaultEnabled: Boolean?,
+    )
 
     /**
      * User attempted to confirm their saved payment method selection and failed
      */
-    fun onConfirmPaymentMethodFailed(type: String)
+    fun onConfirmPaymentMethodFailed(
+        type: String,
+        syncDefaultEnabled: Boolean?,
+    )
 
     /**
      * User tapped on edit button
