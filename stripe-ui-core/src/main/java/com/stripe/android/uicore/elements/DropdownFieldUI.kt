@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.Icon
@@ -25,6 +26,7 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,6 +35,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -155,15 +158,25 @@ fun DropDown(
             }
         }
 
+        val scrollState = rememberScrollState()
+
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
             modifier = Modifier
                 .background(color = MaterialTheme.stripeColors.component)
                 .width(DropdownMenuItemDefaultMaxWidth)
-                .requiredSizeIn(maxHeight = DropdownMenuItemDefaultMinHeight * 8.9f)
+                .requiredSizeIn(maxHeight = DropdownMenuItemDefaultMinHeight * 8.9f),
+            scrollState = scrollState,
         ) {
+            var height = 0
             items.forEachIndexed { index, displayValue ->
+                var hasUpdatedHeight: Boolean = index >= selectedIndex - 1
+                if (index == selectedIndex) {
+                    LaunchedEffect(expanded) {
+                        scrollState.scrollTo(height)
+                    }
+                }
                 DropdownMenuItem(
                     displayValue = displayValue,
                     isSelected = index == selectedIndex,
@@ -171,7 +184,13 @@ fun DropDown(
                     onClick = {
                         expanded = false
                         controller.onValueChange(index)
-                    }
+                    },
+                    modifier = Modifier.onGloballyPositioned { layoutCoordinates ->
+                        if (!hasUpdatedHeight) {
+                            height += layoutCoordinates.size.height
+                            hasUpdatedHeight = true
+                        }
+                    },
                 )
             }
         }
@@ -252,12 +271,13 @@ internal fun DropdownMenuItem(
     displayValue: String,
     isSelected: Boolean,
     currentTextColor: Color,
-    onClick: () -> Unit = {}
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .requiredSizeIn(
                 minHeight = DropdownMenuItemDefaultMinHeight

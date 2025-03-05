@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet
+package com.stripe.paymentelementtestpages
 
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasTestTag
@@ -14,8 +14,8 @@ import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_MANAGE_SCREEN_CHEVR
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
 
-internal class ManagePage(
-    private val composeTestRule: ComposeTestRule
+class ManagePage(
+    private val composeTestRule: ComposeTestRule,
 ) {
     fun waitUntilVisible() {
         composeTestRule.waitUntil {
@@ -24,6 +24,12 @@ internal class ManagePage(
                 .fetchSemanticsNodes()
                 .isNotEmpty()
         }
+    }
+
+    fun assertNotVisible() {
+        composeTestRule
+            .onNode(hasTestTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST))
+            .assertDoesNotExist()
     }
 
     fun selectPaymentMethod(paymentMethodId: String) {
@@ -74,7 +80,15 @@ internal class ManagePage(
     fun assertCardIsVisible(paymentMethodId: String, cardBrand: String) {
         composeTestRule.onNode(
             hasTestTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId")
-                .and(hasAnyDescendant(hasTestTag(TEST_TAG_ICON_FROM_RES).and(hasTestMetadata(cardBrand)))),
+                .and(
+                    hasAnyDescendant(
+                        hasTestTag(TEST_TAG_ICON_FROM_RES).and(
+                            hasTestMetadata(
+                                cardBrand
+                            )
+                        )
+                    )
+                ),
             useUnmergedTree = true,
         ).assertExists()
     }

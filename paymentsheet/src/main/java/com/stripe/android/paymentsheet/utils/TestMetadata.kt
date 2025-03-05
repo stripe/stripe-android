@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.utils
 
+import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsPropertyKey
@@ -13,7 +14,8 @@ internal fun Modifier.testMetadata(metadata: String?) = semantics(
     }
 )
 
-internal val TestMetadata = SemanticsPropertyKey<String?>(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+val TestMetadata = SemanticsPropertyKey<String?>(
     name = "TestMetadata",
     mergePolicy = { parentValue, _ ->
         // Never merge TestMetadata, to avoid leaking internal test tags to parents.

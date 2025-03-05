@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
@@ -23,4 +24,5 @@ internal fun ChevronIcon(paymentMethodId: String?,) {
     )
 }
 
-internal const val TEST_TAG_MANAGE_SCREEN_CHEVRON_ICON = "manage_screen_chevron_icon"
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val TEST_TAG_MANAGE_SCREEN_CHEVRON_ICON = "manage_screen_chevron_icon"

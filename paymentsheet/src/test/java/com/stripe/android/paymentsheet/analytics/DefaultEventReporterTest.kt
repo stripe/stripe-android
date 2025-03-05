@@ -124,6 +124,39 @@ class DefaultEventReporterTest {
     }
 
     @Test
+    fun `on completed loading operation, should fire analytics with hasDefaultPaymentMethod value`() {
+        val eventReporter = createEventReporter(EventReporter.Mode.Complete)
+
+        eventReporter.simulateSuccessfulSetup(
+            setAsDefaultEnabled = true,
+            hasDefaultPaymentMethod = true
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["set_as_default_enabled"] == true &&
+                    req.params["has_default_payment_method"] == true
+            }
+        )
+    }
+
+    @Test
+    fun `on completed loading operation, should fire analytics with setAsDefaultEnabled value`() {
+        val eventReporter = createEventReporter(EventReporter.Mode.Complete)
+
+        eventReporter.simulateSuccessfulSetup(
+            setAsDefaultEnabled = true
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["set_as_default_enabled"] == true &&
+                    req.params["has_default_payment_method"] == null
+            }
+        )
+    }
+
+    @Test
     fun `onShowExistingPaymentOptions() should fire analytics request with expected event value`() {
         val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
             simulateSuccessfulSetup()
@@ -818,7 +851,9 @@ class DefaultEventReporterTest {
             PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "cs_example"
             ),
-        requireCvcRecollection: Boolean = false
+        requireCvcRecollection: Boolean = false,
+        hasDefaultPaymentMethod: Boolean? = null,
+        setAsDefaultEnabled: Boolean? = null,
     ) {
         onInit(configuration, isDeferred = false)
         onLoadStarted(initializedViaCompose = false)
@@ -829,7 +864,9 @@ class DefaultEventReporterTest {
             currency = currency,
             initializationMode = initializationMode,
             orderedLpms = listOf("card", "klarna"),
-            requireCvcRecollection = requireCvcRecollection
+            requireCvcRecollection = requireCvcRecollection,
+            hasDefaultPaymentMethod = hasDefaultPaymentMethod,
+            setAsDefaultEnabled = setAsDefaultEnabled,
         )
     }
 

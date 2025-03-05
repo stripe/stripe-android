@@ -10,6 +10,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.setDefaultPaymentMethodErrorMessage
+import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.updateCardBrandErrorMessage
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.updatesFailedErrorMessage
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -271,11 +272,9 @@ class DefaultUpdatePaymentMethodInteractorTest {
 
     @Test
     fun saveButtonClick_failure_displaysError() {
-        val updateException = IllegalStateException("Not allowed.")
-
         @Suppress("UnusedParameter")
         fun updateCardBrandExecutor(paymentMethod: PaymentMethod, brand: CardBrand): Result<PaymentMethod> {
-            return Result.failure(updateException)
+            return Result.failure(IllegalStateException("Not allowed."))
         }
 
         runScenario(
@@ -300,7 +299,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
                 val state = awaitItem()
                 // Card brand has been changed is still true -- the user could try again.
                 assertThat(state.cardBrandHasBeenChanged).isTrue()
-                assertThat(state.error).isEqualTo(updateException.stripeErrorMessage())
+                assertThat(state.error).isEqualTo(updateCardBrandErrorMessage)
             }
         }
     }
@@ -312,6 +311,22 @@ class DefaultUpdatePaymentMethodInteractorTest {
         shouldShowSetAsDefaultCheckbox = true,
     ) {
         assertThat(interactor.shouldShowSetAsDefaultCheckbox).isFalse()
+    }
+
+    @Test
+    fun setAsDefaultCheckbox_shownForCards() = runScenario(
+        displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
+        shouldShowSetAsDefaultCheckbox = true,
+    ) {
+        assertThat(interactor.shouldShowSetAsDefaultCheckbox).isTrue()
+    }
+
+    @Test
+    fun setAsDefaultCheckbox_shownForUsBankAccount() = runScenario(
+        displayableSavedPaymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT.toDisplayableSavedPaymentMethod(),
+        shouldShowSetAsDefaultCheckbox = true,
+    ) {
+        assertThat(interactor.shouldShowSetAsDefaultCheckbox).isTrue()
     }
 
     @Test
@@ -417,7 +432,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
 
             assertThat(updateSuccessCalled).isFalse()
             interactor.state.test {
-                assertThat(awaitItem().error).isEqualTo(expectedError.stripeErrorMessage())
+                assertThat(awaitItem().error).isEqualTo(updateCardBrandErrorMessage)
             }
         }
     }
@@ -460,7 +475,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
                 .toDisplayableSavedPaymentMethod(),
             shouldShowSetAsDefaultCheckbox = true,
             onSetDefaultPaymentMethod = { Result.failure(IllegalStateException("Fake error")) },
-            onUpdateCardBrand = { paymentMethod, _ -> Result.success(paymentMethod) },
+            onUpdateCardBrand = { _, _ -> Result.failure(IllegalStateException("Fake error")) },
             onUpdateSuccess = ::onUpdateSuccess,
         ) {
             updateCardBrandAndDefaultPaymentMethod(interactor)

@@ -6,6 +6,7 @@ import com.stripe.android.common.analytics.toAnalyticsValue
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.analyticsValue
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -45,21 +46,28 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         linkMode: LinkMode?,
         override val isDeferred: Boolean,
         override val googlePaySupported: Boolean,
-        requireCvcRecollection: Boolean = false
+        requireCvcRecollection: Boolean = false,
+        hasDefaultPaymentMethod: Boolean? = null,
+        setAsDefaultEnabled: Boolean? = null,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_load_succeeded"
         override val linkEnabled: Boolean = linkMode != null
-        override val additionalParams: Map<String, Any?> = mapOf(
-            FIELD_DURATION to duration?.asSeconds,
-            FIELD_SELECTED_LPM to paymentSelection.defaultAnalyticsValue,
-            FIELD_INTENT_TYPE to initializationMode.defaultAnalyticsValue,
-            FIELD_ORDERED_LPMS to orderedLpms.joinToString(","),
-            FIELD_REQUIRE_CVC_RECOLLECTION to requireCvcRecollection
-        ).plus(
+        override val additionalParams: Map<String, Any?> = buildMap {
+            put(FIELD_DURATION, duration?.asSeconds)
+            put(FIELD_SELECTED_LPM, paymentSelection.defaultAnalyticsValue)
+            put(FIELD_INTENT_TYPE, initializationMode.defaultAnalyticsValue)
+            put(FIELD_ORDERED_LPMS, orderedLpms.joinToString(","))
+            put(FIELD_REQUIRE_CVC_RECOLLECTION, requireCvcRecollection)
             linkMode?.let { mode ->
-                mapOf(FIELD_LINK_MODE to mode.analyticsValue)
-            }.orEmpty()
-        )
+                put(FIELD_LINK_MODE, mode.analyticsValue)
+            }
+            setAsDefaultEnabled?.let {
+                put(FIELD_SET_AS_DEFAULT_ENABLED, it)
+            }
+            if (setAsDefaultEnabled == true && hasDefaultPaymentMethod != null) {
+                put(FIELD_HAS_DEFAULT_PAYMENT_METHOD, hasDefaultPaymentMethod)
+            }
+        }
 
         private val PaymentSelection?.defaultAnalyticsValue: String
             get() = when (this) {
@@ -301,25 +309,26 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val eventName: String =
             formatEventName(mode, "payment_${analyticsValue(paymentSelection)}_${result.analyticsValue}")
 
-        override val additionalParams: Map<String, Any?> =
-            mapOf(
-                FIELD_DURATION to duration?.asSeconds,
-                FIELD_CURRENCY to currency,
-            ) + buildDeferredIntentConfirmationType() + paymentSelection.paymentMethodInfo() + errorInfo()
-
-        private fun buildDeferredIntentConfirmationType(): Map<String, String> {
-            return deferredIntentConfirmationType?.let {
-                mapOf(FIELD_DEFERRED_INTENT_CONFIRMATION_TYPE to it.value)
-            }.orEmpty()
-        }
-
-        private fun errorInfo(): Map<String, String> {
-            return when (result) {
-                is Result.Success -> emptyMap()
-                is Result.Failure -> mapOf(
-                    FIELD_ERROR_MESSAGE to result.error.analyticsValue,
-                    FIELD_ERROR_CODE to result.error.errorCode,
-                ).filterNotNullValues()
+        override val additionalParams: Map<String, Any?> = buildMap {
+            put(FIELD_DURATION, duration?.asSeconds)
+            put(FIELD_CURRENCY, currency)
+            deferredIntentConfirmationType?.let { type ->
+                put(FIELD_DEFERRED_INTENT_CONFIRMATION_TYPE, type.value)
+            }
+            if (result is Result.Failure) {
+                put(FIELD_ERROR_MESSAGE, result.error.analyticsValue)
+                result.error.errorCode?.let { errorCode ->
+                    put(FIELD_ERROR_CODE, errorCode)
+                }
+            }
+            paymentSelection.code()?.let { code ->
+                put(FIELD_SELECTED_LPM, code)
+            }
+            paymentSelection.linkContext()?.let { linkContext ->
+                put(FIELD_LINK_CONTEXT, linkContext)
+            }
+            paymentSelection?.getSetAsDefaultPaymentMethodFromPaymentSelection()?.let { setAsDefault ->
+                put(FIELD_SET_AS_DEFAULT, setAsDefault)
             }
         }
 
@@ -511,7 +520,10 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_ERROR_MESSAGE = "error_message"
         const val FIELD_ERROR_CODE = "error_code"
         const val FIELD_CBC_EVENT_SOURCE = "cbc_event_source"
+        const val FIELD_SET_AS_DEFAULT_ENABLED = "set_as_default_enabled"
+        const val FIELD_HAS_DEFAULT_PAYMENT_METHOD = "has_default_payment_method"
         const val FIELD_SELECTED_CARD_BRAND = "selected_card_brand"
+        const val FIELD_SET_AS_DEFAULT = "set_as_default"
         const val FIELD_LINK_CONTEXT = "link_context"
         const val FIELD_EXTERNAL_PAYMENT_METHODS = "external_payment_methods"
         const val FIELD_PAYMENT_METHOD_LAYOUT = "payment_method_layout"
@@ -530,6 +542,20 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     }
 }
 
+private fun PaymentSelection.getSetAsDefaultPaymentMethodFromPaymentSelection(): Boolean? {
+    return when (this) {
+        is PaymentSelection.New.Card -> {
+            (this.paymentMethodExtraParams as? PaymentMethodExtraParams.Card)?.setAsDefault
+        }
+        is PaymentSelection.New.USBankAccount -> {
+            (this.paymentMethodExtraParams as? PaymentMethodExtraParams.USBankAccount)?.setAsDefault
+        }
+        else -> {
+            null
+        }
+    }
+}
+
 private val Duration.asSeconds: Float
     get() = toDouble(DurationUnit.SECONDS).toFloat()
 
@@ -542,13 +568,6 @@ internal fun PaymentSelection?.code(): String? {
         is PaymentSelection.ExternalPaymentMethod -> type
         null -> null
     }
-}
-
-private fun PaymentSelection?.paymentMethodInfo(): Map<String, String> {
-    return mapOf(
-        PaymentSheetEvent.FIELD_SELECTED_LPM to code(),
-        PaymentSheetEvent.FIELD_LINK_CONTEXT to linkContext(),
-    ).filterNotNullValues()
 }
 
 internal fun PaymentSelection?.linkContext(): String? {

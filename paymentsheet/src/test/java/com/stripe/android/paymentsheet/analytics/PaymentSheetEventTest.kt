@@ -9,7 +9,9 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
+import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_SELECTION
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -383,14 +385,9 @@ class PaymentSheetEventTest {
 
     @Test
     fun `LoadSucceeded event should return expected toString()`() {
-        val event = PaymentSheetEvent.LoadSucceeded(
-            isDeferred = false,
-            linkMode = null,
-            googlePaySupported = false,
-            duration = (5L).seconds,
+        val event = createLoadSucceededEvent(
             paymentSelection = null,
-            initializationMode = paymentIntentInitializationMode,
-            orderedLpms = listOf("card", "klarna")
+            orderedLpms = listOf("card", "klarna"),
         )
 
         assertThat(event.eventName).isEqualTo("mc_load_succeeded")
@@ -409,15 +406,61 @@ class PaymentSheetEventTest {
     }
 
     @Test
+    fun `LoadSucceeded event with setAsDefaultPaymentMethod should return expected toString()`() {
+        val event = createLoadSucceededEvent(
+            paymentSelection = null,
+            orderedLpms = listOf("card", "klarna"),
+            hasDefaultPaymentMethod = false,
+            setAsDefaultEnabled = true,
+        )
+
+        assertThat(event.params).containsEntry("set_as_default_enabled", true)
+        assertThat(event.params).containsEntry("has_default_payment_method", false)
+    }
+
+    @Test
+    fun `LoadSucceeded event with setAsDefaultPaymentMethod null should return expected toString()`() {
+        val event = createLoadSucceededEvent(
+            paymentSelection = null,
+            orderedLpms = listOf("card", "klarna"),
+            hasDefaultPaymentMethod = false,
+            setAsDefaultEnabled = null,
+        )
+
+        assertThat(event.params).doesNotContainKey("set_as_default_enabled")
+        assertThat(event.params).doesNotContainKey("has_default_payment_method")
+    }
+
+    @Test
+    fun `LoadSucceeded event with setAsDefaultPaymentMethod false should return expected toString()`() {
+        val event = createLoadSucceededEvent(
+            paymentSelection = null,
+            orderedLpms = listOf("card", "klarna"),
+            hasDefaultPaymentMethod = false,
+            setAsDefaultEnabled = false,
+        )
+
+        assertThat(event.params).containsEntry("set_as_default_enabled", false)
+        assertThat(event.params).doesNotContainKey("has_default_payment_method")
+    }
+
+    @Test
+    fun `LoadSucceeded event with hasDefaultPaymentMethod null should return expected toString()`() {
+        val event = createLoadSucceededEvent(
+            paymentSelection = null,
+            orderedLpms = listOf("card", "klarna"),
+            hasDefaultPaymentMethod = null,
+            setAsDefaultEnabled = true,
+        )
+
+        assertThat(event.params).containsEntry("set_as_default_enabled", true)
+        assertThat(event.params).doesNotContainKey("has_default_payment_method")
+    }
+
+    @Test
     fun `LoadSucceeded event should return 'google_pay' for selected lpm when saved selection is Google Pay`() {
-        val event = PaymentSheetEvent.LoadSucceeded(
-            isDeferred = false,
-            linkMode = null,
-            googlePaySupported = false,
-            duration = (5L).seconds,
+        val event = createLoadSucceededEvent(
             paymentSelection = PaymentSelection.GooglePay,
-            initializationMode = paymentIntentInitializationMode,
-            orderedLpms = listOf("card"),
         )
 
         assertThat(event.params).containsEntry("selected_lpm", "google_pay")
@@ -425,14 +468,8 @@ class PaymentSheetEventTest {
 
     @Test
     fun `LoadSucceeded event should return 'link' for selected lpm when saved selection is Link`() {
-        val event = PaymentSheetEvent.LoadSucceeded(
-            isDeferred = false,
-            linkMode = null,
-            googlePaySupported = false,
-            duration = (5L).seconds,
+        val event = createLoadSucceededEvent(
             paymentSelection = PaymentSelection.Link(),
-            initializationMode = paymentIntentInitializationMode,
-            orderedLpms = listOf("card"),
         )
 
         assertThat(event.params).containsEntry("selected_lpm", "link")
@@ -440,16 +477,10 @@ class PaymentSheetEventTest {
 
     @Test
     fun `LoadSucceeded event should return id for selected lpm when saved selection is a payment method`() {
-        val event = PaymentSheetEvent.LoadSucceeded(
-            isDeferred = false,
-            linkMode = null,
-            googlePaySupported = false,
-            duration = (5L).seconds,
+        val event = createLoadSucceededEvent(
             paymentSelection = PaymentSelection.Saved(
                 paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD
             ),
-            initializationMode = paymentIntentInitializationMode,
-            orderedLpms = listOf("card"),
         )
 
         assertThat(event.params).containsEntry("selected_lpm", "sepa_debit")
@@ -547,6 +578,37 @@ class PaymentSheetEventTest {
                 "selected_lpm" to "card",
             )
         )
+    }
+
+    fun `New payment method set as default true event should return expected event`() {
+        val newPMEvent = newCardPaymentMethod(
+            paymentMethodExtraParams = PaymentMethodExtraParams.Card(
+                setAsDefault = true
+            ),
+            result = PaymentSheetEvent.Payment.Result.Success,
+        )
+        assertThat(
+            newPMEvent.eventName
+        ).isEqualTo(
+            "mc_complete_payment_newpm_success"
+        )
+        assertThat(newPMEvent.params["set_as_default"]).isEqualTo(true)
+    }
+
+    @Test
+    fun `New payment method set as default false event should return expected event`() {
+        val newPMEvent = newCardPaymentMethod(
+            paymentMethodExtraParams = PaymentMethodExtraParams.Card(
+                setAsDefault = false
+            ),
+            result = PaymentSheetEvent.Payment.Result.Success,
+        )
+        assertThat(
+            newPMEvent.eventName
+        ).isEqualTo(
+            "mc_complete_payment_newpm_success"
+        )
+        assertThat(newPMEvent.params["set_as_default"]).isEqualTo(false)
     }
 
     @Test
@@ -809,6 +871,41 @@ class PaymentSheetEventTest {
                 "error_message" to "apiError",
             )
         )
+    }
+
+    fun `New payment method failure setAsDefault true event should return expected event`() {
+        val newPMEvent = newCardPaymentMethod(
+            paymentMethodExtraParams = PaymentMethodExtraParams.Card(
+                setAsDefault = true
+            ),
+            result = PaymentSheetEvent.Payment.Result.Failure(
+                error = PaymentSheetConfirmationError.Stripe(APIException()),
+            )
+        )
+        assertThat(
+            newPMEvent.eventName
+        ).isEqualTo(
+            "mc_complete_payment_newpm_failure"
+        )
+        assertThat(newPMEvent.params["set_as_default"]).isEqualTo(true)
+    }
+
+    @Test
+    fun `New payment method failure setAsDefault false event should return expected event`() {
+        val newPMEvent = newCardPaymentMethod(
+            paymentMethodExtraParams = PaymentMethodExtraParams.Card(
+                setAsDefault = false
+            ),
+            result = PaymentSheetEvent.Payment.Result.Failure(
+                error = PaymentSheetConfirmationError.Stripe(APIException()),
+            )
+        )
+        assertThat(
+            newPMEvent.eventName
+        ).isEqualTo(
+            "mc_complete_payment_newpm_failure"
+        )
+        assertThat(newPMEvent.params["set_as_default"]).isEqualTo(false)
     }
 
     @Test
@@ -1501,6 +1598,35 @@ class PaymentSheetEventTest {
         )
     }
 
+    private fun newCardPaymentMethod(
+        paymentMethodExtraParams: PaymentMethodExtraParams? = null,
+        result: PaymentSheetEvent.Payment.Result
+    ): PaymentSheetEvent.Payment {
+        return paymentMethodEvent(
+            paymentSelection = CARD_PAYMENT_SELECTION.copy(
+                paymentMethodExtraParams = paymentMethodExtraParams
+            ),
+            result = result
+        )
+    }
+
+    private fun paymentMethodEvent(
+        paymentSelection: PaymentSelection,
+        result: PaymentSheetEvent.Payment.Result,
+    ): PaymentSheetEvent.Payment {
+        return PaymentSheetEvent.Payment(
+            mode = EventReporter.Mode.Complete,
+            paymentSelection = paymentSelection,
+            duration = 1.milliseconds,
+            result = result,
+            currency = "usd",
+            isDeferred = false,
+            linkEnabled = false,
+            googlePaySupported = false,
+            deferredIntentConfirmationType = null,
+        )
+    }
+
     private val paymentIntentInitializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
         clientSecret = "cs_example"
     )
@@ -1529,6 +1655,8 @@ class PaymentSheetEventTest {
         paymentSelection: PaymentSelection? = null,
         initializationMode: PaymentElementLoader.InitializationMode = paymentIntentInitializationMode,
         orderedLpms: List<String> = listOf("card"),
+        hasDefaultPaymentMethod: Boolean? = null,
+        setAsDefaultEnabled: Boolean? = null,
     ): PaymentSheetEvent.LoadSucceeded {
         return PaymentSheetEvent.LoadSucceeded(
             isDeferred = isDeferred,
@@ -1538,6 +1666,8 @@ class PaymentSheetEventTest {
             paymentSelection = paymentSelection,
             initializationMode = initializationMode,
             orderedLpms = orderedLpms,
+            hasDefaultPaymentMethod = hasDefaultPaymentMethod,
+            setAsDefaultEnabled = setAsDefaultEnabled,
         )
     }
 }

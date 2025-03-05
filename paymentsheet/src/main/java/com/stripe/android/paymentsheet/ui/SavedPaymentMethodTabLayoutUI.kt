@@ -3,7 +3,6 @@
 package com.stripe.android.paymentsheet.ui
 
 import androidx.annotation.RestrictTo
-import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -518,9 +517,9 @@ internal fun CvcRecollectionField(
     }
 }
 
-internal const val SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG = "PaymentSheetSavedPaymentOptionTabLayout"
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG = "PaymentSheetSavedPaymentOptionTabLayout"
 
-@VisibleForTesting
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val SAVED_PAYMENT_OPTION_TEST_TAG = "PaymentSheetSavedPaymentOption"
 private const val ANIMATION_DELAY = 400

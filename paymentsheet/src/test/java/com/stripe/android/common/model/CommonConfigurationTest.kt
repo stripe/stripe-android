@@ -1,11 +1,9 @@
 package com.stripe.android.common.model
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import org.junit.Test
 
-@OptIn(ExperimentalCardBrandFilteringApi::class)
 internal class CommonConfigurationTest {
     private val configuration = CommonConfigurationFactory.create()
 

@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
 import androidx.annotation.RestrictTo
-import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,7 +18,6 @@ import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.stripeColors
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@VisibleForTesting
 const val TEST_TAG_ICON_FROM_RES = "PaymentMethodIconFomRes"
 
 @Composable

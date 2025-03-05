@@ -1070,9 +1070,13 @@ internal class CustomerSheetViewModel(
                 }?.let {
                     PaymentSelection.Saved(it)
                 } ?: state.currentSelection
-
+                val filteredPaymentMethods = paymentMethods.filter { paymentMethod ->
+                    paymentMethod.card?.let { card ->
+                        PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance).isAccepted(card.brand)
+                    } ?: true
+                }
                 state.copy(
-                    paymentMethods = sortPaymentMethods(paymentMethods, selection as? PaymentSelection.Saved),
+                    paymentMethods = sortPaymentMethods(filteredPaymentMethods, selection as? PaymentSelection.Saved),
                     currentSelection = selection,
                 )
             }
@@ -1092,15 +1096,17 @@ internal class CustomerSheetViewModel(
     }
 
     private fun selectSavedPaymentMethod(savedPaymentSelection: PaymentSelection.Saved?) {
+        val syncDefaultEnabled = customerState.value.metadata?.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
+
         viewModelScope.launch(workContext) {
             awaitSavedSelectionDataSource().setSavedSelection(
                 savedPaymentSelection?.toSavedSelection(),
-                shouldSyncDefault =
-                customerState.value.metadata?.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true,
+                shouldSyncDefault = syncDefaultEnabled == true,
             ).onSuccess {
                 confirmPaymentSelection(
                     paymentSelection = savedPaymentSelection,
                     type = savedPaymentSelection?.paymentMethod?.type?.code,
+                    syncDefaultEnabled = syncDefaultEnabled,
                 )
             }.onFailure { cause, displayMessage ->
                 confirmPaymentSelectionError(
@@ -1108,18 +1114,22 @@ internal class CustomerSheetViewModel(
                     type = savedPaymentSelection?.paymentMethod?.type?.code,
                     cause = cause,
                     displayMessage = displayMessage,
+                    syncDefaultEnabled = syncDefaultEnabled,
                 )
             }
         }
     }
 
     private fun selectGooglePay() {
+        val syncDefaultEnabled = customerState.value.metadata?.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
+
         viewModelScope.launch(workContext) {
             awaitSavedSelectionDataSource().setSavedSelection(SavedSelection.GooglePay, shouldSyncDefault = false)
                 .onSuccess {
                     confirmPaymentSelection(
                         paymentSelection = PaymentSelection.GooglePay,
-                        type = "google_pay"
+                        type = "google_pay",
+                        syncDefaultEnabled = syncDefaultEnabled,
                     )
                 }.onFailure { cause, displayMessage ->
                     confirmPaymentSelectionError(
@@ -1127,14 +1137,22 @@ internal class CustomerSheetViewModel(
                         type = "google_pay",
                         cause = cause,
                         displayMessage = displayMessage,
+                        syncDefaultEnabled = syncDefaultEnabled,
                     )
                 }
         }
     }
 
-    private fun confirmPaymentSelection(paymentSelection: PaymentSelection?, type: String?) {
+    private fun confirmPaymentSelection(
+        paymentSelection: PaymentSelection?,
+        type: String?,
+        syncDefaultEnabled: Boolean?,
+    ) {
         type?.let {
-            eventReporter.onConfirmPaymentMethodSucceeded(type)
+            eventReporter.onConfirmPaymentMethodSucceeded(
+                type = type,
+                syncDefaultEnabled = syncDefaultEnabled
+            )
         }
         _result.tryEmit(
             InternalCustomerSheetResult.Selected(
@@ -1146,11 +1164,15 @@ internal class CustomerSheetViewModel(
     private fun confirmPaymentSelectionError(
         paymentSelection: PaymentSelection?,
         type: String?,
+        syncDefaultEnabled: Boolean?,
         cause: Throwable,
         displayMessage: String?
     ) {
         type?.let {
-            eventReporter.onConfirmPaymentMethodFailed(type)
+            eventReporter.onConfirmPaymentMethodFailed(
+                type = type,
+                syncDefaultEnabled = syncDefaultEnabled
+            )
         }
         logger.error(
             msg = "Failed to persist payment selection: $paymentSelection",

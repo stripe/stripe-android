@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet
+package com.stripe.paymentelementtestpages
 
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
@@ -17,7 +17,7 @@ import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
 import com.stripe.android.uicore.elements.TEST_TAG_DROP_DOWN_CHOICE
 
-internal class EditPage(
+class EditPage(
     private val composeTestRule: ComposeTestRule
 ) {
     fun waitUntilVisible() {
@@ -90,7 +90,13 @@ internal class EditPage(
         if (waitUntilComplete) {
             composeTestRule.waitUntil(timeoutMillis = 5_000L) {
                 composeTestRule
-                    .onAllNodes(hasTestTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).and(hasTestMetadata("isLoading=true")))
+                    .onAllNodes(
+                        hasTestTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).and(
+                            hasTestMetadata(
+                                "isLoading=true"
+                            )
+                        )
+                    )
                     .fetchSemanticsNodes()
                     .isEmpty()
             }

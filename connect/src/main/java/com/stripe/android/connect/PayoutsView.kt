@@ -2,7 +2,6 @@ package com.stripe.android.connect
 
 import android.content.Context
 import android.util.AttributeSet
-import android.widget.FrameLayout
 import androidx.annotation.RestrictTo
 import androidx.core.content.withStyledAttributes
 import com.stripe.android.connect.webview.StripeConnectWebViewContainer
@@ -15,7 +14,7 @@ class PayoutsView private constructor(
     defStyleAttr: Int,
     cacheKey: String?,
     webViewContainerBehavior: StripeConnectWebViewContainerImpl<PayoutsListener, EmptyProps>,
-) : FrameLayout(context, attrs, defStyleAttr),
+) : StripeComponentView<PayoutsListener, EmptyProps>(context, attrs, defStyleAttr),
     StripeConnectWebViewContainer<PayoutsListener, EmptyProps> by webViewContainerBehavior {
 
     @JvmOverloads

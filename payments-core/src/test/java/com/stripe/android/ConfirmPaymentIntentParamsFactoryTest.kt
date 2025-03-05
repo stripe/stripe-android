@@ -112,6 +112,34 @@ class ConfirmPaymentIntentParamsFactoryTest {
     }
 
     @Test
+    fun `create() with new card when setAsDefaultPaymentMethod is true and using paymentMethod`() {
+        val paymentIntentParams = factory.create(
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            optionsParams = PaymentMethodOptionsParams.Card(
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+            ),
+            extraParams = PaymentMethodExtraParams.Card(
+                setAsDefault = true
+            )
+        )
+        assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isTrue()
+    }
+
+    @Test
+    fun `create() with new card when setAsDefaultPaymentMethod is false and using paymentMethod`() {
+        val paymentIntentParams = factory.create(
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            optionsParams = PaymentMethodOptionsParams.Card(
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+            ),
+            extraParams = PaymentMethodExtraParams.Card(
+                setAsDefault = false
+            )
+        )
+        assertThat(paymentIntentParams.setAsDefaultPaymentMethod).isFalse()
+    }
+
+    @Test
     fun `create() with saved card and shippingDetails sets shipping field`() {
         val shippingDetails = ConfirmPaymentIntentParams.Shipping(
             name = "Test",
