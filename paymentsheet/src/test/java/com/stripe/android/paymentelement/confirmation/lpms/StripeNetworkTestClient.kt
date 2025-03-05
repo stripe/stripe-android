@@ -11,6 +11,7 @@ import com.github.kittinunf.fuel.core.requests.suspendable
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.StripeRepository
@@ -104,14 +105,18 @@ internal class StripeNetworkTestClient @Inject constructor(
 
     suspend fun confirmPaymentIntent(confirmParams: ConfirmPaymentIntentParams): Result<PaymentIntent> {
         return stripeRepository.confirmPaymentIntent(
-            confirmPaymentIntentParams = confirmParams.withShouldUseStripeSdk(shouldUseStripeSdk = true),
+            confirmPaymentIntentParams = confirmParams
+                .withShouldUseStripeSdk(shouldUseStripeSdk = true)
+                .withReturnUrl(),
             options = requestOptions,
         )
     }
 
     suspend fun confirmSetupIntent(confirmParams: ConfirmSetupIntentParams): Result<SetupIntent> {
         return stripeRepository.confirmSetupIntent(
-            confirmSetupIntentParams = confirmParams.withShouldUseStripeSdk(shouldUseStripeSdk = true),
+            confirmSetupIntentParams = confirmParams
+                .withShouldUseStripeSdk(shouldUseStripeSdk = true)
+                .withReturnUrl(),
             options = requestOptions,
         )
     }
@@ -141,6 +146,11 @@ internal class StripeNetworkTestClient @Inject constructor(
             )
     }
 
+    private fun <T : ConfirmStripeIntentParams> T.withReturnUrl() = apply {
+        // We don't need a real return URL since we won't be launching into the payment flow
+        returnUrl = DEFAULT_RETURN_URL
+    }
+
     private suspend fun <T : Any> Request.awaitModel(
         serializer: DeserializationStrategy<T>
     ): ApiResult<T, FuelError> {
@@ -163,5 +173,7 @@ internal class StripeNetworkTestClient @Inject constructor(
 
         const val PAYMENT_INTENT_PATH = "create_payment_intent"
         const val SETUP_INTENT_PATH = "create_setup_intent"
+
+        const val DEFAULT_RETURN_URL = "stripesdk://android_lpm_tests"
     }
 }
