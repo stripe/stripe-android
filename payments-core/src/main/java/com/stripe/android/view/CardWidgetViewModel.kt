@@ -23,6 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
@@ -38,11 +39,13 @@ internal class CardWidgetViewModel(
     private val cardNumberHasContent = MutableSharedFlow<Unit>(replay = 1)
     private val _onBehalfOf = MutableStateFlow<String?>(null)
 
-    val isCbcEligible: Flow<Boolean> = cardNumberHasContent.flatMapLatest {
-        _onBehalfOf
-    }.mapLatest {
-        determineCbcEligibility()
-    }.flowOn(dispatcher)
+    val isCbcEligible: Flow<Boolean> = cardNumberHasContent
+        .distinctUntilChanged()
+        .flatMapLatest {
+            _onBehalfOf
+        }.mapLatest {
+            determineCbcEligibility()
+        }.flowOn(dispatcher)
 
     val onBehalfOf: String?
         get() = _onBehalfOf.value
