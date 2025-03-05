@@ -63,9 +63,6 @@ internal data class VerificationPage(
 ) : Parcelable {
     @Serializable
     internal enum class Status {
-        @SerialName("canceled")
-        CANCELLED,
-
         @SerialName("processing")
         PROCESSING,
 
@@ -74,11 +71,5 @@ internal data class VerificationPage(
 
         @SerialName("verified")
         VERIFIED
-    }
-
-    internal companion object {
-        fun VerificationPage.isUnsupportedClient() = unsupportedClient
-
-        fun VerificationPage.requireSelfie() = selfieCapture != null
     }
 }

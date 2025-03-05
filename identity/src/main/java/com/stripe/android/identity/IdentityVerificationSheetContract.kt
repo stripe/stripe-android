@@ -16,7 +16,6 @@ internal class IdentityVerificationSheetContract :
     internal data class Args(
         val verificationSessionId: String,
         val ephemeralKeySecret: String,
-        val brandLogo: Uri,
         @InjectorKey val injectorKey: String,
         val presentTime: Long
     ) : Parcelable {

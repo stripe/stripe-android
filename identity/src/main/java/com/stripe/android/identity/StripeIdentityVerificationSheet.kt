@@ -14,12 +14,10 @@ import com.stripe.android.identity.injection.IdentityVerificationSheetComponent
 internal class StripeIdentityVerificationSheet internal constructor(
     private val activityResultLauncher: ActivityResultLauncher<IdentityVerificationSheetContract.Args>,
     context: Context,
-    private val configuration: IdentityVerificationSheet.Configuration
 ) : IdentityVerificationSheet, Injector {
 
     constructor(
         from: ComponentActivity,
-        configuration: IdentityVerificationSheet.Configuration,
         identityVerificationCallback: IdentityVerificationSheet.IdentityVerificationCallback
     ) : this(
         from.registerForActivityResult(
@@ -27,12 +25,10 @@ internal class StripeIdentityVerificationSheet internal constructor(
             identityVerificationCallback::onVerificationFlowResult
         ),
         from,
-        configuration
     )
 
     constructor(
         from: Fragment,
-        configuration: IdentityVerificationSheet.Configuration,
         identityVerificationCallback: IdentityVerificationSheet.IdentityVerificationCallback
     ) : this(
         from.registerForActivityResult(
@@ -40,7 +36,6 @@ internal class StripeIdentityVerificationSheet internal constructor(
             identityVerificationCallback::onVerificationFlowResult
         ),
         from.requireContext(),
-        configuration
     )
 
     @InjectorKey
@@ -64,7 +59,6 @@ internal class StripeIdentityVerificationSheet internal constructor(
             IdentityVerificationSheetContract.Args(
                 verificationSessionId,
                 ephemeralKeySecret,
-                configuration.brandLogo,
                 injectorKey,
                 System.currentTimeMillis()
             )

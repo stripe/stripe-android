@@ -88,14 +88,13 @@ internal data class IdentitySubmissionState(
 )
 
 private sealed class LoadingState {
-    object Idle : LoadingState()
-    object Loading : LoadingState()
+    data object Idle : LoadingState()
+    data object Loading : LoadingState()
     class Result(val highlight: String = "", val resultString: String = "") : LoadingState()
 }
 
 @Composable
 internal fun ExampleScreen(
-    configuration: IdentityVerificationSheet.Configuration,
     viewModel: IdentityExampleViewModel
 ) {
     val scaffoldState = rememberScaffoldState()
@@ -177,7 +176,6 @@ internal fun ExampleScreen(
             SubmitView(
                 submissionState,
                 scaffoldState,
-                configuration,
                 viewModel,
                 loadingState,
                 onLoadingStateChanged
@@ -419,7 +417,6 @@ private fun LoadingButton(
 private fun SubmitView(
     submissionState: IdentitySubmissionState,
     scaffoldState: ScaffoldState,
-    configuration: IdentityVerificationSheet.Configuration,
     viewModel: IdentityExampleViewModel,
     loadingState: LoadingState,
     onLoadingStateChanged: (LoadingState) -> Unit
@@ -429,9 +426,7 @@ private fun SubmitView(
 
     var vsId by remember { mutableStateOf("") }
 
-    val identityVerificationSheet = IdentityVerificationSheet.rememberIdentityVerificationSheet(
-        configuration = configuration
-    ) { result ->
+    val identityVerificationSheet = IdentityVerificationSheet.rememberIdentityVerificationSheet { result ->
         when (result) {
             is IdentityVerificationSheet.VerificationFlowResult.Failed -> {
                 onLoadingStateChanged(

@@ -10,18 +10,7 @@
             android:windowSoftInputMode="adjustResize"
             android:configChanges="orientation|keyboardHidden"
             android:exported="false" />
-
-        <provider
-            android:name="com.stripe.android.identity.IdentityFileProvider"
-            android:authorities="${applicationId}.StripeIdentityFileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/stripe_identity_file_paths" />
-        </provider>
     </application>
-
 
     <queries>
         <intent>

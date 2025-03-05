@@ -13,17 +13,9 @@ import dagger.Subcomponent
 @IdentityVerificationScope
 @Subcomponent
 internal interface IdentityActivitySubcomponent {
-//    val documentScanViewModelFactory: DocumentScanViewModel.DocumentScanViewModelFactory
-//    val selfieScanViewModelFactory: SelfieScanViewModel.SelfieScanViewModelFactory
     val identityRepository: IdentityRepository
-//    val identityModelFetcher: IdentityModelFetcher
-//    val identityIO: IdentityIO
     val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory
-//    val fpsTracker: FPSTracker
-//    val screenTracker: ScreenTracker
     val verificationArgs: IdentityVerificationSheetContract.Args
-//    val identityImageHandler: IdentityImageHandler
-//    val tfLiteInitializer: InterpreterInitializer
 
     @Subcomponent.Builder
     interface Builder {

@@ -5,8 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AlertDialog
@@ -26,7 +24,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import com.stripe.android.camera.CameraPermissionCheckingActivity
-import com.stripe.android.camera.framework.time.asEpochMillisecondsComparableTimeMark
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
@@ -56,10 +53,8 @@ internal class IdentityActivity :
     internal var viewModelFactory: ViewModelProvider.Factory =
         IdentityViewModel.IdentityViewModelFactory(
             { application },
-            { uiContext },
             { workContext },
-            { subcomponent },
-            { finishWithResult(it) }
+            { subcomponent }
         )
 
     private val starterArgs: IdentityVerificationSheetContract.Args by lazy {
@@ -70,7 +65,7 @@ internal class IdentityActivity :
 
     private val identityViewModel: IdentityViewModel by viewModels { viewModelFactory }
 
-    lateinit var subcomponent: IdentityActivitySubcomponent
+    private lateinit var subcomponent: IdentityActivitySubcomponent
 
     @Inject
     lateinit var subComponentBuilderProvider: Provider<IdentityActivitySubcomponent.Builder>

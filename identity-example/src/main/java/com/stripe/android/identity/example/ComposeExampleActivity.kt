@@ -15,18 +15,6 @@ abstract class ComposeExampleActivity : ComponentActivity() {
     protected abstract val getBrandLogoResId: Int
 
     private val viewModel: IdentityExampleViewModel by viewModels()
-    private val configuration by lazy {
-        IdentityVerificationSheet.Configuration(
-            // Or use webImage by
-            // brandLogo = Uri.parse("https://path/to/a/logo.jpg")
-            brandLogo = Uri.Builder()
-                .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
-                .authority(resources.getResourcePackageName(getBrandLogoResId))
-                .appendPath(resources.getResourceTypeName(getBrandLogoResId))
-                .appendPath(resources.getResourceEntryName(getBrandLogoResId))
-                .build()
-        )
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,10 +23,7 @@ abstract class ComposeExampleActivity : ComponentActivity() {
                 window.isNavigationBarContrastEnforced = false
             }
             MaterialTheme {
-                ExampleScreen(
-                    configuration = configuration,
-                    viewModel = viewModel
-                )
+                ExampleScreen(viewModel = viewModel)
             }
         }
     }

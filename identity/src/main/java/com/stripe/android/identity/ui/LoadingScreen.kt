@@ -43,28 +43,6 @@ internal fun LoadingScreen() {
     }
 }
 
-/**
- * Ensures [IdentityViewModel.verificationPage] is valid and compose.
- * Otherwise navigate to default error.
- */
-@Composable
-internal fun CheckVerificationPageAndCompose(
-    identityViewModel: IdentityViewModel,
-    navController: NavController,
-    onSuccess: @Composable (VerificationPage) -> Unit
-) {
-    val verificationPageState by identityViewModel.verificationPage.observeAsState(Resource.loading())
-    val context = LocalContext.current
-    CheckVerificationPageAndCompose(
-        verificationPageResource = verificationPageState,
-        onError = {
-            identityViewModel.errorCause.postValue(it)
-//            navController.navigateToErrorScreenWithDefaultValues(context)
-        },
-        onSuccess = onSuccess
-    )
-}
-
 @Composable
 internal fun CheckVerificationPageAndCompose(
     verificationPageResource: Resource<VerificationPage>,
@@ -91,31 +69,3 @@ internal fun CheckVerificationPageAndCompose(
         }
     }
 }
-
-//@Composable
-//internal fun CheckVerificationPageModelFilesAndCompose(
-//    identityViewModel: IdentityViewModel,
-//    navController: NavController,
-//    onSuccess: @Composable (IdentityViewModel.PageAndModelFiles) -> Unit
-//) {
-//    val verificationPageState by identityViewModel.pageAndModelFiles.observeAsState(Resource.loading())
-//    val context = LocalContext.current
-//    when (verificationPageState.status) {
-//        Status.SUCCESS -> {
-//            onSuccess(requireNotNull(verificationPageState.data))
-//        }
-//        Status.LOADING -> {
-//            LoadingScreen()
-//        } // no-op
-//        Status.IDLE -> {} // no-op
-//        Status.ERROR -> {
-//            identityViewModel.errorCause.postValue(
-//                InvalidResponseException(
-//                    cause = verificationPageState.throwable,
-//                    message = verificationPageState.message
-//                )
-//            )
-//            navController.navigateToErrorScreenWithDefaultValues(context)
-//        }
-//    }
-//}

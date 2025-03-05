@@ -15,18 +15,6 @@ import kotlinx.parcelize.Parcelize
 
 interface IdentityVerificationSheet {
     /**
-     * Data to configure the verification flow.
-     */
-    data class Configuration(
-        /**
-         * Brand logo to display on the consent page of verification flow.
-         * The Uri could be a local drawable resource file or a web image.
-         * The logo will be displayed in a 32x32 dp ImageView.
-         */
-        val brandLogo: Uri
-    )
-
-    /**
      * Result of verification.
      */
     sealed class VerificationFlowResult : Parcelable {
@@ -78,10 +66,9 @@ interface IdentityVerificationSheet {
          */
         fun create(
             from: ComponentActivity,
-            configuration: Configuration,
             identityVerificationCallback: IdentityVerificationCallback
         ): IdentityVerificationSheet =
-            StripeIdentityVerificationSheet(from, configuration, identityVerificationCallback)
+            StripeIdentityVerificationSheet(from, identityVerificationCallback)
 
         /**
          * Creates a [IdentityVerificationSheet] instance with [Fragment].
@@ -92,10 +79,9 @@ interface IdentityVerificationSheet {
          */
         fun create(
             from: Fragment,
-            configuration: Configuration,
             identityVerificationCallback: IdentityVerificationCallback
         ): IdentityVerificationSheet =
-            StripeIdentityVerificationSheet(from, configuration, identityVerificationCallback)
+            StripeIdentityVerificationSheet(from, identityVerificationCallback)
 
         /**
          * Creates a [IdentityVerificationSheet] instance in a [Composable]. Which would be
@@ -109,7 +95,6 @@ interface IdentityVerificationSheet {
          */
         @Composable
         fun rememberIdentityVerificationSheet(
-            configuration: Configuration,
             identityVerificationCallback: IdentityVerificationCallback
         ): IdentityVerificationSheet {
             val context = LocalContext.current
@@ -117,13 +102,10 @@ interface IdentityVerificationSheet {
                 IdentityVerificationSheetContract(),
                 identityVerificationCallback::onVerificationFlowResult
             )
-            return remember(configuration) {
-                StripeIdentityVerificationSheet(
-                    activityResultLauncher,
-                    context,
-                    configuration
-                )
-            }
+            return StripeIdentityVerificationSheet(
+                activityResultLauncher,
+                context,
+            )
         }
     }
 }
