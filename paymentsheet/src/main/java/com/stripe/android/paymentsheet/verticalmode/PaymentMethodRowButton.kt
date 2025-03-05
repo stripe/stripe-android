@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import android.content.res.Configuration
-import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -215,9 +214,7 @@ private fun RowButtonRadioOuterContent(
 ) {
     val colors = style.getColors(isSystemInDarkTheme())
     Row(
-        modifier = modifier
-            .background(MaterialTheme.stripeColors.component)
-            .padding(contentPaddingValues)
+        modifier = modifier.padding(contentPaddingValues)
     ) {
         RadioButton(
             selected = isSelected,
@@ -254,9 +251,7 @@ private fun RowButtonCheckmarkOuterContent(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Row(
-        modifier = modifier
-            .background(MaterialTheme.stripeColors.component)
-            .padding(contentPaddingValues),
+        modifier = modifier.padding(contentPaddingValues),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(

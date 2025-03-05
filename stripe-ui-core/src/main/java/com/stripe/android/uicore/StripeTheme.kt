@@ -158,6 +158,7 @@ data class EmbeddedFloatingStyle(
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR = Color(0xFF24B47E)
+private val EMBEDDED_SEPARATOR_COLOR_DARK = Color(0x40FFFFFF)
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object StripeThemeDefaults {
@@ -256,7 +257,7 @@ object StripeThemeDefaults {
     )
 
     val checkmarkColorsDark = EmbeddedCheckmarkColors(
-        separatorColor = colorsDark.componentBorder,
+        separatorColor = EMBEDDED_SEPARATOR_COLOR_DARK,
         checkmarkColor = colorsDark.materialColors.primary
     )
 
@@ -268,8 +269,8 @@ object StripeThemeDefaults {
 
     val radioColorsDark = EmbeddedRadioColors(
         selectedColor = colorsDark.materialColors.primary,
-        unselectedColor = colorsDark.componentBorder,
-        separatorColor = colorsDark.componentBorder
+        unselectedColor = EMBEDDED_SEPARATOR_COLOR_DARK,
+        separatorColor = EMBEDDED_SEPARATOR_COLOR_DARK
     )
 
     val embeddedCommon = EmbeddedInsets(

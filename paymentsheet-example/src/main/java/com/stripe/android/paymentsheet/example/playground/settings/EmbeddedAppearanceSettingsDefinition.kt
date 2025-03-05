@@ -78,9 +78,9 @@ internal data class EmbeddedAppearance(
                     unselectedColor = unselectedColor
                 ),
                 colorsDark = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio.Colors(
-                    separatorColor = Color(0xFF787880).toArgb(),
+                    separatorColor = Color(0x40FFFFFF).toArgb(),
                     selectedColor = Color(0xFF0074D4).toArgb(),
-                    unselectedColor = Color(0xFF787880).toArgb(),
+                    unselectedColor = Color(0x40FFFFFF).toArgb(),
                 )
             )
             EmbeddedRow.FlatWithCheckmark -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark(
@@ -97,7 +97,7 @@ internal data class EmbeddedAppearance(
                     checkmarkColor = checkmarkColor
                 ),
                 colorsDark = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.Colors(
-                    separatorColor = Color(0xFF787880).toArgb(),
+                    separatorColor = Color(0x40FFFFFF).toArgb(),
                     checkmarkColor = Color(0xFF0074D4).toArgb()
                 )
             )
