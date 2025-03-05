@@ -1,9 +1,8 @@
 package com.stripe.android.paymentsheet.utils
 
-import androidx.compose.ui.test.junit4.AndroidComposeTestRule
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.testing.RetryRule
 import leakcanary.DetectLeaksAfterTestSuccess
 import org.junit.rules.RuleChain
@@ -13,7 +12,7 @@ import org.junit.runners.model.Statement
 
 class TestRules private constructor(
     private val chain: RuleChain,
-    val compose: AndroidComposeTestRule<*, *>,
+    val compose: ComposeTestRule,
     val networkRule: NetworkRule,
 ) : TestRule {
     override fun apply(base: Statement, description: Description): Statement {
@@ -27,7 +26,7 @@ class TestRules private constructor(
 
     companion object {
         fun create(
-            composeTestRule: AndroidComposeTestRule<*, *> = createAndroidComposeRule<PaymentSheetActivity>(),
+            composeTestRule: ComposeTestRule = createEmptyComposeRule(),
             networkRule: NetworkRule = NetworkRule(),
         ): TestRules {
             val chain = RuleChain.emptyRuleChain()
