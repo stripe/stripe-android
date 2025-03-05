@@ -19,25 +19,23 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
             CustomerSheetIntegration.Type.CustomerSession -> CS_INIT_WITH_CUSTOMER_SESSION
             CustomerSheetIntegration.Type.CustomerAdapter -> CS_INIT_WITH_CUSTOMER_ADAPTER
         }
-        override val additionalParams: Map<String, Any?>
-            get() {
-                val configurationMap = mapOf(
-                    FIELD_GOOGLE_PAY_ENABLED to configuration.googlePayEnabled,
-                    FIELD_BILLING to configuration.defaultBillingDetails.isFilledOut(),
-                    FIELD_APPEARANCE to configuration.appearance.toAnalyticsMap(),
-                    FIELD_ALLOWS_REMOVAL_OF_LAST_SAVED_PAYMENT_METHOD to
-                        configuration.allowsRemovalOfLastSavedPaymentMethod,
-                    FIELD_PAYMENT_METHOD_ORDER to configuration.paymentMethodOrder,
-                    FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION to (
-                        configuration.billingDetailsCollectionConfiguration.toAnalyticsMap()
-                        ),
-                    FIELD_PREFERRED_NETWORKS to configuration.preferredNetworks.toAnalyticsValue(),
-                    FIELD_CARD_BRAND_ACCEPTANCE to configuration.cardBrandAcceptance.toAnalyticsValue(),
-                )
-                return mapOf(
-                    FIELD_CUSTOMER_SHEET_CONFIGURATION to configurationMap,
-                )
-            }
+        override val additionalParams: Map<String, Any?> = buildMap {
+            val configurationMap = mapOf(
+                FIELD_GOOGLE_PAY_ENABLED to configuration.googlePayEnabled,
+                FIELD_BILLING to configuration.defaultBillingDetails.isFilledOut(),
+                FIELD_APPEARANCE to configuration.appearance.toAnalyticsMap(),
+                FIELD_ALLOWS_REMOVAL_OF_LAST_SAVED_PAYMENT_METHOD to
+                    configuration.allowsRemovalOfLastSavedPaymentMethod,
+                FIELD_PAYMENT_METHOD_ORDER to configuration.paymentMethodOrder,
+                FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION to (
+                    configuration.billingDetailsCollectionConfiguration.toAnalyticsMap()
+                    ),
+                FIELD_PREFERRED_NETWORKS to configuration.preferredNetworks.toAnalyticsValue(),
+                FIELD_CARD_BRAND_ACCEPTANCE to configuration.cardBrandAcceptance.toAnalyticsValue(),
+            )
+
+            put(FIELD_CUSTOMER_SHEET_CONFIGURATION, configurationMap)
+        }
     }
 
     class ScreenPresented(
