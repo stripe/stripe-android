@@ -78,19 +78,23 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
 
     class ConfirmPaymentMethodSucceeded(
         type: String,
+        syncDefaultEnabled: Boolean?,
     ) : CustomerSheetEvent() {
-        override val additionalParams: Map<String, Any?> = mapOf(
-            FIELD_PAYMENT_METHOD_TYPE to type
-        )
+        override val additionalParams: Map<String, Any?> = buildMap {
+            put(FIELD_PAYMENT_METHOD_TYPE, type)
+            syncDefaultEnabled?.let { put(FIELD_SYNC_DEFAULT_ENABLED, it) }
+        }
         override val eventName: String = CS_SELECT_PAYMENT_METHOD_CONFIRMED_SAVED_PM_SUCCEEDED
     }
 
     class ConfirmPaymentMethodFailed(
         type: String,
+        syncDefaultEnabled: Boolean?,
     ) : CustomerSheetEvent() {
-        override val additionalParams: Map<String, Any?> = mapOf(
-            FIELD_PAYMENT_METHOD_TYPE to type
-        )
+        override val additionalParams: Map<String, Any?> = buildMap {
+            put(FIELD_PAYMENT_METHOD_TYPE, type)
+            syncDefaultEnabled?.let { put(FIELD_SYNC_DEFAULT_ENABLED, it) }
+        }
         override val eventName: String = CS_SELECT_PAYMENT_METHOD_CONFIRMED_SAVED_PM_FAILED
     }
 
@@ -277,6 +281,7 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
         const val FIELD_SELECTED_CARD_BRAND = "selected_card_brand"
         const val FIELD_ERROR_MESSAGE = "error_message"
         const val FIELD_PAYMENT_METHOD_TYPE = "payment_method_type"
+        const val FIELD_SYNC_DEFAULT_ENABLED = "sync_default_enabled"
         const val FIELD_SELECTED_LPM = "selected_lpm"
         const val FIELD_CARD_BRAND_ACCEPTANCE = "card_brand_acceptance"
         const val FIELD_CUSTOMER_ACCESS_PROVIDER = "customer_access_provider"

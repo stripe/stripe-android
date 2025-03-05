@@ -52,18 +52,26 @@ internal class DefaultCustomerSheetEventReporter @Inject constructor(
         )
     }
 
-    override fun onConfirmPaymentMethodSucceeded(type: String) {
+    override fun onConfirmPaymentMethodSucceeded(
+        type: String,
+        syncDefaultEnabled: Boolean?,
+    ) {
         fireEvent(
             CustomerSheetEvent.ConfirmPaymentMethodSucceeded(
-                type = type
+                type = type,
+                syncDefaultEnabled = syncDefaultEnabled,
             )
         )
     }
 
-    override fun onConfirmPaymentMethodFailed(type: String) {
+    override fun onConfirmPaymentMethodFailed(
+        type: String,
+        syncDefaultEnabled: Boolean?,
+    ) {
         fireEvent(
             CustomerSheetEvent.ConfirmPaymentMethodFailed(
-                type = type
+                type = type,
+                syncDefaultEnabled = syncDefaultEnabled,
             )
         )
     }
