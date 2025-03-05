@@ -33,6 +33,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 
+@Suppress("LargeClass")
 class SavedPaymentMethodMutatorTest {
     @Test
     fun `canEdit is correct when no payment methods`() = runScenario {
