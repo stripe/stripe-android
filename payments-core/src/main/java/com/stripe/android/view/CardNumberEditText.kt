@@ -8,6 +8,7 @@ import android.text.InputFilter
 import android.util.AttributeSet
 import android.view.View
 import androidx.annotation.VisibleForTesting
+import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
@@ -238,6 +239,10 @@ class CardNumberEditText internal constructor(
         }
 
         doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
+            addTextChangedListener { text ->
+                viewModel.updateCardNumber(text?.toString())
+            }
+
             viewModel.isCbcEligible.launchAndCollect { isCbcEligible ->
                 this@CardNumberEditText.isCbcEligible = isCbcEligible
 

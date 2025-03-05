@@ -21,36 +21,41 @@ import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 import javax.inject.Provider
 
 internal class CardWidgetViewModel(
     private val paymentConfigProvider: Provider<PaymentConfiguration>,
     private val stripeRepository: StripeRepository,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
+    dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : ViewModel() {
 
-    private val _isCbcEligible = MutableStateFlow(false)
-    val isCbcEligible: StateFlow<Boolean> = _isCbcEligible
+    private val cardNumberHasContent = MutableSharedFlow<Unit>(replay = 1)
+    private val _onBehalfOf = MutableStateFlow<String?>(null)
 
-    private var _onBehalfOf: String? = null
+    val isCbcEligible: Flow<Boolean> = cardNumberHasContent.flatMapLatest {
+        _onBehalfOf
+    }.mapLatest {
+        determineCbcEligibility()
+    }.flowOn(dispatcher)
+
     val onBehalfOf: String?
-        get() = _onBehalfOf
-
-    init {
-        getEligibility()
-    }
+        get() = _onBehalfOf.value
 
     fun setOnBehalfOf(onBehalfOf: String? = null) {
-        _onBehalfOf = onBehalfOf
-        getEligibility()
+        _onBehalfOf.value = onBehalfOf
     }
 
-    private fun getEligibility() {
-        viewModelScope.launch(dispatcher) {
-            _isCbcEligible.value = determineCbcEligibility()
+    fun updateCardNumber(value: String?) {
+        viewModelScope.launch {
+            if (value.isNullOrBlank().not()) {
+                cardNumberHasContent.emit(Unit)
+            }
         }
     }
 
