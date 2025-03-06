@@ -1,0 +1,5175 @@
+unstable class ConfigurationDefaults {
+  stable val allowsDelayedPaymentMethods: Boolean
+  stable val allowsPaymentMethodsRequiringShippingAddress: Boolean
+  stable val allowsRemovalOfLastSavedPaymentMethod: Boolean
+  runtime val appearance: Appearance
+  runtime val billingDetails: BillingDetails
+  runtime val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
+  runtime val customer: CustomerConfiguration?
+  runtime val googlePay: GooglePayConfiguration?
+  stable val googlePayEnabled: Boolean
+  stable val headerTextForSelectionScreen: String?
+  unstable val paymentMethodOrder: List<String>
+  unstable val preferredNetworks: List<CardBrand>
+  unstable val primaryButtonColor: ColorStateList?
+  stable val primaryButtonLabel: String?
+  runtime val shippingDetails: AddressDetails?
+  unstable val externalPaymentMethods: List<String>
+  stable val paymentMethodLayout: PaymentMethodLayout
+  stable val cardBrandAcceptance: CardBrandAcceptance
+  stable val embeddedViewDisplaysMandateText: Boolean
+  <runtime stability> = Unstable
+}
+unstable class CoalescingOrchestrator {
+  unstable val factory: SuspendFunction0<T>
+  stable val keepDataInMemory: Function1<T, Boolean>
+  stable val awaitListener: Function0<Unit>?
+  runtime var data: T
+  stable var dataInitialized: Boolean
+  unstable var deferred: Deferred<T>?
+  unstable val lock: Any
+  <runtime stability> = Unstable
+}
+stable class ApplicationIdModule {
+  <runtime stability> = Stable
+}
+unstable class CommonConfiguration {
+  stable val merchantDisplayName: String
+  runtime val customer: CustomerConfiguration?
+  runtime val googlePay: GooglePayConfiguration?
+  runtime val defaultBillingDetails: BillingDetails?
+  runtime val shippingDetails: AddressDetails?
+  stable val allowsDelayedPaymentMethods: Boolean
+  stable val allowsPaymentMethodsRequiringShippingAddress: Boolean
+  runtime val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
+  unstable val preferredNetworks: List<CardBrand>
+  stable val allowsRemovalOfLastSavedPaymentMethod: Boolean
+  unstable val paymentMethodOrder: List<String>
+  unstable val externalPaymentMethods: List<String>
+  stable val cardBrandAcceptance: CardBrandAcceptance
+  runtime var CREATOR: Creator<CommonConfiguration>
+  <runtime stability> = Unstable
+}
+unstable class DelegateDrawable {
+  unstable val imageLoader: SuspendFunction0<Drawable>
+  unstable var delegate: Drawable
+  <runtime stability> = Unstable
+}
+unstable class PaymentElementActivityResultCaller {
+  stable val key: String
+  unstable val registryOwner: ActivityResultRegistryOwner
+  <runtime stability> = Unstable
+}
+stable class Valid {
+  <runtime stability> = Stable
+}
+stable class Empty {
+  <runtime stability> = Stable
+}
+stable class LegacyEphemeralKey {
+  <runtime stability> = Stable
+}
+stable class UnknownKey {
+  <runtime stability> = Stable
+}
+stable class CustomerSessionClientSecretValidator {
+  stable val EPHEMERAL_KEY_SECRET_PREFIX: String
+  stable val CUSTOMER_SESSION_CLIENT_SECRET_KEY_PREFIX: String
+  <runtime stability> = Stable
+}
+stable class GooglePay {
+  <runtime stability> = Stable
+}
+stable class Link {
+  <runtime stability> = Stable
+}
+stable class StripeId {
+  stable val id: String
+  <runtime stability> = Stable
+}
+stable class PaymentOption {
+  stable val id: String
+  <runtime stability> = Stable
+}
+runtime class Success {
+  runtime val value: T
+  <runtime stability> = Parameter(T)
+}
+unstable class Failure {
+  unstable val cause: Throwable
+  stable val displayMessage: String?
+  <runtime stability> = Unstable
+}
+stable class Result {
+  <runtime stability> = Stable
+}
+stable class CustomerEphemeralKey {
+  stable val customerId: String
+  stable val ephemeralKey: String
+  <runtime stability> = Stable
+}
+stable class CustomerPermissions {
+  stable val canRemovePaymentMethods: Boolean
+  stable val canRemoveLastPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+unstable class Builder {
+  stable val merchantDisplayName: String
+  runtime var appearance: Appearance
+  stable var googlePayEnabled: Boolean
+  stable var headerTextForSelectionScreen: String?
+  runtime var defaultBillingDetails: BillingDetails
+  runtime var billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
+  unstable var preferredNetworks: List<CardBrand>
+  stable var allowsRemovalOfLastSavedPaymentMethod: Boolean
+  unstable var paymentMethodOrder: List<String>
+  stable var cardBrandAcceptance: CardBrandAcceptance
+  <runtime stability> = Unstable
+}
+unstable class Configuration {
+  runtime val appearance: Appearance
+  stable val googlePayEnabled: Boolean
+  stable val headerTextForSelectionScreen: String?
+  runtime val defaultBillingDetails: BillingDetails
+  runtime val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
+  stable val merchantDisplayName: String
+  unstable val preferredNetworks: List<CardBrand>
+  stable val allowsRemovalOfLastSavedPaymentMethod: Boolean
+  unstable val paymentMethodOrder: List<String>
+  stable val cardBrandAcceptance: CardBrandAcceptance
+  runtime var CREATOR: Creator<Configuration>
+  <runtime stability> = Unstable
+}
+unstable class Builder {
+  unstable var paymentMethodTypes: List<String>
+  <runtime stability> = Unstable
+}
+unstable class IntentConfiguration {
+  unstable val paymentMethodTypes: List<String>
+  <runtime stability> = Unstable
+}
+stable class CustomerSessionClientSecret {
+  stable val customerId: String
+  stable val clientSecret: String
+  <runtime stability> = Stable
+}
+stable class CustomerSessionProvider {
+  <runtime stability> = Stable
+}
+unstable class CustomerSheet {
+  unstable val application: Application
+  stable val integrationType: Type
+  unstable val paymentOptionFactory: PaymentOptionFactory
+  runtime val callback: CustomerSheetResultCallback
+  stable val statusBarColor: Function0<Int?>
+  unstable val customerSheetActivityLauncher: ActivityResultLauncher<Args>
+  unstable val viewModel: CustomerSheetConfigViewModel
+  <runtime stability> = Unstable
+}
+unstable class CustomerSheetActivity {
+  unstable val args$delegate: Lazy<Args?>
+  stable var viewModelFactoryProducer: Function0<Factory>
+  unstable val viewModel$delegate: Lazy<CustomerSheetViewModel>
+  <runtime stability> = Unstable
+}
+stable class Factory {
+  <runtime stability> = Stable
+}
+unstable class CustomerSheetConfigViewModel {
+  unstable val savedStateHandle: SavedStateHandle
+  <runtime stability> = Unstable
+}
+unstable class CustomerSheetConfigureRequest {
+  unstable val configuration: Configuration
+  runtime var CREATOR: Creator<CustomerSheetConfigureRequest>
+  <runtime stability> = Unstable
+}
+unstable class Args {
+  stable val integrationType: Type
+  unstable val configuration: Configuration
+  stable val statusBarColor: Int?
+  runtime var CREATOR: Creator<Args>
+  <runtime stability> = Unstable
+}
+stable class CustomerSheetContract {
+  <runtime stability> = Stable
+}
+runtime class Adapter {
+  runtime val adapter: CustomerAdapter
+  <runtime stability> = Uncertain(CustomerAdapter)
+}
+stable class CustomerSession {
+  stable val customerSessionProvider: CustomerSessionProvider
+  <runtime stability> = Stable
+}
+stable class CustomerSheetIntegration {
+  stable val type: Type
+  <runtime stability> = Stable
+}
+unstable class DefaultCustomerSheetLoader {
+  stable val isLiveModeProvider: Function0<Boolean>
+  stable val googlePayRepositoryFactory: @[JvmSuppressWildcards(suppress = <null>)] Function1<GooglePayEnvironment, GooglePayRepository>
+  unstable val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable
+  stable val lpmRepository: LpmRepository
+  runtime val initializationDataSourceProvider: Single<CustomerSheetInitializationDataSource>
+  unstable val errorReporter: ErrorReporter
+  unstable val workContext: CoroutineContext
+  <runtime stability> = Unstable
+}
+unstable class Selected {
+  unstable val selection: PaymentOptionSelection?
+  <runtime stability> = Unstable
+}
+unstable class Canceled {
+  unstable val selection: PaymentOptionSelection?
+  <runtime stability> = Unstable
+}
+unstable class Failed {
+  unstable val exception: Throwable
+  <runtime stability> = Unstable
+}
+stable class CustomerSheetResult {
+  <runtime stability> = Stable
+}
+unstable class PaymentMethod {
+  runtime val paymentMethod: PaymentMethod
+  unstable val paymentOption: PaymentOption
+  <runtime stability> = Unstable
+}
+unstable class GooglePay {
+  unstable val paymentOption: PaymentOption
+  <runtime stability> = Unstable
+}
+unstable class PaymentOptionSelection {
+  unstable val paymentOption: PaymentOption
+  <runtime stability> = Unstable
+}
+stable class Loading {
+  <runtime stability> = Stable
+}
+unstable class Full {
+  unstable val config: Configuration
+  unstable val paymentMethodMetadata: PaymentMethodMetadata
+  unstable val customerPaymentMethods: List<PaymentMethod>
+  stable val customerPermissions: CustomerPermissions
+  unstable val supportedPaymentMethods: List<SupportedPaymentMethod>
+  unstable val paymentSelection: PaymentSelection?
+  unstable val validationError: Throwable?
+  <runtime stability> = Unstable
+}
+stable class OnDismissed {
+  <runtime stability> = Stable
+}
+stable class OnBackPressed {
+  <runtime stability> = Stable
+}
+stable class OnEditPressed {
+  <runtime stability> = Stable
+}
+stable class OnCardNumberInputCompleted {
+  <runtime stability> = Stable
+}
+stable class OnAddCardPressed {
+  <runtime stability> = Stable
+}
+stable class OnPrimaryButtonPressed {
+  <runtime stability> = Stable
+}
+stable class OnCancelClose {
+  <runtime stability> = Stable
+}
+stable class OnDisallowedCardBrandEntered {
+  stable val brand: CardBrand
+  <runtime stability> = Stable
+}
+unstable class OnItemSelected {
+  unstable val selection: PaymentSelection?
+  <runtime stability> = Unstable
+}
+unstable class OnModifyItem {
+  unstable val paymentMethod: DisplayableSavedPaymentMethod
+  <runtime stability> = Unstable
+}
+unstable class OnAddPaymentMethodItemChanged {
+  unstable val paymentMethod: SupportedPaymentMethod
+  <runtime stability> = Unstable
+}
+unstable class OnFormFieldValuesCompleted {
+  unstable val formFieldValues: FormFieldValues?
+  <runtime stability> = Unstable
+}
+stable class OnUpdateCustomButtonUIState {
+  stable val callback: Function1<UIState?, UIState?>
+  <runtime stability> = Stable
+}
+unstable class OnUpdateMandateText {
+  unstable val mandateText: ResolvableString?
+  stable val showAbovePrimaryButton: Boolean
+  <runtime stability> = Unstable
+}
+unstable class OnBankAccountSelectionChanged {
+  unstable val paymentSelection: USBankAccount?
+  <runtime stability> = Unstable
+}
+unstable class OnFormError {
+  unstable val error: ResolvableString?
+  <runtime stability> = Unstable
+}
+stable class CustomerSheetViewAction {
+  <runtime stability> = Stable
+}
+unstable class Factory {
+  unstable val args: Args
+  <runtime stability> = Unstable
+}
+unstable class CustomerSheetViewModel {
+  unstable var originalPaymentSelection: PaymentSelection?
+  unstable val paymentConfigurationProvider: Provider<PaymentConfiguration>
+  runtime val paymentMethodDataSourceProvider: Single<CustomerSheetPaymentMethodDataSource>
+  runtime val intentDataSourceProvider: Single<CustomerSheetIntentDataSource>
+  runtime val savedSelectionDataSourceProvider: Single<CustomerSheetSavedSelectionDataSource>
+  unstable val configuration: Configuration
+  stable val integrationType: Type
+  unstable val logger: Logger
+  unstable val stripeRepository: StripeRepository
+  runtime val eventReporter: CustomerSheetEventReporter
+  unstable val workContext: CoroutineContext
+  stable val isLiveModeProvider: Function0<Boolean>
+  runtime val customerSheetLoader: CustomerSheetLoader
+  unstable val errorReporter: ErrorReporter
+  runtime val cardAccountRangeRepositoryFactory: DefaultCardAccountRangeRepositoryFactory
+  unstable val backStack: MutableStateFlow<List<CustomerSheetViewState>>
+  unstable val viewState: StateFlow<CustomerSheetViewState>
+  unstable val _result: MutableStateFlow<InternalCustomerSheetResult?>
+  unstable val result: StateFlow<InternalCustomerSheetResult?>
+  runtime val confirmationHandler: ConfirmationHandler
+  unstable val isEditing: MutableStateFlow<Boolean>
+  unstable val selectionConfirmationState: MutableStateFlow<SelectionConfirmationState>
+  unstable val customerState: MutableStateFlow<CustomerState>
+  unstable val selectPaymentMethodState: StateFlow<SelectPaymentMethod>
+  unstable var previouslySelectedPaymentMethod: SupportedPaymentMethod?
+  unstable var supportedPaymentMethods: MutableList<SupportedPaymentMethod>
+  <runtime stability> = Unstable
+}
+stable class Loading {
+  stable val isLiveMode: Boolean
+  <runtime stability> = Stable
+}
+unstable class SelectPaymentMethod {
+  stable val title: String?
+  unstable val savedPaymentMethods: List<PaymentMethod>
+  unstable val paymentSelection: PaymentSelection?
+  stable val isLiveMode: Boolean
+  stable val isProcessing: Boolean
+  stable val isEditing: Boolean
+  stable val showGooglePay: Boolean
+  stable val primaryButtonVisible: Boolean
+  stable val canEdit: Boolean
+  stable val canRemovePaymentMethods: Boolean
+  stable val errorMessage: String?
+  unstable val mandateText: ResolvableString?
+  stable val isCbcEligible: Boolean
+  unstable val primaryButtonLabel: ResolvableString
+  <runtime stability> = Unstable
+}
+unstable class AddPaymentMethod {
+  stable val paymentMethodCode: String
+  unstable val supportedPaymentMethods: List<SupportedPaymentMethod>
+  unstable val formFieldValues: FormFieldValues?
+  unstable val formElements: List<FormElement>
+  unstable val formArguments: FormArguments
+  unstable val usBankAccountFormArguments: USBankAccountFormArguments
+  unstable val draftPaymentSelection: PaymentSelection?
+  stable val enabled: Boolean
+  stable val isLiveMode: Boolean
+  stable val isProcessing: Boolean
+  unstable val errorMessage: ResolvableString?
+  stable val isFirstPaymentMethod: Boolean
+  unstable val primaryButtonLabel: ResolvableString
+  stable val primaryButtonEnabled: Boolean
+  unstable val customPrimaryButtonUiState: UIState?
+  unstable val mandateText: ResolvableString?
+  stable val showMandateAbovePrimaryButton: Boolean
+  stable val displayDismissConfirmationModal: Boolean
+  unstable val bankAccountSelection: USBankAccount?
+  unstable val errorReporter: ErrorReporter
+  <runtime stability> = Unstable
+}
+runtime class UpdatePaymentMethod {
+  runtime val updatePaymentMethodInteractor: UpdatePaymentMethodInteractor
+  stable val isLiveMode: Boolean
+  <runtime stability> = Uncertain(UpdatePaymentMethodInteractor)
+}
+stable class CustomerSheetViewState {
+  stable val isLiveMode: Boolean
+  stable val isProcessing: Boolean
+  stable val canNavigateBack: Boolean
+  <runtime stability> = Stable
+}
+unstable class Selected {
+  unstable val paymentSelection: PaymentSelection?
+  runtime var CREATOR: Creator<Selected>
+  <runtime stability> = Unstable
+}
+unstable class Canceled {
+  unstable val paymentSelection: PaymentSelection?
+  runtime var CREATOR: Creator<Canceled>
+  <runtime stability> = Unstable
+}
+unstable class Error {
+  unstable val exception: Throwable
+  runtime var CREATOR: Creator<Error>
+  <runtime stability> = Unstable
+}
+stable class InternalCustomerSheetResult {
+  <runtime stability> = Stable
+}
+unstable class StripeCustomerAdapter {
+  unstable val context: Context
+  runtime val customerEphemeralKeyProvider: CustomerEphemeralKeyProvider
+  runtime val setupIntentClientSecretProvider: SetupIntentClientSecretProvider?
+  unstable val paymentMethodTypes: List<String>?
+  stable val timeProvider: Function0<Long>
+  runtime val customerRepository: CustomerRepository
+  stable val prefsRepositoryFactory: Function1<CustomerEphemeralKey, PrefsRepository>
+  unstable val workContext: CoroutineContext
+  stable var cachedCustomerEphemeralKey: CachedCustomerEphemeralKey?
+  unstable val customerEphemeralKeyCoalescingOrchestrator: CoalescingOrchestrator<Result<CustomerEphemeralKey>>
+  <runtime stability> = Unstable
+}
+unstable class Init {
+  unstable val configuration: Configuration
+  stable val eventName: String
+  <runtime stability> = Unstable
+}
+unstable class ScreenPresented {
+  unstable val additionalParams: Map<String, Any?>
+  stable val eventName: String
+  <runtime stability> = Unstable
+}
+unstable class ScreenHidden {
+  unstable val additionalParams: Map<String, Any?>
+  stable val eventName: String
+  <runtime stability> = Unstable
+}
+unstable class SelectPaymentMethod {
+  stable val eventName: String
+  unstable val additionalParams: Map<String, Any?>
+  <runtime stability> = Unstable
+}
+unstable class ConfirmPaymentMethodSucceeded {
+  unstable val additionalParams: Map<String, Any?>
+  stable val eventName: String
+  <runtime stability> = Unstable
+}
+unstable class ConfirmPaymentMethodFailed {
+  unstable val additionalParams: Map<String, Any?>
+  stable val eventName: String
+  <runtime stability> = Unstable
+}
+unstable class EditTapped {
+  unstable val additionalParams: Map<String, Any?>
+  stable val eventName: String
+  <runtime stability> = Unstable
+}
+unstable class EditCompleted {
+  unstable val additionalParams: Map<String, Any?>
+  stable val eventName: String
+  <runtime stability> = Unstable
+}
+unstable class RemovePaymentMethodSucceeded {
+  unstable val additionalParams: Map<String, Any?>
+  stable val eventName: String
+  <runtime stability> = Unstable
+}
+unstable class RemovePaymentMethodFailed {
+  unstable val additionalParams: Map<String, Any?>
+  stable val eventName: String
+  <runtime stability> = Unstable
+}
+unstable class AttachPaymentMethodSucceeded {
+  unstable val additionalParams: Map<String, Any?>
+  stable val eventName: String
+  <runtime stability> = Unstable
+}
+unstable class AttachPaymentMethodCanceled {
+  unstable val additionalParams: Map<String, Any?>
+  stable val eventName: String
+  <runtime stability> = Unstable
+}
+unstable class AttachPaymentMethodFailed {
+  unstable val additionalParams: Map<String, Any?>
+  stable val eventName: String
+  <runtime stability> = Unstable
+}
+unstable class ShowPaymentOptionBrands {
+  stable val eventName: String
+  unstable val additionalParams: Map<String, Any?>
+  <runtime stability> = Unstable
+}
+unstable class HidePaymentOptionBrands {
+  stable val eventName: String
+  unstable val additionalParams: Map<String, Any?>
+  <runtime stability> = Unstable
+}
+unstable class UpdatePaymentOptionSucceeded {
+  stable val eventName: String
+  unstable val additionalParams: Map<String, Any?>
+  <runtime stability> = Unstable
+}
+unstable class UpdatePaymentOptionFailed {
+  stable val eventName: String
+  unstable val additionalParams: Map<String, Any?>
+  <runtime stability> = Unstable
+}
+unstable class CardBrandDisallowed {
+  stable val eventName: String
+  unstable val additionalParams: Map<String, Any?>
+  <runtime stability> = Unstable
+}
+unstable class CardNumberCompleted {
+  stable val eventName: String
+  unstable val additionalParams: Map<String, Any?>
+  <runtime stability> = Unstable
+}
+stable class CustomerSheetEvent {
+  <runtime stability> = Stable
+}
+unstable class DefaultCustomerSheetEventReporter {
+  unstable val analyticsRequestExecutor: AnalyticsRequestExecutor
+  unstable val analyticsRequestFactory: AnalyticsRequestFactory
+  unstable val workContext: CoroutineContext
+  <runtime stability> = Unstable
+}
+stable class CachedCustomerEphemeralKey {
+  stable val customerId: String
+  stable val customerSessionClientSecret: String
+  stable val ephemeralKey: String
+  stable val expiresAt: Int
+  <runtime stability> = Stable
+}
+unstable class CustomerAdapterDataSource {
+  runtime val elementsSessionRepository: ElementsSessionRepository
+  runtime val customerAdapter: CustomerAdapter
+  unstable val errorReporter: ErrorReporter
+  unstable val workContext: CoroutineContext
+  stable val canCreateSetupIntents: Boolean
+  <runtime stability> = Unstable
+}
+runtime class CustomerSessionElementsSession {
+  runtime val elementsSession: ElementsSession
+  runtime val customer: Customer
+  stable val ephemeralKey: CachedCustomerEphemeralKey
+  <runtime stability> = Runtime(Customer),Runtime(ElementsSession)
+}
+unstable class DefaultCustomerSessionElementsSessionManager {
+  runtime val elementsSessionRepository: ElementsSessionRepository
+  stable val prefsRepositoryFactory: @[JvmSuppressWildcards(suppress = <null>)] Function1<String, PrefsRepository>
+  stable val customerSessionProvider: CustomerSessionProvider
+  unstable val errorReporter: ErrorReporter
+  stable val timeProvider: Function0<Long>
+  unstable val workContext: CoroutineContext
+  stable var cachedCustomerEphemeralKey: CachedCustomerEphemeralKey?
+  unstable var intentConfiguration: IntentConfiguration?
+  <runtime stability> = Unstable
+}
+unstable class CustomerSessionInitializationDataSource {
+  runtime val elementsSessionManager: CustomerSessionElementsSessionManager
+  runtime val savedSelectionDataSource: CustomerSheetSavedSelectionDataSource
+  unstable val workContext: CoroutineContext
+  <runtime stability> = Unstable
+}
+runtime class CustomerSessionIntentDataSource {
+  runtime val elementsSessionManager: CustomerSessionElementsSessionManager
+  stable val customerSessionProvider: CustomerSessionProvider
+  stable val canCreateSetupIntents: Boolean
+  <runtime stability> = Uncertain(CustomerSessionElementsSessionManager)
+}
+unstable class CustomerSessionPaymentMethodDataSource {
+  runtime val elementsSessionManager: CustomerSessionElementsSessionManager
+  runtime val customerRepository: CustomerRepository
+  unstable val errorReporter: ErrorReporter
+  unstable val workContext: CoroutineContext
+  <runtime stability> = Unstable
+}
+unstable class CustomerSessionSavedSelectionDataSource {
+  runtime val elementsSessionManager: CustomerSessionElementsSessionManager
+  runtime val customerRepository: CustomerRepository
+  stable val prefsRepositoryFactory: @[JvmSuppressWildcards(suppress = <null>)] Function1<String, PrefsRepository>
+  unstable val workContext: CoroutineContext
+  <runtime stability> = Unstable
+}
+runtime class Success {
+  runtime val value: T
+  <runtime stability> = Parameter(T)
+}
+unstable class Failure {
+  unstable val cause: Throwable
+  stable val displayMessage: String?
+  <runtime stability> = Unstable
+}
+unstable class CustomerSheetSession {
+  runtime val elementsSession: ElementsSession
+  unstable val paymentMethods: List<PaymentMethod>
+  stable val savedSelection: SavedSelection?
+  runtime val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior
+  stable val permissions: CustomerPermissions
+  stable val defaultPaymentMethodId: String?
+  <runtime stability> = Unstable
+}
+unstable class CustomerSheetHacks {
+  unstable val _initializationDataSource: MutableStateFlow<CustomerSheetInitializationDataSource?>
+  unstable val _paymentMethodDataSource: MutableStateFlow<CustomerSheetPaymentMethodDataSource?>
+  unstable val _savedSelectionDataSource: MutableStateFlow<CustomerSheetSavedSelectionDataSource?>
+  unstable val _intentDataSource: MutableStateFlow<CustomerSheetIntentDataSource?>
+  <runtime stability> = Unstable
+}
+stable class BackPressed {
+  <runtime stability> = Stable
+}
+stable class LogoutClicked {
+  <runtime stability> = Stable
+}
+unstable class LinkActivity {
+  unstable var viewModelFactory: Factory
+  unstable var viewModel: LinkActivityViewModel?
+  unstable var webLauncher: ActivityResultLauncher<Args>?
+  <runtime stability> = Unstable
+}
+unstable class Args {
+  unstable val configuration: LinkConfiguration
+  stable val startWithVerificationDialog: Boolean
+  unstable val linkAccount: LinkAccount?
+  <runtime stability> = Unstable
+}
+stable class Result {
+  stable val linkResult: LinkActivityResult
+  <runtime stability> = Stable
+}
+unstable class LinkActivityContract {
+  stable val nativeLinkActivityContract: NativeLinkActivityContract
+  unstable val webLinkActivityContract: WebLinkActivityContract
+  runtime val linkGateFactory: Factory
+  <runtime stability> = Unstable
+}
+stable class Completed {
+  runtime val linkAccountUpdate: LinkAccountUpdate
+  runtime var CREATOR: Creator<Completed>
+  <runtime stability> = 
+}
+runtime class PaymentMethodObtained {
+  runtime val paymentMethod: PaymentMethod
+  runtime var CREATOR: Creator<PaymentMethodObtained>
+  <runtime stability> = Runtime(PaymentMethod)
+}
+stable class Canceled {
+  stable val reason: Reason
+  runtime val linkAccountUpdate: LinkAccountUpdate
+  runtime var CREATOR: Creator<Canceled>
+  <runtime stability> = 
+}
+unstable class Failed {
+  unstable val error: Throwable
+  runtime val linkAccountUpdate: LinkAccountUpdate
+  runtime var CREATOR: Creator<Failed>
+  <runtime stability> = Unstable
+}
+stable class LinkActivityResult {
+  <runtime stability> = Stable
+}
+unstable class Value {
+  unstable val linkAccount: LinkAccount?
+  runtime var CREATOR: Creator<Value>
+  <runtime stability> = Unstable
+}
+runtime class None {
+  runtime var CREATOR: Creator<None>
+  <runtime stability> = Uncertain(Creator)
+}
+unstable class LinkActivityViewModel {
+  runtime val activityRetainedComponent: NativeLinkComponent
+  runtime val linkAccountManager: LinkAccountManager
+  unstable val linkAccountHolder: LinkAccountHolder
+  runtime val eventReporter: EventReporter
+  unstable val linkConfiguration: LinkConfiguration
+  runtime val linkAttestationCheck: LinkAttestationCheck
+  unstable val savedStateHandle: SavedStateHandle
+  stable val startWithVerificationDialog: Boolean
+  runtime val confirmationHandler: ConfirmationHandler
+  unstable val _linkAppBarState: MutableStateFlow<LinkAppBarState>
+  unstable val linkAppBarState: StateFlow<LinkAppBarState>
+  unstable val _linkScreenState: MutableStateFlow<ScreenState>
+  unstable val linkScreenState: StateFlow<ScreenState>
+  unstable var navListenerJob: Job?
+  unstable var navController: NavHostController?
+  stable var dismissWithResult: Function1<LinkActivityResult, Unit>?
+  stable var launchWebFlow: Function1<LinkConfiguration, Unit>?
+  <runtime stability> = Unstable
+}
+unstable class VerificationDialog {
+  unstable val linkAccount: LinkAccount
+  <runtime stability> = Unstable
+}
+stable class FullScreen {
+  <runtime stability> = Stable
+}
+stable class Loading {
+  <runtime stability> = Stable
+}
+stable class NoArgsException {
+  <runtime stability> = Stable
+}
+runtime class CustomerInfo {
+  stable val name: String?
+  stable val email: String?
+  stable val phone: String?
+  stable val billingCountryCode: String?
+  runtime var CREATOR: Creator<CustomerInfo>
+  <runtime stability> = Uncertain(Creator)
+}
+unstable class CardBrandChoice {
+  stable val eligible: Boolean
+  unstable val preferredNetworks: List<String>
+  runtime var CREATOR: Creator<CardBrandChoice>
+  <runtime stability> = Unstable
+}
+unstable class LinkConfiguration {
+  unstable val stripeIntent: StripeIntent
+  stable val merchantName: String
+  stable val merchantCountryCode: String?
+  runtime val customerInfo: CustomerInfo
+  runtime val shippingDetails: AddressDetails?
+  stable val passthroughModeEnabled: Boolean
+  unstable val flags: Map<String, Boolean>
+  unstable val cardBrandChoice: CardBrandChoice?
+  stable val useAttestationEndpointsForLink: Boolean
+  stable val suppress2faModal: Boolean
+  stable val initializationMode: InitializationMode
+  stable val elementsSessionId: String
+  stable val linkMode: LinkMode?
+  runtime var CREATOR: Creator<LinkConfiguration>
+  <runtime stability> = Unstable
+}
+unstable class RealLinkConfigurationCoordinator {
+  runtime val linkComponentBuilder: Builder
+  unstable val componentFlow: MutableStateFlow<LinkComponent?>
+  unstable val emailFlow: StateFlow<String?>
+  <runtime stability> = Unstable
+}
+unstable class LinkEventException {
+  unstable val cause: Throwable
+  <runtime stability> = Unstable
+}
+unstable class LinkForegroundActivity {
+  stable var hasLaunchedPopup: Boolean
+  <runtime stability> = Unstable
+}
+unstable class Saved {
+  unstable val paymentDetails: PaymentDetails
+  runtime val paymentMethodCreateParams: PaymentMethodCreateParams
+  runtime var CREATOR: Creator<Saved>
+  <runtime stability> = Unstable
+}
+unstable class New {
+  unstable val paymentDetails: PaymentDetails
+  runtime val paymentMethodCreateParams: PaymentMethodCreateParams
+  runtime val originalParams: PaymentMethodCreateParams
+  runtime var CREATOR: Creator<New>
+  <runtime stability> = Unstable
+}
+unstable class LinkPaymentDetails {
+  unstable val paymentDetails: PaymentDetails
+  runtime val paymentMethodCreateParams: PaymentMethodCreateParams
+  <runtime stability> = Unstable
+}
+unstable class LinkPaymentLauncher {
+  unstable val linkActivityContract: LinkActivityContract
+  unstable val linkStore: LinkStore
+  runtime val analyticsHelper: LinkAnalyticsHelper
+  unstable var linkActivityResultLauncher: ActivityResultLauncher<Args>?
+  <runtime stability> = Unstable
+}
+stable class LinkRedirectHandlerActivity {
+  <runtime stability> = Stable
+}
+stable class Loading {
+  <runtime stability> = Stable
+}
+stable class Verification {
+  <runtime stability> = Stable
+}
+stable class Wallet {
+  <runtime stability> = Stable
+}
+stable class PaymentMethod {
+  <runtime stability> = Stable
+}
+stable class SignUp {
+  <runtime stability> = Stable
+}
+stable class LinkScreen {
+  stable val route: String
+  <runtime stability> = Stable
+}
+stable class NativeLinkActivityContract {
+  <runtime stability> = Stable
+}
+unstable class NativeLinkArgs {
+  unstable val configuration: LinkConfiguration
+  stable val publishableKey: String
+  stable val stripeAccountId: String?
+  stable val startWithVerificationDialog: Boolean
+  unstable val linkAccount: LinkAccount?
+  runtime var CREATOR: Creator<NativeLinkArgs>
+  <runtime stability> = Unstable
+}
+stable class NoLinkAccountFoundException {
+  <runtime stability> = Stable
+}
+unstable class WebLinkActivityContract {
+  unstable val stripeRepository: StripeRepository
+  unstable val errorReporter: ErrorReporter
+  <runtime stability> = Unstable
+}
+stable class FailedToParseLinkResultUriException {
+  <runtime stability> = Stable
+}
+stable class AlreadyLoggedInLinkException {
+  stable val email: String?
+  stable val accountStatus: AccountStatus
+  <runtime stability> = Stable
+}
+unstable class DefaultLinkAccountManager {
+  unstable val linkAccountHolder: LinkAccountHolder
+  unstable val config: LinkConfiguration
+  runtime val linkRepository: LinkRepository
+  runtime val linkEventsReporter: LinkEventsReporter
+  unstable val errorReporter: ErrorReporter
+  unstable val linkAccount: StateFlow<LinkAccount?>
+  stable var consumerPublishableKey: String?
+  unstable val accountStatus: Flow<AccountStatus>
+  <runtime stability> = Unstable
+}
+unstable class DefaultLinkAuth {
+  runtime val linkGate: LinkGate
+  runtime val linkAccountManager: LinkAccountManager
+  unstable val integrityRequestManager: IntegrityRequestManager
+  unstable val errorReporter: ErrorReporter
+  stable val applicationId: String
+  <runtime stability> = Unstable
+}
+unstable class LinkAccountHolder {
+  unstable val savedStateHandle: SavedStateHandle
+  unstable val linkAccount: StateFlow<LinkAccount?>
+  <runtime stability> = Unstable
+}
+unstable class Success {
+  unstable val account: LinkAccount
+  <runtime stability> = Unstable
+}
+stable class NoLinkAccountFound {
+  <runtime stability> = Stable
+}
+unstable class AttestationFailed {
+  unstable val error: Throwable
+  <runtime stability> = Unstable
+}
+unstable class AccountError {
+  unstable val error: Throwable
+  <runtime stability> = Unstable
+}
+unstable class Error {
+  unstable val error: Throwable
+  <runtime stability> = Unstable
+}
+unstable class LinkStore {
+  unstable val sharedPrefs$delegate: Lazy<@[FlexibleNullability] SharedPreferences?>
+  <runtime stability> = Unstable
+}
+runtime class DefaultLinkAnalyticsHelper {
+  runtime val linkEventsReporter: LinkEventsReporter
+  <runtime stability> = Uncertain(LinkEventsReporter)
+}
+unstable class DefaultLinkEventsReporter {
+  unstable val analyticsRequestExecutor: AnalyticsRequestExecutor
+  runtime val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
+  unstable val errorReporter: ErrorReporter
+  unstable val workContext: CoroutineContext
+  unstable val logger: Logger
+  unstable val durationProvider: DurationProvider
+  <runtime stability> = Unstable
+}
+stable class SignUpCheckboxChecked {
+  stable val eventName: String
+  <runtime stability> = Stable
+}
+stable class SignUpFlowPresented {
+  stable val eventName: String
+  <runtime stability> = Stable
+}
+stable class SignUpStart {
+  stable val eventName: String
+  <runtime stability> = Stable
+}
+stable class SignUpComplete {
+  stable val eventName: String
+  <runtime stability> = Stable
+}
+stable class SignUpFailure {
+  stable val eventName: String
+  <runtime stability> = Stable
+}
+stable class SignUpFailureInvalidSessionState {
+  stable val eventName: String
+  <runtime stability> = Stable
+}
+stable class AccountLookupFailure {
+  stable val eventName: String
+  <runtime stability> = Stable
+}
+stable class TwoFAStart {
+  stable val eventName: String
+  <runtime stability> = Stable
+}
+stable class TwoFAStartFailure {
+  stable val eventName: String
+  <runtime stability> = Stable
+}
+stable class TwoFAComplete {
+  stable val eventName: String
+  <runtime stability> = Stable
+}
+stable class TwoFAFailure {
+  stable val eventName: String
+  <runtime stability> = Stable
+}
+stable class TwoFACancel {
+  stable val eventName: String
+  <runtime stability> = Stable
+}
+stable class PopupShow {
+  stable val eventName: String
+  <runtime stability> = Stable
+}
+stable class PopupSuccess {
+  stable val eventName: String
+  <runtime stability> = Stable
+}
+stable class PopupCancel {
+  stable val eventName: String
+  <runtime stability> = Stable
+}
+stable class PopupError {
+  stable val eventName: String
+  <runtime stability> = Stable
+}
+stable class PopupLogout {
+  stable val eventName: String
+  <runtime stability> = Stable
+}
+stable class PopupSkipped {
+  stable val eventName: String
+  <runtime stability> = Stable
+}
+stable class LinkEvent {
+  <runtime stability> = Stable
+}
+unstable class DefaultLinkAttestationCheck {
+  runtime val linkGate: LinkGate
+  runtime val linkAuth: LinkAuth
+  unstable val integrityRequestManager: IntegrityRequestManager
+  runtime val linkAccountManager: LinkAccountManager
+  unstable val linkConfiguration: LinkConfiguration
+  unstable val errorReporter: ErrorReporter
+  unstable val workContext: CoroutineContext
+  <runtime stability> = Unstable
+}
+stable class Successful {
+  <runtime stability> = Stable
+}
+unstable class AttestationFailed {
+  unstable val error: Throwable
+  <runtime stability> = Unstable
+}
+unstable class AccountError {
+  unstable val error: Throwable
+  <runtime stability> = Unstable
+}
+unstable class Error {
+  unstable val error: Throwable
+  <runtime stability> = Unstable
+}
+unstable class Factory {
+  unstable val configuration: LinkConfiguration
+  unstable val logger: Logger
+  <runtime stability> = Unstable
+}
+unstable class DefaultLinkConfirmationHandler {
+  unstable val configuration: LinkConfiguration
+  unstable val logger: Logger
+  runtime val confirmationHandler: ConfirmationHandler
+  <runtime stability> = Unstable
+}
+stable class Succeeded {
+  <runtime stability> = Stable
+}
+stable class Canceled {
+  <runtime stability> = Stable
+}
+unstable class Failed {
+  unstable val message: ResolvableString
+  <runtime stability> = Unstable
+}
+stable class Factory {
+  <runtime stability> = Stable
+}
+unstable class DefaultLinkGate {
+  unstable val configuration: LinkConfiguration
+  <runtime stability> = Unstable
+}
+stable class LinkComponent {
+  <runtime stability> = Stable
+}
+stable class LinkViewModelModule {
+  <runtime stability> = Stable
+}
+unstable class LinkAccount {
+  unstable val consumerSession: ConsumerSession
+  stable val redactedPhoneNumber: String
+  stable val clientSecret: String
+  stable val email: String
+  stable val isVerified: Boolean
+  stable val accountStatus: AccountStatus
+  runtime var CREATOR: Creator<LinkAccount>
+  <runtime stability> = Unstable
+}
+unstable class LinkApiRepository {
+  stable val publishableKeyProvider: Function0<String>
+  stable val stripeAccountIdProvider: Function0<String?>
+  unstable val stripeRepository: StripeRepository
+  unstable val consumersApiService: ConsumersApiService
+  unstable val workContext: CoroutineContext
+  unstable val locale: Locale?
+  unstable val errorReporter: ErrorReporter
+  unstable val fraudDetectionDataRepository: FraudDetectionDataRepository
+  <runtime stability> = Unstable
+}
+unstable class $serializer {
+  unstable val descriptor: SerialDescriptor
+  <runtime stability> = Unstable
+}
+stable class MerchantInfo {
+  stable val businessName: String
+  stable val country: String?
+  <runtime stability> = Stable
+}
+unstable class $serializer {
+  unstable val descriptor: SerialDescriptor
+  <runtime stability> = Unstable
+}
+stable class CustomerInfo {
+  stable val email: String?
+  stable val country: String?
+  <runtime stability> = Stable
+}
+unstable class $serializer {
+  unstable val descriptor: SerialDescriptor
+  <runtime stability> = Unstable
+}
+stable class PaymentInfo {
+  stable val currency: String
+  stable val amount: Long
+  <runtime stability> = Stable
+}
+unstable class $serializer {
+  unstable val descriptor: SerialDescriptor
+  <runtime stability> = Unstable
+}
+unstable class CardBrandChoice {
+  stable val eligible: Boolean
+  unstable val preferredNetworks: List<String>
+  <runtime stability> = Unstable
+}
+unstable class $serializer {
+  unstable val descriptor: SerialDescriptor
+  <runtime stability> = Unstable
+}
+unstable class PopupPayload {
+  stable val publishableKey: String
+  stable val stripeAccount: String?
+  stable val merchantInfo: MerchantInfo
+  stable val customerInfo: CustomerInfo
+  stable val paymentInfo: PaymentInfo?
+  stable val appId: String
+  stable val locale: String
+  stable val paymentUserAgent: String
+  stable val paymentObject: String
+  stable val intentMode: String
+  stable val setupFutureUsage: Boolean
+  unstable val cardBrandChoice: CardBrandChoice?
+  unstable val flags: Map<String, Boolean>
+  unstable val linkFundingSources: List<String>
+  stable val path: String
+  stable val integrationType: String
+  unstable val loggerMetadata: Map<String, String>
+  unstable val experiments: Map<String, String>
+  <runtime stability> = Unstable
+}
+runtime class LinkColors {
+  stable val componentBackground: Color
+  stable val componentBorder: Color
+  stable val componentDivider: Color
+  stable val actionLabel: Color
+  stable val buttonLabel: Color
+  stable val actionLabelLight: Color
+  stable val errorText: Color
+  stable val disabledText: Color
+  stable val errorComponentBackground: Color
+  stable val progressIndicator: Color
+  stable val materialColors: Colors
+  stable val secondaryButtonLabel: Color
+  stable val sheetScrim: Color
+  stable val closeButton: Color
+  stable val linkLogo: Color
+  runtime val otpElementColors: OTPElementColors
+  <runtime stability> = Runtime(OTPElementColors)
+}
+runtime class LinkThemeConfig {
+  runtime val colorsLight: LinkColors
+  runtime val colorsDark: LinkColors
+  <runtime stability> = Runtime(OTPElementColors),Runtime(OTPElementColors)
+}
+stable class LinkShapes {
+  stable val extraSmall: RoundedCornerShape
+  stable val small: RoundedCornerShape
+  stable val medium: RoundedCornerShape
+  stable val large: RoundedCornerShape
+  <runtime stability> = Stable
+}
+runtime class FromResources {
+  stable val stringResId: Int
+  runtime var CREATOR: Creator<FromResources>
+  <runtime stability> = Uncertain(Creator)
+}
+runtime class Raw {
+  stable val errorMessage: String
+  runtime var CREATOR: Creator<Raw>
+  <runtime stability> = Uncertain(Creator)
+}
+stable class ErrorMessage {
+  <runtime stability> = Stable
+}
+stable class Small {
+  stable val shape: RoundedCornerShape
+  stable val iconModifier: Modifier
+  stable val textModifier: Modifier
+  stable val textStyle: TextStyle
+  <runtime stability> = Stable
+}
+stable class Medium {
+  stable val shape: RoundedCornerShape
+  stable val iconModifier: Modifier
+  stable val textModifier: Modifier
+  stable val textStyle: TextStyle
+  <runtime stability> = Stable
+}
+stable class ErrorTextStyle {
+  <runtime stability> = Stable
+}
+unstable class LogoutMenuItem {
+  unstable val text: ResolvableString
+  stable val testTag: String
+  stable val isDestructive: Boolean
+  <runtime stability> = Unstable
+}
+stable class LinkAppBarState {
+  stable val navigationIcon: Int
+  stable val showHeader: Boolean
+  stable val showOverflowMenu: Boolean
+  stable val email: String?
+  <runtime stability> = Stable
+}
+stable class Factory {
+  stable val signupMode: LinkSignupMode
+  stable val initialUserInput: UserInput?
+  stable val linkComponent: LinkComponent
+  <runtime stability> = Stable
+}
+unstable class InlineSignupViewModel {
+  stable val initialUserInput: UserInput?
+  stable val signupMode: LinkSignupMode
+  runtime val linkAccountManager: LinkAccountManager
+  runtime val linkEventsReporter: LinkEventsReporter
+  unstable val logger: Logger
+  stable val lookupDelay: Long
+  stable val hasInitialUserInput: Boolean
+  unstable val initialViewState: InlineSignupViewState
+  unstable val _viewState: MutableStateFlow<InlineSignupViewState>
+  unstable val viewState: StateFlow<InlineSignupViewState>
+  stable val showOptionalLabel: Boolean
+  unstable val prefillEligibleFields: Set<LinkSignupField>
+  stable val initialEmail: String?
+  stable val initialPhone: String?
+  stable val initialName: String?
+  stable val initialCountry: String?
+  stable val prefilledEmail: String?
+  stable val prefilledPhone: String
+  stable val prefilledName: String?
+  runtime val emailController: SimpleTextFieldController
+  runtime val phoneController: PhoneNumberController
+  runtime val nameController: SimpleTextFieldController
+  runtime val sectionController: SectionController
+  unstable val consumerEmail: StateFlow<String?>
+  unstable val consumerPhoneNumber: StateFlow<String?>
+  unstable val consumerName: StateFlow<String?>
+  unstable val _errorMessage: MutableStateFlow<ErrorMessage?>
+  unstable val errorMessage: StateFlow<ErrorMessage?>
+  stable var hasExpanded: Boolean
+  <runtime stability> = Unstable
+}
+unstable class InlineSignupViewState {
+  stable val userInput: UserInput?
+  stable val merchantName: String
+  stable val signupMode: LinkSignupMode?
+  unstable val fields: List<LinkSignupField>
+  unstable val prefillEligibleFields: Set<LinkSignupField>
+  stable val isExpanded: Boolean
+  stable val apiFailed: Boolean
+  stable val signUpState: SignUpState
+  <runtime stability> = Unstable
+}
+runtime class SignIn {
+  stable val email: String
+  runtime var CREATOR: Creator<SignIn>
+  <runtime stability> = Uncertain(Creator)
+}
+runtime class SignUp {
+  stable val email: String
+  stable val phone: String
+  stable val country: String
+  stable val name: String?
+  stable val consentAction: SignUpConsentAction
+  runtime var CREATOR: Creator<SignUp>
+  <runtime stability> = Uncertain(Creator)
+}
+stable class UserInput {
+  <runtime stability> = Stable
+}
+unstable class PaymentMethodState {
+  unstable val formArguments: FormArguments
+  unstable val formElements: List<FormElement>
+  stable val primaryButtonState: PrimaryButtonState
+  unstable val primaryButtonLabel: ResolvableString
+  runtime val paymentMethodCreateParams: PaymentMethodCreateParams?
+  unstable val errorMessage: ResolvableString?
+  <runtime stability> = Unstable
+}
+unstable class PaymentMethodViewModel {
+  unstable val configuration: LinkConfiguration
+  unstable val linkAccount: LinkAccount
+  runtime val linkAccountManager: LinkAccountManager
+  runtime val linkConfirmationHandler: LinkConfirmationHandler
+  unstable val logger: Logger
+  runtime val formHelper: FormHelper
+  stable val dismissWithResult: Function1<LinkActivityResult, Unit>
+  unstable val _state: MutableStateFlow<PaymentMethodState>
+  unstable val state: StateFlow<PaymentMethodState>
+  <runtime stability> = Unstable
+}
+stable class SignUpScreenState {
+  stable val merchantName: String
+  stable val signUpEnabled: Boolean
+  stable val requiresNameCollection: Boolean
+  stable val signUpState: SignUpState
+  unstable val errorMessage: ResolvableString?
+}
+unstable class SignUpViewModel {
+  unstable val configuration: LinkConfiguration
+  runtime val linkEventsReporter: LinkEventsReporter
+  unstable val logger: Logger
+  runtime val linkAuth: LinkAuth
+  unstable val savedStateHandle: SavedStateHandle
+  stable val navigate: Function1<LinkScreen, Unit>
+  stable val navigateAndClearStack: Function1<LinkScreen, Unit>
+  stable val moveToWeb: Function0<Unit>
+  stable val useLinkConfigurationCustomerInfo: Boolean
+  runtime val customerInfo: CustomerInfo?
+  runtime val emailController: SimpleTextFieldController
+  runtime val phoneNumberController: PhoneNumberController
+  runtime val nameController: SimpleTextFieldController
+  unstable val _state: MutableStateFlow<SignUpScreenState>
+  unstable val state: StateFlow<SignUpScreenState>
+  stable var emailHasChanged: Boolean
+  <runtime stability> = Unstable
+}
+unstable class VerificationViewModel {
+  unstable val linkAccount: LinkAccount
+  runtime val linkAccountManager: LinkAccountManager
+  runtime val linkEventsReporter: LinkEventsReporter
+  unstable val logger: Logger
+  stable val isDialog: Boolean
+  stable val onVerificationSucceeded: Function0<Unit>
+  stable val onChangeEmailRequested: Function0<Unit>
+  stable val onDismissClicked: Function0<Unit>
+  unstable val _viewState: MutableStateFlow<VerificationViewState>
+  unstable val viewState: StateFlow<VerificationViewState>
+  runtime val otpElement: OTPElement
+  unstable val otpCode: StateFlow<String?>
+  <runtime stability> = Unstable
+}
+stable class VerificationViewState {
+  stable val isProcessing: Boolean
+  stable val requestFocus: Boolean
+  unstable val errorMessage: ResolvableString?
+  stable val isSendingNewCode: Boolean
+  stable val didSendNewCode: Boolean
+  stable val redactedPhoneNumber: String
+  stable val email: String
+  stable val isDialog: Boolean
+}
+unstable class RemoveItem {
+  unstable val text: ResolvableString
+  <runtime stability> = Unstable
+}
+stable class SetAsDefault {
+  <runtime stability> = Stable
+}
+stable class Cancel {
+  <runtime stability> = Stable
+}
+unstable class WalletPaymentMethodMenuItem {
+  unstable val text: ResolvableString
+  stable val testTag: String
+  stable val isDestructive: Boolean
+  <runtime stability> = Unstable
+}
+stable class WalletUiState {
+  unstable val paymentDetailsList: List<PaymentDetails>
+  unstable val selectedItem: PaymentDetails?
+  stable val isProcessing: Boolean
+  unstable val primaryButtonLabel: ResolvableString
+  stable val hasCompleted: Boolean
+  stable val canAddNewPaymentMethod: Boolean
+  stable val cardBeingUpdated: String?
+  unstable val errorMessage: ResolvableString?
+  runtime val expiryDateInput: FormFieldEntry
+  runtime val cvcInput: FormFieldEntry
+  unstable val alertMessage: ResolvableString?
+  unstable val selectedCard: Card?
+  stable val showBankAccountTerms: Boolean
+}
+unstable class WalletViewModel {
+  unstable val configuration: LinkConfiguration
+  unstable val linkAccount: LinkAccount
+  runtime val linkAccountManager: LinkAccountManager
+  runtime val linkConfirmationHandler: LinkConfirmationHandler
+  unstable val logger: Logger
+  stable val navigate: Function1<@[ParameterName(name = 'route')] LinkScreen, Unit>
+  stable val navigateAndClearStack: Function1<@[ParameterName(name = 'route')] LinkScreen, Unit>
+  stable val dismissWithResult: Function1<LinkActivityResult, Unit>
+  unstable val stripeIntent: StripeIntent
+  unstable val _uiState: MutableStateFlow<WalletUiState>
+  unstable val uiState: StateFlow<WalletUiState>
+  runtime val expiryDateController: SimpleTextFieldController
+  runtime val cvcController: CvcController
+  <runtime stability> = Unstable
+}
+unstable class InlineContentTemplateBuilder {
+  unstable val inlineContent: MutableMap<String, InlineTextContent>
+  <runtime stability> = Unstable
+}
+unstable class FormHeaderInformation {
+  unstable val displayName: ResolvableString
+  stable val shouldShowIcon: Boolean
+  stable val iconResource: Int
+  stable val lightThemeIconUrl: String?
+  stable val darkThemeIconUrl: String?
+  stable val iconRequiresTinting: Boolean
+  stable val promoBadge: String?
+  <runtime stability> = Unstable
+}
+unstable class FormElementsBuilder {
+  unstable val arguments: Arguments
+  unstable val headerFormElements: MutableList<FormElement>
+  unstable val uiFormElements: MutableList<FormElement>
+  unstable val footerFormElements: MutableList<FormElement>
+  unstable val requiredContactInformationCollectionModes: MutableSet<ContactInformationCollectionMode>
+  stable var requireBillingAddressCollection: Boolean
+  unstable var availableCountries: Set<String>
+  <runtime stability> = Unstable
+}
+stable class InitialValuesFactory {
+  <runtime stability> = Stable
+}
+unstable class Result {
+  unstable val sharedDataSpecs: List<SharedDataSpec>
+  stable val failedToParseServerResponse: Boolean
+  stable val failedToParseServerErrorMessage: String?
+  <runtime stability> = Unstable
+}
+stable class LpmRepository {
+  <runtime stability> = Stable
+}
+unstable class SupportedPaymentMethod {
+  stable val code: String
+  unstable val displayName: ResolvableString
+  stable val iconResource: Int
+  stable val lightThemeIconUrl: String?
+  stable val darkThemeIconUrl: String?
+  stable val iconRequiresTinting: Boolean
+  unstable val subtitle: ResolvableString?
+  <runtime stability> = Unstable
+}
+unstable class TransformSpecToElements {
+  unstable val arguments: Arguments
+  <runtime stability> = Unstable
+}
+runtime class CustomerMetadata {
+  stable val hasCustomerConfiguration: Boolean
+  stable val isPaymentMethodSetAsDefaultEnabled: Boolean
+  runtime var CREATOR: Creator<CustomerMetadata>
+  <runtime stability> = Uncertain(Creator)
+}
+unstable class PaymentMethodMetadata {
+  unstable val stripeIntent: StripeIntent
+  runtime val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
+  stable val allowsDelayedPaymentMethods: Boolean
+  stable val allowsPaymentMethodsRequiringShippingAddress: Boolean
+  unstable val paymentMethodOrder: List<String>
+  unstable val cbcEligibility: CardBrandChoiceEligibility
+  stable val merchantName: String
+  runtime val defaultBillingDetails: BillingDetails?
+  runtime val shippingDetails: AddressDetails?
+  unstable val sharedDataSpecs: List<SharedDataSpec>
+  unstable val externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>
+  runtime val customerMetadata: CustomerMetadata?
+  stable val isGooglePayReady: Boolean
+  unstable val linkInlineConfiguration: LinkInlineConfiguration?
+  runtime val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior
+  stable val linkMode: LinkMode?
+  unstable val linkState: LinkState?
+  runtime val paymentMethodIncentive: PaymentMethodIncentive?
+  stable val financialConnectionsAvailable: Boolean
+  unstable val cardBrandFilter: CardBrandFilter
+  runtime var CREATOR: Creator<PaymentMethodMetadata>
+  <runtime stability> = Unstable
+}
+unstable class PaymentMethodRegistry {
+  unstable val all: Set<PaymentMethodDefinition>
+  unstable val definitionsByCode$delegate: Lazy<Map<String, PaymentMethodDefinition>>
+  <runtime stability> = Unstable
+}
+runtime class Legacy {
+  runtime var CREATOR: Creator<Legacy>
+  <runtime stability> = Uncertain(Creator)
+}
+runtime class Enabled {
+  runtime var CREATOR: Creator<Enabled>
+  <runtime stability> = Uncertain(Creator)
+}
+runtime class Disabled {
+  stable val overrideAllowRedisplay: AllowRedisplay?
+  runtime var CREATOR: Creator<Disabled>
+  <runtime stability> = Uncertain(Creator)
+}
+runtime class PaymentSheetCardBrandFilter {
+  stable val cardBrandAcceptance: CardBrandAcceptance
+  runtime var CREATOR: Creator<PaymentSheetCardBrandFilter>
+  <runtime stability> = Uncertain(Creator)
+}
+unstable class Default {
+  unstable val cardAccountRangeRepositoryFactory: Factory
+  runtime val linkConfigurationCoordinator: LinkConfigurationCoordinator?
+  stable val onLinkInlineSignupStateChanged: Function1<InlineSignupViewState, Unit>
+  runtime val paymentMethodCreateParams: PaymentMethodCreateParams?
+  runtime val paymentMethodExtraParams: PaymentMethodExtraParams?
+  stable val initialLinkUserInput: UserInput?
+  <runtime stability> = Unstable
+}
+unstable class Arguments {
+  unstable val cardAccountRangeRepositoryFactory: Factory
+  runtime val linkConfigurationCoordinator: LinkConfigurationCoordinator?
+  unstable val initialValues: Map<IdentifierSpec, String?>
+  stable val initialLinkUserInput: UserInput?
+  unstable val shippingValues: Map<IdentifierSpec, String?>?
+  stable val saveForFutureUseInitialValue: Boolean
+  stable val merchantName: String
+  unstable val cbcEligibility: CardBrandChoiceEligibility
+  runtime val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
+  stable val requiresMandate: Boolean
+  stable val onLinkInlineSignupStateChanged: Function1<InlineSignupViewState, Unit>
+  unstable val cardBrandFilter: CardBrandFilter
+  <runtime stability> = Unstable
+}
+stable class AffirmDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class AfterpayClearpayDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class AlipayDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class AlmaDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class AmazonPayDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class AuBecsDebitDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class BacsDebitDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class BancontactDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class BillieDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class BlikDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class BoletoDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class CardDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class CashAppPayDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class CryptoDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class EpsDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+runtime class ExternalPaymentMethodUiDefinitionFactory {
+  runtime val externalPaymentMethodSpec: ExternalPaymentMethodSpec
+  <runtime stability> = Runtime(ExternalPaymentMethodSpec)
+}
+stable class FpxDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class GiroPayDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class GrabPayDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class IdealDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class InstantDebitsDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class KlarnaDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class KonbiniDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class LinkCardBrandDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class MobilePayDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class MultibancoDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class OxxoDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class P24Definition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class PayPalDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class RevolutPayDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class SatispayDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class SepaDebitDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class SofortDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class SunbitDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class SwishDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class TwintDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class UpiDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class UsBankAccountDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class WeChatPayDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+stable class ZipDefinition {
+  stable val type: Type
+  stable val supportedAsSavedPaymentMethod: Boolean
+  <runtime stability> = Stable
+}
+unstable class LinkFormElement {
+  unstable val configuration: LinkInlineConfiguration
+  runtime val linkConfigurationCoordinator: LinkConfigurationCoordinator
+  stable val initialLinkUserInput: UserInput?
+  stable val onLinkInlineSignupStateChanged: Function1<InlineSignupViewState, Unit>
+  <runtime stability> = Unstable
+}
+unstable class LinkInlineConfiguration {
+  stable val signupMode: LinkSignupMode
+  unstable val linkConfiguration: LinkConfiguration
+  runtime var CREATOR: Creator<LinkInlineConfiguration>
+  <runtime stability> = Unstable
+}
+unstable class Builder {
+  runtime val createIntentCallback: CreateIntentCallback
+  runtime val resultCallback: ResultCallback
+  runtime var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler?
+  <runtime stability> = Unstable
+}
+unstable class Builder {
+  stable val merchantDisplayName: String
+  runtime var customer: CustomerConfiguration?
+  runtime var googlePay: GooglePayConfiguration?
+  runtime var defaultBillingDetails: BillingDetails?
+  runtime var shippingDetails: AddressDetails?
+  stable var allowsDelayedPaymentMethods: Boolean
+  stable var allowsPaymentMethodsRequiringShippingAddress: Boolean
+  runtime var appearance: Appearance
+  stable var primaryButtonLabel: String?
+  runtime var billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
+  unstable var preferredNetworks: List<CardBrand>
+  stable var allowsRemovalOfLastSavedPaymentMethod: Boolean
+  unstable var paymentMethodOrder: List<String>
+  unstable var externalPaymentMethods: List<String>
+  stable var cardBrandAcceptance: CardBrandAcceptance
+  stable var embeddedViewDisplaysMandateText: Boolean
+  <runtime stability> = Unstable
+}
+unstable class Configuration {
+  stable val merchantDisplayName: String
+  runtime val customer: CustomerConfiguration?
+  runtime val googlePay: GooglePayConfiguration?
+  runtime val defaultBillingDetails: BillingDetails?
+  runtime val shippingDetails: AddressDetails?
+  stable val allowsDelayedPaymentMethods: Boolean
+  stable val allowsPaymentMethodsRequiringShippingAddress: Boolean
+  runtime val appearance: Appearance
+  stable val primaryButtonLabel: String?
+  runtime val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
+  unstable val preferredNetworks: List<CardBrand>
+  stable val allowsRemovalOfLastSavedPaymentMethod: Boolean
+  unstable val paymentMethodOrder: List<String>
+  unstable val externalPaymentMethods: List<String>
+  stable val cardBrandAcceptance: CardBrandAcceptance
+  stable val embeddedViewDisplaysMandateText: Boolean
+  runtime var CREATOR: Creator<Configuration>
+  <runtime stability> = Unstable
+}
+stable class Succeeded {
+  <runtime stability> = Stable
+}
+unstable class Failed {
+  unstable val error: Throwable
+  <runtime stability> = Unstable
+}
+unstable class PaymentOptionDisplayData {
+  unstable val imageLoader: SuspendFunction0<Drawable>
+  stable val label: String
+  runtime val billingDetails: BillingDetails?
+  stable val paymentMethodType: String
+  stable val mandateText: AnnotatedString?
+  unstable val iconDrawable$delegate: Lazy<DelegateDrawable>
+  <runtime stability> = Unstable
+}
+stable class Completed {
+  <runtime stability> = Stable
+}
+stable class Canceled {
+  <runtime stability> = Stable
+}
+unstable class Failed {
+  unstable val error: Throwable
+  <runtime stability> = Unstable
+}
+unstable class EmbeddedPaymentElement {
+  runtime val confirmationHelper: EmbeddedConfirmationHelper
+  runtime val contentHelper: EmbeddedContentHelper
+  unstable val selectionHolder: EmbeddedSelectionHolder
+  runtime val configurationCoordinator: EmbeddedConfigurationCoordinator
+  unstable val paymentOption: StateFlow<PaymentOptionDisplayData?>
+  <runtime stability> = Unstable
+}
+unstable class Parameters {
+  unstable val intent: StripeIntent
+  runtime val appearance: Appearance
+  stable val initializationMode: InitializationMode
+  runtime val shippingDetails: AddressDetails?
+  runtime var CREATOR: Creator<Parameters>
+  <runtime stability> = Unstable
+}
+stable class Canceled {
+  stable val action: Action
+  <runtime stability> = Stable
+}
+unstable class Succeeded {
+  unstable val intent: StripeIntent
+  stable val deferredIntentConfirmationType: DeferredIntentConfirmationType?
+  <runtime stability> = Unstable
+}
+unstable class NextStep {
+  runtime val confirmationOption: Option
+  unstable val parameters: Parameters
+  <runtime stability> = Unstable
+}
+unstable class Failed {
+  unstable val cause: Throwable
+  unstable val message: ResolvableString
+  runtime val type: ErrorType
+  <runtime stability> = Unstable
+}
+unstable class Complete {
+  unstable val intent: StripeIntent
+  runtime val confirmationOption: Option
+  stable val deferredIntentConfirmationType: DeferredIntentConfirmationType?
+  <runtime stability> = Unstable
+}
+unstable class Fail {
+  unstable val cause: Throwable
+  unstable val message: ResolvableString
+  runtime val errorType: ErrorType
+  <runtime stability> = Unstable
+}
+runtime class Launch {
+  runtime val launcherArguments: TLauncherArgs
+  stable val receivesResultInProcess: Boolean
+  stable val deferredIntentConfirmationType: DeferredIntentConfirmationType?
+  <runtime stability> = Parameter(TLauncherArgs)
+}
+unstable class Args {
+  unstable val intent: StripeIntent
+  runtime val confirmationOption: Option
+  runtime val appearance: Appearance
+  stable val initializationMode: InitializationMode
+  runtime val shippingDetails: AddressDetails?
+  runtime var CREATOR: Creator<Args>
+  <runtime stability> = Unstable
+}
+stable class Idle {
+  <runtime stability> = Stable
+}
+runtime class Confirming {
+  runtime val option: Option
+  <runtime stability> = Uncertain(Option)
+}
+runtime class Complete {
+  runtime val result: Result
+  <runtime stability> = Uncertain(Result)
+}
+stable class Canceled {
+  stable val action: Action
+  <runtime stability> = Stable
+}
+unstable class Succeeded {
+  unstable val intent: StripeIntent
+  stable val deferredIntentConfirmationType: DeferredIntentConfirmationType?
+  <runtime stability> = Unstable
+}
+stable class Fatal {
+  <runtime stability> = Stable
+}
+stable class Payment {
+  <runtime stability> = Stable
+}
+stable class Internal {
+  <runtime stability> = Stable
+}
+stable class MerchantIntegration {
+  <runtime stability> = Stable
+}
+stable class ExternalPaymentMethod {
+  <runtime stability> = Stable
+}
+stable class GooglePay {
+  stable val errorCode: Int
+  <runtime stability> = Stable
+}
+unstable class Failed {
+  unstable val cause: Throwable
+  unstable val message: ResolvableString
+  runtime val type: ErrorType
+  <runtime stability> = Unstable
+}
+stable class Launch {
+  stable val launch: Function0<Unit>
+  stable val receivesResultInProcess: Boolean
+  <runtime stability> = Stable
+}
+unstable class Fail {
+  unstable val cause: Throwable
+  unstable val message: ResolvableString
+  runtime val errorType: ErrorType
+  <runtime stability> = Unstable
+}
+unstable class Complete {
+  unstable val intent: StripeIntent
+  runtime val confirmationOption: Option
+  stable val deferredIntentConfirmationType: DeferredIntentConfirmationType?
+  <runtime stability> = Unstable
+}
+unstable class Parameters {
+  runtime val confirmationOption: TConfirmationOption
+  unstable val confirmationParameters: Parameters
+  stable val deferredIntentConfirmationType: DeferredIntentConfirmationType?
+  runtime var CREATOR: Creator<Parameters<*>>
+  <runtime stability> = Unstable
+}
+unstable class ConfirmationMediator {
+  unstable val savedStateHandle: SavedStateHandle
+  runtime val definition: ConfirmationDefinition<TConfirmationOption, TLauncher, TLauncherArgs, TLauncherResult>
+  runtime var launcher: TLauncher?
+  stable val parametersKey: String
+  stable val key: String
+  <runtime stability> = Unstable
+}
+unstable class ConfirmationRegistry {
+  unstable val confirmationDefinitions: List<ConfirmationDefinition<*, *, *, *>>
+  <runtime stability> = Unstable
+}
+stable class AwaitingConfirmationResultData {
+  stable val key: String
+  runtime val confirmationOption: Option
+  stable val receivesResultInProcess: Boolean
+  runtime var CREATOR: Creator<AwaitingConfirmationResultData>
+  <runtime stability> = 
+}
+unstable class Factory {
+  unstable val registry: ConfirmationRegistry
+  unstable val savedStateHandle: SavedStateHandle
+  unstable val errorReporter: ErrorReporter
+  <runtime stability> = Unstable
+}
+unstable class DefaultConfirmationHandler {
+  unstable val mediators: List<ConfirmationMediator<*, *, *, *>>
+  unstable val coroutineScope: CoroutineScope
+  unstable val savedStateHandle: SavedStateHandle
+  unstable val errorReporter: ErrorReporter
+  runtime val isInitiallyAwaitingForResultData: AwaitingConfirmationResultData?
+  stable val hasReloadedFromProcessDeath: Boolean
+  unstable val _state: MutableStateFlow<State>
+  unstable val state: StateFlow<State>
+  <runtime stability> = Unstable
+}
+runtime class Saved {
+  runtime val paymentMethod: PaymentMethod
+  runtime val optionsParams: PaymentMethodOptionsParams?
+  runtime var CREATOR: Creator<Saved>
+  <runtime stability> = Runtime(PaymentMethodOptionsParams),Runtime(PaymentMethod)
+}
+runtime class New {
+  runtime val createParams: PaymentMethodCreateParams
+  runtime val optionsParams: PaymentMethodOptionsParams?
+  runtime val extraParams: PaymentMethodExtraParams?
+  stable val shouldSave: Boolean
+  runtime var CREATOR: Creator<New>
+  <runtime stability> = Runtime(PaymentMethodExtraParams),Runtime(PaymentMethodOptionsParams),Runtime(PaymentMethodCreateParams)
+}
+runtime class BacsConfirmationDefinition {
+  runtime val bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory
+  stable val key: String
+  <runtime stability> = Uncertain(BacsMandateConfirmationLauncherFactory)
+}
+runtime class BacsConfirmationOption {
+  runtime val createParams: PaymentMethodCreateParams
+  runtime val optionsParams: PaymentMethodOptionsParams?
+  runtime var CREATOR: Creator<BacsConfirmationOption>
+  <runtime stability> = Runtime(PaymentMethodOptionsParams),Runtime(PaymentMethodCreateParams)
+}
+stable class CvcRecollectionConfirmationDefinition {
+  runtime val handler: CvcRecollectionHandler
+  runtime val factory: CvcRecollectionLauncherFactory
+  stable val key: String
+  <runtime stability> = 
+}
+unstable class ExternalPaymentMethodConfirmationDefinition {
+  unstable val externalPaymentMethodConfirmHandlerProvider: Provider<ExternalPaymentMethodConfirmHandler?>
+  unstable val errorReporter: ErrorReporter
+  stable val key: String
+  <runtime stability> = Unstable
+}
+runtime class ExternalPaymentMethodConfirmationOption {
+  stable val type: String
+  runtime val billingDetails: BillingDetails?
+  runtime var CREATOR: Creator<ExternalPaymentMethodConfirmationOption>
+  <runtime stability> = Runtime(BillingDetails)
+}
+unstable class GooglePayConfirmationDefinition {
+  unstable val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory
+  unstable val userFacingLogger: UserFacingLogger?
+  stable val key: String
+  <runtime stability> = Unstable
+}
+unstable class Config {
+  stable val environment: Environment?
+  stable val merchantName: String
+  stable val merchantCountryCode: String
+  stable val merchantCurrencyCode: String?
+  stable val customAmount: Long?
+  stable val customLabel: String?
+  runtime val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
+  unstable val cardBrandFilter: CardBrandFilter
+  runtime var CREATOR: Creator<Config>
+  <runtime stability> = Unstable
+}
+unstable class GooglePayConfirmationOption {
+  unstable val config: Config
+  runtime var CREATOR: Creator<GooglePayConfirmationOption>
+  <runtime stability> = Unstable
+}
+stable class NextAction {
+  stable val clientSecret: String
+  <runtime stability> = Stable
+}
+unstable class Confirm {
+  unstable val confirmNextParams: ConfirmStripeIntentParams
+  <runtime stability> = Unstable
+}
+runtime class IntentConfirmationDefinition {
+  runtime val intentConfirmationInterceptor: IntentConfirmationInterceptor
+  stable val paymentLauncherFactory: Function1<ActivityResultLauncher<Args>, PaymentLauncher>
+  stable val key: String
+  <runtime stability> = Uncertain(IntentConfirmationInterceptor)
+}
+unstable class Fail {
+  unstable val cause: Throwable
+  unstable val message: ResolvableString
+  <runtime stability> = Unstable
+}
+unstable class Confirm {
+  unstable val confirmParams: ConfirmStripeIntentParams
+  stable val isDeferred: Boolean
+  <runtime stability> = Unstable
+}
+stable class HandleNextAction {
+  stable val clientSecret: String
+  <runtime stability> = Stable
+}
+stable class Complete {
+  stable val isForceSuccess: Boolean
+  <runtime stability> = Stable
+}
+stable class InvalidDeferredIntentUsageException {
+  stable val message: String
+  <runtime stability> = Stable
+}
+unstable class CreateIntentCallbackFailureException {
+  unstable val cause: Throwable?
+  <runtime stability> = Unstable
+}
+unstable class InvalidClientSecretException {
+  stable val clientSecret: String
+  unstable val intent: StripeIntent
+  stable val intentType: String
+  stable val message: String
+  <runtime stability> = Unstable
+}
+unstable class DefaultIntentConfirmationInterceptor {
+  unstable val stripeRepository: StripeRepository
+  unstable val errorReporter: ErrorReporter
+  stable val allowsManualConfirmation: Boolean
+  stable val publishableKeyProvider: Function0<String>
+  stable val stripeAccountIdProvider: Function0<String?>
+  <runtime stability> = Unstable
+}
+unstable class LinkConfirmationDefinition {
+  unstable val linkPaymentLauncher: LinkPaymentLauncher
+  unstable val linkStore: LinkStore
+  unstable val linkAccountHolder: LinkAccountHolder
+  stable val key: String
+  <runtime stability> = Unstable
+}
+unstable class LinkConfirmationOption {
+  unstable val configuration: LinkConfiguration
+  stable val useLinkExpress: Boolean
+  runtime var CREATOR: Creator<LinkConfirmationOption>
+  <runtime stability> = Unstable
+}
+stable class Result {
+  runtime val nextConfirmationOption: PaymentMethodConfirmationOption
+  runtime var CREATOR: Creator<Result>
+  <runtime stability> = 
+}
+runtime class LauncherArguments {
+  runtime val nextConfirmationOption: PaymentMethodConfirmationOption
+  <runtime stability> = Uncertain(PaymentMethodConfirmationOption)
+}
+stable class Launcher {
+  stable val onResult: Function1<Result, Unit>
+  <runtime stability> = Stable
+}
+runtime class LinkPassthroughConfirmationDefinition {
+  runtime val linkAccountManager: LinkAccountManager
+  stable val key: String
+  <runtime stability> = Uncertain(LinkAccountManager)
+}
+runtime class LinkPassthroughConfirmationOption {
+  stable val paymentDetailsId: String
+  stable val expectedPaymentMethodType: String
+  runtime var CREATOR: Creator<LinkPassthroughConfirmationOption>
+  <runtime stability> = Uncertain(Creator)
+}
+stable class Result {
+  runtime val nextConfirmationOption: PaymentMethodConfirmationOption
+  runtime var CREATOR: Creator<Result>
+  <runtime stability> = 
+}
+runtime class LauncherArguments {
+  runtime val nextConfirmationOption: PaymentMethodConfirmationOption
+  <runtime stability> = Uncertain(PaymentMethodConfirmationOption)
+}
+stable class Launcher {
+  stable val onResult: Function1<Result, Unit>
+  <runtime stability> = Stable
+}
+unstable class LinkInlineSignupConfirmationDefinition {
+  runtime val linkConfigurationCoordinator: LinkConfigurationCoordinator
+  runtime val linkAnalyticsHelper: LinkAnalyticsHelper
+  unstable val linkStore: LinkStore
+  stable val key: String
+  <runtime stability> = Unstable
+}
+stable class LinkInlineSignupConfirmationModule {
+  <runtime stability> = Stable
+}
+unstable class LinkInlineSignupConfirmationOption {
+  runtime val createParams: PaymentMethodCreateParams
+  runtime val optionsParams: PaymentMethodOptionsParams?
+  runtime val extraParams: PaymentMethodExtraParams?
+  stable val saveOption: PaymentMethodSaveOption
+  unstable val linkConfiguration: LinkConfiguration
+  stable val userInput: UserInput
+  runtime var CREATOR: Creator<LinkInlineSignupConfirmationOption>
+  <runtime stability> = Unstable
+}
+unstable class EmbeddedFormHelperFactory {
+  runtime val linkConfigurationCoordinator: LinkConfigurationCoordinator
+  unstable val embeddedSelectionHolder: EmbeddedSelectionHolder
+  unstable val cardAccountRangeRepositoryFactory: Factory
+  <runtime stability> = Unstable
+}
+unstable class EmbeddedSelectionHolder {
+  unstable val savedStateHandle: SavedStateHandle
+  unstable val selection: StateFlow<PaymentSelection?>
+  unstable val temporarySelection: StateFlow<String?>
+  <runtime stability> = Unstable
+}
+unstable class DefaultEmbeddedSheetLauncher {
+  unstable val selectionHolder: EmbeddedSelectionHolder
+  unstable val customerStateHolder: CustomerStateHolder
+  unstable val sheetStateHolder: SheetStateHolder
+  unstable val errorReporter: ErrorReporter
+  stable val statusBarColor: Int?
+  unstable val formActivityLauncher: ActivityResultLauncher<Args>
+  unstable val manageActivityLauncher: ActivityResultLauncher<Args>
+  <runtime stability> = Unstable
+}
+unstable class DefaultEmbeddedConfigurationCoordinator {
+  unstable val confirmationStateHolder: EmbeddedConfirmationStateHolder
+  runtime val configurationHandler: EmbeddedConfigurationHandler
+  unstable val selectionHolder: EmbeddedSelectionHolder
+  runtime val selectionChooser: EmbeddedSelectionChooser
+  unstable val customerStateHolder: CustomerStateHolder
+  runtime val embeddedContentHelper: EmbeddedContentHelper
+  unstable val viewModelScope: CoroutineScope
+  <runtime stability> = Unstable
+}
+unstable class Arguments {
+  unstable val intentConfiguration: IntentConfiguration
+  unstable val configuration: CommonConfiguration
+  runtime var CREATOR: Creator<Arguments>
+  <runtime stability> = Unstable
+}
+unstable class ConfigurationCache {
+  unstable val arguments: Arguments
+  unstable val resultState: State
+  runtime var CREATOR: Creator<ConfigurationCache>
+  <runtime stability> = Unstable
+}
+unstable class DefaultEmbeddedConfigurationHandler {
+  runtime val paymentElementLoader: PaymentElementLoader
+  unstable val savedStateHandle: SavedStateHandle
+  unstable val sheetStateHolder: SheetStateHolder
+  unstable var inFlightRequest: InFlightRequest?
+  <runtime stability> = Unstable
+}
+unstable class DefaultEmbeddedConfirmationHelper {
+  unstable val confirmationStarter: EmbeddedConfirmationStarter
+  runtime val resultCallback: ResultCallback
+  unstable val activityResultCaller: ActivityResultCaller
+  unstable val lifecycleOwner: LifecycleOwner
+  unstable val confirmationStateHolder: EmbeddedConfirmationStateHolder
+  unstable val selectionHolder: EmbeddedSelectionHolder
+  <runtime stability> = Unstable
+}
+unstable class EmbeddedConfirmationStarter {
+  runtime val confirmationHandler: ConfirmationHandler
+  unstable val coroutineScope: CoroutineScope
+  unstable val _result: Channel<Result>
+  unstable val result: Flow<Result>
+  <runtime stability> = Unstable
+}
+unstable class State {
+  unstable val paymentMethodMetadata: PaymentMethodMetadata
+  unstable val selection: PaymentSelection?
+  stable val initializationMode: InitializationMode
+  unstable val configuration: Configuration
+  runtime var CREATOR: Creator<State>
+  <runtime stability> = Unstable
+}
+unstable class EmbeddedConfirmationStateHolder {
+  unstable val savedStateHandle: SavedStateHandle
+  unstable val selectionHolder: EmbeddedSelectionHolder
+  unstable val coroutineScope: CoroutineScope
+  <runtime stability> = Unstable
+}
+stable class EmbeddedContent {
+  runtime val interactor: PaymentMethodVerticalLayoutInteractor
+  stable val embeddedViewDisplaysMandateText: Boolean
+  stable val rowStyle: RowStyle
+}
+unstable class State {
+  unstable val paymentMethodMetadata: PaymentMethodMetadata
+  stable val rowStyle: RowStyle
+  stable val embeddedViewDisplaysMandateText: Boolean
+  runtime var CREATOR: Creator<State>
+  <runtime stability> = Unstable
+}
+unstable class DefaultEmbeddedContentHelper {
+  unstable val coroutineScope: CoroutineScope
+  unstable val savedStateHandle: SavedStateHandle
+  runtime val eventReporter: EventReporter
+  unstable val workContext: CoroutineContext
+  unstable val uiContext: CoroutineContext
+  runtime val customerRepository: CustomerRepository
+  unstable val selectionHolder: EmbeddedSelectionHolder
+  runtime val embeddedWalletsHelper: EmbeddedWalletsHelper
+  unstable val customerStateHolder: CustomerStateHolder
+  unstable val embeddedFormHelperFactory: EmbeddedFormHelperFactory
+  runtime val confirmationHandler: ConfirmationHandler
+  unstable val confirmationStateHolder: EmbeddedConfirmationStateHolder
+  unstable val state: StateFlow<State?>
+  unstable val _embeddedContent: MutableStateFlow<EmbeddedContent?>
+  unstable val embeddedContent: StateFlow<EmbeddedContent?>
+  runtime var sheetLauncher: EmbeddedSheetLauncher?
+  <runtime stability> = Unstable
+}
+unstable class EmbeddedPaymentElementInitializer {
+  runtime val sheetLauncher: EmbeddedSheetLauncher
+  runtime val contentHelper: EmbeddedContentHelper
+  unstable val lifecycleOwner: LifecycleOwner
+  <runtime stability> = Unstable
+}
+stable class Factory {
+  stable val statusBarColor: Int?
+  <runtime stability> = Stable
+}
+unstable class EmbeddedPaymentElementViewModel {
+  runtime val embeddedPaymentElementSubcomponentBuilder: Builder
+  unstable val customViewModelScope: CoroutineScope
+  <runtime stability> = Unstable
+}
+unstable class DefaultEmbeddedSelectionChooser {
+  unstable val savedStateHandle: SavedStateHandle
+  unstable val formHelperFactory: EmbeddedFormHelperFactory
+  unstable val coroutineScope: CoroutineScope
+  <runtime stability> = Unstable
+}
+unstable class DefaultEmbeddedWalletsHelper {
+  unstable val linkHandler: LinkHandler
+  <runtime stability> = Unstable
+}
+unstable class NullUiDefinitionFactoryHelper {
+  unstable val nullEmbeddedUiDefinitionFactory: Default
+  <runtime stability> = Unstable
+}
+unstable class PaymentOptionDisplayDataFactory {
+  unstable val iconLoader: IconLoader
+  unstable val context: Context
+  <runtime stability> = Unstable
+}
+unstable class DefaultPaymentOptionDisplayDataHolder {
+  unstable val coroutineScope: CoroutineScope
+  unstable val selectionHolder: EmbeddedSelectionHolder
+  stable val confirmationStateSupplier: Function0<State?>
+  unstable val paymentOptionDisplayDataFactory: PaymentOptionDisplayDataFactory
+  unstable val _paymentOption: MutableStateFlow<PaymentOptionDisplayData?>
+  unstable val paymentOption: StateFlow<PaymentOptionDisplayData?>
+  <runtime stability> = Unstable
+}
+unstable class SheetStateHolder {
+  unstable val savedStateHandle: SavedStateHandle
+  <runtime stability> = Unstable
+}
+unstable class EmbeddedFormInteractorFactory {
+  unstable val paymentMethodMetadata: PaymentMethodMetadata
+  stable val paymentMethodCode: String
+  stable val hasSavedPaymentMethods: Boolean
+  unstable val embeddedSelectionHolder: EmbeddedSelectionHolder
+  unstable val embeddedFormHelperFactory: EmbeddedFormHelperFactory
+  unstable val viewModelScope: CoroutineScope
+  runtime val formActivityStateHelper: FormActivityStateHelper
+  runtime val eventReporter: EventReporter
+  <runtime stability> = Unstable
+}
+unstable class FormActivity {
+  unstable val args$delegate: Lazy<Args?>
+  unstable val viewModel$delegate: Lazy<FormActivityViewModel>
+  unstable var formInteractor: DefaultVerticalModeFormInteractor
+  runtime var eventReporter: EventReporter
+  runtime var formActivityStateHelper: FormActivityStateHelper
+  runtime var confirmationHelper: FormActivityConfirmationHelper
+  <runtime stability> = Unstable
+}
+unstable class DefaultFormActivityConfirmationHelper {
+  stable val initializationMode: InitializationMode
+  unstable val paymentMethodMetadata: PaymentMethodMetadata
+  runtime val confirmationHandler: ConfirmationHandler
+  unstable val configuration: Configuration
+  unstable val selectionHolder: EmbeddedSelectionHolder
+  runtime val stateHelper: FormActivityStateHelper
+  runtime val onClickDelegate: OnClickOverrideDelegate
+  <runtime stability> = Unstable
+}
+unstable class State {
+  unstable val primaryButtonLabel: ResolvableString
+  stable val isEnabled: Boolean
+  runtime val processingState: PrimaryButtonProcessingState
+  stable val isProcessing: Boolean
+  unstable val error: ResolvableString?
+  unstable val mandateText: ResolvableString?
+  <runtime stability> = Unstable
+}
+unstable class DefaultFormActivityStateHelper {
+  unstable val paymentMethodMetadata: PaymentMethodMetadata
+  unstable val selectionHolder: EmbeddedSelectionHolder
+  unstable val configuration: Configuration
+  runtime val onClickDelegate: OnClickOverrideDelegate
+  unstable val _state: MutableStateFlow<State>
+  unstable val state: StateFlow<State>
+  unstable var usBankAccountFormPrimaryButtonUiState: UIState?
+  <runtime stability> = Unstable
+}
+stable class Factory {
+  stable val argSupplier: Function0<Args>
+  <runtime stability> = Stable
+}
+unstable class FormActivityViewModel {
+  runtime val component: FormActivityViewModelComponent
+  unstable val customViewModelScope: CoroutineScope
+  <runtime stability> = Unstable
+}
+unstable class Complete {
+  unstable val selection: PaymentSelection?
+  runtime var CREATOR: Creator<Complete>
+  <runtime stability> = Unstable
+}
+runtime class Cancelled {
+  runtime var CREATOR: Creator<Cancelled>
+  <runtime stability> = Uncertain(Creator)
+}
+unstable class Args {
+  stable val selectedPaymentMethodCode: String
+  unstable val paymentMethodMetadata: PaymentMethodMetadata
+  stable val hasSavedPaymentMethods: Boolean
+  unstable val configuration: Configuration
+  stable val initializationMode: InitializationMode
+  stable val statusBarColor: Int?
+  runtime var CREATOR: Creator<Args>
+  <runtime stability> = Unstable
+}
+stable class FormContract {
+  stable val EXTRA_ARGS: String
+  <runtime stability> = Stable
+}
+unstable class OnClickDelegateOverrideImpl {
+  stable var _onClickOverride: Function0<Unit>?
+  <runtime stability> = Unstable
+}
+unstable class DefaultEmbeddedManageScreenInteractorFactory {
+  unstable val paymentMethodMetadata: PaymentMethodMetadata
+  unstable val customerStateHolder: CustomerStateHolder
+  unstable val selectionHolder: EmbeddedSelectionHolder
+  unstable val savedPaymentMethodMutator: SavedPaymentMethodMutator
+  runtime val eventReporter: EventReporter
+  unstable val manageNavigatorProvider: Provider<ManageNavigator>
+  <runtime stability> = Unstable
+}
+unstable class DefaultEmbeddedUpdateScreenInteractorFactory {
+  unstable val savedPaymentMethodMutatorProvider: Provider<SavedPaymentMethodMutator>
+  unstable val paymentMethodMetadata: PaymentMethodMetadata
+  unstable val customerStateHolder: CustomerStateHolder
+  unstable val selectionHolder: EmbeddedSelectionHolder
+  runtime val eventReporter: EventReporter
+  unstable val manageNavigatorProvider: Provider<ManageNavigator>
+  <runtime stability> = Unstable
+}
+unstable class InitialManageScreenFactory {
+  unstable val customerStateHolder: CustomerStateHolder
+  unstable val paymentMethodMetadata: PaymentMethodMetadata
+  runtime val updateScreenInteractorFactory: EmbeddedUpdateScreenInteractorFactory
+  runtime val manageInteractorFactory: EmbeddedManageScreenInteractorFactory
+  <runtime stability> = Unstable
+}
+unstable class ManageActivity {
+  unstable val args$delegate: Lazy<Args?>
+  unstable val viewModel$delegate: Lazy<ManageViewModel>
+  unstable var customerStateHolder: CustomerStateHolder
+  unstable var manageNavigator: ManageNavigator
+  unstable var selectionHolder: EmbeddedSelectionHolder
+  <runtime stability> = Unstable
+}
+unstable class Complete {
+  unstable val customerState: CustomerState
+  unstable val selection: PaymentSelection?
+  runtime var CREATOR: Creator<Complete>
+  <runtime stability> = Unstable
+}
+runtime class Error {
+  runtime var CREATOR: Creator<Error>
+  <runtime stability> = Uncertain(Creator)
+}
+unstable class Args {
+  unstable val paymentMethodMetadata: PaymentMethodMetadata
+  unstable val customerState: CustomerState
+  unstable val selection: PaymentSelection?
+  runtime var CREATOR: Creator<Args>
+  <runtime stability> = Unstable
+}
+stable class ManageContract {
+  stable val EXTRA_ARGS: String
+  <runtime stability> = Stable
+}
+runtime class All {
+  runtime val interactor: ManageScreenInteractor
+  <runtime stability> = Uncertain(ManageScreenInteractor)
+}
+runtime class Update {
+  runtime val interactor: UpdatePaymentMethodInteractor
+  <runtime stability> = Uncertain(UpdatePaymentMethodInteractor)
+}
+stable class Screen {
+  <runtime stability> = Stable
+}
+stable class Back {
+  <runtime stability> = Stable
+}
+stable class Close {
+  <runtime stability> = Stable
+}
+stable class GoToScreen {
+  stable val screen: Screen
+  <runtime stability> = Stable
+}
+stable class Action {
+  <runtime stability> = Stable
+}
+unstable class ManageNavigator {
+  unstable val navigationHandler: NavigationHandler<Screen>
+  unstable val screen: StateFlow<Screen>
+  unstable val _result: MutableSharedFlow<Unit>
+  unstable val result: SharedFlow<Unit>
+  <runtime stability> = Unstable
+}
+unstable class ManageSavedPaymentMethodMutatorFactory {
+  runtime val eventReporter: EventReporter
+  runtime val customerRepository: CustomerRepository
+  unstable val selectionHolder: EmbeddedSelectionHolder
+  unstable val customerStateHolder: CustomerStateHolder
+  unstable val manageNavigatorProvider: Provider<ManageNavigator>
+  unstable val paymentMethodMetadata: PaymentMethodMetadata
+  unstable val workContext: CoroutineContext
+  unstable val uiContext: CoroutineContext
+  unstable val viewModelScope: CoroutineScope
+  unstable val updateScreenInteractorFactoryProvider: Provider<EmbeddedUpdateScreenInteractorFactory>
+  <runtime stability> = Unstable
+}
+stable class Factory {
+  stable val argsSupplier: Function0<Args>
+  <runtime stability> = Stable
+}
+unstable class ManageViewModel {
+  runtime val component: ManageComponent
+  unstable val customViewModelScope: CoroutineScope
+  <runtime stability> = Unstable
+}
+stable class Success {
+  stable val clientSecret: String
+  <runtime stability> = Stable
+}
+unstable class Failure {
+  unstable val cause: Exception
+  stable val displayMessage: String?
+  <runtime stability> = Unstable
+}
+unstable class CustomerStateHolder {
+  unstable val savedStateHandle: SavedStateHandle
+  unstable val selection: StateFlow<PaymentSelection?>
+  unstable val customer: StateFlow<CustomerState?>
+  unstable val paymentMethods: StateFlow<List<PaymentMethod>>
+  unstable val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?>
+  unstable val canRemove: StateFlow<Boolean>
+  <runtime stability> = Unstable
+}
+unstable class DefaultFormHelper {
+  unstable val coroutineScope: CoroutineScope
+  unstable val linkInlineHandler: LinkInlineHandler
+  unstable val cardAccountRangeRepositoryFactory: Factory
+  unstable val paymentMethodMetadata: PaymentMethodMetadata
+  stable val newPaymentSelectionProvider: Function0<NewOrExternalPaymentSelection?>
+  stable val selectionUpdater: Function1<PaymentSelection?, Unit>
+  runtime val linkConfigurationCoordinator: LinkConfigurationCoordinator?
+  unstable val lastFormValues: MutableSharedFlow<Pair<FormFieldValues?, String>>
+  unstable val paymentSelection: Flow<PaymentSelection?>
+  <runtime stability> = Unstable
+}
+unstable class DefaultPaymentSheetLauncher {
+  unstable val activityResultLauncher: ActivityResultLauncher<Args>
+  unstable val activity: Activity
+  unstable val lifecycleOwner: LifecycleOwner
+  unstable val application: Application
+  runtime val callback: PaymentSheetResultCallback
+  stable val initializedViaCompose: Boolean
+  <runtime stability> = Unstable
+}
+unstable class DefaultPrefsRepository {
+  unstable val context: Context
+  stable val customerId: String?
+  unstable val workContext: CoroutineContext
+  unstable val prefs$delegate: Lazy<@[FlexibleNullability] SharedPreferences?>
+  <runtime stability> = Unstable
+}
+stable class DeferredIntentValidator {
+  <runtime stability> = Stable
+}
+unstable class DisplayableSavedPaymentMethod {
+  unstable val displayName: ResolvableString
+  runtime val paymentMethod: PaymentMethod
+  runtime val savedPaymentMethod: SavedPaymentMethod
+  stable val isCbcEligible: Boolean
+  stable val shouldShowDefaultBadge: Boolean
+  <runtime stability> = Unstable
+}
+runtime class Card {
+  runtime val card: Card
+  <runtime stability> = Runtime(Card)
+}
+runtime class USBankAccount {
+  runtime val usBankAccount: USBankAccount
+  <runtime stability> = Runtime(USBankAccount)
+}
+runtime class SepaDebit {
+  runtime val sepaDebit: SepaDebit
+  <runtime stability> = Runtime(SepaDebit)
+}
+stable class Unexpected {
+  <runtime stability> = Stable
+}
+unstable class ExternalPaymentMethodContract {
+  unstable val errorReporter: ErrorReporter
+  <runtime stability> = Unstable
+}
+runtime class ExternalPaymentMethodInput {
+  stable val type: String
+  runtime val billingDetails: BillingDetails?
+  <runtime stability> = Runtime(BillingDetails)
+}
+unstable class ExternalPaymentMethodInterceptor {
+  runtime var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler?
+  <runtime stability> = Unstable
+}
+unstable class ExternalPaymentMethodProxyActivity {
+  stable var hasConfirmStarted: Boolean
+  <runtime stability> = Unstable
+}
+stable class ExternalPaymentMethodResultHandler {
+  stable val EXTRA_EXTERNAL_PAYMENT_METHOD_RESULT: String
+  <runtime stability> = Stable
+}
+runtime class Completed {
+  stable val RESULT_CODE: Int
+  runtime var CREATOR: Creator<Completed>
+  <runtime stability> = Uncertain(Creator)
+}
+runtime class Canceled {
+  stable val RESULT_CODE: Int
+  runtime var CREATOR: Creator<Canceled>
+  <runtime stability> = Uncertain(Creator)
+}
+runtime class Failed {
+  stable val displayMessage: String?
+  runtime var CREATOR: Creator<Failed>
+  <runtime stability> = Uncertain(Creator)
+}
+stable class ExternalPaymentMethodResult {
+  <runtime stability> = Stable
+}
+stable class Empty {
+  <runtime stability> = Stable
+}
+unstable class MandateOnly {
+  unstable val mandate: ResolvableString
+  <runtime stability> = Unstable
+}
+stable class UserInteractionRequired {
+  <runtime stability> = Stable
+}
+unstable class LinkHandler {
+  runtime val linkConfigurationCoordinator: LinkConfigurationCoordinator
+  unstable val _isLinkEnabled: MutableStateFlow<Boolean?>
+  unstable val isLinkEnabled: StateFlow<Boolean?>
+  unstable val _linkConfiguration: MutableStateFlow<LinkConfiguration?>
+  unstable val linkConfiguration: StateFlow<LinkConfiguration?>
+  <runtime stability> = Unstable
+}
+unstable class LinkInlineHandler {
+  unstable val _linkInlineState: MutableStateFlow<InlineSignupViewState?>
+  unstable val linkInlineState: StateFlow<InlineSignupViewState?>
+  <runtime stability> = Unstable
+}
+unstable class MandateHandler {
+  unstable val selection: StateFlow<PaymentSelection?>
+  stable val merchantDisplayName: String
+  stable val isVerticalMode: Boolean
+  stable val isSetupFlowProvider: Function0<Boolean>
+  unstable val _mandateText: MutableStateFlow<MandateText?>
+  unstable val mandateText: StateFlow<MandateText?>
+  <runtime stability> = Unstable
+}
+stable class New {
+  stable val paymentSelection: New
+  <runtime stability> = Stable
+}
+unstable class External {
+  unstable val paymentSelection: ExternalPaymentMethod
+  <runtime stability> = Unstable
+}
+unstable class Args {
+  unstable val state: Full
+  unstable val configuration: Configuration
+  stable val enableLogging: Boolean
+  unstable val productUsage: Set<String>
+  runtime var CREATOR: Creator<Args>
+  <runtime stability> = Unstable
+}
+stable class PaymentOptionContract {
+  <runtime stability> = Stable
+}
+unstable class Succeeded {
+  unstable val paymentSelection: PaymentSelection
+  unstable val paymentMethods: List<PaymentMethod>?
+  runtime var CREATOR: Creator<Succeeded>
+  <runtime stability> = Unstable
+}
+unstable class Failed {
+  unstable val error: Throwable
+  unstable val paymentMethods: List<PaymentMethod>?
+  runtime var CREATOR: Creator<Failed>
+  <runtime stability> = Unstable
+}
+unstable class Canceled {
+  unstable val mostRecentError: Throwable?
+  unstable val paymentSelection: PaymentSelection?
+  unstable val paymentMethods: List<PaymentMethod>?
+  runtime var CREATOR: Creator<Canceled>
+  <runtime stability> = Unstable
+}
+stable class PaymentOptionResult {
+  stable val resultCode: Int
+  <runtime stability> = Stable
+}
+unstable class PaymentOptionsActivity {
+  unstable var viewModelFactory: Factory
+  unstable val viewModel$delegate: Lazy<PaymentOptionsViewModel>
+  unstable val starterArgs$delegate: Lazy<Args?>
+  <runtime stability> = Unstable
+}
+stable class AddCard {
+  stable val viewType: ViewType
+  stable val isEnabledDuringEditing: Boolean
+  <runtime stability> = Stable
+}
+stable class GooglePay {
+  stable val viewType: ViewType
+  stable val isEnabledDuringEditing: Boolean
+  <runtime stability> = Stable
+}
+stable class Link {
+  stable val viewType: ViewType
+  stable val isEnabledDuringEditing: Boolean
+  <runtime stability> = Stable
+}
+unstable class SavedPaymentMethod {
+  unstable val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod
+  stable val viewType: ViewType
+  unstable val displayName: ResolvableString
+  runtime val paymentMethod: PaymentMethod
+  unstable val isModifiable$delegate: Lazy<Boolean>
+  stable val isEnabledDuringEditing: Boolean
+  <runtime stability> = Unstable
+}
+stable class PaymentOptionsItem {
+  <runtime stability> = Stable
+}
+unstable class PaymentOptionsState {
+  unstable val items: List<PaymentOptionsItem>
+  stable val selectedItem: PaymentOptionsItem?
+  <runtime stability> = Unstable
+}
+stable class PaymentOptionsStateFactory {
+  <runtime stability> = Stable
+}
+stable class Factory {
+  stable val starterArgsSupplier: Function0<Args>
+  <runtime stability> = Stable
+}
+unstable class PaymentOptionsViewModel {
+  unstable val args: Args
+  unstable val primaryButtonUiStateMapper: PrimaryButtonUiStateMapper
+  unstable val _paymentOptionResult: MutableSharedFlow<PaymentOptionResult>
+  unstable val paymentOptionResult: SharedFlow<PaymentOptionResult>
+  unstable val _error: MutableStateFlow<ResolvableString?>
+  unstable val error: StateFlow<ResolvableString?>
+  unstable val walletsProcessingState: StateFlow<WalletsProcessingState?>
+  unstable val walletsState: StateFlow<WalletsState?>
+  runtime var newPaymentSelection: NewOrExternalPaymentSelection?
+  unstable val primaryButtonUiState: StateFlow<UIState?>
+  <runtime stability> = Unstable
+}
+unstable class Builder {
+  runtime val resultCallback: PaymentSheetResultCallback
+  runtime var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler?
+  runtime var createIntentCallback: CreateIntentCallback?
+  <runtime stability> = Unstable
+}
+runtime class Payment {
+  stable val amount: Long
+  stable val currency: String
+  stable val setupFutureUse: SetupFutureUse?
+  stable val captureMethod: CaptureMethod
+  runtime var CREATOR: Creator<Payment>
+  <runtime stability> = Uncertain(Creator)
+}
+runtime class Setup {
+  stable val currency: String?
+  stable val setupFutureUse: SetupFutureUse
+  runtime var CREATOR: Creator<Setup>
+  <runtime stability> = Uncertain(Creator)
+}
+stable class Mode {
+  <runtime stability> = Stable
+}
+unstable class IntentConfiguration {
+  stable val mode: Mode
+  unstable val paymentMethodTypes: List<String>
+  stable val paymentMethodConfigurationId: String?
+  stable val onBehalfOf: String?
+  stable val requireCvcRecollection: Boolean
+  runtime var CREATOR: Creator<IntentConfiguration>
+  <runtime stability> = Unstable
+}
+unstable class Builder {
+  stable var merchantDisplayName: String
+  runtime var customer: CustomerConfiguration?
+  runtime var googlePay: GooglePayConfiguration?
+  unstable var primaryButtonColor: ColorStateList?
+  runtime var defaultBillingDetails: BillingDetails?
+  runtime var shippingDetails: AddressDetails?
+  stable var allowsDelayedPaymentMethods: Boolean
+  stable var allowsPaymentMethodsRequiringShippingAddress: Boolean
+  runtime var appearance: Appearance
+  stable var primaryButtonLabel: String?
+  runtime var billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
+  unstable var preferredNetworks: List<CardBrand>
+  stable var allowsRemovalOfLastSavedPaymentMethod: Boolean
+  unstable var paymentMethodOrder: List<String>
+  unstable var externalPaymentMethods: List<String>
+  stable var paymentMethodLayout: PaymentMethodLayout
+  stable var cardBrandAcceptance: CardBrandAcceptance
+  <runtime stability> = Unstable
+}
+unstable class Configuration {
+  stable val merchantDisplayName: String
+  runtime val customer: CustomerConfiguration?
+  runtime val googlePay: GooglePayConfiguration?
+  unstable val primaryButtonColor: ColorStateList?
+  runtime val defaultBillingDetails: BillingDetails?
+  runtime val shippingDetails: AddressDetails?
+  stable val allowsDelayedPaymentMethods: Boolean
+  stable val allowsPaymentMethodsRequiringShippingAddress: Boolean
+  runtime val appearance: Appearance
+  stable val primaryButtonLabel: String?
+  runtime val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
+  unstable val preferredNetworks: List<CardBrand>
+  stable val allowsRemovalOfLastSavedPaymentMethod: Boolean
+  unstable val paymentMethodOrder: List<String>
+  unstable val externalPaymentMethods: List<String>
+  stable val paymentMethodLayout: PaymentMethodLayout
+  stable val cardBrandAcceptance: CardBrandAcceptance
+  runtime var CREATOR: Creator<Configuration>
+  <runtime stability> = Unstable
+}
+runtime class Colors {
+  stable val separatorColor: Int
+  stable val selectedColor: Int
+  stable val unselectedColor: Int
+  runtime var CREATOR: Creator<Colors>
+  <runtime stability> = Uncertain(Creator)
+}
+stable class FlatWithRadio {
+  stable val separatorThicknessDp: Float
+  stable val startSeparatorInsetDp: Float
+  stable val endSeparatorInsetDp: Float
+  stable val topSeparatorEnabled: Boolean
+  stable val bottomSeparatorEnabled: Boolean
+  stable val additionalVerticalInsetsDp: Float
+  stable val horizontalInsetsDp: Float
+  runtime val colorsLight: Colors
+  runtime val colorsDark: Colors
+  runtime var CREATOR: Creator<FlatWithRadio>
+  <runtime stability> = 
+}
+runtime class Colors {
+  stable val separatorColor: Int
+  stable val checkmarkColor: Int
+  runtime var CREATOR: Creator<Colors>
+  <runtime stability> = Uncertain(Creator)
+}
+stable class FlatWithCheckmark {
+  stable val separatorThicknessDp: Float
+  stable val startSeparatorInsetDp: Float
+  stable val endSeparatorInsetDp: Float
+  stable val topSeparatorEnabled: Boolean
+  stable val bottomSeparatorEnabled: Boolean
+  stable val checkmarkInsetDp: Float
+  stable val additionalVerticalInsetsDp: Float
+  stable val horizontalInsetsDp: Float
+  runtime val colorsLight: Colors
+  runtime val colorsDark: Colors
+  runtime var CREATOR: Creator<FlatWithCheckmark>
+  <runtime stability> = 
+}
+runtime class FloatingButton {
+  stable val spacingDp: Float
+  stable val additionalInsetsDp: Float
+  runtime var CREATOR: Creator<FloatingButton>
+  <runtime stability> = Uncertain(Creator)
+}
+stable class RowStyle {
+  <runtime stability> = Stable
+}
+runtime class Embedded {
+  stable val style: RowStyle
+  runtime var CREATOR: Creator<Embedded>
+  <runtime stability> = Uncertain(Creator)
+}
+unstable class Builder {
+  runtime var colorsLight: Colors
+  runtime var colorsDark: Colors
+  runtime var shapes: Shapes
+  runtime var typography: Typography
+  runtime var primaryButton: PrimaryButton
+  runtime var embeddedAppearance: Embedded
+  <runtime stability> = Unstable
+}
+stable class Appearance {
+  runtime val colorsLight: Colors
+  runtime val colorsDark: Colors
+  runtime val shapes: Shapes
+  runtime val typography: Typography
+  runtime val primaryButton: PrimaryButton
+  runtime val embeddedAppearance: Embedded
+  runtime var CREATOR: Creator<Appearance>
+  <runtime stability> = 
+}
+runtime class Colors {
+  stable val primary: Int
+  stable val surface: Int
+  stable val component: Int
+  stable val componentBorder: Int
+  stable val componentDivider: Int
+  stable val onComponent: Int
+  stable val onSurface: Int
+  stable val subtitle: Int
+  stable val placeholderText: Int
+  stable val appBarIcon: Int
+  stable val error: Int
+  runtime var CREATOR: Creator<Colors>
+  <runtime stability> = Uncertain(Creator)
+}
+runtime class Shapes {
+  stable val cornerRadiusDp: Float
+  stable val borderStrokeWidthDp: Float
+  runtime var CREATOR: Creator<Shapes>
+  <runtime stability> = Uncertain(Creator)
+}
+runtime class Typography {
+  stable val sizeScaleFactor: Float
+  stable val fontResId: Int?
+  runtime var CREATOR: Creator<Typography>
+  <runtime stability> = Uncertain(Creator)
+}
+stable class PrimaryButton {
+  runtime val colorsLight: PrimaryButtonColors
+  runtime val colorsDark: PrimaryButtonColors
+  runtime val shape: PrimaryButtonShape
+  runtime val typography: PrimaryButtonTypography
+  runtime var CREATOR: Creator<PrimaryButton>
+  <runtime stability> = 
+}
+runtime class PrimaryButtonColors {
+  stable val background: Int?
+  stable val onBackground: Int
+  stable val border: Int
+  stable val successBackgroundColor: Int
+  stable val onSuccessBackgroundColor: Int
+  runtime var CREATOR: Creator<PrimaryButtonColors>
+  <runtime stability> = Uncertain(Creator)
+}
+runtime class PrimaryButtonShape {
+  stable val cornerRadiusDp: Float?
+  stable val borderStrokeWidthDp: Float?
+  runtime var CREATOR: Creator<PrimaryButtonShape>
+  <runtime stability> = Uncertain(Creator)
+}
+runtime class PrimaryButtonTypography {
+  stable val fontResId: Int?
+  stable val fontSizeSp: Float?
+  runtime var CREATOR: Creator<PrimaryButtonTypography>
+  <runtime stability> = Uncertain(Creator)
+}
+unstable class Builder {
+  stable var city: String?
+  stable var country: String?
+  stable var line1: String?
+  stable var line2: String?
+  stable var postalCode: String?
+  stable var state: String?
+  <runtime stability> = Unstable
+}
+runtime class Address {
+  stable val city: String?
+  stable val country: String?
+  stable val line1: String?
+  stable val line2: String?
+  stable val postalCode: String?
+  stable val state: String?
+  runtime var CREATOR: Creator<Address>
+  <runtime stability> = Uncertain(Creator)
+}
+unstable class Builder {
+  runtime var address: Address?
+  stable var email: String?
+  stable var name: String?
+  stable var phone: String?
+  <runtime stability> = Unstable
+}
+stable class BillingDetails {
+  runtime val address: Address?
+  stable val email: String?
+  stable val name: String?
+  stable val phone: String?
+  runtime var CREATOR: Creator<BillingDetails>
+  <runtime stability> = 
+}
+runtime class BillingDetailsCollectionConfiguration {
+  stable val name: CollectionMode
+  stable val phone: CollectionMode
+  stable val email: CollectionMode
+  stable val address: AddressCollectionMode
+  stable val attachDefaultsToPaymentMethod: Boolean
+  runtime var CREATOR: Creator<BillingDetailsCollectionConfiguration>
+  <runtime stability> = Uncertain(Creator)
+}
+runtime class All {
+  runtime var CREATOR: Creator<All>
+  <runtime stability> = Uncertain(Creator)
+}
+unstable class Allowed {
+  unstable val brands: List<BrandCategory>
+  runtime var CREATOR: Creator<Allowed>
+  <runtime stability> = Unstable
+}
+unstable class Disallowed {
+  unstable val brands: List<BrandCategory>
+  runtime var CREATOR: Creator<Disallowed>
+  <runtime stability> = Unstable
+}
+stable class CardBrandAcceptance {
+  <runtime stability> = Stable
+}
+runtime class LegacyCustomerEphemeralKey {
+  stable val ephemeralKeySecret: String
+  stable val analyticsValue: String
+  runtime var CREATOR: Creator<LegacyCustomerEphemeralKey>
+  <runtime stability> = Uncertain(Creator)
+}
+runtime class CustomerSession {
+  stable val customerSessionClientSecret: String
+  stable val analyticsValue: String
+  runtime var CREATOR: Creator<CustomerSession>
+  <runtime stability> = Uncertain(Creator)
+}
+stable class CustomerConfiguration {
+  stable val id: String
+  stable val ephemeralKeySecret: String
+  runtime val accessType: CustomerAccessType
+  runtime var CREATOR: Creator<CustomerConfiguration>
+  <runtime stability> = 
+}
+runtime class GooglePayConfiguration {
+  stable val environment: Environment
+  stable val countryCode: String
+  stable val currencyCode: String?
+  stable val amount: Long?
+  stable val label: String?
+  stable val buttonType: ButtonType
+  runtime var CREATOR: Creator<GooglePayConfiguration>
+  <runtime stability> = Uncertain(Creator)
+}
+unstable class Builder {
+  runtime val resultCallback: PaymentSheetResultCallback
+  runtime val paymentOptionCallback: PaymentOptionCallback
+  runtime var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler?
+  runtime var createIntentCallback: CreateIntentCallback?
+  <runtime stability> = Unstable
+}
+stable class Success {
+  <runtime stability> = Stable
+}
+unstable class Failure {
+  unstable val error: Throwable
+  <runtime stability> = Unstable
+}
+stable class Result {
+  <runtime stability> = Stable
+}
+runtime class PaymentSheet {
+  runtime val paymentSheetLauncher: PaymentSheetLauncher
+  <runtime stability> = Uncertain(PaymentSheetLauncher)
+}
+unstable class PaymentSheetActivity {
+  unstable var viewModelFactory: Factory
+  unstable val viewModel$delegate: Lazy<PaymentSheetViewModel>
+  unstable val starterArgs$delegate: Lazy<Args?>
+  <runtime stability> = Unstable
+}
+unstable class Args {
+  stable val clientSecret: ClientSecret
+  unstable val config: Configuration?
+  stable val statusBarColor: Int?
+  stable val injectorKey: String
+  runtime var CREATOR: Creator<Args>
+  <runtime stability> = Unstable
+}
+runtime class Result {
+  stable val paymentSheetResult: PaymentSheetResult
+  runtime var CREATOR: Creator<Result>
+  <runtime stability> = Uncertain(Creator)
+}
+stable class PaymentSheetContract {
+  <runtime stability> = Stable
+}
+unstable class Args {
+  stable val initializationMode: InitializationMode
+  unstable val config: Configuration
+  stable val statusBarColor: Int?
+  stable val initializedViaCompose: Boolean
+  runtime var CREATOR: Creator<Args>
+  <runtime stability> = Unstable
+}
+runtime class Result {
+  stable val paymentSheetResult: PaymentSheetResult
+  runtime var CREATOR: Creator<Result>
+  <runtime stability> = Uncertain(Creator)
+}
+stable class PaymentSheetContractV2 {
+  <runtime stability> = Stable
+}
+stable class PaymentSheetNextActionHandlers {
+  <runtime stability> = Stable
+}
+runtime class Completed {
+  runtime var CREATOR: Creator<Completed>
+  <runtime stability> = Uncertain(Creator)
+}
+runtime class Canceled {
+  runtime var CREATOR: Creator<Canceled>
+  <runtime stability> = Uncertain(Creator)
+}
+unstable class Failed {
+  unstable val error: Throwable
+  runtime var CREATOR: Creator<Failed>
+  <runtime stability> = Unstable
+}
+stable class PaymentSheetResult {
+  <runtime stability> = Stable
+}
+stable class Factory {
+  stable val starterArgsSupplier: Function0<Args>
+  <runtime stability> = Stable
+}
+unstable class PaymentSheetViewModel {
+  unstable val args: Args
+  runtime val paymentElementLoader: PaymentElementLoader
+  runtime val prefsRepository: PrefsRepository
+  unstable val logger: Logger
+  unstable val errorReporter: ErrorReporter
+  runtime val cvcRecollectionHandler: CvcRecollectionHandler
+  runtime val cvcRecollectionInteractorFactory: Factory
+  unstable val _contentVisible: MutableStateFlow<Boolean>
+  unstable val contentVisible: StateFlow<Boolean>
+  unstable val primaryButtonUiStateMapper: PrimaryButtonUiStateMapper
+  unstable val _paymentSheetResult: MutableSharedFlow<PaymentSheetResult>
+  unstable val paymentSheetResult: SharedFlow<PaymentSheetResult>
+  unstable val viewState: MutableStateFlow<PaymentSheetViewState?>
+  stable var checkoutIdentifier: CheckoutIdentifier
+  unstable val buyButtonState: StateFlow<PaymentSheetViewState?>
+  runtime var newPaymentSelection: NewOrExternalPaymentSelection?
+  stable val googlePayButtonType: GooglePayButtonType
+  runtime val googlePayLauncherConfig: Config?
+  unstable val primaryButtonUiState: StateFlow<UIState?>
+  unstable val error: StateFlow<ResolvableString?>
+  unstable val walletsState: StateFlow<WalletsState?>
+  unstable val walletsProcessingState: StateFlow<WalletsProcessingState?>
+  runtime val confirmationHandler: ConfirmationHandler
+  <runtime stability> = Unstable
+}
+unstable class SavedPaymentMethodMutator {
+  unstable val paymentMethodMetadataFlow: StateFlow<PaymentMethodMetadata?>
+  runtime val eventReporter: EventReporter
+  unstable val coroutineScope: CoroutineScope
+  unstable val workContext: CoroutineContext
+  unstable val uiContext: CoroutineContext
+  runtime val customerRepository: CustomerRepository
+  unstable val selection: StateFlow<PaymentSelection?>
+  stable val setSelection: Function1<PaymentSelection?, Unit>
+  unstable val customerStateHolder: CustomerStateHolder
+  unstable val prePaymentMethodRemoveActions: SuspendFunction0<Unit>
+  stable val postPaymentMethodRemoveActions: Function0<Unit>
+  stable val onUpdatePaymentMethod: Function5<DisplayableSavedPaymentMethod, @[ParameterName(name = 'canRemove')] Boolean, @[ParameterName(name = 'performRemove')] SuspendFunction0<Throwable?>, @[ParameterName(name = 'updateExecutor')] SuspendFunction1<@[ParameterName(name = 'brand')] CardBrand, Result<PaymentMethod>>, @[ParameterName(name = 'setDefaultPaymentMethodExecutor')] SuspendFunction1<@[ParameterName(name = 'paymentMethod')] PaymentMethod, Result<Unit>>, Unit>
+  unstable val defaultPaymentMethodId: StateFlow<String?>
+  stable val providePaymentMethodName: Function1<@[ParameterName(name = 'code')] String?, ResolvableString>
+  unstable val paymentOptionsItemsMapper$delegate: Lazy<PaymentOptionsItemsMapper>
+  unstable val paymentOptionsItems: StateFlow<List<PaymentOptionsItem>>
+  unstable val canEdit: StateFlow<Boolean>
+  unstable val _editing: MutableStateFlow<Boolean>
+  unstable val editing: StateFlow<Boolean>
+  <runtime stability> = Unstable
+}
+stable class AddressDetails {
+  stable val name: String?
+  runtime val address: Address?
+  stable val phoneNumber: String?
+  stable val isCheckboxSelected: Boolean?
+  runtime var CREATOR: Creator<AddressDetails>
+  <runtime stability> = 
+}
+unstable class AddressElementActivity {
+  unstable var viewModelFactory: Factory
+  unstable val viewModel$delegate: Lazy<AddressElementViewModel>
+  unstable val starterArgs$delegate: Lazy<Args>
+  <runtime stability> = Unstable
+}
+unstable class Args {
+  stable val publishableKey: String
+  unstable val config: Configuration?
+  runtime var CREATOR: Creator<Args>
+  <runtime stability> = Unstable
+}
+runtime class Result {
+  stable val addressOptionsResult: AddressLauncherResult
+  runtime var CREATOR: Creator<Result>
+  <runtime stability> = Uncertain(Creator)
+}
+stable class AddressElementActivityContract {
+  <runtime stability> = Stable
+}
+unstable class AddressElementNavigator {
+  unstable var navigationController: NavHostController?
+  stable var onDismiss: Function1<AddressLauncherResult, Unit>?
+  <runtime stability> = Unstable
+}
+stable class InputAddress {
+  <runtime stability> = Stable
+}
+stable class Autocomplete {
+  stable val country: String
+  <runtime stability> = Stable
+}
+stable class AddressElementScreen {
+  stable val route: String
+  <runtime stability> = Stable
+}
+stable class Factory {
+  stable val applicationSupplier: Function0<Application>
+  stable val starterArgsSupplier: Function0<Args>
+  <runtime stability> = Stable
+}
+unstable class AddressElementViewModel {
+  unstable val navigator: AddressElementNavigator
+  unstable val inputAddressViewModelSubcomponentBuilderProvider: Provider<Builder>
+  unstable val autoCompleteViewModelSubcomponentBuilderProvider: Provider<Builder>
+  <runtime stability> = Unstable
+}
+unstable class Builder {
+  runtime var appearance: Appearance
+  runtime var address: AddressDetails?
+  unstable var allowedCountries: Set<String>
+  stable var buttonTitle: String?
+  runtime var additionalFields: AdditionalFieldsConfiguration?
+  stable var title: String?
+  stable var googlePlacesApiKey: String?
+  unstable var autocompleteCountries: Set<String>?
+  <runtime stability> = Unstable
+}
+unstable class Configuration {
+  runtime val appearance: Appearance
+  runtime val address: AddressDetails?
+  unstable val allowedCountries: Set<String>
+  stable val buttonTitle: String?
+  runtime val additionalFields: AdditionalFieldsConfiguration?
+  stable val title: String?
+  stable val googlePlacesApiKey: String?
+  unstable val autocompleteCountries: Set<String>
+  runtime var CREATOR: Creator<Configuration>
+  <runtime stability> = Unstable
+}
+runtime class AdditionalFieldsConfiguration {
+  stable val phone: FieldConfiguration
+  stable val checkboxLabel: String?
+  runtime var CREATOR: Creator<AdditionalFieldsConfiguration>
+  <runtime stability> = Uncertain(Creator)
+}
+unstable class AddressLauncher {
+  unstable val application: Application
+  unstable val activityResultLauncher: ActivityResultLauncher<Args>
+  <runtime stability> = Unstable
+}
+stable class Succeeded {
+  runtime val address: AddressDetails
+  runtime var CREATOR: Creator<Succeeded>
+  <runtime stability> = 
+}
+runtime class Canceled {
+  runtime var CREATOR: Creator<Canceled>
+  <runtime stability> = Uncertain(Creator)
+}
+stable class AddressLauncherResult {
+  <runtime stability> = Stable
+}
+stable class AddressSpecFactory {
+  <runtime stability> = Stable
+}
+unstable class Debouncer {
+  unstable var searchJob: Job?
+  <runtime stability> = Unstable
+}
+unstable class Factory {
+  unstable val autoCompleteViewModelSubcomponentBuilderProvider: Provider<Builder>
+  stable val args: Args
+  stable val applicationSupplier: Function0<Application>
+  <runtime stability> = Unstable
+}
+stable class Args {
+  stable val country: String?
+  <runtime stability> = Stable
+}
+unstable class AutocompleteViewModel {
+  unstable val args: Args
+  unstable val navigator: AddressElementNavigator
+  unstable val placesClient: PlacesClientProxy?
+  stable val autocompleteArgs: Args
+  runtime val eventReporter: AddressLauncherEventReporter
+  unstable val _predictions: MutableStateFlow<List<AutocompletePrediction>?>
+  unstable val _loading: MutableStateFlow<Boolean>
+  unstable val addressResult: MutableStateFlow<Result<AddressDetails?>?>
+  runtime val config: SimpleTextFieldConfig
+  runtime val textFieldController: SimpleTextFieldController
+  unstable val queryFlow: StateFlow<String>
+  unstable val debouncer: Debouncer
+  <runtime stability> = Unstable
+}
+unstable class FormController {
+  unstable val elements: StateFlow<List<FormElement>>
+  unstable val cardBillingElement: StateFlow<CardBillingAddressElement?>
+  unstable val hiddenIdentifiers: StateFlow<Set<IdentifierSpec>>
+  unstable val completeFormValues: StateFlow<Map<IdentifierSpec, FormFieldEntry>?>
+  unstable val formValues: StateFlow<Map<IdentifierSpec, FormFieldEntry>>
+  unstable val textFieldControllerIdsFlow: StateFlow<List<IdentifierSpec>>
+  unstable val lastTextFieldIdentifier: StateFlow<IdentifierSpec?>
+  <runtime stability> = Unstable
+}
+stable class FormControllerModule {
+  <runtime stability> = Stable
+}
+unstable class Factory {
+  unstable val inputAddressViewModelSubcomponentBuilderProvider: Provider<Builder>
+  <runtime stability> = Unstable
+}
+unstable class InputAddressViewModel {
+  unstable val args: Args
+  unstable val navigator: AddressElementNavigator
+  runtime val eventReporter: AddressLauncherEventReporter
+  unstable val _collectedAddress: MutableStateFlow<AddressDetails?>
+  unstable val collectedAddress: StateFlow<AddressDetails?>
+  unstable val _forceExpandedForm: MutableStateFlow<Boolean?>
+  unstable val forceExpandedForm: StateFlow<Boolean?>
+  unstable val _formController: MutableStateFlow<FormController?>
+  unstable val formController: StateFlow<FormController?>
+  unstable val _formEnabled: MutableStateFlow<Boolean>
+  unstable val formEnabled: StateFlow<Boolean>
+  unstable val _checkboxChecked: MutableStateFlow<Boolean>
+  unstable val checkboxChecked: StateFlow<Boolean>
+  <runtime stability> = Unstable
+}
+stable class Show {
+  stable val country: String
+  stable val eventName: String
+  <runtime stability> = Stable
+}
+stable class Completed {
+  stable val country: String
+  stable val autocompleteResultSelected: Boolean
+  stable val editDistance: Int?
+  stable val eventName: String
+  <runtime stability> = Stable
+}
+stable class AddressLauncherEvent {
+  <runtime stability> = Stable
+}
+unstable class DefaultAddressLauncherEventReporter {
+  unstable val analyticsRequestExecutor: AnalyticsRequestExecutor
+  unstable val analyticsRequestFactory: AnalyticsRequestFactory
+  unstable val workContext: CoroutineContext
+  <runtime stability> = Unstable
+}
+unstable class DefaultEventReporter {
+  stable val mode: Mode
+  unstable val analyticsRequestExecutor: AnalyticsRequestExecutor
+  runtime val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
+  unstable val durationProvider: DurationProvider
+  unstable val workContext: CoroutineContext
+  stable var isDeferred: Boolean
+  stable var linkMode: LinkMode?
+  stable var googlePaySupported: Boolean
+  stable var currency: String?
+  <runtime stability> = Unstable
+}
+stable class EventTimeProvider {
+  <runtime stability> = Stable
+}
+unstable class PaymentSheetAnalyticsListener {
+  unstable val savedStateHandle: SavedStateHandle
+  runtime val eventReporter: EventReporter
+  stable val currentPaymentMethodTypeProvider: Function0<String>
+  <runtime stability> = Unstable
+}
+unstable class Stripe {
+  unstable val cause: Throwable
+  unstable val stripeException: StripeException
+  stable val errorCode: String?
+  <runtime stability> = Unstable
+}
+stable class GooglePay {
+  stable val errorCodeInt: Int
+  stable val errorCode: String
+  <runtime stability> = Stable
+}
+stable class ExternalPaymentMethod {
+  stable val errorCode: String?
+  <runtime stability> = Stable
+}
+stable class InvalidState {
+  stable val errorCode: String?
+  <runtime stability> = Stable
+}
+stable class PaymentSheetConfirmationError {
+  <runtime stability> = Stable
+}
+unstable class LoadStarted {
+  stable val isDeferred: Boolean
+  stable val linkEnabled: Boolean
+  stable val googlePaySupported: Boolean
+  stable val eventName: String
+  unstable val additionalParams: Map<String, Any?>
+  <runtime stability> = Unstable
+}
+unstable class LoadSucceeded {
+  stable val isDeferred: Boolean
+  stable val googlePaySupported: Boolean
+  stable val eventName: String
+  stable val linkEnabled: Boolean
+  unstable val additionalParams: Map<String, Any?>
+  <runtime stability> = Unstable
+}
+unstable class LoadFailed {
+  stable val isDeferred: Boolean
+  stable val linkEnabled: Boolean
+  stable val googlePaySupported: Boolean
+  stable val eventName: String
+  unstable val additionalParams: Map<String, Any?>
+  <runtime stability> = Unstable
+}
+unstable class ElementsSessionLoadFailed {
+  stable val isDeferred: Boolean
+  stable val linkEnabled: Boolean
+  stable val googlePaySupported: Boolean
+  stable val eventName: String
+  unstable val additionalParams: Map<String, Any?>
+  <runtime stability> = Unstable
+}
+unstable class Init {
+  stable val mode: Mode
+  unstable val configuration: Configuration
+  stable val isDeferred: Boolean
+  stable val linkEnabled: Boolean
+  stable val googlePaySupported: Boolean
+  <runtime stability> = Unstable
+}
+unstable class Dismiss {
+  stable val isDeferred: Boolean
+  stable val linkEnabled: Boolean
+  stable val googlePaySupported: Boolean
+  stable val eventName: String
+  unstable val additionalParams: Map<String, Any>
+  <runtime stability> = Unstable
+}
+unstable class ShowNewPaymentOptions {
+  stable val isDeferred: Boolean
+  stable val linkEnabled: Boolean
+  stable val googlePaySupported: Boolean
+  stable val eventName: String
+  unstable val additionalParams: Map<String, Any?>
+  <runtime stability> = Unstable
+}
+unstable class ShowExistingPaymentOptions {
+  stable val isDeferred: Boolean
+  stable val linkEnabled: Boolean
+  stable val googlePaySupported: Boolean
+  stable val eventName: String
+  unstable val additionalParams: Map<String, Any?>
+  <runtime stability> = Unstable
+}
+unstable class SelectPaymentMethod {
+  stable val isDeferred: Boolean
+  stable val linkEnabled: Boolean
+  stable val googlePaySupported: Boolean
+  stable val eventName: String
+  unstable val additionalParams: Map<String, Any?>
+  <runtime stability> = Unstable
+}
+unstable class SelectPaymentOption {
+  stable val isDeferred: Boolean
+  stable val linkEnabled: Boolean
+  stable val googlePaySupported: Boolean
+  stable val eventName: String
+  unstable val additionalParams: Map<String, Any?>
+  <runtime stability> = Unstable
+}
+unstable class ShowPaymentOptionForm {
+  stable val isDeferred: Boolean
+  stable val linkEnabled: Boolean
+  stable val googlePaySupported: Boolean
+  stable val eventName: String
+  unstable val additionalParams: Map<String, Any?>
+  <runtime stability> = Unstable
+}
+unstable class PaymentOptionFormInteraction {
+  stable val isDeferred: Boolean
+  stable val linkEnabled: Boolean
+  stable val googlePaySupported: Boolean
+  stable val eventName: String
+  unstable val additionalParams: Map<String, Any?>
+  <runtime stability> = Unstable
+}
+unstable class CardNumberCompleted {
+  stable val isDeferred: Boolean
+  stable val linkEnabled: Boolean
+  stable val googlePaySupported: Boolean
+  stable val eventName: String
+  unstable val additionalParams: Map<String, Any?>
+  <runtime stability> = Unstable
+}
+unstable class CardBrandDisallowed {
+  stable val isDeferred: Boolean
+  stable val linkEnabled: Boolean
+  stable val googlePaySupported: Boolean
+  stable val eventName: String
+  unstable val additionalParams: Map<String, Any?>
+  <runtime stability> = Unstable
+}
+unstable class PressConfirmButton {
+  stable val isDeferred: Boolean
+  stable val linkEnabled: Boolean
+  stable val googlePaySupported: Boolean
+  stable val eventName: String
+  unstable val additionalParams: Map<String, Any?>
+  <runtime stability> = Unstable
+}
+stable class Success {
+  <runtime stability> = Stable
+}
+stable class Failure {
+  stable val error: PaymentSheetConfirmationError
+  <runtime stability> = Stable
+}
+unstable class Payment {
+  runtime val result: Result
+  stable val isDeferred: Boolean
+  stable val linkEnabled: Boolean
+  stable val googlePaySupported: Boolean
+  stable val deferredIntentConfirmationType: DeferredIntentConfirmationType?
+  stable val eventName: String
+  unstable val additionalParams: Map<String, Any?>
+  <runtime stability> = Unstable
+}
+unstable class LpmSerializeFailureEvent {
+  stable val isDeferred: Boolean
+  stable val linkEnabled: Boolean
+  stable val googlePaySupported: Boolean
+  stable val errorMessage: String?
+  stable val eventName: String
+  unstable val additionalParams: Map<String, Any?>
+  <runtime stability> = Unstable
+}
+unstable class AutofillEvent {
+  stable val isDeferred: Boolean
+  stable val linkEnabled: Boolean
+  stable val googlePaySupported: Boolean
+  stable val eventName: String
+  unstable val additionalParams: Map<String, Any?>
+  <runtime stability> = Unstable
+}
+unstable class ShowEditablePaymentOption {
+  stable val isDeferred: Boolean
+  stable val linkEnabled: Boolean
+  stable val googlePaySupported: Boolean
+  stable val eventName: String
+  unstable val additionalParams: Map<String, Any?>
+  <runtime stability> = Unstable
+}
+unstable class HideEditablePaymentOption {
+  stable val isDeferred: Boolean
+  stable val linkEnabled: Boolean
+  stable val googlePaySupported: Boolean
+  stable val eventName: String
+  unstable val additionalParams: Map<String, Any?>
+  <runtime stability> = Unstable
+}
+unstable class ShowPaymentOptionBrands {
+  stable val isDeferred: Boolean
+  stable val linkEnabled: Boolean
+  stable val googlePaySupported: Boolean
+  stable val eventName: String
+  unstable val additionalParams: Map<String, Any?>
+  <runtime stability> = Unstable
+}
+unstable class HidePaymentOptionBrands {
+  stable val isDeferred: Boolean
+  stable val linkEnabled: Boolean
+  stable val googlePaySupported: Boolean
+  stable val eventName: String
+  unstable val additionalParams: Map<String, Any?>
+  <runtime stability> = Unstable
+}
+unstable class SetAsDefaultPaymentMethodSucceeded {
+  stable val isDeferred: Boolean
+  stable val linkEnabled: Boolean
+  stable val googlePaySupported: Boolean
+  stable val eventName: String
+  unstable val additionalParams: Map<String, Any?>
+  <runtime stability> = Unstable
+}
+unstable class SetAsDefaultPaymentMethodFailed {
+  stable val isDeferred: Boolean
+  stable val linkEnabled: Boolean
+  stable val googlePaySupported: Boolean
+  stable val eventName: String
+  unstable val additionalParams: Map<String, Any?>
+  <runtime stability> = Unstable
+}
+unstable class UpdatePaymentOptionSucceeded {
+  stable val isDeferred: Boolean
+  stable val linkEnabled: Boolean
+  stable val googlePaySupported: Boolean
+  stable val eventName: String
+  unstable val additionalParams: Map<String, Any?>
+  <runtime stability> = Unstable
+}
+unstable class UpdatePaymentOptionFailed {
+  stable val isDeferred: Boolean
+  stable val linkEnabled: Boolean
+  stable val googlePaySupported: Boolean
+  stable val eventName: String
+  unstable val additionalParams: Map<String, Any?>
+  <runtime stability> = Unstable
+}
+unstable class CannotProperlyReturnFromLinkAndLPMs {
+  stable val linkEnabled: Boolean
+  stable val isDeferred: Boolean
+  stable val googlePaySupported: Boolean
+  stable val eventName: String
+  unstable val additionalParams: Map<String, Any?>
+  <runtime stability> = Unstable
+}
+stable class PaymentSheetEvent {
+  <runtime stability> = Stable
+}
+stable class CvcRecollectionHandlerImpl {
+  <runtime stability> = Stable
+}
+unstable class ActivityHost {
+  unstable val activity: ComponentActivity
+  <runtime stability> = Unstable
+}
+unstable class FragmentHost {
+  unstable val fragment: Fragment
+  <runtime stability> = Unstable
+}
+stable class ActivityLauncherFactory {
+  <runtime stability> = Stable
+}
+unstable class Args {
+  stable val clientSecret: String
+  unstable val config: Configuration?
+  runtime var CREATOR: Creator<Args>
+  <runtime stability> = Unstable
+}
+unstable class State {
+  unstable val paymentSheetState: Full
+  unstable val config: Configuration
+  runtime var CREATOR: Creator<State>
+  <runtime stability> = Unstable
+}
+unstable class DefaultFlowController {
+  unstable val viewModelScope: CoroutineScope
+  unstable val lifecycleOwner: LifecycleOwner
+  unstable val paymentOptionFactory: PaymentOptionFactory
+  runtime val paymentOptionCallback: PaymentOptionCallback
+  runtime val paymentResultCallback: PaymentSheetResultCallback
+  stable val prefsRepositoryFactory: @[JvmSuppressWildcards(suppress = <null>)] Function1<CustomerConfiguration?, PrefsRepository>
+  unstable val context: Context
+  runtime val eventReporter: EventReporter
+  unstable val viewModel: FlowControllerViewModel
+  runtime val confirmationHandler: ConfirmationHandler
+  unstable val linkHandler: LinkHandler
+  stable val enableLogging: Boolean
+  unstable val productUsage: Set<String>
+  unstable val configurationHandler: FlowControllerConfigurationHandler
+  unstable val errorReporter: ErrorReporter
+  stable val initializedViaCompose: Boolean
+  unstable val paymentOptionActivityLauncher: ActivityResultLauncher<Args>
+  unstable val sepaMandateActivityLauncher: ActivityResultLauncher<Args>
+  runtime var flowControllerComponent: FlowControllerComponent
+  <runtime stability> = Unstable
+}
+unstable class ConfigureRequest {
+  stable val initializationMode: InitializationMode
+  unstable val configuration: Configuration
+  <runtime stability> = Unstable
+}
+unstable class FlowControllerConfigurationHandler {
+  runtime val paymentElementLoader: PaymentElementLoader
+  unstable val uiContext: CoroutineContext
+  runtime val eventReporter: EventReporter
+  unstable val viewModel: FlowControllerViewModel
+  runtime val paymentSelectionUpdater: PaymentSelectionUpdater
+  unstable val job: AtomicReference<Job?>
+  stable var didLastConfigurationFail: Boolean
+  <runtime stability> = Unstable
+}
+unstable class FlowControllerFactory {
+  unstable val viewModelStoreOwner: ViewModelStoreOwner
+  unstable val lifecycleOwner: LifecycleOwner
+  unstable val activityResultRegistryOwner: ActivityResultRegistryOwner
+  stable val statusBarColor: Function0<Int?>
+  runtime val paymentOptionCallback: PaymentOptionCallback
+  runtime val paymentResultCallback: PaymentSheetResultCallback
+  stable val initializedViaCompose: Boolean
+  <runtime stability> = Unstable
+}
+stable class FlowControllerModule {
+  <runtime stability> = Stable
+}
+stable class Factory {
+  stable val statusBarColor: Int?
+  <runtime stability> = Stable
+}
+unstable class FlowControllerViewModel {
+  unstable val handle: SavedStateHandle
+  runtime val flowControllerStateComponent: FlowControllerStateComponent
+  unstable var paymentSelection: PaymentSelection?
+  unstable var previousConfigureRequest: ConfigureRequest?
+  unstable val flowControllerStateFlow: StateFlow<State?>
+  stable val restartSession: Function0<Unit>
+  <runtime stability> = Unstable
+}
+stable class DefaultPaymentSelectionUpdater {
+  <runtime stability> = Stable
+}
+unstable class CompleteFormFieldValueFilter {
+  unstable val currentFieldValueMap: Flow<Map<IdentifierSpec, FormFieldEntry>>
+  unstable val hiddenIdentifiers: Flow<Set<IdentifierSpec>>
+  unstable val userRequestedReuse: Flow<CustomerRequestedSave>
+  unstable val defaultValues: Map<IdentifierSpec, String>
+  <runtime stability> = Unstable
+}
+stable class FormArgumentsFactory {
+  <runtime stability> = Stable
+}
+unstable class FormFieldValues {
+  unstable val fieldValuePairs: Map<IdentifierSpec, FormFieldEntry>
+  stable val userRequestedReuse: CustomerRequestedSave
+  <runtime stability> = Unstable
+}
+unstable class Factory {
+  unstable val formElements: List<FormElement>
+  unstable val formArguments: FormArguments
+  <runtime stability> = Unstable
+}
+unstable class FormViewModel {
+  unstable val elements: List<FormElement>
+  unstable val formArguments: FormArguments
+  runtime val cardBillingElement: CardBillingAddressElement?
+  unstable var externalHiddenIdentifiers: MutableStateFlow<Set<IdentifierSpec>>
+  unstable val hiddenIdentifiers: StateFlow<Set<IdentifierSpec>>
+  unstable val userRequestedReuse: Flow<CustomerRequestedSave>
+  unstable val completeFormValues: Flow<FormFieldValues?>
+  unstable val textFieldControllerIdsFlow: StateFlow<List<IdentifierSpec>>
+  unstable val lastTextFieldIdentifier: StateFlow<IdentifierSpec?>
+  <runtime stability> = Unstable
+}
+stable class PlaceholderHelper {
+  <runtime stability> = Stable
+}
+stable class AddressElementViewModelModule {
+  <runtime stability> = Stable
+}
+stable class PaymentOptionsViewModelModule {
+  <runtime stability> = Stable
+}
+stable class PaymentSheetCommonModule {
+  <runtime stability> = Stable
+}
+stable class PaymentSheetLauncherModule {
+  <runtime stability> = Stable
+}
+unstable class PaymentSheetViewModelModule {
+  unstable val starterArgs: Args
+  <runtime stability> = Unstable
+}
+stable class ClientSecret {
+  <runtime stability> = Stable
+}
+runtime class PaymentIntentClientSecret {
+  stable val value: String
+  runtime var CREATOR: Creator<PaymentIntentClientSecret>
+  <runtime stability> = Uncertain(Creator)
+}
+runtime class SetupIntentClientSecret {
+  stable val value: String
+  runtime var CREATOR: Creator<SetupIntentClientSecret>
+  <runtime stability> = Uncertain(Creator)
+}
+unstable class MandateText {
+  unstable val text: ResolvableString?
+  stable val showAbovePrimaryButton: Boolean
+  <runtime stability> = Unstable
+}
+runtime class PaymentMethodIncentive {
+  stable val identifier: String
+  stable val displayText: String
+  runtime var CREATOR: Creator<PaymentMethodIncentive>
+  <runtime stability> = Uncertain(Creator)
+}
+unstable class PaymentOption {
+  stable val drawableResourceId: Int
+  stable val label: String
+  unstable val imageLoader: SuspendFunction0<Drawable>
+  <runtime stability> = Unstable
+}
+unstable class PaymentOptionFactory {
+  unstable val iconLoader: IconLoader
+  unstable val context: Context
+  <runtime stability> = Unstable
+}
+runtime class GooglePay {
+  runtime var CREATOR: Creator<GooglePay>
+  <runtime stability> = Uncertain(Creator)
+}
+runtime class Link {
+  stable val useLinkExpress: Boolean
+  runtime var CREATOR: Creator<Link>
+  <runtime stability> = Uncertain(Creator)
+}
+unstable class ExternalPaymentMethod {
+  stable val type: String
+  runtime val billingDetails: BillingDetails?
+  unstable val label: ResolvableString
+  stable val iconResource: Int
+  stable val lightThemeIconUrl: String?
+  stable val darkThemeIconUrl: String?
+  runtime var CREATOR: Creator<ExternalPaymentMethod>
+  <runtime stability> = Unstable
+}
+runtime class Saved {
+  runtime val paymentMethod: PaymentMethod
+  stable val walletType: WalletType?
+  runtime val paymentMethodOptionsParams: PaymentMethodOptionsParams?
+  runtime var CREATOR: Creator<Saved>
+  <runtime stability> = Runtime(PaymentMethodOptionsParams),Runtime(PaymentMethod)
+}
+runtime class Card {
+  runtime val paymentMethodCreateParams: PaymentMethodCreateParams
+  stable val brand: CardBrand
+  stable val customerRequestedSave: CustomerRequestedSave
+  runtime val paymentMethodOptionsParams: PaymentMethodOptionsParams?
+  runtime val paymentMethodExtraParams: PaymentMethodExtraParams?
+  stable val last4: String
+  runtime var CREATOR: Creator<Card>
+  <runtime stability> = Runtime(PaymentMethodExtraParams),Runtime(PaymentMethodOptionsParams),Runtime(PaymentMethodCreateParams)
+}
+runtime class InstantDebitsInfo {
+  runtime val paymentMethod: PaymentMethod
+  stable val linkMode: LinkMode?
+  runtime var CREATOR: Creator<InstantDebitsInfo>
+  <runtime stability> = Runtime(PaymentMethod)
+}
+runtime class Input {
+  stable val name: String
+  stable val email: String?
+  stable val phone: String?
+  runtime val address: Address?
+  stable val saveForFutureUse: Boolean
+  runtime var CREATOR: Creator<Input>
+  <runtime stability> = Runtime(Address)
+}
+unstable class USBankAccount {
+  stable val label: String
+  stable val iconResource: Int
+  runtime val input: Input
+  unstable val screenState: BankFormScreenState
+  runtime val instantDebits: InstantDebitsInfo?
+  runtime val paymentMethodCreateParams: PaymentMethodCreateParams
+  stable val customerRequestedSave: CustomerRequestedSave
+  runtime val paymentMethodOptionsParams: PaymentMethodOptionsParams?
+  runtime val paymentMethodExtraParams: PaymentMethodExtraParams?
+  runtime var CREATOR: Creator<USBankAccount>
+  <runtime stability> = Unstable
+}
+runtime class LinkInline {
+  runtime val paymentMethodCreateParams: PaymentMethodCreateParams
+  stable val brand: CardBrand
+  stable val customerRequestedSave: CustomerRequestedSave
+  runtime val paymentMethodOptionsParams: PaymentMethodOptionsParams?
+  runtime val paymentMethodExtraParams: PaymentMethodExtraParams?
+  stable val input: UserInput
+  stable val last4: String
+  runtime var CREATOR: Creator<LinkInline>
+  <runtime stability> = Runtime(PaymentMethodExtraParams),Runtime(PaymentMethodOptionsParams),Runtime(PaymentMethodCreateParams)
+}
+unstable class GenericPaymentMethod {
+  unstable val label: ResolvableString
+  stable val iconResource: Int
+  stable val lightThemeIconUrl: String?
+  stable val darkThemeIconUrl: String?
+  runtime val paymentMethodCreateParams: PaymentMethodCreateParams
+  stable val customerRequestedSave: CustomerRequestedSave
+  runtime val paymentMethodOptionsParams: PaymentMethodOptionsParams?
+  runtime val paymentMethodExtraParams: PaymentMethodExtraParams?
+  runtime var CREATOR: Creator<GenericPaymentMethod>
+  <runtime stability> = Unstable
+}
+stable class New {
+  <runtime stability> = Stable
+}
+unstable class IconLoader {
+  unstable val resources: Resources
+  runtime val imageLoader: StripeImageLoader
+  <runtime stability> = Unstable
+}
+unstable class PaymentSelection {
+  stable var hasAcknowledgedSepaMandate: Boolean
+  <runtime stability> = Unstable
+}
+unstable class Reset {
+  unstable val message: UserErrorMessage?
+  <runtime stability> = Unstable
+}
+stable class StartProcessing {
+  <runtime stability> = Stable
+}
+stable class FinishProcessing {
+  stable val onComplete: Function0<Unit>
+  <runtime stability> = Stable
+}
+unstable class UserErrorMessage {
+  unstable val message: ResolvableString
+  <runtime stability> = Unstable
+}
+unstable class PaymentSheetViewState {
+  unstable val errorMessage: UserErrorMessage?
+  <runtime stability> = Unstable
+}
+runtime class GooglePay {
+  runtime var CREATOR: Creator<GooglePay>
+  <runtime stability> = Uncertain(Creator)
+}
+runtime class Link {
+  runtime var CREATOR: Creator<Link>
+  <runtime stability> = Uncertain(Creator)
+}
+runtime class PaymentMethod {
+  stable val id: String
+  runtime var CREATOR: Creator<PaymentMethod>
+  <runtime stability> = Uncertain(Creator)
+}
+runtime class None {
+  runtime var CREATOR: Creator<None>
+  <runtime stability> = Uncertain(Creator)
+}
+stable class SavedSelection {
+  <runtime stability> = Stable
+}
+stable class StripeIntentValidator {
+  <runtime stability> = Stable
+}
+unstable class NavigationHandler {
+  unstable val coroutineScope: CoroutineScope
+  runtime val initialScreen: T
+  stable val shouldRemoveInitialScreenOnTransition: Boolean
+  stable val poppedScreenHandler: Function1<T, Unit>
+  unstable val isTransitioning: AtomicBoolean
+  unstable val backStack: MutableStateFlow<List<T>>
+  unstable val currentScreen: StateFlow<T>
+  unstable val previousScreen: StateFlow<T?>
+  <runtime stability> = Unstable
+}
+unstable class BuyButtonOverride {
+  unstable val label: ResolvableString
+  stable val lockEnabled: Boolean
+  <runtime stability> = Unstable
+}
+unstable class BuyButtonState {
+  stable val visible: Boolean
+  unstable val buyButtonOverride: BuyButtonOverride?
+  <runtime stability> = Unstable
+}
+unstable class Loading {
+  unstable val buyButtonState: StateFlow<BuyButtonState>
+  stable val showsContinueButton: Boolean
+  stable val topContentPadding: Dp
+  stable val bottomContentPadding: Dp
+  stable val walletsDividerSpacing: Dp
+  stable val showsMandates: Boolean
+  <runtime stability> = Unstable
+}
+stable class NotRequired {
+  <runtime stability> = Stable
+}
+unstable class Required {
+  unstable val cvcControllerFlow: StateFlow<CvcController>
+  <runtime stability> = Unstable
+}
+unstable class SelectSavedPaymentMethods {
+  runtime val interactor: SelectSavedPaymentMethodsInteractor
+  runtime val cvcRecollectionState: CvcRecollectionState
+  unstable val buyButtonState: StateFlow<BuyButtonState>
+  stable val showsContinueButton: Boolean
+  stable val topContentPadding: Dp
+  stable val bottomContentPadding: Dp
+  stable val walletsDividerSpacing: Dp
+  stable val animationStyle: AnimationStyle
+  stable val showsMandates: Boolean
+  <runtime stability> = Unstable
+}
+unstable class AddAnotherPaymentMethod {
+  runtime val interactor: AddPaymentMethodInteractor
+  unstable val buyButtonState: StateFlow<BuyButtonState>
+  stable val showsContinueButton: Boolean
+  stable val topContentPadding: Dp
+  stable val bottomContentPadding: Dp
+  stable val walletsDividerSpacing: Dp
+  stable val animationStyle: AnimationStyle
+  stable val showsMandates: Boolean
+  <runtime stability> = Unstable
+}
+unstable class AddFirstPaymentMethod {
+  runtime val interactor: AddPaymentMethodInteractor
+  unstable val buyButtonState: StateFlow<BuyButtonState>
+  stable val showsContinueButton: Boolean
+  stable val topContentPadding: Dp
+  stable val bottomContentPadding: Dp
+  stable val walletsDividerSpacing: Dp
+  stable val showsMandates: Boolean
+  <runtime stability> = Unstable
+}
+unstable class VerticalMode {
+  runtime val interactor: PaymentMethodVerticalLayoutInteractor
+  unstable val buyButtonState: StateFlow<BuyButtonState>
+  stable val showsContinueButton: Boolean
+  stable val topContentPadding: Dp
+  stable val bottomContentPadding: Dp
+  stable val walletsDividerSpacing: Dp
+  stable val showsMandates: Boolean
+  <runtime stability> = Unstable
+}
+unstable class VerticalModeForm {
+  runtime val interactor: VerticalModeFormInteractor
+  stable val showsWalletHeader: Boolean
+  unstable val buyButtonState: StateFlow<BuyButtonState>
+  stable val showsContinueButton: Boolean
+  stable val topContentPadding: Dp
+  stable val bottomContentPadding: Dp
+  stable val walletsDividerSpacing: Dp
+  stable val showsMandates: Boolean
+  <runtime stability> = Unstable
+}
+unstable class ManageSavedPaymentMethods {
+  runtime val interactor: ManageScreenInteractor
+  unstable val buyButtonState: StateFlow<BuyButtonState>
+  stable val showsContinueButton: Boolean
+  stable val topContentPadding: Dp
+  stable val bottomContentPadding: Dp
+  stable val walletsDividerSpacing: Dp
+  stable val showsMandates: Boolean
+  <runtime stability> = Unstable
+}
+unstable class CvcRecollection {
+  runtime val interactor: CvcRecollectionInteractor
+  unstable val buyButtonState: StateFlow<BuyButtonState>
+  stable val showsContinueButton: Boolean
+  stable val topContentPadding: Dp
+  stable val bottomContentPadding: Dp
+  stable val walletsDividerSpacing: Dp
+  stable val showsMandates: Boolean
+  <runtime stability> = Unstable
+}
+unstable class UpdatePaymentMethod {
+  runtime val interactor: UpdatePaymentMethodInteractor
+  unstable val buyButtonState: StateFlow<BuyButtonState>
+  stable val showsContinueButton: Boolean
+  stable val topContentPadding: Dp
+  stable val bottomContentPadding: Dp
+  stable val walletsDividerSpacing: Dp
+  stable val showsMandates: Boolean
+  <runtime stability> = Unstable
+}
+unstable class FormArguments {
+  stable val paymentMethodCode: String
+  unstable val cbcEligibility: CardBrandChoiceEligibility
+  stable val merchantName: String
+  runtime val amount: Amount?
+  runtime val billingDetails: BillingDetails?
+  runtime val shippingDetails: AddressDetails?
+  runtime val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior
+  stable val hasIntentToSetup: Boolean
+  runtime val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
+  <runtime stability> = Unstable
+}
+unstable class LinkedBankAccount {
+  runtime val resultIdentifier: ResultIdentifier
+  stable val bankName: String?
+  stable val last4: String?
+  stable val intentId: String?
+  stable val financialConnectionsSessionId: String?
+  unstable val mandateText: ResolvableString
+  stable val isVerifyingWithMicrodeposits: Boolean
+  stable val eligibleForIncentive: Boolean
+  runtime var CREATOR: Creator<LinkedBankAccount>
+  <runtime stability> = Unstable
+}
+stable class PromoBadgeState {
+  stable val promoText: String
+  stable val eligible: Boolean
+  <runtime stability> = Stable
+}
+runtime class Session {
+  stable val id: String
+  runtime var CREATOR: Creator<Session>
+  <runtime stability> = Uncertain(Creator)
+}
+runtime class PaymentMethod {
+  runtime val paymentMethod: PaymentMethod
+  runtime var CREATOR: Creator<PaymentMethod>
+  <runtime stability> = Runtime(PaymentMethod)
+}
+unstable class BankFormScreenState {
+  stable val isPaymentFlow: Boolean
+  stable val promoText: String?
+  stable val _isProcessing: Boolean
+  unstable val linkedBankAccount: LinkedBankAccount?
+  unstable val error: ResolvableString?
+  runtime var CREATOR: Creator<BankFormScreenState>
+  <runtime stability> = Unstable
+}
+unstable class USBankAccountFormArguments {
+  stable val instantDebits: Boolean
+  runtime val incentive: PaymentMethodIncentive?
+  stable val linkMode: LinkMode?
+  stable val onBehalfOf: String?
+  stable val showCheckbox: Boolean
+  stable val isCompleteFlow: Boolean
+  stable val isPaymentFlow: Boolean
+  stable val stripeIntentId: String?
+  stable val clientSecret: String?
+  stable val hostedSurface: String
+  runtime val shippingDetails: AddressDetails?
+  unstable val draftPaymentSelection: PaymentSelection?
+  stable val onMandateTextChanged: Function2<@[ParameterName(name = 'mandate')] ResolvableString?, @[ParameterName(name = 'showAbove')] Boolean, Unit>
+  stable val onLinkedBankAccountChanged: Function1<USBankAccount?, Unit>
+  stable val onUpdatePrimaryButtonUIState: Function1<Function1<UIState?, UIState?>, Unit>
+  stable val onUpdatePrimaryButtonState: Function1<State, Unit>
+  stable val onError: Function1<ResolvableString?, Unit>
+  stable val shouldShowSetAsDefaultCheckbox: Boolean
+  <runtime stability> = Unstable
+}
+stable class Factory {
+  stable val argsSupplier: Function0<Args>
+  <runtime stability> = Stable
+}
+unstable class Args {
+  stable val instantDebits: Boolean
+  runtime val incentive: PaymentMethodIncentive?
+  stable val linkMode: LinkMode?
+  unstable val formArgs: FormArguments
+  stable val showCheckbox: Boolean
+  stable val isCompleteFlow: Boolean
+  stable val isPaymentFlow: Boolean
+  stable val stripeIntentId: String?
+  stable val clientSecret: String?
+  stable val onBehalfOf: String?
+  unstable val savedPaymentMethod: USBankAccount?
+  runtime val shippingDetails: AddressDetails?
+  stable val hostedSurface: String
+  stable val shouldShowSetAsDefaultCheckbox: Boolean
+  <runtime stability> = Unstable
+}
+unstable class USBankAccountFormViewModel {
+  unstable val args: Args
+  unstable val application: Application
+  unstable val lazyPaymentConfig: Provider<PaymentConfiguration>
+  unstable val savedStateHandle: SavedStateHandle
+  runtime val defaultBillingDetails: BillingDetails?
+  runtime val collectionConfiguration: BillingDetailsCollectionConfiguration
+  stable val collectingAddress: Boolean
+  stable val collectingPhone: Boolean
+  stable val collectingName: Boolean
+  stable val collectingEmail: Boolean
+  stable val defaultName: String?
+  unstable val nameController: TextFieldController
+  unstable val name: StateFlow<String>
+  stable val defaultEmail: String?
+  unstable val emailController: TextFieldController
+  unstable val email: StateFlow<String?>
+  stable val defaultPhoneCountry: String?
+  stable val defaultPhone: String?
+  runtime val phoneController: PhoneNumberController
+  unstable val phone: StateFlow<String?>
+  runtime val defaultAddress: Address?
+  runtime val sameAsShippingElement: SameAsShippingElement?
+  runtime val addressElement: AddressElement
+  unstable val address: StateFlow<Address?>
+  unstable val lastTextFieldIdentifier: StateFlow<IdentifierSpec?>
+  stable val defaultSaveForFutureUse: Boolean
+  runtime val saveForFutureUseElement: SaveForFutureUseElement
+  unstable val saveForFutureUse: StateFlow<Boolean>
+  unstable val shouldShowElementFlow: StateFlow<Boolean>
+  runtime val setAsDefaultPaymentMethodElement: SetAsDefaultPaymentMethodElement
+  unstable val setAsDefaultPaymentMethod: StateFlow<Boolean>
+  unstable val screenStateWithoutSaveForFutureUse: MutableStateFlow<BankFormScreenState>
+  unstable val billingDetails: StateFlow<BillingDetails>
+  unstable val currentScreenState: StateFlow<BankFormScreenState>
+  unstable val linkedAccount: StateFlow<USBankAccount?>
+  unstable val requiredFields: StateFlow<Boolean>
+  unstable var collectBankAccountLauncher: CollectBankAccountLauncher?
+  <runtime stability> = Unstable
+}
+stable class USBankAccountTextBuilder {
+  <runtime stability> = Stable
+}
+stable class USBankAccountFormViewModelModule {
+  <runtime stability> = Stable
+}
+unstable class BacsMandateConfirmationActivity {
+  unstable val starterArgs$delegate: Lazy<Args>
+  unstable val viewModel$delegate: Lazy<BacsMandateConfirmationViewModel>
+  <runtime stability> = Unstable
+}
+stable class Args {
+  stable val email: String
+  stable val nameOnAccount: String
+  stable val sortCode: String
+  stable val accountNumber: String
+  runtime val appearance: Appearance
+  runtime var CREATOR: Creator<Args>
+  <runtime stability> = 
+}
+stable class BacsMandateConfirmationContract {
+  <runtime stability> = Stable
+}
+unstable class DefaultBacsMandateConfirmationLauncher {
+  unstable val activityResultLauncher: ActivityResultLauncher<Args>
+  <runtime stability> = Unstable
+}
+stable class DefaultBacsMandateConfirmationLauncherFactory {
+  <runtime stability> = Stable
+}
+runtime class Confirmed {
+  runtime var CREATOR: Creator<Confirmed>
+  <runtime stability> = Uncertain(Creator)
+}
+runtime class ModifyDetails {
+  runtime var CREATOR: Creator<ModifyDetails>
+  <runtime stability> = Uncertain(Creator)
+}
+runtime class Cancelled {
+  runtime var CREATOR: Creator<Cancelled>
+  <runtime stability> = Uncertain(Creator)
+}
+stable class OnConfirmPressed {
+  <runtime stability> = Stable
+}
+stable class OnModifyDetailsPressed {
+  <runtime stability> = Stable
+}
+stable class OnBackPressed {
+  <runtime stability> = Stable
+}
+stable class Args {
+  stable val email: String
+  stable val nameOnAccount: String
+  stable val sortCode: String
+  stable val accountNumber: String
+  <runtime stability> = Stable
+}
+stable class Factory {
+  runtime val args: Args
+  <runtime stability> = 
+}
+unstable class BacsMandateConfirmationViewModel {
+  unstable val _result: MutableSharedFlow<BacsMandateConfirmationResult>
+  unstable val result: SharedFlow<BacsMandateConfirmationResult>
+  unstable val _viewState: MutableStateFlow<BacsMandateConfirmationViewState>
+  unstable val viewState: StateFlow<BacsMandateConfirmationViewState>
+  <runtime stability> = Unstable
+}
+unstable class BacsMandateConfirmationViewState {
+  stable val email: String
+  stable val nameOnAccount: String
+  stable val sortCode: String
+  stable val accountNumber: String
+  unstable val payer: ResolvableString
+  unstable val supportAddressAsHtml: ResolvableString
+  unstable val debitGuaranteeAsHtml: ResolvableString
+  <runtime stability> = Unstable
+}
+stable class BacsMandateData {
+  stable val name: String
+  stable val email: String
+  stable val accountNumber: String
+  stable val sortCode: String
+  <runtime stability> = Stable
+}
+stable class Args {
+  stable val lastFour: String
+  stable val cardBrand: CardBrand
+  stable val cvc: String
+  stable val isTestMode: Boolean
+  <runtime stability> = Stable
+}
+stable class Incomplete {
+  <runtime stability> = Stable
+}
+stable class Completed {
+  stable val cvc: String
+  <runtime stability> = Stable
+}
+unstable class CvcRecollectionActivity {
+  unstable val args$delegate: Lazy<Args>
+  unstable val viewModel$delegate: Lazy<CvcRecollectionViewModel>
+  <runtime stability> = Unstable
+}
+stable class Args {
+  stable val lastFour: String
+  stable val cardBrand: CardBrand
+  runtime val appearance: Appearance
+  stable val isTestMode: Boolean
+  runtime var CREATOR: Creator<Args>
+  <runtime stability> = 
+}
+stable class CvcRecollectionContract {
+  <runtime stability> = Stable
+}
+stable class CvcRecollectionData {
+  stable val lastFour: String?
+  stable val brand: CardBrand
+  <runtime stability> = Stable
+}
+stable class Factory {
+  <runtime stability> = Stable
+}
+unstable class DefaultCvcRecollectionInteractor {
+  stable val lastFour: String
+  stable val cardBrand: CardBrand
+  stable val cvc: String
+  stable val isTestMode: Boolean
+  unstable val processing: StateFlow<Boolean>
+  unstable val _viewState: MutableStateFlow<CvcRecollectionViewState>
+  unstable val viewState: StateFlow<CvcRecollectionViewState>
+  unstable val cvcCompletionState: StateFlow<CvcCompletionState>
+  <runtime stability> = Unstable
+}
+unstable class DefaultCvcRecollectionLauncher {
+  unstable val activityResultLauncher: ActivityResultLauncher<Args>
+  <runtime stability> = Unstable
+}
+stable class DefaultCvcRecollectionLauncherFactory {
+  <runtime stability> = Stable
+}
+runtime class Confirmed {
+  stable val cvc: String
+  runtime var CREATOR: Creator<Confirmed>
+  <runtime stability> = Uncertain(Creator)
+}
+runtime class Cancelled {
+  runtime var CREATOR: Creator<Cancelled>
+  <runtime stability> = Uncertain(Creator)
+}
+stable class OnConfirmPressed {
+  <runtime stability> = Stable
+}
+stable class OnBackPressed {
+  <runtime stability> = Stable
+}
+stable class OnCvcChanged {
+  stable val cvc: String
+  <runtime stability> = Stable
+}
+stable class Factory {
+  runtime val args: Args
+  <runtime stability> = 
+}
+unstable class CvcRecollectionViewModel {
+  runtime val controller: CvcController
+  unstable val _viewState: MutableStateFlow<CvcRecollectionViewState>
+  unstable val _result: MutableSharedFlow<CvcRecollectionResult>
+  unstable val result: SharedFlow<CvcRecollectionResult>
+  <runtime stability> = Unstable
+}
+stable class CvcRecollectionViewState {
+  stable val lastFour: String
+  stable val isTestMode: Boolean
+  stable val cvcState: CvcState
+  stable val isEnabled: Boolean
+  <runtime stability> = Stable
+}
+stable class CvcState {
+  stable val cvc: String
+  stable val cardBrand: CardBrand
+  runtime val cvcTextFieldConfig: CvcConfig
+  stable val isValid: Boolean
+  stable val label: Int
+  runtime val cvcIcon: Trailing
+}
+unstable class PollingActivity {
+  unstable val args$delegate: Lazy<Args>
+  unstable var viewModelFactory: Factory
+  unstable val viewModel$delegate: Lazy<PollingViewModel>
+  <runtime stability> = Unstable
+}
+runtime class Args {
+  stable val clientSecret: String
+  stable val statusBarColor: Int?
+  stable val timeLimitInSeconds: Int
+  stable val initialDelayInSeconds: Int
+  stable val maxAttempts: Int
+  stable val ctaText: Int
+  runtime var CREATOR: Creator<Args>
+  <runtime stability> = Uncertain(Creator)
+}
+stable class PollingContract {
+  <runtime stability> = Stable
+}
+unstable class PollingNextActionHandler {
+  unstable var pollingLauncher: ActivityResultLauncher<Args>?
+  <runtime stability> = Unstable
+}
+stable class DefaultTimeProvider {
+  <runtime stability> = Stable
+}
+stable class PollingUiState {
+  stable val durationRemaining: Duration
+  stable val ctaText: Int
+  stable val pollingState: PollingState
+  <runtime stability> = Stable
+}
+stable class Factory {
+  stable val argsSupplier: Function0<Args>
+  <runtime stability> = Stable
+}
+stable class Args {
+  stable val clientSecret: String
+  stable val timeLimit: Duration
+  stable val initialDelay: Duration
+  stable val maxAttempts: Int
+  stable val ctaText: Int
+  <runtime stability> = Stable
+}
+unstable class PollingViewModel {
+  stable val args: Args
+  unstable val poller: IntentStatusPoller
+  runtime val timeProvider: TimeProvider
+  unstable val dispatcher: CoroutineDispatcher
+  unstable val savedStateHandle: SavedStateHandle
+  unstable val _uiState: MutableStateFlow<PollingUiState>
+  unstable val uiState: StateFlow<PollingUiState>
+  <runtime stability> = Unstable
+}
+unstable class CustomerApiRepository {
+  unstable val stripeRepository: StripeRepository
+  unstable val lazyPaymentConfig: Provider<PaymentConfiguration>
+  unstable val logger: Logger
+  unstable val errorReporter: ErrorReporter
+  unstable val workContext: CoroutineContext
+  unstable val productUsageTokens: Set<String>
+  <runtime stability> = Unstable
+}
+stable class CustomerInfo {
+  stable val id: String
+  stable val ephemeralKeySecret: String
+  stable val customerSessionClientSecret: String?
+  <runtime stability> = Stable
+}
+unstable class DuplicateDetachFailure {
+  stable val paymentMethodId: String
+  unstable val exception: Throwable
+  <runtime stability> = Unstable
+}
+unstable class DuplicatePaymentMethodDetachFailureException {
+  unstable val failures: List<DuplicateDetachFailure>
+  stable val message: String
+  <runtime stability> = Unstable
+}
+unstable class RealElementsSessionRepository {
+  unstable val stripeRepository: StripeRepository
+  unstable val lazyPaymentConfig: Provider<PaymentConfiguration>
+  unstable val workContext: CoroutineContext
+  stable val appId: String
+  <runtime stability> = Unstable
+}
+runtime class Permissions {
+  stable val canRemovePaymentMethods: Boolean
+  stable val canRemoveLastPaymentMethod: Boolean
+  stable val canRemoveDuplicates: Boolean
+  runtime var CREATOR: Creator<Permissions>
+  <runtime stability> = Uncertain(Creator)
+}
+runtime class Enabled {
+  stable val defaultPaymentMethodId: String?
+  runtime var CREATOR: Creator<Enabled>
+  <runtime stability> = Uncertain(Creator)
+}
+runtime class Disabled {
+  runtime var CREATOR: Creator<Disabled>
+  <runtime stability> = Uncertain(Creator)
+}
+stable class DefaultPaymentMethodState {
+  <runtime stability> = Stable
+}
+unstable class CustomerState {
+  stable val id: String
+  stable val ephemeralKeySecret: String
+  stable val customerSessionClientSecret: String?
+  unstable val paymentMethods: List<PaymentMethod>
+  runtime val permissions: Permissions
+  stable val defaultPaymentMethodId: String?
+  runtime var CREATOR: Creator<CustomerState>
+  <runtime stability> = Unstable
+}
+runtime class DefaultLinkAccountStatusProvider {
+  runtime val linkConfigurationCoordinator: LinkConfigurationCoordinator
+  <runtime stability> = Uncertain(LinkConfigurationCoordinator)
+}
+unstable class LinkState {
+  unstable val configuration: LinkConfiguration
+  stable val loginState: LoginState
+  stable val signupMode: LinkSignupMode?
+  runtime var CREATOR: Creator<LinkState>
+  <runtime stability> = Unstable
+}
+runtime class PaymentIntent {
+  stable val clientSecret: String
+  runtime var CREATOR: Creator<PaymentIntent>
+  <runtime stability> = Uncertain(Creator)
+}
+runtime class SetupIntent {
+  stable val clientSecret: String
+  runtime var CREATOR: Creator<SetupIntent>
+  <runtime stability> = Uncertain(Creator)
+}
+unstable class DeferredIntent {
+  unstable val intentConfiguration: IntentConfiguration
+  runtime var CREATOR: Creator<DeferredIntent>
+  <runtime stability> = Unstable
+}
+stable class InitializationMode {
+  <runtime stability> = Stable
+}
+unstable class State {
+  unstable val config: CommonConfiguration
+  unstable val customer: CustomerState?
+  unstable val paymentSelection: PaymentSelection?
+  stable val validationError: PaymentSheetLoadingException?
+  unstable val paymentMethodMetadata: PaymentMethodMetadata
+  runtime var CREATOR: Creator<State>
+  <runtime stability> = Unstable
+}
+runtime class CustomerSession {
+  runtime val elementsSessionCustomer: Customer
+  stable val customerSessionClientSecret: String
+  stable val id: String
+  stable val ephemeralKeySecret: String
+  <runtime stability> = Runtime(Customer)
+}
+stable class Legacy {
+  runtime val customerConfig: CustomerConfiguration
+  runtime val accessType: LegacyCustomerEphemeralKey
+  stable val id: String
+  stable val ephemeralKeySecret: String
+  <runtime stability> = 
+}
+unstable class DefaultPaymentElementLoader {
+  stable val prefsRepositoryFactory: @[JvmSuppressWildcards(suppress = <null>)] Function1<CustomerConfiguration?, PrefsRepository>
+  stable val googlePayRepositoryFactory: @[JvmSuppressWildcards(suppress = <null>)] Function1<GooglePayEnvironment, GooglePayRepository>
+  runtime val elementsSessionRepository: ElementsSessionRepository
+  runtime val customerRepository: CustomerRepository
+  stable val lpmRepository: LpmRepository
+  unstable val logger: Logger
+  runtime val eventReporter: EventReporter
+  unstable val errorReporter: ErrorReporter
+  unstable val workContext: CoroutineContext
+  runtime val accountStatusProvider: LinkAccountStatusProvider
+  unstable val linkStore: LinkStore
+  runtime val externalPaymentMethodsRepository: ExternalPaymentMethodsRepository
+  unstable val userFacingLogger: UserFacingLogger
+  runtime val cvcRecollectionHandler: CvcRecollectionHandler
+  <runtime stability> = Unstable
+}
+stable class InvalidConfirmationMethod {
+  stable val confirmationMethod: ConfirmationMethod
+  stable val type: String
+  stable val message: String
+  <runtime stability> = Stable
+}
+stable class NoPaymentMethodTypesAvailable {
+  stable val requested: String
+  stable val type: String
+  <runtime stability> = Stable
+}
+stable class PaymentIntentInTerminalState {
+  stable val status: Status?
+  stable val type: String
+  <runtime stability> = Stable
+}
+stable class SetupIntentInTerminalState {
+  stable val status: Status?
+  stable val type: String
+  <runtime stability> = Stable
+}
+stable class MissingAmountOrCurrency {
+  stable val type: String
+  stable val message: String
+  <runtime stability> = Stable
+}
+unstable class Unknown {
+  unstable val cause: Throwable
+  stable val message: String?
+  <runtime stability> = Unstable
+}
+stable class PaymentSheetLoadingException {
+  <runtime stability> = Stable
+}
+runtime class Loading {
+  runtime var CREATOR: Creator<Loading>
+  <runtime stability> = Uncertain(Creator)
+}
+unstable class Full {
+  unstable val config: CommonConfiguration
+  unstable val customer: CustomerState?
+  unstable val paymentSelection: PaymentSelection?
+  stable val validationError: PaymentSheetLoadingException?
+  unstable val paymentMethodMetadata: PaymentMethodMetadata
+  runtime var CREATOR: Creator<Full>
+  <runtime stability> = Unstable
+}
+unstable class Idle {
+  unstable val error: ResolvableString?
+  <runtime stability> = Unstable
+}
+stable class Processing {
+  <runtime stability> = Stable
+}
+stable class Completed {
+  stable val onComplete: Function0<Unit>
+  <runtime stability> = Stable
+}
+stable class Link {
+  stable val email: String?
+  <runtime stability> = Stable
+}
+runtime class GooglePay {
+  stable val buttonType: GooglePayButtonType
+  stable val allowCreditCards: Boolean
+  runtime val billingAddressParameters: BillingAddressParameters?
+  <runtime stability> = Runtime(BillingAddressParameters)
+}
+runtime class WalletsState {
+  stable val link: Link?
+  runtime val googlePay: GooglePay?
+  stable val buttonsEnabled: Boolean
+  stable val dividerTextResource: Int
+  stable val onGooglePayPressed: Function0<Unit>
+  stable val onLinkPressed: Function0<Unit>
+  <runtime stability> = Runtime(BillingAddressParameters)
+}
+unstable class State {
+  stable val selectedPaymentMethodCode: String
+  unstable val supportedPaymentMethods: List<SupportedPaymentMethod>
+  unstable val arguments: FormArguments
+  unstable val formElements: List<FormElement>
+  unstable val paymentSelection: PaymentSelection?
+  stable val processing: Boolean
+  runtime val incentive: PaymentMethodIncentive?
+  unstable val usBankAccountFormArguments: USBankAccountFormArguments
+  <runtime stability> = Unstable
+}
+stable class OnPaymentMethodSelected {
+  stable val code: String
+  <runtime stability> = Stable
+}
+unstable class OnFormFieldValuesChanged {
+  unstable val formValues: FormFieldValues?
+  stable val selectedPaymentMethodCode: String
+  <runtime stability> = Unstable
+}
+stable class ReportFieldInteraction {
+  stable val code: String
+  <runtime stability> = Stable
+}
+stable class ViewAction {
+  <runtime stability> = Stable
+}
+unstable class DefaultAddPaymentMethodInteractor {
+  stable val initiallySelectedPaymentMethodType: String
+  unstable val selection: StateFlow<PaymentSelection?>
+  unstable val processing: StateFlow<Boolean>
+  unstable val incentive: StateFlow<PaymentMethodIncentive?>
+  unstable val supportedPaymentMethods: List<SupportedPaymentMethod>
+  stable val createFormArguments: Function1<String, FormArguments>
+  stable val formElementsForCode: Function1<String, List<FormElement>>
+  stable val clearErrorMessages: Function0<Unit>
+  stable val reportFieldInteraction: Function1<String, Unit>
+  stable val onFormFieldValuesChanged: Function2<FormFieldValues?, String, Unit>
+  stable val reportPaymentMethodTypeSelected: Function1<String, Unit>
+  stable val createUSBankAccountFormArguments: Function1<String, USBankAccountFormArguments>
+  unstable val coroutineScope: CoroutineScope
+  stable val isLiveMode: Boolean
+  unstable val _selectedPaymentMethodCode: MutableStateFlow<String>
+  unstable val selectedPaymentMethodCode: StateFlow<String>
+  unstable val _state: MutableStateFlow<State>
+  unstable val state: StateFlow<State>
+  <runtime stability> = Unstable
+}
+unstable class BaseSheetActivity {
+  stable var earlyExitDueToIllegalState: Boolean
+  <runtime stability> = Unstable
+}
+stable class CardBrandChoice {
+  stable val brand: CardBrand
+  stable val enabled: Boolean
+  <runtime stability> = Stable
+}
+stable class OnBrandChoiceOptionsShown {
+  <runtime stability> = Stable
+}
+stable class OnBrandChoiceOptionsDismissed {
+  <runtime stability> = Stable
+}
+stable class OnBrandChoiceChanged {
+  stable val choice: CardBrandChoice
+  <runtime stability> = Stable
+}
+stable class OnRemovePressed {
+  <runtime stability> = Stable
+}
+stable class OnRemoveConfirmed {
+  <runtime stability> = Stable
+}
+stable class OnUpdatePressed {
+  <runtime stability> = Stable
+}
+stable class OnRemoveConfirmationDismissed {
+  <runtime stability> = Stable
+}
+runtime class OnRemoveRequested {
+  runtime val paymentMethod: PaymentMethod
+  <runtime stability> = Runtime(PaymentMethod)
+}
+runtime class OnUpdateRequested {
+  runtime val paymentMethod: PaymentMethod
+  stable val brand: CardBrand
+  <runtime stability> = Runtime(PaymentMethod)
+}
+unstable class EditPaymentMethodViewState {
+  stable val status: Status
+  stable val last4: String
+  unstable val displayName: ResolvableString
+  stable val canUpdate: Boolean
+  stable val selectedBrand: CardBrandChoice
+  unstable val availableBrands: List<CardBrandChoice>
+  stable val canRemove: Boolean
+  stable val confirmRemoval: Boolean
+  unstable val error: ResolvableString?
+  <runtime stability> = Unstable
+}
+stable class Never {
+  <runtime stability> = Stable
+}
+stable class Maybe {
+  stable val isEditing: Boolean
+  stable val canEdit: Boolean
+  stable val onEditIconPressed: Function0<Unit>
+  <runtime stability> = Stable
+}
+stable class PaymentSheetTopBarState {
+  stable val showTestModeLabel: Boolean
+  stable val showEditMenu: Boolean
+  stable val isEditing: Boolean
+  stable val onEditIconPressed: Function0<Unit>
+  <runtime stability> = Stable
+}
+stable class PaymentSheetTopBarStateFactory {
+  <runtime stability> = Stable
+}
+stable class Ready {
+  <runtime stability> = Stable
+}
+stable class StartProcessing {
+  <runtime stability> = Stable
+}
+stable class FinishProcessing {
+  stable val onComplete: Function0<Unit>
+  <runtime stability> = Stable
+}
+stable class State {
+  stable val isProcessing: Boolean
+  <runtime stability> = Stable
+}
+unstable class UIState {
+  unstable val label: ResolvableString
+  stable val onClick: Function0<Unit>
+  stable val enabled: Boolean
+  stable val lockVisible: Boolean
+  <runtime stability> = Unstable
+}
+unstable class PrimaryButton {
+  unstable var defaultTintList: ColorStateList?
+  stable var state: State?
+  unstable val animator: PrimaryButtonAnimator
+  unstable var originalLabel: ResolvableString?
+  stable var defaultLabelColor: Int?
+  unstable var externalLabel: ResolvableString?
+  unstable val viewBinding: StripePrimaryButtonBinding
+  stable var lockVisible: Boolean
+  unstable val confirmedIcon: ImageView
+  stable var cornerRadius: Float
+  stable var borderStrokeWidth: Float
+  stable var borderStrokeColor: Int
+  stable var finishedBackgroundColor: Int
+  stable var finishedOnBackgroundColor: Int
+  <runtime stability> = Unstable
+}
+unstable class PrimaryButtonAnimator {
+  unstable val context: Context
+  stable val slideAnimationDuration: Long
+  <runtime stability> = Unstable
+}
+unstable class Idle {
+  unstable val error: ResolvableString?
+  <runtime stability> = Unstable
+}
+stable class Processing {
+  <runtime stability> = Stable
+}
+stable class Completed {
+  <runtime stability> = Stable
+}
+stable class PrimaryButtonColors {
+  stable val background: Color
+  stable val onBackground: Color
+  stable val successBackground: Color
+  stable val onSuccessBackground: Color
+  stable val border: Color
+  <runtime stability> = Stable
+}
+stable class PrimaryButtonShape {
+  stable val cornerRadius: Dp
+  stable val borderStrokeWidth: Dp
+  <runtime stability> = Stable
+}
+stable class PrimaryButtonTypography {
+  stable val fontFamily: FontFamily?
+  stable val fontSize: TextUnit
+  <runtime stability> = Stable
+}
+stable class PrimaryButtonTheme {
+  <runtime stability> = Stable
+}
+unstable class State {
+  unstable val paymentOptionsItems: List<PaymentOptionsItem>
+  stable val selectedPaymentOptionsItem: PaymentOptionsItem?
+  stable val isEditing: Boolean
+  stable val isProcessing: Boolean
+  stable val canEdit: Boolean
+  stable val canRemove: Boolean
+  <runtime stability> = Unstable
+}
+stable class AddCardPressed {
+  <runtime stability> = Stable
+}
+unstable class SelectPaymentMethod {
+  unstable val selection: PaymentSelection?
+  <runtime stability> = Unstable
+}
+unstable class EditPaymentMethod {
+  unstable val paymentMethod: DisplayableSavedPaymentMethod
+  <runtime stability> = Unstable
+}
+stable class ToggleEdit {
+  <runtime stability> = Stable
+}
+stable class ViewAction {
+  <runtime stability> = Stable
+}
+unstable class DefaultSelectSavedPaymentMethodsInteractor {
+  unstable val paymentOptionsItems: StateFlow<List<PaymentOptionsItem>>
+  unstable val editing: StateFlow<Boolean>
+  unstable val canEdit: StateFlow<Boolean>
+  unstable val canRemove: StateFlow<Boolean>
+  stable val toggleEdit: Function0<Unit>
+  unstable val isProcessing: StateFlow<Boolean>
+  unstable val currentSelection: StateFlow<PaymentSelection?>
+  unstable val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?>
+  stable val onAddCardPressed: Function0<Unit>
+  stable val onUpdatePaymentMethod: Function1<DisplayableSavedPaymentMethod, Unit>
+  stable val onPaymentMethodSelected: Function1<PaymentSelection?, Unit>
+  stable val isLiveMode: Boolean
+  unstable val coroutineScope: CoroutineScope
+  unstable val _paymentOptionsRelevantSelection: MutableStateFlow<PaymentSelection?>
+  unstable val _state: MutableStateFlow<State>
+  unstable val state: StateFlow<State>
+  <runtime stability> = Unstable
+}
+stable class SepaMandateActivity {
+  <runtime stability> = Stable
+}
+runtime class Args {
+  stable val merchantName: String
+  runtime var CREATOR: Creator<Args>
+  <runtime stability> = Uncertain(Creator)
+}
+stable class SepaMandateContract {
+  <runtime stability> = Stable
+}
+runtime class Canceled {
+  runtime var CREATOR: Creator<Canceled>
+  <runtime stability> = Uncertain(Creator)
+}
+runtime class Acknowledged {
+  runtime var CREATOR: Creator<Acknowledged>
+  <runtime stability> = Uncertain(Creator)
+}
+unstable class State {
+  unstable val error: ResolvableString?
+  stable val status: Status
+  stable val cardBrandChoice: CardBrandChoice
+  stable val cardBrandHasBeenChanged: Boolean
+  stable val setAsDefaultCheckboxChecked: Boolean
+  <runtime stability> = Unstable
+}
+stable class RemovePaymentMethod {
+  <runtime stability> = Stable
+}
+stable class BrandChoiceOptionsShown {
+  <runtime stability> = Stable
+}
+stable class BrandChoiceChanged {
+  stable val cardBrandChoice: CardBrandChoice
+  <runtime stability> = Stable
+}
+stable class BrandChoiceOptionsDismissed {
+  <runtime stability> = Stable
+}
+stable class SaveButtonPressed {
+  <runtime stability> = Stable
+}
+stable class SetAsDefaultCheckboxChanged {
+  stable val isChecked: Boolean
+  <runtime stability> = Stable
+}
+stable class ViewAction {
+  <runtime stability> = Stable
+}
+unstable class Error {
+  unstable val errorMessage: ResolvableString?
+  <runtime stability> = Unstable
+}
+stable class Success {
+  <runtime stability> = Stable
+}
+stable class NoUpdatesMade {
+  <runtime stability> = Stable
+}
+stable class UpdateResult {
+  <runtime stability> = Stable
+}
+unstable class DefaultUpdatePaymentMethodInteractor {
+  stable val canRemove: Boolean
+  unstable val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod
+  unstable val cardBrandFilter: CardBrandFilter
+  unstable val removeExecutor: SuspendFunction1<@[ParameterName(name = 'paymentMethod')] PaymentMethod, Throwable?>
+  unstable val updateCardBrandExecutor: SuspendFunction2<@[ParameterName(name = 'paymentMethod')] PaymentMethod, @[ParameterName(name = 'brand')] CardBrand, Result<PaymentMethod>>
+  unstable val setDefaultPaymentMethodExecutor: SuspendFunction1<@[ParameterName(name = 'paymentMethod')] PaymentMethod, Result<Unit>>
+  stable val onBrandChoiceOptionsShown: Function1<CardBrand, Unit>
+  stable val onBrandChoiceOptionsDismissed: Function1<CardBrand, Unit>
+  stable val onUpdateSuccess: Function0<Unit>
+  unstable val coroutineScope: CoroutineScope
+  unstable val error: MutableStateFlow<ResolvableString?>
+  unstable val status: MutableStateFlow<Status>
+  unstable val cardBrandChoice: MutableStateFlow<CardBrandChoice>
+  unstable val cardBrandHasBeenChanged: MutableStateFlow<Boolean>
+  unstable val setAsDefaultCheckboxChecked: MutableStateFlow<Boolean>
+  unstable val savedCardBrand: MutableStateFlow<CardBrandChoice>
+  stable val shouldShowSetAsDefaultCheckbox: Boolean
+  stable val hasValidBrandChoices: Boolean
+  stable val isExpiredCard: Boolean
+  unstable val screenTitle: ResolvableString?
+  stable val topBarState: PaymentSheetTopBarState
+  unstable val _state: StateFlow<State>
+  unstable val state: StateFlow<State>
+  <runtime stability> = Unstable
+}
+unstable class BankFormInteractor {
+  stable val updateSelection: Function1<USBankAccount?, Unit>
+  unstable val paymentMethodIncentiveInteractor: PaymentMethodIncentiveInteractor
+  <runtime stability> = Unstable
+}
+unstable class DisplayablePaymentMethod {
+  stable val code: String
+  unstable val displayName: ResolvableString
+  stable val iconResource: Int
+  stable val lightThemeIconUrl: String?
+  stable val darkThemeIconUrl: String?
+  stable val iconRequiresTinting: Boolean
+  unstable val subtitle: ResolvableString?
+  stable val promoBadge: String?
+  stable val onClick: Function0<Unit>
+  <runtime stability> = Unstable
+}
+unstable class State {
+  unstable val paymentMethods: List<DisplayableSavedPaymentMethod>
+  unstable val currentSelection: DisplayableSavedPaymentMethod?
+  stable val isEditing: Boolean
+  stable val canEdit: Boolean
+  <runtime stability> = Unstable
+}
+unstable class SelectPaymentMethod {
+  unstable val paymentMethod: DisplayableSavedPaymentMethod
+  <runtime stability> = Unstable
+}
+unstable class UpdatePaymentMethod {
+  unstable val paymentMethod: DisplayableSavedPaymentMethod
+  <runtime stability> = Unstable
+}
+stable class ToggleEdit {
+  <runtime stability> = Stable
+}
+stable class ViewAction {
+  <runtime stability> = Stable
+}
+unstable class DefaultManageScreenInteractor {
+  unstable val paymentMethods: StateFlow<List<PaymentMethod>>
+  unstable val paymentMethodMetadata: PaymentMethodMetadata
+  unstable val selection: StateFlow<PaymentSelection?>
+  unstable val editing: StateFlow<Boolean>
+  unstable val canEdit: StateFlow<Boolean>
+  stable val toggleEdit: Function0<Unit>
+  stable val providePaymentMethodName: Function1<String?, ResolvableString>
+  stable val onSelectPaymentMethod: Function1<DisplayableSavedPaymentMethod, Unit>
+  stable val onUpdatePaymentMethod: Function1<DisplayableSavedPaymentMethod, Unit>
+  stable val navigateBack: Function1<@[ParameterName(name = 'withDelay')] Boolean, Unit>
+  unstable val defaultPaymentMethodId: StateFlow<String?>
+  unstable val coroutineScope: CoroutineScope
+  unstable val hasNavigatedBack: AtomicBoolean
+  unstable val displayableSavedPaymentMethods: StateFlow<List<DisplayableSavedPaymentMethod>>
+  stable val isLiveMode: Boolean
+  unstable val state: StateFlow<State>
+  <runtime stability> = Unstable
+}
+unstable class PaymentMethodIncentiveInteractor {
+  runtime val incentive: PaymentMethodIncentive?
+  unstable val _displayedIncentive: MutableStateFlow<PaymentMethodIncentive?>
+  unstable val displayedIncentive: StateFlow<PaymentMethodIncentive?>
+  <runtime stability> = Unstable
+}
+unstable class State {
+  unstable val displayablePaymentMethods: List<DisplayablePaymentMethod>
+  stable val isProcessing: Boolean
+  runtime val selection: Selection?
+  unstable val displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?
+  stable val availableSavedPaymentMethodAction: SavedPaymentMethodAction
+  unstable val mandate: ResolvableString?
+  <runtime stability> = Unstable
+}
+stable class Saved {
+  <runtime stability> = Stable
+}
+stable class New {
+  stable val code: String
+  <runtime stability> = Stable
+}
+stable class TransitionToManageSavedPaymentMethods {
+  <runtime stability> = Stable
+}
+unstable class OnManageOneSavedPaymentMethod {
+  unstable val savedPaymentMethod: DisplayableSavedPaymentMethod
+  <runtime stability> = Unstable
+}
+stable class PaymentMethodSelected {
+  stable val selectedPaymentMethodCode: String
+  <runtime stability> = Stable
+}
+runtime class SavedPaymentMethodSelected {
+  runtime val savedPaymentMethod: PaymentMethod
+  <runtime stability> = Runtime(PaymentMethod)
+}
+unstable class DefaultPaymentMethodVerticalLayoutInteractor {
+  unstable val paymentMethodMetadata: PaymentMethodMetadata
+  stable val formTypeForCode: Function1<@[ParameterName(name = 'code')] String, FormType>
+  stable val onFormFieldValuesChanged: Function2<@[ParameterName(name = 'formValues')] FormFieldValues, @[ParameterName(name = 'selectedPaymentMethodCode')] String, Unit>
+  stable val transitionToManageScreen: Function0<Unit>
+  stable val transitionToFormScreen: Function1<@[ParameterName(name = 'selectedPaymentMethodCode')] String, Unit>
+  unstable val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?>
+  stable val providePaymentMethodName: Function1<String?, ResolvableString>
+  unstable val canRemove: StateFlow<Boolean>
+  stable val onSelectSavedPaymentMethod: Function1<PaymentMethod, Unit>
+  unstable val walletsState: StateFlow<WalletsState?>
+  stable val canShowWalletsInline: Boolean
+  stable val canShowWalletButtons: Boolean
+  stable val updateSelection: Function1<PaymentSelection?, Unit>
+  unstable val isCurrentScreen: StateFlow<Boolean>
+  stable val reportPaymentMethodTypeSelected: Function1<String, Unit>
+  stable val reportFormShown: Function1<String, Unit>
+  stable val onUpdatePaymentMethod: Function1<DisplayableSavedPaymentMethod, Unit>
+  unstable val coroutineScope: CoroutineScope
+  unstable val _verticalModeScreenSelection: MutableStateFlow<PaymentSelection?>
+  unstable val verticalModeScreenSelection: MutableStateFlow<PaymentSelection?>
+  unstable val supportedPaymentMethods: List<SupportedPaymentMethod>
+  unstable val displayedSavedPaymentMethod: StateFlow<DisplayableSavedPaymentMethod?>
+  unstable val availableSavedPaymentMethodAction: StateFlow<SavedPaymentMethodAction>
+  unstable val displayablePaymentMethods: StateFlow<List<DisplayablePaymentMethod>>
+  stable val isLiveMode: Boolean
+  unstable val state: StateFlow<State>
+  unstable val showsWalletsHeader: StateFlow<Boolean>
+  <runtime stability> = Unstable
+}
+stable class UIConstants {
+  stable val iconHeight: Dp
+  stable val iconWidth: Dp
+  <runtime stability> = Stable
+}
+unstable class State {
+  stable val selectedPaymentMethodCode: String
+  stable val isProcessing: Boolean
+  unstable val usBankAccountFormArguments: USBankAccountFormArguments
+  unstable val formArguments: FormArguments
+  unstable val formElements: List<FormElement>
+  unstable val headerInformation: FormHeaderInformation?
+  <runtime stability> = Unstable
+}
+stable class FieldInteraction {
+  <runtime stability> = Stable
+}
+unstable class FormFieldValuesChanged {
+  unstable val formValues: FormFieldValues?
+  <runtime stability> = Unstable
+}
+unstable class DefaultVerticalModeFormInteractor {
+  stable val selectedPaymentMethodCode: String
+  unstable val formArguments: FormArguments
+  unstable val formElements: List<FormElement>
+  stable val onFormFieldValuesChanged: Function2<@[ParameterName(name = 'formValues')] FormFieldValues?, @[ParameterName(name = 'selectedPaymentMethodCode')] String, Unit>
+  unstable val usBankAccountArguments: USBankAccountFormArguments
+  stable val reportFieldInteraction: Function1<String, Unit>
+  unstable val headerInformation: FormHeaderInformation?
+  stable val isLiveMode: Boolean
+  unstable val coroutineScope: CoroutineScope
+  unstable val state: StateFlow<State>
+  <runtime stability> = Unstable
+}
+stable class VerticalModeInitialScreenFactory {
+  <runtime stability> = Stable
+}
+unstable class BaseSheetViewModel {
+  unstable val config: Configuration
+  runtime val eventReporter: EventReporter
+  runtime val customerRepository: CustomerRepository
+  unstable val workContext: CoroutineContext
+  unstable val savedStateHandle: SavedStateHandle
+  unstable val linkHandler: LinkHandler
+  unstable val cardAccountRangeRepositoryFactory: Factory
+  stable val isCompleteFlow: Boolean
+  unstable val _paymentMethodMetadata: MutableStateFlow<PaymentMethodMetadata?>
+  unstable val paymentMethodMetadata: StateFlow<PaymentMethodMetadata?>
+  unstable val navigationHandler: NavigationHandler<PaymentSheetScreen>
+  unstable val selection: StateFlow<PaymentSelection?>
+  unstable val processing: StateFlow<Boolean>
+  unstable val _primaryButtonState: MutableStateFlow<State?>
+  unstable val primaryButtonState: StateFlow<State?>
+  unstable val customPrimaryButtonUiState: MutableStateFlow<UIState?>
+  unstable val mandateHandler: MandateHandler
+  unstable val _cvcControllerFlow: MutableStateFlow<CvcController>
+  unstable val cvcControllerFlow: StateFlow<CvcController>
+  unstable val _cvcRecollectionCompleteFlow: MutableStateFlow<Boolean>
+  unstable val cvcRecollectionCompleteFlow: StateFlow<Boolean>
+  unstable val analyticsListener: PaymentSheetAnalyticsListener
+  unstable val customerStateHolder: CustomerStateHolder
+  unstable val savedPaymentMethodMutator: SavedPaymentMethodMutator
+  unstable val buttonsEnabled: StateFlow<Boolean>
+  <runtime stability> = Unstable
+}
+unstable class PaymentOptionsItemsMapper {
+  unstable val customerMetadata: StateFlow<CustomerMetadata?>
+  unstable val customerState: StateFlow<CustomerState?>
+  unstable val isGooglePayReady: StateFlow<Boolean>
+  unstable val isLinkEnabled: StateFlow<Boolean?>
+  stable val nameProvider: Function1<String?, ResolvableString>
+  stable val isNotPaymentFlow: Boolean
+  stable val isCbcEligible: Function0<Boolean>
+  <runtime stability> = Unstable
+}
+unstable class PrimaryButtonUiStateMapper {
+  unstable val config: Configuration
+  stable val isProcessingPayment: Boolean
+  unstable val currentScreenFlow: StateFlow<PaymentSheetScreen>
+  unstable val buttonsEnabledFlow: StateFlow<Boolean>
+  unstable val amountFlow: StateFlow<Amount?>
+  unstable val selectionFlow: StateFlow<PaymentSelection?>
+  unstable val customPrimaryButtonUiStateFlow: StateFlow<UIState?>
+  unstable val cvcCompleteFlow: StateFlow<Boolean>
+  stable val onClick: Function0<Unit>
+  <runtime stability> = Unstable
+}

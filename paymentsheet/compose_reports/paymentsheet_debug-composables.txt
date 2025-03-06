@@ -1,0 +1,1700 @@
+restartable skippable scheme("[androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable], [androidx.compose.ui.UiComposable]]") fun BottomSheetScaffold(
+  stable topBar: Function2<Composer, Int, Unit>
+  stable content: Function2<Composer, Int, Unit>
+  stable modifier: Modifier? = @static Companion
+  stable scrollState: ScrollState? = @dynamic rememberScrollState(0, $composer, 0, 0b0001)
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable]]") fun ElementsBottomSheetLayout(
+  state: StripeBottomSheetState
+  stable modifier: Modifier? = @static Companion
+  stable onDismissed: Function0<Unit>
+  stable content: Function2<Composer, Int, Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun BottomSheetLoadingIndicator(
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun LoadingIndicator(
+  stable modifier: Modifier? = @static Companion
+  stable color: Color = @dynamic MaterialTheme.<get-colors>($composer, MaterialTheme.$stable).onSurface
+)
+restartable skippable fun UpdateIntentConfirmationInterceptor(
+  createIntentCallback: CreateIntentCallback?
+)
+restartable skippable fun UpdateExternalPaymentMethodConfirmHandler(
+  externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler?
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PrimaryButton(
+  stable label: String
+  stable isEnabled: Boolean
+  stable onButtonClick: Function0<Unit>
+  stable modifier: Modifier? = @static Companion
+  stable isLoading: Boolean = @static false
+  stable displayLockIcon: Boolean = @static false
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PrimaryButtonContent(
+  stable text: String
+  stable color: Color
+  stable style: TextStyle
+  stable isEnabled: Boolean
+  stable isLoading: Boolean
+  stable displayLockIcon: Boolean
+)
+fun rememberCustomerSheet(
+  customerAdapter: CustomerAdapter
+  callback: CustomerSheetResultCallback
+): CustomerSheet
+fun rememberCustomerSheet(
+  stable customerSessionProvider: CustomerSessionProvider
+  callback: CustomerSheetResultCallback
+): CustomerSheet
+fun rememberCustomerSheet(
+  stable integration: CustomerSheetIntegration
+  callback: CustomerSheetResultCallback
+): CustomerSheet
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun CustomerSheetScreen(
+  unstable viewModel: CustomerSheetViewModel
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun CustomerSheetScreen(
+  stable viewState: CustomerSheetViewState
+  stable displayAddForm: Boolean = @static true
+  stable modifier: Modifier? = @static Companion
+  stable viewActionHandler: Function1<CustomerSheetViewAction, Unit>? = @static $composer.startReplaceGroup(1917978549)
+sourceInformation($composer, "CC(remember):CustomerSheetScreen.kt#9igjgp")
+val tmp0_group = $composer.cache(false) {
+  {     it  :   CustomerSheetViewAction   ->
+
+  }
+
+}
+
+$composer.endReplaceGroup()
+tmp0_group@com.stripe.android.customersheet.ui.CustomerSheetScreen
+  stable paymentMethodNameProvider: Function1<String?, ResolvableString>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun SelectPaymentMethod(
+  unstable viewState: SelectPaymentMethod
+  stable viewActionHandler: Function1<CustomerSheetViewAction, Unit>
+  stable paymentMethodNameProvider: Function1<String?, ResolvableString>
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun AddPaymentMethod(
+  unstable viewState: AddPaymentMethod
+  stable viewActionHandler: Function1<CustomerSheetViewAction, Unit>
+  stable displayForm: Boolean
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun UpdatePaymentMethod(
+  viewState: UpdatePaymentMethod
+  stable modifier: Modifier? = @static Companion
+)
+inline fun linkViewModel(
+  stable factory: Function1<NativeLinkComponent, Factory>
+): T
+fun parentActivity()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun LinkScreenContent(
+  unstable viewModel: LinkActivityViewModel
+  stable onBackPressed: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun LinkScreenContentBody(
+  screenState: ScreenState
+  stable appBarState: LinkAppBarState
+  eventReporter: EventReporter
+  stable onVerificationSucceeded: Function0<Unit>
+  stable onDismissClicked: Function0<Unit>
+  stable onBackPressed: Function0<Unit>
+  stable onLinkScreenScreenCreated: Function0<Unit>
+  stable onNavControllerCreated: Function1<NavHostController, Unit>
+  stable navigate: Function2<@[ParameterName(name = 'route')] LinkScreen, @[ParameterName(name = 'clearStack')] Boolean, Unit>
+  stable dismissWithResult: Function1<LinkActivityResult, Unit>?
+  stable getLinkAccount: Function0<LinkAccount?>
+  stable handleViewAction: Function1<LinkAction, Unit>
+  stable moveToWeb: Function0<Unit>
+  stable goBack: Function0<Unit>
+  stable changeEmail: Function0<Unit>
+)
+restartable skippable scheme("[0, [0]]") fun StripeThemeForLink(
+  stable content: Function2<Composer, Int, Unit>
+)
+restartable skippable scheme("[0, [0]]") fun DefaultLinkTheme(
+  stable darkTheme: Boolean = @dynamic isSystemInDarkTheme($composer, 0)
+  stable content: Function2<Composer, Int, Unit>
+)
+readonly fun <get-linkColors>(
+  unused <this>: MaterialTheme
+): LinkColors
+readonly fun <get-linkShapes>(
+  unused <this>: MaterialTheme
+): LinkShapes
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun ErrorTextPreview()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun ErrorText(
+  stable text: String
+  stable modifier: Modifier? = @static Companion
+  stable style: ErrorTextStyle? = @static Medium
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun FullScreenContent(
+  stable modifier: Modifier
+  stable appBarState: LinkAppBarState
+  eventReporter: EventReporter
+  stable onBackPressed: Function0<Unit>
+  stable moveToWeb: Function0<Unit>
+  stable goBack: Function0<Unit>
+  stable handleViewAction: Function1<LinkAction, Unit>
+  stable onLinkScreenScreenCreated: Function0<Unit>
+  stable onNavControllerCreated: Function1<NavHostController, Unit>
+  stable navigate: Function2<@[ParameterName(name = 'route')] LinkScreen, @[ParameterName(name = 'clearStack')] Boolean, Unit>
+  stable dismissWithResult: Function1<LinkActivityResult, Unit>?
+  stable getLinkAccount: Function0<LinkAccount?>
+  stable changeEmail: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable]]]") fun LinkAppBar(
+  stable state: LinkAppBarState
+  stable onBackPressed: Function0<Unit>
+  stable showBottomSheetContent: Function1<@[ExtensionFunctionType] Function3<ColumnScope, Composer, Int, Unit>?, Unit>
+  stable onLogoutClicked: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun LinkAppBarTitle(
+  stable <this>: RowScope
+  stable email: String?
+  stable showHeader: Boolean
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable]]]") fun LinkAppBarAction(
+  stable showOverflowMenu: Boolean
+  stable showBottomSheetContent: Function1<@[ExtensionFunctionType] Function3<ColumnScope, Composer, Int, Unit>?, Unit>
+  stable onLogoutClicked: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun LinkAppBarPreview()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun LinkAppBarNoEmail()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun LinkAppBarChildScreen()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun LinkAppBarChildScreenNoEmail()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun LinkAppBarMenu(
+  stable onLogoutClicked: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun LinkEmailButton()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun LinkNoEmailButton()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun LinkButton(
+  stable email: String?
+  stable enabled: Boolean
+  stable onClick: Function0<Unit>
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun SignedInButtonContent(
+  stable email: String
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun SignedOutButtonContent(
+  unused stable <this>: RowScope
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun LinkIconAndDivider()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun LinkDivider()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun LinkButtonIcon()
+restartable skippable scheme("[androidx.compose.ui.UiComposable, [_], [androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable]]]") fun LinkContent(
+  unstable navController: NavHostController
+  stable appBarState: LinkAppBarState
+  sheetState: ModalBottomSheetState
+  stable bottomSheetContent: @[ExtensionFunctionType] Function3<ColumnScope, Composer, Int, Unit>?
+  stable onUpdateSheetContent: Function1<@[ExtensionFunctionType] Function3<ColumnScope, Composer, Int, Unit>?, Unit>
+  stable handleViewAction: Function1<LinkAction, Unit>
+  stable navigate: Function2<@[ParameterName(name = 'route')] LinkScreen, @[ParameterName(name = 'clearStack')] Boolean, Unit>
+  stable dismissWithResult: Function1<LinkActivityResult, Unit>?
+  stable getLinkAccount: Function0<LinkAccount?>
+  stable onBackPressed: Function0<Unit>
+  stable moveToWeb: Function0<Unit>
+  stable goBack: Function0<Unit>
+  stable changeEmail: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable]]]") fun Screens(
+  unstable navController: NavHostController
+  stable getLinkAccount: Function0<LinkAccount?>
+  stable goBack: Function0<Unit>
+  stable navigate: Function1<@[ParameterName(name = 'route')] LinkScreen, Unit>
+  stable navigateAndClearStack: Function1<@[ParameterName(name = 'route')] LinkScreen, Unit>
+  stable dismissWithResult: Function1<LinkActivityResult, Unit>
+  stable showBottomSheetContent: Function1<@[ExtensionFunctionType] Function3<ColumnScope, Composer, Int, Unit>?, Unit>
+  stable hideBottomSheetContent: Function0<Unit>
+  stable moveToWeb: Function0<Unit>
+  stable changeEmail: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun SignUpRoute(
+  stable navigate: Function1<@[ParameterName(name = 'route')] LinkScreen, Unit>
+  stable navigateAndClearStack: Function1<@[ParameterName(name = 'route')] LinkScreen, Unit>
+  stable moveToWeb: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun VerificationRoute(
+  unstable linkAccount: LinkAccount
+  stable navigateAndClearStack: Function1<@[ParameterName(name = 'route')] LinkScreen, Unit>
+  stable changeEmail: Function0<Unit>
+  stable goBack: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PaymentMethodRoute(
+  unstable linkAccount: LinkAccount
+  stable dismissWithResult: Function1<LinkActivityResult, Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable]]]") fun WalletRoute(
+  unstable linkAccount: LinkAccount
+  stable navigate: Function1<@[ParameterName(name = 'route')] LinkScreen, Unit>
+  stable navigateAndClearStack: Function1<@[ParameterName(name = 'route')] LinkScreen, Unit>
+  stable dismissWithResult: Function1<LinkActivityResult, Unit>
+  stable showBottomSheetContent: Function1<@[ExtensionFunctionType] Function3<ColumnScope, Composer, Int, Unit>?, Unit>
+  stable hideBottomSheetContent: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun Loader()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun LinkIcon(
+  stable modifier: Modifier? = @static Companion
+  stable tint: Color = @static Companion.Unspecified
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun LinkTerms(
+  stable isOptional: Boolean
+  stable isShowingPhoneFirst: Boolean
+  stable modifier: Modifier? = @static Companion
+  stable textAlign: TextAlign = @dynamic Companion.Center
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun LinkTermsPreview()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PrimaryButton(
+  stable modifier: Modifier? = @static Companion
+  stable label: String
+  stable state: PrimaryButtonState
+  stable onButtonClick: Function0<Unit>
+  stable iconStart: Int? = @static null
+  stable iconEnd: Int? = @static null
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PrimaryButtonIcon(
+  stable icon: Int?
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PrimaryButtonPreview()
+restartable skippable scheme("[androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable]]") fun ScrollableTopLevelColumn(
+  stable content: @[ExtensionFunctionType] Function3<ColumnScope, Composer, Int, Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun SecondaryButton(
+  stable modifier: Modifier? = @static Companion
+  stable enabled: Boolean
+  stable label: String
+  stable onClick: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun LinkElement(
+  stable initialUserInput: UserInput?
+  linkConfigurationCoordinator: LinkConfigurationCoordinator
+  unstable configuration: LinkConfiguration
+  stable linkSignupMode: LinkSignupMode
+  stable enabled: Boolean
+  stable onLinkSignupStateChanged: Function1<InlineSignupViewState, Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun LinkInlineSignup(
+  unstable viewModel: InlineSignupViewModel
+  stable enabled: Boolean
+  stable onStateChanged: Function1<InlineSignupViewState, Unit>
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun LinkInlineSignup(
+  stable merchantName: String
+  sectionController: SectionController
+  unstable emailController: TextFieldController
+  phoneNumberController: PhoneNumberController
+  unstable nameController: TextFieldController
+  stable signUpState: SignUpState
+  stable enabled: Boolean
+  stable expanded: Boolean
+  stable requiresNameCollection: Boolean
+  stable errorMessage: ErrorMessage?
+  stable toggleExpanded: Function0<Unit>
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun LinkCheckbox(
+  stable merchantName: String
+  stable expanded: Boolean
+  stable enabled: Boolean
+  stable contentAlpha: Float
+  stable toggleExpanded: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun LinkFields(
+  stable expanded: Boolean
+  stable enabled: Boolean
+  stable signUpState: SignUpState
+  stable requiresNameCollection: Boolean
+  stable errorMessage: ErrorMessage?
+  sectionController: SectionController
+  unstable emailController: TextFieldController
+  phoneNumberController: PhoneNumberController
+  unstable nameController: TextFieldController
+  stable emailFocusRequester: FocusRequester
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun Preview()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun LinkInlineSignupFields(
+  stable sectionError: Int?
+  unstable emailController: TextFieldController
+  phoneNumberController: PhoneNumberController
+  unstable nameController: TextFieldController
+  stable signUpState: SignUpState
+  stable enabled: Boolean
+  stable isShowingPhoneFirst: Boolean
+  stable requiresNameCollection: Boolean
+  stable errorMessage: ErrorMessage?
+  stable didShowAllFields: Boolean
+  stable onShowingAllFields: Function0<Unit>
+  stable modifier: Modifier? = @static Companion
+  stable emailFocusRequester: FocusRequester? = @static $composer.startReplaceGroup(-280054307)
+sourceInformation($composer, "CC(remember):LinkInlineSignupFields.kt#9igjgp")
+val tmp0_group = $composer.cache(false) {
+  FocusRequester  (  )
+}
+
+$composer.endReplaceGroup()
+tmp0_group@com.stripe.android.link.ui.inline.LinkInlineSignupFields
+  stable phoneFocusRequester: FocusRequester? = @static $composer.startReplaceGroup(-280051971)
+sourceInformation($composer, "CC(remember):LinkInlineSignupFields.kt#9igjgp")
+val tmp1_group = $composer.cache(false) {
+  FocusRequester  (  )
+}
+
+$composer.endReplaceGroup()
+tmp1_group@com.stripe.android.link.ui.inline.LinkInlineSignupFields
+  stable nameFocusRequester: FocusRequester? = @static $composer.startReplaceGroup(-280049667)
+sourceInformation($composer, "CC(remember):LinkInlineSignupFields.kt#9igjgp")
+val tmp2_group = $composer.cache(false) {
+  FocusRequester  (  )
+}
+
+$composer.endReplaceGroup()
+tmp2_group@com.stripe.android.link.ui.inline.LinkInlineSignupFields
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun LinkOptionalInlineSignup(
+  unstable viewModel: InlineSignupViewModel
+  stable enabled: Boolean
+  stable onStateChanged: Function1<InlineSignupViewState, Unit>
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun LinkOptionalInlineSignup(
+  sectionController: SectionController
+  unstable emailController: TextFieldController
+  phoneNumberController: PhoneNumberController
+  unstable nameController: TextFieldController
+  stable isShowingPhoneFirst: Boolean
+  stable signUpState: SignUpState
+  stable enabled: Boolean
+  stable requiresNameCollection: Boolean
+  stable errorMessage: ErrorMessage?
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable]]") fun EmailCollection(
+  stable enabled: Boolean
+  unstable emailController: TextFieldController
+  stable signUpState: SignUpState
+  stable imeAction: ImeAction
+  stable focusRequester: FocusRequester? = @static $composer.startReplaceGroup(-1492093637)
+sourceInformation($composer, "CC(remember):LinkOptionalInlineSignup.kt#9igjgp")
+val tmp0_group = $composer.cache(false) {
+  FocusRequester  (  )
+}
+
+$composer.endReplaceGroup()
+tmp0_group@com.stripe.android.link.ui.inline.EmailCollection
+  stable requestFocusWhenShown: Boolean = @static false
+  stable trailingIcon: Function2<Composer, Int, Unit>? = @static null
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun LinkLogo()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PreviewInitial()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PreviewInitialWithPhoneFirst()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PreviewFilledOut()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun LinkMenu(
+  stable modifier: Modifier? = @static Companion
+  unstable items: List<LinkMenuItem>
+  stable onItemPress: Function1<LinkMenuItem, Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun LinkBottomSheetRow(
+  item: LinkMenuItem
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PaymentMethodScreen(
+  unstable viewModel: PaymentMethodViewModel
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PaymentMethodBody(
+  unstable state: PaymentMethodState
+  stable onFormFieldValuesChanged: Function1<FormFieldValues?, Unit>
+  stable onPayClicked: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun SignUpScreen(
+  unstable viewModel: SignUpViewModel
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun SignUpBody(
+  unstable emailController: TextFieldController
+  phoneNumberController: PhoneNumberController
+  unstable nameController: TextFieldController
+  stable signUpScreenState: SignUpScreenState
+  stable onSignUpClick: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun EmailCollectionSection(
+  stable enabled: Boolean
+  unstable emailController: TextFieldController
+  stable signUpScreenState: SignUpScreenState
+  stable focusRequester: FocusRequester? = @static $composer.startReplaceGroup(860002245)
+sourceInformation($composer, "CC(remember):SignUpScreen.kt#9igjgp")
+val tmp0_group = $composer.cache(false) {
+  FocusRequester  (  )
+}
+
+$composer.endReplaceGroup()
+tmp0_group@com.stripe.android.link.ui.signup.EmailCollectionSection
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun SecondaryFields(
+  phoneNumberController: PhoneNumberController
+  unstable nameController: TextFieldController
+  stable signUpScreenState: SignUpScreenState
+  stable onSignUpClick: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun SignUpScreenPreview()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun VerificationDialog(
+  stable modifier: Modifier
+  unstable linkAccount: LinkAccount
+  stable onVerificationSucceeded: Function0<Unit>
+  stable onDismissClicked: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun VerificationDialogBody(
+  stable modifier: Modifier? = @static Companion
+  unstable viewModel: VerificationViewModel
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun VerificationScreen(
+  unstable viewModel: VerificationViewModel
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun VerificationBody(
+  stable state: VerificationViewState
+  otpElement: OTPElement
+  stable onBack: Function0<Unit>
+  stable onChangeEmailClick: Function0<Unit>
+  stable onResendCodeClick: Function0<Unit>
+  stable focusRequester: FocusRequester? = @static $composer.startReplaceGroup(1393492948)
+sourceInformation($composer, "CC(remember):VerificationScreen.kt#9igjgp")
+val tmp0_group = $composer.cache(false) {
+  FocusRequester  (  )
+}
+
+$composer.endReplaceGroup()
+tmp0_group@com.stripe.android.link.ui.verification.VerificationBody
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun Header(
+  stable isDialog: Boolean
+  stable onBackClicked: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun ChangeEmailRow(
+  stable email: String
+  stable isProcessing: Boolean
+  stable onChangeEmailClick: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun ResendCodeButton(
+  stable isProcessing: Boolean
+  stable isSendingNewCode: Boolean
+  stable onClick: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PaymentDetailsListItem(
+  stable modifier: Modifier? = @static Companion
+  unstable paymentDetails: PaymentDetails
+  stable enabled: Boolean
+  stable isSelected: Boolean
+  stable isUpdating: Boolean
+  stable onClick: Function0<Unit>
+  stable onMenuButtonClick: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun MenuAndLoader(
+  stable enabled: Boolean
+  stable isUpdating: Boolean
+  stable onMenuButtonClick: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun DefaultTag()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PaymentDetails(
+  stable <this>: RowScope
+  stable modifier: Modifier? = @static Companion
+  unstable paymentDetails: PaymentDetails
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun CardInfo(
+  stable <this>: RowScope
+  stable modifier: Modifier? = @static Companion
+  stable last4: String
+  stable icon: Int
+  stable contentDescription: String? = @static null
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun BankAccountInfo(
+  stable <this>: RowScope
+  stable modifier: Modifier? = @static Companion
+  unstable bankAccount: BankAccount
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun WalletPaymentMethodMenu(
+  stable modifier: Modifier? = @static Companion
+  unstable paymentDetails: PaymentDetails
+  stable onSetDefaultClick: Function0<Unit>
+  stable onRemoveClick: Function0<Unit>
+  stable onCancelClick: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable]]]") fun WalletScreen(
+  unstable viewModel: WalletViewModel
+  stable showBottomSheetContent: Function1<@[ExtensionFunctionType] Function3<ColumnScope, Composer, Int, Unit>, Unit>
+  stable hideBottomSheetContent: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable]]]") fun WalletBody(
+  stable state: WalletUiState
+  stable isExpanded: Boolean
+  unstable expiryDateController: TextFieldController
+  cvcController: CvcController
+  stable onItemSelected: Function1<PaymentDetails, Unit>
+  stable onExpandedChanged: Function1<Boolean, Unit>
+  stable onAddNewPaymentMethodClicked: Function0<Unit>
+  stable onPrimaryButtonClick: Function0<Unit>
+  stable onPayAnotherWayClicked: Function0<Unit>
+  stable onDismissAlert: Function0<Unit>
+  stable onSetDefaultClicked: Function1<PaymentDetails, Unit>
+  stable onRemoveClicked: Function1<PaymentDetails, Unit>
+  stable showBottomSheetContent: Function1<@[ExtensionFunctionType] Function3<ColumnScope, Composer, Int, Unit>, Unit>
+  stable hideBottomSheetContent: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable]]]") fun PaymentDetailsSection(
+  stable modifier: Modifier
+  stable state: WalletUiState
+  stable isExpanded: Boolean
+  unstable expiryDateController: TextFieldController
+  cvcController: CvcController
+  stable onItemSelected: Function1<PaymentDetails, Unit>
+  stable onExpandedChanged: Function1<Boolean, Unit>
+  stable onAddNewPaymentMethodClicked: Function0<Unit>
+  stable onSetDefaultClicked: Function1<PaymentDetails, Unit>
+  stable onRemoveClicked: Function1<PaymentDetails, Unit>
+  stable showBottomSheetContent: Function1<@[ExtensionFunctionType] Function3<ColumnScope, Composer, Int, Unit>, Unit>
+  stable hideBottomSheetContent: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun ErrorSection(
+  unstable errorMessage: ResolvableString?
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun ActionSection(
+  stable state: WalletUiState
+  stable onPrimaryButtonClick: Function0<Unit>
+  stable onPayAnotherWayClicked: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable]]]") fun PaymentMethodSection(
+  stable state: WalletUiState
+  stable isExpanded: Boolean
+  stable onItemSelected: Function1<PaymentDetails, Unit>
+  stable onExpandedChanged: Function1<Boolean, Unit>
+  stable onAddNewPaymentMethodClicked: Function0<Unit>
+  stable onSetDefaultClicked: Function1<PaymentDetails, Unit>
+  stable onRemoveClicked: Function1<PaymentDetails, Unit>
+  stable showBottomSheetContent: Function1<@[ExtensionFunctionType] Function3<ColumnScope, Composer, Int, Unit>, Unit>
+  stable hideBottomSheetContent: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun CollapsedPaymentDetails(
+  unstable selectedPaymentMethod: PaymentDetails
+  stable enabled: Boolean
+  stable onClick: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun ExpandedPaymentDetails(
+  stable uiState: WalletUiState
+  stable onItemSelected: Function1<PaymentDetails, Unit>
+  stable onMenuButtonClick: Function1<PaymentDetails, Unit>
+  stable onAddNewPaymentMethodClick: Function0<Unit>
+  stable onCollapse: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PaymentDetailsList(
+  stable uiState: WalletUiState
+  stable onItemSelected: Function1<PaymentDetails, Unit>
+  stable onMenuButtonClick: Function1<PaymentDetails, Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun ExpandedRowHeader(
+  stable isEnabled: Boolean
+  stable onCollapse: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun AddPaymentMethodRow(
+  stable isEnabled: Boolean
+  stable onAddNewPaymentMethodClick: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun BankAccountTerms()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun CardDetailsRecollectionForm(
+  unstable paymentDetails: PaymentDetails
+  unstable expiryDateController: TextFieldController
+  cvcController: CvcController
+  stable isCardExpired: Boolean
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun Loader()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun AlertMessage(
+  unstable alertMessage: ResolvableString
+  stable onDismissAlert: Function0<Unit>
+)
+scheme("[androidx.compose.ui.UiComposable]") fun ComposeUI(
+  stable enabled: Boolean
+  unstable <this>: LinkFormElement
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun Content(
+  unstable <this>: EmbeddedPaymentElement
+)
+fun <get-iconPainter>(
+  unstable <this>: PaymentOptionDisplayData
+): Painter
+fun rememberEmbeddedPaymentElement(
+  unstable builder: Builder
+): EmbeddedPaymentElement
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun Content(
+  stable <this>: EmbeddedContent
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun FormActivityUI(
+  unstable interactor: DefaultVerticalModeFormInteractor
+  eventReporter: EventReporter
+  stable onClick: Function0<Unit>
+  stable onProcessingCompleted: Function0<Unit>
+  unstable state: State
+  stable onDismissed: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun USBankAccountMandate(
+  unstable state: State
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun FormActivityError(
+  unstable state: State
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun FormActivityPrimaryButton(
+  unstable state: State
+  stable onProcessingCompleted: Function0<Unit>? = @static $composer.startReplaceGroup(-1122877480)
+sourceInformation($composer, "CC(remember):FormActivityUI.kt#9igjgp")
+val tmp0_group = $composer.cache(false) {
+  {
+
+  }
+
+}
+
+$composer.endReplaceGroup()
+tmp0_group@com.stripe.android.paymentelement.embedded.form.FormActivityPrimaryButton
+  stable onClick: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun FormActivityTopBar(
+  stable isLiveMode: Boolean
+  stable onDismissed: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun ScreenContent(
+  unstable navigator: ManageNavigator
+  stable screen: Screen
+  unstable <this>: ManageActivity
+)
+scheme("[androidx.compose.ui.UiComposable]") fun Content(
+  <this>: All
+)
+scheme("[androidx.compose.ui.UiComposable]") fun Content(
+  <this>: Update
+)
+fun rememberPaymentSheetFlowController(
+  paymentOptionCallback: PaymentOptionCallback
+  paymentResultCallback: PaymentSheetResultCallback
+): FlowController
+fun rememberPaymentSheetFlowController(
+  createIntentCallback: CreateIntentCallback
+  paymentOptionCallback: PaymentOptionCallback
+  paymentResultCallback: PaymentSheetResultCallback
+): FlowController
+fun rememberPaymentSheetFlowController(
+  createIntentCallback: CreateIntentCallback? = @static null
+  externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler
+  paymentOptionCallback: PaymentOptionCallback
+  paymentResultCallback: PaymentSheetResultCallback
+): FlowController
+fun rememberPaymentSheetFlowController(
+  unstable builder: Builder
+): FlowController
+fun internalRememberPaymentSheetFlowController(
+  paymentOptionCallback: PaymentOptionCallback
+  paymentResultCallback: PaymentSheetResultCallback
+): FlowController
+fun internalRememberPaymentSheetFlowController(
+  createIntentCallback: CreateIntentCallback?
+  externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler?
+  paymentOptionCallback: PaymentOptionCallback
+  paymentResultCallback: PaymentSheetResultCallback
+): FlowController
+fun build(
+  unstable <this>: Builder
+): PaymentSheet
+fun build(
+  unstable <this>: Builder
+): FlowController
+fun rememberPaymentSheet(
+  paymentResultCallback: PaymentSheetResultCallback
+): PaymentSheet
+fun rememberPaymentSheet(
+  createIntentCallback: CreateIntentCallback
+  paymentResultCallback: PaymentSheetResultCallback
+): PaymentSheet
+fun rememberPaymentSheet(
+  createIntentCallback: CreateIntentCallback? = @static null
+  externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler
+  paymentResultCallback: PaymentSheetResultCallback
+): PaymentSheet
+fun rememberAddressLauncher(
+  callback: AddressLauncherResultCallback
+): AddressLauncher
+restartable skippable scheme("[androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable]]") fun ScrollableColumn(
+  stable modifier: Modifier? = @static Companion
+  stable content: @[ExtensionFunctionType] Function3<ColumnScope, Composer, Int, Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun AutocompleteScreen(
+  unstable autoCompleteViewModelSubcomponentBuilderProvider: Provider<Builder>
+  stable country: String?
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun AutocompleteScreenUI(
+  unstable viewModel: AutocompleteViewModel
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun EnterManuallyText(
+  stable onClick: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable], [androidx.compose.ui.UiComposable]]") fun InputAddressScreen(
+  stable primaryButtonEnabled: Boolean
+  stable primaryButtonText: String
+  stable title: String
+  stable onPrimaryButtonClick: Function0<Unit>
+  stable onCloseClick: Function0<Unit>
+  stable formContent: @[ExtensionFunctionType] Function3<ColumnScope, Composer, Int, Unit>
+  stable checkboxContent: @[ExtensionFunctionType] Function3<ColumnScope, Composer, Int, Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun InputAddressScreen(
+  unstable inputAddressViewModelSubcomponentBuilderProvider: Provider<Builder>
+)
+fun <get-iconPainter>(
+  unstable <this>: PaymentOption
+): Painter
+scheme("[androidx.compose.ui.UiComposable]") fun Content(
+  stable modifier: Modifier
+  unused unstable <this>: Loading
+)
+scheme("[androidx.compose.ui.UiComposable]") fun Content(
+  stable modifier: Modifier
+  unstable <this>: SelectSavedPaymentMethods
+)
+scheme("[androidx.compose.ui.UiComposable]") fun Content(
+  stable modifier: Modifier
+  unstable <this>: AddAnotherPaymentMethod
+)
+scheme("[androidx.compose.ui.UiComposable]") fun Content(
+  stable modifier: Modifier
+  unstable <this>: AddFirstPaymentMethod
+)
+scheme("[androidx.compose.ui.UiComposable]") fun Content(
+  stable modifier: Modifier
+  unstable <this>: VerticalMode
+)
+scheme("[androidx.compose.ui.UiComposable]") fun Content(
+  stable modifier: Modifier
+  unstable <this>: VerticalModeForm
+)
+scheme("[androidx.compose.ui.UiComposable]") fun Content(
+  unused stable modifier: Modifier
+  unstable <this>: ManageSavedPaymentMethods
+)
+scheme("[androidx.compose.ui.UiComposable]") fun Content(
+  unused stable modifier: Modifier
+  unstable <this>: CvcRecollection
+)
+scheme("[androidx.compose.ui.UiComposable]") fun Content(
+  stable modifier: Modifier
+  unstable <this>: UpdatePaymentMethod
+)
+restartable skippable fun USBankAccountEmitters(
+  unstable viewModel: USBankAccountFormViewModel
+  unstable usBankAccountFormArgs: USBankAccountFormArguments
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun USBankAccountForm(
+  unstable formArgs: FormArguments
+  unstable usBankAccountFormArgs: USBankAccountFormArguments
+  stable modifier: Modifier? = @static Companion
+  stable enabled: Boolean
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun BankAccountForm(
+  unstable state: BankFormScreenState
+  unstable formArgs: FormArguments
+  stable instantDebits: Boolean
+  stable isPaymentFlow: Boolean
+  stable showCheckboxes: Boolean
+  unstable nameController: TextFieldController
+  unstable emailController: TextFieldController
+  phoneController: PhoneNumberController
+  addressController: AddressController
+  lastTextFieldIdentifier: IdentifierSpec?
+  sameAsShippingElement: SameAsShippingElement?
+  saveForFutureUseElement: SaveForFutureUseElement
+  setAsDefaultPaymentMethodElement: SetAsDefaultPaymentMethodElement
+  stable modifier: Modifier? = @static Companion
+  stable enabled: Boolean
+  stable onRemoveAccount: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PromoDisclaimer(
+  stable promoText: String
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun BillingDetailsForm(
+  stable instantDebits: Boolean
+  unstable formArgs: FormArguments
+  stable enabled: Boolean
+  stable isPaymentFlow: Boolean
+  unstable nameController: TextFieldController
+  unstable emailController: TextFieldController
+  phoneController: PhoneNumberController
+  addressController: AddressController
+  lastTextFieldIdentifier: IdentifierSpec?
+  sameAsShippingElement: SameAsShippingElement?
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PhoneSection(
+  stable enabled: Boolean
+  phoneController: PhoneNumberController
+  stable imeAction: ImeAction
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun AddressSection(
+  stable enabled: Boolean
+  addressController: AddressController
+  lastTextFieldIdentifier: IdentifierSpec?
+  sameAsShippingElement: SameAsShippingElement?
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun AccountDetailsForm(
+  stable modifier: Modifier? = @static Companion
+  stable showCheckboxes: Boolean
+  stable enabled: Boolean
+  stable bankName: String?
+  stable last4: String?
+  stable promoBadgeState: PromoBadgeState?
+  saveForFutureUseElement: SaveForFutureUseElement
+  setAsDefaultPaymentMethodElement: SetAsDefaultPaymentMethodElement
+  stable onRemoveAccount: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun BankAccountDetails(
+  stable bankName: String?
+  stable enabled: Boolean
+  stable last4: String?
+  stable promoBadgeState: PromoBadgeState?
+  stable onIconButtonClick: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun AccountDetailsRemoveBankDialog(
+  stable onDismiss: Function0<Unit>
+  stable onRemoveAccount: Function0<Unit>
+  stable last4: String
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun BacsMandateButton(
+  stable type: BacsMandateButtonType
+  stable label: String
+  stable onClick: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun BacsMandateConfirmationFormScreen(
+  unstable viewModel: BacsMandateConfirmationViewModel? = @dynamic viewModel(null, null, null, null, $composer, 0, 0b1111)
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun BacsMandateConfirmationFormView(
+  unstable state: BacsMandateConfirmationViewState
+  stable viewActionHandler: Function1<@[ParameterName(name = 'action')] BacsMandateConfirmationViewAction, Unit>
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun BacsMandateDetails(
+  stable email: String
+  stable nameOnAccount: String
+  stable sortCode: String
+  stable accountNumber: String
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun BacsMandateDetailsRow(
+  stable label: String
+  stable value: String
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun BacsMandateItem(
+  stable text: String
+  stable modifier: Modifier? = @static Companion
+  stable isHtml: Boolean = @static false
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun MandateButtons(
+  stable viewActionHandler: Function1<@[ParameterName(name = 'action')] BacsMandateConfirmationViewAction, Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun BacsMandateConfirmationFormPreview()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun CvcRecollectionScreen(
+  stable lastFour: String
+  stable isTestMode: Boolean
+  stable cvcState: CvcState
+  stable viewActionHandler: Function1<@[ParameterName(name = 'action')] CvcRecollectionViewAction, Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun CvcRecollectionPaymentSheetScreen(
+  interactor: CvcRecollectionInteractor
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun CvcRecollectionField(
+  stable lastFour: String
+  stable enabled: Boolean
+  stable cvcState: CvcState
+  stable onValueChanged: Function1<String, Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun CvcRecollectionTopBar(
+  stable isTestMode: Boolean
+  stable onClosePressed: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun CvcRecollectionTitle()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun CvcRecollectionButton(
+  stable isComplete: Boolean
+  stable onConfirmPressed: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun CvcRecollectionFieldPreview()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PollingScreen(
+  unstable viewModel: PollingViewModel
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PollingScreen(
+  stable uiState: PollingUiState
+  stable onCancel: Function0<Unit>
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun ActivePolling(
+  stable remainingDuration: Duration
+  stable onCancel: Function0<Unit>
+  stable modifier: Modifier? = @static Companion
+  stable ctaText: Int
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun FailedPolling(
+  stable onCancel: Function0<Unit>
+  stable modifier: Modifier? = @static Companion
+)
+fun rememberActivePollingMessage(
+  stable remainingDuration: Duration
+  stable ctaText: Int
+): String
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun ActivePollingScreenPreview()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun FailedPollingScreenPreview()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun AddPaymentMethod(
+  interactor: AddPaymentMethodInteractor
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun AddressOptionsAppBar(
+  stable isRootScreen: Boolean
+  stable onButtonClick: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun CardBrandDropdown(
+  stable selectedBrand: CardBrandChoice
+  unstable availableBrands: List<CardBrandChoice>
+  stable onBrandOptionsShown: Function0<Unit>
+  stable onBrandChoiceChanged: Function1<CardBrandChoice, Unit>
+  stable onBrandChoiceOptionsDismissed: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun DefaultPaymentMethodLabel(
+  stable modifier: Modifier
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun DefaultPaymentMethodLabelPreview()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun ErrorMessage(
+  stable error: String
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun GooglePayButton(
+  stable state: State?
+  stable allowCreditCards: Boolean
+  stable buttonType: GooglePayButtonType
+  billingAddressParameters: BillingAddressParameters?
+  stable isEnabled: Boolean
+  stable onPressed: Function0<Unit>
+  stable modifier: Modifier? = @static Companion
+  unstable cardBrandFilter: CardBrandFilter
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun GooglePrimaryButton(
+  stable modifier: Modifier? = @static Companion
+  stable state: State
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun LpmSelectorText(
+  stable icon: Int? = @static null
+  stable text: String
+  stable textColor: Color
+  stable modifier: Modifier
+  stable isEnabled: Boolean
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun NewPaymentMethodTab(
+  stable minViewWidth: Dp
+  stable iconRes: Int
+  stable iconUrl: String?
+  imageLoader: StripeImageLoader
+  stable title: String
+  stable isSelected: Boolean
+  stable isEnabled: Boolean
+  stable iconRequiresTinting: Boolean
+  stable promoBadge: String?
+  stable modifier: Modifier? = @static Companion
+  stable onItemSelectedListener: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun NewPaymentMethodTabLayoutUI(
+  unstable paymentMethods: List<SupportedPaymentMethod>
+  stable selectedIndex: Int
+  stable isEnabled: Boolean
+  incentive: PaymentMethodIncentive?
+  stable onItemSelectedListener: Function1<SupportedPaymentMethod, Unit>
+  imageLoader: StripeImageLoader
+  stable modifier: Modifier? = @static Companion
+  stable state: LazyListState? = @dynamic rememberLazyListState(0, 0, $composer, 0, 0b0011)
+)
+fun rememberViewWidth(
+  stable maxWidth: Dp
+  stable numberOfPaymentMethods: Int
+): Dp
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PaymentElement(
+  stable enabled: Boolean
+  unstable supportedPaymentMethods: List<SupportedPaymentMethod>
+  stable selectedItemCode: String
+  incentive: PaymentMethodIncentive?
+  unstable formElements: List<FormElement>
+  stable onItemSelectedListener: Function1<SupportedPaymentMethod, Unit>
+  unstable formArguments: FormArguments
+  unstable usBankAccountFormArguments: USBankAccountFormArguments
+  stable onFormFieldValuesChanged: Function1<FormFieldValues?, Unit>
+  stable modifier: Modifier? = @static Companion
+  stable onInteractionEvent: Function0<Unit>? = @static $composer.startReplaceGroup(-779277104)
+sourceInformation($composer, "CC(remember):PaymentElement.kt#9igjgp")
+val tmp0_group = $composer.cache(false) {
+  {
+
+  }
+
+}
+
+$composer.endReplaceGroup()
+tmp0_group@com.stripe.android.paymentsheet.ui.PaymentElement
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun FormElement(
+  stable enabled: Boolean
+  stable selectedPaymentMethodCode: String
+  unstable formElements: List<FormElement>
+  unstable formArguments: FormArguments
+  unstable usBankAccountFormArguments: USBankAccountFormArguments
+  stable horizontalPadding: Dp
+  stable onFormFieldValuesChanged: Function1<FormFieldValues?, Unit>
+  stable onInteractionEvent: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PaymentMethodForm(
+  stable uuid: String
+  unstable args: FormArguments
+  stable enabled: Boolean
+  stable onFormFieldValuesChanged: Function1<FormFieldValues?, Unit>
+  unstable formElements: List<FormElement>
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PaymentMethodForm(
+  stable paymentMethodCode: String
+  stable enabled: Boolean
+  stable onFormFieldValuesChanged: Function1<FormFieldValues?, Unit>
+  unstable completeFormValues: Flow<FormFieldValues?>
+  unstable hiddenIdentifiers: Set<IdentifierSpec>
+  unstable elements: List<FormElement>
+  lastTextFieldIdentifier: IdentifierSpec?
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PaymentMethodIcon(
+  stable iconRes: Int
+  stable iconUrl: String?
+  imageLoader: StripeImageLoader
+  stable iconRequiresTinting: Boolean
+  stable modifier: Modifier
+  stable contentAlignment: Alignment? = @static Companion.TopStart
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PaymentMethodIconFromResource(
+  stable iconRes: Int
+  stable colorFilter: ColorFilter?
+  stable alignment: Alignment
+  stable modifier: Modifier
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PaymentSheetScreen(
+  unstable viewModel: PaymentSheetViewModel
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PaymentSheetScreen(
+  unstable viewModel: PaymentOptionsViewModel
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PaymentSheetScreen(
+  unstable viewModel: BaseSheetViewModel
+  stable type: PaymentSheetFlowType
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable]]") fun PaymentSheetScreen(
+  unstable viewModel: BaseSheetViewModel
+  stable scrollState: ScrollState
+  stable content: Function2<Composer, Int, Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PaymentSheetScreenContent(
+  unstable viewModel: BaseSheetViewModel
+  stable type: PaymentSheetFlowType
+  stable modifier: Modifier? = @static Companion
+  stable scrollState: ScrollState
+)
+restartable skippable fun ResetScroll(
+  stable scrollState: ScrollState
+  currentScreen: PaymentSheetScreen
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun ProgressOverlay(
+  unused stable <this>: BoxScope
+  walletsProcessingState: WalletsProcessingState?
+)
+scheme("[androidx.compose.ui.UiComposable]") fun Content(
+  stable modifier: Modifier
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PaymentSheetContent(
+  unstable viewModel: BaseSheetViewModel
+  unstable headerText: ResolvableString?
+  walletsState: WalletsState?
+  walletsProcessingState: WalletsProcessingState?
+  unstable error: ResolvableString?
+  currentScreen: PaymentSheetScreen
+  unstable mandateText: MandateText?
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PaymentSheetContent(
+  unstable viewModel: BaseSheetViewModel
+  unstable headerText: ResolvableString?
+  walletsState: WalletsState?
+  walletsProcessingState: WalletsProcessingState?
+  unstable error: ResolvableString?
+  currentScreen: PaymentSheetScreen
+  unstable mandateText: MandateText?
+  stable modifier: Modifier
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun Wallet(
+  state: WalletsState
+  processingState: WalletsProcessingState?
+  stable onGooglePayPressed: Function0<Unit>
+  stable onLinkPressed: Function0<Unit>
+  stable dividerSpacing: Dp
+  stable modifier: Modifier? = @static Companion
+  unstable cardBrandFilter: CardBrandFilter
+)
+restartable skippable fun PrimaryButton(
+  unstable viewModel: BaseSheetViewModel
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PaymentSheetTopBar(
+  stable state: PaymentSheetTopBarState?
+  stable canNavigateBack: Boolean
+  stable isEnabled: Boolean
+  stable handleBackPressed: Function0<Unit>
+  stable elevation: Dp = @static 0.dp
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PaymentSheetTopBar(
+  stable state: PaymentSheetTopBarState
+  stable canNavigateBack: Boolean
+  stable isEnabled: Boolean
+  stable elevation: Dp
+  stable onNavigationIconPressed: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun EditButton(
+  stable labelResourceId: Int
+  stable isEnabled: Boolean
+  stable tintColor: Color
+  stable onClick: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun TestModeBadge()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PaymentSheetTopBar_Preview()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun TestModeBadge_Preview()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun LabelUI(
+  stable label: String
+  stable color: Int?
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PrimaryButton(
+  stable label: String
+  stable locked: Boolean
+  stable enabled: Boolean
+  stable modifier: Modifier? = @static Companion
+  processingState: PrimaryButtonProcessingState? = @dynamic Idle(null)
+  stable onProcessingCompleted: Function0<Unit>? = @static $composer.startReplaceGroup(-1702719330)
+sourceInformation($composer, "CC(remember):PrimaryButtonNew.kt#9igjgp")
+val tmp0_group = $composer.cache(false) {
+  {
+
+  }
+
+}
+
+$composer.endReplaceGroup()
+tmp0_group@com.stripe.android.paymentsheet.ui.PrimaryButton
+  stable onClick: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun Content(
+  stable label: String
+  processingState: PrimaryButtonProcessingState
+  stable areAnimationsDisabled: Boolean
+  stable locked: Boolean
+  stable onProcessingCompleted: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable]]") fun ContentContainer(
+  processingState: PrimaryButtonProcessingState
+  stable areAnimationsDisabled: Boolean
+  stable content: Function3<@[ParameterName(name = 'isCompleted')] Boolean, Composer, Int, Unit>
+)
+fun areAnimationsDisabled()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun StaticIncompleteProcessing(
+  stable <this>: BoxScope
+  stable text: String
+  stable processing: Boolean
+  stable locked: Boolean
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun AnimatedCompleteProcessing(
+  stable <this>: BoxScope
+  stable onAnimationCompleted: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun StaticCompleteProcessing(
+  stable <this>: BoxScope
+  stable onAnimationCompleted: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun SuccessIcon(
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PrimaryButtonPreview()
+fun <get-colors>(
+  stable <this>: PrimaryButtonTheme
+): PrimaryButtonColors
+fun <get-shape>(
+  stable <this>: PrimaryButtonTheme
+): PrimaryButtonShape
+fun <get-typography>(
+  stable <this>: PrimaryButtonTheme
+): PrimaryButtonTypography
+fun getPrimaryButtonColors(
+  unused stable <this>: PrimaryButtonTheme
+): PrimaryButtonColors
+fun getPrimaryButtonShape(
+  unused stable <this>: PrimaryButtonTheme
+): PrimaryButtonShape
+fun getPrimaryButtonTypography(
+  unused stable <this>: PrimaryButtonTheme
+): PrimaryButtonTypography
+restartable skippable scheme("[0, [0]]") fun PrimaryButtonTheme(
+  stable colors: PrimaryButtonColors? = @dynamic PrimaryButtonColors()
+  stable shape: PrimaryButtonShape? = @dynamic PrimaryButtonShape()
+  stable typography: PrimaryButtonTypography? = @dynamic PrimaryButtonTypography()
+  stable content: Function2<Composer, Int, Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PromoBadge(
+  stable text: String
+  stable modifier: Modifier? = @static Companion
+  stable eligible: Boolean = @static true
+  stable tinyMode: Boolean = @static false
+)
+fun formatPromoText(
+  stable text: String
+  stable eligible: Boolean
+): String
+restartable skippable scheme("[0, [0]]") fun FixedTextSize(
+  stable fixed: Boolean
+  stable content: Function2<Composer, Int, Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun RemoveButton(
+  unstable title: ResolvableString
+  stable borderColor: Color
+  stable idle: Boolean
+  stable removing: Boolean
+  stable onRemove: Function0<Unit>
+  stable testTag: String
+)
+fun defaultColor(
+  unused stable <this>: ErrorRippleTheme
+): Color
+fun rippleAlpha(
+  unused stable <this>: ErrorRippleTheme
+): RippleAlpha
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun RemovePaymentMethodDialogUI(
+  unstable paymentMethod: DisplayableSavedPaymentMethod
+  stable onConfirmListener: Function0<Unit>
+  stable onDismissListener: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable]]") fun RowButton(
+  stable isEnabled: Boolean
+  stable isSelected: Boolean
+  stable isClickable: Boolean = @dynamic isEnabled
+  stable onClick: Function0<Unit>
+  stable contentPaddingValues: PaddingValues
+  stable verticalArrangement: Vertical
+  stable modifier: Modifier
+  stable content: @[ExtensionFunctionType] Function3<ColumnScope, Composer, Int, Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun SavedPaymentMethodTab(
+  stable modifier: Modifier? = @static Companion
+  stable viewWidth: Dp
+  stable isSelected: Boolean
+  stable shouldShowModifyBadge: Boolean
+  stable shouldShowDefaultBadge: Boolean
+  stable isEnabled: Boolean
+  stable isClickable: Boolean = @dynamic isEnabled
+  stable iconRes: Int
+  stable iconTint: Color? = @static null
+  stable labelIcon: Int? = @static null
+  stable labelText: String? = @static ""
+  stable description: String
+  stable onModifyListener: Function0<Unit>? = @static null
+  stable onModifyAccessibilityDescription: String? = @static ""
+  stable onItemSelectedListener: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun SavedPaymentMethodBadge(
+  stable isSelected: Boolean
+  stable shouldShowModifyBadge: Boolean
+  stable onModifyListener: Function0<Unit>? = @static null
+  stable onModifyAccessibilityDescription: String? = @static ""
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun SavedPaymentMethodCard(
+  stable isSelected: Boolean
+  stable iconRes: Int
+  stable iconTint: Color?
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun ModifyBadge(
+  stable onModifyAccessibilityDescription: String
+  stable onPressed: Function0<Unit>
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun SavedPaymentMethodTabUISelected()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun SavedPaymentMethodTabUIModifiable()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun DefaultSavedPaymentMethodTabUIModifiable()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun SavedPaymentMethodTabLayoutUI(
+  interactor: SelectSavedPaymentMethodsInteractor
+  cvcRecollectionState: CvcRecollectionState
+  stable modifier: Modifier
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun SavedPaymentMethodTabLayoutUI(
+  unstable paymentOptionsItems: List<PaymentOptionsItem>
+  stable selectedPaymentOptionsItem: PaymentOptionsItem?
+  stable isEditing: Boolean
+  stable isProcessing: Boolean
+  stable onAddCardPressed: Function0<Unit>
+  stable onItemSelected: Function1<PaymentSelection?, Unit>
+  stable onModifyItem: Function1<DisplayableSavedPaymentMethod, Unit>
+  stable modifier: Modifier? = @static Companion
+  stable scrollState: LazyListState? = @dynamic rememberLazyListState(0, 0, $composer, 0, 0b0011)
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun SavedPaymentMethodsTabLayoutPreview()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun SavedPaymentMethodsTabLayoutWithDefaultPreview()
+fun rememberItemWidth(
+  stable maxWidth: Dp
+): Dp
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun SavedPaymentMethodTab(
+  stable item: PaymentOptionsItem
+  stable width: Dp
+  stable isEnabled: Boolean
+  stable isEditing: Boolean
+  stable isSelected: Boolean
+  stable onAddCardPressed: Function0<Unit>
+  stable onItemSelected: Function1<PaymentSelection?, Unit>
+  stable onModifyItem: Function1<DisplayableSavedPaymentMethod, Unit>
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun AddCardTab(
+  stable width: Dp
+  stable isEnabled: Boolean
+  stable onAddCardPressed: Function0<Unit>
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun GooglePayTab(
+  stable width: Dp
+  stable isEnabled: Boolean
+  stable isSelected: Boolean
+  stable onItemSelected: Function1<PaymentSelection?, Unit>
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun LinkTab(
+  stable width: Dp
+  stable isEnabled: Boolean
+  stable isSelected: Boolean
+  stable onItemSelected: Function1<PaymentSelection?, Unit>
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun SavedPaymentMethodTab(
+  unstable paymentMethod: SavedPaymentMethod
+  stable width: Dp
+  stable isEnabled: Boolean
+  stable isEditing: Boolean
+  stable isSelected: Boolean
+  stable onItemSelected: Function1<PaymentSelection?, Unit>
+  stable onModifyItem: Function1<DisplayableSavedPaymentMethod, Unit>
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun CvcRecollectionField(
+  unstable cvcControllerFlow: StateFlow<CvcController>
+  stable isProcessing: Boolean
+  stable animationDuration: Int = @static 500
+  stable animationDelay: Int = @static 400
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun SelectedBadge(
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun SepaMandateScreen(
+  stable merchantName: String
+  stable acknowledgedCallback: Function0<Unit>
+  stable closeCallback: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun UpdatePaymentMethodUI(
+  interactor: UpdatePaymentMethodInteractor
+  stable modifier: Modifier
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun DetailsCannotBeChangedText(
+  interactor: UpdatePaymentMethodInteractor
+  stable shouldShowCardBrandDropdown: Boolean
+  unstable context: Context
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun SetAsDefaultPaymentMethodCheckbox(
+  stable isChecked: Boolean
+  stable onCheckChanged: Function1<Boolean, Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun UpdatePaymentMethodButtons(
+  interactor: UpdatePaymentMethodInteractor
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun CardDetailsUI(
+  unstable displayableSavedPaymentMethod: DisplayableSavedPaymentMethod
+  stable shouldShowCardBrandDropdown: Boolean
+  stable selectedBrand: CardBrandChoice
+  card: Card
+  interactor: UpdatePaymentMethodInteractor
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun USBankAccountUI(
+  stable name: String?
+  stable email: String?
+  usBankAccount: USBankAccount
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun SepaDebitUI(
+  stable name: String?
+  stable email: String?
+  sepaDebit: SepaDebit
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun BankAccountUI(
+  stable name: String?
+  stable email: String?
+  stable bankAccountFieldLabel: String
+  stable bankAccountFieldText: String
+  stable modifier: Modifier
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun BankAccountTextField(
+  stable value: String
+  stable label: String
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun UpdatePaymentMethodUi(
+  interactor: UpdatePaymentMethodInteractor
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun DeletePaymentMethodUi(
+  interactor: UpdatePaymentMethodInteractor
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun CardNumberField(
+  card: Card
+  stable selectedBrand: CardBrandChoice
+  unstable cardBrandFilter: CardBrandFilter
+  stable shouldShowCardBrandDropdown: Boolean
+  stable savedPaymentMethodIcon: Int
+  stable onBrandOptionsShown: Function0<Unit>
+  stable onBrandChoiceChanged: Function1<CardBrandChoice, Unit>
+  stable onBrandChoiceOptionsDismissed: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun ExpiryField(
+  stable expiryMonth: Int?
+  stable expiryYear: Int?
+  stable isExpired: Boolean
+  stable modifier: Modifier
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun CvcField(
+  stable cardBrand: CardBrand
+  stable modifier: Modifier
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable]]") fun CommonTextField(
+  stable value: String
+  stable label: String
+  stable modifier: Modifier? = @static Companion
+  stable trailingIcon: Function2<Composer, Int, Unit>? = @static null
+  stable shouldShowError: Boolean = @static false
+  stable shape: Shape? = @dynamic MaterialTheme.<get-shapes>($composer, MaterialTheme.$stable).small.copy(
+  bottomEnd   =   ZeroCornerSize  , 
+  bottomStart   =   ZeroCornerSize
+)
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun Label(
+  stable text: String
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PreviewUpdatePaymentMethodUI()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun WalletsDivider(
+  stable text: String
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun WalletsDividerLine(
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PaymentSheetContentPadding(
+  stable subtractingExtraPadding: Dp = @static 0.dp
+)
+restartable skippable fun DismissKeyboardOnProcessing(
+  stable processing: Boolean
+)
+restartable skippable scheme("[0, [0]]") fun EventReporterProvider(
+  eventReporter: EventReporter
+  stable content: Function2<Composer, Int, Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun ChevronIcon(
+  stable paymentMethodId: String?
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun ManageScreenUI(
+  interactor: ManageScreenInteractor
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun TrailingContent(
+  unstable paymentMethod: DisplayableSavedPaymentMethod
+  stable isEditing: Boolean
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun NewPaymentMethodRowButton(
+  stable isEnabled: Boolean
+  stable isSelected: Boolean
+  unstable displayablePaymentMethod: DisplayablePaymentMethod
+  imageLoader: StripeImageLoader
+  stable modifier: Modifier? = @static Companion
+  stable rowStyle: RowStyle? = @dynamic Companion.default
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun NewPaymentMethodRowButton(
+  stable isEnabled: Boolean
+  stable isSelected: Boolean
+  stable iconRes: Int
+  stable iconUrl: String?
+  imageLoader: StripeImageLoader
+  stable title: String
+  stable subtitle: String?
+  stable promoText: String?
+  stable iconRequiresTinting: Boolean
+  stable onClick: Function0<Unit>
+  stable modifier: Modifier? = @static Companion
+  stable rowStyle: RowStyle? = @dynamic Companion.default
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun NewPaymentMethodVerticalLayoutUI(
+  unstable paymentMethods: List<DisplayablePaymentMethod>
+  stable selectedIndex: Int
+  stable isEnabled: Boolean
+  imageLoader: StripeImageLoader
+  stable modifier: Modifier? = @static Companion
+  stable rowStyle: RowStyle? = @dynamic Companion.default
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PaymentMethodEmbeddedLayoutUI(
+  unused stable <this>: ColumnScope
+  interactor: PaymentMethodVerticalLayoutInteractor
+  stable embeddedViewDisplaysMandateText: Boolean
+  stable modifier: Modifier? = @static Companion
+  stable rowStyle: RowStyle
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PaymentMethodEmbeddedLayoutUI(
+  unstable paymentMethods: List<DisplayablePaymentMethod>
+  unstable displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?
+  stable savedPaymentMethodAction: SavedPaymentMethodAction
+  selection: Selection?
+  stable isEnabled: Boolean
+  stable onViewMorePaymentMethods: Function0<Unit>
+  stable onManageOneSavedPaymentMethod: Function1<DisplayableSavedPaymentMethod, Unit>
+  stable onSelectSavedPaymentMethod: Function1<DisplayableSavedPaymentMethod, Unit>
+  imageLoader: StripeImageLoader
+  stable rowStyle: RowStyle
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun OptionalEmbeddedDivider(
+  stable rowStyle: RowStyle
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun EmbeddedMandate(
+  stable embeddedViewDisplaysMandateText: Boolean
+  unstable mandate: ResolvableString?
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable], [androidx.compose.ui.UiComposable]]") fun PaymentMethodRowButton(
+  stable isEnabled: Boolean
+  stable isSelected: Boolean
+  stable isClickable: Boolean = @dynamic isEnabled
+  stable shouldShowDefaultBadge: Boolean
+  stable iconContent: @[ExtensionFunctionType] Function3<RowScope, Composer, Int, Unit>
+  stable title: String
+  stable subtitle: String?
+  stable promoText: String?
+  stable onClick: Function0<Unit>
+  stable contentDescription: String? = @static null
+  stable modifier: Modifier? = @static Companion
+  stable style: RowStyle? = @dynamic Companion.default
+  stable trailingContent: @[ExtensionFunctionType] Function3<RowScope, Composer, Int, Unit>? = @static null
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable], [androidx.compose.ui.UiComposable]]") fun RowButtonOuterContent(
+  stable style: RowStyle
+  stable isEnabled: Boolean
+  stable isSelected: Boolean
+  stable contentPaddingValues: Dp
+  stable modifier: Modifier
+  stable trailingContent: @[ExtensionFunctionType] Function3<RowScope, Composer, Int, Unit>?
+  stable onClick: Function0<Unit>
+  stable rowContent: Function3<@[ParameterName(name = 'displayTrailingContent')] Boolean, Composer, Int, Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable]]") fun RowButtonFloatingOuterContent(
+  stable isEnabled: Boolean
+  stable isSelected: Boolean
+  stable contentPaddingValues: PaddingValues
+  stable verticalArrangement: Vertical
+  stable modifier: Modifier
+  stable content: @[ExtensionFunctionType] Function3<ColumnScope, Composer, Int, Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable]]") fun RowButtonRadioOuterContent(
+  stable isEnabled: Boolean
+  stable isSelected: Boolean
+  stable contentPaddingValues: PaddingValues
+  stable verticalArrangement: Vertical
+  stable onClick: Function0<Unit>
+  stable modifier: Modifier
+  style: FlatWithRadio
+  stable content: @[ExtensionFunctionType] Function3<ColumnScope, Composer, Int, Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable], [androidx.compose.ui.UiComposable]]") fun RowButtonCheckmarkOuterContent(
+  stable isSelected: Boolean
+  stable contentPaddingValues: PaddingValues
+  stable verticalArrangement: Vertical
+  stable trailingContent: @[ExtensionFunctionType] Function3<RowScope, Composer, Int, Unit>?
+  stable modifier: Modifier
+  style: FlatWithCheckmark
+  stable content: @[ExtensionFunctionType] Function3<ColumnScope, Composer, Int, Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable]]") fun RowButtonInnerContent(
+  stable isEnabled: Boolean
+  stable shouldShowDefaultBadge: Boolean
+  stable iconContent: @[ExtensionFunctionType] Function3<RowScope, Composer, Int, Unit>
+  stable title: String
+  stable subtitle: String?
+  stable contentDescription: String? = @static null
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun TitleContent(
+  stable title: String
+  stable subtitle: String?
+  stable isEnabled: Boolean
+  stable contentDescription: String?
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun ButtonPreview()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PaymentMethodVerticalLayoutUI(
+  interactor: PaymentMethodVerticalLayoutInteractor
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PaymentMethodVerticalLayoutUI(
+  unstable paymentMethods: List<DisplayablePaymentMethod>
+  unstable displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?
+  stable savedPaymentMethodAction: SavedPaymentMethodAction
+  selection: Selection?
+  stable isEnabled: Boolean
+  stable onViewMorePaymentMethods: Function0<Unit>
+  stable onManageOneSavedPaymentMethod: Function1<DisplayableSavedPaymentMethod, Unit>
+  stable onSelectSavedPaymentMethod: Function1<DisplayableSavedPaymentMethod, Unit>
+  imageLoader: StripeImageLoader
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun SavedPaymentMethodTrailingContent(
+  stable savedPaymentMethodAction: SavedPaymentMethodAction
+  stable onViewMorePaymentMethods: Function0<Unit>
+  stable onManageOneSavedPaymentMethod: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun EditButton(
+  stable onClick: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun ViewMoreButton(
+  stable onViewMorePaymentMethods: Function0<Unit>
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable, [androidx.compose.ui.UiComposable]]") fun SavedPaymentMethodRowButton(
+  unstable displayableSavedPaymentMethod: DisplayableSavedPaymentMethod
+  stable isEnabled: Boolean
+  stable isSelected: Boolean
+  stable modifier: Modifier? = @static Companion
+  stable rowStyle: RowStyle? = @dynamic Companion.default
+  stable onClick: Function0<Unit>? = @static $composer.startReplaceGroup(418328987)
+sourceInformation($composer, "CC(remember):SavedPaymentMethodRowButton.kt#9igjgp")
+val tmp0_group = $composer.cache(false) {
+  {
+
+  }
+
+}
+
+$composer.endReplaceGroup()
+tmp0_group@com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodRowButton
+  stable trailingContent: @[ExtensionFunctionType] Function3<RowScope, Composer, Int, Unit>? = @static null
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PreviewCardSavedPaymentMethodRowButton()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun PreviewCardDefaultSavedPaymentMethodRowButton()
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun VerticalModeFormUI(
+  interactor: VerticalModeFormInteractor
+  stable showsWalletHeader: Boolean
+  stable modifier: Modifier? = @static Companion
+)
+restartable skippable scheme("[androidx.compose.ui.UiComposable]") fun VerticalModeFormHeaderUI(
+  stable isEnabled: Boolean
+  unstable formHeaderInformation: FormHeaderInformation
+)

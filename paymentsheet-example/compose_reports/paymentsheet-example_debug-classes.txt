@@ -1,0 +1,855 @@
+stable class ExampleApplication {
+  <runtime stability> = Stable
+}
+unstable class MainActivity {
+  unstable val viewBinding$delegate: Lazy<@[EnhancedNullability] ActivityMainBinding>
+  unstable val items$delegate: Lazy<List<MenuItem>>
+  <runtime stability> = Unstable
+}
+stable class Badge {
+  stable val labelResId: Int
+  stable val onClick: Function0<Unit>
+  <runtime stability> = Stable
+}
+unstable class Settings {
+  unstable val appContext: @[FlexibleNullability] Context?
+  stable val backendMetadata: String?
+  stable val googlePlacesMetadata: String?
+  <runtime stability> = Unstable
+}
+runtime class CustomerSheetState {
+  runtime val selectedPaymentOption: PaymentOption?
+  stable val shouldFetchPaymentOption: Boolean
+  <runtime stability> = Runtime(PaymentOption)
+}
+runtime class FlowControllerState {
+  runtime val selectedPaymentOption: PaymentOption?
+  runtime val addressDetails: AddressDetails?
+  stable val shouldFetchPaymentOption: Boolean
+  <runtime stability> = Runtime(AddressDetails),Runtime(PaymentOption)
+}
+unstable class PaymentSheetPlaygroundActivity {
+  unstable val viewModel$delegate: Lazy<PaymentSheetPlaygroundViewModel>
+  unstable val embeddedPlaygroundLauncher: ActivityResultLauncher<Payment>
+  <runtime stability> = Unstable
+}
+stable class PaymentSheetPlaygroundUrlHelper {
+  <runtime stability> = Stable
+}
+stable class Factory {
+  stable val applicationSupplier: Function0<Application>
+  stable val uriSupplier: Function0<Uri?>
+  <runtime stability> = Stable
+}
+unstable class PaymentSheetPlaygroundViewModel {
+  unstable val savedStateHandle: SavedStateHandle
+  unstable val settings$delegate: Lazy<Settings>
+  unstable val playgroundSettingsFlow: MutableStateFlow<PlaygroundSettings?>
+  unstable val status: MutableStateFlow<StatusMessage?>
+  unstable val state: StateFlow<PlaygroundState?>
+  unstable val flowControllerState: MutableStateFlow<FlowControllerState?>
+  unstable val customerSheetState: MutableStateFlow<CustomerSheetState?>
+  <runtime stability> = Unstable
+}
+stable class ConfirmIntentEndpointException {
+  <runtime stability> = Stable
+}
+stable class ConfirmIntentNetworkException {
+  <runtime stability> = Stable
+}
+stable class StatusMessage {
+  stable val message: String?
+  stable val hasBeenDisplayed: Boolean
+  <runtime stability> = Stable
+}
+stable class Payment {
+  stable val snapshot: Snapshot
+  stable val amount: Long
+  unstable val paymentMethodTypes: List<String>
+  runtime val customerConfig: CustomerConfiguration?
+  stable val clientSecret: String
+  stable val defaultEndpoint: String
+  runtime var CREATOR: Creator<Payment>
+}
+stable class Customer {
+  stable val snapshot: Snapshot
+  stable val endpoint: String
+  runtime var CREATOR: Creator<Customer>
+}
+stable class AppearanceBottomSheetDialogFragment {
+  stable var embeddedAppearance$delegate: MutableState<EmbeddedAppearance>
+  <runtime stability> = Stable
+}
+stable class AppearanceStore {
+  stable var state$delegate: MutableState<Appearance>
+  stable var forceDarkMode$delegate: MutableState<Boolean>
+  <runtime stability> = Stable
+}
+stable class FawryActivity {
+  <runtime stability> = Stable
+}
+stable class QrCodeActivity {
+  <runtime stability> = Stable
+}
+unstable class EmbeddedPlaygroundActivity {
+  unstable val viewModel$delegate: Lazy<EmbeddedPlaygroundViewModel>
+  stable var playgroundState: Payment
+  unstable var playgroundSettings: PlaygroundSettings
+  <runtime stability> = Unstable
+}
+stable class EmbeddedPlaygroundContract {
+  <runtime stability> = Stable
+}
+unstable class EmbeddedPlaygroundViewModel {
+  unstable val savedStateHandle: SavedStateHandle
+  unstable val confirming: StateFlow<Boolean>
+  <runtime stability> = Unstable
+}
+unstable class Builder {
+  stable var initialization: String?
+  stable var customer: String?
+  stable var customerKeyType: CustomerKeyType?
+  stable var currency: String?
+  stable var mode: String?
+  stable var setShippingAddress: Boolean?
+  stable var automaticPaymentMethods: Boolean?
+  stable var useLink: Boolean?
+  stable var merchantCountryCode: String?
+  unstable var supportedPaymentMethods: List<String>?
+  stable var paymentMethodConfigurationId: String?
+  stable var requireCvcRecollection: Boolean?
+  stable var paymentMethodSaveFeature: FeatureState
+  stable var paymentMethodRemoveFeature: FeatureState
+  stable var paymentMethodRemoveLastFeature: FeatureState
+  stable var paymentMethodSetAsDefaultFeature: FeatureState
+  stable var paymentMethodRedisplayFeature: FeatureState
+  unstable var paymentMethodRedisplayFilters: List<AllowRedisplayFilter>
+  stable var paymentMethodOverrideRedisplay: AllowRedisplayFilter?
+  <runtime stability> = Unstable
+}
+unstable class $serializer {
+  unstable val descriptor: SerialDescriptor
+  <runtime stability> = Unstable
+}
+unstable class CheckoutRequest {
+  stable val initialization: String?
+  stable val customer: String?
+  stable val customerKeyType: CustomerKeyType?
+  stable val currency: String?
+  stable val mode: String?
+  stable val setShippingAddress: Boolean?
+  stable val automaticPaymentMethods: Boolean?
+  stable val useLink: Boolean?
+  stable val merchantCountryCode: String?
+  unstable val supportedPaymentMethods: List<String>?
+  stable val paymentMethodConfigurationId: String?
+  stable val requireCvcRecollection: Boolean?
+  stable val customerSessionComponentName: String
+  stable val paymentMethodSaveFeature: FeatureState?
+  stable val paymentMethodRemoveFeature: FeatureState?
+  stable val paymentMethodRemoveLastFeature: FeatureState?
+  stable val paymentMethodRedisplayFeature: FeatureState?
+  unstable val paymentMethodRedisplayFilters: List<AllowRedisplayFilter>?
+  stable val paymentMethodOverrideRedisplay: AllowRedisplayFilter?
+  stable val paymentMethodSetAsDefaultFeature: FeatureState?
+  <runtime stability> = Unstable
+}
+unstable class $serializer {
+  unstable val descriptor: SerialDescriptor
+  <runtime stability> = Unstable
+}
+stable class CheckoutResponse {
+  stable val publishableKey: String
+  stable val intentClientSecret: String
+  stable val customerId: String?
+  stable val customerEphemeralKeySecret: String?
+  stable val customerSessionClientSecret: String?
+  stable val amount: Long
+  stable val paymentMethodTypes: String?
+  <runtime stability> = Stable
+}
+unstable class $serializer {
+  unstable val descriptor: SerialDescriptor
+  <runtime stability> = Unstable
+}
+stable class ConfirmIntentRequest {
+  stable val clientSecret: String
+  stable val paymentMethodId: String
+  stable val shouldSavePaymentMethod: Boolean
+  stable val merchantCountryCode: String
+  stable val mode: String
+  stable val returnUrl: String
+  <runtime stability> = Stable
+}
+unstable class $serializer {
+  unstable val descriptor: SerialDescriptor
+  <runtime stability> = Unstable
+}
+stable class ConfirmIntentResponse {
+  stable val clientSecret: String
+  <runtime stability> = Stable
+}
+unstable class Builder {
+  stable var customerType: String?
+  stable var customerKeyType: CustomerKeyType
+  stable var merchantCountryCode: String?
+  stable var paymentMethodRemoveFeature: FeatureState
+  stable var paymentMethodRemoveLastFeature: FeatureState
+  stable var paymentMethodSyncDefaultFeature: FeatureState
+  unstable var paymentMethodRedisplayFilters: List<AllowRedisplayFilter>
+  <runtime stability> = Unstable
+}
+unstable class $serializer {
+  unstable val descriptor: SerialDescriptor
+  <runtime stability> = Unstable
+}
+unstable class CustomerEphemeralKeyRequest {
+  stable val customerType: String?
+  stable val customerKeyType: CustomerKeyType?
+  stable val merchantCountryCode: String?
+  stable val paymentMethodSaveFeature: FeatureState?
+  stable val paymentMethodRemoveFeature: FeatureState?
+  stable val paymentMethodRemoveLastFeature: FeatureState?
+  stable val paymentMethodRedisplayFeature: FeatureState?
+  unstable val paymentMethodRedisplayFilters: List<AllowRedisplayFilter>?
+  stable val paymentMethodSyncDefaultFeature: FeatureState?
+  <runtime stability> = Unstable
+}
+unstable class $serializer {
+  unstable val descriptor: SerialDescriptor
+  <runtime stability> = Unstable
+}
+stable class CustomerEphemeralKeyResponse {
+  stable val publishableKey: String
+  stable val customerId: String
+  stable val customerEphemeralKeySecret: String?
+  stable val customerSessionClientSecret: String?
+  <runtime stability> = Stable
+}
+unstable class $serializer {
+  unstable val descriptor: SerialDescriptor
+  <runtime stability> = Unstable
+}
+stable class CreateSetupIntentRequest {
+  stable val customerId: String
+  stable val merchantCountryCode: String
+  <runtime stability> = Stable
+}
+unstable class $serializer {
+  unstable val descriptor: SerialDescriptor
+  <runtime stability> = Unstable
+}
+stable class CreateSetupIntentResponse {
+  stable val clientSecret: String
+  <runtime stability> = Stable
+}
+unstable class PlaygroundRequester {
+  stable val playgroundSettings: Snapshot
+  unstable val applicationContext: Context
+  unstable val settings$delegate: Lazy<Settings>
+  <runtime stability> = Unstable
+}
+stable class AllowsRemovalOfLastSavedPaymentMethodSettingsDefinition {
+  <runtime stability> = Stable
+}
+stable class AppearanceSettingsDefinition {
+  stable val defaultValue: Unit
+  <runtime stability> = Stable
+}
+stable class AttachBillingDetailsToPaymentMethodSettingsDefinition {
+  <runtime stability> = Stable
+}
+stable class AutomaticPaymentMethodsSettingsDefinition {
+  <runtime stability> = Stable
+}
+stable class BooleanSettingsDefinition {
+  stable val key: String
+  stable val displayName: String
+  stable val defaultValue: Boolean
+  <runtime stability> = Stable
+}
+runtime class CardBrandAcceptanceSettingsDefinition {
+  stable val displayName: String
+  stable val key: String
+  runtime val defaultValue: CardBrandAcceptanceType
+  <runtime stability> = Runtime(CardBrandAcceptance)
+}
+stable class All {
+  <runtime stability> = Stable
+}
+stable class DisallowVisa {
+  <runtime stability> = Stable
+}
+stable class AllowVisa {
+  <runtime stability> = Stable
+}
+runtime class CardBrandAcceptanceType {
+  stable val value: String
+  runtime val cardBrandAcceptance: CardBrandAcceptance
+  <runtime stability> = Runtime(CardBrandAcceptance)
+}
+unstable class CheckoutModeSettingsDefinition {
+  unstable var $$delegate_0: EnumSaveable<CheckoutMode>
+  stable val displayName: String
+  <runtime stability> = Unstable
+}
+stable class CollectAddressSettingsDefinition {
+  stable val defaultValue: AddressCollectionMode
+  stable val key: String
+  stable val displayName: String
+  <runtime stability> = Stable
+}
+stable class CollectEmailSettingsDefinition {
+  <runtime stability> = Stable
+}
+stable class CollectNameSettingsDefinition {
+  <runtime stability> = Stable
+}
+stable class CollectPhoneSettingsDefinition {
+  <runtime stability> = Stable
+}
+stable class CollectionModeSettingsDefinition {
+  stable val key: String
+  stable val displayName: String
+  stable val defaultValue: CollectionMode
+  <runtime stability> = Stable
+}
+unstable class CountrySettingsDefinition {
+  unstable var $$delegate_0: EnumSaveable<Country>
+  unstable val supportedPaymentFlowCountries: Set<String>
+  unstable val supportedCustomerFlowCountries: Set<String>
+  stable val displayName: String
+  <runtime stability> = Unstable
+}
+unstable class CurrencySettingsDefinition {
+  unstable var $$delegate_0: EnumSaveable<Currency>
+  stable val displayName: String
+  <runtime stability> = Unstable
+}
+stable class CustomEndpointDefinition {
+  stable val key: String
+  stable val defaultValue: String?
+  <runtime stability> = Stable
+}
+unstable class CustomerSessionOverrideRedisplaySettingsDefinition {
+  unstable var $$delegate_0: EnumSaveable<OverrideAllowRedisplay>
+  stable val displayName: String
+  <runtime stability> = Unstable
+}
+unstable class CustomerSessionRedisplayFiltersSettingsDefinition {
+  unstable var $$delegate_0: EnumSaveable<RedisplayFilterType>
+  stable val displayName: String
+  <runtime stability> = Unstable
+}
+stable class CustomerSessionRedisplaySettingsDefinition {
+  <runtime stability> = Stable
+}
+stable class CustomerSessionRemoveLastSettingsDefinition {
+  <runtime stability> = Stable
+}
+stable class CustomerSessionRemoveSettingsDefinition {
+  <runtime stability> = Stable
+}
+stable class CustomerSessionSaveSettingsDefinition {
+  <runtime stability> = Stable
+}
+stable class CustomerSessionSetAsDefaultSettingsDefinition {
+  <runtime stability> = Stable
+}
+stable class CustomerSessionSettingsDefinition {
+  <runtime stability> = Stable
+}
+stable class CustomerSessionSyncDefaultSettingsDefinition {
+  <runtime stability> = Stable
+}
+stable class CustomerSettingsDefinition {
+  stable val displayName: String
+  stable val key: String
+  stable val defaultValue: CustomerType
+  <runtime stability> = Stable
+}
+stable class GUEST {
+  <runtime stability> = Stable
+}
+stable class NEW {
+  <runtime stability> = Stable
+}
+stable class RETURNING {
+  <runtime stability> = Stable
+}
+stable class Existing {
+  stable val customerId: String
+  <runtime stability> = Stable
+}
+stable class CustomerType {
+  stable val value: String
+  <runtime stability> = Stable
+}
+unstable class CustomerSheetPaymentMethodModeDefinition {
+  unstable var $$delegate_0: EnumSaveable<PaymentMethodMode>
+  stable val displayName: String
+  <runtime stability> = Unstable
+}
+unstable class DefaultBillingAddressSettingsDefinition {
+  unstable var $$delegate_0: EnumSaveable<DefaultBillingAddress>
+  <runtime stability> = Unstable
+}
+stable class DefaultShippingAddressSettingsDefinition {
+  <runtime stability> = Stable
+}
+stable class DelayedPaymentMethodsSettingsDefinition {
+  <runtime stability> = Stable
+}
+stable class EmbeddedAppearanceSettingsDefinition {
+  <runtime stability> = Stable
+}
+unstable class $serializer {
+  unstable val descriptor: SerialDescriptor
+  <runtime stability> = Unstable
+}
+runtime class EmbeddedAppearance {
+  stable val embeddedRowStyle: EmbeddedRow
+  stable val separatorThicknessDp: Float
+  stable val startSeparatorInset: Float
+  stable val endSeparatorInset: Float
+  stable val additionalVerticalInsetsDp: Float
+  stable val horizontalInsetsDp: Float
+  stable val checkmarkInsetsDp: Float
+  stable val floatingButtonSpacingDp: Float
+  stable val topSeparatorEnabled: Boolean
+  stable val bottomSeparatorEnabled: Boolean
+  stable val separatorColor: Int
+  stable val selectedColor: Int
+  stable val unselectedColor: Int
+  stable val checkmarkColor: Int
+  runtime var CREATOR: Creator<EmbeddedAppearance>
+  <runtime stability> = Uncertain(Creator)
+}
+stable class EmbeddedViewDisplaysMandateSettingDefinition {
+  <runtime stability> = Stable
+}
+unstable class EnumSaveable {
+  stable val key: String
+  runtime val defaultValue: T
+  unstable val values: Array<T>
+  <runtime stability> = Unstable
+}
+unstable class ExternalPaymentMethodSettingsDefinition {
+  unstable var $$delegate_0: EnumSaveable<ExternalPaymentMethodType>
+  stable val displayName: String
+  <runtime stability> = Unstable
+}
+unstable class FeatureFlagSettingsDefinition {
+  unstable val featureFlag: FeatureFlag
+  <runtime stability> = Unstable
+}
+stable class GooglePaySettingsDefinition {
+  <runtime stability> = Stable
+}
+unstable class InitializationTypeSettingsDefinition {
+  unstable var $$delegate_0: EnumSaveable<InitializationType>
+  stable val displayName: String
+  <runtime stability> = Unstable
+}
+unstable class LayoutSettingsDefinition {
+  unstable var $$delegate_0: EnumSaveable<Layout>
+  stable val displayName: String
+  <runtime stability> = Unstable
+}
+stable class LinkSettingsDefinition {
+  <runtime stability> = Stable
+}
+unstable class LinkTypeSettingsDefinition {
+  unstable var $$delegate_0: EnumSaveable<LinkType>
+  stable val displayName: String
+  <runtime stability> = Unstable
+}
+stable class PaymentMethodConfigurationSettingsDefinition {
+  stable val key: String
+  stable val displayName: String
+  stable val defaultValue: String
+  <runtime stability> = Stable
+}
+stable class PaymentMethodOrderSettingsDefinition {
+  stable val key: String
+  stable val displayName: String
+  stable val defaultValue: String
+  <runtime stability> = Stable
+}
+unstable class $serializer {
+  unstable val descriptor: SerialDescriptor
+  <runtime stability> = Unstable
+}
+runtime class PlaygroundConfigurationData {
+  stable val integrationType: IntegrationType
+  runtime var CREATOR: Creator<PlaygroundConfigurationData>
+  <runtime stability> = Uncertain(Creator)
+}
+unstable class PaymentSheetConfigurationData {
+  runtime val configurationBuilder: Builder
+  runtime var billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
+  <runtime stability> = Unstable
+}
+unstable class EmbeddedConfigurationData {
+  runtime val configurationBuilder: Builder
+  runtime var billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
+  <runtime stability> = Unstable
+}
+unstable class CustomerSheetConfigurationData {
+  runtime val configurationBuilder: Builder
+  runtime var billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
+  <runtime stability> = Unstable
+}
+runtime class Option {
+  stable val name: String
+  runtime val value: T
+  <runtime stability> = Parameter(T)
+}
+stable class Snapshot {
+  runtime val configurationData: PlaygroundConfigurationData
+  unstable val settings: Map<PlaygroundSettingDefinition<*>, Any?>
+}
+unstable class $serializer {
+  unstable val descriptor: SerialDescriptor
+  <runtime stability> = Unstable
+}
+unstable class PlaygroundSettings {
+  unstable val settings: MutableMap<PlaygroundSettingDefinition<*>, MutableStateFlow<Any?>>
+  unstable val _configurationData: MutableStateFlow<PlaygroundConfigurationData>
+  unstable val configurationData: StateFlow<PlaygroundConfigurationData>
+  unstable val displayableDefinitions: StateFlow<List<Displayable<*>>>
+  <runtime stability> = Unstable
+}
+unstable class PreferredNetworkSettingsDefinition {
+  unstable val preferredNetworks: List<CardBrand>
+  <runtime stability> = Unstable
+}
+stable class PrimaryButtonLabelSettingsDefinition {
+  stable val key: String
+  stable val displayName: String
+  stable val defaultValue: String
+  <runtime stability> = Stable
+}
+stable class RequireCvcRecollectionDefinition {
+  <runtime stability> = Stable
+}
+runtime class ShippingAddressSettingsDefinition {
+  runtime val defaultValue: AddressDetails?
+  <runtime stability> = Runtime(AddressDetails)
+}
+stable class SupportedPaymentMethodsSettingsDefinition {
+  stable val key: String
+  stable val displayName: String
+  stable val defaultValue: String
+  <runtime stability> = Stable
+}
+stable class CartProduct {
+  stable val id: Id
+  stable val icon: String
+  stable val nameResId: Int
+  stable val unitPrice: Long
+  stable val quantity: Int
+  <runtime stability> = Stable
+}
+unstable class CartState {
+  unstable val products: List<CartProduct>
+  stable val isSubscription: Boolean
+  stable val subtotal: Long?
+  stable val salesTax: Long?
+  stable val total: Long?
+  stable val customerId: String?
+  stable val customerEphemeralKeySecret: String?
+  <runtime stability> = Unstable
+}
+unstable class $serializer {
+  unstable val descriptor: SerialDescriptor
+  <runtime stability> = Unstable
+}
+stable class ExamplePublishableKeyResponse {
+  stable val publishableKey: String
+  <runtime stability> = Stable
+}
+unstable class $serializer {
+  unstable val descriptor: SerialDescriptor
+  <runtime stability> = Unstable
+}
+stable class ExampleCheckoutRequest {
+  stable val hotDogCount: Int
+  stable val saladCount: Int
+  stable val isSubscribing: Boolean
+  <runtime stability> = Stable
+}
+unstable class $serializer {
+  unstable val descriptor: SerialDescriptor
+  <runtime stability> = Unstable
+}
+stable class ExampleCheckoutResponse {
+  stable val publishableKey: String
+  stable val paymentIntent: String
+  stable val customer: String?
+  stable val ephemeralKey: String?
+  stable val subtotal: Long
+  stable val tax: Long
+  stable val total: Long
+  <runtime stability> = Stable
+}
+unstable class $serializer {
+  unstable val descriptor: SerialDescriptor
+  <runtime stability> = Unstable
+}
+stable class ExampleUpdateRequest {
+  stable val hotDogCount: Int
+  stable val saladCount: Int
+  stable val isSubscribing: Boolean
+  <runtime stability> = Stable
+}
+unstable class $serializer {
+  unstable val descriptor: SerialDescriptor
+  <runtime stability> = Unstable
+}
+stable class ExampleUpdateResponse {
+  stable val subtotal: Long
+  stable val tax: Long
+  stable val total: Long
+  <runtime stability> = Stable
+}
+unstable class $serializer {
+  unstable val descriptor: SerialDescriptor
+  <runtime stability> = Unstable
+}
+stable class ExampleCreateAndConfirmIntentRequest {
+  stable val paymentMethodId: String
+  stable val shouldSavePaymentMethod: Boolean
+  stable val currency: String
+  stable val hotDogCount: Int
+  stable val saladCount: Int
+  stable val isSubscribing: Boolean
+  stable val returnUrl: String
+  stable val customerId: String?
+  <runtime stability> = Stable
+}
+unstable class $serializer {
+  unstable val descriptor: SerialDescriptor
+  <runtime stability> = Unstable
+}
+stable class ExampleCreateAndConfirmIntentResponse {
+  stable val clientSecret: String
+  <runtime stability> = Stable
+}
+unstable class $serializer {
+  unstable val descriptor: SerialDescriptor
+  <runtime stability> = Unstable
+}
+stable class ExampleCreateAndConfirmErrorResponse {
+  stable val error: String?
+  <runtime stability> = Stable
+}
+unstable class $serializer {
+  unstable val descriptor: SerialDescriptor
+  <runtime stability> = Unstable
+}
+stable class ExampleCustomerSheetRequest {
+  stable val customerType: String
+  <runtime stability> = Stable
+}
+unstable class $serializer {
+  unstable val descriptor: SerialDescriptor
+  <runtime stability> = Unstable
+}
+stable class ExampleCustomerSheetResponse {
+  stable val publishableKey: String
+  stable val customerEphemeralKeySecret: String
+  stable val customerId: String
+  <runtime stability> = Stable
+}
+unstable class $serializer {
+  unstable val descriptor: SerialDescriptor
+  <runtime stability> = Unstable
+}
+stable class PlaygroundCustomerSheetRequest {
+  stable val customerId: String
+  stable val mode: String
+  stable val merchantCountryCode: String
+  stable val currency: String
+  <runtime stability> = Stable
+}
+unstable class $serializer {
+  unstable val descriptor: SerialDescriptor
+  <runtime stability> = Unstable
+}
+stable class PlaygroundCustomerSheetResponse {
+  stable val customerId: String
+  stable val clientSecret: String
+  stable val publishableKey: String
+  stable val customerEphemeralKeySecret: String
+  stable val amount: String
+  stable val paymentMethodTypes: String
+  <runtime stability> = Stable
+}
+unstable class $serializer {
+  unstable val descriptor: SerialDescriptor
+  <runtime stability> = Unstable
+}
+stable class ExampleCreateSetupIntentRequest {
+  stable val customerId: String
+  <runtime stability> = Stable
+}
+unstable class $serializer {
+  unstable val descriptor: SerialDescriptor
+  <runtime stability> = Unstable
+}
+stable class ExampleCreateSetupIntentResponse {
+  stable val clientSecret: String
+  <runtime stability> = Stable
+}
+stable class AddressElementExampleActivity {
+  <runtime stability> = Stable
+}
+unstable class AddressElementExampleViewModel {
+  unstable val _state: MutableStateFlow<AddressElementExampleViewState>
+  unstable val state: StateFlow<AddressElementExampleViewState>
+  <runtime stability> = Unstable
+}
+stable class Loading {
+  <runtime stability> = Stable
+}
+runtime class Content {
+  stable val publishableKey: String
+  runtime val address: AddressDetails?
+  stable val status: String?
+  <runtime stability> = Runtime(AddressDetails)
+}
+stable class Error {
+  stable val message: String
+  <runtime stability> = Stable
+}
+unstable class CustomerSheetExampleActivity {
+  unstable val viewModel$delegate: Lazy<CustomerSheetExampleViewModel>
+  <runtime stability> = Unstable
+}
+unstable class CustomerSheetExampleViewModel {
+  unstable val _state: MutableStateFlow<CustomerSheetExampleViewState>
+  unstable val state: StateFlow<CustomerSheetExampleViewState>
+  unstable val customerAdapter: CustomerAdapter
+  <runtime stability> = Unstable
+}
+stable class Loading {
+  <runtime stability> = Stable
+}
+stable class FailedToLoad {
+  stable val message: String
+  <runtime stability> = Stable
+}
+runtime class Data {
+  runtime val customerEphemeralKey: CustomerEphemeralKey
+  runtime val selection: PaymentOptionSelection?
+  stable val errorMessage: String?
+  <runtime stability> = Runtime(PaymentOptionSelection),Runtime(CustomerEphemeralKey)
+}
+stable class CustomerSheetExampleViewState {
+  <runtime stability> = Stable
+}
+unstable class CompleteFlowActivity {
+  unstable val snackbar$delegate: Lazy<@[EnhancedNullability] Snackbar>
+  unstable val viewModel$delegate: Lazy<CompleteFlowViewModel>
+  <runtime stability> = Unstable
+}
+unstable class CompleteFlowViewModel {
+  unstable val _state: MutableStateFlow<CompleteFlowViewState>
+  unstable val state: StateFlow<CompleteFlowViewState>
+  <runtime stability> = Unstable
+}
+runtime class PaymentInfo {
+  stable val clientSecret: String
+  runtime val customerConfiguration: CustomerConfiguration?
+  stable val shouldPresent: Boolean
+  <runtime stability> = Runtime(CustomerConfiguration)
+}
+unstable class CompleteFlowViewState {
+  stable val isProcessing: Boolean
+  runtime val paymentInfo: PaymentInfo?
+  unstable val cartState: CartState
+  stable val status: String?
+  stable val didComplete: Boolean
+  <runtime stability> = Unstable
+}
+unstable class CustomFlowActivity {
+  unstable val snackbar$delegate: Lazy<@[EnhancedNullability] Snackbar>
+  unstable val viewModel$delegate: Lazy<CustomFlowViewModel>
+  <runtime stability> = Unstable
+}
+unstable class CustomFlowViewModel {
+  unstable val _state: MutableStateFlow<CustomFlowViewState>
+  unstable val state: StateFlow<CustomFlowViewState>
+  <runtime stability> = Unstable
+}
+runtime class PaymentInfo {
+  stable val clientSecret: String
+  runtime val customerConfiguration: CustomerConfiguration?
+  <runtime stability> = Runtime(CustomerConfiguration)
+}
+unstable class CustomFlowViewState {
+  stable val isProcessing: Boolean
+  stable val isError: Boolean
+  unstable val cartState: CartState
+  runtime val paymentInfo: PaymentInfo?
+  stable val status: String?
+  runtime val paymentOption: PaymentOption?
+  stable val didComplete: Boolean
+  <runtime stability> = Unstable
+}
+unstable class ServerSideConfirmationCompleteFlowActivity {
+  unstable val snackbar$delegate: Lazy<@[EnhancedNullability] Snackbar>
+  unstable val viewModel$delegate: Lazy<ServerSideConfirmationCompleteFlowViewModel>
+  <runtime stability> = Unstable
+}
+unstable class ServerSideConfirmationCompleteFlowViewModel {
+  unstable val _state: MutableStateFlow<ServerSideConfirmationCompleteFlowViewState>
+  unstable val state: StateFlow<ServerSideConfirmationCompleteFlowViewState>
+  <runtime stability> = Unstable
+}
+unstable class ServerSideConfirmationCompleteFlowViewState {
+  stable val isProcessing: Boolean
+  stable val isError: Boolean
+  unstable val confirmedCartState: CartState
+  unstable val dirtyCartState: CartState?
+  stable val status: String?
+  stable val didComplete: Boolean
+  <runtime stability> = Unstable
+}
+unstable class ServerSideConfirmationCustomFlowActivity {
+  unstable val snackbar$delegate: Lazy<@[EnhancedNullability] Snackbar>
+  unstable val viewModel$delegate: Lazy<ServerSideConfirmationCustomFlowViewModel>
+  <runtime stability> = Unstable
+}
+unstable class ConfigureResult {
+  runtime val paymentOption: PaymentOption?
+  unstable val error: Throwable?
+  <runtime stability> = Unstable
+}
+unstable class ServerSideConfirmationCustomFlowViewModel {
+  unstable val _state: MutableStateFlow<ServerSideConfirmationCustomFlowViewState>
+  unstable val state: StateFlow<ServerSideConfirmationCustomFlowViewState>
+  unstable var configureHandler: SuspendFunction1<CartState, ConfigureResult>?
+  <runtime stability> = Unstable
+}
+unstable class ServerSideConfirmationCustomFlowViewState {
+  stable val isProcessing: Boolean
+  stable val isError: Boolean
+  unstable val confirmedCartState: CartState
+  unstable val dirtyCartState: CartState?
+  stable val status: String?
+  runtime val paymentOption: PaymentOption?
+  stable val didComplete: Boolean
+  <runtime stability> = Unstable
+}
+unstable class DrawablePainter {
+  unstable val drawable: Drawable
+  stable var drawInvalidateTick$delegate: MutableState<Int>
+  stable var drawableIntrinsicSize$delegate: MutableState<Size>
+  unstable val callback$delegate: Lazy<<no name provided>>
+  <runtime stability> = Unstable
+}
+stable class EmptyPainter {
+  <runtime stability> = Stable
+}
