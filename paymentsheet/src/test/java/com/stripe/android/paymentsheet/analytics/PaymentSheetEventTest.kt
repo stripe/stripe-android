@@ -554,7 +554,12 @@ class PaymentSheetEventTest {
         assertThat(
             newPMEvent.params
         ).isEqualTo(
-            defaultPaymentSuccessEventParams.plus(
+            mapOf(
+                "currency" to "usd",
+                "duration" to 0.001F,
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
                 "selected_lpm" to "card",
             )
         )
@@ -605,7 +610,12 @@ class PaymentSheetEventTest {
         assertThat(
             savedPMEvent.params
         ).isEqualTo(
-            defaultPaymentSuccessEventParams.plus(
+            mapOf(
+                "currency" to "usd",
+                "duration" to 0.001F,
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
                 "selected_lpm" to "card",
             )
         )
@@ -625,7 +635,12 @@ class PaymentSheetEventTest {
         assertThat(
             googlePayEvent.params
         ).isEqualTo(
-            defaultPaymentSuccessEventParams.plus(
+            mapOf(
+                "currency" to "usd",
+                "duration" to 0.001F,
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
                 "selected_lpm" to "google_pay",
             )
         )
@@ -645,11 +660,14 @@ class PaymentSheetEventTest {
         assertThat(
             linkEvent.params
         ).isEqualTo(
-            defaultPaymentSuccessEventParams.plus(
-                mapOf(
-                    "selected_lpm" to "link",
-                    "link_context" to "wallet",
-                )
+            mapOf(
+                "currency" to "usd",
+                "duration" to 0.001F,
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
+                "selected_lpm" to "link",
+                "link_context" to "wallet",
             )
         )
     }
@@ -668,8 +686,13 @@ class PaymentSheetEventTest {
         assertThat(
             inlineLinkEvent.params
         ).isEqualTo(
-            defaultPaymentSuccessEventParams.plus(
+            mapOf(
+                "currency" to "usd",
+                "duration" to 0.001F,
+                "is_decoupled" to false,
+                "link_enabled" to false,
                 "selected_lpm" to "card",
+                "google_pay_enabled" to false,
             )
         )
     }
@@ -695,7 +718,12 @@ class PaymentSheetEventTest {
         assertThat(
             newPMEvent.params
         ).isEqualTo(
-            defaultPaymentSuccessEventParams.plus(
+            mapOf(
+                "currency" to "usd",
+                "duration" to 0.001F,
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
                 "selected_lpm" to "external_fawry",
             )
         )
@@ -724,11 +752,14 @@ class PaymentSheetEventTest {
         assertThat(
             newPMEvent.params
         ).isEqualTo(
-            defaultPaymentFailureEventParams.plus(
-                mapOf(
-                    "selected_lpm" to "external_fawry",
-                    "error_message" to "externalPaymentMethodError",
-                )
+            mapOf(
+                "currency" to "usd",
+                "duration" to 0.001F,
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
+                "selected_lpm" to "external_fawry",
+                "error_message" to "externalPaymentMethodError",
             )
         )
     }
@@ -748,8 +779,14 @@ class PaymentSheetEventTest {
         assertThat(
             newPMEvent.params
         ).isEqualTo(
-            defaultPaymentFailureEventParams.plus(
+            mapOf(
+                "currency" to "usd",
+                "duration" to 0.001F,
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
                 "selected_lpm" to "card",
+                "error_message" to "apiError",
             )
         )
     }
@@ -805,8 +842,14 @@ class PaymentSheetEventTest {
         assertThat(
             savedPMEvent.params
         ).isEqualTo(
-            defaultPaymentFailureEventParams.plus(
+            mapOf(
+                "currency" to "usd",
+                "duration" to 0.001F,
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
                 "selected_lpm" to "card",
+                "error_message" to "apiError",
             )
         )
     }
@@ -827,8 +870,14 @@ class PaymentSheetEventTest {
         assertThat(
             googlePayEvent.params
         ).isEqualTo(
-            defaultPaymentFailureEventParams.plus(
+            mapOf(
+                "currency" to "usd",
+                "duration" to 0.001F,
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
                 "selected_lpm" to "google_pay",
+                "error_message" to "apiError",
             )
         )
     }
@@ -849,11 +898,15 @@ class PaymentSheetEventTest {
         assertThat(
             linkEvent.params
         ).isEqualTo(
-            defaultPaymentFailureEventParams.plus(
-                mapOf(
-                    "selected_lpm" to "link",
-                    "link_context" to "wallet",
-                )
+            mapOf(
+                "currency" to "usd",
+                "duration" to 0.001F,
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
+                "selected_lpm" to "link",
+                "error_message" to "apiError",
+                "link_context" to "wallet",
             )
         )
     }
@@ -874,8 +927,14 @@ class PaymentSheetEventTest {
         assertThat(
             inlineLinkEvent.params
         ).isEqualTo(
-            defaultPaymentFailureEventParams.plus(
+            mapOf(
+                "currency" to "usd",
+                "duration" to 0.001F,
+                "is_decoupled" to false,
+                "link_enabled" to false,
                 "selected_lpm" to "card",
+                "google_pay_enabled" to false,
+                "error_message" to "apiError",
             )
         )
     }
@@ -1444,18 +1503,6 @@ class PaymentSheetEventTest {
             deferredIntentConfirmationType = null,
         )
     }
-
-    private val defaultPaymentSuccessEventParams = mapOf(
-        "currency" to "usd",
-        "duration" to 0.001F,
-        "is_decoupled" to false,
-        "link_enabled" to false,
-        "google_pay_enabled" to false,
-    )
-
-    private val defaultPaymentFailureEventParams = defaultPaymentSuccessEventParams.plus(
-        "error_message" to "apiError",
-    )
 
     private val paymentIntentInitializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
         clientSecret = "cs_example"
