@@ -53,10 +53,7 @@ class AddressTextFieldController(
 
     override val layoutDirection: LayoutDirection? = null
 
-    override val contentDescription: StateFlow<ResolvableString> = _fieldValue.mapAsStateFlow {
-        println("YEET AddressTextFieldController content description here?")
-        it.resolvableString
-    }
+    override val contentDescription: StateFlow<ResolvableString> = _fieldValue.mapAsStateFlow { it.resolvableString }
 
     private val _fieldState = MutableStateFlow<TextFieldState>(TextFieldStateConstants.Error.Blank)
     override val fieldState: StateFlow<TextFieldState> = _fieldState.asStateFlow()
