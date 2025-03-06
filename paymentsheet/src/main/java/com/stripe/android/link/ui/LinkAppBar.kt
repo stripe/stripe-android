@@ -39,7 +39,7 @@ internal fun LinkAppBar(
     state: LinkAppBarState,
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit,
-    showBottomSheetContent: (BottomSheetContent?) -> Unit,
+    showBottomSheetContent: (BottomSheetContent) -> Unit,
     onLogoutClicked: () -> Unit
 ) {
     Row(
@@ -116,7 +116,7 @@ private fun RowScope.LinkAppBarTitle(
 @Composable
 private fun LinkAppBarAction(
     showOverflowMenu: Boolean,
-    showBottomSheetContent: (BottomSheetContent?) -> Unit,
+    showBottomSheetContent: (BottomSheetContent) -> Unit,
     onLogoutClicked: () -> Unit
 ) {
     val overflowIconAlpha by animateFloatAsState(

@@ -15,7 +15,6 @@ import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -41,7 +40,6 @@ import com.stripe.android.link.ui.verification.VerificationViewModel
 import com.stripe.android.link.ui.wallet.WalletScreen
 import com.stripe.android.link.ui.wallet.WalletViewModel
 import com.stripe.android.ui.core.CircularProgressIndicator
-import kotlinx.coroutines.launch
 
 @SuppressWarnings("LongMethod")
 @OptIn(ExperimentalMaterialApi::class)
@@ -61,7 +59,6 @@ internal fun LinkContent(
     goBack: () -> Unit,
     changeEmail: () -> Unit
 ) {
-    val coroutineScope = rememberCoroutineScope()
     DefaultLinkTheme {
         Surface {
             ModalBottomSheetLayout(
@@ -83,22 +80,17 @@ internal fun LinkContent(
                         .fillMaxWidth()
                 ) {
                     BackHandler {
-                        handleViewAction(LinkAction.BackPressed)
+                        if (bottomSheetContent != null) {
+                            onUpdateSheetContent(null)
+                        } else {
+                            handleViewAction(LinkAction.BackPressed)
+                        }
                     }
 
                     LinkAppBar(
                         state = appBarState,
                         onBackPressed = onBackPressed,
-                        showBottomSheetContent = {
-                            if (it == null) {
-                                coroutineScope.launch {
-                                    sheetState.hide()
-                                    onUpdateSheetContent(null)
-                                }
-                            } else {
-                                onUpdateSheetContent(it)
-                            }
-                        },
+                        showBottomSheetContent = onUpdateSheetContent,
                         onLogoutClicked = {
                             handleViewAction(LinkAction.LogoutClicked)
                         },
