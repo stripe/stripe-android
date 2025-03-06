@@ -6,6 +6,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnections
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ConsentAgree
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
@@ -14,8 +15,11 @@ import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.IsLinkWithStripe
+import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
+import com.stripe.android.financialconnections.features.networkinglinkloginwarmup.NetworkingLinkLoginWarmupViewModel.Companion.PANE
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.Legal
 import com.stripe.android.financialconnections.features.notice.PresentSheet
@@ -34,6 +38,7 @@ import com.stripe.android.financialconnections.utils.Experiment.CONNECTIONS_CONS
 import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.financialconnections.utils.experimentAssignment
 import com.stripe.android.financialconnections.utils.trackExposure
+import com.stripe.android.model.EmailSource
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -50,6 +55,9 @@ internal class ConsentViewModel @AssistedInject constructor(
     private val handleClickableUrl: HandleClickableUrl,
     private val logger: Logger,
     private val presentSheet: PresentSheet,
+    private val lookupAccount: LookupAccount,
+    private val isLinkWithStripe: IsLinkWithStripe,
+    private val prefillDetails: ElementsSessionContext.PrefillDetails?,
 ) : FinancialConnectionsViewModel<ConsentState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
@@ -99,9 +107,50 @@ internal class ConsentViewModel @AssistedInject constructor(
             eventTracker.track(ConsentAgree)
             val updatedManifest: FinancialConnectionsSessionManifest = acceptConsent()
             FinancialConnections.emitEvent(Name.CONSENT_ACQUIRED)
-            navigationManager.tryNavigateTo(updatedManifest.nextPane.destination(referrer = Pane.CONSENT))
+
+            val destination = determineNavigationDestination(updatedManifest)
+            navigationManager.tryNavigateTo(destination(referrer = Pane.CONSENT))
+
             updatedManifest
         }.execute { copy(acceptConsent = it) }
+    }
+
+    private suspend fun determineNavigationDestination(
+        manifest: FinancialConnectionsSessionManifest,
+    ): Destination {
+        val defaultDestination = manifest.nextPane.destination
+
+        val useManifestNextPane = !isLinkWithStripe() ||
+            manifest.accountholderCustomerEmailAddress != null ||
+            prefillDetails?.email == null
+
+        if (useManifestNextPane) {
+            return defaultDestination
+        }
+
+        val hasExistingAccount = hasExistingLinkAccount(manifest, prefillDetails.email)
+        return if (hasExistingAccount) {
+            NetworkingLinkLoginWarmup
+        } else {
+            defaultDestination
+        }
+    }
+
+    private suspend fun hasExistingLinkAccount(
+        manifest: FinancialConnectionsSessionManifest,
+        email: String,
+    ): Boolean {
+        return runCatching {
+            lookupAccount(
+                pane = PANE,
+                email = email,
+                phone = null,
+                phoneCountryCode = null,
+                emailSource = EmailSource.CUSTOMER_OBJECT,
+                sessionId = manifest.id,
+                verifiedFlow = manifest.appVerificationEnabled,
+            ).exists
+        }.getOrDefault(false)
     }
 
     fun onClickableTextClick(uri: String) = viewModelScope.launch {
