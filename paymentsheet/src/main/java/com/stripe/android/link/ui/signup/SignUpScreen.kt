@@ -11,6 +11,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -44,6 +45,7 @@ import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.utils.collectAsState
+import kotlinx.coroutines.delay
 
 @Composable
 internal fun SignUpScreen(
@@ -68,6 +70,13 @@ internal fun SignUpBody(
     signUpScreenState: SignUpScreenState,
     onSignUpClick: () -> Unit
 ) {
+    val emailFocusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        delay(250)
+        emailFocusRequester.requestFocus()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -96,7 +105,8 @@ internal fun SignUpBody(
             EmailCollectionSection(
                 enabled = true,
                 emailController = emailController,
-                signUpScreenState = signUpScreenState
+                signUpScreenState = signUpScreenState,
+                focusRequester = emailFocusRequester,
             )
         }
         AnimatedVisibility(
