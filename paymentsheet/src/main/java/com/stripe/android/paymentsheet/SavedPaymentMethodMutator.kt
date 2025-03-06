@@ -63,12 +63,10 @@ internal class SavedPaymentMethodMutator(
         customerStateHolder.customer,
         paymentMethodMetadataFlow
     ) { customer, paymentMethodMetadata ->
-        paymentMethodMetadata?.customerMetadata?.isPaymentMethodSetAsDefaultEnabled?.let { isEnabled ->
-            if (isEnabled) {
-                customer?.defaultPaymentMethodId
-            } else {
-                null
-            }
+        if (paymentMethodMetadata?.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true) {
+            customer?.defaultPaymentMethodId
+        } else {
+            null
         }
     }
 
