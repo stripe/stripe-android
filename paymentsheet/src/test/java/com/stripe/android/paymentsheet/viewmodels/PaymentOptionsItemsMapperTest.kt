@@ -92,6 +92,91 @@ class PaymentOptionsItemsMapperTest {
         }
     }
 
+
+    @Test
+    fun `Correctly creates payment methods in paymentFlow when not isPaymentMethodSetAsDefaultEnabled`() = runTest {
+        val mapper = PaymentOptionsItemsMapper(
+            customerState = customerStateFlow,
+            isGooglePayReady = isGooglePayReadyFlow,
+            isLinkEnabled = isLinkEnabledFlow,
+            isNotPaymentFlow = false,
+            nameProvider = { it!!.resolvableString },
+            isCbcEligible = { false },
+            customerMetadata = MutableStateFlow(
+                CustomerMetadata(
+                    hasCustomerConfiguration = false,
+                    isPaymentMethodSetAsDefaultEnabled = false
+                )
+            ),
+        )
+
+        mapper().test {
+            assertThat(awaitItem()).isEqualTo(emptyList<PaymentOptionsItem>())
+            val paymentMethods = PaymentMethodFixtures.createCards(2)
+            val defaultPaymentMethodId = paymentMethods[1].id
+
+            customerStateFlow.value = createCustomerState(
+                paymentMethods = paymentMethods,
+                defaultPaymentMethodId = defaultPaymentMethodId
+            )
+
+            isGooglePayReadyFlow.value = true
+            isLinkEnabledFlow.value = true
+
+            val state = awaitItem()
+            assertThat(state).hasSize(3)
+            assertThat(state[0].viewType).isEqualTo(PaymentOptionsItem.ViewType.AddCard)
+            assertThat(
+                (state[1] as? PaymentOptionsItem.SavedPaymentMethod)
+                    ?.displayableSavedPaymentMethod?.shouldShowDefaultBadge).isFalse()
+            assertThat(
+                (state[2] as? PaymentOptionsItem.SavedPaymentMethod)
+                    ?.displayableSavedPaymentMethod?.shouldShowDefaultBadge).isFalse()
+        }
+    }
+
+    @Test
+    fun `Correctly creates payment methods in paymentFlow when isPaymentMethodSetAsDefaultEnabled`() = runTest {
+        val mapper = PaymentOptionsItemsMapper(
+            customerState = customerStateFlow,
+            isGooglePayReady = isGooglePayReadyFlow,
+            isLinkEnabled = isLinkEnabledFlow,
+            isNotPaymentFlow = false,
+            nameProvider = { it!!.resolvableString },
+            isCbcEligible = { false },
+            customerMetadata = MutableStateFlow(
+                CustomerMetadata(
+                    hasCustomerConfiguration = false,
+                    isPaymentMethodSetAsDefaultEnabled = true
+                )
+            ),
+        )
+
+        mapper().test {
+            assertThat(awaitItem()).isEqualTo(emptyList<PaymentOptionsItem>())
+            val paymentMethods = PaymentMethodFixtures.createCards(2)
+            val defaultPaymentMethodId = paymentMethods[1].id
+
+            customerStateFlow.value = createCustomerState(
+                paymentMethods = paymentMethods,
+                defaultPaymentMethodId = defaultPaymentMethodId
+            )
+
+            isGooglePayReadyFlow.value = true
+            isLinkEnabledFlow.value = true
+
+            val state = awaitItem()
+            assertThat(state).hasSize(3)
+            assertThat(state[0].viewType).isEqualTo(PaymentOptionsItem.ViewType.AddCard)
+            assertThat(
+                (state[1] as? PaymentOptionsItem.SavedPaymentMethod)
+                    ?.displayableSavedPaymentMethod?.shouldShowDefaultBadge).isFalse()
+            assertThat(
+                (state[2] as? PaymentOptionsItem.SavedPaymentMethod)
+                    ?.displayableSavedPaymentMethod?.shouldShowDefaultBadge).isTrue()
+        }
+    }
+
     private fun createCustomerState(
         defaultPaymentMethodId: String? = null,
         paymentMethods: List<PaymentMethod> = emptyList(),
