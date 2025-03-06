@@ -10,6 +10,7 @@ import com.stripe.android.uicore.forms.FormFieldEntry
 @Immutable
 internal data class WalletUiState(
     val paymentDetailsList: List<ConsumerPaymentDetails.PaymentDetails>,
+    val isExpanded: Boolean = false,
     val selectedItem: ConsumerPaymentDetails.PaymentDetails?,
     val isProcessing: Boolean,
     val primaryButtonLabel: ResolvableString,
@@ -29,7 +30,7 @@ internal data class WalletUiState(
     val primaryButtonState: PrimaryButtonState
         get() {
             val card = selectedItem as? Card
-            val isExpired = card?.isExpired ?: false
+            val isExpired = card?.isExpired == true
             val requiresCvcRecollection = card?.cvcCheck?.requiresRecollection ?: false
 
             val isMissingExpiryDateInput = (expiryDateInput.isComplete && cvcInput.isComplete).not()
