@@ -1,4 +1,4 @@
-package com.stripe.android.paymentelement.confirmation.lpms
+package com.stripe.android.paymentelement.confirmation.lpms.foundations.network
 
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.core.Deserializable
@@ -13,6 +13,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.StripeRepository
 import kotlinx.serialization.DeserializationStrategy
@@ -28,7 +29,7 @@ internal class StripeNetworkTestClient @Inject constructor(
     suspend fun createPaymentIntent(
         amount: Int,
         currency: String,
-        paymentMethodTypes: List<String>,
+        paymentMethodType: PaymentMethod.Type,
         paymentMethodId: String? = null,
         createWithSetupFutureUsage: Boolean = false,
     ): Result<String> {
@@ -38,18 +39,10 @@ internal class StripeNetworkTestClient @Inject constructor(
                 createParams = CreatePaymentIntentRequest.CreateParams(
                     amount = amount,
                     currency = currency,
-                    paymentMethodTypes = paymentMethodTypes,
+                    paymentMethodTypes = listOf(paymentMethodType.code),
                     confirm = false,
                     paymentMethodId = paymentMethodId,
-                    paymentMethodOptions = CreatePaymentIntentRequest.CreateParams.PaymentMethodOptions(
-                        card = CreatePaymentIntentRequest.CreateParams.PaymentMethodOptions.Card(
-                            setupFutureUsage = CreatePaymentIntentRequest
-                                .CreateParams
-                                .PaymentMethodOptions
-                                .SetupFutureUsage
-                                .OffSession
-                        )
-                    ).takeIf {
+                    setupFutureUsage = CreatePaymentIntentRequest.CreateParams.SetupFutureUsage.OffSession.takeIf {
                         createWithSetupFutureUsage
                     },
                 ),
@@ -73,14 +66,14 @@ internal class StripeNetworkTestClient @Inject constructor(
     }
 
     suspend fun createSetupIntent(
-        paymentMethodTypes: List<String>,
+        paymentMethodType: PaymentMethod.Type,
         paymentMethodId: String? = null,
     ): Result<String> {
         val result = executeFuelRequest(
             path = SETUP_INTENT_PATH,
             request = CreateSetupIntentRequest(
                 createParams = CreateSetupIntentRequest.CreateParams(
-                    paymentMethodTypes = paymentMethodTypes,
+                    paymentMethodTypes = listOf(paymentMethodType.code),
                     paymentMethodId = paymentMethodId,
                     confirm = false,
                 ),

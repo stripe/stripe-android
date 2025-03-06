@@ -1,4 +1,4 @@
-package com.stripe.android.paymentelement.confirmation.lpms
+package com.stripe.android.paymentelement.confirmation.lpms.foundations.network
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -24,24 +24,13 @@ internal data class CreatePaymentIntentRequest(
         val paymentMethodTypes: List<String>,
         @SerialName("payment_method")
         val paymentMethodId: String?,
-        @SerialName("payment_method_options")
-        val paymentMethodOptions: PaymentMethodOptions?,
+        @SerialName("setup_future_usage")
+        val setupFutureUsage: SetupFutureUsage?,
     ) {
         @Serializable
-        data class PaymentMethodOptions(
-            val card: Card,
-        ) {
-            @Serializable
-            data class Card(
-                @SerialName("setup_future_usage")
-                val setupFutureUsage: SetupFutureUsage,
-            )
-
-            @Serializable
-            enum class SetupFutureUsage {
-                @SerialName("off_session")
-                OffSession,
-            }
+        enum class SetupFutureUsage {
+            @SerialName("off_session")
+            OffSession,
         }
     }
 }
