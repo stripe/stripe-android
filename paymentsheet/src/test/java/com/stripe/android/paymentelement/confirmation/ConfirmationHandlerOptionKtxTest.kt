@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
@@ -13,6 +14,7 @@ import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
+import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
@@ -370,6 +372,23 @@ class ConfirmationHandlerOptionKtxTest {
         )
     }
 
+    @Test
+    fun `Extra params are passed through from LinkInline payment selection to confirmation option`() {
+        val paymentMethodExtraParams = PaymentMethodExtraParams.Card(setAsDefault = true)
+
+        val linkInlinePaymentSelection = createLinkInlinePaymentSelection(
+            paymentMethodExtraParams = paymentMethodExtraParams
+        )
+        val confirmationOption = linkInlinePaymentSelection.toConfirmationOption(
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+            linkConfiguration = LINK_CONFIGURATION,
+        )
+
+        assertThat(confirmationOption).isInstanceOf<LinkInlineSignupConfirmationOption>()
+        val linkConfirmationOption = confirmationOption as LinkInlineSignupConfirmationOption
+        assertThat(linkConfirmationOption.extraParams).isEqualTo(paymentMethodExtraParams)
+    }
+
     private fun testLinkInlineSignupConfirmationOption(
         customerRequestedSave: PaymentSelection.CustomerRequestedSave,
         expectedSaveOption: LinkInlineSignupConfirmationOption.PaymentMethodSaveOption,
@@ -384,25 +403,44 @@ class ConfirmationHandlerOptionKtxTest {
         )
 
         assertThat(
-            PaymentSelection.New.LinkInline(
-                paymentMethodCreateParams = paymentMethodCreateParams,
-                brand = CardBrand.Visa,
-                customerRequestedSave = customerRequestedSave,
-                paymentMethodOptionsParams = null,
-                paymentMethodExtraParams = null,
-                input = userInput,
-            ).toConfirmationOption(
-                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
-                linkConfiguration = LINK_CONFIGURATION,
-            )
+            createLinkInlinePaymentSelection(customerRequestedSave)
+                .toConfirmationOption(
+                    configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
+                    linkConfiguration = LINK_CONFIGURATION,
+                )
         ).isEqualTo(
             LinkInlineSignupConfirmationOption(
                 createParams = paymentMethodCreateParams,
                 optionsParams = null,
-                linkConfiguration = LINK_CONFIGURATION,
+                extraParams = null,
                 saveOption = expectedSaveOption,
+                linkConfiguration = LINK_CONFIGURATION,
                 userInput = userInput,
             )
+        )
+    }
+
+    private fun createLinkInlinePaymentSelection(
+        customerRequestedSave: PaymentSelection.CustomerRequestedSave =
+            PaymentSelection.CustomerRequestedSave.NoRequest,
+        paymentMethodExtraParams: PaymentMethodExtraParams? = null,
+    ): PaymentSelection.New.LinkInline {
+        val paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD
+        val userInput = UserInput.SignUp(
+            email = "email@email.com",
+            phone = "1234567890",
+            name = "John Doe",
+            country = "CA",
+            consentAction = SignUpConsentAction.Checkbox,
+        )
+
+        return PaymentSelection.New.LinkInline(
+            paymentMethodCreateParams = paymentMethodCreateParams,
+            brand = CardBrand.Visa,
+            customerRequestedSave = customerRequestedSave,
+            paymentMethodOptionsParams = null,
+            paymentMethodExtraParams = paymentMethodExtraParams,
+            input = userInput,
         )
     }
 

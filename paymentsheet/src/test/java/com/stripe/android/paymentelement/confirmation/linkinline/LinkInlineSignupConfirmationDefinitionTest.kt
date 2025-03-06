@@ -643,6 +643,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         return LinkInlineSignupConfirmationOption(
             createParams = createParams,
             optionsParams = null,
+            extraParams = null,
             saveOption = saveOption,
             linkConfiguration = LinkConfiguration(
                 stripeIntent = PaymentIntentFactory.create(),

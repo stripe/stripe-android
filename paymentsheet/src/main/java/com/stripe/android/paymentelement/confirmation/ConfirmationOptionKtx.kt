@@ -65,8 +65,7 @@ private fun PaymentSelection.New.LinkInline.toConfirmationOption(
         LinkInlineSignupConfirmationOption(
             createParams = paymentMethodCreateParams,
             optionsParams = paymentMethodOptionsParams,
-            userInput = input,
-            linkConfiguration = linkConfiguration,
+            extraParams = paymentMethodExtraParams,
             saveOption = when (customerRequestedSave) {
                 PaymentSelection.CustomerRequestedSave.RequestReuse ->
                     LinkInlineSignupConfirmationOption.PaymentMethodSaveOption.RequestedReuse
@@ -74,7 +73,9 @@ private fun PaymentSelection.New.LinkInline.toConfirmationOption(
                     LinkInlineSignupConfirmationOption.PaymentMethodSaveOption.RequestedNoReuse
                 PaymentSelection.CustomerRequestedSave.NoRequest ->
                     LinkInlineSignupConfirmationOption.PaymentMethodSaveOption.NoRequest
-            }
+            },
+            linkConfiguration = linkConfiguration,
+            userInput = input
         )
     }
 }
