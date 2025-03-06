@@ -17,6 +17,7 @@ import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.supportedPaymentMethodTypes
+import com.stripe.android.link.navigation.LinkNavigationManager
 import com.stripe.android.link.ui.completePaymentButtonLabel
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -28,6 +29,7 @@ import com.stripe.android.ui.core.elements.CardDetailsUtil.createExpiryDateFormF
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
+import com.stripe.android.uicore.navigation.PopUpToBehavior
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,7 +37,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.Result
 import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
 internal class WalletViewModel @Inject constructor(
@@ -44,8 +45,7 @@ internal class WalletViewModel @Inject constructor(
     private val linkAccountManager: LinkAccountManager,
     private val linkConfirmationHandler: LinkConfirmationHandler,
     private val logger: Logger,
-    private val navigate: (route: LinkScreen) -> Unit,
-    private val navigateAndClearStack: (route: LinkScreen) -> Unit,
+    private val navigationManager: LinkNavigationManager,
     private val dismissWithResult: (LinkActivityResult) -> Unit
 ) : ViewModel() {
     private val stripeIntent = configuration.stripeIntent
@@ -109,7 +109,10 @@ internal class WalletViewModel @Inject constructor(
                 }
 
                 if (response.paymentDetails.isEmpty()) {
-                    navigateAndClearStack(LinkScreen.PaymentMethod)
+                    navigationManager.tryNavigateTo(
+                        route = LinkScreen.PaymentMethod.route,
+                        popUpTo = PopUpToBehavior.Current(inclusive = true),
+                    )
                 }
             },
             // If we can't load the payment details there's nothing to see here
@@ -296,7 +299,9 @@ internal class WalletViewModel @Inject constructor(
     }
 
     fun onAddNewPaymentMethodClicked() {
-        navigate(LinkScreen.PaymentMethod)
+        navigationManager.tryNavigateTo(
+            route = LinkScreen.PaymentMethod.route,
+        )
     }
 
     fun onDismissAlert() {
@@ -326,8 +331,6 @@ internal class WalletViewModel @Inject constructor(
         fun factory(
             parentComponent: NativeLinkComponent,
             linkAccount: LinkAccount,
-            navigate: (route: LinkScreen) -> Unit,
-            navigateAndClearStack: (route: LinkScreen) -> Unit,
             dismissWithResult: (LinkActivityResult) -> Unit
         ): ViewModelProvider.Factory {
             return viewModelFactory {
@@ -340,8 +343,7 @@ internal class WalletViewModel @Inject constructor(
                         ),
                         logger = parentComponent.logger,
                         linkAccount = linkAccount,
-                        navigate = navigate,
-                        navigateAndClearStack = navigateAndClearStack,
+                        navigationManager = parentComponent.navigationManager,
                         dismissWithResult = dismissWithResult
                     )
                 }

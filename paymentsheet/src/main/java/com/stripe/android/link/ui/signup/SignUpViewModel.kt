@@ -19,6 +19,7 @@ import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.navigation.LinkNavigationManager
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentIntent
@@ -27,6 +28,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
+import com.stripe.android.uicore.navigation.PopUpToBehavior
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -45,8 +47,7 @@ internal class SignUpViewModel @Inject constructor(
     private val logger: Logger,
     private val linkAuth: LinkAuth,
     private val savedStateHandle: SavedStateHandle,
-    private val navigate: (LinkScreen) -> Unit,
-    private val navigateAndClearStack: (LinkScreen) -> Unit,
+    private val navigationManager: LinkNavigationManager,
     private val moveToWeb: () -> Unit
 ) : ViewModel() {
     private val useLinkConfigurationCustomerInfo =
@@ -195,9 +196,15 @@ internal class SignUpViewModel @Inject constructor(
 
     private fun onAccountFetched(linkAccount: LinkAccount?) {
         if (linkAccount?.isVerified == true) {
-            navigateAndClearStack(LinkScreen.Wallet)
+            navigationManager.tryNavigateTo(
+                route = LinkScreen.Wallet.route,
+                popUpTo = PopUpToBehavior.Current(inclusive = true),
+            )
         } else {
-            navigate(LinkScreen.Verification)
+            navigationManager.tryNavigateTo(
+                route = LinkScreen.Verification.route,
+                popUpTo = PopUpToBehavior.Current(inclusive = true),
+            )
             // The sign up screen stays in the back stack.
             // Clean up the state in case the user comes back.
             emailController.onValueChange("")
@@ -247,8 +254,6 @@ internal class SignUpViewModel @Inject constructor(
 
         fun factory(
             parentComponent: NativeLinkComponent,
-            navigate: (LinkScreen) -> Unit,
-            navigateAndClearStack: (LinkScreen) -> Unit,
             moveToWeb: () -> Unit
         ): ViewModelProvider.Factory {
             return viewModelFactory {
@@ -259,8 +264,7 @@ internal class SignUpViewModel @Inject constructor(
                         logger = parentComponent.logger,
                         linkAuth = parentComponent.linkAuth,
                         savedStateHandle = parentComponent.savedStateHandle,
-                        navigate = navigate,
-                        navigateAndClearStack = navigateAndClearStack,
+                        navigationManager = parentComponent.navigationManager,
                         moveToWeb = moveToWeb
                     )
                 }

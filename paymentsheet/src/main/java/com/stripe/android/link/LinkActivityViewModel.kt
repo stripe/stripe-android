@@ -2,7 +2,6 @@ package com.stripe.android.link
 
 import android.app.Application
 import androidx.activity.result.ActivityResultCaller
-import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
@@ -13,7 +12,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import androidx.navigation.NavHostController
+import androidx.navigation.NavBackStackEntry
 import com.stripe.android.link.LinkActivity.Companion.getArgs
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
@@ -23,17 +22,18 @@ import com.stripe.android.link.injection.DaggerNativeLinkComponent
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.navigation.LinkNavigationManager
 import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.uicore.navigation.PopUpToBehavior
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -49,7 +49,8 @@ internal class LinkActivityViewModel @Inject constructor(
     private val linkConfiguration: LinkConfiguration,
     private val linkAttestationCheck: LinkAttestationCheck,
     private val savedStateHandle: SavedStateHandle,
-    private val startWithVerificationDialog: Boolean
+    private val startWithVerificationDialog: Boolean,
+    val navigationManager: LinkNavigationManager,
 ) : ViewModel(), DefaultLifecycleObserver {
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
     private val _linkAppBarState = MutableStateFlow(
@@ -62,21 +63,19 @@ internal class LinkActivityViewModel @Inject constructor(
     )
     val linkAppBarState: StateFlow<LinkAppBarState> = _linkAppBarState
 
-    private val _linkScreenState = MutableStateFlow<ScreenState>(ScreenState.Loading)
-    val linkScreenState: StateFlow<ScreenState> = _linkScreenState
-
     val linkAccount: LinkAccount?
         get() = linkAccountManager.linkAccount.value
 
-    @VisibleForTesting
-    internal var navListenerJob: Job? = null
-    var navController: NavHostController? = null
-        set(value) {
-            listenToNavController(value)
-            field = value
-        }
     var dismissWithResult: ((LinkActivityResult) -> Unit)? = null
     var launchWebFlow: ((LinkConfiguration) -> Unit)? = null
+
+    init {
+        viewModelScope.launch {
+            navigationManager.linkScreenState.first { it == ScreenState.FullScreen }
+            delay(500)
+            navigateToFirstScreen()
+        }
+    }
 
     fun handleViewAction(action: LinkAction) {
         when (action) {
@@ -85,8 +84,24 @@ internal class LinkActivityViewModel @Inject constructor(
         }
     }
 
-    fun onVerificationSucceeded() {
-        _linkScreenState.value = ScreenState.FullScreen
+    fun handleBackStackChanged(backStackEntry: NavBackStackEntry?) {
+        val route = backStackEntry?.destination?.route ?: return
+
+        _linkAppBarState.update {
+            it.copy(
+                showHeader = route in showHeaderRoutes,
+                showOverflowMenu = route == LinkScreen.Wallet.route,
+                // TODO: The back button should be handled differently
+                navigationIcon = if (route == LinkScreen.PaymentMethod.route) {
+                    R.drawable.stripe_link_back
+                } else {
+                    R.drawable.stripe_link_close
+                },
+                email = linkAccountManager.linkAccount.value?.email?.takeIf {
+                    route == LinkScreen.Wallet.route
+                }
+            )
+        }
     }
 
     fun onDismissVerificationClicked() {
@@ -110,30 +125,6 @@ internal class LinkActivityViewModel @Inject constructor(
         )
     }
 
-    private fun listenToNavController(navController: NavHostController?) {
-        cancelNavListenerJob()
-        navController ?: return
-        navListenerJob = viewModelScope.launch {
-            navController.currentBackStackEntryFlow.collectLatest { entry ->
-                val route = entry.destination.route
-                _linkAppBarState.update {
-                    it.copy(
-                        showHeader = showHeaderRoutes.contains(route),
-                        showOverflowMenu = route == LinkScreen.Wallet.route,
-                        navigationIcon = if (route == LinkScreen.PaymentMethod.route) {
-                            R.drawable.stripe_link_back
-                        } else {
-                            R.drawable.stripe_link_close
-                        },
-                        email = linkAccountManager.linkAccount.value?.email?.takeIf {
-                            route == LinkScreen.Wallet.route
-                        }
-                    )
-                }
-            }
-        }
-    }
-
     fun moveToWeb() {
         launchWebFlow?.let { launcher ->
             navigate(LinkScreen.Loading, clearStack = true)
@@ -142,15 +133,7 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     private fun handleBackPressed() {
-        navController?.let { navController ->
-            if (!navController.popBackStack()) {
-                dismissWithResult?.invoke(
-                    LinkActivityResult.Canceled(
-                        linkAccountUpdate = linkAccountManager.linkAccountUpdate
-                    )
-                )
-            }
-        }
+        navigationManager.tryNavigateBack()
     }
 
     fun navigate(screen: LinkScreen, clearStack: Boolean) {
@@ -165,25 +148,16 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     private fun navigate(screen: LinkScreen, clearStack: Boolean, launchSingleTop: Boolean) {
-        val navController = navController ?: return
-        navController.navigate(screen.route) {
-            this.launchSingleTop = launchSingleTop
-            if (clearStack) {
-                popUpTo(navController.graph.id) {
-                    inclusive = true
-                }
-            }
-        }
-    }
-
-    fun goBack() {
-        if (navController?.popBackStack() == false) {
-            dismissWithResult?.invoke(
-                LinkActivityResult.Canceled(
-                    linkAccountUpdate = linkAccountManager.linkAccountUpdate
-                )
-            )
-        }
+        navigationManager.tryNavigateTo(
+            route = screen.route,
+            popUpTo = if (clearStack) {
+                // TODO
+                PopUpToBehavior.Current(inclusive = true)
+            } else {
+                null
+            },
+            isSingleTop = launchSingleTop,
+        )
     }
 
     fun changeEmail() {
@@ -192,21 +166,18 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     fun unregisterActivity() {
-        cancelNavListenerJob()
-        navController = null
         dismissWithResult = null
         launchWebFlow = null
     }
 
-    private fun cancelNavListenerJob() {
-        navListenerJob?.cancel()
-        navListenerJob = null
-    }
-
+    // TODO: This… no…
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
         viewModelScope.launch {
-            if (startWithVerificationDialog) return@launch updateScreenState()
+            if (startWithVerificationDialog) {
+                updateScreenState()
+                return@launch
+            }
             val attestationCheckResult = linkAttestationCheck.invoke()
             when (attestationCheckResult) {
                 is LinkAttestationCheck.Result.AttestationFailed -> {
@@ -223,38 +194,43 @@ internal class LinkActivityViewModel @Inject constructor(
         }
     }
 
-    fun linkScreenCreated() {
-        viewModelScope.launch {
-            val currentRoute = navController?.currentBackStackEntry?.destination?.route
-            if (currentRoute == null || currentRoute == LinkScreen.Loading.route) {
-                navigateToLinkScreen()
-            }
-        }
+    private suspend fun navigateToFirstScreen() {
+        val accountStatus = retrieveAccountStatus()
+        val firstScreen = accountStatus.determineFirstScreen()
+        navigate(firstScreen, clearStack = true, launchSingleTop = true)
     }
 
     private suspend fun updateScreenState() {
-        val accountStatus = linkAccountManager.accountStatus.first()
+        val accountStatus = retrieveAccountStatus()
         val linkAccount = linkAccountManager.linkAccount.value
-        when (accountStatus) {
+        val screenState = accountStatus.determineScreenState(linkAccount)
+        navigationManager.updateScreenState(screenState)
+    }
+
+    private suspend fun retrieveAccountStatus(): AccountStatus {
+        return linkAccountManager.accountStatus.first()
+    }
+
+    private fun AccountStatus.determineScreenState(linkAccount: LinkAccount?): ScreenState {
+        return when (this) {
             AccountStatus.Verified,
             AccountStatus.SignedOut,
             AccountStatus.Error -> {
-                _linkScreenState.value = ScreenState.FullScreen
+                ScreenState.FullScreen
             }
             AccountStatus.NeedsVerification,
             AccountStatus.VerificationStarted -> {
                 if (linkAccount != null && startWithVerificationDialog) {
-                    _linkScreenState.value = ScreenState.VerificationDialog(linkAccount)
+                    ScreenState.VerificationDialog(linkAccount)
                 } else {
-                    _linkScreenState.value = ScreenState.FullScreen
+                    ScreenState.FullScreen
                 }
             }
         }
     }
 
-    private suspend fun navigateToLinkScreen() {
-        val accountStatus = linkAccountManager.accountStatus.first()
-        val screen = when (accountStatus) {
+    private fun AccountStatus.determineFirstScreen(): LinkScreen {
+        return when (this) {
             AccountStatus.Verified -> {
                 LinkScreen.Wallet
             }
@@ -265,13 +241,20 @@ internal class LinkActivityViewModel @Inject constructor(
                 LinkScreen.SignUp
             }
         }
-        navigate(screen, clearStack = true, launchSingleTop = true)
     }
 
     private suspend fun handleAccountError() {
         linkAccountManager.logOut()
         linkAccountHolder.set(null)
         updateScreenState()
+    }
+
+    fun onBackPressed() {
+        dismissWithResult?.invoke(
+            LinkActivityResult.Canceled(
+                linkAccountUpdate = linkAccountManager.linkAccountUpdate
+            )
+        )
     }
 
     companion object {

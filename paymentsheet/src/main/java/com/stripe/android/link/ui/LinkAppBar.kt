@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui
 
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
@@ -37,10 +38,12 @@ import com.stripe.android.ui.core.R as StripeUiCoreR
 @Composable
 internal fun LinkAppBar(
     state: LinkAppBarState,
-    onBackPressed: () -> Unit,
+    canGoBack: Boolean,
     showBottomSheetContent: (BottomSheetContent?) -> Unit,
     onLogoutClicked: () -> Unit
 ) {
+    val backPressDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -49,11 +52,19 @@ internal fun LinkAppBar(
         verticalAlignment = Alignment.Top
     ) {
         IconButton(
-            onClick = onBackPressed,
+            onClick = {
+                backPressDispatcher?.onBackPressed()
+            },
             modifier = Modifier.padding(4.dp)
         ) {
             Icon(
-                painter = painterResource(state.navigationIcon),
+                painter = painterResource(
+                    id = if (canGoBack) {
+                        R.drawable.stripe_link_back
+                    } else {
+                        R.drawable.stripe_link_close
+                    }
+                ),
                 contentDescription = stringResource(id = StripeUiCoreR.string.stripe_back),
                 tint = MaterialTheme.linkColors.closeButton
             )
@@ -154,7 +165,7 @@ private fun LinkAppBarPreview() {
                     showOverflowMenu = true,
                     email = "email@example.com",
                 ),
-                onBackPressed = {},
+                canGoBack = false,
                 showBottomSheetContent = {},
                 onLogoutClicked = {}
             )
@@ -174,7 +185,7 @@ private fun LinkAppBarNoEmail() {
                     showOverflowMenu = true,
                     email = null,
                 ),
-                onBackPressed = {},
+                canGoBack = false,
                 showBottomSheetContent = {},
                 onLogoutClicked = {}
             )
@@ -194,7 +205,7 @@ private fun LinkAppBarChildScreen() {
                     showOverflowMenu = false,
                     email = "email@example.com",
                 ),
-                onBackPressed = {},
+                canGoBack = true,
                 showBottomSheetContent = {},
                 onLogoutClicked = {}
             )
@@ -214,7 +225,7 @@ private fun LinkAppBarChildScreenNoEmail() {
                     showOverflowMenu = false,
                     email = null,
                 ),
-                onBackPressed = {},
+                canGoBack = true,
                 showBottomSheetContent = {},
                 onLogoutClicked = {}
             )

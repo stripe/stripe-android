@@ -4,36 +4,29 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.navigation.NavHostController
+import androidx.navigation.NavBackStackEntry
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.FullScreenContent
 import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.link.ui.verification.VerificationDialog
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.uicore.navigation.NavigationIntent
 import com.stripe.android.uicore.utils.collectAsState
+import kotlinx.coroutines.flow.SharedFlow
 
 @Composable
 internal fun LinkScreenContent(
     viewModel: LinkActivityViewModel,
-    onBackPressed: () -> Unit
 ) {
-    val screenState by viewModel.linkScreenState.collectAsState()
+    val screenState by viewModel.navigationManager.linkScreenState.collectAsState()
     val appBarState by viewModel.linkAppBarState.collectAsState()
 
     LinkScreenContentBody(
         screenState = screenState,
         appBarState = appBarState,
         eventReporter = viewModel.eventReporter,
-        onVerificationSucceeded = viewModel::onVerificationSucceeded,
-        onDismissClicked = viewModel::onDismissVerificationClicked,
-        onBackPressed = onBackPressed,
-        onLinkScreenScreenCreated = {
-            viewModel.linkScreenCreated()
-        },
-        onNavControllerCreated = { navController ->
-            viewModel.navController = navController
-        },
-        navigate = viewModel::navigate,
+        navigationEvents = viewModel.navigationManager.events,
+        onBackPressed = viewModel::onBackPressed,
         dismissWithResult = { result ->
             viewModel.dismissWithResult?.invoke(result)
         },
@@ -42,8 +35,7 @@ internal fun LinkScreenContent(
         },
         handleViewAction = viewModel::handleViewAction,
         moveToWeb = viewModel::moveToWeb,
-        goBack = viewModel::goBack,
-        changeEmail = viewModel::changeEmail
+        onNavBackStackEntryChanged = viewModel::handleBackStackChanged,
     )
 }
 
@@ -52,18 +44,13 @@ internal fun LinkScreenContentBody(
     screenState: ScreenState,
     appBarState: LinkAppBarState,
     eventReporter: EventReporter,
-    onVerificationSucceeded: () -> Unit,
-    onDismissClicked: () -> Unit,
+    navigationEvents: SharedFlow<NavigationIntent>,
     onBackPressed: () -> Unit,
-    onLinkScreenScreenCreated: () -> Unit,
-    onNavControllerCreated: (NavHostController) -> Unit,
-    navigate: (route: LinkScreen, clearStack: Boolean) -> Unit,
     dismissWithResult: ((LinkActivityResult) -> Unit)?,
     getLinkAccount: () -> LinkAccount?,
     handleViewAction: (LinkAction) -> Unit,
     moveToWeb: () -> Unit,
-    goBack: () -> Unit,
-    changeEmail: () -> Unit,
+    onNavBackStackEntryChanged: (NavBackStackEntry?) -> Unit,
 ) {
     when (screenState) {
         ScreenState.FullScreen -> {
@@ -72,16 +59,13 @@ internal fun LinkScreenContentBody(
                     .testTag(FULL_SCREEN_CONTENT_TAG),
                 onBackPressed = onBackPressed,
                 appBarState = appBarState,
-                navigate = navigate,
                 dismissWithResult = dismissWithResult,
                 getLinkAccount = getLinkAccount,
                 moveToWeb = moveToWeb,
-                goBack = goBack,
                 eventReporter = eventReporter,
-                onLinkScreenScreenCreated = onLinkScreenScreenCreated,
-                onNavControllerCreated = onNavControllerCreated,
+                navigationEvents = navigationEvents,
                 handleViewAction = handleViewAction,
-                changeEmail = changeEmail
+                onNavBackStackEntryChanged = onNavBackStackEntryChanged,
             )
         }
         ScreenState.Loading -> Unit
@@ -90,8 +74,6 @@ internal fun LinkScreenContentBody(
                 modifier = Modifier
                     .testTag(VERIFICATION_DIALOG_CONTENT_TAG),
                 linkAccount = screenState.linkAccount,
-                onVerificationSucceeded = onVerificationSucceeded,
-                onDismissClicked = onDismissClicked
             )
         }
     }

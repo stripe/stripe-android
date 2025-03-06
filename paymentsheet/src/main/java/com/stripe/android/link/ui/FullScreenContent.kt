@@ -1,26 +1,29 @@
 package com.stripe.android.link.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavHostController
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.link.LinkAction
 import com.stripe.android.link.LinkActivityResult
-import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
+import com.stripe.android.uicore.navigation.NavigationEffects
+import com.stripe.android.uicore.navigation.NavigationIntent
+import com.stripe.android.uicore.navigation.rememberKeyboardController
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -29,21 +32,19 @@ internal fun FullScreenContent(
     modifier: Modifier,
     appBarState: LinkAppBarState,
     eventReporter: EventReporter,
+    navigationEvents: SharedFlow<NavigationIntent>,
     onBackPressed: () -> Unit,
     moveToWeb: () -> Unit,
-    goBack: () -> Unit,
     handleViewAction: (LinkAction) -> Unit,
-    onLinkScreenScreenCreated: () -> Unit,
-    onNavControllerCreated: (NavHostController) -> Unit,
-    navigate: (route: LinkScreen, clearStack: Boolean) -> Unit,
     dismissWithResult: ((LinkActivityResult) -> Unit)?,
     getLinkAccount: () -> LinkAccount?,
-    changeEmail: () -> Unit,
+    onNavBackStackEntryChanged: (NavBackStackEntry?) -> Unit,
 ) {
     var bottomSheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
     val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val coroutineScope = rememberCoroutineScope()
     val navController = rememberNavController()
+    val keyboardController = rememberKeyboardController()
 
     if (bottomSheetContent != null) {
         DisposableEffect(bottomSheetContent) {
@@ -53,6 +54,19 @@ internal fun FullScreenContent(
             }
         }
     }
+
+    BackHandler {
+        if (!navController.popBackStack()) {
+            onBackPressed()
+        }
+    }
+
+    NavigationEffects(
+        navigationChannel = navigationEvents,
+        navHostController = navController,
+        keyboardController = keyboardController,
+        onBackStackEntryUpdated = onNavBackStackEntryChanged
+    )
 
     Box(
         modifier = modifier
@@ -68,20 +82,11 @@ internal fun FullScreenContent(
                 onUpdateSheetContent = {
                     bottomSheetContent = it
                 },
-                onBackPressed = onBackPressed,
                 moveToWeb = moveToWeb,
                 handleViewAction = handleViewAction,
-                navigate = navigate,
                 dismissWithResult = dismissWithResult,
                 getLinkAccount = getLinkAccount,
-                goBack = goBack,
-                changeEmail = changeEmail
             )
         }
-    }
-
-    LaunchedEffect(Unit) {
-        onNavControllerCreated(navController)
-        onLinkScreenScreenCreated()
     }
 }

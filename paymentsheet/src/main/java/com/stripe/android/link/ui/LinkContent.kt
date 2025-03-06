@@ -14,6 +14,7 @@ import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,6 +29,7 @@ import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.linkViewModel
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.navigation.previousBackStackEntryAsState
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
@@ -52,15 +54,13 @@ internal fun LinkContent(
     bottomSheetContent: BottomSheetContent?,
     onUpdateSheetContent: (BottomSheetContent?) -> Unit,
     handleViewAction: (LinkAction) -> Unit,
-    navigate: (route: LinkScreen, clearStack: Boolean) -> Unit,
     dismissWithResult: ((LinkActivityResult) -> Unit)?,
     getLinkAccount: () -> LinkAccount?,
-    onBackPressed: () -> Unit,
     moveToWeb: () -> Unit,
-    goBack: () -> Unit,
-    changeEmail: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
+    val previousBackStackEntry by navController.previousBackStackEntryAsState()
+
     DefaultLinkTheme {
         Surface {
             ModalBottomSheetLayout(
@@ -87,7 +87,7 @@ internal fun LinkContent(
 
                     LinkAppBar(
                         state = appBarState,
-                        onBackPressed = onBackPressed,
+                        canGoBack = previousBackStackEntry != null,
                         showBottomSheetContent = {
                             if (it == null) {
                                 coroutineScope.launch {
@@ -105,20 +105,12 @@ internal fun LinkContent(
 
                     Screens(
                         navController = navController,
-                        goBack = goBack,
                         moveToWeb = moveToWeb,
-                        navigate = { screen ->
-                            navigate(screen, false)
-                        },
-                        navigateAndClearStack = { screen ->
-                            navigate(screen, true)
-                        },
                         dismissWithResult = { result ->
                             dismissWithResult?.invoke(result)
                         },
                         getLinkAccount = getLinkAccount,
                         showBottomSheetContent = onUpdateSheetContent,
-                        changeEmail = changeEmail,
                         hideBottomSheetContent = {
                             onUpdateSheetContent(null)
                         }
@@ -133,14 +125,10 @@ internal fun LinkContent(
 private fun Screens(
     navController: NavHostController,
     getLinkAccount: () -> LinkAccount?,
-    goBack: () -> Unit,
-    navigate: (route: LinkScreen) -> Unit,
-    navigateAndClearStack: (route: LinkScreen) -> Unit,
     dismissWithResult: (LinkActivityResult) -> Unit,
     showBottomSheetContent: (BottomSheetContent?) -> Unit,
     hideBottomSheetContent: () -> Unit,
     moveToWeb: () -> Unit,
-    changeEmail: () -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -157,22 +145,13 @@ private fun Screens(
             }
 
             composable(LinkScreen.SignUp.route) {
-                SignUpRoute(
-                    navigate = navigate,
-                    navigateAndClearStack = navigateAndClearStack,
-                    moveToWeb = moveToWeb
-                )
+                SignUpRoute(moveToWeb = moveToWeb)
             }
 
             composable(LinkScreen.Verification.route) {
                 val linkAccount = getLinkAccount()
                     ?: return@composable dismissWithResult(noLinkAccountResult())
-                VerificationRoute(
-                    linkAccount = linkAccount,
-                    changeEmail = changeEmail,
-                    navigateAndClearStack = navigateAndClearStack,
-                    goBack = goBack
-                )
+                VerificationRoute(linkAccount = linkAccount)
             }
 
             composable(LinkScreen.Wallet.route) {
@@ -180,8 +159,6 @@ private fun Screens(
                     ?: return@composable dismissWithResult(noLinkAccountResult())
                 WalletRoute(
                     linkAccount = linkAccount,
-                    navigate = navigate,
-                    navigateAndClearStack = navigateAndClearStack,
                     showBottomSheetContent = showBottomSheetContent,
                     hideBottomSheetContent = hideBottomSheetContent,
                     dismissWithResult = dismissWithResult
@@ -198,16 +175,10 @@ private fun Screens(
 }
 
 @Composable
-private fun SignUpRoute(
-    navigate: (route: LinkScreen) -> Unit,
-    navigateAndClearStack: (route: LinkScreen) -> Unit,
-    moveToWeb: () -> Unit
-) {
+private fun SignUpRoute(moveToWeb: () -> Unit) {
     val viewModel: SignUpViewModel = linkViewModel { parentComponent ->
         SignUpViewModel.factory(
             parentComponent = parentComponent,
-            navigate = navigate,
-            navigateAndClearStack = navigateAndClearStack,
             moveToWeb = moveToWeb
         )
     }
@@ -217,22 +188,12 @@ private fun SignUpRoute(
 }
 
 @Composable
-private fun VerificationRoute(
-    linkAccount: LinkAccount,
-    navigateAndClearStack: (route: LinkScreen) -> Unit,
-    changeEmail: () -> Unit,
-    goBack: () -> Unit
-) {
+private fun VerificationRoute(linkAccount: LinkAccount) {
     val viewModel: VerificationViewModel = linkViewModel { parentComponent ->
         VerificationViewModel.factory(
             parentComponent = parentComponent,
-            onDismissClicked = goBack,
             linkAccount = linkAccount,
             isDialog = false,
-            onVerificationSucceeded = {
-                navigateAndClearStack(LinkScreen.Wallet)
-            },
-            onChangeEmailClicked = changeEmail
         )
     }
     VerificationScreen(viewModel)
@@ -256,8 +217,6 @@ private fun PaymentMethodRoute(
 @Composable
 private fun WalletRoute(
     linkAccount: LinkAccount,
-    navigate: (route: LinkScreen) -> Unit,
-    navigateAndClearStack: (route: LinkScreen) -> Unit,
     dismissWithResult: (LinkActivityResult) -> Unit,
     showBottomSheetContent: (BottomSheetContent?) -> Unit,
     hideBottomSheetContent: () -> Unit,
@@ -266,8 +225,6 @@ private fun WalletRoute(
         WalletViewModel.factory(
             parentComponent = parentComponent,
             linkAccount = linkAccount,
-            navigate = navigate,
-            navigateAndClearStack = navigateAndClearStack,
             dismissWithResult = dismissWithResult
         )
     }

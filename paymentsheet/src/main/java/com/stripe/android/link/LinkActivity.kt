@@ -1,6 +1,5 @@
 package com.stripe.android.link
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -29,7 +28,7 @@ internal class LinkActivity : ComponentActivity() {
             viewModel = ViewModelProvider(this, viewModelFactory)[LinkActivityViewModel::class.java]
         } catch (e: NoArgsException) {
             Logger.getInstance(BuildConfig.DEBUG).error("Failed to create LinkActivityViewModel", e)
-            setResult(Activity.RESULT_CANCELED)
+            setResult(RESULT_CANCELED)
             finish()
         }
 
@@ -43,15 +42,13 @@ internal class LinkActivity : ComponentActivity() {
             dismissWithResult(result)
         }
 
+        // TODO: Make these view effects
         vm.launchWebFlow = ::launchWebFlow
         vm.dismissWithResult = ::dismissWithResult
         lifecycle.addObserver(vm)
 
         setContent {
-            LinkScreenContent(
-                viewModel = vm,
-                onBackPressed = onBackPressedDispatcher::onBackPressed
-            )
+            LinkScreenContent(viewModel = vm)
         }
     }
 

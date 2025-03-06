@@ -13,6 +13,7 @@ import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.navigation.LinkNavigationManager
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.ui.core.elements.OTPSpec
@@ -33,9 +34,7 @@ internal class VerificationViewModel @Inject constructor(
     private val linkEventsReporter: LinkEventsReporter,
     private val logger: Logger,
     private val isDialog: Boolean,
-    private val onVerificationSucceeded: () -> Unit,
-    private val onChangeEmailRequested: () -> Unit,
-    private val onDismissClicked: () -> Unit,
+    private val navigationManager: LinkNavigationManager,
 ) : ViewModel() {
 
     private val _viewState = MutableStateFlow(
@@ -86,7 +85,7 @@ internal class VerificationViewModel @Inject constructor(
                 updateViewState {
                     it.copy(isProcessing = false)
                 }
-                onVerificationSucceeded()
+                navigationManager.handleVerificationSuccess()
             },
             onFailure = {
                 otpElement.controller.reset()
@@ -127,13 +126,13 @@ internal class VerificationViewModel @Inject constructor(
 
     fun onBack() {
         clearError()
-        onDismissClicked()
+//        navigationManager.tryNavigateBack()
         linkEventsReporter.on2FACancel()
     }
 
     fun onChangeEmailButtonClicked() {
         clearError()
-        onChangeEmailRequested()
+
         viewModelScope.launch {
             linkAccountManager.logOut()
         }
@@ -179,9 +178,6 @@ internal class VerificationViewModel @Inject constructor(
             parentComponent: NativeLinkComponent,
             linkAccount: LinkAccount,
             isDialog: Boolean,
-            onVerificationSucceeded: () -> Unit,
-            onChangeEmailClicked: () -> Unit = {},
-            onDismissClicked: () -> Unit,
         ): ViewModelProvider.Factory {
             return viewModelFactory {
                 initializer {
@@ -190,10 +186,8 @@ internal class VerificationViewModel @Inject constructor(
                         linkAccountManager = parentComponent.linkAccountManager,
                         linkEventsReporter = parentComponent.linkEventsReporter,
                         logger = parentComponent.logger,
-                        onVerificationSucceeded = onVerificationSucceeded,
-                        onChangeEmailRequested = onChangeEmailClicked,
-                        onDismissClicked = onDismissClicked,
-                        isDialog = isDialog
+                        isDialog = isDialog,
+                        navigationManager = parentComponent.navigationManager,
                     )
                 }
             }

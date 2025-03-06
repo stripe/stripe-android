@@ -16,6 +16,7 @@ import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.link.navigation.LinkNavigationManager
 import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmationModule
 import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -51,6 +52,7 @@ internal interface NativeLinkComponent {
     val linkAuth: LinkAuth
     val savedStateHandle: SavedStateHandle
     val viewModel: LinkActivityViewModel
+    val navigationManager: LinkNavigationManager
 
     @Component.Builder
     interface Builder {
