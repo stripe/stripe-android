@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.compose.rememberNavController
+import com.stripe.android.link.LinkScreen
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
@@ -60,8 +61,9 @@ internal class LinkContentScreenshotTest {
                             initialValue = ModalBottomSheetValue.Hidden,
                             density = Density(1f)
                         ),
-                        onUpdateSheetContent = {},
                         bottomSheetContent = null,
+                        initialDestination = LinkScreen.Wallet,
+                        onUpdateSheetContent = {},
                         handleViewAction = {},
                         navigate = { _, _ -> },
                         dismissWithResult = null,
@@ -69,7 +71,7 @@ internal class LinkContentScreenshotTest {
                         onBackPressed = {},
                         moveToWeb = {},
                         goBack = {},
-                        changeEmail = {}
+                        changeEmail = {},
                     )
                 }
             }

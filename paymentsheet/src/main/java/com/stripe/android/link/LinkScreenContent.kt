@@ -5,7 +5,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavHostController
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.FullScreenContent
 import com.stripe.android.link.ui.LinkAppBarState
@@ -43,7 +42,6 @@ internal fun LinkScreenContent(
         goBack = viewModel::goBack,
         changeEmail = viewModel::changeEmail,
         onNavBackStackEntryChanged = viewModel::onNavEntryChanged,
-        onLinkScreenScreenCreated = viewModel::linkScreenCreated,
         navigationChannel = viewModel.navigationFlow
     )
 }
@@ -59,7 +57,6 @@ internal fun LinkScreenContentBody(
     onDismissClicked: () -> Unit,
     onBackPressed: () -> Unit,
     navigate: (route: LinkScreen, clearStack: Boolean) -> Unit,
-    onLinkScreenScreenCreated: () -> Unit,
     dismissWithResult: ((LinkActivityResult) -> Unit)?,
     getLinkAccount: () -> LinkAccount?,
     handleViewAction: (LinkAction) -> Unit,
@@ -68,11 +65,12 @@ internal fun LinkScreenContentBody(
     changeEmail: () -> Unit,
 ) {
     when (screenState) {
-        ScreenState.FullScreen -> {
+        is ScreenState.FullScreen -> {
             FullScreenContent(
                 modifier = Modifier
                     .testTag(FULL_SCREEN_CONTENT_TAG),
                 onBackPressed = onBackPressed,
+                initialDestination = screenState.initialDestination,
                 appBarState = appBarState,
                 navigate = navigate,
                 dismissWithResult = dismissWithResult,
@@ -80,7 +78,6 @@ internal fun LinkScreenContentBody(
                 moveToWeb = moveToWeb,
                 goBack = goBack,
                 eventReporter = eventReporter,
-                onLinkScreenScreenCreated = onLinkScreenScreenCreated,
                 handleViewAction = handleViewAction,
                 changeEmail = changeEmail,
                 onNavBackStackEntryChanged = onNavBackStackEntryChanged,

@@ -6,7 +6,6 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,6 +30,7 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun FullScreenContent(
     modifier: Modifier,
+    initialDestination: LinkScreen,
     appBarState: LinkAppBarState,
     eventReporter: EventReporter,
     onBackPressed: () -> Unit,
@@ -39,11 +39,10 @@ internal fun FullScreenContent(
     onNavBackStackEntryChanged: (NavBackStackEntry?) -> Unit,
     navigationChannel: SharedFlow<NavigationIntent>,
     handleViewAction: (LinkAction) -> Unit,
-    onLinkScreenScreenCreated: () -> Unit,
     navigate: (route: LinkScreen, clearStack: Boolean) -> Unit,
     dismissWithResult: ((LinkActivityResult) -> Unit)?,
     getLinkAccount: () -> LinkAccount?,
-    changeEmail: () -> Unit,
+    changeEmail: () -> Unit
 ) {
     var bottomSheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
     val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
@@ -74,6 +73,7 @@ internal fun FullScreenContent(
             eventReporter = eventReporter
         ) {
             LinkContent(
+                initialDestination = initialDestination,
                 navController = navController,
                 appBarState = appBarState,
                 sheetState = sheetState,
@@ -91,9 +91,5 @@ internal fun FullScreenContent(
                 changeEmail = changeEmail
             )
         }
-    }
-
-    LaunchedEffect(Unit) {
-        onLinkScreenScreenCreated()
     }
 }

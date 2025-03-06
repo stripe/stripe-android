@@ -83,7 +83,10 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     fun onVerificationSucceeded() {
-        _linkScreenState.value = ScreenState.FullScreen
+        viewModelScope.launch {
+            val initialDestination = getInitialDestination()
+            _linkScreenState.value = ScreenState.FullScreen(initialDestination)
+        }
     }
 
     fun onDismissVerificationClicked() {
@@ -156,19 +159,15 @@ internal class LinkActivityViewModel @Inject constructor(
 
     fun navigate(screen: LinkScreen, clearStack: Boolean, launchSingleTop: Boolean = false) {
         Log.d("LinkActivityViewModel", "navigate: $screen, clearStack: $clearStack, launchSingleTop: $launchSingleTop")
-//        val popupTo = if (false) { // TODO if clear stack
-//            PopUpToBehavior.Current(
-//                inclusive = true
-//            )
-////            PopUpToBehavior.Route(
-////                route = "", // TODO navigate to navController.graph.id
-////                inclusive = true
-////            )
-//        } else null
+        val popupTo = if (clearStack) { // TODO if clear stack
+            PopUpToBehavior.Current(
+                inclusive = true
+            )
+        } else null
         navigationManager.tryNavigateTo(
             screen.route,
             isSingleTop = launchSingleTop,
-            popUpTo = null
+            popUpTo = popupTo
         )
     }
 
@@ -212,15 +211,6 @@ internal class LinkActivityViewModel @Inject constructor(
         }
     }
 
-    fun linkScreenCreated() {
-        viewModelScope.launch {
-            val currentRoute = currentNavEntry.value?.destination?.route
-            if (currentRoute == LinkScreen.Loading.route) {
-                navigateToLinkScreen()
-            }
-        }
-    }
-
     private suspend fun updateScreenState() {
         val accountStatus = linkAccountManager.accountStatus.first()
         val linkAccount = linkAccountManager.linkAccount.value
@@ -228,20 +218,25 @@ internal class LinkActivityViewModel @Inject constructor(
             AccountStatus.Verified,
             AccountStatus.SignedOut,
             AccountStatus.Error -> {
-                _linkScreenState.value = ScreenState.FullScreen
+                _linkScreenState.value = ScreenState.FullScreen(
+                    getInitialDestination()
+                )
             }
             AccountStatus.NeedsVerification,
             AccountStatus.VerificationStarted -> {
                 if (linkAccount != null && startWithVerificationDialog) {
                     _linkScreenState.value = ScreenState.VerificationDialog(linkAccount)
                 } else {
-                    _linkScreenState.value = ScreenState.FullScreen
+                    _linkScreenState.value = ScreenState.FullScreen(
+                        getInitialDestination()
+                    )
                 }
             }
         }
     }
 
-    private suspend fun navigateToLinkScreen() {
+
+    private suspend fun getInitialDestination(): LinkScreen {
         val accountStatus = linkAccountManager.accountStatus.first()
         val screen = when (accountStatus) {
             AccountStatus.Verified -> {
@@ -254,7 +249,7 @@ internal class LinkActivityViewModel @Inject constructor(
                 LinkScreen.SignUp
             }
         }
-        navigate(screen, clearStack = true, launchSingleTop = true)
+        return screen
     }
 
     private suspend fun handleAccountError() {
@@ -295,7 +290,9 @@ internal class LinkActivityViewModel @Inject constructor(
 
 internal sealed interface ScreenState {
     data class VerificationDialog(val linkAccount: LinkAccount) : ScreenState
-    data class FullScreen : ScreenState
+    data class FullScreen(
+        val initialDestination: LinkScreen
+    ) : ScreenState
     data object Loading : ScreenState
 }
 
