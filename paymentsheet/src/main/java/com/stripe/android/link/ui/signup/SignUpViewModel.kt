@@ -197,10 +197,7 @@ internal class SignUpViewModel @Inject constructor(
         if (linkAccount?.isVerified == true) {
             navigateAndClearStack(LinkScreen.Wallet)
         } else {
-            navigate(LinkScreen.Verification)
-            // The sign up screen stays in the back stack.
-            // Clean up the state in case the user comes back.
-            emailController.onValueChange("")
+            navigateAndClearStack(LinkScreen.Verification)
         }
     }
 
