@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.update
@@ -131,11 +132,13 @@ internal class SignUpViewModel @Inject constructor(
     }
 
     private suspend fun lookupEmail(email: String) {
-        val lookupResult = linkAuth.lookUp(
-            email = email,
-            emailSource = EmailSource.USER_ACTION,
-            startSession = true
-        )
+        val lookupResult = withVerifyingSignupState {
+            linkAuth.lookUp(
+                email = email,
+                emailSource = EmailSource.USER_ACTION,
+                startSession = true
+            )
+        }
 
         when (lookupResult) {
             is LinkAuthResult.AttestationFailed -> {
@@ -235,6 +238,22 @@ internal class SignUpViewModel @Inject constructor(
         updateState { old ->
             old.copy(signUpState = signUpState)
         }
+    }
+
+    private suspend fun <T> withVerifyingSignupState(
+        block: suspend () -> T,
+    ): T {
+        val originalState = _state.getAndUpdate {
+            it.copy(signUpState = SignUpState.VerifyingEmail)
+        }
+
+        val result = block()
+
+        _state.update {
+            it.copy(signUpState = originalState.signUpState)
+        }
+
+        return result
     }
 
     companion object {
