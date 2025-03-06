@@ -25,10 +25,13 @@ import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.utils.ActivityLaunchObserver
 import com.stripe.android.paymentsheet.utils.IntegrationType
+import com.stripe.android.paymentsheet.utils.MultipleInstancesTestType
+import com.stripe.android.paymentsheet.utils.MultipleInstancesTestTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.assertFailed
 import com.stripe.android.paymentsheet.utils.runFlowControllerTest
+import com.stripe.android.paymentsheet.utils.runMultipleFlowControllerInstancesTest
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
@@ -510,6 +513,66 @@ internal class FlowControllerTest {
                     Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
                 )
             ),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        page.clickPrimaryButton()
+    }
+
+    @Test
+    fun testDeferredIntentWithMultipleInstances(
+        @TestParameter(valuesProvider = MultipleInstancesTestTypeProvider::class)
+        testType: MultipleInstancesTestType,
+    ) = runMultipleFlowControllerInstancesTest(
+        networkRule = networkRule,
+        testType = testType,
+        createIntentCallback = { _, _ -> CreateIntentResult.Success("pi_example_secret_example") },
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-deferred_payment_intent.json")
+        }
+
+        testContext.configureFlowController {
+            configureWithIntentConfiguration(
+                intentConfiguration = PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                        amount = 5099,
+                        currency = "usd"
+                    )
+                ),
+                configuration = defaultConfiguration,
+                callback = { success, error ->
+                    assertThat(success).isTrue()
+                    assertThat(error).isNull()
+                    presentPaymentOptions()
+                }
+            )
+        }
+
+        page.fillOutCardDetails()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_methods"),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-create.json")
+        }
+
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/payment_intents/pi_example"),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-get-requires_payment_method.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }

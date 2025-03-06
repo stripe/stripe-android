@@ -486,12 +486,16 @@ class EmbeddedPaymentElement @Inject internal constructor(
             activityResultCaller: ActivityResultCaller,
             viewModelStoreOwner: ViewModelStoreOwner,
             lifecycleOwner: LifecycleOwner,
+            paymentElementCallbackIdentifier: String,
             resultCallback: ResultCallback,
         ): EmbeddedPaymentElement {
             val viewModel = ViewModelProvider(
                 owner = viewModelStoreOwner,
-                factory = EmbeddedPaymentElementViewModel.Factory(statusBarColor)
-            )[EmbeddedPaymentElementViewModel::class.java]
+                factory = EmbeddedPaymentElementViewModel.Factory(paymentElementCallbackIdentifier, statusBarColor)
+            ).get(
+                key = "EmbeddedPaymentElementViewModel(instance = $paymentElementCallbackIdentifier)",
+                modelClass = EmbeddedPaymentElementViewModel::class.java,
+            )
 
             val embeddedPaymentElementSubcomponent = viewModel.embeddedPaymentElementSubcomponentBuilder
                 .resultCallback(resultCallback)

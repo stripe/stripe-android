@@ -9,10 +9,12 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
-import com.stripe.android.paymentsheet.CreateIntentCallback
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
+import com.stripe.android.paymentsheet.FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
@@ -20,7 +22,7 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.SessionTestRule
 import com.stripe.android.utils.FakePaymentElementLoader
-import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
+import com.stripe.android.utils.PaymentElementCallbackTestRule
 import com.stripe.android.utils.RelayingPaymentElementLoader
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
@@ -44,7 +46,7 @@ import kotlin.time.Duration.Companion.seconds
 class FlowControllerConfigurationHandlerTest {
 
     @get:Rule
-    val intentConfirmationInterceptorTestRule = IntentConfirmationInterceptorTestRule()
+    val paymentElementCallbackTestRule = PaymentElementCallbackTestRule()
 
     @get:Rule
     val sessionRule = SessionTestRule()
@@ -66,6 +68,7 @@ class FlowControllerConfigurationHandlerTest {
         viewModel = FlowControllerViewModel(
             application = ApplicationProvider.getApplicationContext(),
             handle = SavedStateHandle(),
+            paymentElementCallbackIdentifier = FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER,
             statusBarColor = null,
         )
     }
@@ -447,9 +450,14 @@ class FlowControllerConfigurationHandlerTest {
         val configureTurbine = Turbine<Throwable?>()
         val configurationHandler = createConfigurationHandler()
 
-        IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
-            throw AssertionError("Not expected to be called")
-        }
+        PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks(
+            createIntentCallback = { _, _ ->
+                error("Should not be called!")
+            },
+            externalPaymentMethodConfirmHandler = { _, _ ->
+                error("Should not be called!")
+            },
+        )
 
         configurationHandler.configure(
             scope = this,
@@ -480,10 +488,14 @@ class FlowControllerConfigurationHandlerTest {
         val configureTurbine = Turbine<Throwable?>()
         val configurationHandler = createConfigurationHandler()
 
-        IntentConfirmationInterceptor.createIntentCallback =
-            CreateIntentCallback { _, _ ->
-                throw AssertionError("Not expected to be called")
-            }
+        PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks(
+            createIntentCallback = { _, _ ->
+                error("Should not be called!")
+            },
+            externalPaymentMethodConfirmHandler = { _, _ ->
+                error("Should not be called!")
+            },
+        )
 
         configurationHandler.configure(
             scope = this,

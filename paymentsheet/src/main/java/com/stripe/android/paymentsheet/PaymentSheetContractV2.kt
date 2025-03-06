@@ -36,6 +36,7 @@ internal class PaymentSheetContractV2 :
     data class Args(
         internal val initializationMode: PaymentElementLoader.InitializationMode,
         internal val config: PaymentSheet.Configuration,
+        internal val paymentElementCallbackIdentifier: String,
         @ColorInt internal val statusBarColor: Int?,
         val initializedViaCompose: Boolean = false,
     ) : ActivityStarter.Args {

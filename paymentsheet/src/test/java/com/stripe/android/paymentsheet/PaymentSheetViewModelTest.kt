@@ -56,6 +56,8 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator
@@ -75,6 +77,7 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.ARGS_DEFERRED_INTENT
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -129,8 +132,8 @@ import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
-import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import com.stripe.android.utils.PaymentElementCallbackTestRule
 import com.stripe.android.utils.RecordingLinkPaymentLauncher
 import com.stripe.android.utils.RelayingPaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
@@ -194,7 +197,7 @@ internal class PaymentSheetViewModelTest {
     val rule = RuleChain.emptyRuleChain()
         .around(InstantTaskExecutorRule())
         .around(SessionTestRule())
-        .around(IntentConfirmationInterceptorTestRule())
+        .around(PaymentElementCallbackTestRule())
         .around(ResetMockRule(eventReporter))
         .around(RetryRule(3))
 
@@ -2113,9 +2116,14 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `Sends correct analytics event when using deferred intent with client-side confirmation`() = runTest {
-        IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
-            throw AssertionError("Not expected to be called")
-        }
+        PaymentElementCallbackReferences[PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks(
+            createIntentCallback = { _, _ ->
+                error("Should not be called!")
+            },
+            externalPaymentMethodConfirmHandler = { _, _ ->
+                error("Should not be called!")
+            },
+        )
 
         createViewModelForDeferredIntent()
 
@@ -2127,10 +2135,14 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `Sends correct analytics event when using deferred intent with server-side confirmation`() = runTest {
-        IntentConfirmationInterceptor.createIntentCallback =
-            CreateIntentCallback { _, _ ->
-                throw AssertionError("Not expected to be called")
-            }
+        PaymentElementCallbackReferences[PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks(
+            createIntentCallback = { _, _ ->
+                error("Should not be called!")
+            },
+            externalPaymentMethodConfirmHandler = { _, _ ->
+                error("Should not be called!")
+            },
+        )
 
         createViewModelForDeferredIntent()
 
@@ -2149,10 +2161,6 @@ internal class PaymentSheetViewModelTest {
         )
 
         for ((clientSecret, deferredIntentConfirmationType) in clientSecrets) {
-            IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
-                CreateIntentResult.Success(clientSecret)
-            }
-
             val viewModel = createViewModelForDeferredIntent()
 
             val savedSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
@@ -3279,6 +3287,7 @@ internal class PaymentSheetViewModelTest {
                 savedStateHandle = thisSavedStateHandle,
                 linkHandler = linkHandler,
                 confirmationHandlerFactory = confirmationHandlerFactory ?: createTestConfirmationHandlerFactory(
+                    paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
                     intentConfirmationInterceptor = intentConfirmationInterceptor,
                     savedStateHandle = thisSavedStateHandle,
                     bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
