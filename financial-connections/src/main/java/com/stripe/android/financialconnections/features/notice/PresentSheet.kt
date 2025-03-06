@@ -3,9 +3,9 @@ package com.stripe.android.financialconnections.features.notice
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
-import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.repository.AccountUpdateRequiredContentRepository
 import com.stripe.android.financialconnections.repository.NoticeSheetContentRepository
+import com.stripe.android.uicore.navigation.NavigationManager
 import javax.inject.Inject
 
 internal interface PresentSheet {
