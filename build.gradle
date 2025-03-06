@@ -34,6 +34,7 @@ plugins {
     id 'org.jetbrains.kotlin.jvm' version '2.1.10' apply false
     id 'com.emergetools.android' version '4.0.0' apply false
     id 'com.google.dagger.hilt.android' version '2.55' apply false
+    id("com.joetr.compose.guard") version "2.4.0" apply false
 }
 
 apply plugin: "io.gitlab.arturbosch.detekt"
