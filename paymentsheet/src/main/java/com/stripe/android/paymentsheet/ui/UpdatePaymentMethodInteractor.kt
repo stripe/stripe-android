@@ -30,6 +30,7 @@ internal interface UpdatePaymentMethodInteractor {
     val isModifiablePaymentMethod: Boolean
     val hasValidBrandChoices: Boolean
     val shouldShowSetAsDefaultCheckbox: Boolean
+    val setAsDefaultCheckboxEnabled: Boolean
     val shouldShowSaveButton: Boolean
 
     val state: StateFlow<State>
@@ -87,6 +88,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     override val canRemove: Boolean,
     override val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     override val cardBrandFilter: CardBrandFilter,
+    val isDefaultPaymentMethod: Boolean,
     shouldShowSetAsDefaultCheckbox: Boolean,
     private val removeExecutor: PaymentMethodRemoveOperation,
     private val updateCardBrandExecutor: UpdateCardBrandOperation,
@@ -101,7 +103,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     private val status = MutableStateFlow(UpdatePaymentMethodInteractor.Status.Idle)
     private val cardBrandChoice = MutableStateFlow(getInitialCardBrandChoice())
     private val cardBrandHasBeenChanged = MutableStateFlow(false)
-    private val setAsDefaultCheckboxChecked = MutableStateFlow(false)
+    private val setAsDefaultCheckboxChecked = MutableStateFlow(isDefaultPaymentMethod)
     private val savedCardBrand = MutableStateFlow(getInitialCardBrandChoice())
 
     // We don't yet support setting SEPA payment methods as defaults, so we hide the checkbox for now.
@@ -122,6 +124,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
         isLiveMode = isLiveMode,
         editable = PaymentSheetTopBarState.Editable.Never,
     )
+    override val setAsDefaultCheckboxEnabled: Boolean = !isDefaultPaymentMethod
 
     override val shouldShowSaveButton: Boolean = isModifiablePaymentMethod || shouldShowSetAsDefaultCheckbox
 
@@ -139,8 +142,8 @@ internal class DefaultUpdatePaymentMethodInteractor(
             error = error,
             status = status,
             cardBrandChoice = cardBrandChoice,
-            setAsDefaultCheckboxChecked = setAsDefaultCheckboxChecked,
             isSaveButtonEnabled = isSaveButtonEnabled,
+            setAsDefaultCheckboxChecked = isDefaultPaymentMethod || setAsDefaultCheckboxChecked,
         )
     }
     override val state = _state

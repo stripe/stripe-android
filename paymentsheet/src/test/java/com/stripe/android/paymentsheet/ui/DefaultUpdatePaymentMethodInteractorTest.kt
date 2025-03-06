@@ -330,6 +330,35 @@ class DefaultUpdatePaymentMethodInteractorTest {
     }
 
     @Test
+    fun isDefaultPaymentMethod_setAsDefaultCheckboxChecked() = runScenario(
+        displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
+        shouldShowSetAsDefaultCheckbox = true,
+        isDefaultPaymentMethod = true,
+    ) {
+        interactor.state.test {
+            assertThat(awaitItem().setAsDefaultCheckboxChecked).isTrue()
+        }
+    }
+
+    @Test
+    fun isDefaultPaymentMethod_setAsDefaultCheckboxDisabled() = runScenario(
+        displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
+        shouldShowSetAsDefaultCheckbox = true,
+        isDefaultPaymentMethod = true,
+    ) {
+        assertThat(interactor.setAsDefaultCheckboxEnabled).isFalse()
+    }
+
+    @Test
+    fun isNotDefaultPaymentMethod_setAsDefaultCheckboxEnabled() = runScenario(
+        displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
+        shouldShowSetAsDefaultCheckbox = true,
+        isDefaultPaymentMethod = false,
+    ) {
+        assertThat(interactor.setAsDefaultCheckboxEnabled).isTrue()
+    }
+
+    @Test
     fun setAsDefaultCheckboxChangedViewAction_updatesState() = runScenario(
         shouldShowSetAsDefaultCheckbox = true,
     ) {
@@ -552,6 +581,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         onSetDefaultPaymentMethod: (PaymentMethod) -> Result<Unit> = { _ -> notImplemented() },
         onUpdateSuccess: () -> Unit = { notImplemented() },
         shouldShowSetAsDefaultCheckbox: Boolean = false,
+        isDefaultPaymentMethod: Boolean = false,
         testBlock: suspend TestParams.() -> Unit
     ) {
         val interactor = DefaultUpdatePaymentMethodInteractor(
@@ -566,6 +596,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             onBrandChoiceOptionsShown = {},
             onBrandChoiceOptionsDismissed = {},
             shouldShowSetAsDefaultCheckbox = shouldShowSetAsDefaultCheckbox,
+            isDefaultPaymentMethod = isDefaultPaymentMethod,
             onUpdateSuccess = onUpdateSuccess,
         )
 
