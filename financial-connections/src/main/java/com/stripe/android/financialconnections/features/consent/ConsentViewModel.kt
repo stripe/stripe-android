@@ -37,8 +37,8 @@ import com.stripe.android.financialconnections.utils.Experiment.CONNECTIONS_CONS
 import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.financialconnections.utils.experimentAssignment
 import com.stripe.android.financialconnections.utils.trackExposure
-import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.model.EmailSource
+import com.stripe.android.uicore.navigation.NavigationManager
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
