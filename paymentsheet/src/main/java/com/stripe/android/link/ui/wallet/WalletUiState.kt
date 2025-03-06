@@ -2,12 +2,13 @@ package com.stripe.android.link.ui.wallet
 
 import androidx.compose.runtime.Immutable
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails.Card
 import com.stripe.android.uicore.forms.FormFieldEntry
 
-@Immutable
+//@Immutable
 internal data class WalletUiState(
     val paymentDetailsList: List<ConsumerPaymentDetails.PaymentDetails>,
     val selectedItem: ConsumerPaymentDetails.PaymentDetails?,
@@ -20,6 +21,7 @@ internal data class WalletUiState(
     val expiryDateInput: FormFieldEntry = FormFieldEntry(null),
     val cvcInput: FormFieldEntry = FormFieldEntry(null),
     val alertMessage: ResolvableString? = null,
+    val unstableField: ArrayList<ResolvableString> = arrayListOf("a".resolvableString)
 ) {
 
     val selectedCard: Card? = selectedItem as? Card

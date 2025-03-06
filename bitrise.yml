@@ -246,6 +246,17 @@ workflows:
           timeout: 1200
           inputs:
             - content: ./gradlew :paymentsheet:pixel2api33DebugAndroidTest
+  run-paymentsheet-stability-check:
+    before_run:
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - script@1:
+          title: Run Compose Compiler Checks
+          timeout: 1200
+          inputs:
+            - content: ./gradlew :paymentsheet:debugComposeCompilerCheck
   run-example-instrumentation-tests:
     before_run:
       - start_emulator
