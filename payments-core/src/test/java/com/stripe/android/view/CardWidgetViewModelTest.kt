@@ -29,8 +29,12 @@ class CardWidgetViewModelTest {
             )
 
             viewModel.isCbcEligible.test {
-                assertThat(awaitItem()).isFalse()
+                expectNoEvents()
                 stripeRepository.enqueueEligible()
+                expectNoEvents()
+                viewModel.updateCardNumber("")
+                expectNoEvents()
+                viewModel.updateCardNumber("1")
                 assertThat(awaitItem()).isTrue()
             }
         }
@@ -47,9 +51,10 @@ class CardWidgetViewModelTest {
             )
 
             viewModel.isCbcEligible.test {
-                assertThat(awaitItem()).isFalse()
-                stripeRepository.enqueueNotEligible()
                 expectNoEvents()
+                stripeRepository.enqueueNotEligible()
+                viewModel.updateCardNumber("1")
+                assertThat(awaitItem()).isFalse()
             }
         }
 
@@ -64,9 +69,10 @@ class CardWidgetViewModelTest {
         )
 
         viewModel.isCbcEligible.test {
-            assertThat(awaitItem()).isFalse()
-            stripeRepository.enqueueFailure()
             expectNoEvents()
+            stripeRepository.enqueueFailure()
+            viewModel.updateCardNumber("1")
+            assertThat(awaitItem()).isFalse()
         }
     }
 
@@ -80,10 +86,14 @@ class CardWidgetViewModelTest {
             dispatcher = testDispatcher
         )
 
+        viewModel.updateCardNumber("1")
+
         viewModel.isCbcEligible.test {
-            assertThat(awaitItem()).isFalse()
             stripeRepository.enqueueEligible()
+            assertThat(awaitItem()).isTrue()
             viewModel.setOnBehalfOf("valid_obo")
+            assertThat(awaitItem()).isTrue()
+            viewModel.setOnBehalfOf("valid_obo_2")
             assertThat(awaitItem()).isTrue()
         }
     }
@@ -101,6 +111,8 @@ class CardWidgetViewModelTest {
         stripeRepository.enqueueEligible()
 
         viewModel.isCbcEligible.test {
+            viewModel.updateCardNumber("1")
+            assertThat(awaitItem()).isTrue()
             viewModel.setOnBehalfOf("valid_obo")
             assertThat(awaitItem()).isTrue()
             stripeRepository.enqueueNotEligible()
