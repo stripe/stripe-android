@@ -92,7 +92,6 @@ class PaymentOptionsItemsMapperTest {
         }
     }
 
-
     @Test
     fun `Correctly creates payment methods in paymentFlow when not isPaymentMethodSetAsDefaultEnabled`() = runTest {
         val mapper = PaymentOptionsItemsMapper(
