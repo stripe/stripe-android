@@ -18,6 +18,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -83,7 +84,9 @@ internal fun LinkContent(
                         .fillMaxWidth()
                 ) {
                     BackHandler {
-                        handleViewAction(LinkAction.BackPressed)
+                        if (navController.popBackStack().not()) {
+                            handleViewAction(LinkAction.BackPressed)
+                        }
                     }
 
                     LinkAppBar(

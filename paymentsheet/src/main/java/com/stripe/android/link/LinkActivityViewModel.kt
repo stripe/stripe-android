@@ -14,6 +14,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavBackStackEntry
+import androidx.navigation.compose.NavHost
 import com.stripe.android.link.LinkActivity.Companion.getArgs
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
@@ -84,8 +85,7 @@ internal class LinkActivityViewModel @Inject constructor(
 
     fun onVerificationSucceeded() {
         viewModelScope.launch {
-            val initialDestination = getInitialDestination()
-            _linkScreenState.value = ScreenState.FullScreen(initialDestination)
+            _linkScreenState.value = buildFullScreenState()
         }
     }
 
@@ -138,16 +138,16 @@ internal class LinkActivityViewModel @Inject constructor(
         }
     }
 
-    private fun handleBackPressed() {
-//        navController?.let { navController ->
-//            if (!navController.popBackStack()) {
-//                dismissWithResult?.invoke(
-//                    LinkActivityResult.Canceled(
-//                        linkAccountUpdate = linkAccountManager.linkAccountUpdate
-//                    )
-//                )
-//            }
-//        }
+    /**
+     * [NavHost] handles back presses except for when backstack is empty, where it delegates
+     * to the container activity. [onBackPressed] will be triggered on these empty backstack cases.
+     */
+    fun handleBackPressed() {
+        dismissWithResult?.invoke(
+            LinkActivityResult.Canceled(
+                linkAccountUpdate = linkAccountManager.linkAccountUpdate
+            )
+        )
     }
 
     fun registerActivityForConfirmation(
@@ -158,8 +158,7 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     fun navigate(screen: LinkScreen, clearStack: Boolean, launchSingleTop: Boolean = false) {
-        Log.d("LinkActivityViewModel", "navigate: $screen, clearStack: $clearStack, launchSingleTop: $launchSingleTop")
-        val popupTo = if (clearStack) { // TODO if clear stack
+        val popupTo = if (clearStack) {
             PopUpToBehavior.Current(
                 inclusive = true
             )
@@ -172,13 +171,7 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     fun goBack() {
-//        if (navController?.popBackStack() == false) {
-//            dismissWithResult?.invoke(
-//                LinkActivityResult.Canceled(
-//                    linkAccountUpdate = linkAccountManager.linkAccountUpdate
-//                )
-//            )
-//        }
+        navigationManager.tryNavigateBack()
     }
 
     fun changeEmail() {
@@ -218,38 +211,34 @@ internal class LinkActivityViewModel @Inject constructor(
             AccountStatus.Verified,
             AccountStatus.SignedOut,
             AccountStatus.Error -> {
-                _linkScreenState.value = ScreenState.FullScreen(
-                    getInitialDestination()
-                )
+                _linkScreenState.value = buildFullScreenState()
             }
             AccountStatus.NeedsVerification,
             AccountStatus.VerificationStarted -> {
                 if (linkAccount != null && startWithVerificationDialog) {
                     _linkScreenState.value = ScreenState.VerificationDialog(linkAccount)
                 } else {
-                    _linkScreenState.value = ScreenState.FullScreen(
-                        getInitialDestination()
-                    )
+                    _linkScreenState.value = buildFullScreenState()
                 }
             }
         }
     }
 
-
-    private suspend fun getInitialDestination(): LinkScreen {
+    private suspend fun buildFullScreenState(): ScreenState.FullScreen {
         val accountStatus = linkAccountManager.accountStatus.first()
-        val screen = when (accountStatus) {
-            AccountStatus.Verified -> {
-                LinkScreen.Wallet
+        return ScreenState.FullScreen(
+            initialDestination = when (accountStatus) {
+                AccountStatus.Verified -> {
+                    LinkScreen.Wallet
+                }
+                AccountStatus.NeedsVerification, AccountStatus.VerificationStarted -> {
+                    LinkScreen.Verification
+                }
+                AccountStatus.SignedOut, AccountStatus.Error -> {
+                    LinkScreen.SignUp
+                }
             }
-            AccountStatus.NeedsVerification, AccountStatus.VerificationStarted -> {
-                LinkScreen.Verification
-            }
-            AccountStatus.SignedOut, AccountStatus.Error -> {
-                LinkScreen.SignUp
-            }
-        }
-        return screen
+        )
     }
 
     private suspend fun handleAccountError() {
