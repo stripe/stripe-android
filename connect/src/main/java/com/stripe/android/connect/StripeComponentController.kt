@@ -15,13 +15,12 @@ abstract class StripeComponentController<Listener, Props> internal constructor(
     private val embeddedComponentManager: EmbeddedComponentManager,
     private val title: String? = null,
     private val props: Props? = null,
+    private val dfClass: Class<out StripeComponentDialogFragment<*, Listener, Props>>
 )
     where Listener : StripeEmbeddedComponentListener,
           Props : ComponentProps {
 
-    internal abstract val dfClass: Class<out StripeComponentDialogFragment<*, Listener, Props>>
-
-    private val tag: String get() = dfClass.name
+    private val tag: String = dfClass.name
 
     @VisibleForTesting
     internal val dialogFragment: StripeComponentDialogFragment<*, Listener, Props>
