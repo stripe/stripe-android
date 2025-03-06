@@ -126,12 +126,11 @@ class PaymentOptionsItemsMapperTest {
             val state = awaitItem()
             assertThat(state).hasSize(3)
             assertThat(state[0].viewType).isEqualTo(PaymentOptionsItem.ViewType.AddCard)
-            assertThat(
-                (state[1] as? PaymentOptionsItem.SavedPaymentMethod)
-                    ?.displayableSavedPaymentMethod?.shouldShowDefaultBadge).isFalse()
-            assertThat(
-                (state[2] as? PaymentOptionsItem.SavedPaymentMethod)
-                    ?.displayableSavedPaymentMethod?.shouldShowDefaultBadge).isFalse()
+
+            val firstPaymentMethod = state[1] as? PaymentOptionsItem.SavedPaymentMethod
+            val secondPaymentMethod = state[2] as? PaymentOptionsItem.SavedPaymentMethod
+            assertThat(firstPaymentMethod?.displayableSavedPaymentMethod?.shouldShowDefaultBadge).isFalse()
+            assertThat(secondPaymentMethod?.displayableSavedPaymentMethod?.shouldShowDefaultBadge).isFalse()
         }
     }
 
@@ -168,12 +167,11 @@ class PaymentOptionsItemsMapperTest {
             val state = awaitItem()
             assertThat(state).hasSize(3)
             assertThat(state[0].viewType).isEqualTo(PaymentOptionsItem.ViewType.AddCard)
-            assertThat(
-                (state[1] as? PaymentOptionsItem.SavedPaymentMethod)
-                    ?.displayableSavedPaymentMethod?.shouldShowDefaultBadge).isFalse()
-            assertThat(
-                (state[2] as? PaymentOptionsItem.SavedPaymentMethod)
-                    ?.displayableSavedPaymentMethod?.shouldShowDefaultBadge).isTrue()
+            val firstPaymentMethod = state[1] as? PaymentOptionsItem.SavedPaymentMethod
+            val secondPaymentMethod = state[2] as? PaymentOptionsItem.SavedPaymentMethod
+
+            assertThat(firstPaymentMethod?.displayableSavedPaymentMethod?.shouldShowDefaultBadge).isFalse()
+            assertThat(secondPaymentMethod?.displayableSavedPaymentMethod?.shouldShowDefaultBadge).isTrue()
         }
     }
 
