@@ -38,7 +38,7 @@ import com.stripe.android.ui.core.R as StripeUiCoreR
 internal fun LinkAppBar(
     state: LinkAppBarState,
     onBackPressed: () -> Unit,
-    showBottomSheetContent: (BottomSheetContent?) -> Unit,
+    showBottomSheetContent: (BottomSheetContent) -> Unit,
     onLogoutClicked: () -> Unit
 ) {
     Row(
@@ -115,7 +115,7 @@ private fun RowScope.LinkAppBarTitle(
 @Composable
 private fun LinkAppBarAction(
     showOverflowMenu: Boolean,
-    showBottomSheetContent: (BottomSheetContent?) -> Unit,
+    showBottomSheetContent: (BottomSheetContent) -> Unit,
     onLogoutClicked: () -> Unit
 ) {
     val overflowIconAlpha by animateFloatAsState(
