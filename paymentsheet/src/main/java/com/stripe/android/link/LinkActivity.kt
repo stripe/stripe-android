@@ -50,7 +50,7 @@ internal class LinkActivity : ComponentActivity() {
         setContent {
             LinkScreenContent(
                 viewModel = vm,
-                onBackPressed = onBackPressedDispatcher::onBackPressed
+                onBackPressed = vm::goBack,
             )
         }
     }

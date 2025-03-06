@@ -1,6 +1,7 @@
 package com.stripe.android.link.ui
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.defaultMinSize
@@ -38,6 +39,10 @@ import com.stripe.android.link.ui.verification.VerificationScreen
 import com.stripe.android.link.ui.verification.VerificationViewModel
 import com.stripe.android.link.ui.wallet.WalletScreen
 import com.stripe.android.link.ui.wallet.WalletViewModel
+import com.stripe.android.link.utils.enterTransition
+import com.stripe.android.link.utils.exitTransition
+import com.stripe.android.link.utils.popEnterTransition
+import com.stripe.android.link.utils.popExitTransition
 import com.stripe.android.ui.core.CircularProgressIndicator
 
 @SuppressWarnings("LongMethod")
@@ -138,8 +143,15 @@ private fun Screens(
         modifier = Modifier.fillMaxSize(),
         navController = navController,
         startDestination = LinkScreen.Loading.route,
+        enterTransition = enterTransition,
+        popEnterTransition = popEnterTransition,
+        popExitTransition = popExitTransition,
+        exitTransition = exitTransition,
     ) {
-        composable(LinkScreen.Loading.route) {
+        composable(
+            route = LinkScreen.Loading.route,
+            exitTransition = { fadeOut() },
+        ) {
             Loader()
         }
 
