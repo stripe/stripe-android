@@ -17,18 +17,19 @@ import com.stripe.android.network.CardPaymentMethodDetails
 import com.stripe.android.network.setupPaymentMethodDetachResponse
 import com.stripe.android.network.setupPaymentMethodUpdateResponse
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.paymentsheet.EditPage
-import com.stripe.android.paymentsheet.ManagePage
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.RetryRule
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.paymentelementtestpages.EditPage
+import com.stripe.paymentelementtestpages.ManagePage
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.util.concurrent.CountDownLatch
 
 @RunWith(RobolectricTestRunner::class)
 internal class ManageActivityTest {
@@ -143,6 +144,30 @@ internal class ManageActivityTest {
         Espresso.pressBack()
         val updatedCbcCard = completedResultPaymentMethods().first { it.id == cbcCardId }
         assertThat(updatedCbcCard.card?.displayBrand).isEqualTo("visa")
+    }
+
+    @Test
+    fun `updating card brand prevents sheet from being closed`() = launch {
+        managePage.waitUntilVisible()
+        managePage.assertCardIsVisible(cbcCardId, "cartes_bancaries")
+        managePage.clickEdit()
+        managePage.clickEdit(cbcCardId)
+
+        val countDownLatch = CountDownLatch(1)
+        networkRule.setupPaymentMethodUpdateResponse(
+            paymentMethodDetails = cbcCardDetails,
+            cardBrand = "visa",
+            countDownLatch = countDownLatch,
+        )
+        editPage.waitUntilVisible()
+        editPage.setCardBrand("Visa")
+        editPage.update(waitUntilComplete = false)
+        Espresso.pressBack()
+        managePage.assertNotVisible()
+        countDownLatch.countDown()
+        managePage.waitUntilVisible()
+        managePage.clickDone()
+        managePage.assertCardIsVisible(cbcCardId, "visa")
     }
 
     @Test

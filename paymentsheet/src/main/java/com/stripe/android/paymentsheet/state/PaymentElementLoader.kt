@@ -1,9 +1,6 @@
-@file:OptIn(ExperimentalCardBrandFilteringApi::class)
-
 package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
-import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.Logger
@@ -230,6 +227,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             isReloadingAfterProcessDeath = isReloadingAfterProcessDeath,
             isGooglePaySupported = isGooglePaySupported(),
             initializationMode = initializationMode,
+            customerInfo = customerInfo,
+            paymentMethodMetadata = paymentMethodMetadata
         )
 
         return@runCatching state
@@ -680,12 +679,25 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         isReloadingAfterProcessDeath: Boolean,
         isGooglePaySupported: Boolean,
         initializationMode: PaymentElementLoader.InitializationMode,
+        customerInfo: CustomerInfo?,
+        paymentMethodMetadata: PaymentMethodMetadata,
     ) {
         elementsSession.sessionsError?.let { sessionsError ->
             eventReporter.onElementsSessionLoadFailed(sessionsError)
         }
 
         val treatValidationErrorAsFailure = !state.stripeIntent.isConfirmed || isReloadingAfterProcessDeath
+
+        val hasDefaultPaymentMethod: Boolean?
+        val setAsDefaultEnabled: Boolean?
+
+        if (customerInfo is CustomerInfo.CustomerSession) {
+            hasDefaultPaymentMethod = elementsSession.customer?.defaultPaymentMethod != null
+            setAsDefaultEnabled = paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true
+        } else {
+            hasDefaultPaymentMethod = null
+            setAsDefaultEnabled = null
+        }
 
         if (state.validationError != null && treatValidationErrorAsFailure) {
             eventReporter.onLoadFailed(state.validationError)
@@ -700,7 +712,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 requireCvcRecollection = cvcRecollectionHandler.cvcRecollectionEnabled(
                     state.paymentMethodMetadata.stripeIntent,
                     initializationMode
-                )
+                ),
+                hasDefaultPaymentMethod = hasDefaultPaymentMethod,
+                setAsDefaultEnabled = setAsDefaultEnabled
             )
         }
     }

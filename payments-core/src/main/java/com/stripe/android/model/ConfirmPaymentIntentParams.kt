@@ -565,6 +565,30 @@ constructor(
             )
         }
 
+        internal fun createWithSetAsDefaultPaymentMethod(
+            paymentMethodId: String,
+            clientSecret: String,
+            savePaymentMethod: Boolean? = null,
+            mandateId: String? = null,
+            mandateData: MandateDataParams? = null,
+            setupFutureUsage: SetupFutureUsage? = null,
+            shipping: Shipping? = null,
+            paymentMethodOptions: PaymentMethodOptionsParams? = null,
+            setAsDefaultPaymentMethod: Boolean? = null,
+        ): ConfirmPaymentIntentParams {
+            return ConfirmPaymentIntentParams(
+                paymentMethodId = paymentMethodId,
+                clientSecret = clientSecret,
+                savePaymentMethod = savePaymentMethod,
+                mandateId = mandateId,
+                mandateData = mandateData,
+                setupFutureUsage = setupFutureUsage,
+                shipping = shipping,
+                paymentMethodOptions = paymentMethodOptions,
+                setAsDefaultPaymentMethod = setAsDefaultPaymentMethod,
+            )
+        }
+
         internal fun createForDashboard(
             clientSecret: String,
             paymentMethodId: String,

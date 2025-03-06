@@ -315,14 +315,7 @@ internal class PaymentSheetAnalyticsTest {
         eventName: String,
         vararg requestMatchers: RequestMatcher,
     ) {
-        networkRule.enqueue(
-            host("q.stripe.com"),
-            method("GET"),
-            query("event", eventName),
-            *requestMatchers,
-        ) { response ->
-            response.status = "HTTP/1.1 200 OK"
-        }
+        networkRule.validateAnalyticsRequest(eventName, *requestMatchers)
     }
 
     private fun createFakeGooglePayAvailabilityClient(): GooglePayAvailabilityClient.Factory {

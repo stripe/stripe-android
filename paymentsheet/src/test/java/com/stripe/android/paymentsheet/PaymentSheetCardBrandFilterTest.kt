@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.toBrandCategory
 import com.stripe.android.model.CardBrand
@@ -10,7 +9,6 @@ import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
 import org.junit.Test
 
-@OptIn(ExperimentalCardBrandFilteringApi::class)
 class PaymentSheetCardBrandFilterTest {
 
     @Test

@@ -1,0 +1,8 @@
+apply from: configs.androidLibrary
+
+dependencies {
+    implementation project(':paymentsheet')
+    implementation project(':stripe-ui-core')
+    implementation project(':payments-ui-core')
+    api testLibs.androidx.composeUi
+}

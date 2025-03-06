@@ -4,7 +4,7 @@ copy_test_results () {
   directories=$(find . -type d -regex "$1")
   for directory in $directories
   do
-    relative_directory=$(realpath --relative-to="." "$directory")
+    relative_directory=$(python3 -c "import os.path; print(os.path.relpath('$directory', '.'))")
     destination_directory="/tmp/test_results/$relative_directory"
     mkdir -p "$destination_directory"
     cp -R "$relative_directory" "$destination_directory"

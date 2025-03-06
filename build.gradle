@@ -97,6 +97,7 @@ apiValidation {
             "financial-connections-example",
             "identity-example",
             "network-testing",
+            "payment-element-test-pages",
             "payments-core-testing",
             "paymentsheet-example",
             "stripecardscan-example",

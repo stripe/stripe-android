@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet
+package com.stripe.paymentelementtestpages
 
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasAnyDescendant
@@ -21,7 +21,8 @@ import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHO
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_TEXT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_VIEW_MORE
 
-internal class VerticalModePage(
+@SuppressWarnings("TooManyFunctions")
+class VerticalModePage(
     private val composeTestRule: ComposeTestRule
 ) {
     fun assertIsNotVisible() {
@@ -91,7 +92,15 @@ internal class VerticalModePage(
         if (cardBrand != null) {
             composeTestRule.onNode(
                 hasTestTag("${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodId")
-                    .and(hasAnyDescendant(hasTestTag(TEST_TAG_ICON_FROM_RES).and(hasTestMetadata(cardBrand)))),
+                    .and(
+                        hasAnyDescendant(
+                            hasTestTag(TEST_TAG_ICON_FROM_RES).and(
+                                hasTestMetadata(
+                                    cardBrand
+                                )
+                            )
+                        )
+                    ),
                 useUnmergedTree = true,
             ).assertExists()
         }

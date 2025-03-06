@@ -90,7 +90,7 @@ internal fun PaymentMethodRowButton(
         onClick = onClick
     ) { displayTrailingContent ->
         Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(ROW_CONTENT_HORIZONTAL_SPACING.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             RowButtonInnerContent(isEnabled, shouldShowDefaultBadge, iconContent, title, subtitle, contentDescription)
@@ -128,7 +128,7 @@ private fun RowButtonOuterContent(
                 isEnabled = isEnabled,
                 isSelected = isSelected,
                 contentPaddingValues = PaddingValues(
-                    horizontal = 12.dp,
+                    horizontal = ROW_CONTENT_HORIZONTAL_SPACING.dp,
                     vertical = contentPaddingValues + style.additionalInsetsDp.dp
                 ),
                 verticalArrangement = Arrangement.Center,
@@ -229,7 +229,7 @@ private fun RowButtonRadioOuterContent(
                 unselectedColor = Color(style.unselectedColor)
             )
         )
-        Spacer(Modifier.width(12.dp))
+        Spacer(Modifier.width(ROW_CONTENT_HORIZONTAL_SPACING.dp))
         Column(
             modifier = Modifier
                 .align(Alignment.CenterVertically),
@@ -263,7 +263,7 @@ private fun RowButtonCheckmarkOuterContent(
             content()
             Row {
                 if (trailingContent != null) {
-                    Spacer(Modifier.width(iconWidth + 9.dp))
+                    Spacer(Modifier.width(iconWidth + ROW_CONTENT_HORIZONTAL_SPACING.dp))
                     trailingContent()
                 }
             }
@@ -296,7 +296,7 @@ private fun RowButtonInnerContent(
     contentDescription: String? = null,
 ) {
     Row(
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(ROW_CONTENT_HORIZONTAL_SPACING.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         iconContent()
@@ -408,3 +408,5 @@ private fun ButtonPreview() {
         }
     }
 }
+
+private const val ROW_CONTENT_HORIZONTAL_SPACING = 12

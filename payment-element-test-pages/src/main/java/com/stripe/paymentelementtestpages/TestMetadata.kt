@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet
+package com.stripe.paymentelementtestpages
 
 import androidx.compose.ui.test.SemanticsMatcher
 import com.stripe.android.paymentsheet.utils.TestMetadata
