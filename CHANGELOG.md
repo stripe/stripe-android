@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [FIXED][10327](https://github.com/stripe/stripe-android/pull/10327) Improve accessibility for postal code.
+
 ## 21.6.0 - 2025-03-03
 
 ### PaymentSheet

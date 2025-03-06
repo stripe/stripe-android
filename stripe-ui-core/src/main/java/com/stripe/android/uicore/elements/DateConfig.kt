@@ -25,6 +25,8 @@ class DateConfig : TextFieldConfig {
     override val trailingIcon: StateFlow<TextFieldIcon?> = MutableStateFlow(null)
     override val loading: StateFlow<Boolean> = MutableStateFlow(false)
     override val layoutDirection: LayoutDirection = LayoutDirection.Ltr
+    override val shouldAnnounceFieldValue = false
+    override val shouldAnnounceLabel = false
 
     override fun filter(userTyped: String) = userTyped.filter { it.isDigit() }
 

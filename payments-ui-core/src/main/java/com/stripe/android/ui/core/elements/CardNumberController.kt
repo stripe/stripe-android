@@ -27,7 +27,6 @@ import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.asIndividualDigits
 import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.elements.FieldError
@@ -38,6 +37,7 @@ import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.elements.TextFieldState
 import com.stripe.android.uicore.elements.TextFieldStateConstants
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.uicore.utils.asIndividualDigits
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf

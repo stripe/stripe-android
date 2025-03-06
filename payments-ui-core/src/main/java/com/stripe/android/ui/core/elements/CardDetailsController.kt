@@ -93,9 +93,7 @@ internal class CardDetailsController(
             textFieldConfig = DateConfig(),
             initialValue = initialValues[IdentifierSpec.CardExpMonth] +
                 initialValues[IdentifierSpec.CardExpYear]?.takeLast(2),
-            overrideContentDescriptionProvider = ::formatExpirationDateForAccessibility,
-            shouldAnnounceFieldValue = false,
-            shouldAnnounceLabel = false
+            overrideContentDescriptionProvider = ::formatExpirationDateForAccessibility
         )
     )
 

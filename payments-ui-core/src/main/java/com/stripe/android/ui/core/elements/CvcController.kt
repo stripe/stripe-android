@@ -9,12 +9,12 @@ import androidx.compose.ui.unit.LayoutDirection
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
-import com.stripe.android.ui.core.asIndividualDigits
 import com.stripe.android.uicore.elements.FieldError
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.elements.TextFieldState
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.uicore.utils.asIndividualDigits
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf

@@ -5,6 +5,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.LayoutDirection
+import com.stripe.android.core.strings.ResolvableString
 import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -33,6 +34,15 @@ interface TextFieldConfig {
     val loading: StateFlow<Boolean>
 
     val placeHolder: String?
+        get() = null
+
+    val shouldAnnounceLabel: Boolean
+        get() = true
+
+    val shouldAnnounceFieldValue: Boolean
+        get() = true
+
+    val overrideContentDescriptionProvider: ((fieldValue: String) -> ResolvableString)?
         get() = null
 
     /** This will determine the state of the field based on the text */
