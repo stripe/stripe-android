@@ -27,6 +27,7 @@ internal object PaymentSheetFixtures {
     internal const val DIFFERENT_CLIENT_SECRET = "pi_4321_secret_4321"
     internal const val SETUP_CLIENT_SECRET = "seti_1234_secret_4321"
     internal const val PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER = "PaymentSheetTestIdentifier"
+    internal const val FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER = "FlowControllerTestIdentifier"
 
     internal val PAYMENT_INTENT_CLIENT_SECRET = PaymentIntentClientSecret(CLIENT_SECRET)
     internal val SETUP_INTENT_CLIENT_SECRET = PaymentIntentClientSecret(SETUP_CLIENT_SECRET)

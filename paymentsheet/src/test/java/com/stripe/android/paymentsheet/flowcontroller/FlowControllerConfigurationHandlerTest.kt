@@ -9,8 +9,12 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
+import com.stripe.android.paymentsheet.FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
@@ -64,7 +68,7 @@ class FlowControllerConfigurationHandlerTest {
         viewModel = FlowControllerViewModel(
             application = ApplicationProvider.getApplicationContext(),
             handle = SavedStateHandle(),
-            paymentElementCallbackIdentifier = "FlowControllerTestIdentifier",
+            paymentElementCallbackIdentifier = FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER,
             statusBarColor = null,
         )
     }
@@ -446,6 +450,15 @@ class FlowControllerConfigurationHandlerTest {
         val configureTurbine = Turbine<Throwable?>()
         val configurationHandler = createConfigurationHandler()
 
+        PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks(
+            createIntentCallback = { _, _ ->
+                error("Should not be called!")
+            },
+            externalPaymentMethodConfirmHandler = { _, _ ->
+                error("Should not be called!")
+            },
+        )
+
         configurationHandler.configure(
             scope = this,
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
@@ -474,6 +487,15 @@ class FlowControllerConfigurationHandlerTest {
     fun `Sends correct analytics event when using deferred intent with server-side confirmation`() = runTest {
         val configureTurbine = Turbine<Throwable?>()
         val configurationHandler = createConfigurationHandler()
+
+        PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks(
+            createIntentCallback = { _, _ ->
+                error("Should not be called!")
+            },
+            externalPaymentMethodConfirmHandler = { _, _ ->
+                error("Should not be called!")
+            },
+        )
 
         configurationHandler.configure(
             scope = this,
