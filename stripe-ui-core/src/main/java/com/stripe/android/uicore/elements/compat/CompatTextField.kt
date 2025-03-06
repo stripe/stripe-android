@@ -451,7 +451,7 @@ private object TextFieldTransitionScope {
     }
 }
 
-private fun Modifier.errorSemanticsWithDefault(
+fun Modifier.errorSemanticsWithDefault(
     isError: Boolean,
     errorMessage: String?,
 ): Modifier = composed {
