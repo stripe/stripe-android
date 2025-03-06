@@ -25,10 +25,7 @@ import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -72,16 +69,12 @@ internal fun WalletScreen(
     hideBottomSheetContent: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
-    var isExpanded by rememberSaveable { mutableStateOf(false) }
     WalletBody(
         state = state,
-        isExpanded = isExpanded,
         expiryDateController = viewModel.expiryDateController,
         cvcController = viewModel.cvcController,
         onItemSelected = viewModel::onItemSelected,
-        onExpandedChanged = { expanded ->
-            isExpanded = expanded
-        },
+        onExpandedChanged = viewModel::onExpandedChanged,
         onPrimaryButtonClick = viewModel::onPrimaryButtonClicked,
         onPayAnotherWayClicked = viewModel::onPayAnotherWayClicked,
         onRemoveClicked = viewModel::onRemoveClicked,
@@ -96,7 +89,6 @@ internal fun WalletScreen(
 @Composable
 internal fun WalletBody(
     state: WalletUiState,
-    isExpanded: Boolean,
     expiryDateController: TextFieldController,
     cvcController: CvcController,
     onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
@@ -143,7 +135,7 @@ internal fun WalletBody(
                     fill = false
                 ),
             state = state,
-            isExpanded = isExpanded,
+            isExpanded = state.isExpanded,
             expiryDateController = expiryDateController,
             cvcController = cvcController,
             onItemSelected = onItemSelected,
