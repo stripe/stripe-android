@@ -39,6 +39,12 @@ import com.stripe.android.link.ui.verification.VerificationScreen
 import com.stripe.android.link.ui.verification.VerificationViewModel
 import com.stripe.android.link.ui.wallet.WalletScreen
 import com.stripe.android.link.ui.wallet.WalletViewModel
+import com.stripe.android.link.utils.enterTransition
+import com.stripe.android.link.utils.exitTransition
+import com.stripe.android.link.utils.loadingExitTransition
+import com.stripe.android.link.utils.popEnterTransition
+import com.stripe.android.link.utils.popExitTransition
+import com.stripe.android.link.utils.signupEnterTransition
 import com.stripe.android.ui.core.CircularProgressIndicator
 
 @SuppressWarnings("LongMethod")
@@ -140,12 +146,22 @@ private fun Screens(
         modifier = Modifier.fillMaxSize(),
         navController = navController,
         startDestination = LinkScreen.Loading.route,
+        enterTransition = enterTransition,
+        popEnterTransition = popEnterTransition,
+        popExitTransition = popExitTransition,
+        exitTransition = exitTransition,
     ) {
-        composable(LinkScreen.Loading.route) {
+        composable(
+            route = LinkScreen.Loading.route,
+            exitTransition = loadingExitTransition,
+        ) {
             Loader()
         }
 
-        composable(LinkScreen.SignUp.route) {
+        composable(
+            route = LinkScreen.SignUp.route,
+            enterTransition = signupEnterTransition,
+        ) {
             SignUpRoute(
                 navigate = navigate,
                 navigateAndClearStack = navigateAndClearStack,
