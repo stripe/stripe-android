@@ -31,6 +31,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -254,6 +255,11 @@ internal class LinkActivityViewModel @Inject constructor(
 
     private suspend fun navigateToLinkScreen() {
         val accountStatus = linkAccountManager.accountStatus.first()
+
+        // We add a tiny delay, which gives the loading screen a chance to fully inflate.
+        // Otherwise, we get a weird scaling animation when we display the first non-loading screen.
+        delay(250)
+
         val screen = when (accountStatus) {
             AccountStatus.Verified -> {
                 LinkScreen.Wallet
@@ -276,8 +282,9 @@ internal class LinkActivityViewModel @Inject constructor(
 
     companion object {
         private val showHeaderRoutes = setOf(
-            LinkScreen.Wallet.route,
+            LinkScreen.Loading.route,
             LinkScreen.SignUp.route,
+            LinkScreen.Wallet.route,
             LinkScreen.Verification.route
         )
 
