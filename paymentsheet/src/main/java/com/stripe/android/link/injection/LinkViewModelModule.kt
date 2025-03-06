@@ -8,6 +8,7 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.paymentelement.confirmation.DefaultConfirmationHandler
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.uicore.navigation.NavigationManager
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
@@ -24,6 +25,7 @@ internal object LinkViewModelModule {
         eventReporter: EventReporter,
         linkConfiguration: LinkConfiguration,
         linkAttestationCheck: LinkAttestationCheck,
+        navigationManager: NavigationManager,
         savedStateHandle: SavedStateHandle,
         @Named(START_WITH_VERIFICATION_DIALOG) startWithVerificationDialog: Boolean
     ): LinkActivityViewModel {
@@ -36,6 +38,7 @@ internal object LinkViewModelModule {
             linkConfiguration = linkConfiguration,
             linkAttestationCheck = linkAttestationCheck,
             savedStateHandle = savedStateHandle,
+            navigationManager = navigationManager,
             startWithVerificationDialog = startWithVerificationDialog
         )
     }

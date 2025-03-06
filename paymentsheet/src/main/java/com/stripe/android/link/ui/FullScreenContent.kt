@@ -13,7 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavHostController
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.link.LinkAction
 import com.stripe.android.link.LinkActivityResult
@@ -21,6 +21,10 @@ import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
+import com.stripe.android.uicore.navigation.NavigationEffects
+import com.stripe.android.uicore.navigation.NavigationIntent
+import com.stripe.android.uicore.navigation.rememberKeyboardController
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -32,9 +36,10 @@ internal fun FullScreenContent(
     onBackPressed: () -> Unit,
     moveToWeb: () -> Unit,
     goBack: () -> Unit,
+    onNavBackStackEntryChanged: (NavBackStackEntry?) -> Unit,
+    navigationChannel: SharedFlow<NavigationIntent>,
     handleViewAction: (LinkAction) -> Unit,
     onLinkScreenScreenCreated: () -> Unit,
-    onNavControllerCreated: (NavHostController) -> Unit,
     navigate: (route: LinkScreen, clearStack: Boolean) -> Unit,
     dismissWithResult: ((LinkActivityResult) -> Unit)?,
     getLinkAccount: () -> LinkAccount?,
@@ -44,6 +49,7 @@ internal fun FullScreenContent(
     val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val coroutineScope = rememberCoroutineScope()
     val navController = rememberNavController()
+    val keyboardController = rememberKeyboardController()
 
     if (bottomSheetContent != null) {
         DisposableEffect(bottomSheetContent) {
@@ -53,6 +59,13 @@ internal fun FullScreenContent(
             }
         }
     }
+
+    NavigationEffects(
+        navigationChannel = navigationChannel,
+        navHostController = navController,
+        keyboardController = keyboardController,
+        onBackStackEntryUpdated = onNavBackStackEntryChanged
+    )
 
     Box(
         modifier = modifier
@@ -81,7 +94,6 @@ internal fun FullScreenContent(
     }
 
     LaunchedEffect(Unit) {
-        onNavControllerCreated(navController)
         onLinkScreenScreenCreated()
     }
 }

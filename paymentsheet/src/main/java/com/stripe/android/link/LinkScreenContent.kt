@@ -4,13 +4,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.FullScreenContent
 import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.link.ui.verification.VerificationDialog
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.uicore.navigation.NavigationIntent
 import com.stripe.android.uicore.utils.collectAsState
+import kotlinx.coroutines.flow.SharedFlow
 
 @Composable
 internal fun LinkScreenContent(
@@ -27,12 +30,7 @@ internal fun LinkScreenContent(
         onVerificationSucceeded = viewModel::onVerificationSucceeded,
         onDismissClicked = viewModel::onDismissVerificationClicked,
         onBackPressed = onBackPressed,
-        onLinkScreenScreenCreated = {
-            viewModel.linkScreenCreated()
-        },
-        onNavControllerCreated = { navController ->
-            viewModel.navController = navController
-        },
+        // TODO remove too.
         navigate = viewModel::navigate,
         dismissWithResult = { result ->
             viewModel.dismissWithResult?.invoke(result)
@@ -43,7 +41,10 @@ internal fun LinkScreenContent(
         handleViewAction = viewModel::handleViewAction,
         moveToWeb = viewModel::moveToWeb,
         goBack = viewModel::goBack,
-        changeEmail = viewModel::changeEmail
+        changeEmail = viewModel::changeEmail,
+        onNavBackStackEntryChanged = viewModel::onNavEntryChanged,
+        onLinkScreenScreenCreated = viewModel::linkScreenCreated,
+        navigationChannel = viewModel.navigationFlow
     )
 }
 
@@ -52,12 +53,13 @@ internal fun LinkScreenContentBody(
     screenState: ScreenState,
     appBarState: LinkAppBarState,
     eventReporter: EventReporter,
+    navigationChannel: SharedFlow<NavigationIntent>,
+    onNavBackStackEntryChanged: (NavBackStackEntry?) -> Unit,
     onVerificationSucceeded: () -> Unit,
     onDismissClicked: () -> Unit,
     onBackPressed: () -> Unit,
-    onLinkScreenScreenCreated: () -> Unit,
-    onNavControllerCreated: (NavHostController) -> Unit,
     navigate: (route: LinkScreen, clearStack: Boolean) -> Unit,
+    onLinkScreenScreenCreated: () -> Unit,
     dismissWithResult: ((LinkActivityResult) -> Unit)?,
     getLinkAccount: () -> LinkAccount?,
     handleViewAction: (LinkAction) -> Unit,
@@ -79,9 +81,10 @@ internal fun LinkScreenContentBody(
                 goBack = goBack,
                 eventReporter = eventReporter,
                 onLinkScreenScreenCreated = onLinkScreenScreenCreated,
-                onNavControllerCreated = onNavControllerCreated,
                 handleViewAction = handleViewAction,
-                changeEmail = changeEmail
+                changeEmail = changeEmail,
+                onNavBackStackEntryChanged = onNavBackStackEntryChanged,
+                navigationChannel = navigationChannel,
             )
         }
         ScreenState.Loading -> Unit

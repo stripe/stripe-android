@@ -1,6 +1,7 @@
 package com.stripe.android.uicore.navigation
 
 import android.app.Activity
+import android.util.Log
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -25,11 +26,8 @@ fun NavigationEffects(
     val activity = (LocalContext.current as? Activity)
     val backStackEntry by navHostController.currentBackStackEntryAsState()
 
-    LaunchedEffect(backStackEntry) {
-        onBackStackEntryUpdated(backStackEntry)
-    }
-
     LaunchedEffect(activity, navHostController, navigationChannel) {
+        Log.d("NavigationEffects", "LaunchedEffect registered")
         navigationChannel.onEach { intent ->
             if (activity?.isFinishing == true) {
                 return@onEach
@@ -58,6 +56,10 @@ fun NavigationEffects(
                 }
             }
         }.launchIn(this)
+    }
+
+    LaunchedEffect(backStackEntry) {
+        onBackStackEntryUpdated(backStackEntry)
     }
 }
 
