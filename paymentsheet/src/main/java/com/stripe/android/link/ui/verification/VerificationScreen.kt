@@ -1,6 +1,5 @@
 package com.stripe.android.link.ui.verification
 
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
@@ -51,7 +50,6 @@ internal fun VerificationScreen(
     viewModel: VerificationViewModel
 ) {
     val state by viewModel.viewState.collectAsState()
-    val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val focusRequester: FocusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -68,13 +66,6 @@ internal fun VerificationScreen(
             focusRequester.requestFocus()
             keyboardController?.show()
             viewModel.onFocusRequested()
-        }
-    }
-
-    LaunchedEffect(state.didSendNewCode) {
-        if (state.didSendNewCode) {
-            Toast.makeText(context, R.string.stripe_verification_code_sent, Toast.LENGTH_SHORT).show()
-            viewModel.didShowCodeSentNotification()
         }
     }
 

@@ -43,7 +43,6 @@ internal class VerificationViewModel @Inject constructor(
             requestFocus = true,
             errorMessage = null,
             isSendingNewCode = false,
-            didSendNewCode = false,
             isDialog = isDialog
         )
     )
@@ -104,7 +103,6 @@ internal class VerificationViewModel @Inject constructor(
             updateViewState {
                 it.copy(
                     isSendingNewCode = false,
-                    didSendNewCode = error == null,
                     errorMessage = error?.errorMessage,
                 )
             }
@@ -114,12 +112,6 @@ internal class VerificationViewModel @Inject constructor(
     fun resendCode() {
         updateViewState { it.copy(isSendingNewCode = true) }
         startVerification()
-    }
-
-    fun didShowCodeSentNotification() {
-        updateViewState {
-            it.copy(didSendNewCode = false)
-        }
     }
 
     fun onBack() {
