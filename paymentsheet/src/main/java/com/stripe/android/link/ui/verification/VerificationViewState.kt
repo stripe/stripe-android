@@ -9,7 +9,6 @@ internal data class VerificationViewState(
     val requestFocus: Boolean,
     val errorMessage: ResolvableString?,
     val isSendingNewCode: Boolean,
-    val didSendNewCode: Boolean,
     val redactedPhoneNumber: String,
     val email: String,
     val isDialog: Boolean
