@@ -2,6 +2,7 @@ package com.stripe.android.link.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.menu.LinkMenu
 import com.stripe.android.link.ui.menu.LinkMenuItem
@@ -9,6 +10,7 @@ import com.stripe.android.paymentsheet.R
 
 @Composable
 internal fun LinkAppBarMenu(
+    modifier: Modifier = Modifier,
     onLogoutClicked: () -> Unit
 ) {
     val items = remember {
@@ -16,7 +18,8 @@ internal fun LinkAppBarMenu(
     }
 
     LinkMenu(
-        items = items
+        items = items,
+        modifier = modifier,
     ) {
         onLogoutClicked()
     }

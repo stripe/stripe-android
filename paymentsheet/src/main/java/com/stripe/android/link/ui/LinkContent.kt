@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
@@ -69,13 +70,13 @@ internal fun LinkContent(
                     // calculating its initial size
                     Box(Modifier.defaultMinSize(minHeight = 1.dp)) {}
                 },
-                modifier = Modifier.fillMaxHeight(),
                 sheetState = sheetState,
                 sheetShape = MaterialTheme.linkShapes.large.copy(
                     bottomStart = CornerSize(0.dp),
                     bottomEnd = CornerSize(0.dp)
                 ),
-                scrimColor = MaterialTheme.linkColors.sheetScrim
+                scrimColor = MaterialTheme.linkColors.sheetScrim,
+                modifier = Modifier.fillMaxHeight(),
             ) {
                 Column(
                     modifier = Modifier
@@ -100,7 +101,8 @@ internal fun LinkContent(
                         },
                         onLogoutClicked = {
                             handleViewAction(LinkAction.LogoutClicked)
-                        }
+                        },
+                        modifier = Modifier.statusBarsPadding(),
                     )
 
                     Screens(

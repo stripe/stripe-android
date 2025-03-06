@@ -49,7 +49,6 @@
             android:theme="@style/StripeLinkBaseTheme"
             android:exported="false"
             android:label="@string/stripe_link"
-            android:windowSoftInputMode="adjustResize"
             android:autoRemoveFromRecents="true"
             android:configChanges="orientation|keyboard|keyboardHidden|screenLayout|screenSize|smallestScreenSize" />
 

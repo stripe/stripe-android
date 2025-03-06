@@ -37,12 +37,13 @@ import com.stripe.android.ui.core.R as StripeUiCoreR
 @Composable
 internal fun LinkAppBar(
     state: LinkAppBarState,
+    modifier: Modifier = Modifier,
     onBackPressed: () -> Unit,
     showBottomSheetContent: (BottomSheetContent?) -> Unit,
     onLogoutClicked: () -> Unit
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .defaultMinSize(minHeight = AppBarHeight),
         horizontalArrangement = Arrangement.Center,
@@ -126,7 +127,7 @@ private fun LinkAppBarAction(
     IconButton(
         onClick = {
             showBottomSheetContent {
-                LinkAppBarMenu(onLogoutClicked)
+                LinkAppBarMenu(onLogoutClicked = onLogoutClicked)
             }
         },
         enabled = showOverflowMenu,

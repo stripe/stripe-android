@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -35,6 +36,7 @@ internal fun LinkMenu(
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 10.dp)
+            .navigationBarsPadding()
     ) {
         for (item in items) {
             LinkBottomSheetRow(

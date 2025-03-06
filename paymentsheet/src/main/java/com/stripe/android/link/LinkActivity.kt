@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
@@ -23,7 +24,11 @@ internal class LinkActivity : ComponentActivity() {
     private var webLauncher: ActivityResultLauncher<LinkActivityContract.Args>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // TODO: Enable edge-to-edge
+        // TODO: Scrollable screens
+        // TODO: Fix keyboard inset
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
 
         try {
             viewModel = ViewModelProvider(this, viewModelFactory)[LinkActivityViewModel::class.java]
