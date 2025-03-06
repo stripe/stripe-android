@@ -13,8 +13,8 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.model.VisualUpdate
 import com.stripe.android.financialconnections.navigation.Destination
-import com.stripe.android.financialconnections.navigation.NavigationIntent
-import com.stripe.android.financialconnections.navigation.NavigationManagerImpl
+import com.stripe.android.uicore.navigation.NavigationIntent
+import com.stripe.android.uicore.navigation.NavigationManagerImpl
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule

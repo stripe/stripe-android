@@ -10,9 +10,9 @@ import com.stripe.android.financialconnections.domain.IsLinkWithStripe
 import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.features.notice.PresentSheet
-import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
 import com.stripe.android.financialconnections.utils.TestNavigationManager
+import com.stripe.android.uicore.navigation.NavigationManager
 import org.mockito.kotlin.mock
 
 internal object ConsentViewModelFactory {
