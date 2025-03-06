@@ -115,13 +115,11 @@ internal class StripeConnectWebView private constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        logger.debug("($loggerTag) Attaching to window")
         // We need the Activity context for some UI to work, like web-triggered dialogs
         mutableContext.baseContext = requireNotNull(findActivity())
     }
 
     override fun onDetachedFromWindow() {
-        logger.debug("($loggerTag) Detaching from window")
         mutableContext.baseContext = mutableContext.applicationContext
         super.onDetachedFromWindow()
     }
