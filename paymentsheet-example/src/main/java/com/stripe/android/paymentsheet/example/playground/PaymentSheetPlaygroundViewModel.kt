@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.example.playground
 
 import android.app.Application
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -116,6 +117,7 @@ internal class PaymentSheetPlaygroundViewModel(
                     setPlaygroundState(state)
                 },
                 onFailure = { exception ->
+                    Log.e("TOLUWANI", exception.stackTraceToString())
                     status.value = StatusMessage(
                         "Preparing checkout failed:\n${exception.message}"
                     )

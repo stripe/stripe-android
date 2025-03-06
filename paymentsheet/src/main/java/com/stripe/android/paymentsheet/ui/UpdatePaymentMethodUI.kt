@@ -34,6 +34,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.CardBrandFilter
@@ -47,7 +48,9 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.SavedPaymentMethod
 import com.stripe.android.paymentsheet.utils.testMetadata
 import com.stripe.android.uicore.elements.CheckboxElementUI
+import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.TextFieldColors
+import com.stripe.android.uicore.elements.TextFieldState
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
@@ -403,16 +406,14 @@ private fun ExpiryField(
     isExpired: Boolean,
     modifier: Modifier
 ) {
-    CommonTextField(
+    ExpiryTextField(
         modifier = modifier.testTag(UPDATE_PM_EXPIRY_FIELD_TEST_TAG),
-        value = formattedExpiryDate(expiryMonth = expiryMonth, expiryYear = expiryYear),
-        label = stringResource(id = com.stripe.android.uicore.R.string.stripe_expiration_date_hint),
-        shape = MaterialTheme.shapes.small.copy(
-            topStart = ZeroCornerSize,
-            topEnd = ZeroCornerSize,
-            bottomEnd = ZeroCornerSize,
-        ),
-        shouldShowError = isExpired,
+        onValueChange = {
+
+        },
+        validator = {
+            DateConfig().determineState(it)
+        }
     )
 }
 
@@ -475,19 +476,22 @@ private fun CvcField(cardBrand: CardBrand, modifier: Modifier) {
 }
 
 @Composable
-private fun CommonTextField(
+internal fun CommonTextField(
     value: String,
     label: String,
+    onValueChange: (String) -> Unit = {},
     modifier: Modifier = Modifier,
     trailingIcon: @Composable (() -> Unit)? = null,
     shouldShowError: Boolean = false,
+    enabled: Boolean = false,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
     shape: Shape =
         MaterialTheme.shapes.small.copy(bottomEnd = ZeroCornerSize, bottomStart = ZeroCornerSize),
 ) {
     TextField(
         modifier = modifier.fillMaxWidth(),
         value = value,
-        enabled = false,
+        enabled = enabled,
         label = {
             Label(
                 text = label,
@@ -498,7 +502,8 @@ private fun CommonTextField(
         colors = TextFieldColors(
             shouldShowError = shouldShowError,
         ),
-        onValueChange = {},
+        visualTransformation = visualTransformation,
+        onValueChange = onValueChange,
     )
 }
 
