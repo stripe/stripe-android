@@ -62,21 +62,18 @@ class EmbeddedComponentManager(
      * @param activity The [FragmentActivity] to present the component in.
      * @param title Optional title to display in the toolbar.
      * @param props Optional props to use for configuring the component.
-     * @param cacheKey Key to use for caching the internal WebView across configuration changes.
      */
     @PrivateBetaConnectSDK
     fun createAccountOnboardingController(
         activity: FragmentActivity,
         title: String? = null,
         props: AccountOnboardingProps? = null,
-        cacheKey: String? = null,
     ): AccountOnboardingController {
         return AccountOnboardingController(
             activity = activity,
             embeddedComponentManager = this,
             title = title,
             props = props,
-            cacheKey = cacheKey,
         )
     }
 
@@ -89,7 +86,7 @@ class EmbeddedComponentManager(
      * @param cacheKey Key to use for caching the internal WebView across configuration changes.
      */
     @PrivateBetaConnectSDK
-    fun createAccountOnboardingView(
+    internal fun createAccountOnboardingView(
         context: Context,
         listener: AccountOnboardingListener? = null,
         props: AccountOnboardingProps? = null,
@@ -113,7 +110,7 @@ class EmbeddedComponentManager(
      * @param cacheKey Key to use for caching the internal WebView within an Activity across configuration changes.
      */
     @PrivateBetaConnectSDK
-    fun createPayoutsView(
+    internal fun createPayoutsView(
         context: Context,
         listener: PayoutsListener? = null,
         cacheKey: String? = null,
