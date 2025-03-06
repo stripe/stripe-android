@@ -4,6 +4,8 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.AdministrativeAreaConfig
 import com.stripe.android.uicore.elements.AdministrativeAreaElement
@@ -18,6 +20,7 @@ import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldConfig
+import com.stripe.android.uicore.utils.asIndividualDigits
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
@@ -269,6 +272,7 @@ private fun FieldType.toElement(
                 keyboardType = keyboardType,
                 countryCode = countryCode
             ),
+            overrideContentDescriptionProvider = getOverrideContentDescription(),
             showOptionalLabel = showOptionalLabel
         )
     )
@@ -314,6 +318,15 @@ private fun FieldType.toConfig(
             capitalization = capitalization,
             keyboard = keyboardType
         )
+    }
+}
+
+private fun FieldType.getOverrideContentDescription(): ((fieldValue: String) -> ResolvableString)? {
+    return when (this) {
+        FieldType.PostalCode -> {
+            { it.asIndividualDigits().resolvableString }
+        }
+        else -> null
     }
 }
 

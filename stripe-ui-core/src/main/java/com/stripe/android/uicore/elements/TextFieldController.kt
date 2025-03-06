@@ -129,8 +129,6 @@ class SimpleTextFieldController(
     override val showOptionalLabel: Boolean = false,
     override val initialValue: String? = null,
     private val overrideContentDescriptionProvider: ((fieldValue: String) -> ResolvableString)? = null,
-    private val shouldAnnounceLabel: Boolean = true,
-    private val shouldAnnounceFieldValue: Boolean = true
 ) : TextFieldController {
     override val trailingIcon: StateFlow<TextFieldIcon?> = textFieldConfig.trailingIcon
     override val capitalization: KeyboardCapitalization = textFieldConfig.capitalization
@@ -245,8 +243,8 @@ class SimpleTextFieldController(
             modifier = modifier,
             nextFocusDirection = nextFocusDirection,
             previousFocusDirection = previousFocusDirection,
-            shouldAnnounceLabel = shouldAnnounceLabel,
-            shouldAnnounceFieldValue = shouldAnnounceFieldValue
+            shouldAnnounceLabel = textFieldConfig.shouldAnnounceLabel,
+            shouldAnnounceFieldValue = textFieldConfig.shouldAnnounceFieldValue
         )
     }
 }
