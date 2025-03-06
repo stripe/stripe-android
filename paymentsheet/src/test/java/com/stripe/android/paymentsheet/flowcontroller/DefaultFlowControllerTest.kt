@@ -49,13 +49,13 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
 import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
-import com.stripe.android.paymentsheet.FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.R
@@ -1462,6 +1462,15 @@ internal class DefaultFlowControllerTest {
         )
 
         for ((clientSecret, deferredIntentConfirmationType) in clientSecrets) {
+            PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks(
+                createIntentCallback = { _, _ ->
+                    error("Should not be called!")
+                },
+                externalPaymentMethodConfirmHandler = { _, _ ->
+                    error("Should not be called!")
+                },
+            )
+
             val flowController = createAndConfigureFlowControllerForDeferredIntent()
             val savedSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
 
@@ -1893,7 +1902,7 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `Clears out CreateIntentCallback when lifecycle owner is destroyed`() {
-        PaymentElementCallbackReferences[FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER] = PaymentElementCallbacks(
+        PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks(
             createIntentCallback = { _, _ ->
                 error("I’m alive")
             },
@@ -1904,26 +1913,26 @@ internal class DefaultFlowControllerTest {
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
         assertThat(
-            PaymentElementCallbackReferences[FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER]
+            PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER]
                 ?.createIntentCallback
         ).isNotNull()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
         assertThat(
-            PaymentElementCallbackReferences[FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER]
+            PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER]
                 ?.createIntentCallback
         ).isNotNull()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         assertThat(
-            PaymentElementCallbackReferences[FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER]
+            PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER]
                 ?.createIntentCallback
         ).isNull()
     }
 
     @Test
     fun `Clears out externalPaymentMethodConfirmHandler when lifecycle owner is destroyed`() {
-        PaymentElementCallbackReferences[FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER] = PaymentElementCallbacks(
+        PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks(
             createIntentCallback = null,
             externalPaymentMethodConfirmHandler = { _, _ ->
                 error("I’m alive")
@@ -1934,19 +1943,19 @@ internal class DefaultFlowControllerTest {
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
         assertThat(
-            PaymentElementCallbackReferences[FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER]
+            PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER]
                 ?.externalPaymentMethodConfirmHandler
         ).isNotNull()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
         assertThat(
-            PaymentElementCallbackReferences[FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER]
+            PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER]
                 ?.externalPaymentMethodConfirmHandler
         ).isNotNull()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         assertThat(
-            PaymentElementCallbackReferences[FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER]
+            PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER]
                 ?.externalPaymentMethodConfirmHandler
         ).isNull()
     }
@@ -2314,9 +2323,9 @@ internal class DefaultFlowControllerTest {
         errorReporter = errorReporter,
         initializedViaCompose = false,
         linkHandler = mock(),
-        paymentElementCallbackIdentifier = FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER,
+        paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
         confirmationHandler = createTestConfirmationHandlerFactory(
-            paymentElementCallbackIdentifier = FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER,
+            paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
             bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
             googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
             intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
@@ -2338,7 +2347,7 @@ internal class DefaultFlowControllerTest {
             application = ApplicationProvider.getApplicationContext(),
             handle = SavedStateHandle(),
             statusBarColor = STATUS_BAR_COLOR,
-            paymentElementCallbackIdentifier = FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER,
+            paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
         )
     }
 

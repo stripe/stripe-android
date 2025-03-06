@@ -56,6 +56,8 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator
@@ -75,6 +77,7 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.ARGS_DEFERRED_INTENT
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -2113,6 +2116,15 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `Sends correct analytics event when using deferred intent with client-side confirmation`() = runTest {
+        PaymentElementCallbackReferences[PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks(
+            createIntentCallback = { _, _ ->
+                error("Should not be called!")
+            },
+            externalPaymentMethodConfirmHandler = { _, _ ->
+                error("Should not be called!")
+            },
+        )
+
         createViewModelForDeferredIntent()
 
         verify(eventReporter).onInit(
@@ -2123,6 +2135,15 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `Sends correct analytics event when using deferred intent with server-side confirmation`() = runTest {
+        PaymentElementCallbackReferences[PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks(
+            createIntentCallback = { _, _ ->
+                error("Should not be called!")
+            },
+            externalPaymentMethodConfirmHandler = { _, _ ->
+                error("Should not be called!")
+            },
+        )
+
         createViewModelForDeferredIntent()
 
         verify(eventReporter).onInit(
@@ -3266,7 +3287,7 @@ internal class PaymentSheetViewModelTest {
                 savedStateHandle = thisSavedStateHandle,
                 linkHandler = linkHandler,
                 confirmationHandlerFactory = confirmationHandlerFactory ?: createTestConfirmationHandlerFactory(
-                    paymentElementCallbackIdentifier = PaymentSheetFixtures.PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
+                    paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
                     intentConfirmationInterceptor = intentConfirmationInterceptor,
                     savedStateHandle = thisSavedStateHandle,
                     bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
