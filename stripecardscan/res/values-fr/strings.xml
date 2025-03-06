@@ -2,7 +2,7 @@
 <resources>
   <string name="stripe_camera_permission_settings_message">Veuillez autoriser l\'accès à l\'appareil photo pour scanner votre carte</string>
   <string name="stripe_card_scan_instructions">Scannez votre carte</string>
-  <string name="stripe_card_scan_privacy_link_text"><![CDATA[Nous faisons appel à Stripe pour vérifier vos coordonnées de carte bancaire. Stripe pourra utiliser et stocker vos données conformément à sa politique de confidentialité. <a href="https://support.stripe.com/questions/stripes-card-image-verification"><u>En savoir plus</u></a>]]></string>
+  <string name="stripe_card_scan_privacy_link_text"><![CDATA[Nous faisons appel à Stripe pour vérifier vos coordonnées de carte bancaire. Stripe pourra utiliser et stocker vos données conformément à sa politique de confidentialité. <a href=\"https://support.stripe.com/questions/stripes-card-image-verification\"><u>En savoir plus</u></a>]]></string>
   <string name="stripe_card_scan_title">Placez votre carte dans le rectangle pour la scanner</string>
   <string name="stripe_close_button_description">Fermer</string>
   <string name="stripe_swap_camera_button_description">Basculer l\'appareil photo</string>
