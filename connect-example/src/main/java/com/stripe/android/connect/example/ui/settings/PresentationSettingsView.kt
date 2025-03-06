@@ -1,5 +1,6 @@
 package com.stripe.android.connect.example.ui.settings
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,6 +23,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -50,30 +52,10 @@ private fun PresentationSettingsView(
     onBack: () -> Unit,
     onSave: (PresentationSettings) -> Unit,
 ) {
-    var enableEdgeToEdge by rememberSaveable { mutableStateOf(presentationSettings.enableEdgeToEdge) }
+    val context = LocalContext.current
     ConnectExampleScaffold(
         title = stringResource(R.string.presentation_settings),
         navigationIcon = { BackIconButton(onBack) },
-        actions = {
-            IconButton(
-                onClick = {
-                    onSave(
-                        PresentationSettings(
-                            presentationStyleIsPush = presentationSettings.presentationStyleIsPush,
-                            embedInTabBar = presentationSettings.embedInTabBar,
-                            embedInNavBar = presentationSettings.embedInNavBar,
-                            enableEdgeToEdge = enableEdgeToEdge,
-                        )
-                    )
-                    onBack()
-                },
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = stringResource(R.string.save)
-                )
-            }
-        }
     ) {
         Column(
             modifier = Modifier
@@ -82,8 +64,11 @@ private fun PresentationSettingsView(
         ) {
             SettingsSwitchItem(
                 text = stringResource(R.string.enable_edge_to_edge),
-                isChecked = enableEdgeToEdge,
-                onCheckedChange = { enableEdgeToEdge = it }
+                isChecked = presentationSettings.enableEdgeToEdge,
+                onCheckedChange = {
+                    Toast.makeText(context, R.string.restart_app_prompt, Toast.LENGTH_SHORT).show()
+                    onSave(presentationSettings.copy(enableEdgeToEdge = it))
+                }
             )
         }
     }
