@@ -88,7 +88,7 @@ class StripeComponentControllerTest {
     }
 
     internal class TestActivity : FragmentActivity() {
-        lateinit var controller: StripeComponentControllerImpl<*, TestComponentListener, *>
+        lateinit var controller: StripeComponentController<TestComponentListener, *>
         lateinit var embeddedComponentManager: EmbeddedComponentManager
         val onDismissListener = StripeComponentController.OnDismissListener { }
         val listener = object : TestComponentListener {}
@@ -106,11 +106,12 @@ class StripeComponentControllerTest {
         private fun createController(
             activity: FragmentActivity,
             embeddedComponentManager: EmbeddedComponentManager
-        ) = StripeComponentControllerImpl(
-            cls = TestComponentDialogFragment::class.java,
+        ) = object : StripeComponentController<TestComponentListener, EmptyProps>(
             activity = activity,
             embeddedComponentManager = embeddedComponentManager,
-        )
+        ) {
+            override val dfClass get() = TestComponentDialogFragment::class.java
+        }
     }
 
     internal class TestComponentDialogFragment :
@@ -130,7 +131,6 @@ class StripeComponentControllerTest {
         attrs = null,
         defStyleAttr = 0,
     ) {
-
         override var listener: TestComponentListener? = null
 
         override fun initialize(

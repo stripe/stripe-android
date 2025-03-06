@@ -13,10 +13,11 @@ class AccountOnboardingController internal constructor(
     embeddedComponentManager: EmbeddedComponentManager,
     title: String? = null,
     props: AccountOnboardingProps? = null,
-) : StripeComponentController<AccountOnboardingListener> by StripeComponentControllerImpl(
-    cls = AccountOnboardingDialogFragment::class.java,
+) : StripeComponentController<AccountOnboardingListener, AccountOnboardingProps>(
     activity = activity,
     embeddedComponentManager = embeddedComponentManager,
     title = title,
     props = props,
-)
+) {
+    override val dfClass get() = AccountOnboardingDialogFragment::class.java
+}
