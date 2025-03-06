@@ -73,7 +73,6 @@ internal class StripeComponentControllerImpl<DF, Listener, Props> internal const
     private val embeddedComponentManager: EmbeddedComponentManager,
     private val title: String? = null,
     private val props: Props? = null,
-    private val cacheKey: String? = null,
 ) : StripeComponentController<Listener>
     where DF : StripeComponentDialogFragment<*, Listener, Props>,
           Listener : StripeEmbeddedComponentListener,
@@ -134,7 +133,6 @@ internal class StripeComponentControllerImpl<DF, Listener, Props> internal const
             cls = cls,
             title = title,
             props = props,
-            cacheKey = cacheKey,
         )
     }
 }

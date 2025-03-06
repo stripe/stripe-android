@@ -13,12 +13,10 @@ class AccountOnboardingController internal constructor(
     embeddedComponentManager: EmbeddedComponentManager,
     title: String? = null,
     props: AccountOnboardingProps? = null,
-    cacheKey: String? = null,
 ) : StripeComponentController<AccountOnboardingListener> by StripeComponentControllerImpl(
     cls = AccountOnboardingDialogFragment::class.java,
     activity = activity,
     embeddedComponentManager = embeddedComponentManager,
     title = title,
     props = props,
-    cacheKey = cacheKey
 )

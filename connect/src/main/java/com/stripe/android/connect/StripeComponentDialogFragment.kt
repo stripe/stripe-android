@@ -33,8 +33,6 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
         @Suppress("DEPRECATION")
         get() = arguments?.getParcelable(ARG_PROPS)
 
-    protected val cacheKey: String? get() = arguments?.getString(ARG_CACHE_KEY)
-
     protected abstract fun createComponentView(
         embeddedComponentManager: EmbeddedComponentManager
     ): ComponentView
@@ -135,13 +133,11 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
     internal companion object {
         private const val ARG_TITLE = "title"
         private const val ARG_PROPS = "props"
-        private const val ARG_CACHE_KEY = "cache_key"
 
         fun <DF, Props> newInstance(
             cls: Class<DF>,
             title: String? = null,
             props: Props? = null,
-            cacheKey: String? = null,
         ): DF
             where DF : StripeComponentDialogFragment<*, *, Props>,
                   Props : ComponentProps {
@@ -150,7 +146,6 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
                 arguments = Bundle().apply {
                     putString(ARG_TITLE, title)
                     putParcelable(ARG_PROPS, props)
-                    putString(ARG_CACHE_KEY, cacheKey)
                 }
             }
         }

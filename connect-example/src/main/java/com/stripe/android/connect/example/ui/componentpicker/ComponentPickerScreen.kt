@@ -113,7 +113,6 @@ fun ComponentPickerContent(
                         activity = context,
                         title = "Account Onboarding",
                         props = onboardingSettings.toProps(),
-                        cacheKey = "AccountOnboardingExample"
                     )
                     val logTag = "AccountOnboarding"
                     val listener = object : AccountOnboardingListener {
