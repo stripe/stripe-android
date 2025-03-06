@@ -359,6 +359,7 @@ internal class CustomerSheetScreenshotTest {
                 onBrandChoiceOptionsShown = {},
                 // This checkbox is never displayed in CustomerSheet.
                 shouldShowSetAsDefaultCheckbox = false,
+                isDefaultPaymentMethod = false,
                 onUpdateSuccess = {},
             ),
             isLiveMode = true,

@@ -61,6 +61,7 @@ internal class InitialManageScreenFactoryTest {
                         setAsDefaultCheckboxChecked = false,
                     ),
                     shouldShowSetAsDefaultCheckbox = false,
+                    setAsDefaultCheckboxEnabled = false,
                 )
             },
             manageInteractorFactory = {
