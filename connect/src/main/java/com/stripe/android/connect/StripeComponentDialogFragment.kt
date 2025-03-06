@@ -1,13 +1,11 @@
 package com.stripe.android.connect
 
 import android.content.DialogInterface
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -19,7 +17,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.connect.appearance.Appearance
-import com.stripe.android.connect.databinding.StripeFullScreenComponentBinding
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
@@ -106,21 +103,15 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
         embeddedComponentManager: EmbeddedComponentManager
     ): ComponentView
 
-    private var _binding: StripeFullScreenComponentBinding? = null
-    private val binding get() = _binding!!
-
-    private var componentView: ComponentView? = null
-        set(value) {
-            field = value
-            value?.listener = listener
-        }
+    private var _rootView: StripeComponentDialogFragmentView<ComponentView>? = null
+    private val rootView get() = _rootView!!
 
     internal var initialEmbeddedComponentManager: EmbeddedComponentManager? = null
 
     var listener: Listener? = null
         set(value) {
             field = value
-            componentView?.listener = value
+            _rootView?.componentView?.listener = value
         }
 
     var onDismissListener: StripeComponentController.OnDismissListener? = null
@@ -137,12 +128,11 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
         // `setDecorFitsSystemWindows()` must be called here in onCreateView. If called too early, app crashes on
         // older Android versions; if too late, it doesn't do anything on newer versions.
         dialog?.window?.let { WindowCompat.setDecorFitsSystemWindows(it, false) }
-
-        val binding = StripeFullScreenComponentBinding.inflate(inflater, container, false)
-            .also { this._binding = it }
-        binding.toolbar.title = title
-        binding.toolbar.setNavigationOnClickListener { dismiss() }
-        return binding.root
+        val rootView = StripeComponentDialogFragmentView<ComponentView>(inflater)
+            .also { this._rootView = it }
+        rootView.toolbar.title = title
+        rootView.toolbar.setNavigationOnClickListener { dismiss() }
+        return rootView
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -174,10 +164,10 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
             val embeddedComponentManager =
                 viewModel.embeddedComponentManager.filterNotNull().first()
             val componentView = createComponentView(embeddedComponentManager)
-                .also { this@StripeComponentDialogFragment.componentView = it }
+                .also { it.listener = listener }
             componentView.layoutParams =
                 LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f)
-            binding.root.addView(componentView)
+            rootView.componentView = componentView
         }
     }
 
@@ -190,8 +180,7 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
     }
 
     override fun onDestroyView() {
-        componentView = null
-        _binding = null
+        _rootView = null
         super.onDestroyView()
     }
 
@@ -201,23 +190,8 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
     }
 
     private fun bindAppearance(appearance: Appearance) {
-        val context = binding.toolbar.context
-
-        val backgroundColor =
-            appearance.colors.background
-                ?: ContextCompat.getColor(context, R.color.stripe_connect_background)
-        dialog?.window?.setBackgroundDrawable(ColorDrawable(backgroundColor))
-        binding.toolbar.setBackgroundColor(backgroundColor)
-
-        val textColor = appearance.colors.text
-            ?: ContextCompat.getColor(context, R.color.stripe_connect_text)
-        binding.toolbar.setTitleTextColor(textColor)
-        binding.toolbar.navigationIcon?.setTint(textColor)
-
-        binding.divider.setBackgroundColor(
-            appearance.colors.border
-                ?: ContextCompat.getColor(context, R.color.stripe_connect_border)
-        )
+        rootView.bindAppearance(appearance)
+        dialog?.window?.setBackgroundDrawable(rootView.background)
     }
 
     internal companion object {
