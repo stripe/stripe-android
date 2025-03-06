@@ -86,7 +86,7 @@ class EmbeddedComponentManager(
      * @param cacheKey Key to use for caching the internal WebView across configuration changes.
      */
     @PrivateBetaConnectSDK
-    fun createAccountOnboardingView(
+    internal fun createAccountOnboardingView(
         context: Context,
         listener: AccountOnboardingListener? = null,
         props: AccountOnboardingProps? = null,
@@ -110,7 +110,7 @@ class EmbeddedComponentManager(
      * @param cacheKey Key to use for caching the internal WebView within an Activity across configuration changes.
      */
     @PrivateBetaConnectSDK
-    fun createPayoutsView(
+    internal fun createPayoutsView(
         context: Context,
         listener: PayoutsListener? = null,
         cacheKey: String? = null,
