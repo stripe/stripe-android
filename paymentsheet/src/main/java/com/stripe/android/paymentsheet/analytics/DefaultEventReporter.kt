@@ -399,6 +399,29 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
+    override fun onSetAsDefaultPaymentMethodSucceeded() {
+        fireEvent(
+            PaymentSheetEvent.SetAsDefaultPaymentMethodSucceeded(
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
+    }
+
+    override fun onSetAsDefaultPaymentMethodFailed(
+        error: Throwable,
+    ) {
+        fireEvent(
+            PaymentSheetEvent.SetAsDefaultPaymentMethodFailed(
+                error = error,
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
+    }
+
     override fun onCannotProperlyReturnFromLinkAndOtherLPMs() {
         fireEvent(PaymentSheetEvent.CannotProperlyReturnFromLinkAndLPMs(mode = mode))
     }

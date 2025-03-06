@@ -427,6 +427,29 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         }
     }
 
+    class SetAsDefaultPaymentMethodSucceeded(
+        override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_set_default_payment_method"
+
+        override val additionalParams: Map<String, Any?> = emptyMap()
+    }
+
+    class SetAsDefaultPaymentMethodFailed(
+        error: Throwable,
+        override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_set_default_payment_method_failed"
+
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_ERROR_MESSAGE to error.message,
+        ).plus(ErrorReporter.getAdditionalParamsFromError(error))
+    }
+
     class UpdatePaymentOptionSucceeded(
         selectedBrand: CardBrand,
         override val isDeferred: Boolean,

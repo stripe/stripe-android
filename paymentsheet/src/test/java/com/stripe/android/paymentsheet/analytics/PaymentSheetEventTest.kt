@@ -1377,6 +1377,62 @@ class PaymentSheetEventTest {
     }
 
     @Test
+    fun `SetAsDefaultPaymentMethodSucceeded event with setAsDefaultPaymentMethod should return expected toString()`() {
+        val event = PaymentSheetEvent.SetAsDefaultPaymentMethodSucceeded(
+            isDeferred = false,
+            linkEnabled = false,
+            googlePaySupported = false,
+        )
+        assertThat(
+            event.eventName
+        ).isEqualTo(
+            "mc_set_default_payment_method"
+        )
+        assertThat(
+            event.params
+        ).isEqualTo(
+            mapOf(
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
+            )
+        )
+    }
+
+    @Test
+    fun `SetAsDefaultPaymentMethodFailed event with setAsDefaultPaymentMethod should return expected toString()`() {
+        val event = PaymentSheetEvent.SetAsDefaultPaymentMethodFailed(
+            error = APIException(
+                StripeError(type = "network_error", code = "error_123"),
+                requestId = "request_123",
+                message = "No network available!"
+            ),
+            isDeferred = false,
+            linkEnabled = false,
+            googlePaySupported = false,
+        )
+        assertThat(
+            event.eventName
+        ).isEqualTo(
+            "mc_set_default_payment_method_failed"
+        )
+        assertThat(
+            event.params
+        ).isEqualTo(
+            mapOf(
+                "error_message" to "No network available!",
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
+                "analytics_value" to "apiError",
+                "request_id" to "request_123",
+                "error_type" to "network_error",
+                "error_code" to "error_123",
+            )
+        )
+    }
+
+    @Test
     fun `Init event should have default params if config is all defaults`() {
         val expectedPrimaryButton = mapOf(
             "colorsLight" to false,

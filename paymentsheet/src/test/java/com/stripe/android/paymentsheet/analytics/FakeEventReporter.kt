@@ -15,6 +15,22 @@ internal class FakeEventReporter : EventReporter {
     private val _paymentFailureCalls = Turbine<PaymentFailureCall>()
     val paymentFailureCalls: ReceiveTurbine<PaymentFailureCall> = _paymentFailureCalls
 
+    private val _updatePaymentMethodSucceededCalls = Turbine<UpdatePaymentMethodSucceededCall>()
+    val updatePaymentMethodSucceededCalls: ReceiveTurbine<UpdatePaymentMethodSucceededCall> =
+        _updatePaymentMethodSucceededCalls
+
+    private val _updatePaymentMethodFailedCalls = Turbine<UpdatePaymentMethodFailedCall>()
+    val updatePaymentMethodFailedCalls: ReceiveTurbine<UpdatePaymentMethodFailedCall> =
+        _updatePaymentMethodFailedCalls
+
+    private val _setAsDefaultPaymentMethodFailedCalls = Turbine<SetAsDefaultPaymentMethodFailedCall>()
+    val setAsDefaultPaymentMethodFailedCalls: ReceiveTurbine<SetAsDefaultPaymentMethodFailedCall> =
+        _setAsDefaultPaymentMethodFailedCalls
+
+    private val _setAsDefaultPaymentMethodSucceededCalls = Turbine<SetAsDefaultPaymentMethodSucceededCall>()
+    val setAsDefaultPaymentMethodSucceededCalls: ReceiveTurbine<SetAsDefaultPaymentMethodSucceededCall> =
+        _setAsDefaultPaymentMethodSucceededCalls
+
     override fun onInit(configuration: PaymentSheet.Configuration, isDeferred: Boolean) {
     }
 
@@ -106,9 +122,27 @@ internal class FakeEventReporter : EventReporter {
     }
 
     override fun onUpdatePaymentMethodSucceeded(selectedBrand: CardBrand) {
+        _updatePaymentMethodSucceededCalls.add(
+            UpdatePaymentMethodSucceededCall(selectedBrand = selectedBrand)
+        )
     }
 
     override fun onUpdatePaymentMethodFailed(selectedBrand: CardBrand, error: Throwable) {
+        _updatePaymentMethodFailedCalls.add(
+            UpdatePaymentMethodFailedCall(selectedBrand = selectedBrand, error = error)
+        )
+    }
+
+    override fun onSetAsDefaultPaymentMethodSucceeded() {
+        _setAsDefaultPaymentMethodSucceededCalls.add(
+            SetAsDefaultPaymentMethodSucceededCall()
+        )
+    }
+
+    override fun onSetAsDefaultPaymentMethodFailed(error: Throwable) {
+        _setAsDefaultPaymentMethodFailedCalls.add(
+            SetAsDefaultPaymentMethodFailedCall(error = error)
+        )
     }
 
     override fun onCannotProperlyReturnFromLinkAndOtherLPMs() {
@@ -120,5 +154,20 @@ internal class FakeEventReporter : EventReporter {
     data class PaymentFailureCall(
         val paymentSelection: PaymentSelection?,
         val error: PaymentSheetConfirmationError
+    )
+
+    data class UpdatePaymentMethodSucceededCall(
+        val selectedBrand: CardBrand,
+    )
+
+    data class UpdatePaymentMethodFailedCall(
+        val selectedBrand: CardBrand,
+        val error: Throwable,
+    )
+
+    class SetAsDefaultPaymentMethodSucceededCall
+
+    data class SetAsDefaultPaymentMethodFailedCall(
+        val error: Throwable,
     )
 }
