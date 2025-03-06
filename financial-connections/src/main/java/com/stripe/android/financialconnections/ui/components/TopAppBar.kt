@@ -48,8 +48,8 @@ import com.stripe.android.financialconnections.ui.LocalNavHostController
 import com.stripe.android.financialconnections.ui.theme.Attention300
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.Theme
-import com.stripe.android.financialconnections.utils.KeyboardController
-import com.stripe.android.financialconnections.utils.rememberKeyboardController
+import com.stripe.android.uicore.navigation.KeyboardController
+import com.stripe.android.uicore.navigation.rememberKeyboardController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 

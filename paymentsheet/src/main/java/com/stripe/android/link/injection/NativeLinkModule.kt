@@ -50,6 +50,8 @@ import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.repository.ConsumersApiServiceImpl
+import com.stripe.android.uicore.navigation.NavigationManager
+import com.stripe.android.uicore.navigation.NavigationManagerImpl
 import com.stripe.attestation.IntegrityRequestManager
 import dagger.Binds
 import dagger.Module
@@ -72,6 +74,12 @@ internal interface NativeLinkModule {
     @Binds
     @NativeLinkScope
     fun bindLinkAccountManager(linkAccountManager: DefaultLinkAccountManager): LinkAccountManager
+
+    @Binds
+    @NativeLinkScope
+    fun bindsNavigationManager(
+        impl: NavigationManagerImpl
+    ): NavigationManager
 
     @Binds
     @NativeLinkScope

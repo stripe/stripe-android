@@ -1,6 +1,7 @@
-package com.stripe.android.financialconnections.utils
+package com.stripe.android.uicore.navigation
 
 import android.view.ViewTreeObserver
+import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.State
@@ -13,7 +14,8 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import kotlinx.coroutines.flow.first
 
-internal class KeyboardController(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class KeyboardController(
     private val dismissKeyboard: () -> Unit,
     private val isKeyboardVisible: State<Boolean>,
 ) {
@@ -31,7 +33,8 @@ internal class KeyboardController(
 }
 
 @Composable
-internal fun rememberKeyboardController(): KeyboardController {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun rememberKeyboardController(): KeyboardController {
     val textInputService = LocalTextInputService.current
     val keyboardState = isKeyboardVisibleAsState()
 

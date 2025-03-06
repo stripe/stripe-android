@@ -1,11 +1,13 @@
-package com.stripe.android.financialconnections.navigation
+package com.stripe.android.uicore.navigation
 
+import androidx.annotation.RestrictTo
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import javax.inject.Inject
 
-internal interface NavigationManager {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface NavigationManager {
     val navigationFlow: SharedFlow<NavigationIntent>
 
     fun tryNavigateTo(
@@ -17,30 +19,38 @@ internal interface NavigationManager {
     fun tryNavigateBack()
 }
 
-internal sealed interface PopUpToBehavior {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed interface PopUpToBehavior {
     val inclusive: Boolean
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Current(
         override val inclusive: Boolean,
     ) : PopUpToBehavior
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Route(
         override val inclusive: Boolean,
         val route: String,
     ) : PopUpToBehavior
 }
 
-internal sealed class NavigationIntent {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed class NavigationIntent {
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class NavigateTo(
         val route: String,
         val popUpTo: PopUpToBehavior?,
         val isSingleTop: Boolean,
     ) : NavigationIntent()
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data object NavigateBack : NavigationIntent()
 }
 
-internal class NavigationManagerImpl @Inject constructor() : NavigationManager {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class NavigationManagerImpl @Inject constructor() : NavigationManager {
     private val _navigationFlow = MutableSharedFlow<NavigationIntent>(extraBufferCapacity = 1)
 
     override val navigationFlow = _navigationFlow.asSharedFlow()
