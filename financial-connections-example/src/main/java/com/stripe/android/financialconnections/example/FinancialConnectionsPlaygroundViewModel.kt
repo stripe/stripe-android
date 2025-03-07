@@ -144,13 +144,13 @@ internal class FinancialConnectionsPlaygroundViewModel(
                         )
                     }
 
-                    val stripeAccount = settings.get<StripeAccountIdSetting>().selectedOption
+                    val stripeAccount = settings.getOrNull<StripeAccountIdSetting>()?.selectedOption
 
                     _viewEffect.emit(
                         FinancialConnectionsPlaygroundViewEffect.OpenForPaymentIntent(
                             paymentIntentSecret = it.intentSecret,
                             publishableKey = it.publishableKey,
-                            stripeAccountId = stripeAccount.takeIf(String::isNotBlank),
+                            stripeAccountId = stripeAccount?.takeIf(String::isNotBlank),
                             ephemeralKey = it.ephemeralKey,
                             customerId = it.customerId,
                             elementsSessionContext = ElementsSessionContext(
@@ -187,7 +187,7 @@ internal class FinancialConnectionsPlaygroundViewModel(
                 .onSuccess {
                     showLoadingWithMessage("Session created, opening FinancialConnectionsSheet.")
 
-                    val stripeAccount = settings.get<StripeAccountIdSetting>().selectedOption
+                    val stripeAccount = settings.getOrNull<StripeAccountIdSetting>()?.selectedOption
 
                     _state.update { current -> current.copy(publishableKey = it.publishableKey) }
                     _viewEffect.emit(
@@ -195,7 +195,7 @@ internal class FinancialConnectionsPlaygroundViewModel(
                             configuration = FinancialConnectionsSheet.Configuration(
                                 financialConnectionsSessionClientSecret = it.clientSecret,
                                 publishableKey = it.publishableKey,
-                                stripeAccountId = stripeAccount.takeIf(String::isNotBlank),
+                                stripeAccountId = stripeAccount?.takeIf(String::isNotBlank),
                             )
                         )
                     )
@@ -534,8 +534,6 @@ internal data class FinancialConnectionsPlaygroundState(
 
     val experience: Experience = settings.get<ExperienceSetting>().selectedOption
     val flow: Flow = settings.get<FlowSetting>().selectedOption
-    val stripeAccountId: String? = settings.getOrNull<StripeAccountIdSetting>()?.selectedOption
-        ?.takeIf { it.isNotEmpty() }
 
     fun updateWithMerchants(merchants: List<Merchant>): FinancialConnectionsPlaygroundState {
         return copy(
