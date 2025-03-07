@@ -100,7 +100,11 @@ class SavedPaymentMethodMutatorTest {
 
     @Test
     fun `canEdit is correct CBC is enabled`() = runScenario(
-        isCbcEligible = true
+        paymentMethodMetadataFlow = stateFlowOf(
+            PaymentMethodMetadataFactory.create(
+                cbcEligibility = CardBrandChoiceEligibility.Eligible(listOf(CardBrand.Visa, CardBrand.CartesBancaires))
+            )
+        )
     ) {
         savedPaymentMethodMutator.canEdit.test {
             assertThat(awaitItem()).isFalse()
@@ -842,20 +846,13 @@ class SavedPaymentMethodMutatorTest {
     private fun runScenario(
         customerRepository: CustomerRepository = FakeCustomerRepository(),
         eventReporter: EventReporter = FakeEventReporter(),
-        isCbcEligible: Boolean = false,
         selection: MutableStateFlow<PaymentSelection?> = MutableStateFlow(null),
         customerStateHolder: CustomerStateHolder = CustomerStateHolder(
             savedStateHandle = SavedStateHandle(),
             selection = selection,
         ),
         paymentMethodMetadataFlow: StateFlow<PaymentMethodMetadata?> = stateFlowOf(
-            PaymentMethodMetadataFactory.create(
-                cbcEligibility = if (isCbcEligible) {
-                    CardBrandChoiceEligibility.Eligible(listOf(CardBrand.Visa, CardBrand.CartesBancaires))
-                } else {
-                    CardBrandChoiceEligibility.Ineligible
-                }
-            )
+            PaymentMethodMetadataFactory.create()
         ),
         block: suspend Scenario.() -> Unit
     ) {
