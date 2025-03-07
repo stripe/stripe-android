@@ -208,6 +208,9 @@ internal data class FinancialConnectionsSessionManifest(
         @SerialName(value = "consent")
         CONSENT("consent"),
 
+        @SerialName(value = "streamlined_consent")
+        STREAMLINED_CONSENT("streamlined_consent"),
+
         @SerialName(value = "bank_auth_repair")
         BANK_AUTH_REPAIR("bank_auth_repair"),
 

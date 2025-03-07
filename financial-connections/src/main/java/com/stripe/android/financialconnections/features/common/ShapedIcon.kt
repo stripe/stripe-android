@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.common
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -10,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -89,6 +91,13 @@ internal fun ShapedIcon(
                         contentDescription = contentDescription
                     )
                 }
+            },
+            loadingContent = {
+                Image(
+                    modifier = modifier,
+                    contentDescription = contentDescription,
+                    painter = ColorPainter(color = colors.background),
+                )
             },
             contentScale = ContentScale.Crop
         )

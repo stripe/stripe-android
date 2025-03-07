@@ -5,10 +5,12 @@ import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AppBarDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -27,6 +29,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
@@ -42,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.stripe.android.financialconnections.navigation.bottomsheet.BottomSheetNavigator
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarLogoState
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalNavHostController
@@ -70,6 +74,7 @@ internal fun FinancialConnectionsTopAppBar(
     )
 
     FinancialConnectionsTopAppBar(
+        logoState = state.logoState,
         hideStripeLogo = state.hideStripeLogo || state.forceHideStripeLogo,
         testMode = state.isTestMode,
         theme = state.theme,
@@ -81,6 +86,7 @@ internal fun FinancialConnectionsTopAppBar(
 
 @Composable
 private fun FinancialConnectionsTopAppBar(
+    logoState: TopAppBarLogoState?,
     hideStripeLogo: Boolean,
     testMode: Boolean,
     theme: Theme,
@@ -101,8 +107,9 @@ private fun FinancialConnectionsTopAppBar(
     TopAppBar(
         title = {
             Title(
+                logoState = logoState,
                 hideStripeLogo = hideStripeLogo,
-                testmode = testMode,
+                testMode = testMode,
                 theme = theme,
             )
         },
@@ -183,28 +190,62 @@ private fun CloseButton(
 
 @Composable
 private fun Title(
+    logoState: TopAppBarLogoState?,
     hideStripeLogo: Boolean,
-    testmode: Boolean,
+    testMode: Boolean,
     theme: Theme,
+    modifier: Modifier = Modifier,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = modifier,
     ) {
         if (hideStripeLogo.not()) {
-            Image(
-                modifier = Modifier.size(width = LOGO_WIDTH, height = LOGO_HEIGHT),
-                painter = painterResource(id = theme.icon),
-                colorFilter = if (isSystemInDarkTheme()) {
-                    ColorFilter.tint(FinancialConnectionsTheme.colors.textDefault)
-                } else {
-                    null
-                },
-                contentDescription = null // decorative element
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .clip(shape = RoundedCornerShape(percent = 100))
+                    .clickable(
+                        enabled = logoState?.onClick != null,
+                        onClick = { logoState?.onClick?.invoke() },
+                    )
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+            ) {
+                val colors = FinancialConnectionsTheme.colors
+
+                val trailingIconColorFilter = remember(logoState?.tint) {
+                    if (logoState?.tint == true) {
+                        ColorFilter.tint(colors.icon)
+                    } else {
+                        null
+                    }
+                }
+
+                Image(
+                    modifier = Modifier.size(width = LOGO_WIDTH, height = LOGO_HEIGHT),
+                    painter = painterResource(id = theme.icon),
+                    colorFilter = if (isSystemInDarkTheme()) {
+                        ColorFilter.tint(FinancialConnectionsTheme.colors.textDefault)
+                    } else {
+                        null
+                    },
+                    contentDescription = null,
+                )
+
+                if (logoState?.trailingIcon != null) {
+                    Image(
+                        painter = painterResource(id = logoState.trailingIcon),
+                        modifier = Modifier.size(12.dp),
+                        colorFilter = trailingIconColorFilter,
+                        contentDescription = null,
+                    )
+                }
+            }
         }
         // show a test mode pill if in test mode
-        if (testmode) {
+        if (testMode) {
             Text(
                 modifier = Modifier
                     .drawBehind {
