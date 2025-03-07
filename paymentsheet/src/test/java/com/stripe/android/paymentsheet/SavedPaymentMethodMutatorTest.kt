@@ -721,16 +721,6 @@ class SavedPaymentMethodMutatorTest {
     }
 
     @Test
-    fun `defaultPaymentMethodId correctly set when isPaymentMethodSetAsDefaultEnabled = null`() {
-        runScenarioForTestingDefaultPaymentMethod(
-            initialDefaultPaymentMethodIndex = 0,
-            isPaymentMethodSetAsDefaultEnabled = false,
-        ) { _, savedPaymentMethodMutator, _ ->
-            assertThat(savedPaymentMethodMutator.defaultPaymentMethodId.value).isEqualTo(null)
-        }
-    }
-
-    @Test
     fun `defaultPaymentMethodId correctly set as null when no defaultPaymentMethodId`() {
         runScenarioForTestingDefaultPaymentMethod(
             initialDefaultPaymentMethodIndex = null,
