@@ -94,13 +94,8 @@ class PaymentOptionsItemsMapperTest {
 
     @Test
     fun `Correctly creates payment methods in paymentFlow when not isPaymentMethodSetAsDefaultEnabled`() = runTest {
-        val mapper = getMapperForTesting(
-            isSetAsDefaultEnabled = false
-        )
-
         testMapperForSetAsDefaultPaymentMethod(
-            mapper = mapper,
-            assertShouldShowDefaultBadge = { firstCardPaymentMethod, secondCardPaymentMethod ->
+            assertBlock = { firstCardPaymentMethod, secondCardPaymentMethod ->
                 assertThat(firstCardPaymentMethod?.displayableSavedPaymentMethod?.shouldShowDefaultBadge).isFalse()
                 assertThat(secondCardPaymentMethod?.displayableSavedPaymentMethod?.shouldShowDefaultBadge).isFalse()
             }
@@ -109,13 +104,8 @@ class PaymentOptionsItemsMapperTest {
 
     @Test
     fun `Correctly creates payment methods in paymentFlow when isPaymentMethodSetAsDefaultEnabled`() = runTest {
-        val mapper = getMapperForTesting(
-            isSetAsDefaultEnabled = true
-        )
-
         testMapperForSetAsDefaultPaymentMethod(
-            mapper = mapper,
-            assertShouldShowDefaultBadge = { firstCardPaymentMethod, secondCardPaymentMethod ->
+            assertBlock = { firstCardPaymentMethod, secondCardPaymentMethod ->
                 assertThat(firstCardPaymentMethod?.displayableSavedPaymentMethod?.shouldShowDefaultBadge).isFalse()
                 assertThat(secondCardPaymentMethod?.displayableSavedPaymentMethod?.shouldShowDefaultBadge).isTrue()
             }
@@ -142,12 +132,15 @@ class PaymentOptionsItemsMapperTest {
     }
 
     private suspend fun testMapperForSetAsDefaultPaymentMethod(
-        mapper: PaymentOptionsItemsMapper,
-        assertShouldShowDefaultBadge: (
+        isSetAsDefaultEnabled: Boolean = false,
+        assertBlock: (
             PaymentOptionsItem.SavedPaymentMethod?,
             PaymentOptionsItem.SavedPaymentMethod?
         ) -> Unit,
     ) {
+        val mapper = getMapperForTesting(
+            isSetAsDefaultEnabled = isSetAsDefaultEnabled
+        )
         mapper().test {
             assertThat(awaitItem()).isEqualTo(emptyList<PaymentOptionsItem>())
             val paymentMethods = PaymentMethodFixtures.createCards(2)
@@ -165,7 +158,7 @@ class PaymentOptionsItemsMapperTest {
             assertThat(state).hasSize(3)
             assertThat(state[0].viewType).isEqualTo(PaymentOptionsItem.ViewType.AddCard)
 
-            assertShouldShowDefaultBadge(
+            assertBlock(
                 state[1] as? PaymentOptionsItem.SavedPaymentMethod,
                 state[2] as? PaymentOptionsItem.SavedPaymentMethod
             )
