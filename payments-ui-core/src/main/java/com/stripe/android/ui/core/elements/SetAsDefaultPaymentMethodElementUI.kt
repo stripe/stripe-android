@@ -8,7 +8,8 @@ import androidx.compose.ui.platform.LocalContext
 import com.stripe.android.uicore.elements.CheckboxElementUI
 import com.stripe.android.uicore.utils.collectAsState
 
-internal const val SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG = "SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG"
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG = "SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG"
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
