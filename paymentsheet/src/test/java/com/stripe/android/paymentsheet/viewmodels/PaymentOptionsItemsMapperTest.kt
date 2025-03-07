@@ -105,6 +105,7 @@ class PaymentOptionsItemsMapperTest {
     @Test
     fun `Correctly creates payment methods in paymentFlow when isPaymentMethodSetAsDefaultEnabled`() = runTest {
         testMapperForSetAsDefaultPaymentMethod(
+            isSetAsDefaultEnabled = true,
             assertBlock = { firstCardPaymentMethod, secondCardPaymentMethod ->
                 assertThat(firstCardPaymentMethod?.displayableSavedPaymentMethod?.shouldShowDefaultBadge).isFalse()
                 assertThat(secondCardPaymentMethod?.displayableSavedPaymentMethod?.shouldShowDefaultBadge).isTrue()
