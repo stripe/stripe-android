@@ -3,13 +3,11 @@ package com.stripe.android.connect.example.ui.features.payouts
 import android.content.Context
 import android.view.View
 import android.widget.Toast
-import androidx.activity.viewModels
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PayoutsListener
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.ui.common.BasicExampleComponentActivity
-import com.stripe.android.connect.example.ui.settings.SettingsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @OptIn(PrivateBetaConnectSDK::class)
@@ -17,16 +15,13 @@ import dagger.hilt.android.AndroidEntryPoint
 class PayoutsExampleActivity : BasicExampleComponentActivity() {
     override val titleRes: Int = R.string.payouts
 
-    private val settingsViewModel by viewModels<SettingsViewModel>()
-
     override fun createComponentView(context: Context, embeddedComponentManager: EmbeddedComponentManager): View {
-        val settings = settingsViewModel.state.value
         val listener = Listener()
         return embeddedComponentManager.createPayoutsView(
-                context = context,
-                listener = listener,
-                cacheKey = "PayoutsExampleActivity"
-            )
+            context = context,
+            listener = listener,
+            cacheKey = "PayoutsExampleActivity"
+        )
     }
 
     private inner class Listener : PayoutsListener {
