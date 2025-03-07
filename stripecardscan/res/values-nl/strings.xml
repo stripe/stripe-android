@@ -2,7 +2,7 @@
 <resources>
   <string name="stripe_camera_permission_settings_message">Sta toegang tot je camera toe in Instellingen om je kaart te scannen</string>
   <string name="stripe_card_scan_instructions">Je kaart scannen</string>
-  <string name="stripe_card_scan_privacy_link_text"><![CDATA[We gebruiken Stripe om je kaartgegevens te verifiëren. Stripe kan je gegevens gebruiken en bewaren volgens hun privacybeleid. <a href="https://support.stripe.com/questions/stripes-card-image-verification"><u>Meer informatie</u></a>]]></string>
+  <string name="stripe_card_scan_privacy_link_text"><![CDATA[We gebruiken Stripe om je kaartgegevens te verifiëren. Stripe kan je gegevens gebruiken en bewaren volgens hun privacybeleid. <a href=\"https://support.stripe.com/questions/stripes-card-image-verification\"><u>Meer informatie</u></a>]]></string>
   <string name="stripe_card_scan_title">Plaats je kaart binnen de rechthoek om te scannen</string>
   <string name="stripe_close_button_description">Sluiten</string>
   <string name="stripe_swap_camera_button_description">Camera omwisselen</string>

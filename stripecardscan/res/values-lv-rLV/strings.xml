@@ -2,7 +2,7 @@
 <resources>
   <string name="stripe_camera_permission_settings_message">Atļaujiet kameras piekļuvi iestatījumiem, lai noskenētu karti</string>
   <string name="stripe_card_scan_instructions">Skenēt karti</string>
-  <string name="stripe_card_scan_privacy_link_text"><![CDATA[Mēs izmantojam Stripe, lai verificētu jūsu kartes informāciju. Stripe var izmantot un uzglabāt jūsu datus saskaņā ar konfidencialitātes politiku. <a href="https://support.stripe.com/questions/stripes-card-image-verification"><u>Uzzināt vairāk</u></a>]]></string>
+  <string name="stripe_card_scan_privacy_link_text"><![CDATA[Mēs izmantojam Stripe, lai verificētu jūsu kartes informāciju. Stripe var izmantot un uzglabāt jūsu datus saskaņā ar konfidencialitātes politiku. <a href=\"https://support.stripe.com/questions/stripes-card-image-verification\"><u>Uzzināt vairāk</u></a>]]></string>
   <string name="stripe_card_scan_title">Novietojiet karti taisnstūrī, lai skenētu</string>
   <string name="stripe_close_button_description">Aizvērt</string>
   <string name="stripe_swap_camera_button_description">Apvērst kameru</string>
