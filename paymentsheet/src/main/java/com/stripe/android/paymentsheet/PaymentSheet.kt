@@ -18,6 +18,8 @@ import com.stripe.android.link.account.LinkStore
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentelement.AnalyticEventCallback
+import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.Colors
@@ -195,6 +197,10 @@ class PaymentSheet internal constructor(
         internal var createIntentCallback: CreateIntentCallback? = null
             private set
 
+        @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+        internal var analyticEventCallback: AnalyticEventCallback? = null
+            private set
+
         /**
          * @param handler Called when a user confirms payment for an external payment method. Use with
          * [Configuration.Builder.externalPaymentMethods] to specify external payment methods.
@@ -209,6 +215,14 @@ class PaymentSheet internal constructor(
          */
         fun createIntentCallback(callback: CreateIntentCallback) = apply {
             createIntentCallback = callback
+        }
+
+        /**
+         * @param callback Called when an analytic event occurs.
+         */
+        @ExperimentalAnalyticEventCallbackApi
+        fun analyticEventCallback(callback: AnalyticEventCallback) = apply {
+            analyticEventCallback = callback
         }
 
         /**
@@ -240,12 +254,16 @@ class PaymentSheet internal constructor(
             return rememberPaymentSheet(resultCallback)
         }
 
+        @OptIn(ExperimentalAnalyticEventCallbackApi::class)
         private fun initializeCallbacks() {
             createIntentCallback?.let {
                 IntentConfirmationInterceptor.createIntentCallback = it
             }
             externalPaymentMethodConfirmHandler?.let {
                 ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = it
+            }
+            analyticEventCallback?.let {
+                AnalyticEventInterceptor.analyticEventCallback = it
             }
         }
     }
@@ -2129,6 +2147,10 @@ class PaymentSheet internal constructor(
             internal var createIntentCallback: CreateIntentCallback? = null
                 private set
 
+            @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+            internal var analyticEventCallback: AnalyticEventCallback? = null
+                private set
+
             /**
              * @param handler Called when a user confirms payment for an external payment method.
              */
@@ -2141,6 +2163,14 @@ class PaymentSheet internal constructor(
              */
             fun createIntentCallback(callback: CreateIntentCallback) = apply {
                 createIntentCallback = callback
+            }
+
+            /**
+             * @param callback If specified, called when an analytic event occurs.
+             */
+            @ExperimentalAnalyticEventCallbackApi
+            fun analyticEventCallback(callback: AnalyticEventCallback) = apply {
+                analyticEventCallback = callback
             }
 
             /**
