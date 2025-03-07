@@ -52,7 +52,9 @@ sealed interface CreateFinancialConnectionsSessionParams {
                 PARAM_CLIENT_SECRET to clientSecret,
                 PARAM_HOSTED_SURFACE to hostedSurface,
                 PARAM_LINK_MODE to linkMode.valueForHostedSurface(hostedSurface),
-                PARAM_PAYMENT_METHOD_DATA to paymentMethod.toParamMap()
+                PARAM_PAYMENT_METHOD_DATA to paymentMethod.toParamMap(),
+                // TODO: Remove testing code
+                "initial_institution" to "bcinst_Jg18xEfPHevfHP",
             ).filterNotNullValues()
         }
     }
