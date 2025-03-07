@@ -230,8 +230,8 @@ class DefaultUpdatePaymentMethodInteractorTest {
 
             assertThat(updatedPaymentMethod).isEqualTo(initialPaymentMethod)
             assertThat(newCardBrand).isEqualTo(expectedNewCardBrand)
-            // We reset the cardBrandHasBeenChanged value when saving a new card brand, so that a user could change
-            // their card brand back to the original value if they wanted to.
+            // The user should be able to change their card brand back to the original value if they wanted to at this
+            // point.
             interactor.state.test {
                 assertThat(awaitItem().isSaveButtonEnabled).isFalse()
             }
