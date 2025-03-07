@@ -33,6 +33,9 @@ data class MerchantSetting(
     override fun convertToValue(value: String): Merchant {
         return runCatching {
             Json.decodeFromString<Merchant>(value)
+        }.recoverCatching {
+            // This is used for Maestro tests, where we pass the merchant value in a URL
+            merchants.first { it.value == value }
         }.getOrElse {
             merchants.first()
         }

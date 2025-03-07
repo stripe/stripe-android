@@ -69,7 +69,11 @@ internal class FinancialConnectionsPlaygroundViewModel(
             }
         }
 
-        loadMerchants()
+        if (launchUri == null) {
+            // Only load merchants from the backend if we're not in an end-to-end test,
+            // which typically open the sample app with a custom URI.
+            loadMerchants()
+        }
     }
 
     private fun loadMerchants() {
