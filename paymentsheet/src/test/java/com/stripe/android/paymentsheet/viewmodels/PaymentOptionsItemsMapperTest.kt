@@ -100,7 +100,7 @@ class PaymentOptionsItemsMapperTest {
 
         testMapperForSetAsDefaultPaymentMethod(
             mapper = mapper,
-            assertShouldShowDefaultBadge =  { firstCardPaymentMethod, secondCardPaymentMethod ->
+            assertShouldShowDefaultBadge = { firstCardPaymentMethod, secondCardPaymentMethod ->
                 assertThat(firstCardPaymentMethod?.displayableSavedPaymentMethod?.shouldShowDefaultBadge).isFalse()
                 assertThat(secondCardPaymentMethod?.displayableSavedPaymentMethod?.shouldShowDefaultBadge).isFalse()
             }
@@ -115,7 +115,7 @@ class PaymentOptionsItemsMapperTest {
 
         testMapperForSetAsDefaultPaymentMethod(
             mapper = mapper,
-            assertShouldShowDefaultBadge =  { firstCardPaymentMethod, secondCardPaymentMethod ->
+            assertShouldShowDefaultBadge = { firstCardPaymentMethod, secondCardPaymentMethod ->
                 assertThat(firstCardPaymentMethod?.displayableSavedPaymentMethod?.shouldShowDefaultBadge).isFalse()
                 assertThat(secondCardPaymentMethod?.displayableSavedPaymentMethod?.shouldShowDefaultBadge).isTrue()
             }
