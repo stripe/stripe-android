@@ -6,6 +6,7 @@ apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 apply plugin: 'app.cash.paparazzi'
 apply plugin: 'dev.drewhamilton.poko'
+apply plugin: "com.joetr.compose.guard"
 
 dependencies {
     api project(":payments-core")

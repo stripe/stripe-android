@@ -6,6 +6,7 @@ apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
 apply plugin: 'shot'
 apply plugin: 'org.jetbrains.kotlin.plugin.compose'
+apply plugin: "com.joetr.compose.guard"
 
 // Read values from gradle.properties or system environment variable
 def getBackendUrl() {
