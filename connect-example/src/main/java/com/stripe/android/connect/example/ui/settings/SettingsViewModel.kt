@@ -161,12 +161,7 @@ class SettingsViewModel @Inject constructor(
         val accounts: List<DemoMerchant> = listOf(DemoMerchant.Other()),
         val selectedAccount: DemoMerchant? = accounts.firstOrNull(),
         val onboardingSettings: OnboardingSettings = OnboardingSettings(),
-        val presentationSettings: PresentationSettings = PresentationSettings(
-            presentationStyleIsPush = true,
-            embedInTabBar = false,
-            embedInNavBar = true,
-            useXmlViews = false,
-        )
+        val presentationSettings: PresentationSettings = PresentationSettings()
     ) {
         val serverUrlResetEnabled: Boolean
             get() = serverUrl != EmbeddedComponentService.DEFAULT_SERVER_BASE_URL

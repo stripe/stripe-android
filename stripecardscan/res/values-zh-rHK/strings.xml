@@ -2,7 +2,6 @@
 <resources>
   <string name="stripe_camera_permission_settings_message">請在設置中允許存取攝像頭以掃描您的卡</string>
   <string name="stripe_card_scan_instructions">掃描您的卡</string>
-  <string name="stripe_card_scan_privacy_link_text"><![CDATA[我們用 Stripe 來驗證您的銀行卡資訊。Stripe 可能會根據其私隱權政策使用並存儲您的數據。<a href="https://support.stripe.com/questions/stripes-card-image-verification"><u>瞭解更多</u></a>]]></string>
   <string name="stripe_card_scan_title">將您的卡放在要掃描的方框中</string>
   <string name="stripe_close_button_description">關閉</string>
   <string name="stripe_swap_camera_button_description">翻轉攝像頭</string>

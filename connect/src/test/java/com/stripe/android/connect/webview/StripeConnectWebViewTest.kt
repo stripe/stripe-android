@@ -1,12 +1,15 @@
 package com.stripe.android.connect.webview
 
+import android.app.Activity
+import android.app.Application
+import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.net.Uri
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.widget.FrameLayout
 import androidx.activity.ComponentActivity
-import androidx.lifecycle.setViewTreeLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.version.StripeSdkVersion
@@ -31,10 +34,11 @@ class StripeConnectWebViewTest {
     private lateinit var webView: StripeConnectWebView
 
     private val activity = Robolectric.buildActivity(ComponentActivity::class.java).setup().get()
-    private val containerView = FrameLayout(activity).apply { setViewTreeLifecycleOwner(activity) }
+    private val containerView = FrameLayout(activity)
 
     @Before
     fun setup() {
+        activity.setContentView(containerView)
         webView = StripeConnectWebView(
             application = RuntimeEnvironment.getApplication(),
             delegate = mockDelegate,
@@ -90,5 +94,28 @@ class StripeConnectWebViewTest {
         )
 
         verifyBlocking(mockDelegate) { onChooseFile(activity, filePathCallback, intent) }
+    }
+
+    @Test
+    fun `context is updated when attachment changes`() {
+        fun assertWebViewContext(cls: Class<out Context>) {
+            assertThat(webView.context.findRealContext()).isInstanceOf(cls)
+        }
+
+        assertWebViewContext(Application::class.java)
+
+        containerView.addView(webView)
+        assertWebViewContext(Activity::class.java)
+
+        containerView.removeView(webView)
+        assertWebViewContext(Application::class.java)
+    }
+
+    private fun Context.findRealContext(): Context? {
+        return when (this) {
+            is Activity, is Application -> this
+            is ContextWrapper -> baseContext.findRealContext()
+            else -> null
+        }
     }
 }

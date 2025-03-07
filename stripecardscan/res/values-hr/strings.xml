@@ -2,7 +2,6 @@
 <resources>
   <string name="stripe_camera_permission_settings_message">Omogućite pristup kameri u postavkama kako biste mogli skenirati svoju karticu</string>
   <string name="stripe_card_scan_instructions">Skenirajte svoju karticu</string>
-  <string name="stripe_card_scan_privacy_link_text"><![CDATA[Koristimo Stripe za provjeru podataka vaše kartice. Stripe može koristiti i pohranjivati vaše podatke u skladu sa svojom Pravilima o privatnosti. <a href="https://support.stripe.com/questions/stripes-card-image-verification"><u>Saznajte više</u></a>]]></string>
   <string name="stripe_card_scan_title">Postavite svoju karticu u pravokutnik za skeniranje</string>
   <string name="stripe_close_button_description">Zatvori</string>
   <string name="stripe_swap_camera_button_description">Zamijeni kameru</string>

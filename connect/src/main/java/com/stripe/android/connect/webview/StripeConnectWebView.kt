@@ -5,6 +5,7 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.content.Intent
+import android.content.MutableContextWrapper
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
@@ -50,11 +51,21 @@ import kotlinx.serialization.json.put
 @SuppressLint("ViewConstructor")
 @Suppress("TooManyFunctions")
 @OptIn(PrivateBetaConnectSDK::class)
-internal class StripeConnectWebView(
-    application: Application,
+internal class StripeConnectWebView private constructor(
+    private val mutableContext: MutableContextWrapper,
     @property:VisibleForTesting internal val delegate: Delegate,
     private val logger: Logger,
-) : WebView(application) {
+) : WebView(mutableContext) {
+
+    constructor(
+        application: Application,
+        delegate: Delegate,
+        logger: Logger,
+    ) : this(
+        mutableContext = MutableContextWrapper(application),
+        delegate = delegate,
+        logger = logger,
+    )
 
     private val loggerTag = javaClass.simpleName
 
@@ -100,6 +111,17 @@ internal class StripeConnectWebView(
             setter = "setCollectMobileFinancialConnectionsResult",
             value = ConnectJson.encodeToJsonElement(payload).jsonObject
         )
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        // We need the Activity context for some UI to work, like web-triggered dialogs
+        mutableContext.baseContext = requireNotNull(findActivity())
+    }
+
+    override fun onDetachedFromWindow() {
+        mutableContext.baseContext = mutableContext.applicationContext
+        super.onDetachedFromWindow()
     }
 
     interface Delegate {

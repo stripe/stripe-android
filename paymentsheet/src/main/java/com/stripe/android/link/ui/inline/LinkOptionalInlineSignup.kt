@@ -37,7 +37,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.DefaultLinkTheme
-import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.paymentsheet.R
@@ -49,6 +48,7 @@ import com.stripe.android.uicore.elements.SectionController
 import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.job
@@ -87,7 +87,7 @@ internal fun LinkOptionalInlineSignup(
         isShowingPhoneFirst = viewState.isShowingPhoneFirst,
         enabled = enabled,
         requiresNameCollection = viewModel.requiresNameCollection,
-        errorMessage = errorMessage,
+        errorMessage = errorMessage?.resolve(),
         modifier = modifier
     )
 }
@@ -103,7 +103,7 @@ internal fun LinkOptionalInlineSignup(
     signUpState: SignUpState,
     enabled: Boolean,
     requiresNameCollection: Boolean,
-    errorMessage: ErrorMessage?,
+    errorMessage: String?,
     modifier: Modifier = Modifier
 ) {
     Column(modifier) {
