@@ -5,16 +5,16 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.LinkComponent
-import com.stripe.android.link.ui.ErrorMessage
-import com.stripe.android.link.ui.getErrorMessage
 import com.stripe.android.link.ui.inline.LinkSignupField.Email
 import com.stripe.android.link.ui.inline.LinkSignupField.Name
 import com.stripe.android.link.ui.inline.LinkSignupField.Phone
 import com.stripe.android.link.ui.signup.SignUpState
+import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
@@ -25,6 +25,7 @@ import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.drop
@@ -120,8 +121,8 @@ internal class InlineSignupViewModel(
     private val consumerName: StateFlow<String?> =
         nameController.formFieldValue.mapAsStateFlow { it.takeIf { it.isComplete }?.value }
 
-    private val _errorMessage = MutableStateFlow<ErrorMessage?>(null)
-    val errorMessage: StateFlow<ErrorMessage?> = _errorMessage
+    private val _errorMessage = MutableStateFlow<ResolvableString?>(null)
+    val errorMessage: StateFlow<ResolvableString?> = _errorMessage.asStateFlow()
 
     val requiresNameCollection: Boolean
         get() = Name in initialViewState.fields
@@ -300,7 +301,7 @@ internal class InlineSignupViewModel(
         _errorMessage.value = null
     }
 
-    private fun onError(error: Throwable) = error.getErrorMessage().let {
+    private fun onError(error: Throwable) = error.errorMessage.let {
         logger.error("Error: ", error)
         _errorMessage.value = it
     }

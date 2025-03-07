@@ -7,7 +7,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.theme.DefaultLinkTheme
-import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
@@ -86,7 +85,7 @@ internal class LinkInlineSignupViewTest {
         val errorMessage = "Error message"
         setContent(
             signUpState = SignUpState.InputtingRemainingFields,
-            errorMessage = ErrorMessage.Raw(errorMessage)
+            errorMessage = errorMessage
         )
         composeTestRule.onNodeWithText(errorMessage).assertExists()
     }
@@ -96,7 +95,7 @@ internal class LinkInlineSignupViewTest {
         val errorMessage = "Error message"
         setContent(
             signUpState = SignUpState.InputtingPrimaryField,
-            errorMessage = ErrorMessage.Raw(errorMessage)
+            errorMessage = errorMessage
         )
         composeTestRule.onNodeWithText(errorMessage).assertExists()
     }
@@ -126,7 +125,7 @@ internal class LinkInlineSignupViewTest {
         enabled: Boolean = true,
         expanded: Boolean = true,
         requiresNameCollection: Boolean = false,
-        errorMessage: ErrorMessage? = null,
+        errorMessage: String? = null,
         toggleExpanded: () -> Unit = {}
     ) {
         val sectionController = SectionController(
