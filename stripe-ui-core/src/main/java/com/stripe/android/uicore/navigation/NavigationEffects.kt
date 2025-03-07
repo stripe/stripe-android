@@ -1,7 +1,6 @@
 package com.stripe.android.uicore.navigation
 
 import android.app.Activity
-import android.util.Log
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,8 +25,11 @@ fun NavigationEffects(
     val activity = (LocalContext.current as? Activity)
     val backStackEntry by navHostController.currentBackStackEntryAsState()
 
+    LaunchedEffect(backStackEntry) {
+        onBackStackEntryUpdated(backStackEntry)
+    }
+
     LaunchedEffect(activity, navHostController, navigationChannel) {
-        Log.d("NavigationEffects", "LaunchedEffect registered")
         navigationChannel.onEach { intent ->
             if (activity?.isFinishing == true) {
                 return@onEach
@@ -45,7 +47,11 @@ fun NavigationEffects(
                             launchSingleTop = intent.isSingleTop
 
                             if (intent.popUpTo != null) {
-                                apply(from, intent.popUpTo)
+                                applyPop(
+                                    navHostController = navHostController,
+                                    currentRoute = from,
+                                    popUpTo = intent.popUpTo
+                                )
                             }
                         }
                     }
@@ -63,17 +69,23 @@ fun NavigationEffects(
     }
 }
 
-private fun NavOptionsBuilder.apply(
+private fun NavOptionsBuilder.applyPop(
+    navHostController: NavHostController,
     currentRoute: String?,
     popUpTo: PopUpToBehavior,
 ) {
-    val popUpToRoute = when (popUpTo) {
-        is PopUpToBehavior.Current -> currentRoute
-        is PopUpToBehavior.Route -> popUpTo.route
-    }
-
-    if (popUpToRoute != null) {
-        popUpTo(popUpToRoute) {
+    when (popUpTo) {
+        is PopUpToBehavior.Current -> currentRoute?.let {
+            popUpTo(it) {
+                inclusive = popUpTo.inclusive
+            }
+        }
+        is PopUpToBehavior.Route -> popUpTo(popUpTo.route) {
+            inclusive = popUpTo.inclusive
+        }
+        PopUpToBehavior.Start -> popUpTo(
+            navHostController.graph.startDestinationId
+        ) {
             inclusive = popUpTo.inclusive
         }
     }

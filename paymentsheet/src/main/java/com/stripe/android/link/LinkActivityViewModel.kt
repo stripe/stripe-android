@@ -1,7 +1,6 @@
 package com.stripe.android.link
 
 import android.app.Application
-import android.util.Log
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -130,7 +129,6 @@ internal class LinkActivityViewModel @Inject constructor(
         }
     }
 
-
     fun moveToWeb() {
         launchWebFlow?.let { launcher ->
             navigate(LinkScreen.Loading, clearStack = true)
@@ -159,9 +157,8 @@ internal class LinkActivityViewModel @Inject constructor(
 
     fun navigate(screen: LinkScreen, clearStack: Boolean, launchSingleTop: Boolean = false) {
         val popupTo = if (clearStack) {
-            PopUpToBehavior.Current(
-                inclusive = true
-            )
+            // Clear the backstack up to the current destination
+            PopUpToBehavior.Start
         } else null
         navigationManager.tryNavigateTo(
             screen.route,
@@ -191,7 +188,7 @@ internal class LinkActivityViewModel @Inject constructor(
             val attestationCheckResult = linkAttestationCheck.invoke()
             when (attestationCheckResult) {
                 is LinkAttestationCheck.Result.AttestationFailed -> {
-                    moveToWeb()
+                    launchWebFlow?.invoke(linkConfiguration)
                 }
                 LinkAttestationCheck.Result.Successful -> {
                     updateScreenState()
