@@ -186,7 +186,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
                 )
             )
             interactor.state.test {
-                assertThat(awaitItem().cardBrandHasBeenChanged).isTrue()
+                assertThat(awaitItem().isSaveButtonEnabled).isTrue()
             }
 
             interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
@@ -223,7 +223,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
                 )
             )
             interactor.state.test {
-                assertThat(awaitItem().cardBrandHasBeenChanged).isTrue()
+                assertThat(awaitItem().isSaveButtonEnabled).isTrue()
             }
 
             interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
@@ -233,7 +233,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             // We reset the cardBrandHasBeenChanged value when saving a new card brand, so that a user could change
             // their card brand back to the original value if they wanted to.
             interactor.state.test {
-                assertThat(awaitItem().cardBrandHasBeenChanged).isFalse()
+                assertThat(awaitItem().isSaveButtonEnabled).isFalse()
             }
 
             // Re-clicking on the already saved card brand doesn't update cardBrandHasBeenChanged incorectly.
@@ -243,7 +243,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
                 )
             )
             interactor.state.test {
-                assertThat(awaitItem().cardBrandHasBeenChanged).isFalse()
+                assertThat(awaitItem().isSaveButtonEnabled).isFalse()
             }
         }
     }
@@ -297,8 +297,8 @@ class DefaultUpdatePaymentMethodInteractorTest {
 
             interactor.state.test {
                 val state = awaitItem()
-                // Card brand has been changed is still true -- the user could try again.
-                assertThat(state.cardBrandHasBeenChanged).isTrue()
+                // Save button is still enabled -- the user could try again.
+                assertThat(state.isSaveButtonEnabled).isTrue()
                 assertThat(state.error).isEqualTo(updateCardBrandErrorMessage)
             }
         }
@@ -347,6 +347,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
 
         interactor.state.test {
             assertThat(awaitItem().setAsDefaultCheckboxChecked).isEqualTo(expectedUpdatedCheckedValue)
+            assertThat(awaitItem().isSaveButtonEnabled).isTrue()
         }
     }
 
@@ -485,6 +486,41 @@ class DefaultUpdatePaymentMethodInteractorTest {
                 assertThat(awaitItem().error).isEqualTo(updatesFailedErrorMessage)
             }
         }
+    }
+
+    @Test
+    fun shouldShowSaveButton_whenCardIsModifiable() = runScenario(
+        displayableSavedPaymentMethod = PaymentMethodFixtures
+            .CARD_WITH_NETWORKS_PAYMENT_METHOD
+            .toDisplayableSavedPaymentMethod(),
+    ) {
+        assertThat(interactor.shouldShowSaveButton).isTrue()
+    }
+
+    @Test
+    fun shouldShowSaveButton_whenSetAsDefaultCheckboxShown() = runScenario(
+        displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
+        shouldShowSetAsDefaultCheckbox = true,
+    ) {
+        assertThat(interactor.shouldShowSaveButton).isTrue()
+    }
+
+    @Test
+    fun shouldShowSaveButton_whenCardIsModifiable_andSetAsDefaultCheckboxShown() = runScenario(
+        displayableSavedPaymentMethod = PaymentMethodFixtures
+            .CARD_WITH_NETWORKS_PAYMENT_METHOD
+            .toDisplayableSavedPaymentMethod(),
+        shouldShowSetAsDefaultCheckbox = true,
+    ) {
+        assertThat(interactor.shouldShowSaveButton).isTrue()
+    }
+
+    @Test
+    fun shouldNotShowSaveButton_whenNothingIsChangeable() = runScenario(
+        displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
+        shouldShowSetAsDefaultCheckbox = false,
+    ) {
+        assertThat(interactor.shouldShowSaveButton).isFalse()
     }
 
     private fun updateCardBrandAndDefaultPaymentMethod(interactor: UpdatePaymentMethodInteractor) {

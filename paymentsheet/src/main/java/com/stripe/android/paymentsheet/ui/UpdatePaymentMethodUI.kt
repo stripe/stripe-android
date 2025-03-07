@@ -158,8 +158,7 @@ private fun SetAsDefaultPaymentMethodCheckbox(
 private fun UpdatePaymentMethodButtons(
     interactor: UpdatePaymentMethodInteractor,
 ) {
-    val shouldShowUpdatePaymentMethodUi =
-        interactor.isModifiablePaymentMethod || interactor.shouldShowSetAsDefaultCheckbox
+    val shouldShowUpdatePaymentMethodUi = interactor.shouldShowSaveButton
 
     if (shouldShowUpdatePaymentMethodUi) {
         Spacer(modifier = Modifier.requiredHeight(32.dp))
@@ -327,13 +326,16 @@ private fun UpdatePaymentMethodUi(interactor: UpdatePaymentMethodInteractor) {
     val state by interactor.state.collectAsState()
 
     val isLoading = state.status == UpdatePaymentMethodInteractor.Status.Updating
+    val isEnabled = state.isSaveButtonEnabled
+
     PrimaryButton(
         label = stringResource(id = PaymentSheetR.string.stripe_paymentsheet_save),
         isLoading = isLoading,
-        isEnabled = (state.cardBrandHasBeenChanged || state.setAsDefaultCheckboxChecked) &&
-            state.status == UpdatePaymentMethodInteractor.Status.Idle,
+        isEnabled = state.isSaveButtonEnabled,
         onButtonClick = { interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed) },
-        modifier = Modifier.testTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).testMetadata("isLoading=$isLoading")
+        modifier = Modifier
+            .testTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG)
+            .testMetadata("isLoading=$isLoading")
     )
 }
 
