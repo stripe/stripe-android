@@ -18,7 +18,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -158,6 +157,10 @@ private fun Screens(
             navController = navController,
             startDestination = initialDestination.route,
         ) {
+            composable(LinkScreen.Loading.route) {
+                Loader()
+            }
+
             composable(LinkScreen.SignUp.route) {
                 SignUpRoute(
                     navigate = navigate,
