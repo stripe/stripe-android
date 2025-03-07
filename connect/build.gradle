@@ -5,6 +5,7 @@ apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 apply plugin: 'dev.drewhamilton.poko'
+apply plugin: 'app.cash.paparazzi'
 
 dependencies {
     implementation project(':stripe-core')
@@ -36,6 +37,7 @@ dependencies {
     implementation libs.accompanist.systemUiController
 
     // Test
+    testImplementation project(':screenshot-testing')
     testImplementation testLibs.androidx.archCore
     testImplementation testLibs.androidx.composeUi
     testImplementation testLibs.androidx.core
@@ -86,7 +88,6 @@ android {
 
     buildFeatures {
         compose = true
-        viewBinding true
     }
 
     testOptions {

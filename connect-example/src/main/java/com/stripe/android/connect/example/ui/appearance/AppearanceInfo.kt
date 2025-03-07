@@ -107,7 +107,8 @@ data class AppearanceInfo(
             appearance = Appearance(
                 colors = Colors(
                     background = ContextCompat.getColor(context, R.color.ocean_breeze_background),
-                    primary = ContextCompat.getColor(context, R.color.ocean_breeze_primary)
+                    primary = ContextCompat.getColor(context, R.color.ocean_breeze_primary),
+                    text = ContextCompat.getColor(context, R.color.ocean_breeze_text),
                 ),
                 buttonSecondary = Button(
                     colorText = ContextCompat.getColor(context, R.color.ocean_breeze_button_secondary_text),
@@ -128,6 +129,7 @@ data class AppearanceInfo(
             appearance = Appearance(
                 colors = Colors(
                     primary = ContextCompat.getColor(context, R.color.link_primary),
+                    background = ContextCompat.getColor(context, R.color.link_background),
                     text = ContextCompat.getColor(context, R.color.link_text),
                     secondaryText = ContextCompat.getColor(context, R.color.link_secondary_text),
                     actionPrimaryText = ContextCompat.getColor(context, R.color.link_action_primary_text)

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="stripe_connect_background">#ffffff</color>
+    <color name="stripe_connect_text">#353a44</color>
+    <color name="stripe_connect_border">#d8dee4</color>
+</resources>
