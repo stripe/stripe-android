@@ -1,7 +1,6 @@
 package com.stripe.android.connect
 
 import android.content.Context
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,10 +8,9 @@ import android.widget.LinearLayout
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import com.stripe.android.connect.appearance.Appearance
-import kotlin.math.roundToInt
 
 @OptIn(PrivateBetaConnectSDK::class)
-internal class StripeComponentDialogFragmentView<ComponentView : StripeComponentView<*, *>>(
+internal class StripeComponentDialogFragmentView<ComponentView : View>(
     layoutInflater: LayoutInflater
 ) : LinearLayout(layoutInflater.context) {
 
@@ -42,23 +40,9 @@ internal class StripeComponentDialogFragmentView<ComponentView : StripeComponent
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT,
         )
-        val tv = TypedValue()
-        toolbar = Toolbar(context).apply {
-            context.theme.resolveAttribute(android.R.attr.actionBarSize, tv, true)
-            val height = TypedValue.complexToDimensionPixelSize(tv.data, resources.displayMetrics)
-            layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, height)
-            elevation = 0f
-            navigationIcon = ContextCompat.getDrawable(context, R.drawable.stripe_connect_close)
-        }
-        addView(toolbar)
-
-        divider = View(context).apply {
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1f, resources.displayMetrics).roundToInt()
-            )
-        }
-        addView(divider)
+        layoutInflater.inflate(R.layout.stripe_full_screen_component, this, true)
+        toolbar = findViewById(R.id.toolbar)
+        divider = findViewById(R.id.divider)
     }
 
     fun bindAppearance(appearance: Appearance) {
@@ -67,6 +51,7 @@ internal class StripeComponentDialogFragmentView<ComponentView : StripeComponent
         val backgroundColor =
             appearance.colors.background
                 ?: ContextCompat.getColor(context, R.color.stripe_connect_background)
+        setBackgroundColor(backgroundColor)
         toolbar.setBackgroundColor(backgroundColor)
 
         val textColor = appearance.colors.text

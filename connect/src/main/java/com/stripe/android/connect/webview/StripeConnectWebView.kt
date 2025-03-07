@@ -54,7 +54,7 @@ internal class StripeConnectWebView(
     application: Application,
     @property:VisibleForTesting internal val delegate: Delegate,
     private val logger: Logger,
-) : WebView(application) {
+) : WebView(application), WebViewForPaparazzi {
 
     private val loggerTag = javaClass.simpleName
 

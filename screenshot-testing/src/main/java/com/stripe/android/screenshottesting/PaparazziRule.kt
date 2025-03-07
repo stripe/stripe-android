@@ -20,6 +20,7 @@ class PaparazziRule(
     vararg configOptions: List<PaparazziConfigOption>,
     private val boxModifier: Modifier = Modifier,
     private val includeStripeTheme: Boolean = true,
+    private val theme: String = "Theme.MaterialComponents",
 ) : TestRule {
 
     private val testCases: List<TestCase> = configOptions.toTestCases()
@@ -118,7 +119,7 @@ class PaparazziRule(
             // Needed to shrink the screenshot to the height of the composable
             renderingMode = SessionParams.RenderingMode.SHRINK,
             showSystemUi = false,
-            theme = "Theme.MaterialComponents",
+            theme = theme,
         )
     }
 }
