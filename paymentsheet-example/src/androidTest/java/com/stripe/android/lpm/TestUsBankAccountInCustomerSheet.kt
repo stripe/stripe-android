@@ -6,6 +6,8 @@ import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSheetPaymentMethodModeDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
+import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodMode
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.TestParameters
@@ -21,6 +23,7 @@ internal class TestUsBankAccountInCustomerSheet : BasePlaygroundTest() {
     ) { settings ->
         settings[CountrySettingsDefinition] = Country.US
         settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.SetupIntent
+        settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
     }
 
     @get:Rule
