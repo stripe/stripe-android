@@ -281,6 +281,7 @@ internal class DefaultPaymentMethodsTest {
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
+    }
 
     private fun enqueueElementsSessionResponse(
         cards: List<PaymentMethod> = emptyList(),
