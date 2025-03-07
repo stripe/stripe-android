@@ -37,6 +37,7 @@
     <string name="recipient_terms_of_service">Recipient terms of service</string>
     <string name="privacy_policy">Privacy policy</string>
     <string name="enable_edge_to_edge">Enable edge-to-edge</string>
+    <string name="restart_app_prompt">Restart the app for changes to take effect.</string>
 
     <!-- Appearance Strings -->
     <string name="appearance_default">Default</string>
