@@ -109,7 +109,6 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     fun onNavEntryChanged(entry: NavBackStackEntry?) {
-        // When full screen loads the first time, trigger screen rendering.
         val route = entry?.destination?.route ?: return
         _linkAppBarState.update {
             it.copy(
