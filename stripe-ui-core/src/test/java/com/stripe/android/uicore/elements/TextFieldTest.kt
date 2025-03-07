@@ -1,6 +1,7 @@
 package com.stripe.android.uicore.elements
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.R
 import androidx.compose.ui.platform.testTag
@@ -23,8 +24,10 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.junit.Rule
@@ -136,6 +139,61 @@ class TextFieldTest {
         textField.assert(hasText("A1B2C3"))
     }
 
+    @Test
+    fun `Test TextFieldUi remembers composition`() {
+        val testTag = "TEST"
+        val value = MutableStateFlow(
+            TextFieldValue(
+                text = "",
+            )
+        )
+        val simpleTextFieldController = SimpleTextFieldController(
+            textFieldConfig = TestTextFieldConfig(
+                maxInputLength = 6
+            ),
+            initialValue = ""
+        )
+        composeTestRule.setContent {
+
+            val state by simpleTextFieldController.fieldState.collectAsState()
+            val textFieldValue by value.collectAsState()
+            TextFieldUi(
+                label = "Search",
+                value = textFieldValue,
+                enabled = true,
+                loading = false,
+                placeholder = null,
+                shouldShowError = false,
+                errorMessage = null,
+                showOptionalLabel = false,
+                trailingIcon = null,
+                textFieldController = simpleTextFieldController,
+                onTextStateChanged = {},
+                fieldState = state,
+                modifier = Modifier.testTag(testTag)
+            )
+        }
+
+        val textField = composeTestRule.onNodeWithTag(testTag)
+        textField.assert(hasText(""))
+
+        val composition = TextRange(0,5)
+        value.value = TextFieldValue(
+            text = "Hello",
+            selection = TextRange("Hello".length),
+            composition = composition
+        )
+
+        textField.assert(hasText("Hello"))
+        textField.assert(hasImeComposition(composition))
+
+    }
+
+    private fun hasImeComposition(composition: TextRange): SemanticsMatcher {
+        return SemanticsMatcher.expectValue(ImeCompositionKey, composition.toString())
+    }
+
+
     @Composable
     private fun TestTextField(
         initialValue: String?,
@@ -154,7 +212,7 @@ class TextFieldTest {
         )
     }
 
-    private class TestTextFieldConfig(
+    internal class TestTextFieldConfig(
         private val maxInputLength: Int
     ) : TextFieldConfig {
         override val capitalization: KeyboardCapitalization = KeyboardCapitalization.Characters
