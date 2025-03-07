@@ -50,7 +50,6 @@ private fun PresentationSettingsView(
     onBack: () -> Unit,
     onSave: (PresentationSettings) -> Unit,
 ) {
-    var useXmlViews by rememberSaveable { mutableStateOf(presentationSettings.useXmlViews) }
     var enableEdgeToEdge by rememberSaveable { mutableStateOf(presentationSettings.enableEdgeToEdge) }
     ConnectExampleScaffold(
         title = stringResource(R.string.presentation_settings),
@@ -63,7 +62,6 @@ private fun PresentationSettingsView(
                             presentationStyleIsPush = presentationSettings.presentationStyleIsPush,
                             embedInTabBar = presentationSettings.embedInTabBar,
                             embedInNavBar = presentationSettings.embedInNavBar,
-                            useXmlViews = useXmlViews,
                             enableEdgeToEdge = enableEdgeToEdge,
                         )
                     )
@@ -82,11 +80,6 @@ private fun PresentationSettingsView(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            SettingsSwitchItem(
-                text = stringResource(R.string.use_xml_views),
-                isChecked = useXmlViews,
-                onCheckedChange = { useXmlViews = it }
-            )
             SettingsSwitchItem(
                 text = stringResource(R.string.enable_edge_to_edge),
                 isChecked = enableEdgeToEdge,
