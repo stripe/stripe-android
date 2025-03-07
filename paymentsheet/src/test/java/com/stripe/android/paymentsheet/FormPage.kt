@@ -76,6 +76,10 @@ internal class FormPage(
         waitUntilVisible()
         replaceText(cardNumber, number)
     }
+
+    fun fillOutEmail() {
+        replaceText("Email", "janedoe@example.com")
+    }
 }
 
 fun SemanticsNodeInteraction.assertHasErrorMessage(expectedMessage: String) =

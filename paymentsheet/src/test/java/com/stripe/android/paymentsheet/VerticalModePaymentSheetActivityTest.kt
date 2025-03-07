@@ -133,12 +133,16 @@ internal class VerticalModePaymentSheetActivityTest {
 
     @Test
     fun `When the payment intent only has one LPM it launches directly into the form`() = runTest(
+        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+        ),
         initialLoadWaiter = { formPage.waitUntilVisible() },
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("cashapp"))
         },
     ) {
         verticalModePage.assertIsNotVisible()
+        formPage.fillOutEmail()
         verticalModePage.assertPrimaryButton(isEnabled())
     }
 
@@ -513,6 +517,7 @@ internal class VerticalModePaymentSheetActivityTest {
     private fun runTest(
         primaryButtonLabel: String? = null,
         customer: PaymentSheet.CustomerConfiguration? = null,
+        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration? = null,
         cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = PaymentSheet.CardBrandAcceptance.all(),
         networkSetup: () -> Unit,
         initialLoadWaiter: () -> Unit = { verticalModePage.waitUntilVisible() },
@@ -535,6 +540,11 @@ internal class VerticalModePaymentSheetActivityTest {
                         .apply {
                             if (primaryButtonLabel != null) {
                                 primaryButtonLabel(primaryButtonLabel)
+                            }
+                        }
+                        .apply {
+                            if (billingDetailsCollectionConfiguration != null) {
+                                billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
                             }
                         }
                         .build(),
