@@ -22,8 +22,6 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContra
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
-import com.stripe.android.link.ui.inline.SignUpConsentAction
-import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
@@ -844,20 +842,7 @@ internal class DefaultFlowControllerTest {
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
             )
 
-            val paymentSelection = PaymentSelection.New.LinkInline(
-                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                paymentMethodOptionsParams = null,
-                paymentMethodExtraParams = null,
-                brand = CardBrand.Visa,
-                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
-                input = UserInput.SignUp(
-                    email = "email@email",
-                    phone = "2267007611",
-                    country = "CA",
-                    name = "John Doe",
-                    consentAction = SignUpConsentAction.Checkbox,
-                ),
-            )
+            val paymentSelection = PaymentMethodFixtures.LINK_INLINE_PAYMENT_SELECTION
 
             flowController.onPaymentOptionResult(
                 PaymentOptionResult.Succeeded(
@@ -890,20 +875,7 @@ internal class DefaultFlowControllerTest {
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         )
 
-        val paymentSelection = PaymentSelection.New.LinkInline(
-            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-            paymentMethodOptionsParams = null,
-            paymentMethodExtraParams = null,
-            brand = CardBrand.Visa,
-            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
-            input = UserInput.SignUp(
-                email = "email@email",
-                phone = "2267007611",
-                country = "CA",
-                name = "John Doe",
-                consentAction = SignUpConsentAction.Checkbox,
-            ),
-        )
+        val paymentSelection = PaymentMethodFixtures.LINK_INLINE_PAYMENT_SELECTION
 
         flowController.onPaymentOptionResult(
             PaymentOptionResult.Succeeded(paymentSelection)
@@ -948,20 +920,7 @@ internal class DefaultFlowControllerTest {
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
             )
 
-            val paymentSelection = PaymentSelection.New.LinkInline(
-                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                paymentMethodOptionsParams = null,
-                paymentMethodExtraParams = null,
-                brand = CardBrand.Visa,
-                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
-                input = UserInput.SignUp(
-                    email = "email@email",
-                    phone = "2267007611",
-                    country = "CA",
-                    name = "John Doe",
-                    consentAction = SignUpConsentAction.Checkbox,
-                ),
-            )
+            val paymentSelection = PaymentMethodFixtures.LINK_INLINE_PAYMENT_SELECTION
 
             flowController.onPaymentOptionResult(
                 PaymentOptionResult.Succeeded(paymentSelection)
