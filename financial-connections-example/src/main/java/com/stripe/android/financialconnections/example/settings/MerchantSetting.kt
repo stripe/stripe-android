@@ -3,11 +3,10 @@ package com.stripe.android.financialconnections.example.settings
 import com.stripe.android.financialconnections.example.data.model.LinkAccountSessionBody
 import com.stripe.android.financialconnections.example.data.model.Merchant
 import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 data class MerchantSetting(
-    val merchants: List<Merchant> = listOf(Merchant.default()),
+    val merchants: List<Merchant> = Merchant.hardcoded(),
     override val selectedOption: Merchant = merchants.first(),
     override val key: String = "merchant"
 ) : Saveable<Merchant>, SingleChoiceSetting<Merchant>(
