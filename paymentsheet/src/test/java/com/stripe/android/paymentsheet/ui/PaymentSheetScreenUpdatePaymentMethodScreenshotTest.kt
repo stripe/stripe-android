@@ -136,7 +136,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
             isExpiredCard = isExpiredCard,
             isModifiablePaymentMethod = isModifiablePaymentMethod,
             shouldShowSetAsDefaultCheckbox = shouldShowSetAsDefaultCheckbox,
-            setAsDefaultCheckboxEnabled = false,
+            setAsDefaultCheckboxEnabled = true,
             viewActionRecorder = null,
             initialState = UpdatePaymentMethodInteractor.State(
                 error = error?.resolvableString,
