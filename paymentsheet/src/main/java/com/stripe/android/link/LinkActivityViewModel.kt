@@ -62,7 +62,6 @@ internal class LinkActivityViewModel @Inject constructor(
         )
     )
     val navigationFlow = navigationManager.navigationFlow
-    private val currentNavEntry = MutableStateFlow<NavBackStackEntry?>(null)
 
     val linkAppBarState: StateFlow<LinkAppBarState> = _linkAppBarState
 
@@ -112,7 +111,6 @@ internal class LinkActivityViewModel @Inject constructor(
     fun onNavEntryChanged(entry: NavBackStackEntry?) {
         // When full screen loads the first time, trigger screen rendering.
         val route = entry?.destination?.route ?: return
-        currentNavEntry.update { entry }
         _linkAppBarState.update {
             it.copy(
                 showHeader = showHeaderRoutes.contains(route),
