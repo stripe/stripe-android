@@ -156,14 +156,11 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     fun navigate(screen: LinkScreen, clearStack: Boolean, launchSingleTop: Boolean = false) {
-        val popupTo = if (clearStack) {
-            // Clear the backstack up to the current destination
-            PopUpToBehavior.Start
-        } else null
         navigationManager.tryNavigateTo(
             screen.route,
             isSingleTop = launchSingleTop,
-            popUpTo = popupTo
+            // If clearing the stack, pop to the start destination.
+            popUpTo = if (clearStack) PopUpToBehavior.Start else null
         )
     }
 

@@ -62,7 +62,7 @@ internal class LinkContentScreenshotTest {
                             density = Density(1f)
                         ),
                         bottomSheetContent = null,
-                        initialDestination = LinkScreen.Wallet,
+                        initialDestination = LinkScreen.Loading,
                         onUpdateSheetContent = {},
                         handleViewAction = {},
                         navigate = { _, _ -> },
