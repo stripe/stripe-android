@@ -29,7 +29,6 @@ internal fun LinkScreenContent(
         onVerificationSucceeded = viewModel::onVerificationSucceeded,
         onDismissClicked = viewModel::onDismissVerificationClicked,
         onBackPressed = onBackPressed,
-        // TODO replace by NavigationManager.
         navigate = viewModel::navigate,
         dismissWithResult = { result ->
             viewModel.dismissWithResult?.invoke(result)
@@ -39,7 +38,6 @@ internal fun LinkScreenContent(
         },
         handleViewAction = viewModel::handleViewAction,
         moveToWeb = viewModel::moveToWeb,
-        // TODO replace by NavigationManager.
         goBack = viewModel::goBack,
         changeEmail = viewModel::changeEmail,
         onNavBackStackEntryChanged = viewModel::onNavEntryChanged,
