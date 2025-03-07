@@ -346,8 +346,10 @@ class DefaultUpdatePaymentMethodInteractorTest {
         )
 
         interactor.state.test {
-            assertThat(awaitItem().setAsDefaultCheckboxChecked).isEqualTo(expectedUpdatedCheckedValue)
-            assertThat(awaitItem().isSaveButtonEnabled).isTrue()
+            val newState = awaitItem()
+
+            assertThat(newState.setAsDefaultCheckboxChecked).isEqualTo(expectedUpdatedCheckedValue)
+            assertThat(newState.isSaveButtonEnabled).isTrue()
         }
     }
 
