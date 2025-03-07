@@ -190,7 +190,7 @@ class TextFieldTest {
     }
 
     private fun hasImeComposition(composition: TextRange): SemanticsMatcher {
-        return SemanticsMatcher.expectValue(ImeCompositionKey, composition.toString())
+        return SemanticsMatcher.expectValue(ImeCompositionKey, composition)
     }
 
 

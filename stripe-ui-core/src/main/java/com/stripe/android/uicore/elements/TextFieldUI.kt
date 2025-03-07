@@ -76,7 +76,6 @@ import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.autofill
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -238,7 +237,6 @@ fun TextField(
     )
 }
 
-// Using these to retrieve composition doesn't work
 val ImeCompositionKey = SemanticsPropertyKey<TextRange?>("ImeCompositionKey")
 var SemanticsPropertyReceiver.imeComposition by ImeCompositionKey
 
