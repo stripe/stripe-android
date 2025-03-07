@@ -2,7 +2,6 @@
 <resources>
   <string name="stripe_camera_permission_settings_message">Pahintulutan ang pag-access ng camera sa mga setting para i-scan ang iyong kard</string>
   <string name="stripe_card_scan_instructions">I-scan ang Iyong Kard</string>
-  <string name="stripe_card_scan_privacy_link_text"><![CDATA[Ginagamit namin ang Stripe para i-verify ang mga detalye ng iyong kard. Maaaring gamitin at imbakin ng Stripe ang iyong data ayon sa patakaran nito sa pagkapribado. <a href="https://support.stripe.com/questions/stripes-card-image-verification"><u>Alamin ang higit pa</u></a>]]></string>
   <string name="stripe_card_scan_title">Iposisyon ang iyong kard sa parihaba para i-scan</string>
   <string name="stripe_close_button_description">Isara</string>
   <string name="stripe_swap_camera_button_description">I-swap ang Camera</string>

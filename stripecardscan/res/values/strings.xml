@@ -2,8 +2,6 @@
 <resources>
   <string name="stripe_camera_permission_settings_message">Please allow camera access in settings to scan your card</string>
   <string name="stripe_card_scan_instructions">Scan Your Card</string>
-  <!-- Privacy link text in scan window. THIS STRING SHOULD NOT BE MODIFIED -->
-  <string name="stripe_card_scan_privacy_link_text"><![CDATA[We use Stripe to verify your card details. Stripe may use and store your data according its privacy policy. <a href="https://support.stripe.com/questions/stripes-card-image-verification"><u>Learn more</u></a>]]></string>
   <string name="stripe_card_scan_title">Position your card in the rectangle to scan</string>
   <string name="stripe_close_button_description">Close</string>
   <string name="stripe_swap_camera_button_description">Swap Camera</string>

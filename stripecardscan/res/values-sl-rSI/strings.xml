@@ -2,7 +2,6 @@
 <resources>
   <string name="stripe_camera_permission_settings_message">Podelite dovoljenje za dostop do kamere v nastavitvah, da boste lahko optično prebrali kartico</string>
   <string name="stripe_card_scan_instructions">Optično preberite svojo kartico</string>
-  <string name="stripe_card_scan_privacy_link_text"><![CDATA[Za preverjanje podatkov vaše kartice uporabljamo storitev Stripe. Stripe lahko vaše podatke uporablja in hrani v skladu s svojim pravilnikom o zasebnosti. <a href="https://support.stripe.com/questions/stripes-card-image-verification"><u>Več informacij</u></a>]]></string>
   <string name="stripe_card_scan_title">Postavite kartico v pravokotnik za optično branje</string>
   <string name="stripe_close_button_description">Zapri</string>
   <string name="stripe_swap_camera_button_description">Zamenjaj kamero</string>
