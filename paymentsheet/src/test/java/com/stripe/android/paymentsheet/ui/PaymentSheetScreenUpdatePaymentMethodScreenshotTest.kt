@@ -141,9 +141,10 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
                 error = error?.resolvableString,
                 status = UpdatePaymentMethodInteractor.Status.Idle,
                 cardBrandChoice = CardBrandChoice(brand = initialCardBrand, enabled = true),
-                cardBrandHasBeenChanged = false,
                 setAsDefaultCheckboxChecked = false,
+                isSaveButtonEnabled = false,
             ),
+            shouldShowSaveButton = isModifiablePaymentMethod || shouldShowSetAsDefaultCheckbox,
         )
         val screen = com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.UpdatePaymentMethod(interactor)
         val metadata = PaymentMethodMetadataFactory.create()
