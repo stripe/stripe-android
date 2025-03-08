@@ -465,14 +465,13 @@ class UpdatePaymentMethodUITest {
     }
 
     @Test
-    fun `When should show set as default checkbox, checkbox is visible and enabled`() {
+    fun `When should show set as default checkbox, checkbox is visible`() {
         runScenario(
             shouldShowSetAsDefaultCheckbox = true,
         ) {
             val setAsDefaultCheckbox = composeRule.onNodeWithTag(UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG)
 
             setAsDefaultCheckbox.assertExists()
-            setAsDefaultCheckbox.assertIsEnabled()
         }
     }
 
@@ -482,10 +481,36 @@ class UpdatePaymentMethodUITest {
             shouldShowSetAsDefaultCheckbox = true,
             setAsDefaultCheckboxChecked = true,
         ) {
-            val setAsDefaultCheckbox = composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG)
+            val saveButton = composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG)
+
+            saveButton.assertExists()
+            saveButton.assertIsEnabled()
+        }
+    }
+
+    @Test
+    fun `setAsDefaultCheckboxEnabled true -- set as default checkbox is enabled`() {
+        runScenario(
+            shouldShowSetAsDefaultCheckbox = true,
+            setAsDefaultCheckboxEnabled = true,
+        ) {
+            val setAsDefaultCheckbox = composeRule.onNodeWithTag(UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG)
 
             setAsDefaultCheckbox.assertExists()
             setAsDefaultCheckbox.assertIsEnabled()
+        }
+    }
+
+    @Test
+    fun `setAsDefaultCheckboxEnabled false -- set as default checkbox is not enabled`() {
+        runScenario(
+            shouldShowSetAsDefaultCheckbox = true,
+            setAsDefaultCheckboxEnabled = false,
+        ) {
+            val setAsDefaultCheckbox = composeRule.onNodeWithTag(UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG)
+
+            setAsDefaultCheckbox.assertExists()
+            setAsDefaultCheckbox.assertIsNotEnabled()
         }
     }
 
@@ -529,6 +554,7 @@ class UpdatePaymentMethodUITest {
         isModifiablePaymentMethod: Boolean = true,
         hasValidBrandChoices: Boolean = true,
         setAsDefaultCheckboxChecked: Boolean = false,
+        setAsDefaultCheckboxEnabled: Boolean = true,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
         shouldShowSetAsDefaultCheckbox: Boolean = false,
         testBlock: Scenario.() -> Unit,
@@ -543,6 +569,7 @@ class UpdatePaymentMethodUITest {
             viewActionRecorder = viewActionRecorder,
             hasValidBrandChoices = hasValidBrandChoices,
             shouldShowSetAsDefaultCheckbox = shouldShowSetAsDefaultCheckbox,
+            setAsDefaultCheckboxEnabled = setAsDefaultCheckboxEnabled,
             initialState = UpdatePaymentMethodInteractor.State(
                 error = errorMessage,
                 status = UpdatePaymentMethodInteractor.Status.Idle,

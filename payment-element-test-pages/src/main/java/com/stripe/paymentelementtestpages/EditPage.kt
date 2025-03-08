@@ -17,6 +17,7 @@ import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
 import com.stripe.android.uicore.elements.TEST_TAG_DROP_DOWN_CHOICE
 
+@SuppressWarnings("TooManyFunctions")
 class EditPage(
     private val composeTestRule: ComposeTestRule
 ) {
@@ -118,9 +119,13 @@ class EditPage(
         }
     }
 
-    fun clickSetAsDefaultCheckbox() {
-        composeTestRule.onNodeWithTag(
+    fun onSetAsDefaultCheckbox(): SemanticsNodeInteraction {
+        return composeTestRule.onNodeWithTag(
             UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG
-        ).performClick()
+        )
+    }
+
+    fun clickSetAsDefaultCheckbox() {
+        onSetAsDefaultCheckbox().performClick()
     }
 }
