@@ -47,7 +47,11 @@ fun NavigationEffects(
                             launchSingleTop = intent.isSingleTop
 
                             if (intent.popUpTo != null) {
-                                apply(from, intent.popUpTo)
+                                applyPop(
+                                    navHostController = navHostController,
+                                    currentRoute = from,
+                                    popUpTo = intent.popUpTo
+                                )
                             }
                         }
                     }
@@ -59,19 +63,29 @@ fun NavigationEffects(
             }
         }.launchIn(this)
     }
+
+    LaunchedEffect(backStackEntry) {
+        onBackStackEntryUpdated(backStackEntry)
+    }
 }
 
-private fun NavOptionsBuilder.apply(
+private fun NavOptionsBuilder.applyPop(
+    navHostController: NavHostController,
     currentRoute: String?,
     popUpTo: PopUpToBehavior,
 ) {
-    val popUpToRoute = when (popUpTo) {
-        is PopUpToBehavior.Current -> currentRoute
-        is PopUpToBehavior.Route -> popUpTo.route
-    }
-
-    if (popUpToRoute != null) {
-        popUpTo(popUpToRoute) {
+    when (popUpTo) {
+        is PopUpToBehavior.Current -> currentRoute?.let {
+            popUpTo(it) {
+                inclusive = popUpTo.inclusive
+            }
+        }
+        is PopUpToBehavior.Route -> popUpTo(popUpTo.route) {
+            inclusive = popUpTo.inclusive
+        }
+        PopUpToBehavior.Start -> popUpTo(
+            navHostController.graph.startDestinationId
+        ) {
             inclusive = popUpTo.inclusive
         }
     }
