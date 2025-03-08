@@ -9,7 +9,7 @@ internal class AccountOnboardingDialogFragment :
             context = requireContext(),
             listener = listener,
             props = props,
-            cacheKey = cacheKey,
+            cacheKey = this.javaClass.simpleName
         )
     }
 }
