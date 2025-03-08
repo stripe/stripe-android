@@ -81,7 +81,8 @@ interface CollectBankAccountLauncher {
         ): CollectBankAccountLauncher {
             return CollectBankAccountForACHLauncher(
                 // L1 (public standalone) integration is not hosted by any Stripe surface.
-                hostedSurface = null,
+                // TODO: Reset this to null before merging
+                hostedSurface = "payment_element",
                 hostActivityLauncher = activity.registerForActivityResult(CollectBankAccountContract()) {
                     callback(it.toUSBankAccountResult())
                 }
