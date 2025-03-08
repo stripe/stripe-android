@@ -20,6 +20,7 @@ data class ElementsSession(
     val cardBrandChoice: CardBrandChoice?,
     val isGooglePayEnabled: Boolean,
     val sessionsError: Throwable? = null,
+    val customPaymentMethods: List<CustomPaymentMethod>,
     val elementsSessionId: String,
 ) : StripeModel {
 
@@ -63,6 +64,14 @@ data class ElementsSession(
     data class CardBrandChoice(
         val eligible: Boolean,
         val preferredNetworks: List<String>,
+    ) : StripeModel
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
+    data class CustomPaymentMethod(
+        val id: String,
+        val displayName: String,
+        val logoUrl: String,
     ) : StripeModel
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -136,11 +145,12 @@ data class ElementsSession(
                 externalPaymentMethodData = null,
                 stripeIntent = stripeIntent,
                 customer = null,
+                customPaymentMethods = listOf(),
                 merchantCountry = null,
                 cardBrandChoice = null,
                 isGooglePayEnabled = true,
                 sessionsError = sessionsError,
-                elementsSessionId = elementsSessionId
+                elementsSessionId = elementsSessionId,
             )
         }
     }

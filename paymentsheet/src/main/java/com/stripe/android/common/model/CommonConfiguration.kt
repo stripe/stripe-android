@@ -4,6 +4,7 @@ import android.os.Parcelable
 import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -24,6 +25,8 @@ internal data class CommonConfiguration(
     val paymentMethodOrder: List<String>,
     val externalPaymentMethods: List<String>,
     val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
+    @OptIn(ExperimentalCustomPaymentMethodsApi::class)
+    val customPaymentMethodConfiguration: PaymentSheet.CustomPaymentMethodConfiguration?,
 ) : Parcelable {
 
     fun validate() {
@@ -119,6 +122,7 @@ internal data class CommonConfiguration(
     }
 }
 
+@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
     merchantDisplayName = merchantDisplayName,
     customer = customer,
@@ -133,9 +137,11 @@ internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfigura
     paymentMethodOrder = paymentMethodOrder,
     externalPaymentMethods = externalPaymentMethods,
     cardBrandAcceptance = cardBrandAcceptance,
+    customPaymentMethodConfiguration = customPaymentMethodConfiguration,
 )
 
 @ExperimentalEmbeddedPaymentElementApi
+@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
     merchantDisplayName = merchantDisplayName,
     customer = customer,
@@ -150,6 +156,7 @@ internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): Commo
     paymentMethodOrder = paymentMethodOrder,
     externalPaymentMethods = externalPaymentMethods,
     cardBrandAcceptance = cardBrandAcceptance,
+    customPaymentMethodConfiguration = customPaymentMethodConfiguration,
 )
 
 private fun String.isEKClientSecretValid(): Boolean {

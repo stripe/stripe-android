@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.R
@@ -170,7 +171,7 @@ internal class TransformSpecToElementsTest {
         val staticTextElement = formElement.first() as StaticTextElement
 
         assertThat(staticTextElement.controller).isNull()
-        assertThat(staticTextElement.stringResId).isEqualTo(staticText.stringResId)
+        assertThat(staticTextElement.text).isEqualTo(staticText.stringResId.resolvableString)
         assertThat(staticTextElement.identifier).isEqualTo(staticText.apiPath)
     }
 

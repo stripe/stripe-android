@@ -433,4 +433,5 @@ private fun PaymentSelection.asVerticalSelection(): PaymentMethodVerticalLayoutI
     is PaymentSelection.Link -> PaymentMethodVerticalLayoutInteractor.Selection.New("link")
     is PaymentSelection.New -> PaymentMethodVerticalLayoutInteractor.Selection.New(paymentMethodCreateParams.typeCode)
     is PaymentSelection.ExternalPaymentMethod -> PaymentMethodVerticalLayoutInteractor.Selection.New(type)
+    is PaymentSelection.CustomPaymentMethod -> PaymentMethodVerticalLayoutInteractor.Selection.New(id)
 }

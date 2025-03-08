@@ -12,6 +12,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentB
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.SavedSelection
@@ -119,10 +120,12 @@ internal class CustomerAdapterDataSource @Inject constructor(
             )
         )
 
+        @OptIn(ExperimentalCustomPaymentMethodsApi::class)
         return elementsSessionRepository.get(
             initializationMode,
             customer = null,
             externalPaymentMethods = emptyList(),
+            customPaymentMethodConfig = null,
             savedPaymentMethodSelectionId = null,
         ).onSuccess {
             errorReporter.report(

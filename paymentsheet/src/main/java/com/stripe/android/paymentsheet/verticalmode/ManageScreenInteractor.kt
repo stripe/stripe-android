@@ -203,6 +203,7 @@ internal class DefaultManageScreenInteractor(
             val currentSelectionId = when (selection) {
                 null,
                 is PaymentSelection.ExternalPaymentMethod,
+                is PaymentSelection.CustomPaymentMethod,
                 PaymentSelection.GooglePay,
                 is PaymentSelection.Link,
                 is PaymentSelection.New -> return null

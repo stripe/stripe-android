@@ -102,6 +102,28 @@ internal sealed class PaymentSelection : Parcelable {
     }
 
     @Parcelize
+    data class CustomPaymentMethod(
+        val id: String,
+        val billingDetails: PaymentMethod.BillingDetails?,
+        val label: ResolvableString,
+        // In practice, we don't have an iconResource for custom payment methods.
+        @DrawableRes val iconResource: Int,
+        // In practice, we always have a lightThemeIconUrl for custom payment methods.
+        val lightThemeIconUrl: String?,
+        val darkThemeIconUrl: String?,
+    ) : PaymentSelection() {
+        override val requiresConfirmation: Boolean
+            get() = false
+
+        override fun mandateText(
+            merchantName: String,
+            isSetupFlow: Boolean
+        ): ResolvableString? {
+            return null
+        }
+    }
+
+    @Parcelize
     data class Saved(
         val paymentMethod: PaymentMethod,
         val walletType: WalletType? = null,
@@ -299,6 +321,7 @@ internal val PaymentSelection.isLink: Boolean
         is PaymentSelection.New -> false
         is PaymentSelection.Saved -> walletType == PaymentSelection.Saved.WalletType.Link
         is PaymentSelection.ExternalPaymentMethod -> false
+        is PaymentSelection.CustomPaymentMethod -> false
     }
 
 internal val PaymentSelection.isSaved: Boolean
@@ -310,6 +333,7 @@ internal val PaymentSelection.isSaved: Boolean
 internal val PaymentSelection.drawableResourceId: Int
     get() = when (this) {
         is PaymentSelection.ExternalPaymentMethod -> iconResource
+        is PaymentSelection.CustomPaymentMethod -> iconResource
         PaymentSelection.GooglePay -> R.drawable.stripe_google_pay_mark
         is PaymentSelection.Link -> getLinkIcon()
         is PaymentSelection.New.Card -> brand.getCardBrandIcon()
@@ -335,6 +359,7 @@ private fun getSavedIcon(selection: PaymentSelection.Saved): Int {
 internal val PaymentSelection.lightThemeIconUrl: String?
     get() = when (this) {
         is PaymentSelection.ExternalPaymentMethod -> lightThemeIconUrl
+        is PaymentSelection.CustomPaymentMethod -> lightThemeIconUrl
         PaymentSelection.GooglePay -> null
         is PaymentSelection.Link -> null
         is PaymentSelection.New.Card -> null
@@ -347,6 +372,7 @@ internal val PaymentSelection.lightThemeIconUrl: String?
 internal val PaymentSelection.darkThemeIconUrl: String?
     get() = when (this) {
         is PaymentSelection.ExternalPaymentMethod -> darkThemeIconUrl
+        is PaymentSelection.CustomPaymentMethod -> darkThemeIconUrl
         PaymentSelection.GooglePay -> null
         is PaymentSelection.Link -> null
         is PaymentSelection.New.Card -> null
@@ -359,6 +385,7 @@ internal val PaymentSelection.darkThemeIconUrl: String?
 internal val PaymentSelection.label: ResolvableString
     get() = when (this) {
         is PaymentSelection.ExternalPaymentMethod -> label
+        is PaymentSelection.CustomPaymentMethod -> label
         PaymentSelection.GooglePay -> StripeR.string.stripe_google_pay.resolvableString
         is PaymentSelection.Link -> StripeR.string.stripe_link.resolvableString
         is PaymentSelection.New.Card -> createCardLabel(last4).orEmpty()
@@ -381,6 +408,7 @@ private fun getSavedLabel(selection: PaymentSelection.Saved): ResolvableString? 
 internal val PaymentSelection.paymentMethodType: String
     get() = when (this) {
         is PaymentSelection.ExternalPaymentMethod -> type
+        is PaymentSelection.CustomPaymentMethod -> id
         PaymentSelection.GooglePay -> "google_pay"
         is PaymentSelection.Link -> "link"
         is PaymentSelection.New -> paymentMethodCreateParams.typeCode
@@ -390,6 +418,7 @@ internal val PaymentSelection.paymentMethodType: String
 internal val PaymentSelection.billingDetails: PaymentMethod.BillingDetails?
     get() = when (this) {
         is PaymentSelection.ExternalPaymentMethod -> billingDetails
+        is PaymentSelection.CustomPaymentMethod -> billingDetails
         PaymentSelection.GooglePay -> null
         is PaymentSelection.Link -> null
         is PaymentSelection.New -> paymentMethodCreateParams.billingDetails

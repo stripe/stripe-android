@@ -35,6 +35,10 @@
             android:theme="@style/StripePayLauncherDefaultTheme"
             android:exported="false" />
         <activity
+            android:name="com.stripe.android.paymentelement.confirmation.cpms.CustomPaymentMethodProxyActivity"
+            android:theme="@style/StripePayLauncherDefaultTheme"
+            android:exported="false" />
+        <activity
             android:name=".paymentdatacollection.cvcrecollection.CvcRecollectionActivity"
             android:theme="@style/StripePaymentSheetDefaultTheme" />
         <activity

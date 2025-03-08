@@ -131,7 +131,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     internal val isProcessingPaymentIntent
         get() = args.initializationMode.isProcessingPayment
 
-    override var newPaymentSelection: NewOrExternalPaymentSelection? = null
+    override var newPaymentSelection: NewPaymentSelectionWrapper? = null
 
     private val googlePayButtonType: GooglePayButtonType =
         when (args.config.googlePay?.buttonType) {

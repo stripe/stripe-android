@@ -23,6 +23,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.toPaymentSheetSaveConsent
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.IntentConfiguration
@@ -134,6 +135,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 ) : PaymentElementLoader {
 
     @Suppress("LongMethod")
+    @OptIn(ExperimentalCustomPaymentMethodsApi::class)
     override suspend fun load(
         initializationMode: PaymentElementLoader.InitializationMode,
         configuration: CommonConfiguration,
@@ -147,6 +149,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val elementsSession = retrieveElementsSession(
             initializationMode = initializationMode,
             customer = configuration.customer,
+            customPaymentMethodsConfig = configuration.customPaymentMethodConfiguration,
             externalPaymentMethods = configuration.externalPaymentMethods,
             savedPaymentMethodSelectionId = savedPaymentMethodSelection?.id,
         ).getOrThrow()
@@ -234,9 +237,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         return@runCatching state
     }
 
+    @OptIn(ExperimentalCustomPaymentMethodsApi::class)
     private suspend fun retrieveElementsSession(
         initializationMode: PaymentElementLoader.InitializationMode,
         customer: PaymentSheet.CustomerConfiguration?,
+        customPaymentMethodsConfig: PaymentSheet.CustomPaymentMethodConfiguration?,
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
     ): Result<ElementsSession> {
@@ -244,6 +249,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             initializationMode = initializationMode,
             customer = customer,
             externalPaymentMethods = externalPaymentMethods,
+            customPaymentMethodConfig = customPaymentMethodsConfig,
             savedPaymentMethodSelectionId = savedPaymentMethodSelectionId
         )
     }

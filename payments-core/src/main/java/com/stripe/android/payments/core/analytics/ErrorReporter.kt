@@ -158,6 +158,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         EXTERNAL_PAYMENT_METHOD_CONFIRM_HANDLER_NULL(
             eventName = "paymentsheet.external_payment_method.confirm_handler_is_null"
         ),
+        CUSTOM_PAYMENT_METHOD_CONFIRM_HANDLER_NULL(
+            eventName = "paymentsheet.custom_payment_method.confirm_handler_is_null"
+        ),
         EXTERNAL_PAYMENT_METHOD_LAUNCHER_NULL(
             eventName = "paymentsheet.external_payment_method.launcher_is_null"
         ),
@@ -285,6 +288,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         EXTERNAL_PAYMENT_METHODS_LAUNCH_SUCCESS(
             eventName = "paymentsheet.external_payment_method.launch_success"
+        ),
+        CUSTOM_PAYMENT_METHODS_LAUNCH_SUCCESS(
+            eventName = "paymentsheet.custom_payment_method.launch_success"
         ),
         FOUND_CREATE_INTENT_CALLBACK_WHILE_POLLING(
             eventName = "paymentsheet.polling_for_create_intent_callback.found"

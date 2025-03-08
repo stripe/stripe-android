@@ -9,6 +9,8 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
+import com.stripe.android.paymentelement.confirmation.cpms.CustomPaymentMethodProxyActivity
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.uicore.utils.AnimationConstants
@@ -18,6 +20,7 @@ import org.jetbrains.annotations.TestOnly
  * This is used internally for integrations that don't use Jetpack Compose and are
  * able to pass in an activity.
  */
+@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 internal class DefaultPaymentSheetLauncher(
     private val activityResultLauncher: ActivityResultLauncher<PaymentSheetContractV2.Args>,
     private val activity: Activity,
@@ -32,6 +35,7 @@ internal class DefaultPaymentSheetLauncher(
                 override fun onDestroy(owner: LifecycleOwner) {
                     IntentConfirmationInterceptor.createIntentCallback = null
                     ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
+                    CustomPaymentMethodProxyActivity.customPaymentMethodConfirmHandler = null
                     super.onDestroy(owner)
                 }
             }

@@ -55,10 +55,12 @@ internal class ElementsSessionJsonParser(
             countryCode = countryCode
         )
 
-        val merchantCountry = json.optString(FIELD_MERCHANT_COUNTRY)
+        val customPaymentMethods = parseCustomPaymentMethods(json.optJSONArray(FIELD_CUSTOM_PAYMENT_METHODS_DATA))
 
         val cardBrandChoice = parseCardBrandChoice(json)
         val googlePayPreference = json.optString(FIELD_GOOGLE_PAY_PREFERENCE)
+
+        val merchantCountry = json.optString(FIELD_MERCHANT_COUNTRY)
 
         return if (stripeIntent != null) {
             ElementsSession(
@@ -70,6 +72,7 @@ internal class ElementsSessionJsonParser(
                 cardBrandChoice = cardBrandChoice,
                 isGooglePayEnabled = googlePayPreference != "disabled",
                 externalPaymentMethodData = externalPaymentMethodData,
+                customPaymentMethods = customPaymentMethods,
                 elementsSessionId = elementsSessionId.takeIf { it.isNotBlank() } ?: UUID.randomUUID().toString()
             )
         } else {
@@ -170,6 +173,18 @@ internal class ElementsSessionJsonParser(
             useAttestationEndpoints = useLinkAttestationEndpoints,
             suppress2faModal = suppressLink2faModal
         )
+    }
+
+    private fun parseCustomPaymentMethods(json: JSONArray?): List<ElementsSession.CustomPaymentMethod> {
+        if (json == null) {
+            return emptyList()
+        }
+
+        val customPaymentMethods = (0 until json.length()).mapNotNull { index ->
+            CUSTOM_PAYMENT_METHOD_JSON_PARSER.parse(json.optJSONObject(index))
+        }
+
+        return customPaymentMethods
     }
 
     private fun parseCustomer(json: JSONObject?): ElementsSession.Customer? {
@@ -352,6 +367,7 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_CUSTOMER_PAYMENT_METHODS = "payment_methods"
         private const val FIELD_CUSTOMER_SESSION = "customer_session"
         private const val FIELD_DEFAULT_PAYMENT_METHOD = "default_payment_method"
+        private const val FIELD_CUSTOM_PAYMENT_METHODS_DATA = "custom_payment_method_data"
         private const val FIELD_CUSTOMER_ID = "id"
         private const val FIELD_CUSTOMER_LIVE_MODE = "livemode"
         private const val FIELD_CUSTOMER_API_KEY = "api_key"
@@ -373,5 +389,6 @@ internal class ElementsSessionJsonParser(
         const val FIELD_GOOGLE_PAY_PREFERENCE = "google_pay_preference"
 
         private val PAYMENT_METHOD_JSON_PARSER = PaymentMethodJsonParser()
+        private val CUSTOM_PAYMENT_METHOD_JSON_PARSER = CustomPaymentMethodJsonParser()
     }
 }

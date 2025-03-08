@@ -48,6 +48,10 @@ internal class FormElementsBuilder(
         uiFormElements += formElement
     }
 
+    fun ignoreBillingAddressRequirements() = apply {
+        requireBillingAddressCollection = false
+    }
+
     fun requireBillingAddressIfAllowed(
         availableCountries: Set<String> = this.availableCountries,
     ): FormElementsBuilder = apply {

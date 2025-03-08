@@ -5,6 +5,7 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -77,6 +78,7 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
                     isLinkAvailable = false,
                 ) as? SavedSelection.PaymentMethod
 
+                @OptIn(ExperimentalCustomPaymentMethodsApi::class)
                 elementsSessionRepository.get(
                     initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                         intentConfiguration = PaymentSheet.IntentConfiguration(
@@ -89,6 +91,7 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
                         id = customerSessionClientSecret.customerId,
                         clientSecret = customerSessionClientSecret.clientSecret,
                     ),
+                    customPaymentMethodConfig = null,
                     externalPaymentMethods = listOf(),
                 ).onSuccess {
                     reportSuccessfulElementsSessionLoad()

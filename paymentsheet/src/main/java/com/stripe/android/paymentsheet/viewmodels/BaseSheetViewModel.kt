@@ -13,7 +13,7 @@ import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.MandateHandler
-import com.stripe.android.paymentsheet.NewOrExternalPaymentSelection
+import com.stripe.android.paymentsheet.NewPaymentSelectionWrapper
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -102,7 +102,7 @@ internal abstract class BaseSheetViewModel(
      * save a new payment method that is added so that the payment data entered is recovered when
      * the user returns to that payment method type.
      */
-    abstract var newPaymentSelection: NewOrExternalPaymentSelection?
+    abstract var newPaymentSelection: NewPaymentSelectionWrapper?
 
     val customerStateHolder: CustomerStateHolder = CustomerStateHolder.create(this)
     val savedPaymentMethodMutator: SavedPaymentMethodMutator = SavedPaymentMethodMutator.create(this)
@@ -145,9 +145,11 @@ internal abstract class BaseSheetViewModel(
 
     fun updateSelection(selection: PaymentSelection?) {
         when (selection) {
-            is PaymentSelection.New -> newPaymentSelection = NewOrExternalPaymentSelection.New(selection)
+            is PaymentSelection.New -> newPaymentSelection = NewPaymentSelectionWrapper.New(selection)
             is PaymentSelection.ExternalPaymentMethod ->
-                newPaymentSelection = NewOrExternalPaymentSelection.External(selection)
+                newPaymentSelection = NewPaymentSelectionWrapper.External(selection)
+            is PaymentSelection.CustomPaymentMethod ->
+                newPaymentSelection = NewPaymentSelectionWrapper.Custom(selection)
             else -> Unit
         }
 

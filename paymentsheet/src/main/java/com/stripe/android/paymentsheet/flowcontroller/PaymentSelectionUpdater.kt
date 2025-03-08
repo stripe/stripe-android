@@ -62,6 +62,9 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
             is PaymentSelection.ExternalPaymentMethod -> {
                 state.paymentMethodMetadata.isExternalPaymentMethod(selection.type)
             }
+            is PaymentSelection.CustomPaymentMethod -> {
+                state.paymentMethodMetadata.isExternalPaymentMethod(selection.id)
+            }
         }
     }
 

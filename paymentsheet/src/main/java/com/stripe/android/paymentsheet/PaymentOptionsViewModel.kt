@@ -112,10 +112,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     // Only used to determine if we should skip the list and go to the add card view and how to populate that view.
-    override var newPaymentSelection: NewOrExternalPaymentSelection? =
+    override var newPaymentSelection: NewPaymentSelectionWrapper? =
         when (val selection = args.state.paymentSelection) {
-            is PaymentSelection.New -> NewOrExternalPaymentSelection.New(selection)
-            is PaymentSelection.ExternalPaymentMethod -> NewOrExternalPaymentSelection.External(selection)
+            is PaymentSelection.New -> NewPaymentSelectionWrapper.New(selection)
+            is PaymentSelection.ExternalPaymentMethod -> NewPaymentSelectionWrapper.External(selection)
             else -> null
         }
 
@@ -187,13 +187,12 @@ internal class PaymentOptionsViewModel @Inject constructor(
             // TODO(michelleb-stripe): Should the payment selection in the event be the saved or new item?
             eventReporter.onSelectPaymentOption(paymentSelection)
 
-            when (paymentSelection) {
-                is PaymentSelection.Saved,
-                is PaymentSelection.GooglePay,
-                is PaymentSelection.Link -> processExistingPaymentMethod(paymentSelection)
-                is PaymentSelection.New -> processNewOrExternalPaymentMethod(paymentSelection)
-                is PaymentSelection.ExternalPaymentMethod -> processNewOrExternalPaymentMethod(paymentSelection)
-            }
+            _paymentOptionResult.tryEmit(
+                PaymentOptionResult.Succeeded(
+                    paymentSelection = paymentSelection,
+                    paymentMethods = customerStateHolder.paymentMethods.value
+                )
+            )
         }
     }
 
@@ -211,24 +210,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     override fun clearErrorMessages() {
         _error.value = null
-    }
-
-    private fun processExistingPaymentMethod(paymentSelection: PaymentSelection) {
-        _paymentOptionResult.tryEmit(
-            PaymentOptionResult.Succeeded(
-                paymentSelection = paymentSelection,
-                paymentMethods = customerStateHolder.paymentMethods.value
-            )
-        )
-    }
-
-    private fun processNewOrExternalPaymentMethod(paymentSelection: PaymentSelection) {
-        _paymentOptionResult.tryEmit(
-            PaymentOptionResult.Succeeded(
-                paymentSelection = paymentSelection,
-                paymentMethods = customerStateHolder.paymentMethods.value
-            )
-        )
     }
 
     private fun determineInitialBackStack(
