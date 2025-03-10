@@ -24,6 +24,68 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
+/**
+ * A full-screen DialogFragment that displays a full-screen component.
+ *
+ * The implementation to make this all work *well* is quite tricky and deserves some explanation.
+ *
+ * Goals
+ * =====
+ *  1. Configuration changes are handled well
+ *  2. Process death is handled well
+ *  3. API uses typical listener objects (no need for globals, broadcast receivers, etc.)
+ *  4. API supports streaming events (not just final result)
+ *  5. API enables easy programmatic dismissal
+ *  6. No memory leaks (of course)
+ *
+ * There's a delicate dance between several classes. Here's what they are, their purpose, and their relationships:
+ *
+ * [EmbeddedComponentManager]
+ * ==========================
+ * The starting point. Users (i.e. SDK integrators) should either have a singleton or have Activity ViewModel scope
+ * in order to survive configuration changes. Creates [StripeComponentController] and [StripeConnectWebViewContainer]
+ * instances.
+ *
+ * [StripeComponentController]
+ * ===========================
+ * Creates and holds a single [StripeComponentDialogFragment] and provides APIs for its presentation and setting
+ * the [StripeEmbeddedComponentListener]. The Controller also holds the [FragmentActivity] to display the DialogFragment
+ * and therefore the Controller cannot outlive the Activity.
+ *
+ * The Controller also provides the [EmbeddedComponentManager] to the DialogFragment either directly (when it hasn't
+ * been added to the Activity yet) or indirectly through [StripeComponentDialogFragmentViewModel]. In both cases,
+ * [StripeComponentDialogFragmentViewModel] will hold onto the Manager for DialogFragment re-creation.
+ *
+ * [StripeComponentDialogFragment]
+ * ===============================
+ * Uses its provided [EmbeddedComponentManager] to create and render a [StripeConnectWebViewContainer], i.e. the
+ * container view managing the [StripeConnectWebView]. The [EmbeddedComponentManager] instance is obtained in multiple
+ * ways:
+ *  1. From [StripeComponentController] upon creation. When attached to the Activity, the Manager is immediately
+ *   stored in its [StripeComponentDialogFragmentViewModel] for persistence across config changes.
+ *  2. From [StripeComponentDialogFragmentViewModel] upon re-creation after config changes.
+ *  3. From [StripeComponentDialogFragmentViewModel] upon re-creation after app death. The VM will not immediately have
+ *   the Manager instance, but the first thing [StripeComponentController] does after being created (it should be
+ *   normally re-created if app state is restored properly) is set the Manager in the ViewModel if the DialogFragment
+ *   has been added.
+ *
+ * [StripeComponentDialogFragmentViewModel]
+ * ========================================
+ * Its sole purpose is to retain an [EmbeddedComponentManager] instance to provide for [StripeComponentDialogFragment].
+ *
+ * [StripeEmbeddedComponentListener]
+ * =================================
+ * An interface for users to implement to listen to component events. Since Listeners may contain references to
+ * Android app components (read: Activities), they must not be retained across config changes and must be re-set in
+ * [StripeComponentDialogFragment] upon re-creation.
+ *
+ * [StripeConnectWebViewContainer], [StripeConnectWebViewContainerViewModel], & [StripeConnectWebView]
+ * ===============================
+ * Wraps and manages [StripeConnectWebView]. The WebView itself is actually created and retained by
+ * [StripeConnectWebViewContainerViewModel] (see its docs for why). So upon configuration changes,
+ * [StripeConnectWebViewContainer] is re-created but [StripeConnectWebView] is not -- it's simply re-added to the
+ * re-created container view.
+ */
 @PrivateBetaConnectSDK
 internal abstract class StripeComponentDialogFragment<ComponentView, Listener, Props> : DialogFragment()
     where ComponentView : StripeComponentView<Listener, Props>,
@@ -37,8 +99,6 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
     protected val props: Props?
         @Suppress("DEPRECATION")
         get() = arguments?.getParcelable(ARG_PROPS)
-
-    protected val cacheKey: String? get() = arguments?.getString(ARG_CACHE_KEY)
 
     protected abstract fun createComponentView(
         embeddedComponentManager: EmbeddedComponentManager
@@ -154,13 +214,11 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
     internal companion object {
         private const val ARG_TITLE = "title"
         private const val ARG_PROPS = "props"
-        private const val ARG_CACHE_KEY = "cache_key"
 
         fun <DF, Props> newInstance(
             cls: Class<DF>,
             title: String? = null,
             props: Props? = null,
-            cacheKey: String? = null,
         ): DF
             where DF : StripeComponentDialogFragment<*, *, Props>,
                   Props : ComponentProps {
@@ -169,7 +227,6 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
                 arguments = Bundle().apply {
                     putString(ARG_TITLE, title)
                     putParcelable(ARG_PROPS, props)
-                    putString(ARG_CACHE_KEY, cacheKey)
                 }
             }
         }
