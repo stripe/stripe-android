@@ -4,12 +4,14 @@ import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
+import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_VIEW_MORE
 import com.stripe.paymentelementtestpages.hasTestMetadata
 
 internal class EmbeddedContentPage(
@@ -48,5 +50,9 @@ internal class EmbeddedContentPage(
                 useUnmergedTree = true,
             ).assertExists()
         }
+    }
+
+    fun clickViewMore() {
+        composeTestRule.onNodeWithTag(TEST_TAG_VIEW_MORE).performClick()
     }
 }
