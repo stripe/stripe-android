@@ -30,11 +30,11 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
 
     abstract fun setDefaultPaymentMethod(
         composeTestRule: ComposeTestRule,
-        newDefaultPaymentMethod: PaymentMethod
+        newDefaultPaymentMethod: PaymentMethod,
     )
 
     abstract fun assertDefaultPaymentMethodBadgeDisplayed(
-        composeTestRule: ComposeTestRule
+        composeTestRule: ComposeTestRule,
     )
 
     class Horizontal : PaymentSheetLayoutType(paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal) {

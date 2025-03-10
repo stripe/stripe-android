@@ -5,8 +5,13 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.test.core.app.ApplicationProvider
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.RequestMatchers
+import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.method
+import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG
 import com.stripe.android.paymentsheet.utils.PaymentSheetLayoutType
 import com.stripe.android.paymentsheet.utils.PaymentSheetLayoutTypeProvider
@@ -14,6 +19,7 @@ import com.stripe.android.paymentsheet.utils.ProductIntegrationTestRunnerContext
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
 import com.stripe.android.paymentsheet.utils.ProductIntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
+import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
 import com.stripe.android.testing.PaymentMethodFactory
 import org.json.JSONArray
@@ -164,8 +170,106 @@ internal class DefaultPaymentMethodsTest {
         testContext.markTestSucceeded()
     }
 
+    @Test
+    fun setNewCardAsDefault_sendsSetAsDefaultParamInConfirmCall() = runProductIntegrationTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        val paymentSheetPage = PaymentSheetPage(composeTestRule)
+
+        enqueueElementsSessionResponse()
+
+        launch(
+            testContext = testContext,
+            paymentMethodLayout = layoutType.paymentMethodLayout,
+            hasSavedPaymentMethods = false,
+        )
+
+        paymentSheetPage.fillOutCardDetails()
+        paymentSheetPage.checkSaveForFuture()
+        paymentSheetPage.checkSetAsDefaultCheckbox()
+
+        enqueuePaymentIntentConfirmWithExpectedSetAsDefault(setAsDefaultValue = true)
+
+        paymentSheetPage.clickPrimaryButton()
+    }
+
+    @Test
+    fun payWithNewCard_dontCheckSetAsDefault_sendsSetAsDefaultAsFalseParamInConfirmCall() = runProductIntegrationTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        val paymentSheetPage = PaymentSheetPage(composeTestRule)
+
+        enqueueElementsSessionResponse()
+
+        launch(
+            testContext = testContext,
+            paymentMethodLayout = layoutType.paymentMethodLayout,
+            hasSavedPaymentMethods = false,
+        )
+
+        paymentSheetPage.fillOutCardDetails()
+        paymentSheetPage.checkSaveForFuture()
+
+        enqueuePaymentIntentConfirmWithExpectedSetAsDefault(setAsDefaultValue = false)
+
+        paymentSheetPage.clickPrimaryButton()
+    }
+
+    @Test
+    fun payWithNewCard_uncheckSaveForFuture_doesNotSendSetAsDefaultInConfirmCall() = runProductIntegrationTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        val paymentSheetPage = PaymentSheetPage(composeTestRule)
+
+        enqueueElementsSessionResponse()
+
+        launch(
+            testContext = testContext,
+            paymentMethodLayout = layoutType.paymentMethodLayout,
+            hasSavedPaymentMethods = false,
+        )
+
+        paymentSheetPage.fillOutCardDetails()
+        paymentSheetPage.checkSaveForFuture()
+        paymentSheetPage.checkSetAsDefaultCheckbox()
+
+        // Un-check save for future -- this will hide the set as default checkbox
+        paymentSheetPage.checkSaveForFuture()
+
+        enqueuePaymentIntentConfirmWithoutSetAsDefault()
+
+        paymentSheetPage.clickPrimaryButton()
+    }
+
+    private fun enqueuePaymentIntentConfirmWithoutSetAsDefault() {
+        return networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            bodyPart(urlEncode("payment_method_data[allow_redisplay]"), "unspecified"),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+    }
+
+    private fun enqueuePaymentIntentConfirmWithExpectedSetAsDefault(setAsDefaultValue: Boolean) {
+        return networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            bodyPart(urlEncode("payment_method_data[allow_redisplay]"), "always"),
+            bodyPart(urlEncode("set_as_default_payment_method"), setAsDefaultValue.toString())
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+    }
+
     private fun enqueueElementsSessionResponse(
-        cards: List<PaymentMethod>,
+        cards: List<PaymentMethod> = emptyList(),
         setAsDefaultFeatureEnabled: Boolean = true,
         defaultPaymentMethod: String? = null,
     ) {
@@ -187,6 +291,7 @@ internal class DefaultPaymentMethodsTest {
     private fun launch(
         testContext: ProductIntegrationTestRunnerContext,
         paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
+        hasSavedPaymentMethods: Boolean = true,
     ) {
         testContext.launch(
             configuration = PaymentSheet.Configuration(
@@ -199,7 +304,10 @@ internal class DefaultPaymentMethodsTest {
             ),
         )
 
-        if (paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Horizontal) {
+        if (
+            paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Horizontal &&
+            hasSavedPaymentMethods
+        ) {
             composeTestRule.waitUntil(timeoutMillis = 5_000) {
                 composeTestRule
                     .onAllNodes(hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG))
@@ -238,10 +346,6 @@ internal class DefaultPaymentMethodsTest {
                   "ordered_payment_method_types_and_wallets": [
                     "card"
                   ],
-                  "card_brand_choice": {
-                    "eligible": true,
-                    "preferred_networks": ["cartes_bancaires"]
-                  },
                   "customer": {
                     "payment_methods": $cardsStringified,
                     "customer_session": {
