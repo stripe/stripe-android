@@ -44,7 +44,7 @@ fun rememberEmbeddedPaymentElement(
 
     return remember {
         EmbeddedPaymentElement.create(
-            statusBarColor = activity.window?.statusBarColor,
+            activity = activity,
             activityResultCaller = PaymentElementActivityResultCaller(
                 key = "Embedded",
                 registryOwner = activityResultRegistryOwner,

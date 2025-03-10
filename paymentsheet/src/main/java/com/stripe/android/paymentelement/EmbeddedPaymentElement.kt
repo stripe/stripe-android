@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement
 
+import android.app.Activity
 import android.graphics.drawable.Drawable
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
@@ -28,6 +29,7 @@ import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import com.stripe.android.uicore.utils.collectAsState
 import dev.drewhamilton.poko.Poko
@@ -482,7 +484,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
     internal companion object {
         @ExperimentalEmbeddedPaymentElementApi
         fun create(
-            statusBarColor: Int?,
+            activity: Activity,
             activityResultCaller: ActivityResultCaller,
             viewModelStoreOwner: ViewModelStoreOwner,
             lifecycleOwner: LifecycleOwner,
@@ -490,7 +492,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         ): EmbeddedPaymentElement {
             val viewModel = ViewModelProvider(
                 owner = viewModelStoreOwner,
-                factory = EmbeddedPaymentElementViewModel.Factory(statusBarColor)
+                factory = EmbeddedPaymentElementViewModel.Factory(activity.window?.statusBarColor)
             )[EmbeddedPaymentElementViewModel::class.java]
 
             val embeddedPaymentElementSubcomponent = viewModel.embeddedPaymentElementSubcomponentBuilder
@@ -499,7 +501,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 .lifecycleOwner(lifecycleOwner)
                 .build()
 
-            embeddedPaymentElementSubcomponent.initializer.initialize()
+            embeddedPaymentElementSubcomponent.initializer.initialize(activity.applicationIsTaskOwner())
 
             return embeddedPaymentElementSubcomponent.embeddedPaymentElement
         }
