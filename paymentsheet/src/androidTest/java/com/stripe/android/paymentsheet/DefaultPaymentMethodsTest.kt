@@ -138,7 +138,7 @@ internal class DefaultPaymentMethodsTest {
 
         testContext.markTestSucceeded()
     }
-    
+
     @Test
     fun defaultPaymentMethod_isSelected() = runProductIntegrationTest(
         networkRule = networkRule,
