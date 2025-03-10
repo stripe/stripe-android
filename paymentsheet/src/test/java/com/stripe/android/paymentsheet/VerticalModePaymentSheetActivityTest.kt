@@ -9,27 +9,24 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
-import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
-import com.stripe.android.network.CardPaymentMethodDetails
-import com.stripe.android.network.PaymentMethodDetails
-import com.stripe.android.network.UsBankPaymentMethodDetails
 import com.stripe.android.network.setupPaymentMethodDetachResponse
 import com.stripe.android.network.setupPaymentMethodUpdateResponse
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
-import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.RetryRule
+import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
+import com.stripe.paymentelementnetwork.UsBankPaymentMethodDetails
+import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse
 import com.stripe.paymentelementtestpages.EditPage
 import com.stripe.paymentelementtestpages.ManagePage
 import com.stripe.paymentelementtestpages.VerticalModePage
-import org.json.JSONArray
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -95,7 +92,7 @@ internal class VerticalModePaymentSheetActivityTest {
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card"))
-            setupV1PaymentMethodsResponse(card1, card2)
+            networkRule.setupV1PaymentMethodsResponse(card1, card2)
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -122,7 +119,7 @@ internal class VerticalModePaymentSheetActivityTest {
         initialLoadWaiter = { formPage.waitUntilVisible() },
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card"))
-            setupV1PaymentMethodsResponse(type = "card")
+            networkRule.setupV1PaymentMethodsResponse(type = "card")
         },
     ) {
         verticalModePage.assertIsNotVisible()
@@ -151,7 +148,7 @@ internal class VerticalModePaymentSheetActivityTest {
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card"))
-            setupV1PaymentMethodsResponse(card1, card2)
+            networkRule.setupV1PaymentMethodsResponse(card1, card2)
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -172,7 +169,7 @@ internal class VerticalModePaymentSheetActivityTest {
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse()
-            setupV1PaymentMethodsResponse(card1, card2)
+            networkRule.setupV1PaymentMethodsResponse(card1, card2)
             networkRule.setupPaymentMethodDetachResponse("pm_12345")
         },
     ) {
@@ -202,7 +199,7 @@ internal class VerticalModePaymentSheetActivityTest {
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse()
-            setupV1PaymentMethodsResponse(card1, card2)
+            networkRule.setupV1PaymentMethodsResponse(card1, card2)
             networkRule.setupPaymentMethodDetachResponse("pm_12345")
             networkRule.setupPaymentMethodDetachResponse("pm_67890")
         },
@@ -232,7 +229,7 @@ internal class VerticalModePaymentSheetActivityTest {
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse()
-            setupV1PaymentMethodsResponse(card1)
+            networkRule.setupV1PaymentMethodsResponse(card1)
             networkRule.setupPaymentMethodDetachResponse("pm_12345")
         },
     ) {
@@ -253,7 +250,10 @@ internal class VerticalModePaymentSheetActivityTest {
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse(isCbcEligible = true)
-            setupV1PaymentMethodsResponse(card1.copy(addCbcNetworks = true), card2.copy(addCbcNetworks = true))
+            networkRule.setupV1PaymentMethodsResponse(
+                card1.copy(addCbcNetworks = true),
+                card2.copy(addCbcNetworks = true)
+            )
             networkRule.setupPaymentMethodUpdateResponse(paymentMethodDetails = card1, cardBrand = "visa")
         },
     ) {
@@ -285,7 +285,7 @@ internal class VerticalModePaymentSheetActivityTest {
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse()
-            setupV1PaymentMethodsResponse(card1, card2)
+            networkRule.setupV1PaymentMethodsResponse(card1, card2)
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -311,7 +311,7 @@ internal class VerticalModePaymentSheetActivityTest {
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse()
-            setupV1PaymentMethodsResponse(card1, card2)
+            networkRule.setupV1PaymentMethodsResponse(card1, card2)
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -343,7 +343,7 @@ internal class VerticalModePaymentSheetActivityTest {
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse()
-            setupV1PaymentMethodsResponse(card1, card2)
+            networkRule.setupV1PaymentMethodsResponse(card1, card2)
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -357,8 +357,8 @@ internal class VerticalModePaymentSheetActivityTest {
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card", "us_bank_account"))
-            setupV1PaymentMethodsResponse(usBankAccount1)
-            setupV1PaymentMethodsResponse(card1, card2)
+            networkRule.setupV1PaymentMethodsResponse(usBankAccount1)
+            networkRule.setupV1PaymentMethodsResponse(card1, card2)
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -392,8 +392,8 @@ internal class VerticalModePaymentSheetActivityTest {
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card", "us_bank_account"))
-            setupV1PaymentMethodsResponse(usBankAccount1)
-            setupV1PaymentMethodsResponse(type = "card")
+            networkRule.setupV1PaymentMethodsResponse(usBankAccount1)
+            networkRule.setupV1PaymentMethodsResponse(type = "card")
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -407,8 +407,8 @@ internal class VerticalModePaymentSheetActivityTest {
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card", "us_bank_account"))
-            setupV1PaymentMethodsResponse(usBankAccount1, usBankAccount2)
-            setupV1PaymentMethodsResponse(type = "card")
+            networkRule.setupV1PaymentMethodsResponse(usBankAccount1, usBankAccount2)
+            networkRule.setupV1PaymentMethodsResponse(type = "card")
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -469,7 +469,7 @@ internal class VerticalModePaymentSheetActivityTest {
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse()
-            setupV1PaymentMethodsResponse(card1)
+            networkRule.setupV1PaymentMethodsResponse(card1)
         },
     ) {
         // Saved Visa card should be filtered out
@@ -488,7 +488,7 @@ internal class VerticalModePaymentSheetActivityTest {
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse(isCbcEligible = true)
-            setupV1PaymentMethodsResponse(
+            networkRule.setupV1PaymentMethodsResponse(
                 card1.copy(addCbcNetworks = true, brand = CardBrand.CartesBancaires),
                 card2.copy(addCbcNetworks = true, brand = CardBrand.CartesBancaires)
             )
@@ -584,41 +584,6 @@ internal class VerticalModePaymentSheetActivityTest {
                 new = "$isCbcEligible",
             )
             response.testBodyFromFile("elements-sessions-requires_payment_method.json", replacements)
-        }
-    }
-
-    private fun setupV1PaymentMethodsResponse(
-        vararg paymentMethodDetails: PaymentMethodDetails,
-        type: String = paymentMethodDetails.first().type,
-    ) {
-        for (paymentMethodDetail in paymentMethodDetails) {
-            // All types must match.
-            assertThat(type).isEqualTo(paymentMethodDetail.type)
-        }
-
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/payment_methods"),
-            query("type", type),
-        ) { response ->
-            val paymentMethodsArray = JSONArray()
-
-            for (paymentMethodDetail in paymentMethodDetails) {
-                paymentMethodsArray.put(paymentMethodDetail.createJson())
-            }
-
-            val paymentMethodsStringified = paymentMethodsArray.toString(2)
-
-            val body = """
-            {
-              "object": "list",
-              "data": $paymentMethodsStringified,
-              "has_more": false,
-              "url": "/v1/payment_methods"
-            }
-            """.trimIndent()
-            response.setBody(body)
         }
     }
 }

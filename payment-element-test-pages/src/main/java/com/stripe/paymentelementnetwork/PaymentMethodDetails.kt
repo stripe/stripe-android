@@ -1,4 +1,4 @@
-package com.stripe.android.network
+package com.stripe.paymentelementnetwork
 
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -6,14 +6,14 @@ import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
 import org.json.JSONObject
 
-internal sealed interface PaymentMethodDetails {
+sealed interface PaymentMethodDetails {
     val id: String
     val type: String
 
     fun createJson(transform: (PaymentMethod) -> PaymentMethod = { it }): JSONObject
 }
 
-internal data class CardPaymentMethodDetails(
+data class CardPaymentMethodDetails(
     override val id: String,
     val last4: String,
     val addCbcNetworks: Boolean = false,
@@ -36,7 +36,7 @@ internal data class CardPaymentMethodDetails(
     }
 }
 
-internal data class UsBankPaymentMethodDetails(
+data class UsBankPaymentMethodDetails(
     override val id: String,
 ) : PaymentMethodDetails {
     override val type: String = "us_bank_account"
