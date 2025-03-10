@@ -2,9 +2,10 @@ package com.stripe.android.paymentelement.embedded.manage
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.ui.FakeUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
 import kotlinx.coroutines.test.runTest
-import org.mockito.Mockito.mock
 import kotlin.test.Test
 
 internal class ManageNavigatorTest {
@@ -24,7 +25,7 @@ internal class ManageNavigatorTest {
             assertThat(awaitItem()).isEqualTo(initialScreen)
             assertThat(navigator.canGoBack).isFalse()
 
-            val newScreen = mock<ManageNavigator.Screen>()
+            val newScreen = ManageNavigator.Screen.Update(FakeUpdatePaymentMethodInteractor())
             navigator.performAction(ManageNavigator.Action.GoToScreen(newScreen))
             assertThat(awaitItem()).isEqualTo(newScreen)
             assertThat(navigator.canGoBack).isTrue()
@@ -32,6 +33,7 @@ internal class ManageNavigatorTest {
         navigator.result.test {
             ensureAllEventsConsumed()
         }
+        assertThat(eventReporter.showEditablePaymentOptionCalls.awaitItem()).isEqualTo(Unit)
     }
 
     @Test
@@ -47,12 +49,14 @@ internal class ManageNavigatorTest {
         navigator.screen.test {
             assertThat(awaitItem()).isEqualTo(initialScreen)
 
-            val newScreen = mock<ManageNavigator.Screen>()
+            val newScreen = ManageNavigator.Screen.Update(FakeUpdatePaymentMethodInteractor())
             navigator.performAction(ManageNavigator.Action.GoToScreen(newScreen))
             assertThat(awaitItem()).isEqualTo(newScreen)
+            assertThat(eventReporter.showEditablePaymentOptionCalls.awaitItem()).isEqualTo(Unit)
 
             navigator.performAction(ManageNavigator.Action.Back)
             assertThat(awaitItem()).isEqualTo(initialScreen)
+            assertThat(eventReporter.hideEditablePaymentOptionCalls.awaitItem()).isEqualTo(Unit)
         }
 
         navigator.result.test {
@@ -73,15 +77,23 @@ internal class ManageNavigatorTest {
     ) = runTest {
         lateinit var navigator: ManageNavigator
         val initialScreen = ManageNavigator.Screen.All(FakeManageScreenInteractor())
-        navigator = ManageNavigator(coroutineScope = this, initialScreen = initialScreen)
+        val eventReporter = FakeEventReporter()
+        navigator = ManageNavigator(
+            coroutineScope = this,
+            eventReporter = eventReporter,
+            initialScreen = initialScreen,
+        )
         Scenario(
             navigator = navigator,
             initialScreen = initialScreen,
+            eventReporter = eventReporter,
         ).block()
+        eventReporter.validate()
     }
 
     private class Scenario(
         val navigator: ManageNavigator,
         val initialScreen: ManageNavigator.Screen,
+        val eventReporter: FakeEventReporter,
     )
 }

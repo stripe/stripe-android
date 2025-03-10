@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
@@ -22,13 +23,16 @@ import kotlinx.coroutines.flow.asSharedFlow
 import java.io.Closeable
 
 internal class ManageNavigator private constructor(
+    private val eventReporter: EventReporter,
     private val navigationHandler: NavigationHandler<Screen>
 ) {
     constructor(
         coroutineScope: CoroutineScope,
         initialScreen: Screen,
+        eventReporter: EventReporter,
     ) : this(
-        NavigationHandler(
+        eventReporter = eventReporter,
+        navigationHandler = NavigationHandler(
             coroutineScope = coroutineScope,
             initialScreen = initialScreen,
             shouldRemoveInitialScreenOnTransition = false,
@@ -46,6 +50,7 @@ internal class ManageNavigator private constructor(
     fun performAction(action: Action) {
         when (action) {
             is Action.Back -> {
+                onScreenHidden(screen.value)
                 if (navigationHandler.canGoBack) {
                     navigationHandler.pop()
                 } else {
@@ -53,11 +58,27 @@ internal class ManageNavigator private constructor(
                 }
             }
             is Action.Close -> {
+                onScreenHidden(screen.value)
                 _result.tryEmit(Unit)
             }
             is Action.GoToScreen -> {
                 navigationHandler.transitionToWithDelay(action.screen)
+                onScreenShown(action.screen)
             }
+        }
+    }
+
+    private fun onScreenShown(screen: Screen) {
+        when (screen) {
+            is Screen.All -> Unit
+            is Screen.Update -> eventReporter.onShowEditablePaymentOption()
+        }
+    }
+
+    private fun onScreenHidden(screen: Screen) {
+        when (screen) {
+            is Screen.All -> Unit
+            is Screen.Update -> eventReporter.onHideEditablePaymentOption()
         }
     }
 
