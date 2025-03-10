@@ -128,6 +128,7 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
         // `setDecorFitsSystemWindows()` must be called here in onCreateView. If called too early, app crashes on
         // older Android versions; if too late, it doesn't do anything on newer versions.
         dialog?.window?.let { WindowCompat.setDecorFitsSystemWindows(it, false) }
+
         val rootView = StripeComponentDialogFragmentView<ComponentView>(inflater)
             .also { this._rootView = it }
         rootView.toolbar.title = title
@@ -140,14 +141,13 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
         // Update root view padding to keep content visible with soft keyboard.
         // This works in conjunction with `setDecorFitsSystemWindows()`.
         ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
-            val insetBottom =
-                if (insets.isVisible(WindowInsetsCompat.Type.ime())) {
-                    insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
-                } else {
-                    insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
-                }
-            view.updatePadding(bottom = insetBottom)
-            insets.inset(0, 0, 0, insetBottom)
+            val paddings = insets.getInsets(
+                WindowInsetsCompat.Type.statusBars() or
+                    WindowInsetsCompat.Type.ime() or
+                    WindowInsetsCompat.Type.navigationBars()
+            )
+            view.updatePadding(top = paddings.top, bottom = paddings.bottom)
+            insets.inset(0, paddings.top, 0, paddings.bottom)
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
