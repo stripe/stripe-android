@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.ui
 import android.content.Context
 import android.content.res.Resources
 import androidx.annotation.RestrictTo
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,11 +20,15 @@ import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
+import androidx.compose.material.TextFieldColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
@@ -34,8 +39,10 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.R
@@ -44,16 +51,21 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.SavedPaymentMethod
 import com.stripe.android.paymentsheet.utils.testMetadata
 import com.stripe.android.uicore.elements.CheckboxElementUI
+import com.stripe.android.uicore.elements.SectionElementUI
+import com.stripe.android.uicore.elements.SectionError
 import com.stripe.android.uicore.elements.TextFieldColors
+import com.stripe.android.uicore.elements.TextFieldState
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.mapAsStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import com.stripe.android.common.ui.PrimaryButton as PrimaryButton
 import com.stripe.android.paymentsheet.R as PaymentSheetR
 
@@ -71,13 +83,18 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
         modifier = modifier.padding(horizontal = horizontalPadding).testTag(UPDATE_PM_SCREEN_TEST_TAG),
     ) {
         when (val savedPaymentMethod = interactor.displayableSavedPaymentMethod.savedPaymentMethod) {
-            is SavedPaymentMethod.Card -> CardDetailsUI(
-                displayableSavedPaymentMethod = interactor.displayableSavedPaymentMethod,
-                shouldShowCardBrandDropdown = shouldShowCardBrandDropdown,
-                selectedBrand = state.cardBrandChoice,
-                card = savedPaymentMethod.card,
-                interactor = interactor,
-            )
+            is SavedPaymentMethod.Card -> {
+                val cardUIViewModel = viewModel<CardUIViewModel>(
+                    factory = interactor.cardUIViewModelFactory(savedPaymentMethod)
+                )
+                CardDetailsUI(
+                    displayableSavedPaymentMethod = interactor.displayableSavedPaymentMethod,
+                    shouldShowCardBrandDropdown = shouldShowCardBrandDropdown,
+                    card = savedPaymentMethod.card,
+                    interactor = interactor,
+                    cardUIViewModel = cardUIViewModel
+                )
+            }
             is SavedPaymentMethod.SepaDebit -> SepaDebitUI(
                 name = interactor.displayableSavedPaymentMethod.paymentMethod.billingDetails?.name,
                 email = interactor.displayableSavedPaymentMethod.paymentMethod.billingDetails?.email,
@@ -182,60 +199,92 @@ private fun UpdatePaymentMethodButtons(
 private fun CardDetailsUI(
     displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     shouldShowCardBrandDropdown: Boolean,
-    selectedBrand: CardBrandChoice,
     card: PaymentMethod.Card,
     interactor: UpdatePaymentMethodInteractor,
+    cardUIViewModel: CardUIViewModel
 ) {
     val dividerHeight = remember { mutableStateOf(0.dp) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    val selectedBrand by cardUIViewModel.selectedCardBrandFlow.collectAsState(
+        initial = cardUIViewModel.defaultCardBrandChoice()
+    )
 
-    Card(
-        border = MaterialTheme.getBorderStroke(false),
-        elevation = 0.dp,
-        modifier = Modifier.testTag(UPDATE_PM_CARD_TEST_TAG),
-    ) {
-        Column {
-            CardNumberField(
-                card = card,
-                selectedBrand = selectedBrand,
-                shouldShowCardBrandDropdown = shouldShowCardBrandDropdown,
-                cardBrandFilter = interactor.cardBrandFilter,
-                savedPaymentMethodIcon = displayableSavedPaymentMethod
-                    .paymentMethod
-                    .getSavedPaymentMethodIcon(forVerticalMode = true),
-                onBrandOptionsShown = {
-                    interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsShown)
-                },
-                onBrandChoiceChanged = {
-                    interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(it))
-                },
-                onBrandChoiceOptionsDismissed = {
-                    interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsDismissed)
-                },
-            )
-            Divider(
-                color = MaterialTheme.stripeColors.componentDivider,
-                thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
-            )
-            Row(modifier = Modifier.fillMaxWidth()) {
-                ExpiryField(
-                    expiryMonth = card.expiryMonth,
-                    expiryYear = card.expiryYear,
-                    isExpired = interactor.isExpiredCard,
-                    modifier = Modifier
-                        .weight(1F)
-                        .onSizeChanged {
-                            dividerHeight.value =
-                                (it.height / Resources.getSystem().displayMetrics.density).dp
-                        },
+    LaunchedEffect("card_input_state") {
+        cardUIViewModel.cardInputState.collectLatest {
+            interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.CardChanged(it))
+        }
+    }
+
+    Column {
+        Card(
+            border = MaterialTheme.getBorderStroke(false),
+            elevation = 0.dp,
+            modifier = Modifier.testTag(UPDATE_PM_CARD_TEST_TAG),
+        ) {
+            Column {
+                CardNumberField(
+                    card = card,
+                    selectedBrand = selectedBrand,
+                    shouldShowCardBrandDropdown = shouldShowCardBrandDropdown,
+                    cardBrandFilter = interactor.cardBrandFilter,
+                    savedPaymentMethodIcon = displayableSavedPaymentMethod
+                        .paymentMethod
+                        .getSavedPaymentMethodIcon(forVerticalMode = true),
+                    onBrandOptionsShown = {
+                        cardUIViewModel.handleViewAction(CardUIViewModel.ViewAction.BrandChoiceOptionsShown)
+                    },
+                    onBrandChoiceChanged = {
+                        cardUIViewModel.handleViewAction(CardUIViewModel.ViewAction.BrandChoiceChanged(it))
+                    },
+                    onBrandChoiceOptionsDismissed = {
+                        cardUIViewModel.handleViewAction(CardUIViewModel.ViewAction.BrandChoiceOptionsDismissed)
+                    },
                 )
                 Divider(
-                    modifier = Modifier
-                        .height(dividerHeight.value)
-                        .width(MaterialTheme.stripeShapes.borderStrokeWidth.dp),
                     color = MaterialTheme.stripeColors.componentDivider,
+                    thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
                 )
-                CvcField(cardBrand = card.brand, modifier = Modifier.weight(1F))
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    ExpiryField(
+                        expDate = cardUIViewModel.expDate,
+                        onValueChange = {
+                            cardUIViewModel.dateChanged(it)
+                        },
+                        onErrorChanged = {
+                            errorMessage = it
+                        },
+                        validator = cardUIViewModel::validateDate,
+                        modifier = Modifier
+                            .weight(1F)
+                            .onSizeChanged {
+                                dividerHeight.value =
+                                    (it.height / Resources.getSystem().displayMetrics.density).dp
+                            },
+                    )
+                    Divider(
+                        modifier = Modifier
+                            .height(dividerHeight.value)
+                            .width(MaterialTheme.stripeShapes.borderStrokeWidth.dp),
+                        color = MaterialTheme.stripeColors.componentDivider,
+                    )
+                    CvcField(cardBrand = card.brand, modifier = Modifier.weight(1F))
+                }
             }
+        }
+
+        AnimatedVisibility(errorMessage != null) {
+            SectionError(errorMessage.orEmpty())
+        }
+
+        if (cardUIViewModel.collectAddress) {
+            Spacer(Modifier.height(32.dp))
+
+            SectionElementUI(
+                enabled = true,
+                element = cardUIViewModel.addressSectionElement,
+                hiddenIdentifiers = cardUIViewModel.hiddenAddressElements,
+                lastTextFieldIdentifier = null
+            )
         }
     }
 }
@@ -330,7 +379,7 @@ private fun UpdatePaymentMethodUi(interactor: UpdatePaymentMethodInteractor) {
     PrimaryButton(
         label = stringResource(id = PaymentSheetR.string.stripe_paymentsheet_save),
         isLoading = isLoading,
-        isEnabled = (state.cardBrandHasBeenChanged || state.setAsDefaultCheckboxChecked) &&
+        isEnabled = (state.cardBrandHasBeenChanged || state.setAsDefaultCheckboxChecked || state.cardInputHasChanged) &&
             state.status == UpdatePaymentMethodInteractor.Status.Idle,
         onButtonClick = { interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed) },
         modifier = Modifier.testTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).testMetadata("isLoading=$isLoading")
@@ -398,21 +447,18 @@ private fun CardNumberField(
 
 @Composable
 private fun ExpiryField(
-    expiryMonth: Int?,
-    expiryYear: Int?,
-    isExpired: Boolean,
-    modifier: Modifier
+    expDate: String,
+    modifier: Modifier,
+    onValueChange: (String) -> Unit,
+    validator: (String) -> TextFieldState,
+    onErrorChanged: (String?) -> Unit
 ) {
-    CommonTextField(
+    ExpiryTextField(
         modifier = modifier.testTag(UPDATE_PM_EXPIRY_FIELD_TEST_TAG),
-        value = formattedExpiryDate(expiryMonth = expiryMonth, expiryYear = expiryYear),
-        label = stringResource(id = com.stripe.android.uicore.R.string.stripe_expiration_date_hint),
-        shape = MaterialTheme.shapes.small.copy(
-            topStart = ZeroCornerSize,
-            topEnd = ZeroCornerSize,
-            bottomEnd = ZeroCornerSize,
-        ),
-        shouldShowError = isExpired,
+        expDate = expDate,
+        onValueChange = onValueChange,
+        validator = validator,
+        onErrorChanged = onErrorChanged
     )
 }
 
@@ -475,19 +521,25 @@ private fun CvcField(cardBrand: CardBrand, modifier: Modifier) {
 }
 
 @Composable
-private fun CommonTextField(
+internal fun CommonTextField(
     value: String,
     label: String,
+    onValueChange: (String) -> Unit = {},
     modifier: Modifier = Modifier,
     trailingIcon: @Composable (() -> Unit)? = null,
     shouldShowError: Boolean = false,
+    enabled: Boolean = false,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
     shape: Shape =
         MaterialTheme.shapes.small.copy(bottomEnd = ZeroCornerSize, bottomStart = ZeroCornerSize),
+    colors: TextFieldColors = TextFieldColors(
+        shouldShowError = shouldShowError,
+    ),
 ) {
     TextField(
         modifier = modifier.fillMaxWidth(),
         value = value,
-        enabled = false,
+        enabled = enabled,
         label = {
             Label(
                 text = label,
@@ -495,10 +547,9 @@ private fun CommonTextField(
         },
         trailingIcon = trailingIcon,
         shape = shape,
-        colors = TextFieldColors(
-            shouldShowError = shouldShowError,
-        ),
-        onValueChange = {},
+        colors = colors,
+        visualTransformation = visualTransformation,
+        onValueChange = onValueChange,
     )
 }
 
@@ -532,8 +583,9 @@ private fun PreviewUpdatePaymentMethodUI() {
             isLiveMode = false,
             canRemove = true,
             displayableSavedPaymentMethod = exampleCard,
+            addressCollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
             removeExecutor = { null },
-            updateCardBrandExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
+            updateCardExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
             setDefaultPaymentMethodExecutor = { _ -> Result.success(Unit) },
             cardBrandFilter = DefaultCardBrandFilter,
             onBrandChoiceOptionsShown = {},

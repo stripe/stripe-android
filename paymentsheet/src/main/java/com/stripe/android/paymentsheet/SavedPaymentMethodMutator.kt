@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -12,6 +13,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.ui.CardUpdateParams
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
@@ -53,7 +55,7 @@ internal class SavedPaymentMethodMutator(
         DisplayableSavedPaymentMethod,
         canRemove: Boolean,
         performRemove: suspend () -> Throwable?,
-        updateExecutor: suspend (brand: CardBrand) -> Result<PaymentMethod>,
+        updateExecutor: suspend (cardUpdateParams: CardUpdateParams) -> Result<PaymentMethod>,
         setDefaultPaymentMethodExecutor: suspend (paymentMethod: PaymentMethod) -> Result<Unit>,
     ) -> Unit,
     isLinkEnabled: StateFlow<Boolean?>,
@@ -198,8 +200,8 @@ internal class SavedPaymentMethodMutator(
             {
                 removePaymentMethodInEditScreen(paymentMethod)
             },
-            { cardBrand ->
-                modifyCardPaymentMethod(paymentMethod, cardBrand)
+            { cardUpdateParams ->
+                modifyCardPaymentMethod(paymentMethod, cardUpdateParams)
             },
             ::setDefaultPaymentMethod,
         )
@@ -244,7 +246,7 @@ internal class SavedPaymentMethodMutator(
 
     suspend fun modifyCardPaymentMethod(
         paymentMethod: PaymentMethod,
-        brand: CardBrand,
+        cardUpdateParams: CardUpdateParams,
         onSuccess: (PaymentMethod) -> Unit = {},
     ): Result<PaymentMethod> {
         // TODO(samer-stripe): Send 'unexpected_error' here
@@ -263,9 +265,14 @@ internal class SavedPaymentMethodMutator(
             ),
             paymentMethodId = paymentMethod.id!!,
             params = PaymentMethodUpdateParams.createCard(
-                networks = PaymentMethodUpdateParams.Card.Networks(
-                    preferred = brand.code
-                ),
+                networks = cardUpdateParams.cardBrand?.let {
+                    PaymentMethodUpdateParams.Card.Networks(
+                        preferred = it.code
+                    )
+                },
+                billingDetails = cardUpdateParams.billingDetails,
+                expiryMonth = cardUpdateParams.expiryMonth,
+                expiryYear = cardUpdateParams.expiryYear,
                 productUsageTokens = setOf("PaymentSheet"),
             )
         ).onSuccess { updatedMethod ->
@@ -289,14 +296,14 @@ internal class SavedPaymentMethodMutator(
                 onSuccess(updatedMethod)
             }
 
-            eventReporter.onUpdatePaymentMethodSucceeded(
-                selectedBrand = brand
-            )
+//            eventReporter.onUpdatePaymentMethodSucceeded(
+//                selectedBrand = brand
+//            )
         }.onFailure { error ->
-            eventReporter.onUpdatePaymentMethodFailed(
-                selectedBrand = brand,
-                error = error,
-            )
+//            eventReporter.onUpdatePaymentMethodFailed(
+//                selectedBrand = brand,
+//                error = error,
+//            )
         }
     }
 
@@ -345,7 +352,7 @@ internal class SavedPaymentMethodMutator(
             displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
             canRemove: Boolean,
             performRemove: suspend () -> Throwable?,
-            updateCardBrandExecutor: suspend (brand: CardBrand) -> Result<PaymentMethod>,
+            updateCardExecutor: suspend (cardUpdateParams: CardUpdateParams) -> Result<PaymentMethod>,
             setDefaultPaymentMethodExecutor: suspend (paymentMethod: PaymentMethod) -> Result<Unit>,
         ) {
             if (displayableSavedPaymentMethod.savedPaymentMethod != SavedPaymentMethod.Unexpected) {
@@ -356,12 +363,13 @@ internal class SavedPaymentMethodMutator(
                             isLiveMode = isLiveMode,
                             canRemove = canRemove,
                             displayableSavedPaymentMethod,
+                            addressCollectionMode = viewModel.config.asCommonConfiguration().billingDetailsCollectionConfiguration.address,
                             cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
                             removeExecutor = { method ->
                                 performRemove()
                             },
-                            updateCardBrandExecutor = { method, brand ->
-                                updateCardBrandExecutor(brand)
+                            updateCardExecutor = { method, params ->
+                                updateCardExecutor(params)
                             },
                             setDefaultPaymentMethodExecutor = setDefaultPaymentMethodExecutor,
                             onBrandChoiceOptionsShown = {
@@ -410,14 +418,14 @@ internal class SavedPaymentMethodMutator(
                 onUpdatePaymentMethod = { displayableSavedPaymentMethod,
                                           canRemove,
                                           performRemove,
-                                          updateCardBrandExecutor,
+                                          updateCardExecutor,
                                           setDefaultPaymentMethodExecutor, ->
                     onUpdatePaymentMethod(
                         viewModel = viewModel,
                         displayableSavedPaymentMethod = displayableSavedPaymentMethod,
                         canRemove = canRemove,
                         performRemove = performRemove,
-                        updateCardBrandExecutor = updateCardBrandExecutor,
+                        updateCardExecutor = updateCardExecutor,
                         setDefaultPaymentMethodExecutor = setDefaultPaymentMethodExecutor,
                     )
                 },
