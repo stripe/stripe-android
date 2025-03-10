@@ -66,6 +66,8 @@
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Nie można zmienić szczegółów karty.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Poprzez podanie danych karty wyrażasz zgodę na obciążanie przez %s Twojej karty kwotami przyszłych płatności zgodnie z obowiązującymi warunkami.</string>
+  <!-- Error message displayed when updating a card fails. -->
+  <string name="stripe_paymentsheet_card_updates_failed_error_message">Karta nie została zaktualizowana. Spróbuj ponownie.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Wybierz metodę płatności</string>
   <string name="stripe_paymentsheet_close">Zamknij</string>
@@ -141,6 +143,8 @@
   <string name="stripe_paymentsheet_select_your_payment_method">Wybierz metodę płatności</string>
   <!-- Text displayed on manage SEPA debit screen when SEPA debit details are not editable. -->
   <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">Nie można zmienić szczegółów polecenia zapłaty SEPA.</string>
+  <!-- Error message displayed when setting a default payment method fails. -->
+  <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">Domyślna metoda płatności nie została zmieniona. Spróbuj ponownie.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Razem: %s</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->

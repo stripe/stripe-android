@@ -66,6 +66,8 @@
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Údaje na kartě nelze měnit.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Poskytnutím údajů o vaší kartě povolujete společnosti %s, aby si v souladu se svými podmínkami strhla z vaší karty poplatky za budoucí platby.</string>
+  <!-- Error message displayed when updating a card fails. -->
+  <string name="stripe_paymentsheet_card_updates_failed_error_message">Karta nebyla aktualizována. Zkuste to prosím znovu.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Zvolte platební metodu</string>
   <string name="stripe_paymentsheet_close">Zavřít</string>
@@ -141,6 +143,8 @@
   <string name="stripe_paymentsheet_select_your_payment_method">Vyberte svou platební metodu</string>
   <!-- Text displayed on manage SEPA debit screen when SEPA debit details are not editable. -->
   <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">Údaje pro inkaso SEPA nelze měnit.</string>
+  <!-- Error message displayed when setting a default payment method fails. -->
+  <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">Výchozí způsob platby nebyl změněn. Zkuste to prosím znovu.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Celkem: %s</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
