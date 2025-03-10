@@ -25,6 +25,8 @@ internal data class TextUpdate(
     val returningNetworkingUserAccountPicker: ReturningNetworkingUserAccountPicker? = null,
     @SerialName("success_pane")
     val successPane: SuccessPane? = null,
+    @SerialName("streamlined_consent_pane")
+    val streamlinedConsent: StreamlinedConsentPane? = null,
 ) : Parcelable
 
 @Serializable
@@ -67,6 +69,19 @@ internal data class ConsentPane(
     @SerialName("title")
     @Serializable(with = MarkdownToHtmlSerializer::class)
     val title: String
+) : Parcelable
+
+@Serializable
+@Parcelize
+internal data class StreamlinedConsentPane(
+    @SerialName("screen")
+    val screen: FinancialConnectionsGenericInfoScreen,
+    @SerialName("more_info_notice")
+    val moreInfoNotice: FinancialConnectionsGenericInfoScreen,
+    @SerialName("data_access_notice")
+    val dataAccessNotice: DataAccessNotice? = null,
+    @SerialName("legal_details_notice")
+    val legalDetailsNotice: LegalDetailsNotice,
 ) : Parcelable
 
 @Serializable
