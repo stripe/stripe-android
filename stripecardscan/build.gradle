@@ -1,5 +1,6 @@
 apply from: configs.androidLibrary
 
+apply plugin: 'com.google.devtools.ksp'
 apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 
@@ -7,6 +8,11 @@ dependencies {
     api project(":stripe-core")
     implementation project(":camera-core")
     implementation project(":ml-core:cardscan")
+    implementation project(":payments-core")
+
+    // DI
+    implementation libs.dagger
+    ksp libs.daggerCompiler
 
     implementation libs.androidx.appCompat
     implementation libs.androidx.constraintLayout
