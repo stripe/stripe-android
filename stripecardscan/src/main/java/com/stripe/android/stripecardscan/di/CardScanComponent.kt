@@ -1,7 +1,6 @@
 package com.stripe.android.stripecardscan.di
 
 import android.app.Application
-import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.stripecardscan.cardscan.CardScanConfiguration
 import com.stripe.android.stripecardscan.cardscan.CardScanEventsReporter
@@ -14,7 +13,6 @@ import javax.inject.Singleton
     modules = [
         CardScanModule::class,
         CoroutineContextModule::class,
-//        CoreCommonModule::class
     ]
 )
 interface CardScanComponent {

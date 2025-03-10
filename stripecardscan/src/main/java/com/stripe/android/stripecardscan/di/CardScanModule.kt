@@ -1,7 +1,6 @@
 package com.stripe.android.stripecardscan.di
 
 import android.app.Application
-import android.content.Context
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -13,25 +12,17 @@ import com.stripe.android.core.networking.NetworkTypeDetector
 import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
-import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.stripecardscan.BuildConfig
-import com.stripe.android.stripecardscan.cardscan.CardScanConfiguration
 import com.stripe.android.stripecardscan.cardscan.CardScanEventsReporter
 import com.stripe.android.stripecardscan.cardscan.DefaultCardScanEventsReporter
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
-import javax.inject.Provider
 import javax.inject.Singleton
 
 @Module
 internal interface CardScanModule {
-
-    @Binds
-    @Singleton
-    fun bindsErrorReporter(errorReporter: RealErrorReporter): ErrorReporter
 
     @Binds
     @Singleton

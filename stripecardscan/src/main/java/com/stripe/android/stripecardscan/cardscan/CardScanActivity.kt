@@ -181,11 +181,13 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
         val cardScanSheetParams = intent.extras?.let {
             BundleCompat.getParcelable(it, INTENT_PARAM_REQUEST, CardScanSheetParams::class.java)
         }
+        val cardScanConfiguration = cardScanSheetParams?.cardScanConfiguration
+            ?: CardScanConfiguration(sessionId = null)
+
         component = DaggerCardScanComponent.builder()
             .application(this.application)
-            .configuration(CardScanConfiguration(cardScanSheetParams?.cardScanConfiguration?.sessionId))
+            .configuration(cardScanConfiguration)
             .build()
-
 
         onBackPressedDispatcher.addCallback {
             resultListener.userCanceled(CancellationReason.Back)

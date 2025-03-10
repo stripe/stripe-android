@@ -63,7 +63,6 @@ internal class DefaultCardScanEventsReporter @Inject constructor(
                     event = object : AnalyticsEvent {
                         override val eventName: String
                             get() = eventName
-
                     },
                     additionalParams
                 )

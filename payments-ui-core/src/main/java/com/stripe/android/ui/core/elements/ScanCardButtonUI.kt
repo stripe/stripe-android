@@ -1,8 +1,6 @@
 package com.stripe.android.ui.core.elements
 
-import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -17,20 +15,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.stripecardscan.cardscan.CardScanConfiguration
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.cardscan.CardScanActivity
 import com.stripe.android.ui.core.cardscan.CardScanContract
 
 @Composable
 internal fun ScanCardButtonUI(
     enabled: Boolean,
+    sessionId: String?,
     onResult: (CardScanSheetResult) -> Unit
 ) {
     val cardScanLauncher =
@@ -47,7 +43,7 @@ internal fun ScanCardButtonUI(
                 cardScanLauncher.launch(
                     input = CardScanContract.Args(
                         configuration = CardScanConfiguration(
-                            sessionId = "sessionId"
+                            sessionId = sessionId
                         )
                     )
                 )

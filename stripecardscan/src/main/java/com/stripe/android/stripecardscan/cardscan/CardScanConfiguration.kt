@@ -6,4 +6,4 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class CardScanConfiguration(
     val sessionId: String?
-): Parcelable
+) : Parcelable

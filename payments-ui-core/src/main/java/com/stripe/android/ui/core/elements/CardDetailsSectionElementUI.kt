@@ -13,10 +13,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
-import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.cardscan.CardScanActivity
 import com.stripe.android.uicore.elements.H6Text
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionController
@@ -47,7 +44,10 @@ fun CardDetailsSectionElementUI(
                     }
             )
             if (controller.isCardScanEnabled && controller.isStripeCardScanAvailable()) {
-                ScanCardButtonUI(enabled = enabled) {
+                ScanCardButtonUI(
+                    enabled = enabled,
+                    sessionId = controller.sessionId
+                ) {
                     controller.cardDetailsElement.controller.numberElement.controller.onCardScanResult(it)
                 }
             }
