@@ -19,7 +19,9 @@ import com.stripe.android.stripecardscan.scanui.CancellationReason
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-internal class CardScanSheetParams : Parcelable
+data class CardScanSheetParams(
+    val cardScanConfiguration: CardScanConfiguration
+) : Parcelable
 
 sealed interface CardScanSheetResult : Parcelable {
 
@@ -145,8 +147,8 @@ class CardScanSheet private constructor() {
      * The ID and Secret are created from this server-server request:
      * https://paper.dropbox.com/doc/Bouncer-Web-API-Review--BTOclListnApWjHdpv4DoaOuAg-Wy0HGlL0XfwAOz9hHuzS1#:h2=Creating-a-CardImageVerificati
      */
-    fun present() {
-        launcher.launch(CardScanSheetParams())
+    fun present(configuration: CardScanConfiguration) {
+        launcher.launch(CardScanSheetParams(configuration))
     }
 
     /**
