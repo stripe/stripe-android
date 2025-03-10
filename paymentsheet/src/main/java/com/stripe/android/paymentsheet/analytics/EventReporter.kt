@@ -61,6 +61,8 @@ internal interface EventReporter {
      */
     fun onShowExistingPaymentOptions()
 
+    fun onShowManageSavedPaymentMethods()
+
     /**
      * PaymentSheet is now being displayed and its first screen shows new payment methods.
      */

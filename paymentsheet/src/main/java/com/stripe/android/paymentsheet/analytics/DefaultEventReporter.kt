@@ -137,6 +137,18 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
+    override fun onShowManageSavedPaymentMethods() {
+        fireEvent(
+            PaymentSheetEvent.ShowManagePaymentMethods(
+                mode = mode,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+                currency = currency,
+                isDeferred = isDeferred,
+            )
+        )
+    }
+
     override fun onShowNewPaymentOptions() {
         fireEvent(
             PaymentSheetEvent.ShowNewPaymentOptions(

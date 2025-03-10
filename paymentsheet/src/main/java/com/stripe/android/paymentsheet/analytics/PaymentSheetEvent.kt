@@ -199,6 +199,19 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         )
     }
 
+    class ShowManagePaymentMethods(
+        mode: EventReporter.Mode,
+        currency: String?,
+        override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = formatEventName(mode, "manage_savedpm_show")
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_CURRENCY to currency,
+        )
+    }
+
     class SelectPaymentMethod(
         code: String,
         currency: String?,
