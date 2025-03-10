@@ -1,13 +1,11 @@
 package com.stripe.android.connect.example
 
 import androidx.compose.ui.test.assertIsDisplayed
-import com.stripe.android.connect.example.data.FakeEmbeddedComponentService
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Test
-import javax.inject.Inject
 
 @HiltAndroidTest
-class SmokeTest : ConnectTest() {
+class SmokeTest : BaseConnectTest() {
     @Test
     fun testAppOpensToLoading() {
         Main {
