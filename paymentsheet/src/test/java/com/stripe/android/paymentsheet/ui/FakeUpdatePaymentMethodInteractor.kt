@@ -20,14 +20,14 @@ internal class FakeUpdatePaymentMethodInteractor(
     override val hasValidBrandChoices: Boolean = true,
     override val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
     override val shouldShowSetAsDefaultCheckbox: Boolean = false,
-    override val shouldShowSaveButton: Boolean,
+    override val shouldShowSaveButton: Boolean = false,
     val viewActionRecorder: ViewActionRecorder<UpdatePaymentMethodInteractor.ViewAction>? = ViewActionRecorder(),
     initialState: UpdatePaymentMethodInteractor.State = UpdatePaymentMethodInteractor.State(
         error = null,
         status = UpdatePaymentMethodInteractor.Status.Idle,
         cardBrandChoice = CardBrandChoice(brand = CardBrand.Visa, enabled = false),
-        cardBrandHasBeenChanged = false,
         setAsDefaultCheckboxChecked = false,
+        isSaveButtonEnabled = false,
     ),
 ) : UpdatePaymentMethodInteractor {
     override val state: StateFlow<UpdatePaymentMethodInteractor.State> = MutableStateFlow(initialState)
