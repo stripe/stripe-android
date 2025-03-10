@@ -100,6 +100,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
         rowStyle: Embedded.RowStyle,
         embeddedViewDisplaysMandateText: Boolean,
     ) {
+        eventReporter.onShowNewPaymentOptions()
         savedStateHandle[STATE_KEY_EMBEDDED_CONTENT] = State(
             paymentMethodMetadata = paymentMethodMetadata,
             rowStyle = rowStyle,

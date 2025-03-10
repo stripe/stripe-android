@@ -12,6 +12,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedContentHelper.Companion.STATE_KEY_EMBEDDED_CONTENT
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
@@ -19,7 +20,6 @@ import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
-import org.mockito.Mockito.mock
 import kotlin.test.Test
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
@@ -34,6 +34,7 @@ internal class DefaultEmbeddedContentHelperTest {
         val state = savedStateHandle.get<DefaultEmbeddedContentHelper.State?>(STATE_KEY_EMBEDDED_CONTENT)
         assertThat(state?.paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
         assertThat(state?.rowStyle).isEqualTo(rowStyle)
+        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
     }
 
     @Test
@@ -47,6 +48,7 @@ internal class DefaultEmbeddedContentHelperTest {
             )
             assertThat(awaitItem()).isNotNull()
         }
+        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
     }
 
     @Test
@@ -70,6 +72,7 @@ internal class DefaultEmbeddedContentHelperTest {
     private class Scenario(
         val embeddedContentHelper: DefaultEmbeddedContentHelper,
         val savedStateHandle: SavedStateHandle,
+        val eventReporter: FakeEventReporter,
     )
 
     private fun testScenario(
@@ -85,10 +88,11 @@ internal class DefaultEmbeddedContentHelperTest {
             embeddedSelectionHolder = selectionHolder
         )
         val confirmationHandler = FakeConfirmationHandler()
+        val eventReporter = FakeEventReporter()
         val embeddedContentHelper = DefaultEmbeddedContentHelper(
             coroutineScope = CoroutineScope(Dispatchers.Unconfined),
             savedStateHandle = savedStateHandle,
-            eventReporter = mock(),
+            eventReporter = eventReporter,
             workContext = Dispatchers.Unconfined,
             uiContext = Dispatchers.Unconfined,
             customerRepository = FakeCustomerRepository(),
@@ -106,7 +110,9 @@ internal class DefaultEmbeddedContentHelperTest {
         Scenario(
             embeddedContentHelper = embeddedContentHelper,
             savedStateHandle = savedStateHandle,
+            eventReporter = eventReporter,
         ).block()
         confirmationHandler.validate()
+        eventReporter.validate()
     }
 }
