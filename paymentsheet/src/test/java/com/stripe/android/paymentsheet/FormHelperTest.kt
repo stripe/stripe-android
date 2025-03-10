@@ -22,7 +22,6 @@ import com.stripe.android.model.PaymentMethodCreateParams.Companion.getNameFromP
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
-import com.stripe.android.model.setupFutureUsage
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
@@ -78,7 +77,7 @@ internal class FormHelperTest {
                 )
             ),
             newPaymentSelectionProvider = {
-                NewOrExternalPaymentSelection.New(
+                NewPaymentSelectionWrapper.New(
                     PaymentSelection.New.GenericPaymentMethod(
                         label = "Cash App".resolvableString,
                         iconResource = 0,
@@ -109,7 +108,7 @@ internal class FormHelperTest {
                 )
             ),
             newPaymentSelectionProvider = {
-                NewOrExternalPaymentSelection.New(
+                NewPaymentSelectionWrapper.New(
                     PaymentSelection.New.GenericPaymentMethod(
                         label = "Klarna".resolvableString,
                         iconResource = 0,
@@ -509,7 +508,7 @@ internal class FormHelperTest {
     private fun createFormHelper(
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         linkInlineHandler: LinkInlineHandler = LinkInlineHandler.create(),
-        newPaymentSelectionProvider: () -> NewOrExternalPaymentSelection? = { throw AssertionError("Not implemented") },
+        newPaymentSelectionProvider: () -> NewPaymentSelectionWrapper? = { throw AssertionError("Not implemented") },
         selectionUpdater: (PaymentSelection?) -> Unit = { throw AssertionError("Not implemented") },
     ): FormHelper {
         return DefaultFormHelper(

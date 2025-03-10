@@ -12,6 +12,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.toDeferredIntentParams
@@ -23,9 +24,11 @@ import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 internal interface ElementsSessionRepository {
+    @OptIn(ExperimentalCustomPaymentMethodsApi::class)
     suspend fun get(
         initializationMode: PaymentElementLoader.InitializationMode,
         customer: PaymentSheet.CustomerConfiguration?,
+        customPaymentMethodConfig: PaymentSheet.CustomPaymentMethodConfiguration?,
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
     ): Result<ElementsSession>
@@ -49,14 +52,17 @@ internal class RealElementsSessionRepository @Inject constructor(
             stripeAccount = lazyPaymentConfig.get().stripeAccountId,
         )
 
+    @OptIn(ExperimentalCustomPaymentMethodsApi::class)
     override suspend fun get(
         initializationMode: PaymentElementLoader.InitializationMode,
         customer: PaymentSheet.CustomerConfiguration?,
+        customPaymentMethodConfig: PaymentSheet.CustomPaymentMethodConfiguration?,
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
     ): Result<ElementsSession> {
         val params = initializationMode.toElementsSessionParams(
             customer = customer,
+            customPaymentMethodConfig = customPaymentMethodConfig,
             externalPaymentMethods = externalPaymentMethods,
             savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
             appId = appId
@@ -114,19 +120,23 @@ private fun StripeIntent.withoutWeChatPay(): StripeIntent {
     }
 }
 
+@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
     customer: PaymentSheet.CustomerConfiguration?,
+    customPaymentMethodConfig: PaymentSheet.CustomPaymentMethodConfiguration?,
     externalPaymentMethods: List<String>,
     savedPaymentMethodSelectionId: String?,
     appId: String
 ): ElementsSessionParams {
     val customerSessionClientSecret = customer?.toElementSessionParam()
+    val customPaymentMethods = customPaymentMethodConfig?.toElementSessionParam() ?: emptyList()
 
     return when (this) {
         is PaymentElementLoader.InitializationMode.PaymentIntent -> {
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = clientSecret,
                 customerSessionClientSecret = customerSessionClientSecret,
+                customPaymentMethods = customPaymentMethods,
                 externalPaymentMethods = externalPaymentMethods,
                 savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
                 appId = appId
@@ -138,6 +148,7 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 clientSecret = clientSecret,
                 customerSessionClientSecret = customerSessionClientSecret,
                 externalPaymentMethods = externalPaymentMethods,
+                customPaymentMethods = customPaymentMethods,
                 savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
                 appId = appId
             )
@@ -146,12 +157,20 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
         is PaymentElementLoader.InitializationMode.DeferredIntent -> {
             ElementsSessionParams.DeferredIntentType(
                 deferredIntentParams = intentConfiguration.toDeferredIntentParams(),
+                customPaymentMethods = customPaymentMethods,
                 externalPaymentMethods = externalPaymentMethods,
                 customerSessionClientSecret = customerSessionClientSecret,
                 savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
                 appId = appId
             )
         }
+    }
+}
+
+@OptIn(ExperimentalCustomPaymentMethodsApi::class)
+private fun PaymentSheet.CustomPaymentMethodConfiguration.toElementSessionParam(): List<String> {
+    return customPaymentMethodTypes.map { customPaymentMethodType ->
+        customPaymentMethodType.id
     }
 }
 

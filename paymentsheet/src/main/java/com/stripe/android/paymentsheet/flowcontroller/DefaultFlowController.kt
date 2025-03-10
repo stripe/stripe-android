@@ -16,7 +16,9 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.cpms.CustomPaymentMethodProxyActivity
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
@@ -54,6 +56,7 @@ import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Named
 
+@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 @FlowControllerScope
 internal class DefaultFlowController @Inject internal constructor(
     // Properties provided through FlowControllerComponent.Builder
@@ -125,6 +128,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     activityResultLaunchers.forEach { it.unregister() }
                     IntentConfirmationInterceptor.createIntentCallback = null
                     ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
+                    CustomPaymentMethodProxyActivity.customPaymentMethodConfirmHandler = null
                 }
             }
         )
@@ -274,6 +278,7 @@ internal class DefaultFlowController @Inject internal constructor(
             is PaymentSelection.New.LinkInline,
             is PaymentSelection.GooglePay,
             is PaymentSelection.ExternalPaymentMethod,
+            is PaymentSelection.CustomPaymentMethod,
             is PaymentSelection.New,
             null -> confirmPaymentSelection(
                 paymentSelection = paymentSelection,

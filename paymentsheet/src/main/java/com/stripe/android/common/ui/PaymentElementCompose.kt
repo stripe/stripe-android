@@ -2,6 +2,9 @@ package com.stripe.android.common.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import com.stripe.android.paymentelement.CustomPaymentMethodConfirmHandler
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
+import com.stripe.android.paymentelement.confirmation.cpms.CustomPaymentMethodProxyActivity
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
@@ -22,5 +25,15 @@ internal fun UpdateExternalPaymentMethodConfirmHandler(
 ) {
     LaunchedEffect(externalPaymentMethodConfirmHandler) {
         ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
+    }
+}
+
+@Composable
+@OptIn(ExperimentalCustomPaymentMethodsApi::class)
+internal fun UpdateCustomPaymentMethodConfirmHandler(
+    customPaymentMethodConfirmHandler: CustomPaymentMethodConfirmHandler?,
+) {
+    LaunchedEffect(customPaymentMethodConfirmHandler) {
+        CustomPaymentMethodProxyActivity.customPaymentMethodConfirmHandler = customPaymentMethodConfirmHandler
     }
 }

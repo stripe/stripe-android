@@ -9,6 +9,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
+import com.stripe.android.common.ui.UpdateCustomPaymentMethodConfirmHandler
 import com.stripe.android.common.ui.UpdateExternalPaymentMethodConfirmHandler
 import com.stripe.android.common.ui.UpdateIntentConfirmationInterceptor
 import com.stripe.android.utils.rememberActivity
@@ -21,6 +22,7 @@ import com.stripe.android.utils.rememberActivity
 @ExperimentalEmbeddedPaymentElementApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
+@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 fun rememberEmbeddedPaymentElement(
     builder: EmbeddedPaymentElement.Builder
 ): EmbeddedPaymentElement {
@@ -30,6 +32,7 @@ fun rememberEmbeddedPaymentElement(
 
     UpdateExternalPaymentMethodConfirmHandler(builder.externalPaymentMethodConfirmHandler)
     UpdateIntentConfirmationInterceptor(builder.createIntentCallback)
+    UpdateCustomPaymentMethodConfirmHandler(builder.customPaymentMethodConfirmHandler)
 
     val lifecycleOwner = LocalLifecycleOwner.current
     val activityResultRegistryOwner = requireNotNull(LocalActivityResultRegistryOwner.current) {

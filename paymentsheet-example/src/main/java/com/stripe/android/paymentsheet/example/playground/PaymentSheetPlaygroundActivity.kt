@@ -29,6 +29,8 @@ import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.CustomPaymentMethodConfirmHandler
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -37,6 +39,7 @@ import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
+import com.stripe.android.paymentsheet.example.playground.activity.CustomPaymentMethodActivity
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
 import com.stripe.android.paymentsheet.example.playground.activity.getEmbeddedAppearance
@@ -56,7 +59,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 
-internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPaymentMethodConfirmHandler {
+@OptIn(ExperimentalCustomPaymentMethodsApi::class)
+internal class PaymentSheetPlaygroundActivity :
+    AppCompatActivity(),
+    CustomPaymentMethodConfirmHandler,
+    ExternalPaymentMethodConfirmHandler {
     companion object {
         fun createTestIntent(settingsJson: String): Intent {
             return Intent(
@@ -89,6 +96,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
             }
             val paymentSheet = PaymentSheet.Builder(viewModel::onPaymentSheetResult)
                 .externalPaymentMethodConfirmHandler(this)
+                .customPaymentMethodConfirmHandler(this)
                 .createIntentCallback(viewModel::createIntentCallback)
                 .build()
             val flowController = PaymentSheet.FlowController.Builder(
@@ -96,6 +104,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
                 viewModel::onPaymentOptionSelected
             )
                 .externalPaymentMethodConfirmHandler(this)
+                .customPaymentMethodConfirmHandler(this)
                 .createIntentCallback(viewModel::createIntentCallback)
                 .build()
 
@@ -536,6 +545,20 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
             )
                 .putExtra(FawryActivity.EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE, externalPaymentMethodType)
                 .putExtra(FawryActivity.EXTRA_BILLING_DETAILS, billingDetails)
+        )
+    }
+
+    override fun confirmCustomPaymentMethod(
+        customPaymentMethodType: PaymentSheet.CustomPaymentMethodConfiguration.CustomPaymentMethodType,
+        billingDetails: PaymentMethod.BillingDetails
+    ) {
+        this.startActivity(
+            Intent().setClass(
+                this,
+                CustomPaymentMethodActivity::class.java
+            )
+                .putExtra(CustomPaymentMethodActivity.EXTRA_CUSTOM_PAYMENT_METHOD_TYPE, customPaymentMethodType)
+                .putExtra(CustomPaymentMethodActivity.EXTRA_BILLING_DETAILS, billingDetails)
         )
     }
 }

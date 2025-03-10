@@ -90,6 +90,7 @@ private fun List<PaymentOptionsItem>.findSelectedItem(paymentSelection: PaymentS
             }
             is PaymentSelection.New -> false
             is PaymentSelection.ExternalPaymentMethod -> false
+            is PaymentSelection.CustomPaymentMethod -> false
         }
     }
 }

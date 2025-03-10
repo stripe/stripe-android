@@ -6,7 +6,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.LinkInlineHandler
-import com.stripe.android.paymentsheet.NewOrExternalPaymentSelection
+import com.stripe.android.paymentsheet.NewPaymentSelectionWrapper
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
@@ -29,10 +29,10 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
             newPaymentSelectionProvider = {
                 when (val currentSelection = embeddedSelectionHolder.selection.value) {
                     is PaymentSelection.ExternalPaymentMethod -> {
-                        NewOrExternalPaymentSelection.External(currentSelection)
+                        NewPaymentSelectionWrapper.External(currentSelection)
                     }
                     is PaymentSelection.New -> {
-                        NewOrExternalPaymentSelection.New(currentSelection)
+                        NewPaymentSelectionWrapper.New(currentSelection)
                     }
                     else -> null
                 }

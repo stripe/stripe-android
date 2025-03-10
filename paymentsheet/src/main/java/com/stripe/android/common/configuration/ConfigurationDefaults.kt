@@ -2,6 +2,7 @@ package com.stripe.android.common.configuration
 
 import android.content.res.ColorStateList
 import com.stripe.android.model.CardBrand
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -26,5 +27,8 @@ internal object ConfigurationDefaults {
     val externalPaymentMethods: List<String> = emptyList()
     val paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.Automatic
     val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = PaymentSheet.CardBrandAcceptance.All
+
+    @OptIn(ExperimentalCustomPaymentMethodsApi::class)
+    val customPaymentMethodConfiguration: PaymentSheet.CustomPaymentMethodConfiguration? = null
     const val embeddedViewDisplaysMandateText: Boolean = true
 }

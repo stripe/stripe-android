@@ -27,13 +27,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.CustomPaymentMethodConfirmHandler
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
+import com.stripe.android.paymentsheet.example.playground.activity.CustomPaymentMethodActivity
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.network.PlaygroundRequester
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
@@ -47,8 +51,11 @@ import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSe
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-internal class EmbeddedPlaygroundActivity : AppCompatActivity(), ExternalPaymentMethodConfirmHandler {
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class, ExperimentalCustomPaymentMethodsApi::class)
+internal class EmbeddedPlaygroundActivity :
+    AppCompatActivity(),
+    ExternalPaymentMethodConfirmHandler,
+    CustomPaymentMethodConfirmHandler {
     companion object {
         const val PLAYGROUND_STATE_KEY = "playgroundState"
 
@@ -88,7 +95,9 @@ internal class EmbeddedPlaygroundActivity : AppCompatActivity(), ExternalPayment
                 )
             },
             resultCallback = ::handleEmbeddedResult,
-        ).externalPaymentMethodConfirmHandler(this)
+        )
+            .customPaymentMethodConfirmHandler(this)
+            .externalPaymentMethodConfirmHandler(this)
         val embeddedViewDisplaysMandateText =
             initialPlaygroundState.snapshot[EmbeddedViewDisplaysMandateSettingDefinition]
         setContent {
@@ -213,6 +222,19 @@ internal class EmbeddedPlaygroundActivity : AppCompatActivity(), ExternalPayment
                 FawryActivity::class.java
             ).putExtra(FawryActivity.EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE, externalPaymentMethodType)
                 .putExtra(FawryActivity.EXTRA_BILLING_DETAILS, billingDetails)
+        )
+    }
+
+    override fun confirmCustomPaymentMethod(
+        customPaymentMethodType: PaymentSheet.CustomPaymentMethodConfiguration.CustomPaymentMethodType,
+        billingDetails: PaymentMethod.BillingDetails,
+    ) {
+        startActivity(
+            Intent().setClass(
+                this,
+                CustomPaymentMethodActivity::class.java
+            ).putExtra(CustomPaymentMethodActivity.EXTRA_CUSTOM_PAYMENT_METHOD_TYPE, customPaymentMethodType)
+                .putExtra(CustomPaymentMethodActivity.EXTRA_BILLING_DETAILS, billingDetails)
         )
     }
 

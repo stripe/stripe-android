@@ -1849,7 +1849,7 @@ internal class PaymentSheetViewModelTest {
             assertThat(awaitItem())
                 .isEqualTo(newSelection)
             assertThat(viewModel.newPaymentSelection).isEqualTo(
-                NewOrExternalPaymentSelection.New(
+                NewPaymentSelectionWrapper.New(
                     newSelection
                 )
             )
@@ -1873,7 +1873,7 @@ internal class PaymentSheetViewModelTest {
             viewModel.updateSelection(newSelection)
             assertThat(awaitItem()).isEqualTo(newSelection)
             assertThat(viewModel.newPaymentSelection).isEqualTo(
-                NewOrExternalPaymentSelection.External(
+                NewPaymentSelectionWrapper.External(
                     newSelection
                 )
             )

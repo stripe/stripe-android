@@ -2,6 +2,7 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.InputController
@@ -17,9 +18,19 @@ import kotlinx.coroutines.flow.StateFlow
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class StaticTextElement(
     override val identifier: IdentifierSpec,
-    val stringResId: Int,
+    val text: ResolvableString,
     override val controller: InputController? = null
 ) : FormElement {
+    constructor(
+        identifier: IdentifierSpec,
+        stringResId: Int,
+        controller: InputController? = null
+    ) : this(
+        identifier = identifier,
+        text = stringResId.resolvableString,
+        controller = controller,
+    )
+
     override val allowsUserInteraction: Boolean = false
     override val mandateText: ResolvableString? = null
 
