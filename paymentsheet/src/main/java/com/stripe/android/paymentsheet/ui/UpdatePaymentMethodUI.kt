@@ -22,6 +22,8 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,11 +54,7 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.SavedPaymentMethod
 import com.stripe.android.paymentsheet.utils.testMetadata
-import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.uicore.elements.CheckboxElementUI
-import com.stripe.android.uicore.elements.DateConfig
-import com.stripe.android.uicore.elements.IdentifierSpec
-import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionElementUI
 import com.stripe.android.uicore.elements.SectionError
 import com.stripe.android.uicore.elements.TextFieldColors
@@ -67,6 +65,7 @@ import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.mapAsStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import com.stripe.android.common.ui.PrimaryButton as PrimaryButton
 import com.stripe.android.paymentsheet.R as PaymentSheetR
 
@@ -84,14 +83,18 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
         modifier = modifier.padding(horizontal = horizontalPadding).testTag(UPDATE_PM_SCREEN_TEST_TAG),
     ) {
         when (val savedPaymentMethod = interactor.displayableSavedPaymentMethod.savedPaymentMethod) {
-            is SavedPaymentMethod.Card -> CardDetailsUI(
-                displayableSavedPaymentMethod = interactor.displayableSavedPaymentMethod,
-                shouldShowCardBrandDropdown = shouldShowCardBrandDropdown,
-                selectedBrand = state.cardBrandChoice,
-                card = savedPaymentMethod.card,
-                billingDetails = savedPaymentMethod.billingDetails,
-                interactor = interactor,
-            )
+            is SavedPaymentMethod.Card -> {
+                val cardUIViewModel = viewModel<CardUIViewModel>(
+                    factory = interactor.cardUIViewModelFactory(savedPaymentMethod)
+                )
+                CardDetailsUI(
+                    displayableSavedPaymentMethod = interactor.displayableSavedPaymentMethod,
+                    shouldShowCardBrandDropdown = shouldShowCardBrandDropdown,
+                    card = savedPaymentMethod.card,
+                    interactor = interactor,
+                    cardUIViewModel = cardUIViewModel
+                )
+            }
             is SavedPaymentMethod.SepaDebit -> SepaDebitUI(
                 name = interactor.displayableSavedPaymentMethod.paymentMethod.billingDetails?.name,
                 email = interactor.displayableSavedPaymentMethod.paymentMethod.billingDetails?.email,
@@ -196,20 +199,21 @@ private fun UpdatePaymentMethodButtons(
 private fun CardDetailsUI(
     displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     shouldShowCardBrandDropdown: Boolean,
-    selectedBrand: CardBrandChoice,
     card: PaymentMethod.Card,
-    billingDetails: PaymentMethod.BillingDetails?,
     interactor: UpdatePaymentMethodInteractor,
+    cardUIViewModel: CardUIViewModel
 ) {
-    val cardUIViewModel = viewModel<CardUIViewModel>(
-        factory = CardUIViewModel.factory(
-            card = card,
-            addressCollectionMode = interactor.addressCollectionMode,
-            billingDetails = billingDetails
-        )
-    )
     val dividerHeight = remember { mutableStateOf(0.dp) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    val selectedBrand by cardUIViewModel.selectedCardBrandFlow.collectAsState(
+        initial = cardUIViewModel.defaultCardBrandChoice()
+    )
+
+    LaunchedEffect("card_input_state") {
+        cardUIViewModel.cardInputState.collectLatest {
+            interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.CardChanged(it))
+        }
+    }
 
     Column {
         Card(
@@ -227,13 +231,13 @@ private fun CardDetailsUI(
                         .paymentMethod
                         .getSavedPaymentMethodIcon(forVerticalMode = true),
                     onBrandOptionsShown = {
-                        interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsShown)
+                        cardUIViewModel.handleViewAction(CardUIViewModel.ViewAction.BrandChoiceOptionsShown)
                     },
                     onBrandChoiceChanged = {
-                        interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(it))
+                        cardUIViewModel.handleViewAction(CardUIViewModel.ViewAction.BrandChoiceChanged(it))
                     },
                     onBrandChoiceOptionsDismissed = {
-                        interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsDismissed)
+                        cardUIViewModel.handleViewAction(CardUIViewModel.ViewAction.BrandChoiceOptionsDismissed)
                     },
                 )
                 Divider(
@@ -243,6 +247,9 @@ private fun CardDetailsUI(
                 Row(modifier = Modifier.fillMaxWidth()) {
                     ExpiryField(
                         expDate = cardUIViewModel.expDate,
+                        onValueChange = {
+                            cardUIViewModel.dateChanged(it)
+                        },
                         onErrorChanged = {
                             errorMessage = it
                         },
@@ -372,7 +379,7 @@ private fun UpdatePaymentMethodUi(interactor: UpdatePaymentMethodInteractor) {
     PrimaryButton(
         label = stringResource(id = PaymentSheetR.string.stripe_paymentsheet_save),
         isLoading = isLoading,
-        isEnabled = (state.cardBrandHasBeenChanged || state.setAsDefaultCheckboxChecked) &&
+        isEnabled = (state.cardBrandHasBeenChanged || state.setAsDefaultCheckboxChecked || state.cardInputHasChanged) &&
             state.status == UpdatePaymentMethodInteractor.Status.Idle,
         onButtonClick = { interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed) },
         modifier = Modifier.testTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).testMetadata("isLoading=$isLoading")
@@ -442,15 +449,14 @@ private fun CardNumberField(
 private fun ExpiryField(
     expDate: String,
     modifier: Modifier,
+    onValueChange: (String) -> Unit,
     validator: (String) -> TextFieldState,
     onErrorChanged: (String?) -> Unit
 ) {
     ExpiryTextField(
         modifier = modifier.testTag(UPDATE_PM_EXPIRY_FIELD_TEST_TAG),
         expDate = expDate,
-        onValueChange = {
-
-        },
+        onValueChange = onValueChange,
         validator = validator,
         onErrorChanged = onErrorChanged
     )
@@ -579,7 +585,7 @@ private fun PreviewUpdatePaymentMethodUI() {
             displayableSavedPaymentMethod = exampleCard,
             addressCollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
             removeExecutor = { null },
-            updateCardBrandExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
+            updateCardExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
             setDefaultPaymentMethodExecutor = { _ -> Result.success(Unit) },
             cardBrandFilter = DefaultCardBrandFilter,
             onBrandChoiceOptionsShown = {},

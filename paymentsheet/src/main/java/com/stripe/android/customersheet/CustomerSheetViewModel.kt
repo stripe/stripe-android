@@ -60,6 +60,7 @@ import com.stripe.android.paymentsheet.model.toSavedSelection
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.ui.CardUpdateParams
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -103,7 +104,8 @@ internal class CustomerSheetViewModel(
     private val errorReporter: ErrorReporter,
 ) : ViewModel() {
 
-    @Inject constructor(
+    @Inject
+    constructor(
         application: Application,
         originalPaymentSelection: PaymentSelection?,
         paymentConfigurationProvider: Provider<PaymentConfiguration>,
@@ -557,7 +559,7 @@ internal class CustomerSheetViewModel(
                         )
                     },
                     onUpdateSuccess = ::onBackPressed,
-                    updateCardBrandExecutor = ::updateCardBrandExecutor,
+                    updateCardExecutor = ::updateCardBrandExecutor,
                     workContext = workContext,
                     // This checkbox is never displayed in CustomerSheet.
                     shouldShowSetAsDefaultCheckbox = false,
@@ -580,7 +582,11 @@ internal class CustomerSheetViewModel(
         }.failureOrNull()?.cause
     }
 
-    private suspend fun updateCardBrandExecutor(paymentMethod: PaymentMethod, brand: CardBrand): Result<PaymentMethod> {
+    private suspend fun updateCardBrandExecutor(
+        paymentMethod: PaymentMethod,
+        cardUpdateParams: CardUpdateParams
+    ): Result<PaymentMethod> {
+        val brand = cardUpdateParams.cardBrand ?: return Result.failure(Throwable())
         return when (val result = modifyCardPaymentMethod(paymentMethod, brand)) {
             is CustomerSheetDataResult.Success -> Result.success(result.value)
             is CustomerSheetDataResult.Failure -> Result.failure(result.cause)
@@ -1177,7 +1183,7 @@ internal class CustomerSheetViewModel(
                 eventReporter.onScreenPresented(CustomerSheetEventReporter.Screen.SelectPaymentMethod)
             is CustomerSheetViewState.UpdatePaymentMethod ->
                 eventReporter.onScreenPresented(CustomerSheetEventReporter.Screen.EditPaymentMethod)
-            else -> { }
+            else -> {}
         }
 
         backStack.update {
