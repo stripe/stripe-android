@@ -48,13 +48,13 @@ class StripeComponentControllerTest {
         val activity = activityController.create().start().resume().get()
 
         // Use first controller to show the DF.
-        val controller = createController(activity, mock())
+        val controller = TestComponentController(activity, mock())
         val dialogFragment = controller.dialogFragment
         controller.show()
         awaitMainLooper()
 
         // Second controller should obtain the DF that was added.
-        val newController = createController(activity, mock())
+        val newController = TestComponentController(activity, mock())
         assertThat(newController.dialogFragment).isSameInstanceAs(dialogFragment)
     }
 
@@ -88,7 +88,7 @@ class StripeComponentControllerTest {
     }
 
     internal class TestActivity : FragmentActivity() {
-        lateinit var controller: StripeComponentControllerImpl<*, TestComponentListener, *>
+        lateinit var controller: StripeComponentController<TestComponentListener, *>
         lateinit var embeddedComponentManager: EmbeddedComponentManager
         val onDismissListener = StripeComponentController.OnDismissListener { }
         val listener = object : TestComponentListener {}
@@ -96,22 +96,20 @@ class StripeComponentControllerTest {
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
             embeddedComponentManager = mock()
-            controller = createController(this, embeddedComponentManager)
+            controller = TestComponentController(this, embeddedComponentManager)
             controller.onDismissListener = onDismissListener
             controller.listener = listener
         }
     }
 
-    companion object {
-        private fun createController(
-            activity: FragmentActivity,
-            embeddedComponentManager: EmbeddedComponentManager
-        ) = StripeComponentControllerImpl(
-            cls = TestComponentDialogFragment::class.java,
-            activity = activity,
-            embeddedComponentManager = embeddedComponentManager,
-        )
-    }
+    internal class TestComponentController(
+        activity: FragmentActivity,
+        embeddedComponentManager: EmbeddedComponentManager
+    ) : StripeComponentController<TestComponentListener, EmptyProps>(
+        dfClass = TestComponentDialogFragment::class.java,
+        activity = activity,
+        embeddedComponentManager = embeddedComponentManager,
+    )
 
     internal class TestComponentDialogFragment :
         StripeComponentDialogFragment<TestComponentView, TestComponentListener, EmptyProps>() {
@@ -130,7 +128,6 @@ class StripeComponentControllerTest {
         attrs = null,
         defStyleAttr = 0,
     ) {
-
         override var listener: TestComponentListener? = null
 
         override fun initialize(
