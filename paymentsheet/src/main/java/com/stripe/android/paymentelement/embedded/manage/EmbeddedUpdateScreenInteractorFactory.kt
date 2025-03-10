@@ -32,7 +32,7 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
         return DefaultUpdatePaymentMethodInteractor(
             isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             canRemove = customerStateHolder.canRemove.value,
-            displayableSavedPaymentMethod,
+            displayableSavedPaymentMethod = displayableSavedPaymentMethod,
             cardBrandFilter = paymentMethodMetadata.cardBrandFilter,
             removeExecutor = { method ->
                 val result = savedPaymentMethodMutatorProvider.get().removePaymentMethodInEditScreen(method)
