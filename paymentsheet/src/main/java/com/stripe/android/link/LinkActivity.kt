@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
@@ -46,6 +47,7 @@ internal class LinkActivity : ComponentActivity() {
         vm.launchWebFlow = ::launchWebFlow
         vm.dismissWithResult = ::dismissWithResult
         lifecycle.addObserver(vm)
+        observeBackPress()
 
         setContent {
             LinkScreenContent(
@@ -53,6 +55,10 @@ internal class LinkActivity : ComponentActivity() {
                 onBackPressed = onBackPressedDispatcher::onBackPressed
             )
         }
+    }
+
+    private fun observeBackPress() {
+        onBackPressedDispatcher.addCallback { viewModel?.handleBackPressed() }
     }
 
     private fun dismissWithResult(result: LinkActivityResult) {

@@ -58,7 +58,8 @@ internal fun LinkContent(
     onBackPressed: () -> Unit,
     moveToWeb: () -> Unit,
     goBack: () -> Unit,
-    changeEmail: () -> Unit
+    changeEmail: () -> Unit,
+    initialDestination: LinkScreen
 ) {
     val coroutineScope = rememberCoroutineScope()
     DefaultLinkTheme {
@@ -82,7 +83,9 @@ internal fun LinkContent(
                         .fillMaxWidth()
                 ) {
                     BackHandler {
-                        handleViewAction(LinkAction.BackPressed)
+                        if (navController.popBackStack().not()) {
+                            handleViewAction(LinkAction.BackPressed)
+                        }
                     }
 
                     LinkAppBar(
@@ -104,6 +107,7 @@ internal fun LinkContent(
                     )
 
                     Screens(
+                        initialDestination = initialDestination,
                         navController = navController,
                         goBack = goBack,
                         moveToWeb = moveToWeb,
@@ -141,6 +145,7 @@ private fun Screens(
     hideBottomSheetContent: () -> Unit,
     moveToWeb: () -> Unit,
     changeEmail: () -> Unit,
+    initialDestination: LinkScreen,
 ) {
     Box(
         modifier = Modifier
@@ -150,7 +155,7 @@ private fun Screens(
             modifier = Modifier
                 .matchParentSize(),
             navController = navController,
-            startDestination = LinkScreen.Loading.route,
+            startDestination = initialDestination.route,
         ) {
             composable(LinkScreen.Loading.route) {
                 Loader()
