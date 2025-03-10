@@ -6,6 +6,7 @@ import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.stripecardscan.scanui.CancellationReason
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -45,7 +46,7 @@ internal class DefaultCardScanEventsReporter @Inject constructor(
         )
     }
 
-    override fun scanCancelled() {
+    override fun scanCancelled(reason: CancellationReason) {
         val duration = durationProvider.end(DurationProvider.Key.CardScan)
         fireEvent(
             eventName = "card_scan.scan_cancelled",

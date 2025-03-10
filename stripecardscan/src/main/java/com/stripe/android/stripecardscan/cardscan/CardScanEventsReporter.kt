@@ -1,5 +1,7 @@
 package com.stripe.android.stripecardscan.cardscan
 
+import com.stripe.android.stripecardscan.scanui.CancellationReason
+
 interface CardScanEventsReporter {
     fun scanStarted()
 
@@ -7,5 +9,5 @@ interface CardScanEventsReporter {
 
     fun scanFailed(error: Throwable?)
 
-    fun scanCancelled()
+    fun scanCancelled(reason: CancellationReason)
 }

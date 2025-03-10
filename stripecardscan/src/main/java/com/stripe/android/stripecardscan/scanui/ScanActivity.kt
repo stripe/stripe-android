@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.activity.addCallback
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.camera.CameraAdapter
@@ -287,7 +288,8 @@ internal abstract class ScanActivity : CameraPermissionCheckingActivity(), Corou
     /**
      * A stream of images from the camera is available to be processed.
      */
-    protected abstract suspend fun onCameraStreamAvailable(
+    @VisibleForTesting
+    internal abstract suspend fun onCameraStreamAvailable(
         cameraStream: Flow<CameraPreviewImage<Bitmap>>
     )
 
