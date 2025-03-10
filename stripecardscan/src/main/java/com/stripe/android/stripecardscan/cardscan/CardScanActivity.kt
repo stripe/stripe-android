@@ -26,7 +26,6 @@ import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopState
 import com.stripe.android.stripecardscan.databinding.StripeActivityCardscanBinding
-import com.stripe.android.stripecardscan.di.CardScanComponent
 import com.stripe.android.stripecardscan.di.DaggerCardScanComponent
 import com.stripe.android.stripecardscan.payment.card.ScannedCard
 import com.stripe.android.stripecardscan.scanui.CancellationReason
@@ -39,6 +38,7 @@ import com.stripe.android.stripecardscan.scanui.util.show
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 internal const val INTENT_PARAM_REQUEST = "request"
 internal const val INTENT_PARAM_RESULT = "result"
@@ -62,7 +62,8 @@ sealed class CardScanState(isFinal: Boolean) : ScanState(isFinal) {
 
 internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanState> {
 
-    private lateinit var component: CardScanComponent
+    @Inject
+    lateinit var cardScanEventsReporter: CardScanEventsReporter
 
     override val minimumAnalysisResolution = MINIMUM_RESOLUTION
 
@@ -101,7 +102,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
         object : CardScanResultListener {
 
             override fun cardScanComplete(card: ScannedCard) {
-                component.cardScanEventsReporter.scanSucceeded()
+                cardScanEventsReporter.scanSucceeded()
                 val intent = Intent()
                     .putExtra(
                         INTENT_PARAM_RESULT,
@@ -115,7 +116,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
             }
 
             override fun userCanceled(reason: CancellationReason) {
-                component.cardScanEventsReporter.scanCancelled()
+                cardScanEventsReporter.scanCancelled()
                 val intent = Intent()
                     .putExtra(
                         INTENT_PARAM_RESULT,
@@ -125,7 +126,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
             }
 
             override fun failed(cause: Throwable?) {
-                component.cardScanEventsReporter.scanFailed(cause)
+                cardScanEventsReporter.scanFailed(cause)
                 val intent = Intent()
                     .putExtra(
                         INTENT_PARAM_RESULT,
@@ -184,10 +185,11 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
         val cardScanConfiguration = cardScanSheetParams?.cardScanConfiguration
             ?: CardScanConfiguration(sessionId = null)
 
-        component = DaggerCardScanComponent.builder()
+        DaggerCardScanComponent.builder()
             .application(this.application)
             .configuration(cardScanConfiguration)
             .build()
+            .inject(this)
 
         onBackPressedDispatcher.addCallback {
             resultListener.userCanceled(CancellationReason.Back)
@@ -246,7 +248,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
      * Once the camera stream is available, start processing images.
      */
     override suspend fun onCameraStreamAvailable(cameraStream: Flow<CameraPreviewImage<Bitmap>>) {
-        component.cardScanEventsReporter.scanStarted()
+        cardScanEventsReporter.scanStarted()
         scanFlow.startFlow(
             context = this,
             imageStream = cameraStream,
