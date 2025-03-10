@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.activity.addCallback
 import androidx.annotation.RestrictTo
+import androidx.core.os.BundleCompat
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.scanui.ScanErrorListener
 import com.stripe.android.camera.scanui.ScanState
@@ -61,6 +62,8 @@ sealed class CardScanState(isFinal: Boolean) : ScanState(isFinal) {
 
 internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanState> {
 
+    private lateinit var component: CardScanComponent
+
     override val minimumAnalysisResolution = MINIMUM_RESOLUTION
 
     private val viewBinding by lazy {
@@ -98,6 +101,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
         object : CardScanResultListener {
 
             override fun cardScanComplete(card: ScannedCard) {
+                component.cardScanEventsReporter.scanSucceeded()
                 val intent = Intent()
                     .putExtra(
                         INTENT_PARAM_RESULT,
@@ -111,6 +115,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
             }
 
             override fun userCanceled(reason: CancellationReason) {
+                component.cardScanEventsReporter.scanCancelled()
                 val intent = Intent()
                     .putExtra(
                         INTENT_PARAM_RESULT,
@@ -120,6 +125,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
             }
 
             override fun failed(cause: Throwable?) {
+                component.cardScanEventsReporter.scanFailed(cause)
                 val intent = Intent()
                     .putExtra(
                         INTENT_PARAM_RESULT,
@@ -172,9 +178,12 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
-        val component = DaggerCardScanComponent.builder()
+        val cardScanSheetParams = intent.extras?.let {
+            BundleCompat.getParcelable(it, INTENT_PARAM_REQUEST, CardScanSheetParams::class.java)
+        }
+        component = DaggerCardScanComponent.builder()
             .application(this.application)
-            .configuration(CardScanConfiguration(""))
+            .configuration(CardScanConfiguration(cardScanSheetParams?.cardScanConfiguration?.sessionId))
             .build()
 
 
@@ -235,6 +244,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
      * Once the camera stream is available, start processing images.
      */
     override suspend fun onCameraStreamAvailable(cameraStream: Flow<CameraPreviewImage<Bitmap>>) {
+        component.cardScanEventsReporter.scanStarted()
         scanFlow.startFlow(
             context = this,
             imageStream = cameraStream,
