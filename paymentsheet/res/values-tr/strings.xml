@@ -66,6 +66,8 @@
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Kart ayrıntıları değiştirilemiyor.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Kart bilgilerinizi sağlayarak %s işletmesinin gelecekteki ödemeler için kartınızı kendi şartlarına uygun olarak ücretlendirmesine izin vermiş olursunuz.</string>
+  <!-- Error message displayed when updating a card fails. -->
+  <string name="stripe_paymentsheet_card_updates_failed_error_message">Kart güncellenmedi. Lütfen tekrar deneyin.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Yeni bir ödeme yöntemi seçin</string>
   <string name="stripe_paymentsheet_close">Kapat</string>
@@ -141,8 +143,12 @@
   <string name="stripe_paymentsheet_select_your_payment_method">Ödeme yönteminizi seçin</string>
   <!-- Text displayed on manage SEPA debit screen when SEPA debit details are not editable. -->
   <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">SEPA bankamatik ayrıntıları değiştirilemiyor.</string>
+  <!-- Error message displayed when setting a default payment method fails. -->
+  <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">Varsayılan ödeme yöntemi değiştirilmedi. Lütfen tekrar deneyin.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Toplam: %s</string>
+  <!-- Error message displayed when updating card brand fails. -->
+  <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Kart markası güncellenmedi. Lütfen tekrar deneyin.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Varsayılan ödeme yöntemi olarak ayarla</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->

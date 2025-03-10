@@ -66,6 +66,8 @@
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Betaalkaartgegevens kunnen niet worden gewijzigd.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Door je kaartgegevens te verstrekken geef je %s toestemming om toekomstige betalingen af te schrijven van je betaalkaart in overeenstemming met hun voorwaarden.</string>
+  <!-- Error message displayed when updating a card fails. -->
+  <string name="stripe_paymentsheet_card_updates_failed_error_message">De betaalkaart is niet bijgewerkt. Probeer het opnieuw.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Een betaalmethode kiezen</string>
   <string name="stripe_paymentsheet_close">Sluiten</string>
@@ -141,8 +143,12 @@
   <string name="stripe_paymentsheet_select_your_payment_method">Betaalmethode selecteren</string>
   <!-- Text displayed on manage SEPA debit screen when SEPA debit details are not editable. -->
   <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">SEPA-incassogegevens kunnen niet worden gewijzigd.</string>
+  <!-- Error message displayed when setting a default payment method fails. -->
+  <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">De standaardbetaalmethode is niet gewijzigd. Probeer het opnieuw.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Totaal: %s</string>
+  <!-- Error message displayed when updating card brand fails. -->
+  <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Het merk van de betaalkaart is niet bijgewerkt. Probeer het opnieuw.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Instellen als standaardbetaalmethode</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->

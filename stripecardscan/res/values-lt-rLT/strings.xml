@@ -2,6 +2,7 @@
 <resources>
   <string name="stripe_camera_permission_settings_message">Norėdami nuskaityti kortelę, nuostatose leiskite prieigą prie kameros</string>
   <string name="stripe_card_scan_instructions">Nuskaitykite savo kortelę</string>
+  <string name="stripe_card_scan_privacy_link_text"><![CDATA[Naudojame „Stripe“, kad patikrintume jūsų kortelės duomenis. „Stripe“ gali naudoti ir saugoti jūsų duomenis pagal savo privatumo politiką. <a href=\"https://support.stripe.com/questions/stripes-card-image-verification\"><u>Sužinokite daugiau</u></a>]]></string>
   <string name="stripe_card_scan_title">Norėdami nuskaityti, įdėkite kortelę į stačiakampį</string>
   <string name="stripe_close_button_description">Uždaryti</string>
   <string name="stripe_swap_camera_button_description">Sukeisti kamerą</string>

@@ -66,6 +66,8 @@
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">无法更改银行卡详情。</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">提供您的银行卡信息，即表示您允许 %s 按照他们的条款从您的银行卡收取未来款项。</string>
+  <!-- Error message displayed when updating a card fails. -->
+  <string name="stripe_paymentsheet_card_updates_failed_error_message">卡未更新，请重试。</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">选择一个支付方式</string>
   <string name="stripe_paymentsheet_close">关闭</string>
@@ -141,8 +143,12 @@
   <string name="stripe_paymentsheet_select_your_payment_method">选择您的支付方式</string>
   <!-- Text displayed on manage SEPA debit screen when SEPA debit details are not editable. -->
   <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">无法更改 SEPA 借记详情。</string>
+  <!-- Error message displayed when setting a default payment method fails. -->
+  <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">未更改默认支付方式。请重试。</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">合计：%s</string>
+  <!-- Error message displayed when updating card brand fails. -->
+  <string name="stripe_paymentsheet_update_card_brand_failed_error_message">银行卡品牌未更新，请重试。</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">设置为默认支付方式</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->

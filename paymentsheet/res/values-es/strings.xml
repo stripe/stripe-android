@@ -66,6 +66,8 @@
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Los datos de la tarjeta no se pueden modificar.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Al facilitarnos los datos de la tarjeta, permites que %s cargue en tu tarjeta futuros pagos conforme a las condiciones estipuladas.</string>
+  <!-- Error message displayed when updating a card fails. -->
+  <string name="stripe_paymentsheet_card_updates_failed_error_message">La tarjeta no se ha actualizado. Vuelve a intentarlo.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Elige un método de pago</string>
   <string name="stripe_paymentsheet_close">Cerrar</string>
@@ -141,8 +143,12 @@
   <string name="stripe_paymentsheet_select_your_payment_method">Selecciona tu método de pago</string>
   <!-- Text displayed on manage SEPA debit screen when SEPA debit details are not editable. -->
   <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">Los datos del adeudo SEPA no se pueden modificar.</string>
+  <!-- Error message displayed when setting a default payment method fails. -->
+  <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">El método de pago predeterminado no se ha cambiado. Vuelve a intentarlo.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Total: %s</string>
+  <!-- Error message displayed when updating card brand fails. -->
+  <string name="stripe_paymentsheet_update_card_brand_failed_error_message">La marca de la tarjeta no se ha actualizado. Vuelve a intentarlo.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Establecer como método de pago predeterminado</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->

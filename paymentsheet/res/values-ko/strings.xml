@@ -66,6 +66,8 @@
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">카드 세부사항은 설정되면 변경할 수 없습니다.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">카드 정보를 제공하면 %s에서 향후 결제에 대해 해당 약관에 따라 귀하의 카드에 대금을 청구할 수 있습니다.</string>
+  <!-- Error message displayed when updating a card fails. -->
+  <string name="stripe_paymentsheet_card_updates_failed_error_message">카드가 업데이트되지 않았습니다. 다시 시도하십시오.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">결제 방식 선택</string>
   <string name="stripe_paymentsheet_close">닫기</string>
@@ -141,8 +143,12 @@
   <string name="stripe_paymentsheet_select_your_payment_method">결제 수단을 선택하세요.</string>
   <!-- Text displayed on manage SEPA debit screen when SEPA debit details are not editable. -->
   <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">SEPA 자동 이체 세부사항은 설정되면 변경할 수 없습니다.</string>
+  <!-- Error message displayed when setting a default payment method fails. -->
+  <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">기본 결제 방식이 변경되지 않았습니다. 다시 시도하십시오.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">합계 : %s</string>
+  <!-- Error message displayed when updating card brand fails. -->
+  <string name="stripe_paymentsheet_update_card_brand_failed_error_message">카드 브랜드가 업데이트되지 않았습니다. 다시 시도하십시오.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">기본 결제 방식으로 설정</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
