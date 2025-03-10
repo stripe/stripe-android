@@ -3,11 +3,10 @@ package com.stripe.android.financialconnections.example.settings
 import com.stripe.android.financialconnections.example.data.model.LinkAccountSessionBody
 import com.stripe.android.financialconnections.example.data.model.Merchant
 import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 data class MerchantSetting(
-    val merchants: List<Merchant> = listOf(Merchant.default()),
+    val merchants: List<Merchant> = Merchant.hardcoded(),
     override val selectedOption: Merchant = merchants.first(),
     override val key: String = "merchant"
 ) : Saveable<Merchant>, SingleChoiceSetting<Merchant>(
@@ -34,6 +33,9 @@ data class MerchantSetting(
     override fun convertToValue(value: String): Merchant {
         return runCatching {
             Json.decodeFromString<Merchant>(value)
+        }.recoverCatching {
+            // This is used for Maestro tests, where we pass the merchant value in a URL
+            merchants.first { it.value == value }
         }.getOrElse {
             merchants.first()
         }

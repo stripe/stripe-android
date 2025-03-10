@@ -133,6 +133,37 @@ internal class DefaultPaymentMethodsTest {
         testContext.markTestSucceeded()
     }
 
+    @Test
+    fun defaultPaymentMethod_isSelected() = runProductIntegrationTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = {},
+    ) { testContext ->
+        val cards = listOf(
+            PaymentMethodFactory.card(last4 = "4242", id = "pm_1"),
+            PaymentMethodFactory.card(last4 = "1001", id = "pm_2")
+        )
+        val defaultPaymentMethod = cards[1]
+
+        enqueueElementsSessionResponse(
+            cards = cards,
+            defaultPaymentMethod = defaultPaymentMethod.id
+        )
+
+        launch(
+            testContext = testContext,
+            paymentMethodLayout = layoutType.paymentMethodLayout,
+        )
+
+        layoutType.assertHasSelectedPaymentMethod(
+            composeTestRule = composeTestRule,
+            context = context,
+            paymentMethod = defaultPaymentMethod,
+        )
+
+        testContext.markTestSucceeded()
+    }
+
     private fun enqueueElementsSessionResponse(
         cards: List<PaymentMethod>,
         setAsDefaultFeatureEnabled: Boolean = true,

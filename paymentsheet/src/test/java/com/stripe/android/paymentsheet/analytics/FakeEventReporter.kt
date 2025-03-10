@@ -31,6 +31,22 @@ internal class FakeEventReporter : EventReporter {
     val setAsDefaultPaymentMethodSucceededCalls: ReceiveTurbine<SetAsDefaultPaymentMethodSucceededCall> =
         _setAsDefaultPaymentMethodSucceededCalls
 
+    private val _showEditablePaymentOptionCalls = Turbine<Unit>()
+    val showEditablePaymentOptionCalls: ReceiveTurbine<Unit> = _showEditablePaymentOptionCalls
+
+    private val _hideEditablePaymentOptionCalls = Turbine<Unit>()
+    val hideEditablePaymentOptionCalls: ReceiveTurbine<Unit> = _hideEditablePaymentOptionCalls
+
+    fun validate() {
+        _paymentFailureCalls.ensureAllEventsConsumed()
+        _updatePaymentMethodSucceededCalls.ensureAllEventsConsumed()
+        _updatePaymentMethodFailedCalls.ensureAllEventsConsumed()
+        _setAsDefaultPaymentMethodFailedCalls.ensureAllEventsConsumed()
+        _setAsDefaultPaymentMethodSucceededCalls.ensureAllEventsConsumed()
+        _showEditablePaymentOptionCalls.ensureAllEventsConsumed()
+        _hideEditablePaymentOptionCalls.ensureAllEventsConsumed()
+    }
+
     override fun onInit(configuration: PaymentSheet.Configuration, isDeferred: Boolean) {
     }
 
@@ -107,9 +123,11 @@ internal class FakeEventReporter : EventReporter {
     }
 
     override fun onShowEditablePaymentOption() {
+        _showEditablePaymentOptionCalls.add(Unit)
     }
 
     override fun onHideEditablePaymentOption() {
+        _hideEditablePaymentOptionCalls.add(Unit)
     }
 
     override fun onShowPaymentOptionBrands(source: EventReporter.CardBrandChoiceEventSource, selectedBrand: CardBrand) {

@@ -2,7 +2,6 @@
 <resources>
   <string name="stripe_camera_permission_settings_message">Consenti alla fotocamera di accedere alle impostazioni per eseguire la scansione della tua carta</string>
   <string name="stripe_card_scan_instructions">Scansiona la tua carta</string>
-  <string name="stripe_card_scan_privacy_link_text"><![CDATA[Utilizziamo Stripe per verificare i dati della tua carta. Stripe potrebbe utilizzare e archiviare i tuoi dati conformemente alla sua informativa sulla privacy.  <a href="https://support.stripe.com/questions/stripes-card-image-verification"><u>Ulteriori informazioni</u></a>]]></string>
   <string name="stripe_card_scan_title">Per effettuare la scansione, posiziona la carta in corrispondenza del rettangolo</string>
   <string name="stripe_close_button_description">Chiudi</string>
   <string name="stripe_swap_camera_button_description">Cambia fotocamera</string>

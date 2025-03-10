@@ -15,6 +15,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentsheet.CreateIntentCallback
+import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.test.runTest
 import java.util.concurrent.CountDownLatch
@@ -24,12 +25,16 @@ internal class EmbeddedPaymentElementTestRunnerContext(
     private val embeddedPaymentElement: EmbeddedPaymentElement,
     private val countDownLatch: CountDownLatch,
 ) {
-    suspend fun configure() {
+    suspend fun configure(
+        configurationMutator: EmbeddedPaymentElement.Configuration.Builder.() -> EmbeddedPaymentElement.Configuration.Builder = { this },
+    ) {
         embeddedPaymentElement.configure(
             intentConfiguration = PaymentSheet.IntentConfiguration(
                 mode = PaymentSheet.IntentConfiguration.Mode.Payment(amount = 5000, currency = "USD")
             ),
-            configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
+            configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
+                .configurationMutator()
+                .build()
         )
     }
 
@@ -91,7 +96,7 @@ private fun runEmbeddedPaymentElementTestInternal(
     makeEmbeddedPaymentElement: (ComponentActivity) -> EmbeddedPaymentElement,
     block: suspend (EmbeddedPaymentElementTestRunnerContext) -> Unit,
 ) {
-    ActivityScenario.launch(TestEmbeddedActivity::class.java).use { scenario ->
+    ActivityScenario.launch(MainActivity::class.java).use { scenario ->
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
             PaymentConfiguration.init(it, "pk_test_123")

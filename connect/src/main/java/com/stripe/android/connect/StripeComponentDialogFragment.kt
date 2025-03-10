@@ -5,6 +5,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -67,6 +72,10 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        // `setDecorFitsSystemWindows()` must be called here in onCreateView. If called too early, app crashes on
+        // older Android versions; if too late, it doesn't do anything on newer versions.
+        dialog?.window?.let { WindowCompat.setDecorFitsSystemWindows(it, false) }
+
         val binding = StripeFullScreenComponentBinding.inflate(inflater, container, false)
             .also { this._binding = it }
         binding.toolbar.title = title
@@ -76,6 +85,19 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        // Update root view padding to keep content visible with soft keyboard.
+        // This works in conjunction with `setDecorFitsSystemWindows()`.
+        ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
+            val insetBottom =
+                if (insets.isVisible(WindowInsetsCompat.Type.ime())) {
+                    insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+                } else {
+                    insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+                }
+            view.updatePadding(bottom = insetBottom)
+            insets.inset(0, 0, 0, insetBottom)
+        }
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.embeddedComponentManager
                 .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
@@ -92,10 +114,7 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
             val componentView = createComponentView(embeddedComponentManager)
                 .also { this@StripeComponentDialogFragment.componentView = it }
             componentView.layoutParams =
-                ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
+                LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f)
             binding.root.addView(componentView)
         }
     }

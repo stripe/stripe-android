@@ -6,15 +6,12 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
-import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
-import com.stripe.android.link.ui.ErrorMessage
-import com.stripe.android.link.ui.getErrorMessage
+import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.ui.core.elements.OTPSpec
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -108,7 +105,7 @@ internal class VerificationViewModel @Inject constructor(
                 it.copy(
                     isSendingNewCode = false,
                     didSendNewCode = error == null,
-                    errorMessage = error?.getErrorMessage()?.resolvableString,
+                    errorMessage = error?.errorMessage,
                 )
             }
         }
@@ -151,13 +148,13 @@ internal class VerificationViewModel @Inject constructor(
         }
     }
 
-    private fun onError(error: Throwable) = error.getErrorMessage().let { message ->
+    private fun onError(error: Throwable) = error.errorMessage.let { message ->
         logger.error("VerificationViewModel Error: ", error)
 
         updateViewState {
             it.copy(
                 isProcessing = false,
-                errorMessage = message.resolvableString,
+                errorMessage = message,
             )
         }
     }
@@ -165,14 +162,6 @@ internal class VerificationViewModel @Inject constructor(
     private fun updateViewState(block: (VerificationViewState) -> VerificationViewState) {
         _viewState.update(block)
     }
-
-    private val ErrorMessage.resolvableString: ResolvableString
-        get() {
-            return when (this) {
-                is ErrorMessage.FromResources -> this.stringResId.resolvableString
-                is ErrorMessage.Raw -> this.errorMessage.resolvableString
-            }
-        }
 
     companion object {
         fun factory(

@@ -6,10 +6,6 @@
             android:name="com.stripe.android.paymentsheet.MainActivity"
             android:theme="@style/Theme.AppCompat.Light"
             android:exported="false" />
-        <activity
-            android:name="com.stripe.android.paymentelement.TestEmbeddedActivity"
-            android:theme="@style/Theme.AppCompat.Light"
-            android:exported="false" />
     </application>
 
 </manifest>

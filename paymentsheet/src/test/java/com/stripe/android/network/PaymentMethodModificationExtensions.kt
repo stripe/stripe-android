@@ -7,6 +7,7 @@ import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
