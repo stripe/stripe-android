@@ -22,9 +22,9 @@ class SettingsTest : BaseConnectTest() {
         loadData(merchants.subList(0, 1))
         navigateToSettings()
         Settings {
-            hasAccount(merchants[0].merchantId)
+            assertHasAccount(merchants[0].merchantId)
             loadData(merchants)
-            hasAccount(merchants[1].merchantId)
+            assertHasAccount(merchants[1].merchantId)
         }
     }
 

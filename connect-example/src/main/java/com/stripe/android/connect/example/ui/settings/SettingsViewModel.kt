@@ -37,49 +37,8 @@ class SettingsViewModel @Inject constructor(
 
     init {
         loadOneTimeSettings()
-
-        viewModelScope.launch {
-            embeddedComponentService.accounts.collectLatest { async ->
-                _state.update { state ->
-                    val accountsFromService = async()
-                    val firstMerchantId = accountsFromService?.firstOrNull()?.merchantId
-                    val selectedAccountId = settingsService.getSelectedMerchant()
-                    if (selectedAccountId == null && firstMerchantId != null) {
-                        settingsService.setSelectedMerchant(firstMerchantId)
-                    }
-                    val otherAccountInput =
-                        if (state.otherAccountInput == null &&
-                            accountsFromService?.none { it.merchantId == selectedAccountId } == true
-                        ) {
-                            selectedAccountId
-                        } else {
-                            state.otherAccountInput
-                        }
-                    state.copy(
-                        otherAccountInput = otherAccountInput,
-                        accountsFromServiceAsync = async,
-                        selectedAccountId = selectedAccountId,
-                    )
-                }
-            }
-        }
-
-        viewModelScope.launch {
-            _state.map {
-                // when any of the below values change,
-                // enable the save button
-                listOf(
-                    it.presentationSettings,
-                    it.onboardingSettings,
-                    it.accounts,
-                    it.selectedAccount,
-                    it.serverUrl,
-                )
-            }.distinctUntilChanged()
-                .collect {
-                    _state.update { it.copy(saveEnabled = true) }
-                }
-        }
+        observeAccountsFromService()
+        observeSettingsChanges()
     }
 
     fun onAccountSelected(account: DemoMerchant) {
@@ -148,6 +107,56 @@ class SettingsViewModel @Inject constructor(
                 onboardingSettings = settingsService.getOnboardingSettings(),
                 presentationSettings = settingsService.getPresentationSettings(),
             )
+        }
+    }
+
+    private fun observeAccountsFromService() {
+        viewModelScope.launch {
+            embeddedComponentService.accounts.collectLatest { async ->
+                _state.update { state ->
+                    val accountsFromService = async()
+                    val firstMerchantId = accountsFromService?.firstOrNull()?.merchantId
+                    val selectedAccountId = settingsService.getSelectedMerchant()
+                    // Persist selected merchant if it's not already set.
+                    if (selectedAccountId == null && firstMerchantId != null) {
+                        settingsService.setSelectedMerchant(firstMerchantId)
+                    }
+                    // Determine what the "other account" text input value should be.
+                    // It can be set to the selected account but we don't want to override the user's input.
+                    val otherAccountInput =
+                        if (state.otherAccountInput == null &&
+                            accountsFromService?.none { it.merchantId == selectedAccountId } == true
+                        ) {
+                            selectedAccountId
+                        } else {
+                            state.otherAccountInput
+                        }
+                    state.copy(
+                        otherAccountInput = otherAccountInput,
+                        accountsFromServiceAsync = async,
+                        selectedAccountId = selectedAccountId,
+                    )
+                }
+            }
+        }
+    }
+
+    private fun observeSettingsChanges() {
+        viewModelScope.launch {
+            _state.map {
+                // when any of the below values change,
+                // enable the save button
+                listOf(
+                    it.presentationSettings,
+                    it.onboardingSettings,
+                    it.accounts,
+                    it.selectedAccount,
+                    it.serverUrl,
+                )
+            }.distinctUntilChanged()
+                .collect {
+                    _state.update { it.copy(saveEnabled = true) }
+                }
         }
     }
 

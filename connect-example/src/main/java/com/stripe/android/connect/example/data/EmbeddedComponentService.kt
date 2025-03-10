@@ -7,12 +7,12 @@ import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.fuel.core.awaitResult
 import com.github.kittinunf.result.Result
-import com.stripe.android.connect.example.data.EmbeddedComponentService.Companion.DEFAULT_SERVER_BASE_URL
 import com.stripe.android.connect.example.core.Async
 import com.stripe.android.connect.example.core.Fail
 import com.stripe.android.connect.example.core.Loading
 import com.stripe.android.connect.example.core.Success
 import com.stripe.android.connect.example.core.Uninitialized
+import com.stripe.android.connect.example.data.EmbeddedComponentService.Companion.DEFAULT_SERVER_BASE_URL
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

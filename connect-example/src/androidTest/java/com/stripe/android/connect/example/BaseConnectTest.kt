@@ -15,6 +15,10 @@ import org.junit.Before
 import org.junit.Rule
 import javax.inject.Inject
 
+/**
+ * Base class for Connect SDK instrumentation tests. Provides common setup and helper methods,
+ * including a screen DSL for writing tests in a more readable way.
+ */
 abstract class BaseConnectTest {
 
     @get:Rule(order = 0)
@@ -36,17 +40,17 @@ abstract class BaseConnectTest {
         embeddedComponentService.accounts.value = Success(merchants)
     }
 
-    protected inner class MainContext {
+    protected inner class MainScreen {
         val titleText get() = composeTestRule.onNodeWithTextRes(R.string.connect_sdk_example)
         val loadingText get() = composeTestRule.onNodeWithTextRes(R.string.warming_up_the_server)
     }
 
     @Suppress("TestFunctionName")
-    protected fun Main(f: MainContext.() -> Unit) {
-        MainContext().apply(f)
+    protected fun Main(f: MainScreen.() -> Unit) {
+        MainScreen().apply(f)
     }
 
-    protected inner class ComponentListContext {
+    protected inner class ComponentListScreen {
         val accountOnboardingItem get() = composeTestRule.onNodeWithTextRes(R.string.account_onboarding)
 
         fun openSettings() {
@@ -55,20 +59,20 @@ abstract class BaseConnectTest {
     }
 
     @Suppress("TestFunctionName")
-    protected fun ComponentList(f: ComponentListContext.() -> Unit) {
-        ComponentListContext().apply(f)
+    protected fun ComponentList(f: ComponentListScreen.() -> Unit) {
+        ComponentListScreen().apply(f)
     }
 
-    protected inner class SettingsContext {
+    protected inner class SettingsScreen {
         val demoAccountHeader get() = composeTestRule.onNodeWithTextRes(R.string.select_demo_account)
 
-        fun hasAccount(id: String) {
+        fun assertHasAccount(id: String) {
             composeTestRule.onNodeWithText(id).assertIsDisplayed()
         }
     }
 
     @Suppress("TestFunctionName")
-    protected fun Settings(f: SettingsContext.() -> Unit) {
-        SettingsContext().apply(f)
+    protected fun Settings(f: SettingsScreen.() -> Unit) {
+        SettingsScreen().apply(f)
     }
 }
