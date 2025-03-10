@@ -16,14 +16,14 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
-import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.paymentlauncher.PaymentResult
-import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import com.stripe.android.paymentsheet.InitializedViaCompose
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.PaymentOptionCallback
@@ -75,6 +75,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val configurationHandler: FlowControllerConfigurationHandler,
     private val errorReporter: ErrorReporter,
     @InitializedViaCompose private val initializedViaCompose: Boolean,
+    @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
 ) : PaymentSheet.FlowController {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private val sepaMandateActivityLauncher: ActivityResultLauncher<SepaMandateContract.Args>
@@ -123,8 +124,7 @@ internal class DefaultFlowController @Inject internal constructor(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
                     activityResultLaunchers.forEach { it.unregister() }
-                    IntentConfirmationInterceptor.createIntentCallback = null
-                    ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
+                    PaymentElementCallbackReferences.remove(paymentElementCallbackIdentifier)
                 }
             }
         )
@@ -591,12 +591,16 @@ internal class DefaultFlowController @Inject internal constructor(
             statusBarColor: () -> Int?,
             paymentOptionCallback: PaymentOptionCallback,
             paymentResultCallback: PaymentSheetResultCallback,
+            paymentElementCallbackIdentifier: String,
             initializedViaCompose: Boolean,
         ): PaymentSheet.FlowController {
             val flowControllerViewModel = ViewModelProvider(
                 owner = viewModelStoreOwner,
-                factory = FlowControllerViewModel.Factory(statusBarColor())
-            )[FlowControllerViewModel::class.java]
+                factory = FlowControllerViewModel.Factory(statusBarColor(), paymentElementCallbackIdentifier),
+            ).get(
+                key = "FlowControllerViewModel(instance = $paymentElementCallbackIdentifier)",
+                modelClass = FlowControllerViewModel::class.java
+            )
 
             val flowControllerStateComponent = flowControllerViewModel.flowControllerStateComponent
 

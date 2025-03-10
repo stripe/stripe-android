@@ -43,6 +43,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             hasSavedPaymentMethods = false,
             configuration = state.configuration,
             initializationMode = state.initializationMode,
+            paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
             statusBarColor = null
         )
 
@@ -194,6 +195,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 sheetStateHolder = sheetStateHolder,
                 errorReporter = errorReporter,
                 statusBarColor = null,
+                paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
                 resultCallback = {
                     resultCallbackTurbine.add(it)
                 }

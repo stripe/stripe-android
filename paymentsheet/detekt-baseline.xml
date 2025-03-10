@@ -77,6 +77,7 @@
     <ID>TooManyFunctions:EmbeddedPaymentElementViewModelComponent.kt$EmbeddedPaymentElementViewModelModule</ID>
     <ID>TooManyFunctions:EventReporter.kt$EventReporter</ID>
     <ID>TooManyFunctions:LinkEventsReporter.kt$LinkEventsReporter</ID>
+    <ID>TooManyFunctions:NativeLinkComponent.kt$NativeLinkComponent$Builder</ID>
     <ID>TooManyFunctions:NativeLinkModule.kt$NativeLinkModule</ID>
     <ID>TooManyFunctions:PaymentMethodMetadata.kt$PaymentMethodMetadata : Parcelable</ID>
     <ID>UnusedPrivateClass:PaymentOptionsViewModelTest.kt$PaymentOptionsViewModelTest$MyHostActivity : AppCompatActivity</ID>

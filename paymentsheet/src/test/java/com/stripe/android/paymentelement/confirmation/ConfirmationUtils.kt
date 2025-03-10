@@ -7,6 +7,7 @@ import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.analytics.FakeLinkAnalyticsHelper
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.cvc.CvcRecollectionConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationDefinition
@@ -17,7 +18,6 @@ import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationDefin
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationDefinition
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
-import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
@@ -26,6 +26,7 @@ import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.utils.RecordingLinkStore
 
 internal fun createTestConfirmationHandlerFactory(
+    paymentElementCallbackIdentifier: String,
     intentConfirmationInterceptor: IntentConfirmationInterceptor,
     savedStateHandle: SavedStateHandle,
     bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
@@ -61,8 +62,10 @@ internal fun createTestConfirmationHandlerFactory(
                     userFacingLogger = FakeUserFacingLogger(),
                 ),
                 ExternalPaymentMethodConfirmationDefinition(
+                    paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
                     externalPaymentMethodConfirmHandlerProvider = {
-                        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler
+                        PaymentElementCallbackReferences[paymentElementCallbackIdentifier]
+                            ?.externalPaymentMethodConfirmHandler
                     },
                     errorReporter = errorReporter,
                 ),

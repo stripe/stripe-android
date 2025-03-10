@@ -17,6 +17,7 @@ internal class FlowControllerFactory(
     private val statusBarColor: () -> Int?,
     private val paymentOptionCallback: PaymentOptionCallback,
     private val paymentResultCallback: PaymentSheetResultCallback,
+    private val paymentElementCallbackIdentifier: String = "FlowController",
     private val initializedViaCompose: Boolean = false,
 ) {
     constructor(
@@ -50,12 +51,13 @@ internal class FlowControllerFactory(
             viewModelStoreOwner = viewModelStoreOwner,
             lifecycleOwner = lifecycleOwner,
             activityResultCaller = PaymentElementActivityResultCaller(
-                key = "FlowController",
+                key = "FlowController(instance = $paymentElementCallbackIdentifier)",
                 registryOwner = activityResultRegistryOwner,
             ),
             statusBarColor = statusBarColor,
             paymentOptionCallback = paymentOptionCallback,
             paymentResultCallback = paymentResultCallback,
+            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             initializedViaCompose = initializedViaCompose,
         )
 }
