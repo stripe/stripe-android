@@ -47,6 +47,10 @@ internal class ManageNavigator private constructor(
     private val _result = MutableSharedFlow<Unit>(replay = 1)
     val result: SharedFlow<Unit> = _result.asSharedFlow()
 
+    init {
+        onScreenShown(screen.value)
+    }
+
     fun performAction(action: Action) {
         when (action) {
             is Action.Back -> {
@@ -70,7 +74,7 @@ internal class ManageNavigator private constructor(
 
     private fun onScreenShown(screen: Screen) {
         when (screen) {
-            is Screen.All -> Unit
+            is Screen.All -> eventReporter.onShowManageSavedPaymentMethods()
             is Screen.Update -> eventReporter.onShowEditablePaymentOption()
         }
     }
