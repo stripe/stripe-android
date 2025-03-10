@@ -22,36 +22,14 @@ dependencies {
     api project(":payments-model")
 
     implementation libs.androidx.annotation
-    implementation libs.showkaseAnnotation
     implementation libs.dagger
     implementation libs.kotlin.coroutines
-    implementation libs.kotlin.coroutinesAndroid
     implementation libs.kotlin.serialization
 
     debugImplementation libs.showkase
 
-    ksp libs.daggerCompiler
-
-    kspDebug libs.showkaseProcessor
-
     testImplementation testLibs.json
     testImplementation testLibs.junit
-    testImplementation testLibs.kotlin.annotations
-    testImplementation testLibs.kotlin.coroutines
-    testImplementation testLibs.kotlin.junit
-    testImplementation testLibs.mockito.core
-    testImplementation testLibs.mockito.inline
-    testImplementation testLibs.mockito.kotlin
-    testImplementation testLibs.robolectric
-    testImplementation testLibs.testParameterInjector
-    testImplementation testLibs.turbine
-    testImplementation testLibs.truth
-
-    androidTestImplementation testLibs.espresso.core
-    androidTestImplementation testLibs.espresso.intents
-    androidTestImplementation testLibs.truth
-
-    kspAndroidTest libs.showkaseProcessor
 
     androidTestUtil testLibs.testOrchestrator
 }
@@ -60,7 +38,6 @@ android {
     kotlinOptions {
         freeCompilerArgs += [
                 "-opt-in=kotlin.RequiresOptIn",
-                "-opt-in=androidx.compose.material.ExperimentalMaterialApi",
                 "-Xconsistent-data-class-copy-visibility",
         ]
     }
