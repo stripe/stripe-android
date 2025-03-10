@@ -22,6 +22,9 @@ dependencies {
     implementation libs.kotlin.coroutinesAndroid
     implementation libs.kotlin.serialization
 
+
+    testImplementation project(':payments-core-testing')
+
     testImplementation testLibs.androidx.core
     testImplementation testLibs.androidx.testRunner
     testImplementation testLibs.junit
