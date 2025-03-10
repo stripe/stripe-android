@@ -217,6 +217,8 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         testContext.configure {
             customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
         }
+
+        validateAnalyticsRequest(eventName = "mc_embedded_manage_savedpm_show")
         embeddedContentPage.clickViewMore()
 
         managePage.waitUntilVisible()

@@ -83,6 +83,10 @@ internal class ManageNavigatorTest {
             eventReporter = eventReporter,
             initialScreen = initialScreen,
         )
+
+        // Initial screen is emitted to event reporter.
+        assertThat(eventReporter.showManageSavedPaymentMethods.awaitItem()).isEqualTo(Unit)
+
         Scenario(
             navigator = navigator,
             initialScreen = initialScreen,

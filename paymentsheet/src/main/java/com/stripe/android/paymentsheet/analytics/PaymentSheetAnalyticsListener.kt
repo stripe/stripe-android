@@ -67,9 +67,11 @@ internal class PaymentSheetAnalyticsListener(
         when (currentScreen) {
             is PaymentSheetScreen.Loading,
             is PaymentSheetScreen.VerticalModeForm,
-            is PaymentSheetScreen.ManageSavedPaymentMethods,
             is PaymentSheetScreen.CvcRecollection -> {
                 // Nothing to do here
+            }
+            is PaymentSheetScreen.ManageSavedPaymentMethods -> {
+                eventReporter.onShowManageSavedPaymentMethods()
             }
             is PaymentSheetScreen.UpdatePaymentMethod -> {
                 eventReporter.onShowEditablePaymentOption()
