@@ -5,7 +5,6 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.model.serializers.EnumIgnoreUnknownSerializer
 import com.stripe.android.financialconnections.model.serializer.JsonAsStringSerializer
-import com.stripe.android.financialconnections.model.serializer.PaymentAccountSerializer
 import com.stripe.android.model.Token
 import com.stripe.android.model.parsers.TokenJsonParser
 import kotlinx.parcelize.Parcelize
@@ -32,7 +31,7 @@ import org.json.JSONObject
  */
 @Parcelize
 @Serializable
-data class FinancialConnectionsSession internal constructor(
+data class FinancialConnectionsSession @RestrictTo(RestrictTo.Scope.LIBRARY) constructor(
     @SerialName("client_secret")
     val clientSecret: String,
 
@@ -57,7 +56,8 @@ data class FinancialConnectionsSession internal constructor(
 
     @SerialName("bank_account_token")
     @Serializable(with = JsonAsStringSerializer::class)
-    internal val bankAccountToken: String? = null,
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    val bankAccountToken: String? = null,
 
     @SerialName(value = "manual_entry")
     val manualEntry: ManualEntry? = null,
@@ -139,9 +139,4 @@ data class FinancialConnectionsSession internal constructor(
             }
         }
     }
-}
-
-@Serializable(with = PaymentAccountSerializer::class)
-sealed class PaymentAccount : Parcelable {
-    abstract val id: String
 }

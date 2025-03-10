@@ -23,6 +23,5 @@ data class BankAccount(
 
     // Whether the account is to be verified with microdeposits.
     // This field isn't part of the API response and is being set later on.
-    val usesMicrodeposits: Boolean = true,
-
+    val usesMicrodeposits: Boolean = true
 ) : PaymentAccount()

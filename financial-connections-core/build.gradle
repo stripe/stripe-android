@@ -3,8 +3,6 @@ apply from: configs.androidLibrary
 apply plugin: 'checkstyle'
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 apply plugin: 'kotlinx-serialization'
-apply plugin: 'org.jetbrains.kotlin.plugin.compose'
-apply plugin: 'app.cash.paparazzi'
 apply plugin: 'com.google.devtools.ksp'
 
 android {
@@ -20,44 +18,22 @@ android {
 }
 
 dependencies {
-    api project(":financial-connections-core")
     api project(":stripe-core")
-    api project(":stripe-ui-core")
     api project(":payments-model")
-    implementation project(":stripe-attestation")
 
-    implementation libs.androidx.activity
     implementation libs.androidx.annotation
-    implementation libs.androidx.appCompat
-    implementation libs.androidx.browser
-    implementation libs.androidx.lifecycle
-    implementation libs.androidx.savedState
-    implementation libs.androidx.viewModel
-    implementation libs.compose.activity
-    implementation libs.compose.foundation
-    implementation libs.compose.material
-    implementation libs.compose.materialIcons
-    implementation libs.compose.navigation
-    implementation libs.compose.ui
-    implementation libs.compose.uiToolingPreview
     implementation libs.showkaseAnnotation
     implementation libs.dagger
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.coroutinesAndroid
     implementation libs.kotlin.serialization
 
-    debugImplementation libs.compose.uiTestManifest
-    debugImplementation libs.compose.uiTooling
     debugImplementation libs.showkase
 
     ksp libs.daggerCompiler
 
     kspDebug libs.showkaseProcessor
 
-    testImplementation testLibs.androidx.archCore
-    testImplementation testLibs.androidx.core
-    testImplementation testLibs.androidx.fragment
-    testImplementation testLibs.androidx.junit
     testImplementation testLibs.json
     testImplementation testLibs.junit
     testImplementation testLibs.kotlin.annotations
@@ -71,9 +47,6 @@ dependencies {
     testImplementation testLibs.turbine
     testImplementation testLibs.truth
 
-    androidTestImplementation testLibs.androidx.composeUi
-    androidTestImplementation testLibs.androidx.testRules
-    androidTestImplementation testLibs.androidx.testRunner
     androidTestImplementation testLibs.espresso.core
     androidTestImplementation testLibs.espresso.intents
     androidTestImplementation testLibs.truth
@@ -84,10 +57,6 @@ dependencies {
 }
 
 android {
-    buildFeatures {
-        compose true
-    }
-
     kotlinOptions {
         freeCompilerArgs += [
                 "-opt-in=kotlin.RequiresOptIn",
@@ -98,9 +67,9 @@ android {
 }
 
 ext {
-    artifactId = "financial-connections"
-    artifactName = "financial-connections"
-    artifactDescrption = "The financial connections module of Stripe Android SDK"
+    artifactId = "financial-connections-core"
+    artifactName = "financial-connections-core"
+    artifactDescrption = "The financial connections core module of Stripe Android SDK"
 }
 
 apply from: "${rootDir}/deploy/deploy.gradle"
