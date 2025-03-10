@@ -30,6 +30,7 @@ internal interface UpdatePaymentMethodInteractor {
     val isModifiablePaymentMethod: Boolean
     val hasValidBrandChoices: Boolean
     val shouldShowSetAsDefaultCheckbox: Boolean
+    val shouldShowSaveButton: Boolean
 
     val state: StateFlow<State>
 
@@ -37,8 +38,8 @@ internal interface UpdatePaymentMethodInteractor {
         val error: ResolvableString?,
         val status: Status,
         val cardBrandChoice: CardBrandChoice,
-        val cardBrandHasBeenChanged: Boolean,
         val setAsDefaultCheckboxChecked: Boolean,
+        val isSaveButtonEnabled: Boolean,
     )
 
     enum class Status(val isPerformingNetworkOperation: Boolean) {
@@ -122,6 +123,8 @@ internal class DefaultUpdatePaymentMethodInteractor(
         editable = PaymentSheetTopBarState.Editable.Never,
     )
 
+    override val shouldShowSaveButton: Boolean = isModifiablePaymentMethod || shouldShowSetAsDefaultCheckbox
+
     private val _state = combineAsStateFlow(
         error,
         status,
@@ -129,12 +132,15 @@ internal class DefaultUpdatePaymentMethodInteractor(
         cardBrandHasBeenChanged,
         setAsDefaultCheckboxChecked,
     ) { error, status, cardBrandChoice, cardBrandHasBeenChanged, setAsDefaultCheckboxChecked ->
+        val isSaveButtonEnabled = (cardBrandHasBeenChanged || setAsDefaultCheckboxChecked) &&
+            status == UpdatePaymentMethodInteractor.Status.Idle
+
         UpdatePaymentMethodInteractor.State(
             error = error,
             status = status,
             cardBrandChoice = cardBrandChoice,
-            cardBrandHasBeenChanged = cardBrandHasBeenChanged,
             setAsDefaultCheckboxChecked = setAsDefaultCheckboxChecked,
+            isSaveButtonEnabled = isSaveButtonEnabled,
         )
     }
     override val state = _state
