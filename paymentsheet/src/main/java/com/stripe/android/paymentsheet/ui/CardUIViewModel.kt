@@ -277,17 +277,17 @@ internal data class CardInputState(
             return expChanged || cardBrandChanged || addressChanged
         }
 
-    fun addressValid(): Boolean {
-        when (addressCollectionMode) {
-            AddressCollectionMode.Automatic -> {
-                (entry.country.isNullOrBlank() || entry.postalCode.isNullOrBlank()).not()
-            }
-            AddressCollectionMode.Never -> true
-            AddressCollectionMode.Full -> {
-
-            }
-        }
-    }
+//    fun addressValid(): Boolean {
+//        when (addressCollectionMode) {
+//            AddressCollectionMode.Automatic -> {
+//                (entry.country.isNullOrBlank() || entry.postalCode.isNullOrBlank()).not()
+//            }
+//            AddressCollectionMode.Never -> true
+//            AddressCollectionMode.Full -> {
+//
+//            }
+//        }
+//    }
 }
 
 internal data class CardDetailsEntry(
