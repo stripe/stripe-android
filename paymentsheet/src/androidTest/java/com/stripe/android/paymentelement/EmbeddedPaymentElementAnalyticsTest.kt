@@ -80,6 +80,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
 
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(eventName = "mc_load_succeeded")
+        validateAnalyticsRequest(eventName = "mc_embedded_sheet_newpm_show")
         validateAnalyticsRequest(eventName = "mc_carousel_payment_method_tapped")
         validateAnalyticsRequest(eventName = "mc_form_shown")
 
@@ -152,6 +153,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_load_succeeded")
         validateAnalyticsRequest(eventName = "stripe_android.retrieve_payment_methods")
         validateAnalyticsRequest(eventName = "elements.customer_repository.get_saved_payment_methods_success")
+        validateAnalyticsRequest(eventName = "mc_embedded_sheet_newpm_show")
 
         testContext.configure {
             customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
@@ -210,6 +212,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_load_succeeded")
         validateAnalyticsRequest(eventName = "stripe_android.retrieve_payment_methods")
         validateAnalyticsRequest(eventName = "elements.customer_repository.get_saved_payment_methods_success")
+        validateAnalyticsRequest(eventName = "mc_embedded_sheet_newpm_show")
 
         testContext.configure {
             customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))

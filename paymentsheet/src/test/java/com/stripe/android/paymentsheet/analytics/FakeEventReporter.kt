@@ -41,6 +41,9 @@ internal class FakeEventReporter : EventReporter {
     val cannotProperlyReturnFromLinkAndOtherLPMsCalls: ReceiveTurbine<Unit> =
         _cannotProperlyReturnFromLinkAndOtherLPMsCalls
 
+    private val _showNewPaymentOptionsCalls = Turbine<Unit>()
+    val showNewPaymentOptionsCalls: ReceiveTurbine<Unit> = _showNewPaymentOptionsCalls
+
     fun validate() {
         _paymentFailureCalls.ensureAllEventsConsumed()
         _updatePaymentMethodSucceededCalls.ensureAllEventsConsumed()
@@ -50,6 +53,7 @@ internal class FakeEventReporter : EventReporter {
         _showEditablePaymentOptionCalls.ensureAllEventsConsumed()
         _hideEditablePaymentOptionCalls.ensureAllEventsConsumed()
         _cannotProperlyReturnFromLinkAndOtherLPMsCalls.ensureAllEventsConsumed()
+        showNewPaymentOptionsCalls.ensureAllEventsConsumed()
     }
 
     override fun onInit(configuration: PaymentSheet.Configuration, isDeferred: Boolean) {
@@ -83,6 +87,7 @@ internal class FakeEventReporter : EventReporter {
     }
 
     override fun onShowNewPaymentOptions() {
+        _showNewPaymentOptionsCalls.add(Unit)
     }
 
     override fun onSelectPaymentMethod(code: PaymentMethodCode) {
