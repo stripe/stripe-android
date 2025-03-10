@@ -26,6 +26,8 @@ internal object PaymentSheetFixtures {
     internal const val CLIENT_SECRET = "pi_1234_secret_1234"
     internal const val DIFFERENT_CLIENT_SECRET = "pi_4321_secret_4321"
     internal const val SETUP_CLIENT_SECRET = "seti_1234_secret_4321"
+    internal const val PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER = "PaymentSheetTestIdentifier"
+    internal const val FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER = "FlowControllerTestIdentifier"
 
     internal val PAYMENT_INTENT_CLIENT_SECRET = PaymentIntentClientSecret(CLIENT_SECRET)
     internal val SETUP_INTENT_CLIENT_SECRET = PaymentIntentClientSecret(SETUP_CLIENT_SECRET)
@@ -186,8 +188,9 @@ internal object PaymentSheetFixtures {
     internal val ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP
         get() = PaymentSheetContractV2.Args(
             initializationMode = PaymentElementLoader.InitializationMode.SetupIntent("seti_1234_secret_1234"),
-            CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            STATUS_BAR_COLOR
+            config = CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
+            statusBarColor = STATUS_BAR_COLOR,
         )
 
     internal val ARGS_CUSTOMER_WITH_GOOGLEPAY
@@ -195,8 +198,9 @@ internal object PaymentSheetFixtures {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
-            CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            STATUS_BAR_COLOR
+            config = CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
+            statusBarColor = STATUS_BAR_COLOR
         )
 
     internal val ARGS_CUSTOMER_WITHOUT_GOOGLEPAY
@@ -204,8 +208,9 @@ internal object PaymentSheetFixtures {
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
-            CONFIG_CUSTOMER,
-            STATUS_BAR_COLOR
+            config = CONFIG_CUSTOMER,
+            paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
+            statusBarColor = STATUS_BAR_COLOR
         )
 
     internal val ARGS_WITHOUT_CUSTOMER
@@ -225,8 +230,9 @@ internal object PaymentSheetFixtures {
                     )
                 )
             ),
-            CONFIG_CUSTOMER,
-            STATUS_BAR_COLOR
+            config = CONFIG_CUSTOMER,
+            paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
+            statusBarColor = STATUS_BAR_COLOR
         )
 
     internal val COMPOSE_FRAGMENT_ARGS

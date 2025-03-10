@@ -31,6 +31,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.R as PaymentsCoreR
 
@@ -140,6 +141,7 @@ internal class InvalidClientSecretException(
 internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     private val stripeRepository: StripeRepository,
     private val errorReporter: ErrorReporter,
+    private val intentCreationCallbackProvider: Provider<CreateIntentCallback?>,
     @Named(ALLOWS_MANUAL_CONFIRMATION) private val allowsManualConfirmation: Boolean,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
@@ -356,7 +358,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
     }
 
     private fun retrieveCallback(): CreateIntentCallback? {
-        return IntentConfirmationInterceptor.createIntentCallback
+        return intentCreationCallbackProvider.get()
     }
 
     private suspend fun handleDeferredIntentCreationFromPaymentMethod(

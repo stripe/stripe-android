@@ -23,6 +23,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
@@ -75,6 +76,11 @@ internal interface FormActivityViewModelComponent {
 
         @BindsInstance
         fun initializationMode(initializationMode: PaymentElementLoader.InitializationMode): Builder
+
+        @BindsInstance
+        fun paymentElementCallbackIdentifier(
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+        ): Builder
 
         @BindsInstance
         fun application(application: Application): Builder

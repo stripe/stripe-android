@@ -3,12 +3,14 @@ package com.stripe.android.paymentsheet
 import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
-import com.stripe.android.common.ui.UpdateExternalPaymentMethodConfirmHandler
-import com.stripe.android.common.ui.UpdateIntentConfirmationInterceptor
+import com.stripe.android.common.ui.UpdateCallbacks
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.utils.rememberActivity
+import java.util.UUID
 
 /**
  * Creates a [PaymentSheet.FlowController] that is remembered across compositions.
@@ -120,12 +122,17 @@ private fun internalRememberPaymentSheetFlowController(
         "PaymentSheet.FlowController must be created in the context of an Activity"
     }
 
+    val paymentElementCallbackIdentifier = rememberSaveable {
+        UUID.randomUUID().toString()
+    }
+
     return remember(paymentOptionCallback, paymentResultCallback) {
         FlowControllerFactory(
             viewModelStoreOwner = viewModelStoreOwner,
             lifecycleOwner = lifecycleOwner,
             activityResultRegistryOwner = activityResultRegistryOwner,
             statusBarColor = { activity.window?.statusBarColor },
+            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             paymentOptionCallback = paymentOptionCallback,
             paymentResultCallback = paymentResultCallback,
         ).create()
@@ -133,14 +140,24 @@ private fun internalRememberPaymentSheetFlowController(
 }
 
 @Composable
-private fun internalRememberPaymentSheetFlowController(
+internal fun internalRememberPaymentSheetFlowController(
     createIntentCallback: CreateIntentCallback?,
     externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler?,
     paymentOptionCallback: PaymentOptionCallback,
     paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet.FlowController {
-    UpdateIntentConfirmationInterceptor(createIntentCallback)
-    UpdateExternalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
+    val paymentElementCallbackIdentifier = rememberSaveable {
+        UUID.randomUUID().toString()
+    }
+
+    val callbacks = remember(createIntentCallback, externalPaymentMethodConfirmHandler) {
+        PaymentElementCallbacks(
+            createIntentCallback = createIntentCallback,
+            externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
+        )
+    }
+
+    UpdateCallbacks(paymentElementCallbackIdentifier, callbacks)
 
     val viewModelStoreOwner = requireNotNull(LocalViewModelStoreOwner.current) {
         "PaymentSheet.FlowController must be created with access to a ViewModelStoreOwner"
@@ -164,6 +181,7 @@ private fun internalRememberPaymentSheetFlowController(
             statusBarColor = { activity.window?.statusBarColor },
             paymentOptionCallback = paymentOptionCallback,
             paymentResultCallback = paymentResultCallback,
+            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             initializedViaCompose = true,
         ).create()
     }
