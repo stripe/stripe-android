@@ -2,6 +2,7 @@
 <resources>
   <string name="stripe_camera_permission_settings_message">Perbolehkan akses kamera di pengaturan untuk memindai kartu Anda</string>
   <string name="stripe_card_scan_instructions">Pindai Kartu Anda</string>
+  <string name="stripe_card_scan_privacy_link_text"><![CDATA[Kami menggunakan Stripe untuk memverifikasi detail kartu Anda. Stripe dapat menggunakan dan menyimpan data Anda sesuai dengan kebijakan privasinya. <a href=\"https://support.stripe.com/questions/stripes-card-image-verification\"><u>Pelajari selengkapnya</u></a>]]></string>
   <string name="stripe_card_scan_title">Posisikan kartu Anda di persegi panjang untuk dipindai</string>
   <string name="stripe_close_button_description">Tutup</string>
   <string name="stripe_swap_camera_button_description">Ganti Kamera</string>

@@ -66,6 +66,8 @@
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Hindi puwedeng baguhin ang mga detalye ng kard.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">Sa pagbibigay ng impormasyon ng iyong kard, pinahihintulutan mo ang %s na singilin ang iyong kard para sa mga pagbabayad sa hinaharap alinsunod sa kanilang mga tuntunin.</string>
+  <!-- Error message displayed when updating a card fails. -->
+  <string name="stripe_paymentsheet_card_updates_failed_error_message">Hindi na-update ang kard. Pakisubukan muli.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Pumili ng pamamaraan ng pagbabayad</string>
   <string name="stripe_paymentsheet_close">Isara</string>
@@ -141,8 +143,12 @@
   <string name="stripe_paymentsheet_select_your_payment_method">Piliin ang iyong paraan ng pagbabayad</string>
   <!-- Text displayed on manage SEPA debit screen when SEPA debit details are not editable. -->
   <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">Hindi puwedeng baguhin ang mga detalye ng SEPA debit.</string>
+  <!-- Error message displayed when setting a default payment method fails. -->
+  <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">Hindi nabago ang default na paraan ng pagbabayad. Pakisubukan muli.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Kabuuan: %s</string>
+  <!-- Error message displayed when updating card brand fails. -->
+  <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Hindi na-update ang brand ng kard. Pakisubukan muli.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
   <string name="stripe_pm_set_as_default">Itakda bilang default na paraan ng pagbabayad</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->

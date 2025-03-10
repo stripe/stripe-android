@@ -56,8 +56,16 @@
   <string name="stripe_email">電郵地址</string>
   <!-- Error message when email is invalid -->
   <string name="stripe_email_is_invalid">您的電郵地址無效。</string>
+  <!-- String to describe an complete expiration date text field. Formatted as 'Expiration date. [month] [year] -->
+  <string name="stripe_expiration_date_content_description" formatted="false">有效期。%s %s</string>
+  <!-- String to describe an empty expiration date text field. -->
+  <string name="stripe_expiration_date_empty_content_description">有效期。兩位數月份和兩位數年份，空</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_expiration_date_hint">月份/年份</string>
+  <!-- String to describe an expiration date text field with complete month and empty year. -->
+  <string name="stripe_expiration_date_month_complete_content_description">有效期。%s 和兩位數年份，空</string>
+  <!-- String to describe an expiration date text field with complete month and incomplete year. -->
+  <string name="stripe_expiration_date_year_incomplete_content_description">有效期。%s 和兩位數年份，不完整</string>
   <!-- String to describe that a form field is required to be completed. -->
   <string name="stripe_field_required">必填</string>
   <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
