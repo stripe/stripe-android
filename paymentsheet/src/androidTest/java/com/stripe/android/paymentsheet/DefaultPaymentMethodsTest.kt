@@ -186,8 +186,6 @@ internal class DefaultPaymentMethodsTest {
             hasSavedPaymentMethods = false,
         )
 
-        enqueueGetCardMetadata()
-
         paymentSheetPage.fillOutCardDetails()
         paymentSheetPage.checkSaveForFuture()
         paymentSheetPage.checkSetAsDefaultCheckbox()
@@ -213,8 +211,6 @@ internal class DefaultPaymentMethodsTest {
             hasSavedPaymentMethods = false,
         )
 
-        enqueueGetCardMetadata()
-
         paymentSheetPage.fillOutCardDetails()
         paymentSheetPage.checkSaveForFuture()
 
@@ -239,8 +235,6 @@ internal class DefaultPaymentMethodsTest {
             hasSavedPaymentMethods = false,
         )
 
-        enqueueGetCardMetadata()
-
         paymentSheetPage.fillOutCardDetails()
         paymentSheetPage.checkSaveForFuture()
         paymentSheetPage.checkSetAsDefaultCheckbox()
@@ -251,15 +245,6 @@ internal class DefaultPaymentMethodsTest {
         enqueuePaymentIntentConfirmWithoutSetAsDefault()
 
         paymentSheetPage.clickPrimaryButton()
-    }
-
-    private fun enqueueGetCardMetadata() {
-        networkRule.enqueue(
-            method("GET"),
-            path("edge-internal/card-metadata")
-        ) { response ->
-            response.testBodyFromFile("card-metadata-get.json")
-        }
     }
 
     private fun enqueuePaymentIntentConfirmWithoutSetAsDefault() {
@@ -361,10 +346,6 @@ internal class DefaultPaymentMethodsTest {
                   "ordered_payment_method_types_and_wallets": [
                     "card"
                   ],
-                  "card_brand_choice": {
-                    "eligible": true,
-                    "preferred_networks": ["cartes_bancaires"]
-                  },
                   "customer": {
                     "payment_methods": $cardsStringified,
                     "customer_session": {
