@@ -15,7 +15,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.PrefillDetails
+import com.stripe.android.financialconnections.ElementsSessionContext.PrefillDetails
 import com.stripe.android.financialconnections.FinancialConnectionsSheetActivity.Companion.getArgs
 import com.stripe.android.financialconnections.FinancialConnectionsSheetState.AuthFlowStatus
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
@@ -521,7 +521,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         @StringRes finishMessage: Int? = null,
     ) {
         if (result is Failed && result.error is FinancialConnectionsAttestationError) {
-            val error = result.error
+            val error = result.error as FinancialConnectionsAttestationError
             integrityVerdictManager.setVerdictFailed()
             switchToWebFlow(error.prefillDetails)
             return

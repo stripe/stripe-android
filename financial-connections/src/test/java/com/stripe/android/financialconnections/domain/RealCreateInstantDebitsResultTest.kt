@@ -1,8 +1,8 @@
 package com.stripe.android.financialconnections.domain
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
-import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.BillingDetails
+import com.stripe.android.financialconnections.ElementsSessionContext
+import com.stripe.android.financialconnections.ElementsSessionContext.BillingDetails
 import com.stripe.android.financialconnections.repository.CachedConsumerSession
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository

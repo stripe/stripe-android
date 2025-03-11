@@ -5,8 +5,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.FinancialConnections
-import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ConsentAgree
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
@@ -128,7 +128,7 @@ internal class ConsentViewModel @AssistedInject constructor(
             return defaultDestination
         }
 
-        val hasExistingAccount = hasExistingLinkAccount(manifest, prefillDetails.email)
+        val hasExistingAccount = hasExistingLinkAccount(manifest, prefillDetails.email!!)
         return if (hasExistingAccount) {
             NetworkingLinkLoginWarmup
         } else {

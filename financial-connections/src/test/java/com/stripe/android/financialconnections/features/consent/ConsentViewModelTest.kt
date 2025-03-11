@@ -4,7 +4,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.CoroutineTestRule
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.LookupAccount
@@ -51,7 +51,7 @@ class ConsentViewModelTest {
                 getOrFetchSync = getOrFetchSync,
                 acceptConsent = acceptConsent,
                 lookupAccount = lookupAccount,
-                prefillDetails = FinancialConnectionsSheet.ElementsSessionContext.PrefillDetails(
+                prefillDetails = ElementsSessionContext.PrefillDetails(
                     email = "email@email.com",
                     phone = null,
                     phoneCountryCode = null,
@@ -89,7 +89,7 @@ class ConsentViewModelTest {
                 getOrFetchSync = getOrFetchSync,
                 acceptConsent = acceptConsent,
                 lookupAccount = lookupAccount,
-                prefillDetails = FinancialConnectionsSheet.ElementsSessionContext.PrefillDetails(
+                prefillDetails = ElementsSessionContext.PrefillDetails(
                     email = "email@email.com",
                     phone = null,
                     phoneCountryCode = null,
@@ -126,7 +126,7 @@ class ConsentViewModelTest {
                 getOrFetchSync = getOrFetchSync,
                 acceptConsent = acceptConsent,
                 lookupAccount = throwOnConsumerSessionLookup(),
-                prefillDetails = FinancialConnectionsSheet.ElementsSessionContext.PrefillDetails(
+                prefillDetails = ElementsSessionContext.PrefillDetails(
                     email = "email@email.com",
                     phone = null,
                     phoneCountryCode = null,
@@ -163,7 +163,7 @@ class ConsentViewModelTest {
                 getOrFetchSync = getOrFetchSync,
                 acceptConsent = acceptConsent,
                 lookupAccount = throwOnConsumerSessionLookup(),
-                prefillDetails = FinancialConnectionsSheet.ElementsSessionContext.PrefillDetails(
+                prefillDetails = ElementsSessionContext.PrefillDetails(
                     email = "email@email.com",
                     phone = null,
                     phoneCountryCode = null,

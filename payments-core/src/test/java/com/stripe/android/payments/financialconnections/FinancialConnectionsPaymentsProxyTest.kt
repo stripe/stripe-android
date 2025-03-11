@@ -1,8 +1,6 @@
 package com.stripe.android.payments.financialconnections
 
 import androidx.appcompat.app.AppCompatActivity
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
-import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import org.junit.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever

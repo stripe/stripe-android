@@ -14,9 +14,9 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.compose.NavHost
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.FinancialConnections
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
-import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AppBackgrounded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickNavBarBack
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickNavBarClose
@@ -522,7 +522,7 @@ internal data class FinancialConnectionsSheetNativeState(
      * Tracks whether this state was recreated from a process kill.
      */
     val firstInit: Boolean,
-    val configuration: FinancialConnectionsSheet.Configuration,
+    val configuration: FinancialConnectionsSheetConfiguration,
     val reducedBranding: Boolean,
     val testMode: Boolean,
     val viewEffect: FinancialConnectionsSheetNativeViewEffect?,

@@ -1,11 +1,13 @@
 package com.stripe.android.financialconnections.launcher
 
+import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.ElementsSessionContext
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import org.jetbrains.annotations.TestOnly
 
 @Suppress("unused")
@@ -16,30 +18,33 @@ class FinancialConnectionsSheetForInstantDebitsLauncher(
 
     constructor(
         activity: ComponentActivity,
+        intentBuilder: (FinancialConnectionsSheetActivityArgs) -> Intent,
         callback: (FinancialConnectionsSheetInstantDebitsResult) -> Unit
     ) : this(
         activity.registerForActivityResult(
-            FinancialConnectionsSheetForInstantDebitsContract(),
+            FinancialConnectionsSheetForInstantDebitsContract(intentBuilder),
             callback::invoke
         )
     )
 
     @TestOnly
-    internal constructor(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
         fragment: Fragment,
         registry: ActivityResultRegistry,
+        intentBuilder: (FinancialConnectionsSheetActivityArgs) -> Intent,
         callback: (FinancialConnectionsSheetInstantDebitsResult) -> Unit
     ) : this(
         fragment.registerForActivityResult(
-            FinancialConnectionsSheetForInstantDebitsContract(),
+            FinancialConnectionsSheetForInstantDebitsContract(intentBuilder),
             registry,
             callback::invoke
         )
     )
 
     override fun present(
-        configuration: FinancialConnectionsSheet.Configuration,
-        elementsSessionContext: FinancialConnectionsSheet.ElementsSessionContext?
+        configuration: FinancialConnectionsSheetConfiguration,
+        elementsSessionContext: ElementsSessionContext?
     ) {
         activityResultLauncher.launch(
             FinancialConnectionsSheetActivityArgs.ForInstantDebits(configuration, elementsSessionContext)

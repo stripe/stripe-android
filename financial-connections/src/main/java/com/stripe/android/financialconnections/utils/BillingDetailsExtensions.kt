@@ -1,6 +1,6 @@
 package com.stripe.android.financialconnections.utils
 
-import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.BillingDetails
+import com.stripe.android.financialconnections.ElementsSessionContext.BillingDetails
 
 /**
  * Creates API params for use with the Stripe core API.

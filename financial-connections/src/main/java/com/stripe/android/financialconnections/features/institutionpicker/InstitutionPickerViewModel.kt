@@ -7,7 +7,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnections
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.FeaturedInstitutionsLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.InstitutionSelected
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
@@ -51,7 +51,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 internal class InstitutionPickerViewModel @AssistedInject constructor(
-    private val configuration: FinancialConnectionsSheet.Configuration,
+    private val configuration: FinancialConnectionsSheetConfiguration,
     private val postAuthorizationSession: PostAuthorizationSession,
     private val getOrFetchSync: GetOrFetchSync,
     private val searchInstitutions: SearchInstitutions,

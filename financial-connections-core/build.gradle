@@ -21,6 +21,8 @@ dependencies {
     api project(":stripe-core")
     api project(":payments-model")
 
+    implementation libs.androidx.activity
+    implementation libs.androidx.fragment
     implementation libs.androidx.annotation
     implementation libs.dagger
     implementation libs.kotlin.coroutines

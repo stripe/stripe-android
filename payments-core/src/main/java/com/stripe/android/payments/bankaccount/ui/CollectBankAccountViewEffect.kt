@@ -1,6 +1,6 @@
 package com.stripe.android.payments.bankaccount.ui
 
-import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
+import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 
 /**

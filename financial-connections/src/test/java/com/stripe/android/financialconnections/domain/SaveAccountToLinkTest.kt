@@ -4,7 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.PaymentAccountParams
@@ -219,7 +219,7 @@ internal class SaveAccountToLinkTest {
     ): SaveAccountToLink {
         return SaveAccountToLink(
             locale = Locale.getDefault(),
-            configuration = FinancialConnectionsSheet.Configuration(
+            configuration = FinancialConnectionsSheetConfiguration(
                 ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
                 ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
             ),

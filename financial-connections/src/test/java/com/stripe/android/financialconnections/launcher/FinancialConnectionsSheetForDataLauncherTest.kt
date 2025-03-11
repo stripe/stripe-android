@@ -3,9 +3,10 @@ package com.stripe.android.financialconnections.launcher
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.financialConnectionsSessionWithNoMoreAccounts
+import com.stripe.android.financialconnections.intentBuilder
 import com.stripe.android.financialconnections.utils.FakeActivityResultRegistry
 import com.stripe.android.financialconnections.utils.TestFragment
 import org.junit.Test
@@ -15,7 +16,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class FinancialConnectionsSheetForDataLauncherTest {
 
-    private val configuration = FinancialConnectionsSheet.Configuration("", "")
+    private val configuration = FinancialConnectionsSheetConfiguration("", "")
 
     @Test
     fun `create and present should return expected ConnectionsSheetResult#Completed`() {
@@ -32,7 +33,8 @@ class FinancialConnectionsSheetForDataLauncherTest {
                 val results = mutableListOf<FinancialConnectionsSheetResult>()
                 val launcher = FinancialConnectionsSheetForDataLauncher(
                     fragment,
-                    testRegistry
+                    testRegistry,
+                    intentBuilder(fragment.requireContext())
                 ) {
                     results.add(it)
                 }
@@ -60,7 +62,8 @@ class FinancialConnectionsSheetForDataLauncherTest {
                 val results = mutableListOf<FinancialConnectionsSheetResult>()
                 val launcher = FinancialConnectionsSheetForDataLauncher(
                     fragment,
-                    testRegistry
+                    testRegistry,
+                    intentBuilder(fragment.requireContext())
                 ) {
                     results.add(it)
                 }

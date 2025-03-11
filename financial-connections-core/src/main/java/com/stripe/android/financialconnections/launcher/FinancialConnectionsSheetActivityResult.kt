@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.launcher
 
 import android.os.Bundle
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import androidx.core.os.bundleOf
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.model.Token
@@ -10,9 +11,10 @@ import kotlinx.parcelize.Parcelize
 /**
  * Result used internally to communicate between
  * [com.stripe.android.financialconnections.FinancialConnectionsSheetActivity] and
- * instances of [com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetLauncher].
+ * instances of [FinancialConnectionsSheetLauncher].
  */
-internal sealed class FinancialConnectionsSheetActivityResult : Parcelable {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed class FinancialConnectionsSheetActivityResult : Parcelable {
     /**
      * The customer completed the connections session.
      * @param financialConnectionsSession The financial connections session connected
@@ -53,7 +55,8 @@ internal sealed class FinancialConnectionsSheetActivityResult : Parcelable {
 }
 
 @Parcelize
-internal data class InstantDebitsResult(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class InstantDebitsResult(
     val encodedPaymentMethod: String,
     val last4: String?,
     val bankName: String?,

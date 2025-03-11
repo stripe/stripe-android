@@ -17,6 +17,11 @@ class FinancialConnectionsSheetTest {
     @Test
     fun `present() should launch the connection sheet with the given configuration`() {
         financialConnectionsSheet.present(configuration)
-        verify(financialConnectionsSheetLauncher).present(configuration)
+        verify(financialConnectionsSheetLauncher).present(
+            FinancialConnectionsSheetConfiguration(
+                ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
+                ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+            )
+        )
     }
 }
