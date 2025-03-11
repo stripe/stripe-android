@@ -2202,7 +2202,7 @@ class PaymentSheet internal constructor(
             }
 
             private fun initializeCallbacks() {
-                setPaymentSheetCallbacks(
+                setFlowControllerCallbacks(
                     createIntentCallback = createIntentCallback,
                     externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
                 )
