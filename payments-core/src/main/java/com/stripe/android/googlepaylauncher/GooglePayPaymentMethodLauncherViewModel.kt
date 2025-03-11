@@ -69,16 +69,25 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
         )
     }
 
+    /**
+     * When amount is 0, the [GooglePayJsonFactory.TransactionInfo.TotalPriceStatus] should be NOT_CURRENTLY_KNOWN,
+     * indicating that the merchant is collecting the payment details for future use.
+     */
     @VisibleForTesting
     internal fun createTransactionInfo(
         args: GooglePayPaymentMethodLauncherContractV2.Args
     ): GooglePayJsonFactory.TransactionInfo {
         return GooglePayJsonFactory.TransactionInfo(
             currencyCode = args.currencyCode,
-            totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
+            totalPriceStatus =
+            if (args.amount == 0L) {
+                GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.NotCurrentlyKnown
+            } else {
+                GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated
+            },
             countryCode = args.config.merchantCountryCode,
             transactionId = args.transactionId,
-            totalPrice = args.amount,
+            totalPrice = if (args.amount == 0L) null else args.amount,
             totalPriceLabel = args.label,
             checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
         )
