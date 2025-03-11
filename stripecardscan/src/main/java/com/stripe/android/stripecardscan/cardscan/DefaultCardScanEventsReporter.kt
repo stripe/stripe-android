@@ -1,23 +1,18 @@
 package com.stripe.android.stripecardscan.cardscan
 
 import com.stripe.android.core.exception.safeAnalyticsMessage
-import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.stripecardscan.scanui.CancellationReason
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 
 internal class DefaultCardScanEventsReporter @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
-    @IOContext private val workContext: CoroutineContext,
     private val durationProvider: DurationProvider,
 ) : CardScanEventsReporter {
     override fun scanStarted() {
@@ -60,17 +55,15 @@ internal class DefaultCardScanEventsReporter @Inject constructor(
         eventName: String,
         additionalParams: Map<String, Any> = emptyMap()
     ) {
-        CoroutineScope(workContext).launch {
-            analyticsRequestExecutor.executeAsync(
-                analyticsRequestFactory.createRequest(
-                    event = object : AnalyticsEvent {
-                        override val eventName: String
-                            get() = eventName
-                    },
-                    additionalParams
-                )
+        analyticsRequestExecutor.executeAsync(
+            analyticsRequestFactory.createRequest(
+                event = object : AnalyticsEvent {
+                    override val eventName: String
+                        get() = eventName
+                },
+                additionalParams
             )
-        }
+        )
     }
 
     private fun durationInSecondsFromStart(duration: Duration?): Map<String, Float> {

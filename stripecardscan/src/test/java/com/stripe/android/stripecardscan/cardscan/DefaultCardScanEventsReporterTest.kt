@@ -5,18 +5,14 @@ import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.stripecardscan.scanui.CancellationReason
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
-import kotlinx.coroutines.test.TestCoroutineScheduler
-import kotlinx.coroutines.test.TestScope
 import org.junit.Test
 import kotlin.time.Duration
 
 internal class DefaultCardScanEventsReporterTest {
 
     @Test
-    fun testScanStarted() = runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor, testScheduler ->
+    fun testScanStarted() = runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
         defaultCardScanEventsReporter.scanStarted()
-
-        testScheduler.advanceUntilIdle()
 
         val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
 
@@ -26,25 +22,20 @@ internal class DefaultCardScanEventsReporterTest {
     }
 
     @Test
-    fun testScanSucceeded() =
-        runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor, testScheduler ->
-            defaultCardScanEventsReporter.scanSucceeded()
+    fun testScanSucceeded() = runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
+        defaultCardScanEventsReporter.scanSucceeded()
 
-            testScheduler.advanceUntilIdle()
+        val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
 
-            val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-
-            assertThat(loggedRequests).hasSize(1)
-            val loggedParams = loggedRequests.first().params
-            assertThat(loggedParams["event"]).isEqualTo("card_scan.scan_succeeded")
-            assertThat(loggedParams["duration"]).isEqualTo(0f)
-        }
+        assertThat(loggedRequests).hasSize(1)
+        val loggedParams = loggedRequests.first().params
+        assertThat(loggedParams["event"]).isEqualTo("card_scan.scan_succeeded")
+        assertThat(loggedParams["duration"]).isEqualTo(0f)
+    }
 
     @Test
-    fun testScanFailed() = runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor, testScheduler ->
+    fun testScanFailed() = runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
         defaultCardScanEventsReporter.scanFailed(Throwable("oops"))
-
-        testScheduler.advanceUntilIdle()
 
         val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
 
@@ -56,27 +47,22 @@ internal class DefaultCardScanEventsReporterTest {
     }
 
     @Test
-    fun testScanCancelledOnBackPressed() =
-        runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor, testScheduler ->
-            defaultCardScanEventsReporter.scanCancelled(CancellationReason.Back)
+    fun testScanCancelledOnBackPressed() = runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
+        defaultCardScanEventsReporter.scanCancelled(CancellationReason.Back)
 
-            testScheduler.advanceUntilIdle()
+        val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
 
-            val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-
-            assertThat(loggedRequests).hasSize(1)
-            val loggedParams = loggedRequests.first().params
-            assertThat(loggedParams["event"]).isEqualTo("card_scan.scan_cancelled")
-            assertThat(loggedParams["duration"]).isEqualTo(0f)
-            assertThat(loggedParams["cancellation_reason"]).isEqualTo("back")
-        }
+        assertThat(loggedRequests).hasSize(1)
+        val loggedParams = loggedRequests.first().params
+        assertThat(loggedParams["event"]).isEqualTo("card_scan.scan_cancelled")
+        assertThat(loggedParams["duration"]).isEqualTo(0f)
+        assertThat(loggedParams["cancellation_reason"]).isEqualTo("back")
+    }
 
     @Test
     fun testScanCancelledOnCameraPermissionDenied() =
-        runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor, testScheduler ->
+        runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
             defaultCardScanEventsReporter.scanCancelled(CancellationReason.CameraPermissionDenied)
-
-            testScheduler.advanceUntilIdle()
 
             val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
 
@@ -86,25 +72,20 @@ internal class DefaultCardScanEventsReporterTest {
         }
 
     @Test
-    fun testScanCancelledOnClosed() =
-        runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor, testScheduler ->
-            defaultCardScanEventsReporter.scanCancelled(CancellationReason.Closed)
+    fun testScanCancelledOnClosed() = runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
+        defaultCardScanEventsReporter.scanCancelled(CancellationReason.Closed)
 
-            testScheduler.advanceUntilIdle()
+        val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
 
-            val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
-
-            assertThat(loggedRequests).hasSize(1)
-            assertThat(loggedRequests.first().params["cancellation_reason"])
-                .isEqualTo("closed")
-        }
+        assertThat(loggedRequests).hasSize(1)
+        assertThat(loggedRequests.first().params["cancellation_reason"])
+            .isEqualTo("closed")
+    }
 
     @Test
     fun testScanCancelledOnUserCannotScan() =
-        runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor, testScheduler ->
+        runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
             defaultCardScanEventsReporter.scanCancelled(CancellationReason.UserCannotScan)
-
-            testScheduler.advanceUntilIdle()
 
             val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
 
@@ -114,10 +95,9 @@ internal class DefaultCardScanEventsReporterTest {
         }
 
     private fun runScenario(
-        testBlock: (DefaultCardScanEventsReporter, FakeAnalyticsRequestExecutor, TestCoroutineScheduler) -> Unit
+        testBlock: (DefaultCardScanEventsReporter, FakeAnalyticsRequestExecutor) -> Unit
     ) {
         val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
-        val testScope = TestScope()
         val eventsReporter = DefaultCardScanEventsReporter(
             analyticsRequestExecutor = analyticsRequestExecutor,
             analyticsRequestFactory = AnalyticsRequestFactory(
@@ -128,11 +108,10 @@ internal class DefaultCardScanEventsReporterTest {
                 networkTypeProvider = { "" },
                 pluginTypeProvider = { null }
             ),
-            workContext = testScope.coroutineContext,
             durationProvider = FakeDurationProvider()
         )
 
-        testBlock(eventsReporter, analyticsRequestExecutor, testScope.testScheduler)
+        testBlock(eventsReporter, analyticsRequestExecutor)
     }
 
     private class FakeDurationProvider : DurationProvider {
