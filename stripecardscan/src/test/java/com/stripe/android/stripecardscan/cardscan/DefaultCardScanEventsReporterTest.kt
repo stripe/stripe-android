@@ -19,6 +19,7 @@ internal class DefaultCardScanEventsReporterTest {
         assertThat(loggedRequests).hasSize(1)
         val loggedParams = loggedRequests.first().params
         assertThat(loggedParams["event"]).isEqualTo("card_scan.scan_started")
+        assertThat(loggedParams["elements_session_id"]).isEqualTo(ELEMENTS_SESSION_ID)
     }
 
     @Test
@@ -31,6 +32,7 @@ internal class DefaultCardScanEventsReporterTest {
         val loggedParams = loggedRequests.first().params
         assertThat(loggedParams["event"]).isEqualTo("card_scan.scan_succeeded")
         assertThat(loggedParams["duration"]).isEqualTo(0f)
+        assertThat(loggedParams["elements_session_id"]).isEqualTo(ELEMENTS_SESSION_ID)
     }
 
     @Test
@@ -44,6 +46,7 @@ internal class DefaultCardScanEventsReporterTest {
         assertThat(loggedParams["event"]).isEqualTo("card_scan.scan_failed")
         assertThat(loggedParams["duration"]).isEqualTo(0f)
         assertThat(loggedParams["error_message"]).isEqualTo("unknown")
+        assertThat(loggedParams["elements_session_id"]).isEqualTo(ELEMENTS_SESSION_ID)
     }
 
     @Test
@@ -57,6 +60,7 @@ internal class DefaultCardScanEventsReporterTest {
         assertThat(loggedParams["event"]).isEqualTo("card_scan.scan_cancelled")
         assertThat(loggedParams["duration"]).isEqualTo(0f)
         assertThat(loggedParams["cancellation_reason"]).isEqualTo("back")
+        assertThat(loggedParams["elements_session_id"]).isEqualTo(ELEMENTS_SESSION_ID)
     }
 
     @Test
@@ -108,10 +112,15 @@ internal class DefaultCardScanEventsReporterTest {
                 networkTypeProvider = { "" },
                 pluginTypeProvider = { null }
             ),
-            durationProvider = FakeDurationProvider()
+            durationProvider = FakeDurationProvider(),
+            cardScanConfiguration = CardScanConfiguration(ELEMENTS_SESSION_ID)
         )
 
         testBlock(eventsReporter, analyticsRequestExecutor)
+    }
+
+    companion object {
+        private const val ELEMENTS_SESSION_ID = "elements_session_id"
     }
 
     private class FakeDurationProvider : DurationProvider {

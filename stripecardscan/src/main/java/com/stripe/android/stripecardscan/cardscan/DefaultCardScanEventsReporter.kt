@@ -14,6 +14,7 @@ internal class DefaultCardScanEventsReporter @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
     private val durationProvider: DurationProvider,
+    private val cardScanConfiguration: CardScanConfiguration
 ) : CardScanEventsReporter {
     override fun scanStarted() {
         durationProvider.start(DurationProvider.Key.CardScan)
@@ -55,13 +56,18 @@ internal class DefaultCardScanEventsReporter @Inject constructor(
         eventName: String,
         additionalParams: Map<String, Any> = emptyMap()
     ) {
+        val baseParams = cardScanConfiguration.elementsSessionId?.let {
+            mapOf(
+                "elements_session_id" to cardScanConfiguration.elementsSessionId
+            )
+        } ?: emptyMap()
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.createRequest(
                 event = object : AnalyticsEvent {
                     override val eventName: String
                         get() = eventName
                 },
-                additionalParams
+                additionalParams = additionalParams + baseParams
             )
         )
     }
