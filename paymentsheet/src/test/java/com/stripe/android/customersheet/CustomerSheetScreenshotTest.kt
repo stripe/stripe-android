@@ -75,7 +75,7 @@ internal class CustomerSheetScreenshotTest {
         onUpdatePrimaryButtonState = { },
         onUpdatePrimaryButtonUIState = { },
         onError = { },
-        shouldShowSetAsDefaultCheckbox = false
+        setAsDefaultEnabled = false
     )
 
     private val selectPaymentMethodViewState = CustomerSheetViewState.SelectPaymentMethod(

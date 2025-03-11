@@ -198,19 +198,21 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         merchantName = args.formArgs.merchantName
     )
 
-    val saveForFutureUse: StateFlow<Boolean> = saveForFutureUseElement.controller.saveForFutureUse
+    val saveForFutureUseCheckedFlow: StateFlow<Boolean> = saveForFutureUseElement.controller.saveForFutureUse
 
-    private val shouldShowElementFlow = saveForFutureUse.mapAsStateFlow {
-        it && args.shouldShowSetAsDefaultCheckbox
+    private val shouldShowElementFlow = saveForFutureUseCheckedFlow.mapAsStateFlow {
+        it && args.setAsDefaultEnabled
     }
 
-    val setAsDefaultPaymentMethodElement: SetAsDefaultPaymentMethodElement =
-        SetAsDefaultPaymentMethodElement(
-            initialValue = false,
-            saveForFutureUseCheckedFlow = shouldShowElementFlow
-        )
-
-    val setAsDefaultPaymentMethod = setAsDefaultPaymentMethodElement.controller.setAsDefaultPaymentMethod
+    val setAsDefaultPaymentMethodElement: SetAsDefaultPaymentMethodElement? =
+        if (args.setAsDefaultEnabled) {
+            SetAsDefaultPaymentMethodElement(
+                initialValue = false,
+                saveForFutureUseCheckedFlow = shouldShowElementFlow
+            )
+        } else {
+            null
+        }
 
     private val screenStateWithoutSaveForFutureUse = MutableStateFlow(value = determineInitialState())
 
@@ -220,7 +222,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     val currentScreenState: StateFlow<BankFormScreenState> = combineAsStateFlow(
         screenStateWithoutSaveForFutureUse,
-        saveForFutureUse,
+        saveForFutureUseCheckedFlow,
     ) { state, saveForFutureUse ->
         val mandateText = state.linkedBankAccount?.let {
             buildMandateText(
@@ -235,7 +237,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     val linkedAccount: StateFlow<PaymentSelection.New.USBankAccount?> = combineAsStateFlow(
         currentScreenState,
         billingDetails,
-        setAsDefaultPaymentMethod,
+        setAsDefaultPaymentMethodElement?.controller?.setAsDefaultPaymentMethod ?: stateFlowOf(false),
     ) { state, billingDetails, _ ->
         state.toPaymentSelection(billingDetails)
     }
@@ -609,7 +611,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     ): PaymentSelection.New.USBankAccount {
         val customerRequestedSave = customerRequestedSave(
             showCheckbox = args.showCheckbox,
-            saveForFutureUse = saveForFutureUse.value
+            saveForFutureUse = saveForFutureUseCheckedFlow.value
         )
 
         val paymentMethodCreateParams = when (resultIdentifier) {
@@ -674,17 +676,21 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 email = billingDetails.email,
                 phone = billingDetails.phone,
                 address = billingDetails.address,
-                saveForFutureUse = saveForFutureUse.value,
+                saveForFutureUse = saveForFutureUseCheckedFlow.value,
             ),
-            paymentMethodExtraParams = PaymentMethodExtraParams.USBankAccount(
-                setAsDefault = setAsDefaultPaymentMethod.value
-            )
+            paymentMethodExtraParams = if (setAsDefaultPaymentMethodElement != null) {
+                PaymentMethodExtraParams.USBankAccount(
+                    setAsDefault = setAsDefaultPaymentMethodElement.controller.setAsDefaultPaymentMethod.value
+                )
+            } else {
+                null
+            }
         )
     }
 
     private fun buildMandateText(
         isVerifyWithMicrodeposits: Boolean,
-        isSaveForFutureUseSelected: Boolean = saveForFutureUse.value,
+        isSaveForFutureUseSelected: Boolean = saveForFutureUseCheckedFlow.value,
     ): ResolvableString {
         return USBankAccountTextBuilder.buildMandateAndMicrodepositsText(
             merchantName = formattedMerchantName(),
@@ -739,7 +745,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val savedPaymentMethod: PaymentSelection.New.USBankAccount?,
         val shippingDetails: AddressDetails?,
         val hostedSurface: String,
-        val shouldShowSetAsDefaultCheckbox: Boolean,
+        val setAsDefaultEnabled: Boolean,
     )
 
     private companion object {
