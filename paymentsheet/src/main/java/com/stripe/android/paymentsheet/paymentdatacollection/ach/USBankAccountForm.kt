@@ -88,7 +88,7 @@ internal fun USBankAccountForm(
                 onBehalfOf = usBankAccountFormArgs.onBehalfOf,
                 savedPaymentMethod = usBankAccountFormArgs.draftPaymentSelection as? New.USBankAccount,
                 shippingDetails = usBankAccountFormArgs.shippingDetails,
-                setAsDefaultEnabled = usBankAccountFormArgs.setAsDefaultEnabled
+                setAsDefaultPaymentMethodEnabled = usBankAccountFormArgs.setAsDefaultPaymentMethodEnabled
             )
         },
     )

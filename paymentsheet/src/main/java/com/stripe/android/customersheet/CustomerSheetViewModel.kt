@@ -838,7 +838,7 @@ internal class CustomerSheetViewModel(
             onError = { error ->
                 handleViewAction(CustomerSheetViewAction.OnFormError(error))
             },
-            setAsDefaultEnabled = false,
+            setAsDefaultPaymentMethodEnabled = false,
         )
     }
 

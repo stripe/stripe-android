@@ -76,7 +76,7 @@ class USBankAccountFormViewModelTest {
         shippingDetails = null,
         hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
         linkMode = null,
-        setAsDefaultEnabled = false,
+        setAsDefaultPaymentMethodEnabled = false,
     )
 
     private val mockCollectBankAccountLauncher = mock<CollectBankAccountLauncher>()
@@ -573,7 +573,7 @@ class USBankAccountFormViewModelTest {
             args = defaultArgs.copy(
                 formArgs = defaultArgs.formArgs,
                 showCheckbox = true,
-                setAsDefaultEnabled = IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
+                setAsDefaultPaymentMethodEnabled = IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
             ),
         )
         assertThat(viewModel.setAsDefaultPaymentMethodElement).isNull()
@@ -1322,7 +1322,7 @@ class USBankAccountFormViewModelTest {
         val viewModel = createViewModel(
             args = defaultArgs.copy(
                 showCheckbox = true,
-                setAsDefaultEnabled = true
+                setAsDefaultPaymentMethodEnabled = true
             )
         )
 
@@ -1344,7 +1344,7 @@ class USBankAccountFormViewModelTest {
         val viewModel = createViewModel(
             args = defaultArgs.copy(
                 showCheckbox = true,
-                setAsDefaultEnabled = true
+                setAsDefaultPaymentMethodEnabled = true
             )
         )
 
@@ -1370,7 +1370,7 @@ class USBankAccountFormViewModelTest {
         val viewModel = createViewModel(
             args = defaultArgs.copy(
                 showCheckbox = true,
-                setAsDefaultEnabled = true
+                setAsDefaultPaymentMethodEnabled = true
             )
         )
 
