@@ -26,7 +26,7 @@ internal class DefaultFinancialConnectionsEventReporter @Inject constructor(
         financialConnectionsSheetResult: FinancialConnectionsSheetActivityResult
     ) {
         val event = when (financialConnectionsSheetResult) {
-            is com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed ->
+            is .FinancialConnectionsSheetActivityResult.Completed ->
                 Event(
                     Event.Code.SheetClosed,
                     mapOf(
@@ -35,7 +35,7 @@ internal class DefaultFinancialConnectionsEventReporter @Inject constructor(
                     )
                 )
 
-            is com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled ->
+            is .FinancialConnectionsSheetActivityResult.Canceled ->
                 Event(
                     Event.Code.SheetClosed,
                     mapOf(
