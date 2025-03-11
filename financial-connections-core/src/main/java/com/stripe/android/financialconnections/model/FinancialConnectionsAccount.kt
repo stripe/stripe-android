@@ -206,7 +206,10 @@ data class FinancialConnectionsAccount(
     }
 
     companion object {
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) const val OBJECT_OLD = "linked_account"
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) const val OBJECT_NEW = "financial_connections.account"
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        const val OBJECT_OLD = "linked_account"
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        const val OBJECT_NEW = "financial_connections.account"
     }
 }

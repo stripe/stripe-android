@@ -32,7 +32,9 @@ import org.json.JSONObject
  */
 @Parcelize
 @Serializable
-data class FinancialConnectionsSession @RestrictTo(RestrictTo.Scope.LIBRARY) constructor(
+data class FinancialConnectionsSession
+@RestrictTo(RestrictTo.Scope.LIBRARY)
+constructor(
     @SerialName("client_secret")
     val clientSecret: String,
 
