@@ -575,7 +575,7 @@ class USBankAccountFormViewModelTest {
                 shouldShowSetAsDefaultCheckbox = false,
             ),
         )
-        assertThat(viewModel.setAsDefaultPaymentMethodElement.controller.setAsDefaultPaymentMethod.value).isFalse()
+        assertThat(viewModel.setAsDefaultPaymentMethodElement.controller.setAsDefaultPaymentMethodChecked.value).isFalse()
     }
 
     @Test

@@ -18,7 +18,7 @@ fun SetAsDefaultPaymentMethodElementUI(
     modifier: Modifier = Modifier,
 ) {
     val controller = element.controller
-    val checked by controller.setAsDefaultPaymentMethod.collectAsState()
+    val checked by controller.setAsDefaultPaymentMethodChecked.collectAsState()
     val label by controller.label.collectAsState()
     val resources = LocalContext.current.resources
 

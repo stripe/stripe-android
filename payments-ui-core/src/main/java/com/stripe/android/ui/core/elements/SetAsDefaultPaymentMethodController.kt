@@ -17,12 +17,12 @@ class SetAsDefaultPaymentMethodController(
 ) : InputController {
     override val label: StateFlow<Int> = MutableStateFlow(R.string.stripe_set_as_default_payment_method)
 
-    private val _setAsDefaultPaymentMethod = MutableStateFlow(setAsDefaultPaymentMethodInitialValue)
-    val setAsDefaultPaymentMethod: StateFlow<Boolean> = _setAsDefaultPaymentMethod
+    private val _setAsDefaultPaymentMethodChecked = MutableStateFlow(setAsDefaultPaymentMethodInitialValue)
+    val setAsDefaultPaymentMethodChecked: StateFlow<Boolean> = _setAsDefaultPaymentMethodChecked
 
     override val fieldValue: StateFlow<String> = combineAsStateFlow(
         shouldShowElementFlow,
-        setAsDefaultPaymentMethod
+        setAsDefaultPaymentMethodChecked
     ) { shouldShowElementFlow, setAsDefaultPaymentMethod ->
         (shouldShowElementFlow && setAsDefaultPaymentMethod).toString()
     }
@@ -37,8 +37,8 @@ class SetAsDefaultPaymentMethodController(
             FormFieldEntry(value, complete)
         }
 
-    fun onValueChange(setAsDefaultPaymentMethod: Boolean) {
-        _setAsDefaultPaymentMethod.value = setAsDefaultPaymentMethod
+    fun onValueChange(setAsDefaultPaymentMethodChecked: Boolean) {
+        _setAsDefaultPaymentMethodChecked.value = setAsDefaultPaymentMethodChecked
     }
 
     override fun onRawValueChange(rawValue: String) {

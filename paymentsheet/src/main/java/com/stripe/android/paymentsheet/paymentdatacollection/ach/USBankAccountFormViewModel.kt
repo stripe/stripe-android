@@ -210,7 +210,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             shouldShowElementFlow = shouldShowElementFlow
         )
 
-    val setAsDefaultPaymentMethod = setAsDefaultPaymentMethodElement.controller.setAsDefaultPaymentMethod
+    val setAsDefaultPaymentMethod = setAsDefaultPaymentMethodElement.controller.setAsDefaultPaymentMethodChecked
 
     private val screenStateWithoutSaveForFutureUse = MutableStateFlow(value = determineInitialState())
 
