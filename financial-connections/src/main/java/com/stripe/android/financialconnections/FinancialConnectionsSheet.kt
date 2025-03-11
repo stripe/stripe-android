@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
+import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
@@ -49,7 +50,7 @@ class FinancialConnectionsSheet internal constructor(
         )
     }
 
-    private fun FinancialConnectionsSheet.Configuration.toInternal(): FinancialConnectionsSheetConfiguration {
+    private fun Configuration.toInternal(): FinancialConnectionsSheetConfiguration {
         return FinancialConnectionsSheetConfiguration(
             financialConnectionsSessionClientSecret = financialConnectionsSessionClientSecret,
             publishableKey = publishableKey,
@@ -140,6 +141,12 @@ class FinancialConnectionsSheet internal constructor(
     }
 }
 
+/**
+ * Creates an [Intent] to launch the [FinancialConnectionsSheetActivity].
+ *
+ * @param context the context to use for creating the intent
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun intentBuilder(context: Context): (FinancialConnectionsSheetActivityArgs) -> Intent =
     { args: FinancialConnectionsSheetActivityArgs ->
         FinancialConnectionsSheetActivity.intent(

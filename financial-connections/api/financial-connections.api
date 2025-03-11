@@ -150,10 +150,6 @@ public final class com/stripe/android/financialconnections/FinancialConnectionsS
 	public static final fun rememberFinancialConnectionsSheetForToken (Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet;
 }
 
-public final class com/stripe/android/financialconnections/FinancialConnectionsSheetKt {
-	public static final fun intentBuilder (Landroid/content/Context;)Lkotlin/jvm/functions/Function1;
-}
-
 public final class com/stripe/android/financialconnections/FinancialConnectionsSheetRedirectActivity : androidx/appcompat/app/AppCompatActivity {
 	public static final field $stable I
 	public fun <init> ()V
