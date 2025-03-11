@@ -200,15 +200,11 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     val saveForFutureUseCheckedFlow: StateFlow<Boolean> = saveForFutureUseElement.controller.saveForFutureUse
 
-    private val shouldShowElementFlow = saveForFutureUseCheckedFlow.mapAsStateFlow {
-        it && args.setAsDefaultEnabled
-    }
-
     val setAsDefaultPaymentMethodElement: SetAsDefaultPaymentMethodElement? =
         if (args.setAsDefaultEnabled) {
             SetAsDefaultPaymentMethodElement(
                 initialValue = false,
-                saveForFutureUseCheckedFlow = shouldShowElementFlow
+                saveForFutureUseCheckedFlow = saveForFutureUseCheckedFlow
             )
         } else {
             null
