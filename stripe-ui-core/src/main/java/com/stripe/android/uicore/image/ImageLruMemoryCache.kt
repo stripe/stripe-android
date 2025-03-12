@@ -1,6 +1,5 @@
 package com.stripe.android.uicore.image
 
-import android.graphics.Bitmap
 import android.util.LruCache
 import androidx.annotation.RestrictTo
 
@@ -18,21 +17,21 @@ class ImageLruMemoryCache(
 ) {
 
     @Suppress("MagicNumber")
-    private val lruCache = object : LruCache<String, Bitmap>(maxSize) {
-        override fun sizeOf(key: String, bitmap: Bitmap): Int {
-            return bitmap.byteCount / 1024
+    private val lruCache = object : LruCache<String, LoadedImage>(maxSize) {
+        override fun sizeOf(key: String, image: LoadedImage): Int {
+            return image.bitmap.byteCount / 1024
         }
     }
 
-    fun put(key: String, bitmap: Bitmap) {
+    fun put(key: String, image: LoadedImage) {
         synchronized(this) {
             if (lruCache.get(key.toKey()) == null) {
-                lruCache.put(key.toKey(), bitmap)
+                lruCache.put(key.toKey(), image)
             }
         }
     }
 
-    fun getBitmap(key: String): Bitmap? {
+    fun get(key: String): LoadedImage? {
         synchronized(this) {
             return lruCache.get(key.toKey())
         }

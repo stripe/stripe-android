@@ -967,6 +967,8 @@
 |    |    +--- project :stripe-core (*)
 |    |    +--- project :payments-model (*)
 |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.1.10 (*)
+|    |    +--- androidx.activity:activity-ktx:1.9.3 (*)
+|    |    +--- androidx.fragment:fragment-ktx:1.8.6 (*)
 |    |    +--- androidx.annotation:annotation:1.9.1 (*)
 |    |    +--- com.google.dagger:dagger:2.55 (*)
 |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1 (*)

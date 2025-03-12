@@ -3,7 +3,6 @@
 package com.stripe.android.uicore.image
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.Bitmap.CompressFormat
 import android.graphics.BitmapFactory
 import android.util.Log
@@ -52,7 +51,7 @@ class ImageLruDiskCache(
         }
     }
 
-    fun put(key: String, data: Bitmap) {
+    fun put(key: String, image: LoadedImage) {
         var editor: DiskLruCache.Editor? = null
         val hashedKey = key.toKey()
         if (containsKey(key)) {
@@ -61,12 +60,11 @@ class ImageLruDiskCache(
             try {
                 editor = diskLruCache?.edit(hashedKey)
                 if (editor == null) return
-                val compressFormat = compressFormatFromUrl(key)
-                if (writeBitmapToFile(
-                        bitmap = data,
+                if (
+                    writeImageToFile(
+                        image = image,
                         editor = editor,
-                        compressFormat = compressFormat,
-                        compressQuality = compressFormat.quality()
+                        contentType = image.contentType,
                     )
                 ) {
                     diskLruCache?.flush()
@@ -83,19 +81,8 @@ class ImageLruDiskCache(
         }
     }
 
-    private fun compressFormatFromUrl(url: String) =
-        ImageType.fromUrl(url)?.compressFormat
-            ?: throw throw IllegalArgumentException("Unexpected image format: $url")
-
-    private fun CompressFormat.quality(): Int = when (this) {
-        CompressFormat.JPEG -> JPEG_COMPRESS_QUALITY
-        CompressFormat.PNG -> PNG_COMPRESS_QUALITY
-        CompressFormat.WEBP -> WEBP_COMPRESS_QUALITY
-        else -> throw IllegalArgumentException("Unexpected compress format: $this")
-    }
-
-    fun getBitmap(key: String): Bitmap? {
-        var bitmap: Bitmap? = null
+    fun get(key: String): LoadedImage? {
+        var image: LoadedImage? = null
         var snapshot: DiskLruCache.Snapshot? = null
         val hashedKey = key.toKey()
         try {
@@ -107,21 +94,27 @@ class ImageLruDiskCache(
                 return null
             }
             val inputStream: InputStream = snapshot.getInputStream(0)
+            val contentType = snapshot.getString(1)
             val buffIn = BufferedInputStream(inputStream, IO_BUFFER_SIZE)
-            bitmap = BitmapFactory.decodeStream(buffIn)
+            val bitmap = BitmapFactory.decodeStream(buffIn)
+
+            image = LoadedImage(
+                contentType = contentType,
+                bitmap = bitmap,
+            )
         } catch (e: IOException) {
             Log.e(TAG, "error getting bitmap from cache", e)
         } finally {
             snapshot?.close()
         }
         debug(
-            if (bitmap == null) {
+            if (image == null) {
                 "image not in cache: $hashedKey"
             } else {
                 "image read from disk $hashedKey"
             }
         )
-        return bitmap
+        return image
     }
 
     fun containsKey(key: String): Boolean {
@@ -158,19 +151,36 @@ class ImageLruDiskCache(
     private fun String.toKey(): String = hashCode().toString()
 
     @Throws(IOException::class, FileNotFoundException::class)
-    private fun writeBitmapToFile(
-        bitmap: Bitmap,
+    private fun writeImageToFile(
+        image: LoadedImage,
         editor: DiskLruCache.Editor,
-        compressFormat: CompressFormat,
-        compressQuality: Int
+        contentType: LoadedImage.ContentType,
     ): Boolean {
         var out: OutputStream? = null
         return try {
             out = BufferedOutputStream(editor.newOutputStream(0), IO_BUFFER_SIZE)
-            bitmap.compress(compressFormat, compressQuality, out)
+            editor.set(1, image.contentType.value)
+
+            val compressFormat = contentType.toCompressFormat()
+
+            image.bitmap.compress(compressFormat, compressFormat.quality(), out)
         } finally {
             out?.close()
         }
+    }
+
+    private fun LoadedImage.ContentType.toCompressFormat() = when (this) {
+        LoadedImage.ContentType.Known.Jpeg -> CompressFormat.JPEG
+        LoadedImage.ContentType.Known.Png -> CompressFormat.PNG
+        LoadedImage.ContentType.Known.Webp -> CompressFormat.WEBP
+        else -> throw IllegalArgumentException("Unexpected image type: $value")
+    }
+
+    private fun CompressFormat.quality(): Int = when (this) {
+        CompressFormat.JPEG -> JPEG_COMPRESS_QUALITY
+        CompressFormat.PNG -> PNG_COMPRESS_QUALITY
+        CompressFormat.WEBP -> WEBP_COMPRESS_QUALITY
+        else -> throw IllegalArgumentException("Unexpected compress format: $this")
     }
 
     private fun getDiskCacheDir(context: Context, uniqueName: String): File {
@@ -180,8 +190,8 @@ class ImageLruDiskCache(
 
     private companion object {
         private const val TAG = "stripe_image_disk_cache"
-        private const val APP_VERSION = 1
-        private const val VALUE_COUNT = 1
+        private const val APP_VERSION = 2
+        private const val VALUE_COUNT = 2
         private const val IO_BUFFER_SIZE = 8 * 1024
 
         private const val PNG_COMPRESS_QUALITY = 100
