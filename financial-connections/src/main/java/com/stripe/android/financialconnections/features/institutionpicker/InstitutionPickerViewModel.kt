@@ -24,6 +24,7 @@ import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.domain.SearchInstitutions
+import com.stripe.android.financialconnections.domain.SelectInstitution
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
@@ -34,6 +35,7 @@ import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.Destination.ManualEntry
 import com.stripe.android.financialconnections.navigation.Destination.PartnerAuth
 import com.stripe.android.financialconnections.navigation.Destination.PartnerAuthDrawer
+import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Loading
@@ -53,6 +55,7 @@ import kotlinx.coroutines.launch
 internal class InstitutionPickerViewModel @AssistedInject constructor(
     private val configuration: FinancialConnectionsSheetConfiguration,
     private val postAuthorizationSession: PostAuthorizationSession,
+    private val selectInstitution: SelectInstitution,
     private val getOrFetchSync: GetOrFetchSync,
     private val searchInstitutions: SearchInstitutions,
     private val featuredInstitutions: FeaturedInstitutions,
@@ -209,9 +212,17 @@ internal class InstitutionPickerViewModel @AssistedInject constructor(
                     activeAuthSession = null
                 )
             }
-            // navigate to next step
-            val authSession = postAuthorizationSession(institution, getOrFetchSync())
-            navigateToPartnerAuth(authSession)
+
+            val manifest = getOrFetchSync().manifest
+            if (manifest.consentAcquired) {
+                val authSession = postAuthorizationSession(institution, getOrFetchSync())
+                navigateToPartnerAuth(authSession)
+            } else {
+                // This implies that we have shown the institution picker first and haven't shown the consent
+                // pane yet. Mark the institution as selected and let the backend guide us to the consent pane.
+                val response = selectInstitution.invoke(institution)
+                navigationManager.tryNavigateTo(response.manifest.nextPane.destination(referrer = PANE))
+            }
         }.execute { async ->
             copy(
                 selectedInstitutionId = institution.id.takeIf { async is Loading },
