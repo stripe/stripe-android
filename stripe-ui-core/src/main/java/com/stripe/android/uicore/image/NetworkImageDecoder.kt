@@ -18,10 +18,10 @@ class NetworkImageDecoder {
      *  height.
      */
     suspend fun decode(
-        url: String,
+        url: URL,
         width: Int,
         height: Int
-    ): Bitmap? {
+    ): LoadedImage? {
         return BitmapFactory.Options().run {
             // First decode with inJustDecodeBounds=true to check dimensions
             inJustDecodeBounds = true
@@ -35,20 +35,26 @@ class NetworkImageDecoder {
     }
 
     suspend fun decode(
-        url: String
-    ): Bitmap? {
+        url: URL
+    ): LoadedImage? {
         return BitmapFactory.Options().run {
             decodeStream(url)
         }
     }
 
     private suspend fun BitmapFactory.Options.decodeStream(
-        url: String
-    ): Bitmap? = suspendCancellableCoroutine { cont ->
+        url: URL
+    ): LoadedImage? = suspendCancellableCoroutine { cont ->
         kotlin.runCatching {
-            URL(url).stream()
+            url.stream()
                 .also { stream -> cont.invokeOnCancellation { runCatching { stream.close() } } }
                 .use { BitmapFactory.decodeStream(it, null, this) }
+                ?.let { bitmap ->
+                    LoadedImage(
+                        contentType = outMimeType,
+                        bitmap = bitmap,
+                    )
+                }
         }.fold(
             onSuccess = { cont.resume(it) },
             onFailure = { cont.resumeWithException(it) }

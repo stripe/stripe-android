@@ -64,6 +64,7 @@ dependencies {
     testImplementation testLibs.kotlin.junit
     testImplementation testLibs.mockito.core
     testImplementation testLibs.mockito.kotlin
+    testImplementation testLibs.okhttpMockWebServer
     testImplementation testLibs.robolectric
     testImplementation testLibs.truth
     testImplementation testLibs.turbine

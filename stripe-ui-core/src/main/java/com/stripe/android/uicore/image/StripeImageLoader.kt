@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.net.URL
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -61,7 +62,7 @@ class StripeImageLoader(
     }
 
     private fun loadFromMemory(url: String): Result<Bitmap>? {
-        return memoryCache?.getBitmap(url)
+        return memoryCache?.get(url)
             .also {
                 if (it != null) {
                     debug("Image loaded from memory cache")
@@ -71,11 +72,11 @@ class StripeImageLoader(
             }
             ?.let {
                 diskCache?.put(url, it)
-                Result.success(it)
+                Result.success(it.bitmap)
             }
     }
 
-    private fun loadFromDisk(url: String): Result<Bitmap>? = diskCache?.getBitmap(url)
+    private fun loadFromDisk(url: String): Result<Bitmap>? = diskCache?.get(url)
         .also {
             if (it != null) {
                 debug("Image loaded from disk cache")
@@ -85,7 +86,7 @@ class StripeImageLoader(
         }
         ?.let {
             memoryCache?.put(url, it)
-            Result.success(it)
+            Result.success(it.bitmap)
         }
 
     @WorkerThread
@@ -95,10 +96,10 @@ class StripeImageLoader(
         height: Int
     ): Result<Bitmap?> = kotlin.runCatching {
         debug("Image $url loading from internet ($width x $height)")
-        networkImageDecoder.decode(url, width, height)?.let { bitmap ->
-            diskCache?.put(url, bitmap)
-            memoryCache?.put(url, bitmap)
-            bitmap
+        networkImageDecoder.decode(URL(url), width, height)?.let { image ->
+            diskCache?.put(url, image)
+            memoryCache?.put(url, image)
+            image.bitmap
         }
     }.onFailure { logger.error("$TAG: Could not load image from network", it) }
 
@@ -107,10 +108,10 @@ class StripeImageLoader(
         url: String
     ): Result<Bitmap?> = kotlin.runCatching {
         debug("Image $url loading from internet")
-        networkImageDecoder.decode(url)?.let { bitmap ->
-            diskCache?.put(url, bitmap)
-            memoryCache?.put(url, bitmap)
-            bitmap
+        networkImageDecoder.decode(URL(url))?.let { image ->
+            diskCache?.put(url, image)
+            memoryCache?.put(url, image)
+            image.bitmap
         }
     }.onFailure { logger.error("$TAG: Could not load image from network", it) }
 
