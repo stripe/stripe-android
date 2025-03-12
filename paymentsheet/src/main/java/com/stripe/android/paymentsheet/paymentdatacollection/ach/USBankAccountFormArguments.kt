@@ -59,7 +59,7 @@ internal class USBankAccountFormArguments(
     val onUpdatePrimaryButtonUIState: ((PrimaryButton.UIState?) -> (PrimaryButton.UIState?)) -> Unit,
     val onUpdatePrimaryButtonState: (PrimaryButton.State) -> Unit,
     val onError: (ResolvableString?) -> Unit,
-    val shouldShowSetAsDefaultCheckbox: Boolean
+    val setAsDefaultPaymentMethodEnabled: Boolean
 ) {
     companion object {
         fun create(
@@ -103,7 +103,7 @@ internal class USBankAccountFormArguments(
                 onUpdatePrimaryButtonState = viewModel::updatePrimaryButtonState,
                 onError = viewModel::onError,
                 incentive = paymentMethodMetadata.paymentMethodIncentive,
-                shouldShowSetAsDefaultCheckbox =
+                setAsDefaultPaymentMethodEnabled =
                 paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
                     ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
             )
@@ -150,7 +150,7 @@ internal class USBankAccountFormArguments(
                 },
                 onError = onError,
                 incentive = paymentMethodMetadata.paymentMethodIncentive,
-                shouldShowSetAsDefaultCheckbox =
+                setAsDefaultPaymentMethodEnabled =
                 paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
                     ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
             )

@@ -10,6 +10,7 @@ import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.lpmfoundations.paymentmethod.IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -75,7 +76,7 @@ class USBankAccountFormViewModelTest {
         shippingDetails = null,
         hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
         linkMode = null,
-        shouldShowSetAsDefaultCheckbox = false,
+        setAsDefaultPaymentMethodEnabled = false,
     )
 
     private val mockCollectBankAccountLauncher = mock<CollectBankAccountLauncher>()
@@ -563,19 +564,19 @@ class USBankAccountFormViewModelTest {
                 showCheckbox = true,
             ),
         )
-        assertThat(viewModel.saveForFutureUse.value).isFalse()
+        assertThat(viewModel.saveForFutureUseCheckedFlow.value).isFalse()
     }
 
     @Test
-    fun `Doesn't set setAsDefaultPaymentMethod by default`() = runTest {
+    fun `Doesn't set setAsDefaultPaymentMethodElement by default`() = runTest {
         val viewModel = createViewModel(
             args = defaultArgs.copy(
                 formArgs = defaultArgs.formArgs,
                 showCheckbox = true,
-                shouldShowSetAsDefaultCheckbox = false,
+                setAsDefaultPaymentMethodEnabled = IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
             ),
         )
-        assertThat(viewModel.setAsDefaultPaymentMethodElement.controller.setAsDefaultPaymentMethod.value).isFalse()
+        assertThat(viewModel.setAsDefaultPaymentMethodElement).isNull()
     }
 
     @Test
@@ -1321,7 +1322,7 @@ class USBankAccountFormViewModelTest {
         val viewModel = createViewModel(
             args = defaultArgs.copy(
                 showCheckbox = true,
-                shouldShowSetAsDefaultCheckbox = true
+                setAsDefaultPaymentMethodEnabled = true
             )
         )
 
@@ -1333,7 +1334,7 @@ class USBankAccountFormViewModelTest {
             viewModel.handleCollectBankAccountResult(mockVerifiedBankAccount())
             viewModel.saveForFutureUseElement.controller.onValueChange(true)
 
-            assertThat(viewModel.setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isTrue()
+            assertThat(viewModel.setAsDefaultPaymentMethodElement!!.shouldShowElementFlow.value).isTrue()
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -1343,7 +1344,7 @@ class USBankAccountFormViewModelTest {
         val viewModel = createViewModel(
             args = defaultArgs.copy(
                 showCheckbox = true,
-                shouldShowSetAsDefaultCheckbox = true
+                setAsDefaultPaymentMethodEnabled = true
             )
         )
 
@@ -1355,7 +1356,7 @@ class USBankAccountFormViewModelTest {
             viewModel.handleCollectBankAccountResult(mockVerifiedBankAccount())
             viewModel.saveForFutureUseElement.controller.onValueChange(true)
 
-            assertThat(viewModel.setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isTrue()
+            assertThat(viewModel.setAsDefaultPaymentMethodElement!!.shouldShowElementFlow.value).isTrue()
 
             viewModel.saveForFutureUseElement.controller.onValueChange(false)
 
@@ -1369,7 +1370,7 @@ class USBankAccountFormViewModelTest {
         val viewModel = createViewModel(
             args = defaultArgs.copy(
                 showCheckbox = true,
-                shouldShowSetAsDefaultCheckbox = true
+                setAsDefaultPaymentMethodEnabled = true
             )
         )
 
@@ -1383,7 +1384,7 @@ class USBankAccountFormViewModelTest {
 
             assertThat((awaitItem()?.paymentMethodExtraParams as PaymentMethodExtraParams.USBankAccount).setAsDefault)
                 .isFalse()
-            assertThat(viewModel.setAsDefaultPaymentMethodElement.shouldShowElementFlow.value)
+            assertThat(viewModel.setAsDefaultPaymentMethodElement!!.shouldShowElementFlow.value)
                 .isTrue()
 
             assertThat(awaitItem()?.input?.saveForFutureUse).isTrue()
