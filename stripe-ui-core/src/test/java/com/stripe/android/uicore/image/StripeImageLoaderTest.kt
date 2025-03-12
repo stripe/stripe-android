@@ -22,13 +22,13 @@ class StripeImageLoaderTest {
 
     private val image = LoadedImage(
         bitmap = mock<Bitmap>(),
-        contentType = LoadedImage.ContentType.Png,
+        contentType = LoadedImage.ContentType.Known.Png,
     )
     private val key: String = "https://image-key.com"
     private val keyNoSize: String = "https://image-key-no-size.com"
     private val imageNoSize = LoadedImage(
         bitmap = mock<Bitmap>(),
-        contentType = LoadedImage.ContentType.Png,
+        contentType = LoadedImage.ContentType.Known.Png,
     )
 
     private val imageLoader = StripeImageLoader(

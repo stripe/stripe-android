@@ -17,7 +17,7 @@ class ImageLruMemoryCacheTest {
         cache.put(
             key = URL,
             image = LoadedImage(
-                contentType = LoadedImage.ContentType.Png,
+                contentType = LoadedImage.ContentType.Known.Png,
                 bitmap = BitmapFactory.decodeStream(readImage()),
             ),
         )
@@ -28,7 +28,7 @@ class ImageLruMemoryCacheTest {
 
         val nonNullImage = requireNotNull(image)
 
-        assertThat(nonNullImage.contentType).isEqualTo(LoadedImage.ContentType.Png)
+        assertThat(nonNullImage.contentType).isEqualTo(LoadedImage.ContentType.Known.Png)
     }
 
     private fun readImage() = Unit::class.java.classLoader!!.getResourceAsStream("example.png")

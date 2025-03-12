@@ -60,13 +60,11 @@ class ImageLruDiskCache(
             try {
                 editor = diskLruCache?.edit(hashedKey)
                 if (editor == null) return
-                val compressFormat = image.contentType.toCompressFormat()
                 if (
                     writeImageToFile(
                         image = image,
                         editor = editor,
-                        compressFormat = compressFormat,
-                        compressQuality = compressFormat.quality()
+                        contentType = image.contentType,
                     )
                 ) {
                     diskLruCache?.flush()
@@ -81,20 +79,6 @@ class ImageLruDiskCache(
                 kotlin.runCatching { editor?.abort() }
             }
         }
-    }
-
-    private fun LoadedImage.ContentType.toCompressFormat() = when (this) {
-        LoadedImage.ContentType.Jpeg -> CompressFormat.JPEG
-        LoadedImage.ContentType.Png -> CompressFormat.PNG
-        LoadedImage.ContentType.Webp -> CompressFormat.WEBP
-        else -> throw IllegalArgumentException("Unexpected image type: $value")
-    }
-
-    private fun CompressFormat.quality(): Int = when (this) {
-        CompressFormat.JPEG -> JPEG_COMPRESS_QUALITY
-        CompressFormat.PNG -> PNG_COMPRESS_QUALITY
-        CompressFormat.WEBP -> WEBP_COMPRESS_QUALITY
-        else -> throw IllegalArgumentException("Unexpected compress format: $this")
     }
 
     fun get(key: String): LoadedImage? {
@@ -170,17 +154,33 @@ class ImageLruDiskCache(
     private fun writeImageToFile(
         image: LoadedImage,
         editor: DiskLruCache.Editor,
-        compressFormat: CompressFormat,
-        compressQuality: Int
+        contentType: LoadedImage.ContentType,
     ): Boolean {
         var out: OutputStream? = null
         return try {
             out = BufferedOutputStream(editor.newOutputStream(0), IO_BUFFER_SIZE)
             editor.set(1, image.contentType.value)
-            image.bitmap.compress(compressFormat, compressQuality, out)
+
+            val compressFormat = contentType.toCompressFormat()
+
+            image.bitmap.compress(compressFormat, compressFormat.quality(), out)
         } finally {
             out?.close()
         }
+    }
+
+    private fun LoadedImage.ContentType.toCompressFormat() = when (this) {
+        LoadedImage.ContentType.Known.Jpeg -> CompressFormat.JPEG
+        LoadedImage.ContentType.Known.Png -> CompressFormat.PNG
+        LoadedImage.ContentType.Known.Webp -> CompressFormat.WEBP
+        else -> throw IllegalArgumentException("Unexpected image type: $value")
+    }
+
+    private fun CompressFormat.quality(): Int = when (this) {
+        CompressFormat.JPEG -> JPEG_COMPRESS_QUALITY
+        CompressFormat.PNG -> PNG_COMPRESS_QUALITY
+        CompressFormat.WEBP -> WEBP_COMPRESS_QUALITY
+        else -> throw IllegalArgumentException("Unexpected compress format: $this")
     }
 
     private fun getDiskCacheDir(context: Context, uniqueName: String): File {

@@ -31,13 +31,13 @@ class NetworkImageDecoderTest {
     @Test
     fun `when image is png, content type should be Png`() = testContentType(
         filename = "example.png",
-        expectedContentType = LoadedImage.ContentType.Png,
+        expectedContentType = LoadedImage.ContentType.Known.Png,
     )
 
     @Test
     fun `when image is jpg, content type should be Jpeg`() = testContentType(
         filename = "example.jpg",
-        expectedContentType = LoadedImage.ContentType.Jpeg,
+        expectedContentType = LoadedImage.ContentType.Known.Jpeg,
     )
 
     @Test
