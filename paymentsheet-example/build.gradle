@@ -65,6 +65,12 @@ dependencies {
     implementation libs.retrofitKotlinSerializationConverter
     implementation libs.zxing
 
+
+    // Stripe Terminal library
+//    implementation 'com.stripe:stripeterminal-taptopay:4.2.0'
+//    implementation 'com.stripe:stripeterminal-core:4.2.0'
+
+
     // Needed for createComposeRule, but not createAndroidComposeRule:
     debugImplementation libs.compose.uiTestManifest
     debugImplementation libs.leakCanary
@@ -124,6 +130,19 @@ android {
                 appId = "1:577365562050:android:5b7e92d18f8ca8d1e9a15b"
                 groups = "elements-mobile"
             }
+        }
+    }
+
+    configurations {
+        all*.exclude module: 'bcprov-jdk15to18'
+    }
+    packagingOptions {
+        exclude 'org/bouncycastle/pqc/crypto/picnic/*.properties'
+    }
+
+    packaging {
+        resources {
+            pickFirsts.add("org/bouncycastle/pqc/crypto/picnic/lowmcL3.bin.properties")
         }
     }
 }
