@@ -67,8 +67,8 @@ dependencies {
 
 
     // Stripe Terminal library
-//    implementation 'com.stripe:stripeterminal-taptopay:4.2.0'
-//    implementation 'com.stripe:stripeterminal-core:4.2.0'
+    implementation 'com.stripe:stripeterminal-taptopay:4.2.0'
+    implementation 'com.stripe:stripeterminal-core:4.2.0'
 
 
     // Needed for createComposeRule, but not createAndroidComposeRule:
