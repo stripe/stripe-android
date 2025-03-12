@@ -191,7 +191,7 @@ internal class AccountPreviewScreenshotTest {
 
     private val setAsDefaultPaymentMethodElement = SetAsDefaultPaymentMethodElement(
         initialValue = false,
-        shouldShowElementFlow = saveForFutureUseElement.controller.saveForFutureUse
+        saveForFutureUseCheckedFlow = saveForFutureUseElement.controller.saveForFutureUse
     )
 
     private fun takeAccountPreviewScreenShot(

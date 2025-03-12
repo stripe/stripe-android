@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class SetAsDefaultPaymentMethodController(
     setAsDefaultPaymentMethodInitialValue: Boolean = false,
-    shouldShowElementFlow: StateFlow<Boolean>,
+    saveForFutureUseCheckedFlow: StateFlow<Boolean>,
 ) : InputController {
     override val label: StateFlow<Int> = MutableStateFlow(R.string.stripe_set_as_default_payment_method)
 
@@ -21,10 +21,10 @@ class SetAsDefaultPaymentMethodController(
     val setAsDefaultPaymentMethod: StateFlow<Boolean> = _setAsDefaultPaymentMethod
 
     override val fieldValue: StateFlow<String> = combineAsStateFlow(
-        shouldShowElementFlow,
+        saveForFutureUseCheckedFlow,
         setAsDefaultPaymentMethod
-    ) { shouldShowElementFlow, setAsDefaultPaymentMethod ->
-        (shouldShowElementFlow && setAsDefaultPaymentMethod).toString()
+    ) { saveForFutureUseCheckedFlow, setAsDefaultPaymentMethod ->
+        (saveForFutureUseCheckedFlow && setAsDefaultPaymentMethod).toString()
     }
 
     override val rawFieldValue: StateFlow<String?> = fieldValue

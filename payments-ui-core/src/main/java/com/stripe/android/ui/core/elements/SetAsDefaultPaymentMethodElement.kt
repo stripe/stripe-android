@@ -14,14 +14,18 @@ import kotlinx.coroutines.flow.StateFlow
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class SetAsDefaultPaymentMethodElement(
     val initialValue: Boolean,
-    val shouldShowElementFlow: StateFlow<Boolean>
+    val saveForFutureUseCheckedFlow: StateFlow<Boolean>
 ) : FormElement {
+
+    val shouldShowElementFlow: StateFlow<Boolean> = saveForFutureUseCheckedFlow.mapAsStateFlow {
+        it
+    }
 
     override val identifier: IdentifierSpec = IdentifierSpec.SetAsDefaultPaymentMethod
 
     override val controller: SetAsDefaultPaymentMethodController = SetAsDefaultPaymentMethodController(
         setAsDefaultPaymentMethodInitialValue = initialValue,
-        shouldShowElementFlow = shouldShowElementFlow,
+        saveForFutureUseCheckedFlow = saveForFutureUseCheckedFlow,
     )
     override val allowsUserInteraction: Boolean = true
 

@@ -17,7 +17,7 @@ import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.TextFieldController
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.stripe.android.uicore.utils.stateFlowOf
 import org.junit.Rule
 import org.junit.Test
 
@@ -129,10 +129,9 @@ internal class BillingDetailsCollectionScreenshotTest {
         merchantName = "Test Merchant",
     )
 
-    private val shouldShowElementFlow = MutableStateFlow(false)
     private val setAsDefaultPaymentMethodElement = SetAsDefaultPaymentMethodElement(
         initialValue = false,
-        shouldShowElementFlow = shouldShowElementFlow
+        saveForFutureUseCheckedFlow = stateFlowOf(false)
     )
 
     private fun testBillingDetailsCollectionScreenShot(
