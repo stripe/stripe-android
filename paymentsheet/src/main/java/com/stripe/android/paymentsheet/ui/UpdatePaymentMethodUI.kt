@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.ui
 
+import android.content.Context
 import android.content.res.Resources
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -44,6 +46,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.SavedPaymentMethod
 import com.stripe.android.paymentsheet.utils.testMetadata
+import com.stripe.android.uicore.elements.CheckboxElementUI
 import com.stripe.android.uicore.elements.TextFieldColors
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.strings.resolve
@@ -89,19 +92,18 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
         }
 
         if (!interactor.isExpiredCard) {
-            interactor.displayableSavedPaymentMethod.getDetailsCannotBeChangedText(
-                canUpdateCardBrand = shouldShowCardBrandDropdown && interactor.hasValidBrandChoices,
-            )?.let {
-                Text(
-                    text = it.resolve(context),
-                    style = MaterialTheme.typography.caption,
-                    color = MaterialTheme.stripeColors.subtitle,
-                    fontWeight = FontWeight.Normal,
-                    modifier = Modifier
-                        .padding(top = 12.dp)
-                        .testTag(UPDATE_PM_DETAILS_SUBTITLE_TEST_TAG)
-                )
-            }
+            DetailsCannotBeChangedText(interactor, shouldShowCardBrandDropdown, context)
+        }
+
+        if (interactor.shouldShowSetAsDefaultCheckbox) {
+            SetAsDefaultPaymentMethodCheckbox(
+                isChecked = state.setAsDefaultCheckboxChecked,
+                onCheckChanged = { newCheckedValue ->
+                    interactor.handleViewAction(
+                        UpdatePaymentMethodInteractor.ViewAction.SetAsDefaultCheckboxChanged(newCheckedValue)
+                    )
+                }
+            )
         }
 
         state.error?.let {
@@ -118,14 +120,53 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
 }
 
 @Composable
-private fun UpdatePaymentMethodButtons(interactor: UpdatePaymentMethodInteractor) {
-    if (interactor.isModifiablePaymentMethod) {
+private fun DetailsCannotBeChangedText(
+    interactor: UpdatePaymentMethodInteractor,
+    shouldShowCardBrandDropdown: Boolean,
+    context: Context
+) {
+    interactor.displayableSavedPaymentMethod.getDetailsCannotBeChangedText(
+        canUpdateCardBrand = shouldShowCardBrandDropdown && interactor.hasValidBrandChoices,
+    )?.let {
+        Text(
+            text = it.resolve(context),
+            style = MaterialTheme.typography.caption,
+            color = MaterialTheme.stripeColors.subtitle,
+            fontWeight = FontWeight.Normal,
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .testTag(UPDATE_PM_DETAILS_SUBTITLE_TEST_TAG)
+        )
+    }
+}
+
+@Composable
+private fun SetAsDefaultPaymentMethodCheckbox(
+    isChecked: Boolean,
+    onCheckChanged: (Boolean) -> Unit,
+) {
+    CheckboxElementUI(
+        isChecked = isChecked,
+        onValueChange = onCheckChanged,
+        isEnabled = true,
+        label = (com.stripe.android.ui.core.R.string.stripe_set_as_default_payment_method).resolvableString.resolve(),
+        modifier = Modifier.padding(top = 12.dp).testTag(UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG)
+    )
+}
+
+@Composable
+private fun UpdatePaymentMethodButtons(
+    interactor: UpdatePaymentMethodInteractor,
+) {
+    val shouldShowUpdatePaymentMethodUi = interactor.shouldShowSaveButton
+
+    if (shouldShowUpdatePaymentMethodUi) {
         Spacer(modifier = Modifier.requiredHeight(32.dp))
         UpdatePaymentMethodUi(interactor)
     }
 
     if (interactor.canRemove) {
-        val spacerHeight = if (interactor.isModifiablePaymentMethod) {
+        val spacerHeight = if (shouldShowUpdatePaymentMethodUi) {
             16.dp
         } else {
             32.dp
@@ -285,12 +326,16 @@ private fun UpdatePaymentMethodUi(interactor: UpdatePaymentMethodInteractor) {
     val state by interactor.state.collectAsState()
 
     val isLoading = state.status == UpdatePaymentMethodInteractor.Status.Updating
+    val isEnabled = state.isSaveButtonEnabled
+
     PrimaryButton(
         label = stringResource(id = PaymentSheetR.string.stripe_paymentsheet_save),
         isLoading = isLoading,
-        isEnabled = state.cardBrandHasBeenChanged && state.status == UpdatePaymentMethodInteractor.Status.Idle,
+        isEnabled = state.isSaveButtonEnabled,
         onButtonClick = { interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed) },
-        modifier = Modifier.testTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).testMetadata("isLoading=$isLoading")
+        modifier = Modifier
+            .testTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG)
+            .testMetadata("isLoading=$isLoading")
     )
 }
 
@@ -490,10 +535,13 @@ private fun PreviewUpdatePaymentMethodUI() {
             canRemove = true,
             displayableSavedPaymentMethod = exampleCard,
             removeExecutor = { null },
-            updateExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
+            updateCardBrandExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
+            setDefaultPaymentMethodExecutor = { _ -> Result.success(Unit) },
             cardBrandFilter = DefaultCardBrandFilter,
             onBrandChoiceOptionsShown = {},
             onBrandChoiceOptionsDismissed = {},
+            shouldShowSetAsDefaultCheckbox = true,
+            onUpdateSuccess = {},
         ),
         modifier = Modifier
     )
@@ -527,11 +575,20 @@ private const val YEAR_2100 = 2100
 
 internal const val UPDATE_PM_EXPIRY_FIELD_TEST_TAG = "update_payment_method_expiry_date"
 internal const val UPDATE_PM_CVC_FIELD_TEST_TAG = "update_payment_method_cvc"
-internal const val UPDATE_PM_REMOVE_BUTTON_TEST_TAG = "update_payment_method_remove_button"
-internal const val UPDATE_PM_SAVE_BUTTON_TEST_TAG = "update_payment_method_save_button"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val UPDATE_PM_REMOVE_BUTTON_TEST_TAG = "update_payment_method_remove_button"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val UPDATE_PM_SAVE_BUTTON_TEST_TAG = "update_payment_method_save_button"
 internal const val UPDATE_PM_ERROR_MESSAGE_TEST_TAG = "update_payment_method_error_message"
 internal const val UPDATE_PM_US_BANK_ACCOUNT_TEST_TAG = "update_payment_method_bank_account_ui"
 internal const val UPDATE_PM_SEPA_DEBIT_TEST_TAG = "update_payment_method_sepa_debit_ui"
 internal const val UPDATE_PM_CARD_TEST_TAG = "update_payment_method_card_ui"
 internal const val UPDATE_PM_DETAILS_SUBTITLE_TEST_TAG = "update_payment_method_subtitle"
-internal const val UPDATE_PM_SCREEN_TEST_TAG = "update_payment_method_screen"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val UPDATE_PM_SCREEN_TEST_TAG = "update_payment_method_screen"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG = "update_payment_method_set_as_default_checkbox"

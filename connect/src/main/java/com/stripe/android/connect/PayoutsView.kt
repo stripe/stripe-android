@@ -2,8 +2,8 @@ package com.stripe.android.connect
 
 import android.content.Context
 import android.util.AttributeSet
-import android.widget.FrameLayout
 import androidx.annotation.RestrictTo
+import androidx.core.content.withStyledAttributes
 import com.stripe.android.connect.webview.StripeConnectWebViewContainer
 import com.stripe.android.connect.webview.StripeConnectWebViewContainerImpl
 
@@ -12,8 +12,9 @@ class PayoutsView private constructor(
     context: Context,
     attrs: AttributeSet?,
     defStyleAttr: Int,
+    cacheKey: String?,
     webViewContainerBehavior: StripeConnectWebViewContainerImpl<PayoutsListener, EmptyProps>,
-) : FrameLayout(context, attrs, defStyleAttr),
+) : StripeComponentView<PayoutsListener, EmptyProps>(context, attrs, defStyleAttr),
     StripeConnectWebViewContainer<PayoutsListener, EmptyProps> by webViewContainerBehavior {
 
     @JvmOverloads
@@ -24,21 +25,27 @@ class PayoutsView private constructor(
         defStyleAttr: Int = 0,
         embeddedComponentManager: EmbeddedComponentManager? = null,
         listener: PayoutsListener? = null,
+        cacheKey: String? = null,
     ) : this(
-        context,
-        attrs,
-        defStyleAttr,
-        StripeConnectWebViewContainerImpl(
+        context = context,
+        attrs = attrs,
+        defStyleAttr = defStyleAttr,
+        cacheKey = cacheKey,
+        webViewContainerBehavior = StripeConnectWebViewContainerImpl(
+            context = context,
             embeddedComponent = StripeEmbeddedComponent.PAYOUTS,
             embeddedComponentManager = embeddedComponentManager,
             listener = listener,
-            listenerDelegate = ComponentListenerDelegate.ignore(),
             props = EmptyProps,
         )
     )
 
     init {
-        webViewContainerBehavior.initializeView(this)
+        var xmlCacheKey: String? = null
+        context.withStyledAttributes(attrs, R.styleable.StripeConnectWebViewContainer, defStyleAttr, 0) {
+            xmlCacheKey = getString(R.styleable.StripeConnectWebViewContainer_stripeWebViewCacheKey)
+        }
+        webViewContainerBehavior.initializeView(this, cacheKey ?: xmlCacheKey)
     }
 }
 

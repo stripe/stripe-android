@@ -35,7 +35,9 @@ internal interface EventReporter {
         currency: String?,
         initializationMode: PaymentElementLoader.InitializationMode,
         orderedLpms: List<String>,
-        requireCvcRecollection: Boolean
+        requireCvcRecollection: Boolean,
+        hasDefaultPaymentMethod: Boolean?,
+        setAsDefaultEnabled: Boolean?,
     )
 
     /**
@@ -58,6 +60,8 @@ internal interface EventReporter {
      * methods.
      */
     fun onShowExistingPaymentOptions()
+
+    fun onShowManageSavedPaymentMethods()
 
     /**
      * PaymentSheet is now being displayed and its first screen shows new payment methods.
@@ -173,6 +177,18 @@ internal interface EventReporter {
      */
     fun onUpdatePaymentMethodFailed(
         selectedBrand: CardBrand,
+        error: Throwable,
+    )
+
+    /**
+     * The customer has successfully set a payment method as the default.
+     */
+    fun onSetAsDefaultPaymentMethodSucceeded()
+
+    /**
+     * The customer has failed to set a payment method as the default.
+     */
+    fun onSetAsDefaultPaymentMethodFailed(
         error: Throwable,
     )
 

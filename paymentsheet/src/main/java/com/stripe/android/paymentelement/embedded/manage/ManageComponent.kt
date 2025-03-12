@@ -8,6 +8,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
@@ -63,8 +64,13 @@ internal interface ManageModule {
         fun provideManageNavigator(
             initialManageScreenFactory: InitialManageScreenFactory,
             @ViewModelScope viewModelScope: CoroutineScope,
+            eventReporter: EventReporter,
         ): ManageNavigator {
-            return ManageNavigator(viewModelScope, initialManageScreenFactory.createInitialScreen())
+            return ManageNavigator(
+                coroutineScope = viewModelScope,
+                eventReporter = eventReporter,
+                initialScreen = initialManageScreenFactory.createInitialScreen(),
+            )
         }
 
         @Provides

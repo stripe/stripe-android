@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_camera_permission_settings_message">Bitte gestatten Sie den Kamerazugriff in den Einstellungen, um Ihre Karte zu scannen</string>
+  <string name="stripe_card_scan_instructions">Karte scannen</string>
+  <string name="stripe_card_scan_title">Platzieren Sie Ihre Karte zum Scannen im Rechteck</string>
+  <string name="stripe_close_button_description">Schließen</string>
+  <string name="stripe_swap_camera_button_description">Kamera wechseln</string>
+  <!-- Label for the button that toggles the camera's torch -->
+  <string name="stripe_torch_button_description">Taschenlampe</string>
+</resources>

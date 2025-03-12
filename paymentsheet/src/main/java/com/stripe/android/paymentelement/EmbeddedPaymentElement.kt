@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement
 
+import android.app.Activity
 import android.graphics.drawable.Drawable
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
@@ -12,7 +13,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
-import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.model.CardBrand
@@ -29,6 +29,7 @@ import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import com.stripe.android.uicore.utils.collectAsState
 import dev.drewhamilton.poko.Poko
@@ -323,7 +324,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
              * **Note**: This is only a client-side solution.
              * **Note**: Card brand filtering is not currently supported in Link.
              */
-            @ExperimentalCardBrandFilteringApi
             fun cardBrandAcceptance(
                 cardBrandAcceptance: PaymentSheet.CardBrandAcceptance
             ) = apply {
@@ -484,16 +484,23 @@ class EmbeddedPaymentElement @Inject internal constructor(
     internal companion object {
         @ExperimentalEmbeddedPaymentElementApi
         fun create(
-            statusBarColor: Int?,
+            activity: Activity,
             activityResultCaller: ActivityResultCaller,
             viewModelStoreOwner: ViewModelStoreOwner,
             lifecycleOwner: LifecycleOwner,
+            paymentElementCallbackIdentifier: String,
             resultCallback: ResultCallback,
         ): EmbeddedPaymentElement {
             val viewModel = ViewModelProvider(
                 owner = viewModelStoreOwner,
-                factory = EmbeddedPaymentElementViewModel.Factory(statusBarColor)
-            )[EmbeddedPaymentElementViewModel::class.java]
+                factory = EmbeddedPaymentElementViewModel.Factory(
+                    paymentElementCallbackIdentifier,
+                    activity.window?.statusBarColor,
+                )
+            ).get(
+                key = "EmbeddedPaymentElementViewModel(instance = $paymentElementCallbackIdentifier)",
+                modelClass = EmbeddedPaymentElementViewModel::class.java,
+            )
 
             val embeddedPaymentElementSubcomponent = viewModel.embeddedPaymentElementSubcomponentBuilder
                 .resultCallback(resultCallback)
@@ -501,7 +508,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 .lifecycleOwner(lifecycleOwner)
                 .build()
 
-            embeddedPaymentElementSubcomponent.initializer.initialize()
+            embeddedPaymentElementSubcomponent.initializer.initialize(activity.applicationIsTaskOwner())
 
             return embeddedPaymentElementSubcomponent.embeddedPaymentElement
         }

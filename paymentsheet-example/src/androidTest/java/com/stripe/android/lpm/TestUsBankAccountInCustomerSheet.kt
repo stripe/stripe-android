@@ -1,5 +1,6 @@
 package com.stripe.android.lpm
 
+import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
@@ -8,6 +9,8 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomerSheet
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodMode
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.TestParameters
+import com.stripe.android.utils.ForceNativeBankFlowTestRule
+import org.junit.Rule
 import org.junit.Test
 
 internal class TestUsBankAccountInCustomerSheet : BasePlaygroundTest() {
@@ -19,6 +22,11 @@ internal class TestUsBankAccountInCustomerSheet : BasePlaygroundTest() {
         settings[CountrySettingsDefinition] = Country.US
         settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.SetupIntent
     }
+
+    @get:Rule
+    val forceNativeBankFlowTestRule = ForceNativeBankFlowTestRule(
+        context = ApplicationProvider.getApplicationContext()
+    )
 
     @Test
     fun testUSBankAccount() {

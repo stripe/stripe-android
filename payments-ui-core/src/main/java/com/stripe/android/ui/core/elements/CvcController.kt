@@ -5,14 +5,16 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.LayoutDirection
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
-import com.stripe.android.ui.core.asIndividualDigits
 import com.stripe.android.uicore.elements.FieldError
-import com.stripe.android.uicore.elements.SectionFieldErrorController
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.elements.TextFieldState
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.uicore.utils.asIndividualDigits
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -27,7 +29,7 @@ class CvcController constructor(
     cardBrandFlow: StateFlow<CardBrand>,
     override val initialValue: String? = null,
     override val showOptionalLabel: Boolean = false
-) : TextFieldController, SectionFieldErrorController {
+) : TextFieldController {
     override val capitalization: KeyboardCapitalization = cvcTextFieldConfig.capitalization
     override val keyboardType: KeyboardType = cvcTextFieldConfig.keyboard
 
@@ -41,6 +43,8 @@ class CvcController constructor(
     override val label: StateFlow<Int> = _label
 
     override val debugLabel = cvcTextFieldConfig.debugLabel
+
+    override val layoutDirection: LayoutDirection = LayoutDirection.Ltr
 
     @OptIn(ExperimentalComposeUiApi::class)
     override val autofillType: AutofillType = AutofillType.CreditCardSecurityCode
@@ -56,7 +60,9 @@ class CvcController constructor(
         _fieldValue.mapAsStateFlow { cvcTextFieldConfig.convertToRaw(it) }
 
     // This makes the screen reader read out numbers digit by digit
-    override val contentDescription: StateFlow<String> = _fieldValue.mapAsStateFlow { it.asIndividualDigits() }
+    override val contentDescription: StateFlow<ResolvableString> = _fieldValue.mapAsStateFlow {
+        it.asIndividualDigits().resolvableString
+    }
 
     private val _fieldState = combineAsStateFlow(cardBrandFlow, _fieldValue) { brand, fieldValue ->
         cvcTextFieldConfig.determineState(brand, fieldValue, brand.maxCvcLength)

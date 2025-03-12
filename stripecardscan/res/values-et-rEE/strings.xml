@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_camera_permission_settings_message">Kaardi skannimiseks lubage sätetes juurdepääs kaamerale</string>
+  <string name="stripe_card_scan_instructions">Skannige oma kaart</string>
+  <string name="stripe_card_scan_title">Skannimiseks paigutage oma kaart ristkülikusse</string>
+  <string name="stripe_close_button_description">Sulge</string>
+  <string name="stripe_swap_camera_button_description">Kaameravahetus</string>
+  <!-- Label for the button that toggles the camera's torch -->
+  <string name="stripe_torch_button_description">Valgusti</string>
+</resources>

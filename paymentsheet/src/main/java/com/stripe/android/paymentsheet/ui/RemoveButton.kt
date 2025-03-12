@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,7 +33,8 @@ import com.stripe.android.uicore.getBorderStrokeWidth
 import com.stripe.android.uicore.getComposeTextStyle
 import com.stripe.android.uicore.stripeShapes
 
-internal const val REMOVE_BUTTON_LOADING = "REMOVE_BUTTON_LOADING"
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val REMOVE_BUTTON_LOADING = "REMOVE_BUTTON_LOADING"
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable

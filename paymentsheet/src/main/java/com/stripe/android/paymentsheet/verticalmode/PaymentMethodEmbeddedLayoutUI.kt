@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.annotation.RestrictTo
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -19,7 +20,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
-import com.stripe.android.paymentsheet.ui.Mandate
+import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
@@ -149,7 +150,7 @@ internal fun PaymentMethodEmbeddedLayoutUI(
 @Composable
 private fun OptionalEmbeddedDivider(rowStyle: Embedded.RowStyle) {
     if (rowStyle.hasSeparators()) {
-        val color = Color(rowStyle.separatorColor())
+        val color = Color(rowStyle.separatorColor(isSystemInDarkTheme()))
         val thickness = rowStyle.separatorThickness()
         Divider(
             color = color,
@@ -206,11 +207,11 @@ private fun Embedded.RowStyle.separatorThickness(): Dp {
 }
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-private fun Embedded.RowStyle.separatorColor(): Int {
+private fun Embedded.RowStyle.separatorColor(isDarkMode: Boolean): Int {
     return when (this) {
         is Embedded.RowStyle.FloatingButton -> 0
-        is Embedded.RowStyle.FlatWithRadio -> separatorColor
-        is Embedded.RowStyle.FlatWithCheckmark -> separatorColor
+        is Embedded.RowStyle.FlatWithRadio -> getColors(isDarkMode).separatorColor
+        is Embedded.RowStyle.FlatWithCheckmark -> getColors(isDarkMode).separatorColor
     }
 }
 

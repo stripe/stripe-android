@@ -71,12 +71,17 @@ internal class ManageActivity : AppCompatActivity() {
         viewModel.component.inject(this)
 
         onBackPressedDispatcher.addCallback {
-            manageNavigator.performAction(ManageNavigator.Action.Back)
+            if (!manageNavigator.screen.value.isPerformingNetworkOperation()) {
+                manageNavigator.performAction(ManageNavigator.Action.Back)
+            }
         }
 
         setContent {
             StripeTheme {
-                val bottomSheetState = rememberStripeBottomSheetState()
+                val screen by manageNavigator.screen.collectAsState()
+                val bottomSheetState = rememberStripeBottomSheetState(
+                    confirmValueChange = { !screen.isPerformingNetworkOperation() }
+                )
                 ElementsBottomSheetLayout(
                     state = bottomSheetState,
                     onDismissed = {
@@ -84,14 +89,17 @@ internal class ManageActivity : AppCompatActivity() {
                         finish()
                     }
                 ) {
-                    val screen by manageNavigator.screen.collectAsState()
-                    Box(modifier = Modifier.padding(bottom = 20.dp)) {
-                        ScreenContent(manageNavigator, screen)
-                    }
-                    LaunchedEffect(screen) {
-                        manageNavigator.result.collect { result ->
-                            setManageResult()
-                            finish()
+                    var hasResult by remember { mutableStateOf(false) }
+                    if (!hasResult) {
+                        Box(modifier = Modifier.padding(bottom = 20.dp)) {
+                            ScreenContent(manageNavigator, screen)
+                        }
+                        LaunchedEffect(screen) {
+                            manageNavigator.result.collect { result ->
+                                setManageResult()
+                                finish()
+                                hasResult = true
+                            }
                         }
                     }
                 }

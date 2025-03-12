@@ -15,6 +15,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat.checkSelfPermission
+import androidx.fragment.app.FragmentActivity
 import com.stripe.android.connect.analytics.ComponentAnalyticsService
 import com.stripe.android.connect.analytics.ConnectAnalyticsService
 import com.stripe.android.connect.analytics.DefaultConnectAnalyticsService
@@ -48,56 +49,86 @@ class EmbeddedComponentManager(
     private val _appearanceFlow = MutableStateFlow(appearance)
     internal val appearanceFlow: StateFlow<Appearance> get() = _appearanceFlow.asStateFlow()
 
-    private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
-    private val isDebugBuild: Boolean = BuildConfig.DEBUG
+    private val logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
     private val loggerTag = javaClass.simpleName
+
+    private val isDebugBuild = BuildConfig.DEBUG
 
     // Public functions
 
     /**
-     * Create a new [AccountOnboardingView] for inclusion in the view hierarchy.
+     * Returns a controller for presenting the Account Onboarding component full screen.
+     *
+     * @param activity The [FragmentActivity] to present the component in.
+     * @param title Optional title to display in the toolbar.
+     * @param props Optional props to use for configuring the component.
      */
     @PrivateBetaConnectSDK
-    fun createAccountOnboardingView(
-        context: Context,
-        listener: AccountOnboardingListener? = null,
+    fun createAccountOnboardingController(
+        activity: FragmentActivity,
+        title: String? = null,
         props: AccountOnboardingProps? = null,
-    ): AccountOnboardingView {
-        val activity = checkNotNull(context.findActivity()) {
-            "You must create an AccountOnboardingView from an Activity"
-        }
-        checkNotNull(requestPermissionLaunchers[activity]) {
-            "You must call EmbeddedComponentManager.onActivityCreate in your Activity.onCreate function"
-        }
-
-        return AccountOnboardingView(
-            context = context,
+    ): AccountOnboardingController {
+        return AccountOnboardingController(
+            activity = activity,
             embeddedComponentManager = this,
-            listener = listener,
+            title = title,
             props = props,
         )
     }
 
     /**
-     * Create a new [PayoutsView] for inclusion in the view hierarchy.
+     * Create a new [AccountOnboardingView] for inclusion in the view hierarchy.
+     *
+     * @param context The [Context] to use for creating the view.
+     * @param listener Optional listener to use for handling events from the view.
+     * @param props Optional props to use for configuring the view.
+     * @param cacheKey Key to use for caching the internal WebView across configuration changes.
      */
     @PrivateBetaConnectSDK
-    fun createPayoutsView(
+    internal fun createAccountOnboardingView(
+        context: Context,
+        listener: AccountOnboardingListener? = null,
+        props: AccountOnboardingProps? = null,
+        cacheKey: String? = null,
+    ): AccountOnboardingView {
+        checkContextDuringCreate(context)
+        return AccountOnboardingView(
+            context = context,
+            embeddedComponentManager = this,
+            listener = listener,
+            props = props,
+            cacheKey = cacheKey,
+        )
+    }
+
+    /**
+     * Create a new [PayoutsView] for inclusion in the view hierarchy.
+     *
+     * @param context The [Context] to use for creating the view.
+     * @param listener Optional [PayoutsListener] to use for handling events from the view.
+     * @param cacheKey Key to use for caching the internal WebView within an Activity across configuration changes.
+     */
+    @PrivateBetaConnectSDK
+    internal fun createPayoutsView(
         context: Context,
         listener: PayoutsListener? = null,
+        cacheKey: String? = null,
     ): PayoutsView {
-        val activity = checkNotNull(context.findActivity()) {
-            "You must create a PayoutsView from an Activity"
-        }
-        checkNotNull(requestPermissionLaunchers[activity]) {
-            "You must call EmbeddedComponentManager.onActivityCreate in your Activity.onCreate function"
-        }
-
+        checkContextDuringCreate(context)
         return PayoutsView(
             context = context,
             embeddedComponentManager = this,
             listener = listener,
+            cacheKey = cacheKey,
         )
+    }
+
+    private fun checkContextDuringCreate(context: Context) {
+        val activity = context.findActivityWithErrorHandling()
+        checkNotNull(requestPermissionLaunchers[activity]) {
+            "You must call EmbeddedComponentManager.onActivityCreate in your Activity.onCreate function"
+        }
     }
 
     @PrivateBetaConnectSDK
@@ -109,8 +140,6 @@ class EmbeddedComponentManager(
     fun logout() {
         throw NotImplementedError("Logout functionality is not yet implemented")
     }
-
-    // Internal functions (not for public consumption)
 
     internal fun getInitialParams(context: Context): ConnectInstanceJs {
         return ConnectInstanceJs(
@@ -151,22 +180,21 @@ class EmbeddedComponentManager(
      * This function may result in a permissions pop-up being shown to the user (although this may not always
      * happen, such as when the permission has already granted).
      */
-    internal suspend fun requestCameraPermission(context: Context): Boolean? {
-        if (checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+    internal suspend fun requestCameraPermission(activity: Activity): Boolean? {
+        if (checkSelfPermission(activity, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             logger.debug("($loggerTag) Skipping permission request - CAMERA permission already granted")
             return true
         }
 
-        val (_, launcher) =
-            getLauncher(context, requestPermissionLaunchers, "Error launching camera permission request")
-                ?: return null
+        val launcher = getLauncher(activity, requestPermissionLaunchers, "Error launching camera permission request")
+            ?: return null
         launcher.launch(Manifest.permission.CAMERA)
 
         return permissionsFlow.first()
     }
 
-    internal suspend fun chooseFile(context: Context, requestIntent: Intent): Array<Uri>? {
-        val (activity, launcher) = getLauncher(context, chooseFileLaunchers, "Error choosing file")
+    internal suspend fun chooseFile(activity: Activity, requestIntent: Intent): Array<Uri>? {
+        val launcher = getLauncher(activity, chooseFileLaunchers, "Error choosing file")
             ?: return null
         launcher.launch(requestIntent)
 
@@ -176,12 +204,10 @@ class EmbeddedComponentManager(
     }
 
     internal suspend fun presentFinancialConnections(
-        context: Context,
+        activity: Activity,
         clientSecret: String,
         connectedAccountId: String,
     ): FinancialConnectionsSheetResult? {
-        val activity = context.findActivityWithErrorHandling()
-            ?: return null
         val sheet = financialConnectionsSheets[activity]
         if (sheet == null) {
             logger.warning(
@@ -209,12 +235,10 @@ class EmbeddedComponentManager(
     }
 
     private fun <I> getLauncher(
-        context: Context,
+        activity: Activity,
         launchers: Map<Activity, ActivityResultLauncher<I>>,
         errorMessage: String,
-    ): Pair<Activity, ActivityResultLauncher<I>>? {
-        val activity = context.findActivityWithErrorHandling()
-            ?: return null
+    ): ActivityResultLauncher<I>? {
         val launcher = launchers[activity]
         if (launcher == null) {
             logger.warning(
@@ -223,7 +247,7 @@ class EmbeddedComponentManager(
             )
             return null
         }
-        return activity to launcher
+        return launcher
     }
 
     private fun Context.findActivityWithErrorHandling(): Activity? {

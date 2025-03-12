@@ -19,7 +19,7 @@ internal interface EmbeddedConfirmationHelper {
 @ExperimentalEmbeddedPaymentElementApi
 @EmbeddedPaymentElementScope
 internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
-    private val confirmationHandler: ConfirmationHandler,
+    private val confirmationStarter: EmbeddedConfirmationStarter,
     private val resultCallback: EmbeddedPaymentElement.ResultCallback,
     private val activityResultCaller: ActivityResultCaller,
     private val lifecycleOwner: LifecycleOwner,
@@ -27,22 +27,18 @@ internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
     private val selectionHolder: EmbeddedSelectionHolder,
 ) : EmbeddedConfirmationHelper {
     init {
-        confirmationHandler.register(
+        confirmationStarter.register(
             activityResultCaller = activityResultCaller,
             lifecycleOwner = lifecycleOwner
         )
 
         lifecycleOwner.lifecycleScope.launch {
-            confirmationHandler.state.collect { state ->
-                when (state) {
-                    is ConfirmationHandler.State.Complete -> {
-                        resultCallback.onResult(state.result.asEmbeddedResult())
-                        if (state.result is ConfirmationHandler.Result.Succeeded) {
-                            confirmationStateHolder.state = null
-                            selectionHolder.set(null)
-                        }
-                    }
-                    is ConfirmationHandler.State.Confirming, ConfirmationHandler.State.Idle -> Unit
+            confirmationStarter.result.collect { result ->
+                resultCallback.onResult(result.asEmbeddedResult())
+
+                if (result is ConfirmationHandler.Result.Succeeded) {
+                    confirmationStateHolder.state = null
+                    selectionHolder.set(null)
                 }
             }
         }
@@ -50,7 +46,7 @@ internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
 
     override fun confirm() {
         confirmationArgs()?.let { confirmationArgs ->
-            confirmationHandler.start(confirmationArgs)
+            confirmationStarter.start(confirmationArgs)
         } ?: run {
             resultCallback.onResult(
                 EmbeddedPaymentElement.Result.Failed(IllegalStateException("Not in a state that's confirmable."))

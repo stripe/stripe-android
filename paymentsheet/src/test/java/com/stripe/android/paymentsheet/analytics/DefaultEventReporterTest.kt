@@ -124,6 +124,39 @@ class DefaultEventReporterTest {
     }
 
     @Test
+    fun `on completed loading operation, should fire analytics with hasDefaultPaymentMethod value`() {
+        val eventReporter = createEventReporter(EventReporter.Mode.Complete)
+
+        eventReporter.simulateSuccessfulSetup(
+            setAsDefaultEnabled = true,
+            hasDefaultPaymentMethod = true
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["set_as_default_enabled"] == true &&
+                    req.params["has_default_payment_method"] == true
+            }
+        )
+    }
+
+    @Test
+    fun `on completed loading operation, should fire analytics with setAsDefaultEnabled value`() {
+        val eventReporter = createEventReporter(EventReporter.Mode.Complete)
+
+        eventReporter.simulateSuccessfulSetup(
+            setAsDefaultEnabled = true
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["set_as_default_enabled"] == true &&
+                    req.params["has_default_payment_method"] == null
+            }
+        )
+    }
+
+    @Test
     fun `onShowExistingPaymentOptions() should fire analytics request with expected event value`() {
         val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
             simulateSuccessfulSetup()
@@ -500,6 +533,39 @@ class DefaultEventReporterTest {
     }
 
     @Test
+    fun `onSetAsDefaultPaymentMethodSucceeded() should fire analytics request with expected event value`() {
+        val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
+            simulateSuccessfulSetup()
+        }
+
+        customEventReporter.onSetAsDefaultPaymentMethodSucceeded()
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_set_default_payment_method"
+            }
+        )
+    }
+
+    @Test
+    fun `onSetAsDefaultPaymentMethodFailed() should fire analytics request with expected event value`() {
+        val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
+            simulateSuccessfulSetup()
+        }
+
+        customEventReporter.onSetAsDefaultPaymentMethodFailed(
+            error = Exception("No network available!")
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_set_default_payment_method_failed" &&
+                    req.params["error_message"] == "No network available!"
+            }
+        )
+    }
+
+    @Test
     fun `onPressConfirmButton() should fire analytics request with expected event value`() {
         val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
             simulateSuccessfulSetup()
@@ -818,7 +884,9 @@ class DefaultEventReporterTest {
             PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "cs_example"
             ),
-        requireCvcRecollection: Boolean = false
+        requireCvcRecollection: Boolean = false,
+        hasDefaultPaymentMethod: Boolean? = null,
+        setAsDefaultEnabled: Boolean? = null,
     ) {
         onInit(configuration, isDeferred = false)
         onLoadStarted(initializedViaCompose = false)
@@ -829,7 +897,9 @@ class DefaultEventReporterTest {
             currency = currency,
             initializationMode = initializationMode,
             orderedLpms = listOf("card", "klarna"),
-            requireCvcRecollection = requireCvcRecollection
+            requireCvcRecollection = requireCvcRecollection,
+            hasDefaultPaymentMethod = hasDefaultPaymentMethod,
+            setAsDefaultEnabled = setAsDefaultEnabled,
         )
     }
 

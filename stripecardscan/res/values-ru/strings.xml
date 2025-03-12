@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_camera_permission_settings_message">Чтобы сканировать карту, войдите в \"Настройки\" и разрешите доступ к камере</string>
+  <string name="stripe_card_scan_instructions">Сканируйте свою карту</string>
+  <string name="stripe_card_scan_title">Для сканирования поместите карту в центр прямоугольника</string>
+  <string name="stripe_close_button_description">Закрыть</string>
+  <string name="stripe_swap_camera_button_description">Сменить камеру</string>
+  <!-- Label for the button that toggles the camera's torch -->
+  <string name="stripe_torch_button_description">Фонарик</string>
+</resources>

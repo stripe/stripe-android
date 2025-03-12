@@ -6,12 +6,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
-import com.stripe.android.common.ui.UpdateExternalPaymentMethodConfirmHandler
-import com.stripe.android.common.ui.UpdateIntentConfirmationInterceptor
+import com.stripe.android.common.ui.UpdateCallbacks
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.utils.rememberActivity
+import java.util.UUID
 
 /**
  * Creates an [EmbeddedPaymentElement] that is remembered across compositions.
@@ -28,8 +30,18 @@ fun rememberEmbeddedPaymentElement(
         "EmbeddedPaymentElement must have a ViewModelStoreOwner."
     }
 
-    UpdateExternalPaymentMethodConfirmHandler(builder.externalPaymentMethodConfirmHandler)
-    UpdateIntentConfirmationInterceptor(builder.createIntentCallback)
+    val paymentElementCallbackIdentifier = rememberSaveable {
+        UUID.randomUUID().toString()
+    }
+
+    val callbacks = remember(builder) {
+        PaymentElementCallbacks(
+            createIntentCallback = builder.createIntentCallback,
+            externalPaymentMethodConfirmHandler = builder.externalPaymentMethodConfirmHandler,
+        )
+    }
+
+    UpdateCallbacks(paymentElementCallbackIdentifier, callbacks)
 
     val lifecycleOwner = LocalLifecycleOwner.current
     val activityResultRegistryOwner = requireNotNull(LocalActivityResultRegistryOwner.current) {
@@ -44,11 +56,12 @@ fun rememberEmbeddedPaymentElement(
 
     return remember {
         EmbeddedPaymentElement.create(
-            statusBarColor = activity.window?.statusBarColor,
+            activity = activity,
             activityResultCaller = PaymentElementActivityResultCaller(
-                key = "Embedded",
+                key = "EmbeddedPaymentElement(instance = $paymentElementCallbackIdentifier)",
                 registryOwner = activityResultRegistryOwner,
             ),
+            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             lifecycleOwner = lifecycleOwner,
             viewModelStoreOwner = viewModelStoreOwner,
             resultCallback = onResult,

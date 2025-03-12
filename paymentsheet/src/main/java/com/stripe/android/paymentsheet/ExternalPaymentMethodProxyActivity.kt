@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 
 /**
  * Handles external payment methods.
@@ -23,21 +24,24 @@ internal class ExternalPaymentMethodProxyActivity : AppCompatActivity() {
         savedInstanceState?.getBoolean(HAS_CONFIRM_STARTED_KEY)?.let { hasConfirmStarted = it }
 
         val type = intent.getStringExtra(EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE)
+        val paymentElementCallbackIdentifier = intent.getStringExtra(EXTRA_PAYMENT_ELEMENT_IDENTIFIER)
 
         @Suppress("DEPRECATION")
         val billingDetails = intent.getParcelableExtra<PaymentMethod.BillingDetails>(EXTRA_BILLING_DETAILS)
 
-        if (type != null && !hasConfirmStarted) {
+        if (type != null && !hasConfirmStarted && paymentElementCallbackIdentifier != null) {
             hasConfirmStarted = true
-            ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler?.confirmExternalPaymentMethod(
-                type,
-                billingDetails ?: PaymentMethod.BillingDetails()
-            )
+            PaymentElementCallbackReferences[paymentElementCallbackIdentifier]
+                ?.externalPaymentMethodConfirmHandler
+                ?.confirmExternalPaymentMethod(
+                    externalPaymentMethodType = type,
+                    billingDetails = billingDetails ?: PaymentMethod.BillingDetails(),
+                )
         }
     }
 
     @SuppressLint("MissingSuperCall")
-    override fun onNewIntent(intent: Intent?) {
+    override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
     }
@@ -79,6 +83,7 @@ internal class ExternalPaymentMethodProxyActivity : AppCompatActivity() {
     }
 
     internal companion object {
+        const val EXTRA_PAYMENT_ELEMENT_IDENTIFIER = "payment_element_identifier"
         const val EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE = "external_payment_method_type"
         const val EXTRA_BILLING_DETAILS = "external_payment_method_billing_details"
 

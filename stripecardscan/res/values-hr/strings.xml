@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_camera_permission_settings_message">Omogućite pristup kameri u postavkama kako biste mogli skenirati svoju karticu</string>
+  <string name="stripe_card_scan_instructions">Skenirajte svoju karticu</string>
+  <string name="stripe_card_scan_title">Postavite svoju karticu u pravokutnik za skeniranje</string>
+  <string name="stripe_close_button_description">Zatvori</string>
+  <string name="stripe_swap_camera_button_description">Zamijeni kameru</string>
+  <!-- Label for the button that toggles the camera's torch -->
+  <string name="stripe_torch_button_description">Svjetiljka</string>
+</resources>

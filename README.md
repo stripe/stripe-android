@@ -66,7 +66,7 @@ Add `stripe-android` to your `build.gradle` dependencies.
 
 ```
 dependencies {
-    implementation 'com.stripe:stripe-android:21.4.2'
+    implementation 'com.stripe:stripe-android:21.6.0'
 }
 ```
 

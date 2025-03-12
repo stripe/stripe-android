@@ -29,8 +29,8 @@ internal object EmbeddedAppearanceSettingsDefinition :
     }
 
     @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-    override fun valueUpdated(value: EmbeddedAppearance, playgroundSettings: PlaygroundSettings) {
-        super.valueUpdated(value, playgroundSettings)
+    override fun setValue(value: EmbeddedAppearance) {
+        super.setValue(value)
         AppearanceStore.state = AppearanceStore.state.copy(
             embeddedAppearance = PaymentSheet.Appearance.Embedded(value.getRow())
         )
@@ -53,11 +53,11 @@ internal data class EmbeddedAppearance(
     val endSeparatorInset: Float = 0.0f,
     val additionalVerticalInsetsDp: Float = 4.0f,
     val horizontalInsetsDp: Float = 0.0f,
-    val checkmarkInsetsDp: Float = 12.0f,
+    val checkmarkInsetsDp: Float = 0.0f,
     val floatingButtonSpacingDp: Float = 12.0f,
     val topSeparatorEnabled: Boolean = true,
     val bottomSeparatorEnabled: Boolean = true,
-    val separatorColor: Int = Color(0xFF787880).toArgb(),
+    val separatorColor: Int = Color(0x33787880).toArgb(),
     val selectedColor: Int = Color(0xFF007AFF).toArgb(),
     val unselectedColor: Int = Color(0x33787880).toArgb(),
     val checkmarkColor: Int = Color(0xFF007AFF).toArgb()
@@ -66,27 +66,40 @@ internal data class EmbeddedAppearance(
         return when (embeddedRowStyle) {
             EmbeddedRow.FlatWithRadio -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio(
                 separatorThicknessDp = separatorThicknessDp,
-                separatorColor = separatorColor,
                 startSeparatorInsetDp = startSeparatorInset,
                 endSeparatorInsetDp = endSeparatorInset,
                 topSeparatorEnabled = topSeparatorEnabled,
                 bottomSeparatorEnabled = bottomSeparatorEnabled,
-                selectedColor = selectedColor,
-                unselectedColor = unselectedColor,
                 additionalVerticalInsetsDp = additionalVerticalInsetsDp,
-                horizontalInsetsDp = horizontalInsetsDp
+                horizontalInsetsDp = horizontalInsetsDp,
+                colorsLight = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio.Colors(
+                    separatorColor = separatorColor,
+                    selectedColor = selectedColor,
+                    unselectedColor = unselectedColor
+                ),
+                colorsDark = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio.Colors(
+                    separatorColor = Color(0x40FFFFFF).toArgb(),
+                    selectedColor = Color(0xFF0074D4).toArgb(),
+                    unselectedColor = Color(0x40FFFFFF).toArgb(),
+                )
             )
             EmbeddedRow.FlatWithCheckmark -> PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark(
                 separatorThicknessDp = separatorThicknessDp,
-                separatorColor = separatorColor,
                 startSeparatorInsetDp = startSeparatorInset,
                 endSeparatorInsetDp = endSeparatorInset,
                 topSeparatorEnabled = topSeparatorEnabled,
                 bottomSeparatorEnabled = bottomSeparatorEnabled,
-                checkmarkColor = checkmarkColor,
                 checkmarkInsetDp = checkmarkInsetsDp,
                 additionalVerticalInsetsDp = additionalVerticalInsetsDp,
-                horizontalInsetsDp = horizontalInsetsDp
+                horizontalInsetsDp = horizontalInsetsDp,
+                colorsLight = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.Colors(
+                    separatorColor = separatorColor,
+                    checkmarkColor = checkmarkColor
+                ),
+                colorsDark = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.Colors(
+                    separatorColor = Color(0x40FFFFFF).toArgb(),
+                    checkmarkColor = Color(0xFF0074D4).toArgb()
+                )
             )
             EmbeddedRow.FloatingButton -> PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton(
                 spacingDp = floatingButtonSpacingDp,

@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -19,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -32,9 +31,15 @@ import org.jetbrains.annotations.VisibleForTesting
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT = "TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT"
-internal const val TEST_TAG_VIEW_MORE = "TEST_TAG_VIEW_MORE"
-internal const val TEST_TAG_EDIT_SAVED_CARD = "TEST_TAG_VERTICAL_MODE_SAVED_PM_EDIT"
-internal const val TEST_TAG_SAVED_TEXT = "TEST_TAG_SAVED_TEXT"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val TEST_TAG_VIEW_MORE = "TEST_TAG_VIEW_MORE"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val TEST_TAG_EDIT_SAVED_CARD = "TEST_TAG_VERTICAL_MODE_SAVED_PM_EDIT"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val TEST_TAG_SAVED_TEXT = "TEST_TAG_SAVED_TEXT"
 
 @Composable
 internal fun PaymentMethodVerticalLayoutUI(
@@ -164,7 +169,7 @@ private fun EditButton(onClick: () -> Unit) {
         modifier = Modifier
             .testTag(TEST_TAG_EDIT_SAVED_CARD)
             .clickable(onClick = onClick)
-            .padding(4.dp)
+            .padding(vertical = 4.dp)
             .fillMaxHeight()
     )
 }
@@ -178,7 +183,7 @@ private fun ViewMoreButton(
         modifier = Modifier
             .testTag(TEST_TAG_VIEW_MORE)
             .clickable(onClick = onViewMorePaymentMethods)
-            .padding(4.dp)
+            .padding(vertical = 4.dp)
             .fillMaxHeight()
     ) {
         Text(
@@ -188,9 +193,10 @@ private fun ViewMoreButton(
             fontWeight = FontWeight.Medium,
         )
         Icon(
-            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            painter = painterResource(R.drawable.stripe_ic_chevron_right),
             contentDescription = null,
             tint = MaterialTheme.colors.primary,
+            modifier = Modifier.padding(start = 4.dp, top = 2.dp)
         )
     }
 }

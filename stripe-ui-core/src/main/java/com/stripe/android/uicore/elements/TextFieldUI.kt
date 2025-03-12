@@ -47,16 +47,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.editableText
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.Logger
 import com.stripe.android.uicore.BuildConfig
@@ -134,6 +140,8 @@ fun TextField(
     nextFocusDirection: FocusDirection = FocusDirection.Next,
     previousFocusDirection: FocusDirection = FocusDirection.Previous,
     focusRequester: FocusRequester = remember { FocusRequester() },
+    shouldAnnounceLabel: Boolean = true,
+    shouldAnnounceFieldValue: Boolean = true
 ) {
     val focusManager = LocalFocusManager.current
     val value by textFieldController.fieldValue.collectAsState()
@@ -148,6 +156,16 @@ fun TextField(
 
     val fieldState by textFieldController.fieldState.collectAsState()
     val label by textFieldController.label.collectAsState()
+
+    val error by textFieldController.error.collectAsState()
+    val sectionErrorString = error?.let {
+        it.formatArgs?.let { args ->
+            stringResource(
+                it.errorMessage,
+                *args
+            )
+        } ?: stringResource(it.errorMessage)
+    }
 
     LaunchedEffect(fieldState) {
         // When field is in focus and full, move to next field so the user can keep typing
@@ -165,6 +183,8 @@ fun TextField(
     var composition by remember {
         mutableStateOf<TextRange?>(null)
     }
+
+    val context = LocalContext.current
 
     TextFieldUi(
         value = TextFieldValue(
@@ -207,17 +227,21 @@ fun TextField(
             )
             .focusRequester(focusRequester)
             .semantics {
-                this.contentDescription = contentDescription
+                this.contentDescription = contentDescription.resolve(context)
+                if (!shouldAnnounceFieldValue) this.editableText = AnnotatedString("")
             },
         enabled = enabled && textFieldController.enabled,
         label = label?.let {
             stringResource(it)
         },
         showOptionalLabel = textFieldController.showOptionalLabel,
+        shouldAnnounceLabel = shouldAnnounceLabel,
         placeholder = placeHolder,
         trailingIcon = trailingIcon,
         shouldShowError = shouldShowError,
+        errorMessage = sectionErrorString,
         visualTransformation = visualTransformation,
+        layoutDirection = textFieldController.layoutDirection,
         keyboardOptions = KeyboardOptions(
             keyboardType = textFieldController.keyboardType,
             capitalization = textFieldController.capitalization,
@@ -230,7 +254,7 @@ fun TextField(
             onDone = {
                 focusManager.clearFocus(true)
             }
-        )
+        ),
     )
 }
 
@@ -244,8 +268,11 @@ internal fun TextFieldUi(
     trailingIcon: TextFieldIcon?,
     showOptionalLabel: Boolean,
     shouldShowError: Boolean,
+    errorMessage: String?,
+    shouldAnnounceLabel: Boolean = true,
     modifier: Modifier = Modifier,
     visualTransformation: VisualTransformation = VisualTransformation.None,
+    layoutDirection: LayoutDirection? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions(),
     onValueChange: (value: TextFieldValue) -> Unit = {},
@@ -253,65 +280,79 @@ internal fun TextFieldUi(
 ) {
     val colors = TextFieldColors(shouldShowError)
 
-    CompatTextField(
-        value = value,
-        onValueChange = onValueChange,
-        modifier = modifier.fillMaxWidth(),
-        enabled = enabled,
-        label = label?.let {
-            {
-                FormLabel(
-                    text = if (showOptionalLabel) {
-                        stringResource(
-                            R.string.stripe_form_label_optional,
-                            it
-                        )
-                    } else {
-                        it
-                    }
-                )
-            }
-        },
-        placeholder = placeholder?.let {
-            {
-                Placeholder(text = it)
-            }
-        },
-        trailingIcon = trailingIcon?.let {
-            {
-                Row {
-                    when (it) {
-                        is TextFieldIcon.Trailing -> {
-                            TrailingIcon(it, loading)
-                        }
+    val layoutDirectionToUse = layoutDirection ?: LocalLayoutDirection.current
 
-                        is TextFieldIcon.MultiTrailing -> {
-                            Row(modifier = Modifier.padding(10.dp)) {
-                                it.staticIcons.forEach {
-                                    TrailingIcon(it, loading)
-                                }
-                                AnimatedIcons(icons = it.animatedIcons, loading = loading)
-                            }
-                        }
-
-                        is TextFieldIcon.Dropdown -> {
-                            TrailingDropdown(
-                                icon = it,
-                                loading = loading,
-                                onDropdownItemClicked = onDropdownItemClicked
+    CompositionLocalProvider(LocalLayoutDirection provides layoutDirectionToUse) {
+        CompatTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = modifier.fillMaxWidth(),
+            enabled = enabled,
+            label = label?.let {
+                {
+                    FormLabel(
+                        text = if (showOptionalLabel) {
+                            stringResource(
+                                R.string.stripe_form_label_optional,
+                                it
                             )
-                        }
+                        } else {
+                            it
+                        },
+                        modifier = if (shouldAnnounceLabel) Modifier else Modifier.clearAndSetSemantics {}
+                    )
+                }
+            },
+            placeholder = placeholder?.let {
+                {
+                    Placeholder(text = it)
+                }
+            },
+            trailingIcon = trailingIcon?.let { icon ->
+                {
+                    icon.Composable(loading, onDropdownItemClicked)
+                }
+            },
+            isError = shouldShowError,
+            errorMessage = errorMessage,
+            visualTransformation = visualTransformation,
+            keyboardOptions = keyboardOptions,
+            keyboardActions = keyboardActions,
+            singleLine = true,
+            colors = colors
+        )
+    }
+}
+
+@Composable
+private fun TextFieldIcon.Composable(
+    loading: Boolean,
+    onDropdownItemClicked: (item: TextFieldIcon.Dropdown.Item) -> Unit,
+) {
+    Row {
+        when (this@Composable) {
+            is TextFieldIcon.Trailing -> {
+                TrailingIcon(this@Composable, loading)
+            }
+
+            is TextFieldIcon.MultiTrailing -> {
+                Row(modifier = Modifier.padding(10.dp)) {
+                    staticIcons.forEach {
+                        TrailingIcon(it, loading)
                     }
+                    AnimatedIcons(icons = animatedIcons, loading = loading)
                 }
             }
-        },
-        isError = shouldShowError,
-        visualTransformation = visualTransformation,
-        keyboardOptions = keyboardOptions,
-        keyboardActions = keyboardActions,
-        singleLine = true,
-        colors = colors
-    )
+
+            is TextFieldIcon.Dropdown -> {
+                TrailingDropdown(
+                    icon = this@Composable,
+                    loading = loading,
+                    onDropdownItemClicked = onDropdownItemClicked
+                )
+            }
+        }
+    }
 }
 
 @Composable

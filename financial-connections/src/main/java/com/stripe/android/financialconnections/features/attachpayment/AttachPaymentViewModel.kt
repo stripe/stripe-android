@@ -9,16 +9,18 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
+import com.stripe.android.financialconnections.domain.CachedPartnerAccount
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.IsNetworkingRelinkSession
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAttachPaymentAccount
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.navigation.Destination.ManualEntry
 import com.stripe.android.financialconnections.navigation.Destination.Reset
-import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.Async
@@ -28,6 +30,7 @@ import com.stripe.android.financialconnections.repository.SuccessContentReposito
 import com.stripe.android.financialconnections.ui.TextResource.PluralId
 import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.financialconnections.utils.measureTimeMillis
+import com.stripe.android.uicore.navigation.NavigationManager
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -41,7 +44,8 @@ internal class AttachPaymentViewModel @AssistedInject constructor(
     private val getCachedAccounts: GetCachedAccounts,
     private val navigationManager: NavigationManager,
     private val getOrFetchSync: GetOrFetchSync,
-    private val logger: Logger
+    private val logger: Logger,
+    private val isNetworkingRelinkSession: IsNetworkingRelinkSession,
 ) : FinancialConnectionsViewModel<AttachPaymentState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
@@ -60,15 +64,8 @@ internal class AttachPaymentViewModel @AssistedInject constructor(
                     params = PaymentAccountParams.LinkedAccount(requireNotNull(id))
                 )
             }
-            if (manifest.isNetworkingUserFlow == true && manifest.accountholderIsLinkConsumer == true) {
-                result.networkingSuccessful?.let {
-                    successContentRepository.set(
-                        message = PluralId(
-                            value = R.plurals.stripe_success_pane_desc_link_success,
-                            count = accounts.size
-                        )
-                    )
-                }
+            if (result.networkingSuccessful == true) {
+                setSuccessMessageIfNecessary(manifest, accounts)
             }
             eventTracker.track(
                 PollAttachPaymentsSucceeded(
@@ -89,6 +86,20 @@ internal class AttachPaymentViewModel @AssistedInject constructor(
             allowBackNavigation = false,
             error = state.linkPaymentAccount.error,
         )
+    }
+
+    private fun setSuccessMessageIfNecessary(
+        manifest: FinancialConnectionsSessionManifest,
+        accounts: List<CachedPartnerAccount>,
+    ) {
+        if (manifest.canSetCustomLinkSuccessMessage && !isNetworkingRelinkSession()) {
+            successContentRepository.set(
+                message = PluralId(
+                    value = R.plurals.stripe_success_pane_desc_link_success,
+                    count = accounts.size
+                )
+            )
+        }
     }
 
     private fun logErrors() {
@@ -132,3 +143,6 @@ internal class AttachPaymentViewModel @AssistedInject constructor(
 internal data class AttachPaymentState(
     val linkPaymentAccount: Async<LinkAccountSessionPaymentAccount> = Uninitialized
 )
+
+private val FinancialConnectionsSessionManifest.canSetCustomLinkSuccessMessage: Boolean
+    get() = isNetworkingUserFlow == true && accountholderIsLinkConsumer == true

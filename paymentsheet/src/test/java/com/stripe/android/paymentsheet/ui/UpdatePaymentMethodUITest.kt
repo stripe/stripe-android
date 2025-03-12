@@ -3,13 +3,16 @@ package com.stripe.android.paymentsheet.ui
 import android.os.Build
 import android.os.Parcel
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.assertAll
 import androidx.compose.ui.test.assertContentDescriptionEquals
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.isEnabled
+import androidx.compose.ui.test.isNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onChild
+import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
@@ -183,40 +186,35 @@ class UpdatePaymentMethodUITest {
     }
 
     @Test
-    fun isModifiablePMIsTrue_saveButtonHidden() = runScenario(
-        isModifiablePaymentMethod = true,
+    fun shouldShowSaveButton_saveButtonIsDisplayed() = runScenario(
+        shouldShowSaveButton = true,
     ) {
-        composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).assertExists()
+        composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).assertIsDisplayed()
     }
 
     @Test
-    fun cardBrandHasNotBeenChanged_saveButtonNotEnabled() = runScenario(
-        isModifiablePaymentMethod = true,
-        cardBrandHasBeenChanged = false,
+    fun shouldNotShowSaveButton_saveButtonIsHidden() = runScenario(
+        shouldShowSaveButton = false,
     ) {
-        // The actual button is a child of the composable used for this button.
-        composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).onChild().assertIsNotEnabled()
+        composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).assertDoesNotExist()
     }
 
     @Test
-    fun cardBrandHasBeenChanged_saveButtonEnabled() = runScenario(
-        isModifiablePaymentMethod = true,
-        cardBrandHasBeenChanged = true,
+    fun isSaveButtonEnabled_saveButtonIsEnabled() = runScenario(
+        shouldShowSaveButton = true,
+        isSaveButtonEnabled = true,
     ) {
-        // The actual button is a child of the composable used for this button.
-        composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).onChild().assertIsEnabled()
+        composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).assertIsDisplayed()
+        composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).onChildren().assertAll(isEnabled())
     }
 
     @Test
-    fun clickingSaveButton_sendsSaveButtonPressedAction() = runScenario(
-        isModifiablePaymentMethod = true,
-        cardBrandHasBeenChanged = true,
+    fun isSaveButtonEnabledIsFalse_saveButtonIsNotEnabled() = runScenario(
+        shouldShowSaveButton = true,
+        isSaveButtonEnabled = false,
     ) {
-        assertThat(viewActionRecorder.viewActions).isEmpty()
-        composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).performClick()
-
-        viewActionRecorder.consume(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
-        assertThat(viewActionRecorder.viewActions).isEmpty()
+        composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).assertIsDisplayed()
+        composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).onChildren().assertAll(isNotEnabled())
     }
 
     @Test
@@ -464,6 +462,36 @@ class UpdatePaymentMethodUITest {
         }
     }
 
+    @Test
+    fun `When should show set as default checkbox, checkbox is visible and enabled`() {
+        runScenario(
+            shouldShowSetAsDefaultCheckbox = true,
+        ) {
+            val setAsDefaultCheckbox = composeRule.onNodeWithTag(UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG)
+
+            setAsDefaultCheckbox.assertExists()
+            setAsDefaultCheckbox.assertIsEnabled()
+        }
+    }
+
+    @Test
+    fun `Clicking set as default checkbox sends SetDefaultCheckboxChanged view action`() {
+        val initialCheckedValue = false
+        runScenario(
+            shouldShowSetAsDefaultCheckbox = true,
+            setAsDefaultCheckboxChecked = initialCheckedValue,
+        ) {
+            composeRule.onNodeWithTag(UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG).performClick()
+
+            viewActionRecorder.consume(
+                UpdatePaymentMethodInteractor.ViewAction.SetAsDefaultCheckboxChanged(
+                    isChecked = !initialCheckedValue
+                )
+            )
+            assertThat(viewActionRecorder.viewActions).isEmpty()
+        }
+    }
+
     private fun assertExpiryDateEquals(text: String) {
         composeRule.onNodeWithTag(UPDATE_PM_EXPIRY_FIELD_TEST_TAG).assertTextContains(
             text
@@ -481,11 +509,14 @@ class UpdatePaymentMethodUITest {
         isExpiredCard: Boolean = false,
         errorMessage: ResolvableString? = null,
         initialCardBrand: CardBrand = CardBrand.Unknown,
-        cardBrandHasBeenChanged: Boolean = false,
         canRemove: Boolean = true,
         isModifiablePaymentMethod: Boolean = true,
         hasValidBrandChoices: Boolean = true,
+        setAsDefaultCheckboxChecked: Boolean = false,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+        shouldShowSetAsDefaultCheckbox: Boolean = false,
+        shouldShowSaveButton: Boolean = false,
+        isSaveButtonEnabled: Boolean = false,
         testBlock: Scenario.() -> Unit,
     ) {
         val viewActionRecorder = ViewActionRecorder<UpdatePaymentMethodInteractor.ViewAction>()
@@ -497,11 +528,14 @@ class UpdatePaymentMethodUITest {
             cardBrandFilter = cardBrandFilter,
             viewActionRecorder = viewActionRecorder,
             hasValidBrandChoices = hasValidBrandChoices,
+            shouldShowSetAsDefaultCheckbox = shouldShowSetAsDefaultCheckbox,
+            shouldShowSaveButton = shouldShowSaveButton,
             initialState = UpdatePaymentMethodInteractor.State(
                 error = errorMessage,
                 status = UpdatePaymentMethodInteractor.Status.Idle,
                 cardBrandChoice = CardBrandChoice(brand = initialCardBrand, enabled = true),
-                cardBrandHasBeenChanged = cardBrandHasBeenChanged,
+                setAsDefaultCheckboxChecked = setAsDefaultCheckboxChecked,
+                isSaveButtonEnabled = isSaveButtonEnabled,
             ),
         )
 

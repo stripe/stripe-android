@@ -44,7 +44,7 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
                 subtitle = null,
                 promoText = null,
                 onClick = {},
-                style = FlatWithRadio.defaultLight,
+                style = FlatWithRadio.default,
                 shouldShowDefaultBadge = false,
             )
         }
@@ -66,7 +66,7 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
                 subtitle = null,
                 promoText = null,
                 onClick = {},
-                style = FlatWithRadio.defaultLight,
+                style = FlatWithRadio.default,
                 shouldShowDefaultBadge = false,
             )
         }
@@ -88,7 +88,7 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
                 subtitle = null,
                 promoText = null,
                 onClick = {},
-                style = FlatWithRadio.defaultLight,
+                style = FlatWithRadio.default,
                 shouldShowDefaultBadge = false,
             )
         }
@@ -110,7 +110,7 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
                 subtitle = "Please click me, I'm fancy",
                 promoText = null,
                 onClick = {},
-                style = FlatWithRadio.defaultLight,
+                style = FlatWithRadio.default,
                 shouldShowDefaultBadge = false,
             )
         }
@@ -133,7 +133,7 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
                     "forever.",
                 promoText = null,
                 onClick = {},
-                style = FlatWithRadio.defaultLight,
+                style = FlatWithRadio.default,
                 shouldShowDefaultBadge = false,
             )
         }
@@ -155,7 +155,7 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
                 subtitle = null,
                 promoText = null,
                 onClick = {},
-                style = FlatWithRadio.defaultLight,
+                style = FlatWithRadio.default,
                 trailingContent = {
                     Text(text = "View more")
                 },
@@ -168,15 +168,22 @@ internal class PaymentMethodRowRadioButtonScreenshotTest {
     fun testStyleAppearance() {
         val style = FlatWithRadio(
             separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
-            separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
             startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
             endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
             topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
             bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
-            selectedColor = StripeThemeDefaults.colorsLight.materialColors.error.toArgb(),
-            unselectedColor = StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
             additionalVerticalInsetsDp = 40f,
-            horizontalInsetsDp = 40f
+            horizontalInsetsDp = 40f,
+            colorsLight = FlatWithRadio.Colors(
+                separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
+                selectedColor = StripeThemeDefaults.colorsLight.materialColors.error.toArgb(),
+                unselectedColor = StripeThemeDefaults.colorsLight.materialColors.primary.toArgb()
+            ),
+            colorsDark = FlatWithRadio.Colors(
+                separatorColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
+                selectedColor = StripeThemeDefaults.colorsDark.materialColors.error.toArgb(),
+                unselectedColor = StripeThemeDefaults.colorsDark.materialColors.primary.toArgb()
+            )
         )
         paparazziRule.snapshot {
             PaymentMethodRowButton(

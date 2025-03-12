@@ -8,8 +8,14 @@ import kotlin.random.Random
 
 object PaymentMethodFactory {
 
-    fun card(last4: String, addCbcNetworks: Boolean = false): PaymentMethod {
-        return card(random = true).run {
+    fun card(last4: String, id: String? = null, addCbcNetworks: Boolean = false): PaymentMethod {
+        val card = if (id == null) {
+            card(random = true)
+        } else {
+            card(id = id)
+        }
+
+        return card.run {
             update(last4, addCbcNetworks)
         }
     }

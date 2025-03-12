@@ -382,7 +382,9 @@ class CardMultilineWidget @JvmOverloads constructor(
         initDeleteEmptyListeners()
 
         cardNumberEditText.completionCallback = {
-            expiryDateEditText.requestFocus()
+            post {
+                expiryDateEditText.requestFocus()
+            }
             cardInputListener?.onCardComplete()
         }
 
@@ -413,7 +415,9 @@ class CardMultilineWidget @JvmOverloads constructor(
         }
 
         expiryDateEditText.completionCallback = {
-            cvcEditText.requestFocus()
+            post {
+                cvcEditText.requestFocus()
+            }
             cardInputListener?.onExpirationComplete()
         }
 
@@ -426,7 +430,9 @@ class CardMultilineWidget @JvmOverloads constructor(
             if (brand.isMaxCvc(text)) {
                 updateBrandUi()
                 if (shouldShowPostalCode) {
-                    postalCodeEditText.requestFocus()
+                    post {
+                        postalCodeEditText.requestFocus()
+                    }
                 }
                 cardInputListener?.onCvcComplete()
             } else if (!showCvcIconInCvcField) {

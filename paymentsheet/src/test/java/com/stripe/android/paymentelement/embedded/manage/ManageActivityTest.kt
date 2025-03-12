@@ -13,21 +13,23 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.network.CardPaymentMethodDetails
 import com.stripe.android.network.setupPaymentMethodDetachResponse
 import com.stripe.android.network.setupPaymentMethodUpdateResponse
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.paymentsheet.EditPage
-import com.stripe.android.paymentsheet.ManagePage
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.PaymentConfigurationTestRule
+import com.stripe.android.testing.RetryRule
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
+import com.stripe.paymentelementtestpages.EditPage
+import com.stripe.paymentelementtestpages.ManagePage
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.util.concurrent.CountDownLatch
 
 @RunWith(RobolectricTestRunner::class)
 internal class ManageActivityTest {
@@ -51,6 +53,7 @@ internal class ManageActivityTest {
         .outerRule(composeTestRule)
         .around(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
+        .around(RetryRule(3))
 
     @Test
     fun `when launched without args should finish with error result`() {
@@ -144,6 +147,30 @@ internal class ManageActivityTest {
     }
 
     @Test
+    fun `updating card brand prevents sheet from being closed`() = launch {
+        managePage.waitUntilVisible()
+        managePage.assertCardIsVisible(cbcCardId, "cartes_bancaries")
+        managePage.clickEdit()
+        managePage.clickEdit(cbcCardId)
+
+        val countDownLatch = CountDownLatch(1)
+        networkRule.setupPaymentMethodUpdateResponse(
+            paymentMethodDetails = cbcCardDetails,
+            cardBrand = "visa",
+            countDownLatch = countDownLatch,
+        )
+        editPage.waitUntilVisible()
+        editPage.setCardBrand("Visa")
+        editPage.update(waitUntilComplete = false)
+        Espresso.pressBack()
+        managePage.assertNotVisible()
+        countDownLatch.countDown()
+        managePage.waitUntilVisible()
+        managePage.clickDone()
+        managePage.assertCardIsVisible(cbcCardId, "visa")
+    }
+
+    @Test
     fun `updating card brand returns a result with the new card brand`() = launch(
         paymentMethods = listOf(cbcCardDetails.createPaymentMethod()),
     ) {
@@ -151,6 +178,7 @@ internal class ManageActivityTest {
         editPage.waitUntilVisible()
         editPage.setCardBrand("Visa")
         editPage.update()
+        editPage.waitUntilMissing()
         val updatedCbcCard = completedResultPaymentMethods().single()
         assertThat(updatedCbcCard.card?.displayBrand).isEqualTo("visa")
     }

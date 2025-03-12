@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_camera_permission_settings_message">Atļaujiet kameras piekļuvi iestatījumiem, lai noskenētu karti</string>
+  <string name="stripe_card_scan_instructions">Skenēt karti</string>
+  <string name="stripe_card_scan_title">Novietojiet karti taisnstūrī, lai skenētu</string>
+  <string name="stripe_close_button_description">Aizvērt</string>
+  <string name="stripe_swap_camera_button_description">Apvērst kameru</string>
+  <!-- Label for the button that toggles the camera's torch -->
+  <string name="stripe_torch_button_description">Lukturis</string>
+</resources>

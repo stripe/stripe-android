@@ -20,6 +20,7 @@ android {
 }
 
 dependencies {
+    api project(":financial-connections-core")
     api project(":stripe-core")
     api project(":stripe-ui-core")
     api project(":payments-model")

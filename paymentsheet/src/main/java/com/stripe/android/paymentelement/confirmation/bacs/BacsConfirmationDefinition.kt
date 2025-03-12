@@ -83,6 +83,7 @@ internal class BacsConfirmationDefinition @Inject constructor(
                 val nextConfirmationOption = PaymentMethodConfirmationOption.New(
                     createParams = confirmationOption.createParams,
                     optionsParams = null,
+                    extraParams = null,
                     shouldSave = false,
                 )
 

@@ -14,7 +14,6 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -27,9 +26,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavHostController
-import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.browser.BrowserManager
@@ -37,8 +34,6 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
-import com.stripe.android.financialconnections.navigation.NavigationIntent
-import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.bottomSheet
 import com.stripe.android.financialconnections.navigation.bottomsheet.BottomSheetNavigator
 import com.stripe.android.financialconnections.navigation.composable
@@ -54,17 +49,14 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.Theme
-import com.stripe.android.financialconnections.utils.KeyboardController
-import com.stripe.android.financialconnections.utils.rememberKeyboardController
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.navigation.NavigationEffects
+import com.stripe.android.uicore.navigation.rememberKeyboardController
 import com.stripe.android.uicore.utils.collectAsState
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -177,7 +169,12 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
         val navController = rememberNavController(bottomSheetNavigator)
         val keyboardController = rememberKeyboardController()
 
-        NavigationEffects(viewModel.navigationFlow, navController, keyboardController)
+        NavigationEffects(viewModel.navigationFlow, navController, keyboardController) { backStackEntry ->
+            val pane = backStackEntry?.destination?.pane
+            if (pane != null) {
+                viewModel.handlePaneChanged(pane)
+            }
+        }
 
         CompositionLocalProvider(
             LocalTestMode provides testMode,
@@ -235,7 +232,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
     /**
      * Handles new intents in the form of the redirect from the custom tab hosted auth flow
      */
-    override fun onNewIntent(intent: Intent?) {
+    override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         viewModel.handleOnNewIntent(intent)
     }
@@ -250,53 +247,6 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
             lifecycle.removeObserver(it)
         }
         super.onDestroy()
-    }
-
-    @Composable
-    fun NavigationEffects(
-        navigationChannel: SharedFlow<NavigationIntent>,
-        navHostController: NavHostController,
-        keyboardController: KeyboardController,
-    ) {
-        val activity = (LocalContext.current as? Activity)
-        val backStackEntry by navHostController.currentBackStackEntryAsState()
-
-        LaunchedEffect(backStackEntry) {
-            val pane = backStackEntry?.destination?.pane ?: return@LaunchedEffect
-            viewModel.handlePaneChanged(pane)
-        }
-
-        LaunchedEffect(activity, navHostController, navigationChannel) {
-            navigationChannel.onEach { intent ->
-                if (activity?.isFinishing == true) {
-                    return@onEach
-                }
-
-                keyboardController.dismiss()
-
-                when (intent) {
-                    is NavigationIntent.NavigateTo -> {
-                        val from: String? = navHostController.currentDestination?.route
-                        val destination: String = intent.route
-
-                        if (destination.isNotEmpty() && destination != from) {
-                            logger.debug("Navigating from $from to $destination")
-                            navHostController.navigate(destination) {
-                                launchSingleTop = intent.isSingleTop
-
-                                if (intent.popUpTo != null) {
-                                    apply(from, intent.popUpTo)
-                                }
-                            }
-                        }
-                    }
-
-                    NavigationIntent.NavigateBack -> {
-                        navHostController.popBackStack()
-                    }
-                }
-            }.launchIn(this)
-        }
     }
 
     internal companion object {
@@ -363,22 +313,6 @@ private class ActivityVisibilityObserver(
         if (!changingConfigurations) {
             isInBackground = true
             onBackgrounded()
-        }
-    }
-}
-
-private fun NavOptionsBuilder.apply(
-    currentRoute: String?,
-    popUpTo: PopUpToBehavior,
-) {
-    val popUpToRoute = when (popUpTo) {
-        is PopUpToBehavior.Current -> currentRoute
-        is PopUpToBehavior.Route -> popUpTo.route
-    }
-
-    if (popUpToRoute != null) {
-        popUpTo(popUpToRoute) {
-            inclusive = popUpTo.inclusive
         }
     }
 }

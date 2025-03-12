@@ -18,12 +18,13 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsInstitu
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.Destination.InstitutionPicker
-import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.AccountUpdateRequiredContentRepository
+import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository
+import com.stripe.android.uicore.navigation.NavigationManager
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -33,6 +34,7 @@ internal class AccountUpdateRequiredViewModel @AssistedInject constructor(
     @Assisted initialState: AccountUpdateRequiredState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val updateRequiredContentRepository: AccountUpdateRequiredContentRepository,
+    private val pendingRepairRepository: CoreAuthorizationPendingNetworkingRepairRepository,
     private val navigationManager: NavigationManager,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val updateLocalManifest: UpdateLocalManifest,
@@ -60,7 +62,7 @@ internal class AccountUpdateRequiredViewModel @AssistedInject constructor(
             val referrer = state.referrer
             when (val type = requireNotNull(state.payload()?.type)) {
                 is Type.Repair -> {
-                    handleUnsupportedRepairAction(referrer)
+                    openBankAuthRepair(type.institution, type.authorization, referrer)
                 }
                 is Type.Supportability -> {
                     openPartnerAuth(type.institution, referrer)
@@ -69,15 +71,31 @@ internal class AccountUpdateRequiredViewModel @AssistedInject constructor(
         }
     }
 
-    private fun handleUnsupportedRepairAction(referrer: Pane) {
-        eventTracker.logError(
-            extraMessage = "Updating a repair account, but repairs are not supported in Mobile.",
-            error = UnclassifiedError("UpdateRepairAccountError"),
-            logger = logger,
-            pane = PANE,
-        )
-        // Fall back to the institution picker for now
-        navigationManager.tryNavigateTo(InstitutionPicker(referrer))
+    private fun openBankAuthRepair(
+        institution: FinancialConnectionsInstitution?,
+        authorization: String?,
+        referrer: Pane,
+    ) {
+        if (institution != null && authorization != null) {
+            updateLocalManifest {
+                it.copy(activeInstitution = institution)
+            }
+
+            pendingRepairRepository.set(authorization)
+            navigationManager.tryNavigateTo(Destination.BankAuthRepair(referrer))
+        } else {
+            val missingAuth = authorization == null
+            val missingInstitution = institution == null
+            eventTracker.logError(
+                extraMessage = "Unable to open repair flow " +
+                    "(missing auth: $missingAuth, missing institution: $missingInstitution).",
+                error = UnclassifiedError("UpdateRepairAccountError"),
+                logger = logger,
+                pane = PANE,
+            )
+            // Fall back to the institution picker
+            navigationManager.tryNavigateTo(InstitutionPicker(referrer))
+        }
     }
 
     private fun openPartnerAuth(

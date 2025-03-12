@@ -11,6 +11,7 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -118,6 +119,7 @@ internal class LinkInlineSignupConfirmationDefinition(
 
         val createParams = linkInlineSignupConfirmationOption.createParams
         val saveOption = linkInlineSignupConfirmationOption.saveOption
+        val extraParams = linkInlineSignupConfirmationOption.extraParams
 
         val linkPaymentDetails = linkConfigurationCoordinator.attachNewCardToAccount(
             linkInlineSignupConfirmationOption.linkConfiguration,
@@ -128,7 +130,7 @@ internal class LinkInlineSignupConfirmationDefinition(
             is LinkPaymentDetails.New -> {
                 linkStore.markLinkAsUsed()
 
-                linkPaymentDetails.toNewOption(saveOption)
+                linkPaymentDetails.toNewOption(saveOption, extraParams)
             }
             is LinkPaymentDetails.Saved -> {
                 linkStore.markLinkAsUsed()
@@ -166,13 +168,15 @@ internal class LinkInlineSignupConfirmationDefinition(
     }
 
     private fun LinkPaymentDetails.New.toNewOption(
-        saveOption: LinkInlineSignupConfirmationOption.PaymentMethodSaveOption
+        saveOption: LinkInlineSignupConfirmationOption.PaymentMethodSaveOption,
+        extraParams: PaymentMethodExtraParams?,
     ): PaymentMethodConfirmationOption.New {
         return PaymentMethodConfirmationOption.New(
             createParams = paymentMethodCreateParams,
             optionsParams = PaymentMethodOptionsParams.Card(
                 setupFutureUsage = saveOption.setupFutureUsage,
             ),
+            extraParams = extraParams,
             shouldSave = saveOption.shouldSave(),
         )
     }
@@ -181,6 +185,7 @@ internal class LinkInlineSignupConfirmationDefinition(
         return PaymentMethodConfirmationOption.New(
             createParams = createParams,
             optionsParams = optionsParams,
+            extraParams = extraParams,
             shouldSave = saveOption.shouldSave(),
         )
     }

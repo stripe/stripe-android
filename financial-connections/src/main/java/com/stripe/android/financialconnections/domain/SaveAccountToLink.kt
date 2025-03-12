@@ -24,6 +24,7 @@ internal class SaveAccountToLink @Inject constructor(
     private val successContentRepository: SuccessContentRepository,
     private val repository: FinancialConnectionsManifestRepository,
     private val accountsRepository: FinancialConnectionsAccountsRepository,
+    private val isNetworkingRelinkSession: IsNetworkingRelinkSession,
 ) {
 
     suspend fun new(
@@ -90,9 +91,13 @@ internal class SaveAccountToLink @Inject constructor(
         }.mapCatching {
             action(selectedAccountIds)
         }.onSuccess { manifest ->
-            storeSavedToLinkMessage(manifest, selectedAccountIds.size)
+            if (!isNetworkingRelinkSession()) {
+                storeSavedToLinkMessage(manifest, selectedAccountIds.size)
+            }
         }.onFailure {
-            storeFailedToSaveToLinkMessage(selectedAccountIds.size)
+            if (!isNetworkingRelinkSession()) {
+                storeFailedToSaveToLinkMessage(selectedAccountIds.size)
+            }
         }.getOrThrow()
     }
 

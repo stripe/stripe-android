@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_camera_permission_settings_message">Pahintulutan ang pag-access ng camera sa mga setting para i-scan ang iyong kard</string>
+  <string name="stripe_card_scan_instructions">I-scan ang Iyong Kard</string>
+  <string name="stripe_card_scan_title">Iposisyon ang iyong kard sa parihaba para i-scan</string>
+  <string name="stripe_close_button_description">Isara</string>
+  <string name="stripe_swap_camera_button_description">I-swap ang Camera</string>
+  <!-- Label for the button that toggles the camera's torch -->
+  <string name="stripe_torch_button_description">Flashlight</string>
+</resources>

@@ -37,6 +37,7 @@ dependencies {
     implementation libs.compose.foundation
     implementation libs.compose.material
     implementation libs.compose.materialIcons
+    implementation libs.compose.navigation
     implementation libs.compose.ui
     implementation libs.compose.uiToolingPreview
     implementation libs.diskLruCache
@@ -63,6 +64,7 @@ dependencies {
     testImplementation testLibs.kotlin.junit
     testImplementation testLibs.mockito.core
     testImplementation testLibs.mockito.kotlin
+    testImplementation testLibs.okhttpMockWebServer
     testImplementation testLibs.robolectric
     testImplementation testLibs.truth
     testImplementation testLibs.turbine

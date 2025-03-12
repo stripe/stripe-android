@@ -30,6 +30,7 @@ import com.stripe.android.model.PaymentMethodFixtures.US_BANK_ACCOUNT_VERIFIED
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -41,6 +42,7 @@ import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.testing.PaymentMethodFactory.update
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
@@ -1474,7 +1476,7 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             viewModel.handleViewAction(CustomerSheetViewAction.OnItemSelected(PaymentSelection.GooglePay))
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
-            verify(eventReporter).onConfirmPaymentMethodSucceeded("google_pay")
+            verify(eventReporter).onConfirmPaymentMethodSucceeded(eq("google_pay"), eq(false))
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -1500,7 +1502,7 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             viewModel.handleViewAction(CustomerSheetViewAction.OnItemSelected(PaymentSelection.GooglePay))
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
-            verify(eventReporter).onConfirmPaymentMethodFailed("google_pay")
+            verify(eventReporter).onConfirmPaymentMethodFailed(eq("google_pay"), eq(false))
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -1523,7 +1525,70 @@ class CustomerSheetViewModelTest {
                 )
             )
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
-            verify(eventReporter).onConfirmPaymentMethodSucceeded("card")
+            verify(eventReporter).onConfirmPaymentMethodSucceeded(eq("card"), eq(false))
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `When payment selection is confirmed and syncDefaultEnabled true, event is reported`() = runTest(testDispatcher) {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            eventReporter = eventReporter,
+            customerSheetLoader = FakeCustomerSheetLoader(
+                customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
+                isGooglePayAvailable = true,
+                isPaymentMethodSyncDefaultEnabled = true,
+            ),
+        )
+        viewModel.viewState.test {
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnItemSelected(
+                    PaymentSelection.Saved(
+                        CARD_PAYMENT_METHOD,
+                    )
+                )
+            )
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            verify(eventReporter).onConfirmPaymentMethodSucceeded(eq("card"), eq(true))
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `When payment selection errors and syncDefaultEnabled true, event is reported`() = runTest(testDispatcher) {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            savedSelectionDataSource = FakeCustomerSheetSavedSelectionDataSource(
+                onSetSavedSelection = {
+                    CustomerSheetDataResult.failure(
+                        cause = Exception("Unable to set payment option"),
+                        displayMessage = "Something went wrong"
+                    )
+                }
+            ),
+            eventReporter = eventReporter,
+            customerSheetLoader = FakeCustomerSheetLoader(
+                customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
+                isGooglePayAvailable = true,
+                isPaymentMethodSyncDefaultEnabled = true,
+            ),
+        )
+
+        viewModel.viewState.test {
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnItemSelected(
+                    PaymentSelection.Saved(
+                        CARD_PAYMENT_METHOD,
+                    )
+                )
+            )
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            verify(eventReporter).onConfirmPaymentMethodFailed(eq("card"), eq(true))
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -1554,7 +1619,7 @@ class CustomerSheetViewModelTest {
                 )
             )
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
-            verify(eventReporter).onConfirmPaymentMethodFailed("card")
+            verify(eventReporter).onConfirmPaymentMethodFailed(eq("card"), eq(false))
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -3063,6 +3128,83 @@ class CustomerSheetViewModelTest {
                 assertThat(viewStateAfterRemoval.topBarState {}.showEditMenu).isFalse()
             }
         }
+
+    @Test
+    fun `When refreshing payment methods, payment methods should be filtered based on card brand acceptance`() = runTest(testDispatcher) {
+        val acceptedCardPaymentMethod = CARD_PAYMENT_METHOD.update(
+            last4 = "4242",
+            addCbcNetworks = false,
+            brand = CardBrand.Visa
+        )
+
+        val rejectedCardPaymentMethod = CARD_PAYMENT_METHOD.update(
+            last4 = "3782",
+            addCbcNetworks = false,
+            brand = CardBrand.AmericanExpress
+        )
+        val allPaymentMethods = listOf(acceptedCardPaymentMethod, rejectedCardPaymentMethod)
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Merchant",
+                // Only accept Visa and Mastercard
+                cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.allowed(
+                    listOf(
+                        PaymentSheet.CardBrandAcceptance.BrandCategory.Visa,
+                        PaymentSheet.CardBrandAcceptance.BrandCategory.Mastercard
+                    )
+                )
+            ),
+            customerSheetLoader = FakeCustomerSheetLoader(
+                customerPaymentMethods = listOf(),
+                isGooglePayAvailable = false
+            ),
+            paymentMethodDataSource = FakeCustomerSheetPaymentMethodDataSource(
+                paymentMethods = CustomerSheetDataResult.success(allPaymentMethods),
+                onAttachPaymentMethod = {
+                    CustomerSheetDataResult.success(acceptedCardPaymentMethod)
+                }
+            ),
+            stripeRepository = FakeStripeRepository(
+                createPaymentMethodResult = Result.success(acceptedCardPaymentMethod),
+            ),
+            intentDataSource = FakeCustomerSheetIntentDataSource(
+                canCreateSetupIntents = false
+            )
+        )
+
+        // Call refreshAndUpdatePaymentMethods indirectly through the attachment flow
+        viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+        viewModel.handleViewAction(CustomerSheetViewAction.OnFormFieldValuesCompleted(TEST_FORM_VALUES))
+
+        viewModel.viewState.test {
+            // Initial state is AddPaymentMethod
+            assertThat(awaitItem()).isInstanceOf<AddPaymentMethod>()
+
+            // Trigger refresh by saving the payment method
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+
+            val processingState = awaitItem()
+            assertThat(processingState).isInstanceOf<AddPaymentMethod>()
+            assertThat((processingState as AddPaymentMethod).isProcessing).isTrue()
+
+            var currentState: CustomerSheetViewState? = null
+            while (currentState !is SelectPaymentMethod) {
+                currentState = awaitItem()
+            }
+
+            val selectPaymentMethodState = currentState as SelectPaymentMethod
+
+            // Should only include the accepted card payment method
+            assertThat(selectPaymentMethodState.savedPaymentMethods).hasSize(1)
+            assertThat(selectPaymentMethodState.savedPaymentMethods)
+                .containsExactly(acceptedCardPaymentMethod)
+
+            // Should not include the rejected card payment method
+            assertThat(selectPaymentMethodState.savedPaymentMethods).doesNotContain(rejectedCardPaymentMethod)
+        }
+    }
 
     @Test
     fun `When card number input is completed, should report event`() = runTest(testDispatcher) {

@@ -24,6 +24,7 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
     private val customerStateHolder: CustomerStateHolder,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val eventReporter: EventReporter,
+    private val manageNavigatorProvider: Provider<ManageNavigator>,
 ) : EmbeddedUpdateScreenInteractorFactory {
     override fun createUpdateScreenInteractor(
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod
@@ -31,7 +32,7 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
         return DefaultUpdatePaymentMethodInteractor(
             isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             canRemove = customerStateHolder.canRemove.value,
-            displayableSavedPaymentMethod,
+            displayableSavedPaymentMethod = displayableSavedPaymentMethod,
             cardBrandFilter = paymentMethodMetadata.cardBrandFilter,
             removeExecutor = { method ->
                 val result = savedPaymentMethodMutatorProvider.get().removePaymentMethodInEditScreen(method)
@@ -43,15 +44,20 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
                 }
                 result
             },
-            updateExecutor = { method, brand ->
-                val result = savedPaymentMethodMutatorProvider.get().modifyCardPaymentMethod(method, brand)
-                result.onSuccess { paymentMethod ->
-                    val currentSelection = selectionHolder.selection.value
-                    if (paymentMethod.id == (currentSelection as? PaymentSelection.Saved)?.paymentMethod?.id) {
-                        selectionHolder.set(PaymentSelection.Saved(paymentMethod))
-                    }
-                }
-                result
+            updateCardBrandExecutor = { method, brand ->
+                savedPaymentMethodMutatorProvider.get().modifyCardPaymentMethod(
+                    paymentMethod = method,
+                    brand = brand,
+                    onSuccess = { paymentMethod ->
+                        val currentSelection = selectionHolder.selection.value
+                        if (paymentMethod.id == (currentSelection as? PaymentSelection.Saved)?.paymentMethod?.id) {
+                            selectionHolder.set(PaymentSelection.Saved(paymentMethod))
+                        }
+                    },
+                )
+            },
+            setDefaultPaymentMethodExecutor = { method ->
+                savedPaymentMethodMutatorProvider.get().setDefaultPaymentMethod(method)
             },
             onBrandChoiceOptionsShown = {
                 eventReporter.onShowPaymentOptionBrands(
@@ -64,6 +70,15 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
                     source = EventReporter.CardBrandChoiceEventSource.Edit,
                     selectedBrand = it
                 )
+            },
+            shouldShowSetAsDefaultCheckbox = (
+                paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true &&
+                    !displayableSavedPaymentMethod.isDefaultPaymentMethod(
+                        defaultPaymentMethodId = customerStateHolder.customer.value?.defaultPaymentMethodId
+                    )
+                ),
+            onUpdateSuccess = {
+                manageNavigatorProvider.get().performAction(ManageNavigator.Action.Back)
             },
         )
     }

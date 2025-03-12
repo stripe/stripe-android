@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_camera_permission_settings_message">Veuillez autoriser l\'accès à l\'appareil photo pour scanner votre carte</string>
+  <string name="stripe_card_scan_instructions">Scannez votre carte</string>
+  <string name="stripe_card_scan_title">Placez votre carte dans le rectangle pour la scanner</string>
+  <string name="stripe_close_button_description">Fermer</string>
+  <string name="stripe_swap_camera_button_description">Basculer l\'appareil photo</string>
+  <!-- Label for the button that toggles the camera's torch -->
+  <string name="stripe_torch_button_description">Torche</string>
+</resources>

@@ -12,7 +12,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
-import com.stripe.android.ExperimentalCardBrandFilteringApi
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.account.LinkStore
@@ -20,7 +19,10 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
+import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.Colors
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
@@ -66,7 +68,10 @@ class PaymentSheet internal constructor(
     ) : this(
         DefaultPaymentSheetLauncher(activity, callback)
     ) {
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
+        setPaymentSheetCallbacks(
+            createIntentCallback = null,
+            externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
+        )
     }
 
     /**
@@ -85,7 +90,10 @@ class PaymentSheet internal constructor(
     ) : this(
         DefaultPaymentSheetLauncher(activity, paymentResultCallback)
     ) {
-        IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+        setPaymentSheetCallbacks(
+            createIntentCallback = createIntentCallback,
+            externalPaymentMethodConfirmHandler = null,
+        )
     }
 
     /**
@@ -107,8 +115,10 @@ class PaymentSheet internal constructor(
     ) : this(
         DefaultPaymentSheetLauncher(activity, paymentResultCallback)
     ) {
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
-        IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+        setPaymentSheetCallbacks(
+            createIntentCallback = createIntentCallback,
+            externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
+        )
     }
 
     /**
@@ -139,7 +149,10 @@ class PaymentSheet internal constructor(
     ) : this(
         DefaultPaymentSheetLauncher(fragment, callback)
     ) {
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
+        setPaymentSheetCallbacks(
+            createIntentCallback = null,
+            externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
+        )
     }
 
     /**
@@ -158,7 +171,10 @@ class PaymentSheet internal constructor(
     ) : this(
         DefaultPaymentSheetLauncher(fragment, paymentResultCallback)
     ) {
-        IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+        setPaymentSheetCallbacks(
+            createIntentCallback = createIntentCallback,
+            externalPaymentMethodConfirmHandler = null,
+        )
     }
 
     /**
@@ -180,8 +196,10 @@ class PaymentSheet internal constructor(
     ) : this(
         DefaultPaymentSheetLauncher(fragment, paymentResultCallback)
     ) {
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
-        IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+        setPaymentSheetCallbacks(
+            createIntentCallback = createIntentCallback,
+            externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
+        )
     }
 
     /**
@@ -236,17 +254,21 @@ class PaymentSheet internal constructor(
          */
         @Composable
         fun build(): PaymentSheet {
-            initializeCallbacks()
-            return rememberPaymentSheet(resultCallback)
+            /*
+             * Callbacks are initialized & updated internally by the internal composable function
+             */
+            return internalRememberPaymentSheet(
+                createIntentCallback = createIntentCallback,
+                externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
+                paymentResultCallback = resultCallback,
+            )
         }
 
         private fun initializeCallbacks() {
-            createIntentCallback?.let {
-                IntentConfirmationInterceptor.createIntentCallback = it
-            }
-            externalPaymentMethodConfirmHandler?.let {
-                ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = it
-            }
+            setPaymentSheetCallbacks(
+                createIntentCallback = createIntentCallback,
+                externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
+            )
         }
     }
 
@@ -825,7 +847,6 @@ class PaymentSheet internal constructor(
              * **Note**: This is only a client-side solution.
              * **Note**: Card brand filtering is not currently supported in Link.
              */
-            @ExperimentalCardBrandFilteringApi
             fun cardBrandAcceptance(
                 cardBrandAcceptance: CardBrandAcceptance
             ) = apply {
@@ -945,6 +966,7 @@ class PaymentSheet internal constructor(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+        @Poko
         class Embedded(
             internal val style: RowStyle
         ) : Parcelable {
@@ -952,7 +974,7 @@ class PaymentSheet internal constructor(
             internal companion object {
                 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
                 val default = Embedded(
-                    style = RowStyle.FlatWithRadio.defaultLight
+                    style = RowStyle.FlatWithRadio.default
                 )
             }
 
@@ -967,6 +989,7 @@ class PaymentSheet internal constructor(
                 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 @ExperimentalEmbeddedPaymentElementApi
                 @Parcelize
+                @Poko
                 class FlatWithRadio(
                     /**
                      * The thickness of the separator line between rows.
@@ -974,12 +997,6 @@ class PaymentSheet internal constructor(
                     internal val separatorThicknessDp: Float,
 
                     /**
-                     * The color of the separator line between rows.
-                     */
-                    @ColorInt
-                    internal val separatorColor: Int,
-
-                    /**
                      * The start inset of the separator line between rows.
                      */
                     internal val startSeparatorInsetDp: Float,
@@ -999,80 +1016,98 @@ class PaymentSheet internal constructor(
                      * Element.
                      */
                     internal val bottomSeparatorEnabled: Boolean,
-                    /**
-                     * The color of the radio button when selected.
-                     */
-                    @ColorInt
-                    internal val selectedColor: Int,
 
-                    /**
-                     * The color of the radio button when unselected.
-                     */
-                    @ColorInt
-                    internal val unselectedColor: Int,
                     /**
                      * Additional vertical insets applied to a payment method row.
                      * - Note: Increasing this value increases the height of each row.
                      */
                     internal val additionalVerticalInsetsDp: Float,
+
                     /**
                      * Horizontal insets applied to a payment method row.
                      */
                     internal val horizontalInsetsDp: Float,
+
+                    /**
+                     * Describes the colors used while the system is in light mode.
+                     */
+                    internal val colorsLight: Colors,
+
+                    /**
+                     * Describes the colors used while the system is in dark mode.
+                     */
+                    internal val colorsDark: Colors
                 ) : RowStyle() {
                     constructor(
                         context: Context,
                         separatorThicknessDp: Int,
-                        separatorColor: Color,
                         startSeparatorInsetDp: Int,
                         endSeparatorInsetDp: Int,
                         topSeparatorEnabled: Boolean,
                         bottomSeparatorEnabled: Boolean,
-                        selectedColor: Color,
-                        unselectedColor: Color,
                         additionalVerticalInsetsDp: Int,
-                        horizontalInsetsDp: Int
+                        horizontalInsetsDp: Int,
+                        colorsLight: Colors,
+                        colorsDark: Colors
                     ) : this(
                         separatorThicknessDp = context.getRawValueFromDimenResource(separatorThicknessDp),
-                        separatorColor = separatorColor.toArgb(),
                         startSeparatorInsetDp = context.getRawValueFromDimenResource(startSeparatorInsetDp),
                         endSeparatorInsetDp = context.getRawValueFromDimenResource(endSeparatorInsetDp),
                         topSeparatorEnabled = topSeparatorEnabled,
                         bottomSeparatorEnabled = bottomSeparatorEnabled,
-                        selectedColor = selectedColor.toArgb(),
-                        unselectedColor = unselectedColor.toArgb(),
                         additionalVerticalInsetsDp = context.getRawValueFromDimenResource(additionalVerticalInsetsDp),
-                        horizontalInsetsDp = context.getRawValueFromDimenResource(horizontalInsetsDp)
+                        horizontalInsetsDp = context.getRawValueFromDimenResource(horizontalInsetsDp),
+                        colorsLight = colorsLight,
+                        colorsDark = colorsDark
                     )
 
                     override fun hasSeparators() = true
                     override fun startSeparatorHasDefaultInset() = true
+                    internal fun getColors(isDark: Boolean): Colors = if (isDark) colorsDark else colorsLight
+
+                    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                    @ExperimentalEmbeddedPaymentElementApi
+                    @Parcelize
+                    @Poko
+                    class Colors(
+                        /**
+                         * The color of the separator line between rows.
+                         */
+                        @ColorInt
+                        internal val separatorColor: Int,
+
+                        /**
+                         * The color of the radio button when selected.
+                         */
+                        @ColorInt
+                        internal val selectedColor: Int,
+
+                        /**
+                         * The color of the radio button when unselected.
+                         */
+                        @ColorInt
+                        internal val unselectedColor: Int,
+                    ) : Parcelable
 
                     internal companion object {
-                        val defaultLight = FlatWithRadio(
+                        val default = FlatWithRadio(
                             separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
-                            separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
                             startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
                             endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
                             topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
                             bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
-                            selectedColor = StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
-                            unselectedColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
                             additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp,
-                            horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
-                        )
-
-                        val defaultDark = FlatWithRadio(
-                            separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
-                            separatorColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
-                            startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
-                            endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
-                            topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
-                            bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
-                            selectedColor = StripeThemeDefaults.colorsDark.materialColors.primary.toArgb(),
-                            unselectedColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
-                            additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp,
-                            horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
+                            horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp,
+                            colorsLight = Colors(
+                                separatorColor = StripeThemeDefaults.radioColorsLight.separatorColor.toArgb(),
+                                selectedColor = StripeThemeDefaults.radioColorsLight.selectedColor.toArgb(),
+                                unselectedColor = StripeThemeDefaults.radioColorsLight.unselectedColor.toArgb()
+                            ),
+                            colorsDark = Colors(
+                                separatorColor = StripeThemeDefaults.radioColorsDark.separatorColor.toArgb(),
+                                selectedColor = StripeThemeDefaults.radioColorsDark.selectedColor.toArgb(),
+                                unselectedColor = StripeThemeDefaults.radioColorsDark.unselectedColor.toArgb()
+                            ),
                         )
                     }
                 }
@@ -1080,6 +1115,7 @@ class PaymentSheet internal constructor(
                 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 @ExperimentalEmbeddedPaymentElementApi
                 @Parcelize
+                @Poko
                 class FlatWithCheckmark(
                     /**
                      * The thickness of the separator line between rows.
@@ -1087,12 +1123,6 @@ class PaymentSheet internal constructor(
                     internal val separatorThicknessDp: Float,
 
                     /**
-                     * The color of the separator line between rows.
-                     */
-                    @ColorInt
-                    internal val separatorColor: Int,
-
-                    /**
                      * The start inset of the separator line between rows.
                      */
                     internal val startSeparatorInsetDp: Float,
@@ -1112,78 +1142,98 @@ class PaymentSheet internal constructor(
                      * Element.
                      */
                     internal val bottomSeparatorEnabled: Boolean,
-                    /**
-                     * The color of the checkmark.
-                     */
-                    @ColorInt
-                    internal val checkmarkColor: Int,
+
                     /**
                      * Inset of the checkmark from the end of the row
                      */
                     internal val checkmarkInsetDp: Float,
+
                     /**
                      * Additional vertical insets applied to a payment method row.
                      * - Note: Increasing this value increases the height of each row.
                      */
                     internal val additionalVerticalInsetsDp: Float,
+
                     /**
                      * Horizontal insets applied to a payment method row.
                      */
                     internal val horizontalInsetsDp: Float,
+
+                    /**
+                     * Describes the colors used while the system is in light mode.
+                     */
+                    internal val colorsLight: Colors,
+
+                    /**
+                     * Describes the colors used while the system is in dark mode.
+                     */
+                    internal val colorsDark: Colors
                 ) : RowStyle() {
                     constructor(
                         context: Context,
                         separatorThicknessDp: Int,
-                        separatorColor: Color,
                         startSeparatorInsetDp: Int,
                         endSeparatorInsetDp: Int,
                         topSeparatorEnabled: Boolean,
                         bottomSeparatorEnabled: Boolean,
-                        checkmarkColor: Color,
                         checkmarkInsetDp: Int,
                         additionalVerticalInsetsDp: Int,
-                        horizontalInsetsDp: Int
+                        horizontalInsetsDp: Int,
+                        colorsLight: Colors,
+                        colorsDark: Colors
                     ) : this(
                         separatorThicknessDp = context.getRawValueFromDimenResource(separatorThicknessDp),
-                        separatorColor = separatorColor.toArgb(),
                         startSeparatorInsetDp = context.getRawValueFromDimenResource(startSeparatorInsetDp),
                         endSeparatorInsetDp = context.getRawValueFromDimenResource(endSeparatorInsetDp),
                         topSeparatorEnabled = topSeparatorEnabled,
                         bottomSeparatorEnabled = bottomSeparatorEnabled,
-                        checkmarkColor = checkmarkColor.toArgb(),
                         checkmarkInsetDp = context.getRawValueFromDimenResource(checkmarkInsetDp),
                         additionalVerticalInsetsDp = context.getRawValueFromDimenResource(additionalVerticalInsetsDp),
-                        horizontalInsetsDp = context.getRawValueFromDimenResource(horizontalInsetsDp)
+                        horizontalInsetsDp = context.getRawValueFromDimenResource(horizontalInsetsDp),
+                        colorsLight = colorsLight,
+                        colorsDark = colorsDark
                     )
+
+                    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+                    @ExperimentalEmbeddedPaymentElementApi
+                    @Parcelize
+                    @Poko
+                    class Colors(
+                        /**
+                         * The color of the separator line between rows.
+                         */
+                        @ColorInt
+                        internal val separatorColor: Int,
+
+                        /**
+                         * The color of the checkmark.
+                         */
+                        @ColorInt
+                        internal val checkmarkColor: Int,
+                    ) : Parcelable
 
                     override fun hasSeparators() = true
                     override fun startSeparatorHasDefaultInset() = false
+                    internal fun getColors(isDark: Boolean): Colors = if (isDark) colorsDark else colorsLight
 
                     internal companion object {
-                        val defaultLight = FlatWithCheckmark(
+                        val default = FlatWithCheckmark(
                             separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
-                            separatorColor = StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
                             startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
                             endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
                             topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
                             bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
-                            checkmarkColor = StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
                             checkmarkInsetDp = StripeThemeDefaults.embeddedCommon.checkmarkInsetDp,
                             additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp,
                             horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp,
-                        )
-
-                        val defaultDark = FlatWithCheckmark(
-                            separatorThicknessDp = StripeThemeDefaults.flat.separatorThickness,
-                            separatorColor = StripeThemeDefaults.colorsDark.componentBorder.toArgb(),
-                            startSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
-                            endSeparatorInsetDp = StripeThemeDefaults.flat.separatorInsets,
-                            topSeparatorEnabled = StripeThemeDefaults.flat.topSeparatorEnabled,
-                            bottomSeparatorEnabled = StripeThemeDefaults.flat.bottomSeparatorEnabled,
-                            checkmarkColor = StripeThemeDefaults.colorsDark.materialColors.primary.toArgb(),
-                            checkmarkInsetDp = StripeThemeDefaults.embeddedCommon.checkmarkInsetDp,
-                            additionalVerticalInsetsDp = StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp,
-                            horizontalInsetsDp = StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
+                            colorsLight = Colors(
+                                separatorColor = StripeThemeDefaults.checkmarkColorsLight.separatorColor.toArgb(),
+                                checkmarkColor = StripeThemeDefaults.checkmarkColorsLight.checkmarkColor.toArgb()
+                            ),
+                            colorsDark = Colors(
+                                separatorColor = StripeThemeDefaults.checkmarkColorsDark.separatorColor.toArgb(),
+                                checkmarkColor = StripeThemeDefaults.checkmarkColorsDark.checkmarkColor.toArgb()
+                            )
                         )
                     }
                 }
@@ -1191,6 +1241,7 @@ class PaymentSheet internal constructor(
                 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 @ExperimentalEmbeddedPaymentElementApi
                 @Parcelize
+                @Poko
                 class FloatingButton(
                     /**
                      * The spacing between payment method rows
@@ -1823,7 +1874,6 @@ class PaymentSheet internal constructor(
          * Card brand categories that can be allowed or disallowed
          */
         @Parcelize
-        @ExperimentalCardBrandFilteringApi
         enum class BrandCategory : Parcelable {
             /**
              * Visa branded cards
@@ -1852,7 +1902,6 @@ class PaymentSheet internal constructor(
              * Accept all card brands supported by Stripe
              */
             @JvmStatic
-            @ExperimentalCardBrandFilteringApi
             fun all(): CardBrandAcceptance = All
 
             /**
@@ -1860,7 +1909,6 @@ class PaymentSheet internal constructor(
              * **Note**: Any card brands that do not map to a `BrandCategory` will be blocked when using an allow list.
              */
             @JvmStatic
-            @ExperimentalCardBrandFilteringApi
             fun allowed(brands: List<BrandCategory>): CardBrandAcceptance =
                 Allowed(brands)
 
@@ -1870,7 +1918,6 @@ class PaymentSheet internal constructor(
              * when using a disallow list.
              */
             @JvmStatic
-            @ExperimentalCardBrandFilteringApi
             fun disallowed(brands: List<BrandCategory>): CardBrandAcceptance =
                 Disallowed(brands)
         }
@@ -1879,13 +1926,11 @@ class PaymentSheet internal constructor(
         internal data object All : CardBrandAcceptance()
 
         @Parcelize
-        @OptIn(ExperimentalCardBrandFilteringApi::class)
         internal data class Allowed(
             val brands: List<BrandCategory>
         ) : CardBrandAcceptance()
 
         @Parcelize
-        @OptIn(ExperimentalCardBrandFilteringApi::class)
         internal data class Disallowed(
             val brands: List<BrandCategory>
         ) : CardBrandAcceptance()
@@ -2145,17 +2190,22 @@ class PaymentSheet internal constructor(
              */
             @Composable
             fun build(): FlowController {
-                initializeCallbacks()
-                return rememberPaymentSheetFlowController(this)
+                /*
+                 * Callbacks are initialized & updated internally by the internal composable function
+                 */
+                return internalRememberPaymentSheetFlowController(
+                    createIntentCallback = createIntentCallback,
+                    externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
+                    paymentOptionCallback = paymentOptionCallback,
+                    paymentResultCallback = resultCallback,
+                )
             }
 
             private fun initializeCallbacks() {
-                createIntentCallback?.let {
-                    IntentConfirmationInterceptor.createIntentCallback = it
-                }
-                externalPaymentMethodConfirmHandler?.let {
-                    ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = it
-                }
+                setFlowControllerCallbacks(
+                    createIntentCallback = createIntentCallback,
+                    externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
+                )
             }
         }
 
@@ -2219,8 +2269,7 @@ class PaymentSheet internal constructor(
                 paymentOptionCallback: PaymentOptionCallback,
                 paymentResultCallback: PaymentSheetResultCallback
             ): FlowController {
-                ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler =
-                    externalPaymentMethodConfirmHandler
+                setFlowControllerCallbacks(externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler)
                 return FlowControllerFactory(
                     activity,
                     paymentOptionCallback,
@@ -2246,7 +2295,7 @@ class PaymentSheet internal constructor(
                 createIntentCallback: CreateIntentCallback,
                 paymentResultCallback: PaymentSheetResultCallback,
             ): FlowController {
-                IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+                setFlowControllerCallbacks(createIntentCallback = createIntentCallback)
                 return FlowControllerFactory(
                     activity,
                     paymentOptionCallback,
@@ -2277,9 +2326,10 @@ class PaymentSheet internal constructor(
                 createIntentCallback: CreateIntentCallback,
                 paymentResultCallback: PaymentSheetResultCallback,
             ): FlowController {
-                IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
-                ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler =
-                    externalPaymentMethodConfirmHandler
+                setFlowControllerCallbacks(
+                    createIntentCallback = createIntentCallback,
+                    externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
+                )
                 return FlowControllerFactory(
                     activity,
                     paymentOptionCallback,
@@ -2327,8 +2377,7 @@ class PaymentSheet internal constructor(
                 paymentOptionCallback: PaymentOptionCallback,
                 paymentResultCallback: PaymentSheetResultCallback
             ): FlowController {
-                ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler =
-                    externalPaymentMethodConfirmHandler
+                setFlowControllerCallbacks(externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler)
                 return FlowControllerFactory(
                     fragment,
                     paymentOptionCallback,
@@ -2354,7 +2403,7 @@ class PaymentSheet internal constructor(
                 createIntentCallback: CreateIntentCallback,
                 paymentResultCallback: PaymentSheetResultCallback,
             ): FlowController {
-                IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+                setFlowControllerCallbacks(createIntentCallback = createIntentCallback)
                 return FlowControllerFactory(
                     fragment,
                     paymentOptionCallback,
@@ -2385,9 +2434,10 @@ class PaymentSheet internal constructor(
                 externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
                 paymentResultCallback: PaymentSheetResultCallback,
             ): FlowController {
-                ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler =
-                    externalPaymentMethodConfirmHandler
-                IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+                setFlowControllerCallbacks(
+                    createIntentCallback = createIntentCallback,
+                    externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
+                )
                 return FlowControllerFactory(
                     fragment,
                     paymentOptionCallback,
@@ -2398,6 +2448,26 @@ class PaymentSheet internal constructor(
     }
 
     companion object {
+        private fun setPaymentSheetCallbacks(
+            createIntentCallback: CreateIntentCallback? = null,
+            externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
+        ) {
+            PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER] = PaymentElementCallbacks(
+                createIntentCallback = createIntentCallback,
+                externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
+            )
+        }
+
+        private fun setFlowControllerCallbacks(
+            createIntentCallback: CreateIntentCallback? = null,
+            externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
+        ) {
+            PaymentElementCallbackReferences[FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER] = PaymentElementCallbacks(
+                createIntentCallback = createIntentCallback,
+                externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
+            )
+        }
+
         /**
          * Deletes all persisted authentication state associated with a customer.
          *

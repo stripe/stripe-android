@@ -16,5 +16,8 @@ internal interface CustomerSheetSavedSelectionDataSource {
         customerSessionElementsSession: CustomerSessionElementsSession?
     ): CustomerSheetDataResult<SavedSelection?>
 
-    suspend fun setSavedSelection(selection: SavedSelection?): CustomerSheetDataResult<Unit>
+    suspend fun setSavedSelection(
+        selection: SavedSelection?,
+        shouldSyncDefault: Boolean,
+    ): CustomerSheetDataResult<Unit>
 }

@@ -11,11 +11,12 @@ import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
-import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.destination
+import com.stripe.android.financialconnections.repository.ConsumerSessionProvider
 import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.uicore.navigation.PopUpToBehavior
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -39,6 +40,7 @@ class NetworkingLinkLoginWarmupViewModelTest {
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
     private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
     private val lookupAccount = mock<LookupAccount>()
+    private val consumerSessionProvider = mock<ConsumerSessionProvider>()
 
     private fun buildViewModel(
         state: NetworkingLinkLoginWarmupState
@@ -51,6 +53,8 @@ class NetworkingLinkLoginWarmupViewModelTest {
         initialState = state,
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         lookupAccount = lookupAccount,
+        prefillDetails = null,
+        consumerSessionProvider = consumerSessionProvider,
     )
 
     @Test

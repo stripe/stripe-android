@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_camera_permission_settings_message">Perbolehkan akses kamera di pengaturan untuk memindai kartu Anda</string>
+  <string name="stripe_card_scan_instructions">Pindai Kartu Anda</string>
+  <string name="stripe_card_scan_title">Posisikan kartu Anda di persegi panjang untuk dipindai</string>
+  <string name="stripe_close_button_description">Tutup</string>
+  <string name="stripe_swap_camera_button_description">Ganti Kamera</string>
+  <!-- Label for the button that toggles the camera's torch -->
+  <string name="stripe_torch_button_description">Senter</string>
+</resources>

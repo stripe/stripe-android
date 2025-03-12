@@ -57,8 +57,10 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidJUnit4::class)
 class FinancialConnectionsSheetViewModelTest {
 
+    private val testDispatcher = UnconfinedTestDispatcher()
+
     @get:Rule
-    val rule: TestRule = CoroutineTestRule(UnconfinedTestDispatcher())
+    val rule: TestRule = CoroutineTestRule(testDispatcher)
 
     private val eventReporter = mock<FinancialConnectionsEventReporter>()
     private val configuration = FinancialConnectionsSheet.Configuration(
@@ -67,6 +69,7 @@ class FinancialConnectionsSheetViewModelTest {
     )
 
     private val syncResponse = syncResponse()
+    private val sessionId = syncResponse.manifest.id
 
     private val fetchFinancialConnectionsSession = mock<FetchFinancialConnectionsSession>()
     private val browserManager = mock<BrowserManager>()
@@ -86,7 +89,7 @@ class FinancialConnectionsSheetViewModelTest {
         runTest {
             whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
             createViewModel(defaultInitialState.copy(manifest = sessionManifest()))
-            verify(eventReporter).onPresented(configuration)
+            verify(eventReporter).onPresented()
         }
     }
 
@@ -459,7 +462,7 @@ class FinancialConnectionsSheetViewModelTest {
 
         // Then
         verify(eventReporter)
-            .onResult(eq(configuration), any<Failed>())
+            .onResult(eq(sessionId), any<Failed>())
     }
 
     @Test
@@ -485,7 +488,7 @@ class FinancialConnectionsSheetViewModelTest {
                 assertThat(viewEffect.result).isInstanceOf(Failed::class.java)
             }
             verify(eventReporter)
-                .onResult(eq(configuration), any<Failed>())
+                .onResult(eq(sessionId), any<Failed>())
         }
     }
 
@@ -506,7 +509,7 @@ class FinancialConnectionsSheetViewModelTest {
 
             // Then
             verify(eventReporter)
-                .onResult(configuration, Canceled)
+                .onResult(sessionId, Canceled)
         }
     }
 
@@ -723,7 +726,7 @@ class FinancialConnectionsSheetViewModelTest {
                 assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.ON_EXTERNAL_ACTIVITY)
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isEqualTo(Canceled)
-                verify(eventReporter).onResult(eq(configuration), any<Canceled>())
+                verify(eventReporter).onResult(eq(sessionId), any<Canceled>())
             }
         }
     }
@@ -739,6 +742,8 @@ class FinancialConnectionsSheetViewModelTest {
                 )
             )
 
+            whenever(getOrFetchSync(any(), any())).thenReturn(syncResponse)
+
             // When
             // simulate a config change
             viewModel.onActivityRecreated()
@@ -750,7 +755,7 @@ class FinancialConnectionsSheetViewModelTest {
                 assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.ON_EXTERNAL_ACTIVITY)
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isEqualTo(Canceled)
-                verify(eventReporter).onResult(eq(configuration), any<Canceled>())
+                verify(eventReporter).onResult(eq(sessionId), any<Canceled>())
             }
         }
     }
@@ -767,6 +772,8 @@ class FinancialConnectionsSheetViewModelTest {
                     )
                 )
             )
+
+            whenever(getOrFetchSync(any(), any())).thenReturn(syncResponse)
 
             val viewModel = createViewModel(
                 defaultInitialState.copy(
@@ -846,7 +853,8 @@ class FinancialConnectionsSheetViewModelTest {
             nativeAuthFlowCoordinator = mock(),
             integrityRequestManager = integrityRequestManager,
             integrityVerdictManager = mock(),
-            logger = Logger.noop()
+            logger = Logger.noop(),
+            ioDispatcher = testDispatcher,
         )
     }
 }

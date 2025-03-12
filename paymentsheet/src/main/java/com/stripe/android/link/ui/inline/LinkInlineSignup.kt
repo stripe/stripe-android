@@ -40,7 +40,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.DefaultLinkTheme
-import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.link.ui.signup.SignUpState.InputtingRemainingFields
@@ -52,6 +51,7 @@ import com.stripe.android.uicore.elements.SectionController
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.menu.Checkbox
 import com.stripe.android.uicore.getBorderStroke
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
 import com.stripe.android.uicore.utils.collectAsState
@@ -94,7 +94,7 @@ internal fun LinkInlineSignup(
         enabled = enabled,
         expanded = viewState.isExpanded,
         requiresNameCollection = viewModel.requiresNameCollection,
-        errorMessage = errorMessage,
+        errorMessage = errorMessage?.resolve(),
         toggleExpanded = viewModel::toggleExpanded,
         modifier = modifier
     )
@@ -112,7 +112,7 @@ internal fun LinkInlineSignup(
     enabled: Boolean,
     expanded: Boolean,
     requiresNameCollection: Boolean,
-    errorMessage: ErrorMessage?,
+    errorMessage: String?,
     toggleExpanded: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -221,7 +221,7 @@ internal fun LinkFields(
     enabled: Boolean,
     signUpState: SignUpState,
     requiresNameCollection: Boolean,
-    errorMessage: ErrorMessage?,
+    errorMessage: String?,
     sectionController: SectionController,
     emailController: TextFieldController,
     phoneNumberController: PhoneNumberController,

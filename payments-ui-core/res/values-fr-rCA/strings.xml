@@ -105,6 +105,8 @@
   <string name="stripe_scan_card">Scanner la carte</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">En fournissant vos informations de paiement et en confirmant ce paiement, vous autorisez (A) %s et Stripe, notre prestataire de services de paiement, à donner à votre institution financière l\'instruction de débiter votre compte, et (B) votre institution financièire à débiter votre compte conformément à ces instructions. Vous bénéficiez d\'un droit de remboursement par votre institution financière selon les conditions décrites dans la convention que vous avez passée avec elle. Toute demande de remboursement doit être présentée dans les 8 semaines suivant la date de débit de votre compte. Vos droits sont précisés dans une déclaration que vous pouvez obtenir auprès de votre institution financière. Vous acceptez de recevoir des notifications concernant les débits futurs jusqu\'à 2 jours avant leur réalisation.</string>
+  <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
+  <string name="stripe_set_as_default_payment_method">Définir comme moyen de paiement par défaut</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button sets the payment method up for future use -->
   <string name="stripe_setup_button_label">Configurer</string>
   <!-- Label for UPI ID number field on form -->

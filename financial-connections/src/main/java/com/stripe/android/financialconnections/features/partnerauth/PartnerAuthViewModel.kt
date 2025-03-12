@@ -35,6 +35,7 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
 import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
+import com.stripe.android.financialconnections.domain.RepairAuthorizationSession
 import com.stripe.android.financialconnections.domain.RetrieveAuthorizationSession
 import com.stripe.android.financialconnections.exception.FinancialConnectionsError
 import com.stripe.android.financialconnections.exception.PartnerAuthError
@@ -52,8 +53,6 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.Destination.AccountPicker
-import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.Async.Fail
@@ -61,8 +60,11 @@ import com.stripe.android.financialconnections.presentation.Async.Loading
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
+import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.financialconnections.utils.error
+import com.stripe.android.uicore.navigation.NavigationManager
+import com.stripe.android.uicore.navigation.PopUpToBehavior
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -88,14 +90,19 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
     private val pollAuthorizationSessionOAuthResults: PollAuthorizationSessionOAuthResults,
     private val logger: Logger,
     private val presentSheet: PresentSheet,
-    @Assisted initialState: SharedPartnerAuthState,
+    private val pendingRepairRepository: CoreAuthorizationPendingNetworkingRepairRepository,
+    private val repairAuthSession: RepairAuthorizationSession,
+    @Assisted private val initialState: SharedPartnerAuthState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
 ) : FinancialConnectionsViewModel<SharedPartnerAuthState>(initialState, nativeAuthFlowCoordinator) {
+
+    private val pane: Pane
+        get() = initialState.pane
 
     init {
         handleErrors()
         launchBrowserIfNonOauth()
-        restoreOrCreateAuthSession()
+        initializeState()
     }
 
     override fun updateTopAppBar(state: SharedPartnerAuthState): TopAppBarStateUpdate? {
@@ -103,31 +110,54 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
             null
         } else {
             TopAppBarStateUpdate(
-                pane = PANE,
+                pane = state.pane,
                 allowBackNavigation = state.canNavigateBack,
                 error = state.payload.error,
             )
         }
     }
 
-    private fun restoreOrCreateAuthSession() = suspend {
-        // A session should have been created in the previous pane and set as the active
-        // auth session in the manifest.
-        // if coming from a process kill, we'll fetch the current manifest from network,
-        // that should contain the active auth session.
-        val sync: SynchronizeSessionResponse = getOrFetchSync()
+    private fun initializeState() {
+        suspend {
+            val sync = getOrFetchSync()
+            if (pane == Pane.BANK_AUTH_REPAIR) {
+                initializeBankAuthRepair(sync)
+            } else {
+                initializePartnerAuth(sync)
+            }
+        }.execute {
+            copy(payload = it)
+        }
+    }
+
+    private suspend fun initializeBankAuthRepair(
+        sync: SynchronizeSessionResponse,
+    ): Payload {
+        val authorization = requireNotNull(pendingRepairRepository.get()?.coreAuthorization)
+        val activeInstitution = requireNotNull(sync.manifest.activeInstitution)
+
+        val authSession = repairAuthSession(authorization)
+
+        return Payload(
+            isStripeDirect = sync.manifest.isStripeDirect ?: false,
+            institution = activeInstitution,
+            authSession = authSession,
+        )
+    }
+
+    private suspend fun initializePartnerAuth(
+        sync: SynchronizeSessionResponse,
+    ): Payload {
         val manifest = sync.manifest
         val authSession = manifest.activeAuthSession ?: createAuthorizationSession(
             institution = requireNotNull(manifest.activeInstitution),
             sync = sync
         )
-        Payload(
+        return Payload(
             isStripeDirect = manifest.isStripeDirect ?: false,
             institution = requireNotNull(manifest.activeInstitution),
             authSession = authSession,
         )
-    }.execute {
-        copy(payload = it)
     }
 
     private fun recreateAuthSession() = suspend {
@@ -177,11 +207,11 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
                 handleError(
                     extraMessage = "Error fetching payload / posting AuthSession",
                     error = it,
-                    pane = PANE,
+                    pane = pane,
                     displayErrorScreen = true
                 )
             },
-            onSuccess = { eventTracker.track(PaneLoaded(PANE)) }
+            onSuccess = { eventTracker.track(PaneLoaded(pane)) }
         )
         onAsync(
             SharedPartnerAuthState::authenticationStatus,
@@ -189,7 +219,7 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
                 handleError(
                     extraMessage = "Error with authentication status",
                     error = if (it is FinancialConnectionsError) it else PartnerAuthError(it.message),
-                    pane = PANE,
+                    pane = pane,
                     displayErrorScreen = true
                 )
             }
@@ -211,7 +241,7 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
 
     private fun reportOAuthLaunched(sessionId: String) {
         postAuthSessionEvent(sessionId, AuthSessionEvent.OAuthLaunched(Date()))
-        eventTracker.track(PrepaneClickContinue(PANE))
+        eventTracker.track(PrepaneClickContinue(pane))
     }
 
     private fun launchAuthInBrowser(authSession: FinancialConnectionsAuthorizationSession) {
@@ -220,7 +250,7 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
             eventTracker.track(
                 AuthSessionOpened(
                     id = authSession.id,
-                    pane = PANE,
+                    pane = pane,
                     flow = authSession.flow,
                     defaultBrowser = browserManager.getPackageToHandleUri(uri = url.toUri()),
                 )
@@ -275,7 +305,7 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
             val authSession = getOrFetchSync().manifest.activeAuthSession
             eventTracker.track(
                 AuthSessionUrlReceived(
-                    pane = PANE,
+                    pane = pane,
                     url = url,
                     authSessionId = authSession?.id,
                     status = "failed"
@@ -285,7 +315,7 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
                 extraMessage = "Auth failed, cancelling AuthSession",
                 error = error,
                 logger = logger,
-                pane = PANE
+                pane = pane
             )
             when {
                 authSession != null -> {
@@ -301,7 +331,7 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
                 extraMessage = "failed cancelling session after failed web flow",
                 error = it,
                 logger = logger,
-                pane = PANE
+                pane = pane
             )
         }
     }
@@ -316,7 +346,7 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
             val authSession = manifest.activeAuthSession
             eventTracker.track(
                 AuthSessionUrlReceived(
-                    pane = PANE,
+                    pane = pane,
                     url = url ?: "none",
                     authSessionId = authSession?.id,
                     status = "cancelled"
@@ -335,13 +365,13 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
                         nextPane = nextPane
                     )
                 )
-                if (nextPane == PANE) {
+                if (nextPane == pane) {
                     // auth session was not completed, proceed with cancellation
                     cancelAuthSessionAndContinue(authSession = retrievedAuthSession)
                 } else {
                     // auth session succeeded although client didn't retrieve any deeplink.
                     postAuthSessionEvent(authSession.id, AuthSessionEvent.Success(Date()))
-                    navigationManager.tryNavigateTo(nextPane.destination(referrer = PANE))
+                    navigationManager.tryNavigateTo(nextPane.destination(referrer = pane))
                 }
             } else {
                 cancelAuthSessionAndContinue(authSession)
@@ -351,7 +381,7 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
                 "failed cancelling session after cancelled web flow. url: $url",
                 it,
                 logger,
-                PANE
+                pane
             )
             setState { copy(authenticationStatus = Fail(it)) }
         }
@@ -377,7 +407,7 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
             // For non-OAuth institutions, navigate to Session cancellation's next pane.
             postAuthSessionEvent(authSession.id, AuthSessionEvent.Cancel(Date()))
             navigationManager.tryNavigateTo(
-                route = result.nextPane.destination(referrer = PANE),
+                route = result.nextPane.destination(referrer = pane),
                 popUpTo = PopUpToBehavior.Current(inclusive = true),
             )
         }
@@ -391,7 +421,7 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
             ).manifest.activeAuthSession
             eventTracker.track(
                 AuthSessionUrlReceived(
-                    pane = PANE,
+                    pane = pane,
                     url = url,
                     authSessionId = authSession?.id,
                     status = "success"
@@ -408,9 +438,9 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
                     publicToken = oAuthResults.publicToken
                 )
                 logger.debug("Session authorized!")
-                updatedSession.nextPane.destination(referrer = PANE)
+                updatedSession.nextPane.destination(referrer = pane)
             } else {
-                AccountPicker(referrer = PANE)
+                AccountPicker(referrer = pane)
             }
             FinancialConnections.emitEvent(Name.INSTITUTION_AUTHORIZED)
             navigationManager.tryNavigateTo(nextPane)
@@ -419,7 +449,7 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
                 extraMessage = "failed authorizing session",
                 error = it,
                 logger = logger,
-                pane = PANE
+                pane = pane
             )
             setState { copy(authenticationStatus = Fail(it)) }
         }
@@ -428,7 +458,7 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
     // if clicked uri contains an eventName query param, track click event.
     fun onClickableTextClick(uri: String) = viewModelScope.launch {
         uriUtils.getQueryParameter(uri, "eventName")?.let { eventName ->
-            eventTracker.track(Click(eventName, pane = PANE))
+            eventTracker.track(Click(eventName, pane = pane))
         }
         if (URLUtil.isNetworkUrl(uri)) {
             setState {
@@ -454,7 +484,7 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
         val notice = authSession?.display?.text?.consent?.dataAccessNotice ?: return
         presentSheet(
             content = DataAccess(notice),
-            referrer = PANE,
+            referrer = pane,
         )
     }
 
@@ -466,9 +496,9 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
 
     fun onCancelClick() = withState { state ->
         if (state.inModal) {
-            eventTracker.track(PrepaneClickCancel(pane = PANE))
+            eventTracker.track(PrepaneClickCancel(pane = pane))
         } else {
-            eventTracker.track(PrepaneClickChooseAnotherBank(pane = PANE))
+            eventTracker.track(PrepaneClickChooseAnotherBank(pane = pane))
         }
 
         viewModelScope.launch {
@@ -494,7 +524,7 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
 
     private fun cancelInFullscreen() {
         navigationManager.tryNavigateTo(
-            route = Destination.InstitutionPicker(referrer = PANE),
+            route = Destination.InstitutionPicker(referrer = pane),
             popUpTo = PopUpToBehavior.Current(
                 inclusive = true,
             ),
@@ -516,7 +546,5 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
                     parentComponent.partnerAuthViewModelFactory.create(SharedPartnerAuthState(args))
                 }
             }
-
-        private val PANE = Pane.PARTNER_AUTH
     }
 }

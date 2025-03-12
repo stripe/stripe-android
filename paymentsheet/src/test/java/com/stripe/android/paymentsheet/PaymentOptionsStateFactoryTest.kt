@@ -49,7 +49,7 @@ class PaymentOptionsStateFactoryTest {
     fun `'isModifiable' is true when multiple networks are available & is CBC eligible`() {
         val paymentMethods = PaymentMethodFixtures.createCards(3).toMutableList()
 
-        val lastPaymentMethodWithNetworks = paymentMethods.removeLast().let { paymentMethod ->
+        val lastPaymentMethodWithNetworks = paymentMethods.removeAt(paymentMethods.lastIndex).let { paymentMethod ->
             paymentMethod.copy(
                 card = paymentMethod.card?.copy(
                     networks = PaymentMethod.Card.Networks(

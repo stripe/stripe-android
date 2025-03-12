@@ -17,12 +17,14 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.example.data.BackendRepository
 import com.stripe.android.financialconnections.example.data.Settings
+import com.stripe.android.financialconnections.example.data.model.Merchant
 import com.stripe.android.financialconnections.example.settings.ConfirmIntentSetting
 import com.stripe.android.financialconnections.example.settings.EmailSetting
 import com.stripe.android.financialconnections.example.settings.ExperienceSetting
 import com.stripe.android.financialconnections.example.settings.FinancialConnectionsPlaygroundUrlHelper
 import com.stripe.android.financialconnections.example.settings.FlowSetting
 import com.stripe.android.financialconnections.example.settings.IntegrationTypeSetting
+import com.stripe.android.financialconnections.example.settings.MerchantSetting
 import com.stripe.android.financialconnections.example.settings.PlaygroundSettings
 import com.stripe.android.financialconnections.example.settings.StripeAccountIdSetting
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -64,6 +66,26 @@ internal class FinancialConnectionsPlaygroundViewModel(
                         append(event.metadata.toMap().filterValues { it != null })
                     }
                 )
+            }
+        }
+
+        if (launchUri == null) {
+            // Only load merchants from the backend if we're not in an end-to-end test,
+            // which typically open the sample app with a custom URI.
+            loadMerchants()
+        }
+    }
+
+    private fun loadMerchants() {
+        viewModelScope.launch {
+            runCatching {
+                repository.merchants()
+            }.onSuccess { response ->
+                _state.update {
+                    it.updateWithMerchants(response.merchants)
+                }
+            }.onFailure { error ->
+                Log.e("FinancialConnections", "Failed to fetch merchants from backend", error)
             }
         }
     }
@@ -125,10 +147,14 @@ internal class FinancialConnectionsPlaygroundViewModel(
                             }
                         )
                     }
+
+                    val stripeAccount = settings.getOrNull<StripeAccountIdSetting>()?.selectedOption
+
                     _viewEffect.emit(
                         FinancialConnectionsPlaygroundViewEffect.OpenForPaymentIntent(
                             paymentIntentSecret = it.intentSecret,
                             publishableKey = it.publishableKey,
+                            stripeAccountId = stripeAccount?.takeIf(String::isNotBlank),
                             ephemeralKey = it.ephemeralKey,
                             customerId = it.customerId,
                             elementsSessionContext = ElementsSessionContext(
@@ -164,13 +190,16 @@ internal class FinancialConnectionsPlaygroundViewModel(
                 // Success creating session: open the financial connections sheet with received secret
                 .onSuccess {
                     showLoadingWithMessage("Session created, opening FinancialConnectionsSheet.")
+
+                    val stripeAccount = settings.getOrNull<StripeAccountIdSetting>()?.selectedOption
+
                     _state.update { current -> current.copy(publishableKey = it.publishableKey) }
                     _viewEffect.emit(
                         FinancialConnectionsPlaygroundViewEffect.OpenForData(
                             configuration = FinancialConnectionsSheet.Configuration(
                                 financialConnectionsSessionClientSecret = it.clientSecret,
                                 publishableKey = it.publishableKey,
-                                stripeAccountId = _state.value.stripeAccountId
+                                stripeAccountId = stripeAccount?.takeIf(String::isNotBlank),
                             )
                         )
                     )
@@ -189,6 +218,7 @@ internal class FinancialConnectionsPlaygroundViewModel(
                 // Success creating session: open the financial connections sheet with received secret
                 .onSuccess {
                     showLoadingWithMessage("Session created, opening FinancialConnectionsSheet.")
+
                     _state.update { current -> current.copy(publishableKey = it.publishableKey) }
                     _viewEffect.emit(
                         FinancialConnectionsPlaygroundViewEffect.OpenForToken(
@@ -430,28 +460,6 @@ internal class FinancialConnectionsPlaygroundViewModel(
     }
 }
 
-enum class Merchant(
-    val apiValue: String,
-    val canSwitchBetweenTestAndLive: Boolean = true,
-) {
-    Default("default"),
-    PartnerD("partner_d", canSwitchBetweenTestAndLive = false),
-    PartnerF("partner_f", canSwitchBetweenTestAndLive = false),
-    PartnerM("partner_m", canSwitchBetweenTestAndLive = false),
-    PlatformC("strash"),
-    Networking("networking"),
-    LiveTesting("live_testing", canSwitchBetweenTestAndLive = false),
-    TestMode("testmode", canSwitchBetweenTestAndLive = false),
-    Trusted("trusted", canSwitchBetweenTestAndLive = false),
-    Custom("other");
-
-    companion object {
-        fun fromApiValue(apiValue: String): Merchant {
-            return entries.firstOrNull { it.apiValue == apiValue } ?: Default
-        }
-    }
-}
-
 enum class Flow(val apiValue: String) {
     Data("Data"),
     Token("Token"),
@@ -506,6 +514,7 @@ sealed class FinancialConnectionsPlaygroundViewEffect {
         val ephemeralKey: String?,
         val customerId: String?,
         val publishableKey: String,
+        val stripeAccountId: String?,
         val experience: Experience,
         val integrationType: IntegrationType,
         val elementsSessionContext: ElementsSessionContext,
@@ -529,6 +538,20 @@ internal data class FinancialConnectionsPlaygroundState(
 
     val experience: Experience = settings.get<ExperienceSetting>().selectedOption
     val flow: Flow = settings.get<FlowSetting>().selectedOption
-    val stripeAccountId: String? = settings.getOrNull<StripeAccountIdSetting>()?.selectedOption
-        ?.takeIf { it.isNotEmpty() }
+
+    fun updateWithMerchants(merchants: List<Merchant>): FinancialConnectionsPlaygroundState {
+        return copy(
+            settings = settings.copy(
+                settings = settings.settings.map { setting ->
+                    if (setting is MerchantSetting) {
+                        MerchantSetting(
+                            merchants = merchants,
+                        )
+                    } else {
+                        setting
+                    }
+                }
+            )
+        )
+    }
 }

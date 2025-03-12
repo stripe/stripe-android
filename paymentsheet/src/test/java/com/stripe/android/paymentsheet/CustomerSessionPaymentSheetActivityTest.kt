@@ -294,9 +294,10 @@ internal class CustomerSessionPaymentSheetActivityTest {
 
     private fun runTest(
         cards: List<PaymentMethod>,
-        isPaymentMethodRemoveEnabled: Boolean,
-        canRemoveLastPaymentMethodConfig: Boolean,
-        canRemoveLastPaymentMethodServer: Boolean,
+        isPaymentMethodRemoveEnabled: Boolean = true,
+        canRemoveLastPaymentMethodConfig: Boolean = true,
+        canRemoveLastPaymentMethodServer: Boolean = true,
+        defaultPaymentMethod: String? = null,
         test: (PaymentSheetActivity) -> Unit,
     ) {
         networkRule.enqueue(
@@ -309,6 +310,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
                     cards = cards,
                     isPaymentMethodRemoveEnabled = isPaymentMethodRemoveEnabled,
                     canRemoveLastPaymentMethod = canRemoveLastPaymentMethodServer,
+                    defaultPaymentMethod = defaultPaymentMethod,
                 )
             )
         }
@@ -328,11 +330,12 @@ internal class CustomerSessionPaymentSheetActivityTest {
                             id = "cus_1",
                             clientSecret = "cuss_1",
                         ),
+                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
                         allowsRemovalOfLastSavedPaymentMethod = canRemoveLastPaymentMethodConfig,
                         preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa),
-                        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
                     ),
                     statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
+                    paymentElementCallbackIdentifier = PaymentSheetFixtures.PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
                 )
             )
         ).use { scenario ->
@@ -390,6 +393,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
             cards: List<PaymentMethod>,
             isPaymentMethodRemoveEnabled: Boolean,
             canRemoveLastPaymentMethod: Boolean,
+            defaultPaymentMethod: String?,
         ): String {
             val cardsArray = JSONArray()
 
@@ -399,17 +403,8 @@ internal class CustomerSessionPaymentSheetActivityTest {
 
             val cardsStringified = cardsArray.toString(2)
 
-            val isPaymentMethodRemoveStringified = if (isPaymentMethodRemoveEnabled) {
-                "enabled"
-            } else {
-                "disabled"
-            }
-
-            val canRemoveLastPaymentMethodStringified = if (canRemoveLastPaymentMethod) {
-                "enabled"
-            } else {
-                "disabled"
-            }
+            val isPaymentMethodRemoveStringified = isPaymentMethodRemoveEnabled.toFeatureState()
+            val canRemoveLastPaymentMethodStringified = canRemoveLastPaymentMethod.toFeatureState()
 
             return """
                 {
@@ -451,7 +446,7 @@ internal class CustomerSessionPaymentSheetActivityTest {
                         }
                       }
                     },
-                    "default_payment_method": null
+                    "default_payment_method": $defaultPaymentMethod
                   },
                   "payment_method_preference": {
                     "object": "payment_method_preference",
@@ -515,6 +510,14 @@ internal class CustomerSessionPaymentSheetActivityTest {
                   "unactivated_payment_method_types": []
                 }
             """.trimIndent()
+        }
+
+        private fun Boolean.toFeatureState(): String {
+            return if (this) {
+                "enabled"
+            } else {
+                "disabled"
+            }
         }
     }
 }

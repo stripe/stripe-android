@@ -11,12 +11,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.uicore.elements.PhoneNumberController
@@ -37,7 +35,7 @@ internal fun LinkInlineSignupFields(
     enabled: Boolean,
     isShowingPhoneFirst: Boolean,
     requiresNameCollection: Boolean,
-    errorMessage: ErrorMessage?,
+    errorMessage: String?,
     didShowAllFields: Boolean,
     onShowingAllFields: () -> Unit,
     modifier: Modifier = Modifier,
@@ -82,9 +80,7 @@ internal fun LinkInlineSignupFields(
             visible = signUpState != SignUpState.InputtingRemainingFields && errorMessage != null,
         ) {
             ErrorText(
-                text = errorMessage
-                    ?.getMessage(LocalContext.current.resources)
-                    .orEmpty(),
+                text = errorMessage.orEmpty(),
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -152,9 +148,7 @@ internal fun LinkInlineSignupFields(
 
                 AnimatedVisibility(visible = errorMessage != null) {
                     ErrorText(
-                        text = errorMessage
-                            ?.getMessage(LocalContext.current.resources)
-                            .orEmpty(),
+                        text = errorMessage.orEmpty(),
                         modifier = Modifier.fillMaxWidth()
                     )
                 }

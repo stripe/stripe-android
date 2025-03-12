@@ -72,6 +72,10 @@ internal data class DisplayableSavedPaymentMethod private constructor(
         }
     }
 
+    fun isDefaultPaymentMethod(defaultPaymentMethodId: String?): Boolean {
+        return paymentMethod.id != null && paymentMethod.id == defaultPaymentMethodId
+    }
+
     companion object {
         fun create(
             displayName: ResolvableString,

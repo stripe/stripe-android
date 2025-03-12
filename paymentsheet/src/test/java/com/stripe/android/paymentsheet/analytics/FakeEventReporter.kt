@@ -15,6 +15,51 @@ internal class FakeEventReporter : EventReporter {
     private val _paymentFailureCalls = Turbine<PaymentFailureCall>()
     val paymentFailureCalls: ReceiveTurbine<PaymentFailureCall> = _paymentFailureCalls
 
+    private val _updatePaymentMethodSucceededCalls = Turbine<UpdatePaymentMethodSucceededCall>()
+    val updatePaymentMethodSucceededCalls: ReceiveTurbine<UpdatePaymentMethodSucceededCall> =
+        _updatePaymentMethodSucceededCalls
+
+    private val _updatePaymentMethodFailedCalls = Turbine<UpdatePaymentMethodFailedCall>()
+    val updatePaymentMethodFailedCalls: ReceiveTurbine<UpdatePaymentMethodFailedCall> =
+        _updatePaymentMethodFailedCalls
+
+    private val _setAsDefaultPaymentMethodFailedCalls = Turbine<SetAsDefaultPaymentMethodFailedCall>()
+    val setAsDefaultPaymentMethodFailedCalls: ReceiveTurbine<SetAsDefaultPaymentMethodFailedCall> =
+        _setAsDefaultPaymentMethodFailedCalls
+
+    private val _setAsDefaultPaymentMethodSucceededCalls = Turbine<SetAsDefaultPaymentMethodSucceededCall>()
+    val setAsDefaultPaymentMethodSucceededCalls: ReceiveTurbine<SetAsDefaultPaymentMethodSucceededCall> =
+        _setAsDefaultPaymentMethodSucceededCalls
+
+    private val _showEditablePaymentOptionCalls = Turbine<Unit>()
+    val showEditablePaymentOptionCalls: ReceiveTurbine<Unit> = _showEditablePaymentOptionCalls
+
+    private val _hideEditablePaymentOptionCalls = Turbine<Unit>()
+    val hideEditablePaymentOptionCalls: ReceiveTurbine<Unit> = _hideEditablePaymentOptionCalls
+
+    private val _cannotProperlyReturnFromLinkAndOtherLPMsCalls = Turbine<Unit>()
+    val cannotProperlyReturnFromLinkAndOtherLPMsCalls: ReceiveTurbine<Unit> =
+        _cannotProperlyReturnFromLinkAndOtherLPMsCalls
+
+    private val _showNewPaymentOptionsCalls = Turbine<Unit>()
+    val showNewPaymentOptionsCalls: ReceiveTurbine<Unit> = _showNewPaymentOptionsCalls
+
+    private val _showManageSavedPaymentMethods = Turbine<Unit>()
+    val showManageSavedPaymentMethods: ReceiveTurbine<Unit> = _showManageSavedPaymentMethods
+
+    fun validate() {
+        _paymentFailureCalls.ensureAllEventsConsumed()
+        _updatePaymentMethodSucceededCalls.ensureAllEventsConsumed()
+        _updatePaymentMethodFailedCalls.ensureAllEventsConsumed()
+        _setAsDefaultPaymentMethodFailedCalls.ensureAllEventsConsumed()
+        _setAsDefaultPaymentMethodSucceededCalls.ensureAllEventsConsumed()
+        _showEditablePaymentOptionCalls.ensureAllEventsConsumed()
+        _hideEditablePaymentOptionCalls.ensureAllEventsConsumed()
+        _cannotProperlyReturnFromLinkAndOtherLPMsCalls.ensureAllEventsConsumed()
+        _showNewPaymentOptionsCalls.ensureAllEventsConsumed()
+        _showManageSavedPaymentMethods.ensureAllEventsConsumed()
+    }
+
     override fun onInit(configuration: PaymentSheet.Configuration, isDeferred: Boolean) {
     }
 
@@ -28,9 +73,10 @@ internal class FakeEventReporter : EventReporter {
         currency: String?,
         initializationMode: PaymentElementLoader.InitializationMode,
         orderedLpms: List<String>,
-        requireCvcRecollection: Boolean
-    ) {
-    }
+        requireCvcRecollection: Boolean,
+        hasDefaultPaymentMethod: Boolean?,
+        setAsDefaultEnabled: Boolean?
+    ) {}
 
     override fun onLoadFailed(error: Throwable) {
     }
@@ -44,7 +90,12 @@ internal class FakeEventReporter : EventReporter {
     override fun onShowExistingPaymentOptions() {
     }
 
+    override fun onShowManageSavedPaymentMethods() {
+        _showManageSavedPaymentMethods.add(Unit)
+    }
+
     override fun onShowNewPaymentOptions() {
+        _showNewPaymentOptionsCalls.add(Unit)
     }
 
     override fun onSelectPaymentMethod(code: PaymentMethodCode) {
@@ -90,9 +141,11 @@ internal class FakeEventReporter : EventReporter {
     }
 
     override fun onShowEditablePaymentOption() {
+        _showEditablePaymentOptionCalls.add(Unit)
     }
 
     override fun onHideEditablePaymentOption() {
+        _hideEditablePaymentOptionCalls.add(Unit)
     }
 
     override fun onShowPaymentOptionBrands(source: EventReporter.CardBrandChoiceEventSource, selectedBrand: CardBrand) {
@@ -105,12 +158,31 @@ internal class FakeEventReporter : EventReporter {
     }
 
     override fun onUpdatePaymentMethodSucceeded(selectedBrand: CardBrand) {
+        _updatePaymentMethodSucceededCalls.add(
+            UpdatePaymentMethodSucceededCall(selectedBrand = selectedBrand)
+        )
     }
 
     override fun onUpdatePaymentMethodFailed(selectedBrand: CardBrand, error: Throwable) {
+        _updatePaymentMethodFailedCalls.add(
+            UpdatePaymentMethodFailedCall(selectedBrand = selectedBrand, error = error)
+        )
+    }
+
+    override fun onSetAsDefaultPaymentMethodSucceeded() {
+        _setAsDefaultPaymentMethodSucceededCalls.add(
+            SetAsDefaultPaymentMethodSucceededCall()
+        )
+    }
+
+    override fun onSetAsDefaultPaymentMethodFailed(error: Throwable) {
+        _setAsDefaultPaymentMethodFailedCalls.add(
+            SetAsDefaultPaymentMethodFailedCall(error = error)
+        )
     }
 
     override fun onCannotProperlyReturnFromLinkAndOtherLPMs() {
+        _cannotProperlyReturnFromLinkAndOtherLPMsCalls.add(Unit)
     }
 
     override fun onDisallowedCardBrandEntered(brand: CardBrand) {
@@ -119,5 +191,20 @@ internal class FakeEventReporter : EventReporter {
     data class PaymentFailureCall(
         val paymentSelection: PaymentSelection?,
         val error: PaymentSheetConfirmationError
+    )
+
+    data class UpdatePaymentMethodSucceededCall(
+        val selectedBrand: CardBrand,
+    )
+
+    data class UpdatePaymentMethodFailedCall(
+        val selectedBrand: CardBrand,
+        val error: Throwable,
+    )
+
+    class SetAsDefaultPaymentMethodSucceededCall
+
+    data class SetAsDefaultPaymentMethodFailedCall(
+        val error: Throwable,
     )
 }

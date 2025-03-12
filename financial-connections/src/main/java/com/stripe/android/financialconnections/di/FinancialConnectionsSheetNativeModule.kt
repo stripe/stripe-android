@@ -22,8 +22,6 @@ import com.stripe.android.financialconnections.features.networkinglinksignup.Lin
 import com.stripe.android.financialconnections.features.notice.PresentSheet
 import com.stripe.android.financialconnections.features.notice.RealPresentSheet
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
-import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.NavigationManagerImpl
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState
 import com.stripe.android.financialconnections.repository.ConsumerSessionRepository
@@ -37,6 +35,8 @@ import com.stripe.android.financialconnections.repository.api.RealProvideApiRequ
 import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.repository.ConsumersApiServiceImpl
 import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.navigation.NavigationManager
+import com.stripe.android.uicore.navigation.NavigationManagerImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -196,6 +196,13 @@ internal interface FinancialConnectionsSheetNativeModule {
             initialState: FinancialConnectionsSheetNativeState,
         ): ElementsSessionContext? {
             return initialState.elementsSessionContext
+        }
+
+        @Provides
+        internal fun providePrefillDetails(
+            initialState: FinancialConnectionsSheetNativeState,
+        ): ElementsSessionContext.PrefillDetails? {
+            return initialState.elementsSessionContext?.prefillDetails
         }
     }
 }

@@ -7,7 +7,6 @@ import com.stripe.android.paymentsheet.example.playground.settings.CountrySettin
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.test.core.TestParameters
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -18,14 +17,6 @@ internal class TestAlma : BasePlaygroundTest() {
     ) { settings ->
         settings[CountrySettingsDefinition] = Country.FR
         settings[CurrencySettingsDefinition] = Currency.EUR
-    }
-
-    @Ignore("Complex authorization handling required")
-    @Test
-    fun testAlma() {
-        testDriver.confirmNewOrGuestComplete(
-            testParameters = testParameters,
-        )
     }
 
     @Test

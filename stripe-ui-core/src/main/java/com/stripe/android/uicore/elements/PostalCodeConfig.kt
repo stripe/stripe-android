@@ -34,6 +34,7 @@ class PostalCodeConfig(
     override val visualTransformation: VisualTransformation =
         PostalCodeVisualTransformation(format)
     override val loading: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    override val shouldAnnounceFieldValue = false
 
     override fun determineState(input: String): TextFieldState = object : TextFieldState {
         override fun shouldShowError(hasFocus: Boolean) = getError() != null && !hasFocus

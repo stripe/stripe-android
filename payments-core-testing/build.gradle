@@ -9,6 +9,7 @@ dependencies {
     implementation libs.kotlin.coroutinesAndroid
     implementation testLibs.junit
     implementation testLibs.kotlin.coroutines
+    implementation testLibs.mockito.kotlin
     implementation testLibs.turbine
     implementation testLibs.leakCanaryInstrumentation
 

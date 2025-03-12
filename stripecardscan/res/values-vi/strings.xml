@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_camera_permission_settings_message">Vui lòng cho phép truy cập camera trong phần cài đặt để quét thẻ.</string>
+  <string name="stripe_card_scan_instructions">Quét Thẻ</string>
+  <string name="stripe_card_scan_title">Đặt thẻ vào vùng hình chữ nhật để quét</string>
+  <string name="stripe_close_button_description">Đóng</string>
+  <string name="stripe_swap_camera_button_description">Đổi camera</string>
+  <!-- Label for the button that toggles the camera's torch -->
+  <string name="stripe_torch_button_description">Đèn pin</string>
+</resources>

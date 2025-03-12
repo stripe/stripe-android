@@ -61,7 +61,9 @@ internal class DefaultEventReporter @Inject internal constructor(
         currency: String?,
         initializationMode: PaymentElementLoader.InitializationMode,
         orderedLpms: List<String>,
-        requireCvcRecollection: Boolean
+        requireCvcRecollection: Boolean,
+        hasDefaultPaymentMethod: Boolean?,
+        setAsDefaultEnabled: Boolean?,
     ) {
         this.currency = currency
         this.linkMode = linkMode
@@ -80,7 +82,9 @@ internal class DefaultEventReporter @Inject internal constructor(
                 googlePaySupported = googlePaySupported,
                 initializationMode = initializationMode,
                 orderedLpms = orderedLpms,
-                requireCvcRecollection = requireCvcRecollection
+                requireCvcRecollection = requireCvcRecollection,
+                hasDefaultPaymentMethod = hasDefaultPaymentMethod,
+                setAsDefaultEnabled = setAsDefaultEnabled,
             )
         )
     }
@@ -124,6 +128,18 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onShowExistingPaymentOptions() {
         fireEvent(
             PaymentSheetEvent.ShowExistingPaymentOptions(
+                mode = mode,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+                currency = currency,
+                isDeferred = isDeferred,
+            )
+        )
+    }
+
+    override fun onShowManageSavedPaymentMethods() {
+        fireEvent(
+            PaymentSheetEvent.ShowManagePaymentMethods(
                 mode = mode,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
@@ -387,6 +403,29 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.UpdatePaymentOptionFailed(
                 selectedBrand = selectedBrand,
+                error = error,
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
+    }
+
+    override fun onSetAsDefaultPaymentMethodSucceeded() {
+        fireEvent(
+            PaymentSheetEvent.SetAsDefaultPaymentMethodSucceeded(
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
+    }
+
+    override fun onSetAsDefaultPaymentMethodFailed(
+        error: Throwable,
+    ) {
+        fireEvent(
+            PaymentSheetEvent.SetAsDefaultPaymentMethodFailed(
                 error = error,
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,

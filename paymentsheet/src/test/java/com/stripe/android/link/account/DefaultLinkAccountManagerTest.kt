@@ -21,7 +21,9 @@ import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.ConsumerSignUpConsentAction
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
@@ -531,7 +533,8 @@ class DefaultLinkAccountManagerTest {
                 paymentMethodCreateParams: PaymentMethodCreateParams,
                 id: String,
                 last4: String,
-                consumerSessionClientSecret: String
+                consumerSessionClientSecret: String,
+                allowRedisplay: PaymentMethod.AllowRedisplay?,
             ): Result<LinkPaymentDetails.New> {
                 val paymentDetailsMatch = paymentMethodCreateParams == TestFactory.PAYMENT_METHOD_CREATE_PARAMS &&
                     id == TestFactory.LINK_NEW_PAYMENT_DETAILS.paymentDetails.id &&
@@ -543,7 +546,8 @@ class DefaultLinkAccountManagerTest {
                     paymentMethodCreateParams,
                     id,
                     last4,
-                    consumerSessionClientSecret
+                    consumerSessionClientSecret,
+                    allowRedisplay,
                 )
             }
         }
@@ -968,6 +972,22 @@ class DefaultLinkAccountManagerTest {
         linkRepository.ensureAllEventsConsumed()
     }
 
+    @Test
+    fun `allow_redisplay equals null when sharing card payment details in passthrough mode`() =
+        allowRedisplayTest(expectedAllowRedisplay = null)
+
+    @Test
+    fun `allow_redisplay equals UNSPECIFIED when sharing card payment details in passthrough mode`() =
+        allowRedisplayTest(expectedAllowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED)
+
+    @Test
+    fun `allow_redisplay equals LIMITED when sharing card payment details in passthrough mode`() =
+        allowRedisplayTest(expectedAllowRedisplay = PaymentMethod.AllowRedisplay.LIMITED)
+
+    @Test
+    fun `allow_redisplay equals ALWAYS when sharing card payment details in passthrough mode`() =
+        allowRedisplayTest(expectedAllowRedisplay = PaymentMethod.AllowRedisplay.ALWAYS)
+
     private fun runSuspendTest(testBody: suspend TestScope.() -> Unit) = runTest(dispatcher) {
         testBody()
     }
@@ -1003,6 +1023,52 @@ class DefaultLinkAccountManagerTest {
             name = "name",
             consentAction = consentAction
         )
+    }
+
+    private fun allowRedisplayTest(
+        expectedAllowRedisplay: PaymentMethod.AllowRedisplay?,
+    ) = runTest {
+        var actualAllowRedisplay: PaymentMethod.AllowRedisplay? = null
+
+        val linkRepository = object : FakeLinkRepository() {
+            override suspend fun createCardPaymentDetails(
+                paymentMethodCreateParams: PaymentMethodCreateParams,
+                userEmail: String,
+                stripeIntent: StripeIntent,
+                consumerSessionClientSecret: String,
+                consumerPublishableKey: String?,
+                active: Boolean
+            ): Result<LinkPaymentDetails.New> {
+                return Result.success(TestFactory.LINK_NEW_PAYMENT_DETAILS)
+            }
+
+            override suspend fun shareCardPaymentDetails(
+                paymentMethodCreateParams: PaymentMethodCreateParams,
+                id: String,
+                last4: String,
+                consumerSessionClientSecret: String,
+                allowRedisplay: PaymentMethod.AllowRedisplay?,
+            ): Result<LinkPaymentDetails.New> {
+                actualAllowRedisplay = allowRedisplay
+
+                return Result.success(TestFactory.LINK_NEW_PAYMENT_DETAILS)
+            }
+        }
+
+        val manager = accountManager(
+            passthroughModeEnabled = true,
+            linkRepository = linkRepository
+        )
+
+        manager.setAccountNullable(TestFactory.CONSUMER_SESSION, TestFactory.PUBLISHABLE_KEY)
+        manager.createCardPaymentDetails(
+            paymentMethodCreateParams = PaymentMethodCreateParams.create(
+                card = PaymentMethodCreateParamsFixtures.CARD,
+                allowRedisplay = expectedAllowRedisplay,
+            )
+        )
+
+        assertThat(actualAllowRedisplay).isEqualTo(expectedAllowRedisplay)
     }
 }
 

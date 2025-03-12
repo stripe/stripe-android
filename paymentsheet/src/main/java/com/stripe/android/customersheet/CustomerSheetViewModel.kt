@@ -512,7 +512,6 @@ internal class CustomerSheetViewModel(
                 productUsageTokens = setOf("CustomerSheet"),
             )
         ).onSuccess { updatedMethod ->
-            onBackPressed()
             updatePaymentMethodInState(updatedMethod)
 
             eventReporter.onUpdatePaymentMethodSucceeded(
@@ -556,8 +555,17 @@ internal class CustomerSheetViewModel(
                             selectedBrand = it
                         )
                     },
-                    updateExecutor = ::updateExecutor,
+                    onUpdateSuccess = ::onBackPressed,
+                    updateCardBrandExecutor = ::updateCardBrandExecutor,
                     workContext = workContext,
+                    // This checkbox is never displayed in CustomerSheet.
+                    shouldShowSetAsDefaultCheckbox = false,
+                    // Should never be called from CustomerSheet, because we don't enable the set as default checkbox.
+                    setDefaultPaymentMethodExecutor = {
+                        Result.failure(
+                            IllegalStateException("Unexpected attempt to update default from CustomerSheet.")
+                        )
+                    },
                 ),
                 isLiveMode = isLiveModeProvider(),
             )
@@ -571,7 +579,7 @@ internal class CustomerSheetViewModel(
         }.failureOrNull()?.cause
     }
 
-    private suspend fun updateExecutor(paymentMethod: PaymentMethod, brand: CardBrand): Result<PaymentMethod> {
+    private suspend fun updateCardBrandExecutor(paymentMethod: PaymentMethod, brand: CardBrand): Result<PaymentMethod> {
         return when (val result = modifyCardPaymentMethod(paymentMethod, brand)) {
             is CustomerSheetDataResult.Success -> Result.success(result.value)
             is CustomerSheetDataResult.Failure -> Result.failure(result.cause)
@@ -829,7 +837,8 @@ internal class CustomerSheetViewModel(
             onUpdatePrimaryButtonState = { /* no-op, CustomerSheetScreen does not use PrimaryButton.State */ },
             onError = { error ->
                 handleViewAction(CustomerSheetViewAction.OnFormError(error))
-            }
+            },
+            setAsDefaultPaymentMethodEnabled = false,
         )
     }
 
@@ -1061,9 +1070,13 @@ internal class CustomerSheetViewModel(
                 }?.let {
                     PaymentSelection.Saved(it)
                 } ?: state.currentSelection
-
+                val filteredPaymentMethods = paymentMethods.filter { paymentMethod ->
+                    paymentMethod.card?.let { card ->
+                        PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance).isAccepted(card.brand)
+                    } ?: true
+                }
                 state.copy(
-                    paymentMethods = sortPaymentMethods(paymentMethods, selection as? PaymentSelection.Saved),
+                    paymentMethods = sortPaymentMethods(filteredPaymentMethods, selection as? PaymentSelection.Saved),
                     currentSelection = selection,
                 )
             }
@@ -1083,13 +1096,17 @@ internal class CustomerSheetViewModel(
     }
 
     private fun selectSavedPaymentMethod(savedPaymentSelection: PaymentSelection.Saved?) {
+        val syncDefaultEnabled = customerState.value.metadata?.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
+
         viewModelScope.launch(workContext) {
             awaitSavedSelectionDataSource().setSavedSelection(
-                savedPaymentSelection?.toSavedSelection()
+                savedPaymentSelection?.toSavedSelection(),
+                shouldSyncDefault = syncDefaultEnabled == true,
             ).onSuccess {
                 confirmPaymentSelection(
                     paymentSelection = savedPaymentSelection,
                     type = savedPaymentSelection?.paymentMethod?.type?.code,
+                    syncDefaultEnabled = syncDefaultEnabled,
                 )
             }.onFailure { cause, displayMessage ->
                 confirmPaymentSelectionError(
@@ -1097,18 +1114,22 @@ internal class CustomerSheetViewModel(
                     type = savedPaymentSelection?.paymentMethod?.type?.code,
                     cause = cause,
                     displayMessage = displayMessage,
+                    syncDefaultEnabled = syncDefaultEnabled,
                 )
             }
         }
     }
 
     private fun selectGooglePay() {
+        val syncDefaultEnabled = customerState.value.metadata?.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
+
         viewModelScope.launch(workContext) {
-            awaitSavedSelectionDataSource().setSavedSelection(SavedSelection.GooglePay)
+            awaitSavedSelectionDataSource().setSavedSelection(SavedSelection.GooglePay, shouldSyncDefault = false)
                 .onSuccess {
                     confirmPaymentSelection(
                         paymentSelection = PaymentSelection.GooglePay,
-                        type = "google_pay"
+                        type = "google_pay",
+                        syncDefaultEnabled = syncDefaultEnabled,
                     )
                 }.onFailure { cause, displayMessage ->
                     confirmPaymentSelectionError(
@@ -1116,14 +1137,22 @@ internal class CustomerSheetViewModel(
                         type = "google_pay",
                         cause = cause,
                         displayMessage = displayMessage,
+                        syncDefaultEnabled = syncDefaultEnabled,
                     )
                 }
         }
     }
 
-    private fun confirmPaymentSelection(paymentSelection: PaymentSelection?, type: String?) {
+    private fun confirmPaymentSelection(
+        paymentSelection: PaymentSelection?,
+        type: String?,
+        syncDefaultEnabled: Boolean?,
+    ) {
         type?.let {
-            eventReporter.onConfirmPaymentMethodSucceeded(type)
+            eventReporter.onConfirmPaymentMethodSucceeded(
+                type = type,
+                syncDefaultEnabled = syncDefaultEnabled
+            )
         }
         _result.tryEmit(
             InternalCustomerSheetResult.Selected(
@@ -1135,11 +1164,15 @@ internal class CustomerSheetViewModel(
     private fun confirmPaymentSelectionError(
         paymentSelection: PaymentSelection?,
         type: String?,
+        syncDefaultEnabled: Boolean?,
         cause: Throwable,
         displayMessage: String?
     ) {
         type?.let {
-            eventReporter.onConfirmPaymentMethodFailed(type)
+            eventReporter.onConfirmPaymentMethodFailed(
+                type = type,
+                syncDefaultEnabled = syncDefaultEnabled
+            )
         }
         logger.error(
             msg = "Failed to persist payment selection: $paymentSelection",

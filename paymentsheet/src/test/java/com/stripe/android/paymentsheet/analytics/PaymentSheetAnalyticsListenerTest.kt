@@ -59,6 +59,14 @@ class PaymentSheetAnalyticsListenerTest {
     }
 
     @Test
+    fun `onShowManageSavedPaymentMethods is called when screen updates to ManageSavedPaymentMethods`() = runScenario {
+        verifyNoInteractions(eventReporter)
+        currentScreen.value = mock<PaymentSheetScreen.ManageSavedPaymentMethods>()
+        testScheduler.advanceUntilIdle()
+        verify(eventReporter).onShowManageSavedPaymentMethods()
+    }
+
+    @Test
     fun `onShowEditablePaymentOption is called when screen updates to UpdatePaymentMethod`() = runScenario {
         verifyNoInteractions(eventReporter)
         currentScreen.value = mock<PaymentSheetScreen.UpdatePaymentMethod>()

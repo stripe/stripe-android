@@ -1,7 +1,6 @@
 package com.stripe.android.connect.example.ui.componentpicker
 
-import android.content.Intent
-import androidx.activity.ComponentActivity
+import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -29,6 +28,7 @@ import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,8 +38,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.stripe.android.connect.AccountOnboardingListener
 import com.stripe.android.connect.PrivateBetaConnectSDK
+import com.stripe.android.connect.StripeComponentController
 import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.core.Success
 import com.stripe.android.connect.example.core.then
@@ -50,18 +53,21 @@ import com.stripe.android.connect.example.ui.common.ConnectExampleScaffold
 import com.stripe.android.connect.example.ui.common.CustomizeAppearanceIconButton
 import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentLoaderViewModel
 import com.stripe.android.connect.example.ui.embeddedcomponentmanagerloader.EmbeddedComponentManagerLoader
-import com.stripe.android.connect.example.ui.features.accountonboarding.AccountOnboardingExampleActivity
-import com.stripe.android.connect.example.ui.features.payouts.PayoutsExampleActivity
+import com.stripe.android.connect.example.ui.settings.SettingsViewModel
 import kotlinx.coroutines.launch
 
+@Suppress("LongMethod")
 @OptIn(PrivateBetaConnectSDK::class, ExperimentalMaterialApi::class)
 @Composable
 fun ComponentPickerContent(
     viewModel: EmbeddedComponentLoaderViewModel,
+    settingsViewModel: SettingsViewModel,
     openSettings: () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
+    val settingsState by settingsViewModel.state.collectAsState()
     val embeddedComponentAsync = state.embeddedComponentManagerAsync
+    val context = LocalContext.current as FragmentActivity
 
     val sheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
@@ -98,29 +104,70 @@ fun ComponentPickerContent(
                 embeddedComponentAsync = embeddedComponentAsync,
                 reload = viewModel::reload,
                 openSettings = openSettings,
-            ) {
-                ComponentPickerList()
+            ) { embeddedComponentManager ->
+                val onboardingSettings = settingsState.onboardingSettings
+                val onboardingController = remember(embeddedComponentManager, onboardingSettings) {
+                    val controller = embeddedComponentManager.createAccountOnboardingController(
+                        activity = context,
+                        title = "Account Onboarding",
+                        props = onboardingSettings.toProps(),
+                    )
+                    val logTag = "AccountOnboarding"
+                    val listener = object : AccountOnboardingListener {
+                        override fun onLoaderStart() {
+                            Log.d(logTag, "onLoaderStart")
+                        }
+
+                        override fun onLoadError(error: Throwable) {
+                            Log.d(logTag, "onLoadError", error)
+                        }
+
+                        override fun onExit() {
+                            Log.d(logTag, "onExit")
+                            controller.dismiss()
+                        }
+                    }
+                    controller.apply {
+                        this.listener = listener
+                        this.onDismissListener = StripeComponentController.OnDismissListener {
+                            Log.d(logTag, "onDismiss")
+                        }
+                    }
+                }
+
+                ComponentPickerList(
+                    onMenuItemClick = { menuItem ->
+                        when (menuItem) {
+                            MenuItem.AccountOnboarding -> {
+                                onboardingController.show()
+                            }
+                        }
+                    },
+                )
             }
         }
     }
 }
 
 @Composable
-fun ComponentPickerList() {
+private fun ComponentPickerList(onMenuItemClick: (MenuItem) -> Unit) {
+    val items = remember { listOf(MenuItem.AccountOnboarding) }
     LazyColumn {
-        items(menuItems) { menuItem ->
-            MenuRowItem(menuItem)
+        items(items) { menuItem ->
+            MenuRowItem(menuItem, onMenuItemClick)
         }
     }
 }
 
 @Composable
-private fun LazyItemScope.MenuRowItem(menuItem: MenuItem) {
-    val context = LocalContext.current
+private fun LazyItemScope.MenuRowItem(
+    menuItem: MenuItem,
+    onMenuItemClick: (MenuItem) -> Unit,
+) {
     Row(
         modifier = Modifier
             .fillParentMaxWidth()
-            .clickable { context.startActivity(Intent(context, menuItem.activity)) },
+            .clickable(onClick = { onMenuItemClick(menuItem) }),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(modifier = Modifier.weight(1f)) {
@@ -161,32 +208,22 @@ private fun LazyItemScope.MenuRowItem(menuItem: MenuItem) {
     }
 }
 
-private data class MenuItem(
+private enum class MenuItem(
     @StringRes val title: Int,
     @StringRes val subtitle: Int,
-    val activity: Class<out ComponentActivity>,
     val isBeta: Boolean = false,
-)
-
-private val menuItems = listOf(
-    MenuItem(
+) {
+    AccountOnboarding(
         title = R.string.account_onboarding,
         subtitle = R.string.account_onboarding_menu_subtitle,
-        activity = AccountOnboardingExampleActivity::class.java,
         isBeta = true,
     ),
-    MenuItem(
-        title = R.string.payouts,
-        subtitle = R.string.payouts_menu_subtitle,
-        activity = PayoutsExampleActivity::class.java,
-        isBeta = true,
-    ),
-)
+}
 
 // Previews
 
 @Composable
 @Preview(showBackground = true)
 private fun ComponentListPreview() {
-    ComponentPickerList()
+    ComponentPickerList(onMenuItemClick = {})
 }

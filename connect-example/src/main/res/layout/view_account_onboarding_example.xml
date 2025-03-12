@@ -5,4 +5,5 @@
     android:layout_height="match_parent"
     app:stripeFullTermsOfServiceUrl="https://developer.android.com/"
     app:stripePrivacyPolicyUrl="https://developer.android.com/"
-    app:stripeRecipientTermsOfServiceUrl="https://developer.android.com/" />
+    app:stripeRecipientTermsOfServiceUrl="https://developer.android.com/"
+    app:stripeWebViewCacheKey="account_onboarding_example" />

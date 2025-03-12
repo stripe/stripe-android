@@ -5,13 +5,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
+import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark
+import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio
+import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton
 import com.stripe.android.screenshottesting.PaparazziRule
-import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.utils.MockPaymentMethodsFactory
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
@@ -40,7 +41,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     fun testFloatingButton() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
-                rowStyle = getRowStyle(Embedded.RowStyle.FloatingButton::class)
+                rowStyle = getRowStyle(FloatingButton::class)
             )
         }
     }
@@ -49,7 +50,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     fun testFlatWitRadio() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
-                rowStyle = getRowStyle(Embedded.RowStyle.FlatWithRadio::class)
+                rowStyle = getRowStyle(FlatWithRadio::class)
             )
         }
     }
@@ -58,7 +59,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     fun testFlatWithCheckmark() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
-                rowStyle = getRowStyle(Embedded.RowStyle.FlatWithCheckmark::class)
+                rowStyle = getRowStyle(FlatWithCheckmark::class)
             )
         }
     }
@@ -68,7 +69,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
                 rowStyle = getRowStyle(
-                    type = Embedded.RowStyle.FlatWithCheckmark::class,
+                    type = FlatWithCheckmark::class,
                     separatorThicknessDp = 5f,
                     separatorColor = Color.CYAN,
                     startSeparatorInset = 40f,
@@ -83,7 +84,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
                 rowStyle = getRowStyle(
-                    type = Embedded.RowStyle.FlatWithCheckmark::class,
+                    type = FlatWithCheckmark::class,
                     topSeparatorEnabled = false,
                     bottomSeparatorEnabled = true
                 )
@@ -96,7 +97,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
                 rowStyle = getRowStyle(
-                    type = Embedded.RowStyle.FlatWithCheckmark::class,
+                    type = FlatWithCheckmark::class,
                     topSeparatorEnabled = true,
                     bottomSeparatorEnabled = false
                 )
@@ -109,7 +110,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
                 rowStyle = getRowStyle(
-                    type = Embedded.RowStyle.FlatWithCheckmark::class,
+                    type = FlatWithCheckmark::class,
                     topSeparatorEnabled = true,
                     bottomSeparatorEnabled = true,
                     separatorThicknessDp = 5f
@@ -124,7 +125,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
                 rowStyle = getRowStyle(
-                    type = Embedded.RowStyle.FlatWithCheckmark::class,
+                    type = FlatWithCheckmark::class,
                     topSeparatorEnabled = true,
                     bottomSeparatorEnabled = true,
                     separatorThicknessDp = 5f
@@ -176,36 +177,42 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
         spacingDp: Float? = null
     ): Embedded.RowStyle {
         return when (type) {
-            Embedded.RowStyle.FlatWithRadio::class -> Embedded.RowStyle.FlatWithRadio(
-                separatorThicknessDp = separatorThicknessDp ?: StripeThemeDefaults.flat.separatorThickness,
-                separatorColor = separatorColor ?: StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
-                startSeparatorInsetDp = startSeparatorInset ?: StripeThemeDefaults.flat.separatorInsets,
-                endSeparatorInsetDp = endSeparatorInset ?: StripeThemeDefaults.flat.separatorInsets,
-                topSeparatorEnabled = topSeparatorEnabled ?: StripeThemeDefaults.flat.topSeparatorEnabled,
-                bottomSeparatorEnabled = bottomSeparatorEnabled ?: StripeThemeDefaults.flat.bottomSeparatorEnabled,
-                selectedColor = selectedColor ?: StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
-                unselectedColor = unselectedColor ?: StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
+            FlatWithRadio::class -> FlatWithRadio(
+                separatorThicknessDp = separatorThicknessDp ?: FlatWithRadio.default.separatorThicknessDp,
+                startSeparatorInsetDp = startSeparatorInset ?: FlatWithRadio.default.startSeparatorInsetDp,
+                endSeparatorInsetDp = endSeparatorInset ?: FlatWithRadio.default.endSeparatorInsetDp,
+                topSeparatorEnabled = topSeparatorEnabled ?: FlatWithRadio.default.topSeparatorEnabled,
+                bottomSeparatorEnabled = bottomSeparatorEnabled ?: FlatWithRadio.default.bottomSeparatorEnabled,
                 additionalVerticalInsetsDp = additionalVerticalInsetsDp
-                    ?: StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp,
-                horizontalInsetsDp = horizontalInsetsDp ?: StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
+                    ?: FlatWithRadio.default.additionalVerticalInsetsDp,
+                horizontalInsetsDp = horizontalInsetsDp ?: FlatWithRadio.default.horizontalInsetsDp,
+                colorsLight = FlatWithRadio.Colors(
+                    separatorColor = separatorColor ?: FlatWithRadio.default.colorsLight.separatorColor,
+                    selectedColor = selectedColor ?: FlatWithRadio.default.colorsLight.selectedColor,
+                    unselectedColor = unselectedColor ?: FlatWithRadio.default.colorsLight.unselectedColor
+                ),
+                colorsDark = FlatWithRadio.default.colorsDark
             )
-            Embedded.RowStyle.FlatWithCheckmark::class -> Embedded.RowStyle.FlatWithCheckmark(
-                separatorThicknessDp = separatorThicknessDp ?: StripeThemeDefaults.flat.separatorThickness,
-                separatorColor = separatorColor ?: StripeThemeDefaults.colorsLight.componentBorder.toArgb(),
-                startSeparatorInsetDp = startSeparatorInset ?: StripeThemeDefaults.flat.separatorInsets,
-                endSeparatorInsetDp = endSeparatorInset ?: StripeThemeDefaults.flat.separatorInsets,
-                topSeparatorEnabled = topSeparatorEnabled ?: StripeThemeDefaults.flat.topSeparatorEnabled,
-                bottomSeparatorEnabled = bottomSeparatorEnabled ?: StripeThemeDefaults.flat.bottomSeparatorEnabled,
-                checkmarkColor = checkmarkColor ?: StripeThemeDefaults.colorsLight.materialColors.primary.toArgb(),
-                checkmarkInsetDp = checkmarkInsetDp ?: StripeThemeDefaults.embeddedCommon.checkmarkInsetDp,
+            FlatWithCheckmark::class -> FlatWithCheckmark(
+                separatorThicknessDp = separatorThicknessDp ?: FlatWithCheckmark.default.separatorThicknessDp,
+                startSeparatorInsetDp = startSeparatorInset ?: FlatWithCheckmark.default.startSeparatorInsetDp,
+                endSeparatorInsetDp = endSeparatorInset ?: FlatWithCheckmark.default.endSeparatorInsetDp,
+                topSeparatorEnabled = topSeparatorEnabled ?: FlatWithCheckmark.default.topSeparatorEnabled,
+                bottomSeparatorEnabled = bottomSeparatorEnabled
+                    ?: FlatWithCheckmark.default.bottomSeparatorEnabled,
+                checkmarkInsetDp = checkmarkInsetDp ?: FlatWithCheckmark.default.checkmarkInsetDp,
                 additionalVerticalInsetsDp = additionalVerticalInsetsDp
-                    ?: StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp,
-                horizontalInsetsDp = horizontalInsetsDp ?: StripeThemeDefaults.embeddedCommon.horizontalInsetsDp
+                    ?: FlatWithCheckmark.default.additionalVerticalInsetsDp,
+                horizontalInsetsDp = horizontalInsetsDp ?: FlatWithCheckmark.default.horizontalInsetsDp,
+                colorsLight = FlatWithCheckmark.Colors(
+                    separatorColor = separatorColor ?: FlatWithCheckmark.default.colorsLight.separatorColor,
+                    checkmarkColor = checkmarkColor ?: FlatWithCheckmark.default.colorsLight.checkmarkColor
+                ),
+                colorsDark = FlatWithCheckmark.default.colorsDark
             )
-            else -> Embedded.RowStyle.FloatingButton(
-                spacingDp = spacingDp ?: StripeThemeDefaults.floating.spacing,
-                additionalInsetsDp = additionalVerticalInsetsDp
-                    ?: StripeThemeDefaults.embeddedCommon.additionalVerticalInsetsDp
+            else -> FloatingButton(
+                spacingDp = spacingDp ?: FloatingButton.default.spacingDp,
+                additionalInsetsDp = additionalVerticalInsetsDp ?: FloatingButton.default.additionalInsetsDp
             )
         }
     }

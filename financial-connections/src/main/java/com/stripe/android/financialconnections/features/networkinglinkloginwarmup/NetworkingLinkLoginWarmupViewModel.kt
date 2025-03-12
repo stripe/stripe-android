@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
@@ -15,23 +16,25 @@ import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.features.common.getBusinessName
-import com.stripe.android.financialconnections.features.common.getRedactedEmail
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.Destination.Companion.KEY_NEXT_PANE_ON_DISABLE_NETWORKING
-import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
+import com.stripe.android.financialconnections.repository.ConsumerSessionProvider
 import com.stripe.android.model.EmailSource
+import com.stripe.android.uicore.navigation.NavigationManager
+import com.stripe.android.uicore.navigation.PopUpToBehavior
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+
+private const val EMAIL_LENGTH = 15
 
 internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
     @Assisted initialState: NetworkingLinkLoginWarmupState,
@@ -42,6 +45,8 @@ internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
     private val disableNetworking: DisableNetworking,
     private val navigationManager: NavigationManager,
     private val lookupAccount: LookupAccount,
+    private val prefillDetails: ElementsSessionContext.PrefillDetails?,
+    private val consumerSessionProvider: ConsumerSessionProvider,
 ) : FinancialConnectionsViewModel<NetworkingLinkLoginWarmupState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
@@ -49,10 +54,13 @@ internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
         suspend {
             val manifest = getOrFetchSync().manifest
             eventTracker.track(PaneLoaded(PANE))
+
+            val email = requireNotNull(manifest.accountholderCustomerEmailAddress ?: prefillDetails?.email)
+
             NetworkingLinkLoginWarmupState.Payload(
                 merchantName = manifest.getBusinessName(),
-                redactedEmail = requireNotNull(manifest.getRedactedEmail()),
-                email = requireNotNull(manifest.accountholderCustomerEmailAddress),
+                redactedEmail = redactEmail(email),
+                email = email,
                 sessionId = manifest.id,
                 verifiedFlow = manifest.appVerificationEnabled
             )
@@ -101,19 +109,25 @@ internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
 
     fun onContinueClick() {
         val payload = stateFlow.value.payload() ?: return
+        val existingConsumerSession = consumerSessionProvider.provideConsumerSession()
 
         suspend {
             eventTracker.track(Click("click.continue", PANE))
-            // Trigger a lookup call to ensure we cache a consumer session for posterior verification.
-            lookupAccount(
-                pane = PANE,
-                email = payload.email,
-                phone = null,
-                phoneCountryCode = null,
-                emailSource = EmailSource.CUSTOMER_OBJECT,
-                sessionId = payload.sessionId,
-                verifiedFlow = payload.verifiedFlow
-            )
+
+            if (existingConsumerSession == null) {
+                // Trigger a lookup call to ensure we cache a consumer session for posterior verification.
+                // Don't do this if we already have a consumer session, which means that we call this same
+                // method in the consent pane.
+                lookupAccount(
+                    pane = PANE,
+                    email = payload.email,
+                    phone = null,
+                    phoneCountryCode = null,
+                    emailSource = EmailSource.CUSTOMER_OBJECT,
+                    sessionId = payload.sessionId,
+                    verifiedFlow = payload.verifiedFlow
+                )
+            }
             navigationManager.tryNavigateTo(Destination.NetworkingLinkVerification(referrer = PANE))
         }.execute {
             copy(continueAsync = it)
@@ -188,6 +202,7 @@ internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
 internal data class NetworkingLinkLoginWarmupState(
     val referrer: Pane? = null,
     val nextPaneOnDisableNetworking: String? = null,
+    val consumerEmail: String? = null,
     val payload: Async<Payload> = Uninitialized,
     val disableNetworkingAsync: Async<FinancialConnectionsSessionManifest> = Uninitialized,
     val continueAsync: Async<Unit> = Uninitialized,
@@ -219,4 +234,14 @@ internal data class NetworkingLinkLoginWarmupState(
         val verifiedFlow: Boolean,
         val sessionId: String
     )
+}
+
+private fun redactEmail(email: String): String {
+    val content = email.split('@')[0]
+    return if (content.length <= EMAIL_LENGTH) {
+        email
+    } else {
+        val domain = email.split('@')[1]
+        content.substring(0, EMAIL_LENGTH) + "•••@" + domain
+    }
 }

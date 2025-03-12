@@ -2,10 +2,12 @@ package com.stripe.android.paymentelement.embedded.form
 
 import android.app.Application
 import android.os.Bundle
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasParent
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
@@ -67,6 +69,16 @@ internal class FormActivityTest {
         primaryButton.assertIsEnabled()
     }
 
+    @Test
+    fun `Primary button label is correctly applied`() = launch(
+        configuration = EmbeddedPaymentElement.Configuration
+            .Builder("Example, Inc.")
+            .primaryButtonLabel("Hi mom")
+            .build()
+    ) {
+        primaryButton.assert(hasText("Hi mom"))
+    }
+
     private fun launch(
         selectedPaymentMethodCode: PaymentMethodCode = "card",
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
@@ -91,6 +103,7 @@ internal class FormActivityTest {
                     configuration = configuration,
                     initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration),
                     statusBarColor = null,
+                    paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
                 ),
             )
         ).use { scenario ->

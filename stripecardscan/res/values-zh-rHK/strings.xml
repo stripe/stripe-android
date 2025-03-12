@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+  <string name="stripe_camera_permission_settings_message">請在設置中允許存取攝像頭以掃描您的卡</string>
+  <string name="stripe_card_scan_instructions">掃描您的卡</string>
+  <string name="stripe_card_scan_title">將您的卡放在要掃描的方框中</string>
+  <string name="stripe_close_button_description">關閉</string>
+  <string name="stripe_swap_camera_button_description">翻轉攝像頭</string>
+  <!-- Label for the button that toggles the camera's torch -->
+  <string name="stripe_torch_button_description">手電筒</string>
+</resources>

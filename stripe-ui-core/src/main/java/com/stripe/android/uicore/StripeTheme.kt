@@ -126,7 +126,6 @@ data class PrimaryButtonTypography(
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class EmbeddedFlatStyle(
     val separatorThickness: Float,
-    val separatorColor: Color,
     val separatorInsets: Float,
     val topSeparatorEnabled: Boolean,
     val bottomSeparatorEnabled: Boolean
@@ -140,12 +139,26 @@ data class EmbeddedInsets(
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class EmbeddedCheckmarkColors(
+    val separatorColor: Color,
+    val checkmarkColor: Color
+)
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class EmbeddedRadioColors(
+    val separatorColor: Color,
+    val selectedColor: Color,
+    val unselectedColor: Color
+)
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class EmbeddedFloatingStyle(
     val spacing: Float
 )
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR = Color(0xFF24B47E)
+private val EMBEDDED_SEPARATOR_COLOR_DARK = Color(0x40FFFFFF)
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object StripeThemeDefaults {
@@ -233,16 +246,37 @@ object StripeThemeDefaults {
 
     val flat = EmbeddedFlatStyle(
         separatorThickness = 1.0f,
-        separatorColor = Color(0xFF787880),
         separatorInsets = 0.0f,
         topSeparatorEnabled = true,
         bottomSeparatorEnabled = true
     )
 
+    val checkmarkColorsLight = EmbeddedCheckmarkColors(
+        separatorColor = colorsLight.componentBorder,
+        checkmarkColor = colorsLight.materialColors.primary
+    )
+
+    val checkmarkColorsDark = EmbeddedCheckmarkColors(
+        separatorColor = EMBEDDED_SEPARATOR_COLOR_DARK,
+        checkmarkColor = colorsDark.materialColors.primary
+    )
+
+    val radioColorsLight = EmbeddedRadioColors(
+        selectedColor = colorsLight.materialColors.primary,
+        unselectedColor = colorsLight.componentBorder,
+        separatorColor = colorsLight.componentBorder
+    )
+
+    val radioColorsDark = EmbeddedRadioColors(
+        selectedColor = colorsDark.materialColors.primary,
+        unselectedColor = EMBEDDED_SEPARATOR_COLOR_DARK,
+        separatorColor = EMBEDDED_SEPARATOR_COLOR_DARK
+    )
+
     val embeddedCommon = EmbeddedInsets(
         additionalVerticalInsetsDp = 0.0f,
         horizontalInsetsDp = 0.0f,
-        checkmarkInsetDp = 12.0f
+        checkmarkInsetDp = 0.0f
     )
 
     val floating = EmbeddedFloatingStyle(

@@ -2,6 +2,7 @@ package com.stripe.android.screenshottesting
 
 import app.cash.paparazzi.DeviceConfig
 import com.android.resources.NightMode
+import com.android.resources.LayoutDirection as AndroidLayoutDirection
 
 interface PaparazziConfigOption {
 
@@ -44,6 +45,17 @@ enum class Locale(val locale: String) : PaparazziConfigOption {
     override fun apply(deviceConfig: DeviceConfig): DeviceConfig {
         return deviceConfig.copy(
             locale = locale
+        )
+    }
+}
+
+enum class LayoutDirection(private val layoutDirection: AndroidLayoutDirection) : PaparazziConfigOption {
+    LeftToRight(AndroidLayoutDirection.LTR),
+    RightToLeft(AndroidLayoutDirection.RTL);
+
+    override fun apply(deviceConfig: DeviceConfig): DeviceConfig {
+        return deviceConfig.copy(
+            layoutDirection = layoutDirection,
         )
     }
 }

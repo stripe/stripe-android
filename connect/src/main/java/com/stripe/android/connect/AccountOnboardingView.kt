@@ -3,7 +3,6 @@ package com.stripe.android.connect
 import android.content.Context
 import android.os.Parcelable
 import android.util.AttributeSet
-import android.widget.FrameLayout
 import androidx.annotation.RestrictTo
 import androidx.core.content.withStyledAttributes
 import com.stripe.android.connect.webview.StripeConnectWebViewContainer
@@ -18,8 +17,9 @@ class AccountOnboardingView private constructor(
     context: Context,
     attrs: AttributeSet?,
     defStyleAttr: Int,
+    cacheKey: String?,
     webViewContainerBehavior: StripeConnectWebViewContainerImpl<AccountOnboardingListener, AccountOnboardingProps>,
-) : FrameLayout(context, attrs, defStyleAttr),
+) : StripeComponentView<AccountOnboardingListener, AccountOnboardingProps>(context, attrs, defStyleAttr),
     StripeConnectWebViewContainer<AccountOnboardingListener, AccountOnboardingProps> by webViewContainerBehavior {
 
     @JvmOverloads
@@ -31,11 +31,14 @@ class AccountOnboardingView private constructor(
         embeddedComponentManager: EmbeddedComponentManager? = null,
         listener: AccountOnboardingListener? = null,
         props: AccountOnboardingProps? = null,
+        cacheKey: String? = null,
     ) : this(
-        context,
-        attrs,
-        defStyleAttr,
-        StripeConnectWebViewContainerImpl(
+        context = context,
+        attrs = attrs,
+        defStyleAttr = defStyleAttr,
+        cacheKey = cacheKey,
+        webViewContainerBehavior = StripeConnectWebViewContainerImpl(
+            context = context,
             embeddedComponent = StripeEmbeddedComponent.ACCOUNT_ONBOARDING,
             embeddedComponentManager = embeddedComponentManager,
             listener = listener,
@@ -59,7 +62,11 @@ class AccountOnboardingView private constructor(
             )
             webViewContainerBehavior.setPropsFromXml(props)
         }
-        webViewContainerBehavior.initializeView(this)
+        var xmlCacheKey: String? = null
+        context.withStyledAttributes(attrs, R.styleable.StripeConnectWebViewContainer, defStyleAttr, 0) {
+            xmlCacheKey = getString(R.styleable.StripeConnectWebViewContainer_stripeWebViewCacheKey)
+        }
+        webViewContainerBehavior.initializeView(this, cacheKey ?: xmlCacheKey)
     }
 }
 
@@ -133,10 +140,10 @@ interface AccountOnboardingListener : StripeEmbeddedComponentListener {
 }
 
 @OptIn(PrivateBetaConnectSDK::class)
-internal object AccountOnboardingListenerDelegate : ComponentListenerDelegate<AccountOnboardingListener> {
-    override fun AccountOnboardingListener.delegate(message: SetterFunctionCalledMessage) {
+internal object AccountOnboardingListenerDelegate : ComponentListenerDelegate<AccountOnboardingListener>() {
+    override fun delegate(listener: AccountOnboardingListener, message: SetterFunctionCalledMessage) {
         when (message.value) {
-            is SetOnExit -> onExit()
+            is SetOnExit -> listener.onExit()
             else -> {
                 // Ignore.
             }

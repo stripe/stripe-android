@@ -14,6 +14,7 @@ import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.model.VisualUpdate
 import com.stripe.android.financialconnections.repository.CachedConsumerSession
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSessionSignup
 
 internal object ApiKeyFixtures {
@@ -137,6 +138,12 @@ internal object ApiKeyFixtures {
         redactedPhoneNumber = "+1********12",
         redactedFormattedPhoneNumber = "(***) *** **12",
         verificationSessions = emptyList(),
+    )
+
+    fun consumerSessionLookup(exists: Boolean) = ConsumerSessionLookup(
+        exists = exists,
+        consumerSession = if (exists) consumerSession() else null,
+        publishableKey = if (exists) "pk_123" else null,
     )
 
     fun verifiedConsumerSession() = ConsumerSession(
