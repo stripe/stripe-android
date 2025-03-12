@@ -23,8 +23,8 @@ class SetAsDefaultPaymentMethodController(
     override val fieldValue: StateFlow<String> = combineAsStateFlow(
         saveForFutureUseCheckedFlow,
         setAsDefaultPaymentMethodChecked
-    ) { saveForFutureUseCheckedFlow, setAsDefaultPaymentMethod ->
-        (saveForFutureUseCheckedFlow && setAsDefaultPaymentMethod).toString()
+    ) { saveForFutureUseCheckedFlow, setAsDefaultPaymentMethodChecked ->
+        (saveForFutureUseCheckedFlow && setAsDefaultPaymentMethodChecked).toString()
     }
 
     override val rawFieldValue: StateFlow<String?> = fieldValue
