@@ -207,7 +207,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     val setAsDefaultPaymentMethodElement: SetAsDefaultPaymentMethodElement =
         SetAsDefaultPaymentMethodElement(
             initialValue = false,
-            shouldShowElementFlow = shouldShowElementFlow
+            saveForFutureUseCheckedFlow = shouldShowElementFlow
         )
 
     val setAsDefaultPaymentMethod = setAsDefaultPaymentMethodElement.controller.setAsDefaultPaymentMethod
