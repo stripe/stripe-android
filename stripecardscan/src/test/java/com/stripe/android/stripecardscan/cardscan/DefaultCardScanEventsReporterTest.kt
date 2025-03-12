@@ -18,7 +18,7 @@ internal class DefaultCardScanEventsReporterTest {
 
         assertThat(loggedRequests).hasSize(1)
         val loggedParams = loggedRequests.first().params
-        assertThat(loggedParams["event"]).isEqualTo("card_scan.scan_started")
+        assertThat(loggedParams["event"]).isEqualTo("cardscan_scan_started")
         assertThat(loggedParams["elements_session_id"]).isEqualTo(ELEMENTS_SESSION_ID)
     }
 
@@ -30,7 +30,7 @@ internal class DefaultCardScanEventsReporterTest {
 
         assertThat(loggedRequests).hasSize(1)
         val loggedParams = loggedRequests.first().params
-        assertThat(loggedParams["event"]).isEqualTo("card_scan.scan_succeeded")
+        assertThat(loggedParams["event"]).isEqualTo("cardscan_success")
         assertThat(loggedParams["duration"]).isEqualTo(0f)
         assertThat(loggedParams["elements_session_id"]).isEqualTo(ELEMENTS_SESSION_ID)
     }
@@ -43,7 +43,7 @@ internal class DefaultCardScanEventsReporterTest {
 
         assertThat(loggedRequests).hasSize(1)
         val loggedParams = loggedRequests.first().params
-        assertThat(loggedParams["event"]).isEqualTo("card_scan.scan_failed")
+        assertThat(loggedParams["event"]).isEqualTo("cardscan_failed")
         assertThat(loggedParams["duration"]).isEqualTo(0f)
         assertThat(loggedParams["error_message"]).isEqualTo("unknown")
         assertThat(loggedParams["elements_session_id"]).isEqualTo(ELEMENTS_SESSION_ID)
@@ -57,7 +57,7 @@ internal class DefaultCardScanEventsReporterTest {
 
         assertThat(loggedRequests).hasSize(1)
         val loggedParams = loggedRequests.first().params
-        assertThat(loggedParams["event"]).isEqualTo("card_scan.scan_cancelled")
+        assertThat(loggedParams["event"]).isEqualTo("cardscan_cancel")
         assertThat(loggedParams["duration"]).isEqualTo(0f)
         assertThat(loggedParams["cancellation_reason"]).isEqualTo("back")
         assertThat(loggedParams["elements_session_id"]).isEqualTo(ELEMENTS_SESSION_ID)
