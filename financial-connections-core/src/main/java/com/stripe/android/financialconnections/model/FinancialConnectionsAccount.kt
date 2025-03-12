@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.model
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.model.serializers.EnumIgnoreUnknownSerializer
 import kotlinx.parcelize.IgnoredOnParcel
@@ -205,7 +206,10 @@ data class FinancialConnectionsAccount(
     }
 
     companion object {
-        internal const val OBJECT_OLD = "linked_account"
-        internal const val OBJECT_NEW = "financial_connections.account"
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        const val OBJECT_OLD = "linked_account"
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        const val OBJECT_NEW = "financial_connections.account"
     }
 }

@@ -32,7 +32,9 @@ import org.json.JSONObject
  */
 @Parcelize
 @Serializable
-data class FinancialConnectionsSession internal constructor(
+data class FinancialConnectionsSession
+@RestrictTo(RestrictTo.Scope.LIBRARY)
+constructor(
     @SerialName("client_secret")
     val clientSecret: String,
 
@@ -57,7 +59,8 @@ data class FinancialConnectionsSession internal constructor(
 
     @SerialName("bank_account_token")
     @Serializable(with = JsonAsStringSerializer::class)
-    internal val bankAccountToken: String? = null,
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    val bankAccountToken: String? = null,
 
     @SerialName(value = "manual_entry")
     val manualEntry: ManualEntry? = null,

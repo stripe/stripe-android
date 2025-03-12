@@ -1,6 +1,7 @@
 include ':camera-core'
 include ':example'
 include ':financial-connections'
+include ':financial-connections-core'
 include ':financial-connections-example'
 include ':identity'
 include ':identity-example'
