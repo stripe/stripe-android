@@ -12,8 +12,10 @@ import javax.inject.Singleton
 @Singleton
 @Component(
     modules = [
-        TestStripeConnectComponent.TestModule::class,
+        StripeConnectComponentModule::class,
         CoreCommonModule::class,
+        // Test modules.
+        TestStripeConnectComponent.TestModule::class,
         TestConnectAnalyticsModule::class,
     ]
 )

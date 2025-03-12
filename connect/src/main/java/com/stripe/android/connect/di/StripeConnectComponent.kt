@@ -9,6 +9,7 @@ import com.stripe.android.core.injection.ENABLE_LOGGING
 import dagger.BindsInstance
 import dagger.Component
 import dagger.Module
+import org.jetbrains.annotations.TestOnly
 import javax.inject.Named
 import javax.inject.Provider
 import javax.inject.Singleton
@@ -36,10 +37,21 @@ internal interface StripeConnectComponent {
     }
 
     companion object {
-        internal var instance: StripeConnectComponent =
-            DaggerStripeConnectComponent.builder()
-                .loggingEnabled(BuildConfig.DEBUG)
-                .build()
+        private var _instance: StripeConnectComponent? = null
+
+        internal val instance: StripeConnectComponent
+            get() = synchronized(StripeConnectComponent) {
+                _instance
+                    ?: DaggerStripeConnectComponent.builder()
+                        .loggingEnabled(BuildConfig.DEBUG)
+                        .build()
+                        .also { _instance = it }
+            }
+
+        @TestOnly
+        internal fun replaceInstance(instance: StripeConnectComponent) {
+            _instance = instance
+        }
     }
 }
 
