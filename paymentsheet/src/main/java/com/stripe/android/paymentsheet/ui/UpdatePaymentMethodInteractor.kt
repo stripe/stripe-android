@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.UUID
 import kotlin.coroutines.CoroutineContext
 
 internal interface UpdatePaymentMethodInteractor {
@@ -99,6 +100,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     workContext: CoroutineContext = Dispatchers.Default,
     override val addressCollectionMode: PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode,
 ) : UpdatePaymentMethodInteractor {
+    internal val vmId: String = UUID.randomUUID().toString()
     private val coroutineScope = CoroutineScope(workContext + SupervisorJob())
     private val error = MutableStateFlow(getInitialError())
     private val status = MutableStateFlow(UpdatePaymentMethodInteractor.Status.Idle)

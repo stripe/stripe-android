@@ -5,6 +5,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DateUtils
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import java.util.UUID
 
 internal data class DisplayableSavedPaymentMethod private constructor(
     val displayName: ResolvableString,
@@ -113,7 +114,8 @@ internal data class DisplayableSavedPaymentMethod private constructor(
 internal sealed interface SavedPaymentMethod {
     data class Card(
         val card: PaymentMethod.Card,
-        val billingDetails: PaymentMethod.BillingDetails?
+        val billingDetails: PaymentMethod.BillingDetails?,
+        val vmId: String = UUID.randomUUID().toString()
     ) : SavedPaymentMethod {
         fun isExpired(): Boolean {
             val cardExpiryMonth = card.expiryMonth

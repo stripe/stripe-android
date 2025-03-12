@@ -85,6 +85,7 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
         when (val savedPaymentMethod = interactor.displayableSavedPaymentMethod.savedPaymentMethod) {
             is SavedPaymentMethod.Card -> {
                 val cardUIViewModel = viewModel<CardUIViewModel>(
+                    key = savedPaymentMethod.vmId,
                     factory = interactor.cardUIViewModelFactory(savedPaymentMethod)
                 )
                 CardDetailsUI(
