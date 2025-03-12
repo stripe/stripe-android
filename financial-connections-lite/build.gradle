@@ -22,12 +22,13 @@ dependencies {
 
     implementation libs.androidx.activity
     implementation libs.androidx.fragment
+    implementation libs.androidx.lifecycle
     implementation libs.androidx.annotation
+    implementation libs.androidx.browser
+    implementation libs.androidx.viewModel
     implementation libs.dagger
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.serialization
-
-    debugImplementation libs.showkase
 
     testImplementation testLibs.json
     testImplementation testLibs.junit

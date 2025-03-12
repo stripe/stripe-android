@@ -1,0 +1,15 @@
+public final class com/stripe/android/financialconnections/lite/BuildConfig {
+	public static final field BUILD_TYPE Ljava/lang/String;
+	public static final field DEBUG Z
+	public static final field LIBRARY_PACKAGE_NAME Ljava/lang/String;
+	public fun <init> ()V
+}
+
+public final class com/stripe/android/financialconnections/lite/FinancialConnectionsSheetLite$Configuration$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/lite/FinancialConnectionsSheetLite$Configuration;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/financialconnections/lite/FinancialConnectionsSheetLite$Configuration;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+

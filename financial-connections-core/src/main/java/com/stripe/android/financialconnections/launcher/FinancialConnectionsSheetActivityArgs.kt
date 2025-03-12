@@ -55,4 +55,9 @@ sealed class FinancialConnectionsSheetActivityArgs(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun isValid(): Boolean = runCatching { validate() }.isSuccess
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
+        const val EXTRA_ARGS = "FinancialConnectionsSheetActivityArgs"
+    }
 }
