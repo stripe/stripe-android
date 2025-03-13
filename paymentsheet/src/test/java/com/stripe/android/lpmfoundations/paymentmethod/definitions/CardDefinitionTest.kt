@@ -108,36 +108,80 @@ class CardDefinitionTest {
 
     @Test
     fun `set_as_default_payment_method shown correctly when save_for_future_use checked`() {
-        val formElements = getFormElementsWithSaveForFutureUseAndSetAsDefaultPaymentMethod(
-            isPaymentMethodSetAsDefaultEnabled = true,
-        )
+        testSetAsDefaultElements(
+            hasOtherPaymentMethods = true,
+        ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
+            val saveForFutureUseController = saveForFutureUseElement.controller
 
-        val saveForFutureUseElement = formElements[1] as SaveForFutureUseElement
-        val saveForFutureUseController = saveForFutureUseElement.controller
-        val setAsDefaultPaymentMethodElement = formElements[2] as SetAsDefaultPaymentMethodElement
+            saveForFutureUseController.onValueChange(true)
 
-        saveForFutureUseController.onValueChange(true)
-
-        assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isTrue()
+            assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isTrue()
+        }
     }
 
     @Test
     fun `set_as_default_payment_method hidden correctly when save_for_future_use unchecked`() {
-        val formElements = getFormElementsWithSaveForFutureUseAndSetAsDefaultPaymentMethod(
-            isPaymentMethodSetAsDefaultEnabled = true,
-        )
+        testSetAsDefaultElements(
+            hasOtherPaymentMethods = true,
+        ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
+            val saveForFutureUseController = saveForFutureUseElement.controller
 
-        val saveForFutureUseElement = formElements[1] as SaveForFutureUseElement
-        val saveForFutureUseController = saveForFutureUseElement.controller
-        val setAsDefaultPaymentMethodElement = formElements[2] as SetAsDefaultPaymentMethodElement
+            saveForFutureUseController.onValueChange(true)
 
-        saveForFutureUseController.onValueChange(true)
+            assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isTrue()
 
-        assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isTrue()
+            saveForFutureUseController.onValueChange(false)
 
-        saveForFutureUseController.onValueChange(false)
+            assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isFalse()
+        }
+    }
 
-        assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isFalse()
+    @Test
+    fun `set_as_default_payment_method hidden when save_for_future_use unchecked & hasOtherPaymentMethods`() {
+        testSetAsDefaultElements(
+            hasOtherPaymentMethods = false,
+        ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
+            val saveForFutureUseController = saveForFutureUseElement.controller
+
+            saveForFutureUseController.onValueChange(false)
+            assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isFalse()
+        }
+    }
+
+    @Test
+    fun `set_as_default_payment_method field false when save_for_future_use unchecked & hasOtherPaymentMethods`() {
+        testSetAsDefaultElements(
+            hasOtherPaymentMethods = false,
+        ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
+            val saveForFutureUseController = saveForFutureUseElement.controller
+
+            saveForFutureUseController.onValueChange(false)
+            assertThat(setAsDefaultPaymentMethodElement.controller.fieldValue.value.toBoolean()).isFalse()
+        }
+    }
+
+    @Test
+    fun `set_as_default_payment_method hidden when save_for_future_use checked & hasOtherPaymentMethods`() {
+        testSetAsDefaultElements(
+            hasOtherPaymentMethods = false,
+        ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
+            val saveForFutureUseController = saveForFutureUseElement.controller
+
+            saveForFutureUseController.onValueChange(true)
+            assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isFalse()
+        }
+    }
+
+    @Test
+    fun `set_as_default_payment_method field true when save_for_future_use checked & hasOtherPaymentMethods`() {
+        testSetAsDefaultElements(
+            hasOtherPaymentMethods = false,
+        ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
+            val saveForFutureUseController = saveForFutureUseElement.controller
+
+            saveForFutureUseController.onValueChange(true)
+            assertThat(setAsDefaultPaymentMethodElement.controller.fieldValue.value.toBoolean()).isTrue()
+        }
     }
 
     @Test
@@ -220,17 +264,34 @@ class CardDefinitionTest {
         return this as MandateTextElement
     }
 
+    private fun testSetAsDefaultElements(
+        hasOtherPaymentMethods: Boolean,
+        block: (SaveForFutureUseElement, SetAsDefaultPaymentMethodElement) -> Unit
+    ) {
+        val formElements = getFormElementsWithSaveForFutureUseAndSetAsDefaultPaymentMethod(
+            isPaymentMethodSetAsDefaultEnabled = true,
+            hasOtherPaymentMethods = hasOtherPaymentMethods,
+        )
+
+        val saveForFutureUseElement = formElements[1] as SaveForFutureUseElement
+        val setAsDefaultPaymentMethodElement = formElements[2] as SetAsDefaultPaymentMethodElement
+
+        block(saveForFutureUseElement, setAsDefaultPaymentMethodElement)
+    }
+
     private fun getFormElementsWithSaveForFutureUseAndSetAsDefaultPaymentMethod(
-        isPaymentMethodSetAsDefaultEnabled: Boolean
+        isPaymentMethodSetAsDefaultEnabled: Boolean,
+        hasOtherPaymentMethods: Boolean = true,
     ): List<FormElement> {
         return CardDefinition.formElements(
-            PaymentMethodMetadataFactory.create(
+            metadata = PaymentMethodMetadataFactory.create(
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                     address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
                 ),
                 hasCustomerConfiguration = true,
-                isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled
-            )
+                isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
+            ),
+            hasOtherPaymentMethods = hasOtherPaymentMethods,
         )
     }
 }

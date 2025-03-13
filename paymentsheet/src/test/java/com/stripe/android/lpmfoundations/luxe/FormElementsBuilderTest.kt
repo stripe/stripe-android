@@ -9,6 +9,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.EmptyFormElement
+import com.stripe.android.ui.core.elements.HAS_OTHER_PAYMENT_METHODS_DEFAULT_VALUE
 import com.stripe.android.uicore.elements.IdentifierSpec
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -111,7 +112,8 @@ class FormElementsBuilderTest {
             requiresMandate = false,
             linkConfigurationCoordinator = null,
             onLinkInlineSignupStateChanged = { throw AssertionError("Not implemented") },
-            cardBrandFilter = DefaultCardBrandFilter
+            cardBrandFilter = DefaultCardBrandFilter,
+            hasOtherPaymentMethods = HAS_OTHER_PAYMENT_METHODS_DEFAULT_VALUE,
         )
     }
 }
