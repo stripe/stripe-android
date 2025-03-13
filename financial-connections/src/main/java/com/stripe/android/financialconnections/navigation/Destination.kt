@@ -150,6 +150,12 @@ internal sealed class Destination(
         composable = { NetworkingLinkSignupScreen() }
     )
 
+    data object LinkLogin : Destination(
+        route = Pane.LINK_LOGIN.value,
+        logPaneLaunched = true,
+        composable = { NetworkingLinkSignupScreen() }
+    )
+
     data object NetworkingLinkLoginWarmup : Destination(
         route = Pane.NETWORKING_LINK_LOGIN_WARMUP.value,
         extraArgs = listOf(

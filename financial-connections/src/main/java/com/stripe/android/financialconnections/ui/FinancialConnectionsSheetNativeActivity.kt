@@ -224,6 +224,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
                         composable(Destination.ManualEntrySuccess)
                         bottomSheet(Destination.Notice)
                         bottomSheet(Destination.AccountUpdateRequired)
+                        composable(Destination.LinkLogin)
                     }
                 }
             }
