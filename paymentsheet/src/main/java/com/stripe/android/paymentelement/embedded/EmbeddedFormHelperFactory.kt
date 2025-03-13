@@ -8,7 +8,7 @@ import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.NewOrExternalPaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.ui.core.elements.IF_SAVED_SHOULD_SET_AS_DEFAULT_PAYMENT_METHOD_DEFAULT_VALUE
+import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
 
@@ -40,7 +40,7 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
             },
             selectionUpdater = selectionUpdater,
             linkConfigurationCoordinator = linkConfigurationCoordinator,
-            ifSavedShouldSetAsDefaultPaymentMethod = IF_SAVED_SHOULD_SET_AS_DEFAULT_PAYMENT_METHOD_DEFAULT_VALUE, // TODO for embedded
+            setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE, // TODO for embedded
         )
     }
 }

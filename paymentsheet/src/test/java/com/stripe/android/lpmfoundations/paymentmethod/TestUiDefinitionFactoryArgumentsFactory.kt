@@ -17,7 +17,7 @@ internal object TestUiDefinitionFactoryArgumentsFactory {
         paymentMethodExtraParams: PaymentMethodExtraParams? = null,
         linkConfigurationCoordinator: LinkConfigurationCoordinator? = null,
         initialLinkUserInput: UserInput? = null,
-        ifSavedShouldSetAsDefaultPaymentMethod: Boolean = true,
+        setAsDefaultMatchesSaveForFutureUse: Boolean = true,
     ): UiDefinitionFactory.Arguments.Factory {
         val context: Context? = try {
             ApplicationProvider.getApplicationContext<Application>()
@@ -31,7 +31,7 @@ internal object TestUiDefinitionFactoryArgumentsFactory {
             linkConfigurationCoordinator = linkConfigurationCoordinator,
             initialLinkUserInput = initialLinkUserInput,
             onLinkInlineSignupStateChanged = { throw AssertionError("Not implemented") },
-            ifSavedShouldSetAsDefaultPaymentMethod = ifSavedShouldSetAsDefaultPaymentMethod,
+            setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
         )
     }
 

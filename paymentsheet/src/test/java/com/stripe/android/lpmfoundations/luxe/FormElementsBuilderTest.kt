@@ -9,7 +9,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.EmptyFormElement
-import com.stripe.android.ui.core.elements.IF_SAVED_SHOULD_SET_AS_DEFAULT_PAYMENT_METHOD_DEFAULT_VALUE
+import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.uicore.elements.IdentifierSpec
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -113,7 +113,7 @@ class FormElementsBuilderTest {
             linkConfigurationCoordinator = null,
             onLinkInlineSignupStateChanged = { throw AssertionError("Not implemented") },
             cardBrandFilter = DefaultCardBrandFilter,
-            ifSavedShouldSetAsDefaultPaymentMethod = IF_SAVED_SHOULD_SET_AS_DEFAULT_PAYMENT_METHOD_DEFAULT_VALUE,
+            setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
         )
     }
 }

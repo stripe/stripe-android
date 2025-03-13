@@ -9,7 +9,7 @@ import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-const val IF_SAVED_SHOULD_SET_AS_DEFAULT_PAYMENT_METHOD_DEFAULT_VALUE = false
+const val FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE = false
 
 /**
  * Element that allows users to set a new payment method as their default.
@@ -18,11 +18,11 @@ const val IF_SAVED_SHOULD_SET_AS_DEFAULT_PAYMENT_METHOD_DEFAULT_VALUE = false
 data class SetAsDefaultPaymentMethodElement(
     val initialValue: Boolean,
     val saveForFutureUseCheckedFlow: StateFlow<Boolean>,
-    val ifSavedShouldSetAsDefaultPaymentMethod: Boolean,
+    val setAsDefaultMatchesSaveForFutureUse: Boolean,
 ) : FormElement {
 
     val shouldShowElementFlow: StateFlow<Boolean> = saveForFutureUseCheckedFlow.mapAsStateFlow {
-        it && !ifSavedShouldSetAsDefaultPaymentMethod
+        it && !setAsDefaultMatchesSaveForFutureUse
     }
 
     override val identifier: IdentifierSpec = IdentifierSpec.SetAsDefaultPaymentMethod
@@ -30,7 +30,7 @@ data class SetAsDefaultPaymentMethodElement(
     override val controller: SetAsDefaultPaymentMethodController = SetAsDefaultPaymentMethodController(
         setAsDefaultPaymentMethodInitialValue = initialValue,
         saveForFutureUseCheckedFlow = saveForFutureUseCheckedFlow,
-        ifSavedShouldSetAsDefaultPaymentMethod = ifSavedShouldSetAsDefaultPaymentMethod,
+        setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
     )
     override val allowsUserInteraction: Boolean = true
 

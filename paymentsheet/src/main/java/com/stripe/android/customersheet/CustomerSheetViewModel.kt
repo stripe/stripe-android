@@ -66,7 +66,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.ui.core.elements.IF_SAVED_SHOULD_SET_AS_DEFAULT_PAYMENT_METHOD_DEFAULT_VALUE
+import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.Dispatchers
@@ -841,7 +841,7 @@ internal class CustomerSheetViewModel(
                 handleViewAction(CustomerSheetViewAction.OnFormError(error))
             },
             setAsDefaultPaymentMethodEnabled = false,
-            ifSavedShouldSetAsDefaultPaymentMethod = IF_SAVED_SHOULD_SET_AS_DEFAULT_PAYMENT_METHOD_DEFAULT_VALUE,
+            setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
         )
     }
 

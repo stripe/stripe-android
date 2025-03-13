@@ -12,7 +12,7 @@ internal fun PaymentMethodDefinition.formElements(
     paymentMethodExtraParams: PaymentMethodExtraParams? = null,
     initialLinkUserInput: UserInput? = null,
     linkConfigurationCoordinator: LinkConfigurationCoordinator? = null,
-    ifSavedShouldSetAsDefaultPaymentMethod: Boolean = true,
+    setAsDefaultMatchesSaveForFutureUse: Boolean = true,
 ): List<FormElement> {
     return requireNotNull(
         metadata.formElementsForCode(
@@ -22,7 +22,7 @@ internal fun PaymentMethodDefinition.formElements(
                 paymentMethodExtraParams = paymentMethodExtraParams,
                 linkConfigurationCoordinator = linkConfigurationCoordinator,
                 initialLinkUserInput = initialLinkUserInput,
-                ifSavedShouldSetAsDefaultPaymentMethod = ifSavedShouldSetAsDefaultPaymentMethod,
+                setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
             )
         )
     )

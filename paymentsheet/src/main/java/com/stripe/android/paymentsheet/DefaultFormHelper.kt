@@ -17,7 +17,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.elements.IF_SAVED_SHOULD_SET_AS_DEFAULT_PAYMENT_METHOD_DEFAULT_VALUE
+import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.uicore.elements.FormElement
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -33,7 +33,7 @@ internal class DefaultFormHelper(
     private val newPaymentSelectionProvider: () -> NewOrExternalPaymentSelection?,
     private val selectionUpdater: (PaymentSelection?) -> Unit,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
-    private val ifSavedShouldSetAsDefaultPaymentMethod: Boolean,
+    private val setAsDefaultMatchesSaveForFutureUse: Boolean,
 ) : FormHelper {
     companion object {
         fun create(
@@ -53,7 +53,7 @@ internal class DefaultFormHelper(
                 selectionUpdater = {
                     viewModel.updateSelection(it)
                 },
-                ifSavedShouldSetAsDefaultPaymentMethod = viewModel.customerStateHolder.paymentMethods.value.isEmpty(),
+                setAsDefaultMatchesSaveForFutureUse = viewModel.customerStateHolder.paymentMethods.value.isEmpty(),
             )
         }
 
@@ -70,7 +70,7 @@ internal class DefaultFormHelper(
                 newPaymentSelectionProvider = { null },
                 linkConfigurationCoordinator = null,
                 selectionUpdater = {},
-                ifSavedShouldSetAsDefaultPaymentMethod = IF_SAVED_SHOULD_SET_AS_DEFAULT_PAYMENT_METHOD_DEFAULT_VALUE,
+                setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
             )
         }
     }
@@ -133,7 +133,7 @@ internal class DefaultFormHelper(
                     is PaymentSelection.New.LinkInline -> selection.input
                     else -> null
                 },
-                ifSavedShouldSetAsDefaultPaymentMethod = ifSavedShouldSetAsDefaultPaymentMethod,
+                setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
             ),
         ) ?: emptyList()
     }

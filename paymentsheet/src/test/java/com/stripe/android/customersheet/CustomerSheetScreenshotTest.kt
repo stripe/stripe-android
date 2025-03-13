@@ -28,7 +28,7 @@ import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.SetupIntentFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.ui.core.elements.IF_SAVED_SHOULD_SET_AS_DEFAULT_PAYMENT_METHOD_DEFAULT_VALUE
+import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
@@ -77,7 +77,7 @@ internal class CustomerSheetScreenshotTest {
         onUpdatePrimaryButtonUIState = { },
         onError = { },
         setAsDefaultPaymentMethodEnabled = false,
-        ifSavedShouldSetAsDefaultPaymentMethod = IF_SAVED_SHOULD_SET_AS_DEFAULT_PAYMENT_METHOD_DEFAULT_VALUE,
+        setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
     )
 
     private val selectPaymentMethodViewState = CustomerSheetViewState.SelectPaymentMethod(
