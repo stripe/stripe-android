@@ -22,13 +22,13 @@ import com.stripe.android.model.PaymentMethodCreateParams.Companion.getNameFromP
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
-import com.stripe.android.model.setupFutureUsage
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.elements.HAS_OTHER_PAYMENT_METHODS_DEFAULT_VALUE
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
@@ -520,6 +520,7 @@ internal class FormHelperTest {
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             linkInlineHandler = linkInlineHandler,
             selectionUpdater = selectionUpdater,
+            hasOtherPaymentMethods = HAS_OTHER_PAYMENT_METHODS_DEFAULT_VALUE,
         )
     }
 }

@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.ui.core.elements.HAS_OTHER_PAYMENT_METHODS_DEFAULT_VALUE
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.uicore.elements.EmailConfig
@@ -169,6 +170,24 @@ internal class AccountPreviewScreenshotTest {
         )
     }
 
+    @Test
+    fun testPaymentFlowWhenDoesNotHaveOtherPaymentMethods() {
+        saveForFutureUseElement.controller.onValueChange(true)
+
+        setAsDefaultPaymentMethodElement.controller.onValueChange(true)
+
+        takeAccountPreviewScreenShot(
+            state = BankFormScreenStateFactory.createWithSession(
+                sessionId = "session_1234",
+            ),
+            instantDebits = false,
+            isPaymentFlow = true,
+            enabled = true,
+            showCheckboxes = true,
+            hasOtherPaymentMethods = false
+        )
+    }
+
     private val defaultFormArguments = FormArguments(
         paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
         merchantName = "Test Merchant",
@@ -191,7 +210,8 @@ internal class AccountPreviewScreenshotTest {
 
     private val setAsDefaultPaymentMethodElement = SetAsDefaultPaymentMethodElement(
         initialValue = false,
-        saveForFutureUseCheckedFlow = saveForFutureUseElement.controller.saveForFutureUse
+        saveForFutureUseCheckedFlow = saveForFutureUseElement.controller.saveForFutureUse,
+        hasOtherPaymentMethods = HAS_OTHER_PAYMENT_METHODS_DEFAULT_VALUE,
     )
 
     private fun takeAccountPreviewScreenShot(
@@ -202,6 +222,7 @@ internal class AccountPreviewScreenshotTest {
         fillAddress: Boolean = false,
         enabled: Boolean = true,
         showCheckboxes: Boolean = false,
+        hasOtherPaymentMethods: Boolean = HAS_OTHER_PAYMENT_METHODS_DEFAULT_VALUE,
     ) {
         paparazzi.snapshot {
             BankAccountForm(
@@ -215,7 +236,9 @@ internal class AccountPreviewScreenshotTest {
                 addressController = createAddressController(fillAddress = fillAddress),
                 sameAsShippingElement = sameAsShippingElement,
                 saveForFutureUseElement = saveForFutureUseElement,
-                setAsDefaultPaymentMethodElement = setAsDefaultPaymentMethodElement,
+                setAsDefaultPaymentMethodElement = setAsDefaultPaymentMethodElement.copy(
+                    hasOtherPaymentMethods = hasOtherPaymentMethods
+                ),
                 showCheckboxes = showCheckboxes,
                 lastTextFieldIdentifier = null,
                 onRemoveAccount = {},
