@@ -1,14 +1,19 @@
 package com.stripe.android.financialconnections.lite
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.Companion.EXTRA_ARGS
+import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.OpenAuthFlowWithUrl
+import com.stripe.android.financialconnections.lite.repository.FinancialConnectionsLiteRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.launch
 
 internal class FinancialConnectionsLiteViewModel(
-    val savedStateHandle: SavedStateHandle
+    val savedStateHandle: SavedStateHandle,
+    val repository: FinancialConnectionsLiteRepository,
+    applicationId: String
 ) : ViewModel() {
 
     private val args: FinancialConnectionsSheetActivityArgs
@@ -17,7 +22,15 @@ internal class FinancialConnectionsLiteViewModel(
     internal val viewEffects = MutableSharedFlow<ViewEffect>()
 
     init {
-        Log.d("FCLiteViewModel", "args: $args")
+        viewModelScope.launch {
+            val sync = repository.synchronize(
+                configuration = args.configuration,
+                applicationId = applicationId
+            )
+            viewEffects.emit(
+                OpenAuthFlowWithUrl(requireNotNull(sync.manifest.hostedAuthUrl))
+            )
+        }
     }
 
     internal sealed class ViewEffect {

@@ -16,6 +16,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.Companion.EXTRA_ARGS
 import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.OpenAuthFlowWithUrl
+import com.stripe.android.financialconnections.lite.di.Di
 import kotlinx.coroutines.launch
 
 internal class FinancialConnectionsSheetLiteActivity : ComponentActivity() {
@@ -78,10 +79,15 @@ internal class FinancialConnectionsLiteViewModelFactory : ViewModelProvider.Fact
 
     override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
         val savedStateHandle = extras.createSavedStateHandle()
+        val appContext = extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as Context
 
         if (modelClass.isAssignableFrom(FinancialConnectionsLiteViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return FinancialConnectionsLiteViewModel(savedStateHandle) as T
+            return FinancialConnectionsLiteViewModel(
+                savedStateHandle = savedStateHandle,
+                applicationId = appContext.packageName,
+                repository = Di.repository()
+            ) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
