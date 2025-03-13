@@ -411,17 +411,21 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onSetAsDefaultPaymentMethodSucceeded() {
+    override fun onSetAsDefaultPaymentMethodSucceeded(
+        paymentMethodType: String?,
+    ) {
         fireEvent(
             PaymentSheetEvent.SetAsDefaultPaymentMethodSucceeded(
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
+                paymentMethodType = paymentMethodType,
             )
         )
     }
 
     override fun onSetAsDefaultPaymentMethodFailed(
+        paymentMethodType: String?,
         error: Throwable,
     ) {
         fireEvent(
@@ -430,6 +434,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
+                paymentMethodType = paymentMethodType,
             )
         )
     }

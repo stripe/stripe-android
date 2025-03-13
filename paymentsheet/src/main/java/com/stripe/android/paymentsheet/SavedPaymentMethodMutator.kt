@@ -219,12 +219,17 @@ internal class SavedPaymentMethodMutator(
             ),
             paymentMethodId = paymentMethod.id,
         ).onFailure { error ->
-            eventReporter.onSetAsDefaultPaymentMethodFailed(error = error)
+            eventReporter.onSetAsDefaultPaymentMethodFailed(
+                paymentMethodType = paymentMethod.type?.code,
+                error = error
+            )
         }.onSuccess {
             customerStateHolder.setDefaultPaymentMethod(paymentMethod = paymentMethod)
             setSelection(PaymentSelection.Saved(paymentMethod = paymentMethod))
 
-            eventReporter.onSetAsDefaultPaymentMethodSucceeded()
+            eventReporter.onSetAsDefaultPaymentMethodSucceeded(
+                paymentMethodType = paymentMethod.type?.code,
+            )
         }.map {}
     }
 

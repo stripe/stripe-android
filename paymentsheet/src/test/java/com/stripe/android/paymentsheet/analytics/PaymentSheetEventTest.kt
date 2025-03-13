@@ -6,6 +6,7 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_SELECTION
@@ -1259,6 +1260,7 @@ class PaymentSheetEventTest {
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
+            paymentMethodType = PaymentMethod.Type.Card.code,
         )
         assertThat(
             event.eventName
@@ -1272,6 +1274,7 @@ class PaymentSheetEventTest {
                 "is_decoupled" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
+                "payment_method_type" to "card",
             )
         )
     }
@@ -1287,6 +1290,7 @@ class PaymentSheetEventTest {
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
+            paymentMethodType = PaymentMethod.Type.Card.code,
         )
         assertThat(
             event.eventName
@@ -1301,6 +1305,7 @@ class PaymentSheetEventTest {
                 "is_decoupled" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
+                "payment_method_type" to "card",
                 "analytics_value" to "apiError",
                 "request_id" to "request_123",
                 "error_type" to "network_error",
