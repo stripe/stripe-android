@@ -40,7 +40,7 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
             },
             selectionUpdater = selectionUpdater,
             linkConfigurationCoordinator = linkConfigurationCoordinator,
-            setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE, // TODO for embedded
+            setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
         )
     }
 }

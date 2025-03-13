@@ -1344,9 +1344,9 @@ class USBankAccountFormViewModelTest {
     }
 
     @Test
-    fun `'setAsDefaultPaymentMethod' hidden when saveForFutureUse checked & !setAsDefaultMatchesSaveForFutureUse`() = runTest {
+    fun `'setAsDefaultPaymentMethod' hidden when saveForFutureUse checked & setAsDefaultMatchesSaveForFutureUse`() = runTest {
         testSetAsDefaultPaymentMethod(
-            setAsDefaultMatchesSaveForFutureUse = false,
+            setAsDefaultMatchesSaveForFutureUse = true,
         ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
             saveForFutureUseElement.controller.onValueChange(true)
 
@@ -1355,9 +1355,9 @@ class USBankAccountFormViewModelTest {
     }
 
     @Test
-    fun `'setAsDefaultPaymentMethod' fieldVal true, saveForFutureUse checked & not setAsDefaultMatchesSaveForFutureUse`() = runTest {
+    fun `'setAsDefaultPaymentMethod' fieldVal true, saveForFutureUse checked & setAsDefaultMatchesSaveForFutureUse`() = runTest {
         testSetAsDefaultPaymentMethod(
-            setAsDefaultMatchesSaveForFutureUse = false,
+            setAsDefaultMatchesSaveForFutureUse = true,
         ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
             saveForFutureUseElement.controller.onValueChange(true)
             assertThat(setAsDefaultPaymentMethodElement.controller.fieldValue.value.toBoolean()).isTrue()
@@ -1365,9 +1365,9 @@ class USBankAccountFormViewModelTest {
     }
 
     @Test
-    fun `'setAsDefaultPaymentMethod' hidden when saveForFutureUse !checked & !setAsDefaultMatchesSaveForFutureUse`() = runTest {
+    fun `'setAsDefaultPaymentMethod' hidden when saveForFutureUse !checked & setAsDefaultMatchesSaveForFutureUse`() = runTest {
         testSetAsDefaultPaymentMethod(
-            setAsDefaultMatchesSaveForFutureUse = false,
+            setAsDefaultMatchesSaveForFutureUse = true,
         ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
             saveForFutureUseElement.controller.onValueChange(false)
 
@@ -1376,9 +1376,9 @@ class USBankAccountFormViewModelTest {
     }
 
     @Test
-    fun `setAsDefaultPaymentMethod fieldVal false, saveForFutureUse !checked & !setAsDefaultMatchesSaveForFutureUse`() = runTest {
+    fun `setAsDefaultPaymentMethod fieldVal false, saveForFutureUse !checked & setAsDefaultMatchesSaveForFutureUse`() = runTest {
         testSetAsDefaultPaymentMethod(
-            setAsDefaultMatchesSaveForFutureUse = false,
+            setAsDefaultMatchesSaveForFutureUse = true,
         ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
             saveForFutureUseElement.controller.onValueChange(false)
 

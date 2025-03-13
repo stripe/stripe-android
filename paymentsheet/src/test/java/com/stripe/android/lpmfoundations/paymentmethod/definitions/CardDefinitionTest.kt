@@ -96,7 +96,7 @@ class CardDefinitionTest {
     }
 
     @Test
-    fun `createFormElements returns set_as_default_payment_method when isPaymentMethodSetAsDefaultEnabled`() {
+    fun `createFormElements returns setAsDefaultPaymentMethod when isPaymentMethodSetAsDefaultEnabled`() {
         val formElements = getFormElementsWithSaveForFutureUseAndSetAsDefaultPaymentMethod(
             isPaymentMethodSetAsDefaultEnabled = true,
         )
@@ -107,9 +107,9 @@ class CardDefinitionTest {
     }
 
     @Test
-    fun `set_as_default_payment_method shown correctly when save_for_future_use checked`() {
+    fun `setAsDefaultPaymentMethod shown correctly when saveForFutureUse checked`() {
         testSetAsDefaultElements(
-            setAsDefaultMatchesSaveForFutureUse = true,
+            setAsDefaultMatchesSaveForFutureUse = false,
         ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
             val saveForFutureUseController = saveForFutureUseElement.controller
 
@@ -120,9 +120,9 @@ class CardDefinitionTest {
     }
 
     @Test
-    fun `set_as_default_payment_method hidden correctly when save_for_future_use unchecked`() {
+    fun `setAsDefaultPaymentMethod hidden correctly when saveForFutureUse unchecked`() {
         testSetAsDefaultElements(
-            setAsDefaultMatchesSaveForFutureUse = true,
+            setAsDefaultMatchesSaveForFutureUse = false,
         ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
             val saveForFutureUseController = saveForFutureUseElement.controller
 
@@ -137,9 +137,9 @@ class CardDefinitionTest {
     }
 
     @Test
-    fun `set_as_default_payment_method hidden when save_for_future_use unchecked & setAsDefaultMatchesSaveForFutureUse`() {
+    fun `setAsDefaultPaymentMethod hidden when saveForFutureUse unchecked & setAsDefaultMatchesSaveForFutureUse`() {
         testSetAsDefaultElements(
-            setAsDefaultMatchesSaveForFutureUse = false,
+            setAsDefaultMatchesSaveForFutureUse = true,
         ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
             val saveForFutureUseController = saveForFutureUseElement.controller
 
@@ -149,9 +149,9 @@ class CardDefinitionTest {
     }
 
     @Test
-    fun `set_as_default_payment_method field false when save_for_future_use unchecked & setAsDefaultMatchesSaveForFutureUse`() {
+    fun `setAsDefaultPM field false when saveForFutureUse unchecked & setAsDefaultMatchesSaveForFutureUse`() {
         testSetAsDefaultElements(
-            setAsDefaultMatchesSaveForFutureUse = false,
+            setAsDefaultMatchesSaveForFutureUse = true,
         ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
             val saveForFutureUseController = saveForFutureUseElement.controller
 
@@ -161,9 +161,9 @@ class CardDefinitionTest {
     }
 
     @Test
-    fun `set_as_default_payment_method hidden when save_for_future_use checked & setAsDefaultMatchesSaveForFutureUse`() {
+    fun `setAsDefaultPaymentMethod hidden when saveForFutureUse checked & setAsDefaultMatchesSaveForFutureUse`() {
         testSetAsDefaultElements(
-            setAsDefaultMatchesSaveForFutureUse = false,
+            setAsDefaultMatchesSaveForFutureUse = true,
         ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
             val saveForFutureUseController = saveForFutureUseElement.controller
 
@@ -173,9 +173,9 @@ class CardDefinitionTest {
     }
 
     @Test
-    fun `set_as_default_payment_method field true when save_for_future_use checked & setAsDefaultMatchesSaveForFutureUse`() {
+    fun `setAsDefaultPaymentMethod field true when saveForFutureUse checked & setAsDefaultMatchesSaveForFutureUse`() {
         testSetAsDefaultElements(
-            setAsDefaultMatchesSaveForFutureUse = false,
+            setAsDefaultMatchesSaveForFutureUse = true,
         ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
             val saveForFutureUseController = saveForFutureUseElement.controller
 

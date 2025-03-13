@@ -49,7 +49,8 @@ internal sealed interface UiDefinitionFactory {
                 private val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
                 private val paymentMethodExtraParams: PaymentMethodExtraParams? = null,
                 private val initialLinkUserInput: UserInput? = null,
-                private val setAsDefaultMatchesSaveForFutureUse: Boolean = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
+                private val setAsDefaultMatchesSaveForFutureUse: Boolean =
+                    FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
             ) : Factory {
                 override fun create(
                     metadata: PaymentMethodMetadata,
