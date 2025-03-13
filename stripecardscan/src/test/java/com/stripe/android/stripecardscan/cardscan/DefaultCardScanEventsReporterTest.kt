@@ -2,12 +2,16 @@ package com.stripe.android.stripecardscan.cardscan
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.AnalyticsRequestFactory
-import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.stripecardscan.scanui.CancellationReason
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import org.junit.Test
-import kotlin.time.Duration
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.shadows.ShadowSystemClock
+import java.util.concurrent.TimeUnit
 
+@RunWith(RobolectricTestRunner::class)
 internal class DefaultCardScanEventsReporterTest {
 
     @Test
@@ -24,41 +28,50 @@ internal class DefaultCardScanEventsReporterTest {
 
     @Test
     fun testScanSucceeded() = runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
+        defaultCardScanEventsReporter.scanStarted()
+        ShadowSystemClock.advanceBy(15, TimeUnit.SECONDS)
+
         defaultCardScanEventsReporter.scanSucceeded()
 
         val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
 
-        assertThat(loggedRequests).hasSize(1)
-        val loggedParams = loggedRequests.first().params
+        assertThat(loggedRequests).hasSize(2)
+        val loggedParams = loggedRequests.last().params
         assertThat(loggedParams["event"]).isEqualTo("cardscan_success")
-        assertThat(loggedParams["duration"]).isEqualTo(0f)
+        assertThat(loggedParams["duration"]).isEqualTo(15f)
         assertThat(loggedParams["elements_session_id"]).isEqualTo(ELEMENTS_SESSION_ID)
     }
 
     @Test
     fun testScanFailed() = runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
+        defaultCardScanEventsReporter.scanStarted()
+        ShadowSystemClock.advanceBy(11, TimeUnit.SECONDS)
+
         defaultCardScanEventsReporter.scanFailed(Throwable("oops"))
 
         val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
 
-        assertThat(loggedRequests).hasSize(1)
-        val loggedParams = loggedRequests.first().params
+        assertThat(loggedRequests).hasSize(2)
+        val loggedParams = loggedRequests.last().params
         assertThat(loggedParams["event"]).isEqualTo("cardscan_failed")
-        assertThat(loggedParams["duration"]).isEqualTo(0f)
+        assertThat(loggedParams["duration"]).isEqualTo(11f)
         assertThat(loggedParams["error_message"]).isEqualTo("unknown")
         assertThat(loggedParams["elements_session_id"]).isEqualTo(ELEMENTS_SESSION_ID)
     }
 
     @Test
     fun testScanCancelledOnBackPressed() = runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
+        defaultCardScanEventsReporter.scanStarted()
+        ShadowSystemClock.advanceBy(4, TimeUnit.SECONDS)
+
         defaultCardScanEventsReporter.scanCancelled(CancellationReason.Back)
 
         val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
 
-        assertThat(loggedRequests).hasSize(1)
-        val loggedParams = loggedRequests.first().params
+        assertThat(loggedRequests).hasSize(2)
+        val loggedParams = loggedRequests.last().params
         assertThat(loggedParams["event"]).isEqualTo("cardscan_cancel")
-        assertThat(loggedParams["duration"]).isEqualTo(0f)
+        assertThat(loggedParams["duration"]).isEqualTo(4f)
         assertThat(loggedParams["cancellation_reason"]).isEqualTo("back")
         assertThat(loggedParams["elements_session_id"]).isEqualTo(ELEMENTS_SESSION_ID)
     }
@@ -112,7 +125,7 @@ internal class DefaultCardScanEventsReporterTest {
                 networkTypeProvider = { "" },
                 pluginTypeProvider = { null }
             ),
-            durationProvider = FakeDurationProvider(),
+            durationProvider = DefaultDurationProvider.instance,
             cardScanConfiguration = CardScanConfiguration(ELEMENTS_SESSION_ID)
         )
 
@@ -121,13 +134,5 @@ internal class DefaultCardScanEventsReporterTest {
 
     companion object {
         private const val ELEMENTS_SESSION_ID = "elements_session_id"
-    }
-
-    private class FakeDurationProvider : DurationProvider {
-        override fun start(key: DurationProvider.Key, reset: Boolean) = Unit
-
-        override fun end(key: DurationProvider.Key): Duration {
-            return Duration.ZERO
-        }
     }
 }
