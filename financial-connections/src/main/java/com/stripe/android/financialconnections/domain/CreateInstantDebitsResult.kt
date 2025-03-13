@@ -46,7 +46,7 @@ internal class RealCreateInstantDebitsResult @Inject constructor(
             val sharePaymentDetails = consumerRepository.sharePaymentDetails(
                 paymentDetailsId = paymentDetails.id,
                 consumerSessionClientSecret = clientSecret,
-                expectedPaymentMethodType = linkMode!!.expectedPaymentMethodType,
+                expectedPaymentMethodType = linkMode.expectedPaymentMethodType,
                 billingPhone = elementsSessionContext.billingDetails?.phone,
             )
 

@@ -67,7 +67,6 @@ internal class StripeBrowserLauncherViewModel(
         }
 
         return CustomTabsIntent.Builder()
-            .setSendToExternalDefaultHandlerEnabled(true)
             .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
             .also {
                 if (customTabColorSchemeParams != null) {

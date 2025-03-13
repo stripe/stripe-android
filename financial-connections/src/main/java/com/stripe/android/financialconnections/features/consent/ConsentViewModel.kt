@@ -120,15 +120,16 @@ internal class ConsentViewModel @AssistedInject constructor(
     ): Destination {
         val defaultDestination = manifest.nextPane.destination
 
+        val prefilledEmail = prefillDetails?.email
         val useManifestNextPane = !isLinkWithStripe() ||
             manifest.accountholderCustomerEmailAddress != null ||
-            prefillDetails?.email == null
+            prefilledEmail == null
 
         if (useManifestNextPane) {
             return defaultDestination
         }
 
-        val hasExistingAccount = hasExistingLinkAccount(manifest, prefillDetails.email!!)
+        val hasExistingAccount = hasExistingLinkAccount(manifest, prefilledEmail)
         return if (hasExistingAccount) {
             NetworkingLinkLoginWarmup
         } else {

@@ -59,7 +59,6 @@ def getBackendUrl() {
 
 dependencies {
     implementation project(':financial-connections')
-    implementation project(':financial-connections-lite')
     implementation project(':payments-core')
     implementation project(':paymentsheet')
 
