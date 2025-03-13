@@ -20,13 +20,13 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.stripe.android.connect.BuildConfig
 import com.stripe.android.connect.ComponentEvent
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.analytics.ComponentAnalyticsService
 import com.stripe.android.connect.analytics.ConnectAnalyticsEvent
+import com.stripe.android.connect.di.StripeConnectComponent
 import com.stripe.android.connect.util.Clock
 import com.stripe.android.connect.util.isInInstrumentationTest
 import com.stripe.android.connect.webview.StripeConnectWebView.Delegate
@@ -77,8 +77,8 @@ internal class StripeConnectWebViewContainerViewModel(
     private val embeddedComponentManager: EmbeddedComponentManager,
     private val embeddedComponent: StripeEmbeddedComponent,
     private val analyticsService: ComponentAnalyticsService,
+    private val logger: Logger,
     private val stripeIntentLauncher: StripeIntentLauncher = StripeIntentLauncherImpl(),
-    private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
     createWebView: CreateWebView = CreateWebView(::StripeConnectWebView),
 ) : ViewModel(),
     DefaultLifecycleObserver {
@@ -407,7 +407,7 @@ internal class StripeConnectWebViewContainerViewModel(
         val embeddedComponentManager: EmbeddedComponentManager,
         val embeddedComponent: StripeEmbeddedComponent,
         val stripeIntentLauncher: StripeIntentLauncher = StripeIntentLauncherImpl(),
-        val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
+        val logger: Logger = StripeConnectComponent.instance.logger,
     ) {
         val analyticsService = embeddedComponentManager.coordinator.getComponentAnalyticsService(embeddedComponent)
     }

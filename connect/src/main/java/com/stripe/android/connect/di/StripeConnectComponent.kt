@@ -4,6 +4,7 @@ import com.stripe.android.connect.BuildConfig
 import com.stripe.android.connect.analytics.ConnectAnalyticsModule
 import com.stripe.android.connect.analytics.ConnectAnalyticsServiceFactory
 import com.stripe.android.connect.manager.EmbeddedComponentManagerComponent
+import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import dagger.BindsInstance
@@ -24,16 +25,19 @@ import javax.inject.Singleton
 )
 internal interface StripeConnectComponent {
 
+    val logger: Logger
+
     val analyticsServiceFactory: ConnectAnalyticsServiceFactory
 
     val coordinatorComponentProvider: Provider<EmbeddedComponentManagerComponent.Factory>
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun loggingEnabled(@Named(ENABLE_LOGGING) enabled: Boolean): Builder
-
-        fun build(): StripeConnectComponent
+    @Component.Factory
+    interface Factory {
+        fun build(
+            @BindsInstance
+            @Named(ENABLE_LOGGING)
+            enableLogging: Boolean,
+        ): StripeConnectComponent
     }
 
     companion object {
@@ -42,9 +46,8 @@ internal interface StripeConnectComponent {
         internal val instance: StripeConnectComponent
             get() = synchronized(StripeConnectComponent) {
                 _instance
-                    ?: DaggerStripeConnectComponent.builder()
-                        .loggingEnabled(BuildConfig.DEBUG)
-                        .build()
+                    ?: DaggerStripeConnectComponent.factory()
+                        .build(enableLogging = BuildConfig.DEBUG)
                         .also { _instance = it }
             }
 

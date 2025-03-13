@@ -6,7 +6,6 @@ import com.github.kittinunf.fuel.core.FoldableResponseInterceptor
 import com.github.kittinunf.fuel.core.RequestTransformer
 import com.github.kittinunf.fuel.core.ResponseTransformer
 import com.github.kittinunf.fuel.core.extensions.cUrlString
-import com.stripe.android.connect.example.BuildConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.version.StripeSdkVersion
 
@@ -40,7 +39,7 @@ object UserAgentHeader : FoldableRequestInterceptor {
 
 class RequestLogger(
     private val tag: String,
-    private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
+    private val logger: Logger,
 ) : FoldableRequestInterceptor {
     override fun invoke(next: RequestTransformer): RequestTransformer {
         return { request ->
@@ -52,7 +51,7 @@ class RequestLogger(
 
 class ResponseLogger(
     private val tag: String,
-    private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
+    private val logger: Logger,
 ) : FoldableResponseInterceptor {
     override fun invoke(next: ResponseTransformer): ResponseTransformer {
         return { request, response ->
