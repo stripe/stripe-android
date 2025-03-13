@@ -281,7 +281,7 @@ class CardDefinitionTest {
 
     private fun getFormElementsWithSaveForFutureUseAndSetAsDefaultPaymentMethod(
         isPaymentMethodSetAsDefaultEnabled: Boolean,
-        setAsDefaultMatchesSaveForFutureUse: Boolean = true,
+        setAsDefaultMatchesSaveForFutureUse: Boolean = false,
     ): List<FormElement> {
         return CardDefinition.formElements(
             metadata = PaymentMethodMetadataFactory.create(

@@ -17,7 +17,7 @@ internal object TestUiDefinitionFactoryArgumentsFactory {
         paymentMethodExtraParams: PaymentMethodExtraParams? = null,
         linkConfigurationCoordinator: LinkConfigurationCoordinator? = null,
         initialLinkUserInput: UserInput? = null,
-        setAsDefaultMatchesSaveForFutureUse: Boolean = true,
+        setAsDefaultMatchesSaveForFutureUse: Boolean = false,
     ): UiDefinitionFactory.Arguments.Factory {
         val context: Context? = try {
             ApplicationProvider.getApplicationContext<Application>()
