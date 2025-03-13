@@ -2,14 +2,15 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.runtime.Immutable
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
+import com.stripe.android.uicore.forms.FormFieldEntry
 
 @Immutable
 internal data class CardInputState(
-    private val card: PaymentMethod.Card,
+    val card: PaymentMethod.Card,
     private val cardBrandChoice: CardBrandChoice,
     private val billingDetails: PaymentMethod.BillingDetails?,
-    private val addressCollectionMode: PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode,
+    private val addressCollectionMode: AddressCollectionMode,
     val entry: CardDetailsEntry
 ) {
     val hasChanged: Boolean
@@ -17,32 +18,42 @@ internal data class CardInputState(
             val expChanged = card.expiryMonth != entry.expMonth || card.expiryYear != entry.expYear
             val cardBrandChanged = cardBrandChoice != entry.cardBrandChoice
             val addressChanged = when (addressCollectionMode) {
-                PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> {
-                    billingDetails?.address?.postalCode != entry.postalCode ||
-                        billingDetails?.address?.country != entry.country
+                AddressCollectionMode.Automatic -> {
+                    billingDetails?.address?.postalCode != entry.postalCode?.value ||
+                        billingDetails?.address?.country != entry.country?.value
                 }
-                PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> false
-                PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full -> {
-                    billingDetails?.address?.postalCode != entry.postalCode ||
-                        billingDetails?.address?.country != entry.country ||
-                        billingDetails?.address?.line1 != entry.line1 ||
-                        billingDetails?.address?.line2 != entry.line2 ||
-                        billingDetails?.address?.city != entry.city ||
-                        billingDetails?.address?.state != entry.state
+                AddressCollectionMode.Never -> false
+                AddressCollectionMode.Full -> {
+                    billingDetails?.address?.postalCode != entry.postalCode?.value ||
+                        billingDetails?.address?.country != entry.country?.value ||
+                        billingDetails?.address?.line1 != entry.line1?.value ||
+                        billingDetails?.address?.line2 != entry.line2?.value ||
+                        billingDetails?.address?.city != entry.city?.value ||
+                        billingDetails?.address?.state != entry.state?.value
                 }
             }
             return expChanged || cardBrandChanged || addressChanged
         }
 
-//    fun addressValid(): Boolean {
-//        when (addressCollectionMode) {
-//            AddressCollectionMode.Automatic -> {
-//                (entry.country.isNullOrBlank() || entry.postalCode.isNullOrBlank()).not()
-//            }
-//            AddressCollectionMode.Never -> true
-//            AddressCollectionMode.Full -> {
-//
-//            }
-//        }
-//    }
+    val valid: Boolean = addressValid() && expDateValid()
+
+    fun addressValid(): Boolean {
+        return when (addressCollectionMode) {
+            AddressCollectionMode.Automatic -> {
+                entry.country.isValid && entry.postalCode.isValid
+            }
+            AddressCollectionMode.Never -> {
+                true
+            }
+            AddressCollectionMode.Full -> {
+                entry.country.isValid && entry.state.isValid && entry.postalCode.isValid && entry.line1.isValid
+                    && entry.line2.isValid
+            }
+        }
+    }
+
+   fun expDateValid(): Boolean = entry.expMonth != null && entry.expYear != null
 }
+
+private val FormFieldEntry?.isValid
+    get() = this?.isComplete ?: false

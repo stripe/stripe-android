@@ -14,9 +14,11 @@ import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -46,16 +48,7 @@ internal class DefaultCardEditUIHandler(
         identifier = IdentifierSpec.BillingAddress,
         sameAsShippingElement = null,
         shippingValuesMap = null,
-        rawValuesMap = billingDetails?.address?.let {
-            mapOf(
-                IdentifierSpec.Line1 to it.line1,
-                IdentifierSpec.Line2 to it.line2,
-                IdentifierSpec.State to it.state,
-                IdentifierSpec.City to it.city,
-                IdentifierSpec.Country to it.country,
-                IdentifierSpec.PostalCode to it.postalCode
-            )
-        } ?: emptyMap()
+        rawValuesMap = rawAddressValues()
     )
 
     override val expDate = formattedExpiryDate()
@@ -64,23 +57,22 @@ internal class DefaultCardEditUIHandler(
 
     override val collectAddress = addressCollectionMode != AddressCollectionMode.Never
 
-    val selectedCardBrandFlow: Flow<CardBrandChoice> = _cardInputState.mapLatest { it.entry.cardBrandChoice }
-
     override val hiddenAddressElements = buildHiddenAddressElements()
 
-    private val _state = MutableStateFlow(
-        value = CardEditUIHandler.State(
-            card = card,
-            expDate = expDate,
+    override val state: StateFlow<CardEditUIHandler.State> = _cardInputState.mapLatest { inputState ->
+        CardEditUIHandler.State(
+            card = inputState.card,
+            expDate = formattedExpiryDate(),
             addressElement = addressSectionElement,
             hiddenAddressFields = hiddenAddressElements,
             collectAddress = collectAddress,
-            selectedCardBrand = defaultCardBrandChoice()
+            selectedCardBrand = inputState.entry.cardBrandChoice
         )
+    }.stateIn(
+        scope = scope,
+        started = SharingStarted.Eagerly,
+        initialValue = defaultState()
     )
-
-    override val state: StateFlow<CardEditUIHandler.State> = _state
-
 
 
     init {
@@ -90,13 +82,27 @@ internal class DefaultCardEditUIHandler(
 
         scope.launch {
             _cardInputState.collectLatest { state ->
-                val newParams = state.takeIf { it.hasChanged }?.entry?.toUpdateParams(collectAddress)
+                println("TOLUWANI => entry.isValid: ${state.valid}, entry.addressValid: ${state.addressValid()}, entry.expDateValid: ${state.expDateValid()}")
+                val newParams = state.takeIf {
+                    it.hasChanged && it.valid
+                }?.entry?.toUpdateParams(collectAddress)
                 onCardValuesChanged(newParams)
             }
         }
     }
 
-    fun defaultCardBrandChoice() = card.getPreferredChoice(cardBrandFilter)
+    private fun defaultState(): CardEditUIHandler.State {
+        return CardEditUIHandler.State(
+            card = card,
+            expDate = expDate,
+            addressElement = addressSectionElement,
+            hiddenAddressFields = hiddenAddressElements,
+            collectAddress = collectAddress,
+            selectedCardBrand = defaultCardBrandChoice()
+        )
+    }
+
+    private fun defaultCardBrandChoice() = card.getPreferredChoice(cardBrandFilter)
 
     private fun buildDefaultCardEntry(): CardDetailsEntry {
         val entry = CardDetailsEntry(
@@ -107,8 +113,8 @@ internal class DefaultCardEditUIHandler(
         return when (addressCollectionMode) {
             AddressCollectionMode.Automatic -> {
                 entry.copy(
-                    country = billingDetails?.address?.country,
-                    postalCode = billingDetails?.address?.postalCode
+                    country = billingDetails?.address?.country?.toFormFieldEntry(),
+                    postalCode = billingDetails?.address?.postalCode?.toFormFieldEntry()
                 )
             }
             AddressCollectionMode.Never -> {
@@ -116,12 +122,12 @@ internal class DefaultCardEditUIHandler(
             }
             AddressCollectionMode.Full -> {
                 entry.copy(
-                    line1 = billingDetails?.address?.line1,
-                    line2 = billingDetails?.address?.line2,
-                    city = billingDetails?.address?.city,
-                    state = billingDetails?.address?.state,
-                    country = billingDetails?.address?.country,
-                    postalCode = billingDetails?.address?.postalCode
+                    line1 = billingDetails?.address?.line1?.toFormFieldEntry(),
+                    line2 = billingDetails?.address?.line2?.toFormFieldEntry(),
+                    city = billingDetails?.address?.city?.toFormFieldEntry(),
+                    state = billingDetails?.address?.state?.toFormFieldEntry(),
+                    country = billingDetails?.address?.country?.toFormFieldEntry(),
+                    postalCode = billingDetails?.address?.postalCode?.toFormFieldEntry()
                 )
             }
         }
@@ -133,12 +139,11 @@ internal class DefaultCardEditUIHandler(
             val entry = it.entry
             it.copy(
                 entry = entry.copy(
-                    expYear = map[IdentifierSpec.CardExpYear]?.value?.toIntOrNull(),
-                    expMonth = map[IdentifierSpec.CardExpMonth]?.value?.toIntOrNull(),
+                    expYear = map[IdentifierSpec.CardExpYear]?.value?.toIntOrNull()?.takeIf { it > 0 },
+                    expMonth = map[IdentifierSpec.CardExpMonth]?.value?.toIntOrNull()?.takeIf { it > 0 },
                 )
             )
         }
-        println("TOLUWANI => ${_cardInputState.value.hasChanged} <=> ${_cardInputState.value.entry}")
     }
 
     private suspend fun listenToForm() {
@@ -169,11 +174,10 @@ internal class DefaultCardEditUIHandler(
 
     private fun List<Pair<IdentifierSpec, FormFieldEntry>>.valueOrNull(
         identifierSpec: IdentifierSpec
-    ): String? {
+    ): FormFieldEntry? {
         return firstOrNull {
             it.first == identifierSpec
-        }?.takeIf { it.second.isComplete }
-            ?.second?.value
+        }?.second
     }
 
     private fun formattedExpiryDate(): String {
@@ -231,6 +235,29 @@ internal class DefaultCardEditUIHandler(
         onBrandChoiceOptionsShown(_cardInputState.value.entry.cardBrandChoice.brand)
     }
 
+    private fun rawAddressValues(): Map<IdentifierSpec, String?> {
+        val address = billingDetails?.address ?: return emptyMap()
+        return when (addressCollectionMode) {
+            AddressCollectionMode.Automatic -> {
+                mapOf(
+                    IdentifierSpec.Country to address.country,
+                    IdentifierSpec.PostalCode to address.postalCode
+                )
+            }
+            AddressCollectionMode.Never -> emptyMap()
+            AddressCollectionMode.Full -> {
+                mapOf(
+                    IdentifierSpec.Line1 to address.line1,
+                    IdentifierSpec.Line2 to address.line2,
+                    IdentifierSpec.State to address.state,
+                    IdentifierSpec.City to address.city,
+                    IdentifierSpec.Country to address.country,
+                    IdentifierSpec.PostalCode to address.postalCode
+                )
+            }
+        }
+    }
+
     class Factory(
         private val scope: CoroutineScope,
     ) : CardEditUIHandler.Factory {
@@ -281,3 +308,5 @@ internal class DefaultCardEditUIHandler(
         }
     }
 }
+
+private fun String.toFormFieldEntry() = FormFieldEntry(this, isComplete = true)

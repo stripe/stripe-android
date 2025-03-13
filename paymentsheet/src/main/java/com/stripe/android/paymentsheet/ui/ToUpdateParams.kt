@@ -11,12 +11,12 @@ internal fun CardDetailsEntry.toUpdateParams(collectAddress: Boolean): CardUpdat
         billingDetails = when (collectAddress) {
             true -> {
                 val address = Address(
-                    city = city,
-                    country = country,
-                    line1 = line1,
-                    line2 = line2,
-                    postalCode = postalCode,
-                    state = state
+                    city = city?.value,
+                    country = country?.value,
+                    line1 = line1?.value,
+                    line2 = line2?.value,
+                    postalCode = postalCode?.value,
+                    state = state?.value
                 )
                 PaymentMethod.BillingDetails(address)
             }
