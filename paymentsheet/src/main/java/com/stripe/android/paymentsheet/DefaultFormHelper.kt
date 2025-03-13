@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
@@ -17,6 +18,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.elements.HAS_OTHER_PAYMENT_METHODS_DEFAULT_VALUE
 import com.stripe.android.uicore.elements.FormElement
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -32,6 +34,7 @@ internal class DefaultFormHelper(
     private val newPaymentSelectionProvider: () -> NewOrExternalPaymentSelection?,
     private val selectionUpdater: (PaymentSelection?) -> Unit,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
+    private val hasOtherPaymentMethods: Boolean,
 ) : FormHelper {
     companion object {
         fun create(
@@ -51,6 +54,7 @@ internal class DefaultFormHelper(
                 selectionUpdater = {
                     viewModel.updateSelection(it)
                 },
+                hasOtherPaymentMethods = viewModel.customerStateHolder.paymentMethods.value.isNotEmpty(),
             )
         }
 
@@ -67,6 +71,7 @@ internal class DefaultFormHelper(
                 newPaymentSelectionProvider = { null },
                 linkConfigurationCoordinator = null,
                 selectionUpdater = {},
+                hasOtherPaymentMethods = HAS_OTHER_PAYMENT_METHODS_DEFAULT_VALUE,
             )
         }
     }
@@ -128,7 +133,8 @@ internal class DefaultFormHelper(
                 initialLinkUserInput = when (val selection = currentSelection?.paymentSelection) {
                     is PaymentSelection.New.LinkInline -> selection.input
                     else -> null
-                }
+                },
+                hasOtherPaymentMethods = hasOtherPaymentMethods,
             ),
         ) ?: emptyList()
     }

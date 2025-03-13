@@ -8,6 +8,7 @@ import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.NewOrExternalPaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.ui.core.elements.HAS_OTHER_PAYMENT_METHODS_DEFAULT_VALUE
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
 
@@ -39,6 +40,7 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
             },
             selectionUpdater = selectionUpdater,
             linkConfigurationCoordinator = linkConfigurationCoordinator,
+            hasOtherPaymentMethods = HAS_OTHER_PAYMENT_METHODS_DEFAULT_VALUE, // TODO for embedded
         )
     }
 }

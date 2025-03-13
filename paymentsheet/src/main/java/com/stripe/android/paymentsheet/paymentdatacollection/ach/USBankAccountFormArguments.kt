@@ -17,6 +17,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.verticalmode.BankFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.elements.HAS_OTHER_PAYMENT_METHODS_DEFAULT_VALUE
 import kotlinx.coroutines.flow.update
 
 /**
@@ -59,7 +60,8 @@ internal class USBankAccountFormArguments(
     val onUpdatePrimaryButtonUIState: ((PrimaryButton.UIState?) -> (PrimaryButton.UIState?)) -> Unit,
     val onUpdatePrimaryButtonState: (PrimaryButton.State) -> Unit,
     val onError: (ResolvableString?) -> Unit,
-    val setAsDefaultPaymentMethodEnabled: Boolean
+    val setAsDefaultPaymentMethodEnabled: Boolean,
+    val hasOtherPaymentMethods: Boolean,
 ) {
     companion object {
         fun create(
@@ -106,6 +108,7 @@ internal class USBankAccountFormArguments(
                 setAsDefaultPaymentMethodEnabled =
                 paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
                     ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
+                hasOtherPaymentMethods = viewModel.customerStateHolder.paymentMethods.value.isNotEmpty(),
             )
         }
 
@@ -153,6 +156,7 @@ internal class USBankAccountFormArguments(
                 setAsDefaultPaymentMethodEnabled =
                 paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
                     ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
+                hasOtherPaymentMethods = HAS_OTHER_PAYMENT_METHODS_DEFAULT_VALUE,
             )
         }
     }
