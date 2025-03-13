@@ -233,7 +233,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     val linkedAccount: StateFlow<PaymentSelection.New.USBankAccount?> = combineAsStateFlow(
         currentScreenState,
         billingDetails,
-        setAsDefaultPaymentMethodElement?.controller?.setAsDefaultPaymentMethod ?: stateFlowOf(false),
+        setAsDefaultPaymentMethodElement?.controller?.setAsDefaultPaymentMethodChecked ?: stateFlowOf(false),
     ) { state, billingDetails, _ ->
         state.toPaymentSelection(billingDetails)
     }
@@ -676,7 +676,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             ),
             paymentMethodExtraParams = if (setAsDefaultPaymentMethodElement != null) {
                 PaymentMethodExtraParams.USBankAccount(
-                    setAsDefault = setAsDefaultPaymentMethodElement.controller.setAsDefaultPaymentMethod.value
+                    setAsDefault = setAsDefaultPaymentMethodElement.controller.setAsDefaultPaymentMethodChecked.value
                 )
             } else {
                 null
