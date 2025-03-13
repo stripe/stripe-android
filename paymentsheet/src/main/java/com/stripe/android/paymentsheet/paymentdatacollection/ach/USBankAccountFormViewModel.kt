@@ -205,7 +205,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             SetAsDefaultPaymentMethodElement(
                 initialValue = false,
                 saveForFutureUseCheckedFlow = saveForFutureUseCheckedFlow,
-                hasOtherPaymentMethods = args.hasOtherPaymentMethods,
+                ifSavedShouldSetAsDefaultPaymentMethod = args.ifSavedShouldSetAsDefaultPaymentMethod,
             )
         } else {
             null
@@ -743,7 +743,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val shippingDetails: AddressDetails?,
         val hostedSurface: String,
         val setAsDefaultPaymentMethodEnabled: Boolean,
-        val hasOtherPaymentMethods: Boolean,
+        val ifSavedShouldSetAsDefaultPaymentMethod: Boolean,
     )
 
     private companion object {

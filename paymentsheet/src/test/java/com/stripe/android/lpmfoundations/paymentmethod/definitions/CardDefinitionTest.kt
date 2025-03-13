@@ -109,7 +109,7 @@ class CardDefinitionTest {
     @Test
     fun `set_as_default_payment_method shown correctly when save_for_future_use checked`() {
         testSetAsDefaultElements(
-            hasOtherPaymentMethods = true,
+            ifSavedShouldSetAsDefaultPaymentMethod = true,
         ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
             val saveForFutureUseController = saveForFutureUseElement.controller
 
@@ -122,7 +122,7 @@ class CardDefinitionTest {
     @Test
     fun `set_as_default_payment_method hidden correctly when save_for_future_use unchecked`() {
         testSetAsDefaultElements(
-            hasOtherPaymentMethods = true,
+            ifSavedShouldSetAsDefaultPaymentMethod = true,
         ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
             val saveForFutureUseController = saveForFutureUseElement.controller
 
@@ -137,9 +137,9 @@ class CardDefinitionTest {
     }
 
     @Test
-    fun `set_as_default_payment_method hidden when save_for_future_use unchecked & hasOtherPaymentMethods`() {
+    fun `set_as_default_payment_method hidden when save_for_future_use unchecked & ifSavedShouldSetAsDefaultPaymentMethod`() {
         testSetAsDefaultElements(
-            hasOtherPaymentMethods = false,
+            ifSavedShouldSetAsDefaultPaymentMethod = false,
         ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
             val saveForFutureUseController = saveForFutureUseElement.controller
 
@@ -149,9 +149,9 @@ class CardDefinitionTest {
     }
 
     @Test
-    fun `set_as_default_payment_method field false when save_for_future_use unchecked & hasOtherPaymentMethods`() {
+    fun `set_as_default_payment_method field false when save_for_future_use unchecked & ifSavedShouldSetAsDefaultPaymentMethod`() {
         testSetAsDefaultElements(
-            hasOtherPaymentMethods = false,
+            ifSavedShouldSetAsDefaultPaymentMethod = false,
         ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
             val saveForFutureUseController = saveForFutureUseElement.controller
 
@@ -161,9 +161,9 @@ class CardDefinitionTest {
     }
 
     @Test
-    fun `set_as_default_payment_method hidden when save_for_future_use checked & hasOtherPaymentMethods`() {
+    fun `set_as_default_payment_method hidden when save_for_future_use checked & ifSavedShouldSetAsDefaultPaymentMethod`() {
         testSetAsDefaultElements(
-            hasOtherPaymentMethods = false,
+            ifSavedShouldSetAsDefaultPaymentMethod = false,
         ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
             val saveForFutureUseController = saveForFutureUseElement.controller
 
@@ -173,9 +173,9 @@ class CardDefinitionTest {
     }
 
     @Test
-    fun `set_as_default_payment_method field true when save_for_future_use checked & hasOtherPaymentMethods`() {
+    fun `set_as_default_payment_method field true when save_for_future_use checked & ifSavedShouldSetAsDefaultPaymentMethod`() {
         testSetAsDefaultElements(
-            hasOtherPaymentMethods = false,
+            ifSavedShouldSetAsDefaultPaymentMethod = false,
         ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
             val saveForFutureUseController = saveForFutureUseElement.controller
 
@@ -265,12 +265,12 @@ class CardDefinitionTest {
     }
 
     private fun testSetAsDefaultElements(
-        hasOtherPaymentMethods: Boolean,
+        ifSavedShouldSetAsDefaultPaymentMethod: Boolean,
         block: (SaveForFutureUseElement, SetAsDefaultPaymentMethodElement) -> Unit
     ) {
         val formElements = getFormElementsWithSaveForFutureUseAndSetAsDefaultPaymentMethod(
             isPaymentMethodSetAsDefaultEnabled = true,
-            hasOtherPaymentMethods = hasOtherPaymentMethods,
+            ifSavedShouldSetAsDefaultPaymentMethod = ifSavedShouldSetAsDefaultPaymentMethod,
         )
 
         val saveForFutureUseElement = formElements[1] as SaveForFutureUseElement
@@ -281,7 +281,7 @@ class CardDefinitionTest {
 
     private fun getFormElementsWithSaveForFutureUseAndSetAsDefaultPaymentMethod(
         isPaymentMethodSetAsDefaultEnabled: Boolean,
-        hasOtherPaymentMethods: Boolean = true,
+        ifSavedShouldSetAsDefaultPaymentMethod: Boolean = true,
     ): List<FormElement> {
         return CardDefinition.formElements(
             metadata = PaymentMethodMetadataFactory.create(
@@ -291,7 +291,7 @@ class CardDefinitionTest {
                 hasCustomerConfiguration = true,
                 isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
             ),
-            hasOtherPaymentMethods = hasOtherPaymentMethods,
+            ifSavedShouldSetAsDefaultPaymentMethod = ifSavedShouldSetAsDefaultPaymentMethod,
         )
     }
 }

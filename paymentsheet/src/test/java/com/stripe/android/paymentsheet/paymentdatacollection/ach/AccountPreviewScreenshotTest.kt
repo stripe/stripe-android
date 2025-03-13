@@ -11,7 +11,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.ui.core.elements.HAS_OTHER_PAYMENT_METHODS_DEFAULT_VALUE
+import com.stripe.android.ui.core.elements.IF_SAVED_SHOULD_SET_AS_DEFAULT_PAYMENT_METHOD_DEFAULT_VALUE
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.uicore.elements.EmailConfig
@@ -184,7 +184,7 @@ internal class AccountPreviewScreenshotTest {
             isPaymentFlow = true,
             enabled = true,
             showCheckboxes = true,
-            hasOtherPaymentMethods = false
+            ifSavedShouldSetAsDefaultPaymentMethod = false
         )
     }
 
@@ -211,7 +211,7 @@ internal class AccountPreviewScreenshotTest {
     private val setAsDefaultPaymentMethodElement = SetAsDefaultPaymentMethodElement(
         initialValue = false,
         saveForFutureUseCheckedFlow = saveForFutureUseElement.controller.saveForFutureUse,
-        hasOtherPaymentMethods = HAS_OTHER_PAYMENT_METHODS_DEFAULT_VALUE,
+        ifSavedShouldSetAsDefaultPaymentMethod = IF_SAVED_SHOULD_SET_AS_DEFAULT_PAYMENT_METHOD_DEFAULT_VALUE,
     )
 
     private fun takeAccountPreviewScreenShot(
@@ -222,7 +222,7 @@ internal class AccountPreviewScreenshotTest {
         fillAddress: Boolean = false,
         enabled: Boolean = true,
         showCheckboxes: Boolean = false,
-        hasOtherPaymentMethods: Boolean = HAS_OTHER_PAYMENT_METHODS_DEFAULT_VALUE,
+        ifSavedShouldSetAsDefaultPaymentMethod: Boolean = IF_SAVED_SHOULD_SET_AS_DEFAULT_PAYMENT_METHOD_DEFAULT_VALUE,
     ) {
         paparazzi.snapshot {
             BankAccountForm(
@@ -237,7 +237,7 @@ internal class AccountPreviewScreenshotTest {
                 sameAsShippingElement = sameAsShippingElement,
                 saveForFutureUseElement = saveForFutureUseElement,
                 setAsDefaultPaymentMethodElement = setAsDefaultPaymentMethodElement.copy(
-                    hasOtherPaymentMethods = hasOtherPaymentMethods
+                    ifSavedShouldSetAsDefaultPaymentMethod = ifSavedShouldSetAsDefaultPaymentMethod
                 ),
                 showCheckboxes = showCheckboxes,
                 lastTextFieldIdentifier = null,

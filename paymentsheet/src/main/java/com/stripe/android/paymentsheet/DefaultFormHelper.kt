@@ -17,7 +17,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.elements.HAS_OTHER_PAYMENT_METHODS_DEFAULT_VALUE
+import com.stripe.android.ui.core.elements.IF_SAVED_SHOULD_SET_AS_DEFAULT_PAYMENT_METHOD_DEFAULT_VALUE
 import com.stripe.android.uicore.elements.FormElement
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -33,7 +33,7 @@ internal class DefaultFormHelper(
     private val newPaymentSelectionProvider: () -> NewOrExternalPaymentSelection?,
     private val selectionUpdater: (PaymentSelection?) -> Unit,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
-    private val hasOtherPaymentMethods: Boolean,
+    private val ifSavedShouldSetAsDefaultPaymentMethod: Boolean,
 ) : FormHelper {
     companion object {
         fun create(
@@ -53,7 +53,7 @@ internal class DefaultFormHelper(
                 selectionUpdater = {
                     viewModel.updateSelection(it)
                 },
-                hasOtherPaymentMethods = viewModel.customerStateHolder.paymentMethods.value.isNotEmpty(),
+                ifSavedShouldSetAsDefaultPaymentMethod = viewModel.customerStateHolder.paymentMethods.value.isEmpty(),
             )
         }
 
@@ -70,7 +70,7 @@ internal class DefaultFormHelper(
                 newPaymentSelectionProvider = { null },
                 linkConfigurationCoordinator = null,
                 selectionUpdater = {},
-                hasOtherPaymentMethods = HAS_OTHER_PAYMENT_METHODS_DEFAULT_VALUE,
+                ifSavedShouldSetAsDefaultPaymentMethod = IF_SAVED_SHOULD_SET_AS_DEFAULT_PAYMENT_METHOD_DEFAULT_VALUE,
             )
         }
     }
@@ -133,7 +133,7 @@ internal class DefaultFormHelper(
                     is PaymentSelection.New.LinkInline -> selection.input
                     else -> null
                 },
-                hasOtherPaymentMethods = hasOtherPaymentMethods,
+                ifSavedShouldSetAsDefaultPaymentMethod = ifSavedShouldSetAsDefaultPaymentMethod,
             ),
         ) ?: emptyList()
     }

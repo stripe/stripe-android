@@ -32,7 +32,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.ui.core.elements.HAS_OTHER_PAYMENT_METHODS_DEFAULT_VALUE
+import com.stripe.android.ui.core.elements.IF_SAVED_SHOULD_SET_AS_DEFAULT_PAYMENT_METHOD_DEFAULT_VALUE
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -80,7 +80,7 @@ class USBankAccountFormViewModelTest {
         hostedSurface = CollectBankAccountLauncher.HOSTED_SURFACE_PAYMENT_ELEMENT,
         linkMode = null,
         setAsDefaultPaymentMethodEnabled = false,
-        hasOtherPaymentMethods = HAS_OTHER_PAYMENT_METHODS_DEFAULT_VALUE,
+        ifSavedShouldSetAsDefaultPaymentMethod = IF_SAVED_SHOULD_SET_AS_DEFAULT_PAYMENT_METHOD_DEFAULT_VALUE,
     )
 
     private val mockCollectBankAccountLauncher = mock<CollectBankAccountLauncher>()
@@ -1344,9 +1344,9 @@ class USBankAccountFormViewModelTest {
     }
 
     @Test
-    fun `'setAsDefaultPaymentMethod' hidden when saveForFutureUse checked & !hasOtherPaymentMethods`() = runTest {
+    fun `'setAsDefaultPaymentMethod' hidden when saveForFutureUse checked & !ifSavedShouldSetAsDefaultPaymentMethod`() = runTest {
         testSetAsDefaultPaymentMethod(
-            hasOtherPaymentMethods = false,
+            ifSavedShouldSetAsDefaultPaymentMethod = false,
         ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
             saveForFutureUseElement.controller.onValueChange(true)
 
@@ -1355,9 +1355,9 @@ class USBankAccountFormViewModelTest {
     }
 
     @Test
-    fun `'setAsDefaultPaymentMethod' fieldVal true, saveForFutureUse checked & not hasOtherPaymentMethods`() = runTest {
+    fun `'setAsDefaultPaymentMethod' fieldVal true, saveForFutureUse checked & not ifSavedShouldSetAsDefaultPaymentMethod`() = runTest {
         testSetAsDefaultPaymentMethod(
-            hasOtherPaymentMethods = false,
+            ifSavedShouldSetAsDefaultPaymentMethod = false,
         ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
             saveForFutureUseElement.controller.onValueChange(true)
             assertThat(setAsDefaultPaymentMethodElement.controller.fieldValue.value.toBoolean()).isTrue()
@@ -1365,9 +1365,9 @@ class USBankAccountFormViewModelTest {
     }
 
     @Test
-    fun `'setAsDefaultPaymentMethod' hidden when saveForFutureUse !checked & !hasOtherPaymentMethods`() = runTest {
+    fun `'setAsDefaultPaymentMethod' hidden when saveForFutureUse !checked & !ifSavedShouldSetAsDefaultPaymentMethod`() = runTest {
         testSetAsDefaultPaymentMethod(
-            hasOtherPaymentMethods = false,
+            ifSavedShouldSetAsDefaultPaymentMethod = false,
         ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
             saveForFutureUseElement.controller.onValueChange(false)
 
@@ -1376,9 +1376,9 @@ class USBankAccountFormViewModelTest {
     }
 
     @Test
-    fun `setAsDefaultPaymentMethod fieldVal false, saveForFutureUse !checked & !hasOtherPaymentMethods`() = runTest {
+    fun `setAsDefaultPaymentMethod fieldVal false, saveForFutureUse !checked & !ifSavedShouldSetAsDefaultPaymentMethod`() = runTest {
         testSetAsDefaultPaymentMethod(
-            hasOtherPaymentMethods = false,
+            ifSavedShouldSetAsDefaultPaymentMethod = false,
         ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
             saveForFutureUseElement.controller.onValueChange(false)
 
@@ -1521,14 +1521,14 @@ class USBankAccountFormViewModelTest {
     }
 
     private suspend fun testSetAsDefaultPaymentMethod(
-        hasOtherPaymentMethods: Boolean = true,
+        ifSavedShouldSetAsDefaultPaymentMethod: Boolean = false,
         block: (SaveForFutureUseElement, SetAsDefaultPaymentMethodElement) -> Unit
     ) {
         val viewModel = createViewModel(
             args = defaultArgs.copy(
                 showCheckbox = true,
                 setAsDefaultPaymentMethodEnabled = true,
-                hasOtherPaymentMethods = hasOtherPaymentMethods,
+                ifSavedShouldSetAsDefaultPaymentMethod = ifSavedShouldSetAsDefaultPaymentMethod,
             )
         )
 

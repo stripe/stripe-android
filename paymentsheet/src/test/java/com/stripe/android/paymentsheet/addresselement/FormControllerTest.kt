@@ -12,7 +12,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailSpec
-import com.stripe.android.ui.core.elements.HAS_OTHER_PAYMENT_METHODS_DEFAULT_VALUE
+import com.stripe.android.ui.core.elements.IF_SAVED_SHOULD_SET_AS_DEFAULT_PAYMENT_METHOD_DEFAULT_VALUE
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -49,7 +49,7 @@ class FormControllerTest {
             linkConfigurationCoordinator = null,
             onLinkInlineSignupStateChanged = { throw AssertionError("Not implemented") },
             cardBrandFilter = DefaultCardBrandFilter,
-            hasOtherPaymentMethods = HAS_OTHER_PAYMENT_METHODS_DEFAULT_VALUE,
+            ifSavedShouldSetAsDefaultPaymentMethod = IF_SAVED_SHOULD_SET_AS_DEFAULT_PAYMENT_METHOD_DEFAULT_VALUE,
         )
     )
 

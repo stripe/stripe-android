@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 class SetAsDefaultPaymentMethodController(
     setAsDefaultPaymentMethodInitialValue: Boolean = false,
     saveForFutureUseCheckedFlow: StateFlow<Boolean>,
-    hasOtherPaymentMethods: Boolean,
+    ifSavedShouldSetAsDefaultPaymentMethod: Boolean,
 ) : InputController {
     override val label: StateFlow<Int> = MutableStateFlow(R.string.stripe_set_as_default_payment_method)
 
@@ -25,11 +25,11 @@ class SetAsDefaultPaymentMethodController(
     val shouldPaymentMethodBeSetAsDefault: StateFlow<Boolean> = combineAsStateFlow(
         saveForFutureUseCheckedFlow,
         setAsDefaultPaymentMethodChecked,
-        stateFlowOf(hasOtherPaymentMethods),
-    ) { saveForFutureUseCheckedFlow, setAsDefaultPaymentMethodChecked, hasOtherPaymentMethodsFlow ->
+        stateFlowOf(ifSavedShouldSetAsDefaultPaymentMethod),
+    ) { saveForFutureUseCheckedFlow, setAsDefaultPaymentMethodChecked, ifSavedSetAsDefault ->
         // Payment method must be saved for future use and
         // is either the first payment method or has been checked to be the defaultPaymentMethod
-        (saveForFutureUseCheckedFlow && (!hasOtherPaymentMethodsFlow || setAsDefaultPaymentMethodChecked))
+        (saveForFutureUseCheckedFlow && (ifSavedSetAsDefault || setAsDefaultPaymentMethodChecked))
     }
 
     override val fieldValue: StateFlow<String> = shouldPaymentMethodBeSetAsDefault.mapAsStateFlow {

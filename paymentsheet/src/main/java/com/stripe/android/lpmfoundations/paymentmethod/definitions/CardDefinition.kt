@@ -211,7 +211,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                 SetAsDefaultPaymentMethodElement(
                     initialValue = false,
                     saveForFutureUseCheckedFlow = isSaveForFutureUseCheckedFlow,
-                    hasOtherPaymentMethods = arguments.hasOtherPaymentMethods,
+                    ifSavedShouldSetAsDefaultPaymentMethod = arguments.ifSavedShouldSetAsDefaultPaymentMethod,
                 )
             )
         }
