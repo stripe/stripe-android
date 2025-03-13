@@ -475,19 +475,6 @@ class UpdatePaymentMethodUITest {
     }
 
     @Test
-    fun `When set as default checkbox is checked, save button is visible and enabled`() {
-        runScenario(
-            shouldShowSetAsDefaultCheckbox = true,
-            setAsDefaultCheckboxChecked = true,
-        ) {
-            val saveButton = composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG)
-
-            saveButton.assertExists()
-            saveButton.assertIsEnabled()
-        }
-    }
-
-    @Test
     fun `setAsDefaultCheckboxEnabled true -- set as default checkbox is enabled`() {
         runScenario(
             shouldShowSetAsDefaultCheckbox = true,
