@@ -6,6 +6,7 @@ import com.stripe.android.uicore.elements.FieldError
 import com.stripe.android.uicore.elements.InputController
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,13 +22,18 @@ class SetAsDefaultPaymentMethodController(
     private val _setAsDefaultPaymentMethodChecked = MutableStateFlow(setAsDefaultPaymentMethodInitialValue)
     val setAsDefaultPaymentMethodChecked: StateFlow<Boolean> = _setAsDefaultPaymentMethodChecked
 
-    override val fieldValue: StateFlow<String> = combineAsStateFlow(
+    val shouldPaymentMethodBeSetAsDefault: StateFlow<Boolean> = combineAsStateFlow(
         saveForFutureUseCheckedFlow,
-        setAsDefaultPaymentMethodChecked
-    ) { saveForFutureUseCheckedFlow, setAsDefaultPaymentMethodChecked ->
+        setAsDefaultPaymentMethodChecked,
+        stateFlowOf(hasOtherPaymentMethods),
+    ) { saveForFutureUseCheckedFlow, setAsDefaultPaymentMethodChecked, hasOtherPaymentMethodsFlow ->
         // Payment method must be saved for future use and
         // is either the first payment method or has been checked to be the defaultPaymentMethod
-        (saveForFutureUseCheckedFlow && (!hasOtherPaymentMethods || setAsDefaultPaymentMethodChecked)).toString()
+        (saveForFutureUseCheckedFlow && (!hasOtherPaymentMethodsFlow || setAsDefaultPaymentMethodChecked))
+    }
+
+    override val fieldValue: StateFlow<String> = shouldPaymentMethodBeSetAsDefault.mapAsStateFlow {
+        it.toString()
     }
 
     override val rawFieldValue: StateFlow<String?> = fieldValue
