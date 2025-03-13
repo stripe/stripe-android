@@ -4,7 +4,7 @@
 
 ### PaymentSheet
 * [FIXED][10327](https://github.com/stripe/stripe-android/pull/10327) Improve accessibility for postal code.
-* [Changed][10382](https://github.com/stripe/stripe-android/pull/10382) Hide Google Pay price label when amount is 0.
+* [Changed][10382](https://github.com/stripe/stripe-android/pull/10382) Don't show price as $0.00 in Google Pay for setup intents.
 
 ## 21.6.0 - 2025-03-03
 
