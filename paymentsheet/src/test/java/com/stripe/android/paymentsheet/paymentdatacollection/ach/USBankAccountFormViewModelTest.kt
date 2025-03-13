@@ -6,7 +6,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
+import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession

@@ -1,6 +1,6 @@
 package com.stripe.android.financialconnections.domain
 
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.model.ShareNetworkedAccountsResponse
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
@@ -8,7 +8,7 @@ import com.stripe.android.financialconnections.ui.TextResource
 import javax.inject.Inject
 
 internal class SelectNetworkedAccounts @Inject constructor(
-    private val configuration: FinancialConnectionsSheet.Configuration,
+    private val configuration: FinancialConnectionsSheetConfiguration,
     private val successContentRepository: SuccessContentRepository,
     private val repository: FinancialConnectionsAccountsRepository
 ) {

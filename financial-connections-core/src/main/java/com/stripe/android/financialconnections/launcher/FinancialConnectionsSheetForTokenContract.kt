@@ -3,23 +3,23 @@ package com.stripe.android.financialconnections.launcher
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
-import com.stripe.android.financialconnections.FinancialConnectionsSheetActivity
+import androidx.annotation.RestrictTo
 import com.stripe.android.financialconnections.FinancialConnectionsSheetForTokenResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetForTokenResult.Canceled
 import com.stripe.android.financialconnections.FinancialConnectionsSheetForTokenResult.Completed
 import com.stripe.android.financialconnections.FinancialConnectionsSheetForTokenResult.Failed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Companion.EXTRA_RESULT
 
-internal class FinancialConnectionsSheetForTokenContract :
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class FinancialConnectionsSheetForTokenContract(
+    private val intentBuilder: (FinancialConnectionsSheetActivityArgs) -> Intent
+) :
     ActivityResultContract<FinancialConnectionsSheetActivityArgs.ForToken, FinancialConnectionsSheetForTokenResult>() {
 
     override fun createIntent(
         context: Context,
         input: FinancialConnectionsSheetActivityArgs.ForToken
-    ): Intent = FinancialConnectionsSheetActivity.intent(
-        context = context,
-        args = input
-    )
+    ): Intent = intentBuilder(input)
 
     override fun parseResult(
         resultCode: Int,

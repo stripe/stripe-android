@@ -1,6 +1,6 @@
 package com.stripe.android.financialconnections.domain
 
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.PaymentAccountParams.BankAccount
@@ -19,7 +19,7 @@ import kotlin.time.Duration.Companion.seconds
 
 internal class SaveAccountToLink @Inject constructor(
     private val locale: Locale?,
-    private val configuration: FinancialConnectionsSheet.Configuration,
+    private val configuration: FinancialConnectionsSheetConfiguration,
     private val attachedPaymentAccountRepository: AttachedPaymentAccountRepository,
     private val successContentRepository: SuccessContentRepository,
     private val repository: FinancialConnectionsManifestRepository,

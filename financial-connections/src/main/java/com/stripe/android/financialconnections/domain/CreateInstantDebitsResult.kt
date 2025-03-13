@@ -1,6 +1,6 @@
 package com.stripe.android.financialconnections.domain
 
-import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
+import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.launcher.InstantDebitsResult
 import com.stripe.android.financialconnections.repository.ConsumerSessionProvider
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
@@ -41,11 +41,12 @@ internal class RealCreateInstantDebitsResult @Inject constructor(
 
         val paymentDetails = response.paymentDetails.filterIsInstance<BankAccount>().first()
 
-        val paymentMethod = if (elementsSessionContext?.linkMode == LinkMode.LinkCardBrand) {
+        val linkMode = elementsSessionContext?.linkMode
+        val paymentMethod = if (linkMode == LinkMode.LinkCardBrand) {
             val sharePaymentDetails = consumerRepository.sharePaymentDetails(
                 paymentDetailsId = paymentDetails.id,
                 consumerSessionClientSecret = clientSecret,
-                expectedPaymentMethodType = elementsSessionContext.linkMode.expectedPaymentMethodType,
+                expectedPaymentMethodType = linkMode.expectedPaymentMethodType,
                 billingPhone = elementsSessionContext.billingDetails?.phone,
             )
 

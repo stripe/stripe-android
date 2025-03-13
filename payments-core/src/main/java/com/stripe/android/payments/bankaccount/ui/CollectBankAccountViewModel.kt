@@ -8,7 +8,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.requireApplication
-import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
+import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetInstantDebitsResult
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession

@@ -6,7 +6,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
-import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
+import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal

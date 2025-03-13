@@ -11,7 +11,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.financialConnectionsSessionNoAccounts
 import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.FinancialConnections
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
@@ -62,7 +62,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
     private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
     private val completeFinancialConnectionsSession = mock<CompleteFinancialConnectionsSession>()
     private val applicationId = "com.sample.applicationid"
-    private val configuration = FinancialConnectionsSheet.Configuration(
+    private val configuration = FinancialConnectionsSheetConfiguration(
         financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
         publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )

@@ -1,8 +1,8 @@
 package com.stripe.android.financialconnections
 
 import com.stripe.android.core.networking.QueryStringFactory
-import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.BillingDetails
-import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.PrefillDetails
+import com.stripe.android.financialconnections.ElementsSessionContext.BillingDetails
+import com.stripe.android.financialconnections.ElementsSessionContext.PrefillDetails
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.utils.toApiParams

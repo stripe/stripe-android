@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.domain
 
 import android.os.Parcelable
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import kotlinx.parcelize.Parcelize
@@ -12,7 +12,7 @@ import javax.inject.Inject
  */
 internal class GetCachedAccounts @Inject constructor(
     val repository: FinancialConnectionsAccountsRepository,
-    val configuration: FinancialConnectionsSheet.Configuration
+    val configuration: FinancialConnectionsSheetConfiguration
 ) {
 
     suspend operator fun invoke(): List<CachedPartnerAccount> {

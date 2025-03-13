@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataContract
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForTokenContract
@@ -23,8 +24,9 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 fun rememberFinancialConnectionsSheet(
     callback: (FinancialConnectionsSheetResult) -> Unit
 ): FinancialConnectionsSheet {
+    val context = LocalContext.current
     val activityResultLauncher = rememberLauncherForActivityResult(
-        FinancialConnectionsSheetForDataContract()
+        FinancialConnectionsSheetForDataContract(intentBuilder(context))
     ) { callback(it) }
     return remember {
         FinancialConnectionsSheet(
@@ -50,8 +52,9 @@ fun rememberFinancialConnectionsSheet(
 fun rememberFinancialConnectionsSheetForToken(
     callback: (FinancialConnectionsSheetForTokenResult) -> Unit
 ): FinancialConnectionsSheet {
+    val context = LocalContext.current
     val activityResultLauncher = rememberLauncherForActivityResult(
-        FinancialConnectionsSheetForTokenContract()
+        FinancialConnectionsSheetForTokenContract(intentBuilder(context))
     ) { callback(it) }
     return remember {
         FinancialConnectionsSheet(

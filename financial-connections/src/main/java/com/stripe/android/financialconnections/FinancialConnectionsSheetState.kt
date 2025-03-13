@@ -86,9 +86,9 @@ internal sealed class FinancialConnectionsSheetViewEffect {
      * Open the AuthFlow native activity.
      */
     data class OpenNativeAuthFlow(
-        val configuration: FinancialConnectionsSheet.Configuration,
+        val configuration: FinancialConnectionsSheetConfiguration,
         val initialSyncResponse: SynchronizeSessionResponse,
-        val elementsSessionContext: FinancialConnectionsSheet.ElementsSessionContext?,
+        val elementsSessionContext: ElementsSessionContext?,
     ) : FinancialConnectionsSheetViewEffect()
 
     /**

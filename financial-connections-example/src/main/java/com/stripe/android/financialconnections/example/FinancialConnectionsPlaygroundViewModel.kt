@@ -9,9 +9,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.Stripe
 import com.stripe.android.confirmPaymentIntent
+import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
-import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.FinancialConnectionsSheetForTokenResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
