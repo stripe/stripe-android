@@ -544,9 +544,7 @@ internal data class FinancialConnectionsPlaygroundState(
             settings = settings.copy(
                 settings = settings.settings.map { setting ->
                     if (setting is MerchantSetting) {
-                        MerchantSetting(
-                            merchants = merchants,
-                        )
+                        setting.updateWithMerchants(merchants)
                     } else {
                         setting
                     }
