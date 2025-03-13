@@ -105,7 +105,7 @@ internal class InstitutionPickerViewModel @AssistedInject constructor(
     override fun updateTopAppBar(state: InstitutionPickerState): TopAppBarStateUpdate {
         // We don't allow users to return to the signup pane, as this might result
         // in them accidentally creating multiple accounts.
-        val canNavigateBack = state.referrer != Pane.LINK_LOGIN
+        val canNavigateBack = state.referrer != null && state.referrer != Pane.LINK_LOGIN
 
         return TopAppBarStateUpdate(
             pane = PANE,
