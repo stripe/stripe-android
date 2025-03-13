@@ -112,6 +112,7 @@ internal class InstitutionPickerViewModel @AssistedInject constructor(
             allowBackNavigation = canNavigateBack,
             allowElevation = false,
             error = state.payload.error,
+            canCloseWithoutConfirmation = state.referrer == null,
         )
     }
 

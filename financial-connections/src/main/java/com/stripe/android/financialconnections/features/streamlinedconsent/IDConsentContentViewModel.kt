@@ -57,7 +57,7 @@ internal class IDConsentContentViewModel @AssistedInject constructor(
         return TopAppBarStateUpdate(
             pane = PANE,
             hideStripeLogo = false,
-            allowBackNavigation = true,
+            allowBackNavigation = false,
             error = state.payload.error,
         )
     }
