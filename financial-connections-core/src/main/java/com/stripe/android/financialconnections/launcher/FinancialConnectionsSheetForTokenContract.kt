@@ -12,7 +12,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class FinancialConnectionsSheetForTokenContract(
-    val intentBuilder: (FinancialConnectionsSheetActivityArgs) -> Intent
+    private val intentBuilder: (FinancialConnectionsSheetActivityArgs) -> Intent
 ) :
     ActivityResultContract<FinancialConnectionsSheetActivityArgs.ForToken, FinancialConnectionsSheetForTokenResult>() {
 

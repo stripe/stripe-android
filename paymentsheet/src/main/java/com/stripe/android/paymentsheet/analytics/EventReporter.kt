@@ -183,12 +183,15 @@ internal interface EventReporter {
     /**
      * The customer has successfully set a payment method as the default.
      */
-    fun onSetAsDefaultPaymentMethodSucceeded()
+    fun onSetAsDefaultPaymentMethodSucceeded(
+        paymentMethodType: String?,
+    )
 
     /**
      * The customer has failed to set a payment method as the default.
      */
     fun onSetAsDefaultPaymentMethodFailed(
+        paymentMethodType: String?,
         error: Throwable,
     )
 

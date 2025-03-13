@@ -1112,6 +1112,8 @@
 |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.1.10 (*)
 |    |    +--- project :stripecardscan-tflite
 |    |    \--- androidx.annotation:annotation:1.9.1 (*)
+|    +--- project :payments-core (*)
+|    +--- com.google.dagger:dagger:2.55 (*)
 |    +--- androidx.appcompat:appcompat:1.7.0 (*)
 |    +--- androidx.constraintlayout:constraintlayout:2.2.0 (*)
 |    +--- androidx.core:core-ktx:1.13.1 (*)
