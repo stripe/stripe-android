@@ -103,7 +103,8 @@ internal class DefaultUpdatePaymentMethodInteractor(
     private val status = MutableStateFlow(UpdatePaymentMethodInteractor.Status.Idle)
     private val cardBrandChoice = MutableStateFlow(getInitialCardBrandChoice())
     private val cardBrandHasBeenChanged = MutableStateFlow(false)
-    private val setAsDefaultCheckboxChecked = MutableStateFlow(isDefaultPaymentMethod)
+    private val initialSetAsDefaultCheckedValue = isDefaultPaymentMethod
+    private val setAsDefaultCheckboxChecked = MutableStateFlow(initialSetAsDefaultCheckedValue)
     private val savedCardBrand = MutableStateFlow(getInitialCardBrandChoice())
 
     // We don't yet support setting SEPA payment methods as defaults, so we hide the checkbox for now.
@@ -126,7 +127,8 @@ internal class DefaultUpdatePaymentMethodInteractor(
     )
     override val setAsDefaultCheckboxEnabled: Boolean = !isDefaultPaymentMethod
 
-    override val shouldShowSaveButton: Boolean = isModifiablePaymentMethod || shouldShowSetAsDefaultCheckbox
+    override val shouldShowSaveButton: Boolean = isModifiablePaymentMethod ||
+        (shouldShowSetAsDefaultCheckbox && !isDefaultPaymentMethod)
 
     private val _state = combineAsStateFlow(
         error,
@@ -135,7 +137,8 @@ internal class DefaultUpdatePaymentMethodInteractor(
         cardBrandHasBeenChanged,
         setAsDefaultCheckboxChecked,
     ) { error, status, cardBrandChoice, cardBrandHasBeenChanged, setAsDefaultCheckboxChecked ->
-        val isSaveButtonEnabled = (cardBrandHasBeenChanged || setAsDefaultCheckboxChecked) &&
+        val setAsDefaultValueChanged = setAsDefaultCheckboxChecked != initialSetAsDefaultCheckedValue
+        val isSaveButtonEnabled = (cardBrandHasBeenChanged || setAsDefaultValueChanged) &&
             status == UpdatePaymentMethodInteractor.Status.Idle
 
         UpdatePaymentMethodInteractor.State(
