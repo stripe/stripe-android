@@ -30,6 +30,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
+import com.stripe.android.ui.core.di.CardScanModule
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
@@ -48,7 +49,8 @@ import kotlin.coroutines.CoroutineContext
         EmbeddedCommonModule::class,
         FormActivityViewModelModule::class,
         ExtendedPaymentElementConfirmationModule::class,
-        GooglePayLauncherModule::class
+        GooglePayLauncherModule::class,
+        CardScanModule::class
     ]
 )
 @Singleton
