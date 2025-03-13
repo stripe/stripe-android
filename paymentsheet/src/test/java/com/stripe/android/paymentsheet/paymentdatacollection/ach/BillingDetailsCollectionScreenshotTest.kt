@@ -11,7 +11,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.uicore.elements.EmailConfig
@@ -133,7 +132,7 @@ internal class BillingDetailsCollectionScreenshotTest {
     private val setAsDefaultPaymentMethodElement = SetAsDefaultPaymentMethodElement(
         initialValue = false,
         saveForFutureUseCheckedFlow = stateFlowOf(false),
-        setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
+        setAsDefaultMatchesSaveForFutureUse = false,
     )
 
     private fun testBillingDetailsCollectionScreenShot(

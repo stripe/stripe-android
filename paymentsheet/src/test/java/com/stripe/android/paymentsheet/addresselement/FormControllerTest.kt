@@ -12,7 +12,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailSpec
-import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -49,7 +48,7 @@ class FormControllerTest {
             linkConfigurationCoordinator = null,
             onLinkInlineSignupStateChanged = { throw AssertionError("Not implemented") },
             cardBrandFilter = DefaultCardBrandFilter,
-            setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
+            setAsDefaultMatchesSaveForFutureUse = false,
         )
     )
 

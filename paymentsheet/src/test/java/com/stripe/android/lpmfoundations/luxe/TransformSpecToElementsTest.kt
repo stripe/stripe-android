@@ -16,7 +16,6 @@ import com.stripe.android.ui.core.elements.DropdownItemSpec
 import com.stripe.android.ui.core.elements.DropdownSpec
 import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.EmailSpec
-import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.ui.core.elements.KeyboardType
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.NameSpec
@@ -392,7 +391,7 @@ private object TransformSpecToElementsFactory {
                 linkConfigurationCoordinator = null,
                 onLinkInlineSignupStateChanged = { throw AssertionError("Not implemented") },
                 cardBrandFilter = DefaultCardBrandFilter,
-                setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
+                setAsDefaultMatchesSaveForFutureUse = false,
             )
         )
     }

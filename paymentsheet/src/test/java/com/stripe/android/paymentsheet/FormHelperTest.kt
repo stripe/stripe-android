@@ -28,7 +28,6 @@ import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
@@ -520,7 +519,7 @@ internal class FormHelperTest {
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             linkInlineHandler = linkInlineHandler,
             selectionUpdater = selectionUpdater,
-            setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
+            setAsDefaultMatchesSaveForFutureUse = false,
         )
     }
 }
