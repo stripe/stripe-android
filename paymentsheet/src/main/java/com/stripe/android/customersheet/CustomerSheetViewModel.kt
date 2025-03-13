@@ -69,7 +69,9 @@ import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -539,7 +541,7 @@ internal class CustomerSheetViewModel(
 
         transition(
             to = CustomerSheetViewState.UpdatePaymentMethod(
-                updatePaymentMethodInteractor = DefaultUpdatePaymentMethodInteractor(
+                updatePaymentMethodInteractor = DefaultUpdatePaymentMethodInteractor.factory(
                     isLiveMode = isLiveModeProvider(),
                     canRemove = customerState.canRemove,
                     displayableSavedPaymentMethod = paymentMethod,
@@ -560,7 +562,7 @@ internal class CustomerSheetViewModel(
                     },
                     onUpdateSuccess = ::onBackPressed,
                     updateCardExecutor = ::updateCardBrandExecutor,
-                    workContext = workContext,
+                    coroutineScope = CoroutineScope(workContext + SupervisorJob()),
                     // This checkbox is never displayed in CustomerSheet.
                     shouldShowSetAsDefaultCheckbox = false,
                     // Should never be called from CustomerSheet, because we don't enable the set as default checkbox.
@@ -569,6 +571,7 @@ internal class CustomerSheetViewModel(
                             IllegalStateException("Unexpected attempt to update default from CustomerSheet.")
                         )
                     },
+                    cardEditUIHandlerFactory = TODO(),
                 ),
                 isLiveMode = isLiveModeProvider(),
             )

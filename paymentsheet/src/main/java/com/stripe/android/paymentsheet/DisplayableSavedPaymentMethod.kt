@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import androidx.compose.runtime.Immutable
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DateUtils
@@ -111,6 +112,7 @@ internal data class DisplayableSavedPaymentMethod private constructor(
     }
 }
 
+@Immutable
 internal sealed interface SavedPaymentMethod {
     data class Card(
         val card: PaymentMethod.Card,

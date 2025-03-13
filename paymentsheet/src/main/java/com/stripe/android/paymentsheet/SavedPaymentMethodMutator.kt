@@ -6,7 +6,6 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -357,7 +356,7 @@ internal class SavedPaymentMethodMutator(
                 val isLiveMode = requireNotNull(viewModel.paymentMethodMetadata.value).stripeIntent.isLiveMode
                 viewModel.navigationHandler.transitionTo(
                     PaymentSheetScreen.UpdatePaymentMethod(
-                        DefaultUpdatePaymentMethodInteractor(
+                        DefaultUpdatePaymentMethodInteractor.factory(
                             isLiveMode = isLiveMode,
                             canRemove = canRemove,
                             displayableSavedPaymentMethod,

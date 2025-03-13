@@ -20,8 +20,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.UUID
-import kotlin.coroutines.CoroutineContext
 
 internal interface UpdatePaymentMethodInteractor {
     val topBarState: PaymentSheetTopBarState
@@ -34,6 +32,7 @@ internal interface UpdatePaymentMethodInteractor {
     val hasValidBrandChoices: Boolean
     val shouldShowSetAsDefaultCheckbox: Boolean
     val addressCollectionMode: PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
+    val cardEditUIHandlerFactory: CardEditUIHandler.Factory
 
     val state: StateFlow<State>
 
@@ -53,7 +52,7 @@ internal interface UpdatePaymentMethodInteractor {
 
     fun handleViewAction(viewAction: ViewAction)
 
-    fun cardUIViewModelFactory(savedPaymentMethod: SavedPaymentMethod.Card): ViewModelProvider.Factory
+    fun cardUiHandlerFactory(savedPaymentMethod: SavedPaymentMethod.Card): CardEditUIHandler
 
     sealed class ViewAction {
         data object RemovePaymentMethod : ViewAction()
@@ -97,18 +96,15 @@ internal class DefaultUpdatePaymentMethodInteractor(
     private val onBrandChoiceOptionsShown: (CardBrand) -> Unit,
     private val onBrandChoiceOptionsDismissed: (CardBrand) -> Unit,
     private val onUpdateSuccess: () -> Unit,
-    workContext: CoroutineContext = Dispatchers.Default,
+    val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob()),
     override val addressCollectionMode: PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode,
+    override val cardEditUIHandlerFactory: CardEditUIHandler.Factory,
 ) : UpdatePaymentMethodInteractor {
-    internal val vmId: String = UUID.randomUUID().toString()
-    private val coroutineScope = CoroutineScope(workContext + SupervisorJob())
     private val error = MutableStateFlow(getInitialError())
     private val status = MutableStateFlow(UpdatePaymentMethodInteractor.Status.Idle)
-    private val cardBrandChoice = MutableStateFlow(getInitialCardBrandChoice())
     private val cardBrandHasBeenChanged = MutableStateFlow(false)
     private val setAsDefaultCheckboxChecked = MutableStateFlow(false)
     private val cardUpdateParams = MutableStateFlow<CardUpdateParams?>(null)
-    private val savedCardBrand = MutableStateFlow(getInitialCardBrandChoice())
 
     // We don't yet support setting SEPA payment methods as defaults, so we hide the checkbox for now.
     override val shouldShowSetAsDefaultCheckbox = (
@@ -159,15 +155,19 @@ internal class DefaultUpdatePaymentMethodInteractor(
         }
     }
 
-    override fun cardUIViewModelFactory(savedPaymentMethod: SavedPaymentMethod.Card): ViewModelProvider.Factory {
-        return CardUIViewModel.factory(
+    override fun cardUiHandlerFactory(savedPaymentMethod: SavedPaymentMethod.Card): CardEditUIHandler {
+        val cardUIHandler = cardEditUIHandlerFactory.create(
             card = savedPaymentMethod.card,
-            addressCollectionMode = addressCollectionMode,
             billingDetails = savedPaymentMethod.billingDetails,
+            addressCollectionMode = addressCollectionMode,
             cardBrandFilter = cardBrandFilter,
             onBrandChoiceOptionsShown = onBrandChoiceOptionsShown,
-            onBrandChoiceOptionsDismissed = onBrandChoiceOptionsDismissed
+            onBrandChoiceOptionsDismissed = onBrandChoiceOptionsDismissed,
+            onCardValuesChanged = {
+                cardUpdateParams.value = it
+            }
         )
+        return cardUIHandler
     }
 
     private fun removePaymentMethod() {
@@ -295,6 +295,40 @@ internal class DefaultUpdatePaymentMethodInteractor(
         @VisibleForTesting
         internal val updatesFailedErrorMessage =
             R.string.stripe_paymentsheet_card_updates_failed_error_message.resolvableString
+
+        fun factory(
+            isLiveMode: Boolean,
+            canRemove: Boolean,
+            displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
+            cardBrandFilter: CardBrandFilter,
+            shouldShowSetAsDefaultCheckbox: Boolean,
+            removeExecutor: PaymentMethodRemoveOperation,
+            updateCardExecutor: UpdateCardOperation,
+            setDefaultPaymentMethodExecutor: PaymentMethodSetAsDefaultOperation,
+            onBrandChoiceOptionsShown: (CardBrand) -> Unit,
+            onBrandChoiceOptionsDismissed: (CardBrand) -> Unit,
+            onUpdateSuccess: () -> Unit,
+            coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob()),
+            addressCollectionMode: PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode,
+            cardEditUIHandlerFactory: CardEditUIHandler.Factory = DefaultCardEditUIHandler.Factory(coroutineScope),
+        ): DefaultUpdatePaymentMethodInteractor {
+            return DefaultUpdatePaymentMethodInteractor(
+                isLiveMode = isLiveMode,
+                canRemove = canRemove,
+                displayableSavedPaymentMethod = displayableSavedPaymentMethod,
+                cardBrandFilter = cardBrandFilter,
+                shouldShowSetAsDefaultCheckbox = shouldShowSetAsDefaultCheckbox,
+                removeExecutor = removeExecutor,
+                updateCardExecutor = updateCardExecutor,
+                setDefaultPaymentMethodExecutor = setDefaultPaymentMethodExecutor,
+                onBrandChoiceOptionsShown = onBrandChoiceOptionsShown,
+                onBrandChoiceOptionsDismissed = onBrandChoiceOptionsDismissed,
+                onUpdateSuccess = onUpdateSuccess,
+                coroutineScope = coroutineScope,
+                addressCollectionMode = addressCollectionMode,
+                cardEditUIHandlerFactory = cardEditUIHandlerFactory
+            )
+        }
     }
 }
 
