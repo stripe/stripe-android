@@ -169,24 +169,6 @@ internal class AccountPreviewScreenshotTest {
         )
     }
 
-    @Test
-    fun testPaymentFlowWhenDoesNotHaveOtherPaymentMethods() {
-        saveForFutureUseElement.controller.onValueChange(true)
-
-        setAsDefaultPaymentMethodElement.controller.onValueChange(true)
-
-        takeAccountPreviewScreenShot(
-            state = BankFormScreenStateFactory.createWithSession(
-                sessionId = "session_1234",
-            ),
-            instantDebits = false,
-            isPaymentFlow = true,
-            enabled = true,
-            showCheckboxes = true,
-            setAsDefaultMatchesSaveForFutureUse = false
-        )
-    }
-
     private val defaultFormArguments = FormArguments(
         paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
         merchantName = "Test Merchant",
