@@ -677,7 +677,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             ),
             paymentMethodExtraParams = if (setAsDefaultPaymentMethodElement != null) {
                 PaymentMethodExtraParams.USBankAccount(
-                    setAsDefault = setAsDefaultPaymentMethodElement.controller.setAsDefaultPaymentMethodChecked.value
+                    setAsDefault = setAsDefaultPaymentMethodElement.controller.shouldPaymentMethodBeSetAsDefault.value
                 )
             } else {
                 null
