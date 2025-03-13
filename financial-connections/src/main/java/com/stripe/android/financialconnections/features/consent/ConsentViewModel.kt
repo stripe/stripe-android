@@ -118,21 +118,13 @@ internal class ConsentViewModel @AssistedInject constructor(
     private suspend fun determineNavigationDestination(
         manifest: FinancialConnectionsSessionManifest,
     ): Destination {
-        val defaultDestination = manifest.nextPane.destination
+        val shouldLookupConsumer = manifest.accountholderCustomerEmailAddress == null && prefillDetails?.email != null
+        val showWarmupPane = shouldLookupConsumer && hasExistingLinkAccount(manifest, prefillDetails.email)
 
-        val useManifestNextPane = !isLinkWithStripe() ||
-            manifest.accountholderCustomerEmailAddress != null ||
-            prefillDetails?.email == null
-
-        if (useManifestNextPane) {
-            return defaultDestination
-        }
-
-        val hasExistingAccount = hasExistingLinkAccount(manifest, prefillDetails.email)
-        return if (hasExistingAccount) {
+        return if (showWarmupPane) {
             NetworkingLinkLoginWarmup
         } else {
-            defaultDestination
+            manifest.nextPane.destination
         }
     }
 
