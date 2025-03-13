@@ -107,7 +107,7 @@ class CardDefinitionTest {
     }
 
     @Test
-    fun `setAsDefaultPaymentMethod shown correctly when saveForFutureUse checked`() {
+    fun `setAsDefaultPaymentMethod shown when saveForFutureUse checked & setAsDefaultMatchesSaveForFutureUse false`() {
         testSetAsDefaultElements(
             setAsDefaultMatchesSaveForFutureUse = false,
         ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
@@ -120,7 +120,7 @@ class CardDefinitionTest {
     }
 
     @Test
-    fun `setAsDefaultPaymentMethod hidden correctly when saveForFutureUse unchecked`() {
+    fun `setAsDefaultPaymentMethod hidden when saveForFutureUse unchecked & setAsDefaultMatchesSaveForFutureUse false`() {
         testSetAsDefaultElements(
             setAsDefaultMatchesSaveForFutureUse = false,
         ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
