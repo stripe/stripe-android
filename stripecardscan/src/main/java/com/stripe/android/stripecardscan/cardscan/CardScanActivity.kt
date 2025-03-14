@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.activity.addCallback
 import androidx.annotation.RestrictTo
+import androidx.core.os.BundleCompat
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.scanui.ScanErrorListener
 import com.stripe.android.camera.scanui.ScanState
@@ -25,6 +26,7 @@ import com.stripe.android.stripecardscan.cardscan.exception.UnknownScanException
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopState
 import com.stripe.android.stripecardscan.databinding.StripeActivityCardscanBinding
+import com.stripe.android.stripecardscan.di.DaggerCardScanComponent
 import com.stripe.android.stripecardscan.payment.card.ScannedCard
 import com.stripe.android.stripecardscan.scanui.CancellationReason
 import com.stripe.android.stripecardscan.scanui.ScanActivity
@@ -36,6 +38,7 @@ import com.stripe.android.stripecardscan.scanui.util.show
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 internal const val INTENT_PARAM_REQUEST = "request"
 internal const val INTENT_PARAM_RESULT = "result"
@@ -58,6 +61,9 @@ sealed class CardScanState(isFinal: Boolean) : ScanState(isFinal) {
 }
 
 internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanState> {
+
+    @Inject
+    lateinit var cardScanEventsReporter: CardScanEventsReporter
 
     override val minimumAnalysisResolution = MINIMUM_RESOLUTION
 
@@ -96,6 +102,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
         object : CardScanResultListener {
 
             override fun cardScanComplete(card: ScannedCard) {
+                cardScanEventsReporter.scanSucceeded()
                 val intent = Intent()
                     .putExtra(
                         INTENT_PARAM_RESULT,
@@ -109,6 +116,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
             }
 
             override fun userCanceled(reason: CancellationReason) {
+                cardScanEventsReporter.scanCancelled(reason)
                 val intent = Intent()
                     .putExtra(
                         INTENT_PARAM_RESULT,
@@ -118,6 +126,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
             }
 
             override fun failed(cause: Throwable?) {
+                cardScanEventsReporter.scanFailed(cause)
                 val intent = Intent()
                     .putExtra(
                         INTENT_PARAM_RESULT,
@@ -169,6 +178,18 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
+
+        val cardScanSheetParams = intent.extras?.let {
+            BundleCompat.getParcelable(it, INTENT_PARAM_REQUEST, CardScanSheetParams::class.java)
+        }
+        val cardScanConfiguration = cardScanSheetParams?.cardScanConfiguration
+            ?: CardScanConfiguration(elementsSessionId = null)
+
+        DaggerCardScanComponent.builder()
+            .application(this.application)
+            .configuration(cardScanConfiguration)
+            .build()
+            .inject(this)
 
         onBackPressedDispatcher.addCallback {
             resultListener.userCanceled(CancellationReason.Back)
@@ -227,6 +248,7 @@ internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanSta
      * Once the camera stream is available, start processing images.
      */
     override suspend fun onCameraStreamAvailable(cameraStream: Flow<CameraPreviewImage<Bitmap>>) {
+        cardScanEventsReporter.scanStarted()
         scanFlow.startFlow(
             context = this,
             imageStream = cameraStream,

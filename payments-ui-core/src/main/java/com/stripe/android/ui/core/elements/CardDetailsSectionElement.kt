@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 class CardDetailsSectionElement(
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     initialValues: Map<IdentifierSpec, String?>,
+    sessionId: String? = null,
     private val collectName: Boolean = false,
     private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
@@ -24,8 +25,9 @@ class CardDetailsSectionElement(
         initialValues = initialValues,
         collectName = collectName,
         cbcEligibility = cbcEligibility,
-        cardBrandFilter = cardBrandFilter
-    ),
+        cardBrandFilter = cardBrandFilter,
+        sessionId = sessionId
+    )
 ) : FormElement {
     override val allowsUserInteraction: Boolean = true
     override val mandateText: ResolvableString? = null
