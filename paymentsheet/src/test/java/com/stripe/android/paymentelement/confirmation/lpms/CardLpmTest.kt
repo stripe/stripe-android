@@ -43,13 +43,8 @@ internal class CardLpmTest(
     companion object {
         @JvmStatic
         @ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
-        fun testTypes() = listOf(
-            arrayOf(TestType.PaymentIntent),
-            arrayOf(TestType.PaymentIntentWithSetupFutureUsage),
-            arrayOf(TestType.SetupIntent),
-            arrayOf(TestType.DeferredPaymentIntent),
-            arrayOf(TestType.DeferredPaymentIntentWithSetupFutureUsage),
-            arrayOf(TestType.DeferredSetupIntent),
-        )
+        fun testTypes() = TestType.default().map {
+            arrayOf(it)
+        }
     }
 }
