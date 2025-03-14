@@ -132,9 +132,6 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onShowExistingPaymentOptions() {
-        CoroutineScope(workContext).launch {
-            analyticEventCallbackProvider.get()?.onEvent(AnalyticEvent.PresentedSheet())
-        }
         fireEvent(
             PaymentSheetEvent.ShowExistingPaymentOptions(
                 mode = mode,
@@ -159,6 +156,9 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onShowNewPaymentOptions() {
+        CoroutineScope(workContext).launch {
+            analyticEventCallbackProvider.get()?.onEvent(AnalyticEvent.PresentedSheet())
+        }
         fireEvent(
             PaymentSheetEvent.ShowNewPaymentOptions(
                 mode = mode,

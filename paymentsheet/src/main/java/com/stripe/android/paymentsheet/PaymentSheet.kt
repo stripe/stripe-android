@@ -265,6 +265,7 @@ class PaymentSheet internal constructor(
         /**
          * Returns a [PaymentSheet] composable.
          */
+        @OptIn(ExperimentalAnalyticEventCallbackApi::class)
         @Composable
         fun build(): PaymentSheet {
             /*
@@ -274,6 +275,7 @@ class PaymentSheet internal constructor(
                 createIntentCallback = createIntentCallback,
                 externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
                 paymentResultCallback = resultCallback,
+                analyticEventCallback = analyticEventCallback,
             )
         }
 
