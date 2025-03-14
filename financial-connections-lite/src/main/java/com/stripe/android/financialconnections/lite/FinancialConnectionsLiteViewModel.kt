@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 
 internal class FinancialConnectionsLiteViewModel(
-    val savedStateHandle: SavedStateHandle,
-    val repository: FinancialConnectionsLiteRepository,
+    private val savedStateHandle: SavedStateHandle,
+    private val repository: FinancialConnectionsLiteRepository,
     applicationId: String
 ) : ViewModel() {
 
