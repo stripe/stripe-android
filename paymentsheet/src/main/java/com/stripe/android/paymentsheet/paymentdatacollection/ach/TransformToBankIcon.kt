@@ -1,12 +1,11 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import com.stripe.android.R as StripeR
-import com.stripe.android.financialconnections.R as FinancialConnectionsR
 
 internal interface TransformToBankIcon {
     companion object {
         operator fun invoke(bankName: String?): Int {
-            if (bankName == null) return FinancialConnectionsR.drawable.stripe_ic_bank
+            if (bankName == null) return StripeR.drawable.stripe_ic_bank_grey
             val bankNameRegexIconMap = mapOf(
                 Regex("Bank of America", RegexOption.IGNORE_CASE) to
                     StripeR.drawable.stripe_ic_bank_boa,
@@ -40,7 +39,7 @@ internal interface TransformToBankIcon {
             return bankNameRegexIconMap
                 .filter { it.key.findAll(bankName).any() }
                 .firstNotNullOfOrNull { it.value }
-                ?: FinancialConnectionsR.drawable.stripe_ic_bank
+                ?: StripeR.drawable.stripe_ic_bank_grey
         }
     }
 }
