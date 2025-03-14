@@ -22,6 +22,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -223,6 +224,7 @@ internal open class BaseLpmNetworkTest(
         }
     }
 
+    @OptIn(ExperimentalCustomPaymentMethodsApi::class)
     private fun testWithDeferredPaymentIntent(
         amount: Int,
         currency: String,
@@ -258,6 +260,7 @@ internal open class BaseLpmNetworkTest(
                         }
                     )
                 },
+                customPaymentMethodConfirmHandler = null,
                 externalPaymentMethodConfirmHandler = null,
             )
         )
@@ -284,6 +287,7 @@ internal open class BaseLpmNetworkTest(
         )
     }
 
+    @OptIn(ExperimentalCustomPaymentMethodsApi::class)
     private fun testWithDeferredSetupIntent(
         country: MerchantCountry,
         allowsManualConfirmation: Boolean,
@@ -313,6 +317,7 @@ internal open class BaseLpmNetworkTest(
                         }
                     )
                 },
+                customPaymentMethodConfirmHandler = null,
                 externalPaymentMethodConfirmHandler = null,
             )
         )
