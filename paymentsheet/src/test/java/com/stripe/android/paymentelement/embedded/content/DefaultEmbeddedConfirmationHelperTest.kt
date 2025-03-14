@@ -60,6 +60,7 @@ internal class DefaultEmbeddedConfirmationHelperTest {
                 deferredIntentConfirmationType = null,
             )
         )
+        assertThat(embeddedContentHelper.clearEmbeddedContentTurbine.awaitItem()).isEqualTo(Unit)
         assertThat(resultCallbackTurbine.awaitItem()).isInstanceOf<EmbeddedPaymentElement.Result.Completed>()
         assertThat(confirmationStateHolder.state).isNull()
         assertThat(selectionHolder.selection.value).isNull()
@@ -156,6 +157,7 @@ internal class DefaultEmbeddedConfirmationHelperTest {
             coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
         )
         confirmationStateHolder.state = loadedState
+        val embeddedContentHelper = FakeEmbeddedContentHelper()
         val confirmationHelper = DefaultEmbeddedConfirmationHelper(
             confirmationStarter = EmbeddedConfirmationStarter(
                 confirmationHandler = confirmationHandler,
@@ -168,6 +170,7 @@ internal class DefaultEmbeddedConfirmationHelperTest {
             lifecycleOwner = TestLifecycleOwner(coroutineDispatcher = Dispatchers.Unconfined),
             confirmationStateHolder = confirmationStateHolder,
             selectionHolder = selectionHolder,
+            embeddedContentHelper = embeddedContentHelper,
         )
         assertThat(confirmationHandler.registerTurbine.awaitItem()).isNotNull()
         Scenario(
@@ -176,9 +179,11 @@ internal class DefaultEmbeddedConfirmationHelperTest {
             resultCallbackTurbine = resultCallbackTurbine,
             confirmationStateHolder = confirmationStateHolder,
             selectionHolder = selectionHolder,
+            embeddedContentHelper = embeddedContentHelper,
         ).block()
         resultCallbackTurbine.ensureAllEventsConsumed()
         confirmationHandler.validate()
+        embeddedContentHelper.validate()
     }
 
     private class Scenario(
@@ -187,5 +192,6 @@ internal class DefaultEmbeddedConfirmationHelperTest {
         val resultCallbackTurbine: ReceiveTurbine<EmbeddedPaymentElement.Result>,
         val confirmationStateHolder: EmbeddedConfirmationStateHolder,
         val selectionHolder: EmbeddedSelectionHolder,
+        val embeddedContentHelper: FakeEmbeddedContentHelper,
     )
 }
