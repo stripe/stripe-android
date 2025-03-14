@@ -93,7 +93,7 @@ internal data class FinancialConnectionsGenericInfoScreen(
         @SerialName("below_cta")
         @Serializable(with = MarkdownToHtmlSerializer::class)
         val belowCta: String? = null,
-        // TODO: Confirm this is an ok change to make
+        // TODO(tillh-stripe): Confirm this is an ok change to make
     ) : Parcelable {
         @Parcelize
         @Serializable

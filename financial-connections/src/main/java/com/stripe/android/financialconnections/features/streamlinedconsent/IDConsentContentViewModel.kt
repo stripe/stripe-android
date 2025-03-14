@@ -93,7 +93,9 @@ internal class IDConsentContentViewModel @AssistedInject constructor(
                         navigationManager.tryNavigateTo(
                             NetworkingLinkLoginWarmup(
                                 referrer = PANE,
-                                extraArgs = mapOf(KEY_NEXT_PANE_ON_DISABLE_NETWORKING to it.nextPaneOrDrawerOnSecondaryCta)
+                                extraArgs = mapOf(
+                                    KEY_NEXT_PANE_ON_DISABLE_NETWORKING to it.nextPaneOrDrawerOnSecondaryCta,
+                                )
                             )
                         )
                     },
