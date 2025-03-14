@@ -1,0 +1,3 @@
+-keep @kotlinx.serialization.Serializable class com.stripe.android.connect.webview.serialization.** {
+    *;
+}
