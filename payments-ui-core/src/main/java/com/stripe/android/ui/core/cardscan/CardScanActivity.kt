@@ -23,11 +23,19 @@ internal class CardScanActivity : AppCompatActivity() {
             BundleCompat.getParcelable(it, ARGS, CardScanConfiguration::class.java)
         }
 
+        if (config == null) {
+            return onScanFinished(
+                result = CardScanSheetResult.Failed(
+                    error = IllegalArgumentException("CardScanConfiguration not found")
+                )
+            )
+        }
+
         StripeCardScanProxy.create(
             this,
             this::onScanFinished,
             ErrorReporter.createFallbackInstance(applicationContext, setOf("CardScan"))
-        ).present(config!!)
+        ).present(config)
     }
 
     private fun onScanFinished(result: CardScanSheetResult) {
