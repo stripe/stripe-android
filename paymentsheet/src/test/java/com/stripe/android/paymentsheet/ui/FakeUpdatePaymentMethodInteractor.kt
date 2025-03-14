@@ -29,6 +29,7 @@ internal class FakeUpdatePaymentMethodInteractor(
         setAsDefaultCheckboxChecked = false,
         isSaveButtonEnabled = false,
     ),
+    override val setAsDefaultCheckboxEnabled: Boolean = true,
 ) : UpdatePaymentMethodInteractor {
     override val state: StateFlow<UpdatePaymentMethodInteractor.State> = MutableStateFlow(initialState)
     override val screenTitle: ResolvableString? = UpdatePaymentMethodInteractor.screenTitle(

@@ -13,6 +13,9 @@ internal class FakeEmbeddedContentHelper(
 ) : EmbeddedContentHelper {
     private val _dataLoadedTurbine = Turbine<DefaultEmbeddedContentHelper.State>()
     val dataLoadedTurbine: ReceiveTurbine<DefaultEmbeddedContentHelper.State> = _dataLoadedTurbine
+    private val _clearEmbeddedContentTurbine = Turbine<Unit>()
+    val clearEmbeddedContentTurbine: ReceiveTurbine<Unit> = _clearEmbeddedContentTurbine
+
     var testSheetLauncher: EmbeddedSheetLauncher? = null
 
     override fun dataLoaded(
@@ -29,6 +32,10 @@ internal class FakeEmbeddedContentHelper(
         )
     }
 
+    override fun clearEmbeddedContent() {
+        _clearEmbeddedContentTurbine.add(Unit)
+    }
+
     override fun setSheetLauncher(sheetLauncher: EmbeddedSheetLauncher) {
         this.testSheetLauncher = sheetLauncher
     }
@@ -39,5 +46,6 @@ internal class FakeEmbeddedContentHelper(
 
     fun validate() {
         dataLoadedTurbine.ensureAllEventsConsumed()
+        clearEmbeddedContentTurbine.ensureAllEventsConsumed()
     }
 }

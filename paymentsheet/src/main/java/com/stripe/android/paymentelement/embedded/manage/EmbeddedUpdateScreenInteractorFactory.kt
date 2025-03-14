@@ -72,10 +72,12 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
                 )
             },
             shouldShowSetAsDefaultCheckbox = (
-                paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true &&
-                    !displayableSavedPaymentMethod.isDefaultPaymentMethod(
-                        defaultPaymentMethodId = customerStateHolder.customer.value?.defaultPaymentMethodId
-                    )
+                paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true
+                ),
+            isDefaultPaymentMethod = (
+                displayableSavedPaymentMethod.isDefaultPaymentMethod(
+                    defaultPaymentMethodId = customerStateHolder.customer.value?.defaultPaymentMethodId
+                )
                 ),
             onUpdateSuccess = {
                 manageNavigatorProvider.get().performAction(ManageNavigator.Action.Back)

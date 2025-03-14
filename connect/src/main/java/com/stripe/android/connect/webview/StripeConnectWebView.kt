@@ -55,7 +55,7 @@ internal class StripeConnectWebView private constructor(
     private val mutableContext: MutableContextWrapper,
     @property:VisibleForTesting internal val delegate: Delegate,
     private val logger: Logger,
-) : WebView(mutableContext) {
+) : WebView(mutableContext), WebViewForPaparazzi {
 
     constructor(
         application: Application,

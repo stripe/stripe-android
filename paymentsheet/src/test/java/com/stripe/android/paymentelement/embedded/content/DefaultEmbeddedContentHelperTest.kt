@@ -52,6 +52,22 @@ internal class DefaultEmbeddedContentHelperTest {
     }
 
     @Test
+    fun `embeddedContent emits null when clearEmbeddedContent is called`() = testScenario {
+        embeddedContentHelper.embeddedContent.test {
+            assertThat(awaitItem()).isNull()
+            embeddedContentHelper.dataLoaded(
+                PaymentMethodMetadataFactory.create(),
+                Embedded.RowStyle.FlatWithRadio.default,
+                embeddedViewDisplaysMandateText = true,
+            )
+            assertThat(awaitItem()).isNotNull()
+            embeddedContentHelper.clearEmbeddedContent()
+            assertThat(awaitItem()).isNull()
+        }
+        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
     fun `initializing embeddedContentHelper with paymentMethodMetadata emits correct initial event`() = testScenario(
         setup = {
             set(

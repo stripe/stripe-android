@@ -73,24 +73,19 @@ internal class DeferredIntentValidatorTest {
     }
 
     @Test
-    fun `Fails if PaymentIntent has different captureMethod than IntentConfiguration`() {
+    fun `Succeeds if PaymentIntent has different captureMethod than IntentConfiguration`() {
         val paymentIntent = PaymentIntentFactory.create()
         val intentConfiguration = makeIntentConfigurationForPayment(
             captureMethod = IntentConfiguration.CaptureMethod.Manual,
         )
 
-        val failure = assertFailsWith<IllegalArgumentException> {
-            DeferredIntentValidator.validate(
-                stripeIntent = paymentIntent,
-                intentConfiguration = intentConfiguration,
-                allowsManualConfirmation = false,
-            )
-        }
-
-        assertThat(failure).hasMessageThat().isEqualTo(
-            "Your PaymentIntent captureMethod (Automatic) does not match " +
-                "the PaymentSheet.IntentConfiguration captureMethod (Manual)."
+        val result = DeferredIntentValidator.validate(
+            stripeIntent = paymentIntent,
+            intentConfiguration = intentConfiguration,
+            allowsManualConfirmation = false,
         )
+
+        assertThat(result).isEqualTo(paymentIntent)
     }
 
     @Test

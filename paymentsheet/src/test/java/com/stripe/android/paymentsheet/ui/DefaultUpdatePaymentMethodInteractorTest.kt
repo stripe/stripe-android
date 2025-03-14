@@ -330,6 +330,78 @@ class DefaultUpdatePaymentMethodInteractorTest {
     }
 
     @Test
+    fun isDefaultPaymentMethod_saveButtonHidden() = runScenario(
+        displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
+        shouldShowSetAsDefaultCheckbox = true,
+        isDefaultPaymentMethod = true,
+    ) {
+        assertThat(interactor.shouldShowSaveButton).isFalse()
+    }
+
+    @Test
+    fun isDefaultPaymentMethod_cbcEligibleCard_saveButtonShown() = runScenario(
+        displayableSavedPaymentMethod = PaymentMethodFixtures
+            .CARD_WITH_NETWORKS_PAYMENT_METHOD
+            .toDisplayableSavedPaymentMethod(),
+        shouldShowSetAsDefaultCheckbox = true,
+        isDefaultPaymentMethod = true,
+    ) {
+        assertThat(interactor.shouldShowSaveButton).isTrue()
+    }
+
+    @Test
+    fun isDefaultPaymentMethod_cbcEligibleCard_saveButtonEnabledCorrectly() = runScenario(
+        displayableSavedPaymentMethod = PaymentMethodFixtures
+            .CARD_WITH_NETWORKS_PAYMENT_METHOD
+            .toDisplayableSavedPaymentMethod(),
+        shouldShowSetAsDefaultCheckbox = true,
+        isDefaultPaymentMethod = true,
+    ) {
+        interactor.state.test {
+            assertThat(awaitItem().isSaveButtonEnabled).isFalse()
+        }
+
+        interactor.handleViewAction(
+            UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
+                cardBrandChoice = CardBrandChoice(brand = CardBrand.Visa, enabled = true)
+            )
+        )
+
+        interactor.state.test {
+            assertThat(awaitItem().isSaveButtonEnabled).isTrue()
+        }
+    }
+
+    @Test
+    fun isDefaultPaymentMethod_setAsDefaultCheckboxChecked() = runScenario(
+        displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
+        shouldShowSetAsDefaultCheckbox = true,
+        isDefaultPaymentMethod = true,
+    ) {
+        interactor.state.test {
+            assertThat(awaitItem().setAsDefaultCheckboxChecked).isTrue()
+        }
+    }
+
+    @Test
+    fun isDefaultPaymentMethod_setAsDefaultCheckboxDisabled() = runScenario(
+        displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
+        shouldShowSetAsDefaultCheckbox = true,
+        isDefaultPaymentMethod = true,
+    ) {
+        assertThat(interactor.setAsDefaultCheckboxEnabled).isFalse()
+    }
+
+    @Test
+    fun isNotDefaultPaymentMethod_setAsDefaultCheckboxEnabled() = runScenario(
+        displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
+        shouldShowSetAsDefaultCheckbox = true,
+        isDefaultPaymentMethod = false,
+    ) {
+        assertThat(interactor.setAsDefaultCheckboxEnabled).isTrue()
+    }
+
+    @Test
     fun setAsDefaultCheckboxChangedViewAction_updatesState() = runScenario(
         shouldShowSetAsDefaultCheckbox = true,
     ) {
@@ -552,6 +624,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         onSetDefaultPaymentMethod: (PaymentMethod) -> Result<Unit> = { _ -> notImplemented() },
         onUpdateSuccess: () -> Unit = { notImplemented() },
         shouldShowSetAsDefaultCheckbox: Boolean = false,
+        isDefaultPaymentMethod: Boolean = false,
         testBlock: suspend TestParams.() -> Unit
     ) {
         val interactor = DefaultUpdatePaymentMethodInteractor(
@@ -566,6 +639,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             onBrandChoiceOptionsShown = {},
             onBrandChoiceOptionsDismissed = {},
             shouldShowSetAsDefaultCheckbox = shouldShowSetAsDefaultCheckbox,
+            isDefaultPaymentMethod = isDefaultPaymentMethod,
             onUpdateSuccess = onUpdateSuccess,
         )
 

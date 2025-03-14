@@ -230,6 +230,9 @@ ext.testLibs = [
                 web           : "androidx.test.espresso:espresso-web:${versions.espresso}",
         ],
         hamcrest             : "org.hamcrest:hamcrest:${versions.hamcrest}",
+        hilt: [
+                androidTesting : "com.google.dagger:hilt-android-testing:${versions.hilt}",
+        ],
         json                 : "org.json:json:${versions.json}",
         junit                : "junit:junit:${versions.junit}",
         kotlin               : [
