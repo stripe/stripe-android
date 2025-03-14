@@ -35,10 +35,9 @@ internal interface StripeConnectComponent {
     }
 
     companion object {
-        val instance: StripeConnectComponent by lazy {
+        internal var instance: StripeConnectComponent =
             DaggerStripeConnectComponent.builder()
                 .loggingEnabled(BuildConfig.DEBUG)
                 .build()
-        }
     }
 }

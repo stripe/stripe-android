@@ -68,11 +68,10 @@ dependencies {
     androidTestImplementation (testLibs.espresso.contrib) {
         exclude group: 'org.checkerframework', module: 'checker'
     }
+    androidTestImplementation testLibs.espresso.web
     androidTestImplementation testLibs.mockito.core
     androidTestImplementation testLibs.mockito.inline
     androidTestImplementation testLibs.mockito.kotlin
-    androidTestImplementation libs.leakCanary
-    androidTestImplementation testLibs.leakCanaryInstrumentation
     androidTestImplementation testLibs.testParameterInjector
     androidTestImplementation testLibs.truth
 
@@ -82,6 +81,7 @@ dependencies {
 android {
     defaultConfig {
         testApplicationId "com.stripe.android.connect.test"
+        testInstrumentationRunner "com.stripe.android.connect.ConnectTestRunner"
     }
 
     buildFeatures {

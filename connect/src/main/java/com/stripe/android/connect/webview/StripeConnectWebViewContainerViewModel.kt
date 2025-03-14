@@ -28,6 +28,7 @@ import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.analytics.ComponentAnalyticsService
 import com.stripe.android.connect.analytics.ConnectAnalyticsEvent
 import com.stripe.android.connect.util.Clock
+import com.stripe.android.connect.util.isInInstrumentationTest
 import com.stripe.android.connect.webview.StripeConnectWebView.Delegate
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.OpenFinancialConnectionsMessage
@@ -120,7 +121,12 @@ internal class StripeConnectWebViewContainerViewModel(
      */
     fun onViewAttached() {
         updateState { copy(didBeginLoadingMillis = clock.millis()) }
-        webView.loadUrl(embeddedComponentManager.getStripeURL(embeddedComponent))
+        if (isInInstrumentationTest()) {
+            // Load local static html for instrumentation tests.
+            webView.loadData(getTestHtml(), "text/html", "utf-8")
+        } else {
+            webView.loadUrl(embeddedComponentManager.getStripeURL(embeddedComponent))
+        }
 
         analyticsService.track(ConnectAnalyticsEvent.ComponentViewed(stateFlow.value.pageViewId))
     }
@@ -407,4 +413,18 @@ internal class StripeConnectWebViewContainerViewModel(
 
 internal fun interface CreateWebView {
     operator fun invoke(application: Application, delegate: Delegate, logger: Logger): StripeConnectWebView
+}
+
+@Suppress("MagicNumber")
+private fun getTestHtml(): String {
+    return buildString {
+        append("<html><body>")
+        append("<h1 id=\"top\">Top</h1>")
+        // Make this long enough to scroll.
+        repeat(50) { i ->
+            append("<h2>Content $i</h2>")
+        }
+        append("<h1 id=\"bottom\">Bottom</h1>")
+        append("</body></html>")
+    }
 }

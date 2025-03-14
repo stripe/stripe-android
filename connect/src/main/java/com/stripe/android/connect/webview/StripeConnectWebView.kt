@@ -24,6 +24,7 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.util.findActivity
+import com.stripe.android.connect.util.isInInstrumentationTest
 import com.stripe.android.connect.webview.serialization.AccountSessionClaimedMessage
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.ConnectJson
@@ -31,6 +32,7 @@ import com.stripe.android.connect.webview.serialization.OpenFinancialConnections
 import com.stripe.android.connect.webview.serialization.PageLoadMessage
 import com.stripe.android.connect.webview.serialization.SecureWebViewMessage
 import com.stripe.android.connect.webview.serialization.SetCollectMobileFinancialConnectionsResultPayloadJs
+import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
 import com.stripe.android.connect.webview.serialization.toJs
 import com.stripe.android.core.Logger
@@ -217,6 +219,15 @@ internal class StripeConnectWebView private constructor(
 
         override fun onPageFinished(view: WebView, url: String) {
             delegate.onPageFinished(url)
+            if (isInInstrumentationTest()) {
+                // Fake sending this message to simulate stripe.js loading,
+                // which disappears the native loading spinner.
+                delegate.onReceivedSetterFunctionCalled(
+                    SetterFunctionCalledMessage(
+                        SetOnLoaderStart("test")
+                    )
+                )
+            }
         }
 
         override fun onReceivedHttpError(
