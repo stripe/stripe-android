@@ -203,7 +203,6 @@ internal class AccountPreviewScreenshotTest {
         fillAddress: Boolean = false,
         enabled: Boolean = true,
         showCheckboxes: Boolean = false,
-        setAsDefaultMatchesSaveForFutureUse: Boolean = false,
     ) {
         paparazzi.snapshot {
             BankAccountForm(
@@ -217,9 +216,7 @@ internal class AccountPreviewScreenshotTest {
                 addressController = createAddressController(fillAddress = fillAddress),
                 sameAsShippingElement = sameAsShippingElement,
                 saveForFutureUseElement = saveForFutureUseElement,
-                setAsDefaultPaymentMethodElement = setAsDefaultPaymentMethodElement.copy(
-                    setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse
-                ),
+                setAsDefaultPaymentMethodElement = setAsDefaultPaymentMethodElement,
                 showCheckboxes = showCheckboxes,
                 lastTextFieldIdentifier = null,
                 onRemoveAccount = {},
