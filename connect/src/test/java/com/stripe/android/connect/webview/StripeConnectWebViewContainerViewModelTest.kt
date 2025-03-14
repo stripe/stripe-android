@@ -18,6 +18,7 @@ import com.stripe.android.connect.analytics.ComponentAnalyticsService
 import com.stripe.android.connect.analytics.ConnectAnalyticsEvent
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.Colors
+import com.stripe.android.connect.manager.EmbeddedComponentCoordinator
 import com.stripe.android.connect.util.Clock
 import com.stripe.android.connect.webview.serialization.OpenFinancialConnectionsMessage
 import com.stripe.android.connect.webview.serialization.SetOnLoadError
@@ -67,7 +68,10 @@ class StripeConnectWebViewContainerViewModelTest {
     private val mockPermissionRequest: PermissionRequest = mock()
     private val analyticsService: ComponentAnalyticsService = mock()
     private val androidClock: Clock = mock()
-    private val embeddedComponentManager: EmbeddedComponentManager = mock()
+    private val componentCoordinator: EmbeddedComponentCoordinator = mock()
+    private val embeddedComponentManager: EmbeddedComponentManager = mock {
+        on { this.coordinator } doReturn componentCoordinator
+    }
     private val embeddedComponent: StripeEmbeddedComponent = StripeEmbeddedComponent.PAYOUTS
 
     private val appearanceFlow = MutableStateFlow(Appearance())
@@ -83,8 +87,8 @@ class StripeConnectWebViewContainerViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
 
-        whenever(embeddedComponentManager.appearanceFlow) doReturn appearanceFlow
-        whenever(embeddedComponentManager.getStripeURL(any())) doReturn "https://example.com"
+        whenever(componentCoordinator.appearanceFlow) doReturn appearanceFlow
+        whenever(componentCoordinator.getStripeURL(any())) doReturn "https://example.com"
         whenever(androidClock.millis()) doReturn -1L
 
         viewModel = StripeConnectWebViewContainerViewModel(
@@ -120,7 +124,7 @@ class StripeConnectWebViewContainerViewModelTest {
     @Test
     fun `should load URL when view is attached`() {
         val url = "https://connect-js.stripe.com/v1.0/android_webview.html#component=payouts&publicKey=pk_test_123"
-        whenever(embeddedComponentManager.getStripeURL(embeddedComponent)) doReturn url
+        whenever(componentCoordinator.getStripeURL(embeddedComponent)) doReturn url
 
         viewModel.onViewAttached()
         verify(webView).loadUrl(url)
@@ -270,7 +274,7 @@ class StripeConnectWebViewContainerViewModelTest {
         val intent = Intent()
         val expected = arrayOf(Uri.parse("content://path/to/file"))
         var actual: Array<Uri>? = null
-        wheneverBlocking { embeddedComponentManager.chooseFile(mockActivity, intent) } doReturn expected
+        wheneverBlocking { componentCoordinator.chooseFile(mockActivity, intent) } doReturn expected
 
         viewModel.delegate.onChooseFile(
             activity = mockActivity,
@@ -290,7 +294,7 @@ class StripeConnectWebViewContainerViewModelTest {
         )
         val expected = FinancialConnectionsSheetResult.Canceled
         wheneverBlocking {
-            embeddedComponentManager.presentFinancialConnections(
+            componentCoordinator.presentFinancialConnections(
                 activity = mockActivity,
                 clientSecret = message.clientSecret,
                 connectedAccountId = message.connectedAccountId,
@@ -326,7 +330,7 @@ class StripeConnectWebViewContainerViewModelTest {
             PackageManager.PERMISSION_DENIED
 
         whenever(mockPermissionRequest.resources) doReturn arrayOf(PermissionRequest.RESOURCE_VIDEO_CAPTURE)
-        wheneverBlocking { embeddedComponentManager.requestCameraPermission(any()) } doReturn true
+        wheneverBlocking { componentCoordinator.requestCameraPermission(any()) } doReturn true
 
         viewModel.delegate.onPermissionRequest(mockActivity, mockPermissionRequest)
 
@@ -339,7 +343,7 @@ class StripeConnectWebViewContainerViewModelTest {
             PackageManager.PERMISSION_DENIED
 
         whenever(mockPermissionRequest.resources) doReturn arrayOf(PermissionRequest.RESOURCE_VIDEO_CAPTURE)
-        wheneverBlocking { embeddedComponentManager.requestCameraPermission(any()) } doReturn false
+        wheneverBlocking { componentCoordinator.requestCameraPermission(any()) } doReturn false
 
         viewModel.delegate.onPermissionRequest(mockActivity, mockPermissionRequest)
 
@@ -372,7 +376,7 @@ class StripeConnectWebViewContainerViewModelTest {
     @Test
     fun `emit unexpected navigation analytic if non-stripe url page started`() {
         whenever(
-            embeddedComponentManager.getStripeURL(embeddedComponent)
+            componentCoordinator.getStripeURL(embeddedComponent)
         ) doReturn "https://stripe.com/test?foo=bar#mytest"
 
         viewModel.delegate.onPageStarted("https://example.com/test?foo=bar#mytest")
@@ -386,7 +390,7 @@ class StripeConnectWebViewContainerViewModelTest {
     @Test
     fun `dont emit unexpected navigation analytic if expected stripe url is used on page started`() {
         whenever(
-            embeddedComponentManager.getStripeURL(any())
+            componentCoordinator.getStripeURL(any())
         ) doReturn "https://stripe.com/test?foo=bar#mytest"
 
         viewModel.delegate.onPageStarted("https://stripe.com/test")

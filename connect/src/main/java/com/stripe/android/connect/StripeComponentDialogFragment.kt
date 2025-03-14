@@ -154,7 +154,7 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
             viewModel.embeddedComponentManager
                 .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
                 .collectLatest { embeddedComponentManager ->
-                    embeddedComponentManager?.appearanceFlow?.collectLatest(::bindAppearance)
+                    embeddedComponentManager?.coordinator?.appearanceFlow?.collectLatest(::bindAppearance)
                 }
         }
 

@@ -1,4 +1,4 @@
-package com.stripe.android.connect
+package com.stripe.android.connect.manager
 
 import android.Manifest
 import android.app.Application
@@ -7,6 +7,11 @@ import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.connect.EmbeddedComponentManager
+import com.stripe.android.connect.FetchClientSecretCallback
+import com.stripe.android.connect.PrivateBetaConnectSDK
+import com.stripe.android.connect.appearance.Appearance
+import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import junit.framework.TestCase.assertFalse
 import kotlinx.coroutines.async
@@ -29,18 +34,25 @@ import kotlin.test.assertTrue
 
 @OptIn(PrivateBetaConnectSDK::class)
 @RunWith(RobolectricTestRunner::class)
-class EmbeddedComponentManagerTest {
+class EmbeddedComponentCoordinatorTest {
 
     private lateinit var configuration: EmbeddedComponentManager.Configuration
     private lateinit var mockFetchClientSecretCallback: FetchClientSecretCallback
-    private lateinit var embeddedComponentManager: EmbeddedComponentManager
+    private lateinit var coordinator: EmbeddedComponentCoordinator
     private lateinit var testActivity: ComponentActivity
 
     @Before
     fun setup() {
         configuration = EmbeddedComponentManager.Configuration("test_publishable_key")
         mockFetchClientSecretCallback = mock()
-        embeddedComponentManager = EmbeddedComponentManager(configuration, mockFetchClientSecretCallback)
+        coordinator =
+            EmbeddedComponentCoordinator(
+                configuration = configuration,
+                fetchClientSecretCallback = mockFetchClientSecretCallback,
+                logger = Logger.noop(),
+                appearance = Appearance(),
+                customFonts = emptyList(),
+            )
         testActivity = Robolectric.buildActivity(ComponentActivity::class.java).create().get()
     }
 
@@ -53,7 +65,7 @@ class EmbeddedComponentManagerTest {
             callback.onResult(expectedSecret)
         }
 
-        val result = embeddedComponentManager.fetchClientSecret()
+        val result = coordinator.fetchClientSecret()
 
         assertEquals(expectedSecret, result)
         verify(mockFetchClientSecretCallback).fetchClientSecret(any())
@@ -66,7 +78,7 @@ class EmbeddedComponentManagerTest {
             callback.onResult(null)
         }
 
-        val result = embeddedComponentManager.fetchClientSecret()
+        val result = coordinator.fetchClientSecret()
 
         assertNull(result)
         verify(mockFetchClientSecretCallback).fetchClientSecret(any())
@@ -77,21 +89,21 @@ class EmbeddedComponentManagerTest {
         val shadowApplication = shadowOf(ApplicationProvider.getApplicationContext() as Application)
         shadowApplication.grantPermissions(Manifest.permission.CAMERA)
 
-        assertTrue(embeddedComponentManager.requestCameraPermission(testActivity)!!)
+        assertTrue(coordinator.requestCameraPermission(testActivity)!!)
     }
 
     @Test
     fun `requestCameraPermission returns correct response when user responds to camera permission`() = runTest {
         val shadowApplication = shadowOf(ApplicationProvider.getApplicationContext() as Application)
         shadowApplication.denyPermissions(Manifest.permission.CAMERA)
-        EmbeddedComponentManager.onActivityCreate(testActivity)
+        EmbeddedComponentCoordinator.onActivityCreate(testActivity)
 
         // simulate a permissions denial
         val resultFalseAsync = async {
-            embeddedComponentManager.requestCameraPermission(testActivity)
+            coordinator.requestCameraPermission(testActivity)
         }
         advanceUntilIdle() // make sure we advance up to the point where we're waiting for the permissionsFlow
-        EmbeddedComponentManager.permissionsFlow.emit(false)
+        EmbeddedComponentCoordinator.permissionsFlow.emit(false)
 
         val resultFalse = resultFalseAsync.await()
         assertNotNull(resultFalse)
@@ -99,10 +111,10 @@ class EmbeddedComponentManagerTest {
 
         // simulate a permissions grant
         val resultTrueAsync = async {
-            embeddedComponentManager.requestCameraPermission(testActivity)
+            coordinator.requestCameraPermission(testActivity)
         }
         advanceUntilIdle() // make sure we advance up to the point where we're waiting for the permissionsFlow
-        EmbeddedComponentManager.permissionsFlow.emit(true)
+        EmbeddedComponentCoordinator.permissionsFlow.emit(true)
 
         val resultTrue = resultTrueAsync.await()
         assertNotNull(resultTrue)
@@ -114,20 +126,20 @@ class EmbeddedComponentManagerTest {
         val shadowApplication = shadowOf(ApplicationProvider.getApplicationContext() as Application)
         shadowApplication.denyPermissions(Manifest.permission.CAMERA)
 
-        assertNull(embeddedComponentManager.requestCameraPermission(testActivity))
+        assertNull(coordinator.requestCameraPermission(testActivity))
     }
 
     @Test
     fun `chooseFile returns correct response`() = runTest {
-        EmbeddedComponentManager.onActivityCreate(testActivity)
+        EmbeddedComponentCoordinator.onActivityCreate(testActivity)
         val resultAsync = async {
-            embeddedComponentManager.chooseFile(testActivity, Intent())
+            coordinator.chooseFile(testActivity, Intent())
         }
         advanceUntilIdle()
         val expected = arrayOf(Uri.parse("content://test"))
         // Simulate a file being chosen.
-        EmbeddedComponentManager.chooseFileResultFlow.emit(
-            EmbeddedComponentManager.ActivityResult(testActivity, expected)
+        EmbeddedComponentCoordinator.chooseFileResultFlow.emit(
+            EmbeddedComponentCoordinator.ActivityResult(testActivity, expected)
         )
         val actual = resultAsync.await()
 
@@ -136,15 +148,15 @@ class EmbeddedComponentManagerTest {
 
     @Test
     fun `presentFinancialConnections returns correct result`() = runTest {
-        EmbeddedComponentManager.onActivityCreate(testActivity)
+        EmbeddedComponentCoordinator.onActivityCreate(testActivity)
         val resultAsync = async {
-            embeddedComponentManager.presentFinancialConnections(testActivity, "secret", "id")
+            coordinator.presentFinancialConnections(testActivity, "secret", "id")
         }
         advanceUntilIdle()
         val expected = FinancialConnectionsSheetResult.Canceled
         // Simulate financial connections
-        EmbeddedComponentManager.financialConnectionsResults.emit(
-            EmbeddedComponentManager.ActivityResult(testActivity, expected)
+        EmbeddedComponentCoordinator.financialConnectionsResults.emit(
+            EmbeddedComponentCoordinator.ActivityResult(testActivity, expected)
         )
         val actual = resultAsync.await()
 

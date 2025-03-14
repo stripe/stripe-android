@@ -9,7 +9,7 @@ import com.stripe.android.connect.di.StripeConnectComponent
 @Suppress("unused")
 class ConnectTestRunner : AndroidJUnitRunner() {
     override fun newApplication(cl: ClassLoader?, className: String?, context: Context?): Application {
-        StripeConnectComponent.instance = DaggerTestStripeConnectComponent.create()
+        StripeConnectComponent.replaceInstance(DaggerTestStripeConnectComponent.create())
         return super.newApplication(cl, className, context)
     }
 }
