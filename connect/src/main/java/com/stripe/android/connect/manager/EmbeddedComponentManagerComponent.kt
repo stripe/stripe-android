@@ -5,7 +5,6 @@ import com.stripe.android.connect.FetchClientSecretCallback
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.fonts.CustomFontSource
-import com.stripe.android.core.Logger
 import dagger.BindsInstance
 import dagger.Subcomponent
 
