@@ -11,7 +11,7 @@ dependencies {
     api project(":payments-core")
     implementation project(':payments-ui-core')
     implementation project(':stripe-ui-core')
-    compileOnly project(':financial-connections')
+    implementation project(':financial-connections-lite')
     implementation project(":stripe-attestation")
 
     // Kotlin
