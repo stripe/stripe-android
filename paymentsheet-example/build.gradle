@@ -34,7 +34,6 @@ emerge {
 dependencies {
     implementation project(':payments')
     implementation project(':stripecardscan')
-    implementation project(':financial-connections')
 
     implementation 'androidx.compose.foundation:foundation:1.7.8'
     implementation libs.androidx.activity

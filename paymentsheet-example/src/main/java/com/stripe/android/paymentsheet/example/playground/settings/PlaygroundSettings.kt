@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Parcel
 import android.os.Parcelable
 import android.util.Log
+import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Stable
 import androidx.core.content.edit
 import com.stripe.android.core.utils.FeatureFlags
@@ -14,10 +15,17 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
-import com.stripe.android.uicore.utils.mapAsStateFlow
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.builtins.MapSerializer
@@ -465,4 +473,40 @@ internal class PlaygroundSettings private constructor(
         private val allSettingDefinitions: List<PlaygroundSettingDefinition<*>> =
             uiSettingDefinitions + nonUiSettingDefinitions
     }
+}
+
+private class FlowToStateFlow<T>(
+    private val flow: Flow<T>,
+    private val produceValue: () -> T,
+) : StateFlow<T> {
+
+    override val replayCache: List<T>
+        get() = listOf(value)
+
+    override val value: T
+        get() = produceValue()
+
+    @InternalCoroutinesApi
+    override suspend fun collect(collector: FlowCollector<T>): Nothing {
+        val collectorJob = currentCoroutineContext()[Job]
+        flow.distinctUntilChanged().collect(collector)
+
+        try {
+            while (true) {
+                collectorJob?.ensureActive()
+            }
+        } finally {
+            // Nothing to do here
+        }
+    }
+}
+
+fun <T, R> StateFlow<T>.mapAsStateFlow(
+    transform: (T) -> R,
+): StateFlow<R> {
+    @Suppress("DEPRECATION")
+    return FlowToStateFlow(
+        flow = map(transform),
+        produceValue = { transform(value) },
+    )
 }
