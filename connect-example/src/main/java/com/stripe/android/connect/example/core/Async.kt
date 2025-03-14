@@ -21,7 +21,7 @@ data object Uninitialized : Async<Nothing>(complete = false, shouldLoad = true, 
 
 data class Loading<out T>(private val value: T? = null) : Async<T>(complete = false, shouldLoad = false, value = value)
 
-data class Success<out T>(private val value: T) : Async<T>(complete = true, shouldLoad = false, value = value)
+data class Success<out T>(val value: T) : Async<T>(complete = true, shouldLoad = false, value = value)
 
 data class Fail<out T>(
     val error: Throwable,

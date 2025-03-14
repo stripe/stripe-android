@@ -256,7 +256,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
 
     internal fun setPropsFromXml(props: Props) {
         // Only set props if uninitialized.
-        if (viewModel == null) {
+        if (this.embeddedComponentManager == null) {
             this.propsJson = props.toJsonObject()
         }
     }
