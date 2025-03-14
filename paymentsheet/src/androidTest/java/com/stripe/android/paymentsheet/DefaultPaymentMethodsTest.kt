@@ -203,6 +203,105 @@ internal class DefaultPaymentMethodsTest {
     }
 
     @Test
+    fun setNewCardAsDefault_withSavedPaymentMethods_uncheckSetAsDefault_doesNotSendSetAsDefaultParamInConfirmCall()
+    = runProductIntegrationTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        val paymentSheetPage = PaymentSheetPage(composeTestRule)
+
+        val cards = listOf(
+            PaymentMethodFactory.card(last4 = "4242", id = "pm_1"),
+            PaymentMethodFactory.card(last4 = "1001", id = "pm_2")
+        )
+
+        enqueueElementsSessionResponse(
+            cards = cards
+        )
+
+        launch(
+            testContext = testContext,
+            paymentMethodLayout = layoutType.paymentMethodLayout,
+            hasSavedPaymentMethods = true,
+        )
+
+        paymentSheetPage.fillOutCardDetails()
+        paymentSheetPage.checkSaveForFuture()
+
+        enqueuePaymentIntentConfirmWithExpectedSetAsDefault(setAsDefaultValue = false)
+
+        paymentSheetPage.clickPrimaryButton()
+    }
+
+    @Test
+    fun setNewCardAsDefault_withSavedPaymentMethods_checkSetAsDefault_sendsSetAsDefaultParamInConfirmCall()
+    = runProductIntegrationTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        val paymentSheetPage = PaymentSheetPage(composeTestRule)
+
+        val cards = listOf(
+            PaymentMethodFactory.card(last4 = "4242", id = "pm_1"),
+            PaymentMethodFactory.card(last4 = "1001", id = "pm_2")
+        )
+
+        enqueueElementsSessionResponse(
+            cards = cards
+        )
+
+        launch(
+            testContext = testContext,
+            paymentMethodLayout = layoutType.paymentMethodLayout,
+            hasSavedPaymentMethods = true,
+        )
+
+        paymentSheetPage.fillOutCardDetails()
+        paymentSheetPage.checkSaveForFuture()
+        paymentSheetPage.checkSetAsDefaultCheckbox()
+
+        enqueuePaymentIntentConfirmWithExpectedSetAsDefault(setAsDefaultValue = true)
+
+        paymentSheetPage.clickPrimaryButton()
+    }
+
+    @Test
+    fun setNewCardAsDefault_withSavedPaymentMethods_uncheckSaveForFuture_doesNotSendSetAsDefaultParamInConfirmCall()
+    = runProductIntegrationTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        val paymentSheetPage = PaymentSheetPage(composeTestRule)
+
+        val cards = listOf(
+            PaymentMethodFactory.card(last4 = "4242", id = "pm_1"),
+            PaymentMethodFactory.card(last4 = "1001", id = "pm_2")
+        )
+
+        enqueueElementsSessionResponse(
+            cards = cards
+        )
+
+        launch(
+            testContext = testContext,
+            paymentMethodLayout = layoutType.paymentMethodLayout,
+            hasSavedPaymentMethods = true,
+        )
+
+        paymentSheetPage.fillOutCardDetails()
+        paymentSheetPage.checkSaveForFuture()
+        paymentSheetPage.checkSetAsDefaultCheckbox()
+        paymentSheetPage.checkSaveForFuture()
+
+        enqueuePaymentIntentConfirmWithExpectedSetAsDefault(setAsDefaultValue = false)
+
+        paymentSheetPage.clickPrimaryButton()
+    }
+
+    @Test
     fun setNewCardAsDefault_sendsSetAsDefaultParamInConfirmCall() = runProductIntegrationTest(
         networkRule = networkRule,
         integrationType = integrationType,
@@ -220,33 +319,9 @@ internal class DefaultPaymentMethodsTest {
 
         paymentSheetPage.fillOutCardDetails()
         paymentSheetPage.checkSaveForFuture()
-        paymentSheetPage.checkSetAsDefaultCheckbox()
+        paymentSheetPage.assertNoSetAsDefaultCheckbox()
 
         enqueuePaymentIntentConfirmWithExpectedSetAsDefault(setAsDefaultValue = true)
-
-        paymentSheetPage.clickPrimaryButton()
-    }
-
-    @Test
-    fun payWithNewCard_dontCheckSetAsDefault_sendsSetAsDefaultAsFalseParamInConfirmCall() = runProductIntegrationTest(
-        networkRule = networkRule,
-        integrationType = integrationType,
-        resultCallback = ::assertCompleted,
-    ) { testContext ->
-        val paymentSheetPage = PaymentSheetPage(composeTestRule)
-
-        enqueueElementsSessionResponse()
-
-        launch(
-            testContext = testContext,
-            paymentMethodLayout = layoutType.paymentMethodLayout,
-            hasSavedPaymentMethods = false,
-        )
-
-        paymentSheetPage.fillOutCardDetails()
-        paymentSheetPage.checkSaveForFuture()
-
-        enqueuePaymentIntentConfirmWithExpectedSetAsDefault(setAsDefaultValue = false)
 
         paymentSheetPage.clickPrimaryButton()
     }
@@ -269,10 +344,8 @@ internal class DefaultPaymentMethodsTest {
 
         paymentSheetPage.fillOutCardDetails()
         paymentSheetPage.checkSaveForFuture()
-        paymentSheetPage.checkSetAsDefaultCheckbox()
-
-        // Un-check save for future -- this will hide the set as default checkbox
         paymentSheetPage.checkSaveForFuture()
+        paymentSheetPage.assertNoSetAsDefaultCheckbox()
 
         enqueuePaymentIntentConfirmWithoutSetAsDefault()
 
