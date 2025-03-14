@@ -5,7 +5,6 @@ import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.FetchClientSecretCallback.ClientSecretResultCallback
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.appearance.fonts.CustomFontSource
-import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -19,9 +18,9 @@ import javax.inject.Singleton
 class EmbeddedComponentManagerFactory @Inject constructor(
     private val embeddedComponentService: EmbeddedComponentService,
     private val settingsService: SettingsService,
+    private val logger: Logger,
 ) {
     private val loggingTag = this::class.java.simpleName
-    private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
     private val ioScope: CoroutineScope by lazy { CoroutineScope(Dispatchers.IO) }
 
     /**

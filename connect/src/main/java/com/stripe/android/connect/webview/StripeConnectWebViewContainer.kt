@@ -17,7 +17,6 @@ import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.findViewTreeViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.MutableCreationExtras
-import com.stripe.android.connect.BuildConfig
 import com.stripe.android.connect.ComponentEvent
 import com.stripe.android.connect.ComponentListenerDelegate
 import com.stripe.android.connect.ComponentProps
@@ -25,6 +24,7 @@ import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.StripeEmbeddedComponentListener
+import com.stripe.android.connect.di.StripeConnectComponent
 import com.stripe.android.connect.toJsonObject
 import com.stripe.android.connect.util.AndroidClock
 import com.stripe.android.core.Logger
@@ -65,7 +65,7 @@ internal class StripeConnectWebViewContainerImpl<Listener, Props>(
     override var listener: Listener?,
     props: Props?,
     private val listenerDelegate: ComponentListenerDelegate<Listener> = ComponentListenerDelegate(),
-    private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
+    private val logger: Logger = StripeConnectComponent.instance.logger,
 ) : StripeConnectWebViewContainer<Listener, Props>,
     View.OnAttachStateChangeListener
     where Props : ComponentProps,

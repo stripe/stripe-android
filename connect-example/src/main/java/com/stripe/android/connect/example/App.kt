@@ -18,7 +18,7 @@ class App : Application() {
 
     @Inject lateinit var embeddedComponentService: EmbeddedComponentService
 
-    private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
+    @Inject lateinit var logger: Logger
 
     override fun onCreate() {
         super.onCreate()

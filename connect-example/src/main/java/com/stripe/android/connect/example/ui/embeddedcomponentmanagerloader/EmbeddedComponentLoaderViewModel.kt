@@ -8,7 +8,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import com.github.kittinunf.fuel.core.FuelError
 import com.stripe.android.connect.PrivateBetaConnectSDK
-import com.stripe.android.connect.example.BuildConfig
 import com.stripe.android.connect.example.core.Fail
 import com.stripe.android.connect.example.core.Loading
 import com.stripe.android.connect.example.core.Success
@@ -35,9 +34,9 @@ class EmbeddedComponentLoaderViewModel @Inject constructor(
     private val embeddedComponentService: EmbeddedComponentService,
     private val embeddedComponentManagerFactory: EmbeddedComponentManagerFactory,
     private val settingsService: SettingsService,
+    private val logger: Logger,
 ) : ViewModel(), DefaultLifecycleObserver {
 
-    private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
     private val loggingTag = this::class.java.simpleName
 
     private val _state = MutableStateFlow(EmbeddedComponentManagerLoaderState())
