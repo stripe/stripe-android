@@ -20,7 +20,7 @@ internal class FinancialConnectionsLiteRepository(
     suspend fun synchronize(
         configuration: FinancialConnectionsSheetConfiguration,
         applicationId: String,
-    ): SynchronizeSessionResponse = requestExecutor.execute(
+    ): Result<SynchronizeSessionResponse> = requestExecutor.execute(
         apiRequestFactory.createPost(
             url = synchronizeSessionUrl,
             options = configuration.apiRequestOptions(),
@@ -39,7 +39,7 @@ internal class FinancialConnectionsLiteRepository(
 
     suspend fun getFinancialConnectionsSession(
         configuration: FinancialConnectionsSheetConfiguration,
-    ): FinancialConnectionsSession {
+    ): Result<FinancialConnectionsSession> {
         val financialConnectionsRequest = apiRequestFactory.createGet(
             url = sessionReceiptUrl,
             options = configuration.apiRequestOptions(),

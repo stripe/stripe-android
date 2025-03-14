@@ -12,7 +12,6 @@ import android.widget.FrameLayout
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
 import androidx.annotation.RestrictTo
-import androidx.browser.customtabs.CustomTabsIntent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
@@ -20,12 +19,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.Companion.EXTRA_ARGS
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
+import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.lite.di.Di
 import kotlinx.coroutines.launch
-import androidx.core.net.toUri
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
-import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.FinishWithResult
 
 internal class FinancialConnectionsSheetLiteActivity : ComponentActivity() {
 
@@ -89,12 +87,6 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity() {
         finish()
     }
 
-    private fun openInCustomTab(url: String) {
-        val builder = CustomTabsIntent.Builder()
-        val customTabsIntent = builder.build()
-        customTabsIntent.launchUrl(this, url.toUri())
-    }
-
     companion object {
         fun intent(context: Context, args: FinancialConnectionsSheetActivityArgs): Intent {
             return Intent(context, FinancialConnectionsSheetLiteActivity::class.java).apply {
@@ -120,6 +112,8 @@ internal class FinancialConnectionsLiteViewModelFactory : ViewModelProvider.Fact
             return FinancialConnectionsLiteViewModel(
                 savedStateHandle = savedStateHandle,
                 applicationId = appContext.packageName,
+                logger = Di.logger,
+                workContext = Di.workContext,
                 repository = Di.repository()
             ) as T
         }

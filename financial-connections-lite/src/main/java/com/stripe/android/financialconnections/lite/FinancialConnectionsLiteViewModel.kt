@@ -12,8 +12,9 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.Companion.EXTRA_ARGS
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
+import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.lite.di.Di
 import com.stripe.android.financialconnections.lite.repository.FinancialConnectionsLiteRepository
@@ -26,7 +27,7 @@ internal class FinancialConnectionsLiteViewModel(
     private val logger: Logger,
     private val savedStateHandle: SavedStateHandle,
     private val repository: FinancialConnectionsLiteRepository,
-    workContext: CoroutineDispatcher,
+    private val workContext: CoroutineDispatcher,
     applicationId: String
 ) : ViewModel() {
 
@@ -47,29 +48,39 @@ internal class FinancialConnectionsLiteViewModel(
                     OpenAuthFlowWithUrl(requireNotNull(sync.manifest.hostedAuthUrl))
                 )
             }.onFailure { throwable ->
-                // TODO - handle error state
                 logger.error("Failed to synchronize session", throwable)
+                _viewEffects.emit(
+                    FinishWithResult(
+                        result = Failed(
+                            error = throwable,
+                        )
+                    )
+                )
             }
         }
     }
 
     fun handleUrl(uri: Uri) {
         if (uri.toString().contains("success") || uri.toString().contains("cancel")) {
-            viewModelScope.launch {
-                val fcSession = repository.getFinancialConnectionsSession(
+            viewModelScope.launch(workContext) {
+                repository.getFinancialConnectionsSession(
                     configuration = args.configuration
-                )
-                if (fcSession.paymentAccount != null) {
-                    viewEffects.emit(
-                        ViewEffect.FinishWithResult(
+                ).onSuccess {
+                    _viewEffects.emit(
+                        FinishWithResult(
                             Completed(
-                                financialConnectionsSession = fcSession,
+                                financialConnectionsSession = it,
                             )
                         )
                     )
-                } else {
-                    viewEffects.emit(
-                        ViewEffect.FinishWithResult(Canceled)
+                }.onFailure { throwable ->
+                    logger.error("Failed to retrieve financial connections session", throwable)
+                    _viewEffects.emit(
+                        FinishWithResult(
+                            result = Failed(
+                                error = throwable,
+                            )
+                        )
                     )
                 }
             }
