@@ -11,7 +11,7 @@ internal class FinancialConnectionsLiteRepository(
     private val apiRequestFactory: ApiRequest.Factory,
 ) {
 
-    fun FinancialConnectionsSheetConfiguration.apiRequestOptions() = ApiRequest.Options(
+    private fun FinancialConnectionsSheetConfiguration.apiRequestOptions() = ApiRequest.Options(
         publishableKeyProvider = { publishableKey },
         stripeAccountIdProvider = { stripeAccountId },
     )
