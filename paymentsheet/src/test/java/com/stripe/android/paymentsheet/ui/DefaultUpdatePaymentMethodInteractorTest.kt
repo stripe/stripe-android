@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -12,11 +13,19 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.setDefaultPaymentMethodErrorMessage
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.updateCardBrandErrorMessage
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.updatesFailedErrorMessage
+import com.stripe.android.testing.FeatureFlagTestRule
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 
 class DefaultUpdatePaymentMethodInteractorTest {
+
+    @get:Rule
+    val editSavedCardPaymentMethodEnabledFeatureFlagTestRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.editSavedCardPaymentMethodEnabled,
+        isEnabled = false
+    )
 
     @Test
     fun removeViewAction_removesPmAndNavigatesBack() {
@@ -597,6 +606,20 @@ class DefaultUpdatePaymentMethodInteractorTest {
         assertThat(interactor.shouldShowSaveButton).isFalse()
     }
 
+    @Test
+    fun shouldNotAllowCardEdit_whenCardEditFeatureFlagIsDisabled() = runScenario(
+        editSavedCardPaymentMethodEnabled = false
+    ) {
+        assertThat(interactor.allowCardEdit).isFalse()
+    }
+
+    @Test
+    fun shouldAllowCardEdit_whenCardEditFeatureFlagIsEnabled() = runScenario(
+        editSavedCardPaymentMethodEnabled = true
+    ) {
+        assertThat(interactor.allowCardEdit).isTrue()
+    }
+
     private fun updateCardBrandAndDefaultPaymentMethod(interactor: UpdatePaymentMethodInteractor) {
         interactor.handleViewAction(
             UpdatePaymentMethodInteractor.ViewAction.SetAsDefaultCheckboxChanged(
@@ -625,8 +648,10 @@ class DefaultUpdatePaymentMethodInteractorTest {
         onUpdateSuccess: () -> Unit = { notImplemented() },
         shouldShowSetAsDefaultCheckbox: Boolean = false,
         isDefaultPaymentMethod: Boolean = false,
+        editSavedCardPaymentMethodEnabled: Boolean = false,
         testBlock: suspend TestParams.() -> Unit
     ) {
+        editSavedCardPaymentMethodEnabledFeatureFlagTestRule.setEnabled(editSavedCardPaymentMethodEnabled)
         val interactor = DefaultUpdatePaymentMethodInteractor(
             isLiveMode = isLiveMode,
             canRemove = canRemove,
