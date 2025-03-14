@@ -120,7 +120,7 @@ class CardDefinitionTest {
     }
 
     @Test
-    fun `setAsDefaultPaymentMethod hidden when saveForFutureUse unchecked & setAsDefaultMatchesSaveForFutureUse false`() {
+    fun `setAsDefaultPM hidden when saveForFutureUse unchecked & setAsDefaultMatchesSaveForFutureUse false`() {
         testSetAsDefaultElements(
             setAsDefaultMatchesSaveForFutureUse = false,
         ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
