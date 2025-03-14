@@ -19,8 +19,8 @@ internal class FinancialConnectionsLiteRepository(
     suspend fun synchronize(
         configuration: FinancialConnectionsSheetConfiguration,
         applicationId: String,
-    ): SynchronizeSessionResponse = requestExecutor.execute(
-        apiRequestFactory.createPost(
+    ): Result<SynchronizeSessionResponse> {
+        val request = apiRequestFactory.createPost(
             url = synchronizeSessionUrl,
             options = configuration.apiRequestOptions(),
             params = mapOf(
@@ -32,9 +32,9 @@ internal class FinancialConnectionsLiteRepository(
                 ),
                 PARAMS_CLIENT_SECRET to configuration.financialConnectionsSessionClientSecret
             )
-        ),
-        SynchronizeSessionResponse.serializer()
-    )
+        )
+        return requestExecutor.execute(request, SynchronizeSessionResponse.serializer())
+    }
 
     companion object {
         internal const val PARAMS_FULLSCREEN = "fullscreen"
