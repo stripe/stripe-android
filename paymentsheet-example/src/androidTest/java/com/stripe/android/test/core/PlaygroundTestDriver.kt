@@ -113,19 +113,25 @@ internal class PlaygroundTestDriver(
         populateCustomLpmFields: FieldPopulator.() -> Unit = {},
         verifyCustomLpmFields: FieldPopulator.() -> Unit = {},
     ) {
-        setup(testParameters)
+        setup(
+            testParameters.copyPlaygroundSettings { settings ->
+                settings.updateConfigurationData { configurationData ->
+                    configurationData.copy(
+                        integrationType = PlaygroundConfigurationData.IntegrationType.FlowController
+                    )
+                }
+            }
+        )
+
+        // Clear Link customer
+        composeTestRule
+            .onNodeWithText("Clear Link customer")
+            .performScrollTo()
+            .performClick()
+
         launchCustom()
 
         composeTestRule.waitForIdle()
-
-        composeTestRule.waitUntil(timeoutMillis = 5000L) {
-            selectors.addPaymentMethodButton.isDisplayed()
-        }
-
-        addPaymentMethodNode().apply {
-            assertExists()
-            performClick()
-        }
 
         val fieldPopulator = FieldPopulator(
             selectors,
@@ -136,10 +142,10 @@ internal class PlaygroundTestDriver(
         )
         fieldPopulator.populateFields()
 
-        composeTestRule.onNodeWithText("Save my info for secure 1-click checkout").apply {
-            assertExists()
-            performClick()
-        }
+        composeTestRule
+            .onNodeWithText("Save your info for secure 1-click checkout with Link")
+            .performScrollTo()
+            .performClick()
 
         composeTestRule.onNodeWithText("Email").apply {
             assertExists()

@@ -4,14 +4,17 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Layout
+import com.stripe.android.paymentsheet.example.playground.settings.LayoutSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.LinkSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.LinkType
 import com.stripe.android.paymentsheet.example.playground.settings.LinkTypeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.test.core.TestParameters
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -24,9 +27,20 @@ internal class TestLink : BasePlaygroundTest() {
     }
 
     @Test
-    @Ignore("neutral-culminate")
     fun testLinkInlineCustom() {
-        testDriver.testLinkCustom(linkNewUser)
+        val testParameters = TestParameters.create(
+            paymentMethodCode = "card",
+        ) { settings ->
+            settings[CustomerSettingsDefinition] = CustomerType.GUEST
+            settings[CountrySettingsDefinition] = Country.US
+            settings[LinkTypeSettingsDefinition] = LinkType.Native
+            settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.Off
+            settings[LayoutSettingsDefinition] = Layout.HORIZONTAL
+        }
+        testDriver.testLinkCustom(
+            testParameters = testParameters,
+            populateCustomLpmFields = { populateCardDetails() },
+        )
     }
 
     @Test
