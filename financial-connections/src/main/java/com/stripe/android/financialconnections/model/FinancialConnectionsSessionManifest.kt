@@ -57,6 +57,9 @@ internal data class FinancialConnectionsSessionManifest(
     @SerialName(value = "consent_required")
     val consentRequired: Boolean,
 
+    @SerialName(value = "consent_acquired_at")
+    val consentAcquiredAt: String?,
+
     @SerialName(value = "custom_manual_entry_handling")
     val customManualEntryHandling: Boolean,
 
@@ -187,6 +190,9 @@ internal data class FinancialConnectionsSessionManifest(
     val theme: Theme? = null,
 ) : Parcelable {
 
+    val consentAcquired: Boolean
+        get() = !consentRequired || consentAcquiredAt != null
+
     /**
      *
      *
@@ -210,6 +216,9 @@ internal data class FinancialConnectionsSessionManifest(
 
         @SerialName(value = "bank_auth_repair")
         BANK_AUTH_REPAIR("bank_auth_repair"),
+
+        @SerialName(value = "id_consent_content")
+        ID_CONSENT_CONTENT("id_consent_content"),
 
         @SerialName(value = "institution_picker")
         INSTITUTION_PICKER("institution_picker"),

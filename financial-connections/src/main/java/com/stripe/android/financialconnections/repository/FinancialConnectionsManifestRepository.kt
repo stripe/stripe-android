@@ -10,8 +10,10 @@ import com.stripe.android.financialconnections.analytics.AuthSessionEvent
 import com.stripe.android.financialconnections.model.AuthorizationRepairResponse
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
+import com.stripe.android.financialconnections.model.FinancialConnectionsInstitutionSelected
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.model.IDConsentContentPane
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.network.NetworkConstants
@@ -71,6 +73,17 @@ internal interface FinancialConnectionsManifestRepository {
         applicationId: String,
         institution: FinancialConnectionsInstitution,
     ): FinancialConnectionsAuthorizationSession
+
+    @Throws(
+        AuthenticationException::class,
+        InvalidRequestException::class,
+        APIConnectionException::class,
+        APIException::class
+    )
+    suspend fun selectInstitution(
+        clientSecret: String,
+        institution: FinancialConnectionsInstitution,
+    ): FinancialConnectionsInstitutionSelected
 
     suspend fun postAuthorizationSessionEvent(
         clientSecret: String,
@@ -288,6 +301,28 @@ private class FinancialConnectionsManifestRepositoryImpl(
         ).also {
             updateActiveInstitution("postAuthorizationSession", institution)
             updateCachedActiveAuthSession("postAuthorizationSession", it)
+        }
+    }
+
+    override suspend fun selectInstitution(
+        clientSecret: String,
+        institution: FinancialConnectionsInstitution,
+    ): FinancialConnectionsInstitutionSelected {
+        val request = apiRequestFactory.createPost(
+            url = institutionSelectedUrl,
+            options = provideApiRequestOptions(useConsumerPublishableKey = true),
+            params = mapOf(
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+                "currently_selected_institution" to institution.id,
+            )
+        )
+        return requestExecutor.execute(
+            request,
+            FinancialConnectionsInstitutionSelected.serializer()
+        ).also { newResponse ->
+            updateActiveInstitution("selectInstitution", institution)
+            updateCachedManifest("selectInstitution", newResponse.manifest)
+            updateIDConsentContentPane("selectInstitution", newResponse.text?.idConsentContentPane)
         }
     }
 
@@ -563,6 +598,19 @@ private class FinancialConnectionsManifestRepositoryImpl(
         )
     }
 
+    private fun updateIDConsentContentPane(
+        source: String,
+        pane: IDConsentContentPane?
+    ) {
+        logger.debug("SYNC_CACHE: updating local sync object from $source with ID consent content pane")
+        val cachedResponse = cachedSynchronizeSessionResponse
+        cachedSynchronizeSessionResponse = cachedResponse?.copy(
+            text = cachedResponse.text?.copy(
+                idConsentContentPane = pane,
+            ),
+        )
+    }
+
     companion object {
         internal const val PARAMS_FULLSCREEN = "fullscreen"
         internal const val PARAMS_HIDE_CLOSE_BUTTON = "hide_close_button"
@@ -601,5 +649,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
 
         internal const val generateRepairUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/repair_sessions/generate_url"
+
+        private const val institutionSelectedUrl: String =
+            "${ApiRequest.API_HOST}/v1/link_account_sessions/institution_selected"
     }
 }

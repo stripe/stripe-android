@@ -13,7 +13,7 @@ private val paneToDestination = mapOf(
     Pane.MANUAL_ENTRY to Destination.ManualEntry,
     Pane.ATTACH_LINKED_PAYMENT_ACCOUNT to Destination.AttachLinkedPaymentAccount,
     Pane.NETWORKING_LINK_SIGNUP_PANE to Destination.NetworkingLinkSignup,
-    Pane.LINK_LOGIN to Destination.NetworkingLinkSignup,
+    Pane.LINK_LOGIN to Destination.LinkLogin,
     Pane.NETWORKING_LINK_LOGIN_WARMUP to Destination.NetworkingLinkLoginWarmup,
     Pane.NETWORKING_LINK_VERIFICATION to Destination.NetworkingLinkVerification,
     Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION to Destination.NetworkingSaveToLinkVerification,
@@ -26,6 +26,7 @@ private val paneToDestination = mapOf(
     Pane.MANUAL_ENTRY_SUCCESS to Destination.ManualEntrySuccess,
     Pane.NOTICE to Destination.Notice,
     Pane.ACCOUNT_UPDATE_REQUIRED to Destination.AccountUpdateRequired,
+    Pane.ID_CONSENT_CONTENT to Destination.IDConsentContent,
 )
 
 internal val Pane.destination: Destination
