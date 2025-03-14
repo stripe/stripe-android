@@ -18,9 +18,9 @@ import androidx.core.content.ContextCompat.checkSelfPermission
 import androidx.fragment.app.FragmentActivity
 import com.stripe.android.connect.analytics.ComponentAnalyticsService
 import com.stripe.android.connect.analytics.ConnectAnalyticsService
-import com.stripe.android.connect.analytics.DefaultConnectAnalyticsService
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.fonts.CustomFontSource
+import com.stripe.android.connect.di.StripeConnectComponent
 import com.stripe.android.connect.util.findActivity
 import com.stripe.android.connect.webview.ChooseFileActivityResultContract
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.parcelize.Parcelize
+import javax.inject.Inject
 import kotlin.coroutines.resume
 
 @PrivateBetaConnectSDK
@@ -46,13 +47,19 @@ class EmbeddedComponentManager(
     appearance: Appearance = Appearance(),
     private val customFonts: List<CustomFontSource> = emptyList(),
 ) {
+
     private val _appearanceFlow = MutableStateFlow(appearance)
     internal val appearanceFlow: StateFlow<Appearance> get() = _appearanceFlow.asStateFlow()
 
-    private val logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
+    private val isDebugBuild = BuildConfig.DEBUG
     private val loggerTag = javaClass.simpleName
 
-    private val isDebugBuild = BuildConfig.DEBUG
+    @Inject
+    internal lateinit var logger: Logger
+
+    init {
+        StripeConnectComponent.instance.inject(this)
+    }
 
     // Public functions
 
@@ -316,9 +323,7 @@ class EmbeddedComponentManager(
             val application = activity.application
 
             if (connectAnalyticsService == null) {
-                connectAnalyticsService = DefaultConnectAnalyticsService(
-                    application = application,
-                )
+                connectAnalyticsService = StripeConnectComponent.instance.analyticsServiceFactory.create(application)
             }
 
             application.registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
