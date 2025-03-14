@@ -119,8 +119,9 @@ class CardDefinitionTest {
         }
     }
 
+    @Suppress("MaxLineLength")
     @Test
-    fun `setAsDefaultPM hidden when saveForFutureUse unchecked & setAsDefaultMatchesSaveForFutureUse false`() {
+    fun `setAsDefaultPaymentMethod hidden when saveForFutureUse unchecked & setAsDefaultMatchesSaveForFutureUse false`() {
         testSetAsDefaultElements(
             setAsDefaultMatchesSaveForFutureUse = false,
         ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
