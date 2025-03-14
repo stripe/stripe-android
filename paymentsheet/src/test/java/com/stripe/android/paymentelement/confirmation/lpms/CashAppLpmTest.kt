@@ -19,8 +19,6 @@ internal class CashAppLpmTest(
     companion object {
         @JvmStatic
         @ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
-        fun testTypes() = TestType.default().map {
-            arrayOf(it)
-        }
+        fun testTypes() = TestType.all()
     }
 }

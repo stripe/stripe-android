@@ -10,39 +10,44 @@ internal interface TestType {
     ): Result<CreateIntentFactory.CreateIntentData>
 
     companion object {
-        fun default(): List<TestType> {
+        fun all(
+            amount: Int = 5050,
+            currency: String = "USD"
+        ): List<Array<TestType>> {
             return listOf(
                 PaymentIntentTestType(
-                    amount = 5050,
-                    currency = "USD",
+                    amount = amount,
+                    currency = currency,
                     createWithSetupFutureUsage = false
                 ),
                 PaymentIntentTestType(
                     amount = 5050,
-                    currency = "USD",
+                    currency = currency,
                     createWithSetupFutureUsage = true
                 ),
                 SetupIntentTestType,
                 DeferredPaymentIntentTestType(
-                    amount = 5050,
-                    currency = "USD",
+                    amount = amount,
+                    currency = currency,
                     createWithSetupFutureUsage = false
                 ),
                 DeferredPaymentIntentTestType(
-                    amount = 5050,
-                    currency = "USD",
+                    amount = amount,
+                    currency = currency,
                     createWithSetupFutureUsage = true
                 ),
                 DeferredSetupIntentTestType,
-            )
+            ).map {
+                arrayOf(it)
+            }
         }
     }
 }
 
 internal data class PaymentIntentTestType(
-    val amount: Int,
-    val currency: String,
-    val createWithSetupFutureUsage: Boolean,
+    private val amount: Int,
+    private val currency: String,
+    private val createWithSetupFutureUsage: Boolean,
 ) : TestType {
     override suspend fun createIntent(
         country: MerchantCountry,
@@ -69,9 +74,9 @@ internal data object SetupIntentTestType : TestType {
 }
 
 internal data class DeferredPaymentIntentTestType(
-    val amount: Int,
-    val currency: String,
-    val createWithSetupFutureUsage: Boolean,
+    private val amount: Int,
+    private val currency: String,
+    private val createWithSetupFutureUsage: Boolean,
 ) : TestType {
     override suspend fun createIntent(
         country: MerchantCountry,
