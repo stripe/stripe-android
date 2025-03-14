@@ -98,6 +98,7 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
         if (interactor.shouldShowSetAsDefaultCheckbox) {
             SetAsDefaultPaymentMethodCheckbox(
                 isChecked = state.setAsDefaultCheckboxChecked,
+                isEnabled = interactor.setAsDefaultCheckboxEnabled,
                 onCheckChanged = { newCheckedValue ->
                     interactor.handleViewAction(
                         UpdatePaymentMethodInteractor.ViewAction.SetAsDefaultCheckboxChanged(newCheckedValue)
@@ -143,12 +144,13 @@ private fun DetailsCannotBeChangedText(
 @Composable
 private fun SetAsDefaultPaymentMethodCheckbox(
     isChecked: Boolean,
+    isEnabled: Boolean,
     onCheckChanged: (Boolean) -> Unit,
 ) {
     CheckboxElementUI(
         isChecked = isChecked,
         onValueChange = onCheckChanged,
-        isEnabled = true,
+        isEnabled = isEnabled,
         label = (com.stripe.android.ui.core.R.string.stripe_set_as_default_payment_method).resolvableString.resolve(),
         modifier = Modifier.padding(top = 12.dp).testTag(UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG)
     )
@@ -541,6 +543,7 @@ private fun PreviewUpdatePaymentMethodUI() {
             onBrandChoiceOptionsShown = {},
             onBrandChoiceOptionsDismissed = {},
             shouldShowSetAsDefaultCheckbox = true,
+            isDefaultPaymentMethod = false,
             onUpdateSuccess = {},
         ),
         modifier = Modifier

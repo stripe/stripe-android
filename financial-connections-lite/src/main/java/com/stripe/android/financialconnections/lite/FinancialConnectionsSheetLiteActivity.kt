@@ -32,7 +32,7 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity() {
     private lateinit var webView: WebView
 
     private val viewModel: FinancialConnectionsLiteViewModel by viewModels {
-        FinancialConnectionsLiteViewModelFactory()
+        FinancialConnectionsLiteViewModel.Factory()
     }
 
     @SuppressLint("SetJavaScriptEnabled")

@@ -38,12 +38,6 @@ internal object DeferredIntentValidator {
                         "setupFutureUsage (${paymentMode.setupFutureUsage})."
                 }
 
-                require(paymentMode.captureMethod == stripeIntent.captureMethod) {
-                    "Your PaymentIntent captureMethod (${stripeIntent.captureMethod}) does not " +
-                        "match the PaymentSheet.IntentConfiguration " +
-                        "captureMethod (${paymentMode.captureMethod})."
-                }
-
                 // Manual confirmation is only available using FlowController because merchants own
                 // the final step of confirmation. Showing a successful payment in the complete flow
                 // may be misleading when merchants still need to do a final confirmation which

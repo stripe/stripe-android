@@ -7,6 +7,13 @@ import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.Response
 import com.github.kittinunf.fuel.core.awaitResult
 import com.github.kittinunf.result.Result
+import com.stripe.android.connect.example.core.Async
+import com.stripe.android.connect.example.core.Fail
+import com.stripe.android.connect.example.core.Loading
+import com.stripe.android.connect.example.core.Success
+import com.stripe.android.connect.example.core.Uninitialized
+import com.stripe.android.connect.example.data.EmbeddedComponentService.Companion.DEFAULT_SERVER_BASE_URL
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,22 +21,49 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class EmbeddedComponentService @Inject constructor(
+interface EmbeddedComponentService {
+    val serverBaseUrl: String
+    val publishableKey: StateFlow<String?>
+    val accounts: StateFlow<Async<List<Merchant>>>
+    fun setBackendBaseUrl(url: String)
+
+    /**
+     * Returns the publishable key for use in the Stripe Connect SDK as well as a list
+     * of available merchants. Throws a [FuelError] exception on network issues and other errors.
+     */
+    suspend fun getAccounts(): GetAccountsResponse
+
+    /**
+     * Returns the publishable key for use in the Stripe Connect SDK.
+     * Throws a [FuelError] exception on network issues and other errors.
+     */
+    suspend fun loadPublishableKey(): String
+
+    /**
+     * Returns the client secret for the given merchant account to be used in the Stripe Connect SDK.
+     * Throws a [FuelError] exception on network issues and other errors.
+     */
+    suspend fun fetchClientSecret(account: String): String
+
+    companion object {
+        const val DEFAULT_SERVER_BASE_URL = "https://stripe-connect-mobile-example-v1.glitch.me/"
+    }
+}
+
+class EmbeddedComponentServiceImpl @Inject constructor(
     private val settingsService: SettingsService,
-) {
-    var serverBaseUrl: String = settingsService.getSelectedServerBaseURL() ?: DEFAULT_SERVER_BASE_URL
+) : EmbeddedComponentService {
+    override var serverBaseUrl: String = settingsService.getSelectedServerBaseURL() ?: DEFAULT_SERVER_BASE_URL
         private set
 
     private val _publishableKey: MutableStateFlow<String?> = MutableStateFlow(null)
-    val publishableKey: StateFlow<String?> = _publishableKey
+    override val publishableKey: StateFlow<String?> = _publishableKey
 
-    private val _accounts: MutableStateFlow<List<Merchant>?> = MutableStateFlow(null)
-    val accounts: StateFlow<List<Merchant>?> = _accounts
+    private val _accounts: MutableStateFlow<Async<List<Merchant>>> = MutableStateFlow(Uninitialized)
+    override val accounts: StateFlow<Async<List<Merchant>>> = _accounts
 
-    fun setBackendBaseUrl(url: String) {
+    override fun setBackendBaseUrl(url: String) {
         serverBaseUrl = if (!url.endsWith("/")) {
             "$url/"
         } else {
@@ -58,21 +92,30 @@ class EmbeddedComponentService @Inject constructor(
      * Returns the publishable key for use in the Stripe Connect SDK as well as a list
      * of available merchants. Throws a [FuelError] exception on network issues and other errors.
      */
-    suspend fun getAccounts(): GetAccountsResponse {
+    override suspend fun getAccounts(): GetAccountsResponse {
         return withContext(Dispatchers.IO) {
-            fuel.get(serverBaseUrl + "app_info")
-                .awaitModel(GetAccountsResponse.serializer())
-                .get()
-                .apply {
-                    _publishableKey.value = publishableKey
-                    _accounts.value = availableMerchants
+            _accounts.value = Loading()
+            try {
+                fuel.get(serverBaseUrl + "app_info")
+                    .awaitModel(GetAccountsResponse.serializer())
+                    .get()
+                    .apply {
+                        _publishableKey.value = publishableKey
+                        _accounts.value = Success(availableMerchants)
 
-                    // if we have no selected merchant, default to the first one
-                    val firstMerchant = availableMerchants.firstOrNull()?.merchantId
-                    if (settingsService.getSelectedMerchant() == null && firstMerchant != null) {
-                        settingsService.setSelectedMerchant(firstMerchant)
+                        // if we have no selected merchant, default to the first one
+                        val firstMerchant = availableMerchants.firstOrNull()?.merchantId
+                        if (settingsService.getSelectedMerchant() == null && firstMerchant != null) {
+                            settingsService.setSelectedMerchant(firstMerchant)
+                        }
                     }
-                }
+            } catch (e: CancellationException) {
+                @Suppress("RethrowCaughtException")
+                throw e
+            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                _accounts.value = Fail(e, _accounts.value())
+                throw e
+            }
         }
     }
 
@@ -80,13 +123,13 @@ class EmbeddedComponentService @Inject constructor(
      * Returns the publishable key for use in the Stripe Connect SDK.
      * Throws a [FuelError] exception on network issues and other errors.
      */
-    suspend fun loadPublishableKey(): String = getAccounts().publishableKey
+    override suspend fun loadPublishableKey(): String = getAccounts().publishableKey
 
     /**
      * Returns the client secret for the given merchant account to be used in the Stripe Connect SDK.
      * Throws a [FuelError] exception on network issues and other errors.
      */
-    suspend fun fetchClientSecret(account: String): String {
+    override suspend fun fetchClientSecret(account: String): String {
         return withContext(Dispatchers.IO) {
             fuel.post(serverBaseUrl + "account_session")
                 .header("account", account)
@@ -94,10 +137,6 @@ class EmbeddedComponentService @Inject constructor(
                 .get()
                 .clientSecret
         }
-    }
-
-    companion object {
-        const val DEFAULT_SERVER_BASE_URL = "https://stripe-connect-mobile-example-v1.glitch.me/"
     }
 }
 

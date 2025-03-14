@@ -23,56 +23,41 @@ internal class FinancialConnectionsLiteRequestExecutor @Inject constructor(
     private val json: Json,
     private val logger: Logger,
 ) {
-    @Throws(
-        InvalidRequestException::class,
-        AuthenticationException::class,
-        APIException::class
-    )
     suspend fun <Response> execute(
         request: StripeRequest,
         responseSerializer: KSerializer<Response>
-    ): Response {
+    ): Result<Response> {
         return executeInternal(request) { body ->
-            json.decodeFromString(responseSerializer, body)
+            runCatching {
+                json.decodeFromString(responseSerializer, body)
+            }
         }
     }
 
-    @Throws(
-        InvalidRequestException::class,
-        AuthenticationException::class,
-        APIException::class
-    )
     private suspend fun <Response> executeInternal(
         request: StripeRequest,
-        decodeResponse: (String) -> Response,
-    ): Response = runCatching {
+        decodeResponse: (String) -> Result<Response>,
+    ): Result<Response> {
         logger.debug("Executing ${request.method.code} request to ${request.url}")
-        stripeNetworkClient.executeRequest(request)
-    }.fold(
-        onSuccess = { response ->
-            when {
-                response.isError -> throw handleApiError(response)
-                else -> decodeResponse(requireNotNull(response.body))
+        return runCatching {
+            stripeNetworkClient.executeRequest(request)
+        }.mapCatching { response ->
+            if (response.isError) {
+                throw handleApiError(response)
+            } else {
+                decodeResponse(requireNotNull(response.body)).getOrThrow()
             }
-        },
-        onFailure = {
-            throw APIConnectionException(
-                "Failed to execute $request",
-                cause = it
-            )
+        }.recoverCatching {
+            throw APIConnectionException("Failed to execute $request", cause = it)
         }
-    )
+    }
 
-    @Throws(
-        InvalidRequestException::class,
-        AuthenticationException::class,
-        APIException::class
-    )
     private fun handleApiError(response: StripeResponse<String>): Exception {
         val requestId = response.requestId?.value
         val responseCode = response.code
         val stripeError = StripeErrorJsonParser().parse(response.responseJson())
-        throw when (responseCode) {
+
+        return when (responseCode) {
             HttpURLConnection.HTTP_ACCEPTED,
             HttpURLConnection.HTTP_BAD_REQUEST,
             HttpURLConnection.HTTP_NOT_FOUND -> InvalidRequestException(

@@ -384,11 +384,13 @@ internal class SavedPaymentMethodMutator(
                             shouldShowSetAsDefaultCheckbox = (
                                 viewModel
                                     .paymentMethodMetadata
-                                    .value?.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true &&
-                                    !displayableSavedPaymentMethod.isDefaultPaymentMethod(
-                                        defaultPaymentMethodId =
-                                        viewModel.customerStateHolder.customer.value?.defaultPaymentMethodId
-                                    )
+                                    .value?.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true
+                                ),
+                            isDefaultPaymentMethod = (
+                                displayableSavedPaymentMethod.isDefaultPaymentMethod(
+                                    defaultPaymentMethodId =
+                                    viewModel.customerStateHolder.customer.value?.defaultPaymentMethodId
+                                )
                                 ),
                             onUpdateSuccess = viewModel.navigationHandler::pop,
                         )

@@ -2,6 +2,7 @@ package com.stripe.android.screenshottesting
 
 import app.cash.paparazzi.DeviceConfig
 import com.android.resources.NightMode
+import com.android.resources.ScreenOrientation
 import com.android.resources.LayoutDirection as AndroidLayoutDirection
 
 interface PaparazziConfigOption {
@@ -56,6 +57,17 @@ enum class LayoutDirection(private val layoutDirection: AndroidLayoutDirection) 
     override fun apply(deviceConfig: DeviceConfig): DeviceConfig {
         return deviceConfig.copy(
             layoutDirection = layoutDirection,
+        )
+    }
+}
+
+enum class Orientation(private val orientation: ScreenOrientation) : PaparazziConfigOption {
+    Portrait(ScreenOrientation.PORTRAIT),
+    Landscape(ScreenOrientation.LANDSCAPE);
+
+    override fun apply(deviceConfig: DeviceConfig): DeviceConfig {
+        return deviceConfig.copy(
+            orientation = orientation,
         )
     }
 }
