@@ -1324,37 +1324,34 @@ class USBankAccountFormViewModelTest {
     @Test
     fun `'setAsDefaultPaymentMethod' shown correctly when saveForFutureUse checked`() = runTest {
         testSetAsDefaultPaymentMethod { saveForFutureUseElement, setAsDefaultPaymentMethodElement, testContext ->
-            saveForFutureUseElement.controller.onValueChange(true)
-
-            assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isTrue()
-
             var nextItem = testContext.awaitItem()
             assertThat(nextItem?.input?.saveForFutureUse).isFalse()
 
+            saveForFutureUseElement.controller.onValueChange(true)
+
             nextItem = testContext.awaitItem()
             assertThat(nextItem?.input?.saveForFutureUse).isTrue()
+            assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isTrue()
         }
     }
 
     @Test
     fun `'setAsDefaultPaymentMethod' hidden correctly when saveForFutureUse unchecked`() = runTest {
         testSetAsDefaultPaymentMethod { saveForFutureUseElement, setAsDefaultPaymentMethodElement, testContext ->
+            var nextItem = testContext.awaitItem()
+            assertThat(nextItem?.input?.saveForFutureUse).isFalse()
+
             saveForFutureUseElement.controller.onValueChange(true)
 
+            nextItem = testContext.awaitItem()
+            assertThat(nextItem?.input?.saveForFutureUse).isTrue()
             assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isTrue()
 
             saveForFutureUseElement.controller.onValueChange(false)
 
+            nextItem = testContext.awaitItem()
+            assertThat(nextItem?.input?.saveForFutureUse).isFalse()
             assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isFalse()
-
-            var nextItem = testContext.awaitItem()
-            assertThat(nextItem?.input?.saveForFutureUse).isFalse()
-
-            nextItem = testContext.awaitItem()
-            assertThat(nextItem?.input?.saveForFutureUse).isTrue()
-
-            nextItem = testContext.awaitItem()
-            assertThat(nextItem?.input?.saveForFutureUse).isFalse()
         }
     }
 
@@ -1363,15 +1360,14 @@ class USBankAccountFormViewModelTest {
         testSetAsDefaultPaymentMethod(
             setAsDefaultMatchesSaveForFutureUse = true,
         ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement, testContext ->
-            saveForFutureUseElement.controller.onValueChange(true)
-
-            assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isFalse()
-
             var nextItem = testContext.awaitItem()
             assertThat(nextItem?.input?.saveForFutureUse).isFalse()
 
+            saveForFutureUseElement.controller.onValueChange(true)
+
             nextItem = testContext.awaitItem()
             assertThat(nextItem?.input?.saveForFutureUse).isTrue()
+            assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isFalse()
         }
     }
 
@@ -1380,14 +1376,14 @@ class USBankAccountFormViewModelTest {
         testSetAsDefaultPaymentMethod(
             setAsDefaultMatchesSaveForFutureUse = true,
         ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement, testContext ->
-            saveForFutureUseElement.controller.onValueChange(true)
-            assertThat(setAsDefaultPaymentMethodElement.controller.fieldValue.value.toBoolean()).isTrue()
-
             var nextItem = testContext.awaitItem()
             assertThat(nextItem?.input?.saveForFutureUse).isFalse()
 
+            saveForFutureUseElement.controller.onValueChange(true)
+
             nextItem = testContext.awaitItem()
             assertThat(nextItem?.input?.saveForFutureUse).isTrue()
+            assertThat(setAsDefaultPaymentMethodElement.controller.fieldValue.value.toBoolean()).isTrue()
         }
     }
 
@@ -1396,12 +1392,12 @@ class USBankAccountFormViewModelTest {
         testSetAsDefaultPaymentMethod(
             setAsDefaultMatchesSaveForFutureUse = true,
         ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement, testContext ->
+            val nextItem = testContext.awaitItem()
+            assertThat(nextItem?.input?.saveForFutureUse).isFalse()
+
             saveForFutureUseElement.controller.onValueChange(false)
 
             assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isFalse()
-
-            val nextItem = testContext.awaitItem()
-            assertThat(nextItem?.input?.saveForFutureUse).isFalse()
         }
     }
 
@@ -1410,12 +1406,13 @@ class USBankAccountFormViewModelTest {
         testSetAsDefaultPaymentMethod(
             setAsDefaultMatchesSaveForFutureUse = true,
         ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement, testContext ->
+            val nextItem = testContext.awaitItem()
+            assertThat(nextItem?.input?.saveForFutureUse).isFalse()
+
             saveForFutureUseElement.controller.onValueChange(false)
 
             assertThat(setAsDefaultPaymentMethodElement.controller.fieldValue.value.toBoolean()).isFalse()
 
-            val nextItem = testContext.awaitItem()
-            assertThat(nextItem?.input?.saveForFutureUse).isFalse()
         }
     }
 
