@@ -33,6 +33,7 @@
     <!-- Ocean Breeze Theme Colors -->
     <color name="ocean_breeze_background">#EAF6FB</color>
     <color name="ocean_breeze_primary">#15609E</color>
+    <color name="ocean_breeze_text">#30313d</color>
     <color name="ocean_breeze_badge_success_text">#2A6093</color>
     <color name="ocean_breeze_badge_neutral_text">#5A621D</color>
     <color name="ocean_breeze_button_secondary_text">#2C93E8</color>
@@ -40,6 +41,7 @@
 
     <!-- Link Theme Colors -->
     <color name="link_primary">#1C3944</color>
+    <color name="link_background">#FFFFFF</color>
     <color name="link_button_primary_background">#33DCB3</color>
     <color name="link_button_primary_border">#33DCB3</color>
     <color name="link_button_primary_text">#1C3944</color>
