@@ -4,6 +4,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.lite.network.FinancialConnectionsLiteRequestExecutor
 import com.stripe.android.financialconnections.lite.repository.model.SynchronizeSessionResponse
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import java.util.Locale
 
 internal class FinancialConnectionsLiteRepository(
@@ -36,6 +37,22 @@ internal class FinancialConnectionsLiteRepository(
         SynchronizeSessionResponse.serializer()
     )
 
+    suspend fun getFinancialConnectionsSession(
+        configuration: FinancialConnectionsSheetConfiguration,
+    ): FinancialConnectionsSession {
+        val financialConnectionsRequest = apiRequestFactory.createGet(
+            url = sessionReceiptUrl,
+            options = configuration.apiRequestOptions(),
+            params = mapOf(
+                PARAMS_CLIENT_SECRET to configuration.financialConnectionsSessionClientSecret
+            )
+        )
+        return requestExecutor.execute(
+            financialConnectionsRequest,
+            FinancialConnectionsSession.serializer()
+        )
+    }
+
     companion object {
         internal const val PARAMS_FULLSCREEN = "fullscreen"
         internal const val PARAMS_HIDE_CLOSE_BUTTON = "hide_close_button"
@@ -44,5 +61,8 @@ internal class FinancialConnectionsLiteRepository(
 
         internal const val synchronizeSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/financial_connections/sessions/synchronize"
+
+        private const val sessionReceiptUrl: String =
+            "${ApiRequest.API_HOST}/v1/link_account_sessions/session_receipt"
     }
 }
