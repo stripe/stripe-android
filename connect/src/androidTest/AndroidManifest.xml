@@ -3,7 +3,7 @@
 
     <application>
         <activity
-            android:name=".EmptyActivity"
+            android:name="com.stripe.android.connect.EmptyActivity"
             android:exported="false" />
     </application>
 </manifest>
