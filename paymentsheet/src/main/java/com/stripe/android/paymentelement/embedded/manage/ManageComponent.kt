@@ -4,11 +4,13 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.injection.PaymentSheetLauncherComponent.Builder
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
@@ -41,6 +43,11 @@ internal interface ManageComponent {
 
         @BindsInstance
         fun context(context: Context): Builder
+
+        @BindsInstance
+        fun paymentElementCallbackIdentifier(
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String
+        ): Builder
 
         fun build(): ManageComponent
     }

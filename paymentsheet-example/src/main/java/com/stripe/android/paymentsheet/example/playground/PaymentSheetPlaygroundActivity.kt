@@ -29,6 +29,7 @@ import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -77,7 +78,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         viewModel.onEmbeddedResult(success)
     }
 
-    @OptIn(ExperimentalCustomerSessionApi::class)
+    @OptIn(ExperimentalCustomerSessionApi::class, ExperimentalAnalyticEventCallbackApi::class)
     @Suppress("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -90,6 +91,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
             val paymentSheet = PaymentSheet.Builder(viewModel::onPaymentSheetResult)
                 .externalPaymentMethodConfirmHandler(this)
                 .createIntentCallback(viewModel::createIntentCallback)
+                .analyticEventCallback(viewModel::analyticCallback)
                 .build()
             val flowController = PaymentSheet.FlowController.Builder(
                 viewModel::onPaymentSheetResult,
@@ -97,6 +99,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
             )
                 .externalPaymentMethodConfirmHandler(this)
                 .createIntentCallback(viewModel::createIntentCallback)
+                .analyticEventCallback(viewModel::analyticCallback)
                 .build()
 
             val addressLauncher = rememberAddressLauncher(

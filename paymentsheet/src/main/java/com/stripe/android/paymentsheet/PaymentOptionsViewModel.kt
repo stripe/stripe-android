@@ -291,6 +291,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 .context(application)
                 .productUsage(starterArgs.productUsage)
                 .savedStateHandle(savedStateHandle)
+                .paymentElementCallbackIdentifier(starterArgs.paymentElementCallbackIdentifier)
                 .build()
                 .paymentOptionsViewModelSubcomponentBuilder
                 .application(application)
