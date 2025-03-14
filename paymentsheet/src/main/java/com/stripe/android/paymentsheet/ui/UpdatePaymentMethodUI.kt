@@ -260,13 +260,14 @@ private fun CardDetailsUI(
             SectionError(errorMessage.orEmpty())
         }
 
-        if (state.collectAddress) {
+        val address = state.address
+        if (address != null) {
             Spacer(Modifier.height(32.dp))
 
             SectionElementUI(
                 enabled = true,
-                element = state.addressElement,
-                hiddenIdentifiers = state.hiddenAddressFields,
+                element = address.addressElement,
+                hiddenIdentifiers = address.hiddenAddressFields,
                 lastTextFieldIdentifier = null
             )
         }

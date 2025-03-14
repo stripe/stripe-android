@@ -33,11 +33,14 @@ internal interface CardEditUIHandler {
     data class State(
         val card: PaymentMethod.Card,
         val expDate: String,
-        val addressElement: SectionElement,
-        val hiddenAddressFields: Set<IdentifierSpec>,
-        val collectAddress: Boolean,
+        val address: Address?,
         val selectedCardBrand: CardBrandChoice
-    )
+    ) {
+        data class Address(
+            val addressElement: SectionElement,
+            val hiddenAddressFields: Set<IdentifierSpec>,
+        )
+    }
 
     fun interface Factory {
         fun create(

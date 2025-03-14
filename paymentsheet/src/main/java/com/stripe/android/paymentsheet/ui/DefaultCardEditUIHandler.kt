@@ -12,7 +12,6 @@ import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.TextFieldState
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -33,14 +32,8 @@ internal class DefaultCardEditUIHandler(
     override val onBrandChoiceOptionsDismissed: (CardBrand) -> Unit,
     override val onCardValuesChanged: (CardUpdateParams?) -> Unit,
 ) : CardEditUIHandler {
-    private val _cardInputState = MutableStateFlow(
-        value = CardInputState(
-            card = card,
-            cardBrandChoice = defaultCardBrandChoice(),
-            billingDetails = billingDetails,
-            addressCollectionMode = addressCollectionMode,
-            entry = buildDefaultCardEntry()
-        )
+    private val cardDetailsEntry = MutableStateFlow(
+        value = buildDefaultCardEntry()
     )
 
     private val dateConfig = DateConfig()
@@ -59,19 +52,12 @@ internal class DefaultCardEditUIHandler(
 
     override val hiddenAddressElements = buildHiddenAddressElements()
 
-    override val state: StateFlow<CardEditUIHandler.State> = _cardInputState.mapLatest { inputState ->
-        CardEditUIHandler.State(
-            card = inputState.card,
-            expDate = formattedExpiryDate(),
-            addressElement = addressSectionElement,
-            hiddenAddressFields = hiddenAddressElements,
-            collectAddress = collectAddress,
-            selectedCardBrand = inputState.entry.cardBrandChoice
-        )
+    override val state: StateFlow<CardEditUIHandler.State> = cardDetailsEntry.mapLatest { inputState ->
+        uiState(inputState.cardBrandChoice)
     }.stateIn(
         scope = scope,
         started = SharingStarted.Eagerly,
-        initialValue = defaultState()
+        initialValue = uiState()
     )
 
 
@@ -81,24 +67,36 @@ internal class DefaultCardEditUIHandler(
         }
 
         scope.launch {
-            _cardInputState.collectLatest { state ->
-                println("TOLUWANI => entry.isValid: ${state.valid}, entry.addressValid: ${state.addressValid()}, entry.expDateValid: ${state.expDateValid()}")
+            cardDetailsEntry.collectLatest { state ->
                 val newParams = state.takeIf {
-                    it.hasChanged && it.valid
-                }?.entry?.toUpdateParams(collectAddress)
+                    val hasChanged = it.hasChanged(
+                        card = card,
+                        cardBrandChoice = defaultCardBrandChoice(),
+                        billingDetails = billingDetails,
+                        addressCollectionMode = addressCollectionMode
+                    )
+                    val isValid = it.valid(
+                        addressCollectionMode = addressCollectionMode
+                    )
+                    hasChanged && isValid
+                }?.toUpdateParams(collectAddress)
                 onCardValuesChanged(newParams)
             }
         }
     }
 
-    private fun defaultState(): CardEditUIHandler.State {
+    private fun uiState(cardBrandChoice: CardBrandChoice = defaultCardBrandChoice()): CardEditUIHandler.State {
         return CardEditUIHandler.State(
             card = card,
-            expDate = expDate,
-            addressElement = addressSectionElement,
-            hiddenAddressFields = hiddenAddressElements,
-            collectAddress = collectAddress,
-            selectedCardBrand = defaultCardBrandChoice()
+            expDate = formattedExpiryDate(),
+            address = addressSectionElement.takeIf { collectAddress }
+                ?.let {
+                    CardEditUIHandler.State.Address(
+                        addressElement = addressSectionElement,
+                        hiddenAddressFields = hiddenAddressElements
+                    )
+                },
+            selectedCardBrand = cardBrandChoice
         )
     }
 
@@ -106,7 +104,7 @@ internal class DefaultCardEditUIHandler(
 
     private fun buildDefaultCardEntry(): CardDetailsEntry {
         val entry = CardDetailsEntry(
-            cardBrandChoice = card.getPreferredChoice(cardBrandFilter),
+            cardBrandChoice = defaultCardBrandChoice(),
             expMonth = card.expiryMonth,
             expYear = card.expiryYear
         )
@@ -135,13 +133,10 @@ internal class DefaultCardEditUIHandler(
 
     override fun dateChanged(text: String) {
         val map = CardDetailsUtil.createExpiryDateFormFieldValues(FormFieldEntry(text))
-        _cardInputState.update {
-            val entry = it.entry
+        cardDetailsEntry.update {
             it.copy(
-                entry = entry.copy(
-                    expYear = map[IdentifierSpec.CardExpYear]?.value?.toIntOrNull()?.takeIf { it > 0 },
-                    expMonth = map[IdentifierSpec.CardExpMonth]?.value?.toIntOrNull()?.takeIf { it > 0 },
-                )
+                expYear = map[IdentifierSpec.CardExpYear]?.value?.toIntOrNull()?.takeIf { it > 0 },
+                expMonth = map[IdentifierSpec.CardExpMonth]?.value?.toIntOrNull()?.takeIf { it > 0 },
             )
         }
     }
@@ -156,17 +151,14 @@ internal class DefaultCardEditUIHandler(
                 val postalCode = field.valueOrNull(IdentifierSpec.PostalCode)
                 val country = field.valueOrNull(IdentifierSpec.Country)
                 val state = field.valueOrNull(IdentifierSpec.State)
-                _cardInputState.update {
-                    val entry = it.entry
+                cardDetailsEntry.update {
                     it.copy(
-                        entry = entry.copy(
-                            line1 = line1,
-                            line2 = line2,
-                            city = city,
-                            postalCode = postalCode,
-                            country = country,
-                            state = state
-                        )
+                        line1 = line1,
+                        line2 = line2,
+                        city = city,
+                        postalCode = postalCode,
+                        country = country,
+                        state = state
                     )
                 }
             }
@@ -217,22 +209,19 @@ internal class DefaultCardEditUIHandler(
     }
 
     override fun onBrandChoiceChanged(cardBrandChoice: CardBrandChoice) {
-        _cardInputState.update {
-            val entry = it.entry
+        cardDetailsEntry.update {
             it.copy(
-                entry = entry.copy(
-                    cardBrandChoice = cardBrandChoice
-                )
+                cardBrandChoice = cardBrandChoice
             )
         }
     }
 
     override fun onBrandChoiceOptionsDismissed() {
-        onBrandChoiceOptionsDismissed(_cardInputState.value.entry.cardBrandChoice.brand)
+        onBrandChoiceOptionsDismissed(cardDetailsEntry.value.cardBrandChoice.brand)
     }
 
     override fun onBrandChoiceOptionsShown() {
-        onBrandChoiceOptionsShown(_cardInputState.value.entry.cardBrandChoice.brand)
+        onBrandChoiceOptionsShown(cardDetailsEntry.value.cardBrandChoice.brand)
     }
 
     private fun rawAddressValues(): Map<IdentifierSpec, String?> {
