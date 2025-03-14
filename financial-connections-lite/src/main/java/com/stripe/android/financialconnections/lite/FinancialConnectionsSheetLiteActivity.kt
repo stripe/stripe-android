@@ -8,6 +8,8 @@ import android.webkit.WebView
 import android.widget.FrameLayout
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
+import androidx.annotation.RestrictTo
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
@@ -92,3 +94,17 @@ internal class FinancialConnectionsLiteViewModelFactory : ViewModelProvider.Fact
         throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
+
+/**
+ * Creates an [Intent] to launch the [FinancialConnectionsSheetLiteActivity].
+ *
+ * @param context the context to use for creating the intent
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun intentBuilder(context: Context): (FinancialConnectionsSheetActivityArgs) -> Intent =
+    { args: FinancialConnectionsSheetActivityArgs ->
+        FinancialConnectionsSheetLiteActivity.intent(
+            context = context,
+            args = args
+        )
+    }
