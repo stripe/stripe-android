@@ -8,6 +8,7 @@ import android.webkit.WebView
 import android.widget.FrameLayout
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
+import androidx.annotation.RestrictTo
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.Companion.EXTRA_ARGS
@@ -69,3 +70,17 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity() {
         }
     }
 }
+
+/**
+ * Creates an [Intent] to launch the [FinancialConnectionsSheetLiteActivity].
+ *
+ * @param context the context to use for creating the intent
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun intentBuilder(context: Context): (FinancialConnectionsSheetActivityArgs) -> Intent =
+    { args: FinancialConnectionsSheetActivityArgs ->
+        FinancialConnectionsSheetLiteActivity.intent(
+            context = context,
+            args = args
+        )
+    }

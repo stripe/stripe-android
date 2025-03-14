@@ -17,6 +17,7 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,7 +45,6 @@ import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundCon
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
-import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)

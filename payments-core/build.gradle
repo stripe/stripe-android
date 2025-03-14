@@ -10,7 +10,7 @@ dependencies {
     api project(":payments-model")
     implementation project(":hcaptcha")
     implementation project(":stripe-ui-core")
-    compileOnly project(':financial-connections')
+    implementation project(':financial-connections-lite')
     implementation project(':3ds2sdk')
 
     implementation libs.accompanist.appCompatThemeAdapter
