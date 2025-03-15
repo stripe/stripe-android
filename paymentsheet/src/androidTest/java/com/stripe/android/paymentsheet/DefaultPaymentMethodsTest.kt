@@ -202,9 +202,9 @@ internal class DefaultPaymentMethodsTest {
         testContext.markTestSucceeded()
     }
 
+    @Suppress("MaxLineLength")
     @Test
-    fun setNewCardAsDefault_withSavedPaymentMethods_uncheckSetAsDefault_doesNotSendSetAsDefaultParamInConfirmCall()
-    = runProductIntegrationTest(
+    fun setNewCardAsDefault_withSavedPaymentMethods_uncheckSetAsDefault_doesNotSendSetAsDefaultParamInConfirmCall() = runProductIntegrationTest(
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -224,6 +224,10 @@ internal class DefaultPaymentMethodsTest {
             testContext = testContext,
             paymentMethodLayout = layoutType.paymentMethodLayout,
             hasSavedPaymentMethods = true,
+        )
+
+        layoutType.payWithNewCardWithSavedPaymentMethods(
+            composeTestRule = composeTestRule,
         )
 
         paymentSheetPage.fillOutCardDetails()
@@ -234,9 +238,9 @@ internal class DefaultPaymentMethodsTest {
         paymentSheetPage.clickPrimaryButton()
     }
 
+    @Suppress("MaxLineLength")
     @Test
-    fun setNewCardAsDefault_withSavedPaymentMethods_checkSetAsDefault_sendsSetAsDefaultParamInConfirmCall()
-    = runProductIntegrationTest(
+    fun setNewCardAsDefault_withSavedPaymentMethods_checkSetAsDefault_sendsSetAsDefaultParamInConfirmCall() = runProductIntegrationTest(
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -256,6 +260,10 @@ internal class DefaultPaymentMethodsTest {
             testContext = testContext,
             paymentMethodLayout = layoutType.paymentMethodLayout,
             hasSavedPaymentMethods = true,
+        )
+
+        layoutType.payWithNewCardWithSavedPaymentMethods(
+            composeTestRule = composeTestRule,
         )
 
         paymentSheetPage.fillOutCardDetails()
@@ -267,9 +275,9 @@ internal class DefaultPaymentMethodsTest {
         paymentSheetPage.clickPrimaryButton()
     }
 
+    @Suppress("MaxLineLength")
     @Test
-    fun setNewCardAsDefault_withSavedPaymentMethods_uncheckSaveForFuture_doesNotSendSetAsDefaultParamInConfirmCall()
-    = runProductIntegrationTest(
+    fun setNewCardAsDefault_withSavedPaymentMethods_uncheckSaveForFuture_doesNotSendSetAsDefaultParamInConfirmCall() = runProductIntegrationTest(
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -291,18 +299,22 @@ internal class DefaultPaymentMethodsTest {
             hasSavedPaymentMethods = true,
         )
 
+        layoutType.payWithNewCardWithSavedPaymentMethods(
+            composeTestRule = composeTestRule,
+        )
+
         paymentSheetPage.fillOutCardDetails()
         paymentSheetPage.checkSaveForFuture()
         paymentSheetPage.checkSetAsDefaultCheckbox()
         paymentSheetPage.checkSaveForFuture()
 
-        enqueuePaymentIntentConfirmWithExpectedSetAsDefault(setAsDefaultValue = false)
+        enqueuePaymentIntentConfirmWithoutSetAsDefault()
 
         paymentSheetPage.clickPrimaryButton()
     }
 
     @Test
-    fun setNewCardAsDefault_sendsSetAsDefaultParamInConfirmCall() = runProductIntegrationTest(
+    fun payWithNewCard_checkSaveForFuture_sendsSetAsDefaultInConfirmCall() = runProductIntegrationTest(
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -321,7 +333,7 @@ internal class DefaultPaymentMethodsTest {
         paymentSheetPage.checkSaveForFuture()
         paymentSheetPage.assertNoSetAsDefaultCheckbox()
 
-        enqueuePaymentIntentConfirmWithExpectedSetAsDefault(setAsDefaultValue = true)
+        enqueuePaymentIntentConfirmWithExpectedSetAsDefault(true)
 
         paymentSheetPage.clickPrimaryButton()
     }
