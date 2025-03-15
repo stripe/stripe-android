@@ -11,6 +11,9 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.Companion.EXTRA_ARGS
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForData
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForInstantDebits
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForToken
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
@@ -20,6 +23,7 @@ import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteView
 import com.stripe.android.financialconnections.lite.di.Di
 import com.stripe.android.financialconnections.lite.repository.FinancialConnectionsLiteRepository
 import com.stripe.android.financialconnections.utils.HostedAuthUrlBuilder
+import com.stripe.android.financialconnections.utils.InstantDebitsResultBuilder
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -67,7 +71,11 @@ internal class FinancialConnectionsLiteViewModel(
     fun handleUrl(uri: Uri) = withState { state ->
         when {
             uri.toString().contains(state.successUrl) -> {
-                onAuthFlowCompleted()
+                when (args) {
+                    is ForData -> onSuccessFromDataFlow()
+                    is ForInstantDebits -> onSuccessFromInstantDebits(uri)
+                    is ForToken -> TODO()
+                }
             }
             uri.toString().contains(state.cancelUrl) -> {
                 onAuthFlowCanceled()
@@ -76,6 +84,23 @@ internal class FinancialConnectionsLiteViewModel(
                 logger.debug("Unknown url: $uri")
             }
         }
+    }
+
+    private fun onSuccessFromInstantDebits(url: Uri) = viewModelScope.launch {
+        InstantDebitsResultBuilder.fromUri(url)
+            .onSuccess {
+                _viewEffects.emit(
+                    FinishWithResult(
+                        Completed(
+                            instantDebits = it,
+                            financialConnectionsSession = null,
+                            token = null
+                        )
+                    )
+                )
+            }.onFailure { error ->
+                handleError(error, "Failed to parse instant debits result from url: $url")
+            }
     }
 
     fun withState(block: (State) -> Unit) = runCatching {
@@ -90,7 +115,7 @@ internal class FinancialConnectionsLiteViewModel(
         }
     }
 
-    private fun onAuthFlowCompleted() {
+    private fun onSuccessFromDataFlow() {
         viewModelScope.launch(workContext) {
             runCatching {
                 val session = repository.getFinancialConnectionsSession(args.configuration).getOrThrow()
