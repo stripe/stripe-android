@@ -101,16 +101,16 @@ class GooglePayPaymentMethodLauncherViewModelTest {
     }
 
     @Test
-    fun `createTransactionInfo() with 0 amount should create expected TransactionInfo`() {
+    fun `createTransactionInfo() with 0 amount should expect TotalPriceStatus NOT_CURRENTLY_KNOWN`() {
         val transactionInfo = viewModel.createTransactionInfo(ARGS.copy(amount = 0))
         assertThat(transactionInfo)
             .isEqualTo(
                 GooglePayJsonFactory.TransactionInfo(
                     currencyCode = "usd",
-                    totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
+                    totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.NotCurrentlyKnown,
                     countryCode = "us",
                     transactionId = null,
-                    totalPrice = 0,
+                    totalPrice = null,
                     checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
                 )
             )
