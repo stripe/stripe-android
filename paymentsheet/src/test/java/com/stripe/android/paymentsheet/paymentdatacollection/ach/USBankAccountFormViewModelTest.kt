@@ -1412,7 +1412,6 @@ class USBankAccountFormViewModelTest {
             saveForFutureUseElement.controller.onValueChange(false)
 
             assertThat(setAsDefaultPaymentMethodElement.controller.fieldValue.value.toBoolean()).isFalse()
-
         }
     }
 
