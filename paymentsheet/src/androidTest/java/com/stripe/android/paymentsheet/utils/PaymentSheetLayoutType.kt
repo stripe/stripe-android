@@ -119,7 +119,7 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
 
             editPage.waitUntilVisible()
         }
-        
+
         override fun payWithNewCardWithSavedPaymentMethods(
             composeTestRule: ComposeTestRule,
         ) {
@@ -214,7 +214,7 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
 
             editPage.waitUntilVisible()
         }
-        
+
         override fun payWithNewCardWithSavedPaymentMethods(
             composeTestRule: ComposeTestRule,
         ) {
