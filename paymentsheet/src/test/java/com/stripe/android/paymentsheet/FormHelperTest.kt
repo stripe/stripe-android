@@ -22,7 +22,6 @@ import com.stripe.android.model.PaymentMethodCreateParams.Companion.getNameFromP
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
-import com.stripe.android.model.setupFutureUsage
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
@@ -520,6 +519,7 @@ internal class FormHelperTest {
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             linkInlineHandler = linkInlineHandler,
             selectionUpdater = selectionUpdater,
+            setAsDefaultMatchesSaveForFutureUse = false,
         )
     }
 }

@@ -210,7 +210,8 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
             add(
                 SetAsDefaultPaymentMethodElement(
                     initialValue = false,
-                    saveForFutureUseCheckedFlow = isSaveForFutureUseCheckedFlow
+                    saveForFutureUseCheckedFlow = isSaveForFutureUseCheckedFlow,
+                    setAsDefaultMatchesSaveForFutureUse = arguments.setAsDefaultMatchesSaveForFutureUse,
                 )
             )
         }

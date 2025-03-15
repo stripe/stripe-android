@@ -96,7 +96,7 @@ class CardDefinitionTest {
     }
 
     @Test
-    fun `createFormElements returns set_as_default_payment_method when isPaymentMethodSetAsDefaultEnabled`() {
+    fun `createFormElements returns setAsDefaultPaymentMethod when isPaymentMethodSetAsDefaultEnabled`() {
         val formElements = getFormElementsWithSaveForFutureUseAndSetAsDefaultPaymentMethod(
             isPaymentMethodSetAsDefaultEnabled = true,
         )
@@ -107,37 +107,82 @@ class CardDefinitionTest {
     }
 
     @Test
-    fun `set_as_default_payment_method shown correctly when save_for_future_use checked`() {
-        val formElements = getFormElementsWithSaveForFutureUseAndSetAsDefaultPaymentMethod(
-            isPaymentMethodSetAsDefaultEnabled = true,
-        )
+    fun `setAsDefaultPaymentMethod shown when saveForFutureUse checked & setAsDefaultMatchesSaveForFutureUse false`() {
+        testSetAsDefaultElements(
+            setAsDefaultMatchesSaveForFutureUse = false,
+        ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
+            val saveForFutureUseController = saveForFutureUseElement.controller
 
-        val saveForFutureUseElement = formElements[1] as SaveForFutureUseElement
-        val saveForFutureUseController = saveForFutureUseElement.controller
-        val setAsDefaultPaymentMethodElement = formElements[2] as SetAsDefaultPaymentMethodElement
+            saveForFutureUseController.onValueChange(true)
 
-        saveForFutureUseController.onValueChange(true)
+            assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isTrue()
+        }
+    }
 
-        assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isTrue()
+    @Suppress("MaxLineLength")
+    @Test
+    fun `setAsDefaultPaymentMethod hidden when saveForFutureUse unchecked & setAsDefaultMatchesSaveForFutureUse false`() {
+        testSetAsDefaultElements(
+            setAsDefaultMatchesSaveForFutureUse = false,
+        ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
+            val saveForFutureUseController = saveForFutureUseElement.controller
+
+            saveForFutureUseController.onValueChange(true)
+
+            assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isTrue()
+
+            saveForFutureUseController.onValueChange(false)
+
+            assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isFalse()
+        }
     }
 
     @Test
-    fun `set_as_default_payment_method hidden correctly when save_for_future_use unchecked`() {
-        val formElements = getFormElementsWithSaveForFutureUseAndSetAsDefaultPaymentMethod(
-            isPaymentMethodSetAsDefaultEnabled = true,
-        )
+    fun `setAsDefaultPaymentMethod hidden when saveForFutureUse unchecked & setAsDefaultMatchesSaveForFutureUse`() {
+        testSetAsDefaultElements(
+            setAsDefaultMatchesSaveForFutureUse = true,
+        ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
+            val saveForFutureUseController = saveForFutureUseElement.controller
 
-        val saveForFutureUseElement = formElements[1] as SaveForFutureUseElement
-        val saveForFutureUseController = saveForFutureUseElement.controller
-        val setAsDefaultPaymentMethodElement = formElements[2] as SetAsDefaultPaymentMethodElement
+            saveForFutureUseController.onValueChange(false)
+            assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isFalse()
+        }
+    }
 
-        saveForFutureUseController.onValueChange(true)
+    @Test
+    fun `setAsDefaultPM field false when saveForFutureUse unchecked & setAsDefaultMatchesSaveForFutureUse`() {
+        testSetAsDefaultElements(
+            setAsDefaultMatchesSaveForFutureUse = true,
+        ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
+            val saveForFutureUseController = saveForFutureUseElement.controller
 
-        assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isTrue()
+            saveForFutureUseController.onValueChange(false)
+            assertThat(setAsDefaultPaymentMethodElement.controller.fieldValue.value.toBoolean()).isFalse()
+        }
+    }
 
-        saveForFutureUseController.onValueChange(false)
+    @Test
+    fun `setAsDefaultPaymentMethod hidden when saveForFutureUse checked & setAsDefaultMatchesSaveForFutureUse`() {
+        testSetAsDefaultElements(
+            setAsDefaultMatchesSaveForFutureUse = true,
+        ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
+            val saveForFutureUseController = saveForFutureUseElement.controller
 
-        assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isFalse()
+            saveForFutureUseController.onValueChange(true)
+            assertThat(setAsDefaultPaymentMethodElement.shouldShowElementFlow.value).isFalse()
+        }
+    }
+
+    @Test
+    fun `setAsDefaultPaymentMethod field true when saveForFutureUse checked & setAsDefaultMatchesSaveForFutureUse`() {
+        testSetAsDefaultElements(
+            setAsDefaultMatchesSaveForFutureUse = true,
+        ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
+            val saveForFutureUseController = saveForFutureUseElement.controller
+
+            saveForFutureUseController.onValueChange(true)
+            assertThat(setAsDefaultPaymentMethodElement.controller.fieldValue.value.toBoolean()).isTrue()
+        }
     }
 
     @Test
@@ -220,17 +265,34 @@ class CardDefinitionTest {
         return this as MandateTextElement
     }
 
+    private fun testSetAsDefaultElements(
+        setAsDefaultMatchesSaveForFutureUse: Boolean,
+        block: (SaveForFutureUseElement, SetAsDefaultPaymentMethodElement) -> Unit
+    ) {
+        val formElements = getFormElementsWithSaveForFutureUseAndSetAsDefaultPaymentMethod(
+            isPaymentMethodSetAsDefaultEnabled = true,
+            setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
+        )
+
+        val saveForFutureUseElement = formElements[1] as SaveForFutureUseElement
+        val setAsDefaultPaymentMethodElement = formElements[2] as SetAsDefaultPaymentMethodElement
+
+        block(saveForFutureUseElement, setAsDefaultPaymentMethodElement)
+    }
+
     private fun getFormElementsWithSaveForFutureUseAndSetAsDefaultPaymentMethod(
-        isPaymentMethodSetAsDefaultEnabled: Boolean
+        isPaymentMethodSetAsDefaultEnabled: Boolean,
+        setAsDefaultMatchesSaveForFutureUse: Boolean = false,
     ): List<FormElement> {
         return CardDefinition.formElements(
-            PaymentMethodMetadataFactory.create(
+            metadata = PaymentMethodMetadataFactory.create(
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
                     address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
                 ),
                 hasCustomerConfiguration = true,
-                isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled
-            )
+                isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
+            ),
+            setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
         )
     }
 }

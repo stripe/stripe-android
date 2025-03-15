@@ -15,6 +15,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -33,6 +34,7 @@ internal sealed interface UiDefinitionFactory {
         val requiresMandate: Boolean,
         val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
         val cardBrandFilter: CardBrandFilter,
+        val setAsDefaultMatchesSaveForFutureUse: Boolean,
     ) {
         interface Factory {
             fun create(
@@ -47,6 +49,8 @@ internal sealed interface UiDefinitionFactory {
                 private val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
                 private val paymentMethodExtraParams: PaymentMethodExtraParams? = null,
                 private val initialLinkUserInput: UserInput? = null,
+                private val setAsDefaultMatchesSaveForFutureUse: Boolean =
+                    FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
             ) : Factory {
                 override fun create(
                     metadata: PaymentMethodMetadata,
@@ -69,6 +73,7 @@ internal sealed interface UiDefinitionFactory {
                         onLinkInlineSignupStateChanged = onLinkInlineSignupStateChanged,
                         cardBrandFilter = metadata.cardBrandFilter,
                         initialLinkUserInput = initialLinkUserInput,
+                        setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse
                     )
                 }
             }

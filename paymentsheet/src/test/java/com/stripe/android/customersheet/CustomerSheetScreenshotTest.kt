@@ -75,7 +75,8 @@ internal class CustomerSheetScreenshotTest {
         onUpdatePrimaryButtonState = { },
         onUpdatePrimaryButtonUIState = { },
         onError = { },
-        setAsDefaultPaymentMethodEnabled = false
+        setAsDefaultPaymentMethodEnabled = false,
+        setAsDefaultMatchesSaveForFutureUse = false,
     )
 
     private val selectPaymentMethodViewState = CustomerSheetViewState.SelectPaymentMethod(

@@ -44,6 +44,10 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
         composeTestRule: ComposeTestRule,
     )
 
+    abstract fun payWithNewCardWithSavedPaymentMethods(
+        composeTestRule: ComposeTestRule,
+    )
+
     class Horizontal : PaymentSheetLayoutType(paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal) {
         override fun assertHasSelectedPaymentMethod(
             composeTestRule: ComposeTestRule,
@@ -114,6 +118,14 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
             ).performClick()
 
             editPage.waitUntilVisible()
+        }
+
+        override fun payWithNewCardWithSavedPaymentMethods(
+            composeTestRule: ComposeTestRule,
+        ) {
+            val savedPaymentMethodsPage = SavedPaymentMethodsPage(composeTestRule)
+
+            savedPaymentMethodsPage.clickNewCardButton()
         }
     }
 
@@ -201,6 +213,14 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
             managePage.clickEdit(paymentMethod.id!!)
 
             editPage.waitUntilVisible()
+        }
+
+        override fun payWithNewCardWithSavedPaymentMethods(
+            composeTestRule: ComposeTestRule,
+        ) {
+            val verticalModePage = VerticalModePage(composeTestRule)
+
+            verticalModePage.clickNewPaymentMethodButton(PaymentMethod.Type.Card.code)
         }
     }
 
