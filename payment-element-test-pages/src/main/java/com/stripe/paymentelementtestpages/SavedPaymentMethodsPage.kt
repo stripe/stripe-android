@@ -7,6 +7,7 @@ import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -65,9 +66,14 @@ class SavedPaymentMethodsPage(private val composeTestRule: ComposeTestRule) {
                 .fetchSemanticsNodes()
                 .isNotEmpty()
         }
-
         // AddCard is the value of PaymentOptionItems.ViewType.AddCard.name()
-        composeTestRule.onNodeWithTag("AddCard", true).performClick()
+        val testTag = "AddCard"
+
+        composeTestRule.waitUntil {
+            composeTestRule.onNodeWithTag(testTag).isDisplayed()
+        }
+
+        composeTestRule.onNodeWithTag(testTag, true).performClick()
     }
 
     private fun savedPaymentMethodMatcher(last4: String): SemanticsMatcher {

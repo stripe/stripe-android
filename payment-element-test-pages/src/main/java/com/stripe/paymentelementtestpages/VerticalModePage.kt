@@ -136,7 +136,13 @@ class VerticalModePage(
                 .isNotEmpty()
         }
 
-        composeTestRule.onNode(hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodCode"))
+        val testTag = "${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodCode"
+
+        composeTestRule.waitUntil {
+            composeTestRule.onNodeWithTag(testTag).isDisplayed()
+        }
+
+        composeTestRule.onNode(hasTestTag(testTag))
             .performClick()
     }
 }
