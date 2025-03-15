@@ -4,6 +4,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.lite.network.FinancialConnectionsLiteRequestExecutor
 import com.stripe.android.financialconnections.lite.repository.model.SynchronizeSessionResponse
+import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import java.util.Locale
 
 internal class FinancialConnectionsLiteRepository(
@@ -11,7 +12,7 @@ internal class FinancialConnectionsLiteRepository(
     private val apiRequestFactory: ApiRequest.Factory,
 ) {
 
-    private fun FinancialConnectionsSheetConfiguration.apiRequestOptions() = ApiRequest.Options(
+    fun FinancialConnectionsSheetConfiguration.apiRequestOptions() = ApiRequest.Options(
         publishableKeyProvider = { publishableKey },
         stripeAccountIdProvider = { stripeAccountId },
     )
@@ -19,8 +20,8 @@ internal class FinancialConnectionsLiteRepository(
     suspend fun synchronize(
         configuration: FinancialConnectionsSheetConfiguration,
         applicationId: String,
-    ): Result<SynchronizeSessionResponse> {
-        val request = apiRequestFactory.createPost(
+    ): Result<SynchronizeSessionResponse> = requestExecutor.execute(
+        apiRequestFactory.createPost(
             url = synchronizeSessionUrl,
             options = configuration.apiRequestOptions(),
             params = mapOf(
@@ -32,8 +33,24 @@ internal class FinancialConnectionsLiteRepository(
                 ),
                 PARAMS_CLIENT_SECRET to configuration.financialConnectionsSessionClientSecret
             )
+        ),
+        SynchronizeSessionResponse.serializer()
+    )
+
+    suspend fun getFinancialConnectionsSession(
+        configuration: FinancialConnectionsSheetConfiguration,
+    ): Result<FinancialConnectionsSession> {
+        val financialConnectionsRequest = apiRequestFactory.createGet(
+            url = sessionReceiptUrl,
+            options = configuration.apiRequestOptions(),
+            params = mapOf(
+                PARAMS_CLIENT_SECRET to configuration.financialConnectionsSessionClientSecret
+            )
         )
-        return requestExecutor.execute(request, SynchronizeSessionResponse.serializer())
+        return requestExecutor.execute(
+            financialConnectionsRequest,
+            FinancialConnectionsSession.serializer()
+        )
     }
 
     companion object {
@@ -44,5 +61,8 @@ internal class FinancialConnectionsLiteRepository(
 
         internal const val synchronizeSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/financial_connections/sessions/synchronize"
+
+        private const val sessionReceiptUrl: String =
+            "${ApiRequest.API_HOST}/v1/link_account_sessions/session_receipt"
     }
 }

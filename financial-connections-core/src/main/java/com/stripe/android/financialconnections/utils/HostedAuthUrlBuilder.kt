@@ -1,23 +1,22 @@
-package com.stripe.android.financialconnections
+package com.stripe.android.financialconnections.utils
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.networking.QueryStringFactory
-import com.stripe.android.financialconnections.ElementsSessionContext.BillingDetails
-import com.stripe.android.financialconnections.ElementsSessionContext.PrefillDetails
+import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
-import com.stripe.android.financialconnections.utils.toApiParams
 import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.LinkMode
 
-internal object HostedAuthUrlBuilder {
+@RestrictTo(RestrictTo.Scope.LIBRARY)
+object HostedAuthUrlBuilder {
 
     fun create(
         args: FinancialConnectionsSheetActivityArgs,
-        manifest: FinancialConnectionsSessionManifest,
-        prefillDetails: PrefillDetails? = args.elementsSessionContext?.prefillDetails,
+        hostedAuthUrl: String?,
+        prefillDetails: ElementsSessionContext.PrefillDetails? = args.elementsSessionContext?.prefillDetails,
     ): String? {
         return create(
-            hostedAuthUrl = manifest.hostedAuthUrl,
+            hostedAuthUrl = hostedAuthUrl,
             isInstantDebits = args is FinancialConnectionsSheetActivityArgs.ForInstantDebits,
             linkMode = args.elementsSessionContext?.linkMode,
             billingDetails = args.elementsSessionContext?.billingDetails,
@@ -30,8 +29,8 @@ internal object HostedAuthUrlBuilder {
         hostedAuthUrl: String?,
         isInstantDebits: Boolean,
         linkMode: LinkMode?,
-        billingDetails: BillingDetails?,
-        prefillDetails: PrefillDetails?,
+        billingDetails: ElementsSessionContext.BillingDetails?,
+        prefillDetails: ElementsSessionContext.PrefillDetails?,
         incentiveEligibilitySession: IncentiveEligibilitySession?,
     ): String? {
         if (hostedAuthUrl == null) {
@@ -62,7 +61,7 @@ internal object HostedAuthUrlBuilder {
         return queryParams.joinToString("&")
     }
 
-    private fun makeBillingDetailsQueryParams(billingAddress: BillingDetails): String {
+    private fun makeBillingDetailsQueryParams(billingAddress: ElementsSessionContext.BillingDetails): String {
         val params = mapOf(
             "billingDetails" to billingAddress.toApiParams(),
         )

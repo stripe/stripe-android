@@ -3,15 +3,26 @@ package com.stripe.android.financialconnections.lite
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.webkit.WebResourceRequest
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.FrameLayout
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
+import androidx.annotation.RestrictTo
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.Companion.EXTRA_ARGS
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
+import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.OpenAuthFlowWithUrl
+import com.stripe.android.financialconnections.lite.di.Di
 import kotlinx.coroutines.launch
 
 internal class FinancialConnectionsSheetLiteActivity : ComponentActivity() {
@@ -41,6 +52,7 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity() {
             viewModel.viewEffects.collect { viewEffect ->
                 when (viewEffect) {
                     is OpenAuthFlowWithUrl -> webView.loadUrl(viewEffect.url)
+                    is FinishWithResult -> finishWithResult(viewEffect.result)
                 }
             }
         }
@@ -53,7 +65,26 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity() {
             webSettings.javaScriptEnabled = true
             webSettings.useWideViewPort = true
             webSettings.loadWithOverviewMode = true
+            it.webViewClient = object : WebViewClient() {
+                override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                    val url = request?.url
+                    return handleUrl(url)
+                }
+            }
         }
+    }
+
+    private fun handleUrl(uri: Uri?): Boolean {
+        if (uri != null && uri.scheme == "stripe-auth") {
+            viewModel.handleUrl(uri)
+            return true
+        }
+        return false
+    }
+
+    private fun finishWithResult(result: FinancialConnectionsSheetActivityResult) {
+        setResult(RESULT_OK, Intent().putExtras(result.toBundle()))
+        finish()
     }
 
     companion object {
@@ -69,3 +100,37 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity() {
         }
     }
 }
+
+internal class FinancialConnectionsLiteViewModelFactory : ViewModelProvider.Factory {
+
+    override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+        val savedStateHandle = extras.createSavedStateHandle()
+        val appContext = extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as Context
+
+        if (modelClass.isAssignableFrom(FinancialConnectionsLiteViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return FinancialConnectionsLiteViewModel(
+                savedStateHandle = savedStateHandle,
+                applicationId = appContext.packageName,
+                logger = Di.logger,
+                workContext = Di.workContext,
+                repository = Di.repository()
+            ) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+
+/**
+ * Creates an [Intent] to launch the [FinancialConnectionsSheetLiteActivity].
+ *
+ * @param context the context to use for creating the intent
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun intentBuilder(context: Context): (FinancialConnectionsSheetActivityArgs) -> Intent =
+    { args: FinancialConnectionsSheetActivityArgs ->
+        FinancialConnectionsSheetLiteActivity.intent(
+            context = context,
+            args = args
+        )
+    }
