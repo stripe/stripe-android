@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.utils
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.financialconnections.ElementsSessionContext.BillingDetails
 
 /**
@@ -7,7 +8,8 @@ import com.stripe.android.financialconnections.ElementsSessionContext.BillingDet
  *
  * These params include the phone number and a nested address object.
  */
-internal fun BillingDetails.toApiParams(): Map<String, Any> {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun BillingDetails.toApiParams(): Map<String, Any> {
     val addressParams = address?.let { address ->
         buildMap {
             address.line1?.let { put("line1", it) }
@@ -33,7 +35,8 @@ internal fun BillingDetails.toApiParams(): Map<String, Any> {
  *
  * These params don't include the phone number and flatten the address.
  */
-internal fun BillingDetails.toConsumerBillingAddressParams(): Map<String, Any> {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun BillingDetails.toConsumerBillingAddressParams(): Map<String, Any> {
     val contactParams = buildMap {
         name?.let { put("name", it) }
     }.filter { entry ->

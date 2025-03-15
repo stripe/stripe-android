@@ -62,6 +62,7 @@ import com.stripe.android.financialconnections.model.update
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.utils.HostedAuthUrlBuilder
 import com.stripe.android.financialconnections.utils.parcelable
 import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.CoroutineDispatcher
@@ -179,7 +180,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
 
         val hostedAuthUrl = HostedAuthUrlBuilder.create(
             args = initialState.initialArgs,
-            manifest = manifest,
+            hostedAuthUrl = manifest.hostedAuthUrl,
         )
 
         if (hostedAuthUrl == null) {
@@ -571,7 +572,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     ) {
         val hostedAuthUrl = HostedAuthUrlBuilder.create(
             args = initialState.initialArgs,
-            manifest = manifest,
+            hostedAuthUrl = manifest.hostedAuthUrl,
             prefillDetails = prefillDetails
         )
 
