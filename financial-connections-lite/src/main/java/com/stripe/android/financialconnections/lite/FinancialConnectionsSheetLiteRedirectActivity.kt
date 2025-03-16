@@ -9,15 +9,15 @@ import androidx.activity.ComponentActivity
  * This Activity handles redirects from the Institution authorization flow hand-off from native.
  * It'll process the result url in [Intent.getData] and pass them back to the opening activity.
  */
-class FinancialConnectionsSheetLiteRedirectActivity : ComponentActivity() {
+internal class FinancialConnectionsSheetLiteRedirectActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         /**
          * Used together, FLAG_ACTIVITY_SINGLE_TOP and FLAG_ACTIVITY_CLEAR_TOP
          * clear everything on the stack above the opening activity, including CCT.
          */
-        intent.data.let { uri ->
-            uri!!.toIntent()
+        intent.data?.let { uri ->
+            uri.toIntent()
                 ?.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 ?.also { it.data = uri }
                 ?.let { startActivity(it) }
