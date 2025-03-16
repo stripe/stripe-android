@@ -57,10 +57,10 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity() {
     }
 
     private fun openCustomTab(uri: Uri) {
-        val customTabsIntent = CustomTabsIntent.Builder()
+        CustomTabsIntent.Builder()
             .setShowTitle(true)
             .build()
-        customTabsIntent.launchUrl(this, uri)
+            .launchUrl(this, uri)
     }
 
     @SuppressLint("SetJavaScriptEnabled")
