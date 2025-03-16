@@ -12,12 +12,14 @@ import android.widget.FrameLayout
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
 import androidx.annotation.RestrictTo
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.Companion.EXTRA_ARGS
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.OpenAuthFlowWithUrl
+import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.OpenCustomTab
 import kotlinx.coroutines.launch
 
 internal class FinancialConnectionsSheetLiteActivity : ComponentActivity() {
@@ -48,9 +50,17 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity() {
                 when (viewEffect) {
                     is OpenAuthFlowWithUrl -> webView.loadUrl(viewEffect.url)
                     is FinishWithResult -> finishWithResult(viewEffect.result)
+                    is OpenCustomTab -> openCustomTab(viewEffect.url)
                 }
             }
         }
+    }
+
+    private fun openCustomTab(uri: Uri) {
+        val customTabsIntent = CustomTabsIntent.Builder()
+            .setShowTitle(true)
+            .build()
+        customTabsIntent.launchUrl(this, uri)
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -62,15 +72,14 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity() {
             webSettings.loadWithOverviewMode = true
             it.webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-                    val url = request?.url
-                    return handleUrl(url)
+                    return handleUrl(request?.url)
                 }
             }
         }
     }
 
     private fun handleUrl(uri: Uri?): Boolean {
-        if (uri != null && uri.scheme == "stripe-auth") {
+        if (uri != null) {
             viewModel.handleUrl(uri)
             return true
         }

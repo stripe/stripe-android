@@ -20,6 +20,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
 import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.OpenAuthFlowWithUrl
+import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.OpenCustomTab
 import com.stripe.android.financialconnections.lite.di.Di
 import com.stripe.android.financialconnections.lite.repository.FinancialConnectionsLiteRepository
 import com.stripe.android.financialconnections.utils.HostedAuthUrlBuilder
@@ -83,8 +84,14 @@ internal class FinancialConnectionsLiteViewModel(
                 onAuthFlowCanceled()
             }
             else -> {
-                logger.debug("Unknown url: $uri")
+                launchInBrowser(uri)
             }
+        }
+    }
+
+    private fun launchInBrowser(uri: Uri) {
+        viewModelScope.launch {
+            _viewEffects.emit(OpenCustomTab(uri))
         }
     }
 
@@ -143,6 +150,7 @@ internal class FinancialConnectionsLiteViewModel(
 
     internal sealed class ViewEffect {
         data class OpenAuthFlowWithUrl(val url: String) : ViewEffect()
+        data class OpenCustomTab(val url: Uri) : ViewEffect()
         data class FinishWithResult(val result: FinancialConnectionsSheetActivityResult) : ViewEffect()
     }
 

@@ -2,6 +2,23 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application>
-        <activity android:name=".FinancialConnectionsSheetLiteActivity" />
+        <activity
+            android:name=".FinancialConnectionsSheetLiteRedirectActivity"
+            android:launchMode="singleTask"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="link-accounts"
+                    android:scheme="stripe-auth"
+                    android:pathPrefix="/${applicationId}/auth_redirect" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".FinancialConnectionsSheetLiteActivity" />
     </application>
 </manifest>
