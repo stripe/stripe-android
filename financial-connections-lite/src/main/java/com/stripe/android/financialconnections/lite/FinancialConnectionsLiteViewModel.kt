@@ -105,7 +105,7 @@ internal class FinancialConnectionsLiteViewModel(
             }
     }
 
-    fun withState(block: (State) -> Unit) = runCatching {
+    private fun withState(block: (State) -> Unit) = runCatching {
         block(requireNotNull(_state.value))
     }.onFailure {
         handleError(it, "State is null")
