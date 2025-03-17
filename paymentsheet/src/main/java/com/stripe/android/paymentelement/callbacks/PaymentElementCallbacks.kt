@@ -18,7 +18,7 @@ internal class PaymentElementCallbacks(
         createIntentCallback: CreateIntentCallback?,
         externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler?,
         analyticEventCallback: AnalyticEventCallback?,
-    ): this(createIntentCallback, externalPaymentMethodConfirmHandler) {
+    ) : this(createIntentCallback, externalPaymentMethodConfirmHandler) {
         this.analyticEventCallback = analyticEventCallback
     }
 }

@@ -214,6 +214,7 @@ class PaymentSheet internal constructor(
             private set
         internal var createIntentCallback: CreateIntentCallback? = null
             private set
+
         @OptIn(ExperimentalAnalyticEventCallbackApi::class)
         internal var analyticEventCallback: AnalyticEventCallback? = null
             private set
@@ -2167,6 +2168,7 @@ class PaymentSheet internal constructor(
                 private set
             internal var createIntentCallback: CreateIntentCallback? = null
                 private set
+
             @OptIn(ExperimentalAnalyticEventCallbackApi::class)
             internal var analyticEventCallback: AnalyticEventCallback? = null
                 private set
@@ -2192,7 +2194,6 @@ class PaymentSheet internal constructor(
             fun analyticEventCallback(callback: AnalyticEventCallback) = apply {
                 analyticEventCallback = callback
             }
-
 
             /**
              * Returns a [PaymentSheet.FlowController].
