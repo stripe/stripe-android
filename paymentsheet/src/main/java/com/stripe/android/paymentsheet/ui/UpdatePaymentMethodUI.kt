@@ -203,14 +203,8 @@ private fun CardDetailsUI(
                 savedPaymentMethodIcon = displayableSavedPaymentMethod
                     .paymentMethod
                     .getSavedPaymentMethodIcon(forVerticalMode = true),
-                onBrandOptionsShown = {
-                    interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsShown)
-                },
                 onBrandChoiceChanged = {
                     interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(it))
-                },
-                onBrandChoiceOptionsDismissed = {
-                    interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsDismissed)
                 },
             )
             Divider(
@@ -372,9 +366,7 @@ private fun CardNumberField(
     cardBrandFilter: CardBrandFilter,
     shouldShowCardBrandDropdown: Boolean,
     savedPaymentMethodIcon: Int,
-    onBrandOptionsShown: () -> Unit,
     onBrandChoiceChanged: (CardBrandChoice) -> Unit,
-    onBrandChoiceOptionsDismissed: () -> Unit,
 ) {
     CommonTextField(
         value = "•••• •••• •••• ${card.last4}",
@@ -384,9 +376,7 @@ private fun CardNumberField(
                 CardBrandDropdown(
                     selectedBrand = selectedBrand,
                     availableBrands = card.getAvailableNetworks(cardBrandFilter),
-                    onBrandOptionsShown = onBrandOptionsShown,
                     onBrandChoiceChanged = onBrandChoiceChanged,
-                    onBrandChoiceOptionsDismissed = onBrandChoiceOptionsDismissed,
                 )
             } else {
                 PaymentMethodIconFromResource(
@@ -537,11 +527,10 @@ private fun PreviewUpdatePaymentMethodUI() {
             canRemove = true,
             displayableSavedPaymentMethod = exampleCard,
             removeExecutor = { null },
-            updateCardBrandExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
+            updatePaymentMethodExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
             setDefaultPaymentMethodExecutor = { _ -> Result.success(Unit) },
             cardBrandFilter = DefaultCardBrandFilter,
-            onBrandChoiceOptionsShown = {},
-            onBrandChoiceOptionsDismissed = {},
+            onBrandChoiceSelected = {},
             shouldShowSetAsDefaultCheckbox = true,
             isDefaultPaymentMethod = false,
             onUpdateSuccess = {},

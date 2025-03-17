@@ -99,19 +99,25 @@ internal interface CustomerSheetEventReporter {
     )
 
     /**
-     * User successfully updated the card brand choice selection for
-     * a payment method.
+     * User selected a card brand from the card brand choice dropdown.
      */
-    fun onUpdatePaymentMethodSucceeded(
+    fun onBrandChoiceSelected(
+        source: CardBrandChoiceEventSource,
         selectedBrand: CardBrand,
     )
 
     /**
-     * User failed to updated the card brand choice selection for
-     * a payment method.
+     * User successfully updated the card details for a payment method.
+     */
+    fun onUpdatePaymentMethodSucceeded(
+        selectedBrand: CardBrand?,
+    )
+
+    /**
+     * User failed to updated the card details for a payment method.
      */
     fun onUpdatePaymentMethodFailed(
-        selectedBrand: CardBrand,
+        selectedBrand: CardBrand?,
         error: Throwable,
     )
 

@@ -8,6 +8,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SavedPaymentMethod
@@ -55,9 +56,7 @@ internal interface UpdatePaymentMethodInteractor {
 
     sealed class ViewAction {
         data object RemovePaymentMethod : ViewAction()
-        data object BrandChoiceOptionsShown : ViewAction()
         data class BrandChoiceChanged(val cardBrandChoice: CardBrandChoice) : ViewAction()
-        data object BrandChoiceOptionsDismissed : ViewAction()
         data object SaveButtonPressed : ViewAction()
         data class SetAsDefaultCheckboxChanged(val isChecked: Boolean) : ViewAction()
     }
@@ -77,9 +76,9 @@ internal interface UpdatePaymentMethodInteractor {
 }
 
 internal typealias PaymentMethodRemoveOperation = suspend (paymentMethod: PaymentMethod) -> Throwable?
-internal typealias UpdateCardBrandOperation = suspend (
+internal typealias UpdateCardPaymentMethodOperation = suspend (
     paymentMethod: PaymentMethod,
-    brand: CardBrand
+    cardUpdateParams: CardUpdateParams
 ) -> Result<PaymentMethod>
 internal typealias PaymentMethodSetAsDefaultOperation = suspend (
     paymentMethod: PaymentMethod
@@ -93,10 +92,9 @@ internal class DefaultUpdatePaymentMethodInteractor(
     val isDefaultPaymentMethod: Boolean,
     shouldShowSetAsDefaultCheckbox: Boolean,
     private val removeExecutor: PaymentMethodRemoveOperation,
-    private val updateCardBrandExecutor: UpdateCardBrandOperation,
+    private val updatePaymentMethodExecutor: UpdateCardPaymentMethodOperation,
     private val setDefaultPaymentMethodExecutor: PaymentMethodSetAsDefaultOperation,
-    private val onBrandChoiceOptionsShown: (CardBrand) -> Unit,
-    private val onBrandChoiceOptionsDismissed: (CardBrand) -> Unit,
+    private val onBrandChoiceSelected: (CardBrand) -> Unit,
     private val onUpdateSuccess: () -> Unit,
     workContext: CoroutineContext = Dispatchers.Default,
 ) : UpdatePaymentMethodInteractor {
@@ -157,12 +155,6 @@ internal class DefaultUpdatePaymentMethodInteractor(
     override fun handleViewAction(viewAction: UpdatePaymentMethodInteractor.ViewAction) {
         when (viewAction) {
             UpdatePaymentMethodInteractor.ViewAction.RemovePaymentMethod -> removePaymentMethod()
-            UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsShown -> onBrandChoiceOptionsShown(
-                cardBrandChoice.value.brand
-            )
-            UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsDismissed -> onBrandChoiceOptionsDismissed(
-                cardBrandChoice.value.brand
-            )
             UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed -> savePaymentMethod()
             is UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged -> onBrandChoiceChanged(
                 viewAction.cardBrandChoice
@@ -211,9 +203,11 @@ internal class DefaultUpdatePaymentMethodInteractor(
     private suspend fun maybeUpdateCardBrand(): Result<PaymentMethod>? {
         val newCardBrand = cardBrandChoice.value.brand
         return if (cardBrandHasBeenChanged.value) {
-            updateCardBrandExecutor(
+            updatePaymentMethodExecutor(
                 displayableSavedPaymentMethod.paymentMethod,
-                newCardBrand
+                CardUpdateParams(
+                    cardBrand = newCardBrand
+                )
             ).onSuccess {
                 savedCardBrand.emit(CardBrandChoice(brand = newCardBrand, enabled = true))
                 cardBrandHasBeenChanged.emit(false)
@@ -254,7 +248,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
         this.cardBrandChoice.value = cardBrandChoice
         this.cardBrandHasBeenChanged.value = cardBrandChoice != savedCardBrand.value
 
-        onBrandChoiceOptionsDismissed(cardBrandChoice.brand)
+        onBrandChoiceSelected(cardBrandChoice.brand)
     }
 
     private fun onSetAsDefaultCheckboxChanged(isChecked: Boolean) {

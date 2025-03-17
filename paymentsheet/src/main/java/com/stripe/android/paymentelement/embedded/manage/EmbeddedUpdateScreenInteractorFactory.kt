@@ -44,10 +44,10 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
                 }
                 result
             },
-            updateCardBrandExecutor = { method, brand ->
+            updatePaymentMethodExecutor = { method, cardUpdateParams ->
                 savedPaymentMethodMutatorProvider.get().modifyCardPaymentMethod(
                     paymentMethod = method,
-                    brand = brand,
+                    cardUpdateParams = cardUpdateParams,
                     onSuccess = { paymentMethod ->
                         val currentSelection = selectionHolder.selection.value
                         if (paymentMethod.id == (currentSelection as? PaymentSelection.Saved)?.paymentMethod?.id) {
@@ -59,14 +59,8 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
             setDefaultPaymentMethodExecutor = { method ->
                 savedPaymentMethodMutatorProvider.get().setDefaultPaymentMethod(method)
             },
-            onBrandChoiceOptionsShown = {
-                eventReporter.onShowPaymentOptionBrands(
-                    source = EventReporter.CardBrandChoiceEventSource.Edit,
-                    selectedBrand = it
-                )
-            },
-            onBrandChoiceOptionsDismissed = {
-                eventReporter.onHidePaymentOptionBrands(
+            onBrandChoiceSelected = {
+                eventReporter.onBrandChoiceSelected(
                     source = EventReporter.CardBrandChoiceEventSource.Edit,
                     selectedBrand = it
                 )

@@ -457,41 +457,41 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `onShowPaymentOptionBrands() should fire analytics request with expected event value`() {
+    fun `onBrandChoiceSelected(add) should fire analytics request with expected event value`() {
         val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
             simulateSuccessfulSetup()
         }
 
-        customEventReporter.onShowPaymentOptionBrands(
-            source = EventReporter.CardBrandChoiceEventSource.Edit,
+        customEventReporter.onBrandChoiceSelected(
+            source = EventReporter.CardBrandChoiceEventSource.Add,
             selectedBrand = CardBrand.Visa
         )
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == "mc_open_cbc_dropdown" &&
-                    req.params["cbc_event_source"] == "edit" &&
+                req.params["event"] == "mc_cbc_selected" &&
+                    req.params["cbc_event_source"] == "add" &&
                     req.params["selected_card_brand"] == "visa"
             }
         )
     }
 
     @Test
-    fun `onHidePaymentOptionBrands() should fire analytics request with expected event value`() {
+    fun `onBrandChoiceSelected(edit) should fire analytics request with expected event value`() {
         val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
             simulateSuccessfulSetup()
         }
 
-        customEventReporter.onHidePaymentOptionBrands(
+        customEventReporter.onBrandChoiceSelected(
             source = EventReporter.CardBrandChoiceEventSource.Edit,
-            selectedBrand = CardBrand.CartesBancaires,
+            selectedBrand = CardBrand.Visa
         )
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == "mc_close_cbc_dropdown" &&
+                req.params["event"] == "mc_cbc_selected" &&
                     req.params["cbc_event_source"] == "edit" &&
-                    req.params["selected_card_brand"] == "cartes_bancaires"
+                    req.params["selected_card_brand"] == "visa"
             }
         )
     }
