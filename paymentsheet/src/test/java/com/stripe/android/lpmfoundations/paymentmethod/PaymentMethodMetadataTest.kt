@@ -795,7 +795,7 @@ internal class PaymentMethodMetadataTest {
             linkState = null,
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             paymentMethodIncentive = null,
-            elementsSessionId = "elements_session_1234"
+            elementsSessionId = "session_1234"
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -866,7 +866,7 @@ internal class PaymentMethodMetadataTest {
             linkState = null,
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             paymentMethodIncentive = null,
-            elementsSessionId = "elements_session_1234"
+            elementsSessionId = "session_1234"
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
@@ -973,7 +973,7 @@ internal class PaymentMethodMetadataTest {
             linkSettings = null,
             externalPaymentMethodData = null,
             paymentMethodSpecs = null,
-            elementsSessionId = "elements_session_1234"
+            elementsSessionId = "session_1234"
         )
     }
 
@@ -1327,7 +1327,7 @@ internal class PaymentMethodMetadataTest {
                 useAttestationEndpointsForLink = false,
                 suppress2faModal = false,
                 initializationMode = PaymentSheetFixtures.INITIALIZATION_MODE_PAYMENT_INTENT,
-                elementsSessionId = "elements_session_1234",
+                elementsSessionId = "session_1234",
                 linkMode = LinkMode.LinkPaymentMethod,
             ),
         )
