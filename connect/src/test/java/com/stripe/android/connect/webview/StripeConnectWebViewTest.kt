@@ -42,7 +42,7 @@ class StripeConnectWebViewTest {
         webView = StripeConnectWebView(
             application = RuntimeEnvironment.getApplication(),
             delegate = mockDelegate,
-            logger = Logger.getInstance(enableLogging = false)
+            logger = Logger.getInstance(enableLogging = true)
         )
     }
 

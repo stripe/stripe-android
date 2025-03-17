@@ -112,10 +112,11 @@ class StripeConnectWebViewContainerViewModelTest {
     fun `WebView delegate is set`() {
         val viewModel = StripeConnectWebViewContainerViewModel(
             application = RuntimeEnvironment.getApplication(),
-            analyticsService = analyticsService,
             clock = androidClock,
             embeddedComponentManager = embeddedComponentManager,
             embeddedComponent = embeddedComponent,
+            analyticsService = analyticsService,
+            logger = Logger.noop(),
             // Default `createWebView` value
         )
         assertThat(viewModel.webView.delegate).isEqualTo(viewModel.delegate)
