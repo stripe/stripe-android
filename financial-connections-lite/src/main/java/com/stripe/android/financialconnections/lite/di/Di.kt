@@ -7,6 +7,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.financialconnections.lite.network.FinancialConnectionsLiteRequestExecutor
 import com.stripe.android.financialconnections.lite.repository.FinancialConnectionsLiteRepository
+import com.stripe.android.financialconnections.lite.repository.FinancialConnectionsLiteRepositoryImpl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 
@@ -25,7 +26,7 @@ internal object Di {
     val workContext = Dispatchers.IO
     val logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
 
-    fun repository(): FinancialConnectionsLiteRepository = FinancialConnectionsLiteRepository(
+    fun repository(): FinancialConnectionsLiteRepository = FinancialConnectionsLiteRepositoryImpl(
         requestExecutor = FinancialConnectionsLiteRequestExecutor(
             stripeNetworkClient = DefaultStripeNetworkClient(
                 workContext = workContext,

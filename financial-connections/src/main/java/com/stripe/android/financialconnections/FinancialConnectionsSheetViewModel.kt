@@ -5,7 +5,6 @@ import android.app.Application
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Base64
 import androidx.activity.result.ActivityResult
 import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
@@ -21,7 +20,6 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetState.Au
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenNativeAuthFlow
-import com.stripe.android.financialconnections.FinancialConnectionsSheetViewModel.Companion.QUERY_PARAM_PAYMENT_METHOD
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AttestationInitFailed
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AttestationInitSkipped
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
@@ -53,7 +51,6 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
-import com.stripe.android.financialconnections.launcher.InstantDebitsResult
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -62,6 +59,8 @@ import com.stripe.android.financialconnections.model.update
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.utils.HostedAuthUrlBuilder
+import com.stripe.android.financialconnections.utils.InstantDebitsResultBuilder
 import com.stripe.android.financialconnections.utils.parcelable
 import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.CoroutineDispatcher
@@ -179,7 +178,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
 
         val hostedAuthUrl = HostedAuthUrlBuilder.create(
             args = initialState.initialArgs,
-            manifest = manifest,
+            hostedAuthUrl = manifest.hostedAuthUrl,
         )
 
         if (hostedAuthUrl == null) {
@@ -476,22 +475,16 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     }
 
     private fun onSuccessFromInstantDebits(url: Uri) {
-        runCatching { url.getEncodedPaymentMethodOrThrow() }
-            .onSuccess { paymentMethod ->
+        InstantDebitsResultBuilder.fromUri(url)
+            .onSuccess {
                 finishWithResult(
-                    result = Completed(
-                        instantDebits = InstantDebitsResult(
-                            encodedPaymentMethod = paymentMethod,
-                            last4 = url.getQueryParameter(QUERY_PARAM_LAST4),
-                            bankName = url.getQueryParameter(QUERY_BANK_NAME),
-                            eligibleForIncentive = url.getQueryParameter(QUERY_INCENTIVE_ELIGIBLE).toBoolean(),
-                        ),
+                    Completed(
+                        instantDebits = it,
                         financialConnectionsSession = null,
                         token = null
                     )
                 )
-            }
-            .onFailure { error ->
+            }.onFailure { error ->
                 logger.error("Could not retrieve payment method parameters from success url", error)
                 finishWithResult(Failed(error))
             }
@@ -571,7 +564,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     ) {
         val hostedAuthUrl = HostedAuthUrlBuilder.create(
             args = initialState.initialArgs,
-            manifest = manifest,
+            hostedAuthUrl = manifest.hostedAuthUrl,
             prefillDetails = prefillDetails
         )
 
@@ -620,18 +613,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         }
 
         internal const val MAX_ACCOUNTS = 100
-        internal const val QUERY_PARAM_PAYMENT_METHOD = "payment_method"
-        internal const val QUERY_PARAM_LAST4 = "last4"
-        internal const val QUERY_BANK_NAME = "bank_name"
-        internal const val QUERY_INCENTIVE_ELIGIBLE = "incentive_eligible"
     }
 
     override fun updateTopAppBar(state: FinancialConnectionsSheetState): TopAppBarStateUpdate? {
         return null
     }
-}
-
-private fun Uri.getEncodedPaymentMethodOrThrow(): String {
-    val encodedPaymentMethod = requireNotNull(getQueryParameter(QUERY_PARAM_PAYMENT_METHOD))
-    return String(Base64.decode(encodedPaymentMethod, 0), Charsets.UTF_8)
 }
