@@ -202,9 +202,9 @@ internal class DefaultPaymentMethodsTest {
         testContext.markTestSucceeded()
     }
 
-    @Suppress("MaxLineLength")
     @Test
-    fun setNewCardAsDefault_withSavedPaymentMethods_uncheckSetAsDefault_doesNotSendSetAsDefaultParamInConfirmCall() = runProductIntegrationTest(
+    fun setNewCardAsDefault_withSavedPaymentMethods_uncheckSetAsDefault_doesNotSendSetAsDefaultParamInConfirmCall() =
+        runProductIntegrationTest(
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -238,9 +238,9 @@ internal class DefaultPaymentMethodsTest {
         paymentSheetPage.clickPrimaryButton()
     }
 
-    @Suppress("MaxLineLength")
     @Test
-    fun setNewCardAsDefault_withSavedPaymentMethods_uncheckSaveForFuture_doesNotSendSetAsDefaultParamInConfirmCall() = runProductIntegrationTest(
+    fun setNewCardAsDefault_withSavedPaymentMethods_uncheckSaveForFuture_doesNotSendSetAsDefaultParamInConfirmCall() =
+        runProductIntegrationTest(
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
