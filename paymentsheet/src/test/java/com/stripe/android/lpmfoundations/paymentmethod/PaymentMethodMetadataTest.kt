@@ -973,7 +973,7 @@ internal class PaymentMethodMetadataTest {
             linkSettings = null,
             externalPaymentMethodData = null,
             paymentMethodSpecs = null,
-            elementsSessionId = "session_1234"
+            elementsSessionId = "elements_session_1234"
         )
     }
 
@@ -1327,7 +1327,7 @@ internal class PaymentMethodMetadataTest {
                 useAttestationEndpointsForLink = false,
                 suppress2faModal = false,
                 initializationMode = PaymentSheetFixtures.INITIALIZATION_MODE_PAYMENT_INTENT,
-                elementsSessionId = "session_1234",
+                elementsSessionId = "elements_session_1234",
                 linkMode = LinkMode.LinkPaymentMethod,
             ),
         )
