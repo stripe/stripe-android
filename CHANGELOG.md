@@ -6,7 +6,7 @@
 
 ### PaymentSheet
 * [FIXED][10327](https://github.com/stripe/stripe-android/pull/10327) Improve accessibility for postal code.
-* [ADDED][10393](https://github.com/stripe/stripe-android/pull/10393) Support for default payment methods in private beta.
+* [ADDED] Support for default payment methods in private beta.
 
 ## 21.6.0 - 2025-03-03
 
