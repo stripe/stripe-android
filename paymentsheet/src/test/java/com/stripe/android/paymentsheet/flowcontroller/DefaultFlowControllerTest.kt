@@ -36,6 +36,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.wallets.Wallet
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.createTestConfirmationHandlerFactory
@@ -119,6 +120,7 @@ import kotlin.test.Test
 
 @Suppress("DEPRECATION")
 @RunWith(RobolectricTestRunner::class)
+@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 internal class DefaultFlowControllerTest {
 
     @get:Rule
@@ -1466,6 +1468,9 @@ internal class DefaultFlowControllerTest {
                 createIntentCallback = { _, _ ->
                     error("Should not be called!")
                 },
+                customPaymentMethodConfirmHandler = { _, _ ->
+                    error("Should not be called!")
+                },
                 externalPaymentMethodConfirmHandler = { _, _ ->
                     error("Should not be called!")
                 },
@@ -1906,6 +1911,7 @@ internal class DefaultFlowControllerTest {
             createIntentCallback = { _, _ ->
                 error("I’m alive")
             },
+            customPaymentMethodConfirmHandler = null,
             externalPaymentMethodConfirmHandler = null,
         )
 
@@ -1934,6 +1940,7 @@ internal class DefaultFlowControllerTest {
     fun `Clears out externalPaymentMethodConfirmHandler when lifecycle owner is destroyed`() {
         PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks(
             createIntentCallback = null,
+            customPaymentMethodConfirmHandler = null,
             externalPaymentMethodConfirmHandler = { _, _ ->
                 error("I’m alive")
             }
@@ -1957,6 +1964,37 @@ internal class DefaultFlowControllerTest {
         assertThat(
             PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER]
                 ?.externalPaymentMethodConfirmHandler
+        ).isNull()
+    }
+
+    @Test
+    fun `Clears out customPaymentMethodConfirmHandler when lifecycle owner is destroyed`() {
+        PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks(
+            createIntentCallback = null,
+            customPaymentMethodConfirmHandler = { _, _ ->
+                error("Should not be called!")
+            },
+            externalPaymentMethodConfirmHandler = null
+        )
+
+        createFlowController()
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+        assertThat(
+            PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER]
+                ?.customPaymentMethodConfirmHandler
+        ).isNotNull()
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
+        assertThat(
+            PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER]
+                ?.customPaymentMethodConfirmHandler
+        ).isNotNull()
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        assertThat(
+            PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER]
+                ?.customPaymentMethodConfirmHandler
         ).isNull()
     }
 

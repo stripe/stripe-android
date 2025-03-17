@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.lpms.foundations
 
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.lpms.foundations.network.MerchantCountry
@@ -12,6 +13,7 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
 
+@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 internal class CreateIntentFactory(
     private val paymentElementCallbackIdentifier: String,
     private val paymentMethodType: PaymentMethod.Type,
@@ -68,6 +70,7 @@ internal class CreateIntentFactory(
                         }
                     )
                 },
+                customPaymentMethodConfirmHandler = null,
                 externalPaymentMethodConfirmHandler = null,
             )
         )
@@ -130,6 +133,7 @@ internal class CreateIntentFactory(
                         }
                     )
                 },
+                customPaymentMethodConfirmHandler = null,
                 externalPaymentMethodConfirmHandler = null,
             )
         )

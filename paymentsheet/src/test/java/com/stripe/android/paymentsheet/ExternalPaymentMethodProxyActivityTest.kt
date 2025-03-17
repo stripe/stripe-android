@@ -11,6 +11,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.testing.FakeErrorReporter
@@ -22,6 +23,7 @@ import kotlin.test.fail
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
+@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 class ExternalPaymentMethodProxyActivityTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
@@ -38,6 +40,7 @@ class ExternalPaymentMethodProxyActivityTest {
 
         PaymentElementCallbackReferences["ExternalPaymentMethod"] = PaymentElementCallbacks(
             createIntentCallback = null,
+            customPaymentMethodConfirmHandler = null,
             externalPaymentMethodConfirmHandler = confirmHandler,
         )
 
@@ -67,6 +70,7 @@ class ExternalPaymentMethodProxyActivityTest {
 
         PaymentElementCallbackReferences["ExternalPaymentMethod"] = PaymentElementCallbacks(
             createIntentCallback = null,
+            customPaymentMethodConfirmHandler = null,
             externalPaymentMethodConfirmHandler = confirmHandler,
         )
 
@@ -139,11 +143,13 @@ class ExternalPaymentMethodProxyActivityTest {
 
         PaymentElementCallbackReferences["ExternalPaymentMethodTestIdentifierOne"] = PaymentElementCallbacks(
             createIntentCallback = null,
+            customPaymentMethodConfirmHandler = null,
             externalPaymentMethodConfirmHandler = firstConfirmHandler,
         )
 
         PaymentElementCallbackReferences["ExternalPaymentMethodTestIdentifierTwo"] = PaymentElementCallbacks(
             createIntentCallback = null,
+            customPaymentMethodConfirmHandler = null,
             externalPaymentMethodConfirmHandler = secondConfirmHandler,
         )
 

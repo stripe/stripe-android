@@ -11,6 +11,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -21,6 +22,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
+@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 class DefaultPaymentSheetLauncherTest {
 
     @BeforeTest
@@ -90,6 +92,7 @@ class DefaultPaymentSheetLauncherTest {
             createIntentCallback = { _, _ ->
                 error("I’m alive")
             },
+            customPaymentMethodConfirmHandler = null,
             externalPaymentMethodConfirmHandler = null,
         )
 
@@ -117,6 +120,7 @@ class DefaultPaymentSheetLauncherTest {
     fun `Clears out externalPaymentMethodConfirmHandler when lifecycle owner is destroyed`() {
         PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER] = PaymentElementCallbacks(
             createIntentCallback = null,
+            customPaymentMethodConfirmHandler = null,
             externalPaymentMethodConfirmHandler = { _, _ ->
                 error("I’m alive")
             },
@@ -148,6 +152,45 @@ class DefaultPaymentSheetLauncherTest {
         assertThat(
             PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER]
                 ?.externalPaymentMethodConfirmHandler
+        ).isNull()
+    }
+
+    @Test
+    fun `Clears out customPaymentMethodConfirmHandler when lifecycle owner is destroyed`() {
+        PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER] = PaymentElementCallbacks(
+            createIntentCallback = null,
+            customPaymentMethodConfirmHandler = { _, _ ->
+                error("I’m alive")
+            },
+            externalPaymentMethodConfirmHandler = null,
+        )
+
+        val lifecycleOwner = TestLifecycleOwner()
+
+        DefaultPaymentSheetLauncher(
+            activityResultLauncher = mock(),
+            activity = mock(),
+            lifecycleOwner = lifecycleOwner,
+            application = ApplicationProvider.getApplicationContext(),
+            callback = mock(),
+        )
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+        assertThat(
+            PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER]
+                ?.customPaymentMethodConfirmHandler
+        ).isNotNull()
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
+        assertThat(
+            PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER]
+                ?.customPaymentMethodConfirmHandler
+        ).isNotNull()
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        assertThat(
+            PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER]
+                ?.customPaymentMethodConfirmHandler
         ).isNull()
     }
 

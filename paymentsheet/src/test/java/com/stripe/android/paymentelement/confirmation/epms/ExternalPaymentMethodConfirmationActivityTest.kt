@@ -16,6 +16,7 @@ import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -45,6 +46,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 @RunWith(RobolectricTestRunner::class)
+@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 internal class ExternalPaymentMethodConfirmationActivityTest {
     private val application = ApplicationProvider.getApplicationContext<Application>()
 
@@ -61,6 +63,7 @@ internal class ExternalPaymentMethodConfirmationActivityTest {
     fun setup() {
         PaymentElementCallbackReferences["ConfirmationTestIdentifier"] = PaymentElementCallbacks(
             createIntentCallback = null,
+            customPaymentMethodConfirmHandler = null,
             externalPaymentMethodConfirmHandler = { _, _ ->
                 error("Should not be called!")
             }
