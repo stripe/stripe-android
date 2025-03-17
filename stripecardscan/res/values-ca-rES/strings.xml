@@ -2,6 +2,7 @@
 <resources>
   <string name="stripe_camera_permission_settings_message">Permeteu l\'accés de la càmera a la configuració per escanejar la targeta</string>
   <string name="stripe_card_scan_instructions">Escanegeu la targeta</string>
+  <string name="stripe_card_scan_privacy_link_text"><![CDATA[Utilitzem Stripe per verificar els detalls de la targeta. És possible que Stripe faci ús i emmagatzemi les dades d\'acord amb la política de privadesa. <a href=\"https://support.stripe.com/questions/stripes-card-image-verification\"><u>Més informació</u></a>]]></string>
   <string name="stripe_card_scan_title">Col·loqueu la targeta al rectangle per escanejar-la</string>
   <string name="stripe_close_button_description">Tanca</string>
   <string name="stripe_swap_camera_button_description">Canvia la càmera</string>
