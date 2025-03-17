@@ -19,16 +19,15 @@ internal class CardScanContract : ActivityResultContract<CardScanContract.Args, 
     }
 
     override fun parseResult(resultCode: Int, intent: Intent?): CardScanSheetResult {
-        val bundle = intent?.extras ?: return CardScanSheetResult.Failed(
+        val unknownScanError = CardScanSheetResult.Failed(
             error = UnknownScanException("No data in the result intent")
         )
+        val bundle = intent?.extras ?: return unknownScanError
         return BundleCompat.getParcelable(
             bundle,
             CardScanActivity.CARD_SCAN_PARCELABLE_NAME,
             CardScanSheetResult::class.java
-        ) ?: CardScanSheetResult.Failed(
-            error = UnknownScanException("No data in the result intent")
-        )
+        ) ?: unknownScanError
     }
 
     @Parcelize

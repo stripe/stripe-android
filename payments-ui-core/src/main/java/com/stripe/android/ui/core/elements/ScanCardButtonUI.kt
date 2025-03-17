@@ -26,7 +26,7 @@ import com.stripe.android.ui.core.cardscan.CardScanContract
 @Composable
 internal fun ScanCardButtonUI(
     enabled: Boolean,
-    sessionId: String?,
+    elementsSessionId: String?,
     onResult: (CardScanSheetResult) -> Unit
 ) {
     val cardScanLauncher =
@@ -43,7 +43,7 @@ internal fun ScanCardButtonUI(
                 cardScanLauncher.launch(
                     input = CardScanContract.Args(
                         configuration = CardScanConfiguration(
-                            elementsSessionId = sessionId
+                            elementsSessionId = elementsSessionId
                         )
                     )
                 )

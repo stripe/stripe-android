@@ -65,7 +65,7 @@ internal object PaymentMethodMetadataFactory {
             linkState = linkState,
             cardBrandFilter = cardBrandFilter,
             paymentMethodIncentive = paymentMethodIncentive,
-            sessionId = sessionId
+            elementsSessionId = sessionId
         )
     }
 

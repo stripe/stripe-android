@@ -60,7 +60,7 @@ internal data class PaymentMethodMetadata(
     val paymentMethodIncentive: PaymentMethodIncentive?,
     val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
     val cardBrandFilter: CardBrandFilter,
-    val sessionId: String
+    val elementsSessionId: String
 ) : Parcelable {
     fun hasIntentToSetup(): Boolean {
         return when (stripeIntent) {
@@ -274,7 +274,7 @@ internal data class PaymentMethodMetadata(
                 paymentMethodIncentive = linkSettings?.linkConsumerIncentive?.toPaymentMethodIncentive(),
                 isGooglePayReady = isGooglePayReady,
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
-                sessionId = elementsSession.elementsSessionId
+                elementsSessionId = elementsSession.elementsSessionId
             )
         }
 
@@ -314,7 +314,7 @@ internal data class PaymentMethodMetadata(
                 paymentMethodIncentive = null,
                 externalPaymentMethodSpecs = emptyList(),
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
-                sessionId = elementsSession.elementsSessionId
+                elementsSessionId = elementsSession.elementsSessionId
             )
         }
 
@@ -347,7 +347,7 @@ internal data class PaymentMethodMetadata(
                 paymentMethodIncentive = null,
                 isGooglePayReady = false,
                 cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all()),
-                sessionId = configuration.elementsSessionId
+                elementsSessionId = configuration.elementsSessionId
             )
         }
 
