@@ -52,7 +52,9 @@ internal object ApiKeyFixtures {
         livemode = true
     )
 
-    fun sessionManifest() = FinancialConnectionsSessionManifest(
+    fun sessionManifest(
+        consentAcquiredAt: String? = "some_date",
+    ) = FinancialConnectionsSessionManifest(
         allowManualEntry = true,
         consentRequired = true,
         customManualEntryHandling = true,
@@ -73,7 +75,8 @@ internal object ApiKeyFixtures {
         manualEntryMode = ManualEntryMode.AUTOMATIC,
         successUrl = SUCCESS_URL,
         cancelUrl = CANCEL_URL,
-        hostedAuthUrl = HOSTED_AUTH_URL
+        hostedAuthUrl = HOSTED_AUTH_URL,
+        consentAcquiredAt = consentAcquiredAt,
     )
 
     fun authorizationSession() = FinancialConnectionsAuthorizationSession(

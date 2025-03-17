@@ -57,6 +57,9 @@ internal data class FinancialConnectionsSessionManifest(
     @SerialName(value = "consent_required")
     val consentRequired: Boolean,
 
+    @SerialName(value = "consent_acquired_at")
+    val consentAcquiredAt: String?,
+
     @SerialName(value = "custom_manual_entry_handling")
     val customManualEntryHandling: Boolean,
 
@@ -186,6 +189,9 @@ internal data class FinancialConnectionsSessionManifest(
     @SerialName("theme")
     val theme: Theme? = null,
 ) : Parcelable {
+
+    val consentAcquired: Boolean
+        get() = !consentRequired || consentAcquiredAt != null
 
     /**
      *
