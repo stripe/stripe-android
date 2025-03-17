@@ -30,6 +30,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -45,10 +47,10 @@ internal class FinancialConnectionsLiteViewModel(
         savedStateHandle[EXTRA_ARGS] ?: throw IllegalStateException("Missing arguments")
 
     private val _viewEffects = MutableSharedFlow<ViewEffect>()
-    val viewEffects: SharedFlow<ViewEffect> get() = _viewEffects
+    val viewEffects: SharedFlow<ViewEffect> = _viewEffects.asSharedFlow()
 
     private val _state = MutableStateFlow<State?>(null)
-    val state: StateFlow<State?> get() = _state
+    val state: StateFlow<State?> = _state.asStateFlow()
 
     init {
         viewModelScope.launch(workContext) {
@@ -77,7 +79,7 @@ internal class FinancialConnectionsLiteViewModel(
                 when (args) {
                     is ForData -> onSuccessFromDataFlow()
                     is ForInstantDebits -> onSuccessFromInstantDebits(uri)
-                    is ForToken -> TODO()
+                    is ForToken -> onSuccessFromTokenFlow()
                 }
             }
             uri.toString().contains(state.cancelUrl) -> {
@@ -89,9 +91,32 @@ internal class FinancialConnectionsLiteViewModel(
         }
     }
 
-    private fun launchInBrowser(uri: Uri) {
-        viewModelScope.launch {
-            _viewEffects.emit(OpenCustomTab(uri))
+    private fun onSuccessFromTokenFlow() {
+        viewModelScope.launch(workContext) {
+            runCatching {
+                val session = repository.getFinancialConnectionsSession(args.configuration).getOrThrow()
+                _viewEffects.emit(
+                    FinishWithResult(
+                        Completed(
+                            financialConnectionsSession = session,
+                            token = requireNotNull(session.parsedToken)
+                        )
+                    )
+                )
+            }.onFailure {
+                handleError(it, "Failed to complete session for token flow")
+            }
+        }
+    }
+
+    private fun onSuccessFromDataFlow() {
+        viewModelScope.launch(workContext) {
+            runCatching {
+                val session = repository.getFinancialConnectionsSession(args.configuration).getOrThrow()
+                _viewEffects.emit(FinishWithResult(Completed(financialConnectionsSession = session)))
+            }.onFailure {
+                handleError(it, "Failed to complete session for data flow")
+            }
         }
     }
 
@@ -112,6 +137,12 @@ internal class FinancialConnectionsLiteViewModel(
             }
     }
 
+    private fun launchInBrowser(uri: Uri) {
+        viewModelScope.launch {
+            _viewEffects.emit(OpenCustomTab(uri))
+        }
+    }
+
     private fun withState(block: (State) -> Unit) = runCatching {
         block(requireNotNull(_state.value))
     }.onFailure {
@@ -121,17 +152,6 @@ internal class FinancialConnectionsLiteViewModel(
     private fun onAuthFlowCanceled() {
         viewModelScope.launch {
             _viewEffects.emit(FinishWithResult(result = Canceled))
-        }
-    }
-
-    private fun onSuccessFromDataFlow() {
-        viewModelScope.launch(workContext) {
-            runCatching {
-                val session = repository.getFinancialConnectionsSession(args.configuration).getOrThrow()
-                _viewEffects.emit(FinishWithResult(Completed(financialConnectionsSession = session)))
-            }.onFailure {
-                handleError(it, "Failed to synchronize session")
-            }
         }
     }
 
