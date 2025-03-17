@@ -1,11 +1,25 @@
 $dokka.format:html-v1
 $dokka.linkExtension:html
 
+module:3ds2sdk
+com.stripe.android.stripe3ds2.exceptions
+com.stripe.android.stripe3ds2.init
+com.stripe.android.stripe3ds2.init.ui
+com.stripe.android.stripe3ds2.observability
+com.stripe.android.stripe3ds2.security
+com.stripe.android.stripe3ds2.service
+com.stripe.android.stripe3ds2.transaction
+com.stripe.android.stripe3ds2.transactions
+com.stripe.android.stripe3ds2.utils
+com.stripe.android.stripe3ds2.views
 module:financial-connections
 com.stripe.android.financialconnections
 com.stripe.android.financialconnections.analytics
 com.stripe.android.financialconnections.exception
 com.stripe.android.financialconnections.features.linkaccountpicker
+com.stripe.android.financialconnections.model
+module:financial-connections-core
+com.stripe.android.financialconnections
 com.stripe.android.financialconnections.model
 module:identity
 com.stripe.android.identity
