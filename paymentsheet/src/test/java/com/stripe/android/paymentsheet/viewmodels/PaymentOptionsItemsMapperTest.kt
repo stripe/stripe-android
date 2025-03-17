@@ -8,6 +8,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsItem
+import com.stripe.android.paymentsheet.PaymentOptionsItemViewType
 import com.stripe.android.paymentsheet.state.CustomerState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -51,11 +52,11 @@ class PaymentOptionsItemsMapperTest {
 
             val state = awaitItem()
             assertThat(state).hasSize(5)
-            assertThat(state[0].viewType).isEqualTo(PaymentOptionsItem.ViewType.AddCard)
-            assertThat(state[1].viewType).isEqualTo(PaymentOptionsItem.ViewType.GooglePay)
-            assertThat(state[2].viewType).isEqualTo(PaymentOptionsItem.ViewType.Link)
-            assertThat(state[3].viewType).isEqualTo(PaymentOptionsItem.ViewType.SavedPaymentMethod)
-            assertThat(state[4].viewType).isEqualTo(PaymentOptionsItem.ViewType.SavedPaymentMethod)
+            assertThat(state[0].viewType).isEqualTo(PaymentOptionsItemViewType.AddCard)
+            assertThat(state[1].viewType).isEqualTo(PaymentOptionsItemViewType.GooglePay)
+            assertThat(state[2].viewType).isEqualTo(PaymentOptionsItemViewType.Link)
+            assertThat(state[3].viewType).isEqualTo(PaymentOptionsItemViewType.SavedPaymentMethod)
+            assertThat(state[4].viewType).isEqualTo(PaymentOptionsItemViewType.SavedPaymentMethod)
         }
     }
 
@@ -157,7 +158,7 @@ class PaymentOptionsItemsMapperTest {
 
             val state = awaitItem()
             assertThat(state).hasSize(3)
-            assertThat(state[0].viewType).isEqualTo(PaymentOptionsItem.ViewType.AddCard)
+            assertThat(state[0].viewType).isEqualTo(PaymentOptionsItemViewType.AddCard)
 
             assertBlock(
                 state[1] as? PaymentOptionsItem.SavedPaymentMethod,

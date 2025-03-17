@@ -1,24 +1,25 @@
 package com.stripe.android.paymentsheet
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.model.PaymentMethod
 
 internal sealed class PaymentOptionsItem {
 
-    abstract val viewType: ViewType
+    abstract val viewType: PaymentOptionsItemViewType
     abstract val isEnabledDuringEditing: Boolean
 
     object AddCard : PaymentOptionsItem() {
-        override val viewType: ViewType = ViewType.AddCard
+        override val viewType: PaymentOptionsItemViewType = PaymentOptionsItemViewType.AddCard
         override val isEnabledDuringEditing: Boolean = false
     }
 
     object GooglePay : PaymentOptionsItem() {
-        override val viewType: ViewType = ViewType.GooglePay
+        override val viewType: PaymentOptionsItemViewType = PaymentOptionsItemViewType.GooglePay
         override val isEnabledDuringEditing: Boolean = false
     }
 
     object Link : PaymentOptionsItem() {
-        override val viewType: ViewType = ViewType.Link
+        override val viewType: PaymentOptionsItemViewType = PaymentOptionsItemViewType.Link
         override val isEnabledDuringEditing: Boolean = false
     }
 
@@ -28,7 +29,7 @@ internal sealed class PaymentOptionsItem {
     data class SavedPaymentMethod(
         val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     ) : PaymentOptionsItem() {
-        override val viewType: ViewType = ViewType.SavedPaymentMethod
+        override val viewType: PaymentOptionsItemViewType = PaymentOptionsItemViewType.SavedPaymentMethod
 
         val displayName = displayableSavedPaymentMethod.displayName
         val paymentMethod = displayableSavedPaymentMethod.paymentMethod
@@ -36,13 +37,14 @@ internal sealed class PaymentOptionsItem {
 
         override val isEnabledDuringEditing: Boolean = true
     }
+}
 
-    enum class ViewType {
-        SavedPaymentMethod,
-        AddCard,
-        GooglePay,
-        Link,
-    }
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+enum class PaymentOptionsItemViewType {
+    SavedPaymentMethod,
+    AddCard,
+    GooglePay,
+    Link,
 }
 
 internal val PaymentOptionsItem.key: String
