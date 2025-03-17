@@ -28,9 +28,9 @@ import com.stripe.android.connect.util.isInInstrumentationTest
 import com.stripe.android.connect.webview.serialization.AccountSessionClaimedMessage
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.ConnectJson
+import com.stripe.android.connect.webview.serialization.OpenAuthenticatedWebViewMessage
 import com.stripe.android.connect.webview.serialization.OpenFinancialConnectionsMessage
 import com.stripe.android.connect.webview.serialization.PageLoadMessage
-import com.stripe.android.connect.webview.serialization.SecureWebViewMessage
 import com.stripe.android.connect.webview.serialization.SetCollectMobileFinancialConnectionsResultPayloadJs
 import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
@@ -201,6 +201,11 @@ internal class StripeConnectWebView private constructor(
         fun onMerchantIdChanged(merchantId: String)
 
         /**
+         * Callback to invoke upon receiving 'openAuthenticatedWebView' message.
+         */
+        fun onReceivedOpenAuthenticatedWebView(activity: Activity, message: OpenAuthenticatedWebViewMessage)
+
+        /**
          * Callback to invoke upon receiving 'openFinancialConnections' message.
          */
         suspend fun onOpenFinancialConnections(activity: Activity, message: OpenFinancialConnectionsMessage)
@@ -345,12 +350,16 @@ internal class StripeConnectWebView private constructor(
         }
 
         @JavascriptInterface
-        fun openSecureWebView(message: String) {
-            val secureWebViewData = tryDeserializeWebMessage<SecureWebViewMessage>(
-                webFunctionName = "openSecureWebView",
+        fun openAuthenticatedWebView(message: String) {
+            val activity = findActivity()
+                ?: return
+            val parsed = tryDeserializeWebMessage<OpenAuthenticatedWebViewMessage>(
+                webFunctionName = "openAuthenticatedWebView",
                 message = message,
-            )
-            logger.debug("($loggerTag) Open secure web view with data: $secureWebViewData")
+            ) ?: return
+
+            logger.debug("($loggerTag) Open authenticated WebView: $parsed")
+            delegate.onReceivedOpenAuthenticatedWebView(activity, parsed)
         }
 
         @JavascriptInterface
