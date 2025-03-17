@@ -34,6 +34,7 @@ import com.stripe.android.paymentsheet.state.DefaultLinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.DefaultPaymentElementLoader
 import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.ui.core.di.CardScanModule
 import com.stripe.android.uicore.image.StripeImageLoader
 import dagger.Binds
 import dagger.BindsInstance
@@ -55,7 +56,8 @@ import kotlin.coroutines.CoroutineContext
         GooglePayLauncherModule::class,
         ExtendedPaymentElementConfirmationModule::class,
         EmbeddedCommonModule::class,
-        ApplicationIdModule::class
+        ApplicationIdModule::class,
+        CardScanModule::class
     ],
 )
 internal interface EmbeddedPaymentElementViewModelComponent {

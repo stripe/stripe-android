@@ -27,6 +27,7 @@ import kotlin.time.Duration.Companion.seconds
 @Suppress("LargeClass")
 class PaymentSheetEventTest {
 
+    @Suppress("LongMethod")
     @Test
     fun `Init event with full config should return expected params`() {
         val event = PaymentSheetEvent.Init(
@@ -35,6 +36,7 @@ class PaymentSheetEventTest {
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
+            isStripeCardScanAvailable = true,
         )
 
         assertThat(
@@ -80,6 +82,7 @@ class PaymentSheetEventTest {
             "external_payment_methods" to null,
             "payment_method_layout" to "horizontal",
             "card_brand_acceptance" to false,
+            "card_scan_available" to true
         )
 
         assertThat(event.params).run {
@@ -90,6 +93,7 @@ class PaymentSheetEventTest {
         }
     }
 
+    @Suppress("LongMethod")
     @Test
     fun `Init event with external payment methods should return expected params`() {
         val event = PaymentSheetEvent.Init(
@@ -98,6 +102,7 @@ class PaymentSheetEventTest {
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
+            isStripeCardScanAvailable = true,
         )
 
         assertThat(
@@ -143,6 +148,7 @@ class PaymentSheetEventTest {
             "external_payment_methods" to listOf("external_paypal", "external_fawry"),
             "payment_method_layout" to "horizontal",
             "card_brand_acceptance" to false,
+            "card_scan_available" to true
         )
 
         assertThat(event.params).run {
@@ -153,6 +159,7 @@ class PaymentSheetEventTest {
         }
     }
 
+    @Suppress("LongMethod")
     @Test
     fun `Init event with vertical mode should return expected params`() {
         val event = PaymentSheetEvent.Init(
@@ -162,6 +169,7 @@ class PaymentSheetEventTest {
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
+            isStripeCardScanAvailable = true,
         )
 
         assertThat(
@@ -207,6 +215,7 @@ class PaymentSheetEventTest {
             "external_payment_methods" to null,
             "payment_method_layout" to "vertical",
             "card_brand_acceptance" to false,
+            "card_scan_available" to true
         )
 
         assertThat(event.params).run {
@@ -217,6 +226,7 @@ class PaymentSheetEventTest {
         }
     }
 
+    @Suppress("LongMethod")
     @Test
     fun `Init event with minimum config should return expected params`() {
         val event = PaymentSheetEvent.Init(
@@ -225,6 +235,7 @@ class PaymentSheetEventTest {
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
+            isStripeCardScanAvailable = true,
         )
 
         assertThat(
@@ -270,6 +281,7 @@ class PaymentSheetEventTest {
             "external_payment_methods" to null,
             "payment_method_layout" to "horizontal",
             "card_brand_acceptance" to false,
+            "card_scan_available" to true
         )
 
         assertThat(event.params).run {
@@ -291,6 +303,7 @@ class PaymentSheetEventTest {
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
+            isStripeCardScanAvailable = true,
         )
 
         assertThat(
@@ -336,6 +349,7 @@ class PaymentSheetEventTest {
             "external_payment_methods" to null,
             "payment_method_layout" to "horizontal",
             "card_brand_acceptance" to false,
+            "card_scan_available" to true
         )
 
         assertThat(event.params).run {
@@ -1314,6 +1328,7 @@ class PaymentSheetEventTest {
         )
     }
 
+    @Suppress("LongMethod")
     @Test
     fun `Init event should have default params if config is all defaults`() {
         val expectedPrimaryButton = mapOf(
@@ -1356,6 +1371,7 @@ class PaymentSheetEventTest {
             "external_payment_methods" to null,
             "payment_method_layout" to "horizontal",
             "card_brand_acceptance" to false,
+            "card_scan_available" to true
         )
         assertThat(
             PaymentSheetEvent.Init(
@@ -1364,6 +1380,7 @@ class PaymentSheetEventTest {
                 isDeferred = false,
                 linkEnabled = false,
                 googlePaySupported = false,
+                isStripeCardScanAvailable = true,
             ).params
         ).isEqualTo(
             mapOf(
@@ -1375,6 +1392,7 @@ class PaymentSheetEventTest {
         )
     }
 
+    @Suppress("LongMethod")
     @Test
     fun `Init event should should mark all optional params present if they are there`() {
         val expectedPrimaryButton = mapOf(
@@ -1417,6 +1435,7 @@ class PaymentSheetEventTest {
             "external_payment_methods" to null,
             "payment_method_layout" to "automatic",
             "card_brand_acceptance" to false,
+            "card_scan_available" to true
         )
         assertThat(
             PaymentSheetEvent.Init(
@@ -1425,6 +1444,7 @@ class PaymentSheetEventTest {
                 isDeferred = false,
                 linkEnabled = false,
                 googlePaySupported = false,
+                isStripeCardScanAvailable = true,
             ).params
         ).isEqualTo(
             mapOf(
@@ -1434,6 +1454,34 @@ class PaymentSheetEventTest {
                 "google_pay_enabled" to false,
             )
         )
+    }
+
+    @Test
+    fun `Init event should report card_scan_available as true if available`() {
+        assertThat(
+            PaymentSheetEvent.Init(
+                mode = EventReporter.Mode.Complete,
+                configuration = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING,
+                isDeferred = false,
+                linkEnabled = false,
+                googlePaySupported = false,
+                isStripeCardScanAvailable = true,
+            ).params["mpe_config"]?.asMap()?.get("card_scan_available")
+        ).isEqualTo(true)
+    }
+
+    @Test
+    fun `Init event should report card_scan_available as false if unavailable`() {
+        assertThat(
+            PaymentSheetEvent.Init(
+                mode = EventReporter.Mode.Complete,
+                configuration = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING,
+                isDeferred = false,
+                linkEnabled = false,
+                googlePaySupported = false,
+                isStripeCardScanAvailable = false,
+            ).params["mpe_config"]?.asMap()?.get("card_scan_available")
+        ).isEqualTo(false)
     }
 
     @Test
@@ -1578,6 +1626,7 @@ class PaymentSheetEventTest {
             googlePaySupported = true,
             isDeferred = false,
             linkEnabled = false,
+            isStripeCardScanAvailable = true,
         )
     }
 

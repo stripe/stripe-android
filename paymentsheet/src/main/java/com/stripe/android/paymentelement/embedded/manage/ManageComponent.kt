@@ -9,6 +9,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.ui.core.di.CardScanModule
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
@@ -22,6 +23,7 @@ import javax.inject.Singleton
     modules = [
         ManageModule::class,
         EmbeddedCommonModule::class,
+        CardScanModule::class
     ],
 )
 @Singleton
