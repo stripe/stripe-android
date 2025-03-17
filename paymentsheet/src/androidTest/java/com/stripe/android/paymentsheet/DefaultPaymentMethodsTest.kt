@@ -270,6 +270,8 @@ internal class DefaultPaymentMethodsTest {
         paymentSheetPage.checkSaveForFuture()
         paymentSheetPage.checkSetAsDefaultCheckbox()
 
+        paymentSheetPage.assertSetAsDefaultCheckboxChecked()
+
         enqueuePaymentIntentConfirmWithExpectedSetAsDefault(setAsDefaultValue = true)
 
         paymentSheetPage.clickPrimaryButton()
