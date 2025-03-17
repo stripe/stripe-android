@@ -206,6 +206,7 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
             editPage: EditPage,
             paymentMethod: PaymentMethod,
         ) {
+            verticalModePage.waitUntilVisible()
             verticalModePage.clickViewMore()
             managePage.waitUntilVisible()
 
