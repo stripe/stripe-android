@@ -59,6 +59,8 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity() {
     private fun openCustomTab(uri: Uri) {
         CustomTabsIntent.Builder()
             .setShowTitle(true)
+            .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
+            .setBookmarksButtonEnabled(false)
             .build()
             .launchUrl(this, uri)
     }
