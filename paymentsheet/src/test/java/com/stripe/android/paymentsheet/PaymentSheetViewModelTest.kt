@@ -2124,17 +2124,17 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `Sends correct analytics event when using deferred intent with client-side confirmation`() = runTest {
-        PaymentElementCallbackReferences[PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks(
-            createIntentCallback = { _, _ ->
+        PaymentElementCallbackReferences[PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks.Builder()
+            .createIntentCallback { _, _ ->
                 error("Should not be called!")
-            },
-            customPaymentMethodConfirmHandler = { _, _ ->
+            }
+            .customPaymentMethodConfirmHandler { _, _ ->
                 error("Should not be called!")
-            },
-            externalPaymentMethodConfirmHandler = { _, _ ->
+            }
+            .externalPaymentMethodConfirmHandler { _, _ ->
                 error("Should not be called!")
-            },
-        )
+            }
+            .build()
 
         createViewModelForDeferredIntent()
 
@@ -2146,17 +2146,17 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `Sends correct analytics event when using deferred intent with server-side confirmation`() = runTest {
-        PaymentElementCallbackReferences[PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks(
-            createIntentCallback = { _, _ ->
+        PaymentElementCallbackReferences[PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks.Builder()
+            .createIntentCallback { _, _ ->
                 error("Should not be called!")
-            },
-            customPaymentMethodConfirmHandler = { _, _ ->
+            }
+            .customPaymentMethodConfirmHandler { _, _ ->
                 error("Should not be called!")
-            },
-            externalPaymentMethodConfirmHandler = { _, _ ->
+            }
+            .externalPaymentMethodConfirmHandler { _, _ ->
                 error("Should not be called!")
-            },
-        )
+            }
+            .build()
 
         createViewModelForDeferredIntent()
 

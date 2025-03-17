@@ -10,8 +10,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.stripe.android.common.ui.UpdateCallbacks
-import com.stripe.android.paymentelement.CustomPaymentMethodConfirmHandler
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.utils.rememberActivity
 import java.util.UUID
@@ -27,10 +25,13 @@ import java.util.UUID
 fun rememberPaymentSheet(
     paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet {
-    @OptIn(ExperimentalCustomPaymentMethodsApi::class)
+    val callbacks = remember {
+        PaymentElementCallbacks.Builder()
+            .build()
+    }
+
     return internalRememberPaymentSheet(
-        createIntentCallback = null,
-        externalPaymentMethodConfirmHandler = null,
+        callbacks = callbacks,
         paymentResultCallback = paymentResultCallback,
     )
 }
@@ -50,10 +51,14 @@ fun rememberPaymentSheet(
     createIntentCallback: CreateIntentCallback,
     paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet {
-    @OptIn(ExperimentalCustomPaymentMethodsApi::class)
+    val callbacks = remember(createIntentCallback) {
+        PaymentElementCallbacks.Builder()
+            .createIntentCallback(createIntentCallback)
+            .build()
+    }
+
     return internalRememberPaymentSheet(
-        createIntentCallback = createIntentCallback,
-        externalPaymentMethodConfirmHandler = null,
+        callbacks = callbacks,
         paymentResultCallback = paymentResultCallback,
     )
 }
@@ -77,32 +82,26 @@ fun rememberPaymentSheet(
     externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
     paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet {
-    @OptIn(ExperimentalCustomPaymentMethodsApi::class)
+    val callbacks = remember(createIntentCallback, externalPaymentMethodConfirmHandler) {
+        PaymentElementCallbacks.Builder()
+            .createIntentCallback(createIntentCallback)
+            .externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
+            .build()
+    }
+
     return internalRememberPaymentSheet(
-        createIntentCallback = createIntentCallback,
-        externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
+        callbacks = callbacks,
         paymentResultCallback = paymentResultCallback,
     )
 }
 
 @Composable
-@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 internal fun internalRememberPaymentSheet(
-    createIntentCallback: CreateIntentCallback? = null,
-    externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
-    customPaymentMethodConfirmHandler: CustomPaymentMethodConfirmHandler? = null,
+    callbacks: PaymentElementCallbacks,
     paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet {
     val paymentElementCallbackIdentifier = rememberSaveable {
         UUID.randomUUID().toString()
-    }
-
-    val callbacks = remember(createIntentCallback, externalPaymentMethodConfirmHandler) {
-        PaymentElementCallbacks(
-            createIntentCallback = createIntentCallback,
-            customPaymentMethodConfirmHandler = customPaymentMethodConfirmHandler,
-            externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
-        )
     }
 
     UpdateCallbacks(paymentElementCallbackIdentifier, callbacks)

@@ -1464,17 +1464,18 @@ internal class DefaultFlowControllerTest {
         )
 
         for ((clientSecret, deferredIntentConfirmationType) in clientSecrets) {
-            PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks(
-                createIntentCallback = { _, _ ->
-                    error("Should not be called!")
-                },
-                customPaymentMethodConfirmHandler = { _, _ ->
-                    error("Should not be called!")
-                },
-                externalPaymentMethodConfirmHandler = { _, _ ->
-                    error("Should not be called!")
-                },
-            )
+            PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] =
+                PaymentElementCallbacks.Builder()
+                    .createIntentCallback { _, _ ->
+                        error("Should not be called!")
+                    }
+                    .customPaymentMethodConfirmHandler { _, _ ->
+                        error("Should not be called!")
+                    }
+                    .externalPaymentMethodConfirmHandler { _, _ ->
+                        error("Should not be called!")
+                    }
+                    .build()
 
             val flowController = createAndConfigureFlowControllerForDeferredIntent()
             val savedSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
@@ -1907,13 +1908,11 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `Clears out CreateIntentCallback when lifecycle owner is destroyed`() {
-        PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks(
-            createIntentCallback = { _, _ ->
+        PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks.Builder()
+            .createIntentCallback { _, _ ->
                 error("I’m alive")
-            },
-            customPaymentMethodConfirmHandler = null,
-            externalPaymentMethodConfirmHandler = null,
-        )
+            }
+            .build()
 
         createFlowController()
 
@@ -1938,13 +1937,11 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `Clears out externalPaymentMethodConfirmHandler when lifecycle owner is destroyed`() {
-        PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks(
-            createIntentCallback = null,
-            customPaymentMethodConfirmHandler = null,
-            externalPaymentMethodConfirmHandler = { _, _ ->
+        PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks.Builder()
+            .externalPaymentMethodConfirmHandler { _, _ ->
                 error("I’m alive")
             }
-        )
+            .build()
 
         createFlowController()
 
@@ -1969,13 +1966,11 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `Clears out customPaymentMethodConfirmHandler when lifecycle owner is destroyed`() {
-        PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks(
-            createIntentCallback = null,
-            customPaymentMethodConfirmHandler = { _, _ ->
-                error("Should not be called!")
-            },
-            externalPaymentMethodConfirmHandler = null
-        )
+        PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks.Builder()
+            .customPaymentMethodConfirmHandler { _, _ ->
+                error("I’m alive")
+            }
+            .build()
 
         createFlowController()
 

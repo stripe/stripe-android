@@ -88,13 +88,11 @@ class DefaultPaymentSheetLauncherTest {
 
     @Test
     fun `Clears out CreateIntentCallback when lifecycle owner is destroyed`() {
-        PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER] = PaymentElementCallbacks(
-            createIntentCallback = { _, _ ->
+        PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER] = PaymentElementCallbacks.Builder()
+            .createIntentCallback { _, _ ->
                 error("I’m alive")
-            },
-            customPaymentMethodConfirmHandler = null,
-            externalPaymentMethodConfirmHandler = null,
-        )
+            }
+            .build()
 
         val lifecycleOwner = TestLifecycleOwner()
 
@@ -118,13 +116,11 @@ class DefaultPaymentSheetLauncherTest {
 
     @Test
     fun `Clears out externalPaymentMethodConfirmHandler when lifecycle owner is destroyed`() {
-        PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER] = PaymentElementCallbacks(
-            createIntentCallback = null,
-            customPaymentMethodConfirmHandler = null,
-            externalPaymentMethodConfirmHandler = { _, _ ->
+        PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER] = PaymentElementCallbacks.Builder()
+            .externalPaymentMethodConfirmHandler { _, _ ->
                 error("I’m alive")
-            },
-        )
+            }
+            .build()
 
         val lifecycleOwner = TestLifecycleOwner()
 
@@ -157,13 +153,11 @@ class DefaultPaymentSheetLauncherTest {
 
     @Test
     fun `Clears out customPaymentMethodConfirmHandler when lifecycle owner is destroyed`() {
-        PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER] = PaymentElementCallbacks(
-            createIntentCallback = null,
-            customPaymentMethodConfirmHandler = { _, _ ->
+        PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER] = PaymentElementCallbacks.Builder()
+            .customPaymentMethodConfirmHandler { _, _ ->
                 error("I’m alive")
-            },
-            externalPaymentMethodConfirmHandler = null,
-        )
+            }
+            .build()
 
         val lifecycleOwner = TestLifecycleOwner()
 
