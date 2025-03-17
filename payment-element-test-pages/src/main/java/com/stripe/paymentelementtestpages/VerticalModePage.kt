@@ -127,4 +127,27 @@ class VerticalModePage(
     fun clickEdit() {
         composeTestRule.onNodeWithTag(TEST_TAG_EDIT_SAVED_CARD).performClick()
     }
+
+    fun clickNewPaymentMethodButton(paymentMethodCode: PaymentMethodCode) {
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT))
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+
+        val testTag = "${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodCode"
+
+        composeTestRule.waitUntil(
+            timeoutMillis = 5000L
+        ) {
+            composeTestRule
+                .onAllNodes(hasTestTag(testTag))
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+
+        composeTestRule.onNode(hasTestTag(testTag))
+            .performClick()
+    }
 }
