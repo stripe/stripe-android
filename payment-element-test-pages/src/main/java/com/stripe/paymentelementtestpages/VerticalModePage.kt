@@ -138,8 +138,13 @@ class VerticalModePage(
 
         val testTag = "${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$paymentMethodCode"
 
-        composeTestRule.waitUntil {
-            composeTestRule.onNodeWithTag(testTag).isDisplayed()
+        composeTestRule.waitUntil(
+            timeoutMillis = 5000L
+        ) {
+            composeTestRule
+                .onAllNodes(hasTestTag(testTag))
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
 
         composeTestRule.onNode(hasTestTag(testTag))

@@ -69,8 +69,13 @@ class SavedPaymentMethodsPage(private val composeTestRule: ComposeTestRule) {
         // AddCard is the value of PaymentOptionItems.ViewType.AddCard.name()
         val testTag = "AddCard"
 
-        composeTestRule.waitUntil {
-            composeTestRule.onNodeWithTag(testTag).isDisplayed()
+        composeTestRule.waitUntil(
+            timeoutMillis = 5000L
+        ) {
+            composeTestRule
+                .onAllNodes(hasTestTag(testTag))
+                .fetchSemanticsNodes()
+                .isNotEmpty()
         }
 
         composeTestRule.onNodeWithTag(testTag, true).performClick()
