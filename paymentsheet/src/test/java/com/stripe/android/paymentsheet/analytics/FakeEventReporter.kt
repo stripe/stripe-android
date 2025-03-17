@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.analytics
 
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
+import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCode
@@ -60,7 +61,13 @@ internal class FakeEventReporter : EventReporter {
         _showManageSavedPaymentMethods.ensureAllEventsConsumed()
     }
 
-    override fun onInit(configuration: PaymentSheet.Configuration, isDeferred: Boolean) {
+    override fun onInit(
+        commonConfiguration: CommonConfiguration,
+        appearance: PaymentSheet.Appearance,
+        primaryButtonColor: Boolean?,
+        paymentMethodLayout: PaymentSheet.PaymentMethodLayout?,
+        isDeferred: Boolean
+    ) {
     }
 
     override fun onLoadStarted(initializedViaCompose: Boolean) {

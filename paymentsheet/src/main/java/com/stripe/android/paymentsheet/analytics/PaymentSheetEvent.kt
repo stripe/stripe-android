@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.analytics
 import com.stripe.android.common.analytics.getExternalPaymentMethodsAnalyticsValue
 import com.stripe.android.common.analytics.toAnalyticsMap
 import com.stripe.android.common.analytics.toAnalyticsValue
+import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
@@ -11,6 +12,8 @@ import com.stripe.android.model.analyticsValue
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent.Companion.FIELD_PAYMENT_METHOD_LAYOUT
+import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent.Companion.FIELD_PRIMARY_BUTTON_COLOR
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.asPaymentSheetLoadingException
@@ -118,46 +121,61 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
     class Init(
         private val mode: EventReporter.Mode,
-        private val configuration: PaymentSheet.Configuration,
-        override val isDeferred: Boolean,
+        private val commonConfiguration: CommonConfiguration,
+        private val appearance: PaymentSheet.Appearance,
+        private val primaryButtonColor: Boolean?,
+        private val paymentMethodLayout: PaymentSheet.PaymentMethodLayout?,
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
+        override val isDeferred: Boolean
     ) : PaymentSheetEvent() {
 
         override val eventName: String
             get() {
-                val configValue = listOfNotNull(
-                    FIELD_CUSTOMER.takeIf { configuration.customer != null },
-                    FIELD_GOOGLE_PAY.takeIf { configuration.googlePay != null }
-                ).takeUnless { it.isEmpty() }?.joinToString(separator = "_") ?: "default"
-                return formatEventName(mode, "init_$configValue")
+                return if (mode == EventReporter.Mode.Embedded) {
+                    formatEventName(mode, "init")
+                } else {
+                    val configValue = listOfNotNull(
+                        FIELD_CUSTOMER.takeIf { commonConfiguration.customer != null },
+                        FIELD_GOOGLE_PAY.takeIf { commonConfiguration.googlePay != null }
+                    ).takeUnless { it.isEmpty() }?.joinToString(separator = "_") ?: "default"
+                    formatEventName(mode, "init_$configValue")
+                }
             }
 
         override val additionalParams: Map<String, Any?>
             get() {
 
-                @Suppress("DEPRECATION")
-                val configurationMap = mapOf(
-                    FIELD_CUSTOMER to (configuration.customer != null),
-                    FIELD_CUSTOMER_ACCESS_PROVIDER to (configuration.customer?.accessType?.analyticsValue),
-                    FIELD_GOOGLE_PAY to (configuration.googlePay != null),
-                    FIELD_PRIMARY_BUTTON_COLOR to (configuration.primaryButtonColor != null),
-                    FIELD_BILLING to (configuration.defaultBillingDetails?.isFilledOut() == true),
-                    FIELD_DELAYED_PMS to configuration.allowsDelayedPaymentMethods,
-                    FIELD_APPEARANCE to configuration.appearance.toAnalyticsMap(),
-                    FIELD_PAYMENT_METHOD_ORDER to configuration.paymentMethodOrder,
-                    FIELD_ALLOWS_PAYMENT_METHODS_REQUIRING_SHIPPING_ADDRESS to
-                        configuration.allowsPaymentMethodsRequiringShippingAddress,
-                    FIELD_ALLOWS_REMOVAL_OF_LAST_SAVED_PAYMENT_METHOD to
-                        configuration.allowsRemovalOfLastSavedPaymentMethod,
-                    FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION to (
-                        configuration.billingDetailsCollectionConfiguration.toAnalyticsMap()
-                        ),
-                    FIELD_PREFERRED_NETWORKS to configuration.preferredNetworks.toAnalyticsValue(),
-                    FIELD_EXTERNAL_PAYMENT_METHODS to configuration.getExternalPaymentMethodsAnalyticsValue(),
-                    FIELD_PAYMENT_METHOD_LAYOUT to configuration.paymentMethodLayout.toAnalyticsValue(),
-                    FIELD_CARD_BRAND_ACCEPTANCE to configuration.cardBrandAcceptance.toAnalyticsValue(),
-                )
+                val configurationMap = buildMap {
+                    put(FIELD_CUSTOMER, commonConfiguration.customer != null)
+                    put(FIELD_CUSTOMER_ACCESS_PROVIDER, commonConfiguration.customer?.accessType?.analyticsValue)
+                    put(FIELD_GOOGLE_PAY, commonConfiguration.googlePay != null)
+                    primaryButtonColor?.let {
+                        put(FIELD_PRIMARY_BUTTON_COLOR, primaryButtonColor)
+                    }
+                    put(FIELD_BILLING, commonConfiguration.defaultBillingDetails?.isFilledOut() == true)
+                    put(FIELD_DELAYED_PMS, commonConfiguration.allowsDelayedPaymentMethods)
+                    put(FIELD_APPEARANCE, appearance.toAnalyticsMap(mode == EventReporter.Mode.Embedded))
+                    put(FIELD_PAYMENT_METHOD_ORDER, commonConfiguration.paymentMethodOrder)
+                    put(
+                        FIELD_ALLOWS_PAYMENT_METHODS_REQUIRING_SHIPPING_ADDRESS,
+                        commonConfiguration.allowsPaymentMethodsRequiringShippingAddress
+                    )
+                    put(
+                        FIELD_ALLOWS_REMOVAL_OF_LAST_SAVED_PAYMENT_METHOD,
+                        commonConfiguration.allowsRemovalOfLastSavedPaymentMethod
+                    )
+                    put(
+                        FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION,
+                        commonConfiguration.billingDetailsCollectionConfiguration.toAnalyticsMap()
+                    )
+                    put(FIELD_PREFERRED_NETWORKS, commonConfiguration.preferredNetworks.toAnalyticsValue())
+                    put(FIELD_EXTERNAL_PAYMENT_METHODS, commonConfiguration.getExternalPaymentMethodsAnalyticsValue())
+                    paymentMethodLayout?.let {
+                        put(FIELD_PAYMENT_METHOD_LAYOUT, paymentMethodLayout.toAnalyticsValue())
+                    }
+                    put(FIELD_CARD_BRAND_ACCEPTANCE, commonConfiguration.cardBrandAcceptance.toAnalyticsValue())
+                }
                 return mapOf(
                     FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION to configurationMap,
                 )
@@ -631,3 +649,6 @@ internal fun PaymentSelection?.linkContext(): String? {
         null -> null
     }
 }
+
+@Suppress("DEPRECATION")
+internal fun PaymentSheet.Configuration.primaryButtonColorUsage(): Boolean = primaryButtonColor != null

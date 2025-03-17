@@ -1,6 +1,8 @@
 package com.stripe.android.common.analytics
 
+import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.model.CardBrand
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.uicore.StripeThemeDefaults
@@ -18,8 +20,11 @@ internal const val FIELD_COLLECT_NAME = "name"
 internal const val FIELD_COLLECT_EMAIL = "email"
 internal const val FIELD_COLLECT_PHONE = "phone"
 internal const val FIELD_COLLECT_ADDRESS = "address"
+internal const val FIELD_EMBEDDED_PAYMENT_ELEMENT = "embedded_payment_element"
+internal const val FIELD_STYLE = "style"
+internal const val FIELD_ROW_STYLE = "row_style"
 
-internal fun PaymentSheet.Appearance.toAnalyticsMap(): Map<String, Any?> {
+internal fun PaymentSheet.Appearance.toAnalyticsMap(isEmbedded: Boolean = false): Map<String, Any?> {
     val primaryButtonConfig = primaryButton
 
     val primaryButtonConfigMap = mapOf(
@@ -40,13 +45,34 @@ internal fun PaymentSheet.Appearance.toAnalyticsMap(): Map<String, Any?> {
         FIELD_PRIMARY_BUTTON to primaryButtonConfigMap
     )
 
+    val embeddedConfigMap = embeddedAppearance.toAnalyticsMap()
+    if (isEmbedded) appearanceConfigMap[FIELD_EMBEDDED_PAYMENT_ELEMENT] = embeddedConfigMap
+
     // We add a usage field to make queries easier.
     val usedPrimaryButtonApi = primaryButtonConfigMap.values.contains(true)
     val usedAppearanceApi = appearanceConfigMap.values.filterIsInstance<Boolean>().contains(true)
+    val usedEmbeddedAppearanceApi = embeddedConfigMap.values.filterIsInstance<Boolean>().contains(true)
 
-    appearanceConfigMap[FIELD_APPEARANCE_USAGE] = usedAppearanceApi || usedPrimaryButtonApi
+    appearanceConfigMap[FIELD_APPEARANCE_USAGE] = usedAppearanceApi || usedPrimaryButtonApi || usedEmbeddedAppearanceApi
 
     return appearanceConfigMap
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+internal fun PaymentSheet.Appearance.Embedded.toAnalyticsMap(): Map<String, Any?> {
+    return mapOf(
+        FIELD_STYLE to (this.style != PaymentSheet.Appearance.Embedded.default.style),
+        FIELD_ROW_STYLE to this.style.toAnalyticsValue()
+    )
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+internal fun PaymentSheet.Appearance.Embedded.RowStyle.toAnalyticsValue(): String {
+    return when (this) {
+        is PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton -> "floating_button"
+        is PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio -> "flat_with_radio"
+        is PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark -> "flat_with_checkmark"
+    }
 }
 
 internal fun PaymentSheet.BillingDetailsCollectionConfiguration.toAnalyticsMap(): Map<String, Any?> {
@@ -67,7 +93,7 @@ internal fun List<CardBrand>.toAnalyticsValue(): String? {
     }
 }
 
-internal fun PaymentSheet.Configuration.getExternalPaymentMethodsAnalyticsValue(): List<String>? {
+internal fun CommonConfiguration.getExternalPaymentMethodsAnalyticsValue(): List<String>? {
     return this.externalPaymentMethods.takeIf { it.isNotEmpty() }?.take(PaymentSheetEvent.MAX_EXTERNAL_PAYMENT_METHODS)
 }
 

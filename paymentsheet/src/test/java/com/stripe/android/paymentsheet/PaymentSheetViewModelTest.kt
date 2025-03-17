@@ -14,6 +14,7 @@ import com.google.android.gms.common.api.Status
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
@@ -217,8 +218,12 @@ internal class PaymentSheetViewModelTest {
     fun `init should fire analytics event`() {
         val beforeSessionId = AnalyticsRequestFactory.sessionId
         createViewModel()
+        val config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         verify(eventReporter).onInit(
-            configuration = eq(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY),
+            commonConfiguration = eq(config.asCommonConfiguration()),
+            appearance = config.appearance,
+            primaryButtonColor = anyOrNull(),
+            paymentMethodLayout = anyOrNull(),
             isDeferred = eq(false),
         )
 
@@ -2115,7 +2120,10 @@ internal class PaymentSheetViewModelTest {
         createViewModel()
 
         verify(eventReporter).onInit(
-            configuration = anyOrNull(),
+            commonConfiguration = anyOrNull(),
+            appearance = anyOrNull(),
+            primaryButtonColor = anyOrNull(),
+            paymentMethodLayout = anyOrNull(),
             isDeferred = eq(false),
         )
     }
@@ -2134,7 +2142,10 @@ internal class PaymentSheetViewModelTest {
         createViewModelForDeferredIntent()
 
         verify(eventReporter).onInit(
-            configuration = anyOrNull(),
+            commonConfiguration = anyOrNull(),
+            appearance = anyOrNull(),
+            primaryButtonColor = anyOrNull(),
+            paymentMethodLayout = anyOrNull(),
             isDeferred = eq(true),
         )
     }
@@ -2153,7 +2164,10 @@ internal class PaymentSheetViewModelTest {
         createViewModelForDeferredIntent()
 
         verify(eventReporter).onInit(
-            configuration = anyOrNull(),
+            commonConfiguration = anyOrNull(),
+            appearance = anyOrNull(),
+            primaryButtonColor = anyOrNull(),
+            paymentMethodLayout = anyOrNull(),
             isDeferred = eq(true),
         )
     }

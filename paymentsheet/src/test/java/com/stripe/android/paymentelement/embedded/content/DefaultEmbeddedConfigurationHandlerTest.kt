@@ -14,6 +14,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedConfigurationHandler.ConfigurationCache
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import kotlinx.coroutines.Dispatchers
@@ -305,7 +306,8 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
             val loader = FakePaymentElementLoader()
             val savedStateHandle = SavedStateHandle()
             val sheetStateHolder = SheetStateHolder(savedStateHandle)
-            val handler = DefaultEmbeddedConfigurationHandler(loader, savedStateHandle, sheetStateHolder)
+            val eventReporter = FakeEventReporter()
+            val handler = DefaultEmbeddedConfigurationHandler(loader, savedStateHandle, sheetStateHolder, eventReporter)
             Scenario(
                 loader = loader,
                 savedStateHandle = savedStateHandle,

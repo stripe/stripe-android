@@ -4,6 +4,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.primaryButtonColorUsage
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import kotlinx.coroutines.CoroutineScope
@@ -115,8 +116,11 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
         val isDecoupling = configureRequest.initializationMode is PaymentElementLoader.InitializationMode.DeferredIntent
 
         eventReporter.onInit(
-            configuration = configuration,
+            commonConfiguration = configuration.asCommonConfiguration(),
+            primaryButtonColor = configuration.primaryButtonColorUsage(),
+            paymentMethodLayout = configuration.paymentMethodLayout,
             isDeferred = isDecoupling,
+            appearance = configuration.appearance
         )
 
         viewModel.paymentSelection = paymentSelectionUpdater(

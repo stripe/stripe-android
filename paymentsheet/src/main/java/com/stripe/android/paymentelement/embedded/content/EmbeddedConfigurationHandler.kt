@@ -10,6 +10,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -28,6 +29,7 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
     private val paymentElementLoader: PaymentElementLoader,
     private val savedStateHandle: SavedStateHandle,
     private val sheetStateHolder: SheetStateHolder,
+    private val eventReporter: EventReporter
 ) : EmbeddedConfigurationHandler {
 
     private var cache: ConfigurationCache?
@@ -46,6 +48,13 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
         configuration: EmbeddedPaymentElement.Configuration,
     ): Result<PaymentElementLoader.State> {
         val targetConfiguration = configuration.asCommonConfiguration()
+        eventReporter.onInit(
+            commonConfiguration = targetConfiguration,
+            appearance = configuration.appearance,
+            isDeferred = true,
+            primaryButtonColor = null,
+            paymentMethodLayout = null
+        )
 
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration)
         try {

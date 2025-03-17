@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.analytics
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
@@ -11,6 +12,7 @@ import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_SELECTION
 import com.stripe.android.model.PaymentMethodFixtures.LINK_INLINE_PAYMENT_SELECTION
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -29,9 +31,13 @@ class PaymentSheetEventTest {
 
     @Test
     fun `Init event with full config should return expected params`() {
+        val config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            commonConfiguration = config.asCommonConfiguration(),
+            appearance = config.appearance,
+            primaryButtonColor = config.primaryButtonColorUsage(),
+            paymentMethodLayout = config.paymentMethodLayout,
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
@@ -92,9 +98,13 @@ class PaymentSheetEventTest {
 
     @Test
     fun `Init event with external payment methods should return expected params`() {
+        val config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_EXTERNAL_PAYMENT_METHODS
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_EXTERNAL_PAYMENT_METHODS,
+            commonConfiguration = config.asCommonConfiguration(),
+            appearance = config.appearance,
+            primaryButtonColor = config.primaryButtonColorUsage(),
+            paymentMethodLayout = config.paymentMethodLayout,
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
@@ -155,10 +165,15 @@ class PaymentSheetEventTest {
 
     @Test
     fun `Init event with vertical mode should return expected params`() {
+        val config = PaymentSheetFixtures.CONFIG_CUSTOMER.copy(
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical
+        )
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER
-                .copy(paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical),
+            commonConfiguration = config.asCommonConfiguration(),
+            appearance = config.appearance,
+            primaryButtonColor = config.primaryButtonColorUsage(),
+            paymentMethodLayout = config.paymentMethodLayout,
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
@@ -219,9 +234,13 @@ class PaymentSheetEventTest {
 
     @Test
     fun `Init event with minimum config should return expected params`() {
+        val config = PaymentSheetFixtures.CONFIG_MINIMUM
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
-            configuration = PaymentSheetFixtures.CONFIG_MINIMUM,
+            commonConfiguration = config.asCommonConfiguration(),
+            appearance = config.appearance,
+            primaryButtonColor = config.primaryButtonColorUsage(),
+            paymentMethodLayout = config.paymentMethodLayout,
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
@@ -283,11 +302,15 @@ class PaymentSheetEventTest {
     @Test
     @Suppress("LongMethod")
     fun `Init event with preferred networks`() {
+        val config = PaymentSheetFixtures.CONFIG_MINIMUM.copy(
+            preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa)
+        )
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
-            configuration = PaymentSheetFixtures.CONFIG_MINIMUM.copy(
-                preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa)
-            ),
+            commonConfiguration = config.asCommonConfiguration(),
+            appearance = config.appearance,
+            primaryButtonColor = config.primaryButtonColorUsage(),
+            paymentMethodLayout = config.paymentMethodLayout,
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
@@ -379,6 +402,82 @@ class PaymentSheetEventTest {
 
         assertThat(config).containsEntry("customer", true)
         assertThat(config).containsEntry("customer_access_provider", "customer_session")
+    }
+
+    @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+    @Test
+    fun `Init event with embedded appearance should return expected params`() {
+        val config = PaymentSheetFixtures.CONFIG_MINIMUM.copy(
+            appearance = PaymentSheet.Appearance(
+                embeddedAppearance = PaymentSheet.Appearance.Embedded(
+                    style = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.default
+                )
+            )
+        )
+        val event = PaymentSheetEvent.Init(
+            mode = EventReporter.Mode.Embedded,
+            commonConfiguration = config.asCommonConfiguration(),
+            appearance = config.appearance,
+            primaryButtonColor = null,
+            paymentMethodLayout = null,
+            isDeferred = true,
+            linkEnabled = false,
+            googlePaySupported = false,
+        )
+
+        assertThat(
+            event.eventName
+        ).isEqualTo(
+            "mc_embedded_init"
+        )
+
+        val expectedConfig = mapOf(
+            "customer" to false,
+            "customer_access_provider" to null,
+            "googlepay" to false,
+            "default_billing_details" to false,
+            "allows_delayed_payment_methods" to false,
+            "appearance" to mapOf(
+                "colorsLight" to false,
+                "colorsDark" to false,
+                "corner_radius" to false,
+                "border_width" to false,
+                "font" to false,
+                "size_scale_factor" to false,
+                "primary_button" to mapOf(
+                    "colorsLight" to false,
+                    "colorsDark" to false,
+                    "corner_radius" to false,
+                    "border_width" to false,
+                    "font" to false,
+                ),
+                "embedded_payment_element" to mapOf(
+                    "style" to true,
+                    "row_style" to "flat_with_checkmark"
+                ),
+                "usage" to true,
+            ),
+            "payment_method_order" to listOf<String>(),
+            "allows_payment_methods_requiring_shipping_address" to false,
+            "allows_removal_of_last_saved_payment_method" to true,
+            "billing_details_collection_configuration" to mapOf(
+                "attach_defaults" to false,
+                "name" to "Automatic",
+                "email" to "Automatic",
+                "phone" to "Automatic",
+                "address" to "Automatic",
+            ),
+            "preferred_networks" to null,
+            "external_payment_methods" to null,
+            "card_brand_acceptance" to false,
+        )
+
+        assertThat(event.params).run {
+            containsEntry("link_enabled", false)
+            containsEntry("google_pay_enabled", false)
+            containsEntry("is_decoupled", true)
+            containsEntry("mpe_config", expectedConfig)
+        }
     }
 
     @Test
@@ -1357,10 +1456,14 @@ class PaymentSheetEventTest {
             "payment_method_layout" to "horizontal",
             "card_brand_acceptance" to false,
         )
+        val config = PaymentSheetFixtures.CONFIG_MINIMUM
         assertThat(
             PaymentSheetEvent.Init(
                 mode = EventReporter.Mode.Complete,
-                configuration = PaymentSheetFixtures.CONFIG_MINIMUM,
+                commonConfiguration = config.asCommonConfiguration(),
+                appearance = config.appearance,
+                primaryButtonColor = config.primaryButtonColorUsage(),
+                paymentMethodLayout = config.paymentMethodLayout,
                 isDeferred = false,
                 linkEnabled = false,
                 googlePaySupported = false,
@@ -1418,10 +1521,14 @@ class PaymentSheetEventTest {
             "payment_method_layout" to "automatic",
             "card_brand_acceptance" to false,
         )
+        val config = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING
         assertThat(
             PaymentSheetEvent.Init(
                 mode = EventReporter.Mode.Complete,
-                configuration = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING,
+                commonConfiguration = config.asCommonConfiguration(),
+                appearance = config.appearance,
+                primaryButtonColor = config.primaryButtonColorUsage(),
+                paymentMethodLayout = config.paymentMethodLayout,
                 isDeferred = false,
                 linkEnabled = false,
                 googlePaySupported = false,
@@ -1574,7 +1681,10 @@ class PaymentSheetEventTest {
     ): PaymentSheetEvent.Init {
         return PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
-            configuration = configuration,
+            commonConfiguration = configuration.asCommonConfiguration(),
+            appearance = configuration.appearance,
+            primaryButtonColor = configuration.primaryButtonColorUsage(),
+            paymentMethodLayout = configuration.paymentMethodLayout,
             googlePaySupported = true,
             isDeferred = false,
             linkEnabled = false,
