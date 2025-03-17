@@ -139,7 +139,7 @@ internal class DefaultPaymentMethodsTest {
                           "email": null,
                           "livemode": false,
                           "shipping": null,
-                          "foo": "https://docs.oracle.com/javase"
+                          "foo": "https://kotlinlang.org"
                         }
                     """.trimIndent()
             )
