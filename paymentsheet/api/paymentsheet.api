@@ -899,6 +899,16 @@ public final class com/stripe/android/paymentsheet/PaymentOptionResult$Succeeded
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/paymentsheet/PaymentOptionsItem$ViewType : java/lang/Enum {
+	public static final field AddCard Lcom/stripe/android/paymentsheet/PaymentOptionsItem$ViewType;
+	public static final field GooglePay Lcom/stripe/android/paymentsheet/PaymentOptionsItem$ViewType;
+	public static final field Link Lcom/stripe/android/paymentsheet/PaymentOptionsItem$ViewType;
+	public static final field SavedPaymentMethod Lcom/stripe/android/paymentsheet/PaymentOptionsItem$ViewType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentOptionsItem$ViewType;
+	public static fun values ()[Lcom/stripe/android/paymentsheet/PaymentOptionsItem$ViewType;
+}
+
 public final class com/stripe/android/paymentsheet/PaymentSheet {
 	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/paymentsheet/PaymentSheet$Companion;
