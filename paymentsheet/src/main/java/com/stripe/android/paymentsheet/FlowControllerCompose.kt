@@ -7,6 +7,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.stripe.android.common.ui.UpdateCallbacks
+import com.stripe.android.paymentelement.CustomPaymentMethodConfirmHandler
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.utils.rememberActivity
@@ -25,9 +27,11 @@ fun rememberPaymentSheetFlowController(
     paymentOptionCallback: PaymentOptionCallback,
     paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet.FlowController {
+    @OptIn(ExperimentalCustomPaymentMethodsApi::class)
     return internalRememberPaymentSheetFlowController(
         paymentOptionCallback = paymentOptionCallback,
         paymentResultCallback = paymentResultCallback,
+        customPaymentMethodConfirmHandler = null,
         createIntentCallback = null,
         externalPaymentMethodConfirmHandler = null,
     )
@@ -50,9 +54,11 @@ fun rememberPaymentSheetFlowController(
     paymentOptionCallback: PaymentOptionCallback,
     paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet.FlowController {
+    @OptIn(ExperimentalCustomPaymentMethodsApi::class)
     return internalRememberPaymentSheetFlowController(
         paymentOptionCallback = paymentOptionCallback,
         paymentResultCallback = paymentResultCallback,
+        customPaymentMethodConfirmHandler = null,
         createIntentCallback = createIntentCallback,
         externalPaymentMethodConfirmHandler = null,
     )
@@ -79,9 +85,11 @@ fun rememberPaymentSheetFlowController(
     paymentOptionCallback: PaymentOptionCallback,
     paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet.FlowController {
+    @OptIn(ExperimentalCustomPaymentMethodsApi::class)
     return internalRememberPaymentSheetFlowController(
         paymentOptionCallback = paymentOptionCallback,
         paymentResultCallback = paymentResultCallback,
+        customPaymentMethodConfirmHandler = null,
         createIntentCallback = createIntentCallback,
         externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
     )
@@ -140,9 +148,11 @@ private fun internalRememberPaymentSheetFlowController(
 }
 
 @Composable
+@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 internal fun internalRememberPaymentSheetFlowController(
     createIntentCallback: CreateIntentCallback?,
     externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler?,
+    customPaymentMethodConfirmHandler: CustomPaymentMethodConfirmHandler?,
     paymentOptionCallback: PaymentOptionCallback,
     paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet.FlowController {
@@ -153,6 +163,7 @@ internal fun internalRememberPaymentSheetFlowController(
     val callbacks = remember(createIntentCallback, externalPaymentMethodConfirmHandler) {
         PaymentElementCallbacks(
             createIntentCallback = createIntentCallback,
+            customPaymentMethodConfirmHandler = customPaymentMethodConfirmHandler,
             externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
         )
     }

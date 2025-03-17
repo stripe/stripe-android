@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.callbacks
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.utils.PaymentElementCallbackTestRule
 import org.junit.Rule
 import org.junit.Test
@@ -52,9 +53,13 @@ class PaymentElementCallbackReferencesTest {
         assertThat(PaymentElementCallbackReferences[DEFAULT_TEST_KEY]).isNull()
     }
 
+    @OptIn(ExperimentalCustomPaymentMethodsApi::class)
     private fun createCallbacks(): PaymentElementCallbacks {
         return PaymentElementCallbacks(
             createIntentCallback = { _, _ ->
+                error("Should not be called!")
+            },
+            customPaymentMethodConfirmHandler = { _, _ ->
                 error("Should not be called!")
             },
             externalPaymentMethodConfirmHandler = { _, _ ->
