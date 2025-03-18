@@ -39,17 +39,17 @@ internal class EmbeddedPaymentElementInitializerTest {
     @OptIn(ExperimentalCustomPaymentMethodsApi::class)
     fun `when lifecycle is destroyed, should un-initialize callbacks`() {
         val owner = TestLifecycleOwner()
-        val callbacks = PaymentElementCallbacks(
-            createIntentCallback = { _, _ ->
-                error("Not implemented")
-            },
-            customPaymentMethodConfirmHandler = { _, _ ->
-                error("Not implemented")
-            },
-            externalPaymentMethodConfirmHandler = { _, _ ->
+        val callbacks = PaymentElementCallbacks.Builder()
+            .createIntentCallback { _, _ ->
                 error("Not implemented")
             }
-        )
+            .customPaymentMethodConfirmHandler { _, _ ->
+                error("Not implemented")
+            }
+            .externalPaymentMethodConfirmHandler { _, _ ->
+                error("Not implemented")
+            }
+            .build()
 
         PaymentElementCallbackReferences[PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER] = callbacks
 

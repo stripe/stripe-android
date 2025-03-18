@@ -55,17 +55,17 @@ class PaymentElementCallbackReferencesTest {
 
     @OptIn(ExperimentalCustomPaymentMethodsApi::class)
     private fun createCallbacks(): PaymentElementCallbacks {
-        return PaymentElementCallbacks(
-            createIntentCallback = { _, _ ->
-                error("Should not be called!")
-            },
-            customPaymentMethodConfirmHandler = { _, _ ->
-                error("Should not be called!")
-            },
-            externalPaymentMethodConfirmHandler = { _, _ ->
+        return PaymentElementCallbacks.Builder()
+            .createIntentCallback { _, _ ->
                 error("Should not be called!")
             }
-        )
+            .customPaymentMethodConfirmHandler { _, _ ->
+                error("Should not be called!")
+            }
+            .externalPaymentMethodConfirmHandler { _, _ ->
+                error("Should not be called!")
+            }
+            .build()
     }
 
     private companion object {

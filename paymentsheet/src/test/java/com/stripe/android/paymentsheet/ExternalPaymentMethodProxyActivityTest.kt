@@ -11,7 +11,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.testing.FakeErrorReporter
@@ -23,7 +22,6 @@ import kotlin.test.fail
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
-@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 class ExternalPaymentMethodProxyActivityTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
@@ -38,11 +36,9 @@ class ExternalPaymentMethodProxyActivityTest {
         val expectedBillingDetails =
             PaymentMethod.BillingDetails(name = "Joe", address = Address(city = "Seattle", line1 = "123 Main St"))
 
-        PaymentElementCallbackReferences["ExternalPaymentMethod"] = PaymentElementCallbacks(
-            createIntentCallback = null,
-            customPaymentMethodConfirmHandler = null,
-            externalPaymentMethodConfirmHandler = confirmHandler,
-        )
+        PaymentElementCallbackReferences["ExternalPaymentMethod"] = PaymentElementCallbacks.Builder()
+            .externalPaymentMethodConfirmHandler(confirmHandler)
+            .build()
 
         activityLauncher.launch(
             input = ExternalPaymentMethodInput(
@@ -68,11 +64,9 @@ class ExternalPaymentMethodProxyActivityTest {
             context,
         )
 
-        PaymentElementCallbackReferences["ExternalPaymentMethod"] = PaymentElementCallbacks(
-            createIntentCallback = null,
-            customPaymentMethodConfirmHandler = null,
-            externalPaymentMethodConfirmHandler = confirmHandler,
-        )
+        PaymentElementCallbackReferences["ExternalPaymentMethod"] = PaymentElementCallbacks.Builder()
+            .externalPaymentMethodConfirmHandler(confirmHandler)
+            .build()
 
         activityLauncher.launch(
             input = ExternalPaymentMethodInput(
@@ -141,17 +135,13 @@ class ExternalPaymentMethodProxyActivityTest {
             context,
         )
 
-        PaymentElementCallbackReferences["ExternalPaymentMethodTestIdentifierOne"] = PaymentElementCallbacks(
-            createIntentCallback = null,
-            customPaymentMethodConfirmHandler = null,
-            externalPaymentMethodConfirmHandler = firstConfirmHandler,
-        )
+        PaymentElementCallbackReferences["ExternalPaymentMethodTestIdentifierOne"] = PaymentElementCallbacks.Builder()
+            .externalPaymentMethodConfirmHandler(firstConfirmHandler)
+            .build()
 
-        PaymentElementCallbackReferences["ExternalPaymentMethodTestIdentifierTwo"] = PaymentElementCallbacks(
-            createIntentCallback = null,
-            customPaymentMethodConfirmHandler = null,
-            externalPaymentMethodConfirmHandler = secondConfirmHandler,
-        )
+        PaymentElementCallbackReferences["ExternalPaymentMethodTestIdentifierTwo"] = PaymentElementCallbacks.Builder()
+            .externalPaymentMethodConfirmHandler(secondConfirmHandler)
+            .build()
 
         activityLauncher.launch(
             input = ExternalPaymentMethodInput(

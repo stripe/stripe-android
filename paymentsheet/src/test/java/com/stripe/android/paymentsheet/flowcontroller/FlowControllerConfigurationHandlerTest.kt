@@ -452,17 +452,17 @@ class FlowControllerConfigurationHandlerTest {
         val configureTurbine = Turbine<Throwable?>()
         val configurationHandler = createConfigurationHandler()
 
-        PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks(
-            createIntentCallback = { _, _ ->
+        PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks.Builder()
+            .createIntentCallback { _, _ ->
                 error("Should not be called!")
-            },
-            customPaymentMethodConfirmHandler = { _, _ ->
+            }
+            .customPaymentMethodConfirmHandler { _, _ ->
                 error("Should not be called!")
-            },
-            externalPaymentMethodConfirmHandler = { _, _ ->
+            }
+            .externalPaymentMethodConfirmHandler { _, _ ->
                 error("Should not be called!")
-            },
-        )
+            }
+            .build()
 
         configurationHandler.configure(
             scope = this,
@@ -493,17 +493,17 @@ class FlowControllerConfigurationHandlerTest {
         val configureTurbine = Turbine<Throwable?>()
         val configurationHandler = createConfigurationHandler()
 
-        PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks(
-            createIntentCallback = { _, _ ->
+        PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks.Builder()
+            .createIntentCallback { _, _ ->
                 error("Should not be called!")
-            },
-            customPaymentMethodConfirmHandler = { _, _ ->
+            }
+            .customPaymentMethodConfirmHandler { _, _ ->
                 error("Should not be called!")
-            },
-            externalPaymentMethodConfirmHandler = { _, _ ->
+            }
+            .externalPaymentMethodConfirmHandler { _, _ ->
                 error("Should not be called!")
-            },
-        )
+            }
+            .build()
 
         configurationHandler.configure(
             scope = this,
