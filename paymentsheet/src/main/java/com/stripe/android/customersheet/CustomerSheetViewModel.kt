@@ -1157,6 +1157,7 @@ internal class CustomerSheetViewModel(
                 syncDefaultEnabled = syncDefaultEnabled
             )
         }
+        // This gets hit everytime, but the actual response to it isn't necessarily triggered in my tests.
         _result.tryEmit(
             InternalCustomerSheetResult.Selected(
                 paymentSelection = paymentSelection,
