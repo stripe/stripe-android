@@ -191,6 +191,44 @@ internal class DefaultPaymentMethodsTest {
     }
 
     @Test
+    fun setNewCardAsDefault_withSavedPaymentMethods_andSetAsDefault() = runProductIntegrationTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        val paymentSheetPage = PaymentSheetPage(composeTestRule)
+
+        val cards = listOf(
+            PaymentMethodFactory.card(last4 = "4242", id = "pm_1"),
+            PaymentMethodFactory.card(last4 = "1001", id = "pm_2")
+        )
+
+        enqueueElementsSessionResponse(
+            cards = cards
+        )
+
+        launch(
+            testContext = testContext,
+            paymentMethodLayout = layoutType.paymentMethodLayout,
+            hasSavedPaymentMethods = true,
+        )
+
+        layoutType.payWithNewCardWithSavedPaymentMethods(
+            composeTestRule = composeTestRule,
+        )
+
+        paymentSheetPage.fillOutCardDetails()
+        paymentSheetPage.checkSaveForFuture()
+        paymentSheetPage.checkSetAsDefaultCheckbox()
+
+        paymentSheetPage.assertSetAsDefaultCheckboxChecked()
+
+        enqueuePaymentIntentConfirmWithExpectedSetAsDefault(setAsDefaultValue = true)
+
+        paymentSheetPage.clickPrimaryButton()
+    }
+
+    @Test
     fun setNewCardAsDefault_withSavedPaymentMethods_uncheckSetAsDefault_doesNotSendSetAsDefaultParamInConfirmCall() =
         runProductIntegrationTest(
         networkRule = networkRule,
