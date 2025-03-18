@@ -125,23 +125,11 @@ internal class DefaultPaymentMethodsTest {
     private fun enqueueSetDefaultPaymentMethodRequest() {
         networkRule.enqueue(
             RequestMatchers.host("api.stripe.com"),
-            RequestMatchers.method("POST"),
-            RequestMatchers.path("/v1/elements/customers/cus_1/set_default_payment_method"),
+            method("POST"),
+            path("/v1/elements/customers/cus_1/set_default_payment_method"),
         ) { response ->
             response.setResponseCode(200)
-            response.setBody(
-                """{
-                          "id": "cus_1",
-                          "object": "customer",
-                          "created": 1739227546,
-                          "default_source": null,
-                          "description": null,
-                          "email": null,
-                          "livemode": false,
-                          "shipping": null
-                        }
-                    """.trimIndent()
-            )
+            response.testBodyFromFile("set-default-payment-method-success.json")
         }
     }
 

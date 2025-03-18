@@ -1,11 +1,14 @@
 package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
+import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.ComposeTestRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
@@ -35,6 +38,14 @@ internal class CustomerSheetPage(
             composeTestRule
                 .onAllNodes(hasText(text, substring).and(isPlaced()))
                 .fetchSemanticsNodes().isEmpty()
+        }
+    }
+
+    fun waitUntilMissing() {
+        composeTestRule.waitUntil(5000) {
+            composeTestRule.onAllNodesWithTag(SAVED_PAYMENT_OPTION_TEST_TAG).fetchSemanticsNodes(
+                atLeastOneRootRequired = false
+            ).isEmpty()
         }
     }
 
@@ -111,12 +122,25 @@ internal class CustomerSheetPage(
         click(dialogRemoveButtonMatcher, canScroll = false)
     }
 
+    fun onSavedPaymentMethod(endsWith: String): SemanticsNodeInteraction {
+        val savedPaymentMethodMatcher = getSavedPaymentMethodMatcher(endsWith = endsWith)
+
+        waitUntil(savedPaymentMethodMatcher)
+        return composeTestRule.onNode(savedPaymentMethodMatcher)
+    }
+
     fun clickSavedPaymentMethod(endsWith: String) {
-        val savedPaymentMethodMatcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
-            .and(hasText(endsWith, substring = true))
+        val savedPaymentMethodMatcher = getSavedPaymentMethodMatcher(endsWith = endsWith)
 
         waitUntil(savedPaymentMethodMatcher)
         click(savedPaymentMethodMatcher)
+
+        waitUntil(savedPaymentMethodMatcher.and(isSelected()))
+    }
+
+    private fun getSavedPaymentMethodMatcher(endsWith: String): SemanticsMatcher {
+        return hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
+            .and(hasText(endsWith, substring = true))
     }
 
     private fun clickPrimaryButton(tag: String) {
