@@ -47,7 +47,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.Init(
                 mode = mode,
-                commonConfiguration = commonConfiguration,
+                configuration = commonConfiguration,
                 appearance = appearance,
                 primaryButtonColor = primaryButtonColor,
                 paymentMethodLayout = paymentMethodLayout,

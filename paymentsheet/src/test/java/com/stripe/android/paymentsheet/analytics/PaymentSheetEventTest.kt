@@ -34,7 +34,7 @@ class PaymentSheetEventTest {
         val config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
-            commonConfiguration = config.asCommonConfiguration(),
+            configuration = config.asCommonConfiguration(),
             appearance = config.appearance,
             primaryButtonColor = config.primaryButtonColorUsage(),
             paymentMethodLayout = config.paymentMethodLayout,
@@ -69,7 +69,7 @@ class PaymentSheetEventTest {
         val config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_EXTERNAL_PAYMENT_METHODS
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
-            commonConfiguration = config.asCommonConfiguration(),
+            configuration = config.asCommonConfiguration(),
             appearance = config.appearance,
             primaryButtonColor = config.primaryButtonColorUsage(),
             paymentMethodLayout = config.paymentMethodLayout,
@@ -106,7 +106,7 @@ class PaymentSheetEventTest {
         )
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
-            commonConfiguration = config.asCommonConfiguration(),
+            configuration = config.asCommonConfiguration(),
             appearance = config.appearance,
             primaryButtonColor = config.primaryButtonColorUsage(),
             paymentMethodLayout = config.paymentMethodLayout,
@@ -141,7 +141,7 @@ class PaymentSheetEventTest {
         val config = PaymentSheetFixtures.CONFIG_MINIMUM
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
-            commonConfiguration = config.asCommonConfiguration(),
+            configuration = config.asCommonConfiguration(),
             appearance = config.appearance,
             primaryButtonColor = config.primaryButtonColorUsage(),
             paymentMethodLayout = config.paymentMethodLayout,
@@ -174,7 +174,7 @@ class PaymentSheetEventTest {
         )
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
-            commonConfiguration = config.asCommonConfiguration(),
+            configuration = config.asCommonConfiguration(),
             appearance = config.appearance,
             primaryButtonColor = config.primaryButtonColorUsage(),
             paymentMethodLayout = config.paymentMethodLayout,
@@ -249,7 +249,7 @@ class PaymentSheetEventTest {
         )
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Embedded,
-            commonConfiguration = config.asCommonConfiguration(),
+            configuration = config.asCommonConfiguration(),
             appearance = config.appearance,
             primaryButtonColor = null,
             paymentMethodLayout = null,
@@ -1225,7 +1225,7 @@ class PaymentSheetEventTest {
         assertThat(
             PaymentSheetEvent.Init(
                 mode = EventReporter.Mode.Complete,
-                commonConfiguration = config.asCommonConfiguration(),
+                configuration = config.asCommonConfiguration(),
                 appearance = config.appearance,
                 primaryButtonColor = config.primaryButtonColorUsage(),
                 paymentMethodLayout = config.paymentMethodLayout,
@@ -1270,7 +1270,7 @@ class PaymentSheetEventTest {
         assertThat(
             PaymentSheetEvent.Init(
                 mode = EventReporter.Mode.Complete,
-                commonConfiguration = config.asCommonConfiguration(),
+                configuration = config.asCommonConfiguration(),
                 appearance = config.appearance,
                 primaryButtonColor = config.primaryButtonColorUsage(),
                 paymentMethodLayout = config.paymentMethodLayout,
@@ -1295,7 +1295,7 @@ class PaymentSheetEventTest {
         assertThat(
             PaymentSheetEvent.Init(
                 mode = EventReporter.Mode.Complete,
-                commonConfiguration = config.asCommonConfiguration(),
+                configuration = config.asCommonConfiguration(),
                 appearance = config.appearance,
                 paymentMethodLayout = config.paymentMethodLayout,
                 primaryButtonColor = config.primaryButtonColorUsage(),
@@ -1313,7 +1313,7 @@ class PaymentSheetEventTest {
         assertThat(
             PaymentSheetEvent.Init(
                 mode = EventReporter.Mode.Complete,
-                commonConfiguration = config.asCommonConfiguration(),
+                configuration = config.asCommonConfiguration(),
                 appearance = config.appearance,
                 paymentMethodLayout = config.paymentMethodLayout,
                 primaryButtonColor = config.primaryButtonColorUsage(),
@@ -1463,7 +1463,7 @@ class PaymentSheetEventTest {
     ): PaymentSheetEvent.Init {
         return PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
-            commonConfiguration = configuration.asCommonConfiguration(),
+            configuration = configuration.asCommonConfiguration(),
             appearance = configuration.appearance,
             primaryButtonColor = configuration.primaryButtonColorUsage(),
             paymentMethodLayout = configuration.paymentMethodLayout,

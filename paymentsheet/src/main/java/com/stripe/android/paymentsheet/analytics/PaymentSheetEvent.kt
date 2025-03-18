@@ -12,8 +12,6 @@ import com.stripe.android.model.analyticsValue
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent.Companion.FIELD_PAYMENT_METHOD_LAYOUT
-import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent.Companion.FIELD_PRIMARY_BUTTON_COLOR
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.asPaymentSheetLoadingException
@@ -121,7 +119,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
     class Init(
         private val mode: EventReporter.Mode,
-        private val commonConfiguration: CommonConfiguration,
+        private val configuration: CommonConfiguration,
         private val appearance: PaymentSheet.Appearance,
         private val primaryButtonColor: Boolean?,
         private val paymentMethodLayout: PaymentSheet.PaymentMethodLayout?,
@@ -137,8 +135,8 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                     formatEventName(mode, "init")
                 } else {
                     val configValue = listOfNotNull(
-                        FIELD_CUSTOMER.takeIf { commonConfiguration.customer != null },
-                        FIELD_GOOGLE_PAY.takeIf { commonConfiguration.googlePay != null }
+                        FIELD_CUSTOMER.takeIf { configuration.customer != null },
+                        FIELD_GOOGLE_PAY.takeIf { configuration.googlePay != null }
                     ).takeUnless { it.isEmpty() }?.joinToString(separator = "_") ?: "default"
                     formatEventName(mode, "init_$configValue")
                 }
@@ -148,24 +146,24 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             get() {
 
                 val configurationMap = mapOf(
-                    FIELD_CUSTOMER to (commonConfiguration.customer != null),
-                    FIELD_CUSTOMER_ACCESS_PROVIDER to (commonConfiguration.customer?.accessType?.analyticsValue),
-                    FIELD_GOOGLE_PAY to (commonConfiguration.googlePay != null),
+                    FIELD_CUSTOMER to (configuration.customer != null),
+                    FIELD_CUSTOMER_ACCESS_PROVIDER to (configuration.customer?.accessType?.analyticsValue),
+                    FIELD_GOOGLE_PAY to (configuration.googlePay != null),
                     FIELD_PRIMARY_BUTTON_COLOR to primaryButtonColor,
-                    FIELD_BILLING to (commonConfiguration.defaultBillingDetails?.isFilledOut() == true),
-                    FIELD_DELAYED_PMS to commonConfiguration.allowsDelayedPaymentMethods,
+                    FIELD_BILLING to (configuration.defaultBillingDetails?.isFilledOut() == true),
+                    FIELD_DELAYED_PMS to configuration.allowsDelayedPaymentMethods,
                     FIELD_APPEARANCE to appearance.toAnalyticsMap(mode == EventReporter.Mode.Embedded),
-                    FIELD_PAYMENT_METHOD_ORDER to commonConfiguration.paymentMethodOrder,
+                    FIELD_PAYMENT_METHOD_ORDER to configuration.paymentMethodOrder,
                     FIELD_ALLOWS_PAYMENT_METHODS_REQUIRING_SHIPPING_ADDRESS to
-                        commonConfiguration.allowsPaymentMethodsRequiringShippingAddress,
+                        configuration.allowsPaymentMethodsRequiringShippingAddress,
                     FIELD_ALLOWS_REMOVAL_OF_LAST_SAVED_PAYMENT_METHOD to
-                        commonConfiguration.allowsRemovalOfLastSavedPaymentMethod,
+                        configuration.allowsRemovalOfLastSavedPaymentMethod,
                     FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION to
-                        commonConfiguration.billingDetailsCollectionConfiguration.toAnalyticsMap(),
-                    FIELD_PREFERRED_NETWORKS to commonConfiguration.preferredNetworks.toAnalyticsValue(),
-                    FIELD_EXTERNAL_PAYMENT_METHODS to commonConfiguration.getExternalPaymentMethodsAnalyticsValue(),
+                        configuration.billingDetailsCollectionConfiguration.toAnalyticsMap(),
+                    FIELD_PREFERRED_NETWORKS to configuration.preferredNetworks.toAnalyticsValue(),
+                    FIELD_EXTERNAL_PAYMENT_METHODS to configuration.getExternalPaymentMethodsAnalyticsValue(),
                     FIELD_PAYMENT_METHOD_LAYOUT to paymentMethodLayout?.toAnalyticsValue(),
-                    FIELD_CARD_BRAND_ACCEPTANCE to commonConfiguration.cardBrandAcceptance.toAnalyticsValue(),
+                    FIELD_CARD_BRAND_ACCEPTANCE to configuration.cardBrandAcceptance.toAnalyticsValue(),
                     FIELD_CARD_SCAN_AVAILABLE to isStripeCardScanAvailable
                 )
                 return mapOf(
