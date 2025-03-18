@@ -2128,7 +2128,7 @@ internal class PaymentSheetViewModelTest {
             .createIntentCallback { _, _ ->
                 error("Should not be called!")
             }
-            .customPaymentMethodConfirmHandler { _, _ ->
+            .confirmCustomPaymentMethodCallback { _, _ ->
                 error("Should not be called!")
             }
             .externalPaymentMethodConfirmHandler { _, _ ->
@@ -2150,7 +2150,7 @@ internal class PaymentSheetViewModelTest {
             .createIntentCallback { _, _ ->
                 error("Should not be called!")
             }
-            .customPaymentMethodConfirmHandler { _, _ ->
+            .confirmCustomPaymentMethodCallback { _, _ ->
                 error("Should not be called!")
             }
             .externalPaymentMethodConfirmHandler { _, _ ->

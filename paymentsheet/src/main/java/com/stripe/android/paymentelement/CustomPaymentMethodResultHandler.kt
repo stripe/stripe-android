@@ -14,10 +14,10 @@ object CustomPaymentMethodResultHandler {
     /**
      * Updates the Payment Element UI to reflect the result of confirming a custom payment method.
      *
-     * Should be called when [CustomPaymentMethodConfirmHandler.confirmCustomPaymentMethod] completes.
+     * Should be called when [ConfirmCustomPaymentMethodCallback.onConfirmCustomPaymentMethod] completes.
      */
     @JvmStatic
-    fun onCustomPaymentMethodResult(context: Context, customPaymentMethodResult: CustomPaymentMethodResult) {
+    fun handleCustomPaymentMethodResult(context: Context, customPaymentMethodResult: CustomPaymentMethodResult) {
         error(
             "Not implemented! Should not called with context from " +
                 "${context.packageName} and $customPaymentMethodResult"

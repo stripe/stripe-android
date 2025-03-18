@@ -43,7 +43,7 @@ internal class EmbeddedPaymentElementInitializerTest {
             .createIntentCallback { _, _ ->
                 error("Not implemented")
             }
-            .customPaymentMethodConfirmHandler { _, _ ->
+            .confirmCustomPaymentMethodCallback { _, _ ->
                 error("Not implemented")
             }
             .externalPaymentMethodConfirmHandler { _, _ ->

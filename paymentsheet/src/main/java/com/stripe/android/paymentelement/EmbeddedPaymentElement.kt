@@ -116,7 +116,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
             private set
 
         @OptIn(ExperimentalCustomPaymentMethodsApi::class)
-        internal var customPaymentMethodConfirmHandler: CustomPaymentMethodConfirmHandler? = null
+        internal var confirmCustomPaymentMethodCallback: ConfirmCustomPaymentMethodCallback? = null
             private set
 
         /**
@@ -131,8 +131,8 @@ class EmbeddedPaymentElement @Inject internal constructor(
          */
         @ExperimentalCustomPaymentMethodsApi
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        fun customPaymentMethodConfirmHandler(handler: CustomPaymentMethodConfirmHandler) = apply {
-            this.customPaymentMethodConfirmHandler = handler
+        fun confirmCustomPaymentMethodCallback(callback: ConfirmCustomPaymentMethodCallback) = apply {
+            this.confirmCustomPaymentMethodCallback = callback
         }
     }
 

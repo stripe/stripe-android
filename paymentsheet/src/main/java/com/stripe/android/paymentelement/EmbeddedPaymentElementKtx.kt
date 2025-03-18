@@ -38,7 +38,7 @@ fun rememberEmbeddedPaymentElement(
         @OptIn(ExperimentalCustomPaymentMethodsApi::class)
         PaymentElementCallbacks.Builder()
             .createIntentCallback(builder.createIntentCallback)
-            .customPaymentMethodConfirmHandler(builder.customPaymentMethodConfirmHandler)
+            .confirmCustomPaymentMethodCallback(builder.confirmCustomPaymentMethodCallback)
             .externalPaymentMethodConfirmHandler(builder.externalPaymentMethodConfirmHandler)
             .build()
     }
