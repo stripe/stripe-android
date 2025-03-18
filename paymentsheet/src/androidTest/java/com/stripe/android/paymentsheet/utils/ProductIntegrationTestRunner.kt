@@ -18,6 +18,7 @@ internal fun runProductIntegrationTest(
             runPaymentSheetTest(
                 networkRule = networkRule,
                 integrationType = IntegrationType.Compose,
+                createIntentCallback = createIntentCallback,
                 resultCallback = resultCallback,
                 block = { context ->
                     block(ProductIntegrationTestRunnerContext.WithPaymentSheet(context))
