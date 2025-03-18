@@ -17,10 +17,6 @@ import com.stripe.android.financialconnections.features.notice.NoticeSheetState.
 import com.stripe.android.financialconnections.features.notice.PresentSheet
 import com.stripe.android.financialconnections.features.streamlinedconsent.IDConsentContentState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
-import com.stripe.android.financialconnections.navigation.Destination
-import com.stripe.android.financialconnections.navigation.Destination.Companion.KEY_NEXT_PANE_ON_DISABLE_NETWORKING
-import com.stripe.android.financialconnections.navigation.Destination.ManualEntry
-import com.stripe.android.financialconnections.navigation.Destination.NetworkingLinkLoginWarmup
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
@@ -84,27 +80,6 @@ internal class IDConsentContentViewModel @AssistedInject constructor(
                     ConsentClickableText.LEGAL_DETAILS.value to {
                         presentLegalDetailsBottomSheet()
                     },
-                    // Clicked on the "Manual entry" link -> Navigate to the Manual Entry screen
-                    ConsentClickableText.MANUAL_ENTRY.value to {
-                        navigationManager.tryNavigateTo(ManualEntry(referrer = PANE))
-                    },
-                    // Clicked on the "Manual entry" link on NME flows -> Navigate to the Link Login Warmup screen
-                    ConsentClickableText.LINK_LOGIN_WARMUP.value to {
-                        navigationManager.tryNavigateTo(
-                            NetworkingLinkLoginWarmup(
-                                referrer = PANE,
-                                extraArgs = mapOf(
-                                    KEY_NEXT_PANE_ON_DISABLE_NETWORKING to it.nextPaneOrDrawerOnSecondaryCta,
-                                )
-                            )
-                        )
-                    },
-                    // Surfaces where user has signed in to Link and then launches the auth flow.
-                    ConsentClickableText.LINK_ACCOUNT_PICKER.value to {
-                        navigationManager.tryNavigateTo(
-                            route = Destination.LinkAccountPicker(referrer = PANE)
-                        )
-                    }
                 )
             )
         }
