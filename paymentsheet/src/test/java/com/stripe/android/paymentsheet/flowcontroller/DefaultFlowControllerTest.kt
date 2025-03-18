@@ -456,7 +456,8 @@ internal class DefaultFlowControllerTest {
             ),
             configuration = PaymentSheet.Configuration("com.stripe.android.paymentsheet.test"),
             enableLogging = ENABLE_LOGGING,
-            productUsage = PRODUCT_USAGE
+            productUsage = PRODUCT_USAGE,
+            paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER
         )
 
         verify(paymentOptionActivityLauncher).launch(eq(expectedArgs), anyOrNull())
