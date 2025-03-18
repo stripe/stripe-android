@@ -456,7 +456,7 @@ class FlowControllerConfigurationHandlerTest {
             .createIntentCallback { _, _ ->
                 error("Should not be called!")
             }
-            .customPaymentMethodConfirmHandler { _, _ ->
+            .confirmCustomPaymentMethodCallback { _, _ ->
                 error("Should not be called!")
             }
             .externalPaymentMethodConfirmHandler { _, _ ->
@@ -497,7 +497,7 @@ class FlowControllerConfigurationHandlerTest {
             .createIntentCallback { _, _ ->
                 error("Should not be called!")
             }
-            .customPaymentMethodConfirmHandler { _, _ ->
+            .confirmCustomPaymentMethodCallback { _, _ ->
                 error("Should not be called!")
             }
             .externalPaymentMethodConfirmHandler { _, _ ->
