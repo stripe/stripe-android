@@ -27,7 +27,6 @@ import com.stripe.android.paymentsheet.utils.runCustomerSheetTest
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
 import org.json.JSONArray
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -45,7 +44,6 @@ internal class CustomerSessionCustomerSheetTest {
     @TestParameter(valuesProvider = IntegrationTypeProvider::class)
     lateinit var integrationType: IntegrationType
 
-    @Ignore
     @Test
     fun testSuccessfulCardSave() = runCustomerSheetTest(
         networkRule = networkRule,
@@ -83,7 +81,6 @@ internal class CustomerSessionCustomerSheetTest {
         page.clickConfirmButton()
     }
 
-    @Ignore
     @Test
     fun testSuccessfulCardSaveWithCardBrandChoice() = runCustomerSheetTest(
         networkRule = networkRule,
@@ -133,7 +130,6 @@ internal class CustomerSessionCustomerSheetTest {
         page.clickConfirmButton()
     }
 
-    @Ignore
     @Test
     fun testSepaSuccessfullyHiddenWhenDefaultPMsFeatureEnabled() = runCustomerSheetTest(
         networkRule = networkRule,
@@ -180,19 +176,19 @@ internal class CustomerSessionCustomerSheetTest {
         context.markTestSucceeded()
     }
 
-    @Ignore
     @Test
     fun defaultPaymentMethodUsedAsSelected_whenSyncDefaultEnabled() = runCustomerSheetTest(
-    networkRule = networkRule,
-    integrationType = integrationType,
-    customerSheetTestType = CustomerSheetTestType.CustomerSession,
-    resultCallback = { result ->
-        verifySelected(
-            expectedLast4 = "1001",
-            expectedBrand = CardBrand.Visa,
-            result = result,
-        )
-    }) { context ->
+        networkRule = networkRule,
+        integrationType = integrationType,
+        customerSheetTestType = CustomerSheetTestType.CustomerSession,
+        resultCallback = { result ->
+            verifySelected(
+                expectedLast4 = "1001",
+                expectedBrand = CardBrand.Visa,
+                result = result,
+            )
+        }
+    ) { context ->
         val cards = listOf(
             PaymentMethodFactory.card(last4 = "4242"),
             PaymentMethodFactory.card(last4 = "1001")
@@ -244,7 +240,7 @@ internal class CustomerSessionCustomerSheetTest {
         enqueueSetDefaultPaymentMethodRequest()
 
         page.clickConfirmButton()
-        context.markTestSucceeded()
+        page.waitUntilMissing()
     }
 
     private fun assertOnlySavedCardIsDisplayed() {
