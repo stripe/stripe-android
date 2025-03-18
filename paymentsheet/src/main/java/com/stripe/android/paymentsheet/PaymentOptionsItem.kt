@@ -39,6 +39,7 @@ sealed class PaymentOptionsItem {
         override val isEnabledDuringEditing: Boolean = true
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class ViewType {
         SavedPaymentMethod,
         AddCard,
