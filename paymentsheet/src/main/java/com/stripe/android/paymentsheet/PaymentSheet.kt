@@ -237,7 +237,8 @@ class PaymentSheet internal constructor(
          * [Configuration.Builder.customPaymentMethods] to specify custom payment methods.
          */
         @ExperimentalCustomPaymentMethodsApi
-        internal fun confirmCustomPaymentMethodCallback(callback: ConfirmCustomPaymentMethodCallback) = apply {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun confirmCustomPaymentMethodCallback(callback: ConfirmCustomPaymentMethodCallback) = apply {
             callbacksBuilder.confirmCustomPaymentMethodCallback(callback)
         }
 
@@ -891,7 +892,8 @@ class PaymentSheet internal constructor(
              * If set, Payment Sheet will display the defined list of custom payment methods in the UI.
              */
             @ExperimentalCustomPaymentMethodsApi
-            internal fun customPaymentMethods(
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun customPaymentMethods(
                 customPaymentMethods: List<CustomPaymentMethod>,
             ) = apply {
                 this.customPaymentMethods = customPaymentMethods
