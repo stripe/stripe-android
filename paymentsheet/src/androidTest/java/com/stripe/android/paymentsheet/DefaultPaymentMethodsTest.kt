@@ -202,10 +202,8 @@ internal class DefaultPaymentMethodsTest {
         testContext.markTestSucceeded()
     }
 
-    //this used to be setNewCardAsDefault_withSavedPaymentMethods_checkSetAsDefault_sendsSetAsDefaultParamInConfirmCall
     @Test
-    fun whatIfIRenamedTheTest() =
-        runProductIntegrationTest(
+    fun setNewCardAsDefault_withSavedPaymentMethods_andSetAsDefault() = runProductIntegrationTest(
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
