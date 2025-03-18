@@ -437,6 +437,7 @@ class PaymentSheetEventTest {
             isDeferred = true,
             linkEnabled = false,
             googlePaySupported = false,
+            isStripeCardScanAvailable = false
         )
 
         assertThat(
@@ -484,6 +485,7 @@ class PaymentSheetEventTest {
             "preferred_networks" to null,
             "external_payment_methods" to null,
             "card_brand_acceptance" to false,
+            "card_scan_available" to false
         )
 
         assertThat(event.params).run {
@@ -1565,10 +1567,14 @@ class PaymentSheetEventTest {
 
     @Test
     fun `Init event should report card_scan_available as true if available`() {
+        val config = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING
         assertThat(
             PaymentSheetEvent.Init(
                 mode = EventReporter.Mode.Complete,
-                configuration = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING,
+                commonConfiguration = config.asCommonConfiguration(),
+                appearance = config.appearance,
+                paymentMethodLayout = config.paymentMethodLayout,
+                primaryButtonColor = config.primaryButtonColorUsage(),
                 isDeferred = false,
                 linkEnabled = false,
                 googlePaySupported = false,
@@ -1579,10 +1585,14 @@ class PaymentSheetEventTest {
 
     @Test
     fun `Init event should report card_scan_available as false if unavailable`() {
+        val config = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING
         assertThat(
             PaymentSheetEvent.Init(
                 mode = EventReporter.Mode.Complete,
-                configuration = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING,
+                commonConfiguration = config.asCommonConfiguration(),
+                appearance = config.appearance,
+                paymentMethodLayout = config.paymentMethodLayout,
+                primaryButtonColor = config.primaryButtonColorUsage(),
                 isDeferred = false,
                 linkEnabled = false,
                 googlePaySupported = false,

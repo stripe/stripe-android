@@ -85,6 +85,7 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
+import com.stripe.android.paymentsheet.analytics.primaryButtonColorUsage
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.RecordingCvcRecollectionLauncherFactory
@@ -223,9 +224,9 @@ internal class PaymentSheetViewModelTest {
         val config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         verify(eventReporter).onInit(
             commonConfiguration = eq(config.asCommonConfiguration()),
-            appearance = config.appearance,
-            primaryButtonColor = anyOrNull(),
-            paymentMethodLayout = anyOrNull(),
+            appearance = eq(config.appearance),
+            primaryButtonColor = eq(config.primaryButtonColorUsage()),
+            paymentMethodLayout = eq(config.paymentMethodLayout),
             isDeferred = eq(false),
         )
 
