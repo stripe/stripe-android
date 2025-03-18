@@ -20,14 +20,18 @@ fun interface AnalyticEventCallback {
 @ExperimentalAnalyticEventCallbackApi
 abstract class AnalyticEvent internal constructor() {
 
-    @Override
-    override fun toString(): String {
-        return this::class.java.simpleName
-    }
-
     // Sheet is presented
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    class PresentedSheet internal constructor() : AnalyticEvent()
+    class PresentedSheet internal constructor() : AnalyticEvent() {
+        override fun toString(): String =
+            javaClass.simpleName
+
+        override fun equals(other: Any?): Boolean =
+            other is PresentedSheet
+
+        override fun hashCode(): Int =
+            javaClass.hashCode()
+    }
 
     // Selected a different payment method type
     @Poko
