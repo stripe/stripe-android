@@ -35,7 +35,7 @@ internal fun PaymentSheet.Appearance.toAnalyticsMap(isEmbedded: Boolean = false)
         FIELD_FONT to (primaryButtonConfig.typography.fontResId != null)
     )
 
-    val appearanceConfigMap = mutableMapOf(
+    val appearanceConfigMap = mutableMapOf<String, Any?>(
         FIELD_COLORS_LIGHT to (colorsLight != PaymentSheet.Colors.defaultLight),
         FIELD_COLORS_DARK to (colorsDark != PaymentSheet.Colors.defaultDark),
         FIELD_CORNER_RADIUS to (shapes.cornerRadiusDp != StripeThemeDefaults.shapes.cornerRadius),
@@ -46,7 +46,7 @@ internal fun PaymentSheet.Appearance.toAnalyticsMap(isEmbedded: Boolean = false)
     )
 
     val embeddedConfigMap = embeddedAppearance.toAnalyticsMap()
-    if (isEmbedded) appearanceConfigMap[FIELD_EMBEDDED_PAYMENT_ELEMENT] = embeddedConfigMap
+    appearanceConfigMap[FIELD_EMBEDDED_PAYMENT_ELEMENT] = if (isEmbedded) embeddedConfigMap else null
 
     // We add a usage field to make queries easier.
     val usedPrimaryButtonApi = primaryButtonConfigMap.values.contains(true)

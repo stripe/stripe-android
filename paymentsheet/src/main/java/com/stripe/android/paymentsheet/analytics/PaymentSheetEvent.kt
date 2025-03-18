@@ -147,37 +147,27 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val additionalParams: Map<String, Any?>
             get() {
 
-                val configurationMap = buildMap {
-                    put(FIELD_CUSTOMER, commonConfiguration.customer != null)
-                    put(FIELD_CUSTOMER_ACCESS_PROVIDER, commonConfiguration.customer?.accessType?.analyticsValue)
-                    put(FIELD_GOOGLE_PAY, commonConfiguration.googlePay != null)
-                    primaryButtonColor?.let {
-                        put(FIELD_PRIMARY_BUTTON_COLOR, primaryButtonColor)
-                    }
-                    put(FIELD_BILLING, commonConfiguration.defaultBillingDetails?.isFilledOut() == true)
-                    put(FIELD_DELAYED_PMS, commonConfiguration.allowsDelayedPaymentMethods)
-                    put(FIELD_APPEARANCE, appearance.toAnalyticsMap(mode == EventReporter.Mode.Embedded))
-                    put(FIELD_PAYMENT_METHOD_ORDER, commonConfiguration.paymentMethodOrder)
-                    put(
-                        FIELD_ALLOWS_PAYMENT_METHODS_REQUIRING_SHIPPING_ADDRESS,
-                        commonConfiguration.allowsPaymentMethodsRequiringShippingAddress
-                    )
-                    put(
-                        FIELD_ALLOWS_REMOVAL_OF_LAST_SAVED_PAYMENT_METHOD,
-                        commonConfiguration.allowsRemovalOfLastSavedPaymentMethod
-                    )
-                    put(
-                        FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION,
-                        commonConfiguration.billingDetailsCollectionConfiguration.toAnalyticsMap()
-                    )
-                    put(FIELD_PREFERRED_NETWORKS, commonConfiguration.preferredNetworks.toAnalyticsValue())
-                    put(FIELD_EXTERNAL_PAYMENT_METHODS, commonConfiguration.getExternalPaymentMethodsAnalyticsValue())
-                    paymentMethodLayout?.let {
-                        put(FIELD_PAYMENT_METHOD_LAYOUT, paymentMethodLayout.toAnalyticsValue())
-                    }
-                    put(FIELD_CARD_BRAND_ACCEPTANCE, commonConfiguration.cardBrandAcceptance.toAnalyticsValue())
-                    put(FIELD_CARD_SCAN_AVAILABLE, isStripeCardScanAvailable)
-                }
+                val configurationMap = mapOf(
+                    FIELD_CUSTOMER to (commonConfiguration.customer != null),
+                    FIELD_CUSTOMER_ACCESS_PROVIDER to (commonConfiguration.customer?.accessType?.analyticsValue),
+                    FIELD_GOOGLE_PAY to (commonConfiguration.googlePay != null),
+                    FIELD_PRIMARY_BUTTON_COLOR to primaryButtonColor,
+                    FIELD_BILLING to (commonConfiguration.defaultBillingDetails?.isFilledOut() == true),
+                    FIELD_DELAYED_PMS to commonConfiguration.allowsDelayedPaymentMethods,
+                    FIELD_APPEARANCE to appearance.toAnalyticsMap(mode == EventReporter.Mode.Embedded),
+                    FIELD_PAYMENT_METHOD_ORDER to commonConfiguration.paymentMethodOrder,
+                    FIELD_ALLOWS_PAYMENT_METHODS_REQUIRING_SHIPPING_ADDRESS to
+                        commonConfiguration.allowsPaymentMethodsRequiringShippingAddress,
+                    FIELD_ALLOWS_REMOVAL_OF_LAST_SAVED_PAYMENT_METHOD to
+                        commonConfiguration.allowsRemovalOfLastSavedPaymentMethod,
+                    FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION to
+                        commonConfiguration.billingDetailsCollectionConfiguration.toAnalyticsMap(),
+                    FIELD_PREFERRED_NETWORKS to commonConfiguration.preferredNetworks.toAnalyticsValue(),
+                    FIELD_EXTERNAL_PAYMENT_METHODS to commonConfiguration.getExternalPaymentMethodsAnalyticsValue(),
+                    FIELD_PAYMENT_METHOD_LAYOUT to paymentMethodLayout?.toAnalyticsValue(),
+                    FIELD_CARD_BRAND_ACCEPTANCE to commonConfiguration.cardBrandAcceptance.toAnalyticsValue(),
+                    FIELD_CARD_SCAN_AVAILABLE to isStripeCardScanAvailable
+                )
                 return mapOf(
                     FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION to configurationMap,
                 )

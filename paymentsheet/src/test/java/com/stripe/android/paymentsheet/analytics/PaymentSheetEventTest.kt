@@ -29,7 +29,6 @@ import kotlin.time.Duration.Companion.seconds
 @Suppress("LargeClass")
 class PaymentSheetEventTest {
 
-    @Suppress("LongMethod")
     @Test
     fun `Init event with full config should return expected params`() {
         val config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
@@ -51,44 +50,10 @@ class PaymentSheetEventTest {
             "mc_complete_init_customer_googlepay"
         )
 
-        val expectedConfig = mapOf(
-            "customer" to true,
-            "customer_access_provider" to "legacy",
-            "googlepay" to true,
-            "primary_button_color" to false,
-            "default_billing_details" to false,
-            "allows_delayed_payment_methods" to false,
-            "appearance" to mapOf(
-                "colorsLight" to false,
-                "colorsDark" to false,
-                "corner_radius" to false,
-                "border_width" to false,
-                "font" to false,
-                "size_scale_factor" to false,
-                "primary_button" to mapOf(
-                    "colorsLight" to false,
-                    "colorsDark" to false,
-                    "corner_radius" to false,
-                    "border_width" to false,
-                    "font" to false,
-                ),
-                "usage" to false,
-            ),
-            "payment_method_order" to listOf<String>(),
-            "allows_payment_methods_requiring_shipping_address" to false,
-            "allows_removal_of_last_saved_payment_method" to true,
-            "billing_details_collection_configuration" to mapOf(
-                "attach_defaults" to false,
-                "name" to "Automatic",
-                "email" to "Automatic",
-                "phone" to "Automatic",
-                "address" to "Automatic",
-            ),
-            "preferred_networks" to null,
-            "external_payment_methods" to null,
-            "payment_method_layout" to "horizontal",
-            "card_brand_acceptance" to false,
-            "card_scan_available" to true
+        val expectedConfig = buildInitMpeConfig(
+            customer = true,
+            customerAccessProvider = "legacy",
+            googlePay = true
         )
 
         assertThat(event.params).run {
@@ -99,7 +64,6 @@ class PaymentSheetEventTest {
         }
     }
 
-    @Suppress("LongMethod")
     @Test
     fun `Init event with external payment methods should return expected params`() {
         val config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_EXTERNAL_PAYMENT_METHODS
@@ -121,44 +85,10 @@ class PaymentSheetEventTest {
             "mc_complete_init_customer"
         )
 
-        val expectedConfig = mapOf(
-            "customer" to true,
-            "customer_access_provider" to "legacy",
-            "googlepay" to false,
-            "primary_button_color" to false,
-            "default_billing_details" to false,
-            "allows_delayed_payment_methods" to false,
-            "appearance" to mapOf(
-                "colorsLight" to false,
-                "colorsDark" to false,
-                "corner_radius" to false,
-                "border_width" to false,
-                "font" to false,
-                "size_scale_factor" to false,
-                "primary_button" to mapOf(
-                    "colorsLight" to false,
-                    "colorsDark" to false,
-                    "corner_radius" to false,
-                    "border_width" to false,
-                    "font" to false,
-                ),
-                "usage" to false,
-            ),
-            "payment_method_order" to listOf<String>(),
-            "allows_payment_methods_requiring_shipping_address" to false,
-            "allows_removal_of_last_saved_payment_method" to true,
-            "billing_details_collection_configuration" to mapOf(
-                "attach_defaults" to false,
-                "name" to "Automatic",
-                "email" to "Automatic",
-                "phone" to "Automatic",
-                "address" to "Automatic",
-            ),
-            "preferred_networks" to null,
-            "external_payment_methods" to listOf("external_paypal", "external_fawry"),
-            "payment_method_layout" to "horizontal",
-            "card_brand_acceptance" to false,
-            "card_scan_available" to true
+        val expectedConfig = buildInitMpeConfig(
+            customer = true,
+            customerAccessProvider = "legacy",
+            externalPaymentMethods = listOf("external_paypal", "external_fawry")
         )
 
         assertThat(event.params).run {
@@ -193,11 +123,36 @@ class PaymentSheetEventTest {
             "mc_complete_init_customer"
         )
 
-        val expectedConfig = mapOf(
-            "customer" to true,
-            "customer_access_provider" to "legacy",
-            "googlepay" to false,
-            "primary_button_color" to false,
+        val expectedConfig = buildInitMpeConfig(
+            customer = true,
+            customerAccessProvider = "legacy",
+            paymentMethodLayout = "vertical",
+        )
+
+        assertThat(event.params).run {
+            containsEntry("link_enabled", false)
+            containsEntry("google_pay_enabled", false)
+            containsEntry("is_decoupled", false)
+            containsEntry("mpe_config", expectedConfig)
+        }
+    }
+
+    private fun buildInitMpeConfig(
+        customer: Boolean = false,
+        customerAccessProvider: String? = null,
+        googlePay: Boolean = false,
+        paymentMethodLayout: String? = "horizontal",
+        externalPaymentMethods: List<String>? = null,
+        preferredNetworks: String? = null,
+        embeddedConfig: Map<String, Any>? = null,
+        primaryButtonColor: Boolean? = false,
+        usage: Boolean = false
+    ): Map<String, Any?> {
+        return mapOf(
+            "customer" to customer,
+            "customer_access_provider" to customerAccessProvider,
+            "googlepay" to googlePay,
+            "primary_button_color" to primaryButtonColor,
             "default_billing_details" to false,
             "allows_delayed_payment_methods" to false,
             "appearance" to mapOf(
@@ -214,7 +169,8 @@ class PaymentSheetEventTest {
                     "border_width" to false,
                     "font" to false,
                 ),
-                "usage" to false,
+                "embedded_payment_element" to embeddedConfig,
+                "usage" to usage,
             ),
             "payment_method_order" to listOf<String>(),
             "allows_payment_methods_requiring_shipping_address" to false,
@@ -226,22 +182,14 @@ class PaymentSheetEventTest {
                 "phone" to "Automatic",
                 "address" to "Automatic",
             ),
-            "preferred_networks" to null,
-            "external_payment_methods" to null,
-            "payment_method_layout" to "vertical",
+            "preferred_networks" to preferredNetworks,
+            "external_payment_methods" to externalPaymentMethods,
+            "payment_method_layout" to paymentMethodLayout,
             "card_brand_acceptance" to false,
             "card_scan_available" to true
         )
-
-        assertThat(event.params).run {
-            containsEntry("link_enabled", false)
-            containsEntry("google_pay_enabled", false)
-            containsEntry("is_decoupled", false)
-            containsEntry("mpe_config", expectedConfig)
-        }
     }
 
-    @Suppress("LongMethod")
     @Test
     fun `Init event with minimum config should return expected params`() {
         val config = PaymentSheetFixtures.CONFIG_MINIMUM
@@ -263,45 +211,7 @@ class PaymentSheetEventTest {
             "mc_complete_init_default"
         )
 
-        val expectedConfig = mapOf(
-            "customer" to false,
-            "customer_access_provider" to null,
-            "googlepay" to false,
-            "primary_button_color" to false,
-            "default_billing_details" to false,
-            "allows_delayed_payment_methods" to false,
-            "appearance" to mapOf(
-                "colorsLight" to false,
-                "colorsDark" to false,
-                "corner_radius" to false,
-                "border_width" to false,
-                "font" to false,
-                "size_scale_factor" to false,
-                "primary_button" to mapOf(
-                    "colorsLight" to false,
-                    "colorsDark" to false,
-                    "corner_radius" to false,
-                    "border_width" to false,
-                    "font" to false,
-                ),
-                "usage" to false,
-            ),
-            "payment_method_order" to listOf<String>(),
-            "allows_payment_methods_requiring_shipping_address" to false,
-            "allows_removal_of_last_saved_payment_method" to true,
-            "billing_details_collection_configuration" to mapOf(
-                "attach_defaults" to false,
-                "name" to "Automatic",
-                "email" to "Automatic",
-                "phone" to "Automatic",
-                "address" to "Automatic",
-            ),
-            "preferred_networks" to null,
-            "external_payment_methods" to null,
-            "payment_method_layout" to "horizontal",
-            "card_brand_acceptance" to false,
-            "card_scan_available" to true
-        )
+        val expectedConfig = buildInitMpeConfig()
 
         assertThat(event.params).run {
             containsEntry("link_enabled", false)
@@ -335,44 +245,8 @@ class PaymentSheetEventTest {
             "mc_complete_init_default"
         )
 
-        val expectedConfig = mapOf(
-            "customer" to false,
-            "customer_access_provider" to null,
-            "googlepay" to false,
-            "primary_button_color" to false,
-            "default_billing_details" to false,
-            "allows_delayed_payment_methods" to false,
-            "appearance" to mapOf(
-                "colorsLight" to false,
-                "colorsDark" to false,
-                "corner_radius" to false,
-                "border_width" to false,
-                "font" to false,
-                "size_scale_factor" to false,
-                "primary_button" to mapOf(
-                    "colorsLight" to false,
-                    "colorsDark" to false,
-                    "corner_radius" to false,
-                    "border_width" to false,
-                    "font" to false,
-                ),
-                "usage" to false,
-            ),
-            "payment_method_order" to listOf<String>(),
-            "allows_payment_methods_requiring_shipping_address" to false,
-            "allows_removal_of_last_saved_payment_method" to true,
-            "billing_details_collection_configuration" to mapOf(
-                "attach_defaults" to false,
-                "name" to "Automatic",
-                "email" to "Automatic",
-                "phone" to "Automatic",
-                "address" to "Automatic",
-            ),
-            "preferred_networks" to "cartes_bancaires, visa",
-            "external_payment_methods" to null,
-            "payment_method_layout" to "horizontal",
-            "card_brand_acceptance" to false,
-            "card_scan_available" to true
+        val expectedConfig = buildInitMpeConfig(
+            preferredNetworks = "cartes_bancaires, visa"
         )
 
         assertThat(event.params).run {
@@ -437,7 +311,7 @@ class PaymentSheetEventTest {
             isDeferred = true,
             linkEnabled = false,
             googlePaySupported = false,
-            isStripeCardScanAvailable = false
+            isStripeCardScanAvailable = true
         )
 
         assertThat(
@@ -446,46 +320,14 @@ class PaymentSheetEventTest {
             "mc_embedded_init"
         )
 
-        val expectedConfig = mapOf(
-            "customer" to false,
-            "customer_access_provider" to null,
-            "googlepay" to false,
-            "default_billing_details" to false,
-            "allows_delayed_payment_methods" to false,
-            "appearance" to mapOf(
-                "colorsLight" to false,
-                "colorsDark" to false,
-                "corner_radius" to false,
-                "border_width" to false,
-                "font" to false,
-                "size_scale_factor" to false,
-                "primary_button" to mapOf(
-                    "colorsLight" to false,
-                    "colorsDark" to false,
-                    "corner_radius" to false,
-                    "border_width" to false,
-                    "font" to false,
-                ),
-                "embedded_payment_element" to mapOf(
-                    "style" to true,
-                    "row_style" to "flat_with_checkmark"
-                ),
-                "usage" to true,
+        val expectedConfig = buildInitMpeConfig(
+            embeddedConfig = mapOf(
+                "style" to true,
+                "row_style" to "flat_with_checkmark"
             ),
-            "payment_method_order" to listOf<String>(),
-            "allows_payment_methods_requiring_shipping_address" to false,
-            "allows_removal_of_last_saved_payment_method" to true,
-            "billing_details_collection_configuration" to mapOf(
-                "attach_defaults" to false,
-                "name" to "Automatic",
-                "email" to "Automatic",
-                "phone" to "Automatic",
-                "address" to "Automatic",
-            ),
-            "preferred_networks" to null,
-            "external_payment_methods" to null,
-            "card_brand_acceptance" to false,
-            "card_scan_available" to false
+            paymentMethodLayout = null,
+            primaryButtonColor = null,
+            usage = true
         )
 
         assertThat(event.params).run {
