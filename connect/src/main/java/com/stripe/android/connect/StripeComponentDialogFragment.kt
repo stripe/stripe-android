@@ -129,11 +129,12 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
         // older Android versions; if too late, it doesn't do anything on newer versions.
         dialog?.window?.let { WindowCompat.setDecorFitsSystemWindows(it, false) }
 
-        val rootView = StripeComponentDialogFragmentView<ComponentView>(inflater)
-            .also { this._rootView = it }
-        rootView.toolbar.title = title
-        rootView.toolbar.setNavigationOnClickListener { dismiss() }
-        return rootView
+        return StripeComponentDialogFragmentView<ComponentView>(inflater)
+            .also {
+                this._rootView = it
+                it.title = title
+                it.listener = DialogFragmentViewListener()
+            }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -192,6 +193,12 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
     private fun bindAppearance(appearance: Appearance) {
         rootView.bindAppearance(appearance)
         dialog?.window?.setBackgroundDrawable(rootView.background)
+    }
+
+    private inner class DialogFragmentViewListener : StripeComponentDialogFragmentView.Listener {
+        override fun onCloseButtonClickError() {
+            dismiss()
+        }
     }
 
     internal companion object {

@@ -118,6 +118,16 @@ internal class StripeConnectWebView private constructor(
         )
     }
 
+    fun mobileInputReceived(input: MobileInput, resultCallback: ValueCallback<String>) {
+        evaluateSdkJs(
+            function = "mobileInputReceived",
+            payload = buildJsonObject {
+                put("input", input.value)
+            },
+            resultCallback = resultCallback
+        )
+    }
+
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         // We need the Activity context for some UI to work, like web-triggered dialogs
@@ -437,11 +447,15 @@ internal class StripeConnectWebView private constructor(
         )
     }
 
-    private fun WebView.evaluateSdkJs(function: String, payload: JsonObject) {
+    private fun WebView.evaluateSdkJs(
+        function: String,
+        payload: JsonObject,
+        resultCallback: ValueCallback<String>? = null
+    ) {
         val command = "$ANDROID_JS_INTERFACE.$function($payload)"
         post {
             logger.debug("($loggerTag) Evaluating JS: $command")
-            evaluateJavascript(command, null)
+            evaluateJavascript(command, resultCallback)
         }
     }
 

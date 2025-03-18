@@ -7,7 +7,7 @@ import android.util.AttributeSet
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.WebView
+import android.webkit.ValueCallback
 import android.widget.FrameLayout
 import android.widget.ProgressBar
 import androidx.annotation.RestrictTo
@@ -20,6 +20,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.MutableCreationExtras
 import com.stripe.android.connect.di.StripeConnectComponent
 import com.stripe.android.connect.util.AndroidClock
+import com.stripe.android.connect.webview.MobileInput
+import com.stripe.android.connect.webview.StripeConnectWebView
 import com.stripe.android.connect.webview.StripeConnectWebViewContainer
 import com.stripe.android.connect.webview.StripeConnectWebViewContainerState
 import com.stripe.android.connect.webview.StripeConnectWebViewContainerViewModel
@@ -53,7 +55,7 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
     private var progressBar: ProgressBar? = null
 
     // See StripeConnectWebViewContainerViewModel for why we're getting a WebView from a ViewModel.
-    private val webView: WebView? get() = viewModel?.webView
+    internal val webView: StripeConnectWebView? get() = viewModel?.webView
     private var webViewCacheKey: String? = null
 
     /* Notes on initialization
@@ -108,6 +110,10 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
             listener = listener,
             propsJson = props.toJsonObject()
         )
+    }
+
+    internal fun mobileInputReceived(input: MobileInput, resultCallback: ValueCallback<String>) {
+        webView?.mobileInputReceived(input, resultCallback)
     }
 
     private fun initializeInternal(
