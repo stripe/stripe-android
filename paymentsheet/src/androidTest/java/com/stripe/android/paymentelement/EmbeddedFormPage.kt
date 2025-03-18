@@ -57,6 +57,15 @@ internal class EmbeddedFormPage(
         }
     }
 
+    fun waitUntilMissing() {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            composeTestRule
+                .onAllNodes(hasTestTag(FORM_ELEMENT_TEST_TAG))
+                .fetchSemanticsNodes()
+                .isEmpty()
+        }
+    }
+
     fun clickPrimaryButton() {
         composeTestRule.waitUntil {
             composeTestRule.onAllNodes(hasTestTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON).and(isEnabled()))
