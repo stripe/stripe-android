@@ -38,6 +38,6 @@ internal class FinancialConnectionsSheetLiteRedirectActivity : ComponentActivity
     }
 
     private fun Uri.isFinancialConnectionsScheme(): Boolean {
-        return (this.scheme == "stripe-auth" || this.scheme == "stripe")
+        return (this.scheme == "stripe")
     }
 }
