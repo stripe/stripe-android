@@ -69,7 +69,7 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity(R.layou
         progressBar.isVisible = true
     }
 
-    @SuppressLint("SetJavaScriptEnabled, MagicNumber")
+    @SuppressLint("SetJavaScriptEnabled")
     private fun setupWebView(): WebView {
         return webView.apply {
             settings.javaScriptEnabled = true
