@@ -12,7 +12,7 @@ internal data class PaymentElementCallbacks private constructor(
     val createIntentCallback: CreateIntentCallback?,
     val customPaymentMethodConfirmHandler: CustomPaymentMethodConfirmHandler?,
     val externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler?,
-    var analyticEventCallback: AnalyticEventCallback?,
+    val analyticEventCallback: AnalyticEventCallback?,
 ) {
     class Builder {
         private var createIntentCallback: CreateIntentCallback? = null
