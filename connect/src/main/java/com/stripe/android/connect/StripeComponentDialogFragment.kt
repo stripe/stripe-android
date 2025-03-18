@@ -1,11 +1,14 @@
 package com.stripe.android.connect
 
+import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import androidx.activity.ComponentDialog
+import androidx.activity.OnBackPressedCallback
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -17,6 +20,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.connect.appearance.Appearance
+import com.stripe.android.connect.webview.MobileInput
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
@@ -116,12 +120,20 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
 
     var onDismissListener: StripeComponentController.OnDismissListener? = null
 
+    private val onBackPressedCallback = OnBackPressedCallbackImpl(false)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setStyle(STYLE_NO_FRAME, R.style.StripeConnectFullScreenDialogStyle)
 
         initialEmbeddedComponentManager?.let { viewModel.embeddedComponentManager.value = it }
         initialEmbeddedComponentManager = null
+    }
+
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        return ComponentDialog(requireContext(), theme).apply {
+            onBackPressedDispatcher.addCallback(onBackPressedCallback)
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -169,6 +181,7 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
             componentView.layoutParams =
                 LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f)
             rootView.componentView = componentView
+            onBackPressedCallback.isEnabled = true
         }
     }
 
@@ -198,6 +211,24 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
     private inner class DialogFragmentViewListener : StripeComponentDialogFragmentView.Listener {
         override fun onCloseButtonClickError() {
             dismiss()
+        }
+    }
+
+    private inner class OnBackPressedCallbackImpl(enabled: Boolean) : OnBackPressedCallback(enabled) {
+        override fun handleOnBackPressed() {
+            val componentView = rootView.componentView
+            if (componentView == null) {
+                dismiss()
+                return
+            }
+            componentView.mobileInputReceived(
+                input = MobileInput.BACK_BUTTON_PRESSED,
+                resultCallback = { result ->
+                    if (result == null || result == "null") {
+                        dismiss()
+                    }
+                }
+            )
         }
     }
 
