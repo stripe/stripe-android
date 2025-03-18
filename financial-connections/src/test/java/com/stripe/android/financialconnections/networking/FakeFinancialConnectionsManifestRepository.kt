@@ -4,6 +4,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
+import com.stripe.android.financialconnections.model.FinancialConnectionsInstitutionSelected
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
@@ -109,4 +110,11 @@ internal class FakeFinancialConnectionsManifestRepository : FinancialConnections
     override fun updateLocalManifest(
         block: (FinancialConnectionsSessionManifest) -> FinancialConnectionsSessionManifest
     ) = Unit
+
+    override suspend fun selectInstitution(
+        clientSecret: String,
+        institution: FinancialConnectionsInstitution
+    ): FinancialConnectionsInstitutionSelected {
+        TODO("Not yet implemented")
+    }
 }

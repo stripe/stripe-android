@@ -131,7 +131,8 @@ internal class BillingDetailsCollectionScreenshotTest {
 
     private val setAsDefaultPaymentMethodElement = SetAsDefaultPaymentMethodElement(
         initialValue = false,
-        saveForFutureUseCheckedFlow = stateFlowOf(false)
+        saveForFutureUseCheckedFlow = stateFlowOf(false),
+        setAsDefaultMatchesSaveForFutureUse = false,
     )
 
     private fun testBillingDetailsCollectionScreenShot(

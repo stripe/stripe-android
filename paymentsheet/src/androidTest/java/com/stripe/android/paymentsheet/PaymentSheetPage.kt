@@ -232,6 +232,12 @@ internal class PaymentSheetPage(
             .performClick()
     }
 
+    fun assertNoSetAsDefaultCheckbox() {
+        composeTestRule.onAllNodesWithTag(
+            SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG
+        ).fetchSemanticsNodes().isEmpty()
+    }
+
     fun clickOnLpm(code: String, forVerticalMode: Boolean = false) {
         if (forVerticalMode) {
             composeTestRule.waitUntil {

@@ -2,7 +2,6 @@ package com.stripe.android.connect.example.ui.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.connect.BuildConfig
 import com.stripe.android.connect.example.core.Async
 import com.stripe.android.connect.example.core.Uninitialized
 import com.stripe.android.connect.example.data.EmbeddedComponentService
@@ -26,10 +25,10 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val embeddedComponentService: EmbeddedComponentService,
-    private val settingsService: SettingsService
+    private val settingsService: SettingsService,
+    private val logger: Logger,
 ) : ViewModel() {
 
-    private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
     private val loggingTag = this::class.java.simpleName
 
     private val _state = MutableStateFlow(SettingsState(serverUrl = embeddedComponentService.serverBaseUrl))

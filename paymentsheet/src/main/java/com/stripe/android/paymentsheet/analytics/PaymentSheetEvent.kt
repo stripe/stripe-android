@@ -127,7 +127,8 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         private val paymentMethodLayout: PaymentSheet.PaymentMethodLayout?,
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
-        override val isDeferred: Boolean
+        override val isDeferred: Boolean,
+        private val isStripeCardScanAvailable: Boolean
     ) : PaymentSheetEvent() {
 
         override val eventName: String
@@ -175,6 +176,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                         put(FIELD_PAYMENT_METHOD_LAYOUT, paymentMethodLayout.toAnalyticsValue())
                     }
                     put(FIELD_CARD_BRAND_ACCEPTANCE, commonConfiguration.cardBrandAcceptance.toAnalyticsValue())
+                    put(FIELD_CARD_SCAN_AVAILABLE, isStripeCardScanAvailable)
                 }
                 return mapOf(
                     FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION to configurationMap,
@@ -593,6 +595,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_ORDERED_LPMS = "ordered_lpms"
         const val FIELD_REQUIRE_CVC_RECOLLECTION = "require_cvc_recollection"
         const val FIELD_CARD_BRAND_ACCEPTANCE = "card_brand_acceptance"
+        const val FIELD_CARD_SCAN_AVAILABLE = "card_scan_available"
 
         const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
         const val VALUE_ADD_CBC_EVENT_SOURCE = "add"

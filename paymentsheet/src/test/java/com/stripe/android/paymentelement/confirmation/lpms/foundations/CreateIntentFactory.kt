@@ -47,8 +47,8 @@ internal class CreateIntentFactory(
     ): Result<CreateIntentData> {
         PaymentElementCallbackReferences.set(
             key = paymentElementCallbackIdentifier,
-            callbacks = PaymentElementCallbacks(
-                createIntentCallback = { paymentMethod, _ ->
+            callbacks = PaymentElementCallbacks.Builder()
+                .createIntentCallback { paymentMethod, _ ->
                     testClient.createPaymentIntent(
                         country = country,
                         amount = amount,
@@ -67,9 +67,8 @@ internal class CreateIntentFactory(
                             )
                         }
                     )
-                },
-                externalPaymentMethodConfirmHandler = null,
-            )
+                }
+                .build()
         )
 
         return Result.success(
@@ -112,8 +111,8 @@ internal class CreateIntentFactory(
     ): Result<CreateIntentData> {
         PaymentElementCallbackReferences.set(
             key = paymentElementCallbackIdentifier,
-            callbacks = PaymentElementCallbacks(
-                createIntentCallback = { paymentMethod, _ ->
+            callbacks = PaymentElementCallbacks.Builder()
+                .createIntentCallback { paymentMethod, _ ->
                     testClient.createSetupIntent(
                         country = country,
                         paymentMethodType = paymentMethodType,
@@ -129,9 +128,8 @@ internal class CreateIntentFactory(
                             )
                         }
                     )
-                },
-                externalPaymentMethodConfirmHandler = null,
-            )
+                }
+                .build()
         )
 
         return Result.success(

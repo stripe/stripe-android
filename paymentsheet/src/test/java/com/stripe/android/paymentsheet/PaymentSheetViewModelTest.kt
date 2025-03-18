@@ -57,6 +57,7 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -174,6 +175,7 @@ import com.stripe.android.R as PaymentsCoreR
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
+@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 internal class PaymentSheetViewModelTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
@@ -2130,14 +2132,17 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `Sends correct analytics event when using deferred intent with client-side confirmation`() = runTest {
-        PaymentElementCallbackReferences[PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks(
-            createIntentCallback = { _, _ ->
+        PaymentElementCallbackReferences[PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks.Builder()
+            .createIntentCallback { _, _ ->
                 error("Should not be called!")
-            },
-            externalPaymentMethodConfirmHandler = { _, _ ->
+            }
+            .customPaymentMethodConfirmHandler { _, _ ->
                 error("Should not be called!")
-            },
-        )
+            }
+            .externalPaymentMethodConfirmHandler { _, _ ->
+                error("Should not be called!")
+            }
+            .build()
 
         createViewModelForDeferredIntent()
 
@@ -2152,14 +2157,17 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `Sends correct analytics event when using deferred intent with server-side confirmation`() = runTest {
-        PaymentElementCallbackReferences[PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks(
-            createIntentCallback = { _, _ ->
+        PaymentElementCallbackReferences[PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks.Builder()
+            .createIntentCallback { _, _ ->
                 error("Should not be called!")
-            },
-            externalPaymentMethodConfirmHandler = { _, _ ->
+            }
+            .customPaymentMethodConfirmHandler { _, _ ->
                 error("Should not be called!")
-            },
-        )
+            }
+            .externalPaymentMethodConfirmHandler { _, _ ->
+                error("Should not be called!")
+            }
+            .build()
 
         createViewModelForDeferredIntent()
 

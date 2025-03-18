@@ -13,6 +13,7 @@ import com.stripe.android.connect.example.core.Loading
 import com.stripe.android.connect.example.core.Success
 import com.stripe.android.connect.example.core.Uninitialized
 import com.stripe.android.connect.example.data.EmbeddedComponentService.Companion.DEFAULT_SERVER_BASE_URL
+import com.stripe.android.core.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -53,6 +54,7 @@ interface EmbeddedComponentService {
 
 class EmbeddedComponentServiceImpl @Inject constructor(
     private val settingsService: SettingsService,
+    private val logger: Logger,
 ) : EmbeddedComponentService {
     override var serverBaseUrl: String = settingsService.getSelectedServerBaseURL() ?: DEFAULT_SERVER_BASE_URL
         private set
@@ -80,8 +82,8 @@ class EmbeddedComponentServiceImpl @Inject constructor(
             timeoutReadInMillisecond = 30_000
 
             // add logging
-            addRequestInterceptor(RequestLogger(tag = "EmbeddedComponentService"))
-            addResponseInterceptor(ResponseLogger(tag = "EmbeddedComponentService"))
+            addRequestInterceptor(RequestLogger(tag = "EmbeddedComponentService", logger = logger))
+            addResponseInterceptor(ResponseLogger(tag = "EmbeddedComponentService", logger = logger))
 
             // add headers
             addRequestInterceptor(ApplicationJsonHeaderInterceptor)

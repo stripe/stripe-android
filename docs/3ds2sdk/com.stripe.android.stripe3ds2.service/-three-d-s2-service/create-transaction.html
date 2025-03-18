@@ -1,0 +1,76 @@
+<!doctype html>
+<html class="no-js">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>createTransaction</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">    <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async></script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<body>
+    <div class="root">
+<nav class="navigation" id="navigation-wrapper">
+    <div class="navigation--inner">
+        <div class="navigation-title">
+            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
+            <div class="library-name">
+<a class="library-name--link" href="../../../index.html">
+                            stripe-android
+                    </a>            </div>
+            <div class="library-version">
+            </div>
+        </div>
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":3ds2sdk:dokkaHtmlPartial/release">androidJvm</button>
+        </div>
+    </div>
+    <div class="navigation-controls">
+        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
+        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
+    </div>
+</nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="sidebar--inner" id="sideMenu"></div>
+            </div>
+            <div id="main">
+<div class="main-content" data-page-type="member" id="content" pageids="3ds2sdk::com.stripe.android.stripe3ds2.service/ThreeDS2Service/createTransaction/#kotlin.String#kotlin.String?/PointingToDeclaration//1817547867">
+  <div class="breadcrumbs"><a href="../../index.html">3ds2sdk</a><span class="delimiter">/</span><a href="../index.html">com.stripe.android.stripe3ds2.service</a><span class="delimiter">/</span><a href="index.html">ThreeDS2Service</a><span class="delimiter">/</span><span class="current">createTransaction</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>create</span><wbr><span><span>Transaction</span></span></h1>
+  </div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":3ds2sdk:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="create-transaction.html"><span class="token function">createTransaction</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">directoryServerID<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">messageVersion<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.stripe.android.stripe3ds2.transaction/-transaction/index.html">Transaction</a></div><p class="paragraph">The createTransaction method creates an instance of Transaction through which the app gets the data that is required to perform the transaction. The app calls the createTransaction method for each transaction that is to be processed. When the createTransaction method is called:</p><ul><li><p class="paragraph">The 3DS SDK uses the information adhering to the protocol version passed in the optional messageVersion parameter, if it supports the protocol version. If it does not support the protocol version, it generates an InvalidInputException. If the messageVersion parameter is empty or null, the highest protocol version that the 3DS SDK supports is used. If Challenge Flow is triggered for the transaction, the 3DS SDK uses the same protocol version during the challenge process.</p></li><li><p class="paragraph">The 3DS SDK uses a secure random function to generate a Transaction ID in UUID format. This ID is used to uniquely identify each transaction.</p></li><li><p class="paragraph">The 3DS SDK generates a fresh ephemeral key pair. This key pair is used to establish a secure session between the 3DS SDK and the ACS subsequently during the transaction.</p></li></ul><span class="kdoc-tag"><h4 class="">Return</h4><p class="paragraph">This method returns an instance of the Transaction interface.</p></span><h4 class="">Parameters</h4><div class="table"><div class="table-row" data-filterable-current=":3ds2sdk:dokkaHtmlPartial/release" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>directory</span><wbr><span>Server</span><wbr><span><span>ID</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Registered Application Provider Identifier (RID) that is unique to the Payment System.<br><br> RIDs are defined by the ISO 7816-5 standard.<br><br> RIDs are issued by the ISO/IEC 7816- 5 registration authority.<br><br> Contains a 5-byte value.<br><br> The 3DS SDK encrypts the device information by using the DS public key. This key is identified based on the directoryServerID that is passed to the createTransaction method.<br><br> Note: The 3DS SDK shall have the DS Public Keys of all the 3-D Secure participating Directory Servers.</p></div></div></div></div><div class="table-row" data-filterable-current=":3ds2sdk:dokkaHtmlPartial/release" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>message</span><wbr><span><span>Version</span></span></u></div></span></div><div><div class="title"><p class="paragraph">(optional) Protocol version according to which the transaction shall be created.</p></div></div></div></div></div><h4 class="">Throws</h4><div class="table"><div class="table-row" data-filterable-current=":3ds2sdk:dokkaHtmlPartial/release" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../../com.stripe.android.stripe3ds2.exceptions/-invalid-input-exception/index.html"><span>Invalid</span><wbr><span>Input</span><wbr><span><span>Exception</span></span></a></div></span></div><div><div class="title"><p class="paragraph">This exception shall be thrown if an input parameter is invalid. This also includes an invalid Directory Server ID or a protocol version that the 3DS SDK does not support.</p></div></div></div></div><div class="table-row" data-filterable-current=":3ds2sdk:dokkaHtmlPartial/release" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../../com.stripe.android.stripe3ds2.exceptions/-s-d-k-runtime-exception/index.html"><span>SDKRuntime</span><wbr><span><span>Exception</span></span></a></div></span></div><div><div class="title"><p class="paragraph">This exception shall be thrown if an internal error is encountered by the 3DS SDK.</p></div></div></div></div></div></div></div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2025 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

@@ -25,11 +25,15 @@ fun rememberPaymentSheetFlowController(
     paymentOptionCallback: PaymentOptionCallback,
     paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet.FlowController {
+    val callbacks = remember {
+        PaymentElementCallbacks.Builder()
+            .build()
+    }
+
     return internalRememberPaymentSheetFlowController(
         paymentOptionCallback = paymentOptionCallback,
         paymentResultCallback = paymentResultCallback,
-        createIntentCallback = null,
-        externalPaymentMethodConfirmHandler = null,
+        callbacks = callbacks,
     )
 }
 
@@ -50,11 +54,16 @@ fun rememberPaymentSheetFlowController(
     paymentOptionCallback: PaymentOptionCallback,
     paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet.FlowController {
+    val callbacks = remember(createIntentCallback) {
+        PaymentElementCallbacks.Builder()
+            .createIntentCallback(createIntentCallback)
+            .build()
+    }
+
     return internalRememberPaymentSheetFlowController(
         paymentOptionCallback = paymentOptionCallback,
         paymentResultCallback = paymentResultCallback,
-        createIntentCallback = createIntentCallback,
-        externalPaymentMethodConfirmHandler = null,
+        callbacks = callbacks,
     )
 }
 
@@ -79,11 +88,17 @@ fun rememberPaymentSheetFlowController(
     paymentOptionCallback: PaymentOptionCallback,
     paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet.FlowController {
+    val callbacks = remember(createIntentCallback, externalPaymentMethodConfirmHandler) {
+        PaymentElementCallbacks.Builder()
+            .createIntentCallback(createIntentCallback)
+            .externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
+            .build()
+    }
+
     return internalRememberPaymentSheetFlowController(
         paymentOptionCallback = paymentOptionCallback,
         paymentResultCallback = paymentResultCallback,
-        createIntentCallback = createIntentCallback,
-        externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
+        callbacks = callbacks,
     )
 }
 
@@ -141,20 +156,12 @@ private fun internalRememberPaymentSheetFlowController(
 
 @Composable
 internal fun internalRememberPaymentSheetFlowController(
-    createIntentCallback: CreateIntentCallback?,
-    externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler?,
+    callbacks: PaymentElementCallbacks,
     paymentOptionCallback: PaymentOptionCallback,
     paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet.FlowController {
     val paymentElementCallbackIdentifier = rememberSaveable {
         UUID.randomUUID().toString()
-    }
-
-    val callbacks = remember(createIntentCallback, externalPaymentMethodConfirmHandler) {
-        PaymentElementCallbacks(
-            createIntentCallback = createIntentCallback,
-            externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
-        )
     }
 
     UpdateCallbacks(paymentElementCallbackIdentifier, callbacks)
