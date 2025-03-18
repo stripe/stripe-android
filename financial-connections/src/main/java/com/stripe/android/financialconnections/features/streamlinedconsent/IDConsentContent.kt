@@ -23,9 +23,6 @@ internal fun IDConsentContentScreen() {
     IDConsentContent(
         state = state,
         onPrimaryButtonClick = viewModel::onContinueClick,
-        onSecondaryButtonClick = {
-            // There is no secondary button
-        },
         onClickableTextClick = viewModel::onClickableTextClick,
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
     )
@@ -35,7 +32,6 @@ internal fun IDConsentContentScreen() {
 private fun IDConsentContent(
     state: IDConsentContentState,
     onPrimaryButtonClick: () -> Unit,
-    onSecondaryButtonClick: () -> Unit,
     onClickableTextClick: (String) -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit,
 ) {
@@ -48,7 +44,9 @@ private fun IDConsentContent(
             GenericScreen(
                 state = result().genericScreenState,
                 onPrimaryButtonClick = onPrimaryButtonClick,
-                onSecondaryButtonClick = onSecondaryButtonClick,
+                onSecondaryButtonClick = {
+                    // There is no secondary button
+                },
                 onClickableTextClick = onClickableTextClick,
             )
         }
