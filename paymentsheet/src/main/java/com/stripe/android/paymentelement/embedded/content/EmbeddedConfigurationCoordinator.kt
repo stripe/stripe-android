@@ -8,9 +8,8 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.EmbeddedPaymentElement.ConfigureResult
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentelement.embedded.EmbeddedStateHelper
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
@@ -30,8 +29,7 @@ internal class DefaultEmbeddedConfigurationCoordinator @Inject constructor(
     private val configurationHandler: EmbeddedConfigurationHandler,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val selectionChooser: EmbeddedSelectionChooser,
-    private val customerStateHolder: CustomerStateHolder,
-    private val embeddedContentHelper: EmbeddedContentHelper,
+    private val stateHelper: EmbeddedStateHelper,
     @ViewModelScope private val viewModelScope: CoroutineScope,
 ) : EmbeddedConfigurationCoordinator {
     override suspend fun configure(
@@ -64,7 +62,6 @@ internal class DefaultEmbeddedConfigurationCoordinator @Inject constructor(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: EmbeddedPaymentElement.Configuration,
     ) {
-        configuration.appearance.parseAppearance()
         val newPaymentSelection = selectionChooser.choose(
             paymentMethodMetadata = state.paymentMethodMetadata,
             paymentMethods = state.customer?.paymentMethods,
@@ -72,20 +69,16 @@ internal class DefaultEmbeddedConfigurationCoordinator @Inject constructor(
             newSelection = state.paymentSelection,
             newConfiguration = configuration.asCommonConfiguration(),
         )
-        confirmationStateHolder.state = EmbeddedConfirmationStateHolder.State(
-            paymentMethodMetadata = state.paymentMethodMetadata,
-            selection = newPaymentSelection,
-            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
-                intentConfiguration
+        stateHelper.state = EmbeddedPaymentElement.State(
+            confirmationState = EmbeddedConfirmationStateHolder.State(
+                paymentMethodMetadata = state.paymentMethodMetadata,
+                selection = newPaymentSelection,
+                initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                    intentConfiguration
+                ),
+                configuration = configuration,
             ),
-            configuration = configuration,
-        )
-        customerStateHolder.setCustomerState(state.customer)
-        selectionHolder.set(newPaymentSelection)
-        embeddedContentHelper.dataLoaded(
-            paymentMethodMetadata = state.paymentMethodMetadata,
-            rowStyle = configuration.appearance.embeddedAppearance.style,
-            embeddedViewDisplaysMandateText = configuration.embeddedViewDisplaysMandateText,
+            customer = state.customer,
         )
     }
 }

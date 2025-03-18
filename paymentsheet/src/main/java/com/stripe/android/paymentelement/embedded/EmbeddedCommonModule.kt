@@ -51,6 +51,11 @@ internal interface EmbeddedCommonModule {
     @Binds
     fun bindsCustomerRepository(repository: CustomerApiRepository): CustomerRepository
 
+    @Binds
+    fun bindsEmbeddedStateHelper(
+        stateHelper: DefaultEmbeddedStateHelper
+    ): EmbeddedStateHelper
+
     companion object {
         @Provides
         @Named(ENABLE_LOGGING)

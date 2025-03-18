@@ -19,8 +19,10 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.EmbeddedStateHelper
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfigurationCoordinator
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationHelper
+import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelper
 import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentElementScope
 import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentElementViewModel
@@ -29,6 +31,7 @@ import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import com.stripe.android.uicore.utils.collectAsState
@@ -46,6 +49,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
     private val selectionHolder: EmbeddedSelectionHolder,
     paymentOptionDisplayDataHolder: PaymentOptionDisplayDataHolder,
     private val configurationCoordinator: EmbeddedConfigurationCoordinator,
+    stateHelper: EmbeddedStateHelper,
 ) {
 
     /**
@@ -53,6 +57,13 @@ class EmbeddedPaymentElement @Inject internal constructor(
      * Use this to display the payment option in your own UI.
      */
     val paymentOption: StateFlow<PaymentOptionDisplayData?> = paymentOptionDisplayDataHolder.paymentOption
+
+    /**
+     * The state of an already configured [EmbeddedPaymentElement].
+     *
+     * Use this to instantly configure an [EmbeddedPaymentElement], likely from the state of another Activity.
+     */
+    var state: State? by stateHelper::state
 
     /**
      * Call this method to configure [EmbeddedPaymentElement] or when the IntentConfiguration values you used to
@@ -510,6 +521,18 @@ class EmbeddedPaymentElement @Inject internal constructor(
     fun interface ResultCallback {
         fun onResult(result: Result)
     }
+
+    /**
+     * A [Parcelable] state used to reconfigure [EmbeddedPaymentElement] across activity boundaries.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @ExperimentalEmbeddedPaymentElementApi
+    @Poko
+    @Parcelize
+    class State internal constructor(
+        internal val confirmationState: EmbeddedConfirmationStateHolder.State,
+        internal val customer: CustomerState?,
+    ) : Parcelable
 
     internal companion object {
         @ExperimentalEmbeddedPaymentElementApi

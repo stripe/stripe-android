@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -50,11 +51,17 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class EmbeddedPlaygroundActivity : AppCompatActivity(), ExternalPaymentMethodConfirmHandler {
     companion object {
-        const val PLAYGROUND_STATE_KEY = "playgroundState"
+        private const val PLAYGROUND_STATE_KEY = "playgroundState"
+        const val EMBEDDED_PAYMENT_ELEMENT_STATE_KEY = "EMBEDDED_PAYMENT_ELEMENT_STATE_KEY"
 
-        fun create(context: Context, playgroundState: PlaygroundState.Payment): Intent {
+        fun create(
+            context: Context,
+            playgroundState: PlaygroundState.Payment,
+            embeddedPaymentElementState: EmbeddedPaymentElement.State? = null,
+        ): Intent {
             return Intent(context, EmbeddedPlaygroundActivity::class.java).apply {
                 putExtra(PLAYGROUND_STATE_KEY, playgroundState)
+                putExtra(EMBEDDED_PAYMENT_ELEMENT_STATE_KEY, embeddedPaymentElementState)
             }
         }
     }
@@ -62,6 +69,7 @@ internal class EmbeddedPlaygroundActivity : AppCompatActivity(), ExternalPayment
     private val viewModel: EmbeddedPlaygroundViewModel by viewModels()
     private lateinit var playgroundState: PlaygroundState.Payment
     private lateinit var playgroundSettings: PlaygroundSettings
+    private lateinit var embeddedPaymentElement: EmbeddedPaymentElement
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,7 +100,7 @@ internal class EmbeddedPlaygroundActivity : AppCompatActivity(), ExternalPayment
         val embeddedViewDisplaysMandateText =
             initialPlaygroundState.snapshot[EmbeddedViewDisplaysMandateSettingDefinition]
         setContent {
-            val embeddedPaymentElement = rememberEmbeddedPaymentElement(embeddedBuilder)
+            embeddedPaymentElement = rememberEmbeddedPaymentElement(embeddedBuilder)
 
             var loadingState by remember {
                 mutableStateOf(LoadingState.Loading)
@@ -113,7 +121,13 @@ internal class EmbeddedPlaygroundActivity : AppCompatActivity(), ExternalPayment
             }
 
             LaunchedEffect(embeddedPaymentElement) {
-                configure()
+                val embeddedPaymentElementState = getEmbeddedPaymentElementState(savedInstanceState)
+                if (embeddedPaymentElementState != null) {
+                    embeddedPaymentElement.state = embeddedPaymentElementState
+                    loadingState = LoadingState.Complete
+                } else {
+                    configure()
+                }
             }
 
             PlaygroundTheme(
@@ -125,7 +139,6 @@ internal class EmbeddedPlaygroundActivity : AppCompatActivity(), ExternalPayment
 
                     selectedPaymentOption?.let { selectedPaymentOption ->
                         EmbeddedContentWithSelectedPaymentOption(
-                            embeddedPaymentElement = embeddedPaymentElement,
                             selectedPaymentOption = selectedPaymentOption,
                             embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
                         )
@@ -135,6 +148,24 @@ internal class EmbeddedPlaygroundActivity : AppCompatActivity(), ExternalPayment
                 }
             )
         }
+
+        setupBackPressedCallback()
+    }
+
+    private fun setupBackPressedCallback() {
+        onBackPressedDispatcher.addCallback(
+            object : OnBackPressedCallback(enabled = true) {
+                override fun handleOnBackPressed() {
+                    setResult(
+                        RESULT_CANCELED,
+                        Intent().apply {
+                            putExtra(EMBEDDED_PAYMENT_ELEMENT_STATE_KEY, embeddedPaymentElement.state)
+                        }
+                    )
+                    finish()
+                }
+            }
+        )
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -168,7 +199,6 @@ internal class EmbeddedPlaygroundActivity : AppCompatActivity(), ExternalPayment
 
     @Composable
     private fun EmbeddedContentWithSelectedPaymentOption(
-        embeddedPaymentElement: EmbeddedPaymentElement,
         selectedPaymentOption: EmbeddedPaymentElement.PaymentOptionDisplayData,
         embeddedViewDisplaysMandateText: Boolean,
     ) {
@@ -239,6 +269,14 @@ internal class EmbeddedPlaygroundActivity : AppCompatActivity(), ExternalPayment
     private fun getPlaygroundState(savedInstanceState: Bundle?): PlaygroundState.Payment? {
         return savedInstanceState?.getParcelable<PlaygroundState.Payment?>(PLAYGROUND_STATE_KEY)
             ?: intent.getParcelableExtra<PlaygroundState.Payment?>(PLAYGROUND_STATE_KEY)
+    }
+
+    @Suppress("DEPRECATION")
+    private fun getEmbeddedPaymentElementState(savedInstanceState: Bundle?): EmbeddedPaymentElement.State? {
+        if (savedInstanceState != null) {
+            return null // Only set the state the first time.
+        }
+        return intent.getParcelableExtra<EmbeddedPaymentElement.State?>(EMBEDDED_PAYMENT_ELEMENT_STATE_KEY)
     }
 
     private fun PlaygroundState.Payment?.validate(): PlaygroundState.Payment? {
