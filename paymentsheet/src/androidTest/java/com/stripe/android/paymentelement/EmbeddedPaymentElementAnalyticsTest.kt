@@ -129,6 +129,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         )
 
         formPage.clickPrimaryButton()
+        formPage.waitUntilMissing()
     }
 
     @Test
