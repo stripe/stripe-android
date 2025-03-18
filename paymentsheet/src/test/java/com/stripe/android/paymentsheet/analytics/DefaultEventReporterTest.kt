@@ -28,17 +28,16 @@ import com.stripe.android.utils.FakeDurationProvider
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.json.JSONException
 import org.junit.runner.RunWith
-import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.reset
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.io.IOException
 import javax.inject.Provider
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -54,10 +53,25 @@ class DefaultEventReporterTest {
     )
 
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
-    private val analyticEventCallbackProvider = mock<Provider<AnalyticEventCallback?>>()
+    private class FakeAnalyticEventCallback : AnalyticEventCallback {
+        val events = mutableListOf<AnalyticEvent>()
+
+        override fun onEvent(event: AnalyticEvent) {
+            events.add(event)
+        }
+    }
 
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
-    private val analyticEventCallback = mock<AnalyticEventCallback>()
+    private class FakeAnalyticEventCallbackProvider(
+        private val callback: AnalyticEventCallback? = null
+    ) : Provider<AnalyticEventCallback?> {
+        override fun get(): AnalyticEventCallback? = callback
+    }
+
+    private val analyticEventCallback = FakeAnalyticEventCallback()
+
+    @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+    private val analyticEventCallbackProvider = FakeAnalyticEventCallbackProvider(analyticEventCallback)
 
     private val configuration: PaymentSheet.Configuration
         get() = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
@@ -198,10 +212,9 @@ class DefaultEventReporterTest {
 
         completeEventReporter.onShowNewPaymentOptions()
 
-        verify(analyticEventCallback).onEvent(
-            argThat { event ->
-                event is AnalyticEvent.PresentedSheet
-            }
+        assertEquals(
+            analyticEventCallback.events,
+            listOf<AnalyticEvent>(AnalyticEvent.PresentedSheet())
         )
 
         verify(analyticsRequestExecutor).executeAsync(
@@ -875,8 +888,6 @@ class DefaultEventReporterTest {
             workContext = testDispatcher,
             isStripeCardScanAvailable = FakeIsStripeCardScanAvailable()
         )
-
-        whenever(analyticEventCallbackProvider.get()).thenReturn(analyticEventCallback)
 
         reporter.configure()
 
