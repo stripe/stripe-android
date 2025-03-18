@@ -77,6 +77,9 @@ internal class StripeConnectWebView private constructor(
     @VisibleForTesting
     internal val stripeWebChromeClient = StripeConnectWebChromeClient()
 
+    @VisibleForTesting
+    internal val stripeJsInterface = StripeJsInterface()
+
     private val webViewLifecycleScope get() = findViewTreeLifecycleOwner()?.lifecycleScope
 
     init {
@@ -93,7 +96,7 @@ internal class StripeConnectWebView private constructor(
         }
 
         setDownloadListener(StripeDownloadListener(context))
-        addJavascriptInterface(StripeJsInterface(), ANDROID_JS_INTERFACE)
+        addJavascriptInterface(stripeJsInterface, ANDROID_JS_INTERFACE)
     }
 
     fun updateConnectInstance(appearance: Appearance) {
@@ -314,7 +317,8 @@ internal class StripeConnectWebView private constructor(
         }
     }
 
-    private inner class StripeJsInterface {
+    @VisibleForTesting
+    internal inner class StripeJsInterface {
         @JavascriptInterface
         fun debug(message: String) {
             logger.debug("($loggerTag) Debug log from JS: $message")
