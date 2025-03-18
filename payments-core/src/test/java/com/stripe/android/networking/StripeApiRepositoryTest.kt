@@ -2424,6 +2424,7 @@ internal class StripeApiRepositoryTest {
             params = ElementsSessionParams.PaymentIntentType(
                 clientSecret = "client_secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             options = DEFAULT_OPTIONS,
@@ -2459,6 +2460,7 @@ internal class StripeApiRepositoryTest {
                 params = ElementsSessionParams.PaymentIntentType(
                     clientSecret = "client_secret",
                     externalPaymentMethods = externalPaymentMethods,
+                    customPaymentMethods = emptyList(),
                     appId = APP_ID
                 ),
                 options = DEFAULT_OPTIONS,
@@ -2481,6 +2483,43 @@ internal class StripeApiRepositoryTest {
         }
 
     @Test
+    fun `Verify that the elements session endpoint has the right query params for custom payment methods`() =
+        runTest {
+            val customPaymentMethods = listOf("cpmt_123", "cpmt_456", "cpmt_789")
+            val stripeResponse = StripeResponse(
+                200,
+                ElementsSessionFixtures.DEFERRED_INTENT_JSON.toString(),
+                emptyMap()
+            )
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>())).thenReturn(stripeResponse)
+
+            create().retrieveElementsSession(
+                params = ElementsSessionParams.PaymentIntentType(
+                    clientSecret = "client_secret",
+                    externalPaymentMethods = emptyList(),
+                    customPaymentMethods = customPaymentMethods,
+                    appId = APP_ID
+                ),
+                options = DEFAULT_OPTIONS,
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+
+            val request = apiRequestArgumentCaptor.firstValue
+            val params = requireNotNull(request.params)
+
+            assertThat(request.baseUrl).isEqualTo("https://api.stripe.com/v1/elements/sessions")
+
+            with(params) {
+                assertThat(this["type"]).isEqualTo("payment_intent")
+                assertThat(this["locale"]).isEqualTo("en-US")
+                assertThat(this["client_secret"]).isEqualTo("client_secret")
+                assertThat(this["custom_payment_methods"]).isEqualTo(customPaymentMethods)
+                assertThat(this["mobile_app_id"]).isEqualTo(APP_ID)
+            }
+        }
+
+    @Test
     fun `Verify external payment methods not in params if there are no EPMs`() =
         runTest {
             val externalPaymentMethods = emptyList<String>()
@@ -2495,6 +2534,7 @@ internal class StripeApiRepositoryTest {
                 params = ElementsSessionParams.PaymentIntentType(
                     clientSecret = "client_secret",
                     externalPaymentMethods = externalPaymentMethods,
+                    customPaymentMethods = emptyList(),
                     appId = APP_ID
                 ),
                 options = DEFAULT_OPTIONS,
@@ -2531,6 +2571,7 @@ internal class StripeApiRepositoryTest {
                 clientSecret = "client_secret",
                 customerSessionClientSecret = null,
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             options = DEFAULT_OPTIONS,
@@ -2566,6 +2607,7 @@ internal class StripeApiRepositoryTest {
                 clientSecret = "client_secret",
                 customerSessionClientSecret = "customer_session_client_secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             options = DEFAULT_OPTIONS,
@@ -2600,6 +2642,7 @@ internal class StripeApiRepositoryTest {
             params = ElementsSessionParams.SetupIntentType(
                 clientSecret = "client_secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             options = DEFAULT_OPTIONS,
@@ -2635,6 +2678,7 @@ internal class StripeApiRepositoryTest {
             params = ElementsSessionParams.PaymentIntentType(
                 clientSecret = "client_secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 savedPaymentMethodSelectionId = "pm_123",
                 appId = APP_ID
             ),
@@ -2671,6 +2715,7 @@ internal class StripeApiRepositoryTest {
                 clientSecret = "client_secret",
                 savedPaymentMethodSelectionId = null,
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             options = DEFAULT_OPTIONS,
@@ -2715,6 +2760,7 @@ internal class StripeApiRepositoryTest {
                     onBehalfOf = null,
                 ),
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             options = DEFAULT_OPTIONS,

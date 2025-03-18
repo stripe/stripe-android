@@ -2044,4 +2044,126 @@ internal object ElementsSessionFixtures {
             }
         """.trimIndent()
     )
+
+    fun createWithCustomPaymentMethods(
+        customPaymentMethodData: String,
+    ): JSONObject {
+        return JSONObject(
+            """
+                {
+                    "account_id": "acct_1HvTI7Lu5o3P18Zp",
+                    "apple_pay_merchant_token_webhook_url": "https:\/\/pm-hooks.stripe.com\/apple_pay\/merchant_token\/pDq7tf9uieoQWMVJixFwuOve\/acct_1HvTI7Lu5o3P18Zp\/",
+                    "apple_pay_preference": "enabled",
+                    "business_name": "Mobile Example Account",
+                    "card_brand_choice": null,
+                    "customer": null,
+                    "customer_error": null,
+                    "experiments_data": {
+                        "arb_id": "4397e65b-d3eb-44e0-afd7-e5054f23c4a2",
+                        "experiment_assignments": {
+                            "elements_card_mulberry_purchase_protections": "control"
+                        }
+                    },
+                    "custom_payment_method_data": $customPaymentMethodData,
+                    "external_payment_method_data": [],
+                    "flags": {
+                        "cbc_in_link_popup": false
+                    },
+                    "google_pay_preference": "enabled",
+                    "legacy_customer": null,
+                    "link_purchase_protections_data": {
+                        "is_eligible": true,
+                        "type": "shopping"
+                    },
+                    "lpm_promotions": null,
+                    "merchant_country": "US",
+                    "merchant_currency": "usd",
+                    "merchant_id": "acct_1HvTI7Lu5o3P18Zp",
+                    "merchant_logo_url": null,
+                    "meta_pay_signed_container_context": null,
+                    "order": null,
+                    "ordered_payment_method_types_and_wallets": [
+                        "card"
+                    ],
+                    "passive_captcha": {
+                        "site_key": "20000000-ffff-ffff-ffff-000000000002"
+                    },
+                    "payment_method_preference": {
+                        "object": "payment_method_preference",
+                        "country_code": "US",
+                        "ordered_payment_method_types": [
+                            "card"
+                        ],
+                        "payment_intent": {
+                            "id": "pi_3P8S7cLu5o3P18Zp14AjsL3v",
+                            "object": "payment_intent",
+                            "amount": 5099,
+                            "amount_details": {
+                                "tip": {}
+                            },
+                            "automatic_payment_methods": {
+                                "allow_redirects": "always",
+                                "enabled": true
+                            },
+                            "canceled_at": null,
+                            "cancellation_reason": null,
+                            "capture_method": "automatic",
+                            "client_secret": "pi_3P8S7cLu5o3P18Zp14AjsL3v_secret_Wtzl733f6p5NBZS15Bnzn4TRl",
+                            "confirmation_method": "automatic",
+                            "created": 1713812508,
+                            "currency": "usd",
+                            "description": null,
+                            "last_payment_error": null,
+                            "livemode": false,
+                            "next_action": null,
+                            "payment_method": null,
+                            "payment_method_configuration_details": {
+                                "id": "pmc_1JcZxfLu5o3P18Zp6oYzNhiP",
+                                "parent": null
+                            },
+                            "payment_method_options": {
+                                "us_bank_account": {
+                                    "verification_method": "automatic"
+                                }
+                            },
+                            "payment_method_types": [
+                                "card"
+                            ],
+                            "processing": null,
+                            "receipt_email": null,
+                            "setup_future_usage": null,
+                            "shipping": null,
+                            "source": null,
+                            "status": "requires_payment_method"
+                        },
+                        "type": "payment_intent"
+                    },
+                    "payment_method_specs": [
+                        {
+                            "async": false,
+                            "fields": [],
+                            "type": "card"
+                        },
+                    ],
+                    "paypal_express_config": {
+                        "client_id": null,
+                        "paypal_merchant_id": null
+                    },
+                    "prefill_selectors": {
+                        "default_values": {
+                            "email": []
+                        }
+                    },
+                    "session_id": "elements_session_0lFa7ifluGm",
+                    "shipping_address_settings": {
+                        "autocomplete_allowed": true
+                    },
+                    "unactivated_payment_method_types": [],
+                    "unverified_payment_methods_on_domain": [
+                        "apple_pay"
+                    ]
+                }
+            """.trimIndent()
+        )
+    }
 }

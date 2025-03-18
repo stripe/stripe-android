@@ -147,6 +147,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val elementsSession = retrieveElementsSession(
             initializationMode = initializationMode,
             customer = configuration.customer,
+            customPaymentMethods = configuration.customPaymentMethods,
             externalPaymentMethods = configuration.externalPaymentMethods,
             savedPaymentMethodSelectionId = savedPaymentMethodSelection?.id,
         ).getOrThrow()
@@ -237,6 +238,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private suspend fun retrieveElementsSession(
         initializationMode: PaymentElementLoader.InitializationMode,
         customer: PaymentSheet.CustomerConfiguration?,
+        customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
     ): Result<ElementsSession> {
@@ -244,6 +246,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             initializationMode = initializationMode,
             customer = customer,
             externalPaymentMethods = externalPaymentMethods,
+            customPaymentMethods = customPaymentMethods,
             savedPaymentMethodSelectionId = savedPaymentMethodSelectionId
         )
     }
@@ -271,6 +274,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             requestedExternalPaymentMethods = configuration.externalPaymentMethods,
             actualExternalPaymentMethods = externalPaymentMethodSpecs
         )
+
+        logCustomPaymentMethodErrors(elementsSession.customPaymentMethods)
 
         return PaymentMethodMetadata.createForPaymentElement(
             elementsSession = elementsSession,
@@ -746,6 +751,24 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                         "available-external-payment-methods"
                 )
             }
+        }
+    }
+
+    private fun logCustomPaymentMethodErrors(
+        customPaymentMethods: List<ElementsSession.CustomPaymentMethod>,
+    ) {
+        if (customPaymentMethods.isEmpty()) {
+            return
+        }
+
+        val unavailableCustomPaymentMethods = customPaymentMethods
+            .filterIsInstance<ElementsSession.CustomPaymentMethod.Unavailable>()
+
+        for (unavailableCustomPaymentMethod in unavailableCustomPaymentMethods) {
+            userFacingLogger.logWarningWithoutPii(
+                "Requested custom payment method ${unavailableCustomPaymentMethod.type} contained an " +
+                    "error \"${unavailableCustomPaymentMethod.error}\"!"
+            )
         }
     }
 
