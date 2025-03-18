@@ -11,7 +11,9 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
+import androidx.compose.ui.test.isOn
 import androidx.compose.ui.test.isSelected
+import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
@@ -236,6 +238,17 @@ internal class PaymentSheetPage(
         composeTestRule.onAllNodesWithTag(
             SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG
         ).fetchSemanticsNodes().isEmpty()
+    }
+
+    fun assertSetAsDefaultCheckboxChecked() {
+        val testTag = SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG
+        composeTestRule.waitUntil(
+            timeoutMillis = 5000L
+        ) {
+            composeTestRule.onAllNodes(
+                hasTestTag(testTag).and(isToggleable()).and(isOn())
+            ).fetchSemanticsNodes().isNotEmpty()
+        }
     }
 
     fun clickOnLpm(code: String, forVerticalMode: Boolean = false) {
