@@ -122,6 +122,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
+        private val isStripeCardScanAvailable: Boolean
     ) : PaymentSheetEvent() {
 
         override val eventName: String
@@ -157,6 +158,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                     FIELD_EXTERNAL_PAYMENT_METHODS to configuration.getExternalPaymentMethodsAnalyticsValue(),
                     FIELD_PAYMENT_METHOD_LAYOUT to configuration.paymentMethodLayout.toAnalyticsValue(),
                     FIELD_CARD_BRAND_ACCEPTANCE to configuration.cardBrandAcceptance.toAnalyticsValue(),
+                    FIELD_CARD_SCAN_AVAILABLE to isStripeCardScanAvailable
                 )
                 return mapOf(
                     FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION to configurationMap,
@@ -444,10 +446,13 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
+        val paymentMethodType: String?,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_set_default_payment_method"
 
-        override val additionalParams: Map<String, Any?> = emptyMap()
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_PAYMENT_METHOD_TYPE to paymentMethodType,
+        )
     }
 
     class SetAsDefaultPaymentMethodFailed(
@@ -455,11 +460,13 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
+        paymentMethodType: String?,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_set_default_payment_method_failed"
 
         override val additionalParams: Map<String, Any?> = mapOf(
             FIELD_ERROR_MESSAGE to error.message,
+            FIELD_PAYMENT_METHOD_TYPE to paymentMethodType,
         ).plus(ErrorReporter.getAdditionalParamsFromError(error))
     }
 
@@ -556,6 +563,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_ERROR_MESSAGE = "error_message"
         const val FIELD_ERROR_CODE = "error_code"
         const val FIELD_CBC_EVENT_SOURCE = "cbc_event_source"
+        const val FIELD_PAYMENT_METHOD_TYPE = "payment_method_type"
         const val FIELD_SET_AS_DEFAULT_ENABLED = "set_as_default_enabled"
         const val FIELD_HAS_DEFAULT_PAYMENT_METHOD = "has_default_payment_method"
         const val FIELD_SELECTED_CARD_BRAND = "selected_card_brand"
@@ -569,6 +577,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_ORDERED_LPMS = "ordered_lpms"
         const val FIELD_REQUIRE_CVC_RECOLLECTION = "require_cvc_recollection"
         const val FIELD_CARD_BRAND_ACCEPTANCE = "card_brand_acceptance"
+        const val FIELD_CARD_SCAN_AVAILABLE = "card_scan_available"
 
         const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
         const val VALUE_ADD_CBC_EVENT_SOURCE = "add"

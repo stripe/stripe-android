@@ -5,13 +5,14 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.CoroutineTestRule
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.FeaturedInstitutions
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.domain.SearchInstitutions
+import com.stripe.android.financialconnections.domain.SelectInstitution
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
@@ -32,7 +33,10 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 import kotlin.test.assertEquals
@@ -52,9 +56,10 @@ internal class InstitutionPickerViewModelTest {
     private val updateLocalManifest = mock<UpdateLocalManifest>()
     private val navigationManager = TestNavigationManager()
     private val postAuthorizationSession = mock<PostAuthorizationSession>()
+    private val selectInstitution = mock<SelectInstitution>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
     private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
-    private val defaultConfiguration = FinancialConnectionsSheet.Configuration(
+    private val defaultConfiguration = FinancialConnectionsSheetConfiguration(
         ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )
@@ -72,6 +77,7 @@ internal class InstitutionPickerViewModelTest {
             logger = Logger.noop(),
             eventTracker = eventTracker,
             postAuthorizationSession = postAuthorizationSession,
+            selectInstitution = selectInstitution,
             handleError = handleError,
             initialState = state,
             nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
@@ -325,6 +331,41 @@ internal class InstitutionPickerViewModelTest {
             pane = Pane.INSTITUTION_PICKER,
             displayErrorScreen = true
         )
+    }
+
+    @Test
+    fun `Creates normal auth session when not in 'institution picker first' flow`() = runTest {
+        val manifest = ApiKeyFixtures.sessionManifest().copy(
+            consentRequired = true,
+            consentAcquiredAt = "some date",
+        )
+        val institution = ApiKeyFixtures.institution()
+
+        givenManifestReturns(manifest)
+        givenCreateSessionForInstitutionReturns(ApiKeyFixtures.authorizationSession())
+
+        val viewModel = buildViewModel(InstitutionPickerState())
+        viewModel.onInstitutionSelected(institution, fromFeatured = true)
+
+        verify(postAuthorizationSession).invoke(eq(institution), any())
+        verify(selectInstitution, never()).invoke(any())
+    }
+
+    @Test
+    fun `Calls institution_selected when in 'institution picker first' flow`() = runTest {
+        val manifest = ApiKeyFixtures.sessionManifest().copy(
+            consentRequired = true,
+            consentAcquiredAt = null,
+        )
+        val institution = ApiKeyFixtures.institution()
+
+        givenManifestReturns(manifest)
+
+        val viewModel = buildViewModel(InstitutionPickerState())
+        viewModel.onInstitutionSelected(institution, fromFeatured = true)
+
+        verify(postAuthorizationSession, never()).invoke(any(), any())
+        verify(selectInstitution).invoke(institution)
     }
 
     private suspend fun givenCreateSessionForInstitutionThrows(throwable: Throwable) {

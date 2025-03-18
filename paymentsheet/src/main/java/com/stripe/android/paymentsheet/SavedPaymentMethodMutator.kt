@@ -219,12 +219,17 @@ internal class SavedPaymentMethodMutator(
             ),
             paymentMethodId = paymentMethod.id,
         ).onFailure { error ->
-            eventReporter.onSetAsDefaultPaymentMethodFailed(error = error)
+            eventReporter.onSetAsDefaultPaymentMethodFailed(
+                paymentMethodType = paymentMethod.type?.code,
+                error = error
+            )
         }.onSuccess {
             customerStateHolder.setDefaultPaymentMethod(paymentMethod = paymentMethod)
             setSelection(PaymentSelection.Saved(paymentMethod = paymentMethod))
 
-            eventReporter.onSetAsDefaultPaymentMethodSucceeded()
+            eventReporter.onSetAsDefaultPaymentMethodSucceeded(
+                paymentMethodType = paymentMethod.type?.code,
+            )
         }.map {}
     }
 
@@ -379,11 +384,13 @@ internal class SavedPaymentMethodMutator(
                             shouldShowSetAsDefaultCheckbox = (
                                 viewModel
                                     .paymentMethodMetadata
-                                    .value?.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true &&
-                                    !displayableSavedPaymentMethod.isDefaultPaymentMethod(
-                                        defaultPaymentMethodId =
-                                        viewModel.customerStateHolder.customer.value?.defaultPaymentMethodId
-                                    )
+                                    .value?.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true
+                                ),
+                            isDefaultPaymentMethod = (
+                                displayableSavedPaymentMethod.isDefaultPaymentMethod(
+                                    defaultPaymentMethodId =
+                                    viewModel.customerStateHolder.customer.value?.defaultPaymentMethodId
+                                )
                                 ),
                             onUpdateSuccess = viewModel.navigationHandler::pop,
                         )

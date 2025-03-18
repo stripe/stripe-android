@@ -20,14 +20,15 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.stripe.android.connect.BuildConfig
 import com.stripe.android.connect.ComponentEvent
 import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.analytics.ComponentAnalyticsService
 import com.stripe.android.connect.analytics.ConnectAnalyticsEvent
+import com.stripe.android.connect.di.StripeConnectComponent
 import com.stripe.android.connect.util.Clock
+import com.stripe.android.connect.util.isInInstrumentationTest
 import com.stripe.android.connect.webview.StripeConnectWebView.Delegate
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.OpenFinancialConnectionsMessage
@@ -76,8 +77,8 @@ internal class StripeConnectWebViewContainerViewModel(
     private val embeddedComponentManager: EmbeddedComponentManager,
     private val embeddedComponent: StripeEmbeddedComponent,
     private val analyticsService: ComponentAnalyticsService,
+    private val logger: Logger,
     private val stripeIntentLauncher: StripeIntentLauncher = StripeIntentLauncherImpl(),
-    private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
     createWebView: CreateWebView = CreateWebView(::StripeConnectWebView),
 ) : ViewModel(),
     DefaultLifecycleObserver {
@@ -90,6 +91,8 @@ internal class StripeConnectWebViewContainerViewModel(
 
     private val loggerTag = javaClass.simpleName
     private val _stateFlow = MutableStateFlow(StripeConnectWebViewContainerState())
+
+    private val componentCoordinator get() = embeddedComponentManager.coordinator
 
     /**
      * Flow of the container state.
@@ -120,7 +123,12 @@ internal class StripeConnectWebViewContainerViewModel(
      */
     fun onViewAttached() {
         updateState { copy(didBeginLoadingMillis = clock.millis()) }
-        webView.loadUrl(embeddedComponentManager.getStripeURL(embeddedComponent))
+        if (isInInstrumentationTest()) {
+            // Load local static html for instrumentation tests.
+            webView.loadData(getTestHtml(), "text/html", "utf-8")
+        } else {
+            webView.loadUrl(componentCoordinator.getStripeURL(embeddedComponent))
+        }
 
         analyticsService.track(ConnectAnalyticsEvent.ComponentViewed(stateFlow.value.pageViewId))
     }
@@ -130,7 +138,7 @@ internal class StripeConnectWebViewContainerViewModel(
             owner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     // Bind appearance changes in the manager to the WebView (only when page is loaded).
-                    embeddedComponentManager.appearanceFlow
+                    componentCoordinator.appearanceFlow
                         .collectLatest { appearance ->
                             updateState { copy(appearance = appearance) }
                             if (stateFlow.value.pageViewId != null) {
@@ -155,7 +163,7 @@ internal class StripeConnectWebViewContainerViewModel(
             updateState { copy(isNativeLoadingIndicatorVisible = !receivedSetOnLoaderStart) }
 
             val pageLoadUrl = Uri.parse(url)
-            val expectedUrl = Uri.parse(embeddedComponentManager.getStripeURL(embeddedComponent))
+            val expectedUrl = Uri.parse(componentCoordinator.getStripeURL(embeddedComponent))
             if (
                 pageLoadUrl.scheme != expectedUrl.scheme ||
                 pageLoadUrl.host != expectedUrl.host ||
@@ -251,11 +259,11 @@ internal class StripeConnectWebViewContainerViewModel(
         }
 
         override suspend fun fetchClientSecret(): String? {
-            return embeddedComponentManager.fetchClientSecret()
+            return componentCoordinator.fetchClientSecret()
         }
 
         override fun getInitialParams(context: Context): ConnectInstanceJs {
-            return embeddedComponentManager.getInitialParams(context)
+            return componentCoordinator.getInitialParams(context)
         }
 
         override suspend fun onPermissionRequest(activity: Activity, request: PermissionRequest) {
@@ -280,7 +288,7 @@ internal class StripeConnectWebViewContainerViewModel(
             }
 
             // all calls to PermissionRequest must be on the main thread
-            val isGranted = embeddedComponentManager.requestCameraPermission(activity) ?: return
+            val isGranted = componentCoordinator.requestCameraPermission(activity) ?: return
             withContext(Dispatchers.Main) {
                 if (isGranted) {
                     logger.debug("($loggerTag) Granting permission - user accepted permission")
@@ -299,7 +307,7 @@ internal class StripeConnectWebViewContainerViewModel(
         ) {
             var result: Array<Uri>? = null
             try {
-                result = embeddedComponentManager.chooseFile(activity, requestIntent)
+                result = componentCoordinator.chooseFile(activity, requestIntent)
             } finally {
                 // Ensure `filePathCallback` always gets a value.
                 filePathCallback.onReceiveValue(result)
@@ -310,7 +318,7 @@ internal class StripeConnectWebViewContainerViewModel(
             activity: Activity,
             message: OpenFinancialConnectionsMessage,
         ) {
-            val result = embeddedComponentManager.presentFinancialConnections(
+            val result = componentCoordinator.presentFinancialConnections(
                 activity = activity,
                 clientSecret = message.clientSecret,
                 connectedAccountId = message.connectedAccountId,
@@ -322,7 +330,7 @@ internal class StripeConnectWebViewContainerViewModel(
         }
 
         override fun onReceivedPageDidLoad(pageViewId: String) {
-            webView.updateConnectInstance(embeddedComponentManager.appearanceFlow.value)
+            webView.updateConnectInstance(componentCoordinator.appearanceFlow.value)
             updateState { copy(pageViewId = pageViewId) }
 
             // right now view onAttach and begin load happen at the same time,
@@ -399,12 +407,26 @@ internal class StripeConnectWebViewContainerViewModel(
         val embeddedComponentManager: EmbeddedComponentManager,
         val embeddedComponent: StripeEmbeddedComponent,
         val stripeIntentLauncher: StripeIntentLauncher = StripeIntentLauncherImpl(),
-        val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG),
+        val logger: Logger = StripeConnectComponent.instance.logger,
     ) {
-        val analyticsService = embeddedComponentManager.getComponentAnalyticsService(embeddedComponent)
+        val analyticsService = embeddedComponentManager.coordinator.getComponentAnalyticsService(embeddedComponent)
     }
 }
 
 internal fun interface CreateWebView {
     operator fun invoke(application: Application, delegate: Delegate, logger: Logger): StripeConnectWebView
+}
+
+@Suppress("MagicNumber")
+private fun getTestHtml(): String {
+    return buildString {
+        append("<html><body>")
+        append("<h1 id=\"top\">Top</h1>")
+        // Make this long enough to scroll.
+        repeat(50) { i ->
+            append("<h2>Content $i</h2>")
+        }
+        append("<h1 id=\"bottom\">Bottom</h1>")
+        append("</body></html>")
+    }
 }

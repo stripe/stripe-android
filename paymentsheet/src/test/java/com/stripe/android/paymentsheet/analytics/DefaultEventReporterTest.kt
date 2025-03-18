@@ -11,6 +11,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -19,6 +20,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.ui.core.IsStripeCardScanAvailable
 import com.stripe.android.utils.FakeDurationProvider
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.json.JSONException
@@ -538,11 +540,14 @@ class DefaultEventReporterTest {
             simulateSuccessfulSetup()
         }
 
-        customEventReporter.onSetAsDefaultPaymentMethodSucceeded()
+        customEventReporter.onSetAsDefaultPaymentMethodSucceeded(
+            paymentMethodType = PaymentMethod.Type.Card.code,
+        )
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == "mc_set_default_payment_method"
+                req.params["event"] == "mc_set_default_payment_method" &&
+                    req.params["payment_method_type"] == "card"
             }
         )
     }
@@ -554,12 +559,14 @@ class DefaultEventReporterTest {
         }
 
         customEventReporter.onSetAsDefaultPaymentMethodFailed(
+            paymentMethodType = PaymentMethod.Type.Card.code,
             error = Exception("No network available!")
         )
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "mc_set_default_payment_method_failed" &&
+                    req.params["payment_method_type"] == "card" &&
                     req.params["error_message"] == "No network available!"
             }
         )
@@ -616,7 +623,8 @@ class DefaultEventReporterTest {
             analyticsRequestExecutor,
             analyticsRequestFactory,
             durationProvider,
-            testDispatcher
+            testDispatcher,
+            FakeIsStripeCardScanAvailable()
         )
     }
 
@@ -842,6 +850,7 @@ class DefaultEventReporterTest {
             paymentAnalyticsRequestFactory = analyticsRequestFactory,
             durationProvider = FakeDurationProvider(duration),
             workContext = testDispatcher,
+            isStripeCardScanAvailable = FakeIsStripeCardScanAvailable()
         )
 
         reporter.configure()
@@ -862,6 +871,7 @@ class DefaultEventReporterTest {
             paymentAnalyticsRequestFactory = analyticsRequestFactory,
             durationProvider = durationProvider,
             workContext = testDispatcher,
+            isStripeCardScanAvailable = FakeIsStripeCardScanAvailable()
         )
 
         reporter.configure()
@@ -922,5 +932,11 @@ class DefaultEventReporterTest {
             ).takeIf { it.linkMode != null },
             screenState = mock(),
         )
+    }
+
+    private class FakeIsStripeCardScanAvailable(
+        private val value: Boolean = true
+    ) : IsStripeCardScanAvailable {
+        override fun invoke() = value
     }
 }

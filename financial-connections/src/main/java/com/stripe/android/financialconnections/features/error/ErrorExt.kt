@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.features.error
 
 import com.stripe.android.core.exception.APIException
-import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.PrefillDetails
+import com.stripe.android.financialconnections.ElementsSessionContext.PrefillDetails
 import com.stripe.attestation.AttestationError
 
 /**

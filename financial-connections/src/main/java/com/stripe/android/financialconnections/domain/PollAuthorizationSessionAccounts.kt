@@ -2,7 +2,7 @@ package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.StripeException
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.exception.AccountLoadError
 import com.stripe.android.financialconnections.exception.AccountNoneEligibleForPaymentMethodError
 import com.stripe.android.financialconnections.features.common.getBusinessName
@@ -25,7 +25,7 @@ import kotlin.time.Duration.Companion.seconds
  */
 internal class PollAuthorizationSessionAccounts @Inject constructor(
     private val repository: FinancialConnectionsAccountsRepository,
-    private val configuration: FinancialConnectionsSheet.Configuration
+    private val configuration: FinancialConnectionsSheetConfiguration
 ) {
 
     suspend operator fun invoke(

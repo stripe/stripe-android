@@ -9,6 +9,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetLauncherComponent.Builder
+import com.stripe.android.ui.core.di.CardScanModule
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
 import dagger.BindsInstance
 import dagger.Component
@@ -23,7 +24,8 @@ import javax.inject.Singleton
         PaymentOptionsViewModelModule::class,
         CoroutineContextModule::class,
         CoreCommonModule::class,
-        ResourceRepositoryModule::class
+        ResourceRepositoryModule::class,
+        CardScanModule::class
     ]
 )
 internal interface PaymentOptionsViewModelFactoryComponent {

@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.core.exception.StripeException
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.exception.AccountNumberRetrievalError
 import com.stripe.android.financialconnections.features.common.showManualEntryInErrors
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
@@ -21,7 +21,7 @@ internal class PollAttachPaymentAccount @Inject constructor(
     private val repository: FinancialConnectionsAccountsRepository,
     private val consumerSessionProvider: ConsumerSessionProvider,
     private val attachedPaymentAccountRepository: AttachedPaymentAccountRepository,
-    private val configuration: FinancialConnectionsSheet.Configuration
+    private val configuration: FinancialConnectionsSheetConfiguration
 ) {
 
     suspend operator fun invoke(

@@ -115,11 +115,24 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null
             private set
 
+        @OptIn(ExperimentalCustomPaymentMethodsApi::class)
+        internal var customPaymentMethodConfirmHandler: CustomPaymentMethodConfirmHandler? = null
+            private set
+
         /**
          * Called when a user confirms payment for an external payment method.
          */
         fun externalPaymentMethodConfirmHandler(handler: ExternalPaymentMethodConfirmHandler) = apply {
             this.externalPaymentMethodConfirmHandler = handler
+        }
+
+        /**
+         * Called when a user confirms payment for a custom payment method.
+         */
+        @ExperimentalCustomPaymentMethodsApi
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun customPaymentMethodConfirmHandler(handler: CustomPaymentMethodConfirmHandler) = apply {
+            this.customPaymentMethodConfirmHandler = handler
         }
     }
 
@@ -144,6 +157,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val paymentMethodOrder: List<String>,
         internal val externalPaymentMethods: List<String>,
         internal val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
+        internal val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         internal val embeddedViewDisplaysMandateText: Boolean,
     ) : Parcelable {
         @Suppress("TooManyFunctions")
@@ -174,6 +188,8 @@ class EmbeddedPaymentElement @Inject internal constructor(
             private var cardBrandAcceptance: PaymentSheet.CardBrandAcceptance =
                 ConfigurationDefaults.cardBrandAcceptance
             private var embeddedViewDisplaysMandateText: Boolean = ConfigurationDefaults.embeddedViewDisplaysMandateText
+            private var customPaymentMethods: List<PaymentSheet.CustomPaymentMethod> =
+                ConfigurationDefaults.customPaymentMethods
 
             /**
              * If set, the customer can select a previously saved payment method.
@@ -331,6 +347,19 @@ class EmbeddedPaymentElement @Inject internal constructor(
             }
 
             /**
+             * Configuration related to custom payment methods.
+             *
+             * If set, Embedded Payment Element will display the defined list of custom payment methods in the UI.
+             */
+            @ExperimentalCustomPaymentMethodsApi
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun customPaymentMethods(
+                customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
+            ) = apply {
+                this.customPaymentMethods = customPaymentMethods
+            }
+
+            /**
              * Controls whether the view displays mandate text at the bottom for payment methods that require it.
              *
              * If set to `false`, your integration must display `PaymentOptionDisplayData.mandateText` to the customer
@@ -360,6 +389,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 paymentMethodOrder = paymentMethodOrder,
                 externalPaymentMethods = externalPaymentMethods,
                 cardBrandAcceptance = cardBrandAcceptance,
+                customPaymentMethods = customPaymentMethods,
                 embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
             )
         }

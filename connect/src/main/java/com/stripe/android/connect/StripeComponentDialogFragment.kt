@@ -17,7 +17,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.connect.appearance.Appearance
-import com.stripe.android.connect.databinding.StripeFullScreenComponentBinding
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
@@ -104,21 +103,15 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
         embeddedComponentManager: EmbeddedComponentManager
     ): ComponentView
 
-    private var _binding: StripeFullScreenComponentBinding? = null
-    private val binding get() = _binding!!
-
-    private var componentView: ComponentView? = null
-        set(value) {
-            field = value
-            value?.listener = listener
-        }
+    private var _rootView: StripeComponentDialogFragmentView<ComponentView>? = null
+    private val rootView get() = _rootView!!
 
     internal var initialEmbeddedComponentManager: EmbeddedComponentManager? = null
 
     var listener: Listener? = null
         set(value) {
             field = value
-            componentView?.listener = value
+            _rootView?.componentView?.listener = value
         }
 
     var onDismissListener: StripeComponentController.OnDismissListener? = null
@@ -136,11 +129,11 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
         // older Android versions; if too late, it doesn't do anything on newer versions.
         dialog?.window?.let { WindowCompat.setDecorFitsSystemWindows(it, false) }
 
-        val binding = StripeFullScreenComponentBinding.inflate(inflater, container, false)
-            .also { this._binding = it }
-        binding.toolbar.title = title
-        binding.toolbar.setNavigationOnClickListener { dismiss() }
-        return binding.root
+        val rootView = StripeComponentDialogFragmentView<ComponentView>(inflater)
+            .also { this._rootView = it }
+        rootView.toolbar.title = title
+        rootView.toolbar.setNavigationOnClickListener { dismiss() }
+        return rootView
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -148,21 +141,20 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
         // Update root view padding to keep content visible with soft keyboard.
         // This works in conjunction with `setDecorFitsSystemWindows()`.
         ViewCompat.setOnApplyWindowInsetsListener(view) { _, insets ->
-            val insetBottom =
-                if (insets.isVisible(WindowInsetsCompat.Type.ime())) {
-                    insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
-                } else {
-                    insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
-                }
-            view.updatePadding(bottom = insetBottom)
-            insets.inset(0, 0, 0, insetBottom)
+            val paddings = insets.getInsets(
+                WindowInsetsCompat.Type.statusBars() or
+                    WindowInsetsCompat.Type.ime() or
+                    WindowInsetsCompat.Type.navigationBars()
+            )
+            view.updatePadding(top = paddings.top, bottom = paddings.bottom)
+            insets.inset(0, paddings.top, 0, paddings.bottom)
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.embeddedComponentManager
                 .flowWithLifecycle(viewLifecycleOwner.lifecycle, Lifecycle.State.STARTED)
                 .collectLatest { embeddedComponentManager ->
-                    embeddedComponentManager?.appearanceFlow?.collectLatest(::bindAppearance)
+                    embeddedComponentManager?.coordinator?.appearanceFlow?.collectLatest(::bindAppearance)
                 }
         }
 
@@ -172,10 +164,10 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
             val embeddedComponentManager =
                 viewModel.embeddedComponentManager.filterNotNull().first()
             val componentView = createComponentView(embeddedComponentManager)
-                .also { this@StripeComponentDialogFragment.componentView = it }
+                .also { it.listener = listener }
             componentView.layoutParams =
                 LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f)
-            binding.root.addView(componentView)
+            rootView.componentView = componentView
         }
     }
 
@@ -188,8 +180,7 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
     }
 
     override fun onDestroyView() {
-        componentView = null
-        _binding = null
+        _rootView = null
         super.onDestroyView()
     }
 
@@ -199,16 +190,8 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
     }
 
     private fun bindAppearance(appearance: Appearance) {
-        appearance.colors.background?.let {
-            binding.toolbar.setBackgroundColor(it)
-        }
-        appearance.colors.text?.let {
-            binding.toolbar.setTitleTextColor(it)
-            binding.toolbar.navigationIcon?.setTint(it)
-        }
-        appearance.colors.border?.let {
-            binding.divider.setBackgroundColor(it)
-        }
+        rootView.bindAppearance(appearance)
+        dialog?.window?.setBackgroundDrawable(rootView.background)
     }
 
     internal companion object {

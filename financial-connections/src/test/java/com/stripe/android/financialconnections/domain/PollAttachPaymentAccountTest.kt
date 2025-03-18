@@ -5,7 +5,7 @@ import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.financialconnections.ApiKeyFixtures.institution
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.exception.AccountNumberRetrievalError
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount.MicrodepositVerificationMethod.DESCRIPTOR_CODE
@@ -29,7 +29,7 @@ internal class PollAttachPaymentAccountTest {
     private val repository = mock(FinancialConnectionsAccountsRepository::class.java)
     private val consumerSessionRepository = ConsumerSessionProvider { consumerSession }
     private val attachedPaymentAccountRepository = mock(AttachedPaymentAccountRepository::class.java)
-    private val configuration = FinancialConnectionsSheet.Configuration(
+    private val configuration = FinancialConnectionsSheetConfiguration(
         financialConnectionsSessionClientSecret = "client_secret",
         publishableKey = "publishable_key"
     )

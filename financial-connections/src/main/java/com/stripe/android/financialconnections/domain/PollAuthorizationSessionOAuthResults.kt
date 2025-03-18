@@ -1,6 +1,6 @@
 package com.stripe.android.financialconnections.domain
 
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.MixedOAuthParams
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
@@ -17,7 +17,7 @@ import kotlin.time.Duration.Companion.seconds
  */
 internal class PollAuthorizationSessionOAuthResults @Inject constructor(
     private val repository: FinancialConnectionsRepository,
-    private val configuration: FinancialConnectionsSheet.Configuration
+    private val configuration: FinancialConnectionsSheetConfiguration
 ) {
 
     suspend operator fun invoke(

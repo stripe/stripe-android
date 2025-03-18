@@ -5,6 +5,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -30,7 +31,9 @@ internal interface UpdatePaymentMethodInteractor {
     val isModifiablePaymentMethod: Boolean
     val hasValidBrandChoices: Boolean
     val shouldShowSetAsDefaultCheckbox: Boolean
+    val setAsDefaultCheckboxEnabled: Boolean
     val shouldShowSaveButton: Boolean
+    val allowCardEdit: Boolean
 
     val state: StateFlow<State>
 
@@ -87,6 +90,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     override val canRemove: Boolean,
     override val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     override val cardBrandFilter: CardBrandFilter,
+    val isDefaultPaymentMethod: Boolean,
     shouldShowSetAsDefaultCheckbox: Boolean,
     private val removeExecutor: PaymentMethodRemoveOperation,
     private val updateCardBrandExecutor: UpdateCardBrandOperation,
@@ -101,7 +105,8 @@ internal class DefaultUpdatePaymentMethodInteractor(
     private val status = MutableStateFlow(UpdatePaymentMethodInteractor.Status.Idle)
     private val cardBrandChoice = MutableStateFlow(getInitialCardBrandChoice())
     private val cardBrandHasBeenChanged = MutableStateFlow(false)
-    private val setAsDefaultCheckboxChecked = MutableStateFlow(false)
+    private val initialSetAsDefaultCheckedValue = isDefaultPaymentMethod
+    private val setAsDefaultCheckboxChecked = MutableStateFlow(initialSetAsDefaultCheckedValue)
     private val savedCardBrand = MutableStateFlow(getInitialCardBrandChoice())
 
     // We don't yet support setting SEPA payment methods as defaults, so we hide the checkbox for now.
@@ -122,8 +127,11 @@ internal class DefaultUpdatePaymentMethodInteractor(
         isLiveMode = isLiveMode,
         editable = PaymentSheetTopBarState.Editable.Never,
     )
+    override val setAsDefaultCheckboxEnabled: Boolean = !isDefaultPaymentMethod
 
-    override val shouldShowSaveButton: Boolean = isModifiablePaymentMethod || shouldShowSetAsDefaultCheckbox
+    override val shouldShowSaveButton: Boolean = isModifiablePaymentMethod ||
+        (shouldShowSetAsDefaultCheckbox && !isDefaultPaymentMethod)
+    override val allowCardEdit = FeatureFlags.editSavedCardPaymentMethodEnabled.isEnabled
 
     private val _state = combineAsStateFlow(
         error,
@@ -132,15 +140,16 @@ internal class DefaultUpdatePaymentMethodInteractor(
         cardBrandHasBeenChanged,
         setAsDefaultCheckboxChecked,
     ) { error, status, cardBrandChoice, cardBrandHasBeenChanged, setAsDefaultCheckboxChecked ->
-        val isSaveButtonEnabled = (cardBrandHasBeenChanged || setAsDefaultCheckboxChecked) &&
+        val setAsDefaultValueChanged = setAsDefaultCheckboxChecked != initialSetAsDefaultCheckedValue
+        val isSaveButtonEnabled = (cardBrandHasBeenChanged || setAsDefaultValueChanged) &&
             status == UpdatePaymentMethodInteractor.Status.Idle
 
         UpdatePaymentMethodInteractor.State(
             error = error,
             status = status,
             cardBrandChoice = cardBrandChoice,
-            setAsDefaultCheckboxChecked = setAsDefaultCheckboxChecked,
             isSaveButtonEnabled = isSaveButtonEnabled,
+            setAsDefaultCheckboxChecked = isDefaultPaymentMethod || setAsDefaultCheckboxChecked,
         )
     }
     override val state = _state

@@ -1,0 +1,318 @@
+<!doctype html>
+<html class="no-js">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>FinancialConnectionsSession</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">    <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async></script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<body>
+    <div class="root">
+<nav class="navigation" id="navigation-wrapper">
+    <div class="navigation--inner">
+        <div class="navigation-title">
+            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
+            <div class="library-name">
+<a class="library-name--link" href="../../../index.html">
+                            stripe-android
+                    </a>            </div>
+            <div class="library-version">
+            </div>
+        </div>
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":financial-connections-core:dokkaHtmlPartial/release">androidJvm</button>
+        </div>
+    </div>
+    <div class="navigation-controls">
+        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
+        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
+    </div>
+</nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="sidebar--inner" id="sideMenu"></div>
+            </div>
+            <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="financial-connections-core::com.stripe.android.financialconnections.model/FinancialConnectionsSession///PointingToDeclaration//2093243736">
+  <div class="breadcrumbs"><a href="../../index.html">financial-connections-core</a><span class="delimiter">/</span><a href="../index.html">com.stripe.android.financialconnections.model</a><span class="delimiter">/</span><span class="current">FinancialConnectionsSession</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Financial</span><wbr><span>Connections</span><wbr><span><span>Session</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">class </span><a href="index.html">FinancialConnectionsSession</a> : <span data-unresolved-link="com.stripe.android.core.model/StripeModel///PointingToDeclaration/">StripeModel</span>, <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a></div><p class="paragraph">A Financial Connections Session is the secure way to programmatically launch the client-side modal that lets your users link their accounts.</p><h4 class="">Parameters</h4><div class="table"><div class="table-row" data-filterable-current=":financial-connections-core:dokkaHtmlPartial/release" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>accounts</span></span></u></div></span></div><div></div></div></div><div class="table-row" data-filterable-current=":financial-connections-core:dokkaHtmlPartial/release" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>client</span><wbr><span><span>Secret</span></span></u></div></span></div><div><div class="title"><p class="paragraph">A value that will be passed to the client to launch the authentication flow.</p></div></div></div></div><div class="table-row" data-filterable-current=":financial-connections-core:dokkaHtmlPartial/release" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>id</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Unique identifier for the object.</p></div></div></div></div><div class="table-row" data-filterable-current=":financial-connections-core:dokkaHtmlPartial/release" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>livemode</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Has the value <code class="lang-kotlin">true</code> if the object exists in live mode or the value <code class="lang-kotlin">false</code> if the object exists in test mode.</p></div></div></div></div><div class="table-row" data-filterable-current=":financial-connections-core:dokkaHtmlPartial/release" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>bank</span><wbr><span>Account</span><wbr><span><span>Token</span></span></u></div></span></div><div></div></div></div><div class="table-row" data-filterable-current=":financial-connections-core:dokkaHtmlPartial/release" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>manual</span><wbr><span><span>Entry</span></span></u></div></span></div><div></div></div></div><div class="table-row" data-filterable-current=":financial-connections-core:dokkaHtmlPartial/release" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>payment</span><wbr><span><span>Account</span></span></u></div></span></div><div></div></div></div><div class="table-row" data-filterable-current=":financial-connections-core:dokkaHtmlPartial/release" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>return</span><wbr><span><span>Url</span></span></u></div></span></div><div><div class="title"><p class="paragraph">For webview integrations only. Upon completing OAuth login in the native browser, the user will be redirected to this URL to return to your app.</p></div></div></div></div><div class="table-row" data-filterable-current=":financial-connections-core:dokkaHtmlPartial/release" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span><span>status</span></span></u></div></span></div><div><div class="title"><p class="paragraph">The current state of the session.</p></div></div></div></div><div class="table-row" data-filterable-current=":financial-connections-core:dokkaHtmlPartial/release" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>status</span><wbr><span><span>Details</span></span></u></div></span></div><div></div></div></div></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="TYPE">
+        <h2 class="">Types</h2>
+        <div class="table"><a data-name="-1926113402%2FClasslikes%2F2093243736" anchor-label="Status" id="-1926113402%2FClasslikes%2F2093243736" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":financial-connections-core:dokkaHtmlPartial/release" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-status/index.html"><span><span>Status</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1926113402%2FClasslikes%2F2093243736"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span><span class="token punctuation">(</span><span>with<span class="token operator"> = </span><span data-unresolved-link="com.stripe.android.financialconnections.model/FinancialConnectionsSession.Status.Serializer///PointingToDeclaration/">FinancialConnectionsSession.Status.Serializer::class</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">enum </span><a href="-status/index.html">Status</a> : <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="-status/index.html">FinancialConnectionsSession.Status</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">The current state of the session.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="148790106%2FClasslikes%2F2093243736" anchor-label="StatusDetails" id="148790106%2FClasslikes%2F2093243736" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":financial-connections-core:dokkaHtmlPartial/release" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-status-details/index.html"><span>Status</span><wbr><span><span>Details</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="148790106%2FClasslikes%2F2093243736"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">class </span><a href="-status-details/index.html">StatusDetails</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>cancelled<span class="token operator">: </span><a href="-status-details/-cancelled/index.html">FinancialConnectionsSession.StatusDetails.Cancelled</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="">Properties</h2>
+        <div class="table"><a data-name="1555362333%2FProperties%2F2093243736" anchor-label="accounts" id="1555362333%2FProperties%2F2093243736" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":financial-connections-core:dokkaHtmlPartial/release" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="accounts.html"><span><span>accounts</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1555362333%2FProperties%2F2093243736"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="accounts.html">accounts</a><span class="token operator">: </span><a href="../-financial-connections-account-list/index.html">FinancialConnectionsAccountList</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1921400293%2FProperties%2F2093243736" anchor-label="bankAccountToken" id="-1921400293%2FProperties%2F2093243736" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":financial-connections-core:dokkaHtmlPartial/release" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="bank-account-token.html"><span>bank</span><wbr><span>Account</span><wbr><span><span>Token</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1921400293%2FProperties%2F2093243736"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/SerialName///PointingToDeclaration/"><span class="token annotation builtin">SerialName</span></span><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"bank_account_token"</span></span></span><wbr><span class="token punctuation">)</span></div><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span><span class="token punctuation">(</span><span>with<span class="token operator"> = </span><span data-unresolved-link="com.stripe.android.financialconnections.model.serializer/JsonAsStringSerializer///PointingToDeclaration/">JsonAsStringSerializer::class</span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">val </span><a href="bank-account-token.html">bankAccountToken</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-381792696%2FProperties%2F2093243736" anchor-label="clientSecret" id="-381792696%2FProperties%2F2093243736" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":financial-connections-core:dokkaHtmlPartial/release" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="client-secret.html"><span>client</span><wbr><span><span>Secret</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-381792696%2FProperties%2F2093243736"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/SerialName///PointingToDeclaration/"><span class="token annotation builtin">SerialName</span></span><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"client_secret"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">val </span><a href="client-secret.html">clientSecret</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-691367160%2FProperties%2F2093243736" anchor-label="id" id="-691367160%2FProperties%2F2093243736" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":financial-connections-core:dokkaHtmlPartial/release" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="id.html"><span><span>id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-691367160%2FProperties%2F2093243736"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/SerialName///PointingToDeclaration/"><span class="token annotation builtin">SerialName</span></span><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"id"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">val </span><a href="id.html">id</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1946286484%2FProperties%2F2093243736" anchor-label="livemode" id="1946286484%2FProperties%2F2093243736" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":financial-connections-core:dokkaHtmlPartial/release" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="livemode.html"><span><span>livemode</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1946286484%2FProperties%2F2093243736"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/SerialName///PointingToDeclaration/"><span class="token annotation builtin">SerialName</span></span><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"livemode"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">val </span><a href="livemode.html">livemode</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1025784917%2FProperties%2F2093243736" anchor-label="manualEntry" id="-1025784917%2FProperties%2F2093243736" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":financial-connections-core:dokkaHtmlPartial/release" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="manual-entry.html"><span>manual</span><wbr><span><span>Entry</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1025784917%2FProperties%2F2093243736"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/SerialName///PointingToDeclaration/"><span class="token annotation builtin">SerialName</span></span><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"manual_entry"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">val </span><a href="manual-entry.html">manualEntry</a><span class="token operator">: </span><a href="../-manual-entry/index.html">ManualEntry</a><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1350829839%2FProperties%2F2093243736" anchor-label="parsedToken" id="1350829839%2FProperties%2F2093243736" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":financial-connections-core:dokkaHtmlPartial/release" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="parsed-token.html"><span>parsed</span><wbr><span><span>Token</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1350829839%2FProperties%2F2093243736"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">val </span><a href="parsed-token.html">parsedToken</a><span class="token operator">: </span><a href="../../../payments-model/com.stripe.android.model/-token/index.html">Token</a><span class="token operator">?</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1912712356%2FProperties%2F2093243736" anchor-label="paymentAccount" id="-1912712356%2FProperties%2F2093243736" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":financial-connections-core:dokkaHtmlPartial/release" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="payment-account.html"><span>payment</span><wbr><span><span>Account</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1912712356%2FProperties%2F2093243736"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/SerialName///PointingToDeclaration/"><span class="token annotation builtin">SerialName</span></span><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"payment_account"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">val </span><a href="payment-account.html">paymentAccount</a><span class="token operator">: </span><a href="../-payment-account/index.html">PaymentAccount</a><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1189042248%2FProperties%2F2093243736" anchor-label="returnUrl" id="-1189042248%2FProperties%2F2093243736" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":financial-connections-core:dokkaHtmlPartial/release" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="return-url.html"><span>return</span><wbr><span><span>Url</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1189042248%2FProperties%2F2093243736"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/SerialName///PointingToDeclaration/"><span class="token annotation builtin">SerialName</span></span><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"return_url"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">val </span><a href="return-url.html">returnUrl</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-496472815%2FProperties%2F2093243736" anchor-label="status" id="-496472815%2FProperties%2F2093243736" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":financial-connections-core:dokkaHtmlPartial/release" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="status.html"><span><span>status</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-496472815%2FProperties%2F2093243736"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/SerialName///PointingToDeclaration/"><span class="token annotation builtin">SerialName</span></span><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"status"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">val </span><a href="status.html">status</a><span class="token operator">: </span><a href="-status/index.html">FinancialConnectionsSession.Status</a><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="740307975%2FProperties%2F2093243736" anchor-label="statusDetails" id="740307975%2FProperties%2F2093243736" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":financial-connections-core:dokkaHtmlPartial/release" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="status-details.html"><span>status</span><wbr><span><span>Details</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="740307975%2FProperties%2F2093243736"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/SerialName///PointingToDeclaration/"><span class="token annotation builtin">SerialName</span></span><span class="token punctuation">(</span><span>value<span class="token operator"> = </span><span class="breakable-word"><span class="token string">"status_details"</span></span></span><wbr><span class="token punctuation">)</span></div></div><span class="token keyword">val </span><a href="status-details.html">statusDetails</a><span class="token operator">: </span><a href="-status-details/index.html">FinancialConnectionsSession.StatusDetails</a><span class="token operator">?</span><span class="token operator"> = </span>null</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="-1578325224%2FFunctions%2F2093243736" anchor-label="describeContents" id="-1578325224%2FFunctions%2F2093243736" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":financial-connections-core:dokkaHtmlPartial/release" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-ownership-refresh/index.html#-1578325224%2FFunctions%2F2093243736"><span>describe</span><wbr><span><span>Contents</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1578325224%2FFunctions%2F2093243736"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="../-ownership-refresh/index.html#-1578325224%2FFunctions%2F2093243736"><span class="token function">describeContents</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1754457655%2FFunctions%2F2093243736" anchor-label="writeToParcel" id="-1754457655%2FFunctions%2F2093243736" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":financial-connections-core:dokkaHtmlPartial/release" data-filterable-set=":financial-connections-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-ownership-refresh/index.html#-1754457655%2FFunctions%2F2093243736"><span>write</span><wbr><span>To</span><wbr><span><span>Parcel</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1754457655%2FFunctions%2F2093243736"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":financial-connections-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="../-ownership-refresh/index.html#-1754457655%2FFunctions%2F2093243736"><span class="token function">writeToParcel</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p0<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/os/Parcel.html">Parcel</a><span class="token punctuation">, </span></span><span class="parameter ">p1<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2025 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

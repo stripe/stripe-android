@@ -145,194 +145,14 @@ public final class com/stripe/android/financialconnections/FinancialConnectionsS
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/financialconnections/FinancialConnectionsSheet$ElementsSessionContext$BillingDetails$Address$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$ElementsSessionContext$BillingDetails$Address;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$ElementsSessionContext$BillingDetails$Address;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/financialconnections/FinancialConnectionsSheet$ElementsSessionContext$BillingDetails$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$ElementsSessionContext$BillingDetails;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$ElementsSessionContext$BillingDetails;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/financialconnections/FinancialConnectionsSheet$ElementsSessionContext$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$ElementsSessionContext;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$ElementsSessionContext;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/financialconnections/FinancialConnectionsSheet$ElementsSessionContext$PrefillDetails$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$ElementsSessionContext$PrefillDetails;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/financialconnections/FinancialConnectionsSheet$ElementsSessionContext$PrefillDetails;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public final class com/stripe/android/financialconnections/FinancialConnectionsSheetComposeKt {
 	public static final fun rememberFinancialConnectionsSheet (Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet;
 	public static final fun rememberFinancialConnectionsSheetForToken (Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/financialconnections/FinancialConnectionsSheet;
 }
 
-public abstract class com/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult : android/os/Parcelable {
-	public static final field $stable I
-}
-
-public final class com/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult$Canceled : com/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field INSTANCE Lcom/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult$Canceled;
-	public final fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult$Canceled$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult$Canceled;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult$Canceled;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult$Completed : com/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;Lcom/stripe/android/model/Token;)V
-	public final fun component1 ()Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;
-	public final fun component2 ()Lcom/stripe/android/model/Token;
-	public final fun copy (Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;Lcom/stripe/android/model/Token;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult$Completed;
-	public static synthetic fun copy$default (Lcom/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult$Completed;Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;Lcom/stripe/android/model/Token;ILjava/lang/Object;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult$Completed;
-	public final fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getFinancialConnectionsSession ()Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;
-	public final fun getToken ()Lcom/stripe/android/model/Token;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult$Completed$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult$Completed;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult$Completed;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult$Failed : com/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Ljava/lang/Throwable;)V
-	public final fun component1 ()Ljava/lang/Throwable;
-	public final fun copy (Ljava/lang/Throwable;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult$Failed;
-	public static synthetic fun copy$default (Lcom/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult$Failed;Ljava/lang/Throwable;ILjava/lang/Object;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult$Failed;
-	public final fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getError ()Ljava/lang/Throwable;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult$Failed$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult$Failed;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult$Failed;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public final class com/stripe/android/financialconnections/FinancialConnectionsSheetRedirectActivity : androidx/appcompat/app/AppCompatActivity {
 	public static final field $stable I
 	public fun <init> ()V
-}
-
-public abstract class com/stripe/android/financialconnections/FinancialConnectionsSheetResult : android/os/Parcelable {
-	public static final field $stable I
-}
-
-public final class com/stripe/android/financialconnections/FinancialConnectionsSheetResult$Canceled : com/stripe/android/financialconnections/FinancialConnectionsSheetResult {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field INSTANCE Lcom/stripe/android/financialconnections/FinancialConnectionsSheetResult$Canceled;
-	public final fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/financialconnections/FinancialConnectionsSheetResult$Canceled$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheetResult$Canceled;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/financialconnections/FinancialConnectionsSheetResult$Canceled;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/financialconnections/FinancialConnectionsSheetResult$Completed : com/stripe/android/financialconnections/FinancialConnectionsSheetResult {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;)V
-	public final fun component1 ()Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;
-	public final fun copy (Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheetResult$Completed;
-	public static synthetic fun copy$default (Lcom/stripe/android/financialconnections/FinancialConnectionsSheetResult$Completed;Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;ILjava/lang/Object;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheetResult$Completed;
-	public final fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getFinancialConnectionsSession ()Lcom/stripe/android/financialconnections/model/FinancialConnectionsSession;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/financialconnections/FinancialConnectionsSheetResult$Completed$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheetResult$Completed;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/financialconnections/FinancialConnectionsSheetResult$Completed;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/financialconnections/FinancialConnectionsSheetResult$Failed : com/stripe/android/financialconnections/FinancialConnectionsSheetResult {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Ljava/lang/Throwable;)V
-	public final fun component1 ()Ljava/lang/Throwable;
-	public final fun copy (Ljava/lang/Throwable;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheetResult$Failed;
-	public static synthetic fun copy$default (Lcom/stripe/android/financialconnections/FinancialConnectionsSheetResult$Failed;Ljava/lang/Throwable;ILjava/lang/Object;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheetResult$Failed;
-	public final fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getError ()Ljava/lang/Throwable;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/financialconnections/FinancialConnectionsSheetResult$Failed$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/FinancialConnectionsSheetResult$Failed;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/financialconnections/FinancialConnectionsSheetResult$Failed;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public abstract interface class com/stripe/android/financialconnections/FinancialConnectionsSheetResultCallback {
-	public abstract fun onFinancialConnectionsSheetResult (Lcom/stripe/android/financialconnections/FinancialConnectionsSheetResult;)V
-}
-
-public abstract interface class com/stripe/android/financialconnections/FinancialConnectionsSheetResultForTokenCallback {
-	public abstract fun onFinancialConnectionsSheetResult (Lcom/stripe/android/financialconnections/FinancialConnectionsSheetForTokenResult;)V
 }
 
 public final class com/stripe/android/financialconnections/analytics/FinancialConnectionsEvent {
@@ -602,91 +422,11 @@ public final class com/stripe/android/financialconnections/features/reset/Compos
 	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class com/stripe/android/financialconnections/launcher/FinancialConnectionsSheetActivityArgs$ForData$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/launcher/FinancialConnectionsSheetActivityArgs$ForData;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/financialconnections/launcher/FinancialConnectionsSheetActivityArgs$ForData;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/financialconnections/launcher/FinancialConnectionsSheetActivityArgs$ForInstantDebits$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/launcher/FinancialConnectionsSheetActivityArgs$ForInstantDebits;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/financialconnections/launcher/FinancialConnectionsSheetActivityArgs$ForInstantDebits;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/financialconnections/launcher/FinancialConnectionsSheetActivityArgs$ForToken$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/launcher/FinancialConnectionsSheetActivityArgs$ForToken;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/financialconnections/launcher/FinancialConnectionsSheetActivityArgs$ForToken;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/financialconnections/launcher/FinancialConnectionsSheetActivityResult$Canceled$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/launcher/FinancialConnectionsSheetActivityResult$Canceled;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/financialconnections/launcher/FinancialConnectionsSheetActivityResult$Canceled;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/financialconnections/launcher/FinancialConnectionsSheetActivityResult$Completed$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/launcher/FinancialConnectionsSheetActivityResult$Completed;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/financialconnections/launcher/FinancialConnectionsSheetActivityResult$Completed;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/financialconnections/launcher/FinancialConnectionsSheetActivityResult$Failed$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/launcher/FinancialConnectionsSheetActivityResult$Failed;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/financialconnections/launcher/FinancialConnectionsSheetActivityResult$Failed;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/financialconnections/launcher/FinancialConnectionsSheetInstantDebitsResult$Canceled$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/launcher/FinancialConnectionsSheetInstantDebitsResult$Canceled;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/financialconnections/launcher/FinancialConnectionsSheetInstantDebitsResult$Canceled;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/financialconnections/launcher/FinancialConnectionsSheetInstantDebitsResult$Completed$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/launcher/FinancialConnectionsSheetInstantDebitsResult$Completed;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/financialconnections/launcher/FinancialConnectionsSheetInstantDebitsResult$Completed;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/financialconnections/launcher/FinancialConnectionsSheetInstantDebitsResult$Failed$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/launcher/FinancialConnectionsSheetInstantDebitsResult$Failed;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/financialconnections/launcher/FinancialConnectionsSheetInstantDebitsResult$Failed;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
 public final class com/stripe/android/financialconnections/launcher/FinancialConnectionsSheetNativeActivityArgs$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/launcher/FinancialConnectionsSheetNativeActivityArgs;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/financialconnections/launcher/FinancialConnectionsSheetNativeActivityArgs;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/financialconnections/launcher/InstantDebitsResult$Creator : android/os/Parcelable$Creator {
-	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/launcher/InstantDebitsResult;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/financialconnections/launcher/InstantDebitsResult;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
@@ -867,6 +607,14 @@ public final class com/stripe/android/financialconnections/model/FinancialConnec
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/model/FinancialConnectionsInstitution;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/financialconnections/model/FinancialConnectionsInstitution;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/financialconnections/model/FinancialConnectionsInstitutionSelected$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/model/FinancialConnectionsInstitutionSelected;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/financialconnections/model/FinancialConnectionsInstitutionSelected;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
@@ -1072,6 +820,7 @@ public final class com/stripe/android/financialconnections/navigation/Composable
 	public final fun getLambda-2$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-20$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-21$financial_connections_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-22$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-3$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-4$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-5$financial_connections_release ()Lkotlin/jvm/functions/Function3;

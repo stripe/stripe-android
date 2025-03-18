@@ -26,6 +26,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffe
 import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.Companion.EXTRA_ARGS
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
@@ -165,7 +166,6 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity() {
 
     companion object {
 
-        private const val EXTRA_ARGS = "FinancialConnectionsSheetActivityArgs"
         fun intent(context: Context, args: FinancialConnectionsSheetActivityArgs): Intent {
             return Intent(context, FinancialConnectionsSheetActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)

@@ -14,6 +14,7 @@ import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.ui.core.IsStripeCardScanAvailable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -27,7 +28,8 @@ internal class DefaultEventReporter @Inject internal constructor(
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     private val durationProvider: DurationProvider,
     private val analyticEventCallbackProvider: Provider<AnalyticEventCallback?>,
-    @IOContext private val workContext: CoroutineContext
+    @IOContext private val workContext: CoroutineContext,
+    private val isStripeCardScanAvailable: IsStripeCardScanAvailable
 ) : EventReporter {
 
     private var isDeferred: Boolean = false
@@ -51,6 +53,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
+                isStripeCardScanAvailable = isStripeCardScanAvailable(),
             )
         )
     }
@@ -420,17 +423,21 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onSetAsDefaultPaymentMethodSucceeded() {
+    override fun onSetAsDefaultPaymentMethodSucceeded(
+        paymentMethodType: String?,
+    ) {
         fireEvent(
             PaymentSheetEvent.SetAsDefaultPaymentMethodSucceeded(
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
+                paymentMethodType = paymentMethodType,
             )
         )
     }
 
     override fun onSetAsDefaultPaymentMethodFailed(
+        paymentMethodType: String?,
         error: Throwable,
     ) {
         fireEvent(
@@ -439,6 +446,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
+                paymentMethodType = paymentMethodType,
             )
         )
     }

@@ -66,6 +66,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.Dispatchers
@@ -560,6 +561,7 @@ internal class CustomerSheetViewModel(
                     workContext = workContext,
                     // This checkbox is never displayed in CustomerSheet.
                     shouldShowSetAsDefaultCheckbox = false,
+                    isDefaultPaymentMethod = false,
                     // Should never be called from CustomerSheet, because we don't enable the set as default checkbox.
                     setDefaultPaymentMethodExecutor = {
                         Result.failure(
@@ -838,7 +840,8 @@ internal class CustomerSheetViewModel(
             onError = { error ->
                 handleViewAction(CustomerSheetViewAction.OnFormError(error))
             },
-            shouldShowSetAsDefaultCheckbox = false,
+            setAsDefaultPaymentMethodEnabled = false,
+            setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
         )
     }
 

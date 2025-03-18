@@ -2,7 +2,7 @@ package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.financialconnections.ApiKeyFixtures
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.model.MixedOAuthParams
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import kotlinx.coroutines.test.runTest
@@ -17,7 +17,7 @@ internal class PollAuthorizationSessionOAuthResultsTest {
     private val repository = mock<FinancialConnectionsRepository>()
     private val pollAuthAccounts = PollAuthorizationSessionOAuthResults(
         repository = repository,
-        configuration = FinancialConnectionsSheet.Configuration(
+        configuration = FinancialConnectionsSheetConfiguration(
             ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
             ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
         )

@@ -7,6 +7,7 @@ import androidx.compose.ui.test.assertAll
 import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.isEnabled
@@ -470,7 +471,32 @@ class UpdatePaymentMethodUITest {
             val setAsDefaultCheckbox = composeRule.onNodeWithTag(UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG)
 
             setAsDefaultCheckbox.assertExists()
+        }
+    }
+
+    @Test
+    fun `setAsDefaultCheckboxEnabled true -- set as default checkbox is enabled`() {
+        runScenario(
+            shouldShowSetAsDefaultCheckbox = true,
+            setAsDefaultCheckboxEnabled = true,
+        ) {
+            val setAsDefaultCheckbox = composeRule.onNodeWithTag(UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG)
+
+            setAsDefaultCheckbox.assertExists()
             setAsDefaultCheckbox.assertIsEnabled()
+        }
+    }
+
+    @Test
+    fun `setAsDefaultCheckboxEnabled false -- set as default checkbox is not enabled`() {
+        runScenario(
+            shouldShowSetAsDefaultCheckbox = true,
+            setAsDefaultCheckboxEnabled = false,
+        ) {
+            val setAsDefaultCheckbox = composeRule.onNodeWithTag(UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG)
+
+            setAsDefaultCheckbox.assertExists()
+            setAsDefaultCheckbox.assertIsNotEnabled()
         }
     }
 
@@ -513,6 +539,7 @@ class UpdatePaymentMethodUITest {
         isModifiablePaymentMethod: Boolean = true,
         hasValidBrandChoices: Boolean = true,
         setAsDefaultCheckboxChecked: Boolean = false,
+        setAsDefaultCheckboxEnabled: Boolean = true,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
         shouldShowSetAsDefaultCheckbox: Boolean = false,
         shouldShowSaveButton: Boolean = false,
@@ -530,6 +557,7 @@ class UpdatePaymentMethodUITest {
             hasValidBrandChoices = hasValidBrandChoices,
             shouldShowSetAsDefaultCheckbox = shouldShowSetAsDefaultCheckbox,
             shouldShowSaveButton = shouldShowSaveButton,
+            setAsDefaultCheckboxEnabled = setAsDefaultCheckboxEnabled,
             initialState = UpdatePaymentMethodInteractor.State(
                 error = errorMessage,
                 status = UpdatePaymentMethodInteractor.Status.Idle,

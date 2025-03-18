@@ -3,10 +3,11 @@ package com.stripe.android.financialconnections.launcher
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.lifecycle.Lifecycle
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.FinancialConnectionsSheetForTokenResult
 import com.stripe.android.financialconnections.bankAccountToken
 import com.stripe.android.financialconnections.financialConnectionsSessionWithNoMoreAccounts
+import com.stripe.android.financialconnections.intentBuilder
 import com.stripe.android.financialconnections.utils.FakeActivityResultRegistry
 import com.stripe.android.financialconnections.utils.TestFragment
 import org.junit.Test
@@ -16,7 +17,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class FinancialConnectionsSheetForTokenLauncherTest {
 
-    private val configuration = FinancialConnectionsSheet.Configuration("", "")
+    private val configuration = FinancialConnectionsSheetConfiguration("", "")
 
     @Test
     fun `create and present should return expected ConnectionsSheetForTokenResult#Completed`() {
@@ -34,7 +35,8 @@ class FinancialConnectionsSheetForTokenLauncherTest {
                 val results = mutableListOf<FinancialConnectionsSheetForTokenResult>()
                 val launcher = FinancialConnectionsSheetForTokenLauncher(
                     fragment,
-                    testRegistry
+                    testRegistry,
+                    intentBuilder(fragment.requireContext())
                 ) {
                     results.add(it)
                 }
@@ -63,7 +65,8 @@ class FinancialConnectionsSheetForTokenLauncherTest {
                 val results = mutableListOf<FinancialConnectionsSheetForTokenResult>()
                 val launcher = FinancialConnectionsSheetForTokenLauncher(
                     fragment,
-                    testRegistry
+                    testRegistry,
+                    intentBuilder(fragment.requireContext())
                 ) {
                     results.add(it)
                 }

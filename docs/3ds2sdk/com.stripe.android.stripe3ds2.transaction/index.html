@@ -1,0 +1,384 @@
+<!doctype html>
+<html class="no-js">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>com.stripe.android.stripe3ds2.transaction</title>
+<link href="../../images/logo-icon.svg" rel="icon" type="image/svg">    <script>var pathToRoot = "../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async></script>
+<script type="text/javascript" src="../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../styles/style.css" rel="Stylesheet">
+<link href="../../styles/main.css" rel="Stylesheet">
+<link href="../../styles/prism.css" rel="Stylesheet">
+<link href="../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../styles/font-jb-sans-auto.css" rel="Stylesheet">
+<script type="text/javascript" src="../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<body>
+    <div class="root">
+<nav class="navigation" id="navigation-wrapper">
+    <div class="navigation--inner">
+        <div class="navigation-title">
+            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
+            <div class="library-name">
+<a class="library-name--link" href="../../index.html">
+                            stripe-android
+                    </a>            </div>
+            <div class="library-version">
+            </div>
+        </div>
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":3ds2sdk:dokkaHtmlPartial/release">androidJvm</button>
+        </div>
+    </div>
+    <div class="navigation-controls">
+        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
+        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
+    </div>
+</nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="sidebar--inner" id="sideMenu"></div>
+            </div>
+            <div id="main">
+<div class="main-content" data-page-type="package" id="content" pageids="3ds2sdk::com.stripe.android.stripe3ds2.transaction////PointingToDeclaration//1817547867">
+  <div class="breadcrumbs"><a href="../index.html">3ds2sdk</a><span class="delimiter">/</span><span class="current">com.stripe.android.stripe3ds2.transaction</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>Package-level</span></span> <span><span>declarations</span></span></h1>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="TYPE">Types</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="TYPE">
+        <h2 class="">Types</h2>
+        <div class="table"><a data-name="658835519%2FClasslikes%2F1817547867" anchor-label="AuthenticationRequestParameters" id="658835519%2FClasslikes%2F1817547867" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":3ds2sdk:dokkaHtmlPartial/release" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-authentication-request-parameters/index.html"><span>Authentication</span><wbr><span>Request</span><wbr><span><span>Parameters</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="658835519%2FClasslikes%2F1817547867"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":3ds2sdk:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-authentication-request-parameters/index.html">AuthenticationRequestParameters</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>deviceData<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>sdkTransactionId<span class="token operator">: </span><a href="-sdk-transaction-id/index.html">SdkTransactionId</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>sdkAppId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>sdkReferenceNumber<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>sdkEphemeralPublicKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>messageVersion<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a></div><div class="brief "><p class="paragraph">The AuthenticationRequestParameters class shall hold transaction data that the App passes to the 3DS Server for creating the AReq.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-199285589%2FClasslikes%2F1817547867" anchor-label="ChallengeContract" id="-199285589%2FClasslikes%2F1817547867" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":3ds2sdk:dokkaHtmlPartial/release" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-challenge-contract/index.html"><span>Challenge</span><wbr><span><span>Contract</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-199285589%2FClasslikes%2F1817547867"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":3ds2sdk:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="-challenge-contract/index.html">ChallengeContract</a> : <a href="https://developer.android.com/reference/kotlin/androidx/activity/result/contract/ActivityResultContract.html">ActivityResultContract</a><span class="token operator">&lt;</span><a href="../com.stripe.android.stripe3ds2.views/-challenge-view-args/index.html">ChallengeViewArgs</a><span class="token punctuation">, </span><a href="-challenge-result/index.html">ChallengeResult</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">An <a href="https://developer.android.com/reference/kotlin/androidx/activity/result/contract/ActivityResultContract.html">ActivityResultContract</a> for starting <a href="../com.stripe.android.stripe3ds2.views/-challenge-activity/index.html">ChallengeActivity</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1910246445%2FClasslikes%2F1817547867" anchor-label="ChallengeParameters" id="-1910246445%2FClasslikes%2F1817547867" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":3ds2sdk:dokkaHtmlPartial/release" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-challenge-parameters/index.html"><span>Challenge</span><wbr><span><span>Parameters</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1910246445%2FClasslikes%2F1817547867"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":3ds2sdk:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-challenge-parameters/index.html">ChallengeParameters</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">var </span>threeDsServerTransactionId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">var </span>acsTransactionId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">var </span>acsRefNumber<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">var </span>acsSignedContent<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">var </span>threeDSRequestorAppURL<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a></div><div class="brief "><p class="paragraph">The ChallengeParameters class shall hold the parameters that are required to conduct the challenge process. Note: It is mandatory to set values for these parameters.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-941373661%2FClasslikes%2F1817547867" anchor-label="ChallengeRequestExecutor" id="-941373661%2FClasslikes%2F1817547867" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":3ds2sdk:dokkaHtmlPartial/release" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-challenge-request-executor/index.html"><span>Challenge</span><wbr><span>Request</span><wbr><span><span>Executor</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-941373661%2FClasslikes%2F1817547867"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":3ds2sdk:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-challenge-request-executor/index.html">ChallengeRequestExecutor</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1549454247%2FClasslikes%2F1817547867" anchor-label="ChallengeRequestResult" id="-1549454247%2FClasslikes%2F1817547867" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":3ds2sdk:dokkaHtmlPartial/release" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-challenge-request-result/index.html"><span>Challenge</span><wbr><span>Request</span><wbr><span><span>Result</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1549454247%2FClasslikes%2F1817547867"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":3ds2sdk:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">sealed </span><span class="token keyword">class </span><a href="-challenge-request-result/index.html">ChallengeRequestResult</a> : <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1003339008%2FClasslikes%2F1817547867" anchor-label="ChallengeResult" id="-1003339008%2FClasslikes%2F1817547867" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":3ds2sdk:dokkaHtmlPartial/release" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-challenge-result/index.html"><span>Challenge</span><wbr><span><span>Result</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1003339008%2FClasslikes%2F1817547867"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":3ds2sdk:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">sealed </span><span class="token keyword">class </span><a href="-challenge-result/index.html">ChallengeResult</a> : <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a></div><div class="brief "><p class="paragraph">A sealed class representing the possible outcomes of a 3DS2 challenge.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2071913117%2FClasslikes%2F1817547867" anchor-label="ErrorMessage" id="-2071913117%2FClasslikes%2F1817547867" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":3ds2sdk:dokkaHtmlPartial/release" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-error-message/index.html"><span>Error</span><wbr><span><span>Message</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2071913117%2FClasslikes%2F1817547867"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":3ds2sdk:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-error-message/index.html">ErrorMessage</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>transactionId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>errorCode<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>errorDescription<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>errorDetails<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a></div><div class="brief "><p class="paragraph">The ErrorMessage class shall represent an error message that is returned by the ACS to the 3DS SDK or an error message that is generated by the 3DS SDK to be returned to the ACS. For more information about error messages, refer to Table A.4: Error Code, Error Description, and Error Detail and Table B.10: Error Message Data Elements in the EMV 3DS Protocol Specification.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1674849008%2FClasslikes%2F1817547867" anchor-label="InitChallengeArgs" id="1674849008%2FClasslikes%2F1817547867" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":3ds2sdk:dokkaHtmlPartial/release" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-init-challenge-args/index.html"><span>Init</span><wbr><span>Challenge</span><wbr><span><span>Args</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1674849008%2FClasslikes%2F1817547867"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":3ds2sdk:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-init-challenge-args/index.html">InitChallengeArgs</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">sdkReferenceNumber<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">sdkKeyPair<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/java/security/KeyPair.html">KeyPair</a><span class="token punctuation">, </span></span><span class="parameter ">challengeParameters<span class="token operator">: </span><a href="-challenge-parameters/index.html">ChallengeParameters</a><span class="token punctuation">, </span></span><span class="parameter ">timeoutMins<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">intentData<span class="token operator">: </span><a href="-intent-data/index.html">IntentData</a></span></span><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-342648797%2FClasslikes%2F1817547867" anchor-label="InitChallengeRepository" id="-342648797%2FClasslikes%2F1817547867" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":3ds2sdk:dokkaHtmlPartial/release" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-init-challenge-repository/index.html"><span>Init</span><wbr><span>Challenge</span><wbr><span><span>Repository</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-342648797%2FClasslikes%2F1817547867"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":3ds2sdk:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-init-challenge-repository/index.html">InitChallengeRepository</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1278579285%2FClasslikes%2F1817547867" anchor-label="InitChallengeRepositoryFactory" id="1278579285%2FClasslikes%2F1817547867" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":3ds2sdk:dokkaHtmlPartial/release" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-init-challenge-repository-factory/index.html"><span>Init</span><wbr><span>Challenge</span><wbr><span>Repository</span><wbr><span><span>Factory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1278579285%2FClasslikes%2F1817547867"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":3ds2sdk:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="-init-challenge-repository-factory/index.html">InitChallengeRepositoryFactory</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">application<span class="token operator">: </span><a href="https://developer.android.com/reference/kotlin/android/app/Application.html">Application</a><span class="token punctuation">, </span></span><span class="parameter ">isLiveMode<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">sdkTransactionId<span class="token operator">: </span><a href="-sdk-transaction-id/index.html">SdkTransactionId</a><span class="token punctuation">, </span></span><span class="parameter ">uiCustomization<span class="token operator">: </span><a href="../com.stripe.android.stripe3ds2.init.ui/-stripe-ui-customization/index.html">StripeUiCustomization</a><span class="token punctuation">, </span></span><span class="parameter ">rootCerts<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><a href="https://developer.android.com/reference/kotlin/java/security/cert/X509Certificate.html">X509Certificate</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">enableLogging<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token punctuation">, </span></span><span class="parameter ">workContext<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin.coroutines/-coroutine-context/index.html">CoroutineContext</a></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1049621328%2FClasslikes%2F1817547867" anchor-label="InitChallengeResult" id="-1049621328%2FClasslikes%2F1817547867" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":3ds2sdk:dokkaHtmlPartial/release" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-init-challenge-result/index.html"><span>Init</span><wbr><span>Challenge</span><wbr><span><span>Result</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1049621328%2FClasslikes%2F1817547867"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":3ds2sdk:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">sealed </span><span class="token keyword">class </span><a href="-init-challenge-result/index.html">InitChallengeResult</a> : <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1412361212%2FClasslikes%2F1817547867" anchor-label="IntentData" id="1412361212%2FClasslikes%2F1817547867" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":3ds2sdk:dokkaHtmlPartial/release" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-intent-data/index.html"><span>Intent</span><wbr><span><span>Data</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1412361212%2FClasslikes%2F1817547867"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":3ds2sdk:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-intent-data/index.html">IntentData</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>clientSecret<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>sourceId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>publishableKey<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>accountId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token operator">?</span><span class="token operator"> = </span>null</span></span><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="187803060%2FClasslikes%2F1817547867" anchor-label="MessageVersionRegistry" id="187803060%2FClasslikes%2F1817547867" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":3ds2sdk:dokkaHtmlPartial/release" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-message-version-registry/index.html"><span>Message</span><wbr><span>Version</span><wbr><span><span>Registry</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="187803060%2FClasslikes%2F1817547867"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":3ds2sdk:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="-message-version-registry/index.html">MessageVersionRegistry</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-627746376%2FClasslikes%2F1817547867" anchor-label="ProtocolErrorEvent" id="-627746376%2FClasslikes%2F1817547867" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":3ds2sdk:dokkaHtmlPartial/release" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-protocol-error-event/index.html"><span>Protocol</span><wbr><span>Error</span><wbr><span><span>Event</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-627746376%2FClasslikes%2F1817547867"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":3ds2sdk:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-protocol-error-event/index.html">ProtocolErrorEvent</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>sdkTransactionId<span class="token operator">: </span><a href="-sdk-transaction-id/index.html">SdkTransactionId</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>errorMessage<span class="token operator">: </span><a href="-error-message/index.html">ErrorMessage</a></span></span><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a></div><div class="brief "><p class="paragraph">An error message that is generated by the 3DS SDK to be returned to the ACS. The ProtocolErrorEvent class shall represent an error message of this type. The 3DS SDK sends the error code and details from this error message as part of the notification to the 3DS Requestor App.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-487076064%2FClasslikes%2F1817547867" anchor-label="ProtocolErrorEventFactory" id="-487076064%2FClasslikes%2F1817547867" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":3ds2sdk:dokkaHtmlPartial/release" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-protocol-error-event-factory/index.html"><span>Protocol</span><wbr><span>Error</span><wbr><span>Event</span><wbr><span><span>Factory</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-487076064%2FClasslikes%2F1817547867"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":3ds2sdk:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="-protocol-error-event-factory/index.html">ProtocolErrorEventFactory</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1042823542%2FClasslikes%2F1817547867" anchor-label="RuntimeErrorEvent" id="1042823542%2FClasslikes%2F1817547867" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":3ds2sdk:dokkaHtmlPartial/release" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-runtime-error-event/index.html"><span>Runtime</span><wbr><span>Error</span><wbr><span><span>Event</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1042823542%2FClasslikes%2F1817547867"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":3ds2sdk:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-runtime-error-event/index.html">RuntimeErrorEvent</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>errorCode<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>errorMessage<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span> : <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a></div><div class="brief "><p class="paragraph">The com.ults.samplesdk.RuntimeErrorEvent class shall hold details of run-time errors that are encountered by the 3DS SDK during authentication.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-609689789%2FClasslikes%2F1817547867" anchor-label="SdkTransactionId" id="-609689789%2FClasslikes%2F1817547867" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":3ds2sdk:dokkaHtmlPartial/release" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-sdk-transaction-id/index.html"><span>Sdk</span><wbr><span>Transaction</span><wbr><span><span>Id</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-609689789%2FClasslikes%2F1817547867"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":3ds2sdk:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">data </span><span class="token keyword">class </span><a href="-sdk-transaction-id/index.html">SdkTransactionId</a> : <a href="https://developer.android.com/reference/kotlin/android/os/Parcelable.html">Parcelable</a>, <a href="https://developer.android.com/reference/kotlin/java/io/Serializable.html">Serializable</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1411161150%2FClasslikes%2F1817547867" anchor-label="Transaction" id="-1411161150%2FClasslikes%2F1817547867" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":3ds2sdk:dokkaHtmlPartial/release" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-transaction/index.html"><span><span>Transaction</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1411161150%2FClasslikes%2F1817547867"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":3ds2sdk:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-transaction/index.html">Transaction</a></div><div class="brief "><p class="paragraph">An object that implements the Transaction interface shall hold parameters that the 3DS Server requires to create AReq messages and to perform the Challenge Flow.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="384683824%2FClasslikes%2F1817547867" anchor-label="TransactionStatus" id="384683824%2FClasslikes%2F1817547867" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":3ds2sdk:dokkaHtmlPartial/release" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-transaction-status/index.html"><span>Transaction</span><wbr><span><span>Status</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="384683824%2FClasslikes%2F1817547867"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":3ds2sdk:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">enum </span><a href="-transaction-status/index.html">TransactionStatus</a> : <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-enum/index.html">Enum</a><span class="token operator">&lt;</span><a href="-transaction-status/index.html">TransactionStatus</a><span class="token operator">&gt; </span></div><div class="brief "><p class="paragraph">Transaction Status is populated in the transStatus field of the final CRes response.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1429202875%2FClasslikes%2F1817547867" anchor-label="TransactionTimer" id="1429202875%2FClasslikes%2F1817547867" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":3ds2sdk:dokkaHtmlPartial/release" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-transaction-timer/index.html"><span>Transaction</span><wbr><span><span>Timer</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1429202875%2FClasslikes%2F1817547867"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":3ds2sdk:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-transaction-timer/index.html">TransactionTimer</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2025 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

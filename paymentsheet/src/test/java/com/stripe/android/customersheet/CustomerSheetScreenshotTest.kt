@@ -75,7 +75,8 @@ internal class CustomerSheetScreenshotTest {
         onUpdatePrimaryButtonState = { },
         onUpdatePrimaryButtonUIState = { },
         onError = { },
-        shouldShowSetAsDefaultCheckbox = false
+        setAsDefaultPaymentMethodEnabled = false,
+        setAsDefaultMatchesSaveForFutureUse = false,
     )
 
     private val selectPaymentMethodViewState = CustomerSheetViewState.SelectPaymentMethod(
@@ -359,6 +360,7 @@ internal class CustomerSheetScreenshotTest {
                 onBrandChoiceOptionsShown = {},
                 // This checkbox is never displayed in CustomerSheet.
                 shouldShowSetAsDefaultCheckbox = false,
+                isDefaultPaymentMethod = false,
                 onUpdateSuccess = {},
             ),
             isLiveMode = true,

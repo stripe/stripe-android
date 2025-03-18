@@ -4,6 +4,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.embedded.FakeEmbeddedSheetLauncher
@@ -35,16 +36,20 @@ internal class EmbeddedPaymentElementInitializerTest {
     }
 
     @Test
+    @OptIn(ExperimentalCustomPaymentMethodsApi::class)
     fun `when lifecycle is destroyed, should un-initialize callbacks`() {
         val owner = TestLifecycleOwner()
-        val callbacks = PaymentElementCallbacks(
-            createIntentCallback = { _, _ ->
-                error("Not implemented")
-            },
-            externalPaymentMethodConfirmHandler = { _, _ ->
+        val callbacks = PaymentElementCallbacks.Builder()
+            .createIntentCallback { _, _ ->
                 error("Not implemented")
             }
-        )
+            .customPaymentMethodConfirmHandler { _, _ ->
+                error("Not implemented")
+            }
+            .externalPaymentMethodConfirmHandler { _, _ ->
+                error("Not implemented")
+            }
+            .build()
 
         PaymentElementCallbackReferences[PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER] = callbacks
 

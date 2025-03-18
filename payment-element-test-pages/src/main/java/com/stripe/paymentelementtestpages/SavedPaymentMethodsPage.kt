@@ -58,6 +58,28 @@ class SavedPaymentMethodsPage(private val composeTestRule: ComposeTestRule) {
         composeTestRule.onNodeWithTag(UPDATE_PM_REMOVE_BUTTON_TEST_TAG).performClick()
     }
 
+    fun clickNewCardButton() {
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onAllNodes(hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG))
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+        // AddCard is the value of PaymentOptionItems.ViewType.AddCard.name()
+        val testTag = "AddCard"
+
+        composeTestRule.waitUntil(
+            timeoutMillis = 5000L
+        ) {
+            composeTestRule
+                .onAllNodes(hasTestTag(testTag))
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+
+        composeTestRule.onNodeWithTag(testTag, true).performClick()
+    }
+
     private fun savedPaymentMethodMatcher(last4: String): SemanticsMatcher {
         return hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG).and(hasText(last4, substring = true))
     }

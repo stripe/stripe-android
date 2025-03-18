@@ -23,7 +23,7 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.core.utils.IsWorkManagerAvailable
 import com.stripe.android.core.utils.RealIsWorkManagerAvailable
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.analytics.DefaultFinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTrackerImpl
@@ -148,7 +148,7 @@ internal interface FinancialConnectionsSheetSharedModule {
             context: Application,
             getOrFetchSync: GetOrFetchSync,
             locale: Locale?,
-            configuration: FinancialConnectionsSheet.Configuration,
+            configuration: FinancialConnectionsSheetConfiguration,
             requestExecutor: AnalyticsRequestV2Executor,
         ): FinancialConnectionsAnalyticsTracker = FinancialConnectionsAnalyticsTrackerImpl(
             context = context,

@@ -88,7 +88,8 @@ internal fun USBankAccountForm(
                 onBehalfOf = usBankAccountFormArgs.onBehalfOf,
                 savedPaymentMethod = usBankAccountFormArgs.draftPaymentSelection as? New.USBankAccount,
                 shippingDetails = usBankAccountFormArgs.shippingDetails,
-                shouldShowSetAsDefaultCheckbox = usBankAccountFormArgs.shouldShowSetAsDefaultCheckbox
+                setAsDefaultPaymentMethodEnabled = usBankAccountFormArgs.setAsDefaultPaymentMethodEnabled,
+                setAsDefaultMatchesSaveForFutureUse = usBankAccountFormArgs.setAsDefaultMatchesSaveForFutureUse,
             )
         },
     )
@@ -136,7 +137,7 @@ internal fun BankAccountForm(
     lastTextFieldIdentifier: IdentifierSpec?,
     sameAsShippingElement: SameAsShippingElement?,
     saveForFutureUseElement: SaveForFutureUseElement,
-    setAsDefaultPaymentMethodElement: SetAsDefaultPaymentMethodElement,
+    setAsDefaultPaymentMethodElement: SetAsDefaultPaymentMethodElement?,
     modifier: Modifier = Modifier,
     enabled: Boolean,
     onRemoveAccount: () -> Unit,
@@ -378,7 +379,7 @@ private fun AccountDetailsForm(
     last4: String?,
     promoBadgeState: PromoBadgeState?,
     saveForFutureUseElement: SaveForFutureUseElement,
-    setAsDefaultPaymentMethodElement: SetAsDefaultPaymentMethodElement,
+    setAsDefaultPaymentMethodElement: SetAsDefaultPaymentMethodElement?,
     onRemoveAccount: () -> Unit,
 ) {
     var openDialog by rememberSaveable { mutableStateOf(false) }
@@ -409,11 +410,13 @@ private fun AccountDetailsForm(
                 modifier = Modifier.padding(top = 8.dp)
             )
 
-            SetAsDefaultPaymentMethodElementUI(
-                enabled = true,
-                element = setAsDefaultPaymentMethodElement,
-                modifier = Modifier.padding(top = 8.dp),
-            )
+            setAsDefaultPaymentMethodElement?.let {
+                SetAsDefaultPaymentMethodElementUI(
+                    enabled = true,
+                    element = it,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
         }
     }
 

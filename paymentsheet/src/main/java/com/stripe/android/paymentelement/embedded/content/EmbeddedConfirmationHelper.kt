@@ -25,6 +25,7 @@ internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
     private val lifecycleOwner: LifecycleOwner,
     private val confirmationStateHolder: EmbeddedConfirmationStateHolder,
     private val selectionHolder: EmbeddedSelectionHolder,
+    private val embeddedContentHelper: EmbeddedContentHelper,
 ) : EmbeddedConfirmationHelper {
     init {
         confirmationStarter.register(
@@ -37,6 +38,7 @@ internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
                 resultCallback.onResult(result.asEmbeddedResult())
 
                 if (result is ConfirmationHandler.Result.Succeeded) {
+                    embeddedContentHelper.clearEmbeddedContent()
                     confirmationStateHolder.state = null
                     selectionHolder.set(null)
                 }

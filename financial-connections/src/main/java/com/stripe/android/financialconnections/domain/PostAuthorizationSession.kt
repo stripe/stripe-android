@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.core.exception.StripeException
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
@@ -21,7 +21,7 @@ import kotlin.time.Duration.Companion.seconds
  */
 internal class PostAuthorizationSession @Inject constructor(
     val repository: FinancialConnectionsManifestRepository,
-    val configuration: FinancialConnectionsSheet.Configuration,
+    val configuration: FinancialConnectionsSheetConfiguration,
     @Named(APPLICATION_ID) private val applicationId: String
 ) {
 

@@ -17,6 +17,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.uicore.elements.FormElement
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -32,6 +33,7 @@ internal class DefaultFormHelper(
     private val newPaymentSelectionProvider: () -> NewOrExternalPaymentSelection?,
     private val selectionUpdater: (PaymentSelection?) -> Unit,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
+    private val setAsDefaultMatchesSaveForFutureUse: Boolean,
 ) : FormHelper {
     companion object {
         fun create(
@@ -51,6 +53,7 @@ internal class DefaultFormHelper(
                 selectionUpdater = {
                     viewModel.updateSelection(it)
                 },
+                setAsDefaultMatchesSaveForFutureUse = viewModel.customerStateHolder.paymentMethods.value.isEmpty(),
             )
         }
 
@@ -67,6 +70,7 @@ internal class DefaultFormHelper(
                 newPaymentSelectionProvider = { null },
                 linkConfigurationCoordinator = null,
                 selectionUpdater = {},
+                setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
             )
         }
     }
@@ -128,7 +132,8 @@ internal class DefaultFormHelper(
                 initialLinkUserInput = when (val selection = currentSelection?.paymentSelection) {
                     is PaymentSelection.New.LinkInline -> selection.input
                     else -> null
-                }
+                },
+                setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
             ),
         ) ?: emptyList()
     }

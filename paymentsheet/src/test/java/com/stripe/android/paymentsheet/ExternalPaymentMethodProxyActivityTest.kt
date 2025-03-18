@@ -36,10 +36,9 @@ class ExternalPaymentMethodProxyActivityTest {
         val expectedBillingDetails =
             PaymentMethod.BillingDetails(name = "Joe", address = Address(city = "Seattle", line1 = "123 Main St"))
 
-        PaymentElementCallbackReferences["ExternalPaymentMethod"] = PaymentElementCallbacks(
-            createIntentCallback = null,
-            externalPaymentMethodConfirmHandler = confirmHandler,
-        )
+        PaymentElementCallbackReferences["ExternalPaymentMethod"] = PaymentElementCallbacks.Builder()
+            .externalPaymentMethodConfirmHandler(confirmHandler)
+            .build()
 
         activityLauncher.launch(
             input = ExternalPaymentMethodInput(
@@ -65,10 +64,9 @@ class ExternalPaymentMethodProxyActivityTest {
             context,
         )
 
-        PaymentElementCallbackReferences["ExternalPaymentMethod"] = PaymentElementCallbacks(
-            createIntentCallback = null,
-            externalPaymentMethodConfirmHandler = confirmHandler,
-        )
+        PaymentElementCallbackReferences["ExternalPaymentMethod"] = PaymentElementCallbacks.Builder()
+            .externalPaymentMethodConfirmHandler(confirmHandler)
+            .build()
 
         activityLauncher.launch(
             input = ExternalPaymentMethodInput(
@@ -137,15 +135,13 @@ class ExternalPaymentMethodProxyActivityTest {
             context,
         )
 
-        PaymentElementCallbackReferences["ExternalPaymentMethodTestIdentifierOne"] = PaymentElementCallbacks(
-            createIntentCallback = null,
-            externalPaymentMethodConfirmHandler = firstConfirmHandler,
-        )
+        PaymentElementCallbackReferences["ExternalPaymentMethodTestIdentifierOne"] = PaymentElementCallbacks.Builder()
+            .externalPaymentMethodConfirmHandler(firstConfirmHandler)
+            .build()
 
-        PaymentElementCallbackReferences["ExternalPaymentMethodTestIdentifierTwo"] = PaymentElementCallbacks(
-            createIntentCallback = null,
-            externalPaymentMethodConfirmHandler = secondConfirmHandler,
-        )
+        PaymentElementCallbackReferences["ExternalPaymentMethodTestIdentifierTwo"] = PaymentElementCallbacks.Builder()
+            .externalPaymentMethodConfirmHandler(secondConfirmHandler)
+            .build()
 
         activityLauncher.launch(
             input = ExternalPaymentMethodInput(

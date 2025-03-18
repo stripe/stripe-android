@@ -169,15 +169,25 @@ internal class FakeEventReporter : EventReporter {
         )
     }
 
-    override fun onSetAsDefaultPaymentMethodSucceeded() {
+    override fun onSetAsDefaultPaymentMethodSucceeded(
+        paymentMethodType: String?,
+    ) {
         _setAsDefaultPaymentMethodSucceededCalls.add(
-            SetAsDefaultPaymentMethodSucceededCall()
+            SetAsDefaultPaymentMethodSucceededCall(
+                paymentMethodType = paymentMethodType,
+            )
         )
     }
 
-    override fun onSetAsDefaultPaymentMethodFailed(error: Throwable) {
+    override fun onSetAsDefaultPaymentMethodFailed(
+        paymentMethodType: String?,
+        error: Throwable,
+    ) {
         _setAsDefaultPaymentMethodFailedCalls.add(
-            SetAsDefaultPaymentMethodFailedCall(error = error)
+            SetAsDefaultPaymentMethodFailedCall(
+                paymentMethodType = paymentMethodType,
+                error = error,
+            )
         )
     }
 
@@ -202,9 +212,12 @@ internal class FakeEventReporter : EventReporter {
         val error: Throwable,
     )
 
-    class SetAsDefaultPaymentMethodSucceededCall
+    class SetAsDefaultPaymentMethodSucceededCall(
+        val paymentMethodType: String?,
+    )
 
     data class SetAsDefaultPaymentMethodFailedCall(
+        val paymentMethodType: String?,
         val error: Throwable,
     )
 }

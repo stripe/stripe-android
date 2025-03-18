@@ -40,4 +40,12 @@ data class MerchantSetting(
             merchants.first()
         }
     }
+
+    fun updateWithMerchants(merchants: List<Merchant>): MerchantSetting {
+        val selectedOption = selectedOption.takeIf { it in merchants } ?: merchants.first()
+        return copy(
+            merchants = merchants,
+            selectedOption = selectedOption,
+        )
+    }
 }
