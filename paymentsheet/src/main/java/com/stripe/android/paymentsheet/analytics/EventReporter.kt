@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.analytics
 
 import androidx.annotation.Keep
+import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCode
@@ -15,7 +16,10 @@ internal interface EventReporter {
      * PaymentSheet has been instantiated or FlowController has finished its configuration.
      */
     fun onInit(
-        configuration: PaymentSheet.Configuration,
+        commonConfiguration: CommonConfiguration,
+        appearance: PaymentSheet.Appearance,
+        primaryButtonColor: Boolean?,
+        paymentMethodLayout: PaymentSheet.PaymentMethodLayout?,
         isDeferred: Boolean,
     )
 

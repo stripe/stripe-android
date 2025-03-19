@@ -14,6 +14,7 @@ import com.google.android.gms.common.api.Status
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
@@ -84,6 +85,7 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
+import com.stripe.android.paymentsheet.analytics.primaryButtonColorUsage
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.RecordingCvcRecollectionLauncherFactory
@@ -219,8 +221,12 @@ internal class PaymentSheetViewModelTest {
     fun `init should fire analytics event`() {
         val beforeSessionId = AnalyticsRequestFactory.sessionId
         createViewModel()
+        val config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         verify(eventReporter).onInit(
-            configuration = eq(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY),
+            commonConfiguration = eq(config.asCommonConfiguration()),
+            appearance = eq(config.appearance),
+            primaryButtonColor = eq(config.primaryButtonColorUsage()),
+            paymentMethodLayout = eq(config.paymentMethodLayout),
             isDeferred = eq(false),
         )
 
@@ -2117,7 +2123,10 @@ internal class PaymentSheetViewModelTest {
         createViewModel()
 
         verify(eventReporter).onInit(
-            configuration = anyOrNull(),
+            commonConfiguration = anyOrNull(),
+            appearance = anyOrNull(),
+            primaryButtonColor = anyOrNull(),
+            paymentMethodLayout = anyOrNull(),
             isDeferred = eq(false),
         )
     }
@@ -2139,7 +2148,10 @@ internal class PaymentSheetViewModelTest {
         createViewModelForDeferredIntent()
 
         verify(eventReporter).onInit(
-            configuration = anyOrNull(),
+            commonConfiguration = anyOrNull(),
+            appearance = anyOrNull(),
+            primaryButtonColor = anyOrNull(),
+            paymentMethodLayout = anyOrNull(),
             isDeferred = eq(true),
         )
     }
@@ -2161,7 +2173,10 @@ internal class PaymentSheetViewModelTest {
         createViewModelForDeferredIntent()
 
         verify(eventReporter).onInit(
-            configuration = anyOrNull(),
+            commonConfiguration = anyOrNull(),
+            appearance = anyOrNull(),
+            primaryButtonColor = anyOrNull(),
+            paymentMethodLayout = anyOrNull(),
             isDeferred = eq(true),
         )
     }
