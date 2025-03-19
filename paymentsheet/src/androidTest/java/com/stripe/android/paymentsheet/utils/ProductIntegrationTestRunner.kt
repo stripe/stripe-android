@@ -94,7 +94,7 @@ internal sealed interface ProductIntegrationTestRunnerContext {
                             )
                         ),
                         configuration = configuration,
-                        callback ={ success, error ->
+                        callback = { success, error ->
                             assertThat(success).isTrue()
                             assertThat(error).isNull()
                             presentPaymentOptions()

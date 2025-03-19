@@ -27,6 +27,7 @@ internal class DefaultPaymentMethodsDeferredServerSideConfirmationTest {
     @TestParameter(valuesProvider = ProductIntegrationTypeProvider::class)
     lateinit var integrationType: ProductIntegrationType
 
+    // Confirmation behavior between horizontal and vertical doesn't differ, so we're testing with vertical mode only.
     private val layoutType = PaymentSheetLayoutType.Vertical()
 
     @Test
@@ -83,9 +84,7 @@ internal class DefaultPaymentMethodsDeferredServerSideConfirmationTest {
             response.testBodyFromFile("payment-intent-get-success.json")
         }
 
-
         paymentSheetPage.clickPrimaryButton()
-
 
         integrationType.assertDefaultPaymentMethodsDeferredSSCErrorShown(
             composeTestRule = composeTestRule,

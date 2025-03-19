@@ -5,6 +5,7 @@ import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
+import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.CreateIntentCallback
@@ -41,12 +42,12 @@ internal sealed class ConfirmationType(
             }
         }
 
-        // TODO: add a not set as default pm param check to this and to the one for deferred CSC?
         override fun enqueuePaymentIntentConfirmWithoutSetAsDefault(networkRule: NetworkRule) {
             return networkRule.enqueue(
                 method("POST"),
                 path("/v1/payment_intents/pi_example/confirm"),
                 bodyPart(urlEncode("payment_method_data[allow_redisplay]"), "unspecified"),
+                not(bodyPart(urlEncode("set_as_default_payment_method"), "true")),
             ) { response ->
                 response.testBodyFromFile("payment-intent-confirm.json")
             }
@@ -104,6 +105,7 @@ internal sealed class ConfirmationType(
             networkRule.enqueue(
                 method("POST"),
                 path("/v1/payment_intents/pi_example/confirm"),
+                not(bodyPart(urlEncode("set_as_default_payment_method"), "true")),
             ) { response ->
                 response.testBodyFromFile("payment-intent-confirm.json")
             }

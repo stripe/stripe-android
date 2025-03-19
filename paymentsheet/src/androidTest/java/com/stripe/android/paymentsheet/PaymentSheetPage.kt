@@ -152,7 +152,7 @@ internal class PaymentSheetPage(
     }
 
     fun assertErrorMessageShown() {
-        composeTestRule.waitUntil(5000) {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule
                 .onAllNodesWithTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG)
                 .fetchSemanticsNodes()
