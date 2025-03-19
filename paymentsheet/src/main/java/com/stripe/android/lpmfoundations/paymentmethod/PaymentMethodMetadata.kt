@@ -11,6 +11,7 @@ import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPaymentMethodUiDefinitionFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.LinkCardBrandDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfiguration
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
@@ -324,10 +325,19 @@ internal data class PaymentMethodMetadata(
                 allowsDelayedPaymentMethods = false,
                 allowsPaymentMethodsRequiringShippingAddress = false,
                 paymentMethodOrder = ConfigurationDefaults.paymentMethodOrder,
-                cbcEligibility = CardBrandChoiceEligibility.create(
-                    isEligible = false,
-                    preferredNetworks = emptyList(),
-                ),
+                cbcEligibility = if (configuration.cardBrandChoice?.eligible == true) {
+                    CardBrandChoiceEligibility.create(
+                        isEligible = true,
+                        preferredNetworks = configuration.cardBrandChoice.preferredNetworks.map { code ->
+                            CardBrand.fromCode(code)
+                        },
+                    )
+                } else {
+                    CardBrandChoiceEligibility.create(
+                        isEligible = false,
+                        preferredNetworks = emptyList(),
+                    )
+                },
                 merchantName = configuration.merchantName,
                 defaultBillingDetails = null,
                 shippingDetails = null,
