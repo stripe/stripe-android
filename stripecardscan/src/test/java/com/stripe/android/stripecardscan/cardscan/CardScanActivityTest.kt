@@ -4,7 +4,6 @@ import androidx.test.core.app.ActivityScenario
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.stripecardscan.payment.card.ScannedCard
 import com.stripe.android.stripecardscan.scanui.CancellationReason
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.TestScope

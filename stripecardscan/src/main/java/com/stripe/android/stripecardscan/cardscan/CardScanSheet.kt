@@ -8,6 +8,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.IdRes
+import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.add
@@ -18,6 +19,7 @@ import com.stripe.android.stripecardscan.payment.card.ScannedCard
 import com.stripe.android.stripecardscan.scanui.CancellationReason
 import kotlinx.parcelize.Parcelize
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
 data class CardScanSheetParams(
     val cardScanConfiguration: CardScanConfiguration
@@ -147,6 +149,11 @@ class CardScanSheet private constructor() {
      * The ID and Secret are created from this server-server request:
      * https://paper.dropbox.com/doc/Bouncer-Web-API-Review--BTOclListnApWjHdpv4DoaOuAg-Wy0HGlL0XfwAOz9hHuzS1#:h2=Creating-a-CardImageVerificati
      */
+    fun present() {
+        present(CardScanConfiguration(elementsSessionId = null))
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun present(configuration: CardScanConfiguration) {
         launcher.launch(CardScanSheetParams(configuration))
     }
