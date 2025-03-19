@@ -16,7 +16,6 @@ internal object DefaultPaymentMethodsUtils {
         networkRule: NetworkRule,
         isDeferredIntent: Boolean = false,
         cards: List<PaymentMethod> = emptyList(),
-        setAsDefaultFeatureEnabled: Boolean = true,
         defaultPaymentMethod: String? = null,
     ) {
         networkRule.enqueue(
@@ -27,7 +26,6 @@ internal object DefaultPaymentMethodsUtils {
             response.setBody(
                 createElementsSessionResponse(
                     cards = cards,
-                    setAsDefaultFeatureEnabled = setAsDefaultFeatureEnabled,
                     defaultPaymentMethod = defaultPaymentMethod,
                     isDeferredIntent = isDeferredIntent,
                 )
@@ -66,7 +64,6 @@ internal object DefaultPaymentMethodsUtils {
     @Suppress("LongMethod")
     private fun createElementsSessionResponse(
         cards: List<PaymentMethod>,
-        setAsDefaultFeatureEnabled: Boolean,
         defaultPaymentMethod: String?,
         isDeferredIntent: Boolean,
     ): String {
@@ -77,8 +74,6 @@ internal object DefaultPaymentMethodsUtils {
         }
 
         val cardsStringified = cardsArray.toString(2)
-
-        val setAsDefaultFeatureEnabledStringified = setAsDefaultFeatureEnabled.toFeatureState()
 
         val paymentIntent = if (isDeferredIntent) {
             ""
@@ -158,7 +153,7 @@ internal object DefaultPaymentMethodsUtils {
                             "payment_method_remove": "enabled",
                             "payment_method_remove_last": "enabled",
                             "payment_method_save_allow_redisplay_override": null,
-                            "payment_method_set_as_default": $setAsDefaultFeatureEnabledStringified
+                            "payment_method_set_as_default": "enabled"
                           }
                         },
                         "customer_sheet": {
