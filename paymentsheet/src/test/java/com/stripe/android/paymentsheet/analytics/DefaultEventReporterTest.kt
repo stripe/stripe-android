@@ -5,6 +5,7 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -27,7 +28,6 @@ import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.IsStripeCardScanAvailable
 import com.stripe.android.utils.FakeDurationProvider
-import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.json.JSONException
@@ -47,8 +47,9 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 @RunWith(RobolectricTestRunner::class)
+@OptIn(ExperimentalAnalyticEventCallbackApi::class)
 class DefaultEventReporterTest {
-    private val testDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler())
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
@@ -60,10 +61,7 @@ class DefaultEventReporterTest {
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )
 
-    @OptIn(ExperimentalAnalyticEventCallbackApi::class)
     private val analyticEventCall = Turbine<AnalyticEvent>()
-
-    @OptIn(ExperimentalAnalyticEventCallbackApi::class)
     private class FakeAnalyticEventCallbackProvider : Provider<AnalyticEventCallback?> {
         private var callback: AnalyticEventCallback? = null
 
@@ -72,8 +70,26 @@ class DefaultEventReporterTest {
         }
         override fun get(): AnalyticEventCallback? = callback
     }
-
     private val analyticEventCallbackProvider = FakeAnalyticEventCallbackProvider()
+
+    private val loggerCall = Turbine<String>()
+    private val logger = object : Logger {
+        override fun error(msg: String, tr: Throwable?) {
+            loggerCall.add("error")
+        }
+
+        override fun debug(msg: String) {
+            // no-op
+        }
+
+        override fun info(msg: String) {
+            // no-op
+        }
+
+        override fun warning(msg: String) {
+            // no-op
+        }
+    }
 
     private val configuration: PaymentSheet.Configuration
         get() = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
@@ -878,16 +894,18 @@ class DefaultEventReporterTest {
 
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
     @Test
-    fun `Exception in analytic event callback should not be propagated`() = runTest(testDispatcher) {
+    fun `Throwable in analytic event callback should not be propagated`() = runTest(testDispatcher) {
         val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
             simulateSuccessfulSetup(linkMode = null, googlePayReady = false)
         }
 
         analyticEventCallbackProvider.set {
-            throw Exception("Something went wrong")
+            throw RuntimeException("Something went wrong")
         }
 
         completeEventReporter.onShowNewPaymentOptions()
+
+        assertThat(loggerCall.awaitItem()).isEqualTo("error")
     }
 
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
@@ -915,7 +933,8 @@ class DefaultEventReporterTest {
             durationProvider = FakeDurationProvider(duration),
             analyticEventCallbackProvider = analyticEventCallbackProvider,
             workContext = testDispatcher,
-            isStripeCardScanAvailable = FakeIsStripeCardScanAvailable()
+            isStripeCardScanAvailable = FakeIsStripeCardScanAvailable(),
+            logger = logger,
         )
 
         reporter.configure()
@@ -938,7 +957,8 @@ class DefaultEventReporterTest {
             durationProvider = durationProvider,
             analyticEventCallbackProvider = analyticEventCallbackProvider,
             workContext = testDispatcher,
-            isStripeCardScanAvailable = FakeIsStripeCardScanAvailable()
+            isStripeCardScanAvailable = FakeIsStripeCardScanAvailable(),
+            logger = logger,
         )
 
         reporter.configure()

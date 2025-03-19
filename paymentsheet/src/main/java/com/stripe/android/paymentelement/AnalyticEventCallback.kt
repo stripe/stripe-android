@@ -20,10 +20,6 @@ fun interface AnalyticEventCallback {
 @ExperimentalAnalyticEventCallbackApi
 abstract class AnalyticEvent internal constructor() {
 
-    internal companion object {
-        val TAG: String = AnalyticEvent::class.java.simpleName
-    }
-
     /**
      * Sheet is presented
      */
