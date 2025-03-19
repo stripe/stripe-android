@@ -13,12 +13,13 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="link-accounts"
-                    android:scheme="stripe-auth"
+                    android:host="financial-connections-lite"
+                    android:scheme="stripe"
                     android:pathPrefix="/${applicationId}/auth_redirect" />
             </intent-filter>
         </activity>
         <activity
-            android:name=".FinancialConnectionsSheetLiteActivity" />
+            android:name=".FinancialConnectionsSheetLiteActivity"
+            android:theme="@style/StripeBottomSheetActivityTheme" />
     </application>
 </manifest>
