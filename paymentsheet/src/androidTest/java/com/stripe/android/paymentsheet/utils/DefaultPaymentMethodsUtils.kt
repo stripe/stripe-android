@@ -61,7 +61,6 @@ internal object DefaultPaymentMethodsUtils {
         }
     }
 
-    @Suppress("LongMethod")
     private fun createElementsSessionResponse(
         cards: List<PaymentMethod>,
         defaultPaymentMethod: String?,
@@ -75,11 +74,68 @@ internal object DefaultPaymentMethodsUtils {
 
         val cardsStringified = cardsArray.toString(2)
 
-        val paymentIntent = if (isDeferredIntent) {
-            ""
+        return if (isDeferredIntent) {
+            deferredIntentElementsSessionResponse(
+                paymentMethods = cardsStringified,
+                defaultPaymentMethod = defaultPaymentMethod,
+            )
         } else {
-            """
-               "payment_intent": {
+            intentFirstElementsSessionResponse(
+                paymentMethods = cardsStringified,
+                defaultPaymentMethod = defaultPaymentMethod,
+            )
+        }
+    }
+
+    private fun intentFirstElementsSessionResponse(
+        paymentMethods: String,
+        defaultPaymentMethod: String?,
+    ): String {
+        return """
+                {
+                  "business_name": "Mobile Example Account",
+                  "google_pay_preference": "enabled",
+                  "merchant_country": "US",
+                  "merchant_currency": "usd",
+                  "merchant_id": "acct_1HvTI7Lu5o3P18Zp",
+                  "meta_pay_signed_container_context": null,
+                  "order": null,
+                  "ordered_payment_method_types_and_wallets": [
+                    "card"
+                  ],
+                  "customer": {
+                    "payment_methods": $paymentMethods,
+                    "customer_session": {
+                      "id": "cuss_654321",
+                      "livemode": false,
+                      "api_key": "ek_12345",
+                      "api_key_expiry": 1899787184,
+                      "customer": "cus_1",
+                      "components": {
+                        "mobile_payment_element": {
+                          "enabled": true,
+                          "features": {
+                            "payment_method_save": "enabled",
+                            "payment_method_remove": "enabled",
+                            "payment_method_remove_last": "enabled",
+                            "payment_method_save_allow_redisplay_override": null,
+                            "payment_method_set_as_default": "enabled"
+                          }
+                        },
+                        "customer_sheet": {
+                          "enabled": false,
+                          "features": null
+                        }
+                      }
+                    },
+                    "default_payment_method": $defaultPaymentMethod
+                  },
+                  "payment_method_preference": {
+                    "object": "payment_method_preference",
+                    "country_code": "US",
+                    "ordered_payment_method_types": [
+                      "card"
+                    ],               "payment_intent": {
                       "id": "pi_example",
                       "object": "payment_intent",
                       "amount": 5099,
@@ -116,15 +172,31 @@ internal object DefaultPaymentMethodsUtils {
                       "source": null,
                       "status": "requires_payment_method"
                     }, 
+                    "type": "payment_intent"
+                  },
+                  "payment_method_specs": [
+                    {
+                      "async": false,
+                      "fields": [],
+                      "type": "card"
+                    }
+                  ],
+                  "paypal_express_config": {
+                    "client_id": null,
+                    "paypal_merchant_id": null
+                  },
+                  "shipping_address_settings": {
+                    "autocomplete_allowed": true
+                  },
+                  "unactivated_payment_method_types": []
+                }
             """.trimIndent()
-        }
+    }
 
-        val paymentIntentType = if (isDeferredIntent) {
-            "deferred_intent"
-        } else {
-            "payment_intent"
-        }
-
+    private fun deferredIntentElementsSessionResponse(
+        paymentMethods: String,
+        defaultPaymentMethod: String?,
+    ): String {
         return """
                 {
                   "business_name": "Mobile Example Account",
@@ -138,7 +210,7 @@ internal object DefaultPaymentMethodsUtils {
                     "card"
                   ],
                   "customer": {
-                    "payment_methods": $cardsStringified,
+                    "payment_methods": $paymentMethods,
                     "customer_session": {
                       "id": "cuss_654321",
                       "livemode": false,
@@ -169,8 +241,8 @@ internal object DefaultPaymentMethodsUtils {
                     "country_code": "US",
                     "ordered_payment_method_types": [
                       "card"
-                    ],$paymentIntent
-                    "type": "$paymentIntentType"
+                    ],
+                    "type": "deferred_intent"
                   },
                   "payment_method_specs": [
                     {
@@ -189,13 +261,5 @@ internal object DefaultPaymentMethodsUtils {
                   "unactivated_payment_method_types": []
                 }
             """.trimIndent()
-    }
-
-    private fun Boolean.toFeatureState(): String {
-        return if (this) {
-            "enabled"
-        } else {
-            "disabled"
-        }
     }
 }
