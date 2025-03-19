@@ -3,10 +3,6 @@ package com.stripe.android.uicore.image
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
@@ -87,7 +83,6 @@ fun StripeImage(
         AnimatedContent(
             targetState = state.value,
             label = "loading_image_animation",
-            transitionSpec = { fadeIn(tween()) togetherWith fadeOut(tween()) },
             contentKey = { targetState ->
                 if (disableAnimations) {
                     // Animations only occur when the content key changes, by setting the content key to a constant
