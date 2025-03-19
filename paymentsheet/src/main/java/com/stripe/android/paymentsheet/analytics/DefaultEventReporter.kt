@@ -353,48 +353,27 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onShowPaymentOptionBrands(
-        source: EventReporter.CardBrandChoiceEventSource,
-        selectedBrand: CardBrand
-    ) {
+    override fun onBrandChoiceSelected(source: EventReporter.CardBrandChoiceEventSource, selectedBrand: CardBrand) {
         fireEvent(
-            PaymentSheetEvent.ShowPaymentOptionBrands(
-                selectedBrand = selectedBrand,
+            PaymentSheetEvent.CardBrandSelected(
                 source = when (source) {
-                    EventReporter.CardBrandChoiceEventSource.Add ->
-                        PaymentSheetEvent.ShowPaymentOptionBrands.Source.Add
-                    EventReporter.CardBrandChoiceEventSource.Edit ->
-                        PaymentSheetEvent.ShowPaymentOptionBrands.Source.Edit
+                    EventReporter.CardBrandChoiceEventSource.Edit -> {
+                        PaymentSheetEvent.CardBrandSelected.Source.Edit
+                    }
+                    EventReporter.CardBrandChoiceEventSource.Add -> {
+                        PaymentSheetEvent.CardBrandSelected.Source.Add
+                    }
                 },
+                selectedBrand = selectedBrand,
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
-            )
-        )
-    }
-
-    override fun onHidePaymentOptionBrands(
-        source: EventReporter.CardBrandChoiceEventSource,
-        selectedBrand: CardBrand?
-    ) {
-        fireEvent(
-            PaymentSheetEvent.HidePaymentOptionBrands(
-                selectedBrand = selectedBrand,
-                source = when (source) {
-                    EventReporter.CardBrandChoiceEventSource.Add ->
-                        PaymentSheetEvent.HidePaymentOptionBrands.Source.Add
-                    EventReporter.CardBrandChoiceEventSource.Edit ->
-                        PaymentSheetEvent.HidePaymentOptionBrands.Source.Edit
-                },
-                isDeferred = isDeferred,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
+                googlePaySupported = googlePaySupported
             )
         )
     }
 
     override fun onUpdatePaymentMethodSucceeded(
-        selectedBrand: CardBrand
+        selectedBrand: CardBrand?
     ) {
         fireEvent(
             PaymentSheetEvent.UpdatePaymentOptionSucceeded(
@@ -407,7 +386,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onUpdatePaymentMethodFailed(
-        selectedBrand: CardBrand,
+        selectedBrand: CardBrand?,
         error: Throwable,
     ) {
         fireEvent(

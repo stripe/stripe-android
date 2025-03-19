@@ -2906,64 +2906,6 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `Showing payment option brands in edit screen reports event`() = runTest(testDispatcher) {
-        val eventReporter: CustomerSheetEventReporter = mock()
-        val paymentMethods = listOf(CARD_WITH_NETWORKS_PAYMENT_METHOD)
-
-        val viewModel = createViewModel(
-            workContext = testDispatcher,
-            eventReporter = eventReporter,
-            customerPaymentMethods = paymentMethods
-        )
-
-        viewModel.viewState.test {
-            assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
-            viewModel.handleViewAction(
-                CustomerSheetViewAction.OnModifyItem(paymentMethods.single().toDisplayableSavedPaymentMethod())
-            )
-
-            val editViewState = awaitViewState<CustomerSheetViewState.UpdatePaymentMethod>()
-            editViewState.updatePaymentMethodInteractor.handleViewAction(
-                UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsShown
-            )
-
-            verify(eventReporter).onShowPaymentOptionBrands(
-                source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
-                selectedBrand = CardBrand.CartesBancaires
-            )
-        }
-    }
-
-    @Test
-    fun `Hiding payment option brands in edit screen reports event`() = runTest(testDispatcher) {
-        val eventReporter: CustomerSheetEventReporter = mock()
-        val paymentMethods = listOf(CARD_WITH_NETWORKS_PAYMENT_METHOD)
-
-        val viewModel = createViewModel(
-            workContext = testDispatcher,
-            eventReporter = eventReporter,
-            customerPaymentMethods = paymentMethods,
-        )
-
-        viewModel.viewState.test {
-            assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
-            viewModel.handleViewAction(
-                CustomerSheetViewAction.OnModifyItem(paymentMethods.single().toDisplayableSavedPaymentMethod())
-            )
-
-            val editViewState = awaitViewState<CustomerSheetViewState.UpdatePaymentMethod>()
-            editViewState.updatePaymentMethodInteractor.handleViewAction(
-                UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsDismissed
-            )
-
-            verify(eventReporter).onHidePaymentOptionBrands(
-                source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
-                selectedBrand = CardBrand.CartesBancaires
-            )
-        }
-    }
-
-    @Test
     fun `Changing payment option brand in edit screen reports event`() = runTest(testDispatcher) {
         val eventReporter: CustomerSheetEventReporter = mock()
         val paymentMethods = listOf(CARD_WITH_NETWORKS_PAYMENT_METHOD)

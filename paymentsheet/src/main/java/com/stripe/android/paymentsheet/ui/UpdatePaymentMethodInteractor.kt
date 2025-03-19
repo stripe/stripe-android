@@ -55,9 +55,7 @@ internal interface UpdatePaymentMethodInteractor {
 
     sealed class ViewAction {
         data object RemovePaymentMethod : ViewAction()
-        data object BrandChoiceOptionsShown : ViewAction()
         data class BrandChoiceChanged(val cardBrandChoice: CardBrandChoice) : ViewAction()
-        data object BrandChoiceOptionsDismissed : ViewAction()
         data object SaveButtonPressed : ViewAction()
         data class SetAsDefaultCheckboxChanged(val isChecked: Boolean) : ViewAction()
     }
@@ -95,8 +93,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     private val removeExecutor: PaymentMethodRemoveOperation,
     private val updateCardBrandExecutor: UpdateCardBrandOperation,
     private val setDefaultPaymentMethodExecutor: PaymentMethodSetAsDefaultOperation,
-    private val onBrandChoiceOptionsShown: (CardBrand) -> Unit,
-    private val onBrandChoiceOptionsDismissed: (CardBrand) -> Unit,
+    private val onBrandChoiceSelected: (CardBrand) -> Unit,
     private val onUpdateSuccess: () -> Unit,
     workContext: CoroutineContext = Dispatchers.Default,
 ) : UpdatePaymentMethodInteractor {
@@ -157,12 +154,6 @@ internal class DefaultUpdatePaymentMethodInteractor(
     override fun handleViewAction(viewAction: UpdatePaymentMethodInteractor.ViewAction) {
         when (viewAction) {
             UpdatePaymentMethodInteractor.ViewAction.RemovePaymentMethod -> removePaymentMethod()
-            UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsShown -> onBrandChoiceOptionsShown(
-                cardBrandChoice.value.brand
-            )
-            UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsDismissed -> onBrandChoiceOptionsDismissed(
-                cardBrandChoice.value.brand
-            )
             UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed -> savePaymentMethod()
             is UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged -> onBrandChoiceChanged(
                 viewAction.cardBrandChoice
@@ -254,7 +245,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
         this.cardBrandChoice.value = cardBrandChoice
         this.cardBrandHasBeenChanged.value = cardBrandChoice != savedCardBrand.value
 
-        onBrandChoiceOptionsDismissed(cardBrandChoice.brand)
+        onBrandChoiceSelected(cardBrandChoice.brand)
     }
 
     private fun onSetAsDefaultCheckboxChanged(isChecked: Boolean) {

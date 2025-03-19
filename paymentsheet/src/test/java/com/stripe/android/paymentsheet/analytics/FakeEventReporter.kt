@@ -155,22 +155,15 @@ internal class FakeEventReporter : EventReporter {
         _hideEditablePaymentOptionCalls.add(Unit)
     }
 
-    override fun onShowPaymentOptionBrands(source: EventReporter.CardBrandChoiceEventSource, selectedBrand: CardBrand) {
-    }
+    override fun onBrandChoiceSelected(source: EventReporter.CardBrandChoiceEventSource, selectedBrand: CardBrand) {}
 
-    override fun onHidePaymentOptionBrands(
-        source: EventReporter.CardBrandChoiceEventSource,
-        selectedBrand: CardBrand?
-    ) {
-    }
-
-    override fun onUpdatePaymentMethodSucceeded(selectedBrand: CardBrand) {
+    override fun onUpdatePaymentMethodSucceeded(selectedBrand: CardBrand?) {
         _updatePaymentMethodSucceededCalls.add(
             UpdatePaymentMethodSucceededCall(selectedBrand = selectedBrand)
         )
     }
 
-    override fun onUpdatePaymentMethodFailed(selectedBrand: CardBrand, error: Throwable) {
+    override fun onUpdatePaymentMethodFailed(selectedBrand: CardBrand?, error: Throwable) {
         _updatePaymentMethodFailedCalls.add(
             UpdatePaymentMethodFailedCall(selectedBrand = selectedBrand, error = error)
         )
@@ -211,11 +204,11 @@ internal class FakeEventReporter : EventReporter {
     )
 
     data class UpdatePaymentMethodSucceededCall(
-        val selectedBrand: CardBrand,
+        val selectedBrand: CardBrand?,
     )
 
     data class UpdatePaymentMethodFailedCall(
-        val selectedBrand: CardBrand,
+        val selectedBrand: CardBrand?,
         val error: Throwable,
     )
 

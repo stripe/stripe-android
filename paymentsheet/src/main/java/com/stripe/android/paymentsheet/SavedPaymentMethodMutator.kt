@@ -369,14 +369,8 @@ internal class SavedPaymentMethodMutator(
                                 updateCardBrandExecutor(brand)
                             },
                             setDefaultPaymentMethodExecutor = setDefaultPaymentMethodExecutor,
-                            onBrandChoiceOptionsShown = {
-                                viewModel.eventReporter.onShowPaymentOptionBrands(
-                                    source = EventReporter.CardBrandChoiceEventSource.Edit,
-                                    selectedBrand = it
-                                )
-                            },
-                            onBrandChoiceOptionsDismissed = {
-                                viewModel.eventReporter.onHidePaymentOptionBrands(
+                            onBrandChoiceSelected = {
+                                viewModel.eventReporter.onBrandChoiceSelected(
                                     source = EventReporter.CardBrandChoiceEventSource.Edit,
                                     selectedBrand = it
                                 )
