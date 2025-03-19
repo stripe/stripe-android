@@ -14,6 +14,7 @@ import org.json.JSONArray
 internal object DefaultPaymentMethodsUtils {
     fun enqueueElementsSessionResponse(
         networkRule: NetworkRule,
+        isDeferredIntent: Boolean = false,
         cards: List<PaymentMethod> = emptyList(),
         setAsDefaultFeatureEnabled: Boolean = true,
         defaultPaymentMethod: String? = null,
@@ -28,6 +29,7 @@ internal object DefaultPaymentMethodsUtils {
                     cards = cards,
                     setAsDefaultFeatureEnabled = setAsDefaultFeatureEnabled,
                     defaultPaymentMethod = defaultPaymentMethod,
+                    isDeferredIntent = isDeferredIntent,
                 )
             )
         }
@@ -39,6 +41,7 @@ internal object DefaultPaymentMethodsUtils {
         composeTestRule: ComposeTestRule,
         paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
         hasSavedPaymentMethods: Boolean = true,
+        isDeferredIntent: Boolean = false,
     ) {
         testContext.launch(
             configuration = PaymentSheet.Configuration(
@@ -49,6 +52,7 @@ internal object DefaultPaymentMethodsUtils {
                     clientSecret = "cuss_1",
                 )
             ),
+            isDeferredIntent = isDeferredIntent,
         )
 
         if (paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Horizontal && hasSavedPaymentMethods) {
@@ -64,6 +68,7 @@ internal object DefaultPaymentMethodsUtils {
         cards: List<PaymentMethod>,
         setAsDefaultFeatureEnabled: Boolean,
         defaultPaymentMethod: String?,
+        isDeferredIntent: Boolean,
     ): String {
         val cardsArray = JSONArray()
 
@@ -74,6 +79,56 @@ internal object DefaultPaymentMethodsUtils {
         val cardsStringified = cardsArray.toString(2)
 
         val setAsDefaultFeatureEnabledStringified = setAsDefaultFeatureEnabled.toFeatureState()
+
+        val paymentIntent = if (isDeferredIntent) {
+            ""
+        } else {
+            """
+               "payment_intent": {
+                      "id": "pi_example",
+                      "object": "payment_intent",
+                      "amount": 5099,
+                      "amount_details": {
+                        "tip": {}
+                      },
+                      "automatic_payment_methods": {
+                        "enabled": true
+                      },
+                      "canceled_at": null,
+                      "cancellation_reason": null,
+                      "capture_method": "automatic",
+                      "client_secret": "pi_example_secret_example",
+                      "confirmation_method": "automatic",
+                      "created": 1674750417,
+                      "currency": "usd",
+                      "description": null,
+                      "last_payment_error": null,
+                      "livemode": false,
+                      "next_action": null,
+                      "payment_method": null,
+                      "payment_method_options": {
+                        "us_bank_account": {
+                          "verification_method": "automatic"
+                        }
+                      },
+                      "payment_method_types": [
+                        "card"
+                      ],
+                      "processing": null,
+                      "receipt_email": null,
+                      "setup_future_usage": null,
+                      "shipping": null,
+                      "source": null,
+                      "status": "requires_payment_method"
+                    }, 
+            """.trimIndent()
+        }
+
+        val paymentIntentType = if (isDeferredIntent) {
+            "deferred_intent"
+        } else {
+            "payment_intent"
+        }
 
         return """
                 {
@@ -119,45 +174,8 @@ internal object DefaultPaymentMethodsUtils {
                     "country_code": "US",
                     "ordered_payment_method_types": [
                       "card"
-                    ],
-                    "payment_intent": {
-                      "id": "pi_example",
-                      "object": "payment_intent",
-                      "amount": 5099,
-                      "amount_details": {
-                        "tip": {}
-                      },
-                      "automatic_payment_methods": {
-                        "enabled": true
-                      },
-                      "canceled_at": null,
-                      "cancellation_reason": null,
-                      "capture_method": "automatic",
-                      "client_secret": "pi_example_secret_example",
-                      "confirmation_method": "automatic",
-                      "created": 1674750417,
-                      "currency": "usd",
-                      "description": null,
-                      "last_payment_error": null,
-                      "livemode": false,
-                      "next_action": null,
-                      "payment_method": null,
-                      "payment_method_options": {
-                        "us_bank_account": {
-                          "verification_method": "automatic"
-                        }
-                      },
-                      "payment_method_types": [
-                        "card"
-                      ],
-                      "processing": null,
-                      "receipt_email": null,
-                      "setup_future_usage": null,
-                      "shipping": null,
-                      "source": null,
-                      "status": "requires_payment_method"
-                    },
-                    "type": "payment_intent"
+                    ],$paymentIntent
+                    "type": "$paymentIntentType"
                   },
                   "payment_method_specs": [
                     {

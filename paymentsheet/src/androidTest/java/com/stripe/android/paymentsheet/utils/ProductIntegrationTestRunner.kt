@@ -45,7 +45,8 @@ internal sealed interface ProductIntegrationTestRunnerContext {
         configuration: PaymentSheet.Configuration = PaymentSheet.Configuration(
             merchantDisplayName = "Merchant, Inc.",
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
-        )
+        ),
+        isDeferredIntent: Boolean = false
     )
 
     fun markTestSucceeded()
@@ -53,12 +54,24 @@ internal sealed interface ProductIntegrationTestRunnerContext {
     class WithPaymentSheet(
         private val context: PaymentSheetTestRunnerContext
     ) : ProductIntegrationTestRunnerContext {
-        override fun launch(configuration: PaymentSheet.Configuration) {
+        override fun launch(configuration: PaymentSheet.Configuration, isDeferredIntent: Boolean) {
             context.presentPaymentSheet {
-                presentWithPaymentIntent(
-                    paymentIntentClientSecret = "pi_example_secret_example",
-                    configuration = configuration,
-                )
+                if (isDeferredIntent) {
+                    presentWithIntentConfiguration(
+                        intentConfiguration = PaymentSheet.IntentConfiguration(
+                            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                                amount = 5099,
+                                currency = "usd"
+                            )
+                        ),
+                        configuration = configuration,
+                    )
+                } else {
+                    presentWithPaymentIntent(
+                        paymentIntentClientSecret = "pi_example_secret_example",
+                        configuration = configuration,
+                    )
+                }
             }
         }
 
@@ -70,17 +83,34 @@ internal sealed interface ProductIntegrationTestRunnerContext {
     class WithFlowController(
         val context: FlowControllerTestRunnerContext
     ) : ProductIntegrationTestRunnerContext {
-        override fun launch(configuration: PaymentSheet.Configuration) {
+        override fun launch(configuration: PaymentSheet.Configuration, isDeferredIntent: Boolean) {
             context.configureFlowController {
-                configureWithPaymentIntent(
-                    paymentIntentClientSecret = "pi_example_secret_example",
-                    configuration = configuration,
-                    callback = { success, error ->
-                        assertThat(success).isTrue()
-                        assertThat(error).isNull()
-                        presentPaymentOptions()
-                    },
-                )
+                if (isDeferredIntent) {
+                    configureWithIntentConfiguration(
+                        PaymentSheet.IntentConfiguration(
+                            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                                amount = 5099,
+                                currency = "usd",
+                            )
+                        ),
+                        configuration = configuration,
+                        callback ={ success, error ->
+                            assertThat(success).isTrue()
+                            assertThat(error).isNull()
+                            presentPaymentOptions()
+                        },
+                    )
+                } else {
+                    configureWithPaymentIntent(
+                        paymentIntentClientSecret = "pi_example_secret_example",
+                        configuration = configuration,
+                        callback = { success, error ->
+                            assertThat(success).isTrue()
+                            assertThat(error).isNull()
+                            presentPaymentOptions()
+                        },
+                    )
+                }
             }
         }
 
