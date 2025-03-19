@@ -94,13 +94,13 @@ internal fun PaymentMethodRowButton(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             RowButtonInnerContent(
-                isEnabled,
-                shouldShowDefaultBadge,
-                iconContent,
-                title,
-                subtitle,
-                contentDescription,
-                style
+                isEnabled = isEnabled,
+                shouldShowDefaultBadge = shouldShowDefaultBadge,
+                iconContent = iconContent,
+                title = title,
+                subtitle = subtitle,
+                contentDescription = contentDescription,
+                style = style
             )
 
             if (style !is RowStyle.FlatWithCheckmark) {
