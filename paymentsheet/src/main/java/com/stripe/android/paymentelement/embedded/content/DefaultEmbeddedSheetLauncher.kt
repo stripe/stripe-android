@@ -48,7 +48,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     resultCallback: EmbeddedPaymentElement.ResultCallback,
-    private val embeddedContentHelper: EmbeddedContentHelper,
+    private val stateHelper: EmbeddedStateHelper,
 ) : EmbeddedSheetLauncher {
 
     init {
@@ -68,9 +68,8 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             sheetStateHolder.sheetIsOpen = false
             selectionHolder.setTemporary(null)
             if (result is FormResult.Complete) {
-                embeddedContentHelper.clearEmbeddedContent()
                 resultCallback.onResult(EmbeddedPaymentElement.Result.Completed())
-                selectionHolder.set(null)
+                stateHelper.state = null
             }
         }
 
