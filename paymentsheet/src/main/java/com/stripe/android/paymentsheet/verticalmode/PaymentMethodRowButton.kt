@@ -93,7 +93,15 @@ internal fun PaymentMethodRowButton(
             horizontalArrangement = Arrangement.spacedBy(ROW_CONTENT_HORIZONTAL_SPACING.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            RowButtonInnerContent(isEnabled, shouldShowDefaultBadge, iconContent, title, subtitle, contentDescription)
+            RowButtonInnerContent(
+                isEnabled = isEnabled,
+                shouldShowDefaultBadge = shouldShowDefaultBadge,
+                iconContent = iconContent,
+                title = title,
+                subtitle = subtitle,
+                contentDescription = contentDescription,
+                style = style
+            )
 
             if (style !is RowStyle.FlatWithCheckmark) {
                 Spacer(modifier = Modifier.weight(1f))
@@ -283,6 +291,7 @@ private fun RowButtonCheckmarkOuterContent(
 /**
  * Icon, title, and subtitle if provided. Common across all PaymentMethodRowButton configurations
  */
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 private fun RowButtonInnerContent(
     isEnabled: Boolean,
@@ -291,6 +300,7 @@ private fun RowButtonInnerContent(
     title: String,
     subtitle: String?,
     contentDescription: String? = null,
+    style: RowStyle
 ) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(ROW_CONTENT_HORIZONTAL_SPACING.dp),
@@ -302,7 +312,8 @@ private fun RowButtonInnerContent(
             title = title,
             subtitle = subtitle,
             isEnabled = isEnabled,
-            contentDescription = contentDescription
+            contentDescription = contentDescription,
+            style = style
         )
 
         if (shouldShowDefaultBadge) {
@@ -314,15 +325,21 @@ private fun RowButtonInnerContent(
     }
 }
 
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
-private fun TitleContent(title: String, subtitle: String?, isEnabled: Boolean, contentDescription: String?) {
-    val textColor = MaterialTheme.stripeColors.onComponent
-
+private fun TitleContent(
+    title: String,
+    subtitle: String?,
+    isEnabled: Boolean,
+    contentDescription: String?,
+    style: RowStyle
+) {
+    val titleColor = style.getTitleTextColor()
     Column {
         Text(
             text = title,
             style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Medium),
-            color = if (isEnabled) textColor else textColor.copy(alpha = 0.6f),
+            color = if (isEnabled) titleColor else titleColor.copy(alpha = 0.6f),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.semantics {
@@ -333,7 +350,7 @@ private fun TitleContent(title: String, subtitle: String?, isEnabled: Boolean, c
         )
 
         if (subtitle != null) {
-            val subtitleTextColor = MaterialTheme.stripeColors.subtitle
+            val subtitleTextColor = style.getSubtitleTextColor()
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.caption.copy(fontWeight = FontWeight.Normal),
@@ -404,6 +421,20 @@ private fun ButtonPreview() {
             )
         }
     }
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+@Composable
+private fun RowStyle.getTitleTextColor() = when (this) {
+    is RowStyle.FloatingButton -> MaterialTheme.stripeColors.onComponent
+    else -> MaterialTheme.colors.onSurface
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+@Composable
+private fun RowStyle.getSubtitleTextColor() = when (this) {
+    is RowStyle.FloatingButton -> MaterialTheme.stripeColors.placeholderText
+    else -> MaterialTheme.stripeColors.subtitle
 }
 
 private const val ROW_CONTENT_HORIZONTAL_SPACING = 12
