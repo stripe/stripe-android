@@ -10,6 +10,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import android.webkit.JavascriptInterface
+import android.webkit.JsResult
 import android.webkit.PermissionRequest
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
@@ -18,7 +19,11 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.ComponentActivity
 import androidx.annotation.VisibleForTesting
+import androidx.appcompat.app.AlertDialog
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.connect.PrivateBetaConnectSDK
@@ -26,6 +31,7 @@ import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.util.findActivity
 import com.stripe.android.connect.util.isInInstrumentationTest
 import com.stripe.android.connect.webview.serialization.AccountSessionClaimedMessage
+import com.stripe.android.connect.webview.serialization.AlertJs
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.ConnectJson
 import com.stripe.android.connect.webview.serialization.OpenAuthenticatedWebViewMessage
@@ -40,6 +46,7 @@ import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
@@ -293,6 +300,84 @@ internal class StripeConnectWebView private constructor(
      * A [WebChromeClient] that provides additional functionality for Stripe Connect Embedded Component WebViews.
      */
     internal inner class StripeConnectWebChromeClient : WebChromeClient() {
+        override fun onJsConfirm(view: WebView, url: String, message: String, result: JsResult): Boolean {
+            return handleJsAlert(view, message, result)
+        }
+
+        override fun onJsAlert(view: WebView, url: String, message: String, result: JsResult): Boolean {
+            return handleJsAlert(view, message, result)
+        }
+
+        private fun handleJsAlert(view: WebView, message: String, result: JsResult): Boolean {
+            val alert =
+                try {
+                    ConnectJson.decodeFromString<AlertJs>(message.removeSurrounding("\""))
+                } catch (e: SerializationException) {
+                    logger.error("($loggerTag) Error parsing alert message: $message", e)
+                    return false
+                }
+
+            // The following code is awkward because:
+            //  * WebViews will hang until a result is returned,
+            //  * this WebView is kept across configuration changes,
+            //  * Dialog dismiss listener is not called on configuration changes, and
+            //  * Dialog lifecycle pause/stop/destroy callbacks are not called on configuration changes.
+            //
+            // So, the approach is to return the result in two places:
+            //  1. On Dialog dismiss. This is always called in typical UX flows (cancel, OK, tap outside, back button).
+            //  2. On Activity destroy. This is called on configuration changes.
+
+            var didConfirm = false
+            fun returnResult() {
+                if (didConfirm) {
+                    result.confirm()
+                } else {
+                    result.cancel()
+                }
+            }
+
+            // Hook into the Activity lifecycle
+            val activity = (view.findActivity() as? ComponentActivity)
+            val activityLifecycleObserver =
+                object : DefaultLifecycleObserver {
+                    override fun onDestroy(owner: LifecycleOwner) {
+                        // Invoked on configuration changes but not normal dialog dismissals.
+                        // No need to clean up the observer since the activity is being destroyed.
+                        returnResult()
+                    }
+                }
+            activity?.lifecycle?.addObserver(activityLifecycleObserver)
+
+            // Prepare and show the dialog.
+            AlertDialog.Builder(view.context)
+                .setCancelable(true)
+                .setOnCancelListener {
+                    didConfirm = false
+                }
+                .setOnDismissListener {
+                    // Invoked on dialog dismissals but not configuration changes.
+                    returnResult()
+                    // Clean up the observer.
+                    activity?.lifecycle?.removeObserver(activityLifecycleObserver)
+                }
+                .apply {
+                    alert.title?.let { setTitle(it) }
+                    alert.message?.let { setMessage(it) }
+                    alert.buttons?.ok?.let {
+                        setPositiveButton(it) { _, _ ->
+                            didConfirm = true
+                        }
+                    }
+                    alert.buttons?.cancel?.let {
+                        setNegativeButton(it) { _, _ ->
+                            didConfirm = false
+                        }
+                    }
+                }
+                .show()
+            return true
+        }
+
         override fun onPermissionRequest(request: PermissionRequest) {
             val activity = findActivity()
                 ?: return request.deny()
