@@ -12,6 +12,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
+import com.stripe.android.paymentsheet.ui.DefaultCardEditUIHandler
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -361,10 +362,10 @@ internal class SavedPaymentMethodMutator(
                 val isLiveMode = requireNotNull(viewModel.paymentMethodMetadata.value).stripeIntent.isLiveMode
                 viewModel.navigationHandler.transitionTo(
                     PaymentSheetScreen.UpdatePaymentMethod(
-                        DefaultUpdatePaymentMethodInteractor(
+                        DefaultUpdatePaymentMethodInteractor.factory(
                             isLiveMode = isLiveMode,
                             canRemove = canRemove,
-                            displayableSavedPaymentMethod,
+                            displayableSavedPaymentMethod = displayableSavedPaymentMethod,
                             cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
                             removeExecutor = { method ->
                                 performRemove()
@@ -373,12 +374,6 @@ internal class SavedPaymentMethodMutator(
                                 updatePaymentMethodExecutor(cardUpdateParams)
                             },
                             setDefaultPaymentMethodExecutor = setDefaultPaymentMethodExecutor,
-                            onBrandChoiceSelected = {
-                                viewModel.eventReporter.onBrandChoiceSelected(
-                                    source = EventReporter.CardBrandChoiceEventSource.Edit,
-                                    selectedBrand = it
-                                )
-                            },
                             shouldShowSetAsDefaultCheckbox = (
                                 viewModel
                                     .paymentMethodMetadata
@@ -391,6 +386,12 @@ internal class SavedPaymentMethodMutator(
                                 )
                                 ),
                             onUpdateSuccess = viewModel.navigationHandler::pop,
+                            onBrandChoiceChanged = {
+                                viewModel.eventReporter.onBrandChoiceSelected(
+                                    source = EventReporter.CardBrandChoiceEventSource.Edit,
+                                    selectedBrand = it
+                                )
+                            },
                         )
                     )
                 )

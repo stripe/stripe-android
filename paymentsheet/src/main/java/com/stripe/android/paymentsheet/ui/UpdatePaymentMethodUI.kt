@@ -71,13 +71,12 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
         modifier = modifier.padding(horizontal = horizontalPadding).testTag(UPDATE_PM_SCREEN_TEST_TAG),
     ) {
         when (val savedPaymentMethod = interactor.displayableSavedPaymentMethod.savedPaymentMethod) {
-            is SavedPaymentMethod.Card -> CardDetailsUI(
-                displayableSavedPaymentMethod = interactor.displayableSavedPaymentMethod,
-                shouldShowCardBrandDropdown = shouldShowCardBrandDropdown,
-                selectedBrand = state.cardBrandChoice,
-                card = savedPaymentMethod.card,
-                interactor = interactor,
-            )
+            is SavedPaymentMethod.Card -> {
+                CardDetailsUI(
+                    savedPaymentMethod = savedPaymentMethod,
+                    interactor = interactor,
+                )
+            }
             is SavedPaymentMethod.SepaDebit -> SepaDebitUI(
                 name = interactor.displayableSavedPaymentMethod.paymentMethod.billingDetails?.name,
                 email = interactor.displayableSavedPaymentMethod.paymentMethod.billingDetails?.email,
@@ -181,12 +180,13 @@ private fun UpdatePaymentMethodButtons(
 
 @Composable
 private fun CardDetailsUI(
-    displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
-    shouldShowCardBrandDropdown: Boolean,
-    selectedBrand: CardBrandChoice,
-    card: PaymentMethod.Card,
+    savedPaymentMethod: SavedPaymentMethod.Card,
     interactor: UpdatePaymentMethodInteractor,
 ) {
+    val cardEditUIHandler = remember(savedPaymentMethod) {
+        interactor.cardUiHandlerFactory(savedPaymentMethod)
+    }
+    val state by cardEditUIHandler.state.collectAsState()
     val dividerHeight = remember { mutableStateOf(0.dp) }
 
     Card(
@@ -196,15 +196,13 @@ private fun CardDetailsUI(
     ) {
         Column {
             CardNumberField(
-                card = card,
-                selectedBrand = selectedBrand,
-                shouldShowCardBrandDropdown = shouldShowCardBrandDropdown,
-                cardBrandFilter = interactor.cardBrandFilter,
-                savedPaymentMethodIcon = displayableSavedPaymentMethod
-                    .paymentMethod
-                    .getSavedPaymentMethodIcon(forVerticalMode = true),
+                card = state.card,
+                selectedBrand = state.selectedCardBrand,
+                shouldShowCardBrandDropdown = cardEditUIHandler.showCardBrandDropdown,
+                cardBrandFilter = cardEditUIHandler.cardBrandFilter,
+                savedPaymentMethodIcon = cardEditUIHandler.paymentMethodIcon,
                 onBrandChoiceChanged = {
-                    interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(it))
+                    cardEditUIHandler.onBrandChoiceChanged(it)
                 },
             )
             Divider(
@@ -213,8 +211,8 @@ private fun CardDetailsUI(
             )
             Row(modifier = Modifier.fillMaxWidth()) {
                 ExpiryField(
-                    expiryMonth = card.expiryMonth,
-                    expiryYear = card.expiryYear,
+                    expiryMonth = state.card.expiryMonth,
+                    expiryYear = state.card.expiryYear,
                     isExpired = interactor.isExpiredCard,
                     modifier = Modifier
                         .weight(1F)
@@ -229,7 +227,7 @@ private fun CardDetailsUI(
                         .width(MaterialTheme.stripeShapes.borderStrokeWidth.dp),
                     color = MaterialTheme.stripeColors.componentDivider,
                 )
-                CvcField(cardBrand = card.brand, modifier = Modifier.weight(1F))
+                CvcField(cardBrand = state.card.brand, modifier = Modifier.weight(1F))
             }
         }
     }
@@ -522,7 +520,7 @@ private fun PreviewUpdatePaymentMethodUI() {
         )
     )
     UpdatePaymentMethodUI(
-        interactor = DefaultUpdatePaymentMethodInteractor(
+        interactor = DefaultUpdatePaymentMethodInteractor.factory(
             isLiveMode = false,
             canRemove = true,
             displayableSavedPaymentMethod = exampleCard,
@@ -530,10 +528,10 @@ private fun PreviewUpdatePaymentMethodUI() {
             updatePaymentMethodExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
             setDefaultPaymentMethodExecutor = { _ -> Result.success(Unit) },
             cardBrandFilter = DefaultCardBrandFilter,
-            onBrandChoiceSelected = {},
             shouldShowSetAsDefaultCheckbox = true,
             isDefaultPaymentMethod = false,
             onUpdateSuccess = {},
+            onBrandChoiceChanged = {},
         ),
         modifier = Modifier
     )

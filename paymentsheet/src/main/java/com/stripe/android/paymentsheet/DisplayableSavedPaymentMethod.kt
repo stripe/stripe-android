@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet
 
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DateUtils
@@ -105,21 +107,29 @@ internal data class DisplayableSavedPaymentMethod private constructor(
     }
 }
 
+@Immutable
 internal sealed interface SavedPaymentMethod {
-    data class Card(val card: PaymentMethod.Card) : SavedPaymentMethod {
-        fun isExpired(): Boolean {
-            val cardExpiryMonth = card.expiryMonth
-            val cardExpiryYear = card.expiryYear
-            // If the card's expiration dates are missing, we can't conclude that it is expired, so we don't want to
-            // show the user an expired card error.
-            return cardExpiryMonth != null && cardExpiryYear != null &&
-                !DateUtils.isExpiryDataValid(
-                    expiryMonth = cardExpiryMonth,
-                    expiryYear = cardExpiryYear,
-                )
-        }
-    }
+    @Immutable
+    data class Card(val card: PaymentMethod.Card) : SavedPaymentMethod
+
+    @Immutable
     data class USBankAccount(val usBankAccount: PaymentMethod.USBankAccount) : SavedPaymentMethod
+
+    @Immutable
     data class SepaDebit(val sepaDebit: PaymentMethod.SepaDebit) : SavedPaymentMethod
+
+    @Immutable
     data object Unexpected : SavedPaymentMethod
+}
+
+internal fun SavedPaymentMethod.Card.isExpired(): Boolean {
+    val cardExpiryMonth = card.expiryMonth
+    val cardExpiryYear = card.expiryYear
+    // If the card's expiration dates are missing, we can't conclude that it is expired, so we don't want to
+    // show the user an expired card error.
+    return cardExpiryMonth != null && cardExpiryYear != null &&
+        !DateUtils.isExpiryDataValid(
+            expiryMonth = cardExpiryMonth,
+            expiryYear = cardExpiryYear,
+        )
 }

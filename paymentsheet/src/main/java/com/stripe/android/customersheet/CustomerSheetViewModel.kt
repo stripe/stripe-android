@@ -61,6 +61,7 @@ import com.stripe.android.paymentsheet.model.toSavedSelection
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.ui.DefaultCardEditUIHandler
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -544,21 +545,14 @@ internal class CustomerSheetViewModel(
 
         transition(
             to = CustomerSheetViewState.UpdatePaymentMethod(
-                updatePaymentMethodInteractor = DefaultUpdatePaymentMethodInteractor(
+                updatePaymentMethodInteractor = DefaultUpdatePaymentMethodInteractor.factory(
                     isLiveMode = isLiveModeProvider(),
                     canRemove = customerState.canRemove,
                     displayableSavedPaymentMethod = paymentMethod,
                     cardBrandFilter = PaymentSheetCardBrandFilter(customerState.configuration.cardBrandAcceptance),
                     removeExecutor = ::removeExecutor,
-                    onBrandChoiceSelected = { brand ->
-                        eventReporter.onBrandChoiceSelected(
-                            source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
-                            selectedBrand = brand
-                        )
-                    },
                     onUpdateSuccess = ::onBackPressed,
                     updatePaymentMethodExecutor = ::updatePaymentMethodExecutor,
-                    workContext = workContext,
                     // This checkbox is never displayed in CustomerSheet.
                     shouldShowSetAsDefaultCheckbox = false,
                     isDefaultPaymentMethod = false,
@@ -568,6 +562,12 @@ internal class CustomerSheetViewModel(
                             IllegalStateException("Unexpected attempt to update default from CustomerSheet.")
                         )
                     },
+                    onBrandChoiceChanged = { brand ->
+                        eventReporter.onBrandChoiceSelected(
+                            source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
+                            selectedBrand = brand
+                        )
+                    }
                 ),
                 isLiveMode = isLiveModeProvider(),
             )

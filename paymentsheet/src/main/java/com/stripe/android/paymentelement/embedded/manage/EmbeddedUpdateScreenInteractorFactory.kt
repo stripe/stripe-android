@@ -7,6 +7,7 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.ui.DefaultCardEditUIHandler
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import javax.inject.Inject
@@ -29,7 +30,7 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
     override fun createUpdateScreenInteractor(
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod
     ): UpdatePaymentMethodInteractor {
-        return DefaultUpdatePaymentMethodInteractor(
+        return DefaultUpdatePaymentMethodInteractor.factory(
             isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             canRemove = customerStateHolder.canRemove.value,
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
@@ -59,12 +60,6 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
             setDefaultPaymentMethodExecutor = { method ->
                 savedPaymentMethodMutatorProvider.get().setDefaultPaymentMethod(method)
             },
-            onBrandChoiceSelected = {
-                eventReporter.onBrandChoiceSelected(
-                    source = EventReporter.CardBrandChoiceEventSource.Edit,
-                    selectedBrand = it
-                )
-            },
             shouldShowSetAsDefaultCheckbox = (
                 paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true
                 ),
@@ -76,6 +71,12 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
             onUpdateSuccess = {
                 manageNavigatorProvider.get().performAction(ManageNavigator.Action.Back)
             },
+            onBrandChoiceChanged = {
+                eventReporter.onBrandChoiceSelected(
+                    source = EventReporter.CardBrandChoiceEventSource.Edit,
+                    selectedBrand = it
+                )
+            }
         )
     }
 }
