@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.analytics
 
+import android.util.Log
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.utils.DurationProvider
@@ -159,9 +160,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onShowNewPaymentOptions() {
-        CoroutineScope(workContext).launch {
-            analyticEventCallbackProvider.get()?.onEvent(AnalyticEvent.PresentedSheet())
-        }
+        fireAnalyticsEvent(AnalyticEvent.PresentedSheet())
         fireEvent(
             PaymentSheetEvent.ShowNewPaymentOptions(
                 mode = mode,
@@ -463,6 +462,18 @@ internal class DefaultEventReporter @Inject internal constructor(
                     additionalParams = event.params,
                 )
             )
+        }
+    }
+
+    private fun fireAnalyticsEvent(event: AnalyticEvent) {
+        CoroutineScope(workContext).launch {
+            analyticEventCallbackProvider.get()?.run {
+                try {
+                    onEvent(event)
+                } catch (e: Exception) {
+                    Log.e(AnalyticEvent.TAG, "Analytics callback failed", e)
+                }
+            }
         }
     }
 

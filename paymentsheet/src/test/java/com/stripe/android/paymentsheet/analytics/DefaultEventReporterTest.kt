@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.analytics
 
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
@@ -22,11 +23,15 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.IsStripeCardScanAvailable
 import com.stripe.android.utils.FakeDurationProvider
+import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.json.JSONException
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.argumentCaptor
@@ -37,14 +42,17 @@ import org.robolectric.RobolectricTestRunner
 import java.io.IOException
 import javax.inject.Provider
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 @RunWith(RobolectricTestRunner::class)
 class DefaultEventReporterTest {
-    private val testDispatcher = UnconfinedTestDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler())
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(testDispatcher)
+
     private val durationProvider = FakeDurationProvider()
     private val analyticsRequestExecutor = mock<AnalyticsRequestExecutor>()
     private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
@@ -53,25 +61,19 @@ class DefaultEventReporterTest {
     )
 
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
-    private class FakeAnalyticEventCallback : AnalyticEventCallback {
-        val events = mutableListOf<AnalyticEvent>()
-
-        override fun onEvent(event: AnalyticEvent) {
-            events.add(event)
-        }
-    }
+    private val analyticEventCall = Turbine<AnalyticEvent>()
 
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
-    private class FakeAnalyticEventCallbackProvider(
-        private val callback: AnalyticEventCallback? = null
-    ) : Provider<AnalyticEventCallback?> {
+    private class FakeAnalyticEventCallbackProvider : Provider<AnalyticEventCallback?> {
+        private var callback: AnalyticEventCallback? = null
+
+        fun set(callback: AnalyticEventCallback?) {
+            this.callback = callback
+        }
         override fun get(): AnalyticEventCallback? = callback
     }
 
-    private val analyticEventCallback = FakeAnalyticEventCallback()
-
-    @OptIn(ExperimentalAnalyticEventCallbackApi::class)
-    private val analyticEventCallbackProvider = FakeAnalyticEventCallbackProvider(analyticEventCallback)
+    private val analyticEventCallbackProvider = FakeAnalyticEventCallbackProvider()
 
     private val configuration: PaymentSheet.Configuration
         get() = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
@@ -205,18 +207,18 @@ class DefaultEventReporterTest {
 
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
     @Test
-    fun `onShowNewPaymentOptions() should fire analytics request with expected event value`() {
+    fun `onShowNewPaymentOptions() should fire analytics request with expected event value`() = runTest(testDispatcher) {
         val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
             simulateSuccessfulSetup(linkMode = null, googlePayReady = false)
         }
 
+        analyticEventCallbackProvider.set { event ->
+            analyticEventCall.add(event)
+        }
+
         completeEventReporter.onShowNewPaymentOptions()
 
-        assertEquals(
-            analyticEventCallback.events,
-            listOf<AnalyticEvent>(AnalyticEvent.PresentedSheet())
-        )
-
+        assertThat(analyticEventCall.awaitItem()).isEqualTo(AnalyticEvent.PresentedSheet())
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "mc_complete_sheet_newpm_show" &&
@@ -226,6 +228,7 @@ class DefaultEventReporterTest {
                     req.params["locale"] == "en_US"
             }
         )
+        analyticEventCall.ensureAllEventsConsumed()
     }
 
     @Test
@@ -871,6 +874,32 @@ class DefaultEventReporterTest {
         verify(analyticsRequestExecutor).executeAsync(argumentCaptor.capture())
 
         assertThat(argumentCaptor.firstValue.params).doesNotContainKey("link_context")
+    }
+
+    @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+    @Test
+    fun `Exception in analytic event callback should not be propagated`() = runTest(testDispatcher) {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateSuccessfulSetup(linkMode = null, googlePayReady = false)
+        }
+
+        analyticEventCallbackProvider.set {
+            throw Exception("Something went wrong")
+        }
+
+        completeEventReporter.onShowNewPaymentOptions()
+    }
+
+    @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+    @Test
+    fun `Null callback return by provider should not crash the app`() = runTest(testDispatcher) {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateSuccessfulSetup(linkMode = null, googlePayReady = false)
+        }
+
+        analyticEventCallbackProvider.set(null)
+
+        completeEventReporter.onShowNewPaymentOptions()
     }
 
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
