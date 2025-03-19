@@ -28,6 +28,7 @@ import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
+import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_ERROR_TEXT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
@@ -148,6 +149,17 @@ internal class PaymentSheetPage(
                 assertThat(nodeInfo.isEnabled).isFalse()
             }
         }
+    }
+
+    fun assertErrorMessageShown() {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            composeTestRule
+                .onAllNodesWithTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG)
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+
+        composeTestRule.onNodeWithTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG).assertIsDisplayed()
     }
 
     fun fillCvcRecollection(cvc: String) {
