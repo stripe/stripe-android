@@ -6,7 +6,6 @@ import com.stripe.android.paymentsheet.utils.ConfirmationType
 import com.stripe.android.paymentsheet.utils.ConfirmationTypeProvider
 import com.stripe.android.paymentsheet.utils.DefaultPaymentMethodsUtils
 import com.stripe.android.paymentsheet.utils.PaymentSheetLayoutType
-import com.stripe.android.paymentsheet.utils.PaymentSheetLayoutTypeProvider
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
 import com.stripe.android.paymentsheet.utils.ProductIntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -29,11 +28,11 @@ internal class DefaultPaymentMethodsConfirmationTest {
     @TestParameter(valuesProvider = ProductIntegrationTypeProvider::class)
     lateinit var integrationType: ProductIntegrationType
 
-    @TestParameter(valuesProvider = PaymentSheetLayoutTypeProvider::class)
-    lateinit var layoutType: PaymentSheetLayoutType
-
     @TestParameter(valuesProvider = ConfirmationTypeProvider::class)
     lateinit var confirmationType: ConfirmationType
+
+    // Confirmation behavior between horizontal and vertical doesn't differ, so we're testing with vertical mode only.
+    private val layoutType: PaymentSheetLayoutType = PaymentSheetLayoutType.Vertical()
 
     @Test
     fun setNewCardAsDefault_withSavedPaymentMethods_andSetAsDefault() = runProductIntegrationTest(
