@@ -54,6 +54,7 @@ internal class StripeComponentDialogFragmentView<ComponentView : StripeComponent
         divider = findViewById(R.id.divider)
 
         toolbar.setNavigationOnClickListener {
+            // Defer to the component view if it's available.
             val componentView = this.componentView
             if (componentView == null) {
                 listener?.onCloseButtonClickError()

@@ -226,6 +226,7 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
 
     private inner class OnBackPressedCallbackImpl(enabled: Boolean) : OnBackPressedCallback(enabled) {
         override fun handleOnBackPressed() {
+            // Defer to the component view if it's available; if not, dismiss.
             val componentView = rootView.componentView
             if (componentView == null) {
                 dismiss()
