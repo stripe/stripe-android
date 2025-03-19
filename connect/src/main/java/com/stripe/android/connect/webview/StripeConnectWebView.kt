@@ -224,6 +224,11 @@ internal class StripeConnectWebView private constructor(
         suspend fun onOpenFinancialConnections(activity: Activity, message: OpenFinancialConnectionsMessage)
 
         /**
+         * Callback to invoke upon receiving 'closeWebView' message.
+         */
+        fun onCloseWebView()
+
+        /**
          * Callback to invoke upon failing to deserialize a web message.
          */
         fun onErrorDeserializingWebMessage(webFunctionName: String, error: Throwable)
@@ -419,6 +424,12 @@ internal class StripeConnectWebView private constructor(
             return runBlocking {
                 checkNotNull(delegate.fetchClientSecret())
             }
+        }
+
+        @JavascriptInterface
+        fun closeWebView() {
+            logger.debug("($loggerTag) Close WebView")
+            delegate.onCloseWebView()
         }
     }
 

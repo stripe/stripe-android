@@ -344,6 +344,10 @@ internal class StripeConnectWebViewContainerViewModel(
             )
         }
 
+        override fun onCloseWebView() {
+            updateState { copy(receivedCloseWebView = true) }
+        }
+
         override fun onReceivedPageDidLoad(pageViewId: String) {
             webView.updateConnectInstance(componentCoordinator.appearanceFlow.value)
             updateState { copy(pageViewId = pageViewId) }

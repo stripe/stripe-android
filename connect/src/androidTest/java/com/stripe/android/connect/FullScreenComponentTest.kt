@@ -7,12 +7,14 @@ import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.RootMatchers
-import androidx.test.espresso.matcher.ViewMatchers
+import androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom
+import androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withClassName
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withParent
 import androidx.test.espresso.web.assertion.WebViewAssertions.webMatches
+import androidx.test.espresso.web.model.Atoms.script
 import androidx.test.espresso.web.sugar.Web.onWebView
 import androidx.test.espresso.web.webdriver.DriverAtoms.findElement
 import androidx.test.espresso.web.webdriver.DriverAtoms.getText
@@ -40,10 +42,10 @@ class FullScreenComponentTest {
     private lateinit var controller: AccountOnboardingController
 
     private val rootView
-        get() = withClassName(containsString(StripeComponentDialogFragmentView::class.simpleName))
+        get() = isAssignableFrom(StripeComponentDialogFragmentView::class.java)
 
     private val toolbar
-        get() = allOf(withId(R.id.toolbar), ViewMatchers.isDescendantOfA(rootView))
+        get() = allOf(withId(R.id.toolbar), isDescendantOfA(rootView))
 
     private val toolbarNavigationButton
         get() = allOf(withParent(toolbar), withClassName(containsString("ImageButton")))
@@ -115,6 +117,13 @@ class FullScreenComponentTest {
     fun testBackButtonDismissesByDefault() {
         checkDialogIsDisplayed()
         Espresso.pressBack()
+        checkDialogDoesNotExist()
+    }
+
+    @Test
+    fun testJsCloseWebViewDismisses() {
+        checkDialogIsDisplayed()
+        onWebView().perform(script("Android.closeWebView()"))
         checkDialogDoesNotExist()
     }
 

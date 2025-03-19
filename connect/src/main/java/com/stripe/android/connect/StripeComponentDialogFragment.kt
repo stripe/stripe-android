@@ -23,6 +23,7 @@ import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.webview.MobileInput
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -174,6 +175,7 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
         // The View scaffolding has been created, but not the component view. The Manager may not be available yet, e.g.
         // after process death, so wait for the VM to provide it.
         viewLifecycleOwner.lifecycleScope.launch {
+            // Setup the component view.
             val embeddedComponentManager =
                 viewModel.embeddedComponentManager.filterNotNull().first()
             val componentView = createComponentView(embeddedComponentManager)
@@ -181,7 +183,16 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
             componentView.layoutParams =
                 LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f)
             rootView.componentView = componentView
+
+            // With the component view set up, we can allow it to control back behavior.
             onBackPressedCallback.isEnabled = true
+
+            // Dismiss on command.
+            launch {
+                componentView.receivedCloseWebView
+                    .filter { it }
+                    .collectLatest { dismiss() }
+            }
         }
     }
 

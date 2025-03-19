@@ -26,6 +26,9 @@ import com.stripe.android.connect.webview.StripeConnectWebViewContainer
 import com.stripe.android.connect.webview.StripeConnectWebViewContainerState
 import com.stripe.android.connect.webview.StripeConnectWebViewContainerViewModel
 import com.stripe.android.core.Logger
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
@@ -57,6 +60,9 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
     // See StripeConnectWebViewContainerViewModel for why we're getting a WebView from a ViewModel.
     internal val webView: StripeConnectWebView? get() = viewModel?.webView
     private var webViewCacheKey: String? = null
+
+    private val _receivedCloseWebView = MutableStateFlow(false)
+    internal val receivedCloseWebView: StateFlow<Boolean> = _receivedCloseWebView.asStateFlow()
 
     /* Notes on initialization
      * -----------------------
@@ -250,6 +256,7 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
         val progressBar = this.progressBar ?: return
 
         logger.debug("($loggerTag) Binding view state: $state")
+        _receivedCloseWebView.value = state.receivedCloseWebView
         setBackgroundColor(state.backgroundColor)
         webView.setBackgroundColor(state.backgroundColor)
         progressBar.isVisible = state.isNativeLoadingIndicatorVisible
