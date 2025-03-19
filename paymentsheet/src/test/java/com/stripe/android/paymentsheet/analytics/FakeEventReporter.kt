@@ -16,6 +16,9 @@ internal class FakeEventReporter : EventReporter {
     private val _paymentFailureCalls = Turbine<PaymentFailureCall>()
     val paymentFailureCalls: ReceiveTurbine<PaymentFailureCall> = _paymentFailureCalls
 
+    private val _paymentSuccessCalls = Turbine<PaymentSuccessCall>()
+    val paymentSuccessCalls: ReceiveTurbine<PaymentSuccessCall> = _paymentSuccessCalls
+
     private val _updatePaymentMethodSucceededCalls = Turbine<UpdatePaymentMethodSucceededCall>()
     val updatePaymentMethodSucceededCalls: ReceiveTurbine<UpdatePaymentMethodSucceededCall> =
         _updatePaymentMethodSucceededCalls
@@ -50,6 +53,7 @@ internal class FakeEventReporter : EventReporter {
 
     fun validate() {
         _paymentFailureCalls.ensureAllEventsConsumed()
+        _paymentSuccessCalls.ensureAllEventsConsumed()
         _updatePaymentMethodSucceededCalls.ensureAllEventsConsumed()
         _updatePaymentMethodFailedCalls.ensureAllEventsConsumed()
         _setAsDefaultPaymentMethodFailedCalls.ensureAllEventsConsumed()
@@ -127,6 +131,12 @@ internal class FakeEventReporter : EventReporter {
         paymentSelection: PaymentSelection?,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?
     ) {
+        _paymentSuccessCalls.add(
+            PaymentSuccessCall(
+                paymentSelection = paymentSelection,
+                deferredIntentConfirmationType = deferredIntentConfirmationType
+            )
+        )
     }
 
     override fun onPaymentFailure(
@@ -208,6 +218,11 @@ internal class FakeEventReporter : EventReporter {
     data class PaymentFailureCall(
         val paymentSelection: PaymentSelection?,
         val error: PaymentSheetConfirmationError
+    )
+
+    data class PaymentSuccessCall(
+        val paymentSelection: PaymentSelection?,
+        val deferredIntentConfirmationType: DeferredIntentConfirmationType?
     )
 
     data class UpdatePaymentMethodSucceededCall(

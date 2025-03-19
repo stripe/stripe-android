@@ -128,6 +128,8 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             eventName = "stripe_android.paymenthandler.confirm.finished",
             query("intent_id", "pi_example"),
         )
+        validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
+        validateAnalyticsRequest(eventName = "mc_embedded_payment_success")
 
         formPage.clickPrimaryButton()
         formPage.waitUntilMissing()
@@ -189,6 +191,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             eventName = "stripe_android.paymenthandler.confirm.finished",
             query("intent_id", "pi_example"),
         )
+        validateAnalyticsRequest(eventName = "mc_embedded_payment_success")
 
         testContext.confirm()
     }

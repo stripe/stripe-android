@@ -328,7 +328,11 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     ) : PaymentSheetEvent() {
 
         override val eventName: String =
-            formatEventName(mode, "payment_${analyticsValue(paymentSelection)}_${result.analyticsValue}")
+            if (mode == EventReporter.Mode.Embedded) {
+                formatEventName(mode, "payment_${result.analyticsValue}")
+            } else {
+                formatEventName(mode, "payment_${analyticsValue(paymentSelection)}_${result.analyticsValue}")
+            }
 
         override val additionalParams: Map<String, Any?> = buildMap {
             put(FIELD_DURATION, duration?.asSeconds)
