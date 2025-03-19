@@ -9,6 +9,8 @@ import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.utils.reportPaymentResult
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -26,6 +28,7 @@ internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
     private val confirmationStateHolder: EmbeddedConfirmationStateHolder,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val embeddedContentHelper: EmbeddedContentHelper,
+    private val eventReporter: EventReporter
 ) : EmbeddedConfirmationHelper {
     init {
         confirmationStarter.register(
@@ -36,6 +39,7 @@ internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
         lifecycleOwner.lifecycleScope.launch {
             confirmationStarter.result.collect { result ->
                 resultCallback.onResult(result.asEmbeddedResult())
+                eventReporter.reportPaymentResult(result, confirmationStateHolder.state?.selection)
 
                 if (result is ConfirmationHandler.Result.Succeeded) {
                     embeddedContentHelper.clearEmbeddedContent()

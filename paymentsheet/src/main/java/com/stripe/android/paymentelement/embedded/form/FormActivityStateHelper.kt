@@ -9,11 +9,13 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.amount
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.paymentsheet.utils.buyButtonLabel
+import com.stripe.android.paymentsheet.utils.reportPaymentResult
 import com.stripe.android.ui.core.Amount
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -48,6 +50,7 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
     private val selectionHolder: EmbeddedSelectionHolder,
     private val configuration: EmbeddedPaymentElement.Configuration,
     private val onClickDelegate: OnClickOverrideDelegate,
+    private val eventReporter: EventReporter,
     @ViewModelScope coroutineScope: CoroutineScope,
 ) : FormActivityStateHelper {
     private val _state = MutableStateFlow(
@@ -124,6 +127,7 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
     ): FormActivityStateHelper.State {
         return when (state) {
             is ConfirmationHandler.State.Complete -> {
+                eventReporter.reportPaymentResult(state.result, selectionHolder.selection.value)
                 when (state.result) {
                     is ConfirmationHandler.Result.Succeeded -> copy(
                         processingState = PrimaryButtonProcessingState.Completed,
