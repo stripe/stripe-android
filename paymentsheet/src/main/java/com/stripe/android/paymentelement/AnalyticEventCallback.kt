@@ -21,7 +21,7 @@ fun interface AnalyticEventCallback {
 abstract class AnalyticEvent internal constructor() {
 
     /**
-     * Sheet is presented
+     * User viewed the payment sheet
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class PresentedSheet internal constructor() : AnalyticEvent() {
@@ -36,14 +36,14 @@ abstract class AnalyticEvent internal constructor() {
     }
 
     /**
-     * Selected a different payment method type
+     * User selected a payment method type
      */
     @Poko
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class SelectedPaymentMethodType internal constructor(val paymentMethodType: String) : AnalyticEvent()
 
     /**
-     * Payment method form for was displayed
+     * User viewed a payment method form
      */
     @Poko
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -57,7 +57,7 @@ abstract class AnalyticEvent internal constructor() {
     class StartedInteractionWithPaymentMethodForm internal constructor(val paymentMethodType: String) : AnalyticEvent()
 
     /**
-     * All mandatory fields for the payment method form have been completed
+     * User completed all required payment form fields
      */
     @Poko
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
