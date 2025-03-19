@@ -21,6 +21,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfigurationCoordinator
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationHelper
+import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelper
 import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentElementScope
 import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentElementViewModel
@@ -29,6 +30,7 @@ import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import com.stripe.android.uicore.utils.collectAsState
@@ -510,6 +512,17 @@ class EmbeddedPaymentElement @Inject internal constructor(
     fun interface ResultCallback {
         fun onResult(result: Result)
     }
+
+    /**
+     * A [Parcelable] state used to reconfigure [EmbeddedPaymentElement] across activity boundaries.
+     */
+    @ExperimentalEmbeddedPaymentElementApi
+    @Poko
+    @Parcelize
+    internal class State internal constructor(
+        internal val confirmationState: EmbeddedConfirmationStateHolder.State,
+        internal val customer: CustomerState?,
+    ) : Parcelable
 
     internal companion object {
         @ExperimentalEmbeddedPaymentElementApi

@@ -93,6 +93,11 @@ internal interface EmbeddedPaymentElementViewModelComponent {
 )
 internal interface EmbeddedPaymentElementViewModelModule {
     @Binds
+    fun bindsEmbeddedStateHelper(
+        stateHelper: DefaultEmbeddedStateHelper
+    ): EmbeddedStateHelper
+
+    @Binds
     fun bindsPaymentOptionDisplayDataHolder(
         paymentOptionDisplayDataHolder: DefaultPaymentOptionDisplayDataHolder
     ): PaymentOptionDisplayDataHolder
