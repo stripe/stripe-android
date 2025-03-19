@@ -93,7 +93,15 @@ internal fun PaymentMethodRowButton(
             horizontalArrangement = Arrangement.spacedBy(ROW_CONTENT_HORIZONTAL_SPACING.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            RowButtonInnerContent(isEnabled, shouldShowDefaultBadge, iconContent, title, subtitle, contentDescription, style)
+            RowButtonInnerContent(
+                isEnabled,
+                shouldShowDefaultBadge,
+                iconContent,
+                title,
+                subtitle,
+                contentDescription,
+                style
+            )
 
             if (style !is RowStyle.FlatWithCheckmark) {
                 Spacer(modifier = Modifier.weight(1f))
