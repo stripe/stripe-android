@@ -204,7 +204,7 @@ internal class DefaultPaymentMethodsConfirmationTest {
     }
 
     @Test
-    fun payWithNewCard_doNotSaveCard_doesNotSendSetAsDefaultInConfirmCall() = runProductIntegrationTest(
+    fun payWithNewCard_doNotSaveCard_doesNotSetAsDefault() = runProductIntegrationTest(
         networkRule = networkRule,
         createIntentCallback = confirmationType.createIntentCallback,
         integrationType = integrationType,
