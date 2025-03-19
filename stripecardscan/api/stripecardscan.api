@@ -45,7 +45,7 @@ public final class com/stripe/android/stripecardscan/cardscan/CardScanSheet {
 	public final fun attachCardScanFragment (Landroidx/lifecycle/LifecycleOwner;Landroidx/fragment/app/FragmentManager;ILkotlin/jvm/functions/Function1;)V
 	public static final fun create (Landroidx/activity/ComponentActivity;Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet$CardScanResultCallback;Landroidx/activity/result/ActivityResultRegistry;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet;
 	public static final fun create (Landroidx/fragment/app/Fragment;Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet$CardScanResultCallback;Landroidx/activity/result/ActivityResultRegistry;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet;
-	public final fun present (Lcom/stripe/android/stripecardscan/cardscan/CardScanConfiguration;)V
+	public final fun present ()V
 }
 
 public abstract interface class com/stripe/android/stripecardscan/cardscan/CardScanSheet$CardScanResultCallback {
@@ -58,20 +58,6 @@ public final class com/stripe/android/stripecardscan/cardscan/CardScanSheet$Comp
 	public static synthetic fun create$default (Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet$Companion;Landroidx/activity/ComponentActivity;Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet$CardScanResultCallback;Landroidx/activity/result/ActivityResultRegistry;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet;
 	public static synthetic fun create$default (Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet$Companion;Landroidx/fragment/app/Fragment;Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet$CardScanResultCallback;Landroidx/activity/result/ActivityResultRegistry;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheet;
 	public final fun removeCardScanFragment (Landroidx/fragment/app/FragmentManager;)V
-}
-
-public final class com/stripe/android/stripecardscan/cardscan/CardScanSheetParams : android/os/Parcelable {
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Lcom/stripe/android/stripecardscan/cardscan/CardScanConfiguration;)V
-	public final fun component1 ()Lcom/stripe/android/stripecardscan/cardscan/CardScanConfiguration;
-	public final fun copy (Lcom/stripe/android/stripecardscan/cardscan/CardScanConfiguration;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheetParams;
-	public static synthetic fun copy$default (Lcom/stripe/android/stripecardscan/cardscan/CardScanSheetParams;Lcom/stripe/android/stripecardscan/cardscan/CardScanConfiguration;ILjava/lang/Object;)Lcom/stripe/android/stripecardscan/cardscan/CardScanSheetParams;
-	public final fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getCardScanConfiguration ()Lcom/stripe/android/stripecardscan/cardscan/CardScanConfiguration;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/stripecardscan/cardscan/CardScanSheetParams$Creator : android/os/Parcelable$Creator {
