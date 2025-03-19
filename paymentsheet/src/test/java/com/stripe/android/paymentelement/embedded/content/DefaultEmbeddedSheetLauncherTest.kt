@@ -90,8 +90,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val callback = formRegisterCall.callback.asCallbackFor<FormResult>()
 
         callback.onActivityResult(result)
-        assertThat(embeddedContentHelper.clearEmbeddedContentTurbine.awaitItem()).isEqualTo(Unit)
-        assertThat(selectionHolder.selection.value).isNull()
+        assertThat(stateHelper.stateTurbine.awaitItem()).isNull()
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
         assertThat(selectionHolder.temporarySelection.value).isNull()
         assertThat(resultCallbackTurbine.awaitItem()).isInstanceOf<EmbeddedPaymentElement.Result.Completed>()
@@ -186,7 +185,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val sheetStateHolder = SheetStateHolder(savedStateHandle)
         val errorReporter = FakeErrorReporter()
         val resultCallbackTurbine = Turbine<EmbeddedPaymentElement.Result>()
-        val embeddedContentHelper = FakeEmbeddedContentHelper()
+        val stateHelper = FakeEmbeddedStateHelper()
 
         DummyActivityResultCaller.test {
             val sheetLauncher = DefaultEmbeddedSheetLauncher(
@@ -201,7 +200,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 resultCallback = {
                     resultCallbackTurbine.add(it)
                 },
-                embeddedContentHelper = embeddedContentHelper,
+                stateHelper = stateHelper,
             )
             val formRegisterCall = awaitRegisterCall()
             val manageRegisterCall = awaitRegisterCall()
@@ -228,11 +227,11 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 sheetStateHolder = sheetStateHolder,
                 errorReporter = errorReporter,
                 resultCallbackTurbine = resultCallbackTurbine,
-                embeddedContentHelper = embeddedContentHelper,
+                stateHelper = stateHelper,
             ).block()
 
             resultCallbackTurbine.ensureAllEventsConsumed()
-            embeddedContentHelper.validate()
+            stateHelper.validate()
         }
     }
 
@@ -249,6 +248,6 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val sheetStateHolder: SheetStateHolder,
         val errorReporter: FakeErrorReporter,
         val resultCallbackTurbine: Turbine<EmbeddedPaymentElement.Result>,
-        val embeddedContentHelper: FakeEmbeddedContentHelper,
+        val stateHelper: FakeEmbeddedStateHelper,
     )
 }
