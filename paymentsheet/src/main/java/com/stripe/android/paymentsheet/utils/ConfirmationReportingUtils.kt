@@ -24,13 +24,13 @@ internal fun EventReporter.reportPaymentResult(
     paymentSelection: PaymentSelection?
 ) {
     when (result) {
-        is ConfirmationHandler.Result.Succeeded -> this.onPaymentSuccess(
+        is ConfirmationHandler.Result.Succeeded -> onPaymentSuccess(
             paymentSelection,
             result.deferredIntentConfirmationType
         )
         is ConfirmationHandler.Result.Failed -> {
             result.toConfirmationError()?.let { confirmationError ->
-                this.onPaymentFailure(paymentSelection, confirmationError)
+                onPaymentFailure(paymentSelection, confirmationError)
             }
         }
         is ConfirmationHandler.Result.Canceled -> {}
