@@ -60,9 +60,9 @@ internal class StripeComponentDialogFragmentView<ComponentView : StripeComponent
                 return@setNavigationOnClickListener
             }
             componentView.mobileInputReceived(
-                MobileInput.CLOSE_BUTTON_PRESSED,
-                { result ->
-                    if (result == null || result == "null") {
+                input = MobileInput.CLOSE_BUTTON_PRESSED,
+                resultCallback = { result ->
+                    if (result.isFailure) {
                         listener?.onCloseButtonClickError()
                     }
                 }

@@ -142,12 +142,11 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
         // older Android versions; if too late, it doesn't do anything on newer versions.
         dialog?.window?.let { WindowCompat.setDecorFitsSystemWindows(it, false) }
 
-        return StripeComponentDialogFragmentView<ComponentView>(inflater)
-            .also {
-                this._rootView = it
-                it.title = title
-                it.listener = DialogFragmentViewListener()
-            }
+        return StripeComponentDialogFragmentView<ComponentView>(inflater).also {
+            this._rootView = it
+            it.title = title
+            it.listener = DialogFragmentViewListener()
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -235,7 +234,7 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
             componentView.mobileInputReceived(
                 input = MobileInput.BACK_BUTTON_PRESSED,
                 resultCallback = { result ->
-                    if (result == null || result == "null") {
+                    if (result.isFailure) {
                         dismiss()
                     }
                 }

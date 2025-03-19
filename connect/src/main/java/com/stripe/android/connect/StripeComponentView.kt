@@ -58,7 +58,7 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
     private var progressBar: ProgressBar? = null
 
     // See StripeConnectWebViewContainerViewModel for why we're getting a WebView from a ViewModel.
-    internal val webView: StripeConnectWebView? get() = viewModel?.webView
+    private val webView: StripeConnectWebView? get() = viewModel?.webView
     private var webViewCacheKey: String? = null
 
     private val _receivedCloseWebView = MutableStateFlow(false)
@@ -116,10 +116,6 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
             listener = listener,
             propsJson = props.toJsonObject()
         )
-    }
-
-    internal fun mobileInputReceived(input: MobileInput, resultCallback: ValueCallback<String>) {
-        webView?.mobileInputReceived(input, resultCallback)
     }
 
     private fun initializeInternal(
@@ -264,6 +260,10 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
         if (state.isNativeLoadingIndicatorVisible) {
             progressBar.indeterminateTintList = ColorStateList.valueOf(state.nativeLoadingIndicatorColor)
         }
+    }
+
+    internal fun mobileInputReceived(input: MobileInput, resultCallback: ValueCallback<Result<String>>) {
+        webView?.mobileInputReceived(input, resultCallback)
     }
 
     private fun handleEvent(event: ComponentEvent) {
