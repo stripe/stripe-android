@@ -9,6 +9,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.setDefaultPaymentMethodErrorMessage
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.updateCardBrandErrorMessage
@@ -19,6 +20,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 
+@Suppress("LargeClass")
 class DefaultUpdatePaymentMethodInteractorTest {
 
     @get:Rule
@@ -216,7 +218,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         runScenario(
             displayableSavedPaymentMethod =
             PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD.toDisplayableSavedPaymentMethod(),
-            onUpdateCardBrand = { paymentMethod, _ -> Result.success(paymentMethod) },
+            updatePaymentMethodExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
             onUpdateSuccess = ::onUpdateSuccess,
         ) {
             interactor.state.test {
@@ -244,16 +246,19 @@ class DefaultUpdatePaymentMethodInteractorTest {
         var newCardBrand: CardBrand? = null
         val initialPaymentMethod = PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
 
-        fun updateCardBrandExecutor(paymentMethod: PaymentMethod, brand: CardBrand): Result<PaymentMethod> {
+        fun updatePaymentMethodExecutor(
+            paymentMethod: PaymentMethod,
+            cardUpdateParams: CardUpdateParams
+        ): Result<PaymentMethod> {
             updatedPaymentMethod = paymentMethod
-            newCardBrand = brand
+            newCardBrand = cardUpdateParams.cardBrand
 
             return Result.success(paymentMethod)
         }
 
         runScenario(
             displayableSavedPaymentMethod = initialPaymentMethod.toDisplayableSavedPaymentMethod(),
-            onUpdateCardBrand = ::updateCardBrandExecutor,
+            updatePaymentMethodExecutor = ::updatePaymentMethodExecutor,
             onUpdateSuccess = {},
         ) {
             interactor.state.test {
@@ -298,7 +303,10 @@ class DefaultUpdatePaymentMethodInteractorTest {
         var cardBrandUpdateCalled = false
 
         @Suppress("UnusedParameter")
-        fun updateCardBrandExecutor(paymentMethod: PaymentMethod, brand: CardBrand): Result<PaymentMethod> {
+        fun updatePaymentMethodExecutor(
+            paymentMethod: PaymentMethod,
+            cardUpdateParams: CardUpdateParams
+        ): Result<PaymentMethod> {
             cardBrandUpdateCalled = true
 
             return Result.success(paymentMethod)
@@ -306,7 +314,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
 
         runScenario(
             displayableSavedPaymentMethod = initialPaymentMethod.toDisplayableSavedPaymentMethod(),
-            onUpdateCardBrand = ::updateCardBrandExecutor,
+            updatePaymentMethodExecutor = ::updatePaymentMethodExecutor,
         ) {
             interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
 
@@ -317,7 +325,10 @@ class DefaultUpdatePaymentMethodInteractorTest {
     @Test
     fun saveButtonClick_failure_displaysError() {
         @Suppress("UnusedParameter")
-        fun updateCardBrandExecutor(paymentMethod: PaymentMethod, brand: CardBrand): Result<PaymentMethod> {
+        fun updatePaymentMethodExecutor(
+            paymentMethod: PaymentMethod,
+            cardUpdateParams: CardUpdateParams
+        ): Result<PaymentMethod> {
             return Result.failure(IllegalStateException("Not allowed."))
         }
 
@@ -325,7 +336,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             displayableSavedPaymentMethod = PaymentMethodFixtures
                 .CARD_WITH_NETWORKS_PAYMENT_METHOD
                 .toDisplayableSavedPaymentMethod(),
-            onUpdateCardBrand = ::updateCardBrandExecutor,
+            updatePaymentMethodExecutor = ::updatePaymentMethodExecutor,
         ) {
             val originalCardBrand = CardBrand.CartesBancaires
             interactor.state.test {
@@ -544,7 +555,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
                 .toDisplayableSavedPaymentMethod(),
             shouldShowSetAsDefaultCheckbox = true,
             onSetDefaultPaymentMethod = { Result.success(Unit) },
-            onUpdateCardBrand = { _, _ -> Result.failure(expectedError) },
+            updatePaymentMethodExecutor = { _, _ -> Result.failure(expectedError) },
             onUpdateSuccess = ::onUpdateSuccess,
         ) {
             updateCardBrandAndDefaultPaymentMethod(interactor)
@@ -569,7 +580,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
                 .toDisplayableSavedPaymentMethod(),
             shouldShowSetAsDefaultCheckbox = true,
             onSetDefaultPaymentMethod = { Result.failure(IllegalStateException("Fake error")) },
-            onUpdateCardBrand = { paymentMethod, _ -> Result.success(paymentMethod) },
+            updatePaymentMethodExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
             onUpdateSuccess = ::onUpdateSuccess,
         ) {
             updateCardBrandAndDefaultPaymentMethod(interactor)
@@ -594,7 +605,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
                 .toDisplayableSavedPaymentMethod(),
             shouldShowSetAsDefaultCheckbox = true,
             onSetDefaultPaymentMethod = { Result.failure(IllegalStateException("Fake error")) },
-            onUpdateCardBrand = { _, _ -> Result.failure(IllegalStateException("Fake error")) },
+            updatePaymentMethodExecutor = { _, _ -> Result.failure(IllegalStateException("Fake error")) },
             onUpdateSuccess = ::onUpdateSuccess,
         ) {
             updateCardBrandAndDefaultPaymentMethod(interactor)
@@ -678,7 +689,10 @@ class DefaultUpdatePaymentMethodInteractorTest {
         canRemove: Boolean = false,
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
         onRemovePaymentMethod: (PaymentMethod) -> Throwable? = { notImplemented() },
-        onUpdateCardBrand: (PaymentMethod, CardBrand) -> Result<PaymentMethod> = { _, _ -> notImplemented() },
+        updatePaymentMethodExecutor: (
+            PaymentMethod,
+            CardUpdateParams
+        ) -> Result<PaymentMethod> = { _, _ -> notImplemented() },
         onSetDefaultPaymentMethod: (PaymentMethod) -> Result<Unit> = { _ -> notImplemented() },
         onUpdateSuccess: () -> Unit = { notImplemented() },
         shouldShowSetAsDefaultCheckbox: Boolean = false,
@@ -693,7 +707,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             canRemove = canRemove,
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
             removeExecutor = onRemovePaymentMethod,
-            updateCardBrandExecutor = onUpdateCardBrand,
+            updatePaymentMethodExecutor = updatePaymentMethodExecutor,
             setDefaultPaymentMethodExecutor = onSetDefaultPaymentMethod,
             workContext = UnconfinedTestDispatcher(),
             cardBrandFilter = DefaultCardBrandFilter,
