@@ -233,7 +233,7 @@ internal data class PaymentMethodMetadata(
     }
 
     internal companion object {
-        internal fun create(
+        internal fun createForPaymentElement(
             elementsSession: ElementsSession,
             configuration: CommonConfiguration,
             sharedDataSpecs: List<SharedDataSpec>,
