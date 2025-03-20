@@ -114,7 +114,12 @@ internal class DefaultEmbeddedSheetLauncherTest {
     fun `launchManage launches activity with correct parameters`() = testScenario {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
-        val expectedArgs = ManageContract.Args(paymentMethodMetadata, customerState, PaymentSelection.GooglePay)
+        val expectedArgs = ManageContract.Args(
+            paymentMethodMetadata,
+            customerState,
+            PaymentSelection.GooglePay,
+            "EmbeddedFormTestIdentifier"
+        )
 
         sheetLauncher.launchManage(paymentMethodMetadata, customerState, PaymentSelection.GooglePay)
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall()

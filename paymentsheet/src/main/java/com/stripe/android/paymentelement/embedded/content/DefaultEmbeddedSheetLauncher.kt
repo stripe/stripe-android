@@ -123,6 +123,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             paymentMethodMetadata = paymentMethodMetadata,
             customerState = customerState,
             selection = selection,
+            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
         )
         manageActivityLauncher.launch(args)
     }

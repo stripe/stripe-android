@@ -21,7 +21,9 @@ import com.stripe.android.link.account.LinkStore
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
+import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -245,6 +247,15 @@ class PaymentSheet internal constructor(
          */
         fun createIntentCallback(callback: CreateIntentCallback) = apply {
             callbacksBuilder.createIntentCallback(callback)
+        }
+
+        /**
+         * @param callback Called when an analytic event occurs.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @ExperimentalAnalyticEventCallbackApi
+        fun analyticEventCallback(callback: AnalyticEventCallback) = apply {
+            callbacksBuilder.analyticEventCallback(callback)
         }
 
         /**
@@ -2274,6 +2285,15 @@ class PaymentSheet internal constructor(
              */
             fun createIntentCallback(callback: CreateIntentCallback) = apply {
                 callbacksBuilder.createIntentCallback(callback)
+            }
+
+            /**
+             * @param callback If specified, called when an analytic event occurs.
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @ExperimentalAnalyticEventCallbackApi
+            fun analyticEventCallback(callback: AnalyticEventCallback) = apply {
+                callbacksBuilder.analyticEventCallback(callback)
             }
 
             /**
