@@ -127,6 +127,10 @@ class StripeComponentControllerTest {
         context = context,
         attrs = null,
         defStyleAttr = 0,
+        embeddedComponent = StripeEmbeddedComponent.ACCOUNT_ONBOARDING,
+        embeddedComponentManager = null,
+        listener = null,
+        props = null,
     ) {
         override var listener: TestComponentListener? = null
 
