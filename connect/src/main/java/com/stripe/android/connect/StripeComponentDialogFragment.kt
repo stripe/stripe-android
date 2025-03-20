@@ -220,7 +220,8 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
     }
 
     private fun bindAppearance(appearance: Appearance) {
-        rootView.bindAppearance(appearance)
+        val customFonts = viewModel.embeddedComponentManager.value?.coordinator?.customFonts
+        rootView.bindAppearance(appearance, customFonts)
         dialog?.window?.setBackgroundDrawable(rootView.background)
     }
 

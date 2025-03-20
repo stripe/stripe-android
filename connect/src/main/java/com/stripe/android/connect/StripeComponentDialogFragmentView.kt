@@ -2,6 +2,7 @@ package com.stripe.android.connect
 
 import android.content.Context
 import android.content.res.ColorStateList
+import android.graphics.Typeface
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +13,7 @@ import androidx.appcompat.widget.AppCompatImageButton
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.TypefaceCompat
 import com.stripe.android.connect.appearance.Appearance
+import com.stripe.android.connect.appearance.fonts.CustomFontSource
 import com.stripe.android.connect.webview.MobileInput
 
 @OptIn(PrivateBetaConnectSDK::class)
@@ -79,7 +81,7 @@ internal class StripeComponentDialogFragmentView<ComponentView : StripeComponent
         }
     }
 
-    fun bindAppearance(appearance: Appearance) {
+    fun bindAppearance(appearance: Appearance, customFonts: List<CustomFontSource>?) {
         val context = titleText.context
 
         val backgroundColor =
@@ -91,17 +93,37 @@ internal class StripeComponentDialogFragmentView<ComponentView : StripeComponent
         val textColor = appearance.colors.text
             ?: ContextCompat.getColor(context, R.color.stripe_connect_text)
         titleText.setTextColor(textColor)
-        titleText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
-        titleText.typeface = TypefaceCompat.create(context, null, 700, false)
         closeButton.imageTintList = ColorStateList.valueOf(textColor)
-
         divider.setBackgroundColor(
             appearance.colors.border
                 ?: ContextCompat.getColor(context, R.color.stripe_connect_border)
         )
+
+        bindTitleTypography(appearance, customFonts)
+    }
+
+    private fun bindTitleTypography(appearance: Appearance, customFonts: List<CustomFontSource>?) {
+        val context = titleText.context
+
+        val customFontSource = appearance.typography.fontFamily
+            ?.let { fontFamily -> customFonts?.find { it.name == fontFamily } }
+        val customTypeface = customFontSource
+            ?.let { Typeface.createFromAsset(context.assets, it.assetsFilePath) }
+
+        val customStyle = appearance.typography.headingMd
+        val fontSize = customStyle?.fontSize ?: DEFAULT_TITLE_FONT_SIZE
+        val fontWeight = customStyle?.fontWeight ?: customFontSource?.weight ?: DEFAULT_TITLE_WEIGHT
+
+        titleText.typeface = TypefaceCompat.create(context, customTypeface, fontWeight, false)
+        titleText.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize)
     }
 
     interface Listener {
         fun onCloseButtonClickError()
+    }
+
+    companion object {
+        private const val DEFAULT_TITLE_FONT_SIZE = 20f
+        private const val DEFAULT_TITLE_WEIGHT = 700
     }
 }
