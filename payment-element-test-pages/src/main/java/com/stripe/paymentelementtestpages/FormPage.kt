@@ -1,5 +1,6 @@
-package com.stripe.android.paymentsheet
+package com.stripe.paymentelementtestpages
 
+import androidx.annotation.RestrictTo
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
@@ -14,7 +15,8 @@ import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_HEADER_TITLE
 
-internal class FormPage(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class FormPage(
     private val composeTestRule: ComposeTestRule,
 ) {
     val cardNumber: SemanticsNodeInteraction = nodeWithLabel("Card number")

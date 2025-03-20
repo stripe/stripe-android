@@ -151,7 +151,7 @@ internal sealed class ConnectAnalyticsEvent(
      * A web view was opened when `openWebView` was called.
      *
      * @param pageViewId The pageViewID from the web view. May be null if not yet sent from web
-     * @param authenticatedViewId The id for this secure web view session (sent in `openWebView` message)
+     * @param authenticatedViewId The id for this secure web view session (sent in `openAuthenticatedWebView` message)
      */
     data class AuthenticatedWebOpened(
         val pageViewId: String?,

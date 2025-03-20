@@ -149,7 +149,8 @@ internal object PaymentSheetFixtures {
         ),
         configuration = CONFIG_GOOGLEPAY,
         enableLogging = false,
-        productUsage = mock()
+        productUsage = mock(),
+        paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
     )
 
     internal fun PaymentOptionContract.Args.updateState(

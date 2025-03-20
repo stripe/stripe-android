@@ -76,7 +76,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val configurationHandler: FlowControllerConfigurationHandler,
     private val errorReporter: ErrorReporter,
     @InitializedViaCompose private val initializedViaCompose: Boolean,
-    @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
 ) : PaymentSheet.FlowController {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private val sepaMandateActivityLauncher: ActivityResultLauncher<SepaMandateContract.Args>
@@ -235,6 +235,7 @@ internal class DefaultFlowController @Inject internal constructor(
             configuration = state.config,
             enableLogging = enableLogging,
             productUsage = productUsage,
+            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier
         )
 
         val options = ActivityOptionsCompat.makeCustomAnimation(

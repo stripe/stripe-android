@@ -20,6 +20,7 @@ import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.Colors
 import com.stripe.android.connect.manager.EmbeddedComponentCoordinator
 import com.stripe.android.connect.util.Clock
+import com.stripe.android.connect.webview.serialization.OpenAuthenticatedWebViewMessage
 import com.stripe.android.connect.webview.serialization.OpenFinancialConnectionsMessage
 import com.stripe.android.connect.webview.serialization.SetOnLoadError
 import com.stripe.android.connect.webview.serialization.SetOnLoadError.LoadError
@@ -42,6 +43,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.inOrder
@@ -284,6 +287,27 @@ class StripeConnectWebViewContainerViewModelTest {
         )
 
         assertThat(actual).isEqualTo(expected)
+    }
+
+    @Test
+    fun `onReceivedOpenAuthenticatedWebView should launch ChromeCustomTab`() = runTest(testDispatcher) {
+        val pageViewId = "pv-id"
+        val uri = Uri.parse("https://test.stripe.com/")
+        val message = OpenAuthenticatedWebViewMessage(
+            id = "message-id",
+            url = uri.toString(),
+        )
+        viewModel.delegate.onReceivedPageDidLoad(pageViewId)
+        viewModel.delegate.onReceivedOpenAuthenticatedWebView(mockActivity, message)
+        verify(mockStripeIntentLauncher).launchSecureExternalWebTab(mockActivity, uri)
+        val captor = argumentCaptor<ConnectAnalyticsEvent>()
+        verify(analyticsService, atLeastOnce()).track(captor.capture())
+        assertThat(captor.lastValue).isEqualTo(
+            ConnectAnalyticsEvent.AuthenticatedWebOpened(
+                pageViewId = pageViewId,
+                authenticatedViewId = message.id,
+            )
+        )
     }
 
     @Test

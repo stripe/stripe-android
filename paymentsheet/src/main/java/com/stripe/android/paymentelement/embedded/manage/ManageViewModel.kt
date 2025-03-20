@@ -29,6 +29,7 @@ internal class ManageViewModel @Inject constructor(
 
             val component = DaggerManageComponent.builder()
                 .savedStateHandle(savedStateHandle)
+                .paymentElementCallbackIdentifier(args.paymentElementCallbackIdentifier)
                 .paymentMethodMetadata(args.paymentMethodMetadata)
                 .context(extras.requireApplication())
                 .build()

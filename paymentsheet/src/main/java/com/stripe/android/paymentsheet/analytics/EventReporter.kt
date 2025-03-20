@@ -153,34 +153,25 @@ internal interface EventReporter {
     fun onHideEditablePaymentOption()
 
     /**
-     * The customer has chosen to show the payment option brands for an editable payment option.
+     * User selected a card brand from the card brand choice dropdown.
      */
-    fun onShowPaymentOptionBrands(
+    fun onBrandChoiceSelected(
         source: CardBrandChoiceEventSource,
         selectedBrand: CardBrand,
     )
 
     /**
-     * The customer has chosen to hide the payment option brands for an editable payment option. The customer may
-     * have also chosen a new card brand selection as well.
+     * The customer has successfully updated the details of a payment method.
      */
-    fun onHidePaymentOptionBrands(
-        source: CardBrandChoiceEventSource,
+    fun onUpdatePaymentMethodSucceeded(
         selectedBrand: CardBrand?,
     )
 
     /**
-     * The customer has successfully updated a payment method with a new card brand selection.
-     */
-    fun onUpdatePaymentMethodSucceeded(
-        selectedBrand: CardBrand,
-    )
-
-    /**
-     * The customer has failed to update a payment method with a new card brand selection.
+     * The customer has failed to update the details of a payment method.
      */
     fun onUpdatePaymentMethodFailed(
-        selectedBrand: CardBrand,
+        selectedBrand: CardBrand?,
         error: Throwable,
     )
 

@@ -17,6 +17,10 @@ import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.paymentelement.AnalyticEventCallback
+import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.paymentsheet.BuildConfig
@@ -151,6 +155,14 @@ internal abstract class PaymentSheetCommonModule {
         @Provides
         fun providesCvcRecollectionInteractorFactory(): CvcRecollectionInteractor.Factory {
             return DefaultCvcRecollectionInteractor.Factory
+        }
+
+        @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+        @Provides
+        fun providesAnalyticEventCallback(
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+        ): AnalyticEventCallback? {
+            return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.analyticEventCallback
         }
     }
 }

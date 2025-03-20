@@ -8,16 +8,17 @@ import android.widget.LinearLayout
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import com.stripe.android.connect.appearance.Appearance
+import com.stripe.android.connect.webview.MobileInput
 
 @OptIn(PrivateBetaConnectSDK::class)
-internal class StripeComponentDialogFragmentView<ComponentView : View>(
+internal class StripeComponentDialogFragmentView<ComponentView : StripeComponentView<*, *>>(
     layoutInflater: LayoutInflater
 ) : LinearLayout(layoutInflater.context) {
 
     constructor(context: Context) : this(LayoutInflater.from(context))
 
-    val toolbar: Toolbar
-    val divider: View
+    private val toolbar: Toolbar
+    private val divider: View
     var componentView: ComponentView? = null
         set(value) {
             field?.let { removeView(it) }
@@ -34,6 +35,14 @@ internal class StripeComponentDialogFragmentView<ComponentView : View>(
             }
         }
 
+    var title: CharSequence?
+        get() = toolbar.title
+        set(value) {
+            toolbar.title = value
+        }
+
+    var listener: Listener? = null
+
     init {
         orientation = VERTICAL
         layoutParams = ViewGroup.LayoutParams(
@@ -43,6 +52,23 @@ internal class StripeComponentDialogFragmentView<ComponentView : View>(
         layoutInflater.inflate(R.layout.stripe_full_screen_component, this, true)
         toolbar = findViewById(R.id.toolbar)
         divider = findViewById(R.id.divider)
+
+        toolbar.setNavigationOnClickListener {
+            // Defer to the component view if it's available.
+            val componentView = this.componentView
+            if (componentView == null) {
+                listener?.onCloseButtonClickError()
+                return@setNavigationOnClickListener
+            }
+            componentView.mobileInputReceived(
+                input = MobileInput.CLOSE_BUTTON_PRESSED,
+                resultCallback = { result ->
+                    if (result.isFailure) {
+                        listener?.onCloseButtonClickError()
+                    }
+                }
+            )
+        }
     }
 
     fun bindAppearance(appearance: Appearance) {
@@ -63,5 +89,9 @@ internal class StripeComponentDialogFragmentView<ComponentView : View>(
             appearance.colors.border
                 ?: ContextCompat.getColor(context, R.color.stripe_connect_border)
         )
+    }
+
+    interface Listener {
+        fun onCloseButtonClickError()
     }
 }

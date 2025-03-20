@@ -391,42 +391,6 @@ class UpdatePaymentMethodUITest {
     }
 
     @Test
-    fun openingCardBrandDropdown_sendsOnBrandChoicesShownAction() {
-        runScenario(
-            displayableSavedPaymentMethod = PaymentMethodFixtures
-                .CARD_WITH_NETWORKS_PAYMENT_METHOD
-                .toDisplayableSavedPaymentMethod()
-        ) {
-            assertThat(viewActionRecorder.viewActions).isEmpty()
-            composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).performClick()
-
-            viewActionRecorder.consume(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsShown)
-            assertThat(viewActionRecorder.viewActions).isEmpty()
-        }
-    }
-
-    @Test
-    fun closingCardBrandDropdown_sendsOnBrandChoicesDismissedAction() {
-        runScenario(
-            displayableSavedPaymentMethod = PaymentMethodFixtures
-                .CARD_WITH_NETWORKS_PAYMENT_METHOD
-                .toDisplayableSavedPaymentMethod()
-        ) {
-            assertThat(viewActionRecorder.viewActions).isEmpty()
-            composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).performClick()
-
-            viewActionRecorder.consume(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsShown)
-            assertThat(viewActionRecorder.viewActions).isEmpty()
-
-            // Click the card brand dropdown again to dismiss it.
-            composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).performClick()
-
-            viewActionRecorder.consume(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsDismissed)
-            assertThat(viewActionRecorder.viewActions).isEmpty()
-        }
-    }
-
-    @Test
     fun selectingCardBrandDropdown_sendsOnBrandChoiceChangedAction() {
         runScenario(
             displayableSavedPaymentMethod = PaymentMethodFixtures
@@ -435,9 +399,6 @@ class UpdatePaymentMethodUITest {
         ) {
             assertThat(viewActionRecorder.viewActions).isEmpty()
             composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).performClick()
-
-            viewActionRecorder.consume(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsShown)
-            assertThat(viewActionRecorder.viewActions).isEmpty()
 
             composeRule.onNodeWithTag("${TEST_TAG_DROP_DOWN_CHOICE}_Visa").performClick()
 

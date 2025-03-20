@@ -2,6 +2,7 @@ package com.stripe.android.stripecardscan.di
 
 import android.app.Application
 import com.stripe.android.core.injection.CoroutineContextModule
+import com.stripe.android.stripecardscan.cardscan.CardScanActivity
 import com.stripe.android.stripecardscan.cardscan.CardScanConfiguration
 import com.stripe.android.stripecardscan.cardscan.CardScanEventsReporter
 import dagger.BindsInstance
@@ -17,6 +18,8 @@ import javax.inject.Singleton
 )
 internal interface CardScanComponent {
     val cardScanEventsReporter: CardScanEventsReporter
+
+    fun inject(activity: CardScanActivity)
 
     @Component.Builder
     interface Builder {

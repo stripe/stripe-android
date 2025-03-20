@@ -56,6 +56,7 @@ internal object ManageContract : ActivityResultContract<ManageContract.Args, Man
         val paymentMethodMetadata: PaymentMethodMetadata,
         val customerState: CustomerState,
         val selection: PaymentSelection?,
+        val paymentElementCallbackIdentifier: String,
     ) : Parcelable {
         companion object {
             fun fromIntent(intent: Intent): Args? {

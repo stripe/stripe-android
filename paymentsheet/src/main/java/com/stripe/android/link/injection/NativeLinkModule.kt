@@ -21,6 +21,8 @@ import com.stripe.android.core.networking.NetworkTypeDetector
 import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.core.utils.RealUserFacingLogger
+import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.account.DefaultLinkAccountManager
 import com.stripe.android.link.account.DefaultLinkAuth
@@ -40,6 +42,10 @@ import com.stripe.android.link.repositories.LinkApiRepository
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentelement.AnalyticEventCallback
+import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationDefinition
@@ -110,6 +116,9 @@ internal interface NativeLinkModule {
     @Binds
     @NativeLinkScope
     fun bindsLinkAttestationCheck(linkAttestationCheck: DefaultLinkAttestationCheck): LinkAttestationCheck
+
+    @Binds
+    fun bindsUserFacingLogger(impl: RealUserFacingLogger): UserFacingLogger
 
     @SuppressWarnings("TooManyFunctions")
     companion object {
@@ -225,6 +234,14 @@ internal interface NativeLinkModule {
             return LinkPassthroughConfirmationDefinition(
                 linkAccountManager = linkAccountManager,
             )
+        }
+
+        @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+        @Provides
+        fun providesAnalyticEventCallback(
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+        ): AnalyticEventCallback? {
+            return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.analyticEventCallback
         }
     }
 }
