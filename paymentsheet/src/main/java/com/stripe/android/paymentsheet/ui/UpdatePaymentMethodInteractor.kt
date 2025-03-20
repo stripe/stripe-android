@@ -243,9 +243,12 @@ internal class DefaultUpdatePaymentMethodInteractor(
 
     private fun onBrandChoiceChanged(cardBrandChoice: CardBrandChoice) {
         this.cardBrandChoice.value = cardBrandChoice
-        this.cardBrandHasBeenChanged.value = cardBrandChoice != savedCardBrand.value
+        val changed = cardBrandChoice != savedCardBrand.value
+        this.cardBrandHasBeenChanged.value = changed
 
-        onBrandChoiceSelected(cardBrandChoice.brand)
+        if (changed) {
+            onBrandChoiceSelected(cardBrandChoice.brand)
+        }
     }
 
     private fun onSetAsDefaultCheckboxChanged(isChecked: Boolean) {

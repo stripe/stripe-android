@@ -200,9 +200,11 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
     ) : CustomerSheetEvent() {
         override val eventName: String = CS_UPDATE_PAYMENT_METHOD
 
-        override val additionalParams: Map<String, Any?> = mapOf(
-            FIELD_SELECTED_CARD_BRAND to selectedBrand?.code
-        )
+        override val additionalParams: Map<String, Any?> = buildMap {
+            if (selectedBrand != null) {
+                put(FIELD_SELECTED_CARD_BRAND, selectedBrand.code)
+            }
+        }
     }
 
     class UpdatePaymentOptionFailed(
@@ -211,10 +213,12 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
     ) : CustomerSheetEvent() {
         override val eventName: String = CS_UPDATE_PAYMENT_METHOD_FAILED
 
-        override val additionalParams: Map<String, Any?> = mapOf(
-            FIELD_SELECTED_CARD_BRAND to selectedBrand?.code,
-            FIELD_ERROR_MESSAGE to error.message,
-        )
+        override val additionalParams: Map<String, Any?> = buildMap {
+            if (selectedBrand != null) {
+                put(FIELD_SELECTED_CARD_BRAND, selectedBrand.code)
+            }
+            put(FIELD_ERROR_MESSAGE, error.message)
+        }
     }
 
     class CardBrandDisallowed(

@@ -465,9 +465,11 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_update_card"
 
-        override val additionalParams: Map<String, Any?> = mapOf(
-            FIELD_SELECTED_CARD_BRAND to selectedBrand?.code
-        )
+        override val additionalParams: Map<String, Any?> = buildMap {
+            if (selectedBrand != null) {
+                put(FIELD_SELECTED_CARD_BRAND, selectedBrand.code)
+            }
+        }
     }
 
     class UpdatePaymentOptionFailed(
@@ -479,10 +481,12 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_update_card_failed"
 
-        override val additionalParams: Map<String, Any?> = mapOf(
-            FIELD_SELECTED_CARD_BRAND to selectedBrand?.code,
-            FIELD_ERROR_MESSAGE to error.message,
-        ).plus(ErrorReporter.getAdditionalParamsFromError(error))
+        override val additionalParams: Map<String, Any?> = buildMap {
+            if (selectedBrand != null) {
+                put(FIELD_SELECTED_CARD_BRAND, selectedBrand.code)
+            }
+            put(FIELD_ERROR_MESSAGE, error.message)
+        }.plus(ErrorReporter.getAdditionalParamsFromError(error))
     }
 
     class CannotProperlyReturnFromLinkAndLPMs(
