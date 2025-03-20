@@ -15,6 +15,9 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata.Permissions.Companion.createForPaymentSheetCustomerSession
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata.Permissions.Companion.createForPaymentSheetLegacyEphemeralKey
 import com.stripe.android.lpmfoundations.paymentmethod.IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
@@ -38,6 +41,7 @@ import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.model.validate
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
+import com.stripe.android.paymentsheet.state.CustomerState.Permissions
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import kotlinx.coroutines.Deferred
@@ -180,6 +184,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             createPaymentMethodMetadata(
                 configuration = configuration,
                 elementsSession = elementsSession,
+                customerInfo = customerInfo,
                 isGooglePayReady = isGooglePayReady,
                 linkState = linkState.await(),
             )
@@ -255,6 +260,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private fun createPaymentMethodMetadata(
         configuration: CommonConfiguration,
         elementsSession: ElementsSession,
+        customerInfo: CustomerInfo?,
         linkState: LinkState?,
         isGooglePayReady: Boolean,
     ): PaymentMethodMetadata {
@@ -286,7 +292,40 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             isGooglePayReady = isGooglePayReady,
             linkInlineConfiguration = createLinkInlineConfiguration(linkState),
             linkState = linkState,
+            customerMetadata = getCustomerMetadata(
+                configuration = configuration,
+                elementsSession = elementsSession,
+                customerInfo = customerInfo,
+            ),
         )
+    }
+
+    private fun getCustomerMetadata(
+        configuration: CommonConfiguration,
+        elementsSession: ElementsSession,
+        customerInfo: CustomerInfo?,
+    ): CustomerMetadata {
+        return CustomerMetadata(
+            hasCustomerConfiguration = configuration.customer != null,
+            isPaymentMethodSetAsDefaultEnabled = getDefaultPaymentMethodsEnabled(elementsSession),
+            permissions = if (customerInfo is CustomerInfo.CustomerSession) {
+                createForPaymentSheetCustomerSession(
+                    configuration = configuration,
+                    customer = customerInfo.elementsSessionCustomer
+                )
+            } else {
+                createForPaymentSheetLegacyEphemeralKey(
+                    configuration = configuration
+                )
+            }
+        )
+    }
+
+    private fun getDefaultPaymentMethodsEnabled(elementsSession: ElementsSession): Boolean {
+        val mobilePaymentElement = elementsSession.customer?.session?.components?.mobilePaymentElement
+            as? ElementsSession.Customer.Components.MobilePaymentElement.Enabled
+        return mobilePaymentElement?.isPaymentMethodSetAsDefaultEnabled
+            ?: false
     }
 
     private fun createCustomerInfo(

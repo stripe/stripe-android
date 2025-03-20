@@ -16,6 +16,7 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.PaymentMethod
@@ -125,6 +126,15 @@ internal class DefaultCustomerSheetLoader(
             if (isLiveModeProvider()) GooglePayEnvironment.Production else GooglePayEnvironment.Test
         ).isReady().first()
 
+        val customerMetadata = CustomerMetadata(
+            hasCustomerConfiguration = true,
+            isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
+            permissions = CustomerMetadata.Permissions.createForCustomerSheet(
+                configuration = configuration,
+                customerSheetSession = customerSheetSession
+            )
+        )
+
         return PaymentMethodMetadata.createForCustomerSheet(
             elementsSession = elementsSession,
             configuration = configuration,
@@ -132,6 +142,7 @@ internal class DefaultCustomerSheetLoader(
             sharedDataSpecs = sharedDataSpecs,
             isGooglePayReady = isGooglePayReadyAndEnabled,
             isPaymentMethodSyncDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
+            customerMetadata = customerMetadata,
         )
     }
 
