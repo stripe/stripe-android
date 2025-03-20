@@ -622,6 +622,8 @@ class PaymentSheet internal constructor(
 
         internal val customPaymentMethods: List<CustomPaymentMethod> =
             ConfigurationDefaults.customPaymentMethods,
+
+        internal val link: LinkConfiguration = ConfigurationDefaults.link,
     ) : Parcelable {
 
         @JvmOverloads
@@ -773,6 +775,7 @@ class PaymentSheet internal constructor(
             private var externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods
             private var paymentMethodLayout: PaymentMethodLayout = ConfigurationDefaults.paymentMethodLayout
             private var cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance
+            private var link: PaymentSheet.LinkConfiguration = ConfigurationDefaults.link
 
             private var customPaymentMethods: List<CustomPaymentMethod> =
                 ConfigurationDefaults.customPaymentMethods
@@ -899,6 +902,13 @@ class PaymentSheet internal constructor(
                 this.customPaymentMethods = customPaymentMethods
             }
 
+            /**
+             * Configuration related to Link.
+             */
+            fun link(link: PaymentSheet.LinkConfiguration): Builder = apply {
+                this.link = link
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -918,6 +928,7 @@ class PaymentSheet internal constructor(
                 paymentMethodLayout = paymentMethodLayout,
                 cardBrandAcceptance = cardBrandAcceptance,
                 customPaymentMethods = customPaymentMethods,
+                link = link,
             )
         }
 
@@ -2187,6 +2198,43 @@ class PaymentSheet internal constructor(
              * Displays only the Google Pay logo.
              */
             Plain
+        }
+    }
+
+    /**
+     * Configuration related to Link.
+     */
+    @Poko
+    @Parcelize
+    class LinkConfiguration @JvmOverloads constructor(
+        internal val display: Display = Display.Automatic,
+    ) : Parcelable {
+
+        internal val shouldDisplay: Boolean
+            get() = when (display) {
+                Display.Automatic -> true
+                Display.Never -> false
+            }
+
+        /**
+         * Display configuration for Link
+         */
+        enum class Display {
+            /**
+             * Link will be displayed when available.
+             */
+            Automatic,
+
+            /**
+             * Link will never be displayed.
+             */
+            Never;
+
+            internal val analyticsValue: String
+                get() = when (this) {
+                    Automatic -> "automatic"
+                    Never -> "never"
+                }
         }
     }
 
