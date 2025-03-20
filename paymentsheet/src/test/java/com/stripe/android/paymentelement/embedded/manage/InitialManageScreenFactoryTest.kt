@@ -56,7 +56,6 @@ internal class InitialManageScreenFactoryTest {
                     initialState = UpdatePaymentMethodInteractor.State(
                         error = null,
                         status = UpdatePaymentMethodInteractor.Status.Idle,
-                        cardBrandChoice = CardBrandChoice(brand = CardBrand.Visa, enabled = true),
                         setAsDefaultCheckboxChecked = false,
                         isSaveButtonEnabled = false,
                     ),

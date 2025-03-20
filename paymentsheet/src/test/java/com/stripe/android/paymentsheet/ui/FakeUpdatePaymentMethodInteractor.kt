@@ -6,6 +6,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.SavedPaymentMethod
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,17 +26,22 @@ internal class FakeUpdatePaymentMethodInteractor(
     initialState: UpdatePaymentMethodInteractor.State = UpdatePaymentMethodInteractor.State(
         error = null,
         status = UpdatePaymentMethodInteractor.Status.Idle,
-        cardBrandChoice = CardBrandChoice(brand = CardBrand.Visa, enabled = false),
         setAsDefaultCheckboxChecked = false,
         isSaveButtonEnabled = false,
     ),
     override val setAsDefaultCheckboxEnabled: Boolean = true,
-    override val allowCardEdit: Boolean = false
+    override val allowCardEdit: Boolean = false,
+    override val cardEditUIHandlerFactory: CardEditUIHandler.Factory = FakeCardEditUIHandlerFactory()
 ) : UpdatePaymentMethodInteractor {
     override val state: StateFlow<UpdatePaymentMethodInteractor.State> = MutableStateFlow(initialState)
     override val screenTitle: ResolvableString? = UpdatePaymentMethodInteractor.screenTitle(
         displayableSavedPaymentMethod
     )
+
+    override fun cardUiHandlerFactory(savedPaymentMethod: SavedPaymentMethod.Card): CardEditUIHandler {
+        TODO("Not yet implemented")
+    }
+
     override val topBarState: PaymentSheetTopBarState = PaymentSheetTopBarStateFactory.create(
         isLiveMode = false,
         editable = PaymentSheetTopBarState.Editable.Never,

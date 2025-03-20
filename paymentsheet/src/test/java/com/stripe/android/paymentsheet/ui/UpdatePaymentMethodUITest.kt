@@ -522,7 +522,6 @@ class UpdatePaymentMethodUITest {
             initialState = UpdatePaymentMethodInteractor.State(
                 error = errorMessage,
                 status = UpdatePaymentMethodInteractor.Status.Idle,
-                cardBrandChoice = CardBrandChoice(brand = initialCardBrand, enabled = true),
                 setAsDefaultCheckboxChecked = setAsDefaultCheckboxChecked,
                 isSaveButtonEnabled = isSaveButtonEnabled,
             ),
