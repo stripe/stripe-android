@@ -32,6 +32,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
+import com.stripe.android.paymentsheet.analytics.primaryButtonColorUsage
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
@@ -51,6 +52,7 @@ import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.utils.canSave
+import com.stripe.android.paymentsheet.utils.toConfirmationError
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
@@ -218,8 +220,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         val isDeferred = args.initializationMode is PaymentElementLoader.InitializationMode.DeferredIntent
 
         eventReporter.onInit(
-            configuration = config,
+            commonConfiguration = config.asCommonConfiguration(),
+            primaryButtonColor = config.primaryButtonColorUsage(),
+            paymentMethodLayout = config.paymentMethodLayout,
             isDeferred = isDeferred,
+            appearance = config.appearance
         )
 
         viewModelScope.launch(workContext) {
@@ -566,18 +571,16 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun processIntentFailure(failure: ConfirmationHandler.Result.Failed) {
         when (failure.type) {
-            ConfirmationHandler.Result.Failed.ErrorType.Payment -> handlePaymentFailed(
-                error = PaymentSheetConfirmationError.Stripe(failure.cause),
-                message = failure.message,
-            )
-            ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod -> handlePaymentFailed(
-                error = PaymentSheetConfirmationError.ExternalPaymentMethod,
-                message = failure.message,
-            )
-            is ConfirmationHandler.Result.Failed.ErrorType.GooglePay -> handlePaymentFailed(
-                error = PaymentSheetConfirmationError.GooglePay(failure.type.errorCode),
-                message = failure.message,
-            )
+            ConfirmationHandler.Result.Failed.ErrorType.Payment,
+            ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod,
+            is ConfirmationHandler.Result.Failed.ErrorType.GooglePay -> {
+                failure.toConfirmationError()?.let { confirmationError ->
+                    handlePaymentFailed(
+                        error = confirmationError,
+                        message = failure.message,
+                    )
+                }
+            }
             ConfirmationHandler.Result.Failed.ErrorType.Fatal -> onFatal(failure.cause)
             ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration,
             ConfirmationHandler.Result.Failed.ErrorType.Internal -> onError(failure.message)

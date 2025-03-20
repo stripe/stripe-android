@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.analytics
 
+import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.utils.DurationProvider
@@ -43,7 +44,10 @@ internal class DefaultEventReporter @Inject internal constructor(
         get() = linkMode != null
 
     override fun onInit(
-        configuration: PaymentSheet.Configuration,
+        commonConfiguration: CommonConfiguration,
+        appearance: PaymentSheet.Appearance,
+        primaryButtonColor: Boolean?,
+        paymentMethodLayout: PaymentSheet.PaymentMethodLayout?,
         isDeferred: Boolean,
     ) {
         this.isDeferred = isDeferred
@@ -51,7 +55,10 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.Init(
                 mode = mode,
-                configuration = configuration,
+                configuration = commonConfiguration,
+                appearance = appearance,
+                primaryButtonColor = primaryButtonColor,
+                paymentMethodLayout = paymentMethodLayout,
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
@@ -473,8 +480,8 @@ internal class DefaultEventReporter @Inject internal constructor(
                     onEvent(event)
                 } catch (e: Throwable) {
                     logger.logWarningWithoutPii(
-                        "AnalyticEventCallback.onEvent() failed\n"
-                            + e.stackTraceToString()
+                        "AnalyticEventCallback.onEvent() failed\n" +
+                            e.stackTraceToString()
                     )
                 }
             }

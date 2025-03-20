@@ -11,18 +11,18 @@ import com.stripe.android.paymentsheet.PaymentSheet
  */
 @ExperimentalCustomPaymentMethodsApi
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun interface CustomPaymentMethodConfirmHandler {
+fun interface ConfirmCustomPaymentMethodCallback {
 
     /**
      * Called when a user confirms payment or setup with a custom payment method.
      *
-     * On completion, this should call [CustomPaymentMethodResultHandler.onCustomPaymentMethodResult] with the
+     * On completion, this should call [CustomPaymentMethodResultHandler.handleCustomPaymentMethodResult] with the
      * result of the custom payment method's confirmation.
      *
      * @param customPaymentMethod The custom payment method to confirm payment with
      * @param billingDetails Any billing details you've configured Payment Element to collect
      */
-    fun confirmCustomPaymentMethod(
+    fun onConfirmCustomPaymentMethod(
         customPaymentMethod: PaymentSheet.CustomPaymentMethod,
         billingDetails: PaymentMethod.BillingDetails,
     )

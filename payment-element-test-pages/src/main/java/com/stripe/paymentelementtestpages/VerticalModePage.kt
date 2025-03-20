@@ -129,7 +129,7 @@ class VerticalModePage(
     }
 
     fun clickNewPaymentMethodButton(paymentMethodCode: PaymentMethodCode) {
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
             composeTestRule
                 .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT))
                 .fetchSemanticsNodes()

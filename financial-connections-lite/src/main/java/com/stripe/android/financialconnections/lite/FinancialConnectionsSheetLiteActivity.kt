@@ -5,26 +5,34 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.View
+import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.widget.FrameLayout
+import android.widget.ProgressBar
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
 import androidx.annotation.RestrictTo
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.Companion.EXTRA_ARGS
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForData
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForInstantDebits
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForToken
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.OpenCustomTab
 import kotlinx.coroutines.launch
 
-internal class FinancialConnectionsSheetLiteActivity : ComponentActivity() {
+internal class FinancialConnectionsSheetLiteActivity : ComponentActivity(R.layout.stripe_activity_lite) {
 
     private lateinit var webView: WebView
+    private lateinit var progressBar: ProgressBar
 
     private val viewModel: FinancialConnectionsLiteViewModel by viewModels {
         FinancialConnectionsLiteViewModel.Factory()
@@ -33,17 +41,12 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity() {
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView(R.layout.stripe_activity_lite)
 
-        val args = getArgs(intent)
-        if (args == null) {
-            finish()
-            return
-        }
-
-        val frameLayout = FrameLayout(this)
-        webView = setupWebView()
-        frameLayout.addView(webView)
-        setContentView(frameLayout)
+        webView = findViewById(R.id.webView)
+        progressBar = findViewById(R.id.progressBar)
+        setupProgressBar()
+        setupWebView()
 
         lifecycleScope.launch {
             viewModel.viewEffects.collect { viewEffect ->
@@ -56,6 +59,36 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity() {
         }
     }
 
+    private fun setupProgressBar() {
+        val color = when (getArgs(intent)) {
+            null, is ForData, is ForToken -> R.color.stripe_blurple
+            is ForInstantDebits -> R.color.stripe_link
+        }.let { ContextCompat.getColor(this, it) }
+        progressBar.progressDrawable.setTint(color)
+        progressBar.indeterminateDrawable.setTint(color)
+        progressBar.isVisible = true
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun setupWebView(): WebView {
+        return webView.apply {
+            settings.javaScriptEnabled = true
+            settings.useWideViewPort = true
+            settings.loadWithOverviewMode = true
+            webChromeClient = object : WebChromeClient() {
+                override fun onProgressChanged(view: WebView?, newProgress: Int) {
+                    progressBar.visibility = if (newProgress < 100) View.VISIBLE else View.GONE
+                    progressBar.progress = newProgress
+                }
+            }
+            webViewClient = object : WebViewClient() {
+                override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                    return handleUrl(request?.url)
+                }
+            }
+        }
+    }
+
     private fun openCustomTab(uri: Uri) {
         CustomTabsIntent.Builder()
             .setShowTitle(true)
@@ -63,21 +96,6 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity() {
             .setBookmarksButtonEnabled(false)
             .build()
             .launchUrl(this, uri)
-    }
-
-    @SuppressLint("SetJavaScriptEnabled")
-    private fun setupWebView(): WebView {
-        return WebView(this).also {
-            val webSettings = it.settings
-            webSettings.javaScriptEnabled = true
-            webSettings.useWideViewPort = true
-            webSettings.loadWithOverviewMode = true
-            it.webViewClient = object : WebViewClient() {
-                override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-                    return handleUrl(request?.url)
-                }
-            }
-        }
     }
 
     private fun handleUrl(uri: Uri?): Boolean {

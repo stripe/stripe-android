@@ -152,9 +152,9 @@ class DefaultPaymentSheetLauncherTest {
     }
 
     @Test
-    fun `Clears out customPaymentMethodConfirmHandler when lifecycle owner is destroyed`() {
+    fun `Clears out confirmCustomPaymentMethodCallback when lifecycle owner is destroyed`() {
         PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER] = PaymentElementCallbacks.Builder()
-            .customPaymentMethodConfirmHandler { _, _ ->
+            .confirmCustomPaymentMethodCallback { _, _ ->
                 error("I’m alive")
             }
             .build()
@@ -172,19 +172,19 @@ class DefaultPaymentSheetLauncherTest {
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
         assertThat(
             PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER]
-                ?.customPaymentMethodConfirmHandler
+                ?.confirmCustomPaymentMethodCallback
         ).isNotNull()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
         assertThat(
             PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER]
-                ?.customPaymentMethodConfirmHandler
+                ?.confirmCustomPaymentMethodCallback
         ).isNotNull()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         assertThat(
             PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER]
-                ?.customPaymentMethodConfirmHandler
+                ?.confirmCustomPaymentMethodCallback
         ).isNull()
     }
 

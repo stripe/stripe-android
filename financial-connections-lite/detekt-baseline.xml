@@ -1,5 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <SmellBaseline>
   <ManuallySuppressedIssues/>
-  <CurrentIssues />
+  <CurrentIssues>
+    <ID>MagicNumber:FinancialConnectionsSheetLiteActivity.kt$FinancialConnectionsSheetLiteActivity.&lt;no name provided>$100</ID>
+  </CurrentIssues>
 </SmellBaseline>

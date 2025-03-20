@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.analytics
 
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
+import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCode
@@ -14,6 +15,9 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 internal class FakeEventReporter : EventReporter {
     private val _paymentFailureCalls = Turbine<PaymentFailureCall>()
     val paymentFailureCalls: ReceiveTurbine<PaymentFailureCall> = _paymentFailureCalls
+
+    private val _paymentSuccessCalls = Turbine<PaymentSuccessCall>()
+    val paymentSuccessCalls: ReceiveTurbine<PaymentSuccessCall> = _paymentSuccessCalls
 
     private val _updatePaymentMethodSucceededCalls = Turbine<UpdatePaymentMethodSucceededCall>()
     val updatePaymentMethodSucceededCalls: ReceiveTurbine<UpdatePaymentMethodSucceededCall> =
@@ -49,6 +53,7 @@ internal class FakeEventReporter : EventReporter {
 
     fun validate() {
         _paymentFailureCalls.ensureAllEventsConsumed()
+        _paymentSuccessCalls.ensureAllEventsConsumed()
         _updatePaymentMethodSucceededCalls.ensureAllEventsConsumed()
         _updatePaymentMethodFailedCalls.ensureAllEventsConsumed()
         _setAsDefaultPaymentMethodFailedCalls.ensureAllEventsConsumed()
@@ -60,7 +65,13 @@ internal class FakeEventReporter : EventReporter {
         _showManageSavedPaymentMethods.ensureAllEventsConsumed()
     }
 
-    override fun onInit(configuration: PaymentSheet.Configuration, isDeferred: Boolean) {
+    override fun onInit(
+        commonConfiguration: CommonConfiguration,
+        appearance: PaymentSheet.Appearance,
+        primaryButtonColor: Boolean?,
+        paymentMethodLayout: PaymentSheet.PaymentMethodLayout?,
+        isDeferred: Boolean
+    ) {
     }
 
     override fun onLoadStarted(initializedViaCompose: Boolean) {
@@ -120,6 +131,12 @@ internal class FakeEventReporter : EventReporter {
         paymentSelection: PaymentSelection?,
         deferredIntentConfirmationType: DeferredIntentConfirmationType?
     ) {
+        _paymentSuccessCalls.add(
+            PaymentSuccessCall(
+                paymentSelection = paymentSelection,
+                deferredIntentConfirmationType = deferredIntentConfirmationType
+            )
+        )
     }
 
     override fun onPaymentFailure(
@@ -201,6 +218,11 @@ internal class FakeEventReporter : EventReporter {
     data class PaymentFailureCall(
         val paymentSelection: PaymentSelection?,
         val error: PaymentSheetConfirmationError
+    )
+
+    data class PaymentSuccessCall(
+        val paymentSelection: PaymentSelection?,
+        val deferredIntentConfirmationType: DeferredIntentConfirmationType?
     )
 
     data class UpdatePaymentMethodSucceededCall(

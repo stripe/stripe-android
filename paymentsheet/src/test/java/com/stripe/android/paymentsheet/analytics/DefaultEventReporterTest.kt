@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -99,7 +100,10 @@ class DefaultEventReporterTest {
         val completeEventReporter = createEventReporter(EventReporter.Mode.Complete)
 
         completeEventReporter.onInit(
-            configuration = configuration,
+            commonConfiguration = configuration.asCommonConfiguration(),
+            appearance = configuration.appearance,
+            primaryButtonColor = configuration.primaryButtonColorUsage(),
+            paymentMethodLayout = configuration.paymentMethodLayout,
             isDeferred = false,
         )
 
@@ -969,7 +973,13 @@ class DefaultEventReporterTest {
     }
 
     private fun EventReporter.simulateInit() {
-        onInit(configuration, isDeferred = false)
+        onInit(
+            commonConfiguration = configuration.asCommonConfiguration(),
+            appearance = configuration.appearance,
+            primaryButtonColor = configuration.primaryButtonColorUsage(),
+            paymentMethodLayout = configuration.paymentMethodLayout,
+            isDeferred = false
+        )
     }
 
     private fun EventReporter.simulateSuccessfulSetup(
@@ -985,7 +995,7 @@ class DefaultEventReporterTest {
         hasDefaultPaymentMethod: Boolean? = null,
         setAsDefaultEnabled: Boolean? = null,
     ) {
-        onInit(configuration, isDeferred = false)
+        simulateInit()
         onLoadStarted(initializedViaCompose = false)
         onLoadSucceeded(
             paymentSelection = paymentSelection,

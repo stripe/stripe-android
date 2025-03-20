@@ -22,7 +22,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.AnalyticEventCallback
-import com.stripe.android.paymentelement.CustomPaymentMethodConfirmHandler
+import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
@@ -233,12 +233,12 @@ class PaymentSheet internal constructor(
         }
 
         /**
-         * @param handler Called when a user confirms payment for a custom payment method. Use with
+         * @param callback Called when a user confirms payment for a custom payment method. Use with
          * [Configuration.Builder.customPaymentMethods] to specify custom payment methods.
          */
         @ExperimentalCustomPaymentMethodsApi
-        internal fun customPaymentMethodConfirmHandler(handler: CustomPaymentMethodConfirmHandler) = apply {
-            callbacksBuilder.customPaymentMethodConfirmHandler(handler)
+        internal fun confirmCustomPaymentMethodCallback(callback: ConfirmCustomPaymentMethodCallback) = apply {
+            callbacksBuilder.confirmCustomPaymentMethodCallback(callback)
         }
 
         /**
@@ -1990,7 +1990,7 @@ class PaymentSheet internal constructor(
     class CustomPaymentMethod internal constructor(
         val id: String,
         internal val subtitle: ResolvableString?,
-        internal val disableBillingDetailCollection: Boolean = false
+        internal val disableBillingDetailCollection: Boolean,
     ) : Parcelable {
         @ExperimentalCustomPaymentMethodsApi
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -2014,7 +2014,7 @@ class PaymentSheet internal constructor(
              * This has no effect if [PaymentSheet.Configuration.billingDetailsCollectionConfiguration] is not
              * configured.
              */
-            disableBillingDetailCollection: Boolean,
+            disableBillingDetailCollection: Boolean = true,
         ) : this(
             id = id,
             subtitle = subtitle?.resolvableString,
@@ -2044,7 +2044,7 @@ class PaymentSheet internal constructor(
              * This has no effect if [PaymentSheet.Configuration.billingDetailsCollectionConfiguration] is not
              * configured.
              */
-            disableBillingDetailCollection: Boolean,
+            disableBillingDetailCollection: Boolean = true,
         ) : this(
             id = id,
             subtitle = subtitle?.resolvableString,
@@ -2272,12 +2272,12 @@ class PaymentSheet internal constructor(
             }
 
             /**
-             * @param handler Called when a user confirms payment for a custom payment method.
+             * @param callback Called when a user confirms payment for a custom payment method.
              */
             @ExperimentalCustomPaymentMethodsApi
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            fun customPaymentMethodConfirmHandler(handler: CustomPaymentMethodConfirmHandler) = apply {
-                callbacksBuilder.customPaymentMethodConfirmHandler(handler)
+            fun confirmCustomPaymentMethodCallback(callback: ConfirmCustomPaymentMethodCallback) = apply {
+                callbacksBuilder.confirmCustomPaymentMethodCallback(callback)
             }
 
             /**

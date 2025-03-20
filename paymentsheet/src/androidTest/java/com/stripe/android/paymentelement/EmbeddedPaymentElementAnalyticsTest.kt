@@ -78,6 +78,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
+        validateAnalyticsRequest(eventName = "mc_embedded_init")
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(eventName = "mc_load_succeeded")
         validateAnalyticsRequest(eventName = "mc_embedded_sheet_newpm_show")
@@ -127,8 +128,11 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             eventName = "stripe_android.paymenthandler.confirm.finished",
             query("intent_id", "pi_example"),
         )
+        validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
+        validateAnalyticsRequest(eventName = "mc_embedded_payment_success")
 
         formPage.clickPrimaryButton()
+        formPage.waitUntilMissing()
     }
 
     @Test
@@ -149,6 +153,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         }
         networkRule.setupV1PaymentMethodsResponse(card1, card2)
 
+        validateAnalyticsRequest(eventName = "mc_embedded_init")
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(eventName = "mc_load_succeeded")
         validateAnalyticsRequest(eventName = "stripe_android.retrieve_payment_methods")
@@ -186,6 +191,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             eventName = "stripe_android.paymenthandler.confirm.finished",
             query("intent_id", "pi_example"),
         )
+        validateAnalyticsRequest(eventName = "mc_embedded_payment_success")
 
         testContext.confirm()
     }
@@ -208,6 +214,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         }
         networkRule.setupV1PaymentMethodsResponse(card1, card2)
 
+        validateAnalyticsRequest(eventName = "mc_embedded_init")
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(eventName = "mc_load_succeeded")
         validateAnalyticsRequest(eventName = "stripe_android.retrieve_payment_methods")

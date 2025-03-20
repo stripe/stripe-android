@@ -59,7 +59,7 @@ class PaymentElementCallbackReferencesTest {
             .createIntentCallback { _, _ ->
                 error("Should not be called!")
             }
-            .customPaymentMethodConfirmHandler { _, _ ->
+            .confirmCustomPaymentMethodCallback { _, _ ->
                 error("Should not be called!")
             }
             .externalPaymentMethodConfirmHandler { _, _ ->

@@ -1470,7 +1470,7 @@ internal class DefaultFlowControllerTest {
                     .createIntentCallback { _, _ ->
                         error("Should not be called!")
                     }
-                    .customPaymentMethodConfirmHandler { _, _ ->
+                    .confirmCustomPaymentMethodCallback { _, _ ->
                         error("Should not be called!")
                     }
                     .externalPaymentMethodConfirmHandler { _, _ ->
@@ -1966,9 +1966,9 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `Clears out customPaymentMethodConfirmHandler when lifecycle owner is destroyed`() {
+    fun `Clears out confirmCustomPaymentMethodCallback when lifecycle owner is destroyed`() {
         PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks.Builder()
-            .customPaymentMethodConfirmHandler { _, _ ->
+            .confirmCustomPaymentMethodCallback { _, _ ->
                 error("I’m alive")
             }
             .build()
@@ -1978,19 +1978,19 @@ internal class DefaultFlowControllerTest {
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
         assertThat(
             PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER]
-                ?.customPaymentMethodConfirmHandler
+                ?.confirmCustomPaymentMethodCallback
         ).isNotNull()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
         assertThat(
             PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER]
-                ?.customPaymentMethodConfirmHandler
+                ?.confirmCustomPaymentMethodCallback
         ).isNotNull()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
         assertThat(
             PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER]
-                ?.customPaymentMethodConfirmHandler
+                ?.confirmCustomPaymentMethodCallback
         ).isNull()
     }
 
