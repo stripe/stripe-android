@@ -16,13 +16,7 @@ import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
-import com.stripe.android.link.LinkConfigurationCoordinator
-import com.stripe.android.link.RealLinkConfigurationCoordinator
 import com.stripe.android.link.account.LinkAccountHolder
-import com.stripe.android.link.gate.DefaultLinkGate
-import com.stripe.android.link.gate.LinkGate
-import com.stripe.android.link.injection.LinkAnalyticsComponent
-import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.paymentsheet.BuildConfig
@@ -39,9 +33,7 @@ import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
-import com.stripe.android.paymentsheet.state.DefaultLinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.DefaultPaymentElementLoader
-import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import dagger.Binds
 import dagger.Lazy
@@ -53,12 +45,7 @@ import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 @SuppressWarnings("TooManyFunctions")
-@Module(
-    subcomponents = [
-        LinkAnalyticsComponent::class,
-        LinkComponent::class,
-    ],
-)
+@Module
 internal abstract class PaymentSheetCommonModule {
 
     @Singleton
@@ -83,20 +70,9 @@ internal abstract class PaymentSheetCommonModule {
     abstract fun bindsUserFacingLogger(impl: RealUserFacingLogger): UserFacingLogger
 
     @Binds
-    abstract fun bindsLinkAccountStatusProvider(
-        impl: DefaultLinkAccountStatusProvider,
-    ): LinkAccountStatusProvider
-
-    @Binds
     abstract fun bindsPaymentSheetUpdater(
         impl: DefaultPaymentSelectionUpdater,
     ): PaymentSelectionUpdater
-
-    @Binds
-    abstract fun bindsLinkConfigurationCoordinator(impl: RealLinkConfigurationCoordinator): LinkConfigurationCoordinator
-
-    @Binds
-    abstract fun bindLinkGateFactory(linkGateFactory: DefaultLinkGate.Factory): LinkGate.Factory
 
     @Binds
     abstract fun bindsCardAccountRangeRepositoryFactory(
