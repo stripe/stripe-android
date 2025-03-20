@@ -7123,7 +7123,6 @@ public final class com/stripe/android/view/CardFormView : android/widget/LinearL
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;I)V
 	public synthetic fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getBrand ()Lcom/stripe/android/model/CardBrand;
-	public final fun getCardParams ()Lcom/stripe/android/model/CardParams;
 	public final fun getOnBehalfOf ()Ljava/lang/String;
 	public final fun getPaymentMethodCreateParams ()Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun setCardValidCallback (Lcom/stripe/android/view/CardValidCallback;)V
@@ -7158,7 +7157,6 @@ public final class com/stripe/android/view/CardInputWidget : android/widget/Line
 	public synthetic fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;IILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun clear ()V
 	public final fun getBrand ()Lcom/stripe/android/model/CardBrand;
-	public fun getCardParams ()Lcom/stripe/android/model/CardParams;
 	public final fun getOnBehalfOf ()Ljava/lang/String;
 	public fun getPaymentMethodCard ()Lcom/stripe/android/model/PaymentMethodCreateParams$Card;
 	public fun getPaymentMethodCreateParams ()Lcom/stripe/android/model/PaymentMethodCreateParams;
@@ -7195,7 +7193,6 @@ public final class com/stripe/android/view/CardMultilineWidget : android/widget/
 	public synthetic fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;IZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun clear ()V
 	public final synthetic fun getBrand ()Lcom/stripe/android/model/CardBrand;
-	public fun getCardParams ()Lcom/stripe/android/model/CardParams;
 	public final fun getOnBehalfOf ()Ljava/lang/String;
 	public final fun getPaymentMethodBillingDetails ()Lcom/stripe/android/model/PaymentMethod$BillingDetails;
 	public final fun getPaymentMethodBillingDetailsBuilder ()Lcom/stripe/android/model/PaymentMethod$BillingDetails$Builder;
