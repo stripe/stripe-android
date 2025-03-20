@@ -1,10 +1,13 @@
 package com.stripe.android.financialconnections.features.streamlinedconsent
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalUriHandler
 import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.generic.GenericScreen
+import com.stripe.android.financialconnections.features.streamlinedconsent.IDConsentContentState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.presentation.Async.Fail
 import com.stripe.android.financialconnections.presentation.Async.Loading
 import com.stripe.android.financialconnections.presentation.Async.Success
@@ -19,6 +22,16 @@ internal fun IDConsentContentScreen() {
     val parentViewModel = parentViewModel()
 
     val state by viewModel.stateFlow.collectAsState()
+    val uriHandler = LocalUriHandler.current
+
+    state.viewEffect?.let { viewEffect ->
+        LaunchedEffect(viewEffect) {
+            when (viewEffect) {
+                is OpenUrl -> uriHandler.openUri(viewEffect.url)
+            }
+            viewModel.onViewEffectLaunched()
+        }
+    }
 
     IDConsentContent(
         state = state,

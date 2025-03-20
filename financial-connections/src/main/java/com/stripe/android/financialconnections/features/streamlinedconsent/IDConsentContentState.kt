@@ -20,9 +20,6 @@ internal data class IDConsentContentState(
     }
 
     sealed interface ViewEffect {
-        data class OpenUrl(
-            val url: String,
-            val id: Long,
-        ) : ViewEffect
+        data class OpenUrl(val url: String) : ViewEffect
     }
 }

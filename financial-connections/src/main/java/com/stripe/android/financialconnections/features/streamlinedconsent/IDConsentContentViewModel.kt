@@ -27,7 +27,6 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.launch
-import java.util.Date
 
 internal class IDConsentContentViewModel @AssistedInject constructor(
     @Assisted initialState: IDConsentContentState,
@@ -70,11 +69,10 @@ internal class IDConsentContentViewModel @AssistedInject constructor(
 
     fun onClickableTextClick(uri: String) {
         viewModelScope.launch {
-            val date = Date()
             handleClickableUrl(
                 currentPane = PANE,
                 uri = uri,
-                onNetworkUrlClicked = { setState { copy(viewEffect = OpenUrl(uri, date.time)) } },
+                onNetworkUrlClicked = { setState { copy(viewEffect = OpenUrl(uri)) } },
                 knownDeeplinkActions = mapOf(
                     // Clicked on the "Legal details" link -> Open the Legal Details bottom sheet
                     ConsentClickableText.LEGAL_DETAILS.value to {
@@ -83,6 +81,10 @@ internal class IDConsentContentViewModel @AssistedInject constructor(
                 )
             )
         }
+    }
+
+    fun onViewEffectLaunched() {
+        setState { copy(viewEffect = null) }
     }
 
     private fun presentLegalDetailsBottomSheet() {
