@@ -118,6 +118,16 @@ internal class StripeConnectWebView private constructor(
         )
     }
 
+    fun mobileInputReceived(input: MobileInput, resultCallback: ValueCallback<Result<String>>) {
+        evaluateSdkJs(
+            function = "mobileInputReceived",
+            payload = buildJsonObject {
+                put("input", input.value)
+            },
+            resultCallback = resultCallback
+        )
+    }
+
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         // We need the Activity context for some UI to work, like web-triggered dialogs
@@ -212,6 +222,11 @@ internal class StripeConnectWebView private constructor(
          * Callback to invoke upon receiving 'openFinancialConnections' message.
          */
         suspend fun onOpenFinancialConnections(activity: Activity, message: OpenFinancialConnectionsMessage)
+
+        /**
+         * Callback to invoke upon receiving 'closeWebView' message.
+         */
+        fun onCloseWebView()
 
         /**
          * Callback to invoke upon failing to deserialize a web message.
@@ -410,6 +425,12 @@ internal class StripeConnectWebView private constructor(
                 checkNotNull(delegate.fetchClientSecret())
             }
         }
+
+        @JavascriptInterface
+        fun closeWebView() {
+            logger.debug("($loggerTag) Close WebView")
+            delegate.onCloseWebView()
+        }
     }
 
     private inline fun <reified T> tryDeserializeWebMessage(
@@ -437,15 +458,41 @@ internal class StripeConnectWebView private constructor(
         )
     }
 
-    private fun WebView.evaluateSdkJs(function: String, payload: JsonObject) {
+    private fun WebView.evaluateSdkJs(
+        function: String,
+        payload: JsonObject,
+        resultCallback: ValueCallback<Result<String>>? = null
+    ) {
         val command = "$ANDROID_JS_INTERFACE.$function($payload)"
+        // language=JavaScript
+        val wrappedCommand = """
+            (function () {
+                try {
+                    return $command;
+                } catch (error) {
+                    return "$EVALUATE_SDK_JS_ERROR_PREFIX" + error;
+                }
+            })()
+        """.trimIndent()
         post {
             logger.debug("($loggerTag) Evaluating JS: $command")
-            evaluateJavascript(command, null)
+            evaluateJavascript(wrappedCommand) { result ->
+                val unquotedResult = result.removeSurrounding("\"")
+                val wrappedResult =
+                    if (!unquotedResult.startsWith(EVALUATE_SDK_JS_ERROR_PREFIX)) {
+                        Result.success(result)
+                    } else {
+                        val errorMessage = unquotedResult.removePrefix(EVALUATE_SDK_JS_ERROR_PREFIX)
+                        logger.error("($loggerTag) Error evaluating JS: $errorMessage")
+                        Result.failure(RuntimeException(errorMessage))
+                    }
+                resultCallback?.onReceiveValue(wrappedResult)
+            }
         }
     }
 
     internal companion object {
         private const val ANDROID_JS_INTERFACE = "Android"
+        private const val EVALUATE_SDK_JS_ERROR_PREFIX = "__STRIPE_EVALUATE_SDK_JS_ERROR__:"
     }
 }

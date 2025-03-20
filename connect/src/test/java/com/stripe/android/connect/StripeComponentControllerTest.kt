@@ -2,12 +2,12 @@
 
 package com.stripe.android.connect
 
-import android.content.Context
-import android.os.Bundle
 import android.view.ViewGroup
 import androidx.core.view.children
-import androidx.fragment.app.FragmentActivity
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.connect.test.TestActivity
+import com.stripe.android.connect.test.TestComponentController
+import com.stripe.android.connect.test.TestComponentView
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
@@ -86,62 +86,4 @@ class StripeComponentControllerTest {
     private fun awaitMainLooper() {
         ShadowLooper.shadowMainLooper().idle()
     }
-
-    internal class TestActivity : FragmentActivity() {
-        lateinit var controller: StripeComponentController<TestComponentListener, *>
-        lateinit var embeddedComponentManager: EmbeddedComponentManager
-        val onDismissListener = StripeComponentController.OnDismissListener { }
-        val listener = object : TestComponentListener {}
-
-        override fun onCreate(savedInstanceState: Bundle?) {
-            super.onCreate(savedInstanceState)
-            embeddedComponentManager = mock()
-            controller = TestComponentController(this, embeddedComponentManager)
-            controller.onDismissListener = onDismissListener
-            controller.listener = listener
-        }
-    }
-
-    internal class TestComponentController(
-        activity: FragmentActivity,
-        embeddedComponentManager: EmbeddedComponentManager
-    ) : StripeComponentController<TestComponentListener, EmptyProps>(
-        dfClass = TestComponentDialogFragment::class.java,
-        activity = activity,
-        embeddedComponentManager = embeddedComponentManager,
-    )
-
-    internal class TestComponentDialogFragment :
-        StripeComponentDialogFragment<TestComponentView, TestComponentListener, EmptyProps>() {
-
-        override fun createComponentView(
-            embeddedComponentManager: EmbeddedComponentManager
-        ): TestComponentView {
-            return TestComponentView(requireContext())
-        }
-    }
-
-    internal class TestComponentView(
-        context: Context
-    ) : StripeComponentView<TestComponentListener, EmptyProps>(
-        context = context,
-        attrs = null,
-        defStyleAttr = 0,
-        embeddedComponent = StripeEmbeddedComponent.ACCOUNT_ONBOARDING,
-        embeddedComponentManager = null,
-        listener = null,
-        props = null,
-    ) {
-        override var listener: TestComponentListener? = null
-
-        override fun initialize(
-            embeddedComponentManager: EmbeddedComponentManager,
-            listener: TestComponentListener?,
-            props: EmptyProps
-        ) {
-            // Nothing.
-        }
-    }
-
-    internal interface TestComponentListener : StripeEmbeddedComponentListener
 }

@@ -7,7 +7,7 @@ import android.util.AttributeSet
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.WebView
+import android.webkit.ValueCallback
 import android.widget.FrameLayout
 import android.widget.ProgressBar
 import androidx.annotation.RestrictTo
@@ -20,10 +20,15 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.MutableCreationExtras
 import com.stripe.android.connect.di.StripeConnectComponent
 import com.stripe.android.connect.util.AndroidClock
+import com.stripe.android.connect.webview.MobileInput
+import com.stripe.android.connect.webview.StripeConnectWebView
 import com.stripe.android.connect.webview.StripeConnectWebViewContainer
 import com.stripe.android.connect.webview.StripeConnectWebViewContainerState
 import com.stripe.android.connect.webview.StripeConnectWebViewContainerViewModel
 import com.stripe.android.core.Logger
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
@@ -53,8 +58,11 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
     private var progressBar: ProgressBar? = null
 
     // See StripeConnectWebViewContainerViewModel for why we're getting a WebView from a ViewModel.
-    private val webView: WebView? get() = viewModel?.webView
+    private val webView: StripeConnectWebView? get() = viewModel?.webView
     private var webViewCacheKey: String? = null
+
+    private val _receivedCloseWebView = MutableStateFlow(false)
+    internal val receivedCloseWebView: StateFlow<Boolean> = _receivedCloseWebView.asStateFlow()
 
     /* Notes on initialization
      * -----------------------
@@ -244,6 +252,7 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
         val progressBar = this.progressBar ?: return
 
         logger.debug("($loggerTag) Binding view state: $state")
+        _receivedCloseWebView.value = state.receivedCloseWebView
         setBackgroundColor(state.backgroundColor)
         webView.setBackgroundColor(state.backgroundColor)
         progressBar.isVisible = state.isNativeLoadingIndicatorVisible
@@ -251,6 +260,10 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
         if (state.isNativeLoadingIndicatorVisible) {
             progressBar.indeterminateTintList = ColorStateList.valueOf(state.nativeLoadingIndicatorColor)
         }
+    }
+
+    internal fun mobileInputReceived(input: MobileInput, resultCallback: ValueCallback<Result<String>>) {
+        webView?.mobileInputReceived(input, resultCallback)
     }
 
     private fun handleEvent(event: ComponentEvent) {
