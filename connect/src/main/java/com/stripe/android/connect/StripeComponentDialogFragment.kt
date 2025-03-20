@@ -157,9 +157,15 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
             val paddings = insets.getInsets(
                 WindowInsetsCompat.Type.statusBars() or
                     WindowInsetsCompat.Type.ime() or
-                    WindowInsetsCompat.Type.navigationBars()
+                    WindowInsetsCompat.Type.navigationBars() or
+                    WindowInsetsCompat.Type.displayCutout()
             )
-            view.updatePadding(top = paddings.top, bottom = paddings.bottom)
+            view.updatePadding(
+                left = paddings.left,
+                top = paddings.top,
+                right = paddings.right,
+                bottom = paddings.bottom,
+            )
             insets.inset(0, paddings.top, 0, paddings.bottom)
         }
 
