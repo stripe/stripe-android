@@ -46,7 +46,7 @@ internal class DefaultPaymentMethodsConfirmationTest {
     private val layoutType: PaymentSheetLayoutType = PaymentSheetLayoutType.Vertical()
 
     @Test
-    fun setNewPMAsDefault_withSavedPaymentMethods_andSetAsDefault() = runProductIntegrationTest(
+    fun setNewPMAsDefault_withSavedPaymentMethods_sendsSetAsDefaultParamInConfirmCall() = runProductIntegrationTest(
         networkRule = networkRule,
         createIntentCallback = confirmationType.createIntentCallback,
         integrationType = integrationType,
@@ -178,7 +178,7 @@ internal class DefaultPaymentMethodsConfirmationTest {
         }
 
     @Test
-    fun payWithNewPM_checkSaveForFuture_sendsSetAsDefaultInConfirmCall() = runProductIntegrationTest(
+    fun payWithNewPM_savePM_sendsSetAsDefaultInConfirmCall() = runProductIntegrationTest(
         networkRule = networkRule,
         createIntentCallback = confirmationType.createIntentCallback,
         integrationType = integrationType,
