@@ -20,11 +20,11 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.manage.ManageActivity
-import com.stripe.paymentelementtestpages.FormPage
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.testing.PaymentConfigurationTestRule
+import com.stripe.paymentelementtestpages.FormPage
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
