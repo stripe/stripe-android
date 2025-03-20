@@ -1,10 +1,13 @@
 package com.stripe.android.paymentsheet
 
+import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.paymentsheet.utils.ConfirmationType
 import com.stripe.android.paymentsheet.utils.ConfirmationTypeProvider
 import com.stripe.android.paymentsheet.utils.DefaultPaymentMethodsUtils
+import com.stripe.android.paymentsheet.utils.PaymentMethodType
+import com.stripe.android.paymentsheet.utils.PaymentMethodTypeProvider
 import com.stripe.android.paymentsheet.utils.PaymentSheetLayoutType
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
 import com.stripe.android.paymentsheet.utils.ProductIntegrationTypeProvider
@@ -12,6 +15,8 @@ import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.paymentelementtestpages.FormPage
+import com.stripe.paymentelementtestpages.VerticalModePage
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -25,17 +30,23 @@ internal class DefaultPaymentMethodsConfirmationTest {
     private val composeTestRule = testRules.compose
     private val networkRule = testRules.networkRule
 
+    @get:Rule
+    val intentsRule = IntentsRule()
+
     @TestParameter(valuesProvider = ProductIntegrationTypeProvider::class)
     lateinit var integrationType: ProductIntegrationType
 
     @TestParameter(valuesProvider = ConfirmationTypeProvider::class)
     lateinit var confirmationType: ConfirmationType
 
+    @TestParameter(valuesProvider = PaymentMethodTypeProvider::class)
+    lateinit var paymentMethodType: PaymentMethodType
+
     // Confirmation behavior between horizontal and vertical doesn't differ, so we're testing with vertical mode only.
     private val layoutType: PaymentSheetLayoutType = PaymentSheetLayoutType.Vertical()
 
     @Test
-    fun setNewCardAsDefault_withSavedPaymentMethods_andSetAsDefault() = runProductIntegrationTest(
+    fun setNewPMAsDefault_withSavedPaymentMethods_andSetAsDefault() = runProductIntegrationTest(
         networkRule = networkRule,
         createIntentCallback = confirmationType.createIntentCallback,
         integrationType = integrationType,
@@ -60,13 +71,12 @@ internal class DefaultPaymentMethodsConfirmationTest {
             paymentMethodLayout = layoutType.paymentMethodLayout,
             hasSavedPaymentMethods = true,
             isDeferredIntent = confirmationType.isDeferredIntent,
+            paymentMethodType = paymentMethodType,
         )
 
-        layoutType.payWithNewCardWithSavedPaymentMethods(
-            composeTestRule = composeTestRule,
-        )
+        navigateToFormForLpm()
 
-        paymentSheetPage.fillOutCardDetails()
+        paymentMethodType.fillOutFormDetails(composeTestRule = composeTestRule)
         paymentSheetPage.checkSaveForFuture()
         paymentSheetPage.checkSetAsDefaultCheckbox()
 
@@ -81,7 +91,7 @@ internal class DefaultPaymentMethodsConfirmationTest {
     }
 
     @Test
-    fun setNewCardAsDefault_withSavedPaymentMethods_uncheckSetAsDefault_doesNotSendSetAsDefaultParamInConfirmCall() =
+    fun setNewPMAsDefault_withSavedPaymentMethods_uncheckSetAsDefault_doesNotSendSetAsDefaultParamInConfirmCall() =
         runProductIntegrationTest(
             networkRule = networkRule,
             createIntentCallback = confirmationType.createIntentCallback,
@@ -107,13 +117,12 @@ internal class DefaultPaymentMethodsConfirmationTest {
                 paymentMethodLayout = layoutType.paymentMethodLayout,
                 hasSavedPaymentMethods = true,
                 isDeferredIntent = confirmationType.isDeferredIntent,
+                paymentMethodType = paymentMethodType,
             )
 
-            layoutType.payWithNewCardWithSavedPaymentMethods(
-                composeTestRule = composeTestRule,
-            )
+            navigateToFormForLpm()
 
-            paymentSheetPage.fillOutCardDetails()
+            paymentMethodType.fillOutFormDetails(composeTestRule = composeTestRule)
             paymentSheetPage.checkSaveForFuture()
 
             confirmationType.enqueuePaymentIntentConfirmWithExpectedSetAsDefault(
@@ -125,7 +134,7 @@ internal class DefaultPaymentMethodsConfirmationTest {
         }
 
     @Test
-    fun setNewCardAsDefault_withSavedPaymentMethods_uncheckSaveForFuture_doesNotSendSetAsDefaultParamInConfirmCall() =
+    fun setNewPMAsDefault_withSavedPaymentMethods_uncheckSaveForFuture_doesNotSendSetAsDefaultParamInConfirmCall() =
         runProductIntegrationTest(
             networkRule = networkRule,
             createIntentCallback = confirmationType.createIntentCallback,
@@ -151,13 +160,12 @@ internal class DefaultPaymentMethodsConfirmationTest {
                 paymentMethodLayout = layoutType.paymentMethodLayout,
                 hasSavedPaymentMethods = true,
                 isDeferredIntent = confirmationType.isDeferredIntent,
+                paymentMethodType = paymentMethodType,
             )
 
-            layoutType.payWithNewCardWithSavedPaymentMethods(
-                composeTestRule = composeTestRule,
-            )
+            navigateToFormForLpm()
 
-            paymentSheetPage.fillOutCardDetails()
+            paymentMethodType.fillOutFormDetails(composeTestRule = composeTestRule)
             paymentSheetPage.checkSaveForFuture()
             paymentSheetPage.checkSetAsDefaultCheckbox()
             paymentSheetPage.checkSaveForFuture()
@@ -170,7 +178,7 @@ internal class DefaultPaymentMethodsConfirmationTest {
         }
 
     @Test
-    fun payWithNewCard_checkSaveForFuture_sendsSetAsDefaultInConfirmCall() = runProductIntegrationTest(
+    fun payWithNewPM_checkSaveForFuture_sendsSetAsDefaultInConfirmCall() = runProductIntegrationTest(
         networkRule = networkRule,
         createIntentCallback = confirmationType.createIntentCallback,
         integrationType = integrationType,
@@ -189,9 +197,12 @@ internal class DefaultPaymentMethodsConfirmationTest {
             paymentMethodLayout = layoutType.paymentMethodLayout,
             hasSavedPaymentMethods = false,
             isDeferredIntent = confirmationType.isDeferredIntent,
+            paymentMethodType = paymentMethodType,
         )
 
-        paymentSheetPage.fillOutCardDetails()
+        navigateToFormForLpm()
+
+        paymentMethodType.fillOutFormDetails(composeTestRule = composeTestRule)
         paymentSheetPage.checkSaveForFuture()
         paymentSheetPage.assertNoSetAsDefaultCheckbox()
 
@@ -204,7 +215,7 @@ internal class DefaultPaymentMethodsConfirmationTest {
     }
 
     @Test
-    fun payWithNewCard_doNotSaveCard_doesNotSetAsDefault() = runProductIntegrationTest(
+    fun payWithNewPM_doNotSaveCard_doesNotSetAsDefault() = runProductIntegrationTest(
         networkRule = networkRule,
         createIntentCallback = confirmationType.createIntentCallback,
         integrationType = integrationType,
@@ -223,9 +234,12 @@ internal class DefaultPaymentMethodsConfirmationTest {
             paymentMethodLayout = layoutType.paymentMethodLayout,
             hasSavedPaymentMethods = false,
             isDeferredIntent = confirmationType.isDeferredIntent,
+            paymentMethodType = paymentMethodType,
         )
 
-        paymentSheetPage.fillOutCardDetails()
+        navigateToFormForLpm()
+
+        paymentMethodType.fillOutFormDetails(composeTestRule = composeTestRule)
         paymentSheetPage.checkSaveForFuture()
         paymentSheetPage.checkSaveForFuture()
         paymentSheetPage.assertNoSetAsDefaultCheckbox()
@@ -235,5 +249,13 @@ internal class DefaultPaymentMethodsConfirmationTest {
         )
 
         paymentSheetPage.clickPrimaryButton()
+    }
+
+    private fun navigateToFormForLpm() {
+        val verticalModePage = VerticalModePage(composeTestRule)
+        val formPage = FormPage(composeTestRule)
+
+        verticalModePage.clickNewPaymentMethodButton(paymentMethodType.type.code)
+        formPage.waitUntilVisible()
     }
 }

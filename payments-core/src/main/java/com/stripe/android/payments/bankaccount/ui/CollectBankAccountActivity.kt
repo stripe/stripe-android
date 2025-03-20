@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
+import androidx.annotation.RestrictTo
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
@@ -19,7 +20,8 @@ import com.stripe.android.payments.financialconnections.FinancialConnectionsPaym
 /**
  * No-UI activity that will handle collect bank account logic.
  */
-internal class CollectBankAccountActivity : AppCompatActivity() {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class CollectBankAccountActivity : AppCompatActivity() {
 
     private val starterArgs: CollectBankAccountContract.Args? by lazy {
         CollectBankAccountContract.Args.fromIntent(intent)

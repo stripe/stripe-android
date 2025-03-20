@@ -79,6 +79,10 @@ class FormPage(
         replaceText(cardNumber, number)
     }
 
+    fun fillOutName() {
+        replaceText("Full name", "Jane Doe")
+    }
+
     fun fillOutEmail() {
         replaceText("Email", "janedoe@example.com")
     }
