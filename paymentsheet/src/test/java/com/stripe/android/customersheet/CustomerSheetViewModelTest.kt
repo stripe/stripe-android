@@ -2932,41 +2932,7 @@ class CustomerSheetViewModelTest {
                 )
             )
 
-            verify(eventReporter).onHidePaymentOptionBrands(
-                source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
-                selectedBrand = CardBrand.Visa
-            )
-        }
-    }
-
-    @Test
-    fun `Modifying a payment method does not show remove`() = runTest(testDispatcher) {
-        val eventReporter: CustomerSheetEventReporter = mock()
-        val paymentMethod = CARD_WITH_NETWORKS_PAYMENT_METHOD
-
-        val viewModel = createViewModel(
-            workContext = testDispatcher,
-            eventReporter = eventReporter,
-            customerPaymentMethods = listOf(paymentMethod),
-        )
-
-        viewModel.viewState.test {
-            assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
-            viewModel.handleViewAction(
-                CustomerSheetViewAction.OnModifyItem(paymentMethod.toDisplayableSavedPaymentMethod())
-            )
-
-            val editViewState = awaitViewState<CustomerSheetViewState.UpdatePaymentMethod>()
-            editViewState.updatePaymentMethodInteractor.handleViewAction(
-                UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                    CardBrandChoice(
-                        brand = CardBrand.Visa,
-                        enabled = true
-                    )
-                )
-            )
-
-            verify(eventReporter).onHidePaymentOptionBrands(
+            verify(eventReporter).onBrandChoiceSelected(
                 source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
                 selectedBrand = CardBrand.Visa
             )
