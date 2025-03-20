@@ -878,7 +878,8 @@ internal class PaymentOptionsViewModelTest {
             ),
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             enableLogging = false,
-            productUsage = mock()
+            productUsage = mock(),
+            paymentElementCallbackIdentifier = "PaymentOptionsViewModelTestCallbackIdentifier",
         )
     }
 

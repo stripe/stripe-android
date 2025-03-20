@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.example.playground
 
 import android.app.Application
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -19,6 +20,8 @@ import com.stripe.android.customersheet.CustomerEphemeralKey
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.AnalyticEvent
+import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
@@ -441,6 +444,18 @@ internal class PaymentSheetPlaygroundViewModel(
             shouldSavePaymentMethod = shouldSavePaymentMethod,
             playgroundState = playgroundState,
         )
+    }
+
+    @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+    fun analyticCallback(event: AnalyticEvent) {
+        when (event) {
+            is AnalyticEvent.PresentedSheet -> {
+                Log.d("AnalyticEvent", "Event: $event")
+            }
+            is AnalyticEvent.DisplayedPaymentMethodForm -> {
+                Log.d("AnalyticEvent", "Event: $event, PM: ${event.paymentMethodType}")
+            }
+        }
     }
 
     @OptIn(DelicatePaymentSheetApi::class)

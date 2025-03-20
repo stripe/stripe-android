@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,7 +30,8 @@ import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
 
-internal const val TEST_TAG_HEADER_TITLE = "TEST_TAG_HEADER_TITLE"
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val TEST_TAG_HEADER_TITLE = "TEST_TAG_HEADER_TITLE"
 
 @Composable
 internal fun VerticalModeFormUI(

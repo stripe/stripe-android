@@ -6,50 +6,51 @@ import android.util.AttributeSet
 import androidx.annotation.RestrictTo
 import androidx.core.content.withStyledAttributes
 import com.stripe.android.connect.webview.StripeConnectWebViewContainer
-import com.stripe.android.connect.webview.StripeConnectWebViewContainerImpl
 import com.stripe.android.connect.webview.serialization.SetOnExit
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 @PrivateBetaConnectSDK
-class AccountOnboardingView private constructor(
+internal class AccountOnboardingView internal constructor(
     context: Context,
-    attrs: AttributeSet?,
-    defStyleAttr: Int,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0,
+    embeddedComponentManager: EmbeddedComponentManager?,
+    listener: AccountOnboardingListener?,
+    props: AccountOnboardingProps?,
     cacheKey: String?,
-    webViewContainerBehavior: StripeConnectWebViewContainerImpl<AccountOnboardingListener, AccountOnboardingProps>,
-) : StripeComponentView<AccountOnboardingListener, AccountOnboardingProps>(context, attrs, defStyleAttr),
-    StripeConnectWebViewContainer<AccountOnboardingListener, AccountOnboardingProps> by webViewContainerBehavior {
+) :
+    StripeComponentView<AccountOnboardingListener, AccountOnboardingProps>(
+        context = context,
+        attrs = attrs,
+        defStyleAttr = defStyleAttr,
+        embeddedComponent = StripeEmbeddedComponent.ACCOUNT_ONBOARDING,
+        embeddedComponentManager = embeddedComponentManager,
+        listener = listener,
+        listenerDelegate = AccountOnboardingListenerDelegate,
+        props = props,
+    ),
+    StripeConnectWebViewContainer<AccountOnboardingListener, AccountOnboardingProps> {
 
     @JvmOverloads
-    @RestrictTo(RestrictTo.Scope.LIBRARY)
     constructor(
         context: Context,
         attrs: AttributeSet? = null,
         defStyleAttr: Int = 0,
-        embeddedComponentManager: EmbeddedComponentManager? = null,
-        listener: AccountOnboardingListener? = null,
-        props: AccountOnboardingProps? = null,
-        cacheKey: String? = null,
     ) : this(
         context = context,
         attrs = attrs,
         defStyleAttr = defStyleAttr,
-        cacheKey = cacheKey,
-        webViewContainerBehavior = StripeConnectWebViewContainerImpl(
-            context = context,
-            embeddedComponent = StripeEmbeddedComponent.ACCOUNT_ONBOARDING,
-            embeddedComponentManager = embeddedComponentManager,
-            listener = listener,
-            listenerDelegate = AccountOnboardingListenerDelegate,
-            props = props,
-        )
+        embeddedComponentManager = null,
+        listener = null,
+        props = null,
+        cacheKey = null,
     )
 
     init {
         context.withStyledAttributes(attrs, R.styleable.StripeAccountOnboardingView, defStyleAttr, 0) {
-            val props = AccountOnboardingProps(
+            val xmlProps = AccountOnboardingProps(
                 fullTermsOfServiceUrl = getString(
                     R.styleable.StripeAccountOnboardingView_stripeFullTermsOfServiceUrl
                 ),
@@ -60,13 +61,13 @@ class AccountOnboardingView private constructor(
                     R.styleable.StripeAccountOnboardingView_stripePrivacyPolicyUrl
                 ),
             )
-            webViewContainerBehavior.setPropsFromXml(props)
+            setPropsFromXml(xmlProps)
         }
         var xmlCacheKey: String? = null
         context.withStyledAttributes(attrs, R.styleable.StripeConnectWebViewContainer, defStyleAttr, 0) {
             xmlCacheKey = getString(R.styleable.StripeConnectWebViewContainer_stripeWebViewCacheKey)
         }
-        webViewContainerBehavior.initializeView(this, cacheKey ?: xmlCacheKey)
+        initializeView(cacheKey ?: xmlCacheKey)
     }
 }
 

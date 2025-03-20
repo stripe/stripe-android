@@ -30,6 +30,11 @@ internal data class StripeConnectWebViewContainerState(
     val isNativeLoadingIndicatorVisible: Boolean = false,
 
     /**
+     * True if we received the 'closeWebView' message.
+     */
+    val receivedCloseWebView: Boolean = false,
+
+    /**
      * The appearance to use for the view.
      */
     val appearance: Appearance? = null

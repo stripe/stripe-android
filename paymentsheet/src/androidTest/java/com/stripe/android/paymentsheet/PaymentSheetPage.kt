@@ -230,6 +230,13 @@ internal class PaymentSheetPage(
     }
 
     fun checkSaveForFuture() {
+        composeTestRule.waitUntil(timeoutMillis = 5_000L) {
+            composeTestRule
+                .onAllNodesWithTag(SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG)
+                .fetchSemanticsNodes(
+                    atLeastOneRootRequired = false
+                ).isNotEmpty()
+        }
         composeTestRule.onNode(hasTestTag(SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG))
             .performScrollTo()
             .performClick()

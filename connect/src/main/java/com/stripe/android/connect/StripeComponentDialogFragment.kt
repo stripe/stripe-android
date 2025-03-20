@@ -1,11 +1,14 @@
 package com.stripe.android.connect
 
+import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import androidx.activity.ComponentDialog
+import androidx.activity.OnBackPressedCallback
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -17,8 +20,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.connect.appearance.Appearance
+import com.stripe.android.connect.webview.MobileInput
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -116,6 +121,8 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
 
     var onDismissListener: StripeComponentController.OnDismissListener? = null
 
+    private val onBackPressedCallback = OnBackPressedCallbackImpl(false)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setStyle(STYLE_NO_FRAME, R.style.StripeConnectFullScreenDialogStyle)
@@ -124,16 +131,22 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
         initialEmbeddedComponentManager = null
     }
 
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        return ComponentDialog(requireContext(), theme).apply {
+            onBackPressedDispatcher.addCallback(onBackPressedCallback)
+        }
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         // `setDecorFitsSystemWindows()` must be called here in onCreateView. If called too early, app crashes on
         // older Android versions; if too late, it doesn't do anything on newer versions.
         dialog?.window?.let { WindowCompat.setDecorFitsSystemWindows(it, false) }
 
-        val rootView = StripeComponentDialogFragmentView<ComponentView>(inflater)
-            .also { this._rootView = it }
-        rootView.toolbar.title = title
-        rootView.toolbar.setNavigationOnClickListener { dismiss() }
-        return rootView
+        return StripeComponentDialogFragmentView<ComponentView>(inflater).also {
+            this._rootView = it
+            it.title = title
+            it.listener = DialogFragmentViewListener()
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -144,9 +157,15 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
             val paddings = insets.getInsets(
                 WindowInsetsCompat.Type.statusBars() or
                     WindowInsetsCompat.Type.ime() or
-                    WindowInsetsCompat.Type.navigationBars()
+                    WindowInsetsCompat.Type.navigationBars() or
+                    WindowInsetsCompat.Type.displayCutout()
             )
-            view.updatePadding(top = paddings.top, bottom = paddings.bottom)
+            view.updatePadding(
+                left = paddings.left,
+                top = paddings.top,
+                right = paddings.right,
+                bottom = paddings.bottom,
+            )
             insets.inset(0, paddings.top, 0, paddings.bottom)
         }
 
@@ -161,6 +180,7 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
         // The View scaffolding has been created, but not the component view. The Manager may not be available yet, e.g.
         // after process death, so wait for the VM to provide it.
         viewLifecycleOwner.lifecycleScope.launch {
+            // Setup the component view.
             val embeddedComponentManager =
                 viewModel.embeddedComponentManager.filterNotNull().first()
             val componentView = createComponentView(embeddedComponentManager)
@@ -168,6 +188,16 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
             componentView.layoutParams =
                 LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f)
             rootView.componentView = componentView
+
+            // With the component view set up, we can allow it to control back behavior.
+            onBackPressedCallback.isEnabled = true
+
+            // Dismiss on command.
+            launch {
+                componentView.receivedCloseWebView
+                    .filter { it }
+                    .collectLatest { dismiss() }
+            }
         }
     }
 
@@ -192,6 +222,31 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
     private fun bindAppearance(appearance: Appearance) {
         rootView.bindAppearance(appearance)
         dialog?.window?.setBackgroundDrawable(rootView.background)
+    }
+
+    private inner class DialogFragmentViewListener : StripeComponentDialogFragmentView.Listener {
+        override fun onCloseButtonClickError() {
+            dismiss()
+        }
+    }
+
+    private inner class OnBackPressedCallbackImpl(enabled: Boolean) : OnBackPressedCallback(enabled) {
+        override fun handleOnBackPressed() {
+            // Defer to the component view if it's available; if not, dismiss.
+            val componentView = rootView.componentView
+            if (componentView == null) {
+                dismiss()
+                return
+            }
+            componentView.mobileInputReceived(
+                input = MobileInput.BACK_BUTTON_PRESSED,
+                resultCallback = { result ->
+                    if (result.isFailure) {
+                        dismiss()
+                    }
+                }
+            )
+        }
     }
 
     internal companion object {

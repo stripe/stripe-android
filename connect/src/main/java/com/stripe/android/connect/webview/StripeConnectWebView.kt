@@ -28,9 +28,9 @@ import com.stripe.android.connect.util.isInInstrumentationTest
 import com.stripe.android.connect.webview.serialization.AccountSessionClaimedMessage
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.ConnectJson
+import com.stripe.android.connect.webview.serialization.OpenAuthenticatedWebViewMessage
 import com.stripe.android.connect.webview.serialization.OpenFinancialConnectionsMessage
 import com.stripe.android.connect.webview.serialization.PageLoadMessage
-import com.stripe.android.connect.webview.serialization.SecureWebViewMessage
 import com.stripe.android.connect.webview.serialization.SetCollectMobileFinancialConnectionsResultPayloadJs
 import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
@@ -77,6 +77,9 @@ internal class StripeConnectWebView private constructor(
     @VisibleForTesting
     internal val stripeWebChromeClient = StripeConnectWebChromeClient()
 
+    @VisibleForTesting
+    internal val stripeJsInterface = StripeJsInterface()
+
     private val webViewLifecycleScope get() = findViewTreeLifecycleOwner()?.lifecycleScope
 
     init {
@@ -93,7 +96,7 @@ internal class StripeConnectWebView private constructor(
         }
 
         setDownloadListener(StripeDownloadListener(context))
-        addJavascriptInterface(StripeJsInterface(), ANDROID_JS_INTERFACE)
+        addJavascriptInterface(stripeJsInterface, ANDROID_JS_INTERFACE)
     }
 
     fun updateConnectInstance(appearance: Appearance) {
@@ -112,6 +115,16 @@ internal class StripeConnectWebView private constructor(
         callSetterWithSerializableValue(
             setter = "setCollectMobileFinancialConnectionsResult",
             value = ConnectJson.encodeToJsonElement(payload).jsonObject
+        )
+    }
+
+    fun mobileInputReceived(input: MobileInput, resultCallback: ValueCallback<Result<String>>) {
+        evaluateSdkJs(
+            function = "mobileInputReceived",
+            payload = buildJsonObject {
+                put("input", input.value)
+            },
+            resultCallback = resultCallback
         )
     }
 
@@ -201,9 +214,19 @@ internal class StripeConnectWebView private constructor(
         fun onMerchantIdChanged(merchantId: String)
 
         /**
+         * Callback to invoke upon receiving 'openAuthenticatedWebView' message.
+         */
+        fun onReceivedOpenAuthenticatedWebView(activity: Activity, message: OpenAuthenticatedWebViewMessage)
+
+        /**
          * Callback to invoke upon receiving 'openFinancialConnections' message.
          */
         suspend fun onOpenFinancialConnections(activity: Activity, message: OpenFinancialConnectionsMessage)
+
+        /**
+         * Callback to invoke upon receiving 'closeWebView' message.
+         */
+        fun onCloseWebView()
 
         /**
          * Callback to invoke upon failing to deserialize a web message.
@@ -309,7 +332,8 @@ internal class StripeConnectWebView private constructor(
         }
     }
 
-    private inner class StripeJsInterface {
+    @VisibleForTesting
+    internal inner class StripeJsInterface {
         @JavascriptInterface
         fun debug(message: String) {
             logger.debug("($loggerTag) Debug log from JS: $message")
@@ -345,12 +369,16 @@ internal class StripeConnectWebView private constructor(
         }
 
         @JavascriptInterface
-        fun openSecureWebView(message: String) {
-            val secureWebViewData = tryDeserializeWebMessage<SecureWebViewMessage>(
-                webFunctionName = "openSecureWebView",
+        fun openAuthenticatedWebView(message: String) {
+            val activity = findActivity()
+                ?: return
+            val parsed = tryDeserializeWebMessage<OpenAuthenticatedWebViewMessage>(
+                webFunctionName = "openAuthenticatedWebView",
                 message = message,
-            )
-            logger.debug("($loggerTag) Open secure web view with data: $secureWebViewData")
+            ) ?: return
+
+            logger.debug("($loggerTag) Open authenticated WebView: $parsed")
+            delegate.onReceivedOpenAuthenticatedWebView(activity, parsed)
         }
 
         @JavascriptInterface
@@ -397,6 +425,12 @@ internal class StripeConnectWebView private constructor(
                 checkNotNull(delegate.fetchClientSecret())
             }
         }
+
+        @JavascriptInterface
+        fun closeWebView() {
+            logger.debug("($loggerTag) Close WebView")
+            delegate.onCloseWebView()
+        }
     }
 
     private inline fun <reified T> tryDeserializeWebMessage(
@@ -424,15 +458,41 @@ internal class StripeConnectWebView private constructor(
         )
     }
 
-    private fun WebView.evaluateSdkJs(function: String, payload: JsonObject) {
+    private fun WebView.evaluateSdkJs(
+        function: String,
+        payload: JsonObject,
+        resultCallback: ValueCallback<Result<String>>? = null
+    ) {
         val command = "$ANDROID_JS_INTERFACE.$function($payload)"
+        // language=JavaScript
+        val wrappedCommand = """
+            (function () {
+                try {
+                    return $command;
+                } catch (error) {
+                    return "$EVALUATE_SDK_JS_ERROR_PREFIX" + error;
+                }
+            })()
+        """.trimIndent()
         post {
             logger.debug("($loggerTag) Evaluating JS: $command")
-            evaluateJavascript(command, null)
+            evaluateJavascript(wrappedCommand) { result ->
+                val unquotedResult = result.removeSurrounding("\"")
+                val wrappedResult =
+                    if (!unquotedResult.startsWith(EVALUATE_SDK_JS_ERROR_PREFIX)) {
+                        Result.success(result)
+                    } else {
+                        val errorMessage = unquotedResult.removePrefix(EVALUATE_SDK_JS_ERROR_PREFIX)
+                        logger.error("($loggerTag) Error evaluating JS: $errorMessage")
+                        Result.failure(RuntimeException(errorMessage))
+                    }
+                resultCallback?.onReceiveValue(wrappedResult)
+            }
         }
     }
 
     internal companion object {
         private const val ANDROID_JS_INTERFACE = "Android"
+        private const val EVALUATE_SDK_JS_ERROR_PREFIX = "__STRIPE_EVALUATE_SDK_JS_ERROR__:"
     }
 }

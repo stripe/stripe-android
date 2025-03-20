@@ -356,8 +356,7 @@ internal class CustomerSheetScreenshotTest {
                 canRemove = canRemove,
                 isLiveMode = true,
                 cardBrandFilter = DefaultCardBrandFilter,
-                onBrandChoiceOptionsDismissed = {},
-                onBrandChoiceOptionsShown = {},
+                onBrandChoiceSelected = {},
                 // This checkbox is never displayed in CustomerSheet.
                 shouldShowSetAsDefaultCheckbox = false,
                 isDefaultPaymentMethod = false,

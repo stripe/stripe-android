@@ -38,6 +38,7 @@ internal object PaymentMethodMetadataFactory {
         defaultBillingDetails: PaymentSheet.BillingDetails = PaymentSheet.BillingDetails(),
         paymentMethodIncentive: PaymentMethodIncentive? = null,
         isPaymentMethodSetAsDefaultEnabled: Boolean = IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
+        elementsSessionId: String = "session_1234"
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -62,6 +63,7 @@ internal object PaymentMethodMetadataFactory {
             linkState = linkState,
             cardBrandFilter = cardBrandFilter,
             paymentMethodIncentive = paymentMethodIncentive,
+            elementsSessionId = elementsSessionId
         )
     }
 

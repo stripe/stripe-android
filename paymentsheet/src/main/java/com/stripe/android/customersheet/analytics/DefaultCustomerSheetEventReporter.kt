@@ -164,8 +164,25 @@ internal class DefaultCustomerSheetEventReporter @Inject constructor(
         )
     }
 
+    override fun onBrandChoiceSelected(
+        source: CustomerSheetEventReporter.CardBrandChoiceEventSource,
+        selectedBrand: CardBrand
+    ) {
+        fireEvent(
+            CustomerSheetEvent.BrandChoiceSelected(
+                source = when (source) {
+                    CustomerSheetEventReporter.CardBrandChoiceEventSource.Add ->
+                        CustomerSheetEvent.BrandChoiceSelected.Source.Add
+                    CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit ->
+                        CustomerSheetEvent.BrandChoiceSelected.Source.Edit
+                },
+                selectedBrand = selectedBrand
+            )
+        )
+    }
+
     override fun onUpdatePaymentMethodSucceeded(
-        selectedBrand: CardBrand,
+        selectedBrand: CardBrand?,
     ) {
         fireEvent(
             CustomerSheetEvent.UpdatePaymentOptionSucceeded(
@@ -175,7 +192,7 @@ internal class DefaultCustomerSheetEventReporter @Inject constructor(
     }
 
     override fun onUpdatePaymentMethodFailed(
-        selectedBrand: CardBrand,
+        selectedBrand: CardBrand?,
         error: Throwable,
     ) {
         fireEvent(

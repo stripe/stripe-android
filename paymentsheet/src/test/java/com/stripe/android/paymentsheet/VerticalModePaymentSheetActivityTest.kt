@@ -25,6 +25,7 @@ import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
 import com.stripe.paymentelementnetwork.UsBankPaymentMethodDetails
 import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse
 import com.stripe.paymentelementtestpages.EditPage
+import com.stripe.paymentelementtestpages.FormPage
 import com.stripe.paymentelementtestpages.ManagePage
 import com.stripe.paymentelementtestpages.VerticalModePage
 import org.junit.Rule
