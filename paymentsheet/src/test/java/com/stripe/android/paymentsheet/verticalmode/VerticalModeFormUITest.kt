@@ -17,11 +17,11 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.KlarnaDefinit
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.FormPage
+import com.stripe.paymentelementtestpages.FormPage
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.ViewActionRecorder
-import com.stripe.android.paymentsheet.assertHasErrorMessage
-import com.stripe.android.paymentsheet.assertHasNoErrorMessage
+import com.stripe.paymentelementtestpages.assertHasErrorMessage
+import com.stripe.paymentelementtestpages.assertHasNoErrorMessage
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
 import com.stripe.android.ui.core.Amount
