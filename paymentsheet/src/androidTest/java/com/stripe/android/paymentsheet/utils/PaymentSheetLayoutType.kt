@@ -44,7 +44,7 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
         composeTestRule: ComposeTestRule,
     )
 
-    abstract fun payWithNewCardWithSavedPaymentMethods(
+    abstract fun openNewCardForm(
         composeTestRule: ComposeTestRule,
     )
 
@@ -120,7 +120,7 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
             editPage.waitUntilVisible()
         }
 
-        override fun payWithNewCardWithSavedPaymentMethods(
+        override fun openNewCardForm(
             composeTestRule: ComposeTestRule,
         ) {
             val savedPaymentMethodsPage = SavedPaymentMethodsPage(composeTestRule)
@@ -215,7 +215,7 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
             editPage.waitUntilVisible()
         }
 
-        override fun payWithNewCardWithSavedPaymentMethods(
+        override fun openNewCardForm(
             composeTestRule: ComposeTestRule,
         ) {
             val verticalModePage = VerticalModePage(composeTestRule)

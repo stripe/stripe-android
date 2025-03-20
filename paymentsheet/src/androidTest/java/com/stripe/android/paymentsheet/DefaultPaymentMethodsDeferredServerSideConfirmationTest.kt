@@ -60,7 +60,7 @@ internal class DefaultPaymentMethodsDeferredServerSideConfirmationTest {
             isDeferredIntent = true,
         )
 
-        layoutType.payWithNewCardWithSavedPaymentMethods(
+        layoutType.openNewCardForm(
             composeTestRule = composeTestRule,
         )
 
@@ -114,6 +114,10 @@ internal class DefaultPaymentMethodsDeferredServerSideConfirmationTest {
             paymentMethodLayout = layoutType.paymentMethodLayout,
             hasSavedPaymentMethods = false,
             isDeferredIntent = true,
+        )
+
+        layoutType.openNewCardForm(
+            composeTestRule = composeTestRule,
         )
 
         paymentSheetPage.fillOutCardDetails()
