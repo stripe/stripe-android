@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.TestFactory
+import com.stripe.android.stripecardscan.cardscan.CardScanConfiguration
 import com.stripe.android.stripecardscan.cardscan.CardScanSheet
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.testing.FakeErrorReporter
@@ -25,7 +27,7 @@ class StripeCardScanProxyTest {
     private val mockActivity: AppCompatActivity = mock()
 
     private class FakeProxy : StripeCardScanProxy {
-        override fun present() {
+        override fun present(configuration: CardScanConfiguration) {
             // noop
         }
 
@@ -91,7 +93,7 @@ class StripeCardScanProxyTest {
                 onFinished = {},
                 isStripeCardScanAvailable = mockIsStripeCardScanAvailable,
                 errorReporter = FakeErrorReporter(),
-            ).present()
+            ).present(TestFactory.cardScanConfiguration)
         }
         assertFailsWith<IllegalStateException> {
             StripeCardScanProxy.create(
@@ -99,7 +101,7 @@ class StripeCardScanProxyTest {
                 onFinished = {},
                 isStripeCardScanAvailable = mockIsStripeCardScanAvailable,
                 errorReporter = FakeErrorReporter(),
-            ).present()
+            ).present(TestFactory.cardScanConfiguration)
         }
     }
 

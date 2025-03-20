@@ -88,7 +88,8 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                     identifier = IdentifierSpec.Generic("card_details"),
                     collectName = billingDetailsCollectionConfiguration.collectsName,
                     cbcEligibility = arguments.cbcEligibility,
-                    cardBrandFilter = arguments.cardBrandFilter
+                    cardBrandFilter = arguments.cardBrandFilter,
+                    elementsSessionId = metadata.elementsSessionId
                 )
             )
 

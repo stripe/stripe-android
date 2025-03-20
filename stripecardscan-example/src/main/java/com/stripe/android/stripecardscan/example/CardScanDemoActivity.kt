@@ -2,6 +2,7 @@ package com.stripe.android.stripecardscan.example
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.stripe.android.stripecardscan.cardscan.CardScanConfiguration
 import com.stripe.android.stripecardscan.cardscan.CardScanSheet
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.stripecardscan.example.databinding.ActivityCardScanDemoBinding
@@ -18,7 +19,7 @@ class CardScanDemoActivity : AppCompatActivity() {
         val cardScanSheet = CardScanSheet.create(this, ::onScanFinished)
 
         viewBinding.launchScanButton.setOnClickListener {
-            cardScanSheet.present()
+            cardScanSheet.present(CardScanConfiguration(null))
         }
     }
 
