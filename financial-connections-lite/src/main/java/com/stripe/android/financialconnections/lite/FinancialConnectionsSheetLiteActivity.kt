@@ -61,7 +61,7 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity() {
 
     private fun setupProgressBar() {
         val color = when (getArgs(intent)) {
-            null, is ForData, is ForToken -> R.color.stripe_blurple
+            null, is ForData, is ForToken -> R.color.stripe_financial_connections
             is ForInstantDebits -> R.color.stripe_link
         }.let { ContextCompat.getColor(this, it) }
         progressBar.progressDrawable.setTint(color)
