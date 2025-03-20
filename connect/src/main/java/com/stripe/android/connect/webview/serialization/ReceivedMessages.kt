@@ -25,7 +25,7 @@ internal data class SetterMessageValue(
 )
 
 @Serializable
-internal data class SecureWebViewMessage(
+internal data class OpenAuthenticatedWebViewMessage(
     val id: String,
     val url: String
 )

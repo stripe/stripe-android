@@ -9,6 +9,7 @@ import android.net.Uri
 import android.webkit.PermissionRequest
 import android.webkit.ValueCallback
 import androidx.annotation.VisibleForTesting
+import androidx.core.net.toUri
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
@@ -31,6 +32,7 @@ import com.stripe.android.connect.util.Clock
 import com.stripe.android.connect.util.isInInstrumentationTest
 import com.stripe.android.connect.webview.StripeConnectWebView.Delegate
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
+import com.stripe.android.connect.webview.serialization.OpenAuthenticatedWebViewMessage
 import com.stripe.android.connect.webview.serialization.OpenFinancialConnectionsMessage
 import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
@@ -312,6 +314,19 @@ internal class StripeConnectWebViewContainerViewModel(
                 // Ensure `filePathCallback` always gets a value.
                 filePathCallback.onReceiveValue(result)
             }
+        }
+
+        override fun onReceivedOpenAuthenticatedWebView(
+            activity: Activity,
+            message: OpenAuthenticatedWebViewMessage
+        ) {
+            stripeIntentLauncher.launchSecureExternalWebTab(activity, message.url.toUri())
+            analyticsService.track(
+                ConnectAnalyticsEvent.AuthenticatedWebOpened(
+                    pageViewId = stateFlow.value.pageViewId,
+                    authenticatedViewId = message.id,
+                )
+            )
         }
 
         override suspend fun onOpenFinancialConnections(

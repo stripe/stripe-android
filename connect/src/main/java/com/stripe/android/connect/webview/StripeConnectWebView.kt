@@ -28,9 +28,9 @@ import com.stripe.android.connect.util.isInInstrumentationTest
 import com.stripe.android.connect.webview.serialization.AccountSessionClaimedMessage
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.ConnectJson
+import com.stripe.android.connect.webview.serialization.OpenAuthenticatedWebViewMessage
 import com.stripe.android.connect.webview.serialization.OpenFinancialConnectionsMessage
 import com.stripe.android.connect.webview.serialization.PageLoadMessage
-import com.stripe.android.connect.webview.serialization.SecureWebViewMessage
 import com.stripe.android.connect.webview.serialization.SetCollectMobileFinancialConnectionsResultPayloadJs
 import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
@@ -77,6 +77,9 @@ internal class StripeConnectWebView private constructor(
     @VisibleForTesting
     internal val stripeWebChromeClient = StripeConnectWebChromeClient()
 
+    @VisibleForTesting
+    internal val stripeJsInterface = StripeJsInterface()
+
     private val webViewLifecycleScope get() = findViewTreeLifecycleOwner()?.lifecycleScope
 
     init {
@@ -93,7 +96,7 @@ internal class StripeConnectWebView private constructor(
         }
 
         setDownloadListener(StripeDownloadListener(context))
-        addJavascriptInterface(StripeJsInterface(), ANDROID_JS_INTERFACE)
+        addJavascriptInterface(stripeJsInterface, ANDROID_JS_INTERFACE)
     }
 
     fun updateConnectInstance(appearance: Appearance) {
@@ -199,6 +202,11 @@ internal class StripeConnectWebView private constructor(
          * Callback whenever the merchant ID changes
          */
         fun onMerchantIdChanged(merchantId: String)
+
+        /**
+         * Callback to invoke upon receiving 'openAuthenticatedWebView' message.
+         */
+        fun onReceivedOpenAuthenticatedWebView(activity: Activity, message: OpenAuthenticatedWebViewMessage)
 
         /**
          * Callback to invoke upon receiving 'openFinancialConnections' message.
@@ -309,7 +317,8 @@ internal class StripeConnectWebView private constructor(
         }
     }
 
-    private inner class StripeJsInterface {
+    @VisibleForTesting
+    internal inner class StripeJsInterface {
         @JavascriptInterface
         fun debug(message: String) {
             logger.debug("($loggerTag) Debug log from JS: $message")
@@ -345,12 +354,16 @@ internal class StripeConnectWebView private constructor(
         }
 
         @JavascriptInterface
-        fun openSecureWebView(message: String) {
-            val secureWebViewData = tryDeserializeWebMessage<SecureWebViewMessage>(
-                webFunctionName = "openSecureWebView",
+        fun openAuthenticatedWebView(message: String) {
+            val activity = findActivity()
+                ?: return
+            val parsed = tryDeserializeWebMessage<OpenAuthenticatedWebViewMessage>(
+                webFunctionName = "openAuthenticatedWebView",
                 message = message,
-            )
-            logger.debug("($loggerTag) Open secure web view with data: $secureWebViewData")
+            ) ?: return
+
+            logger.debug("($loggerTag) Open authenticated WebView: $parsed")
+            delegate.onReceivedOpenAuthenticatedWebView(activity, parsed)
         }
 
         @JavascriptInterface
