@@ -25,10 +25,8 @@ import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.databinding.StripeCardFormViewBinding
 import com.stripe.android.databinding.StripeHorizontalDividerBinding
 import com.stripe.android.databinding.StripeVerticalDividerBinding
-import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
-import com.stripe.android.model.DelicateCardDetailsApi
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.view.CardFormView.Style
 import com.stripe.android.view.CardValidCallback.Fields
@@ -120,11 +118,10 @@ class CardFormView @JvmOverloads constructor(
         }
 
     /**
-     * Retrieve a [CardParams] representing the card details if all these fields are valid:
-     * card number, expiration date, CVC, postal, country.
-     * Returns null otherwise and display corresponding errors.
+     * A [PaymentMethodCreateParams.Card] representing the card details if all fields are valid;
+     * otherwise `null`
      */
-    val cardParams: CardParams?
+    private val paymentMethodCard: PaymentMethodCreateParams.Card?
         get() {
             // first validate card fields
             if (!cardMultilineWidget.validateAllFields()) {
@@ -145,38 +142,14 @@ class CardFormView @JvmOverloads constructor(
             val expirationDate =
                 requireNotNull(cardMultilineWidget.expiryDateEditText.validatedDate)
 
-            return CardParams(
-                brand = brand,
-                loggingTokens = setOf(CARD_FORM_VIEW),
+            return PaymentMethodCreateParams.Card(
                 number = cardMultilineWidget.validatedCardNumber?.value.orEmpty(),
-                expMonth = expirationDate.month,
-                expYear = expirationDate.year,
                 cvc = cardMultilineWidget.cvcEditText.text?.toString(),
-                address = Address.Builder()
-                    .setCountryCode(countryLayout.selectedCountryCode)
-                    .setPostalCode(postalCodeView.text?.toString())
-                    .build(),
-                networks = cardMultilineWidget.cardBrandView.cardParamsNetworks()
+                expiryMonth = expirationDate.month,
+                expiryYear = expirationDate.year,
+                attribution = setOf(CARD_FORM_VIEW),
+                networks = cardMultilineWidget.cardBrandView.paymentMethodCreateParamsNetworks(),
             )
-        }
-
-    /**
-     * A [PaymentMethodCreateParams.Card] representing the card details if all fields are valid;
-     * otherwise `null`
-     */
-    private val paymentMethodCard: PaymentMethodCreateParams.Card?
-        @OptIn(DelicateCardDetailsApi::class)
-        get() {
-            return cardParams?.let {
-                PaymentMethodCreateParams.Card(
-                    number = it.number,
-                    cvc = it.cvc,
-                    expiryMonth = it.expMonth,
-                    expiryYear = it.expYear,
-                    attribution = it.attribution,
-                    networks = cardMultilineWidget.cardBrandView.paymentMethodCreateParamsNetworks(),
-                )
-            }
         }
 
     /**

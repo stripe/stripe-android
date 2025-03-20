@@ -42,8 +42,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".activity.CreateCardTokenActivity" />
-        <activity android:name=".activity.CreateCardSourceActivity" />
         <activity android:name=".activity.CreateCardPaymentMethodActivity" />
         <activity android:name=".activity.GooglePayLauncherIntegrationActivity" />
         <activity android:name=".activity.GooglePayLauncherPlaygroundActivity" />
