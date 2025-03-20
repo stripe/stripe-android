@@ -27,7 +27,6 @@ internal class FakeCustomerSheetLoader(
     private val isGooglePayAvailable: Boolean = false,
     private val delay: Duration = Duration.ZERO,
     private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
-    private val financialConnectionsAvailable: Boolean = false,
     private val permissions: CustomerPermissions = CustomerPermissions(
         canRemovePaymentMethods = true,
         canRemoveLastPaymentMethod = true,

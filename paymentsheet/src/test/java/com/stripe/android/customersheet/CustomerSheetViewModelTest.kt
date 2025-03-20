@@ -1978,7 +1978,6 @@ class CustomerSheetViewModelTest {
                     customerPaymentMethods = listOf(),
                     isGooglePayAvailable = false,
                     stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD_WITH_US_BANK_ACCOUNT,
-                    financialConnectionsAvailable = true,
                 ),
                 configuration = CustomerSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
