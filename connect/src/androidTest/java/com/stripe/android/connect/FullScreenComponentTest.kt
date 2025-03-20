@@ -188,6 +188,14 @@ class FullScreenComponentTest {
         onView(withText(alertJs.message)).check(matches(isDisplayed()))
     }
 
+    @Test
+    fun testPlainJsAlertWorks() {
+        checkDialogIsDisplayed()
+        val message = testAlertJs.message!!
+        performWebViewAlert(ALERT, message)
+        onView(withText(message)).check(matches(isDisplayed()))
+    }
+
     private fun randomString() = UUID.randomUUID().toString()
 
     private fun checkDialogIsDisplayed() {
@@ -204,10 +212,14 @@ class FullScreenComponentTest {
 
     private fun performWebViewAlert(method: String, alertJs: AlertJs) {
         val alertString = ConnectJson.encodeToString(alertJs)
+        performWebViewAlert(method, alertString)
+    }
+
+    private fun performWebViewAlert(method: String, message: String) {
         try {
             onWebView()
                 .withTimeout(500L, TimeUnit.MILLISECONDS)
-                .perform(script("""$method(`$alertString`)"""))
+                .perform(script("""$method(`$message`)"""))
         } catch (_: NoMatchingViewException) {
             // HACK: After the JS executes, the alert dialog prevents the WebView from
             //  being interacted with. Assume the alert was shown -- we'll be verifying

@@ -314,7 +314,7 @@ internal class StripeConnectWebView private constructor(
                     ConnectJson.decodeFromString<AlertJs>(message.removeSurrounding("\""))
                 } catch (e: SerializationException) {
                     logger.error("($loggerTag) Error parsing alert message: $message", e)
-                    return false
+                    AlertJs(message = message)
                 }
 
             // The following code is awkward because:

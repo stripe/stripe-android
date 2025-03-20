@@ -4,13 +4,13 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 internal data class AlertJs(
-    val title: String?,
-    val message: String?,
-    val buttons: ButtonsJs?,
+    val title: String? = null,
+    val message: String? = null,
+    val buttons: ButtonsJs? = null,
 ) {
     @Serializable
     internal data class ButtonsJs(
-        val ok: String?,
-        val cancel: String?,
+        val ok: String? = null,
+        val cancel: String? = null,
     )
 }
