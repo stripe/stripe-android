@@ -40,7 +40,7 @@ class StripeComponentDialogFragmentViewTest {
 
     @Test
     fun testLongTitle() {
-        snapshot(title = "This is a pretty long component name")
+        snapshot(title = "This is a pretty long component name for a title")
     }
 
     @Test
@@ -78,7 +78,7 @@ class StripeComponentDialogFragmentViewTest {
                 factory = {
                     StripeComponentDialogFragmentView<TestComponentView>(context).apply {
                         this.title = title
-                        bindAppearance(appearance)
+                        bindAppearance(appearance, null)
                         applyView(context)
                     }
                 }
