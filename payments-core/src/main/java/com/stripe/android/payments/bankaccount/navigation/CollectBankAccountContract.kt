@@ -141,7 +141,8 @@ class CollectBankAccountContract :
     }
 
     @Parcelize
-    internal data class Result(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class Result(
         val collectBankAccountResult: CollectBankAccountResultInternal
     ) : Parcelable {
         fun toBundle(): Bundle {

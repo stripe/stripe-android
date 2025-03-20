@@ -38,9 +38,12 @@ internal object DefaultPaymentMethodsUtils {
         testContext: ProductIntegrationTestRunnerContext,
         composeTestRule: ComposeTestRule,
         paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
+        paymentMethodType: PaymentMethodType = PaymentMethodType.Card,
         hasSavedPaymentMethods: Boolean = true,
         isDeferredIntent: Boolean = false,
     ) {
+        paymentMethodType.paymentMethodSetup()
+
         testContext.launch(
             configuration = PaymentSheet.Configuration(
                 merchantDisplayName = "Example, Inc.",
@@ -48,7 +51,8 @@ internal object DefaultPaymentMethodsUtils {
                 customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
                     id = "cus_1",
                     clientSecret = "cuss_1",
-                )
+                ),
+                allowsDelayedPaymentMethods = true,
             ),
             isDeferredIntent = isDeferredIntent,
         )
@@ -101,7 +105,8 @@ internal object DefaultPaymentMethodsUtils {
                   "meta_pay_signed_container_context": null,
                   "order": null,
                   "ordered_payment_method_types_and_wallets": [
-                    "card"
+                    "card",
+                    "us_bank_account"
                   ],
                   "customer": {
                     "payment_methods": $paymentMethods,
@@ -134,8 +139,10 @@ internal object DefaultPaymentMethodsUtils {
                     "object": "payment_method_preference",
                     "country_code": "US",
                     "ordered_payment_method_types": [
-                      "card"
-                    ],               "payment_intent": {
+                      "card",
+                       "us_bank_account"
+                    ],
+                    "payment_intent": {
                       "id": "pi_example",
                       "object": "payment_intent",
                       "amount": 5099,
@@ -163,7 +170,8 @@ internal object DefaultPaymentMethodsUtils {
                         }
                       },
                       "payment_method_types": [
-                        "card"
+                        "card",
+                        "us_bank_account"
                       ],
                       "processing": null,
                       "receipt_email": null,
@@ -174,13 +182,6 @@ internal object DefaultPaymentMethodsUtils {
                     }, 
                     "type": "payment_intent"
                   },
-                  "payment_method_specs": [
-                    {
-                      "async": false,
-                      "fields": [],
-                      "type": "card"
-                    }
-                  ],
                   "paypal_express_config": {
                     "client_id": null,
                     "paypal_merchant_id": null
@@ -207,7 +208,8 @@ internal object DefaultPaymentMethodsUtils {
                   "meta_pay_signed_container_context": null,
                   "order": null,
                   "ordered_payment_method_types_and_wallets": [
-                    "card"
+                    "card",
+                    "us_bank_account"
                   ],
                   "customer": {
                     "payment_methods": $paymentMethods,
@@ -240,17 +242,11 @@ internal object DefaultPaymentMethodsUtils {
                     "object": "payment_method_preference",
                     "country_code": "US",
                     "ordered_payment_method_types": [
-                      "card"
+                      "card",
+                      "us_bank_account"
                     ],
                     "type": "deferred_intent"
                   },
-                  "payment_method_specs": [
-                    {
-                      "async": false,
-                      "fields": [],
-                      "type": "card"
-                    }
-                  ],
                   "paypal_express_config": {
                     "client_id": null,
                     "paypal_merchant_id": null

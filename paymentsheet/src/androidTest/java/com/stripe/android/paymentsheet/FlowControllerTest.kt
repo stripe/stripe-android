@@ -1,12 +1,14 @@
 package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import com.google.common.truth.Truth.assertThat
@@ -948,11 +950,13 @@ internal class FlowControllerTest {
                 "card",
                 "afterpay_clearpay",
                 "klarna",
-                // "us_bank_account", this is not in the list per configuration
-                "affirm",
-                // "link", this is not in the list per configuration
+                "us_bank_account",
             ).map { TEST_TAG_LIST + it }
         )
+
+        // Scroll to check that Affirm is included, we expect it to be last in the list.
+        composeTestRule.onNodeWithTag(TEST_TAG_LIST).performScrollToIndex(4)
+        composeTestRule.onNodeWithTag(TEST_TAG_LIST + "affirm").assertIsDisplayed()
 
         testContext.markTestSucceeded()
     }
