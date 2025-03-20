@@ -6,6 +6,10 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForInstantDebitsLauncher
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetLauncher
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration.InstantDebits
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration.USBankAccount
@@ -14,7 +18,8 @@ import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountCont
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal.Failed
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithResult
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.OpenConnectionsFlow
-import com.stripe.android.payments.financialconnections.FinancialConnectionsPaymentsProxy
+import com.stripe.android.payments.financialconnections.DefaultIntentBuilderProvider
+import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 
 /**
  * No-UI activity that will handle collect bank account logic.
@@ -25,7 +30,7 @@ internal class CollectBankAccountActivity : AppCompatActivity() {
         CollectBankAccountContract.Args.fromIntent(intent)
     }
 
-    private lateinit var financialConnectionsPaymentsProxy: FinancialConnectionsPaymentsProxy
+    private lateinit var financialConnectionsLauncher: FinancialConnectionsSheetLauncher
 
     private val viewModel: CollectBankAccountViewModel by viewModels {
         CollectBankAccountViewModel.Factory {
@@ -52,30 +57,36 @@ internal class CollectBankAccountActivity : AppCompatActivity() {
     }
 
     private fun initConnectionsPaymentsProxy(configuration: CollectBankAccountConfiguration) {
-        financialConnectionsPaymentsProxy = when (configuration) {
-            is InstantDebits -> FinancialConnectionsPaymentsProxy.createForInstantDebits(
+        financialConnectionsLauncher = when (configuration) {
+            is InstantDebits -> FinancialConnectionsSheetForInstantDebitsLauncher(
                 activity = this,
-                onComplete = viewModel::onConnectionsForInstantDebitsResult
+                callback = viewModel::onConnectionsForInstantDebitsResult,
+                intentBuilder = DefaultIntentBuilderProvider().provide(
+                    context = this,
+                    isFinancialConnectionsAvailable = DefaultIsFinancialConnectionsAvailable()
+                ).provider
             )
 
-            is USBankAccount -> FinancialConnectionsPaymentsProxy.createForACH(
+            is USBankAccount,
+            is USBankAccountInternal -> FinancialConnectionsSheetForDataLauncher(
                 activity = this,
-                onComplete = viewModel::onConnectionsForACHResult
-            )
-
-            is USBankAccountInternal -> FinancialConnectionsPaymentsProxy.createForACH(
-                activity = this,
-                onComplete = viewModel::onConnectionsForACHResult
+                callback = viewModel::onConnectionsForACHResult,
+                intentBuilder = DefaultIntentBuilderProvider().provide(
+                    context = this,
+                    isFinancialConnectionsAvailable = DefaultIsFinancialConnectionsAvailable()
+                ).provider
             )
         }
     }
 
     private fun OpenConnectionsFlow.launch() {
-        financialConnectionsPaymentsProxy.present(
-            financialConnectionsSessionClientSecret = financialConnectionsSessionSecret,
-            publishableKey = publishableKey,
-            stripeAccountId = stripeAccountId,
-            elementsSessionContext = elementsSessionContext,
+        financialConnectionsLauncher.present(
+            FinancialConnectionsSheetConfiguration(
+                financialConnectionsSessionClientSecret = financialConnectionsSessionSecret,
+                publishableKey = publishableKey,
+                stripeAccountId = stripeAccountId,
+            ),
+            elementsSessionContext = elementsSessionContext
         )
     }
 

@@ -131,7 +131,7 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity(R.layou
  * @param context the context to use for creating the intent
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun intentBuilder(context: Context): (FinancialConnectionsSheetActivityArgs) -> Intent =
+fun liteIntentBuilder(context: Context): (FinancialConnectionsSheetActivityArgs) -> Intent =
     { args: FinancialConnectionsSheetActivityArgs ->
         FinancialConnectionsSheetLiteActivity.intent(
             context = context,
