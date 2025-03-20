@@ -33,6 +33,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import java.util.Locale
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 
@@ -101,19 +102,62 @@ class GooglePayPaymentMethodLauncherViewModelTest {
     }
 
     @Test
-    fun `createTransactionInfo() with 0 amount should expect TotalPriceStatus NOT_CURRENTLY_KNOWN`() {
-        val transactionInfo = viewModel.createTransactionInfo(ARGS.copy(amount = 0))
-        assertThat(transactionInfo)
-            .isEqualTo(
-                GooglePayJsonFactory.TransactionInfo(
+    fun `createTransactionInfo() with 0 amount in US and CA should expect TotalPriceStatus NOT_CURRENTLY_KNOWN`() {
+        for (countryCode in listOf("us", "ca")) {
+            val transactionInfo = viewModel.createTransactionInfo(
+                GooglePayPaymentMethodLauncherContractV2.Args(
+                    GooglePayPaymentMethodLauncher.Config(
+                        GooglePayEnvironment.Test,
+                        merchantCountryCode = countryCode,
+                        merchantName = "Widget, Inc."
+                    ),
                     currencyCode = "usd",
-                    totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.NotCurrentlyKnown,
-                    countryCode = "us",
-                    transactionId = null,
-                    totalPrice = null,
-                    checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
+                    amount = 0
                 )
             )
+            assertThat(transactionInfo)
+                .isEqualTo(
+                    GooglePayJsonFactory.TransactionInfo(
+                        currencyCode = "usd",
+                        totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.NotCurrentlyKnown,
+                        countryCode = countryCode,
+                        transactionId = null,
+                        totalPrice = null,
+                        checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
+                    )
+                )
+        }
+    }
+
+    @Test
+    fun `createTransactionInfo() with 0 amount outside US and CA should honor the price`() {
+        val countryCodesOutsideUSAndCA = Locale.getISOCountries()
+            .map { it.lowercase() }
+            .filterNot { it == "us" || it == "ca" }
+        for (countryCode in countryCodesOutsideUSAndCA) {
+            val transactionInfo = viewModel.createTransactionInfo(
+                GooglePayPaymentMethodLauncherContractV2.Args(
+                    GooglePayPaymentMethodLauncher.Config(
+                        GooglePayEnvironment.Test,
+                        merchantCountryCode = countryCode,
+                        merchantName = "Widget, Inc."
+                    ),
+                    currencyCode = "usd",
+                    amount = 0
+                )
+            )
+            assertThat(transactionInfo)
+                .isEqualTo(
+                    GooglePayJsonFactory.TransactionInfo(
+                        currencyCode = "usd",
+                        totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
+                        countryCode = countryCode,
+                        transactionId = null,
+                        totalPrice = 0,
+                        checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
+                    )
+                )
+        }
     }
 
     @Test
