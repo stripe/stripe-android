@@ -14,12 +14,38 @@ internal class StripeNetworkTestClient @Inject constructor(
     private val stripeRepository: StripeRepository,
     private val requestOptions: ApiRequest.Options,
 ) {
+    suspend fun retrievePaymentMethod(
+        country: MerchantCountry,
+    ): Result<SavedPaymentMethod> {
+        val result = executeFuelPostRequest(
+            url = createUrl(CREATE_SAVED_CARD_PATH),
+            request = CreatePaymentMethodRequest(
+                country = country,
+            ),
+            requestSerializer = CreatePaymentMethodRequest.serializer(),
+            responseDeserializer = CreatePaymentMethodRequest.Response.serializer(),
+        )
+
+        return result.mapCatching { response ->
+            SavedPaymentMethod(
+                customerId = response.customerId,
+                paymentMethod = PaymentMethod.Builder()
+                    .setId(response.paymentMethodId)
+                    .setType(PaymentMethod.Type.Card)
+                    .setCode(PaymentMethod.Type.Card.code)
+                    .setLiveMode(false)
+                    .build()
+            )
+        }
+    }
+
     suspend fun createPaymentIntent(
         country: MerchantCountry,
         amount: Int,
         currency: String,
         paymentMethodType: PaymentMethod.Type,
         paymentMethodId: String? = null,
+        customerId: String? = null,
         createWithSetupFutureUsage: Boolean = false,
     ): Result<String> {
         val result = executeFuelPostRequest(
@@ -31,6 +57,7 @@ internal class StripeNetworkTestClient @Inject constructor(
                     paymentMethodTypes = listOf(paymentMethodType.code),
                     confirm = false,
                     paymentMethodId = paymentMethodId,
+                    customerId = customerId,
                     setupFutureUsage = CreatePaymentIntentRequest.CreateParams.SetupFutureUsage.OffSession.takeIf {
                         createWithSetupFutureUsage
                     },
@@ -58,6 +85,7 @@ internal class StripeNetworkTestClient @Inject constructor(
         country: MerchantCountry,
         paymentMethodType: PaymentMethod.Type,
         paymentMethodId: String? = null,
+        customerId: String? = null,
     ): Result<String> {
         val result = executeFuelPostRequest(
             url = createUrl(SETUP_INTENT_PATH),
@@ -65,6 +93,7 @@ internal class StripeNetworkTestClient @Inject constructor(
                 createParams = CreateSetupIntentRequest.CreateParams(
                     paymentMethodTypes = listOf(paymentMethodType.code),
                     paymentMethodId = paymentMethodId,
+                    customerId = customerId,
                     confirm = false,
                 ),
                 country = country,
@@ -116,6 +145,7 @@ internal class StripeNetworkTestClient @Inject constructor(
     private companion object {
         const val STRIPE_VERSION = "2020-03-02"
 
+        const val CREATE_SAVED_CARD_PATH = "create_saved_card"
         const val PAYMENT_INTENT_PATH = "create_payment_intent"
         const val SETUP_INTENT_PATH = "create_setup_intent"
 

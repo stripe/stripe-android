@@ -21,6 +21,7 @@ internal class CreateIntentFactory(
         country: MerchantCountry,
         amount: Int,
         currency: String,
+        customerId: String?,
         createWithSetupFutureUsage: Boolean
     ): Result<CreateIntentData> {
         return testClient.createPaymentIntent(
@@ -28,6 +29,7 @@ internal class CreateIntentFactory(
             amount = amount,
             currency = currency,
             paymentMethodType = paymentMethodType,
+            customerId = customerId,
             createWithSetupFutureUsage = createWithSetupFutureUsage,
         ).mapCatching { clientSecret ->
             CreateIntentData(
@@ -43,6 +45,7 @@ internal class CreateIntentFactory(
         country: MerchantCountry,
         amount: Int,
         currency: String,
+        customerId: String?,
         createWithSetupFutureUsage: Boolean,
     ): Result<CreateIntentData> {
         PaymentElementCallbackReferences.set(
@@ -55,6 +58,7 @@ internal class CreateIntentFactory(
                         currency = currency,
                         paymentMethodType = paymentMethodType,
                         paymentMethodId = paymentMethod.id,
+                        customerId = customerId,
                         createWithSetupFutureUsage = createWithSetupFutureUsage,
                     ).fold(
                         onSuccess = {
@@ -92,10 +96,12 @@ internal class CreateIntentFactory(
 
     suspend fun createSetupIntent(
         country: MerchantCountry,
+        customerId: String?,
     ): Result<CreateIntentData> {
         return testClient.createSetupIntent(
             country = country,
             paymentMethodType = paymentMethodType,
+            customerId = customerId,
         ).mapCatching { clientSecret ->
             CreateIntentData(
                 initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
@@ -108,6 +114,7 @@ internal class CreateIntentFactory(
 
     fun createDeferredSetupIntent(
         country: MerchantCountry,
+        customerId: String?,
     ): Result<CreateIntentData> {
         PaymentElementCallbackReferences.set(
             key = paymentElementCallbackIdentifier,
@@ -117,6 +124,7 @@ internal class CreateIntentFactory(
                         country = country,
                         paymentMethodType = paymentMethodType,
                         paymentMethodId = paymentMethod.id,
+                        customerId = customerId,
                     ).fold(
                         onSuccess = {
                             CreateIntentResult.Success(it)

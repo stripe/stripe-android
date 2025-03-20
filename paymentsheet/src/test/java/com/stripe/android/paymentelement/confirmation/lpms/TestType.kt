@@ -5,6 +5,7 @@ import com.stripe.android.paymentelement.confirmation.lpms.foundations.network.M
 
 internal interface TestType {
     suspend fun createIntent(
+        customerId: String?,
         country: MerchantCountry,
         factory: CreateIntentFactory
     ): Result<CreateIntentFactory.CreateIntentData>
@@ -50,6 +51,7 @@ internal data class PaymentIntentTestType(
     private val createWithSetupFutureUsage: Boolean,
 ) : TestType {
     override suspend fun createIntent(
+        customerId: String?,
         country: MerchantCountry,
         factory: CreateIntentFactory,
     ): Result<CreateIntentFactory.CreateIntentData> {
@@ -58,17 +60,20 @@ internal data class PaymentIntentTestType(
             amount = amount,
             currency = currency,
             createWithSetupFutureUsage = createWithSetupFutureUsage,
+            customerId = customerId,
         )
     }
 }
 
 internal data object SetupIntentTestType : TestType {
     override suspend fun createIntent(
+        customerId: String?,
         country: MerchantCountry,
         factory: CreateIntentFactory,
     ): Result<CreateIntentFactory.CreateIntentData> {
         return factory.createSetupIntent(
             country = country,
+            customerId = customerId,
         )
     }
 }
@@ -79,6 +84,7 @@ internal data class DeferredPaymentIntentTestType(
     private val createWithSetupFutureUsage: Boolean,
 ) : TestType {
     override suspend fun createIntent(
+        customerId: String?,
         country: MerchantCountry,
         factory: CreateIntentFactory,
     ): Result<CreateIntentFactory.CreateIntentData> {
@@ -87,17 +93,20 @@ internal data class DeferredPaymentIntentTestType(
             amount = amount,
             currency = currency,
             createWithSetupFutureUsage = createWithSetupFutureUsage,
+            customerId = customerId,
         )
     }
 }
 
 internal data object DeferredSetupIntentTestType : TestType {
     override suspend fun createIntent(
+        customerId: String?,
         country: MerchantCountry,
         factory: CreateIntentFactory,
     ): Result<CreateIntentFactory.CreateIntentData> {
         return factory.createDeferredSetupIntent(
             country = country,
+            customerId = customerId,
         )
     }
 }

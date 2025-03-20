@@ -24,6 +24,8 @@ internal data class CreatePaymentIntentRequest(
         val paymentMethodTypes: List<String>,
         @SerialName("payment_method")
         val paymentMethodId: String?,
+        @SerialName("customer")
+        val customerId: String?,
         @SerialName("setup_future_usage")
         val setupFutureUsage: SetupFutureUsage?,
     ) {

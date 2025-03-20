@@ -13,7 +13,9 @@ internal class CashAppLpmTest(
     @Test
     fun `Confirm Cash App LPM`() = test(
         testType = testType,
-        createParams = PaymentMethodCreateParams.createCashAppPay(),
+        params = PaymentMethodTestParams.New(
+            createParams = PaymentMethodCreateParams.createCashAppPay(),
+        )
     )
 
     companion object {
