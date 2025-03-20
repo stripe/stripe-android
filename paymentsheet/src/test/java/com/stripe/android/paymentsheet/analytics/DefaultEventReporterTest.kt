@@ -5,13 +5,13 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.Logger
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
@@ -73,22 +73,10 @@ class DefaultEventReporterTest {
     }
     private val analyticEventCallbackProvider = FakeAnalyticEventCallbackProvider()
 
-    private val loggerCall = Turbine<String>()
-    private val logger = object : Logger {
-        override fun error(msg: String, tr: Throwable?) {
-            loggerCall.add("error")
-        }
-
-        override fun debug(msg: String) {
-            // no-op
-        }
-
-        override fun info(msg: String) {
-            // no-op
-        }
-
-        override fun warning(msg: String) {
-            // no-op
+    private val fakeUserFacingLoggerCall = Turbine<String>()
+    private val fakeUserFacingLogger = object : UserFacingLogger {
+        override fun logWarningWithoutPii(message: String) {
+            fakeUserFacingLoggerCall.add(message)
         }
     }
 
@@ -227,29 +215,30 @@ class DefaultEventReporterTest {
 
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
     @Test
-    fun `onShowNewPaymentOptions() should fire analytics request with expected event value`() = runTest(testDispatcher) {
-        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
-            simulateSuccessfulSetup(linkMode = null, googlePayReady = false)
-        }
-
-        analyticEventCallbackProvider.set { event ->
-            analyticEventCall.add(event)
-        }
-
-        completeEventReporter.onShowNewPaymentOptions()
-
-        assertThat(analyticEventCall.awaitItem()).isEqualTo(AnalyticEvent.PresentedSheet())
-        verify(analyticsRequestExecutor).executeAsync(
-            argWhere { req ->
-                req.params["event"] == "mc_complete_sheet_newpm_show" &&
-                    req.params["link_enabled"] == false &&
-                    req.params["google_pay_enabled"] == false &&
-                    req.params["currency"] == "usd" &&
-                    req.params["locale"] == "en_US"
+    fun `onShowNewPaymentOptions() should fire analytics request with expected event value`() =
+        runTest(testDispatcher) {
+            val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+                simulateSuccessfulSetup(linkMode = null, googlePayReady = false)
             }
-        )
-        analyticEventCall.ensureAllEventsConsumed()
-    }
+
+            analyticEventCallbackProvider.set { event ->
+                analyticEventCall.add(event)
+            }
+
+            completeEventReporter.onShowNewPaymentOptions()
+
+            assertThat(analyticEventCall.awaitItem()).isEqualTo(AnalyticEvent.PresentedSheet())
+            verify(analyticsRequestExecutor).executeAsync(
+                argWhere { req ->
+                    req.params["event"] == "mc_complete_sheet_newpm_show" &&
+                        req.params["link_enabled"] == false &&
+                        req.params["google_pay_enabled"] == false &&
+                        req.params["currency"] == "usd" &&
+                        req.params["locale"] == "en_US"
+                }
+            )
+            analyticEventCall.ensureAllEventsConsumed()
+        }
 
     @Test
     fun `onPaymentSuccess() should fire analytics request with expected event value`() {
@@ -681,7 +670,8 @@ class DefaultEventReporterTest {
             durationProvider,
             analyticEventCallbackProvider,
             testDispatcher,
-            FakeIsStripeCardScanAvailable()
+            FakeIsStripeCardScanAvailable(),
+            fakeUserFacingLogger,
         )
     }
 
@@ -903,13 +893,18 @@ class DefaultEventReporterTest {
             simulateSuccessfulSetup(linkMode = null, googlePayReady = false)
         }
 
+        val e = RuntimeException("Something went wrong")
         analyticEventCallbackProvider.set {
-            throw RuntimeException("Something went wrong")
+            @Suppress("TooGenericExceptionThrown")
+            throw e
         }
 
         completeEventReporter.onShowNewPaymentOptions()
 
-        assertThat(loggerCall.awaitItem()).isEqualTo("error")
+        assertThat(fakeUserFacingLoggerCall.awaitItem()).isEqualTo(
+            "AnalyticEventCallback.onEvent() failed\n" +
+            e.stackTraceToString()
+        )
     }
 
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
@@ -938,7 +933,7 @@ class DefaultEventReporterTest {
             analyticEventCallbackProvider = analyticEventCallbackProvider,
             workContext = testDispatcher,
             isStripeCardScanAvailable = FakeIsStripeCardScanAvailable(),
-            logger = logger,
+            logger = fakeUserFacingLogger,
         )
 
         reporter.configure()
@@ -962,7 +957,7 @@ class DefaultEventReporterTest {
             analyticEventCallbackProvider = analyticEventCallbackProvider,
             workContext = testDispatcher,
             isStripeCardScanAvailable = FakeIsStripeCardScanAvailable(),
-            logger = logger,
+            logger = fakeUserFacingLogger,
         )
 
         reporter.configure()
