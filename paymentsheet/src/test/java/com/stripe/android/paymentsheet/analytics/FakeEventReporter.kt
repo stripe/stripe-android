@@ -81,6 +81,7 @@ internal class FakeEventReporter : EventReporter {
         paymentSelection: PaymentSelection?,
         linkMode: LinkMode?,
         googlePaySupported: Boolean,
+        linkDisplay: PaymentSheet.LinkConfiguration.Display,
         currency: String?,
         initializationMode: PaymentElementLoader.InitializationMode,
         orderedLpms: List<String>,

@@ -302,7 +302,8 @@ class PaymentSheetEventTest {
                 "selected_lpm" to "none",
                 "intent_type" to "payment_intent",
                 "ordered_lpms" to "card,klarna",
-                "require_cvc_recollection" to false
+                "require_cvc_recollection" to false,
+                "link_display" to "automatic",
             )
         )
     }
@@ -1434,6 +1435,7 @@ class PaymentSheetEventTest {
         orderedLpms: List<String> = listOf("card"),
         hasDefaultPaymentMethod: Boolean? = null,
         setAsDefaultEnabled: Boolean? = null,
+        linkDisplay: PaymentSheet.LinkConfiguration.Display = PaymentSheet.LinkConfiguration.Display.Automatic,
     ): PaymentSheetEvent.LoadSucceeded {
         return PaymentSheetEvent.LoadSucceeded(
             isDeferred = isDeferred,
@@ -1445,6 +1447,7 @@ class PaymentSheetEventTest {
             orderedLpms = orderedLpms,
             hasDefaultPaymentMethod = hasDefaultPaymentMethod,
             setAsDefaultEnabled = setAsDefaultEnabled,
+            linkDisplay = linkDisplay,
         )
     }
 

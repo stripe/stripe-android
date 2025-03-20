@@ -36,6 +36,7 @@ import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.MERCHANT_DISPLAY_NAME
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
@@ -55,12 +56,13 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.eq
 import org.mockito.Captor
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.capture
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
@@ -1094,6 +1096,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
+            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
         )
     }
 
@@ -1151,6 +1154,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
+            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
         )
     }
 
@@ -2238,6 +2242,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
+            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
         )
     }
 
@@ -2266,6 +2271,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
+            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
         )
     }
 
@@ -2294,6 +2300,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
+            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
         )
     }
 
@@ -2320,6 +2327,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = true,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
+            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
         )
     }
 
@@ -2356,6 +2364,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = true,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
+            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
         )
     }
 
@@ -2392,6 +2401,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
+            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
         )
     }
 
@@ -2465,6 +2475,126 @@ internal class DefaultPaymentElementLoaderTest {
         ) { permissions ->
             assertThat(permissions.canRemoveLastPaymentMethod).isTrue()
         }
+
+    @Test
+    fun `Allows Link if Link display is set to 'automatic'`() = runTest {
+        val loader = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+        )
+
+        val config = PaymentSheet.Configuration(
+            merchantDisplayName = MERCHANT_DISPLAY_NAME,
+            link = PaymentSheet.LinkConfiguration(
+                display = PaymentSheet.LinkConfiguration.Display.Automatic,
+            ),
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = config,
+            initializedViaCompose = false,
+        ).getOrThrow()
+
+        assertThat(result.paymentMethodMetadata.linkState).isNotNull()
+        assertThat(result.paymentMethodMetadata.supportedPaymentMethodTypes()).contains("link")
+    }
+
+    @Test
+    fun `Emits correct load event if Link display is set to 'automatic'`() = runTest {
+        val loader = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+        )
+
+        val config = PaymentSheet.Configuration(
+            merchantDisplayName = MERCHANT_DISPLAY_NAME,
+            link = PaymentSheet.LinkConfiguration(
+                display = PaymentSheet.LinkConfiguration.Display.Automatic,
+            ),
+        )
+
+        loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = config,
+            initializedViaCompose = false,
+        ).getOrThrow()
+
+        verify(eventReporter).onLoadSucceeded(
+            paymentSelection = anyOrNull(),
+            linkMode = anyOrNull(),
+            googlePaySupported = any(),
+            linkDisplay = eq(PaymentSheet.LinkConfiguration.Display.Automatic),
+            currency = anyOrNull(),
+            initializationMode = any(),
+            orderedLpms = any(),
+            requireCvcRecollection = any(),
+            hasDefaultPaymentMethod = anyOrNull(),
+            setAsDefaultEnabled = anyOrNull(),
+        )
+    }
+
+    @Test
+    fun `Hides Link if Link display is set to 'never'`() = runTest {
+        val loader = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+        )
+
+        val config = PaymentSheet.Configuration(
+            merchantDisplayName = MERCHANT_DISPLAY_NAME,
+            link = PaymentSheet.LinkConfiguration(
+                display = PaymentSheet.LinkConfiguration.Display.Never,
+            ),
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = config,
+            initializedViaCompose = false,
+        ).getOrThrow()
+
+        assertThat(result.paymentMethodMetadata.linkState).isNull()
+        assertThat(result.paymentMethodMetadata.supportedPaymentMethodTypes()).doesNotContain("link")
+    }
+
+    @Test
+    fun `Emits correct load event if Link display is set to 'never'`() = runTest {
+        val loader = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+        )
+
+        val config = PaymentSheet.Configuration(
+            merchantDisplayName = MERCHANT_DISPLAY_NAME,
+            link = PaymentSheet.LinkConfiguration(
+                display = PaymentSheet.LinkConfiguration.Display.Never,
+            ),
+        )
+
+        loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = config,
+            initializedViaCompose = false,
+        ).getOrThrow()
+
+        verify(eventReporter).onLoadSucceeded(
+            paymentSelection = anyOrNull(),
+            linkMode = anyOrNull(),
+            googlePaySupported = any(),
+            linkDisplay = eq(PaymentSheet.LinkConfiguration.Display.Never),
+            currency = anyOrNull(),
+            initializationMode = any(),
+            orderedLpms = any(),
+            requireCvcRecollection = any(),
+            hasDefaultPaymentMethod = anyOrNull(),
+            setAsDefaultEnabled = anyOrNull(),
+        )
+    }
 
     private fun removeLastPaymentMethodTest(
         customer: PaymentSheet.CustomerConfiguration,
@@ -2593,6 +2723,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
+            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
         )
     }
 
