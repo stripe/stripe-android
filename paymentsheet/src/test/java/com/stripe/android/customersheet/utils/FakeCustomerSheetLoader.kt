@@ -46,7 +46,6 @@ internal class FakeCustomerSheetLoader(
                     PaymentMethodMetadataFactory.create(
                         stripeIntent = stripeIntent,
                         cbcEligibility = cbcEligibility,
-                        financialConnectionsAvailable = financialConnectionsAvailable,
                         paymentMethodOrder = configuration.paymentMethodOrder,
                         isGooglePayReady = isGooglePayAvailable,
                         isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSyncDefaultEnabled,

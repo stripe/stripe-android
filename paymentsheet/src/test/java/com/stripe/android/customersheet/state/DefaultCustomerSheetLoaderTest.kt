@@ -410,7 +410,6 @@ class DefaultCustomerSheetLoaderTest {
             googlePayRepositoryFactory = { readyGooglePayRepository },
             initializationDataSourceProvider = initDataSource,
             lpmRepository = lpmRepository,
-            isFinancialConnectionsAvailable = { false },
             errorReporter = FakeErrorReporter(),
             workContext = coroutineContext,
         )
@@ -449,7 +448,6 @@ class DefaultCustomerSheetLoaderTest {
             isLiveModeProvider = { false },
             googlePayRepositoryFactory = { readyGooglePayRepository },
             lpmRepository = lpmRepository,
-            isFinancialConnectionsAvailable = { false },
             errorReporter = FakeErrorReporter(),
             workContext = coroutineContext,
         )
@@ -616,7 +614,6 @@ class DefaultCustomerSheetLoaderTest {
             },
             initializationDataSourceProvider = initializationDataSourceProvider,
             lpmRepository = lpmRepository,
-            isFinancialConnectionsAvailable = isFinancialConnectionsFullSdkAvailable,
             errorReporter = errorReporter,
             workContext = workContext,
         )

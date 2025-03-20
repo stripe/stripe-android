@@ -835,7 +835,6 @@ internal class PaymentMethodMetadataTest {
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             sharedDataSpecs = listOf(SharedDataSpec("card")),
             isGooglePayReady = true,
-            isFinancialConnectionsAvailable = { false },
             isPaymentMethodSyncDefaultEnabled = false,
         )
 
@@ -859,7 +858,6 @@ internal class PaymentMethodMetadataTest {
             ),
             isGooglePayReady = true,
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
-            financialConnectionsAvailable = false,
             linkInlineConfiguration = null,
             linkMode = null,
             linkState = null,

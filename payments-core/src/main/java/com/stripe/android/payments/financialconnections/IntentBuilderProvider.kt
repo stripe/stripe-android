@@ -17,7 +17,7 @@ internal interface IntentBuilderProvider {
     }
 }
 
-internal class DefaultIntentBuilderProvider() : IntentBuilderProvider {
+internal class DefaultIntentBuilderProvider : IntentBuilderProvider {
 
     override fun provide(context: Context, isFinancialConnectionsAvailable: Boolean): IntentBuilder {
         return if (isFinancialConnectionsAvailable && FeatureFlags.forceFinancialConnectionsLiteSdk.isEnabled.not()) {
