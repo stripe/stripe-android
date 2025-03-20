@@ -478,10 +478,9 @@ internal class DefaultEventReporter @Inject internal constructor(
             analyticEventCallbackProvider.get()?.run {
                 try {
                     onEvent(event)
-                } catch (@Suppress("TooGenericExceptionCaught") e: Throwable) {
+                } catch (_: Throwable) {
                     logger.logWarningWithoutPii(
-                        "AnalyticEventCallback.onEvent() failed\n" +
-                            e.stackTraceToString()
+                        "AnalyticEventCallback.onEvent() failed for event: $event"
                     )
                 }
             }

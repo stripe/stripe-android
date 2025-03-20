@@ -902,8 +902,7 @@ class DefaultEventReporterTest {
         completeEventReporter.onShowNewPaymentOptions()
 
         assertThat(fakeUserFacingLoggerCall.awaitItem()).isEqualTo(
-            "AnalyticEventCallback.onEvent() failed\n" +
-                e.stackTraceToString()
+            "AnalyticEventCallback.onEvent() failed for event: PresentedSheet"
         )
     }
 
