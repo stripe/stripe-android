@@ -5,7 +5,7 @@ import junit.framework.TestCase.assertTrue
 import org.mockito.Mockito.mock
 import kotlin.test.Test
 
-class IntentBuilderProviderTest {
+class DefaultIntentBuilderProviderTest {
 
     private val mockContext: Context = mock()
 
