@@ -20,7 +20,6 @@ internal object UsBankAccountDefinition : PaymentMethodDefinition {
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf(
-        AddPaymentMethodRequirement.FinancialConnectionsSdk,
         AddPaymentMethodRequirement.ValidUsBankVerificationMethod,
         AddPaymentMethodRequirement.MerchantSupportsDelayedPaymentMethods,
     )

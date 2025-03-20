@@ -17,8 +17,6 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
-import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
@@ -58,7 +56,6 @@ internal data class PaymentMethodMetadata(
     val linkMode: LinkMode?,
     val linkState: LinkState?,
     val paymentMethodIncentive: PaymentMethodIncentive?,
-    val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
     val cardBrandFilter: CardBrandFilter,
 ) : Parcelable {
     fun hasIntentToSetup(): Boolean {
@@ -282,7 +279,6 @@ internal data class PaymentMethodMetadata(
             paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
             sharedDataSpecs: List<SharedDataSpec>,
             isGooglePayReady: Boolean,
-            isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
             isPaymentMethodSyncDefaultEnabled: Boolean,
         ): PaymentMethodMetadata {
             return PaymentMethodMetadata(
@@ -305,7 +301,6 @@ internal data class PaymentMethodMetadata(
                 sharedDataSpecs = sharedDataSpecs,
                 isGooglePayReady = isGooglePayReady,
                 linkInlineConfiguration = null,
-                financialConnectionsAvailable = isFinancialConnectionsAvailable(),
                 paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
                 linkMode = elementsSession.linkSettings?.linkMode,
                 linkState = null,

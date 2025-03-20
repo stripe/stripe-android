@@ -8,7 +8,7 @@ import com.stripe.android.financialconnections.lite.liteIntentBuilder
 import com.stripe.android.payments.financialconnections.IntentBuilderProvider.IntentBuilder
 import com.stripe.android.financialconnections.intentBuilder as fullIntentBuilder
 
-interface IntentBuilderProvider {
+internal interface IntentBuilderProvider {
     fun provide(context: Context, isFinancialConnectionsAvailable: Boolean): IntentBuilder
 
     sealed class IntentBuilder(val provider: (FinancialConnectionsSheetActivityArgs) -> Intent) {
@@ -17,7 +17,7 @@ interface IntentBuilderProvider {
     }
 }
 
-class DefaultIntentBuilderProvider() : IntentBuilderProvider {
+internal class DefaultIntentBuilderProvider() : IntentBuilderProvider {
 
     override fun provide(context: Context, isFinancialConnectionsAvailable: Boolean): IntentBuilder {
         return if (isFinancialConnectionsAvailable && FeatureFlags.forceFinancialConnectionsLiteSdk.isEnabled.not()) {
