@@ -757,7 +757,7 @@ internal class PaymentMethodMetadataTest {
         val sharedDataSpecs = listOf(SharedDataSpec("card"))
         val externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC)
 
-        val metadata = PaymentMethodMetadata.create(
+        val metadata = PaymentMethodMetadata.createForPaymentElement(
             elementsSession = elementsSession,
             configuration = configuration.asCommonConfiguration(),
             sharedDataSpecs = sharedDataSpecs,
@@ -925,7 +925,7 @@ internal class PaymentMethodMetadataTest {
     private fun createPaymentMethodMetadataForPaymentSheet(
         mobilePaymentElementComponent: ElementsSession.Customer.Components.MobilePaymentElement?,
     ): PaymentMethodMetadata {
-        return PaymentMethodMetadata.create(
+        return PaymentMethodMetadata.createForPaymentElement(
             elementsSession = createElementsSession(
                 mobilePaymentElementComponent = mobilePaymentElementComponent
             ),

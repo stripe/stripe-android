@@ -233,7 +233,7 @@ internal data class PaymentMethodMetadata(
     }
 
     internal companion object {
-        internal fun create(
+        internal fun createForPaymentElement(
             elementsSession: ElementsSession,
             configuration: CommonConfiguration,
             sharedDataSpecs: List<SharedDataSpec>,
@@ -315,7 +315,7 @@ internal data class PaymentMethodMetadata(
             )
         }
 
-        internal fun create(
+        internal fun createForNativeLink(
             configuration: LinkConfiguration,
         ): PaymentMethodMetadata {
             return PaymentMethodMetadata(
