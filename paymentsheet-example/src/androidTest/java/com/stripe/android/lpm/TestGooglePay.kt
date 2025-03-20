@@ -50,9 +50,17 @@ internal class TestGooglePay : BasePlaygroundTest() {
     }
 
     @Test
-    fun testSetupIntentWithEEA() {
+    fun testSetupIntentInEEA() {
         testDriver.confirmWithGooglePay(
             country = Country.FR,
+            checkoutMode = CheckoutMode.SETUP
+        )
+    }
+
+    @Test
+    fun testSetupIntentInUS() {
+        testDriver.confirmWithGooglePay(
+            country = Country.US,
             checkoutMode = CheckoutMode.SETUP
         )
     }

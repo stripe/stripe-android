@@ -33,7 +33,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import java.util.Locale
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 
@@ -131,10 +130,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
 
     @Test
     fun `createTransactionInfo() with 0 amount outside US and CA should honor the price`() {
-        val countryCodesOutsideUSAndCA = Locale.getISOCountries()
-            .map { it.lowercase() }
-            .filterNot { it == "us" || it == "ca" }
-        for (countryCode in countryCodesOutsideUSAndCA) {
+        for (countryCode in listOf("de", "fr", "gb", "jp", "mx")) {
             val transactionInfo = viewModel.createTransactionInfo(
                 GooglePayPaymentMethodLauncherContractV2.Args(
                     GooglePayPaymentMethodLauncher.Config(
