@@ -903,7 +903,7 @@ class DefaultEventReporterTest {
 
         assertThat(fakeUserFacingLoggerCall.awaitItem()).isEqualTo(
             "AnalyticEventCallback.onEvent() failed\n" +
-            e.stackTraceToString()
+                e.stackTraceToString()
         )
     }
 
