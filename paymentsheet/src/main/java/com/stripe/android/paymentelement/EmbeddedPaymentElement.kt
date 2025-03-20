@@ -161,6 +161,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
         internal val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         internal val embeddedViewDisplaysMandateText: Boolean,
+        internal val link: PaymentSheet.LinkConfiguration,
     ) : Parcelable {
         @Suppress("TooManyFunctions")
         @ExperimentalEmbeddedPaymentElementApi
@@ -192,6 +193,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
             private var embeddedViewDisplaysMandateText: Boolean = ConfigurationDefaults.embeddedViewDisplaysMandateText
             private var customPaymentMethods: List<PaymentSheet.CustomPaymentMethod> =
                 ConfigurationDefaults.customPaymentMethods
+            private var link: PaymentSheet.LinkConfiguration = ConfigurationDefaults.link
 
             /**
              * If set, the customer can select a previously saved payment method.
@@ -375,6 +377,13 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 this.embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText
             }
 
+            /**
+             * Configuration related to Link.
+             */
+            fun link(link: PaymentSheet.LinkConfiguration): Builder = apply {
+                this.link = link
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -393,6 +402,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 cardBrandAcceptance = cardBrandAcceptance,
                 customPaymentMethods = customPaymentMethods,
                 embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
+                link = link,
             )
         }
     }
