@@ -907,6 +907,7 @@ class DefaultEventReporterTest {
         requireCvcRecollection: Boolean = false,
         hasDefaultPaymentMethod: Boolean? = null,
         setAsDefaultEnabled: Boolean? = null,
+        linkDisplay: PaymentSheet.LinkConfiguration.Display = PaymentSheet.LinkConfiguration.Display.Automatic,
     ) {
         simulateInit()
         onLoadStarted(initializedViaCompose = false)
@@ -920,6 +921,7 @@ class DefaultEventReporterTest {
             requireCvcRecollection = requireCvcRecollection,
             hasDefaultPaymentMethod = hasDefaultPaymentMethod,
             setAsDefaultEnabled = setAsDefaultEnabled,
+            linkDisplay = linkDisplay,
         )
     }
 
