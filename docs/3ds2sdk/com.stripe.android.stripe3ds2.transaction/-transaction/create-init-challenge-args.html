@@ -1,0 +1,76 @@
+<!doctype html>
+<html class="no-js">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>createInitChallengeArgs</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg">    <script>var pathToRoot = "../../../";</script>
+    <script>document.documentElement.classList.replace("no-js","js");</script>
+    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async></script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<link href="../../../styles/font-jb-sans-auto.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<body>
+    <div class="root">
+<nav class="navigation" id="navigation-wrapper">
+    <div class="navigation--inner">
+        <div class="navigation-title">
+            <button class="menu-toggle" id="menu-toggle" type="button">toggle menu</button>
+            <div class="library-name">
+<a class="library-name--link" href="../../../index.html">
+                            stripe-android
+                    </a>            </div>
+            <div class="library-version">
+            </div>
+        </div>
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":3ds2sdk:dokkaHtmlPartial/release">androidJvm</button>
+        </div>
+    </div>
+    <div class="navigation-controls">
+        <button class="navigation-controls--btn navigation-controls--theme" id="theme-toggle-button" type="button">switch theme</button>
+        <div class="navigation-controls--btn navigation-controls--search" id="searchBar" role="button">search in API</div>
+    </div>
+</nav>
+        <div id="container">
+            <div class="sidebar" id="leftColumn">
+                <div class="sidebar--inner" id="sideMenu"></div>
+            </div>
+            <div id="main">
+<div class="main-content" data-page-type="member" id="content" pageids="3ds2sdk::com.stripe.android.stripe3ds2.transaction/Transaction/createInitChallengeArgs/#com.stripe.android.stripe3ds2.transaction.ChallengeParameters#kotlin.Int#com.stripe.android.stripe3ds2.transaction.IntentData/PointingToDeclaration//1817547867">
+  <div class="breadcrumbs"><a href="../../index.html">3ds2sdk</a><span class="delimiter">/</span><a href="../index.html">com.stripe.android.stripe3ds2.transaction</a><span class="delimiter">/</span><a href="index.html">Transaction</a><span class="delimiter">/</span><span class="current">createInitChallengeArgs</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>create</span><wbr><span>Init</span><wbr><span>Challenge</span><wbr><span><span>Args</span></span></h1>
+  </div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":3ds2sdk:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">fun </span><a href="create-init-challenge-args.html"><span class="token function">createInitChallengeArgs</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">challengeParameters<span class="token operator">: </span><a href="../-challenge-parameters/index.html">ChallengeParameters</a><span class="token punctuation">, </span></span><span class="parameter ">timeoutMins<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin-stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">intentData<span class="token operator">: </span><a href="../-intent-data/index.html">IntentData</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-init-challenge-args/index.html">InitChallengeArgs</a></div><p class="paragraph">If the ARes that is returned indicates that the Challenge Flow must be applied, the 3DS Requestor App calls the <a href="create-init-challenge-args.html">createInitChallengeArgs</a> method with the required input parameters. The <a href="../-init-challenge-args/index.html">InitChallengeArgs</a> will be used to initiate the challenge process.</p><p class="paragraph">Note: The <a href="create-init-challenge-args.html">createInitChallengeArgs</a> method shall be called only when the Challenge Flow is to be applied.</p><p class="paragraph">When the <a href="create-init-challenge-args.html">createInitChallengeArgs</a> method is called and the Intent is started, control of the app is passed to the 3DS SDK. At this point:</p><ul><li><p class="paragraph">The 3DS SDK shall start a time counter to measure the overall time taken by the challenge process.</p></li><li><p class="paragraph">The 3DS SDK shall check if the CA public key (root) of the Directory Server CA (DS-CA) is present, based on the directoryServerID that was passed to the createTransaction method.</p></li><li><p class="paragraph">The 3DS SDK shall use the CA public key of the DS-CA to validate the ACS signed content JWS object. Based on the information included in the JWS object, the algorithm used to perform the validation can be PS256 or ES256.</p></li><li><p class="paragraph">The 3DS SDK shall complete the Diffie-Hellman key exchange process according to JWA (RFC</p></li></ul><ol><li><p class="paragraph">in Direct Key Agreement mode using curve P-256. The output of this process is a pair of CEKs.</p></li></ol><ul><li><p class="paragraph">The 3DS SDK shall use the CEKs to encrypt the CReq messages and decrypt the CRes messages.</p></li></ul><p class="paragraph">For more information about the algorithms used for validation, and the CEKs, refer to the "3DS SDK Secure Channel Set-Up" section in Section 6.2.3, "Function J: 3DS SDK—ACS Secure Channel Set-Up" in the EMV 3DS Protocol Specification. The 3DS SDK shall display the challenge to the Cardholder. The following steps shall take place during the challenge process:</p><ul><li><p class="paragraph">The 3DS Requestor App’s current screen shall be closed either before the challenge screen is launched or before the ChallengeStatusReceiver callback is invoked by the 3DS SDK. This is to prevent the Cardholder from revisiting the card details screen using the Back button during the challenge process. For more information about the user experience when the Cardholder taps the Back button, refer to Figure 4-1.</p></li><li><p class="paragraph">The 3DS SDK shall exchange two or more CReq and CRes messages with the ACS.</p></li><li><p class="paragraph">The 3DS SDK shall send the challenge status back to the 3DS Requestor App by using the ChallengeStatusReceiver callback functions.</p></li><li><p class="paragraph">The 3DS SDK shall clean up resources that are held by the Transaction object.</p></li></ul><p class="paragraph">At any point of time, if the time taken by the challenge process (as measured by the time counter) exceeds the timeout value passed by the 3DS Requestor App, then the 3DS SDK shall call the timedout method of the ChallengeStatusReceiver callback object and clean up resources that are held by the Transaction object.</p><h4 class="">Parameters</h4><div class="table"><div class="table-row" data-filterable-current=":3ds2sdk:dokkaHtmlPartial/release" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>challenge</span><wbr><span><span>Parameters</span></span></u></div></span></div><div><div class="title"><p class="paragraph">ACS details (contained in the ARes) required by the 3DS SDK to conduct the challenge process during the transaction. The following details are mandatory:</p><ul><li><p class="paragraph">3DS Server Transaction ID</p></li><li><p class="paragraph">ACS Transaction ID</p></li><li><p class="paragraph">ACS Reference Number</p></li><li><p class="paragraph">ACS Signed Content</p></li></ul></div></div></div></div><div class="table-row" data-filterable-current=":3ds2sdk:dokkaHtmlPartial/release" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>timeout</span><wbr><span><span>Mins</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Timeout interval (in minutes) within which the challenge process must be completed. The minimum timeout interval shall be 5 minutes.</p></div></div></div></div><div class="table-row" data-filterable-current=":3ds2sdk:dokkaHtmlPartial/release" data-filterable-set=":3ds2sdk:dokkaHtmlPartial/release"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><u><span>intent</span><wbr><span><span>Data</span></span></u></div></span></div><div><div class="title"><p class="paragraph">Stripe Intent data that will be included in the Activity result</p></div></div></div></div></div></div></div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2025 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

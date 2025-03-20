@@ -14,6 +14,7 @@ import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationO
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -90,7 +91,8 @@ internal class FormActivityConfirmationHandlerTest {
             stateHelper = stateHelper,
             lifecycleOwner = TestLifecycleOwner(),
             activityResultCaller = mock(),
-            onClickDelegate = onClickOverrideDelegate
+            onClickDelegate = onClickOverrideDelegate,
+            eventReporter = FakeEventReporter()
         )
 
         assertThat(confirmationHandler.registerTurbine.awaitItem()).isNotNull()

@@ -11,7 +11,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSessionSig
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.CoroutineTestRule
-import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
+import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ConsentAgree.analyticsValue
 import com.stripe.android.financialconnections.domain.GetCachedAccounts

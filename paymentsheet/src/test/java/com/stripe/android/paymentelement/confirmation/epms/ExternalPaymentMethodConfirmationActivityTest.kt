@@ -59,12 +59,11 @@ internal class ExternalPaymentMethodConfirmationActivityTest {
 
     @Before
     fun setup() {
-        PaymentElementCallbackReferences["ConfirmationTestIdentifier"] = PaymentElementCallbacks(
-            createIntentCallback = null,
-            externalPaymentMethodConfirmHandler = { _, _ ->
+        PaymentElementCallbackReferences["ConfirmationTestIdentifier"] = PaymentElementCallbacks.Builder()
+            .externalPaymentMethodConfirmHandler { _, _ ->
                 error("Should not be called!")
             }
-        )
+            .build()
     }
 
     @Test

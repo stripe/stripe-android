@@ -272,7 +272,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             actualExternalPaymentMethods = externalPaymentMethodSpecs
         )
 
-        return PaymentMethodMetadata.create(
+        return PaymentMethodMetadata.createForPaymentElement(
             elementsSession = elementsSession,
             configuration = configuration,
             sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,

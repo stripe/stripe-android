@@ -24,13 +24,15 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.util.findActivity
+import com.stripe.android.connect.util.isInInstrumentationTest
 import com.stripe.android.connect.webview.serialization.AccountSessionClaimedMessage
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.ConnectJson
+import com.stripe.android.connect.webview.serialization.OpenAuthenticatedWebViewMessage
 import com.stripe.android.connect.webview.serialization.OpenFinancialConnectionsMessage
 import com.stripe.android.connect.webview.serialization.PageLoadMessage
-import com.stripe.android.connect.webview.serialization.SecureWebViewMessage
 import com.stripe.android.connect.webview.serialization.SetCollectMobileFinancialConnectionsResultPayloadJs
+import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
 import com.stripe.android.connect.webview.serialization.toJs
 import com.stripe.android.core.Logger
@@ -55,7 +57,7 @@ internal class StripeConnectWebView private constructor(
     private val mutableContext: MutableContextWrapper,
     @property:VisibleForTesting internal val delegate: Delegate,
     private val logger: Logger,
-) : WebView(mutableContext) {
+) : WebView(mutableContext), WebViewForPaparazzi {
 
     constructor(
         application: Application,
@@ -75,6 +77,9 @@ internal class StripeConnectWebView private constructor(
     @VisibleForTesting
     internal val stripeWebChromeClient = StripeConnectWebChromeClient()
 
+    @VisibleForTesting
+    internal val stripeJsInterface = StripeJsInterface()
+
     private val webViewLifecycleScope get() = findViewTreeLifecycleOwner()?.lifecycleScope
 
     init {
@@ -91,7 +96,7 @@ internal class StripeConnectWebView private constructor(
         }
 
         setDownloadListener(StripeDownloadListener(context))
-        addJavascriptInterface(StripeJsInterface(), ANDROID_JS_INTERFACE)
+        addJavascriptInterface(stripeJsInterface, ANDROID_JS_INTERFACE)
     }
 
     fun updateConnectInstance(appearance: Appearance) {
@@ -199,6 +204,11 @@ internal class StripeConnectWebView private constructor(
         fun onMerchantIdChanged(merchantId: String)
 
         /**
+         * Callback to invoke upon receiving 'openAuthenticatedWebView' message.
+         */
+        fun onReceivedOpenAuthenticatedWebView(activity: Activity, message: OpenAuthenticatedWebViewMessage)
+
+        /**
          * Callback to invoke upon receiving 'openFinancialConnections' message.
          */
         suspend fun onOpenFinancialConnections(activity: Activity, message: OpenFinancialConnectionsMessage)
@@ -217,6 +227,15 @@ internal class StripeConnectWebView private constructor(
 
         override fun onPageFinished(view: WebView, url: String) {
             delegate.onPageFinished(url)
+            if (isInInstrumentationTest()) {
+                // Fake sending this message to simulate stripe.js loading,
+                // which disappears the native loading spinner.
+                delegate.onReceivedSetterFunctionCalled(
+                    SetterFunctionCalledMessage(
+                        SetOnLoaderStart("test")
+                    )
+                )
+            }
         }
 
         override fun onReceivedHttpError(
@@ -298,7 +317,8 @@ internal class StripeConnectWebView private constructor(
         }
     }
 
-    private inner class StripeJsInterface {
+    @VisibleForTesting
+    internal inner class StripeJsInterface {
         @JavascriptInterface
         fun debug(message: String) {
             logger.debug("($loggerTag) Debug log from JS: $message")
@@ -334,12 +354,16 @@ internal class StripeConnectWebView private constructor(
         }
 
         @JavascriptInterface
-        fun openSecureWebView(message: String) {
-            val secureWebViewData = tryDeserializeWebMessage<SecureWebViewMessage>(
-                webFunctionName = "openSecureWebView",
+        fun openAuthenticatedWebView(message: String) {
+            val activity = findActivity()
+                ?: return
+            val parsed = tryDeserializeWebMessage<OpenAuthenticatedWebViewMessage>(
+                webFunctionName = "openAuthenticatedWebView",
                 message = message,
-            )
-            logger.debug("($loggerTag) Open secure web view with data: $secureWebViewData")
+            ) ?: return
+
+            logger.debug("($loggerTag) Open authenticated WebView: $parsed")
+            delegate.onReceivedOpenAuthenticatedWebView(activity, parsed)
         }
 
         @JavascriptInterface

@@ -1,6 +1,6 @@
 package com.stripe.android.financialconnections.networking
 
-import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.BillingDetails
+import com.stripe.android.financialconnections.ElementsSessionContext.BillingDetails
 import com.stripe.android.financialconnections.financialConnectionsSessionWithNoMoreAccounts
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession

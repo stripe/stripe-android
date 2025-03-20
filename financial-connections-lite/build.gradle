@@ -1,0 +1,65 @@
+apply from: configs.androidLibrary
+
+apply plugin: 'checkstyle'
+apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
+apply plugin: 'kotlinx-serialization'
+apply plugin: 'com.google.devtools.ksp'
+
+android {
+    defaultConfig {
+        testApplicationId "com.stripe.android.financialconnections.test"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
+}
+
+dependencies {
+    api project(":financial-connections-core")
+
+    implementation libs.androidx.activity
+    implementation libs.androidx.fragment
+    implementation libs.androidx.lifecycle
+    implementation libs.androidx.annotation
+    implementation libs.androidx.browser
+    implementation libs.androidx.viewModel
+    implementation libs.dagger
+    implementation libs.kotlin.coroutines
+    implementation libs.kotlin.serialization
+
+    testImplementation testLibs.json
+    testImplementation testLibs.junit
+    testImplementation testLibs.androidx.archCore
+    testImplementation testLibs.androidx.core
+    testImplementation testLibs.androidx.junit
+    testImplementation testLibs.kotlin.annotations
+    testImplementation testLibs.kotlin.coroutines
+    testImplementation testLibs.kotlin.junit
+    testImplementation testLibs.mockito.core
+    testImplementation testLibs.mockito.inline
+    testImplementation testLibs.mockito.kotlin
+    testImplementation testLibs.turbine
+    testImplementation testLibs.truth
+
+    androidTestUtil testLibs.testOrchestrator
+}
+
+android {
+    kotlinOptions {
+        freeCompilerArgs += [
+                "-opt-in=kotlin.RequiresOptIn",
+                "-Xconsistent-data-class-copy-visibility",
+        ]
+    }
+}
+
+ext {
+    artifactId = "financial-connections-lite"
+    artifactName = "financial-connections-lite"
+    artifactDescrption = "The Financial Connections Lite module of Stripe Android SDK"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"

@@ -35,10 +35,12 @@ fun rememberEmbeddedPaymentElement(
     }
 
     val callbacks = remember(builder) {
-        PaymentElementCallbacks(
-            createIntentCallback = builder.createIntentCallback,
-            externalPaymentMethodConfirmHandler = builder.externalPaymentMethodConfirmHandler,
-        )
+        @OptIn(ExperimentalCustomPaymentMethodsApi::class)
+        PaymentElementCallbacks.Builder()
+            .createIntentCallback(builder.createIntentCallback)
+            .confirmCustomPaymentMethodCallback(builder.confirmCustomPaymentMethodCallback)
+            .externalPaymentMethodConfirmHandler(builder.externalPaymentMethodConfirmHandler)
+            .build()
     }
 
     UpdateCallbacks(paymentElementCallbackIdentifier, callbacks)

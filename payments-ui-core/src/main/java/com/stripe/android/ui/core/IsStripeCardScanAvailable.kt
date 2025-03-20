@@ -1,6 +1,9 @@
 package com.stripe.android.ui.core
 
-internal interface IsStripeCardScanAvailable {
+import androidx.annotation.RestrictTo
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface IsStripeCardScanAvailable {
     operator fun invoke(): Boolean
 }
 

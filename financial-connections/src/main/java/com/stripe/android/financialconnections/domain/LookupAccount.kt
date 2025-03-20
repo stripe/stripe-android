@@ -1,8 +1,8 @@
 package com.stripe.android.financialconnections.domain
 
 import android.app.Application
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
-import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext.PrefillDetails
+import com.stripe.android.financialconnections.ElementsSessionContext.PrefillDetails
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AttestationEndpoint
 import com.stripe.android.financialconnections.features.error.toAttestationErrorIfApplicable
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -15,7 +15,7 @@ internal class LookupAccount @Inject constructor(
     private val application: Application,
     private val requestIntegrityToken: RequestIntegrityToken,
     private val consumerSessionRepository: FinancialConnectionsConsumerSessionRepository,
-    val configuration: FinancialConnectionsSheet.Configuration,
+    val configuration: FinancialConnectionsSheetConfiguration,
 ) {
 
     suspend operator fun invoke(

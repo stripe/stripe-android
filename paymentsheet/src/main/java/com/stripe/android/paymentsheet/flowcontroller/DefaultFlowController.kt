@@ -46,6 +46,7 @@ import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.ui.SepaMandateContract
 import com.stripe.android.paymentsheet.ui.SepaMandateResult
 import com.stripe.android.paymentsheet.utils.canSave
+import com.stripe.android.paymentsheet.utils.toConfirmationError
 import com.stripe.android.uicore.utils.AnimationConstants
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
@@ -447,7 +448,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 )
             }
             is ConfirmationHandler.Result.Failed -> {
-                val error = result.type.toConfirmationError(result.cause)
+                val error = result.toConfirmationError()
 
                 error?.let {
                     eventReporter.onPaymentFailure(
@@ -536,22 +537,6 @@ internal class DefaultFlowController @Inject internal constructor(
             else -> {
                 // Nothing to do here
             }
-        }
-    }
-
-    private fun ConfirmationHandler.Result.Failed.ErrorType.toConfirmationError(
-        cause: Throwable
-    ): PaymentSheetConfirmationError? {
-        return when (this) {
-            ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod ->
-                PaymentSheetConfirmationError.ExternalPaymentMethod
-            ConfirmationHandler.Result.Failed.ErrorType.Payment ->
-                PaymentSheetConfirmationError.Stripe(cause)
-            is ConfirmationHandler.Result.Failed.ErrorType.GooglePay ->
-                PaymentSheetConfirmationError.GooglePay(errorCode)
-            ConfirmationHandler.Result.Failed.ErrorType.Internal,
-            ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration,
-            ConfirmationHandler.Result.Failed.ErrorType.Fatal -> null
         }
     }
 

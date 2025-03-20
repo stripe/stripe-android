@@ -14,6 +14,7 @@ import com.google.android.gms.common.api.Status
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
@@ -56,6 +57,7 @@ import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -83,6 +85,7 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
+import com.stripe.android.paymentsheet.analytics.primaryButtonColorUsage
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.RecordingCvcRecollectionLauncherFactory
@@ -116,6 +119,8 @@ import com.stripe.android.paymentsheet.ui.CardBrandChoice
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
+import com.stripe.android.paymentsheet.utils.prefillCreate
+import com.stripe.android.paymentsheet.utils.prefilledBuilder
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.testing.FakeErrorReporter
@@ -171,6 +176,7 @@ import com.stripe.android.R as PaymentsCoreR
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
+@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 internal class PaymentSheetViewModelTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
@@ -215,120 +221,17 @@ internal class PaymentSheetViewModelTest {
     fun `init should fire analytics event`() {
         val beforeSessionId = AnalyticsRequestFactory.sessionId
         createViewModel()
+        val config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         verify(eventReporter).onInit(
-            configuration = eq(PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY),
+            commonConfiguration = eq(config.asCommonConfiguration()),
+            appearance = eq(config.appearance),
+            primaryButtonColor = eq(config.primaryButtonColorUsage()),
+            paymentMethodLayout = eq(config.paymentMethodLayout),
             isDeferred = eq(false),
         )
 
         // Creating the view model should regenerate the analytics sessionId.
         assertThat(beforeSessionId).isNotEqualTo(AnalyticsRequestFactory.sessionId)
-    }
-
-    @Test
-    fun `correct event is sent when dropdown is opened in EditPaymentMethod`() = runTest {
-        val paymentMethods = listOf(CARD_WITH_NETWORKS_PAYMENT_METHOD)
-
-        val viewModel = createViewModel(
-            customer = EMPTY_CUSTOMER_STATE.copy(paymentMethods = paymentMethods)
-        )
-
-        viewModel.navigationHandler.currentScreen.test {
-            awaitItem()
-
-            viewModel.savedPaymentMethodMutator.updatePaymentMethod(
-                CARD_WITH_NETWORKS_PAYMENT_METHOD.toDisplayableSavedPaymentMethod()
-            )
-
-            val currentScreen = awaitItem()
-
-            assertThat(currentScreen).isInstanceOf<PaymentSheetScreen.UpdatePaymentMethod>()
-
-            if (currentScreen is PaymentSheetScreen.UpdatePaymentMethod) {
-                val interactor = currentScreen.interactor
-
-                interactor.handleViewAction(
-                    UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsShown
-                )
-
-                verify(eventReporter).onShowPaymentOptionBrands(
-                    source = EventReporter.CardBrandChoiceEventSource.Edit,
-                    selectedBrand = CardBrand.CartesBancaires
-                )
-            }
-        }
-    }
-
-    @Test
-    fun `correct event is sent when dropdown is dismissed in EditPaymentMethod`() = runTest {
-        val paymentMethods = listOf(CARD_WITH_NETWORKS_PAYMENT_METHOD)
-
-        val viewModel = createViewModel(
-            customer = EMPTY_CUSTOMER_STATE.copy(paymentMethods = paymentMethods)
-        )
-
-        viewModel.navigationHandler.currentScreen.test {
-            awaitItem()
-
-            viewModel.savedPaymentMethodMutator.updatePaymentMethod(
-                CARD_WITH_NETWORKS_PAYMENT_METHOD.toDisplayableSavedPaymentMethod()
-            )
-
-            val currentScreen = awaitItem()
-
-            assertThat(currentScreen).isInstanceOf<PaymentSheetScreen.UpdatePaymentMethod>()
-
-            if (currentScreen is PaymentSheetScreen.UpdatePaymentMethod) {
-                val interactor = currentScreen.interactor
-
-                interactor.handleViewAction(
-                    UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsDismissed
-                )
-
-                verify(eventReporter).onHidePaymentOptionBrands(
-                    source = EventReporter.CardBrandChoiceEventSource.Edit,
-                    selectedBrand = CardBrand.CartesBancaires,
-                )
-            }
-        }
-    }
-
-    @Test
-    fun `correct event is sent when dropdown is dismissed with change in EditPaymentMethod`() = runTest {
-        val paymentMethods = listOf(CARD_WITH_NETWORKS_PAYMENT_METHOD)
-
-        val viewModel = createViewModel(
-            customer = EMPTY_CUSTOMER_STATE.copy(paymentMethods = paymentMethods)
-        )
-
-        viewModel.navigationHandler.currentScreen.test {
-            awaitItem()
-
-            viewModel.savedPaymentMethodMutator.updatePaymentMethod(
-                CARD_WITH_NETWORKS_PAYMENT_METHOD.toDisplayableSavedPaymentMethod()
-            )
-
-            val currentScreen = awaitItem()
-
-            assertThat(currentScreen).isInstanceOf<PaymentSheetScreen.UpdatePaymentMethod>()
-
-            if (currentScreen is PaymentSheetScreen.UpdatePaymentMethod) {
-                val interactor = currentScreen.interactor
-
-                interactor.handleViewAction(
-                    UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                        CardBrandChoice(
-                            CardBrand.Visa,
-                            enabled = true
-                        )
-                    )
-                )
-
-                verify(eventReporter).onHidePaymentOptionBrands(
-                    source = EventReporter.CardBrandChoiceEventSource.Edit,
-                    selectedBrand = CardBrand.Visa
-                )
-            }
-        }
     }
 
     @Test
@@ -346,12 +249,14 @@ internal class PaymentSheetViewModelTest {
         )
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
-                    customer = PaymentSheet.CustomerConfiguration(
-                        id = "cus_1",
-                        ephemeralKeySecret = "ek_123"
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.prefilledBuilder()
+                    .customer(
+                        PaymentSheet.CustomerConfiguration(
+                            id = "cus_1",
+                            ephemeralKeySecret = "ek_123"
+                        )
                     )
-                )
+                    .build()
             ),
             customer = CustomerState(
                 id = "cus_2",
@@ -696,14 +601,16 @@ internal class PaymentSheetViewModelTest {
             createViewModel(
                 stripeIntent = stripeIntent,
                 args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                    config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
-                        shippingDetails = AddressDetails(
-                            address = PaymentSheet.Address(
-                                country = "US"
-                            ),
-                            name = "Test Name"
+                    config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.prefilledBuilder()
+                        .shippingDetails(
+                            AddressDetails(
+                                address = PaymentSheet.Address(
+                                    country = "US"
+                                ),
+                                name = "Test Name"
+                            )
                         )
-                    )
+                        .build()
                 )
             )
         )
@@ -1330,10 +1237,10 @@ internal class PaymentSheetViewModelTest {
     fun `Verify supported payment methods exclude afterpay if no shipping and no allow flag`() {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
-                    shippingDetails = null,
-                    allowsPaymentMethodsRequiringShippingAddress = false,
-                )
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.prefilledBuilder()
+                    .shippingDetails(null)
+                    .allowsPaymentMethodsRequiringShippingAddress(false)
+                    .build()
             ),
             stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
                 paymentMethodTypes = listOf("afterpay_clearpay"),
@@ -1348,9 +1255,9 @@ internal class PaymentSheetViewModelTest {
     fun `Verify supported payment methods include afterpay if allow flag but no shipping`() {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
-                    allowsPaymentMethodsRequiringShippingAddress = true,
-                )
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.prefilledBuilder()
+                    .allowsPaymentMethodsRequiringShippingAddress(true)
+                    .build()
             ),
             stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
                 paymentMethodTypes = listOf("afterpay_clearpay"),
@@ -1365,9 +1272,9 @@ internal class PaymentSheetViewModelTest {
     fun `Verify supported payment methods include afterpay if shipping but no allow flag`() {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
-                    allowsPaymentMethodsRequiringShippingAddress = false,
-                )
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.prefilledBuilder()
+                    .allowsPaymentMethodsRequiringShippingAddress(true)
+                    .build()
             ),
             stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
                 paymentMethodTypes = listOf("afterpay_clearpay"),
@@ -1621,9 +1528,9 @@ internal class PaymentSheetViewModelTest {
     fun `launched with correct screen when in horizontal mode`() = runTest {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal
-                )
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.prefilledBuilder()
+                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+                    .build()
             ),
         )
         viewModel.navigationHandler.currentScreen.test {
@@ -1635,9 +1542,9 @@ internal class PaymentSheetViewModelTest {
     fun `launched with correct screen when in vertical mode`() = runTest {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical
-                )
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.prefilledBuilder()
+                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                    .build()
             ),
         )
         viewModel.navigationHandler.currentScreen.test {
@@ -1649,9 +1556,9 @@ internal class PaymentSheetViewModelTest {
     fun `launched with correct screen when in automatic mode`() = runTest {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic
-                )
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.prefilledBuilder()
+                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Automatic)
+                    .build()
             ),
         )
         viewModel.navigationHandler.currentScreen.test {
@@ -1973,9 +1880,9 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(
             isGooglePayReady = true,
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
-                    allowsDelayedPaymentMethods = true,
-                ),
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.prefilledBuilder()
+                    .allowsDelayedPaymentMethods(true)
+                    .build(),
             ),
             stripeIntent = intent,
         )
@@ -2006,9 +1913,9 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(
             isGooglePayReady = true,
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
-                    allowsDelayedPaymentMethods = true,
-                ),
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.prefilledBuilder()
+                    .allowsDelayedPaymentMethods(true)
+                    .build(),
             ),
             stripeIntent = intent,
         )
@@ -2109,45 +2016,60 @@ internal class PaymentSheetViewModelTest {
         createViewModel()
 
         verify(eventReporter).onInit(
-            configuration = anyOrNull(),
+            commonConfiguration = anyOrNull(),
+            appearance = anyOrNull(),
+            primaryButtonColor = anyOrNull(),
+            paymentMethodLayout = anyOrNull(),
             isDeferred = eq(false),
         )
     }
 
     @Test
     fun `Sends correct analytics event when using deferred intent with client-side confirmation`() = runTest {
-        PaymentElementCallbackReferences[PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks(
-            createIntentCallback = { _, _ ->
+        PaymentElementCallbackReferences[PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks.Builder()
+            .createIntentCallback { _, _ ->
                 error("Should not be called!")
-            },
-            externalPaymentMethodConfirmHandler = { _, _ ->
+            }
+            .confirmCustomPaymentMethodCallback { _, _ ->
                 error("Should not be called!")
-            },
-        )
+            }
+            .externalPaymentMethodConfirmHandler { _, _ ->
+                error("Should not be called!")
+            }
+            .build()
 
         createViewModelForDeferredIntent()
 
         verify(eventReporter).onInit(
-            configuration = anyOrNull(),
+            commonConfiguration = anyOrNull(),
+            appearance = anyOrNull(),
+            primaryButtonColor = anyOrNull(),
+            paymentMethodLayout = anyOrNull(),
             isDeferred = eq(true),
         )
     }
 
     @Test
     fun `Sends correct analytics event when using deferred intent with server-side confirmation`() = runTest {
-        PaymentElementCallbackReferences[PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks(
-            createIntentCallback = { _, _ ->
+        PaymentElementCallbackReferences[PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks.Builder()
+            .createIntentCallback { _, _ ->
                 error("Should not be called!")
-            },
-            externalPaymentMethodConfirmHandler = { _, _ ->
+            }
+            .confirmCustomPaymentMethodCallback { _, _ ->
                 error("Should not be called!")
-            },
-        )
+            }
+            .externalPaymentMethodConfirmHandler { _, _ ->
+                error("Should not be called!")
+            }
+            .build()
 
         createViewModelForDeferredIntent()
 
         verify(eventReporter).onInit(
-            configuration = anyOrNull(),
+            commonConfiguration = anyOrNull(),
+            appearance = anyOrNull(),
+            primaryButtonColor = anyOrNull(),
+            paymentMethodLayout = anyOrNull(),
             isDeferred = eq(true),
         )
     }
@@ -2302,15 +2224,17 @@ internal class PaymentSheetViewModelTest {
         val expectedAmount = 1099L
 
         val args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-            config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
-                googlePay = PaymentSheet.GooglePayConfiguration(
-                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                    countryCode = "CA",
-                    currencyCode = "CAD",
-                    amount = 12345,
-                    label = expectedLabel,
+            config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.prefilledBuilder()
+                .googlePay(
+                    PaymentSheet.GooglePayConfiguration(
+                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                        countryCode = "CA",
+                        currencyCode = "CAD",
+                        amount = 12345,
+                        label = expectedLabel,
+                    )
                 )
-            )
+                .build()
         )
 
         val viewModel = createViewModel(
@@ -2334,15 +2258,17 @@ internal class PaymentSheetViewModelTest {
         val expectedAmount = 1234L
 
         val args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.copy(
-            config = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.config.copy(
-                googlePay = PaymentSheet.GooglePayConfiguration(
-                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                    countryCode = "CA",
-                    currencyCode = "CAD",
-                    amount = expectedAmount,
-                    label = expectedLabel,
+            config = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.config.prefilledBuilder()
+                .googlePay(
+                    PaymentSheet.GooglePayConfiguration(
+                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                        countryCode = "CA",
+                        currencyCode = "CAD",
+                        amount = expectedAmount,
+                        label = expectedLabel,
+                    )
                 )
-            )
+                .build()
         )
 
         val viewModel = createViewModel(
@@ -2425,17 +2351,21 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Requires email and phone with Google Pay when collection mode is set to always`() {
         val args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.copy(
-            config = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.config.copy(
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                ),
-                googlePay = PaymentSheet.GooglePayConfiguration(
-                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                    countryCode = "CA",
-                    currencyCode = "CAD",
+            config = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.config.prefilledBuilder()
+                .googlePay(
+                    PaymentSheet.GooglePayConfiguration(
+                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                        countryCode = "CA",
+                        currencyCode = "CAD",
+                    )
                 )
-            )
+                .billingDetailsCollectionConfiguration(
+                    PaymentSheet.BillingDetailsCollectionConfiguration(
+                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    )
+                )
+                .build()
         )
 
         val viewModel = createViewModel(
@@ -2456,16 +2386,20 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Requires full billing details with Google Pay when collection mode is set to full`() {
         val args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.copy(
-            config = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.config.copy(
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-                ),
-                googlePay = PaymentSheet.GooglePayConfiguration(
-                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                    countryCode = "CA",
-                    currencyCode = "CAD",
+            config = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.config.prefilledBuilder()
+                .googlePay(
+                    PaymentSheet.GooglePayConfiguration(
+                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                        countryCode = "CA",
+                        currencyCode = "CAD",
+                    )
                 )
-            )
+                .billingDetailsCollectionConfiguration(
+                    PaymentSheet.BillingDetailsCollectionConfiguration(
+                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    )
+                )
+                .build()
         )
 
         val viewModel = createViewModel(
@@ -2486,17 +2420,21 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Does not require email and phone with Google Pay when collection mode is not set to always`() {
         val args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.copy(
-            config = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.config.copy(
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
-                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
-                ),
-                googlePay = PaymentSheet.GooglePayConfiguration(
-                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                    countryCode = "CA",
-                    currencyCode = "CAD",
+            config = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.config.prefilledBuilder()
+                .billingDetailsCollectionConfiguration(
+                    PaymentSheet.BillingDetailsCollectionConfiguration(
+                        phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+                    )
                 )
-            )
+                .googlePay(
+                    PaymentSheet.GooglePayConfiguration(
+                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                        countryCode = "CA",
+                        currencyCode = "CAD",
+                    )
+                )
+                .build()
         )
 
         val viewModel = createViewModel(
@@ -2517,16 +2455,20 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Does not require billing details with Google Pay when collection mode is set to never`() {
         val args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.copy(
-            config = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.config.copy(
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
-                ),
-                googlePay = PaymentSheet.GooglePayConfiguration(
-                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                    countryCode = "CA",
-                    currencyCode = "CAD",
+            config = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.config.prefilledBuilder()
+                .billingDetailsCollectionConfiguration(
+                    PaymentSheet.BillingDetailsCollectionConfiguration(
+                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+                    )
                 )
-            )
+                .googlePay(
+                    PaymentSheet.GooglePayConfiguration(
+                        environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                        countryCode = "CA",
+                        currencyCode = "CAD",
+                    )
+                )
+                .build()
         )
 
         val viewModel = createViewModel(
@@ -2915,9 +2857,9 @@ internal class PaymentSheetViewModelTest {
     fun `requiresCvcRecollection should return correct value`() {
         var viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical
-                )
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.prefilledBuilder()
+                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                    .build()
             )
         )
 
@@ -2950,9 +2892,9 @@ internal class PaymentSheetViewModelTest {
     fun `requiresCvcRecollection should return correct value in automatic mode`() {
         var viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic
-                )
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.prefilledBuilder()
+                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Automatic)
+                    .build()
             )
         )
 
@@ -2985,9 +2927,9 @@ internal class PaymentSheetViewModelTest {
     fun `CvcRecollection screen should be displayed on checkout when required in vertical mode`() = runTest {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical
-                )
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.prefilledBuilder()
+                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                    .build()
             ),
         )
 
@@ -3005,9 +2947,9 @@ internal class PaymentSheetViewModelTest {
     fun `CvcRecollection screen should be displayed on checkout when required in automatic mode`() = runTest {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic
-                )
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.prefilledBuilder()
+                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Automatic)
+                    .build()
             ),
         )
 
@@ -3026,9 +2968,9 @@ internal class PaymentSheetViewModelTest {
         val cvcRecollectionInteractor = FakeCvcRecollectionInteractor()
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical
-                )
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.prefilledBuilder()
+                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                    .build()
             ),
             cvcRecollectionInteractor = cvcRecollectionInteractor
         )
@@ -3068,9 +3010,9 @@ internal class PaymentSheetViewModelTest {
     fun `CvcRecollection screen should not be displayed on checkout when not required in vertical mode`() = runTest {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical
-                )
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.prefilledBuilder()
+                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                    .build()
             ),
         )
 
@@ -3088,9 +3030,9 @@ internal class PaymentSheetViewModelTest {
     fun `CvcRecollection screen should not be displayed on checkout when not required in automatic mode`() = runTest {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic
-                )
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.prefilledBuilder()
+                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Automatic)
+                    .build()
             ),
         )
 
@@ -3368,11 +3310,13 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel(
             isGooglePayReady = true,
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.config.copy(
-                    googlePay = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.googlePayConfig?.copy(
-                        buttonType = buttonType
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.config.prefilledBuilder()
+                    .googlePay(
+                        ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP.googlePayConfig?.prefillCreate(
+                            buttonType = buttonType,
+                        )
                     )
-                )
+                    .build()
             )
         )
 

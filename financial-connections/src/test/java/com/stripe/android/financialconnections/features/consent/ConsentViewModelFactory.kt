@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.features.consent
 
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
+import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.AcceptConsent

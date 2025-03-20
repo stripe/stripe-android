@@ -4,6 +4,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -11,6 +12,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -19,6 +21,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.ui.core.IsStripeCardScanAvailable
 import com.stripe.android.utils.FakeDurationProvider
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.json.JSONException
@@ -53,7 +56,10 @@ class DefaultEventReporterTest {
         val completeEventReporter = createEventReporter(EventReporter.Mode.Complete)
 
         completeEventReporter.onInit(
-            configuration = configuration,
+            commonConfiguration = configuration.asCommonConfiguration(),
+            appearance = configuration.appearance,
+            primaryButtonColor = configuration.primaryButtonColorUsage(),
+            paymentMethodLayout = configuration.paymentMethodLayout,
             isDeferred = false,
         )
 
@@ -455,41 +461,41 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `onShowPaymentOptionBrands() should fire analytics request with expected event value`() {
+    fun `onBrandChoiceSelected(add) should fire analytics request with expected event value`() {
         val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
             simulateSuccessfulSetup()
         }
 
-        customEventReporter.onShowPaymentOptionBrands(
-            source = EventReporter.CardBrandChoiceEventSource.Edit,
+        customEventReporter.onBrandChoiceSelected(
+            source = EventReporter.CardBrandChoiceEventSource.Add,
             selectedBrand = CardBrand.Visa
         )
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == "mc_open_cbc_dropdown" &&
-                    req.params["cbc_event_source"] == "edit" &&
+                req.params["event"] == "mc_cbc_selected" &&
+                    req.params["cbc_event_source"] == "add" &&
                     req.params["selected_card_brand"] == "visa"
             }
         )
     }
 
     @Test
-    fun `onHidePaymentOptionBrands() should fire analytics request with expected event value`() {
+    fun `onBrandChoiceSelected(edit) should fire analytics request with expected event value`() {
         val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
             simulateSuccessfulSetup()
         }
 
-        customEventReporter.onHidePaymentOptionBrands(
+        customEventReporter.onBrandChoiceSelected(
             source = EventReporter.CardBrandChoiceEventSource.Edit,
-            selectedBrand = CardBrand.CartesBancaires,
+            selectedBrand = CardBrand.Visa
         )
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == "mc_close_cbc_dropdown" &&
+                req.params["event"] == "mc_cbc_selected" &&
                     req.params["cbc_event_source"] == "edit" &&
-                    req.params["selected_card_brand"] == "cartes_bancaires"
+                    req.params["selected_card_brand"] == "visa"
             }
         )
     }
@@ -538,11 +544,14 @@ class DefaultEventReporterTest {
             simulateSuccessfulSetup()
         }
 
-        customEventReporter.onSetAsDefaultPaymentMethodSucceeded()
+        customEventReporter.onSetAsDefaultPaymentMethodSucceeded(
+            paymentMethodType = PaymentMethod.Type.Card.code,
+        )
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == "mc_set_default_payment_method"
+                req.params["event"] == "mc_set_default_payment_method" &&
+                    req.params["payment_method_type"] == "card"
             }
         )
     }
@@ -554,12 +563,14 @@ class DefaultEventReporterTest {
         }
 
         customEventReporter.onSetAsDefaultPaymentMethodFailed(
+            paymentMethodType = PaymentMethod.Type.Card.code,
             error = Exception("No network available!")
         )
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "mc_set_default_payment_method_failed" &&
+                    req.params["payment_method_type"] == "card" &&
                     req.params["error_message"] == "No network available!"
             }
         )
@@ -616,7 +627,8 @@ class DefaultEventReporterTest {
             analyticsRequestExecutor,
             analyticsRequestFactory,
             durationProvider,
-            testDispatcher
+            testDispatcher,
+            FakeIsStripeCardScanAvailable()
         )
     }
 
@@ -842,6 +854,7 @@ class DefaultEventReporterTest {
             paymentAnalyticsRequestFactory = analyticsRequestFactory,
             durationProvider = FakeDurationProvider(duration),
             workContext = testDispatcher,
+            isStripeCardScanAvailable = FakeIsStripeCardScanAvailable()
         )
 
         reporter.configure()
@@ -862,6 +875,7 @@ class DefaultEventReporterTest {
             paymentAnalyticsRequestFactory = analyticsRequestFactory,
             durationProvider = durationProvider,
             workContext = testDispatcher,
+            isStripeCardScanAvailable = FakeIsStripeCardScanAvailable()
         )
 
         reporter.configure()
@@ -872,7 +886,13 @@ class DefaultEventReporterTest {
     }
 
     private fun EventReporter.simulateInit() {
-        onInit(configuration, isDeferred = false)
+        onInit(
+            commonConfiguration = configuration.asCommonConfiguration(),
+            appearance = configuration.appearance,
+            primaryButtonColor = configuration.primaryButtonColorUsage(),
+            paymentMethodLayout = configuration.paymentMethodLayout,
+            isDeferred = false
+        )
     }
 
     private fun EventReporter.simulateSuccessfulSetup(
@@ -888,7 +908,7 @@ class DefaultEventReporterTest {
         hasDefaultPaymentMethod: Boolean? = null,
         setAsDefaultEnabled: Boolean? = null,
     ) {
-        onInit(configuration, isDeferred = false)
+        simulateInit()
         onLoadStarted(initializedViaCompose = false)
         onLoadSucceeded(
             paymentSelection = paymentSelection,
@@ -922,5 +942,11 @@ class DefaultEventReporterTest {
             ).takeIf { it.linkMode != null },
             screenState = mock(),
         )
+    }
+
+    private class FakeIsStripeCardScanAvailable(
+        private val value: Boolean = true
+    ) : IsStripeCardScanAvailable {
+        override fun invoke() = value
     }
 }

@@ -2,7 +2,7 @@ package com.stripe.android.financialconnections.di
 
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerViewModel
 import com.stripe.android.financialconnections.features.accountupdate.AccountUpdateRequiredViewModel
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentViewModel
@@ -83,7 +83,7 @@ internal interface FinancialConnectionsSheetNativeComponent {
         fun initialState(initialState: FinancialConnectionsSheetNativeState): Builder
 
         @BindsInstance
-        fun configuration(configuration: FinancialConnectionsSheet.Configuration): Builder
+        fun configuration(configuration: FinancialConnectionsSheetConfiguration): Builder
 
         fun sharedComponent(component: FinancialConnectionsSingletonSharedComponent): Builder
 

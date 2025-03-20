@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.financialconnections.ApiKeyFixtures
-import com.stripe.android.financialconnections.FinancialConnectionsSheet.Configuration
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.model.Display
 import com.stripe.android.financialconnections.model.ShareNetworkedAccountsResponse
 import com.stripe.android.financialconnections.model.SuccessPane
@@ -20,7 +20,7 @@ import kotlin.test.Test
 
 class SelectNetworkedAccountsTest {
 
-    private val configuration = Configuration(
+    private val configuration = FinancialConnectionsSheetConfiguration(
         ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )

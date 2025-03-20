@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.analytics
 
+import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.utils.DurationProvider
@@ -11,6 +12,7 @@ import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.ui.core.IsStripeCardScanAvailable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -21,7 +23,8 @@ internal class DefaultEventReporter @Inject internal constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     private val durationProvider: DurationProvider,
-    @IOContext private val workContext: CoroutineContext
+    @IOContext private val workContext: CoroutineContext,
+    private val isStripeCardScanAvailable: IsStripeCardScanAvailable
 ) : EventReporter {
 
     private var isDeferred: Boolean = false
@@ -33,7 +36,10 @@ internal class DefaultEventReporter @Inject internal constructor(
         get() = linkMode != null
 
     override fun onInit(
-        configuration: PaymentSheet.Configuration,
+        commonConfiguration: CommonConfiguration,
+        appearance: PaymentSheet.Appearance,
+        primaryButtonColor: Boolean?,
+        paymentMethodLayout: PaymentSheet.PaymentMethodLayout?,
         isDeferred: Boolean,
     ) {
         this.isDeferred = isDeferred
@@ -41,10 +47,14 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.Init(
                 mode = mode,
-                configuration = configuration,
+                configuration = commonConfiguration,
+                appearance = appearance,
+                primaryButtonColor = primaryButtonColor,
+                paymentMethodLayout = paymentMethodLayout,
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
+                isStripeCardScanAvailable = isStripeCardScanAvailable(),
             )
         )
     }
@@ -343,48 +353,27 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onShowPaymentOptionBrands(
-        source: EventReporter.CardBrandChoiceEventSource,
-        selectedBrand: CardBrand
-    ) {
+    override fun onBrandChoiceSelected(source: EventReporter.CardBrandChoiceEventSource, selectedBrand: CardBrand) {
         fireEvent(
-            PaymentSheetEvent.ShowPaymentOptionBrands(
-                selectedBrand = selectedBrand,
+            PaymentSheetEvent.CardBrandSelected(
                 source = when (source) {
-                    EventReporter.CardBrandChoiceEventSource.Add ->
-                        PaymentSheetEvent.ShowPaymentOptionBrands.Source.Add
-                    EventReporter.CardBrandChoiceEventSource.Edit ->
-                        PaymentSheetEvent.ShowPaymentOptionBrands.Source.Edit
+                    EventReporter.CardBrandChoiceEventSource.Edit -> {
+                        PaymentSheetEvent.CardBrandSelected.Source.Edit
+                    }
+                    EventReporter.CardBrandChoiceEventSource.Add -> {
+                        PaymentSheetEvent.CardBrandSelected.Source.Add
+                    }
                 },
+                selectedBrand = selectedBrand,
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
-            )
-        )
-    }
-
-    override fun onHidePaymentOptionBrands(
-        source: EventReporter.CardBrandChoiceEventSource,
-        selectedBrand: CardBrand?
-    ) {
-        fireEvent(
-            PaymentSheetEvent.HidePaymentOptionBrands(
-                selectedBrand = selectedBrand,
-                source = when (source) {
-                    EventReporter.CardBrandChoiceEventSource.Add ->
-                        PaymentSheetEvent.HidePaymentOptionBrands.Source.Add
-                    EventReporter.CardBrandChoiceEventSource.Edit ->
-                        PaymentSheetEvent.HidePaymentOptionBrands.Source.Edit
-                },
-                isDeferred = isDeferred,
-                linkEnabled = linkEnabled,
-                googlePaySupported = googlePaySupported,
+                googlePaySupported = googlePaySupported
             )
         )
     }
 
     override fun onUpdatePaymentMethodSucceeded(
-        selectedBrand: CardBrand
+        selectedBrand: CardBrand?
     ) {
         fireEvent(
             PaymentSheetEvent.UpdatePaymentOptionSucceeded(
@@ -397,7 +386,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onUpdatePaymentMethodFailed(
-        selectedBrand: CardBrand,
+        selectedBrand: CardBrand?,
         error: Throwable,
     ) {
         fireEvent(
@@ -411,17 +400,21 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onSetAsDefaultPaymentMethodSucceeded() {
+    override fun onSetAsDefaultPaymentMethodSucceeded(
+        paymentMethodType: String?,
+    ) {
         fireEvent(
             PaymentSheetEvent.SetAsDefaultPaymentMethodSucceeded(
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
+                paymentMethodType = paymentMethodType,
             )
         )
     }
 
     override fun onSetAsDefaultPaymentMethodFailed(
+        paymentMethodType: String?,
         error: Throwable,
     ) {
         fireEvent(
@@ -430,6 +423,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
+                paymentMethodType = paymentMethodType,
             )
         )
     }

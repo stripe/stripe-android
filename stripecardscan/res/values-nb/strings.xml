@@ -2,6 +2,7 @@
 <resources>
   <string name="stripe_camera_permission_settings_message">Gi kameratilgang i innstillingene for å skanne kortet ditt</string>
   <string name="stripe_card_scan_instructions">Skann kortet ditt</string>
+  <string name="stripe_card_scan_privacy_link_text"><![CDATA[Vi bruker Stripe til å verifisere kortdetaljene dine. Stripe kan bruke og lagre opplysningene dine i henhold til personvernerklæringen sin. <a href=\"https://support.stripe.com/questions/stripes-card-image-verification\"><u>Finn ut mer</u></a>]]></string>
   <string name="stripe_card_scan_title">Plasser kortet i rektangelet for å skanne</string>
   <string name="stripe_close_button_description">Lukk</string>
   <string name="stripe_swap_camera_button_description">Bytt kamera</string>

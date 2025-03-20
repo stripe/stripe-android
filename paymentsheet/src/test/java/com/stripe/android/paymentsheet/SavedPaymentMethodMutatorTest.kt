@@ -670,6 +670,8 @@ class SavedPaymentMethodMutatorTest {
 
             val succeededCall = eventReporter.setAsDefaultPaymentMethodSucceededCalls.awaitItem()
             assertThat(succeededCall).isInstanceOf(FakeEventReporter.SetAsDefaultPaymentMethodSucceededCall::class.java)
+            assertThat(succeededCall.paymentMethodType).isNotNull()
+            assertThat(succeededCall.paymentMethodType).isEqualTo(paymentMethods[1].type?.code)
         }
     }
 
@@ -697,6 +699,8 @@ class SavedPaymentMethodMutatorTest {
 
             val failedCall = eventReporter.setAsDefaultPaymentMethodFailedCalls.awaitItem()
             assertThat(failedCall.error.message).isEqualTo("Test failure")
+            assertThat(failedCall.paymentMethodType).isNotNull()
+            assertThat(failedCall.paymentMethodType).isEqualTo(paymentMethods[1].type?.code)
         }
     }
 

@@ -7,7 +7,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.institution
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.exception.AccountLoadError
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.PartnerAccountsList
@@ -29,7 +29,7 @@ import kotlin.test.assertIs
 internal class PollAuthorizationSessionAccountsTest {
 
     private val repository: FinancialConnectionsAccountsRepository = mock()
-    private val configuration = FinancialConnectionsSheet.Configuration(
+    private val configuration = FinancialConnectionsSheetConfiguration(
         ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )

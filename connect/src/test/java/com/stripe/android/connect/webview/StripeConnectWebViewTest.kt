@@ -11,6 +11,8 @@ import android.webkit.WebChromeClient
 import android.widget.FrameLayout
 import androidx.activity.ComponentActivity
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.connect.webview.serialization.ConnectJson
+import com.stripe.android.connect.webview.serialization.OpenAuthenticatedWebViewMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.version.StripeSdkVersion
 import org.junit.Before
@@ -42,7 +44,7 @@ class StripeConnectWebViewTest {
         webView = StripeConnectWebView(
             application = RuntimeEnvironment.getApplication(),
             delegate = mockDelegate,
-            logger = Logger.getInstance(enableLogging = false)
+            logger = Logger.getInstance(enableLogging = true)
         )
     }
 
@@ -94,6 +96,16 @@ class StripeConnectWebViewTest {
         )
 
         verifyBlocking(mockDelegate) { onChooseFile(activity, filePathCallback, intent) }
+    }
+
+    @Test
+    fun `JS openAuthenticatedWebView is handled`() {
+        val message = OpenAuthenticatedWebViewMessage("test-id", "https://test.stripe.com")
+        containerView.addView(webView)
+        webView.stripeJsInterface.openAuthenticatedWebView(
+            ConnectJson.encodeToString(message)
+        )
+        verify(mockDelegate).onReceivedOpenAuthenticatedWebView(activity, message)
     }
 
     @Test

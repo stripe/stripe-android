@@ -7,6 +7,7 @@ import androidx.compose.ui.test.assertAll
 import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.isEnabled
@@ -390,42 +391,6 @@ class UpdatePaymentMethodUITest {
     }
 
     @Test
-    fun openingCardBrandDropdown_sendsOnBrandChoicesShownAction() {
-        runScenario(
-            displayableSavedPaymentMethod = PaymentMethodFixtures
-                .CARD_WITH_NETWORKS_PAYMENT_METHOD
-                .toDisplayableSavedPaymentMethod()
-        ) {
-            assertThat(viewActionRecorder.viewActions).isEmpty()
-            composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).performClick()
-
-            viewActionRecorder.consume(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsShown)
-            assertThat(viewActionRecorder.viewActions).isEmpty()
-        }
-    }
-
-    @Test
-    fun closingCardBrandDropdown_sendsOnBrandChoicesDismissedAction() {
-        runScenario(
-            displayableSavedPaymentMethod = PaymentMethodFixtures
-                .CARD_WITH_NETWORKS_PAYMENT_METHOD
-                .toDisplayableSavedPaymentMethod()
-        ) {
-            assertThat(viewActionRecorder.viewActions).isEmpty()
-            composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).performClick()
-
-            viewActionRecorder.consume(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsShown)
-            assertThat(viewActionRecorder.viewActions).isEmpty()
-
-            // Click the card brand dropdown again to dismiss it.
-            composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).performClick()
-
-            viewActionRecorder.consume(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsDismissed)
-            assertThat(viewActionRecorder.viewActions).isEmpty()
-        }
-    }
-
-    @Test
     fun selectingCardBrandDropdown_sendsOnBrandChoiceChangedAction() {
         runScenario(
             displayableSavedPaymentMethod = PaymentMethodFixtures
@@ -434,9 +399,6 @@ class UpdatePaymentMethodUITest {
         ) {
             assertThat(viewActionRecorder.viewActions).isEmpty()
             composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).performClick()
-
-            viewActionRecorder.consume(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsShown)
-            assertThat(viewActionRecorder.viewActions).isEmpty()
 
             composeRule.onNodeWithTag("${TEST_TAG_DROP_DOWN_CHOICE}_Visa").performClick()
 
@@ -470,7 +432,32 @@ class UpdatePaymentMethodUITest {
             val setAsDefaultCheckbox = composeRule.onNodeWithTag(UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG)
 
             setAsDefaultCheckbox.assertExists()
+        }
+    }
+
+    @Test
+    fun `setAsDefaultCheckboxEnabled true -- set as default checkbox is enabled`() {
+        runScenario(
+            shouldShowSetAsDefaultCheckbox = true,
+            setAsDefaultCheckboxEnabled = true,
+        ) {
+            val setAsDefaultCheckbox = composeRule.onNodeWithTag(UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG)
+
+            setAsDefaultCheckbox.assertExists()
             setAsDefaultCheckbox.assertIsEnabled()
+        }
+    }
+
+    @Test
+    fun `setAsDefaultCheckboxEnabled false -- set as default checkbox is not enabled`() {
+        runScenario(
+            shouldShowSetAsDefaultCheckbox = true,
+            setAsDefaultCheckboxEnabled = false,
+        ) {
+            val setAsDefaultCheckbox = composeRule.onNodeWithTag(UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG)
+
+            setAsDefaultCheckbox.assertExists()
+            setAsDefaultCheckbox.assertIsNotEnabled()
         }
     }
 
@@ -513,6 +500,7 @@ class UpdatePaymentMethodUITest {
         isModifiablePaymentMethod: Boolean = true,
         hasValidBrandChoices: Boolean = true,
         setAsDefaultCheckboxChecked: Boolean = false,
+        setAsDefaultCheckboxEnabled: Boolean = true,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
         shouldShowSetAsDefaultCheckbox: Boolean = false,
         shouldShowSaveButton: Boolean = false,
@@ -530,6 +518,7 @@ class UpdatePaymentMethodUITest {
             hasValidBrandChoices = hasValidBrandChoices,
             shouldShowSetAsDefaultCheckbox = shouldShowSetAsDefaultCheckbox,
             shouldShowSaveButton = shouldShowSaveButton,
+            setAsDefaultCheckboxEnabled = setAsDefaultCheckboxEnabled,
             initialState = UpdatePaymentMethodInteractor.State(
                 error = errorMessage,
                 status = UpdatePaymentMethodInteractor.Status.Idle,

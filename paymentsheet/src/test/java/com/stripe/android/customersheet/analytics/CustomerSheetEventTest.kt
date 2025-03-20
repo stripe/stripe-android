@@ -32,6 +32,7 @@ class CustomerSheetEventTest {
                     "border_width" to false,
                     "font" to false,
                 ),
+                "embedded_payment_element" to null,
                 "usage" to false,
             ),
             "payment_method_order" to listOf<String>(),
@@ -77,6 +78,7 @@ class CustomerSheetEventTest {
                     "border_width" to false,
                     "font" to false,
                 ),
+                "embedded_payment_element" to null,
                 "usage" to false,
             ),
             "payment_method_order" to listOf<String>(),
@@ -114,6 +116,7 @@ class CustomerSheetEventTest {
             "font" to true,
             "size_scale_factor" to true,
             "primary_button" to expectedPrimaryButton,
+            "embedded_payment_element" to null,
             "usage" to true
         )
 

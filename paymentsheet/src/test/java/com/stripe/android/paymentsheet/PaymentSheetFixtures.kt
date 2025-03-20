@@ -15,6 +15,7 @@ import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
+import com.stripe.android.paymentsheet.utils.prefilledBuilder
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import org.mockito.kotlin.mock
 
@@ -215,9 +216,9 @@ internal object PaymentSheetFixtures {
 
     internal val ARGS_WITHOUT_CUSTOMER
         get() = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-            config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
-                customer = null
-            )
+            config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.prefilledBuilder()
+                .customer(null)
+                .build()
         )
 
     internal val ARGS_DEFERRED_INTENT

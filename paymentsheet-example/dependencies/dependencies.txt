@@ -1112,6 +1112,8 @@
 |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.1.10 (*)
 |    |    +--- project :stripecardscan-tflite
 |    |    \--- androidx.annotation:annotation:1.9.1 (*)
+|    +--- project :payments-core (*)
+|    +--- com.google.dagger:dagger:2.55 (*)
 |    +--- androidx.appcompat:appcompat:1.7.0 (*)
 |    +--- androidx.constraintlayout:constraintlayout:2.2.0 (*)
 |    +--- androidx.core:core-ktx:1.13.1 (*)
@@ -1121,6 +1123,17 @@
 |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0 (*)
 |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.1.10 (*)
 +--- project :financial-connections
+|    +--- project :financial-connections-core
+|    |    +--- project :stripe-core (*)
+|    |    +--- project :payments-model (*)
+|    |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.1.10 (*)
+|    |    +--- androidx.activity:activity-ktx:1.9.3 (*)
+|    |    +--- androidx.fragment:fragment-ktx:1.8.6 (*)
+|    |    +--- androidx.annotation:annotation:1.9.1 (*)
+|    |    +--- com.google.dagger:dagger:2.55 (*)
+|    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1 (*)
+|    |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0 (*)
+|    |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.1.10 (*)
 |    +--- project :stripe-core (*)
 |    +--- project :stripe-ui-core (*)
 |    +--- project :payments-model (*)

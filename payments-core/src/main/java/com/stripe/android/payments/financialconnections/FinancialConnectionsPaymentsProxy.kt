@@ -2,9 +2,10 @@ package com.stripe.android.payments.financialconnections
 
 import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.BuildConfig
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
-import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
+import com.stripe.android.financialconnections.ElementsSessionContext
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
+import com.stripe.android.financialconnections.intentBuilder
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForInstantDebitsLauncher
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetInstantDebitsResult
@@ -30,8 +31,9 @@ internal interface FinancialConnectionsPaymentsProxy {
             provider: () -> FinancialConnectionsPaymentsProxy = {
                 FinancialConnectionsLauncherProxy(
                     FinancialConnectionsSheetForInstantDebitsLauncher(
-                        activity,
-                        onComplete
+                        activity = activity,
+                        callback = onComplete,
+                        intentBuilder = intentBuilder(activity)
                     )
                 )
             },
@@ -50,8 +52,9 @@ internal interface FinancialConnectionsPaymentsProxy {
             provider: () -> FinancialConnectionsPaymentsProxy = {
                 FinancialConnectionsLauncherProxy(
                     FinancialConnectionsSheetForDataLauncher(
-                        activity,
-                        onComplete
+                        activity = activity,
+                        callback = onComplete,
+                        intentBuilder = intentBuilder(activity)
                     )
                 )
             },
@@ -76,7 +79,7 @@ internal class FinancialConnectionsLauncherProxy<T : FinancialConnectionsSheetLa
         elementsSessionContext: ElementsSessionContext?,
     ) {
         launcher.present(
-            configuration = FinancialConnectionsSheet.Configuration(
+            configuration = FinancialConnectionsSheetConfiguration(
                 financialConnectionsSessionClientSecret,
                 publishableKey,
                 stripeAccountId,

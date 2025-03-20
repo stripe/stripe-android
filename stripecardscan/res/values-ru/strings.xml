@@ -2,6 +2,7 @@
 <resources>
   <string name="stripe_camera_permission_settings_message">Чтобы сканировать карту, войдите в \"Настройки\" и разрешите доступ к камере</string>
   <string name="stripe_card_scan_instructions">Сканируйте свою карту</string>
+  <string name="stripe_card_scan_privacy_link_text"><![CDATA[Мы используем Stripe для проверки данных вашей карты. Stripe может использовать и хранить ваши данные в соответствии со своей политикой конфиденциальности. <a href=\"https://support.stripe.com/questions/stripes-card-image-verification\"><u>Подробнее</u></a>]]></string>
   <string name="stripe_card_scan_title">Для сканирования поместите карту в центр прямоугольника</string>
   <string name="stripe_close_button_description">Закрыть</string>
   <string name="stripe_swap_camera_button_description">Сменить камеру</string>

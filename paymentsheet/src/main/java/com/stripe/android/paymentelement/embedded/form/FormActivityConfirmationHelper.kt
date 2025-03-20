@@ -10,6 +10,7 @@ import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -29,6 +30,7 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
     private val selectionHolder: EmbeddedSelectionHolder,
     private val stateHelper: FormActivityStateHelper,
     private val onClickDelegate: OnClickOverrideDelegate,
+    private val eventReporter: EventReporter,
     lifecycleOwner: LifecycleOwner,
     activityResultCaller: ActivityResultCaller
 ) : FormActivityConfirmationHelper {
@@ -46,6 +48,7 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
         if (onClickDelegate.onClickOverride != null) {
             onClickDelegate.onClickOverride?.invoke()
         } else {
+            eventReporter.onPressConfirmButton(selectionHolder.selection.value)
             confirmationArgs()?.let { args ->
                 confirmationHandler.start(args)
             }

@@ -11,7 +11,9 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
+import androidx.compose.ui.test.isOn
 import androidx.compose.ui.test.isSelected
+import androidx.compose.ui.test.isToggleable
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
@@ -26,6 +28,7 @@ import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
+import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_ERROR_TEXT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
@@ -148,6 +151,17 @@ internal class PaymentSheetPage(
         }
     }
 
+    fun assertErrorMessageShown() {
+        composeTestRule.waitUntil(timeoutMillis = 5_000) {
+            composeTestRule
+                .onAllNodesWithTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG)
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+
+        composeTestRule.onNodeWithTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG).assertIsDisplayed()
+    }
+
     fun fillCvcRecollection(cvc: String) {
         waitForText("Confirm your CVC")
         composeTestRule
@@ -230,6 +244,23 @@ internal class PaymentSheetPage(
         composeTestRule.onNode(hasTestTag(SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG))
             .performScrollTo()
             .performClick()
+    }
+
+    fun assertNoSetAsDefaultCheckbox() {
+        composeTestRule.onAllNodesWithTag(
+            SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG
+        ).fetchSemanticsNodes().isEmpty()
+    }
+
+    fun assertSetAsDefaultCheckboxChecked() {
+        val testTag = SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG
+        composeTestRule.waitUntil(
+            timeoutMillis = 5000L
+        ) {
+            composeTestRule.onAllNodes(
+                hasTestTag(testTag).and(isToggleable()).and(isOn())
+            ).fetchSemanticsNodes().isNotEmpty()
+        }
     }
 
     fun clickOnLpm(code: String, forVerticalMode: Boolean = false) {

@@ -6,7 +6,7 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.AnalyticsRequestV2Executor
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory
 import com.stripe.android.financialconnections.FinancialConnections
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ErrorCode
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsResponseEventEmitter.Companion.EVENTS_TO_EMIT
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
@@ -82,7 +82,7 @@ private fun emitPublicClientErrorEventIfNeeded(error: Throwable) {
 
 internal class FinancialConnectionsAnalyticsTrackerImpl(
     private val getOrFetchSync: GetOrFetchSync,
-    private val configuration: FinancialConnectionsSheet.Configuration,
+    private val configuration: FinancialConnectionsSheetConfiguration,
     private val locale: Locale,
     context: Context,
     private val requestExecutor: AnalyticsRequestV2Executor,

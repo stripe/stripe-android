@@ -10,7 +10,6 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
-import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
 import com.stripe.android.financialconnections.FinancialConnectionsSheetState.AuthFlowStatus
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
@@ -63,7 +62,7 @@ class FinancialConnectionsSheetViewModelTest {
     val rule: TestRule = CoroutineTestRule(testDispatcher)
 
     private val eventReporter = mock<FinancialConnectionsEventReporter>()
-    private val configuration = FinancialConnectionsSheet.Configuration(
+    private val configuration = FinancialConnectionsSheetConfiguration(
         ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )

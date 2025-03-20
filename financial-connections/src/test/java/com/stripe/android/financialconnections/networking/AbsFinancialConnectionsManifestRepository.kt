@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.networking
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
+import com.stripe.android.financialconnections.model.FinancialConnectionsInstitutionSelected
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
@@ -105,6 +106,13 @@ internal abstract class AbsFinancialConnectionsManifestRepository : FinancialCon
         supportsAppVerification: Boolean,
         reFetchCondition: (SynchronizeSessionResponse) -> Boolean
     ): SynchronizeSessionResponse {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun selectInstitution(
+        clientSecret: String,
+        institution: FinancialConnectionsInstitution
+    ): FinancialConnectionsInstitutionSelected {
         TODO("Not yet implemented")
     }
 }

@@ -98,6 +98,7 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
         if (interactor.shouldShowSetAsDefaultCheckbox) {
             SetAsDefaultPaymentMethodCheckbox(
                 isChecked = state.setAsDefaultCheckboxChecked,
+                isEnabled = interactor.setAsDefaultCheckboxEnabled,
                 onCheckChanged = { newCheckedValue ->
                     interactor.handleViewAction(
                         UpdatePaymentMethodInteractor.ViewAction.SetAsDefaultCheckboxChanged(newCheckedValue)
@@ -143,12 +144,13 @@ private fun DetailsCannotBeChangedText(
 @Composable
 private fun SetAsDefaultPaymentMethodCheckbox(
     isChecked: Boolean,
+    isEnabled: Boolean,
     onCheckChanged: (Boolean) -> Unit,
 ) {
     CheckboxElementUI(
         isChecked = isChecked,
         onValueChange = onCheckChanged,
-        isEnabled = true,
+        isEnabled = isEnabled,
         label = (com.stripe.android.ui.core.R.string.stripe_set_as_default_payment_method).resolvableString.resolve(),
         modifier = Modifier.padding(top = 12.dp).testTag(UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG)
     )
@@ -201,14 +203,8 @@ private fun CardDetailsUI(
                 savedPaymentMethodIcon = displayableSavedPaymentMethod
                     .paymentMethod
                     .getSavedPaymentMethodIcon(forVerticalMode = true),
-                onBrandOptionsShown = {
-                    interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsShown)
-                },
                 onBrandChoiceChanged = {
                     interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(it))
-                },
-                onBrandChoiceOptionsDismissed = {
-                    interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsDismissed)
                 },
             )
             Divider(
@@ -370,9 +366,7 @@ private fun CardNumberField(
     cardBrandFilter: CardBrandFilter,
     shouldShowCardBrandDropdown: Boolean,
     savedPaymentMethodIcon: Int,
-    onBrandOptionsShown: () -> Unit,
     onBrandChoiceChanged: (CardBrandChoice) -> Unit,
-    onBrandChoiceOptionsDismissed: () -> Unit,
 ) {
     CommonTextField(
         value = "•••• •••• •••• ${card.last4}",
@@ -382,9 +376,7 @@ private fun CardNumberField(
                 CardBrandDropdown(
                     selectedBrand = selectedBrand,
                     availableBrands = card.getAvailableNetworks(cardBrandFilter),
-                    onBrandOptionsShown = onBrandOptionsShown,
                     onBrandChoiceChanged = onBrandChoiceChanged,
-                    onBrandChoiceOptionsDismissed = onBrandChoiceOptionsDismissed,
                 )
             } else {
                 PaymentMethodIconFromResource(
@@ -538,9 +530,9 @@ private fun PreviewUpdatePaymentMethodUI() {
             updateCardBrandExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
             setDefaultPaymentMethodExecutor = { _ -> Result.success(Unit) },
             cardBrandFilter = DefaultCardBrandFilter,
-            onBrandChoiceOptionsShown = {},
-            onBrandChoiceOptionsDismissed = {},
+            onBrandChoiceSelected = {},
             shouldShowSetAsDefaultCheckbox = true,
+            isDefaultPaymentMethod = false,
             onUpdateSuccess = {},
         ),
         modifier = Modifier

@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet
 
+import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -174,6 +176,73 @@ internal class CustomerSessionCustomerSheetTest {
         context.markTestSucceeded()
     }
 
+    @Test
+    fun defaultPaymentMethodUsedAsSelected_whenSyncDefaultEnabled() = runCustomerSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        customerSheetTestType = CustomerSheetTestType.CustomerSession,
+        resultCallback = { result ->
+            verifySelected(
+                expectedLast4 = "1001",
+                expectedBrand = CardBrand.Visa,
+                result = result,
+            )
+        }
+    ) { context ->
+        val cards = listOf(
+            PaymentMethodFactory.card(last4 = "4242"),
+            PaymentMethodFactory.card(last4 = "1001")
+        )
+
+        val defaultPaymentMethod = cards[1]
+
+        enqueueElementsSession(
+            cards = cards,
+            isPaymentMethodSyncDefaultEnabled = true,
+            defaultPaymentMethod = defaultPaymentMethod,
+        )
+
+        context.presentCustomerSheet()
+
+        assertSavedCardDisplayed(last4 = cards[0].card!!.last4!!, isSelected = false)
+        assertSavedCardDisplayed(last4 = defaultPaymentMethod.card!!.last4!!, isSelected = true)
+
+        context.markTestSucceeded()
+    }
+
+    @Test
+    fun confirmingPaymentMethodSetsDefaultOnBackend_whenSyncDefaultEnabled() = runCustomerSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        customerSheetTestType = CustomerSheetTestType.CustomerSession,
+        resultCallback = { result ->
+            verifySelected(
+                expectedLast4 = "1001",
+                expectedBrand = CardBrand.Visa,
+                result = result,
+            )
+        }
+    ) { context ->
+        val cards = listOf(
+            PaymentMethodFactory.card(last4 = "4242"),
+            PaymentMethodFactory.card(last4 = "1001")
+        )
+
+        enqueueElementsSession(
+            cards = cards,
+            isPaymentMethodSyncDefaultEnabled = true,
+        )
+
+        context.presentCustomerSheet()
+
+        page.clickSavedPaymentMethod(endsWith = "1001")
+
+        enqueueSetDefaultPaymentMethodRequest()
+
+        page.clickConfirmButton()
+        page.waitUntilMissing()
+    }
+
     private fun assertOnlySavedCardIsDisplayed() {
         val savedPaymentMethodMatcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
             .and(hasText("4242", substring = true))
@@ -184,11 +253,21 @@ internal class CustomerSessionCustomerSheetTest {
         ).isEqualTo(1)
     }
 
+    private fun assertSavedCardDisplayed(last4: String, isSelected: Boolean) {
+        val savedPaymentMethodNode = page.onSavedPaymentMethod(endsWith = last4)
+        if (isSelected) {
+            savedPaymentMethodNode.assertIsSelected()
+        } else {
+            savedPaymentMethodNode.assertIsNotSelected()
+        }
+    }
+
     private fun enqueueElementsSession(
         cards: List<PaymentMethod>,
         sepaPaymentMethod: PaymentMethod? = null,
         isPaymentMethodSyncDefaultEnabled: Boolean = false,
         isCbcEligible: Boolean = false,
+        defaultPaymentMethod: PaymentMethod? = null,
     ) {
         val paymentMethodsArray = JSONArray()
 
@@ -226,6 +305,10 @@ internal class CustomerSessionCustomerSheetTest {
                         original = "PAYMENT_METHOD_SYNC_DEFAULT_FEATURE",
                         new = syncDefaultFeature,
                     ),
+                    ResponseReplacement(
+                        original = "DEFAULT_PAYMENT_METHOD",
+                        new = defaultPaymentMethod?.id.toString(),
+                    )
                 ),
             )
         }
@@ -269,6 +352,17 @@ internal class CustomerSessionCustomerSheetTest {
             confirmSetupIntentParams(),
         ) { response ->
             response.testBodyFromFile("setup-intent-confirm.json")
+        }
+    }
+
+    private fun enqueueSetDefaultPaymentMethodRequest() {
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("POST"),
+            path("/v1/elements/customers/cus_12345/set_default_payment_method"),
+        ) { response ->
+            response.setResponseCode(200)
+            response.testBodyFromFile("set-default-payment-method-success.json")
         }
     }
 

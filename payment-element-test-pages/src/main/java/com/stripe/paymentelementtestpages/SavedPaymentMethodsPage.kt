@@ -10,6 +10,7 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
@@ -56,6 +57,27 @@ class SavedPaymentMethodsPage(private val composeTestRule: ComposeTestRule) {
 
     fun clickRemoveButton() {
         composeTestRule.onNodeWithTag(UPDATE_PM_REMOVE_BUTTON_TEST_TAG).performClick()
+    }
+
+    fun clickNewCardButton() {
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onAllNodes(hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG))
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+        val testTag = PaymentOptionsItem.ViewType.AddCard.name
+
+        composeTestRule.waitUntil(
+            timeoutMillis = 5000L
+        ) {
+            composeTestRule
+                .onAllNodes(hasTestTag(testTag))
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+        }
+
+        composeTestRule.onNodeWithTag(testTag, true).performClick()
     }
 
     private fun savedPaymentMethodMatcher(last4: String): SemanticsMatcher {

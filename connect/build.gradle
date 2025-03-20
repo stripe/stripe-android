@@ -5,6 +5,7 @@ apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 apply plugin: 'dev.drewhamilton.poko'
+apply plugin: 'app.cash.paparazzi'
 
 dependencies {
     implementation project(':stripe-core')
@@ -20,22 +21,21 @@ dependencies {
     implementation libs.androidx.annotation
     implementation libs.androidx.appCompat
     implementation libs.androidx.browser
-    implementation libs.androidx.constraintLayout
     implementation libs.androidx.fragment
     implementation libs.androidx.lifecycle
-    implementation libs.androidx.savedState
     implementation libs.androidx.viewModel
+
+    // DI
+    implementation libs.dagger
+    ksp libs.daggerCompiler
 
     // Compose
     implementation libs.compose.ui
-    implementation libs.compose.uiViewBinding
     implementation libs.compose.foundation
     implementation libs.compose.material
-    implementation libs.compose.activity
-    implementation libs.compose.navigation
-    implementation libs.accompanist.systemUiController
 
     // Test
+    testImplementation project(':screenshot-testing')
     testImplementation testLibs.androidx.archCore
     testImplementation testLibs.androidx.composeUi
     testImplementation testLibs.androidx.core
@@ -68,11 +68,10 @@ dependencies {
     androidTestImplementation (testLibs.espresso.contrib) {
         exclude group: 'org.checkerframework', module: 'checker'
     }
+    androidTestImplementation testLibs.espresso.web
     androidTestImplementation testLibs.mockito.core
     androidTestImplementation testLibs.mockito.inline
     androidTestImplementation testLibs.mockito.kotlin
-    androidTestImplementation libs.leakCanary
-    androidTestImplementation testLibs.leakCanaryInstrumentation
     androidTestImplementation testLibs.testParameterInjector
     androidTestImplementation testLibs.truth
 
@@ -82,11 +81,11 @@ dependencies {
 android {
     defaultConfig {
         testApplicationId "com.stripe.android.connect.test"
+        testInstrumentationRunner "com.stripe.android.connect.ConnectTestRunner"
     }
 
     buildFeatures {
         compose = true
-        viewBinding true
     }
 
     testOptions {

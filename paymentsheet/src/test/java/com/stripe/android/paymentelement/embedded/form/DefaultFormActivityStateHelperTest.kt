@@ -15,6 +15,7 @@ import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.ui.core.R
@@ -263,7 +264,8 @@ class DefaultFormActivityStateHelperTest {
             selectionHolder = selectionHolder,
             configuration = config,
             coroutineScope = TestScope(UnconfinedTestDispatcher()),
-            onClickDelegate = onClickOverrideDelegate
+            onClickDelegate = onClickOverrideDelegate,
+            eventReporter = FakeEventReporter()
         )
 
         Scenario(

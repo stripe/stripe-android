@@ -5,7 +5,7 @@ import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.financialconnections.BuildConfig
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
@@ -17,14 +17,14 @@ internal object FinancialConnectionsSheetConfigurationModule {
     @Named(PUBLISHABLE_KEY)
     @ActivityRetainedScope
     fun providesPublishableKey(
-        configuration: FinancialConnectionsSheet.Configuration
+        configuration: FinancialConnectionsSheetConfiguration
     ): String = configuration.publishableKey
 
     @Provides
     @Named(STRIPE_ACCOUNT_ID)
     @ActivityRetainedScope
     fun providesStripeAccountId(
-        configuration: FinancialConnectionsSheet.Configuration
+        configuration: FinancialConnectionsSheetConfiguration
     ): String? = configuration.stripeAccountId
 
     @Provides
