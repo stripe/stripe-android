@@ -1,6 +1,8 @@
 package com.stripe.android.connect
 
+import android.content.pm.ActivityInfo
 import androidx.appcompat.widget.Toolbar
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.NoMatchingViewException
@@ -23,7 +25,7 @@ import androidx.test.espresso.web.webdriver.DriverAtoms.getText
 import androidx.test.espresso.web.webdriver.DriverAtoms.webClick
 import androidx.test.espresso.web.webdriver.DriverAtoms.webScrollIntoView
 import androidx.test.espresso.web.webdriver.Locator
-import androidx.test.ext.junit.rules.ActivityScenarioRule
+import androidx.test.ext.junit.rules.activityScenarioRule
 import com.stripe.android.connect.webview.serialization.AlertJs
 import com.stripe.android.connect.webview.serialization.ConnectJson
 import org.hamcrest.Matchers.allOf
@@ -39,13 +41,15 @@ import java.util.concurrent.TimeUnit
 
 @OptIn(PrivateBetaConnectSDK::class)
 class FullScreenComponentTest {
-    @get:Rule
-    val activityRule = ActivityScenarioRule(EmptyActivity::class.java)
-
     private val title = "Test title"
 
-    private lateinit var manager: EmbeddedComponentManager
-    private lateinit var controller: AccountOnboardingController
+    @get:Rule
+    val activityRule = activityScenarioRule<EmptyEmbeddedComponentActivity>(
+        EmptyEmbeddedComponentActivity.newIntent(
+            context = ApplicationProvider.getApplicationContext(),
+            title = title,
+        )
+    )
 
     private val rootView
         get() = isAssignableFrom(StripeComponentDialogFragmentView::class.java)
@@ -56,27 +60,27 @@ class FullScreenComponentTest {
     private val toolbarNavigationButton
         get() = allOf(withParent(toolbar), withClassName(containsString("ImageButton")))
 
+    private val testAlertJs
+        get() = AlertJs(
+            title = randomString(),
+            message = randomString(),
+            buttons = AlertJs.ButtonsJs(
+                ok = randomString(),
+                cancel = randomString(),
+            ),
+        )
+
     @Before
     fun setup() {
-        activityRule.scenario.onActivity { activity ->
-            manager = EmbeddedComponentManager(
-                configuration = EmbeddedComponentManager.Configuration(
-                    publishableKey = "fake_pk"
-                ),
-                fetchClientSecretCallback = { it.onResult("fake_secret") },
-            )
-            controller = manager.createAccountOnboardingController(
-                activity = activity,
-                title = title,
-            )
-            controller.show()
+        activityRule.scenario.onActivity {
+            it.controller.show()
         }
     }
 
     @After
     fun cleanup() {
         activityRule.scenario.onActivity {
-            controller.dismiss()
+            it.controller.dismiss()
         }
     }
 
@@ -108,7 +112,9 @@ class FullScreenComponentTest {
     @Test
     fun testControllerDismisses() {
         checkDialogIsDisplayed()
-        controller.dismiss()
+        activityRule.scenario.onActivity {
+            it.controller.dismiss()
+        }
         checkDialogDoesNotExist()
     }
 
@@ -136,14 +142,7 @@ class FullScreenComponentTest {
     @Test
     fun testCustomJsAlertContents() {
         checkDialogIsDisplayed()
-        val alertJs = AlertJs(
-            title = randomString(),
-            message = randomString(),
-            buttons = AlertJs.ButtonsJs(
-                ok = randomString(),
-                cancel = randomString(),
-            ),
-        )
+        val alertJs = testAlertJs
         performWebViewAlert(ALERT, alertJs)
         onView(withText(alertJs.title)).check(matches(isDisplayed()))
         onView(withText(alertJs.message)).check(matches(isDisplayed()))
@@ -152,16 +151,9 @@ class FullScreenComponentTest {
     }
 
     @Test
-    fun testCustomJsAlertDismissal() {
+    fun testCustomJsAlertDismissActions() {
         checkDialogIsDisplayed()
-        val alertJs = AlertJs(
-            title = null,
-            message = "alert message",
-            buttons = AlertJs.ButtonsJs(
-                ok = "ok button",
-                cancel = "cancel button",
-            ),
-        )
+        val alertJs = testAlertJs.copy(title = null)
         val dismissActions = listOf(
             { onView(withText(alertJs.buttons!!.ok)).perform(click()) },
             { onView(withText(alertJs.buttons!!.cancel)).perform(click()) },
@@ -174,6 +166,26 @@ class FullScreenComponentTest {
                 checkDialogIsDisplayed()
             }
         }
+    }
+
+    @Test
+    fun testCustomJsAlertWorksAfterRotation() {
+        checkDialogIsDisplayed()
+        val alertJs = testAlertJs
+        // Show the alert then rotate the screen.
+        performWebViewAlert(ALERT, alertJs)
+        onView(withText(alertJs.message)).check(matches(isDisplayed()))
+        activityRule.scenario.onActivity {
+            it.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE
+        }
+        // Alert should be gone after rotation.
+        onView(withText(alertJs.message))
+            .inRoot(RootMatchers.isDialog())
+            .check(doesNotExist())
+        // Show the alert again. If the alert is *not* shown, it's an indication that the
+        // WebView is hanging because it never got a result from the first alert.
+        performWebViewAlert(ALERT, alertJs)
+        onView(withText(alertJs.message)).check(matches(isDisplayed()))
     }
 
     private fun randomString() = UUID.randomUUID().toString()
