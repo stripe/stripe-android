@@ -315,7 +315,7 @@ internal data class PaymentMethodMetadata(
             )
         }
 
-        internal fun create(
+        internal fun createForNativeLink(
             configuration: LinkConfiguration,
         ): PaymentMethodMetadata {
             return PaymentMethodMetadata(

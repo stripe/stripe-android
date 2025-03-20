@@ -12,7 +12,6 @@ import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.account.LinkAccountManager
-import com.stripe.android.link.account.linkAccountUpdate
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.confirmation.Result
 import com.stripe.android.link.injection.NativeLinkComponent
@@ -151,7 +150,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                         formHelper = DefaultFormHelper.create(
                             coroutineScope = parentComponent.viewModel.viewModelScope,
                             cardAccountRangeRepositoryFactory = parentComponent.cardAccountRangeRepositoryFactory,
-                            paymentMethodMetadata = PaymentMethodMetadata.create(
+                            paymentMethodMetadata = PaymentMethodMetadata.createForNativeLink(
                                 configuration = parentComponent.configuration,
                             ),
                         ),
