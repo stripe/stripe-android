@@ -21,6 +21,8 @@ import com.stripe.android.core.networking.NetworkTypeDetector
 import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.core.utils.RealUserFacingLogger
+import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.account.DefaultLinkAccountManager
 import com.stripe.android.link.account.DefaultLinkAuth
@@ -114,6 +116,9 @@ internal interface NativeLinkModule {
     @Binds
     @NativeLinkScope
     fun bindsLinkAttestationCheck(linkAttestationCheck: DefaultLinkAttestationCheck): LinkAttestationCheck
+
+    @Binds
+    fun bindsUserFacingLogger(impl: RealUserFacingLogger): UserFacingLogger
 
     @SuppressWarnings("TooManyFunctions")
     companion object {

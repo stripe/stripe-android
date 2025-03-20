@@ -1,9 +1,9 @@
 package com.stripe.android.paymentsheet.analytics
 
-import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCode
@@ -31,7 +31,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     private val analyticEventCallbackProvider: Provider<AnalyticEventCallback?>,
     @IOContext private val workContext: CoroutineContext,
     private val isStripeCardScanAvailable: IsStripeCardScanAvailable,
-    private val logger: Logger = Logger.getInstance(true)
+    private val logger: UserFacingLogger,
 ) : EventReporter {
 
     private var isDeferred: Boolean = false
@@ -472,7 +472,10 @@ internal class DefaultEventReporter @Inject internal constructor(
                 try {
                     onEvent(event)
                 } catch (e: Throwable) {
-                    logger.error("AnalyticEventCallback.onEvent() failed", e)
+                    logger.logWarningWithoutPii(
+                        "AnalyticEventCallback.onEvent() failed\n"
+                            + e.stackTraceToString()
+                    )
                 }
             }
         }
