@@ -354,14 +354,17 @@ internal class ElementsSessionRepositoryTest {
                 PaymentSheet.CustomPaymentMethod(
                     id = "cpmt_123",
                     subtitle = "Pay now".resolvableString,
+                    disableBillingDetailCollection = true,
                 ),
                 PaymentSheet.CustomPaymentMethod(
                     id = "cpmt_456",
                     subtitle = "Pay later".resolvableString,
+                    disableBillingDetailCollection = true,
                 ),
                 PaymentSheet.CustomPaymentMethod(
                     id = "cpmt_789",
                     subtitle = "Pay never".resolvableString,
+                    disableBillingDetailCollection = true,
                 ),
             ),
             savedPaymentMethodSelectionId = "pm_123",
