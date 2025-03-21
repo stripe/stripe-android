@@ -14,7 +14,6 @@ import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
-import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
@@ -137,7 +136,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
             setPaymentMethodMetadata(args.state.paymentMethodMetadata)
         }
         customerStateHolder.setCustomerState(args.state.customer)
-        savedStateHandle[SAVE_PROCESSING] = false
 
         updateSelection(args.state.paymentSelection)
 
@@ -195,10 +193,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 is PaymentSelection.ExternalPaymentMethod -> processNewOrExternalPaymentMethod(paymentSelection)
             }
         }
-    }
-
-    override fun onPaymentResult(paymentResult: PaymentResult) {
-        savedStateHandle[SAVE_PROCESSING] = false
     }
 
     override fun handlePaymentMethodSelected(selection: PaymentSelection?) {

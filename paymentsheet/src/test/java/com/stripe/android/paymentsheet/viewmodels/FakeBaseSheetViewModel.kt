@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.NewOrExternalPaymentSelection
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -106,10 +105,6 @@ internal class FakeBaseSheetViewModel private constructor(
     }
 
     override fun onUserCancel() {
-        throw AssertionError("Not expected.")
-    }
-
-    override fun onPaymentResult(paymentResult: PaymentResult) {
         throw AssertionError("Not expected.")
     }
 }
