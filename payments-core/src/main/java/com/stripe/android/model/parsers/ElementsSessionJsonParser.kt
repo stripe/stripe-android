@@ -6,6 +6,7 @@ import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArray
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.ElementsSessionFlags
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
@@ -47,7 +48,10 @@ internal class ElementsSessionJsonParser(
         val linkFundingSources = linkSettings?.optJSONArray(FIELD_LINK_FUNDING_SOURCES)
 
         val flags = json.optJSONObject(FIELD_FLAGS)?.let { flags ->
-            parseFlags(flags, relevantFlags = listOf("financial-connections-lite-killswitch"))
+            parseFlags(
+                json = flags,
+                relevantFlags = listOf(ElementsSessionFlags.FINANCIAL_CONNECTIONS_LITE_KILLSWITCH.flagValue)
+            )
         } ?: emptyMap()
 
         val stripeIntent = parseStripeIntent(

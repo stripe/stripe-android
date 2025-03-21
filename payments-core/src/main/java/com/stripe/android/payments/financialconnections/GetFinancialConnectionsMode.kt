@@ -1,10 +1,10 @@
 package com.stripe.android.payments.financialconnections
 
-import android.util.Log
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.financialconnections.FinancialConnectionsMode
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.ElementsSessionFlags.FINANCIAL_CONNECTIONS_LITE_KILLSWITCH
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object GetFinancialConnectionsMode {
@@ -14,19 +14,15 @@ object GetFinancialConnectionsMode {
     ): FinancialConnectionsMode {
         return when {
             FeatureFlags.forceFinancialConnectionsLiteSdk.isEnabled -> {
-                Log.d("FCMode", "lite because of force flag")
                 FinancialConnectionsMode.Lite
             }
             false -> {
-                Log.d("FCMode", "full because of available")
                 FinancialConnectionsMode.Full
             }
-            elementsSession?.flags["financial-connections-lite-killswitch"] == true -> {
-                Log.d("FCMode", "none because of killswitch")
+            elementsSession?.flags[FINANCIAL_CONNECTIONS_LITE_KILLSWITCH.flagValue] == true -> {
                 FinancialConnectionsMode.None
             }
             else -> {
-                Log.d("FCMode", "lite")
                 FinancialConnectionsMode.Lite
             }
         }
