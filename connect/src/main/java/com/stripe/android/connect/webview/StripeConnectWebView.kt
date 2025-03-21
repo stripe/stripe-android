@@ -408,7 +408,10 @@ internal class StripeConnectWebView private constructor(
             val activity = findActivity()
                 ?: return
 
-            val parsed = ConnectJson.decodeFromString<OpenFinancialConnectionsMessage>(message)
+            val parsed = tryDeserializeWebMessage<OpenFinancialConnectionsMessage>(
+                webFunctionName = "openFinancialConnections",
+                message = message
+            ) ?: return
             logger.debug("($loggerTag) Open FinancialConnections: $parsed")
 
             webViewLifecycleScope?.launch {
