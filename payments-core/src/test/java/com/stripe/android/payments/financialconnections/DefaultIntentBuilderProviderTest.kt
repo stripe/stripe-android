@@ -12,7 +12,7 @@ class DefaultIntentBuilderProviderTest {
     @Test
     fun `provide returns Full intent builder when module is available`() {
         val provider = DefaultIntentBuilderProvider()
-        val intentBuilder = provider.provide(mockContext, isFinancialConnectionsAvailable = true)
+        val intentBuilder = provider.provide(mockContext, isFullSdkAvailable = true)
 
         assertTrue(intentBuilder is IntentBuilderProvider.IntentBuilder.Full)
     }
@@ -20,7 +20,7 @@ class DefaultIntentBuilderProviderTest {
     @Test
     fun `provide returns Lite intent builder when module is not available`() {
         val provider = DefaultIntentBuilderProvider()
-        val intentBuilder = provider.provide(mockContext, isFinancialConnectionsAvailable = false)
+        val intentBuilder = provider.provide(mockContext, isFullSdkAvailable = false)
 
         assertTrue(intentBuilder is IntentBuilderProvider.IntentBuilder.Lite)
     }

@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnectionsMode
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.PaymentIntent
@@ -514,7 +515,8 @@ class CollectBankAccountViewModelTest {
                 email
             ),
             attachToIntent = attachToIntent,
-            hostedSurface = "payment_element"
+            hostedSurface = "payment_element",
+            financialConnectionsMode = FinancialConnectionsMode.Full
         )
     }
 
@@ -530,7 +532,8 @@ class CollectBankAccountViewModelTest {
                 email
             ),
             attachToIntent = attachToIntent,
-            hostedSurface = "payment_element"
+            hostedSurface = "payment_element",
+            financialConnectionsMode = FinancialConnectionsMode.Full
         )
     }
 
@@ -547,7 +550,8 @@ class CollectBankAccountViewModelTest {
             onBehalfOf = "on_behalf_of_id",
             amount = 1000,
             currency = "usd",
-            hostedSurface = "payment_element"
+            hostedSurface = "payment_element",
+            financialConnectionsMode = FinancialConnectionsMode.Full
         )
     }
 
@@ -562,7 +566,8 @@ class CollectBankAccountViewModelTest {
             elementsSessionId = "elements_session_id",
             customerId = "customer_id",
             onBehalfOf = "on_behalf_of_id",
-            hostedSurface = "payment_element"
+            hostedSurface = "payment_element",
+            financialConnectionsMode = FinancialConnectionsMode.Full
         )
     }
 }

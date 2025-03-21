@@ -155,7 +155,7 @@ internal class ElementsSessionJsonParser(
         }
 
         val linkFlags = json?.let { linkSettingsJson ->
-            parseFlags(linkSettingsJson, listOf("financial-connections-lite-killswitch"))
+            parseFlags(linkSettingsJson)
         } ?: emptyMap()
 
         val linkConsumerIncentive = if (FeatureFlags.instantDebitsIncentives.isEnabled) {
@@ -318,6 +318,11 @@ internal class ElementsSessionJsonParser(
         )
     }
 
+    /**
+     * Parse the flags from the [json] object.
+     * @param json the json object to parse
+     * @param relevantFlags the flags to parse. If null, all flags will be parsed.
+     */
     private fun parseFlags(json: JSONObject, relevantFlags: List<String>? = null): Map<String, Boolean> {
         val flags = mutableMapOf<String, Boolean>()
 
