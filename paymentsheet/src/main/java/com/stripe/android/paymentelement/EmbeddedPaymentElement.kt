@@ -121,6 +121,10 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal var confirmCustomPaymentMethodCallback: ConfirmCustomPaymentMethodCallback? = null
             private set
 
+        @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+        internal var analyticEventCallback: AnalyticEventCallback? = null
+            private set
+
         /**
          * Called when a user confirms payment for an external payment method.
          */
@@ -135,6 +139,15 @@ class EmbeddedPaymentElement @Inject internal constructor(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun confirmCustomPaymentMethodCallback(callback: ConfirmCustomPaymentMethodCallback) = apply {
             this.confirmCustomPaymentMethodCallback = callback
+        }
+
+        /**
+         * Called when an analytic event is emitted.
+         */
+        @ExperimentalAnalyticEventCallbackApi
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun analyticEventCallback(callback: AnalyticEventCallback) = apply {
+            this.analyticEventCallback = callback
         }
     }
 

@@ -576,6 +576,7 @@ class DefaultCustomerSheetLoaderTest {
             ),
             linkSettings = null,
             externalPaymentMethodData = null,
+            customPaymentMethods = emptyList(),
             paymentMethodSpecs = null,
             elementsSessionId = "session_1234",
             flags = emptyMap()

@@ -5,6 +5,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
@@ -13,6 +14,7 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.LinkSignupMode.AlongsideSaveForFutureUse
 import com.stripe.android.link.ui.inline.LinkSignupMode.InsteadOfSaveForFutureUse
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.CardBrand
@@ -26,6 +28,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeIntent.Status.Canceled
 import com.stripe.android.model.StripeIntent.Status.Succeeded
 import com.stripe.android.model.wallets.Wallet
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.FakePrefsRepository
@@ -63,6 +66,7 @@ import org.mockito.kotlin.whenever
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
+@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 internal class DefaultPaymentElementLoaderTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -1399,6 +1403,63 @@ internal class DefaultPaymentElementLoaderTest {
         )
     }
 
+    @Test
+    fun `When CPMs are requested and returned by elements session, CPMs are available`() = testCustomPaymentMethods(
+        requestedCustomPaymentMethods = listOf(
+            PaymentSheet.CustomPaymentMethod(
+                id = "cpmt_123",
+                subtitle = "Pay now".resolvableString,
+                disableBillingDetailCollection = false,
+            ),
+            PaymentSheet.CustomPaymentMethod(
+                id = "cpmt_456",
+                subtitle = "Pay later".resolvableString,
+                disableBillingDetailCollection = true,
+            ),
+            PaymentSheet.CustomPaymentMethod(
+                id = "cpmt_789",
+                subtitle = "Pay later".resolvableString,
+                disableBillingDetailCollection = true,
+            )
+        ),
+        returnedCustomPaymentMethods = listOf(
+            ElementsSession.CustomPaymentMethod.Available(
+                type = "cpmt_123",
+                displayName = "CPM #1",
+                logoUrl = "https://image1",
+            ),
+            ElementsSession.CustomPaymentMethod.Available(
+                type = "cpmt_456",
+                displayName = "CPM #2",
+                logoUrl = "https://image2",
+            ),
+            ElementsSession.CustomPaymentMethod.Unavailable(
+                type = "cpmt_789",
+                error = "not_found",
+            ),
+        ),
+        expectedCustomPaymentMethods = listOf(
+            DisplayableCustomPaymentMethod(
+                id = "cpmt_123",
+                displayName = "CPM #1",
+                subtitle = "Pay now".resolvableString,
+                logoUrl = "https://image1",
+                doesNotCollectBillingDetails = false,
+            ),
+            DisplayableCustomPaymentMethod(
+                id = "cpmt_456",
+                displayName = "CPM #2",
+                subtitle = "Pay later".resolvableString,
+                logoUrl = "https://image2",
+                doesNotCollectBillingDetails = true,
+            )
+        ),
+        expectedLogMessages = listOf(
+            "Requested custom payment method cpmt_789 contained an " +
+                "error \"not_found\"!"
+        ),
+    )
+
     @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
     fun `When customer session configuration is provided, should pass it to 'ElementsSessionRepository'`() = runTest {
@@ -2465,6 +2526,33 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(userFacingLogger.getLoggedMessages()).containsExactlyElementsIn(expectedLogMessages)
     }
 
+    private fun testCustomPaymentMethods(
+        requestedCustomPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
+        returnedCustomPaymentMethods: List<ElementsSession.CustomPaymentMethod>,
+        expectedCustomPaymentMethods: List<DisplayableCustomPaymentMethod>,
+        expectedLogMessages: List<String>,
+    ) = runTest {
+        val userFacingLogger = FakeUserFacingLogger()
+        val loader = createPaymentElementLoader(
+            customPaymentMethods = returnedCustomPaymentMethods,
+            userFacingLogger = userFacingLogger
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
+                .customPaymentMethods(requestedCustomPaymentMethods).build(),
+            initializedViaCompose = false,
+        ).getOrThrow()
+
+        assertThat(result.paymentMethodMetadata.displayableCustomPaymentMethods)
+            .isEqualTo(expectedCustomPaymentMethods)
+
+        assertThat(userFacingLogger.getLoggedMessages()).containsExactlyElementsIn(expectedLogMessages)
+    }
+
     private suspend fun testSuccessfulLoadSendsEventsCorrectly(paymentSelection: PaymentSelection?) {
         prefsRepository.savePaymentSelection(paymentSelection)
 
@@ -2573,6 +2661,7 @@ internal class DefaultPaymentElementLoaderTest {
         customer: ElementsSession.Customer? = null,
         externalPaymentMethodData: String? = null,
         errorReporter: ErrorReporter = FakeErrorReporter(),
+        customPaymentMethods: List<ElementsSession.CustomPaymentMethod> = emptyList(),
         elementsSessionRepository: ElementsSessionRepository = FakeElementsSessionRepository(
             stripeIntent = stripeIntent,
             error = error,
@@ -2581,6 +2670,7 @@ internal class DefaultPaymentElementLoaderTest {
             sessionsCustomer = customer,
             isGooglePayEnabled = isGooglePayEnabledFromBackend,
             cardBrandChoice = cardBrandChoice,
+            customPaymentMethods = customPaymentMethods,
             externalPaymentMethodData = externalPaymentMethodData,
         ),
         userFacingLogger: FakeUserFacingLogger = FakeUserFacingLogger(),

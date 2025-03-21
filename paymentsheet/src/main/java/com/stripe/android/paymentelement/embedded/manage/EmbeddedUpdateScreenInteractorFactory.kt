@@ -44,10 +44,10 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
                 }
                 result
             },
-            updateCardBrandExecutor = { method, brand ->
+            updatePaymentMethodExecutor = { method, cardUpdateParams ->
                 savedPaymentMethodMutatorProvider.get().modifyCardPaymentMethod(
                     paymentMethod = method,
-                    brand = brand,
+                    cardUpdateParams = cardUpdateParams,
                     onSuccess = { paymentMethod ->
                         val currentSelection = selectionHolder.selection.value
                         if (paymentMethod.id == (currentSelection as? PaymentSelection.Saved)?.paymentMethod?.id) {

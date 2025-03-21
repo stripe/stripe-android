@@ -123,6 +123,7 @@ internal class CustomerAdapterDataSource @Inject constructor(
             initializationMode,
             customer = null,
             externalPaymentMethods = emptyList(),
+            customPaymentMethods = listOf(),
             savedPaymentMethodSelectionId = null,
         ).onSuccess {
             errorReporter.report(

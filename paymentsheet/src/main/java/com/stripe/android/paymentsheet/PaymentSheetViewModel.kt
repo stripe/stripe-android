@@ -29,7 +29,6 @@ import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmation
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.analytics.primaryButtonColorUsage
@@ -315,7 +314,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     }
                     is ConfirmationHandler.State.Complete -> {
                         setContentVisible(true)
-                        processIntentResult(state.result)
+                        processConfirmationResult(state.result)
                     }
                 }
             }
@@ -483,7 +482,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
                 errorReporter.report(event, StripeException.create(exception))
 
-                processIntentResult(
+                processConfirmationResult(
                     ConfirmationHandler.Result.Failed(
                         cause = exception,
                         message = exception.stripeErrorMessage(),
@@ -491,13 +490,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     )
                 )
             }
-        }
-    }
-
-    override fun onPaymentResult(paymentResult: PaymentResult) {
-        viewModelScope.launch(workContext) {
-            val stripeIntent = awaitStripeIntent()
-            processPayment(stripeIntent, paymentResult)
         }
     }
 
@@ -556,20 +548,20 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    private fun processIntentResult(result: ConfirmationHandler.Result?) {
+    private fun processConfirmationResult(result: ConfirmationHandler.Result?) {
         when (result) {
             is ConfirmationHandler.Result.Succeeded -> handlePaymentCompleted(
                 intent = result.intent,
                 deferredIntentConfirmationType = result.deferredIntentConfirmationType,
                 finishImmediately = false,
             )
-            is ConfirmationHandler.Result.Failed -> processIntentFailure(result)
+            is ConfirmationHandler.Result.Failed -> processConfirmationFailure(result)
             is ConfirmationHandler.Result.Canceled,
             null -> resetViewState()
         }
     }
 
-    private fun processIntentFailure(failure: ConfirmationHandler.Result.Failed) {
+    private fun processConfirmationFailure(failure: ConfirmationHandler.Result.Failed) {
         when (failure.type) {
             ConfirmationHandler.Result.Failed.ErrorType.Payment,
             ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod,
@@ -584,27 +576,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             ConfirmationHandler.Result.Failed.ErrorType.Fatal -> onFatal(failure.cause)
             ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration,
             ConfirmationHandler.Result.Failed.ErrorType.Internal -> onError(failure.message)
-        }
-    }
-
-    private fun processPayment(stripeIntent: StripeIntent, paymentResult: PaymentResult) {
-        when (paymentResult) {
-            is PaymentResult.Completed -> {
-                handlePaymentCompleted(
-                    intent = stripeIntent,
-                    deferredIntentConfirmationType = null,
-                    finishImmediately = false
-                )
-            }
-            is PaymentResult.Failed -> {
-                handlePaymentFailed(
-                    error = PaymentSheetConfirmationError.Stripe(paymentResult.throwable),
-                    message = paymentResult.throwable.stripeErrorMessage(),
-                )
-            }
-            is PaymentResult.Canceled -> {
-                resetViewState()
-            }
         }
     }
 

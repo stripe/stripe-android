@@ -89,6 +89,7 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
                         id = customerSessionClientSecret.customerId,
                         clientSecret = customerSessionClientSecret.clientSecret,
                     ),
+                    customPaymentMethods = listOf(),
                     externalPaymentMethods = listOf(),
                 ).onSuccess {
                     reportSuccessfulElementsSessionLoad()

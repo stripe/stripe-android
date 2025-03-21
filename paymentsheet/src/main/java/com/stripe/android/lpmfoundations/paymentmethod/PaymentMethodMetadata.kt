@@ -50,6 +50,7 @@ internal data class PaymentMethodMetadata(
     val defaultBillingDetails: PaymentSheet.BillingDetails?,
     val shippingDetails: AddressDetails?,
     val sharedDataSpecs: List<SharedDataSpec>,
+    val displayableCustomPaymentMethods: List<DisplayableCustomPaymentMethod>,
     val externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
     val customerMetadata: CustomerMetadata?,
     val isGooglePayReady: Boolean,
@@ -273,6 +274,7 @@ internal data class PaymentMethodMetadata(
                 linkState = linkState,
                 paymentMethodIncentive = linkSettings?.linkConsumerIncentive?.toPaymentMethodIncentive(),
                 isGooglePayReady = isGooglePayReady,
+                displayableCustomPaymentMethods = elementsSession.toDisplayableCustomPaymentMethods(configuration),
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
                 financialConnectionsMode = GetFinancialConnectionsMode(elementsSession),
                 elementsSessionId = elementsSession.elementsSessionId
@@ -312,6 +314,7 @@ internal data class PaymentMethodMetadata(
                 linkState = null,
                 paymentMethodIncentive = null,
                 externalPaymentMethodSpecs = emptyList(),
+                displayableCustomPaymentMethods = emptyList(),
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
                 elementsSessionId = elementsSession.elementsSessionId,
                 financialConnectionsMode = GetFinancialConnectionsMode(elementsSession)
@@ -346,6 +349,7 @@ internal data class PaymentMethodMetadata(
                 linkState = null,
                 paymentMethodIncentive = null,
                 isGooglePayReady = false,
+                displayableCustomPaymentMethods = emptyList(),
                 cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all()),
                 elementsSessionId = configuration.elementsSessionId,
                 financialConnectionsMode = FinancialConnectionsMode.None

@@ -414,7 +414,8 @@ class SavedPaymentMethodMutatorTest {
             savedPaymentMethodMutator.updatePaymentMethod(displayableSavedPaymentMethod)
 
             assertThat(customerStateHolder.paymentMethods.value.first().card?.brand).isEqualTo(CardBrand.Unknown)
-            updatePaymentMethodTurbine.awaitItem().updateExecutor(CardBrand.CartesBancaires)
+            updatePaymentMethodTurbine.awaitItem()
+                .updateExecutor(CardUpdateParams(cardBrand = CardBrand.CartesBancaires))
 
             assertThat(calledUpdate.awaitItem()).isTrue()
 
@@ -452,7 +453,8 @@ class SavedPaymentMethodMutatorTest {
 
             savedPaymentMethodMutator.updatePaymentMethod(displayableSavedPaymentMethod)
 
-            updatePaymentMethodTurbine.awaitItem().updateExecutor(CardBrand.CartesBancaires)
+            updatePaymentMethodTurbine.awaitItem()
+                .updateExecutor(CardUpdateParams(cardBrand = CardBrand.CartesBancaires))
 
             val succeededCall = eventReporter.updatePaymentMethodSucceededCalls.awaitItem()
             assertThat(succeededCall.selectedBrand).isEqualTo(CardBrand.CartesBancaires)
@@ -487,7 +489,9 @@ class SavedPaymentMethodMutatorTest {
 
             savedPaymentMethodMutator.modifyCardPaymentMethod(
                 paymentMethod = displayableSavedPaymentMethod.paymentMethod,
-                brand = CardBrand.CartesBancaires,
+                cardUpdateParams = CardUpdateParams(
+                    cardBrand = CardBrand.CartesBancaires
+                ),
             )
 
             assertThat(calledUpdate.awaitItem()).isTrue()
@@ -526,7 +530,7 @@ class SavedPaymentMethodMutatorTest {
 
             savedPaymentMethodMutator.modifyCardPaymentMethod(
                 paymentMethod = displayableSavedPaymentMethod.paymentMethod,
-                brand = CardBrand.CartesBancaires,
+                cardUpdateParams = CardUpdateParams(cardBrand = CardBrand.CartesBancaires)
             )
 
             val succeededCall = eventReporter.updatePaymentMethodSucceededCalls.awaitItem()
@@ -556,7 +560,8 @@ class SavedPaymentMethodMutatorTest {
             savedPaymentMethodMutator.updatePaymentMethod(displayableSavedPaymentMethod)
 
             assertThat(customerStateHolder.paymentMethods.value.first().card?.brand).isEqualTo(CardBrand.Unknown)
-            updatePaymentMethodTurbine.awaitItem().updateExecutor(CardBrand.CartesBancaires)
+            updatePaymentMethodTurbine.awaitItem()
+                .updateExecutor(CardUpdateParams(cardBrand = CardBrand.CartesBancaires))
 
             assertThat(calledUpdate.awaitItem()).isTrue()
 
@@ -589,7 +594,8 @@ class SavedPaymentMethodMutatorTest {
             )
 
             savedPaymentMethodMutator.updatePaymentMethod(displayableSavedPaymentMethod)
-            updatePaymentMethodTurbine.awaitItem().updateExecutor(CardBrand.CartesBancaires)
+            updatePaymentMethodTurbine.awaitItem()
+                .updateExecutor(CardUpdateParams(cardBrand = CardBrand.CartesBancaires))
 
             val failedCall = eventReporter.updatePaymentMethodFailedCalls.awaitItem()
             assertThat(failedCall.selectedBrand).isEqualTo(CardBrand.CartesBancaires)
@@ -874,7 +880,8 @@ class SavedPaymentMethodMutatorTest {
                         canRemove,
                         performRemove,
                         updateExecutor,
-                        setDefaultPaymentMethodExecutor, ->
+                        setDefaultPaymentMethodExecutor,
+                    ->
                     updatePaymentMethodTurbine.add(
                         UpdateCall(
                             displayableSavedPaymentMethod,
@@ -923,7 +930,7 @@ class SavedPaymentMethodMutatorTest {
         val paymentMethod: DisplayableSavedPaymentMethod,
         val canRemove: Boolean,
         val performRemove: suspend () -> Throwable?,
-        val updateExecutor: suspend (brand: CardBrand) -> Result<PaymentMethod>,
+        val updateExecutor: suspend (cardUpdateParams: CardUpdateParams) -> Result<PaymentMethod>,
         val setSetDefaultPaymentMethodExecutor: suspend (paymentMethod: PaymentMethod) -> Result<Unit>,
     )
 }

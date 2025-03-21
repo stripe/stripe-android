@@ -741,11 +741,29 @@ internal class PaymentMethodMetadataTest {
         val cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.allowed(
             listOf(PaymentSheet.CardBrandAcceptance.BrandCategory.Amex)
         )
+        val customPaymentMethods = listOf(
+            PaymentSheet.CustomPaymentMethod(
+                id = "cpmt_123",
+                subtitle = "Pay now".resolvableString,
+                disableBillingDetailCollection = true,
+            ),
+            PaymentSheet.CustomPaymentMethod(
+                id = "cpmt_456",
+                subtitle = "Pay later".resolvableString,
+                disableBillingDetailCollection = false,
+            ),
+            PaymentSheet.CustomPaymentMethod(
+                id = "cpmt_789",
+                subtitle = "Pay never".resolvableString,
+                disableBillingDetailCollection = false,
+            )
+        )
         val configuration = createPaymentSheetConfiguration(
             billingDetailsCollectionConfiguration,
             defaultBillingDetails,
             shippingDetails,
-            cardBrandAcceptance
+            customPaymentMethods,
+            cardBrandAcceptance,
         )
         val elementsSession = createElementsSession(
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
@@ -753,6 +771,22 @@ internal class PaymentMethodMetadataTest {
                 eligible = true,
                 preferredNetworks = listOf("cartes_bancaires"),
             ),
+            customPaymentMethods = listOf(
+                ElementsSession.CustomPaymentMethod.Available(
+                    type = "cpmt_123",
+                    displayName = "CPM #1",
+                    logoUrl = "https://image1",
+                ),
+                ElementsSession.CustomPaymentMethod.Available(
+                    type = "cpmt_456",
+                    displayName = "CPM #2",
+                    logoUrl = "https://image2",
+                ),
+                ElementsSession.CustomPaymentMethod.Unavailable(
+                    type = "cpmt_789",
+                    error = "not_found",
+                ),
+            )
         )
 
         val sharedDataSpecs = listOf(SharedDataSpec("card"))
@@ -784,6 +818,22 @@ internal class PaymentMethodMetadataTest {
             defaultBillingDetails = defaultBillingDetails,
             shippingDetails = shippingDetails,
             sharedDataSpecs = sharedDataSpecs,
+            displayableCustomPaymentMethods = listOf(
+                DisplayableCustomPaymentMethod(
+                    id = "cpmt_123",
+                    displayName = "CPM #1",
+                    logoUrl = "https://image1",
+                    subtitle = "Pay now".resolvableString,
+                    doesNotCollectBillingDetails = true,
+                ),
+                DisplayableCustomPaymentMethod(
+                    id = "cpmt_456",
+                    displayName = "CPM #2",
+                    logoUrl = "https://image2",
+                    subtitle = "Pay later".resolvableString,
+                    doesNotCollectBillingDetails = false,
+                )
+            ),
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             customerMetadata = CustomerMetadata(
                 hasCustomerConfiguration = true,
@@ -854,6 +904,7 @@ internal class PaymentMethodMetadataTest {
             defaultBillingDetails = defaultBillingDetails,
             shippingDetails = null,
             sharedDataSpecs = listOf(SharedDataSpec("card")),
+            displayableCustomPaymentMethods = emptyList(),
             externalPaymentMethodSpecs = listOf(),
             customerMetadata = CustomerMetadata(
                 hasCustomerConfiguration = true,
@@ -947,6 +998,7 @@ internal class PaymentMethodMetadataTest {
             eligible = true,
             preferredNetworks = listOf("cartes_bancaires")
         ),
+        customPaymentMethods: List<ElementsSession.CustomPaymentMethod> = emptyList(),
         mobilePaymentElementComponent: ElementsSession.Customer.Components.MobilePaymentElement? = null
     ): ElementsSession {
         return ElementsSession(
@@ -972,6 +1024,7 @@ internal class PaymentMethodMetadataTest {
                 )
             },
             linkSettings = null,
+            customPaymentMethods = customPaymentMethods,
             externalPaymentMethodData = null,
             paymentMethodSpecs = null,
             elementsSessionId = "session_1234",
@@ -1360,6 +1413,7 @@ internal class PaymentMethodMetadataTest {
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
         defaultBillingDetails: PaymentSheet.BillingDetails,
         shippingDetails: AddressDetails,
+        customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         cardBrandAcceptance: PaymentSheet.CardBrandAcceptance
     ) = PaymentSheet.Configuration(
         merchantDisplayName = "Merchant Inc.",
@@ -1371,6 +1425,7 @@ internal class PaymentMethodMetadataTest {
         defaultBillingDetails = defaultBillingDetails,
         shippingDetails = shippingDetails,
         preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa),
+        customPaymentMethods = customPaymentMethods,
         cardBrandAcceptance = cardBrandAcceptance
     )
 }

@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import org.json.JSONObject
+import java.util.Locale
 import javax.inject.Inject
 
 internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
@@ -73,15 +74,39 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
     internal fun createTransactionInfo(
         args: GooglePayPaymentMethodLauncherContractV2.Args
     ): GooglePayJsonFactory.TransactionInfo {
-        return GooglePayJsonFactory.TransactionInfo(
-            currencyCode = args.currencyCode,
-            totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
-            countryCode = args.config.merchantCountryCode,
-            transactionId = args.transactionId,
-            totalPrice = args.amount,
-            totalPriceLabel = args.label,
-            checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
-        )
+        return if (shouldHidePrice(args)) {
+            GooglePayJsonFactory.TransactionInfo(
+                currencyCode = args.currencyCode,
+                totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.NotCurrentlyKnown,
+                countryCode = args.config.merchantCountryCode,
+                transactionId = args.transactionId,
+                totalPriceLabel = args.label,
+                checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
+            )
+        } else {
+            GooglePayJsonFactory.TransactionInfo(
+                currencyCode = args.currencyCode,
+                totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
+                countryCode = args.config.merchantCountryCode,
+                transactionId = args.transactionId,
+                totalPrice = args.amount,
+                totalPriceLabel = args.label,
+                checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
+            )
+        }
+    }
+
+    /**
+     * Only hide the price when the merchant is collecting the payment details for future use.
+     * This is only valid in US and CA now.
+     * See [trailhead](https://trailhead.corp.stripe.com/docs/mobile-sdk/payments/tribal-knowledge#google-pay)
+     * for more context.
+     */
+    private fun shouldHidePrice(args: GooglePayPaymentMethodLauncherContractV2.Args): Boolean {
+        return (
+            args.config.merchantCountryCode.equals(Locale.US.country, ignoreCase = true) ||
+                args.config.merchantCountryCode.equals(Locale.CANADA.country, ignoreCase = true)
+            ) && args.amount == 0L
     }
 
     suspend fun loadPaymentData(): Task<PaymentData> {

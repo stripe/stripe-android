@@ -28,11 +28,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.AnalyticEvent
+import com.stripe.android.paymentelement.AnalyticEventCallback
+import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
@@ -47,8 +53,16 @@ import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-internal class EmbeddedPlaygroundActivity : AppCompatActivity(), ExternalPaymentMethodConfirmHandler {
+@OptIn(
+    ExperimentalEmbeddedPaymentElementApi::class,
+    ExperimentalCustomPaymentMethodsApi::class,
+    ExperimentalAnalyticEventCallbackApi::class,
+)
+internal class EmbeddedPlaygroundActivity :
+    AppCompatActivity(),
+    ConfirmCustomPaymentMethodCallback,
+    ExternalPaymentMethodConfirmHandler,
+    AnalyticEventCallback {
     companion object {
         const val PLAYGROUND_STATE_KEY = "playgroundState"
 
@@ -88,7 +102,10 @@ internal class EmbeddedPlaygroundActivity : AppCompatActivity(), ExternalPayment
                 )
             },
             resultCallback = ::handleEmbeddedResult,
-        ).externalPaymentMethodConfirmHandler(this)
+        )
+            .confirmCustomPaymentMethodCallback(this)
+            .externalPaymentMethodConfirmHandler(this)
+            .analyticEventCallback(this)
         val embeddedViewDisplaysMandateText =
             initialPlaygroundState.snapshot[EmbeddedViewDisplaysMandateSettingDefinition]
         setContent {
@@ -279,5 +296,23 @@ internal class EmbeddedPlaygroundActivity : AppCompatActivity(), ExternalPayment
 
         @Composable
         abstract fun Content(embeddedPaymentElement: EmbeddedPaymentElement, retry: () -> Unit)
+    }
+
+    override fun onConfirmCustomPaymentMethod(
+        customPaymentMethod: PaymentSheet.CustomPaymentMethod,
+        billingDetails: PaymentMethod.BillingDetails
+    ) {
+        error("Currently cannot handle custom payment methods!")
+    }
+
+    override fun onEvent(event: AnalyticEvent) {
+        when (event) {
+            is AnalyticEvent.PresentedSheet -> {
+                Log.d("AnalyticEvent", "Event: $event")
+            }
+            is AnalyticEvent.DisplayedPaymentMethodForm -> {
+                Log.d("AnalyticEvent", "Event: $event, PM: ${event.paymentMethodType}")
+            }
+        }
     }
 }
