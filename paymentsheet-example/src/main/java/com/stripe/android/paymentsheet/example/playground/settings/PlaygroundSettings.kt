@@ -449,6 +449,7 @@ internal class PlaygroundSettings private constructor(
             AllowsRemovalOfLastSavedPaymentMethodSettingsDefinition,
             PaymentMethodOrderSettingsDefinition,
             ExternalPaymentMethodSettingsDefinition,
+            CustomPaymentMethodsSettingDefinition,
             LayoutSettingsDefinition,
             CardBrandAcceptanceSettingsDefinition,
             FeatureFlagSettingsDefinition(FeatureFlags.instantDebitsIncentives),
