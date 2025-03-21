@@ -98,6 +98,9 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
 
     /**
      * Only hide the price when the merchant is collecting the payment details for future use.
+     * This is only valid in US and CA now.
+     * See [trailhead](https://trailhead.corp.stripe.com/docs/mobile-sdk/payments/tribal-knowledge#google-pay)
+     * for more context.
      */
     private fun shouldHidePrice(args: GooglePayPaymentMethodLauncherContractV2.Args): Boolean {
         return (
