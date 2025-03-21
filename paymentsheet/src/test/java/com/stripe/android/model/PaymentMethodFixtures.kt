@@ -15,7 +15,7 @@ import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
 
 internal object PaymentMethodFixtures {
-    private val CARD = PaymentMethod.Card(
+    val CARD = PaymentMethod.Card(
         brand = CardBrand.Visa,
         checks = PaymentMethod.Card.Checks(
             addressLine1Check = "unchecked",
@@ -34,7 +34,7 @@ internal object PaymentMethodFixtures {
         wallet = null
     )
 
-    private val CARD_WITH_NETWORKS = CARD.copy(
+    val CARD_WITH_NETWORKS = CARD.copy(
         displayBrand = "cartes_bancaires",
         networks = PaymentMethod.Card.Networks(
             available = setOf("visa", "cartes_bancaires"),
