@@ -28,6 +28,8 @@ import com.stripe.android.connect.webview.ChooseFileActivityResultContract
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.toJs
 import com.stripe.android.core.Logger
+import com.stripe.android.core.utils.RealUserFacingLogger
+import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -127,9 +129,9 @@ internal class EmbeddedComponentCoordinator @Inject constructor(
     ): FinancialConnectionsSheetResult? {
         val sheet = financialConnectionsSheets[activity]
         if (sheet == null) {
-            logger.warning(
+            userFacingLogger?.logWarningWithoutPii(
                 buildString {
-                    append("($loggerTag) Error presenting FinancialConnectionsSheet ")
+                    append("Error presenting FinancialConnectionsSheet. ")
                     append("Did you call EmbeddedComponentManager.onActivityCreate in your Activity.onCreate function?")
                 }
             )
@@ -158,9 +160,12 @@ internal class EmbeddedComponentCoordinator @Inject constructor(
     ): ActivityResultLauncher<I>? {
         val launcher = launchers[activity]
         if (launcher == null) {
-            logger.warning(
-                "($loggerTag) $errorMessage " +
-                    "Did you call EmbeddedComponentManager.onActivityCreate in your Activity.onCreate function?"
+            userFacingLogger?.logWarningWithoutPii(
+                buildString {
+                    append(errorMessage)
+                    append(". ")
+                    append("Did you call EmbeddedComponentManager.onActivityCreate in your Activity.onCreate function?")
+                }
             )
             return null
         }
@@ -193,7 +198,9 @@ internal class EmbeddedComponentCoordinator @Inject constructor(
     private fun Context.findActivityWithErrorHandling(): Activity? {
         val activity = findActivity()
         if (activity == null) {
-            logger.warning("($loggerTag) You must create the EmbeddedComponent view from an Activity")
+            userFacingLogger?.logWarningWithoutPii(
+                "You must create the EmbeddedComponent view from an Activity"
+            )
             if (isDebugBuild) {
                 // crash if in debug mode so that developers are more likely to catch this error.
                 error("You must create the EmbeddedComponent view from an Activity")
@@ -204,6 +211,7 @@ internal class EmbeddedComponentCoordinator @Inject constructor(
 
     companion object {
         private var connectAnalyticsService: ConnectAnalyticsService? = null
+        private var userFacingLogger: UserFacingLogger? = null
 
         @VisibleForTesting
         internal val permissionsFlow: MutableSharedFlow<Boolean> = MutableSharedFlow(extraBufferCapacity = 1)
@@ -224,6 +232,10 @@ internal class EmbeddedComponentCoordinator @Inject constructor(
 
             if (connectAnalyticsService == null) {
                 connectAnalyticsService = StripeConnectComponent.instance.analyticsServiceFactory.create(application)
+            }
+
+            if (userFacingLogger == null) {
+                userFacingLogger = RealUserFacingLogger(application)
             }
 
             application.registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
