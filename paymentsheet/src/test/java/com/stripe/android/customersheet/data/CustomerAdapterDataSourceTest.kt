@@ -518,6 +518,10 @@ class CustomerAdapterDataSourceTest {
 
         val result = dataSource.loadCustomerSheetSession(createConfiguration())
 
+        val lastParams = elementsSessionRepository.lastParams
+
+        assertThat(lastParams?.customPaymentMethods).isEmpty()
+
         assertThat(result).isInstanceOf<CustomerSheetDataResult.Success<CustomerSheetSession>>()
 
         val customerSheetSession = result.asSuccess().value

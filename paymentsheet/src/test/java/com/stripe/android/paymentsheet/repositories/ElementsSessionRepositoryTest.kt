@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.PaymentIntentFixtures
@@ -54,6 +55,7 @@ internal class ElementsSessionRepositoryTest {
                 ),
                 customer = null,
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 savedPaymentMethodSelectionId = null,
             ).getOrThrow()
         }
@@ -85,6 +87,7 @@ internal class ElementsSessionRepositoryTest {
                     ),
                     customer = null,
                     externalPaymentMethods = emptyList(),
+                    customPaymentMethods = emptyList(),
                     savedPaymentMethodSelectionId = null,
                 ).getOrThrow()
             }
@@ -111,6 +114,7 @@ internal class ElementsSessionRepositoryTest {
                     ),
                     customer = null,
                     externalPaymentMethods = emptyList(),
+                    customPaymentMethods = emptyList(),
                     savedPaymentMethodSelectionId = null,
                 ).getOrThrow()
             }
@@ -144,6 +148,7 @@ internal class ElementsSessionRepositoryTest {
             ),
             customer = null,
             externalPaymentMethods = emptyList(),
+            customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
         ).getOrThrow()
 
@@ -183,6 +188,7 @@ internal class ElementsSessionRepositoryTest {
             ),
             customer = null,
             externalPaymentMethods = emptyList(),
+            customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
         )
 
@@ -217,6 +223,7 @@ internal class ElementsSessionRepositoryTest {
             ),
             customer = null,
             externalPaymentMethods = emptyList(),
+            customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
         )
 
@@ -254,6 +261,7 @@ internal class ElementsSessionRepositoryTest {
                 clientSecret = "customer_session_client_secret"
             ),
             externalPaymentMethods = emptyList(),
+            customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = null,
         )
 
@@ -263,6 +271,7 @@ internal class ElementsSessionRepositoryTest {
                     clientSecret = "client_secret",
                     customerSessionClientSecret = "customer_session_client_secret",
                     externalPaymentMethods = emptyList(),
+                    customPaymentMethods = emptyList(),
                     savedPaymentMethodSelectionId = null,
                     appId = APP_ID
                 )
@@ -297,6 +306,7 @@ internal class ElementsSessionRepositoryTest {
             ),
             customer = null,
             externalPaymentMethods = emptyList(),
+            customPaymentMethods = emptyList(),
             savedPaymentMethodSelectionId = "pm_123",
         )
 
@@ -305,6 +315,67 @@ internal class ElementsSessionRepositoryTest {
                 ElementsSessionParams.PaymentIntentType(
                     clientSecret = "client_secret",
                     externalPaymentMethods = emptyList(),
+                    customPaymentMethods = emptyList(),
+                    savedPaymentMethodSelectionId = "pm_123",
+                    appId = APP_ID
+                )
+            ),
+            options = any()
+        )
+    }
+
+    @Test
+    fun `Verify custom payment methods ids are passed to 'StripeRepository'`() = runTest {
+        whenever(
+            stripeRepository.retrieveElementsSession(any(), any())
+        ).thenReturn(
+            Result.success(
+                ElementsSession.createFromFallback(
+                    stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
+                    sessionsError = null,
+                )
+            )
+        )
+
+        val repository = RealElementsSessionRepository(
+            stripeRepository,
+            { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
+            testDispatcher,
+            appId = APP_ID
+        )
+
+        repository.get(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "client_secret"
+            ),
+            customer = null,
+            externalPaymentMethods = emptyList(),
+            customPaymentMethods = listOf(
+                PaymentSheet.CustomPaymentMethod(
+                    id = "cpmt_123",
+                    subtitle = "Pay now".resolvableString,
+                    disableBillingDetailCollection = true,
+                ),
+                PaymentSheet.CustomPaymentMethod(
+                    id = "cpmt_456",
+                    subtitle = "Pay later".resolvableString,
+                    disableBillingDetailCollection = true,
+                ),
+                PaymentSheet.CustomPaymentMethod(
+                    id = "cpmt_789",
+                    subtitle = "Pay never".resolvableString,
+                    disableBillingDetailCollection = true,
+                ),
+            ),
+            savedPaymentMethodSelectionId = "pm_123",
+        )
+
+        verify(stripeRepository).retrieveElementsSession(
+            params = eq(
+                ElementsSessionParams.PaymentIntentType(
+                    clientSecret = "client_secret",
+                    externalPaymentMethods = emptyList(),
+                    customPaymentMethods = listOf("cpmt_123", "cpmt_456", "cpmt_789"),
                     savedPaymentMethodSelectionId = "pm_123",
                     appId = APP_ID
                 )

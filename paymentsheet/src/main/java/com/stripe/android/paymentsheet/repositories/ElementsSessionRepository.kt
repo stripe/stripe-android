@@ -26,6 +26,7 @@ internal interface ElementsSessionRepository {
     suspend fun get(
         initializationMode: PaymentElementLoader.InitializationMode,
         customer: PaymentSheet.CustomerConfiguration?,
+        customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
     ): Result<ElementsSession>
@@ -52,11 +53,13 @@ internal class RealElementsSessionRepository @Inject constructor(
     override suspend fun get(
         initializationMode: PaymentElementLoader.InitializationMode,
         customer: PaymentSheet.CustomerConfiguration?,
+        customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
     ): Result<ElementsSession> {
         val params = initializationMode.toElementsSessionParams(
             customer = customer,
+            customPaymentMethods = customPaymentMethods,
             externalPaymentMethods = externalPaymentMethods,
             savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
             appId = appId
@@ -116,17 +119,20 @@ private fun StripeIntent.withoutWeChatPay(): StripeIntent {
 
 internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
     customer: PaymentSheet.CustomerConfiguration?,
+    customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
     externalPaymentMethods: List<String>,
     savedPaymentMethodSelectionId: String?,
     appId: String
 ): ElementsSessionParams {
     val customerSessionClientSecret = customer?.toElementSessionParam()
+    val customPaymentMethodIds = customPaymentMethods.toElementSessionParam()
 
     return when (this) {
         is PaymentElementLoader.InitializationMode.PaymentIntent -> {
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = clientSecret,
                 customerSessionClientSecret = customerSessionClientSecret,
+                customPaymentMethods = customPaymentMethodIds,
                 externalPaymentMethods = externalPaymentMethods,
                 savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
                 appId = appId
@@ -138,6 +144,7 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 clientSecret = clientSecret,
                 customerSessionClientSecret = customerSessionClientSecret,
                 externalPaymentMethods = externalPaymentMethods,
+                customPaymentMethods = customPaymentMethodIds,
                 savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
                 appId = appId
             )
@@ -146,12 +153,19 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
         is PaymentElementLoader.InitializationMode.DeferredIntent -> {
             ElementsSessionParams.DeferredIntentType(
                 deferredIntentParams = intentConfiguration.toDeferredIntentParams(),
+                customPaymentMethods = customPaymentMethodIds,
                 externalPaymentMethods = externalPaymentMethods,
                 customerSessionClientSecret = customerSessionClientSecret,
                 savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
                 appId = appId
             )
         }
+    }
+}
+
+private fun List<PaymentSheet.CustomPaymentMethod>.toElementSessionParam(): List<String> {
+    return map { customPaymentMethod ->
+        customPaymentMethod.id
     }
 }
 
