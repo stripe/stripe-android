@@ -15,7 +15,7 @@ GEM
     mini_portile2 (2.8.8)
     net-http (0.4.1)
       uri
-    nokogiri (1.18.3)
+    nokogiri (1.18.4)
       mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
     octokit (9.1.0)
