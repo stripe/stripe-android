@@ -1,6 +1,5 @@
 package com.stripe.android.connect
 
-import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
@@ -9,7 +8,6 @@ import androidx.lifecycle.ViewModelProvider
  * Controller for a full screen component.
  */
 @PrivateBetaConnectSDK
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 abstract class StripeComponentController<Listener, Props> internal constructor(
     private val activity: FragmentActivity,
     private val embeddedComponentManager: EmbeddedComponentManager,

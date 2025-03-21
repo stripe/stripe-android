@@ -72,7 +72,6 @@ internal class AccountOnboardingView internal constructor(
 }
 
 @PrivateBetaConnectSDK
-@RestrictTo(RestrictTo.Scope.LIBRARY)
 @Parcelize
 @Poko
 class AccountOnboardingProps(
@@ -124,7 +123,6 @@ class AccountOnboardingProps(
     }
 
     @PrivateBetaConnectSDK
-    @RestrictTo(RestrictTo.Scope.LIBRARY)
     enum class FutureRequirementOption(internal val value: String) {
         OMIT("omit"),
         INCLUDE("include"),
@@ -132,7 +130,6 @@ class AccountOnboardingProps(
 }
 
 @PrivateBetaConnectSDK
-@RestrictTo(RestrictTo.Scope.LIBRARY)
 interface AccountOnboardingListener : StripeEmbeddedComponentListener {
     /**
      * The connected account has exited the onboarding process.

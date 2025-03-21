@@ -1,3 +1,35 @@
+public final class com/stripe/android/connect/AccountOnboardingController : com/stripe/android/connect/StripeComponentController {
+	public static final field $stable I
+}
+
+public abstract interface class com/stripe/android/connect/AccountOnboardingListener : com/stripe/android/connect/StripeEmbeddedComponentListener {
+	public abstract fun onExit ()V
+}
+
+public final class com/stripe/android/connect/AccountOnboardingListener$DefaultImpls {
+	public static fun onExit (Lcom/stripe/android/connect/AccountOnboardingListener;)V
+	public static fun onLoadError (Lcom/stripe/android/connect/AccountOnboardingListener;Ljava/lang/Throwable;)V
+	public static fun onLoaderStart (Lcom/stripe/android/connect/AccountOnboardingListener;)V
+}
+
+public final class com/stripe/android/connect/AccountOnboardingProps : com/stripe/android/connect/ComponentProps {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/connect/AccountOnboardingProps$CollectionOptions;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/connect/AccountOnboardingProps$CollectionOptions;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCollectionOptions ()Lcom/stripe/android/connect/AccountOnboardingProps$CollectionOptions;
+	public final fun getFullTermsOfServiceUrl ()Ljava/lang/String;
+	public final fun getPrivacyPolicyUrl ()Ljava/lang/String;
+	public final fun getRecipientTermsOfServiceUrl ()Ljava/lang/String;
+	public final fun getSkipTermsOfServiceCollection ()Ljava/lang/Boolean;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
 public final class com/stripe/android/connect/AccountOnboardingProps$CollectionOptions$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/connect/AccountOnboardingProps$CollectionOptions;
@@ -14,11 +46,51 @@ public final class com/stripe/android/connect/AccountOnboardingProps$Creator : a
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/connect/AccountOnboardingProps$FutureRequirementOption : java/lang/Enum {
+	public static final field INCLUDE Lcom/stripe/android/connect/AccountOnboardingProps$FutureRequirementOption;
+	public static final field OMIT Lcom/stripe/android/connect/AccountOnboardingProps$FutureRequirementOption;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/connect/AccountOnboardingProps$FutureRequirementOption;
+	public static fun values ()[Lcom/stripe/android/connect/AccountOnboardingProps$FutureRequirementOption;
+}
+
 public final class com/stripe/android/connect/BuildConfig {
 	public static final field BUILD_TYPE Ljava/lang/String;
 	public static final field DEBUG Z
 	public static final field LIBRARY_PACKAGE_NAME Ljava/lang/String;
 	public fun <init> ()V
+}
+
+public abstract interface class com/stripe/android/connect/ComponentProps : android/os/Parcelable {
+}
+
+public final class com/stripe/android/connect/EmbeddedComponentManager {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/connect/EmbeddedComponentManager$Configuration;Lcom/stripe/android/connect/FetchClientSecretCallback;)V
+	public fun <init> (Lcom/stripe/android/connect/EmbeddedComponentManager$Configuration;Lcom/stripe/android/connect/FetchClientSecretCallback;Lcom/stripe/android/connect/appearance/Appearance;)V
+	public fun <init> (Lcom/stripe/android/connect/EmbeddedComponentManager$Configuration;Lcom/stripe/android/connect/FetchClientSecretCallback;Lcom/stripe/android/connect/appearance/Appearance;Ljava/util/List;)V
+	public synthetic fun <init> (Lcom/stripe/android/connect/EmbeddedComponentManager$Configuration;Lcom/stripe/android/connect/FetchClientSecretCallback;Lcom/stripe/android/connect/appearance/Appearance;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun createAccountOnboardingController (Landroidx/fragment/app/FragmentActivity;)Lcom/stripe/android/connect/AccountOnboardingController;
+	public final fun createAccountOnboardingController (Landroidx/fragment/app/FragmentActivity;Ljava/lang/String;)Lcom/stripe/android/connect/AccountOnboardingController;
+	public final fun createAccountOnboardingController (Landroidx/fragment/app/FragmentActivity;Ljava/lang/String;Lcom/stripe/android/connect/AccountOnboardingProps;)Lcom/stripe/android/connect/AccountOnboardingController;
+	public static synthetic fun createAccountOnboardingController$default (Lcom/stripe/android/connect/EmbeddedComponentManager;Landroidx/fragment/app/FragmentActivity;Ljava/lang/String;Lcom/stripe/android/connect/AccountOnboardingProps;ILjava/lang/Object;)Lcom/stripe/android/connect/AccountOnboardingController;
+	public static final fun onActivityCreate (Landroidx/activity/ComponentActivity;)V
+	public final fun update (Lcom/stripe/android/connect/appearance/Appearance;)V
+}
+
+public final class com/stripe/android/connect/EmbeddedComponentManager$Configuration : android/os/Parcelable {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/connect/EmbeddedComponentManager$Configuration;
+	public static synthetic fun copy$default (Lcom/stripe/android/connect/EmbeddedComponentManager$Configuration;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/connect/EmbeddedComponentManager$Configuration;
+	public final fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPublishableKey ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/connect/EmbeddedComponentManager$Configuration$Creator : android/os/Parcelable$Creator {
@@ -29,12 +101,44 @@ public final class com/stripe/android/connect/EmbeddedComponentManager$Configura
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/connect/EmptyProps : com/stripe/android/connect/ComponentProps {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field INSTANCE Lcom/stripe/android/connect/EmptyProps;
+	public final fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
 public final class com/stripe/android/connect/EmptyProps$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/connect/EmptyProps;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/connect/EmptyProps;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public abstract interface class com/stripe/android/connect/FetchClientSecretCallback {
+	public abstract fun fetchClientSecret (Lcom/stripe/android/connect/FetchClientSecretCallback$ClientSecretResultCallback;)V
+}
+
+public abstract interface class com/stripe/android/connect/FetchClientSecretCallback$ClientSecretResultCallback {
+	public abstract fun onResult (Ljava/lang/String;)V
+}
+
+public abstract interface annotation class com/stripe/android/connect/PrivateBetaConnectSDK : java/lang/annotation/Annotation {
+}
+
+public abstract class com/stripe/android/connect/StripeComponentController {
+	public static final field $stable I
+	public final fun dismiss ()V
+	public final fun getListener ()Lcom/stripe/android/connect/StripeEmbeddedComponentListener;
+	public final fun getOnDismissListener ()Lcom/stripe/android/connect/StripeComponentController$OnDismissListener;
+	public final fun setListener (Lcom/stripe/android/connect/StripeEmbeddedComponentListener;)V
+	public final fun setOnDismissListener (Lcom/stripe/android/connect/StripeComponentController$OnDismissListener;)V
+	public final fun show ()V
 }
 
 public abstract interface class com/stripe/android/connect/StripeComponentController$OnDismissListener {
