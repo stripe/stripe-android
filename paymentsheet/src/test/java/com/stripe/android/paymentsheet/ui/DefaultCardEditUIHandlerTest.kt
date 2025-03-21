@@ -58,7 +58,7 @@ internal class DefaultCardEditUIHandlerTest {
 
         handler.brandChanged(CardBrand.Visa)
 
-        assertThat(cardUpdateParams?.cardBrand).isEqualTo(CardBrand.Visa)
+        assertThat(cardUpdateParams).isEqualTo(cardUpdateParams(cardBrand = CardBrand.Visa))
 
         handler.brandChanged(CardBrand.CartesBancaires)
 
@@ -94,6 +94,20 @@ internal class DefaultCardEditUIHandlerTest {
 
     private val DefaultCardEditUIHandler.selectedBrand
         get() = uiState.selectedCardBrand.brand
+
+    private fun cardUpdateParams(
+        expiryMonth: Int? = null,
+        expiryYear: Int? = null,
+        cardBrand: CardBrand? = null,
+        billingDetails: PaymentMethod.BillingDetails? = null
+    ): CardUpdateParams {
+        return CardUpdateParams(
+            expiryMonth = expiryMonth,
+            expiryYear = expiryYear,
+            cardBrand = cardBrand,
+            billingDetails = billingDetails
+        )
+    }
 
     private fun handler(
         card: PaymentMethod.Card = PaymentMethodFixtures.CARD_WITH_NETWORKS,
