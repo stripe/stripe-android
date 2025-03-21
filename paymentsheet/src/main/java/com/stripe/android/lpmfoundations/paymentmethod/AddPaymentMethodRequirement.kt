@@ -68,14 +68,18 @@ internal enum class AddPaymentMethodRequirement {
     /** Requires that Instant Debits are possible for this transaction. */
     InstantDebits {
         override fun isMetBy(metadata: PaymentMethodMetadata): Boolean {
-            return metadata.linkMode != LinkMode.LinkCardBrand && metadata.supportsMobileInstantDebitsFlow
+            return metadata.linkConfiguration.shouldDisplay &&
+                metadata.linkMode != LinkMode.LinkCardBrand &&
+                metadata.supportsMobileInstantDebitsFlow
         }
     },
 
     /** Requires that LinkCardBrand is possible for this transaction. */
     LinkCardBrand {
         override fun isMetBy(metadata: PaymentMethodMetadata): Boolean {
-            return metadata.linkMode == LinkMode.LinkCardBrand && metadata.supportsMobileInstantDebitsFlow
+            return metadata.linkConfiguration.shouldDisplay &&
+                metadata.linkMode == LinkMode.LinkCardBrand &&
+                metadata.supportsMobileInstantDebitsFlow
         }
     };
 

@@ -226,6 +226,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             state = state,
             isReloadingAfterProcessDeath = isReloadingAfterProcessDeath,
             isGooglePaySupported = isGooglePaySupported(),
+            linkDisplay = configuration.link.display,
             initializationMode = initializationMode,
             customerInfo = customerInfo,
             paymentMethodMetadata = paymentMethodMetadata
@@ -394,10 +395,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         customer: CustomerInfo?,
         initializationMode: PaymentElementLoader.InitializationMode
     ): LinkState? {
-        return if (elementsSession.isLinkEnabled &&
-            !configuration.billingDetailsCollectionConfiguration.collectsAnything &&
-            configuration.cardBrandAcceptance == PaymentSheet.CardBrandAcceptance.all()
-        ) {
+        return if (configuration.allowsLink && elementsSession.isLinkEnabled) {
             loadLinkState(
                 configuration = configuration,
                 customer = customer,
@@ -678,6 +676,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         state: PaymentElementLoader.State,
         isReloadingAfterProcessDeath: Boolean,
         isGooglePaySupported: Boolean,
+        linkDisplay: PaymentSheet.LinkConfiguration.Display,
         initializationMode: PaymentElementLoader.InitializationMode,
         customerInfo: CustomerInfo?,
         paymentMethodMetadata: PaymentMethodMetadata,
@@ -705,6 +704,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             eventReporter.onLoadSucceeded(
                 linkMode = elementsSession.linkSettings?.linkMode,
                 googlePaySupported = isGooglePaySupported,
+                linkDisplay = linkDisplay,
                 currency = elementsSession.stripeIntent.currency,
                 paymentSelection = state.paymentSelection,
                 initializationMode = initializationMode,
@@ -792,3 +792,8 @@ private suspend fun List<PaymentMethod>.withDefaultPaymentMethodOrLastUsedPaymen
 private fun PaymentMethod.toPaymentSelection(): PaymentSelection.Saved {
     return PaymentSelection.Saved(this)
 }
+
+private val CommonConfiguration.allowsLink: Boolean
+    get() = link.shouldDisplay &&
+        !billingDetailsCollectionConfiguration.collectsAnything &&
+        cardBrandAcceptance == PaymentSheet.CardBrandAcceptance.all()
