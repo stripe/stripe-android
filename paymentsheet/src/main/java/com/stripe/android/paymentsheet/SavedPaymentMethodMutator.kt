@@ -12,7 +12,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
-import com.stripe.android.paymentsheet.ui.DefaultCardEditUIHandler
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -386,7 +385,7 @@ internal class SavedPaymentMethodMutator(
                                 )
                                 ),
                             onUpdateSuccess = viewModel.navigationHandler::pop,
-                            onBrandChoiceChanged = {
+                            onBrandChoiceSelected = {
                                 viewModel.eventReporter.onBrandChoiceSelected(
                                     source = EventReporter.CardBrandChoiceEventSource.Edit,
                                     selectedBrand = it

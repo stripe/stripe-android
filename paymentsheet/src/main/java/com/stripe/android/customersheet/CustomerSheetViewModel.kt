@@ -561,7 +561,7 @@ internal class CustomerSheetViewModel(
                             IllegalStateException("Unexpected attempt to update default from CustomerSheet.")
                         )
                     },
-                    onBrandChoiceChanged = { brand ->
+                    onBrandChoiceSelected = { brand ->
                         eventReporter.onBrandChoiceSelected(
                             source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
                             selectedBrand = brand

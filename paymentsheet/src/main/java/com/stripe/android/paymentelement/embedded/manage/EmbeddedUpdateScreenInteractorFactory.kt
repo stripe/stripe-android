@@ -7,7 +7,6 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.ui.DefaultCardEditUIHandler
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import javax.inject.Inject
@@ -71,7 +70,7 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
             onUpdateSuccess = {
                 manageNavigatorProvider.get().performAction(ManageNavigator.Action.Back)
             },
-            onBrandChoiceChanged = {
+            onBrandChoiceSelected = {
                 eventReporter.onBrandChoiceSelected(
                     source = EventReporter.CardBrandChoiceEventSource.Edit,
                     selectedBrand = it

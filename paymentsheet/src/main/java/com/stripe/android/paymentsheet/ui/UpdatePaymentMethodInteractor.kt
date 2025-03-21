@@ -137,7 +137,9 @@ internal class DefaultUpdatePaymentMethodInteractor(
                 cardUpdateParams.value = it
             },
             showCardBrandDropdown = isModifiablePaymentMethod && displayableSavedPaymentMethod.isModifiable(),
-            paymentMethodIcon = 0
+            paymentMethodIcon = displayableSavedPaymentMethod.paymentMethod.getSavedPaymentMethodIcon(
+                forVerticalMode = true
+            )
         )
         return cardUIHandler
     }
@@ -301,13 +303,13 @@ internal class DefaultUpdatePaymentMethodInteractor(
             removeExecutor: PaymentMethodRemoveOperation,
             updatePaymentMethodExecutor: UpdateCardPaymentMethodOperation,
             setDefaultPaymentMethodExecutor: PaymentMethodSetAsDefaultOperation,
-            onBrandChoiceChanged: BrandChoiceCallback,
+            onBrandChoiceSelected: BrandChoiceCallback,
             onUpdateSuccess: () -> Unit,
             coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob()),
-            cardEditUIHandlerFactory: (BrandChoiceCallback) -> CardEditUIHandler.Factory = {
+            cardEditUIHandlerFactory: (BrandChoiceCallback) -> CardEditUIHandler.Factory = { brandChoiceCallback ->
                 DefaultCardEditUIHandler.Factory(
                     scope = coroutineScope,
-                    onBrandChoiceChanged = it
+                    onBrandChoiceChanged = brandChoiceCallback
                 )
             },
         ): DefaultUpdatePaymentMethodInteractor {
@@ -322,7 +324,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
                 setDefaultPaymentMethodExecutor = setDefaultPaymentMethodExecutor,
                 onUpdateSuccess = onUpdateSuccess,
                 coroutineScope = coroutineScope,
-                cardEditUIHandlerFactory = cardEditUIHandlerFactory.invoke(onBrandChoiceChanged),
+                cardEditUIHandlerFactory = cardEditUIHandlerFactory.invoke(onBrandChoiceSelected),
                 isDefaultPaymentMethod = isDefaultPaymentMethod,
             )
         }

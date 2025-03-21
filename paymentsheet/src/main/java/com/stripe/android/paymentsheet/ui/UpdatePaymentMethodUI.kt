@@ -186,51 +186,10 @@ private fun CardDetailsUI(
     val cardEditUIHandler = remember(savedPaymentMethod) {
         interactor.cardUiHandlerFactory(savedPaymentMethod)
     }
-    val state by cardEditUIHandler.state.collectAsState()
-    val dividerHeight = remember { mutableStateOf(0.dp) }
-
-    Card(
-        border = MaterialTheme.getBorderStroke(false),
-        elevation = 0.dp,
-        modifier = Modifier.testTag(UPDATE_PM_CARD_TEST_TAG),
-    ) {
-        Column {
-            CardNumberField(
-                card = state.card,
-                selectedBrand = state.selectedCardBrand,
-                shouldShowCardBrandDropdown = cardEditUIHandler.showCardBrandDropdown,
-                cardBrandFilter = cardEditUIHandler.cardBrandFilter,
-                savedPaymentMethodIcon = cardEditUIHandler.paymentMethodIcon,
-                onBrandChoiceChanged = {
-                    cardEditUIHandler.onBrandChoiceChanged(it)
-                },
-            )
-            Divider(
-                color = MaterialTheme.stripeColors.componentDivider,
-                thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
-            )
-            Row(modifier = Modifier.fillMaxWidth()) {
-                ExpiryField(
-                    expiryMonth = state.card.expiryMonth,
-                    expiryYear = state.card.expiryYear,
-                    isExpired = interactor.isExpiredCard,
-                    modifier = Modifier
-                        .weight(1F)
-                        .onSizeChanged {
-                            dividerHeight.value =
-                                (it.height / Resources.getSystem().displayMetrics.density).dp
-                        },
-                )
-                Divider(
-                    modifier = Modifier
-                        .height(dividerHeight.value)
-                        .width(MaterialTheme.stripeShapes.borderStrokeWidth.dp),
-                    color = MaterialTheme.stripeColors.componentDivider,
-                )
-                CvcField(cardBrand = state.card.brand, modifier = Modifier.weight(1F))
-            }
-        }
-    }
+    CardDetailsEditUI(
+        cardEditUIHandler = cardEditUIHandler,
+        isExpiredCard = interactor.isExpiredCard
+    )
 }
 
 @Composable
@@ -357,154 +316,6 @@ private fun DeletePaymentMethodUi(interactor: UpdatePaymentMethodInteractor) {
     }
 }
 
-@Composable
-private fun CardNumberField(
-    card: PaymentMethod.Card,
-    selectedBrand: CardBrandChoice,
-    cardBrandFilter: CardBrandFilter,
-    shouldShowCardBrandDropdown: Boolean,
-    savedPaymentMethodIcon: Int,
-    onBrandChoiceChanged: (CardBrandChoice) -> Unit,
-) {
-    CommonTextField(
-        value = "•••• •••• •••• ${card.last4}",
-        label = stringResource(id = R.string.stripe_acc_label_card_number),
-        trailingIcon = {
-            if (shouldShowCardBrandDropdown) {
-                CardBrandDropdown(
-                    selectedBrand = selectedBrand,
-                    availableBrands = card.getAvailableNetworks(cardBrandFilter),
-                    onBrandChoiceChanged = onBrandChoiceChanged,
-                )
-            } else {
-                PaymentMethodIconFromResource(
-                    iconRes = savedPaymentMethodIcon,
-                    colorFilter = null,
-                    alignment = Alignment.Center,
-                    modifier = Modifier,
-                )
-            }
-        },
-    )
-}
-
-@Composable
-private fun ExpiryField(
-    expiryMonth: Int?,
-    expiryYear: Int?,
-    isExpired: Boolean,
-    modifier: Modifier
-) {
-    CommonTextField(
-        modifier = modifier.testTag(UPDATE_PM_EXPIRY_FIELD_TEST_TAG),
-        value = formattedExpiryDate(expiryMonth = expiryMonth, expiryYear = expiryYear),
-        label = stringResource(id = com.stripe.android.uicore.R.string.stripe_expiration_date_hint),
-        shape = MaterialTheme.shapes.small.copy(
-            topStart = ZeroCornerSize,
-            topEnd = ZeroCornerSize,
-            bottomEnd = ZeroCornerSize,
-        ),
-        shouldShowError = isExpired,
-    )
-}
-
-private fun formattedExpiryDate(expiryMonth: Int?, expiryYear: Int?): String {
-    @Suppress("ComplexCondition")
-    if (
-        expiryMonth == null ||
-        monthIsInvalid(expiryMonth) ||
-        expiryYear == null ||
-        yearIsInvalid(expiryYear)
-    ) {
-        return "••/••"
-    }
-
-    val formattedExpiryMonth = if (expiryMonth < OCTOBER) {
-        "0$expiryMonth"
-    } else {
-        expiryMonth.toString()
-    }
-
-    @Suppress("MagicNumber")
-    val formattedExpiryYear = expiryYear.toString().substring(2, 4)
-
-    return "$formattedExpiryMonth/$formattedExpiryYear"
-}
-
-private fun monthIsInvalid(expiryMonth: Int): Boolean {
-    return expiryMonth < JANUARY || expiryMonth > DECEMBER
-}
-
-private fun yearIsInvalid(expiryYear: Int): Boolean {
-    // Since we use 2-digit years to represent the expiration year, we should keep dates to
-    // this century.
-    return expiryYear < YEAR_2000 || expiryYear > YEAR_2100
-}
-
-@Composable
-private fun CvcField(cardBrand: CardBrand, modifier: Modifier) {
-    val cvc = buildString {
-        repeat(cardBrand.maxCvcLength) {
-            append("•")
-        }
-    }
-    CommonTextField(
-        modifier = modifier.testTag(UPDATE_PM_CVC_FIELD_TEST_TAG),
-        value = cvc,
-        label = stringResource(id = R.string.stripe_cvc_number_hint),
-        shape = MaterialTheme.shapes.small.copy(
-            topStart = ZeroCornerSize,
-            topEnd = ZeroCornerSize,
-            bottomStart = ZeroCornerSize
-        ),
-        trailingIcon = {
-            Image(
-                painter = painterResource(cardBrand.cvcIcon),
-                contentDescription = null,
-            )
-        },
-    )
-}
-
-@Composable
-private fun CommonTextField(
-    value: String,
-    label: String,
-    modifier: Modifier = Modifier,
-    trailingIcon: @Composable (() -> Unit)? = null,
-    shouldShowError: Boolean = false,
-    shape: Shape =
-        MaterialTheme.shapes.small.copy(bottomEnd = ZeroCornerSize, bottomStart = ZeroCornerSize),
-) {
-    TextField(
-        modifier = modifier.fillMaxWidth(),
-        value = value,
-        enabled = false,
-        label = {
-            Label(
-                text = label,
-            )
-        },
-        trailingIcon = trailingIcon,
-        shape = shape,
-        colors = TextFieldColors(
-            shouldShowError = shouldShowError,
-        ),
-        onValueChange = {},
-    )
-}
-
-@Composable
-private fun Label(
-    text: String,
-) {
-    Text(
-        text = text,
-        color = MaterialTheme.stripeColors.placeholderText.copy(alpha = ContentAlpha.disabled),
-        style = MaterialTheme.typography.subtitle1
-    )
-}
-
 @Preview
 @Composable
 private fun PreviewUpdatePaymentMethodUI() {
@@ -531,7 +342,7 @@ private fun PreviewUpdatePaymentMethodUI() {
             shouldShowSetAsDefaultCheckbox = true,
             isDefaultPaymentMethod = false,
             onUpdateSuccess = {},
-            onBrandChoiceChanged = {},
+            onBrandChoiceSelected = {},
         ),
         modifier = Modifier
     )
@@ -556,12 +367,6 @@ private fun DisplayableSavedPaymentMethod.getDetailsCannotBeChangedText(
         }
         )?.resolvableString
 }
-
-private const val JANUARY = 1
-private const val OCTOBER = 10
-private const val DECEMBER = 12
-private const val YEAR_2000 = 2000
-private const val YEAR_2100 = 2100
 
 internal const val UPDATE_PM_EXPIRY_FIELD_TEST_TAG = "update_payment_method_expiry_date"
 internal const val UPDATE_PM_CVC_FIELD_TEST_TAG = "update_payment_method_cvc"

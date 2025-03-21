@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.ui
 import app.cash.turbine.Turbine
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update

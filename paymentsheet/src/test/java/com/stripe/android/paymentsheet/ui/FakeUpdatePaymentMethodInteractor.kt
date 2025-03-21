@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.ui
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.SavedPaymentMethod
@@ -33,13 +32,19 @@ internal class FakeUpdatePaymentMethodInteractor(
     override val allowCardEdit: Boolean = false,
     override val cardEditUIHandlerFactory: CardEditUIHandler.Factory = FakeCardEditUIHandlerFactory()
 ) : UpdatePaymentMethodInteractor {
+    var cardUiHandler: FakeCardEditUIHandler? = null
     override val state: StateFlow<UpdatePaymentMethodInteractor.State> = MutableStateFlow(initialState)
     override val screenTitle: ResolvableString? = UpdatePaymentMethodInteractor.screenTitle(
         displayableSavedPaymentMethod
     )
 
     override fun cardUiHandlerFactory(savedPaymentMethod: SavedPaymentMethod.Card): CardEditUIHandler {
-        TODO("Not yet implemented")
+        return FakeCardEditUIHandler(
+            card = savedPaymentMethod.card,
+            cardBrandFilter = cardBrandFilter,
+            paymentMethodIcon = 0,
+            showCardBrandDropdown = displayableSavedPaymentMethod.isModifiable() && isModifiablePaymentMethod
+        ).also { cardUiHandler = it }
     }
 
     override val topBarState: PaymentSheetTopBarState = PaymentSheetTopBarStateFactory.create(

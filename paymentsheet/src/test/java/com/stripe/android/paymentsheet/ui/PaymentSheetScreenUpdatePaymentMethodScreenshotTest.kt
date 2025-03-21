@@ -36,7 +36,6 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
                     .CARD_WITH_NETWORKS_PAYMENT_METHOD
                     .toDisplayableSavedPaymentMethod(),
                 canRemove = true,
-                initialCardBrand = CardBrand.CartesBancaires,
                 isModifiablePaymentMethod = true,
             )
         }
@@ -50,7 +49,6 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
                     .CARD_WITH_NETWORKS_PAYMENT_METHOD
                     .toDisplayableSavedPaymentMethod(),
                 canRemove = false,
-                initialCardBrand = CardBrand.CartesBancaires,
                 isModifiablePaymentMethod = true,
             )
         }
@@ -125,7 +123,6 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
         paymentMethod: DisplayableSavedPaymentMethod,
         canRemove: Boolean,
         isModifiablePaymentMethod: Boolean = false,
-        initialCardBrand: CardBrand = CardBrand.Unknown,
         isExpiredCard: Boolean = false,
         error: String? = null,
         shouldShowSetAsDefaultCheckbox: Boolean = false,

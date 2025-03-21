@@ -23,5 +23,4 @@ internal class FakeCardEditUIHandlerFactory : CardEditUIHandler.Factory {
             this.cardEditUIHandler = it
         }
     }
-
 }

@@ -17,12 +17,21 @@ import org.robolectric.RobolectricTestRunner
 internal class DefaultCardEditUIHandlerTest {
 
     @Test
-    fun testInitialState() {
+    fun testInitialStateForCardWithNetworks() {
         val handler = handler()
 
         val state = handler.uiState
         assertThat(state.card).isEqualTo(PaymentMethodFixtures.CARD_WITH_NETWORKS)
         assertThat(state.selectedCardBrand.brand).isEqualTo(CardBrand.CartesBancaires)
+    }
+
+    @Test
+    fun testInitialStateForCardWithNoNetworks() {
+        val handler = handler(card = PaymentMethodFixtures.CARD)
+
+        val state = handler.uiState
+        assertThat(state.card).isEqualTo(PaymentMethodFixtures.CARD)
+        assertThat(state.selectedCardBrand.brand).isEqualTo(CardBrand.Unknown)
     }
 
     @Test
