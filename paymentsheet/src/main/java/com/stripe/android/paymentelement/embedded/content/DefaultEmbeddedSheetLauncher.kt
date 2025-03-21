@@ -48,8 +48,6 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     private val errorReporter: ErrorReporter,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
-//    resultCallback: EmbeddedPaymentElement.ResultCallback,
-//    private val stateHelper: EmbeddedStateHelper,
     embeddedResultCallbackHelper: EmbeddedResultCallbackHelper
 ) : EmbeddedSheetLauncher {
 
