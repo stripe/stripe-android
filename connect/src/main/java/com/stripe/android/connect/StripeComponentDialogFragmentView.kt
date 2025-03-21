@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.widget.AppCompatImageButton
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.TypefaceCompat
@@ -17,7 +18,7 @@ import com.stripe.android.connect.appearance.fonts.CustomFontSource
 import com.stripe.android.connect.webview.MobileInput
 
 @OptIn(PrivateBetaConnectSDK::class)
-internal class StripeComponentDialogFragmentView<ComponentView : StripeComponentView<*, *>>(
+internal open class StripeComponentDialogFragmentView<ComponentView : StripeComponentView<*, *>>(
     layoutInflater: LayoutInflater
 ) : LinearLayout(layoutInflater.context) {
 
@@ -108,7 +109,7 @@ internal class StripeComponentDialogFragmentView<ComponentView : StripeComponent
         val customFontSource = appearance.typography.fontFamily
             ?.let { fontFamily -> customFonts?.find { it.name == fontFamily } }
         val customTypeface = customFontSource
-            ?.let { Typeface.createFromAsset(context.assets, it.assetsFilePath) }
+            ?.let { createTypeface(it) }
 
         val customStyle = appearance.typography.headingMd
         val fontSize = customStyle?.fontSize ?: DEFAULT_TITLE_FONT_SIZE
@@ -116,6 +117,11 @@ internal class StripeComponentDialogFragmentView<ComponentView : StripeComponent
 
         titleText.typeface = TypefaceCompat.create(context, customTypeface, fontWeight, false)
         titleText.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize)
+    }
+
+    @VisibleForTesting
+    internal open fun createTypeface(customFontSource: CustomFontSource): Typeface {
+        return Typeface.createFromAsset(context.assets, customFontSource.assetsFilePath)
     }
 
     interface Listener {
