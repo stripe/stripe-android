@@ -21,7 +21,7 @@ import javax.inject.Singleton
         CoreCommonModule::class,
         AddressElementViewModelModule::class,
         FormControllerModule::class,
-        ResourceRepositoryModule::class
+        ResourceRepositoryModule::class,
     ]
 )
 internal interface AddressElementViewModelFactoryComponent {

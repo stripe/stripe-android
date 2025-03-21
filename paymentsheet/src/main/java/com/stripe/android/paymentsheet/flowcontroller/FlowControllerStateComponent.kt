@@ -5,6 +5,7 @@ import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
+import com.stripe.android.link.injection.LinkExtrasModule
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
@@ -32,7 +33,8 @@ import javax.inject.Singleton
         CoreCommonModule::class,
         ResourceRepositoryModule::class,
         ApplicationIdModule::class,
-        CardScanModule::class
+        CardScanModule::class,
+        LinkExtrasModule::class
     ]
 )
 internal interface FlowControllerStateComponent {

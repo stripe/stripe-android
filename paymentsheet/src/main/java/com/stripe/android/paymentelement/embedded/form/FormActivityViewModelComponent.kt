@@ -12,13 +12,8 @@ import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
-import com.stripe.android.link.LinkConfigurationCoordinator
-import com.stripe.android.link.RealLinkConfigurationCoordinator
 import com.stripe.android.link.account.LinkAccountHolder
-import com.stripe.android.link.gate.DefaultLinkGate
-import com.stripe.android.link.gate.LinkGate
-import com.stripe.android.link.injection.LinkAnalyticsComponent
-import com.stripe.android.link.injection.LinkComponent
+import com.stripe.android.link.injection.LinkExtrasModule
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -50,7 +45,8 @@ import kotlin.coroutines.CoroutineContext
         FormActivityViewModelModule::class,
         ExtendedPaymentElementConfirmationModule::class,
         GooglePayLauncherModule::class,
-        CardScanModule::class
+        CardScanModule::class,
+        LinkExtrasModule::class
     ]
 )
 @Singleton
@@ -96,8 +92,6 @@ internal interface FormActivityViewModelComponent {
 
 @Module(
     subcomponents = [
-        LinkAnalyticsComponent::class,
-        LinkComponent::class,
         FormActivitySubcomponent::class
     ]
 )
@@ -108,13 +102,7 @@ internal interface FormActivityViewModelModule {
     ): CardAccountRangeRepository.Factory
 
     @Binds
-    fun bindsLinkConfigurationCoordinator(impl: RealLinkConfigurationCoordinator): LinkConfigurationCoordinator
-
-    @Binds
     fun bindsUserFacingLogger(impl: RealUserFacingLogger): UserFacingLogger
-
-    @Binds
-    fun bindLinkGateFactory(linkGateFactory: DefaultLinkGate.Factory): LinkGate.Factory
 
     @Binds
     fun bindsFormActivityStateHelper(helper: DefaultFormActivityStateHelper): FormActivityStateHelper

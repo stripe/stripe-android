@@ -12,13 +12,8 @@ import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
-import com.stripe.android.link.LinkConfigurationCoordinator
-import com.stripe.android.link.RealLinkConfigurationCoordinator
 import com.stripe.android.link.account.LinkAccountHolder
-import com.stripe.android.link.gate.DefaultLinkGate
-import com.stripe.android.link.gate.LinkGate
-import com.stripe.android.link.injection.LinkAnalyticsComponent
-import com.stripe.android.link.injection.LinkComponent
+import com.stripe.android.link.injection.LinkExtrasModule
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -30,9 +25,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
-import com.stripe.android.paymentsheet.state.DefaultLinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.DefaultPaymentElementLoader
-import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.ui.core.di.CardScanModule
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -57,7 +50,8 @@ import kotlin.coroutines.CoroutineContext
         ExtendedPaymentElementConfirmationModule::class,
         EmbeddedCommonModule::class,
         ApplicationIdModule::class,
-        CardScanModule::class
+        CardScanModule::class,
+        LinkExtrasModule::class
     ],
 )
 internal interface EmbeddedPaymentElementViewModelComponent {
@@ -86,8 +80,6 @@ internal interface EmbeddedPaymentElementViewModelComponent {
 @ExperimentalEmbeddedPaymentElementApi
 @Module(
     subcomponents = [
-        LinkAnalyticsComponent::class,
-        LinkComponent::class,
         EmbeddedPaymentElementSubcomponent::class,
     ],
 )
@@ -131,17 +123,6 @@ internal interface EmbeddedPaymentElementViewModelModule {
 
     @Binds
     fun bindsUserFacingLogger(impl: RealUserFacingLogger): UserFacingLogger
-
-    @Binds
-    fun bindsLinkAccountStatusProvider(
-        impl: DefaultLinkAccountStatusProvider,
-    ): LinkAccountStatusProvider
-
-    @Binds
-    fun bindsLinkConfigurationCoordinator(impl: RealLinkConfigurationCoordinator): LinkConfigurationCoordinator
-
-    @Binds
-    fun bindLinkGateFactory(linkGateFactory: DefaultLinkGate.Factory): LinkGate.Factory
 
     @Binds
     fun bindsEmbeddedContentHelper(helper: DefaultEmbeddedContentHelper): EmbeddedContentHelper

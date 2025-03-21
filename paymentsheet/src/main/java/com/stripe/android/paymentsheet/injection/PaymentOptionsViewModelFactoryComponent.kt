@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
+import com.stripe.android.link.injection.LinkExtrasModule
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
@@ -25,7 +26,8 @@ import javax.inject.Singleton
         CoroutineContextModule::class,
         CoreCommonModule::class,
         ResourceRepositoryModule::class,
-        CardScanModule::class
+        CardScanModule::class,
+        LinkExtrasModule::class
     ]
 )
 internal interface PaymentOptionsViewModelFactoryComponent {
