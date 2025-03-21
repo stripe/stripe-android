@@ -89,7 +89,7 @@ internal interface CardEditUIHandler {
             cardBrandFilter: CardBrandFilter,
             showCardBrandDropdown: Boolean,
             paymentMethodIcon: Int,
-            onCardDetailsChanged: (CardUpdateParams?) -> Unit
+            onCardDetailsChanged: CardDetailsCallback
         ): CardEditUIHandler
     }
 }
