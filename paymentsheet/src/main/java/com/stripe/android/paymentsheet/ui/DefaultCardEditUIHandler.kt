@@ -1,9 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
 import com.stripe.android.CardBrandFilter
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.CardUpdateParams
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -40,7 +38,7 @@ internal class DefaultCardEditUIHandler(
             cardDetailsEntry.collectLatest { state ->
                 val newParams = state.takeIf {
                     it.hasChanged(
-                        cardBrandChoice = defaultCardBrandChoice(),
+                        originalCardBrandChoice = defaultCardBrandChoice(),
                     )
                 }?.toUpdateParams()
                 onCardDetailsChanged(newParams)
