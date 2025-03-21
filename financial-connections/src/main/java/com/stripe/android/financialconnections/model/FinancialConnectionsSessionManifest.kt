@@ -217,6 +217,9 @@ internal data class FinancialConnectionsSessionManifest(
         @SerialName(value = "bank_auth_repair")
         BANK_AUTH_REPAIR("bank_auth_repair"),
 
+        @SerialName(value = "id_consent_content")
+        ID_CONSENT_CONTENT("id_consent_content"),
+
         @SerialName(value = "institution_picker")
         INSTITUTION_PICKER("institution_picker"),
 

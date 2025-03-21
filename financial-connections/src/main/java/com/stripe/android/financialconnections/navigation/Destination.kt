@@ -33,6 +33,7 @@ import com.stripe.android.financialconnections.features.networkingsavetolinkveri
 import com.stripe.android.financialconnections.features.notice.NoticeSheet
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthScreen
 import com.stripe.android.financialconnections.features.reset.ResetScreen
+import com.stripe.android.financialconnections.features.streamlinedconsent.IDConsentContentScreen
 import com.stripe.android.financialconnections.features.success.SuccessScreen
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.bottomsheet.LifecycleAwareContent
@@ -43,12 +44,10 @@ import com.stripe.android.financialconnections.presentation.parentViewModel
  * Represents a destination in the financial connections flow.
  *
  * @param route The route of the destination.
- * @param closeWithoutConfirmation Whether the destination should be close without showing a confirmation modal.
  * @param logPaneLaunched Whether the destination is a real pane that should log the pane launched event.
  */
 internal sealed class Destination(
     protected val route: String,
-    val closeWithoutConfirmation: Boolean,
     val logPaneLaunched: Boolean,
     extraArgs: List<NamedNavArgument> = emptyList(),
     protected val composable: @Composable (NavBackStackEntry) -> Unit
@@ -93,70 +92,66 @@ internal sealed class Destination(
 
     data object InstitutionPicker : Destination(
         route = Pane.INSTITUTION_PICKER.value,
-        closeWithoutConfirmation = false,
         logPaneLaunched = true,
         composable = { InstitutionPickerScreen(it) },
     )
 
     data object Consent : Destination(
         route = Pane.CONSENT.value,
-        closeWithoutConfirmation = true,
         logPaneLaunched = true,
-        composable = { ConsentScreen() }
+        composable = { ConsentScreen() },
+    )
+
+    data object IDConsentContent : Destination(
+        route = Pane.ID_CONSENT_CONTENT.value,
+        logPaneLaunched = true,
+        composable = { IDConsentContentScreen() },
     )
 
     data object PartnerAuthDrawer : Destination(
         route = Pane.PARTNER_AUTH_DRAWER.value,
-        closeWithoutConfirmation = false,
         logPaneLaunched = true,
         composable = { PartnerAuthScreen(pane = Pane.PARTNER_AUTH, inModal = true) }
     )
 
     data object PartnerAuth : Destination(
         route = Pane.PARTNER_AUTH.value,
-        closeWithoutConfirmation = false,
         logPaneLaunched = true,
         composable = { PartnerAuthScreen(pane = Pane.PARTNER_AUTH, inModal = false) }
     )
 
     data object AccountPicker : Destination(
         route = Pane.ACCOUNT_PICKER.value,
-        closeWithoutConfirmation = false,
         logPaneLaunched = true,
         composable = { AccountPickerScreen() }
     )
 
     data object Success : Destination(
         route = Pane.SUCCESS.value,
-        closeWithoutConfirmation = true,
         logPaneLaunched = true,
         composable = { SuccessScreen() }
     )
 
     data object ManualEntry : Destination(
         route = Pane.MANUAL_ENTRY.value,
-        closeWithoutConfirmation = false,
         logPaneLaunched = true,
         composable = { ManualEntryScreen() }
     )
 
     data object AttachLinkedPaymentAccount : Destination(
         route = Pane.ATTACH_LINKED_PAYMENT_ACCOUNT.value,
-        closeWithoutConfirmation = false,
         logPaneLaunched = true,
         composable = { AttachPaymentScreen() }
     )
 
     data object NetworkingLinkSignup : Destination(
         route = Pane.NETWORKING_LINK_SIGNUP_PANE.value,
-        closeWithoutConfirmation = false,
         logPaneLaunched = true,
         composable = { NetworkingLinkSignupScreen() }
     )
 
     data object LinkLogin : Destination(
         route = Pane.LINK_LOGIN.value,
-        closeWithoutConfirmation = false,
         logPaneLaunched = true,
         composable = { NetworkingLinkSignupScreen() }
     )
@@ -169,84 +164,72 @@ internal sealed class Destination(
                 nullable = true
             }
         ),
-        closeWithoutConfirmation = false,
         logPaneLaunched = true,
         composable = { NetworkingLinkLoginWarmupScreen(it) }
     )
 
     data object NetworkingLinkVerification : Destination(
         route = Pane.NETWORKING_LINK_VERIFICATION.value,
-        closeWithoutConfirmation = false,
         logPaneLaunched = true,
         composable = { NetworkingLinkVerificationScreen() }
     )
 
     data object NetworkingSaveToLinkVerification : Destination(
         route = Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION.value,
-        closeWithoutConfirmation = false,
         logPaneLaunched = true,
         composable = { NetworkingSaveToLinkVerificationScreen() }
     )
 
     data object LinkAccountPicker : Destination(
         route = Pane.LINK_ACCOUNT_PICKER.value,
-        closeWithoutConfirmation = false,
         logPaneLaunched = true,
         composable = { LinkAccountPickerScreen() },
     )
 
     data object LinkStepUpVerification : Destination(
         route = Pane.LINK_STEP_UP_VERIFICATION.value,
-        closeWithoutConfirmation = false,
         logPaneLaunched = true,
         composable = { LinkStepUpVerificationScreen() }
     )
 
     data object Reset : Destination(
         route = Pane.RESET.value,
-        closeWithoutConfirmation = false,
         logPaneLaunched = true,
         composable = { ResetScreen() }
     )
 
     data object Exit : Destination(
         route = Pane.EXIT.value,
-        closeWithoutConfirmation = false,
         logPaneLaunched = false,
         composable = { ExitModal(it) }
     )
 
     data object Notice : Destination(
         route = Pane.NOTICE.value,
-        closeWithoutConfirmation = false,
         logPaneLaunched = false,
         composable = { NoticeSheet(it) },
     )
 
     data object AccountUpdateRequired : Destination(
         route = Pane.ACCOUNT_UPDATE_REQUIRED.value,
-        closeWithoutConfirmation = false,
         logPaneLaunched = false,
         composable = { AccountUpdateRequiredModal(it) },
     )
 
     data object Error : Destination(
         route = Pane.UNEXPECTED_ERROR.value,
-        closeWithoutConfirmation = false,
         logPaneLaunched = false,
         composable = { ErrorScreen() }
     )
 
     data object BankAuthRepair : Destination(
         route = Pane.BANK_AUTH_REPAIR.value,
-        closeWithoutConfirmation = false,
         logPaneLaunched = true,
         composable = { PartnerAuthScreen(pane = Pane.BANK_AUTH_REPAIR, inModal = false) }
     )
 
     data object ManualEntrySuccess : Destination(
         route = Pane.MANUAL_ENTRY_SUCCESS.value,
-        closeWithoutConfirmation = true,
         logPaneLaunched = true,
         composable = { ManualEntrySuccessScreen() }
     )

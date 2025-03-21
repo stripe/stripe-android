@@ -68,6 +68,7 @@ internal class SuccessViewModel @AssistedInject constructor(
             pane = PANE,
             allowBackNavigation = false,
             error = state.payload.error,
+            canCloseWithoutConfirmation = true,
         )
     }
 

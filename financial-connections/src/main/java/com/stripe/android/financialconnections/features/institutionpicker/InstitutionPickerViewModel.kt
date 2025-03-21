@@ -46,6 +46,7 @@ import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.financialconnections.utils.isCancellationError
 import com.stripe.android.financialconnections.utils.measureTimeMillis
 import com.stripe.android.uicore.navigation.NavigationManager
+import com.stripe.android.uicore.navigation.PopUpToBehavior
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -112,6 +113,7 @@ internal class InstitutionPickerViewModel @AssistedInject constructor(
             allowBackNavigation = canNavigateBack,
             allowElevation = false,
             error = state.payload.error,
+            canCloseWithoutConfirmation = state.referrer == null,
         )
     }
 
@@ -221,7 +223,10 @@ internal class InstitutionPickerViewModel @AssistedInject constructor(
                 // This implies that we have shown the institution picker first and haven't shown the consent
                 // pane yet. Mark the institution as selected and let the backend guide us to the consent pane.
                 val response = selectInstitution.invoke(institution)
-                navigationManager.tryNavigateTo(response.manifest.nextPane.destination(referrer = PANE))
+                navigationManager.tryNavigateTo(
+                    route = response.manifest.nextPane.destination(referrer = PANE),
+                    popUpTo = PopUpToBehavior.Current(inclusive = true),
+                )
             }
         }.execute { async ->
             copy(
