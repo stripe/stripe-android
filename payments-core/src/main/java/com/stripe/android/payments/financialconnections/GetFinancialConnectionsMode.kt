@@ -10,13 +10,14 @@ import com.stripe.android.model.ElementsSessionFlags.FINANCIAL_CONNECTIONS_LITE_
 object GetFinancialConnectionsMode {
 
     operator fun invoke(
-        elementsSession: ElementsSession?
+        elementsSession: ElementsSession?,
+        isFinancialConnectionsFullSdkAvailable: IsFinancialConnectionsFullSdkAvailable = DefaultIsFinancialConnectionsAvailable,
     ): FinancialConnectionsMode {
         return when {
             FeatureFlags.forceFinancialConnectionsLiteSdk.isEnabled -> {
                 FinancialConnectionsMode.Lite
             }
-            false -> {
+            isFinancialConnectionsFullSdkAvailable() -> {
                 FinancialConnectionsMode.Full
             }
             elementsSession?.flags[FINANCIAL_CONNECTIONS_LITE_KILLSWITCH.flagValue] == true -> {
