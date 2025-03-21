@@ -18,6 +18,7 @@ internal object InstantDebitsDefinition : PaymentMethodDefinition {
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf(
+        AddPaymentMethodRequirement.FinancialConnectionsSdk,
         AddPaymentMethodRequirement.InstantDebits,
     )
 

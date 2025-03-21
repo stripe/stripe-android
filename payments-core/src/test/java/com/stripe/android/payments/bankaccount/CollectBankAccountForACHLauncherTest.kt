@@ -168,6 +168,7 @@ class CollectBankAccountForACHLauncherTest {
         return CollectBankAccountForACHLauncher(
             mockHostActivityLauncher,
             hostedSurface = hostedSurface,
+            isFullSdkAvailable,
         )
     }
 

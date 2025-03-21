@@ -7,6 +7,7 @@ import androidx.activity.viewModels
 import androidx.annotation.RestrictTo
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.financialconnections.FinancialConnectionsMode
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForInstantDebitsLauncher
@@ -20,7 +21,6 @@ import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResu
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithResult
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.OpenConnectionsFlow
 import com.stripe.android.payments.financialconnections.DefaultIntentBuilderProvider
-import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 
 /**
  * No-UI activity that will handle collect bank account logic.
@@ -46,7 +46,8 @@ class CollectBankAccountActivity : AppCompatActivity() {
             val failure = Failed(IllegalStateException("Configuration not provided"))
             FinishWithResult(failure).launch()
         } else {
-            initConnectionsPaymentsProxy(requireNotNull(starterArgs).configuration)
+            val args = requireNotNull(starterArgs)
+            initConnectionsPaymentsProxy(args.configuration, args.financialConnectionsMode)
             lifecycleScope.launchWhenStarted {
                 viewModel.viewEffect.collect { viewEffect ->
                     when (viewEffect) {
@@ -58,14 +59,17 @@ class CollectBankAccountActivity : AppCompatActivity() {
         }
     }
 
-    private fun initConnectionsPaymentsProxy(configuration: CollectBankAccountConfiguration) {
+    private fun initConnectionsPaymentsProxy(
+        configuration: CollectBankAccountConfiguration,
+        financialConnectionsMode: FinancialConnectionsMode?
+    ) {
         financialConnectionsLauncher = when (configuration) {
             is InstantDebits -> FinancialConnectionsSheetForInstantDebitsLauncher(
                 activity = this,
                 callback = viewModel::onConnectionsForInstantDebitsResult,
                 intentBuilder = DefaultIntentBuilderProvider().provide(
                     context = this,
-                    isFinancialConnectionsAvailable = DefaultIsFinancialConnectionsAvailable()
+                    isFullSdkAvailable = financialConnectionsMode == FinancialConnectionsMode.Full
                 ).provider
             )
 
@@ -75,7 +79,7 @@ class CollectBankAccountActivity : AppCompatActivity() {
                 callback = viewModel::onConnectionsForACHResult,
                 intentBuilder = DefaultIntentBuilderProvider().provide(
                     context = this,
-                    isFinancialConnectionsAvailable = DefaultIsFinancialConnectionsAvailable()
+                    isFullSdkAvailable = financialConnectionsMode == FinancialConnectionsMode.Full
                 ).provider
             )
         }

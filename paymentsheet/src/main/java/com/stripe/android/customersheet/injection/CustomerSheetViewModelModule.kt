@@ -27,6 +27,8 @@ import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
+import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
@@ -80,6 +82,11 @@ internal interface CustomerSheetViewModelModule {
         fun providesPaymentElementCallbackIdentifier(): String {
             // We currently do not support multiple instances of Customer Sheet
             return "CustomerSheet"
+        }
+
+        @Provides
+        fun providesIsFinancialConnectionsAvailable(): IsFinancialConnectionsAvailable {
+            return DefaultIsFinancialConnectionsAvailable
         }
 
         @Provides

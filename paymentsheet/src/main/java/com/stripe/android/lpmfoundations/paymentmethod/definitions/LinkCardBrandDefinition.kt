@@ -18,6 +18,7 @@ internal object LinkCardBrandDefinition : PaymentMethodDefinition {
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf(
+        AddPaymentMethodRequirement.FinancialConnectionsSdk,
         AddPaymentMethodRequirement.LinkCardBrand,
     )
 
