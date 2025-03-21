@@ -51,9 +51,10 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.createTestConfirmationHandlerFactory
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherFactory
-import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER
@@ -749,13 +750,27 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `successful payment should dismiss bottom sheet`() {
-        val viewModel = createViewModel()
+    fun `successful payment should dismiss bottom sheet`() = runTest {
+        val confirmationHandler = FakeConfirmationHandler()
+
+        confirmationHandler.awaitResultTurbine.add(null)
+        confirmationHandler.awaitResultTurbine.add(null)
+
+        val viewModel = createViewModel(
+            confirmationHandlerFactory = {
+                confirmationHandler
+            }
+        )
         val scenario = activityScenario(viewModel)
 
         scenario.launchForResult(intent).onActivity {
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomBuy
-            viewModel.onPaymentResult(PaymentResult.Completed)
+            confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+                result = ConfirmationHandler.Result.Succeeded(
+                    intent = PAYMENT_INTENT,
+                    deferredIntentConfirmationType = null,
+                )
+            )
         }
 
         composeTestRule.waitForIdle()
@@ -1138,6 +1153,7 @@ internal class PaymentSheetActivityTest {
         initialPaymentSelection: PaymentSelection? = paymentMethods.firstOrNull()?.let { PaymentSelection.Saved(it) },
         args: PaymentSheetContractV2.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
         cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
+        confirmationHandlerFactory: ConfirmationHandler.Factory? = null,
     ): PaymentSheetViewModel = runBlocking {
         val coordinator = FakeLinkConfigurationCoordinator(
             accountStatus = AccountStatus.SignedOut,
@@ -1169,7 +1185,7 @@ internal class PaymentSheetActivityTest {
                 workContext = testDispatcher,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
-                confirmationHandlerFactory = createTestConfirmationHandlerFactory(
+                confirmationHandlerFactory = confirmationHandlerFactory ?: createTestConfirmationHandlerFactory(
                     paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
                     intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
                     savedStateHandle = savedStateHandle,
