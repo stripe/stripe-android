@@ -8,6 +8,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SavedPaymentMethod
@@ -75,9 +76,9 @@ internal interface UpdatePaymentMethodInteractor {
 }
 
 internal typealias PaymentMethodRemoveOperation = suspend (paymentMethod: PaymentMethod) -> Throwable?
-internal typealias UpdateCardBrandOperation = suspend (
+internal typealias UpdateCardPaymentMethodOperation = suspend (
     paymentMethod: PaymentMethod,
-    brand: CardBrand
+    cardUpdateParams: CardUpdateParams
 ) -> Result<PaymentMethod>
 internal typealias PaymentMethodSetAsDefaultOperation = suspend (
     paymentMethod: PaymentMethod
@@ -91,7 +92,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     val isDefaultPaymentMethod: Boolean,
     shouldShowSetAsDefaultCheckbox: Boolean,
     private val removeExecutor: PaymentMethodRemoveOperation,
-    private val updateCardBrandExecutor: UpdateCardBrandOperation,
+    private val updatePaymentMethodExecutor: UpdateCardPaymentMethodOperation,
     private val setDefaultPaymentMethodExecutor: PaymentMethodSetAsDefaultOperation,
     private val onBrandChoiceSelected: (CardBrand) -> Unit,
     private val onUpdateSuccess: () -> Unit,
@@ -202,9 +203,11 @@ internal class DefaultUpdatePaymentMethodInteractor(
     private suspend fun maybeUpdateCardBrand(): Result<PaymentMethod>? {
         val newCardBrand = cardBrandChoice.value.brand
         return if (cardBrandHasBeenChanged.value) {
-            updateCardBrandExecutor(
+            updatePaymentMethodExecutor(
                 displayableSavedPaymentMethod.paymentMethod,
-                newCardBrand
+                CardUpdateParams(
+                    cardBrand = newCardBrand
+                )
             ).onSuccess {
                 savedCardBrand.emit(CardBrandChoice(brand = newCardBrand, enabled = true))
                 cardBrandHasBeenChanged.emit(false)

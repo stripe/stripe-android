@@ -2,6 +2,7 @@ package com.stripe.android.lpm
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
+import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.Country
 import org.junit.Ignore
 import org.junit.Test
@@ -46,5 +47,21 @@ internal class TestGooglePay : BasePlaygroundTest() {
     @Test
     fun testMexico() {
         testDriver.confirmWithGooglePay(Country.MX)
+    }
+
+    @Test
+    fun testSetupIntentInEEA() {
+        testDriver.confirmWithGooglePay(
+            country = Country.FR,
+            checkoutMode = CheckoutMode.SETUP
+        )
+    }
+
+    @Test
+    fun testSetupIntentInUS() {
+        testDriver.confirmWithGooglePay(
+            country = Country.US,
+            checkoutMode = CheckoutMode.SETUP
+        )
     }
 }

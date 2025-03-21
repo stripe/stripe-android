@@ -4,10 +4,14 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.paymentelement.AnalyticEvent
+import com.stripe.android.paymentelement.AnalyticEventCallback
+import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -16,15 +20,19 @@ import com.stripe.android.ui.core.IsStripeCardScanAvailable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
+@OptIn(ExperimentalAnalyticEventCallbackApi::class)
 internal class DefaultEventReporter @Inject internal constructor(
     private val mode: EventReporter.Mode,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     private val durationProvider: DurationProvider,
+    private val analyticEventCallbackProvider: Provider<AnalyticEventCallback?>,
     @IOContext private val workContext: CoroutineContext,
-    private val isStripeCardScanAvailable: IsStripeCardScanAvailable
+    private val isStripeCardScanAvailable: IsStripeCardScanAvailable,
+    private val logger: UserFacingLogger,
 ) : EventReporter {
 
     private var isDeferred: Boolean = false
@@ -160,6 +168,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onShowNewPaymentOptions() {
+        fireAnalyticsEvent(AnalyticEvent.PresentedSheet())
         fireEvent(
             PaymentSheetEvent.ShowNewPaymentOptions(
                 mode = mode,
@@ -440,6 +449,20 @@ internal class DefaultEventReporter @Inject internal constructor(
                     additionalParams = event.params,
                 )
             )
+        }
+    }
+
+    private fun fireAnalyticsEvent(event: AnalyticEvent) {
+        CoroutineScope(workContext).launch {
+            analyticEventCallbackProvider.get()?.run {
+                try {
+                    onEvent(event)
+                } catch (_: Throwable) {
+                    logger.logWarningWithoutPii(
+                        "AnalyticEventCallback.onEvent() failed for event: $event"
+                    )
+                }
+            }
         }
     }
 

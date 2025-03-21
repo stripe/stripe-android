@@ -29,7 +29,8 @@ internal class PaymentOptionContract :
         val state: PaymentSheetState.Full,
         val configuration: PaymentSheet.Configuration,
         val enableLogging: Boolean,
-        val productUsage: Set<String>
+        val productUsage: Set<String>,
+        val paymentElementCallbackIdentifier: String,
     ) : ActivityStarter.Args {
         internal companion object {
             internal fun fromIntent(intent: Intent): Args? {

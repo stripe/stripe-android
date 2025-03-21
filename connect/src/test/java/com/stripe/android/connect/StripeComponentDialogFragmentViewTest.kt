@@ -1,7 +1,6 @@
 package com.stripe.android.connect
 
 import android.content.Context
-import android.view.View
 import android.widget.TextView
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
@@ -10,6 +9,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.google.android.apps.common.testing.accessibility.framework.utils.contrast.Color
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.Colors
+import com.stripe.android.connect.test.TestComponentView
 import com.stripe.android.screenshottesting.Orientation
 import com.stripe.android.screenshottesting.PaparazziRule
 import org.junit.Rule
@@ -53,10 +53,14 @@ class StripeComponentDialogFragmentViewTest {
         snapshot(
             appearance = testAppearance,
             applyView = { context ->
-                componentView = TextView(context).apply {
-                    text = "Hello world"
-                    setTextColor(Color.BLACK)
+                componentView = TestComponentView(context).apply {
                     setBackgroundColor(Color.argb(255, 0, 255, 255))
+                    addView(
+                        TextView(context).apply {
+                            text = "Hello world"
+                            setTextColor(Color.BLACK)
+                        }
+                    )
                 }
             }
         )
@@ -65,15 +69,15 @@ class StripeComponentDialogFragmentViewTest {
     private fun snapshot(
         title: String = "Account Onboarding",
         appearance: Appearance = Appearance(),
-        applyView: StripeComponentDialogFragmentView<View>.(Context) -> Unit = {},
+        applyView: StripeComponentDialogFragmentView<TestComponentView>.(Context) -> Unit = {},
     ) {
         paparazziRule.snapshot {
             val context = LocalContext.current
             AndroidView(
                 modifier = Modifier.fillMaxSize(),
                 factory = {
-                    StripeComponentDialogFragmentView<View>(context).apply {
-                        toolbar.title = title
+                    StripeComponentDialogFragmentView<TestComponentView>(context).apply {
+                        this.title = title
                         bindAppearance(appearance)
                         applyView(context)
                     }

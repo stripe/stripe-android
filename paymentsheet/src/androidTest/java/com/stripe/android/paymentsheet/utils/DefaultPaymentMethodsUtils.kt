@@ -58,9 +58,12 @@ internal object DefaultPaymentMethodsUtils {
         testContext: ProductIntegrationTestRunnerContext,
         composeTestRule: ComposeTestRule,
         paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
+        paymentMethodType: PaymentMethodType = PaymentMethodType.Card,
         hasSavedPaymentMethods: Boolean = true,
         isDeferredIntent: Boolean = false,
     ) {
+        paymentMethodType.paymentMethodSetup()
+
         testContext.launch(
             configuration = PaymentSheet.Configuration(
                 merchantDisplayName = "Example, Inc.",
@@ -68,7 +71,8 @@ internal object DefaultPaymentMethodsUtils {
                 customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
                     id = "cus_1",
                     clientSecret = "cuss_1",
-                )
+                ),
+                allowsDelayedPaymentMethods = true,
             ),
             isDeferredIntent = isDeferredIntent,
         )

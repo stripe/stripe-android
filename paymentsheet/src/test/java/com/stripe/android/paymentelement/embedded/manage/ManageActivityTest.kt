@@ -200,6 +200,7 @@ internal class ManageActivityTest {
                         paymentMethods = paymentMethods,
                     ),
                     selection = selection,
+                    paymentElementCallbackIdentifier = "ManageActivityTestCallbackIdentifier",
                 ),
             )
         ).use { scenario ->
