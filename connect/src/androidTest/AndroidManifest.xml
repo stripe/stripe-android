@@ -3,7 +3,8 @@
 
     <application>
         <activity
-            android:name="com.stripe.android.connect.EmptyActivity"
-            android:exported="false" />
+            android:name="com.stripe.android.connect.EmptyEmbeddedComponentActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
     </application>
 </manifest>
