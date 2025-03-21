@@ -49,7 +49,7 @@ internal class DefaultCardEditUIHandlerTest {
     fun cardUpdateParamsIsUpdatedWhenNewCardBrandIsSelected() {
         var cardUpdateParams: CardUpdateParams? = null
         val handler = handler(
-            onCardValuesChanged = {
+            onCardDetailsChanged = {
                 cardUpdateParams = it
             }
         )
@@ -100,7 +100,7 @@ internal class DefaultCardEditUIHandlerTest {
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
         showCardBrandDropdown: Boolean = true,
         onBrandChoiceChanged: (CardBrand) -> Unit = {},
-        onCardValuesChanged: (CardUpdateParams?) -> Unit = {}
+        onCardDetailsChanged: (CardUpdateParams?) -> Unit = {}
     ): DefaultCardEditUIHandler {
         return DefaultCardEditUIHandler(
             card = card,
@@ -109,7 +109,7 @@ internal class DefaultCardEditUIHandlerTest {
             showCardBrandDropdown = showCardBrandDropdown,
             scope = TestScope(UnconfinedTestDispatcher()),
             onBrandChoiceChanged = onBrandChoiceChanged,
-            onCardDetailsChanged = onCardValuesChanged
+            onCardDetailsChanged = onCardDetailsChanged
         )
     }
 }
