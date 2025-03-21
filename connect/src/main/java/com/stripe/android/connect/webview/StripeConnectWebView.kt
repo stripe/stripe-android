@@ -301,14 +301,14 @@ internal class StripeConnectWebView private constructor(
      */
     internal inner class StripeConnectWebChromeClient : WebChromeClient() {
         override fun onJsConfirm(view: WebView, url: String, message: String, result: JsResult): Boolean {
-            return handleJsAlert(view, message, result)
+            return handleJsAlert(view, message, result, isConfirm = true)
         }
 
         override fun onJsAlert(view: WebView, url: String, message: String, result: JsResult): Boolean {
-            return handleJsAlert(view, message, result)
+            return handleJsAlert(view, message, result, isConfirm = false)
         }
 
-        private fun handleJsAlert(view: WebView, message: String, result: JsResult): Boolean {
+        private fun handleJsAlert(view: WebView, message: String, result: JsResult, isConfirm: Boolean): Boolean {
             val alert =
                 try {
                     ConnectJson.decodeFromString<AlertJs>(message.removeSurrounding("\""))
@@ -348,6 +348,11 @@ internal class StripeConnectWebView private constructor(
                 }
             activity?.lifecycle?.addObserver(activityLifecycleObserver)
 
+            val okText = alert.buttons?.ok
+                ?: view.context.getString(android.R.string.ok)
+            val cancelText = alert.buttons?.cancel
+                ?: view.context.getString(android.R.string.cancel).takeIf { isConfirm }
+
             // Prepare and show the dialog.
             AlertDialog.Builder(view.context)
                 .setCancelable(true)
@@ -360,15 +365,13 @@ internal class StripeConnectWebView private constructor(
                     // Clean up the observer.
                     activity?.lifecycle?.removeObserver(activityLifecycleObserver)
                 }
+                .setMessage(alert.message)
+                .setPositiveButton(okText) { _, _ ->
+                    didConfirm = true
+                }
                 .apply {
                     alert.title?.let { setTitle(it) }
-                    alert.message?.let { setMessage(it) }
-                    alert.buttons?.ok?.let {
-                        setPositiveButton(it) { _, _ ->
-                            didConfirm = true
-                        }
-                    }
-                    alert.buttons?.cancel?.let {
+                    cancelText?.let {
                         setNegativeButton(it) { _, _ ->
                             didConfirm = false
                         }

@@ -151,6 +151,25 @@ class FullScreenComponentTest {
     }
 
     @Test
+    fun testCustomJsAlertDefaultContents() {
+        checkDialogIsDisplayed()
+        val alertJs = AlertJs(message = testAlertJs.message)
+        performWebViewAlert(ALERT, alertJs)
+        onView(withText(alertJs.message)).check(matches(isDisplayed()))
+        onView(withText("OK")).check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun testCustomJsConfirmDefaultContents() {
+        checkDialogIsDisplayed()
+        val alertJs = AlertJs(message = testAlertJs.message)
+        performWebViewAlert(CONFIRM, alertJs)
+        onView(withText(alertJs.message)).check(matches(isDisplayed()))
+        onView(withText("OK")).check(matches(isDisplayed()))
+        onView(withText("Cancel")).check(matches(isDisplayed()))
+    }
+
+    @Test
     fun testCustomJsAlertDismissActions() {
         checkDialogIsDisplayed()
         val alertJs = testAlertJs.copy(title = null)
@@ -191,9 +210,20 @@ class FullScreenComponentTest {
     @Test
     fun testPlainJsAlertWorks() {
         checkDialogIsDisplayed()
-        val message = testAlertJs.message!!
+        val message = testAlertJs.message
         performWebViewAlert(ALERT, message)
         onView(withText(message)).check(matches(isDisplayed()))
+        onView(withText("OK")).check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun testPlainJsConfirmWorks() {
+        checkDialogIsDisplayed()
+        val message = testAlertJs.message
+        performWebViewAlert(CONFIRM, message)
+        onView(withText(message)).check(matches(isDisplayed()))
+        onView(withText("OK")).check(matches(isDisplayed()))
+        onView(withText("Cancel")).check(matches(isDisplayed()))
     }
 
     private fun randomString() = UUID.randomUUID().toString()
