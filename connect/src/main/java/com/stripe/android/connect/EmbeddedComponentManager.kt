@@ -13,7 +13,7 @@ import kotlinx.parcelize.Parcelize
 
 @PrivateBetaConnectSDK
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class EmbeddedComponentManager(
+class EmbeddedComponentManager @JvmOverloads constructor(
     configuration: Configuration,
     fetchClientSecretCallback: FetchClientSecretCallback,
     appearance: Appearance = Appearance(),
@@ -39,6 +39,7 @@ class EmbeddedComponentManager(
      * @param props Optional props to use for configuring the component.
      */
     @PrivateBetaConnectSDK
+    @JvmOverloads
     fun createAccountOnboardingController(
         activity: FragmentActivity,
         title: String? = null,
@@ -105,11 +106,6 @@ class EmbeddedComponentManager(
     }
 
     @PrivateBetaConnectSDK
-    fun logout() {
-        throw NotImplementedError("Logout functionality is not yet implemented")
-    }
-
-    @PrivateBetaConnectSDK
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Configuration(
@@ -125,6 +121,7 @@ class EmbeddedComponentManager(
          * activity as [activity]. This must be called in all activities where an EmbeddedComponent
          * view is used.
          */
+        @JvmStatic
         fun onActivityCreate(activity: ComponentActivity) {
             EmbeddedComponentCoordinator.onActivityCreate(activity)
         }

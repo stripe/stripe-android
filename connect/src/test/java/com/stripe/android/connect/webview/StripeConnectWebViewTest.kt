@@ -110,6 +110,7 @@ class StripeConnectWebViewTest {
 
     @Test
     fun `context is updated when attachment changes`() {
+        // We need the Activity context for some UI to work, like web-triggered dialogs
         fun assertWebViewContext(cls: Class<out Context>) {
             assertThat(webView.context.findRealContext()).isInstanceOf(cls)
         }
