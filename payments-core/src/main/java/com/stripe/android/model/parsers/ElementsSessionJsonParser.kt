@@ -6,6 +6,7 @@ import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArray
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.ElementsSessionFlags
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
@@ -46,6 +47,13 @@ internal class ElementsSessionJsonParser(
         val linkSettings = json.optJSONObject(FIELD_LINK_SETTINGS)
         val linkFundingSources = linkSettings?.optJSONArray(FIELD_LINK_FUNDING_SOURCES)
 
+        val flags = json.optJSONObject(FIELD_FLAGS)?.let { flags ->
+            parseFlags(
+                json = flags,
+                relevantFlags = listOf(ElementsSessionFlags.FINANCIAL_CONNECTIONS_LITE_KILLSWITCH.flagValue)
+            )
+        } ?: emptyMap()
+
         val stripeIntent = parseStripeIntent(
             elementsSessionId = elementsSessionId,
             paymentMethodPreference = paymentMethodPreference,
@@ -73,6 +81,7 @@ internal class ElementsSessionJsonParser(
                 isGooglePayEnabled = googlePayPreference != "disabled",
                 externalPaymentMethodData = externalPaymentMethodData,
                 customPaymentMethods = customPaymentMethods,
+                flags = flags,
                 elementsSessionId = elementsSessionId.takeIf { it.isNotBlank() } ?: UUID.randomUUID().toString()
             )
         } else {
@@ -153,7 +162,7 @@ internal class ElementsSessionJsonParser(
         }
 
         val linkFlags = json?.let { linkSettingsJson ->
-            parseLinkFlags(linkSettingsJson)
+            parseFlags(linkSettingsJson)
         } ?: emptyMap()
 
         val linkConsumerIncentive = if (FeatureFlags.instantDebitsIncentives.isEnabled) {
@@ -328,16 +337,23 @@ internal class ElementsSessionJsonParser(
         )
     }
 
-    private fun parseLinkFlags(json: JSONObject): Map<String, Boolean> {
+    /**
+     * Parse the flags from the [json] object.
+     * @param json the json object to parse
+     * @param relevantFlags the flags to parse. If null, all flags will be parsed.
+     */
+    private fun parseFlags(json: JSONObject, relevantFlags: List<String>? = null): Map<String, Boolean> {
         val flags = mutableMapOf<String, Boolean>()
 
-        json.keys().forEach { key ->
-            val value = json.get(key)
+        json.keys().asSequence()
+            .filter { relevantFlags == null || relevantFlags.contains(it) }
+            .forEach { key ->
+                val value = json.get(key)
 
-            if (value is Boolean) {
-                flags[key] = value
+                if (value is Boolean) {
+                    flags[key] = value
+                }
             }
-        }
 
         return flags.toMap()
     }
@@ -350,6 +366,7 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_ORDERED_PAYMENT_METHOD_TYPES = "ordered_payment_method_types"
         private const val FIELD_LINK_SETTINGS = "link_settings"
         private const val FIELD_LINK_FUNDING_SOURCES = "link_funding_sources"
+        private const val FIELD_FLAGS = "flags"
         private const val FIELD_LINK_PASSTHROUGH_MODE_ENABLED = "link_passthrough_mode_enabled"
         private const val FIELD_LINK_MODE = "link_mode"
         private const val FIELD_DISABLE_LINK_SIGNUP = "link_mobile_disable_signup"

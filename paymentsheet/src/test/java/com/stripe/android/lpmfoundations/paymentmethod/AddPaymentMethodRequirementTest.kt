@@ -130,18 +130,6 @@ internal class AddPaymentMethodRequirementTest {
     }
 
     @Test
-    fun testFinancialConnectionsSdkReturnsTrue() {
-        val metadata = PaymentMethodMetadataFactory.create(financialConnectionsAvailable = true)
-        assertThat(AddPaymentMethodRequirement.FinancialConnectionsSdk.isMetBy(metadata)).isTrue()
-    }
-
-    @Test
-    fun testFinancialConnectionsSdkReturnsFalse() {
-        val metadata = PaymentMethodMetadataFactory.create(financialConnectionsAvailable = false)
-        assertThat(AddPaymentMethodRequirement.FinancialConnectionsSdk.isMetBy(metadata)).isFalse()
-    }
-
-    @Test
     fun testValidUsBankVerificationMethodReturnsTrueWithDeferredFlow() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(clientSecret = null)

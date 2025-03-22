@@ -7,10 +7,12 @@ import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
 import com.stripe.android.financialconnections.ElementsSessionContext
+import com.stripe.android.financialconnections.FinancialConnectionsMode
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.payments.bankaccount.navigation.toUSBankAccountResult
+import com.stripe.android.payments.financialconnections.GetFinancialConnectionsMode
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -81,10 +83,11 @@ interface CollectBankAccountLauncher {
         ): CollectBankAccountLauncher {
             return CollectBankAccountForACHLauncher(
                 // L1 (public standalone) integration is not hosted by any Stripe surface.
-                hostedSurface = null,
                 hostActivityLauncher = activity.registerForActivityResult(CollectBankAccountContract()) {
                     callback(it.toUSBankAccountResult())
-                }
+                },
+                hostedSurface = null,
+                financialConnectionsMode = GetFinancialConnectionsMode(elementsSession = null),
             )
         }
 
@@ -100,10 +103,11 @@ interface CollectBankAccountLauncher {
         ): CollectBankAccountLauncher {
             return CollectBankAccountForACHLauncher(
                 // L1 (public standalone) integration is not hosted by any Stripe surface.
-                hostedSurface = null,
                 hostActivityLauncher = fragment.registerForActivityResult(CollectBankAccountContract()) {
                     callback(it.toUSBankAccountResult())
-                }
+                },
+                hostedSurface = null,
+                financialConnectionsMode = GetFinancialConnectionsMode(elementsSession = null),
             )
         }
 
@@ -113,11 +117,13 @@ interface CollectBankAccountLauncher {
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun createForPaymentSheet(
             hostedSurface: String,
+            financialConnectionsMode: FinancialConnectionsMode,
             activityResultRegistryOwner: ActivityResultRegistryOwner,
             callback: (CollectBankAccountResultInternal) -> Unit,
         ): CollectBankAccountLauncher {
             return CollectBankAccountForACHLauncher(
                 hostedSurface = hostedSurface,
+                financialConnectionsMode = financialConnectionsMode,
                 hostActivityLauncher = activityResultRegistryOwner.activityResultRegistry.register(
                     LAUNCHER_KEY,
                     CollectBankAccountContract(),
