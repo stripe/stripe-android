@@ -4,7 +4,6 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.financialconnections.FinancialConnectionsMode
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfiguration
-import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
