@@ -104,6 +104,7 @@ internal class SavedPaymentMethodMutator(
     init {
         coroutineScope.launch {
             selection.collect { selection ->
+                // This gets fired without an outdated copy of the payment selection when cbc is saved
                 if (selection is PaymentSelection.Saved) {
                     customerStateHolder.updateMostRecentlySelectedSavedPaymentMethod(selection.paymentMethod)
                 }
@@ -279,7 +280,7 @@ internal class SavedPaymentMethodMutator(
             )
         ).onSuccess { updatedMethod ->
             withContext(uiContext) {
-                customerStateHolder.updateMostRecentlySelectedSavedPaymentMethod(updatedMethod)
+//                customerStateHolder.updateMostRecentlySelectedSavedPaymentMethod(updatedMethod)
                 customerStateHolder.setCustomerState(
                     currentCustomer.copy(
                         paymentMethods = currentCustomer.paymentMethods.map { savedMethod ->

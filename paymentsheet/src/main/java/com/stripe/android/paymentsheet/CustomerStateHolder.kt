@@ -5,8 +5,11 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
 
 internal class CustomerStateHolder(
     private val savedStateHandle: SavedStateHandle,
@@ -24,10 +27,17 @@ internal class CustomerStateHolder(
             state?.paymentMethods ?: emptyList()
         }
 
-    val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?> = savedStateHandle.getStateFlow(
+    private val mostRecentlySelectedSavedPaymentMethodId: StateFlow<String?> = savedStateHandle.getStateFlow(
         SAVED_PM_SELECTION,
-        initialValue = (selection.value as? PaymentSelection.Saved)?.paymentMethod
+        initialValue = (selection.value as? PaymentSelection.Saved)?.paymentMethod?.id
     )
+
+    // This will ensure we use the latest copy of the payment method
+    val mostRecentlySelectedSavedPaymentMethod = paymentMethods.flatMapLatestAsStateFlow { paymentMethods ->
+        mostRecentlySelectedSavedPaymentMethodId.mapAsStateFlow { id ->
+            paymentMethods.firstOrNull { it.id == id }
+        }
+    }
 
     val canRemove: StateFlow<Boolean> = customer.mapAsStateFlow { customerState ->
         customerState?.run {
@@ -57,7 +67,7 @@ internal class CustomerStateHolder(
     }
 
     fun updateMostRecentlySelectedSavedPaymentMethod(paymentMethod: PaymentMethod?) {
-        savedStateHandle[SAVED_PM_SELECTION] = paymentMethod
+        savedStateHandle[SAVED_PM_SELECTION] = paymentMethod?.id
     }
 
     companion object {
