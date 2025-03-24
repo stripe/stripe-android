@@ -210,7 +210,7 @@ class FullScreenComponentTest {
         activityRule.scenario.onActivity {
             it.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE
         }
-        // Alert should be gone after rotation.
+        // Alert expected to be gone after rotation.
         onView(withText(alertJs.message))
             .inRoot(RootMatchers.isDialog())
             .check(doesNotExist())
