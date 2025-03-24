@@ -356,11 +356,11 @@ internal class CustomerSheetScreenshotTest {
                 canRemove = canRemove,
                 isLiveMode = true,
                 cardBrandFilter = DefaultCardBrandFilter,
-                onBrandChoiceSelected = {},
                 // This checkbox is never displayed in CustomerSheet.
                 shouldShowSetAsDefaultCheckbox = false,
                 isDefaultPaymentMethod = false,
                 onUpdateSuccess = {},
+                cardEditUIHandlerFactory = TODO(),
             ),
             isLiveMode = true,
         )
