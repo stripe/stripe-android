@@ -3,7 +3,6 @@ package com.stripe.android.connect
 import android.content.Context
 import android.os.Parcelable
 import android.util.AttributeSet
-import androidx.annotation.RestrictTo
 import androidx.core.content.withStyledAttributes
 import com.stripe.android.connect.webview.StripeConnectWebViewContainer
 import com.stripe.android.connect.webview.serialization.SetOnExit
@@ -106,8 +105,6 @@ class AccountOnboardingProps(
     val collectionOptions: CollectionOptions? = null,
 ) : ComponentProps {
 
-    @PrivateBetaConnectSDK
-    @RestrictTo(RestrictTo.Scope.LIBRARY)
     @Parcelize
     @Poko
     class CollectionOptions(
@@ -115,14 +112,11 @@ class AccountOnboardingProps(
         val futureRequirements: FutureRequirementOption? = null,
     ) : Parcelable
 
-    @PrivateBetaConnectSDK
-    @RestrictTo(RestrictTo.Scope.LIBRARY)
     enum class FieldOption(internal val value: String) {
         CURRENTLY_DUE("currently_due"),
         EVENTUALLY_DUE("eventually_due"),
     }
 
-    @PrivateBetaConnectSDK
     enum class FutureRequirementOption(internal val value: String) {
         OMIT("omit"),
         INCLUDE("include"),
