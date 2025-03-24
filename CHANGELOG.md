@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 21.7.1 - 2025-03-24
+
 ### PaymentSheet
 * [CHANGED][https://github.com/stripe/stripe-android/pull/10421] Afterpay no longer requires a shipping address to be shown.
 * [CHANGED][10382](https://github.com/stripe/stripe-android/pull/10382) Don't show price as $0.00 in Google Pay for setup intents in US and CA.
