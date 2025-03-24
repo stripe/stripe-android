@@ -62,7 +62,7 @@ internal fun RemoveButton(
                         .fillMaxWidth()
                         .height(height = dimensionResource(id = R.dimen.stripe_paymentsheet_primary_button_height)),
                     border = BorderStroke(
-                        width = MaterialTheme.getBorderStrokeWidth(isSelected = false),
+                        width = MaterialTheme.getBorderStrokeWidth(isSelected = true),
                         color = borderColor,
                     ),
                     shape = MaterialTheme.stripeShapes.roundedCornerShape,
