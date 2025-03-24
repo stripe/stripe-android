@@ -50,5 +50,5 @@ internal class PayoutsView internal constructor(
 }
 
 @PrivateBetaConnectSDK
-@RestrictTo(RestrictTo.Scope.LIBRARY)
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface PayoutsListener : StripeEmbeddedComponentListener

@@ -3,6 +3,7 @@ package com.stripe.android.connect
 import android.content.Context
 import android.os.Parcelable
 import android.util.AttributeSet
+import androidx.annotation.RestrictTo
 import androidx.core.content.withStyledAttributes
 import com.stripe.android.connect.webview.StripeConnectWebViewContainer
 import com.stripe.android.connect.webview.serialization.SetOnExit
@@ -71,6 +72,7 @@ internal class AccountOnboardingView internal constructor(
 }
 
 @PrivateBetaConnectSDK
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
 @Poko
 class AccountOnboardingProps(
@@ -105,6 +107,7 @@ class AccountOnboardingProps(
     val collectionOptions: CollectionOptions? = null,
 ) : ComponentProps {
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     @Poko
     class CollectionOptions(
@@ -112,11 +115,13 @@ class AccountOnboardingProps(
         val futureRequirements: FutureRequirementOption? = null,
     ) : Parcelable
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class FieldOption(internal val value: String) {
         CURRENTLY_DUE("currently_due"),
         EVENTUALLY_DUE("eventually_due"),
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class FutureRequirementOption(internal val value: String) {
         OMIT("omit"),
         INCLUDE("include"),
@@ -124,6 +129,7 @@ class AccountOnboardingProps(
 }
 
 @PrivateBetaConnectSDK
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface AccountOnboardingListener : StripeEmbeddedComponentListener {
     /**
      * The connected account has exited the onboarding process.

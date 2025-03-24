@@ -12,6 +12,7 @@ import com.stripe.android.connect.manager.EmbeddedComponentCoordinator
 import kotlinx.parcelize.Parcelize
 
 @PrivateBetaConnectSDK
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class EmbeddedComponentManager @JvmOverloads constructor(
     configuration: Configuration,
     fetchClientSecretCallback: FetchClientSecretCallback,
@@ -98,6 +99,7 @@ class EmbeddedComponentManager @JvmOverloads constructor(
         coordinator.update(appearance)
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     data class Configuration(
         val publishableKey: String,
