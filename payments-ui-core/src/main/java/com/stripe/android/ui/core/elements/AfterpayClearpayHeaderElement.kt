@@ -15,7 +15,8 @@ import kotlinx.coroutines.flow.StateFlow
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class AfterpayClearpayHeaderElement(
     override val identifier: IdentifierSpec,
-    override val controller: Controller? = null
+    override val controller: Controller? = null,
+    val currency: String?
 ) : FormElement {
     override val allowsUserInteraction: Boolean = false
     override val mandateText: ResolvableString? = null
@@ -45,6 +46,9 @@ data class AfterpayClearpayHeaderElement(
         const val NO_BREAK_SPACE = "\u00A0"
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        fun isClearpay() = setOf("GB", "ES", "FR", "IT").contains(Locale.current.region)
+        fun isClearpay(currency: String?) = "GBP".equals(currency, ignoreCase = true)
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun isCashappAfterpay(currency: String?) = "USD".equals(currency, ignoreCase = true)
     }
 }

@@ -28,7 +28,10 @@ internal object AmazonPayDefinition : PaymentMethodDefinition {
 }
 
 private object AmazonPayUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSpec {
-    override fun createSupportedPaymentMethod(sharedDataSpec: SharedDataSpec) = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(
+        metadata: PaymentMethodMetadata,
+        sharedDataSpec: SharedDataSpec,
+    ) = SupportedPaymentMethod(
         paymentMethodDefinition = AmazonPayDefinition,
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_amazon_pay,
@@ -46,6 +49,7 @@ private object AmazonPayUiDefinitionFactory : UiDefinitionFactory.RequiresShared
             emptyList()
         }
         return transformSpecToElements.transform(
+            metadata = metadata,
             specs = sharedDataSpec.fields + localLayoutSpecs,
         )
     }

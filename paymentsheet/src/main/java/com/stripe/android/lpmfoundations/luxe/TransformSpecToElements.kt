@@ -1,7 +1,9 @@
 package com.stripe.android.lpmfoundations.luxe
 
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.forms.PlaceholderHelper.specsForConfiguration
+import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AffirmTextSpec
 import com.stripe.android.ui.core.elements.AfterpayClearpayTextSpec
@@ -42,6 +44,7 @@ internal class TransformSpecToElements(
     private val arguments: UiDefinitionFactory.Arguments,
 ) {
     fun transform(
+        metadata: PaymentMethodMetadata?,
         specs: List<FormItemSpec>,
         placeholderOverrideList: List<IdentifierSpec> = emptyList(),
     ): List<FormElement> {
@@ -53,7 +56,7 @@ internal class TransformSpecToElements(
         ).flatMap { spec ->
             when (spec) {
                 is StaticTextSpec -> listOf(spec.transform())
-                is AfterpayClearpayTextSpec -> listOf(spec.transform())
+                is AfterpayClearpayTextSpec -> listOf(spec.transform(metadata?.stripeIntent?.currency))
                 is AffirmTextSpec -> listOf(spec.transform())
                 is EmptyFormSpec -> listOf(EmptyFormElement())
                 is MandateTextSpec -> listOf(spec.transform(arguments.merchantName))

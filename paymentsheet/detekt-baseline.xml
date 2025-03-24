@@ -5,7 +5,7 @@
     <ID>ConstructorParameterNaming:BankFormScreenState.kt$BankFormScreenState$private val _isProcessing: Boolean = false</ID>
     <ID>CyclomaticComplexMethod:CustomerSheetViewModel.kt$CustomerSheetViewModel$fun handleViewAction(viewAction: CustomerSheetViewAction)</ID>
     <ID>CyclomaticComplexMethod:PlaceholderHelper.kt$PlaceholderHelper$@VisibleForTesting internal fun specForPlaceholderField( field: PlaceholderField, placeholderOverrideList: List&lt;IdentifierSpec>, requiresMandate: Boolean, configuration: PaymentSheet.BillingDetailsCollectionConfiguration, )</ID>
-    <ID>CyclomaticComplexMethod:TransformSpecToElements.kt$TransformSpecToElements$fun transform( specs: List&lt;FormItemSpec>, placeholderOverrideList: List&lt;IdentifierSpec> = emptyList(), ): List&lt;FormElement></ID>
+    <ID>CyclomaticComplexMethod:TransformSpecToElements.kt$TransformSpecToElements$fun transform( metadata: PaymentMethodMetadata?, specs: List&lt;FormItemSpec>, placeholderOverrideList: List&lt;IdentifierSpec> = emptyList(), ): List&lt;FormElement></ID>
     <ID>EmptyFunctionBlock:PrimaryButtonAnimator.kt$PrimaryButtonAnimator.&lt;no name provided>${ }</ID>
     <ID>EmptyFunctionBlock:VerticalModeFormUITest.kt$VerticalModeFormUITest.&lt;no name provided>${}</ID>
     <ID>FunctionNaming:PaymentSheetTopBar.kt$@Preview @Composable internal fun PaymentSheetTopBar_Preview()</ID>

@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [CHANGED][10480](https://github.com/stripe/stripe-android/pull/10480) Updated Afterpay branding in the US to be Cash App Afterpay.
+
 ## 21.7.1 - 2025-03-24
 
 ### PaymentSheet

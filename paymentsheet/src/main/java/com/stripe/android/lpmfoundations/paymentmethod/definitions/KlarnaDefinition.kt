@@ -28,7 +28,10 @@ internal object KlarnaDefinition : PaymentMethodDefinition {
 }
 
 private object KlarnaUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSpec {
-    override fun createSupportedPaymentMethod(sharedDataSpec: SharedDataSpec) = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(
+        metadata: PaymentMethodMetadata,
+        sharedDataSpec: SharedDataSpec,
+    ) = SupportedPaymentMethod(
         paymentMethodDefinition = KlarnaDefinition,
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_klarna,
@@ -47,6 +50,7 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDat
             emptyList()
         }
         return transformSpecToElements.transform(
+            metadata = metadata,
             specs = sharedDataSpec.fields + localLayoutSpecs
         )
     }
