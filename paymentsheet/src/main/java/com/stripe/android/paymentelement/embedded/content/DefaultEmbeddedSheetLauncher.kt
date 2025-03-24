@@ -8,6 +8,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.embedded.EmbeddedResultCallbackHelper
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.FormContract
 import com.stripe.android.paymentelement.embedded.form.FormResult
@@ -47,8 +48,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     private val errorReporter: ErrorReporter,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
-    resultCallback: EmbeddedPaymentElement.ResultCallback,
-    private val stateHelper: EmbeddedStateHelper,
+    embeddedResultCallbackHelper: EmbeddedResultCallbackHelper
 ) : EmbeddedSheetLauncher {
 
     init {
@@ -68,8 +68,9 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             sheetStateHolder.sheetIsOpen = false
             selectionHolder.setTemporary(null)
             if (result is FormResult.Complete) {
-                resultCallback.onResult(EmbeddedPaymentElement.Result.Completed())
-                stateHelper.state = null
+                embeddedResultCallbackHelper.setResult(
+                    EmbeddedPaymentElement.Result.Completed()
+                )
             }
         }
 
