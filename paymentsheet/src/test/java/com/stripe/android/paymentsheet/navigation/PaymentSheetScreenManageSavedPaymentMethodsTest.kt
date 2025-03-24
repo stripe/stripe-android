@@ -25,7 +25,7 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsTest {
         PaymentSheetScreen.ManageSavedPaymentMethods(interactor)
             .title(isCompleteFlow = true, isWalletEnabled = true).test {
                 assertThat(awaitItem()).isEqualTo(
-                    R.string.stripe_paymentsheet_select_your_payment_method.resolvableString
+                    R.string.stripe_paymentsheet_select_payment_method.resolvableString
                 )
             }
     }

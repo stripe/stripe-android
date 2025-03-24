@@ -43,7 +43,7 @@ internal interface ManageScreenInteractor {
                 val title = if (isEditing) {
                     R.string.stripe_paymentsheet_manage_payment_methods
                 } else {
-                    R.string.stripe_paymentsheet_select_your_payment_method
+                    R.string.stripe_paymentsheet_select_payment_method
                 }
 
                 return title.resolvableString
