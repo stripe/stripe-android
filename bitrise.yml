@@ -131,18 +131,30 @@ workflows:
     before_run:
       - _build-connections
       - _run-connections-e2e-tests
+    meta:
+      bitrise.io:
+        stack: linux-docker-android-22.04
+        machine_type_id: g2.linux.x-large
   run-connections-e2e-data-tests-on-push:
     envs:
       - MAESTRO_TAGS: testmode-data
     before_run:
       - _build-connections
       - _run-connections-e2e-tests
+    meta:
+      bitrise.io:
+        stack: linux-docker-android-22.04
+        machine_type_id: g2.linux.x-large
   run-connections-e2e-token-tests-on-push:
     envs:
       - MAESTRO_TAGS: testmode-token
     before_run:
       - _build-connections
       - _run-connections-e2e-tests
+    meta:
+      bitrise.io:
+        stack: linux-docker-android-22.04
+        machine_type_id: g2.linux.x-large
   run-connections-e2e-livemode-tests:
     envs:
       - MAESTRO_TAGS: livemode-data
@@ -246,6 +258,10 @@ workflows:
           timeout: 1200
           inputs:
             - content: ./gradlew :paymentsheet:pixel2api33DebugAndroidTest
+    meta:
+      bitrise.io:
+        stack: linux-docker-android-22.04
+        machine_type_id: g2.linux.x-large
   run-example-instrumentation-tests:
     before_run:
       - start_emulator
@@ -354,7 +370,7 @@ workflows:
                 -camera-front none
                 -netdelay none
                 -netspeed full
-                -memory 2048
+                -memory 4096
                 -no-snapshot
                 -no-audio
                 -no-window
@@ -371,7 +387,7 @@ workflows:
                -camera-front none
                -netdelay none
                -netspeed full
-               -memory 2048
+               -memory 4096
                -no-snapshot
                -no-audio
                -no-window
@@ -433,4 +449,4 @@ workflows:
 meta:
   bitrise.io:
     stack: linux-docker-android-22.04
-    machine_type_id: g2.linux.large
+    machine_type_id: g2.linux.medium
