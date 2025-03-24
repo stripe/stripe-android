@@ -3,6 +3,7 @@ package com.stripe.android.model
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -177,6 +178,14 @@ internal object PaymentMethodFixtures {
         label = "PayPal",
         lightImageUrl = "example_url",
         darkImageUrl = null
+    )
+
+    val PAYPAL_CUSTOM_PAYMENT_METHOD = DisplayableCustomPaymentMethod(
+        id = "cpmt_paypal",
+        displayName = "PayPal",
+        subtitle = "Pay now with PayPal".resolvableString,
+        logoUrl = "example_url",
+        doesNotCollectBillingDetails = true,
     )
 
     //
