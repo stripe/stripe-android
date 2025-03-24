@@ -28,7 +28,10 @@ internal object RevolutPayDefinition : PaymentMethodDefinition {
 }
 
 private object RevolutPayUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSpec {
-    override fun createSupportedPaymentMethod(sharedDataSpec: SharedDataSpec) = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(
+        metadata: PaymentMethodMetadata,
+        sharedDataSpec: SharedDataSpec,
+    ) = SupportedPaymentMethod(
         paymentMethodDefinition = RevolutPayDefinition,
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_revolut_pay,
@@ -47,6 +50,7 @@ private object RevolutPayUiDefinitionFactory : UiDefinitionFactory.RequiresShare
         }
 
         return transformSpecToElements.transform(
+            metadata = metadata,
             specs = sharedDataSpec.fields + localLayoutSpecs,
         )
     }

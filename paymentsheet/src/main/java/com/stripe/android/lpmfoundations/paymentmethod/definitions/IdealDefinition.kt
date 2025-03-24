@@ -29,7 +29,10 @@ internal object IdealDefinition : PaymentMethodDefinition {
 }
 
 private object IdealUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSpec {
-    override fun createSupportedPaymentMethod(sharedDataSpec: SharedDataSpec) = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(
+        metadata: PaymentMethodMetadata,
+        sharedDataSpec: SharedDataSpec,
+    ) = SupportedPaymentMethod(
         paymentMethodDefinition = IdealDefinition,
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_ideal,
@@ -42,6 +45,7 @@ private object IdealUiDefinitionFactory : UiDefinitionFactory.RequiresSharedData
         transformSpecToElements: TransformSpecToElements
     ): List<FormElement> {
         return transformSpecToElements.transform(
+            metadata = metadata,
             specs = sharedDataSpec.fields,
             placeholderOverrideList = if (metadata.hasIntentToSetup()) {
                 listOf(IdentifierSpec.Name, IdentifierSpec.Email)

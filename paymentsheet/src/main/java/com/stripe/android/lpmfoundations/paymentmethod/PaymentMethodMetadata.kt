@@ -105,7 +105,7 @@ internal data class PaymentMethodMetadata(
             getUiDefinitionFactoryForExternalPaymentMethod(code)?.createSupportedPaymentMethod()
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
-            definition.uiDefinitionFactory().supportedPaymentMethod(definition, sharedDataSpecs)
+            definition.uiDefinitionFactory().supportedPaymentMethod(this, definition, sharedDataSpecs)
         }
     }
 
