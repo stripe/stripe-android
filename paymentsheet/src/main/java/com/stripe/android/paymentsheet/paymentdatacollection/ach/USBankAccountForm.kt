@@ -405,14 +405,14 @@ private fun AccountDetailsForm(
         )
         if (showCheckboxes) {
             SaveForFutureUseElementUI(
-                enabled = true,
+                enabled = enabled,
                 element = saveForFutureUseElement,
                 modifier = Modifier.padding(top = 8.dp)
             )
 
             setAsDefaultPaymentMethodElement?.let {
                 SetAsDefaultPaymentMethodElementUI(
-                    enabled = true,
+                    enabled = enabled,
                     element = it,
                     modifier = Modifier.padding(top = 8.dp),
                 )
