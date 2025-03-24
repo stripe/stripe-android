@@ -124,6 +124,7 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
         propsJson: JsonObject?,
     ) {
         this.embeddedComponentManager = embeddedComponentManager
+            .apply { coordinator.checkContextDuringCreate(context) }
         this.listener = listener
         val oldProps = this.propsJson
         this.propsJson =

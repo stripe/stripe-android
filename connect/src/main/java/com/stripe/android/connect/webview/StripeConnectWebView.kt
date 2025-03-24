@@ -109,7 +109,7 @@ internal class StripeConnectWebView private constructor(
 
     fun setCollectMobileFinancialConnectionsResult(
         id: String,
-        result: FinancialConnectionsSheetResult?
+        result: FinancialConnectionsSheetResult
     ) {
         val payload = SetCollectMobileFinancialConnectionsResultPayloadJs.from(id, result)
         callSetterWithSerializableValue(

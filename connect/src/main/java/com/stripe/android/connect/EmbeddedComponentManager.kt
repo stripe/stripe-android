@@ -67,7 +67,6 @@ class EmbeddedComponentManager(
         props: AccountOnboardingProps? = null,
         cacheKey: String? = null,
     ): AccountOnboardingView {
-        coordinator.checkContextDuringCreate(context)
         return AccountOnboardingView(
             context = context,
             embeddedComponentManager = this,
@@ -90,7 +89,6 @@ class EmbeddedComponentManager(
         listener: PayoutsListener? = null,
         cacheKey: String? = null,
     ): PayoutsView {
-        coordinator.checkContextDuringCreate(context)
         return PayoutsView(
             context = context,
             embeddedComponentManager = this,

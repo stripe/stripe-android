@@ -290,7 +290,7 @@ internal class StripeConnectWebViewContainerViewModel(
             }
 
             // all calls to PermissionRequest must be on the main thread
-            val isGranted = componentCoordinator.requestCameraPermission(activity) ?: return
+            val isGranted = componentCoordinator.requestCameraPermission(activity)
             withContext(Dispatchers.Main) {
                 if (isGranted) {
                     logger.debug("($loggerTag) Granting permission - user accepted permission")

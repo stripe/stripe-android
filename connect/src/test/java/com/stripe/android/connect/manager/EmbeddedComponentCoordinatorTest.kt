@@ -89,7 +89,7 @@ class EmbeddedComponentCoordinatorTest {
         val shadowApplication = shadowOf(ApplicationProvider.getApplicationContext() as Application)
         shadowApplication.grantPermissions(Manifest.permission.CAMERA)
 
-        assertTrue(coordinator.requestCameraPermission(testActivity)!!)
+        assertTrue(coordinator.requestCameraPermission(testActivity))
     }
 
     @Test
