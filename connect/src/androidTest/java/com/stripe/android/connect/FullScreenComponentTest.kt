@@ -18,6 +18,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withParent
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.espresso.web.assertion.WebViewAssertions.webMatches
+import androidx.test.espresso.web.model.Atoms.castOrDie
 import androidx.test.espresso.web.model.Atoms.script
 import androidx.test.espresso.web.sugar.Web.onWebView
 import androidx.test.espresso.web.webdriver.DriverAtoms.findElement
@@ -173,19 +174,31 @@ class FullScreenComponentTest {
     fun testCustomJsAlertDismissActions() {
         checkDialogIsDisplayed()
         val alertJs = testAlertJs.copy(title = null)
-        val dismissActions = listOf(
-            { onView(withText(alertJs.buttons!!.ok)).perform(click()) },
-            { onView(withText(alertJs.buttons!!.cancel)).perform(click()) },
-            { Espresso.pressBack() },
-        )
-        listOf(ALERT, CONFIRM).forEach { method ->
-            dismissActions.forEach { dismiss ->
-                performWebViewAlert(method, alertJs)
-                dismiss()
-                checkDialogIsDisplayed()
-            }
+
+        val pressBack = { Espresso.pressBack() }
+        val pressCancel = { onView(withText(alertJs.buttons!!.cancel)).perform(click()) }
+        val pressOk = { onView(withText(alertJs.buttons!!.ok)).perform(click()) }
+
+        listOf(
+            DismissActionTestCase(ALERT, pressBack, "undefined"),
+            DismissActionTestCase(ALERT, pressCancel, "undefined"),
+            DismissActionTestCase(ALERT, pressOk, "undefined"),
+            DismissActionTestCase(CONFIRM, pressBack, "false"),
+            DismissActionTestCase(CONFIRM, pressCancel, "false"),
+            DismissActionTestCase(CONFIRM, pressOk, "true"),
+        ).forEach { testCase ->
+            performWebViewAlert(testCase.method, alertJs)
+            testCase.action()
+            checkDialogIsDisplayed()
+            checkWebViewAlertResult(testCase.expected)
         }
     }
+
+    private class DismissActionTestCase(
+        val method: String,
+        val action: () -> Any,
+        val expected: String,
+    )
 
     @Test
     fun testCustomJsAlertWorksAfterRotation() {
@@ -249,7 +262,7 @@ class FullScreenComponentTest {
         try {
             onWebView()
                 .withTimeout(500L, TimeUnit.MILLISECONDS)
-                .perform(script("""$method(`$message`)"""))
+                .perform(script("function performWebViewAlert() { $ALERT_RESULT_VAR = $method(`$message`); }"))
         } catch (_: NoMatchingViewException) {
             // HACK: After the JS executes, the alert dialog prevents the WebView from
             //  being interacted with. Assume the alert was shown -- we'll be verifying
@@ -257,8 +270,19 @@ class FullScreenComponentTest {
         }
     }
 
+    private fun checkWebViewAlertResult(expected: String) {
+        onWebView().check(webMatches(getAlertResult(), equalTo(expected)))
+    }
+
+    private fun getAlertResult() =
+        script(
+            "function getAlertResult() { return String($ALERT_RESULT_VAR); }",
+            castOrDie(String::class.java)
+        )
+
     companion object {
         private const val ALERT = "alert"
         private const val CONFIRM = "confirm"
+        private const val ALERT_RESULT_VAR = "window.__test_alert_result__"
     }
 }
