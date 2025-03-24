@@ -28,6 +28,8 @@ import com.stripe.android.connect.webview.ChooseFileActivityResultContract
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.toJs
 import com.stripe.android.core.Logger
+import com.stripe.android.core.utils.RealUserFacingLogger
+import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -97,24 +99,18 @@ internal class EmbeddedComponentCoordinator @Inject constructor(
      * This function may result in a permissions pop-up being shown to the user (although this may not always
      * happen, such as when the permission has already granted).
      */
-    internal suspend fun requestCameraPermission(activity: Activity): Boolean? {
+    internal suspend fun requestCameraPermission(activity: Activity): Boolean {
         if (checkSelfPermission(activity, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             logger.debug("($loggerTag) Skipping permission request - CAMERA permission already granted")
             return true
         }
 
-        val launcher = getLauncher(activity, requestPermissionLaunchers, "Error launching camera permission request")
-            ?: return null
-        launcher.launch(Manifest.permission.CAMERA)
-
+        requestPermissionLaunchers[activity]!!.launch(Manifest.permission.CAMERA)
         return permissionsFlow.first()
     }
 
     internal suspend fun chooseFile(activity: Activity, requestIntent: Intent): Array<Uri>? {
-        val launcher = getLauncher(activity, chooseFileLaunchers, "Error choosing file")
-            ?: return null
-        launcher.launch(requestIntent)
-
+        chooseFileLaunchers[activity]!!.launch(requestIntent)
         return chooseFileResultFlow
             .first { it.activity == activity }
             .result
@@ -124,22 +120,8 @@ internal class EmbeddedComponentCoordinator @Inject constructor(
         activity: Activity,
         clientSecret: String,
         connectedAccountId: String,
-    ): FinancialConnectionsSheetResult? {
-        val sheet = financialConnectionsSheets[activity]
-        if (sheet == null) {
-            logger.warning(
-                buildString {
-                    append("($loggerTag) Error presenting FinancialConnectionsSheet ")
-                    append("Did you call EmbeddedComponentManager.onActivityCreate in your Activity.onCreate function?")
-                }
-            )
-            if (isDebugBuild) {
-                // crash if in debug mode so that developers are more likely to catch this error.
-                error("You must create the EmbeddedComponent view from an Activity")
-            }
-            return null
-        }
-        sheet.present(
+    ): FinancialConnectionsSheetResult {
+        financialConnectionsSheets[activity]!!.present(
             FinancialConnectionsSheet.Configuration(
                 financialConnectionsSessionClientSecret = clientSecret,
                 publishableKey = configuration.publishableKey,
@@ -149,22 +131,6 @@ internal class EmbeddedComponentCoordinator @Inject constructor(
         return financialConnectionsResults
             .first { it.activity == activity }
             .result
-    }
-
-    private fun <I> getLauncher(
-        activity: Activity,
-        launchers: Map<Activity, ActivityResultLauncher<I>>,
-        errorMessage: String,
-    ): ActivityResultLauncher<I>? {
-        val launcher = launchers[activity]
-        if (launcher == null) {
-            logger.warning(
-                "($loggerTag) $errorMessage " +
-                    "Did you call EmbeddedComponentManager.onActivityCreate in your Activity.onCreate function?"
-            )
-            return null
-        }
-        return launcher
     }
 
     internal fun getComponentAnalyticsService(component: StripeEmbeddedComponent): ComponentAnalyticsService {
@@ -193,7 +159,9 @@ internal class EmbeddedComponentCoordinator @Inject constructor(
     private fun Context.findActivityWithErrorHandling(): Activity? {
         val activity = findActivity()
         if (activity == null) {
-            logger.warning("($loggerTag) You must create the EmbeddedComponent view from an Activity")
+            userFacingLogger?.logWarningWithoutPii(
+                "You must create the EmbeddedComponent view from an Activity"
+            )
             if (isDebugBuild) {
                 // crash if in debug mode so that developers are more likely to catch this error.
                 error("You must create the EmbeddedComponent view from an Activity")
@@ -204,6 +172,7 @@ internal class EmbeddedComponentCoordinator @Inject constructor(
 
     companion object {
         private var connectAnalyticsService: ConnectAnalyticsService? = null
+        private var userFacingLogger: UserFacingLogger? = null
 
         @VisibleForTesting
         internal val permissionsFlow: MutableSharedFlow<Boolean> = MutableSharedFlow(extraBufferCapacity = 1)
@@ -224,6 +193,10 @@ internal class EmbeddedComponentCoordinator @Inject constructor(
 
             if (connectAnalyticsService == null) {
                 connectAnalyticsService = StripeConnectComponent.instance.analyticsServiceFactory.create(application)
+            }
+
+            if (userFacingLogger == null) {
+                userFacingLogger = RealUserFacingLogger(application)
             }
 
             application.registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {

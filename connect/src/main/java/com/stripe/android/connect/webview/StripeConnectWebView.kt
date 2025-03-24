@@ -116,7 +116,7 @@ internal class StripeConnectWebView private constructor(
 
     fun setCollectMobileFinancialConnectionsResult(
         id: String,
-        result: FinancialConnectionsSheetResult?
+        result: FinancialConnectionsSheetResult
     ) {
         val payload = SetCollectMobileFinancialConnectionsResultPayloadJs.from(id, result)
         callSetterWithSerializableValue(
@@ -496,7 +496,10 @@ internal class StripeConnectWebView private constructor(
             val activity = findActivity()
                 ?: return
 
-            val parsed = ConnectJson.decodeFromString<OpenFinancialConnectionsMessage>(message)
+            val parsed = tryDeserializeWebMessage<OpenFinancialConnectionsMessage>(
+                webFunctionName = "openFinancialConnections",
+                message = message
+            ) ?: return
             logger.debug("($loggerTag) Open FinancialConnections: $parsed")
 
             webViewLifecycleScope?.launch {
