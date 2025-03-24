@@ -2,7 +2,6 @@ package com.stripe.android.connect
 
 import android.content.Context
 import androidx.activity.ComponentActivity
-import androidx.annotation.RestrictTo
 import androidx.fragment.app.FragmentActivity
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.fonts.CustomFontSource
@@ -10,7 +9,6 @@ import com.stripe.android.connect.di.StripeConnectComponent
 import com.stripe.android.connect.manager.EmbeddedComponentCoordinator
 
 @PrivateBetaConnectSDK
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class EmbeddedComponentManager @JvmOverloads constructor(
     publishableKey: String,
     clientSecretProvider: ClientSecretProvider,
@@ -97,7 +95,6 @@ class EmbeddedComponentManager @JvmOverloads constructor(
         coordinator.update(appearance)
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         /**
          * Hooks the [EmbeddedComponentManager] into this activity's lifecycle.
