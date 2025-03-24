@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.PaymentSheetLauncherComponent.Builder
 import com.stripe.android.ui.core.di.CardScanModule
+import com.stripe.android.uicore.utils.stateFlowOf
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
@@ -21,6 +22,7 @@ import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Singleton
 
 @Component(
@@ -93,6 +95,15 @@ internal interface ManageModule {
             factory: ManageSavedPaymentMethodMutatorFactory
         ): SavedPaymentMethodMutator {
             return factory.createSavedPaymentMethodMutator()
+        }
+
+        @Provides
+        fun providePaymentMethodMetadata(
+            paymentMethodMetadata: PaymentMethodMetadata
+        ): StateFlow<PaymentMethodMetadata> {
+            return stateFlowOf(
+                paymentMethodMetadata
+            )
         }
 
         @Provides

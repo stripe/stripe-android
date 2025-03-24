@@ -13,14 +13,15 @@ internal data class CustomerMetadata(
     val isPaymentMethodSetAsDefaultEnabled: Boolean,
     val permissions: Permissions,
 ) : Parcelable {
+
     @Parcelize
-    data class Permissions(
+    internal data class Permissions(
         val canRemovePaymentMethods: Boolean,
         val canRemoveLastPaymentMethod: Boolean,
         val canRemoveDuplicates: Boolean,
     ) : Parcelable {
         companion object {
-            fun createForPaymentSheetCustomerSession(
+            internal fun createForPaymentSheetCustomerSession(
                 configuration: CommonConfiguration,
                 customer: ElementsSession.Customer,
             ): Permissions {
@@ -31,12 +32,10 @@ internal data class CustomerMetadata(
                     }
                     is ElementsSession.Customer.Components.MobilePaymentElement.Disabled -> false
                 }
-                val canRemoveLastPaymentMethod = when {
-                    !configuration.allowsRemovalOfLastSavedPaymentMethod -> false
-                    mobilePaymentElementComponent is ElementsSession.Customer.Components.MobilePaymentElement.Enabled ->
-                        mobilePaymentElementComponent.canRemoveLastPaymentMethod
-                    else -> false
-                }
+
+                val canRemoveLastPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod &&
+                    mobilePaymentElementComponent is ElementsSession.Customer.Components.MobilePaymentElement.Enabled &&
+                    mobilePaymentElementComponent.canRemoveLastPaymentMethod
 
                 return Permissions(
                     canRemovePaymentMethods = canRemovePaymentMethods,
@@ -46,7 +45,7 @@ internal data class CustomerMetadata(
                 )
             }
 
-            fun createForPaymentSheetLegacyEphemeralKey(
+            internal fun createForPaymentSheetLegacyEphemeralKey(
                 configuration: CommonConfiguration,
             ): Permissions {
                 return Permissions(
@@ -70,7 +69,7 @@ internal data class CustomerMetadata(
                 )
             }
 
-            fun createForCustomerSheet(
+            internal fun createForCustomerSheet(
                 configuration: CustomerSheet.Configuration,
                 customerSheetSession: CustomerSheetSession,
             ): Permissions {
@@ -82,7 +81,7 @@ internal data class CustomerMetadata(
             }
 
             // Native link uses PaymentMethodMetadata for DefaultFormHelper and doesn't use CustomerMetadata at all
-            fun createForNativeLink(): Permissions {
+            internal fun createForNativeLink(): Permissions {
                 return Permissions(
                     canRemovePaymentMethods = false,
                     canRemoveLastPaymentMethod = false,

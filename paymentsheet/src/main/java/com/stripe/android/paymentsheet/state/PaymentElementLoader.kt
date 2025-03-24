@@ -41,7 +41,6 @@ import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.model.validate
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
-import com.stripe.android.paymentsheet.state.CustomerState.Permissions
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import kotlinx.coroutines.Deferred
@@ -195,7 +194,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 customerInfo = customerInfo,
                 metadata = metadata.await(),
                 savedSelection = savedSelection,
-                configuration = configuration,
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
             )
         }
@@ -366,7 +364,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     }
 
     private suspend fun createCustomerState(
-        configuration: CommonConfiguration,
         customerInfo: CustomerInfo?,
         metadata: PaymentMethodMetadata,
         savedSelection: Deferred<SavedSelection>,
@@ -376,7 +373,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             is CustomerInfo.CustomerSession -> {
                 CustomerState.createForCustomerSession(
                     customer = customerInfo.elementsSessionCustomer,
-                    configuration = configuration,
                     supportedSavedPaymentMethodTypes = metadata.supportedSavedPaymentMethodTypes(),
                     customerSessionClientSecret = customerInfo.customerSessionClientSecret,
                 )
@@ -385,7 +381,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 CustomerState.createForLegacyEphemeralKey(
                     customerId = customerInfo.id,
                     accessType = customerInfo.accessType,
-                    configuration = configuration,
                     paymentMethods = retrieveCustomerPaymentMethods(
                         metadata = metadata,
                         customerConfig = customerInfo.customerConfig,
