@@ -5,6 +5,7 @@
 ### PaymentSheet
 * [CHANGED][https://github.com/stripe/stripe-android/pull/10421] Afterpay no longer requires a shipping address to be shown.
 * [CHANGED][10382](https://github.com/stripe/stripe-android/pull/10382) Don't show price as $0.00 in Google Pay for setup intents in US and CA.
+* [FIXED][10436](https://github.com/stripe/stripe-android/pull/10436) Update `PaymentMethodRowButton` to use `PaymentSheet.Appearance.Colors.placeholderText` as the subtitle color when the `RowStyle` is `FloatingButton`.
 
 ## 21.7.0 - 2025-03-17
 
