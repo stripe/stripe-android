@@ -220,13 +220,13 @@ class SavedPaymentMethodMutatorTest {
     @Test
     fun `updatePaymentMethod should call through to the callback`() = runScenario(
         paymentMethodMetadata =
-            PaymentMethodMetadataFactory.create(
-                customerMetadataPermissions = CustomerMetadata.Permissions(
-                    canRemoveDuplicates = true,
-                    canRemovePaymentMethods = true,
-                    canRemoveLastPaymentMethod = true,
-                )
+        PaymentMethodMetadataFactory.create(
+            customerMetadataPermissions = CustomerMetadata.Permissions(
+                canRemoveDuplicates = true,
+                canRemovePaymentMethods = true,
+                canRemoveLastPaymentMethod = true,
             )
+        )
     ) {
         val cards = PaymentMethodFixtures.createCards(3)
         val expectedPaymentMethod = cards[0].toDisplayableSavedPaymentMethod()
