@@ -11,10 +11,21 @@ import android.webkit.WebChromeClient
 import android.widget.FrameLayout
 import androidx.activity.ComponentActivity
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.connect.PrivateBetaConnectSDK
+import com.stripe.android.connect.webview.serialization.AccountSessionClaimedMessage
+import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.ConnectJson
+import com.stripe.android.connect.webview.serialization.CustomFontSourceJs
 import com.stripe.android.connect.webview.serialization.OpenAuthenticatedWebViewMessage
+import com.stripe.android.connect.webview.serialization.OpenFinancialConnectionsMessage
+import com.stripe.android.connect.webview.serialization.PageLoadMessage
+import com.stripe.android.connect.webview.serialization.SetOnExit
+import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.version.StripeSdkVersion
+import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,10 +35,13 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyBlocking
+import org.mockito.kotlin.whenever
+import org.mockito.kotlin.wheneverBlocking
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 
+@OptIn(PrivateBetaConnectSDK::class)
 @RunWith(RobolectricTestRunner::class)
 class StripeConnectWebViewTest {
     private val testUrl = "http://stripe.com"
@@ -99,6 +113,29 @@ class StripeConnectWebViewTest {
     }
 
     @Test
+    fun `JS fetchInitComponentProps is handled`() {
+        val props = JsonObject(mapOf("foo" to JsonPrimitive("bar")))
+        whenever(mockDelegate.propsJson).doReturn(props)
+        assertThat(webView.stripeJsInterface.fetchInitComponentProps())
+            .isEqualTo(ConnectJson.encodeToString(props))
+    }
+
+    @Test
+    fun `JS fetchInitParams is handled`() {
+        val params = ConnectInstanceJs(fonts = listOf(CustomFontSourceJs("foo", "bar")))
+        whenever(mockDelegate.getInitialParams(any())).doReturn(params)
+        assertThat(webView.stripeJsInterface.fetchInitParams())
+            .isEqualTo(ConnectJson.encodeToString(params))
+    }
+
+    @Test
+    fun `JS onSetterFunctionCalled is handled`() {
+        val message = SetterFunctionCalledMessage(SetOnExit)
+        webView.stripeJsInterface.onSetterFunctionCalled(ConnectJson.encodeToString(message))
+        verify(mockDelegate).onReceivedSetterFunctionCalled(message)
+    }
+
+    @Test
     fun `JS openAuthenticatedWebView is handled`() {
         val message = OpenAuthenticatedWebViewMessage("test-id", "https://test.stripe.com")
         containerView.addView(webView)
@@ -106,6 +143,46 @@ class StripeConnectWebViewTest {
             ConnectJson.encodeToString(message)
         )
         verify(mockDelegate).onReceivedOpenAuthenticatedWebView(activity, message)
+    }
+
+    @Test
+    fun `JS pageDidLoad is handled`() {
+        val message = PageLoadMessage("page-id")
+        webView.stripeJsInterface.pageDidLoad(ConnectJson.encodeToString(message))
+        verify(mockDelegate).onReceivedPageDidLoad(message.pageViewId)
+    }
+
+    @Test
+    fun `JS accountSessionClaimed is handled`() {
+        val message = AccountSessionClaimedMessage("merchant-id")
+        webView.stripeJsInterface.accountSessionClaimed(ConnectJson.encodeToString(message))
+        verify(mockDelegate).onMerchantIdChanged(message.merchantId)
+    }
+
+    @Test
+    fun `JS openFinancialConnections is handled`() = runTest {
+        containerView.addView(webView)
+        val message = OpenFinancialConnectionsMessage(
+            id = "id",
+            clientSecret = "client-secret",
+            connectedAccountId = "connected-account-id",
+        )
+        webView.stripeJsInterface.openFinancialConnections(ConnectJson.encodeToString(message))
+        verify(mockDelegate).onOpenFinancialConnections(activity, message)
+    }
+
+    @Test
+    fun `JS fetchClientSecret is handled`() = runTest {
+        val clientSecret = "client-secret"
+        wheneverBlocking { mockDelegate.fetchClientSecret() }.doReturn(clientSecret)
+        assertThat(webView.stripeJsInterface.fetchClientSecret())
+            .isEqualTo(clientSecret)
+    }
+
+    @Test
+    fun `JS closeWebView is handled`() {
+        webView.stripeJsInterface.closeWebView()
+        verify(mockDelegate).onCloseWebView()
     }
 
     @Test
