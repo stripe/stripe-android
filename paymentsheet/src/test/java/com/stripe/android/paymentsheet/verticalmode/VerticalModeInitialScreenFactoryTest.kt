@@ -13,6 +13,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.uicore.utils.stateFlowOf
 import org.junit.Rule
 import kotlin.test.Test
 
@@ -66,7 +67,11 @@ class VerticalModeInitialScreenFactoryTest {
             canGoBack = false,
         )
 
-        val customerStateHolder = CustomerStateHolder(SavedStateHandle(), fakeViewModel.selection)
+        val customerStateHolder = CustomerStateHolder(
+            savedStateHandle = SavedStateHandle(),
+            selection = fakeViewModel.selection,
+            customerMetadata = stateFlowOf(paymentMethodMetadata.customerMetadata)
+        )
         if (hasSavedPaymentMethods) {
             customerStateHolder.setCustomerState(
                 CustomerState(
@@ -74,11 +79,6 @@ class VerticalModeInitialScreenFactoryTest {
                     ephemeralKeySecret = "ek_123",
                     customerSessionClientSecret = null,
                     paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
-                    permissions = CustomerState.Permissions(
-                        canRemovePaymentMethods = true,
-                        canRemoveLastPaymentMethod = true,
-                        canRemoveDuplicates = true,
-                    ),
                     defaultPaymentMethodId = null,
                 )
             )

@@ -14,6 +14,7 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.LinkSignupMode.AlongsideSaveForFutureUse
 import com.stripe.android.link.ui.inline.LinkSignupMode.InsteadOfSaveForFutureUse
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
@@ -132,11 +133,6 @@ internal class DefaultPaymentElementLoaderTest {
                     ephemeralKeySecret = config.customer!!.ephemeralKeySecret,
                     customerSessionClientSecret = null,
                     paymentMethods = PAYMENT_METHODS,
-                    permissions = CustomerState.Permissions(
-                        canRemovePaymentMethods = true,
-                        canRemoveLastPaymentMethod = true,
-                        canRemoveDuplicates = false,
-                    ),
                     defaultPaymentMethodId = null,
                 ),
                 paymentSelection = PaymentSelection.Saved(
@@ -151,7 +147,12 @@ internal class DefaultPaymentElementLoaderTest {
                     linkMode = null,
                     cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all()),
                     hasCustomerConfiguration = true,
-                    financialConnectionsAvailability = FinancialConnectionsAvailability.Full
+                    financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
+                    customerMetadataPermissions = CustomerMetadata.Permissions(
+                        canRemoveDuplicates = false,
+                        canRemovePaymentMethods = true,
+                        canRemoveLastPaymentMethod = true,
+                    )
                 ),
             )
         )
@@ -1562,7 +1563,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
-    fun `When 'elements_session' has remove permissions enabled, should enable remove permissions in customer state`() =
+    fun `When 'elements_session' has remove permissions enabled, should enable remove permissions in customerMetadata`() =
         runTest {
             val loader = createPaymentElementLoader(
                 customer = ElementsSession.Customer(
@@ -1593,8 +1594,8 @@ internal class DefaultPaymentElementLoaderTest {
                 initializedViaCompose = false,
             ).getOrThrow()
 
-            assertThat(state.customer?.permissions).isEqualTo(
-                CustomerState.Permissions(
+            assertThat(state.paymentMethodMetadata.customerMetadata?.permissions).isEqualTo(
+                CustomerMetadata.Permissions(
                     canRemovePaymentMethods = true,
                     canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = true,
@@ -1604,7 +1605,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
-    fun `When 'elements_session' has remove permissions disabled, should disable remove permissions in customer state`() =
+    fun `When 'elements_session' has remove permissions disabled, should disable remove permissions in customerMetadata`() =
         runTest {
             val loader = createPaymentElementLoader(
                 customer = ElementsSession.Customer(
@@ -1635,8 +1636,8 @@ internal class DefaultPaymentElementLoaderTest {
                 initializedViaCompose = false,
             ).getOrThrow()
 
-            assertThat(state.customer?.permissions).isEqualTo(
-                CustomerState.Permissions(
+            assertThat(state.paymentMethodMetadata.customerMetadata?.permissions).isEqualTo(
+                CustomerMetadata.Permissions(
                     canRemovePaymentMethods = false,
                     canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = true,
@@ -1646,7 +1647,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
-    fun `When 'elements_session' has Payment Sheet component disabled, should disable permissions in customer state`() =
+    fun `When 'elements_session' has Payment Sheet component disabled, should disable permissions in customerMetadata`() =
         runTest {
             val loader = createPaymentElementLoader(
                 customer = ElementsSession.Customer(
@@ -1677,8 +1678,8 @@ internal class DefaultPaymentElementLoaderTest {
                 initializedViaCompose = false,
             ).getOrThrow()
 
-            assertThat(state.customer?.permissions).isEqualTo(
-                CustomerState.Permissions(
+            assertThat(state.paymentMethodMetadata.customerMetadata?.permissions).isEqualTo(
+                CustomerMetadata.Permissions(
                     canRemovePaymentMethods = false,
                     canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = true,
@@ -1705,8 +1706,8 @@ internal class DefaultPaymentElementLoaderTest {
                 initializedViaCompose = false,
             ).getOrThrow()
 
-            assertThat(state.customer?.permissions).isEqualTo(
-                CustomerState.Permissions(
+            assertThat(state.paymentMethodMetadata.customerMetadata?.permissions).isEqualTo(
+                CustomerMetadata.Permissions(
                     canRemovePaymentMethods = true,
                     canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = false,
@@ -2611,7 +2612,7 @@ internal class DefaultPaymentElementLoaderTest {
         shouldDisableMobilePaymentElement: Boolean = false,
         canRemoveLastPaymentMethodFromServer: Boolean = true,
         canRemoveLastPaymentMethodFromConfig: Boolean = true,
-        test: (CustomerState.Permissions) -> Unit,
+        test: (CustomerMetadata.Permissions) -> Unit,
     ) = runTest {
         val loader = createPaymentElementLoader(
             customer = ElementsSession.Customer(
@@ -2644,7 +2645,7 @@ internal class DefaultPaymentElementLoaderTest {
             initializedViaCompose = false,
         ).getOrThrow()
 
-        test(requireNotNull(state.customer).permissions)
+        test(requireNotNull(state.paymentMethodMetadata.customerMetadata).permissions)
     }
 
     private suspend fun testExternalPaymentMethods(

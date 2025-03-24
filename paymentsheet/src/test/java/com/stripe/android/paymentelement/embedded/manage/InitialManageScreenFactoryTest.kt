@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -42,7 +43,11 @@ internal class InitialManageScreenFactoryTest {
     private fun testScenario(
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        val customerStateHolder = CustomerStateHolder(SavedStateHandle(), stateFlowOf(null))
+        val customerStateHolder = CustomerStateHolder(
+            savedStateHandle = SavedStateHandle(),
+            selection = stateFlowOf(null),
+            customerMetadata = stateFlowOf(PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA),
+        )
         val factory = InitialManageScreenFactory(
             customerStateHolder = customerStateHolder,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),

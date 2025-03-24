@@ -5,6 +5,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsItem
@@ -35,7 +36,8 @@ class PaymentOptionsItemsMapperTest {
             customerMetadata = MutableStateFlow(
                 CustomerMetadata(
                     hasCustomerConfiguration = false,
-                    isPaymentMethodSetAsDefaultEnabled = false
+                    isPaymentMethodSetAsDefaultEnabled = false,
+                    permissions = DEFAULT_CUSTOMER_METADATA_PERMISSIONS,
                 )
             ),
         )
@@ -71,7 +73,8 @@ class PaymentOptionsItemsMapperTest {
             customerMetadata = MutableStateFlow(
                 CustomerMetadata(
                     hasCustomerConfiguration = false,
-                    isPaymentMethodSetAsDefaultEnabled = false
+                    isPaymentMethodSetAsDefaultEnabled = false,
+                    permissions = DEFAULT_CUSTOMER_METADATA_PERMISSIONS,
                 )
             ),
         )
@@ -126,7 +129,8 @@ class PaymentOptionsItemsMapperTest {
             customerMetadata = MutableStateFlow(
                 CustomerMetadata(
                     hasCustomerConfiguration = false,
-                    isPaymentMethodSetAsDefaultEnabled = isSetAsDefaultEnabled
+                    isPaymentMethodSetAsDefaultEnabled = isSetAsDefaultEnabled,
+                    permissions = DEFAULT_CUSTOMER_METADATA_PERMISSIONS,
                 )
             ),
         )
@@ -175,11 +179,6 @@ class PaymentOptionsItemsMapperTest {
             ephemeralKeySecret = "ek_123",
             customerSessionClientSecret = null,
             paymentMethods = paymentMethods,
-            permissions = CustomerState.Permissions(
-                canRemovePaymentMethods = true,
-                canRemoveLastPaymentMethod = true,
-                canRemoveDuplicates = false,
-            ),
             defaultPaymentMethodId = defaultPaymentMethodId,
         )
     }

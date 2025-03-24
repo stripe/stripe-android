@@ -103,11 +103,6 @@ internal object PaymentSheetFixtures {
         ephemeralKeySecret = defaultCustomerConfig.ephemeralKeySecret,
         customerSessionClientSecret = null,
         paymentMethods = listOf(),
-        permissions = CustomerState.Permissions(
-            canRemovePaymentMethods = true,
-            canRemoveLastPaymentMethod = true,
-            canRemoveDuplicates = false,
-        ),
         defaultPaymentMethodId = null,
     )
 
@@ -168,11 +163,6 @@ internal object PaymentSheetFixtures {
                     ephemeralKeySecret = config.customer?.ephemeralKeySecret ?: "client_secret",
                     customerSessionClientSecret = null,
                     paymentMethods = paymentMethods,
-                    permissions = CustomerState.Permissions(
-                        canRemovePaymentMethods = true,
-                        canRemoveLastPaymentMethod = true,
-                        canRemoveDuplicates = false,
-                    ),
                     defaultPaymentMethodId = null,
                 ),
                 config = config.asCommonConfiguration(),

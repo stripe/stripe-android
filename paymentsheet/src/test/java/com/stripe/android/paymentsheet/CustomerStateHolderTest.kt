@@ -3,7 +3,8 @@ package com.stripe.android.paymentsheet
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -34,7 +35,6 @@ internal class CustomerStateHolderTest {
         val savedStateHandle = SavedStateHandle()
         val customerState = CustomerState.createForLegacyEphemeralKey(
             customerId = "cus_123",
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
             paymentMethods = emptyList()
         )
@@ -54,7 +54,6 @@ internal class CustomerStateHolderTest {
             customerStateHolder.setCustomerState(
                 CustomerState.createForLegacyEphemeralKey(
                     customerId = "cus_123",
-                    configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                     accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
                     paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
                 )
@@ -69,7 +68,6 @@ internal class CustomerStateHolderTest {
         val savedStateHandle = SavedStateHandle()
         val customerState = CustomerState.createForLegacyEphemeralKey(
             customerId = "cus_123",
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
             paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         )
@@ -96,7 +94,6 @@ internal class CustomerStateHolderTest {
             customerStateHolder.setCustomerState(
                 CustomerState.createForLegacyEphemeralKey(
                     customerId = "cus_123",
-                    configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                     accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
                     paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
                 )
@@ -107,7 +104,6 @@ internal class CustomerStateHolderTest {
             customerStateHolder.setCustomerState(
                 CustomerState.createForLegacyEphemeralKey(
                     customerId = "cus_123",
-                    configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                     accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
                     paymentMethods = emptyList(),
                 )
@@ -125,7 +121,6 @@ internal class CustomerStateHolderTest {
             customerStateHolder.setCustomerState(
                 CustomerState.createForLegacyEphemeralKey(
                     customerId = "cus_123",
-                    configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                     accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
                     paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD, extraPaymentMethod)
                 )
@@ -136,7 +131,6 @@ internal class CustomerStateHolderTest {
             customerStateHolder.setCustomerState(
                 CustomerState.createForLegacyEphemeralKey(
                     customerId = "cus_123",
-                    configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                     accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
                     paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
                 )
@@ -154,7 +148,6 @@ internal class CustomerStateHolderTest {
             customerStateHolder.setCustomerState(
                 CustomerState.createForLegacyEphemeralKey(
                     customerId = "cus_123",
-                    configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                     accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
                     paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD, extraPaymentMethod)
                 )
@@ -165,7 +158,6 @@ internal class CustomerStateHolderTest {
             customerStateHolder.setCustomerState(
                 CustomerState.createForLegacyEphemeralKey(
                     customerId = "cus_123",
-                    configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                     accessType = PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey("ek_123"),
                     paymentMethods = listOf(
                         PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
@@ -181,14 +173,15 @@ internal class CustomerStateHolderTest {
     }
 
     @Test
-    fun `canRemove is correct when no payment methods for customer`() = runScenario {
+    fun `canRemove is correct when no payment methods for customer`() = runScenario(
+        isRemoveEnabled = true,
+        canRemoveLastPaymentMethod = true,
+    ) {
         customerStateHolder.canRemove.test {
             assertThat(awaitItem()).isFalse()
 
             customerStateHolder.setCustomerState(
                 createCustomerState(
-                    isRemoveEnabled = true,
-                    canRemoveLastPaymentMethod = true,
                     paymentMethods = listOf()
                 )
             )
@@ -200,14 +193,15 @@ internal class CustomerStateHolderTest {
 
     @Test
     fun `canRemove is correct when one payment method & can remove last payment method`() =
-        runScenario {
+        runScenario(
+            isRemoveEnabled = true,
+            canRemoveLastPaymentMethod = true,
+        ) {
             customerStateHolder.canRemove.test {
                 assertThat(awaitItem()).isFalse()
 
                 customerStateHolder.setCustomerState(
                     createCustomerState(
-                        isRemoveEnabled = true,
-                        canRemoveLastPaymentMethod = true,
                         paymentMethods = PaymentMethodFactory.cards(1),
                     )
                 )
@@ -220,14 +214,15 @@ internal class CustomerStateHolderTest {
 
     @Test
     fun `canRemove is correct when one payment method & cannot remove last payment method`() =
-        runScenario {
+        runScenario(
+            isRemoveEnabled = true,
+            canRemoveLastPaymentMethod = false,
+        ) {
             customerStateHolder.canRemove.test {
                 assertThat(awaitItem()).isFalse()
 
                 customerStateHolder.setCustomerState(
                     createCustomerState(
-                        isRemoveEnabled = true,
-                        canRemoveLastPaymentMethod = false,
                         paymentMethods = PaymentMethodFactory.cards(1),
                     )
                 )
@@ -239,14 +234,15 @@ internal class CustomerStateHolderTest {
 
     @Test
     fun `canRemove is correct when multiple payment methods & can remove last payment method`() =
-        runScenario {
+        runScenario(
+            isRemoveEnabled = true,
+            canRemoveLastPaymentMethod = true,
+        ) {
             customerStateHolder.canRemove.test {
                 assertThat(awaitItem()).isFalse()
 
                 customerStateHolder.setCustomerState(
                     createCustomerState(
-                        isRemoveEnabled = true,
-                        canRemoveLastPaymentMethod = true,
                         paymentMethods = PaymentMethodFactory.cards(2),
                     )
                 )
@@ -257,14 +253,15 @@ internal class CustomerStateHolderTest {
 
     @Test
     fun `canRemove is correct when multiple payment methods & cannot remove last payment method`() =
-        runScenario {
+        runScenario(
+            isRemoveEnabled = true,
+            canRemoveLastPaymentMethod = false,
+        ) {
             customerStateHolder.canRemove.test {
                 assertThat(awaitItem()).isFalse()
 
                 customerStateHolder.setCustomerState(
                     createCustomerState(
-                        isRemoveEnabled = true,
-                        canRemoveLastPaymentMethod = false,
                         paymentMethods = PaymentMethodFactory.cards(2),
                     )
                 )
@@ -275,15 +272,16 @@ internal class CustomerStateHolderTest {
 
     @Test
     fun `canRemove is correct when has remove permissions & can remove last payment method`() =
-        runScenario {
+        runScenario(
+            isRemoveEnabled = true,
+            canRemoveLastPaymentMethod = true,
+        ) {
             customerStateHolder.canRemove.test {
                 assertThat(awaitItem()).isFalse()
 
                 customerStateHolder.setCustomerState(
                     createCustomerState(
                         paymentMethods = PaymentMethodFactory.cards(1),
-                        isRemoveEnabled = true,
-                        canRemoveLastPaymentMethod = true,
                     )
                 )
 
@@ -295,15 +293,16 @@ internal class CustomerStateHolderTest {
 
     @Test
     fun `canRemove is correct when has remove permissions & canRemoveLastPaymentMethod is false`() =
-        runScenario {
+        runScenario(
+            isRemoveEnabled = true,
+            canRemoveLastPaymentMethod = false,
+        ) {
             customerStateHolder.canRemove.test {
                 assertThat(awaitItem()).isFalse()
 
                 customerStateHolder.setCustomerState(
                     createCustomerState(
                         paymentMethods = PaymentMethodFactory.cards(1),
-                        isRemoveEnabled = true,
-                        canRemoveLastPaymentMethod = false,
                     )
                 )
 
@@ -313,15 +312,16 @@ internal class CustomerStateHolderTest {
 
     @Test
     fun `canRemove is correct when does not remove permissions & canRemoveLastPaymentMethod is true`() =
-        runScenario {
+        runScenario(
+            isRemoveEnabled = false,
+            canRemoveLastPaymentMethod = true,
+        ) {
             customerStateHolder.canRemove.test {
                 assertThat(awaitItem()).isFalse()
 
                 customerStateHolder.setCustomerState(
                     createCustomerState(
                         paymentMethods = PaymentMethodFactory.cards(1),
-                        isRemoveEnabled = false,
-                        canRemoveLastPaymentMethod = true,
                     )
                 )
 
@@ -330,11 +330,24 @@ internal class CustomerStateHolderTest {
         }
 
     private fun runScenario(
+        isRemoveEnabled: Boolean = true,
+        canRemoveLastPaymentMethod: Boolean = true,
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
         selection: StateFlow<PaymentSelection?> = stateFlowOf(null),
         block: suspend Scenario.() -> Unit
     ) {
+        val customerMetadata: StateFlow<CustomerMetadata> = stateFlowOf(
+            DEFAULT_CUSTOMER_METADATA.copy(
+                permissions = CustomerMetadata.Permissions(
+                    canRemovePaymentMethods = isRemoveEnabled,
+                    canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
+                    canRemoveDuplicates = true
+                )
+            )
+        )
+
         val customerStateHolder = CustomerStateHolder(
+            customerMetadata = customerMetadata,
             savedStateHandle = savedStateHandle,
             selection = selection,
         )

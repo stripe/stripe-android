@@ -5,6 +5,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
@@ -114,7 +115,11 @@ internal class DefaultEmbeddedContentHelperTest {
             customerRepository = FakeCustomerRepository(),
             selectionHolder = selectionHolder,
             embeddedWalletsHelper = { stateFlowOf(null) },
-            customerStateHolder = CustomerStateHolder(savedStateHandle, selectionHolder.selection),
+            customerStateHolder = CustomerStateHolder(
+                savedStateHandle = savedStateHandle,
+                selection = selectionHolder.selection,
+                customerMetadata = stateFlowOf(PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA)
+            ),
             embeddedFormHelperFactory = embeddedFormHelperFactory,
             confirmationHandler = confirmationHandler,
             confirmationStateHolder = EmbeddedConfirmationStateHolder(

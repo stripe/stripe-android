@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.model.PaymentIntentFixtures
@@ -93,6 +94,7 @@ class CardUiDefinitionFactoryTest {
                     customerMetadata = CustomerMetadata(
                         hasCustomerConfiguration = true,
                         isPaymentMethodSetAsDefaultEnabled = false,
+                        permissions = DEFAULT_CUSTOMER_METADATA_PERMISSIONS,
                     ),
                 )
             )
@@ -106,6 +108,7 @@ class CardUiDefinitionFactoryTest {
                 customerMetadata = CustomerMetadata(
                     hasCustomerConfiguration = true,
                     isPaymentMethodSetAsDefaultEnabled = true,
+                    permissions = DEFAULT_CUSTOMER_METADATA_PERMISSIONS,
                 ),
             )
         )
@@ -171,6 +174,7 @@ class CardUiDefinitionFactoryTest {
                     customerMetadata = CustomerMetadata(
                         hasCustomerConfiguration = true,
                         isPaymentMethodSetAsDefaultEnabled = false,
+                        permissions = DEFAULT_CUSTOMER_METADATA_PERMISSIONS,
                     ),
                 ),
             )

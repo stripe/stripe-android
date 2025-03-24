@@ -5,8 +5,10 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -24,7 +26,6 @@ import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeCustomerRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -34,6 +35,7 @@ import org.mockito.kotlin.mock
 
 @Suppress("LargeClass")
 class SavedPaymentMethodMutatorTest {
+
     @Test
     fun `canEdit is correct when no payment methods`() = runScenario {
         savedPaymentMethodMutator.canEdit.test {
@@ -41,8 +43,6 @@ class SavedPaymentMethodMutatorTest {
 
             customerStateHolder.setCustomerState(
                 createCustomerState(
-                    isRemoveEnabled = true,
-                    canRemoveLastPaymentMethod = true,
                     paymentMethods = listOf()
                 )
             )
@@ -53,14 +53,20 @@ class SavedPaymentMethodMutatorTest {
     }
 
     @Test
-    fun `canEdit is correct when user has permissions to remove last PM`() = runScenario {
+    fun `canEdit is correct when user has permissions to remove last PM`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            customerMetadataPermissions = CustomerMetadata.Permissions(
+                canRemovePaymentMethods = true,
+                canRemoveLastPaymentMethod = true,
+                canRemoveDuplicates = false,
+            )
+        )
+    ) {
         savedPaymentMethodMutator.canEdit.test {
             assertThat(awaitItem()).isFalse()
 
             customerStateHolder.setCustomerState(
                 createCustomerState(
-                    isRemoveEnabled = true,
-                    canRemoveLastPaymentMethod = true,
                     paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
                 )
             )
@@ -69,14 +75,20 @@ class SavedPaymentMethodMutatorTest {
     }
 
     @Test
-    fun `canEdit is correct when when user does not have permissions to remove last PM`() = runScenario {
+    fun `canEdit is correct when when user does not have permissions to remove last PM`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            customerMetadataPermissions = CustomerMetadata.Permissions(
+                canRemovePaymentMethods = true,
+                canRemoveLastPaymentMethod = false,
+                canRemoveDuplicates = false,
+            )
+        )
+    ) {
         savedPaymentMethodMutator.canEdit.test {
             assertThat(awaitItem()).isFalse()
 
             customerStateHolder.setCustomerState(
                 createCustomerState(
-                    isRemoveEnabled = true,
-                    canRemoveLastPaymentMethod = false,
                     paymentMethods = listOf(
                         PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                         PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
@@ -87,8 +99,6 @@ class SavedPaymentMethodMutatorTest {
 
             customerStateHolder.setCustomerState(
                 createCustomerState(
-                    isRemoveEnabled = true,
-                    canRemoveLastPaymentMethod = false,
                     paymentMethods = listOf(
                         PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD,
                     )
@@ -100,10 +110,8 @@ class SavedPaymentMethodMutatorTest {
 
     @Test
     fun `canEdit is correct CBC is enabled`() = runScenario(
-        paymentMethodMetadataFlow = stateFlowOf(
-            PaymentMethodMetadataFactory.create(
-                cbcEligibility = CardBrandChoiceEligibility.Eligible(listOf(CardBrand.Visa, CardBrand.CartesBancaires))
-            )
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            cbcEligibility = CardBrandChoiceEligibility.Eligible(listOf(CardBrand.Visa, CardBrand.CartesBancaires)),
         )
     ) {
         savedPaymentMethodMutator.canEdit.test {
@@ -111,8 +119,6 @@ class SavedPaymentMethodMutatorTest {
 
             customerStateHolder.setCustomerState(
                 createCustomerState(
-                    isRemoveEnabled = true,
-                    canRemoveLastPaymentMethod = false,
                     paymentMethods = listOf(
                         PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD,
                     )
@@ -125,8 +131,6 @@ class SavedPaymentMethodMutatorTest {
 
             customerStateHolder.setCustomerState(
                 createCustomerState(
-                    isRemoveEnabled = true,
-                    canRemoveLastPaymentMethod = false,
                     paymentMethods = listOf(
                         PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
                     ),
@@ -147,11 +151,11 @@ class SavedPaymentMethodMutatorTest {
             }
         )
 
-        runScenario(customerRepository = customerRepository) {
+        runScenario(
+            customerRepository = customerRepository,
+        ) {
             customerStateHolder.setCustomerState(
                 createCustomerState(
-                    isRemoveEnabled = true,
-                    canRemoveLastPaymentMethod = true,
                     paymentMethods = listOf(
                         PaymentMethodFixtures.CARD_PAYMENT_METHOD
                     ),
@@ -188,7 +192,15 @@ class SavedPaymentMethodMutatorTest {
     }
 
     @Test
-    fun `Sets editing to false when removing the last payment method while editing`() = runScenario {
+    fun `Sets editing to false when removing the last payment method while editing`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            customerMetadataPermissions = CustomerMetadata.Permissions(
+                canRemovePaymentMethods = true,
+                canRemoveLastPaymentMethod = true,
+                canRemoveDuplicates = false,
+            )
+        )
+    ) {
         val customerPaymentMethods = PaymentMethodFixtures.createCards(1)
         customerStateHolder.setCustomerState(EMPTY_CUSTOMER_STATE.copy(paymentMethods = customerPaymentMethods))
 
@@ -206,15 +218,22 @@ class SavedPaymentMethodMutatorTest {
     }
 
     @Test
-    fun `updatePaymentMethod should call through to the callback`() = runScenario {
+    fun `updatePaymentMethod should call through to the callback`() = runScenario(
+        paymentMethodMetadata =
+            PaymentMethodMetadataFactory.create(
+                customerMetadataPermissions = CustomerMetadata.Permissions(
+                    canRemoveDuplicates = true,
+                    canRemovePaymentMethods = true,
+                    canRemoveLastPaymentMethod = true,
+                )
+            )
+    ) {
         val cards = PaymentMethodFixtures.createCards(3)
         val expectedPaymentMethod = cards[0].toDisplayableSavedPaymentMethod()
 
         customerStateHolder.setCustomerState(
             createCustomerState(
                 paymentMethods = cards,
-                isRemoveEnabled = true,
-                canRemoveLastPaymentMethod = true,
             )
         )
 
@@ -226,15 +245,21 @@ class SavedPaymentMethodMutatorTest {
     }
 
     @Test
-    fun `updatePaymentMethod should be called correctly when 1 PM & cannot remove last PM`() = runScenario {
+    fun `updatePaymentMethod should be called correctly when 1 PM & cannot remove last PM`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            customerMetadataPermissions = CustomerMetadata.Permissions(
+                canRemoveDuplicates = true,
+                canRemovePaymentMethods = true,
+                canRemoveLastPaymentMethod = false,
+            )
+        )
+    ) {
         val cards = PaymentMethodFixtures.createCards(1)
         val expectedPaymentMethod = cards[0].toDisplayableSavedPaymentMethod()
 
         customerStateHolder.setCustomerState(
             createCustomerState(
                 paymentMethods = cards,
-                isRemoveEnabled = true,
-                canRemoveLastPaymentMethod = false,
             )
         )
 
@@ -302,8 +327,6 @@ class SavedPaymentMethodMutatorTest {
             customerStateHolder.setCustomerState(
                 createCustomerState(
                     paymentMethods = listOf(displayableSavedPaymentMethod.paymentMethod),
-                    isRemoveEnabled = true,
-                    canRemoveLastPaymentMethod = true,
                 )
             )
 
@@ -337,8 +360,6 @@ class SavedPaymentMethodMutatorTest {
             customerStateHolder.setCustomerState(
                 createCustomerState(
                     paymentMethods = listOf(displayableSavedPaymentMethod.paymentMethod),
-                    isRemoveEnabled = true,
-                    canRemoveLastPaymentMethod = true,
                 )
             )
 
@@ -370,8 +391,6 @@ class SavedPaymentMethodMutatorTest {
             customerStateHolder.setCustomerState(
                 createCustomerState(
                     paymentMethods = listOf(displayableSavedPaymentMethod.paymentMethod),
-                    isRemoveEnabled = true,
-                    canRemoveLastPaymentMethod = true,
                 )
             )
 
@@ -406,8 +425,6 @@ class SavedPaymentMethodMutatorTest {
             customerStateHolder.setCustomerState(
                 createCustomerState(
                     paymentMethods = listOf(displayableSavedPaymentMethod.paymentMethod),
-                    isRemoveEnabled = true,
-                    canRemoveLastPaymentMethod = true,
                 )
             )
 
@@ -446,8 +463,6 @@ class SavedPaymentMethodMutatorTest {
             customerStateHolder.setCustomerState(
                 createCustomerState(
                     paymentMethods = listOf(displayableSavedPaymentMethod.paymentMethod),
-                    isRemoveEnabled = true,
-                    canRemoveLastPaymentMethod = true,
                 )
             )
 
@@ -480,8 +495,6 @@ class SavedPaymentMethodMutatorTest {
             customerStateHolder.setCustomerState(
                 createCustomerState(
                     paymentMethods = listOf(displayableSavedPaymentMethod.paymentMethod),
-                    isRemoveEnabled = true,
-                    canRemoveLastPaymentMethod = true,
                 )
             )
 
@@ -523,8 +536,6 @@ class SavedPaymentMethodMutatorTest {
             customerStateHolder.setCustomerState(
                 createCustomerState(
                     paymentMethods = listOf(displayableSavedPaymentMethod.paymentMethod),
-                    isRemoveEnabled = true,
-                    canRemoveLastPaymentMethod = true,
                 )
             )
 
@@ -552,8 +563,6 @@ class SavedPaymentMethodMutatorTest {
             customerStateHolder.setCustomerState(
                 createCustomerState(
                     paymentMethods = listOf(displayableSavedPaymentMethod.paymentMethod),
-                    isRemoveEnabled = true,
-                    canRemoveLastPaymentMethod = true,
                 )
             )
 
@@ -588,8 +597,6 @@ class SavedPaymentMethodMutatorTest {
             customerStateHolder.setCustomerState(
                 createCustomerState(
                     paymentMethods = listOf(displayableSavedPaymentMethod.paymentMethod),
-                    isRemoveEnabled = true,
-                    canRemoveLastPaymentMethod = true,
                 )
             )
 
@@ -769,18 +776,22 @@ class SavedPaymentMethodMutatorTest {
     private fun removeDuplicatesTest(shouldRemoveDuplicates: Boolean) {
         val repository = FakeCustomerRepository()
 
-        runScenario(repository) {
+        runScenario(
+            customerRepository = repository,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                customerMetadataPermissions = CustomerMetadata.Permissions(
+                    canRemovePaymentMethods = true,
+                    canRemoveLastPaymentMethod = true,
+                    canRemoveDuplicates = shouldRemoveDuplicates,
+                )
+            )
+        ) {
             customerStateHolder.setCustomerState(
                 CustomerState(
                     id = "cus_1",
                     ephemeralKeySecret = "ek_1",
                     customerSessionClientSecret = null,
                     paymentMethods = listOf(),
-                    permissions = CustomerState.Permissions(
-                        canRemovePaymentMethods = true,
-                        canRemoveLastPaymentMethod = true,
-                        canRemoveDuplicates = shouldRemoveDuplicates,
-                    ),
                     defaultPaymentMethodId = null,
                 )
             )
@@ -819,15 +830,13 @@ class SavedPaymentMethodMutatorTest {
         val customerStateHolder = CustomerStateHolder(
             savedStateHandle = SavedStateHandle(),
             selection = MutableStateFlow(null),
-        )
-        val paymentMethodMetadataFlow = stateFlowOf(
-            PaymentMethodMetadataFactory.create(
-                isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled
-            )
+            customerMetadata = stateFlowOf(PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA),
         )
         runScenario(
             customerStateHolder = customerStateHolder,
-            paymentMethodMetadataFlow = paymentMethodMetadataFlow,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled
+            ),
         ) {
             customerStateHolder.setCustomerState(
                 createCustomerState(
@@ -847,12 +856,13 @@ class SavedPaymentMethodMutatorTest {
         customerRepository: CustomerRepository = FakeCustomerRepository(),
         eventReporter: EventReporter = FakeEventReporter(),
         selection: MutableStateFlow<PaymentSelection?> = MutableStateFlow(null),
+        paymentMethodMetadata: PaymentMethodMetadata? = PaymentMethodMetadataFactory.create(),
         customerStateHolder: CustomerStateHolder = CustomerStateHolder(
             savedStateHandle = SavedStateHandle(),
             selection = selection,
-        ),
-        paymentMethodMetadataFlow: StateFlow<PaymentMethodMetadata?> = stateFlowOf(
-            PaymentMethodMetadataFactory.create()
+            customerMetadata = stateFlowOf(
+                paymentMethodMetadata?.customerMetadata ?: PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
+            ),
         ),
         block: suspend Scenario.() -> Unit
     ) {
@@ -864,7 +874,7 @@ class SavedPaymentMethodMutatorTest {
             val updatePaymentMethodTurbine = Turbine<UpdateCall>()
 
             val savedPaymentMethodMutator = SavedPaymentMethodMutator(
-                paymentMethodMetadataFlow = paymentMethodMetadataFlow,
+                paymentMethodMetadataFlow = stateFlowOf(paymentMethodMetadata),
                 eventReporter = eventReporter,
                 coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
                 workContext = coroutineContext,
