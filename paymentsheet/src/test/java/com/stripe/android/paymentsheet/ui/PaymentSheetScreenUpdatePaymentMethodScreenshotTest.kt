@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.ui
 import androidx.compose.runtime.Composable
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -35,6 +36,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
                     .CARD_WITH_NETWORKS_PAYMENT_METHOD
                     .toDisplayableSavedPaymentMethod(),
                 canRemove = true,
+                initialCardBrand = CardBrand.CartesBancaires,
                 isModifiablePaymentMethod = true,
             )
         }
@@ -48,6 +50,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
                     .CARD_WITH_NETWORKS_PAYMENT_METHOD
                     .toDisplayableSavedPaymentMethod(),
                 canRemove = false,
+                initialCardBrand = CardBrand.CartesBancaires,
                 isModifiablePaymentMethod = true,
             )
         }
@@ -122,6 +125,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
         paymentMethod: DisplayableSavedPaymentMethod,
         canRemove: Boolean,
         isModifiablePaymentMethod: Boolean = false,
+        initialCardBrand: CardBrand = CardBrand.Unknown,
         isExpiredCard: Boolean = false,
         error: String? = null,
         shouldShowSetAsDefaultCheckbox: Boolean = false,
@@ -137,6 +141,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
             initialState = UpdatePaymentMethodInteractor.State(
                 error = error?.resolvableString,
                 status = UpdatePaymentMethodInteractor.Status.Idle,
+                cardBrandChoice = CardBrandChoice(brand = initialCardBrand, enabled = true),
                 setAsDefaultCheckboxChecked = false,
                 isSaveButtonEnabled = false,
             ),

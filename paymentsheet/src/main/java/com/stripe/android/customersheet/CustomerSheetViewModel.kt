@@ -544,14 +544,21 @@ internal class CustomerSheetViewModel(
 
         transition(
             to = CustomerSheetViewState.UpdatePaymentMethod(
-                updatePaymentMethodInteractor = DefaultUpdatePaymentMethodInteractor.factory(
+                updatePaymentMethodInteractor = DefaultUpdatePaymentMethodInteractor(
                     isLiveMode = isLiveModeProvider(),
                     canRemove = customerState.canRemove,
                     displayableSavedPaymentMethod = paymentMethod,
                     cardBrandFilter = PaymentSheetCardBrandFilter(customerState.configuration.cardBrandAcceptance),
                     removeExecutor = ::removeExecutor,
+                    onBrandChoiceSelected = { brand ->
+                        eventReporter.onBrandChoiceSelected(
+                            source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
+                            selectedBrand = brand
+                        )
+                    },
                     onUpdateSuccess = ::onBackPressed,
                     updatePaymentMethodExecutor = ::updatePaymentMethodExecutor,
+                    workContext = workContext,
                     // This checkbox is never displayed in CustomerSheet.
                     shouldShowSetAsDefaultCheckbox = false,
                     isDefaultPaymentMethod = false,
@@ -561,12 +568,6 @@ internal class CustomerSheetViewModel(
                             IllegalStateException("Unexpected attempt to update default from CustomerSheet.")
                         )
                     },
-                    onBrandChoiceSelected = { brand ->
-                        eventReporter.onBrandChoiceSelected(
-                            source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
-                            selectedBrand = brand
-                        )
-                    }
                 ),
                 isLiveMode = isLiveModeProvider(),
             )

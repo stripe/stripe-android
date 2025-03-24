@@ -29,7 +29,7 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
     override fun createUpdateScreenInteractor(
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod
     ): UpdatePaymentMethodInteractor {
-        return DefaultUpdatePaymentMethodInteractor.factory(
+        return DefaultUpdatePaymentMethodInteractor(
             isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             canRemove = customerStateHolder.canRemove.value,
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
@@ -59,6 +59,12 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
             setDefaultPaymentMethodExecutor = { method ->
                 savedPaymentMethodMutatorProvider.get().setDefaultPaymentMethod(method)
             },
+            onBrandChoiceSelected = {
+                eventReporter.onBrandChoiceSelected(
+                    source = EventReporter.CardBrandChoiceEventSource.Edit,
+                    selectedBrand = it
+                )
+            },
             shouldShowSetAsDefaultCheckbox = (
                 paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true
                 ),
@@ -70,12 +76,6 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
             onUpdateSuccess = {
                 manageNavigatorProvider.get().performAction(ManageNavigator.Action.Back)
             },
-            onBrandChoiceSelected = {
-                eventReporter.onBrandChoiceSelected(
-                    source = EventReporter.CardBrandChoiceEventSource.Edit,
-                    selectedBrand = it
-                )
-            }
         )
     }
 }

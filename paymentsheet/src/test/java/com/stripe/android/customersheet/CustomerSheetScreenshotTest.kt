@@ -20,7 +20,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
-import com.stripe.android.paymentsheet.ui.FakeCardEditUIHandlerFactory
 import com.stripe.android.paymentsheet.utils.ViewModelStoreOwnerContext
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
@@ -357,11 +356,11 @@ internal class CustomerSheetScreenshotTest {
                 canRemove = canRemove,
                 isLiveMode = true,
                 cardBrandFilter = DefaultCardBrandFilter,
+                onBrandChoiceSelected = {},
                 // This checkbox is never displayed in CustomerSheet.
                 shouldShowSetAsDefaultCheckbox = false,
                 isDefaultPaymentMethod = false,
                 onUpdateSuccess = {},
-                cardEditUIHandlerFactory = FakeCardEditUIHandlerFactory(),
             ),
             isLiveMode = true,
         )
