@@ -4,7 +4,7 @@ import com.stripe.android.core.utils.FeatureFlags.financialConnectionsFullSdkUna
 import com.stripe.android.core.utils.FeatureFlags.financialConnectionsLiteKillswitch
 import com.stripe.android.financialconnections.FinancialConnectionsMode
 import com.stripe.android.model.ElementsSession
-import com.stripe.android.model.ElementsSessionFlags.FINANCIAL_CONNECTIONS_LITE_KILLSWITCH
+import com.stripe.android.model.ElementsSessionFlags.ELEMENTS_DISABLE_FC_LITE
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import kotlin.test.Test
@@ -29,7 +29,7 @@ class GetFinancialConnectionsModeTest {
     fun `when lite killswitch is enabled and full not available should return None`() {
         financialConnectionsLiteKillswitch.setEnabled(true)
         val elementsSession = createSession(
-            mapOf(FINANCIAL_CONNECTIONS_LITE_KILLSWITCH.flagValue to true)
+            mapOf(ELEMENTS_DISABLE_FC_LITE.flagValue to true)
         )
         assertEquals(
             FinancialConnectionsMode.None,

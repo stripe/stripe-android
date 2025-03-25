@@ -5,7 +5,7 @@ import com.stripe.android.core.utils.FeatureFlags.financialConnectionsFullSdkUna
 import com.stripe.android.core.utils.FeatureFlags.financialConnectionsLiteKillswitch
 import com.stripe.android.financialconnections.FinancialConnectionsMode
 import com.stripe.android.model.ElementsSession
-import com.stripe.android.model.ElementsSessionFlags.FINANCIAL_CONNECTIONS_LITE_KILLSWITCH
+import com.stripe.android.model.ElementsSessionFlags.ELEMENTS_DISABLE_FC_LITE
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object GetFinancialConnectionsMode {
@@ -28,5 +28,5 @@ object GetFinancialConnectionsMode {
     }
 
     private fun ElementsSession?.fcLiteKillSwitchEnabled(): Boolean =
-        this?.flags[FINANCIAL_CONNECTIONS_LITE_KILLSWITCH.flagValue] == true
+        this?.flags[ELEMENTS_DISABLE_FC_LITE.flagValue] == true
 }
