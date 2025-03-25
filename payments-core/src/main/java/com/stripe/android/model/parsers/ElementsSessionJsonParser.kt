@@ -50,7 +50,7 @@ internal class ElementsSessionJsonParser(
         val flags = json.optJSONObject(FIELD_FLAGS)?.let { flags ->
             parseFlags(
                 json = flags,
-                relevantFlags = listOf(ElementsSessionFlags.FINANCIAL_CONNECTIONS_LITE_KILLSWITCH.flagValue)
+                relevantFlags = ElementsSessionFlags.entries.toList().map { it.flagValue }
             )
         } ?: emptyMap()
 

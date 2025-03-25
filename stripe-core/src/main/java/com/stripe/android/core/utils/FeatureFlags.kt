@@ -10,7 +10,8 @@ object FeatureFlags {
     val nativeLinkAttestationEnabled = FeatureFlag("Native Link Attestation")
     val instantDebitsIncentives = FeatureFlag("Instant Bank Payments Incentives")
     val editSavedCardPaymentMethodEnabled = FeatureFlag("Edit Saved Card Payment Method")
-    val forceFinancialConnectionsLiteSdk = FeatureFlag("Force FC lite SDK")
+    val financialConnectionsLiteKillswitch = FeatureFlag("FC Lite killswitch")
+    val financialConnectionsFullSdkUnavailable = FeatureFlag("FC Full SDK Unavailable")
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

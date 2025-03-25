@@ -452,7 +452,8 @@ internal class PlaygroundSettings private constructor(
             LayoutSettingsDefinition,
             CardBrandAcceptanceSettingsDefinition,
             FeatureFlagSettingsDefinition(FeatureFlags.instantDebitsIncentives),
-            FeatureFlagSettingsDefinition(FeatureFlags.forceFinancialConnectionsLiteSdk),
+            FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsLiteKillswitch),
+            FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsFullSdkUnavailable),
             EmbeddedViewDisplaysMandateSettingDefinition,
         )
 

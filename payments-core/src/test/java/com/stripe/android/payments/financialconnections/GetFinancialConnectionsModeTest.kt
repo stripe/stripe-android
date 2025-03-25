@@ -1,6 +1,7 @@
 package com.stripe.android.payments.financialconnections
 
-import com.stripe.android.core.utils.FeatureFlags.forceFinancialConnectionsLiteSdk
+import com.stripe.android.core.utils.FeatureFlags.financialConnectionsFullSdkUnavailable
+import com.stripe.android.core.utils.FeatureFlags.financialConnectionsLiteKillswitch
 import com.stripe.android.financialconnections.FinancialConnectionsMode
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionFlags.FINANCIAL_CONNECTIONS_LITE_KILLSWITCH
@@ -12,21 +13,8 @@ import kotlin.test.assertEquals
 class GetFinancialConnectionsModeTest {
 
     @Test
-    fun `when client flag is enabled force lite`() {
-        forceFinancialConnectionsLiteSdk.setEnabled(true)
-        val elementsSession = createSession(emptyMap())
-        assertEquals(
-            FinancialConnectionsMode.Lite,
-            GetFinancialConnectionsMode(
-                elementsSession = elementsSession,
-                isFinancialConnectionsFullSdkAvailable = isFinancialConnectionsFullSdkAvailable(true)
-            )
-        )
-    }
-
-    @Test
-    fun `when full SDK available should return full`() {
-        forceFinancialConnectionsLiteSdk.setEnabled(false)
+    fun `when full SDK available and not unavailable should return full`() {
+        financialConnectionsFullSdkUnavailable.setEnabled(false)
         val elementsSession = createSession(emptyMap())
         assertEquals(
             FinancialConnectionsMode.Full,
@@ -39,7 +27,7 @@ class GetFinancialConnectionsModeTest {
 
     @Test
     fun `when lite killswitch is enabled and full not available should return None`() {
-        forceFinancialConnectionsLiteSdk.setEnabled(false)
+        financialConnectionsLiteKillswitch.setEnabled(true)
         val elementsSession = createSession(
             mapOf(FINANCIAL_CONNECTIONS_LITE_KILLSWITCH.flagValue to true)
         )
@@ -54,7 +42,7 @@ class GetFinancialConnectionsModeTest {
 
     @Test
     fun `when full not available and killswitch not enabled, should return Lite`() {
-        forceFinancialConnectionsLiteSdk.setEnabled(false)
+        financialConnectionsLiteKillswitch.setEnabled(false)
         val elementsSession = createSession(flags = emptyMap())
         assertEquals(
             FinancialConnectionsMode.Lite,
