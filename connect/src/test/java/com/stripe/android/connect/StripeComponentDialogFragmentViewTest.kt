@@ -67,7 +67,7 @@ class StripeComponentDialogFragmentViewTest {
 
     private fun snapshot(
         title: String = "Account Onboarding",
-        appearance: Appearance = Appearance(),
+        appearance: Appearance = Appearance.default(),
         applyView: StripeComponentDialogFragmentView<TestComponentView>.(Context) -> Unit = {},
     ) {
         paparazziRule.snapshot {
@@ -87,14 +87,20 @@ class StripeComponentDialogFragmentViewTest {
     }
 
     private fun createAppearance(includeFont: Boolean = false) =
-        Appearance(
-            colors = Colors(
-                text = Color.argb(255, 255, 0, 0),
-                border = Color.argb(255, 0, 255, 0),
-                background = Color.argb(255, 0, 0, 255),
-            ),
-            typography = Typography(fontFamily = "doto".takeIf { includeFont })
-        )
+        Appearance.Builder()
+            .setColors(
+                Colors.Builder()
+                    .setText(Color.argb(255, 255, 0, 0))
+                    .setBorder(Color.argb(255, 0, 255, 0))
+                    .setBackground(Color.argb(255, 0, 0, 255))
+                    .build()
+            )
+            .setTypography(
+                Typography.Builder()
+                    .setFontFamily("doto".takeIf { includeFont })
+                    .build()
+            )
+            .build()
 
     private class TestStripeComponentDialogFragmentView(
         context: Context

@@ -16,7 +16,7 @@ import kotlinx.parcelize.Parcelize
 class EmbeddedComponentManager @JvmOverloads constructor(
     configuration: Configuration,
     fetchClientSecretCallback: FetchClientSecretCallback,
-    appearance: Appearance = Appearance(),
+    appearance: Appearance = Appearance.default(),
     customFonts: List<CustomFontSource> = emptyList(),
 ) {
     internal val coordinator: EmbeddedComponentCoordinator =

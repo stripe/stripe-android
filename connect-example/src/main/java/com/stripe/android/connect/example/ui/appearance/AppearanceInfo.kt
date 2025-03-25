@@ -2,6 +2,7 @@ package com.stripe.android.connect.example.ui.appearance
 
 import android.content.Context
 import android.os.Parcelable
+import androidx.annotation.ColorRes
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import com.stripe.android.connect.PrivateBetaConnectSDK
@@ -46,167 +47,221 @@ data class AppearanceInfo(
 
         private fun defaultAppearance() = AppearanceInfo(
             appearanceId = AppearanceId.Default,
-            appearance = Appearance()
+            appearance = Appearance.Builder().build()
         )
 
         private fun ogreAppearance(context: Context) = AppearanceInfo(
             appearanceId = AppearanceId.Ogre,
-            appearance = Appearance(
-                colors = Colors(
-                    primary = ContextCompat.getColor(context, R.color.ogre_primary),
-                    background = ContextCompat.getColor(context, R.color.ogre_background),
-                    text = ContextCompat.getColor(context, R.color.ogre_text)
-                ),
-                buttonPrimary = Button(
-                    colorBackground = ContextCompat.getColor(context, R.color.ogre_button_primary_background),
-                    colorBorder = ContextCompat.getColor(context, R.color.ogre_button_primary_border),
-                    colorText = ContextCompat.getColor(context, R.color.ogre_button_primary_text)
-                ),
-                buttonSecondary = Button(
-                    colorBackground = ContextCompat.getColor(context, R.color.ogre_button_secondary_background),
-                    colorText = ContextCompat.getColor(context, R.color.ogre_button_secondary_text)
-                ),
-                badgeNeutral = Badge(
-                    colorBackground = ContextCompat.getColor(context, R.color.ogre_badge_neutral_background),
-                    colorText = ContextCompat.getColor(context, R.color.ogre_badge_neutral_text)
+            appearance = Appearance.Builder()
+                .setColors(
+                    Colors.Builder()
+                        .setPrimary(context.getColorCompat(R.color.ogre_primary))
+                        .setBackground(context.getColorCompat(R.color.ogre_background))
+                        .setText(context.getColorCompat(R.color.ogre_text))
+                        .build()
                 )
-            )
+                .setButtonPrimary(
+                    Button(
+                        colorBackground = context.getColorCompat(R.color.ogre_button_primary_background),
+                        colorBorder = context.getColorCompat(R.color.ogre_button_primary_border),
+                        colorText = context.getColorCompat(R.color.ogre_button_primary_text)
+                    )
+                )
+                .setButtonSecondary(
+                    Button(
+                        colorBackground = context.getColorCompat(R.color.ogre_button_secondary_background),
+                        colorText = context.getColorCompat(R.color.ogre_button_secondary_text)
+                    )
+                )
+                .setBadgeNeutral(
+                    Badge(
+                        colorBackground = context.getColorCompat(R.color.ogre_badge_neutral_background),
+                        colorText = context.getColorCompat(R.color.ogre_badge_neutral_text)
+                    )
+                )
+                .build()
         )
 
         private fun hotDogAppearance(context: Context) = AppearanceInfo(
             appearanceId = AppearanceId.HotDog,
-            appearance = Appearance(
-                colors = Colors(
-                    primary = ContextCompat.getColor(context, R.color.hot_dog_primary),
-                    background = ContextCompat.getColor(context, R.color.hot_dog_background),
-                    text = ContextCompat.getColor(context, R.color.hot_dog_text),
-                    secondaryText = ContextCompat.getColor(context, R.color.hot_dog_secondary_text),
-                    offsetBackground = ContextCompat.getColor(context, R.color.hot_dog_offset_background)
-                ),
-                buttonPrimary = Button(
-                    colorBackground = ContextCompat.getColor(context, R.color.hot_dog_button_primary_background),
-                    colorBorder = ContextCompat.getColor(context, R.color.hot_dog_button_primary_border),
-                    colorText = ContextCompat.getColor(context, R.color.hot_dog_button_primary_text)
-                ),
-                buttonSecondary = Button(
-                    colorBackground = ContextCompat.getColor(context, R.color.hot_dog_button_secondary_background),
-                    colorBorder = ContextCompat.getColor(context, R.color.hot_dog_button_secondary_border)
-                ),
-                badgeDanger = Badge(
-                    colorText = ContextCompat.getColor(context, R.color.hot_dog_badge_danger_text)
-                ),
-                badgeWarning = Badge(
-                    colorBackground = ContextCompat.getColor(context, R.color.hot_dog_badge_warning_background)
-                ),
-                cornerRadius = CornerRadius(base = 0f)
-            )
+            appearance = Appearance.Builder()
+                .setColors(
+                    Colors.Builder()
+                        .setPrimary(context.getColorCompat(R.color.hot_dog_primary))
+                        .setBackground(context.getColorCompat(R.color.hot_dog_background))
+                        .setText(context.getColorCompat(R.color.hot_dog_text))
+                        .setSecondaryText(context.getColorCompat(R.color.hot_dog_secondary_text))
+                        .setOffsetBackground(context.getColorCompat(R.color.hot_dog_offset_background))
+                        .build()
+                )
+                .setButtonPrimary(
+                    Button(
+                        colorBackground = context.getColorCompat(R.color.hot_dog_button_primary_background),
+                        colorBorder = context.getColorCompat(R.color.hot_dog_button_primary_border),
+                        colorText = context.getColorCompat(R.color.hot_dog_button_primary_text)
+                    )
+                )
+                .setButtonSecondary(
+                    Button(
+                        colorBackground = context.getColorCompat(R.color.hot_dog_button_secondary_background),
+                        colorBorder = context.getColorCompat(R.color.hot_dog_button_secondary_border)
+                    )
+                )
+                .setBadgeDanger(
+                    Badge(colorText = context.getColorCompat(R.color.hot_dog_badge_danger_text))
+                )
+                .setBadgeWarning(
+                    Badge(colorBackground = context.getColorCompat(R.color.hot_dog_badge_warning_background))
+                )
+                .setCornerRadius(
+                    @Suppress("MagicNumber")
+                    CornerRadius.Builder()
+                        .setBase(0f)
+                        .build()
+                )
+                .build()
         )
 
         private fun oceanBreezeAppearance(context: Context) = AppearanceInfo(
             appearanceId = AppearanceId.OceanBreeze,
-            appearance = Appearance(
-                colors = Colors(
-                    background = ContextCompat.getColor(context, R.color.ocean_breeze_background),
-                    primary = ContextCompat.getColor(context, R.color.ocean_breeze_primary),
-                    text = ContextCompat.getColor(context, R.color.ocean_breeze_text),
-                ),
-                buttonSecondary = Button(
-                    colorText = ContextCompat.getColor(context, R.color.ocean_breeze_button_secondary_text),
-                    colorBorder = ContextCompat.getColor(context, R.color.ocean_breeze_button_secondary_border)
-                ),
-                badgeSuccess = Badge(
-                    colorText = ContextCompat.getColor(context, R.color.ocean_breeze_badge_success_text)
-                ),
-                badgeNeutral = Badge(
-                    colorText = ContextCompat.getColor(context, R.color.ocean_breeze_badge_neutral_text)
-                ),
-                cornerRadius = CornerRadius(base = 23f)
-            )
+            appearance = Appearance.Builder()
+                .setColors(
+                    Colors.Builder()
+                        .setBackground(context.getColorCompat(R.color.ocean_breeze_background))
+                        .setPrimary(context.getColorCompat(R.color.ocean_breeze_primary))
+                        .setText(context.getColorCompat(R.color.ocean_breeze_text))
+                        .build()
+                )
+                .setButtonSecondary(
+                    Button(
+                        colorText = context.getColorCompat(R.color.ocean_breeze_button_secondary_text),
+                        colorBorder = context.getColorCompat(R.color.ocean_breeze_button_secondary_border)
+                    )
+                )
+                .setBadgeSuccess(Badge(colorText = context.getColorCompat(R.color.ocean_breeze_badge_success_text)))
+                .setBadgeNeutral(Badge(colorText = context.getColorCompat(R.color.ocean_breeze_badge_neutral_text)))
+                .setCornerRadius(
+                    @Suppress("MagicNumber")
+                    CornerRadius.Builder()
+                        .setBase(23f)
+                        .build()
+                )
+                .build()
         )
 
         private fun linkAppearance(context: Context) = AppearanceInfo(
             appearanceId = AppearanceId.Link,
-            appearance = Appearance(
-                colors = Colors(
-                    primary = ContextCompat.getColor(context, R.color.link_primary),
-                    background = ContextCompat.getColor(context, R.color.link_background),
-                    text = ContextCompat.getColor(context, R.color.link_text),
-                    secondaryText = ContextCompat.getColor(context, R.color.link_secondary_text),
-                    actionPrimaryText = ContextCompat.getColor(context, R.color.link_action_primary_text)
-                ),
-                buttonPrimary = Button(
-                    colorBackground = ContextCompat.getColor(context, R.color.link_button_primary_background),
-                    colorBorder = ContextCompat.getColor(context, R.color.link_button_primary_border),
-                    colorText = ContextCompat.getColor(context, R.color.link_button_primary_text)
-                ),
-                badgeSuccess = Badge(
-                    colorBackground = ContextCompat.getColor(context, R.color.link_badge_success_background),
-                    colorBorder = ContextCompat.getColor(context, R.color.link_badge_success_border),
-                    colorText = ContextCompat.getColor(context, R.color.link_badge_success_text)
-                ),
-                badgeNeutral = Badge(
-                    colorBackground = ContextCompat.getColor(context, R.color.link_badge_neutral_background),
-                    colorText = ContextCompat.getColor(context, R.color.link_badge_neutral_text)
-                ),
-                cornerRadius = CornerRadius(base = 5f)
-            )
+            appearance = Appearance.Builder()
+                .setColors(
+                    Colors.Builder()
+                        .setPrimary(context.getColorCompat(R.color.link_primary))
+                        .setBackground(context.getColorCompat(R.color.link_background))
+                        .setText(context.getColorCompat(R.color.link_text))
+                        .setSecondaryText(context.getColorCompat(R.color.link_secondary_text))
+                        .setActionPrimaryText(context.getColorCompat(R.color.link_action_primary_text))
+                        .build()
+                )
+                .setButtonPrimary(
+                    Button(
+                        colorBackground = context.getColorCompat(R.color.link_button_primary_background),
+                        colorBorder = context.getColorCompat(R.color.link_button_primary_border),
+                        colorText = context.getColorCompat(R.color.link_button_primary_text)
+                    )
+                )
+                .setBadgeSuccess(
+                    Badge(
+                        colorBackground = context.getColorCompat(R.color.link_badge_success_background),
+                        colorBorder = context.getColorCompat(R.color.link_badge_success_border),
+                        colorText = context.getColorCompat(R.color.link_badge_success_text)
+                    )
+                )
+                .setBadgeNeutral(
+                    Badge(
+                        colorBackground = context.getColorCompat(R.color.link_badge_neutral_background),
+                        colorText = context.getColorCompat(R.color.link_badge_neutral_text)
+                    )
+                )
+                .setCornerRadius(
+                    @Suppress("MagicNumber")
+                    CornerRadius.Builder()
+                        .setBase(5f)
+                        .build()
+                )
+                .build()
         )
 
+        @Suppress("LongMethod")
         private fun dynamicAppearance(context: Context) = AppearanceInfo(
             appearanceId = AppearanceId.Dynamic,
-            appearance = Appearance(
-                colors = Colors(
-                    primary = ContextCompat.getColor(context, R.color.dynamic_colors_primary),
-                    text = ContextCompat.getColor(context, R.color.dynamic_colors_text),
-                    background = ContextCompat.getColor(context, R.color.dynamic_colors_background),
-                    border = ContextCompat.getColor(context, R.color.dynamic_colors_border),
-                    secondaryText = ContextCompat.getColor(context, R.color.dynamic_colors_secondary_text),
-                    actionPrimaryText = ContextCompat.getColor(context, R.color.dynamic_colors_action_primary_text),
-                    actionSecondaryText = ContextCompat.getColor(context, R.color.dynamic_colors_action_secondary_text),
-                    formAccent = ContextCompat.getColor(context, R.color.dynamic_colors_form_accent),
-                    formHighlightBorder = ContextCompat.getColor(context, R.color.dynamic_colors_form_highlight_border),
-                    danger = ContextCompat.getColor(context, R.color.dynamic_colors_danger),
-                    offsetBackground = ContextCompat.getColor(context, R.color.dynamic_colors_offset_background),
-                ),
-                buttonPrimary = Button(
-                    colorBackground = ContextCompat.getColor(context, R.color.dynamic_colors_button_primary_background),
-                    colorBorder = ContextCompat.getColor(context, R.color.dynamic_colors_button_primary_border),
-                    colorText = ContextCompat.getColor(context, R.color.dynamic_colors_button_primary_text)
-                ),
-                buttonSecondary = Button(
-                    colorBackground = ContextCompat.getColor(
-                        context,
-                        R.color.dynamic_colors_button_secondary_background
-                    ),
-                    colorBorder = ContextCompat.getColor(context, R.color.dynamic_colors_button_secondary_border),
-                    colorText = ContextCompat.getColor(context, R.color.dynamic_colors_button_secondary_text)
-                ),
-                badgeSuccess = Badge(
-                    colorBorder = ContextCompat.getColor(context, R.color.dynamic_colors_badge_success_border),
-                    colorText = ContextCompat.getColor(context, R.color.dynamic_colors_badge_success_text)
-                ),
-                badgeNeutral = Badge(
-                    colorBorder = ContextCompat.getColor(context, R.color.dynamic_colors_badge_neutral_border),
-                    colorText = ContextCompat.getColor(context, R.color.dynamic_colors_badge_neutral_text),
-                ),
-                badgeWarning = Badge(
-                    colorBorder = ContextCompat.getColor(context, R.color.dynamic_colors_badge_warning_border),
-                    colorText = ContextCompat.getColor(context, R.color.dynamic_colors_badge_warning_text)
-                ),
-                badgeDanger = Badge(
-                    colorBorder = ContextCompat.getColor(context, R.color.dynamic_colors_badge_danger_border),
-                    colorText = ContextCompat.getColor(context, R.color.dynamic_colors_badge_danger_text)
-                ),
-            )
+            appearance = Appearance.Builder()
+                .setColors(
+                    Colors.Builder()
+                        .setPrimary(context.getColorCompat(R.color.dynamic_colors_primary))
+                        .setText(context.getColorCompat(R.color.dynamic_colors_text))
+                        .setBackground(context.getColorCompat(R.color.dynamic_colors_background))
+                        .setBorder(context.getColorCompat(R.color.dynamic_colors_border))
+                        .setSecondaryText(context.getColorCompat(R.color.dynamic_colors_secondary_text))
+                        .setActionPrimaryText(context.getColorCompat(R.color.dynamic_colors_action_primary_text))
+                        .setActionSecondaryText(context.getColorCompat(R.color.dynamic_colors_action_secondary_text))
+                        .setFormAccent(context.getColorCompat(R.color.dynamic_colors_form_accent))
+                        .setFormHighlightBorder(context.getColorCompat(R.color.dynamic_colors_form_highlight_border))
+                        .setDanger(context.getColorCompat(R.color.dynamic_colors_danger))
+                        .setOffsetBackground(context.getColorCompat(R.color.dynamic_colors_offset_background))
+                        .build()
+                )
+                .setButtonPrimary(
+                    Button(
+                        colorBackground = context.getColorCompat(R.color.dynamic_colors_button_primary_background),
+                        colorBorder = context.getColorCompat(R.color.dynamic_colors_button_primary_border),
+                        colorText = context.getColorCompat(R.color.dynamic_colors_button_primary_text)
+                    )
+                )
+                .setButtonSecondary(
+                    Button(
+                        colorBackground = context.getColorCompat(R.color.dynamic_colors_button_secondary_background),
+                        colorBorder = context.getColorCompat(R.color.dynamic_colors_button_secondary_border),
+                        colorText = context.getColorCompat(R.color.dynamic_colors_button_secondary_text)
+                    )
+                )
+                .setBadgeSuccess(
+                    Badge(
+                        colorBorder = context.getColorCompat(R.color.dynamic_colors_badge_success_border),
+                        colorText = context.getColorCompat(R.color.dynamic_colors_badge_success_text)
+                    )
+                )
+                .setBadgeNeutral(
+                    Badge(
+                        colorBorder = context.getColorCompat(R.color.dynamic_colors_badge_neutral_border),
+                        colorText = context.getColorCompat(R.color.dynamic_colors_badge_neutral_text),
+                    )
+                )
+                .setBadgeWarning(
+                    Badge(
+                        colorBorder = context.getColorCompat(R.color.dynamic_colors_badge_warning_border),
+                        colorText = context.getColorCompat(R.color.dynamic_colors_badge_warning_text)
+                    )
+                )
+                .setBadgeDanger(
+                    Badge(
+                        colorBorder = context.getColorCompat(R.color.dynamic_colors_badge_danger_border),
+                        colorText = context.getColorCompat(R.color.dynamic_colors_badge_danger_text)
+                    )
+                )
+                .build()
         )
 
         private fun customFont() = AppearanceInfo(
-            appearanceId = AppearanceId.Link,
-            appearance = Appearance(
-                typography = Typography(
-                    fontFamily = "doto",
+            appearanceId = AppearanceId.CustomFont,
+            appearance = Appearance.Builder()
+                .setTypography(
+                    Typography.Builder()
+                        .setFontFamily("doto")
+                        .build()
                 )
-            )
+                .build()
         )
+
+        private fun Context.getColorCompat(@ColorRes colorRes: Int): Int =
+            ContextCompat.getColor(this, colorRes)
     }
 }
