@@ -1,7 +1,6 @@
 package com.stripe.android.connect
 
 import android.content.pm.ActivityInfo
-import androidx.appcompat.widget.Toolbar
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.onView
@@ -13,7 +12,6 @@ import androidx.test.espresso.matcher.RootMatchers
 import androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom
 import androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withClassName
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withParent
 import androidx.test.espresso.matcher.ViewMatchers.withText
@@ -30,10 +28,8 @@ import androidx.test.ext.junit.rules.activityScenarioRule
 import com.stripe.android.connect.webview.serialization.AlertJs
 import com.stripe.android.connect.webview.serialization.ConnectJson
 import org.hamcrest.Matchers.allOf
-import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.equalTo
 import org.junit.After
-import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -58,8 +54,11 @@ class FullScreenComponentTest {
     private val toolbar
         get() = allOf(withId(R.id.toolbar), isDescendantOfA(rootView))
 
-    private val toolbarNavigationButton
-        get() = allOf(withParent(toolbar), withClassName(containsString("ImageButton")))
+    private val closeButton
+        get() = allOf(withParent(toolbar), withId(R.id.close_button))
+
+    private val titleText
+        get() = allOf(withParent(toolbar), withId(R.id.title_text))
 
     private val testAlertJs
         get() = AlertJs(
@@ -88,8 +87,7 @@ class FullScreenComponentTest {
     @Test
     fun testShowWithTitleAndDummyPage() {
         checkDialogIsDisplayed()
-        onView(toolbar)
-            .check { view, _ -> assertEquals((view as Toolbar).title, title) }
+        onView(titleText).check(matches(withText(title)))
         onWebView()
             // Sanity check that dummy page is loaded.
             .withElement(findElement(Locator.ID, "top"))
@@ -122,7 +120,7 @@ class FullScreenComponentTest {
     @Test
     fun testCloseButtonDismissesByDefault() {
         checkDialogIsDisplayed()
-        onView(toolbarNavigationButton).perform(click())
+        onView(closeButton).perform(click())
         checkDialogDoesNotExist()
     }
 
