@@ -550,6 +550,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         configuration: CommonConfiguration,
         elementsSession: ElementsSession,
     ): Boolean {
+        if (!elementsSession.isGooglePayEnabled) {
+            userFacingLogger.logWarningWithoutPii(
+                "Google Pay is not enabled for this session."
+            )
+        }
         return elementsSession.isGooglePayEnabled && configuration.isGooglePayReady()
     }
 
