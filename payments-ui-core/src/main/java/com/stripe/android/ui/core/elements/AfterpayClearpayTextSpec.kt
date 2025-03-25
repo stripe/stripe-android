@@ -17,5 +17,5 @@ data class AfterpayClearpayTextSpec(
     @SerialName("api_path")
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic("afterpay_text")
 ) : FormItemSpec() {
-    fun transform(): FormElement = AfterpayClearpayHeaderElement(apiPath)
+    fun transform(currency: String?): FormElement = AfterpayClearpayHeaderElement(apiPath, currency = currency)
 }

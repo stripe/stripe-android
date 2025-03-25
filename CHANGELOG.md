@@ -3,8 +3,14 @@
 ## XX.XX.XX - 20XX-XX-XX
 
 ### PaymentSheet
+* [CHANGED][10480](https://github.com/stripe/stripe-android/pull/10480) Updated Afterpay branding in the US to be Cash App Afterpay.
+
+## 21.7.1 - 2025-03-24
+
+### PaymentSheet
 * [CHANGED][https://github.com/stripe/stripe-android/pull/10421] Afterpay no longer requires a shipping address to be shown.
 * [CHANGED][10382](https://github.com/stripe/stripe-android/pull/10382) Don't show price as $0.00 in Google Pay for setup intents in US and CA.
+* [FIXED][10436](https://github.com/stripe/stripe-android/pull/10436) Update payment method rows to use `PaymentSheet.Appearance.Colors.placeholderText` as the subtitle color when `PaymentMethodLayout` is `Vertical`.
 
 ## 21.7.0 - 2025-03-17
 

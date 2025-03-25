@@ -27,6 +27,7 @@ import org.mockito.kotlin.whenever
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
+import org.robolectric.android.controller.ActivityController
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -39,7 +40,8 @@ class EmbeddedComponentCoordinatorTest {
     private lateinit var configuration: EmbeddedComponentManager.Configuration
     private lateinit var mockFetchClientSecretCallback: FetchClientSecretCallback
     private lateinit var coordinator: EmbeddedComponentCoordinator
-    private lateinit var testActivity: ComponentActivity
+    private lateinit var testActivityController: ActivityController<ComponentActivity>
+    private val testActivity: ComponentActivity get() = testActivityController.get()
 
     @Before
     fun setup() {
@@ -53,7 +55,19 @@ class EmbeddedComponentCoordinatorTest {
                 appearance = Appearance(),
                 customFonts = emptyList(),
             )
-        testActivity = Robolectric.buildActivity(ComponentActivity::class.java).create().get()
+        testActivityController = Robolectric.buildActivity(ComponentActivity::class.java).create()
+    }
+
+    @Test
+    fun `onActivityCreate registers Activity in mappings and unregisters on destroy`() {
+        EmbeddedComponentCoordinator.onActivityCreate(testActivity)
+        assertThat(EmbeddedComponentCoordinator.requestPermissionLaunchers[testActivity]).isNotNull()
+        assertThat(EmbeddedComponentCoordinator.chooseFileLaunchers[testActivity]).isNotNull()
+        assertThat(EmbeddedComponentCoordinator.financialConnectionsSheets[testActivity]).isNotNull()
+        testActivityController.destroy()
+        assertThat(EmbeddedComponentCoordinator.requestPermissionLaunchers[testActivity]).isNull()
+        assertThat(EmbeddedComponentCoordinator.chooseFileLaunchers[testActivity]).isNull()
+        assertThat(EmbeddedComponentCoordinator.financialConnectionsSheets[testActivity]).isNull()
     }
 
     @Test
@@ -89,7 +103,7 @@ class EmbeddedComponentCoordinatorTest {
         val shadowApplication = shadowOf(ApplicationProvider.getApplicationContext() as Application)
         shadowApplication.grantPermissions(Manifest.permission.CAMERA)
 
-        assertTrue(coordinator.requestCameraPermission(testActivity)!!)
+        assertTrue(coordinator.requestCameraPermission(testActivity))
     }
 
     @Test
@@ -119,14 +133,6 @@ class EmbeddedComponentCoordinatorTest {
         val resultTrue = resultTrueAsync.await()
         assertNotNull(resultTrue)
         assertTrue(resultTrue)
-    }
-
-    @Test
-    fun `requestCameraPermission returns null when not initialized in Activity onCreate`() = runTest {
-        val shadowApplication = shadowOf(ApplicationProvider.getApplicationContext() as Application)
-        shadowApplication.denyPermissions(Manifest.permission.CAMERA)
-
-        assertNull(coordinator.requestCameraPermission(testActivity))
     }
 
     @Test

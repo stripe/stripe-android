@@ -33,7 +33,10 @@ internal object BacsDebitDefinition : PaymentMethodDefinition {
 }
 
 private object BacsDebitUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSpec {
-    override fun createSupportedPaymentMethod(sharedDataSpec: SharedDataSpec) = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(
+        metadata: PaymentMethodMetadata,
+        sharedDataSpec: SharedDataSpec,
+    ) = SupportedPaymentMethod(
         paymentMethodDefinition = BacsDebitDefinition,
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_bacs_debit,
@@ -68,6 +71,7 @@ private object BacsDebitUiDefinitionFactory : UiDefinitionFactory.RequiresShared
         )
 
         return transformSpecToElements.transform(
+            metadata = metadata,
             specs = sharedDataSpec.fields + localFields,
             placeholderOverrideList = listOf(
                 IdentifierSpec.Name,

@@ -44,6 +44,8 @@ abstract class StripeComponentController<Listener, Props> internal constructor(
         }
 
     init {
+        embeddedComponentManager.coordinator.checkContextDuringCreate(activity)
+
         val existingDialogFragment = getExistingDialogFragment()
         if (existingDialogFragment?.isAdded == true) {
             // The DF may already be added during re-creation after process death.

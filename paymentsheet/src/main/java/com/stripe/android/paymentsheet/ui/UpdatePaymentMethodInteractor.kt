@@ -13,6 +13,7 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SavedPaymentMethod
 import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -131,14 +132,23 @@ internal class DefaultUpdatePaymentMethodInteractor(
         (shouldShowSetAsDefaultCheckbox && !isDefaultPaymentMethod)
     override val allowCardEdit = FeatureFlags.editSavedCardPaymentMethodEnabled.isEnabled
 
+    private val _setAsDefaultValueChanged = setAsDefaultCheckboxChecked.mapAsStateFlow { setAsDefaultCheckboxChecked ->
+        setAsDefaultCheckboxChecked != initialSetAsDefaultCheckedValue
+    }
+
     private val _state = combineAsStateFlow(
         error,
         status,
         cardBrandChoice,
         cardBrandHasBeenChanged,
         setAsDefaultCheckboxChecked,
-    ) { error, status, cardBrandChoice, cardBrandHasBeenChanged, setAsDefaultCheckboxChecked ->
-        val setAsDefaultValueChanged = setAsDefaultCheckboxChecked != initialSetAsDefaultCheckedValue
+        _setAsDefaultValueChanged,
+    ) { error,
+        status,
+        cardBrandChoice,
+        cardBrandHasBeenChanged,
+        setAsDefaultCheckboxChecked,
+        setAsDefaultValueChanged ->
         val isSaveButtonEnabled = (cardBrandHasBeenChanged || setAsDefaultValueChanged) &&
             status == UpdatePaymentMethodInteractor.Status.Idle
 
@@ -218,7 +228,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     }
 
     private suspend fun maybeSetDefaultPaymentMethod(): Result<Unit>? {
-        return if (setAsDefaultCheckboxChecked.value) {
+        return if (_setAsDefaultValueChanged.value && setAsDefaultCheckboxChecked.value) {
             setDefaultPaymentMethodExecutor(displayableSavedPaymentMethod.paymentMethod)
         } else {
             null

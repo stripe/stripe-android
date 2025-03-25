@@ -43,7 +43,7 @@ class DefaultManageScreenInteractorTest {
         runScenario(initialPaymentMethods, currentSelection = null) {
             interactor.state.test {
                 assertThat(awaitItem().title)
-                    .isEqualTo(R.string.stripe_paymentsheet_select_your_payment_method.resolvableString)
+                    .isEqualTo(R.string.stripe_paymentsheet_select_payment_method.resolvableString)
                 editingSource.value = true
                 assertThat(awaitItem().title)
                     .isEqualTo(R.string.stripe_paymentsheet_manage_payment_methods.resolvableString)

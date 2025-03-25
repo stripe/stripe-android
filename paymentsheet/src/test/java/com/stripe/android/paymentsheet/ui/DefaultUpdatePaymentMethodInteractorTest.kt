@@ -666,6 +666,17 @@ class DefaultUpdatePaymentMethodInteractorTest {
         assertThat(interactor.allowCardEdit).isTrue()
     }
 
+    @Test
+    fun shouldNotCallSetDefaultPaymentMethod_ifPaymentMethodIsAlreadyDefault() = runScenario(
+        isDefaultPaymentMethod = true,
+        onSetDefaultPaymentMethod = { _ -> notImplemented() },
+        updatePaymentMethodExecutor = { _, _ -> notImplemented() }
+    ) {
+        interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
+
+        // No exceptions thrown here indicates that the executors were not called.
+    }
+
     private fun updateCardBrandAndDefaultPaymentMethod(interactor: UpdatePaymentMethodInteractor) {
         interactor.handleViewAction(
             UpdatePaymentMethodInteractor.ViewAction.SetAsDefaultCheckboxChanged(

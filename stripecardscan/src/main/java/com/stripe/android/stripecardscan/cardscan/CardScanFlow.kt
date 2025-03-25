@@ -84,7 +84,6 @@ internal abstract class CardScanFlow(
                 analyzerPool = analyzerPool,
                 resultHandler = it,
                 analyzerLoopErrorListener = scanErrorListener,
-                statsName = "main_loop_images_processed"
             ).apply {
                 mainLoopJob = subscribeTo(
                     imageStream.map { cameraImage ->

@@ -7,6 +7,7 @@
     <FrameLayout
         android:id="@+id/card_number_input_container"
         android:layout_width="match_parent"
+        android:layoutDirection="ltr"
         android:layout_height="wrap_content">
 
         <com.stripe.android.view.CardNumberTextInputLayout
@@ -44,6 +45,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:baselineAligned="false"
+        android:layoutDirection="ltr"
         android:orientation="horizontal">
 
         <com.google.android.material.textfield.TextInputLayout
@@ -55,6 +57,7 @@
             android:layout_marginEnd="@dimen/stripe_add_card_expiry_middle_margin"
             android:layout_weight="1"
             android:hint="@string/stripe_acc_label_expiry_date"
+            android:layoutDirection="ltr"
             app:placeholderText="@string/stripe_expiry_date_hint">
 
             <com.stripe.android.view.ExpiryDateEditText
@@ -77,6 +80,7 @@
             android:layout_marginTop="@dimen/stripe_add_card_element_vertical_margin"
             android:layout_marginEnd="@dimen/stripe_add_card_expiry_middle_margin"
             android:layout_weight="1"
+            android:layoutDirection="ltr"
             app:placeholderText="@string/stripe_cvc_multiline_helper">
 
             <com.stripe.android.view.CvcEditText

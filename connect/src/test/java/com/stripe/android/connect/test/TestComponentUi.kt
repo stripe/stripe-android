@@ -13,17 +13,22 @@ import com.stripe.android.connect.StripeComponentDialogFragment
 import com.stripe.android.connect.StripeComponentView
 import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.StripeEmbeddedComponentListener
-import org.mockito.Mockito.mock
+import com.stripe.android.connect.manager.EmbeddedComponentCoordinator
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
 
 internal class TestActivity : FragmentActivity() {
     lateinit var controller: StripeComponentController<TestComponentListener, *>
     lateinit var embeddedComponentManager: EmbeddedComponentManager
+    val embeddedComponentCoordinator: EmbeddedComponentCoordinator = mock()
     val onDismissListener = StripeComponentController.OnDismissListener { }
     val listener = object : TestComponentListener {}
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        embeddedComponentManager = mock()
+        embeddedComponentManager = mock<EmbeddedComponentManager> {
+            on { this.coordinator }.doReturn(embeddedComponentCoordinator)
+        }
         controller = TestComponentController(this, embeddedComponentManager)
         controller.onDismissListener = onDismissListener
         controller.listener = listener

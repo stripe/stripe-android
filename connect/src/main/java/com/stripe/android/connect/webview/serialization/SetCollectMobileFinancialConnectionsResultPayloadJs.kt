@@ -19,10 +19,9 @@ internal data class SetCollectMobileFinancialConnectionsResultPayloadJs(
     companion object {
         fun from(
             id: String,
-            result: FinancialConnectionsSheetResult?
+            result: FinancialConnectionsSheetResult
         ): SetCollectMobileFinancialConnectionsResultPayloadJs {
             return when (result) {
-                null,
                 is FinancialConnectionsSheetResult.Canceled -> {
                     SetCollectMobileFinancialConnectionsResultPayloadJs(
                         id = id,
