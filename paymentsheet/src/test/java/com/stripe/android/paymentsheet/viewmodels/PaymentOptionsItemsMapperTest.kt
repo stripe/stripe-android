@@ -4,8 +4,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.getDefaultCustomerMetadataFlow
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsItem
@@ -33,13 +32,7 @@ class PaymentOptionsItemsMapperTest {
             isNotPaymentFlow = true,
             nameProvider = { it!!.resolvableString },
             isCbcEligible = { false },
-            customerMetadata = MutableStateFlow(
-                CustomerMetadata(
-                    hasCustomerConfiguration = false,
-                    isPaymentMethodSetAsDefaultEnabled = false,
-                    permissions = DEFAULT_CUSTOMER_METADATA_PERMISSIONS,
-                )
-            ),
+            customerMetadata = getDefaultCustomerMetadataFlow(),
         )
 
         mapper().test {
@@ -70,13 +63,7 @@ class PaymentOptionsItemsMapperTest {
             isNotPaymentFlow = false,
             nameProvider = { it!!.resolvableString },
             isCbcEligible = { false },
-            customerMetadata = MutableStateFlow(
-                CustomerMetadata(
-                    hasCustomerConfiguration = false,
-                    isPaymentMethodSetAsDefaultEnabled = false,
-                    permissions = DEFAULT_CUSTOMER_METADATA_PERMISSIONS,
-                )
-            ),
+            customerMetadata = getDefaultCustomerMetadataFlow(),
         )
 
         mapper().test {
@@ -126,12 +113,8 @@ class PaymentOptionsItemsMapperTest {
             isNotPaymentFlow = false,
             nameProvider = { it!!.resolvableString },
             isCbcEligible = { false },
-            customerMetadata = MutableStateFlow(
-                CustomerMetadata(
-                    hasCustomerConfiguration = false,
-                    isPaymentMethodSetAsDefaultEnabled = isSetAsDefaultEnabled,
-                    permissions = DEFAULT_CUSTOMER_METADATA_PERMISSIONS,
-                )
+            customerMetadata = getDefaultCustomerMetadataFlow(
+                isPaymentMethodSetAsDefaultEnabled = isSetAsDefaultEnabled
             ),
         )
     }
