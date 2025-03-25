@@ -7,7 +7,7 @@ import androidx.core.os.bundleOf
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
-internal class AddressElementActivityContract :
+internal object AddressElementActivityContract :
     ActivityResultContract<AddressElementActivityContract.Args, AddressLauncherResult>() {
 
     override fun createIntent(context: Context, input: Args): Intent {
@@ -15,7 +15,7 @@ internal class AddressElementActivityContract :
     }
 
     @Suppress("DEPRECATION")
-    override fun parseResult(resultCode: Int, intent: Intent?) =
+    override fun parseResult(resultCode: Int, intent: Intent?): AddressLauncherResult =
         intent?.getParcelableExtra<Result>(EXTRA_RESULT)?.addressOptionsResult
             ?: AddressLauncherResult.Canceled
 
@@ -46,12 +46,10 @@ internal class AddressElementActivityContract :
         override fun toBundle() = bundleOf(EXTRA_RESULT to this)
     }
 
-    internal companion object {
-        const val EXTRA_ARGS =
-            "com.stripe.android.paymentsheet.addresselement" +
-                ".AddressElementActivityContract.extra_args"
-        const val EXTRA_RESULT =
-            "com.stripe.android.paymentsheet.addresselement" +
-                ".AddressElementActivityContract.extra_result"
-    }
+    const val EXTRA_ARGS =
+        "com.stripe.android.paymentsheet.addresselement" +
+            ".AddressElementActivityContract.extra_args"
+    const val EXTRA_RESULT =
+        "com.stripe.android.paymentsheet.addresselement" +
+            ".AddressElementActivityContract.extra_result"
 }
