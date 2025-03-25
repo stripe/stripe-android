@@ -10,7 +10,7 @@ import org.mockito.kotlin.mock
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class GetFinancialConnectionsModeTest {
+class GetFinancialConnectionsAvailabilityTest {
 
     @Test
     fun `when full SDK available and not unavailable should return full`() {
