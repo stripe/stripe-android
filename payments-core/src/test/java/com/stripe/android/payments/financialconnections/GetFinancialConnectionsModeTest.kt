@@ -2,7 +2,7 @@ package com.stripe.android.payments.financialconnections
 
 import com.stripe.android.core.utils.FeatureFlags.financialConnectionsFullSdkUnavailable
 import com.stripe.android.core.utils.FeatureFlags.financialConnectionsLiteKillswitch
-import com.stripe.android.financialconnections.FinancialConnectionsMode
+import com.stripe.android.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionFlags.ELEMENTS_DISABLE_FC_LITE
 import org.mockito.kotlin.doReturn
@@ -17,8 +17,8 @@ class GetFinancialConnectionsModeTest {
         financialConnectionsFullSdkUnavailable.setEnabled(false)
         val elementsSession = createSession(emptyMap())
         assertEquals(
-            FinancialConnectionsMode.Full,
-            GetFinancialConnectionsMode(
+            FinancialConnectionsAvailability.Full,
+            GetFinancialConnectionsAvailability(
                 elementsSession = elementsSession,
                 isFinancialConnectionsFullSdkAvailable = isFinancialConnectionsFullSdkAvailable(true)
             )
@@ -32,8 +32,8 @@ class GetFinancialConnectionsModeTest {
             mapOf(ELEMENTS_DISABLE_FC_LITE.flagValue to true)
         )
         assertEquals(
-            FinancialConnectionsMode.None,
-            GetFinancialConnectionsMode(
+            FinancialConnectionsAvailability.None,
+            GetFinancialConnectionsAvailability(
                 elementsSession = elementsSession,
                 isFinancialConnectionsFullSdkAvailable = isFinancialConnectionsFullSdkAvailable(false)
             )
@@ -45,8 +45,8 @@ class GetFinancialConnectionsModeTest {
         financialConnectionsLiteKillswitch.setEnabled(false)
         val elementsSession = createSession(flags = emptyMap())
         assertEquals(
-            FinancialConnectionsMode.Lite,
-            GetFinancialConnectionsMode(
+            FinancialConnectionsAvailability.Lite,
+            GetFinancialConnectionsAvailability(
                 elementsSession = elementsSession,
                 isFinancialConnectionsFullSdkAvailable = isFinancialConnectionsFullSdkAvailable(false)
             )

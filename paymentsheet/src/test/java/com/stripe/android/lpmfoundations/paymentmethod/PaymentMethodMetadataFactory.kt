@@ -2,7 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
-import com.stripe.android.financialconnections.FinancialConnectionsMode
+import com.stripe.android.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfiguration
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntentFixtures
@@ -41,7 +41,7 @@ internal object PaymentMethodMetadataFactory {
         paymentMethodIncentive: PaymentMethodIncentive? = null,
         isPaymentMethodSetAsDefaultEnabled: Boolean = IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
         elementsSessionId: String = "session_1234",
-        financialConnectionsMode: FinancialConnectionsMode = FinancialConnectionsMode.Lite
+        financialConnectionsAvailability: FinancialConnectionsAvailability = FinancialConnectionsAvailability.Lite
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -68,7 +68,7 @@ internal object PaymentMethodMetadataFactory {
             cardBrandFilter = cardBrandFilter,
             paymentMethodIncentive = paymentMethodIncentive,
             elementsSessionId = elementsSessionId,
-            financialConnectionsMode = financialConnectionsMode
+            financialConnectionsAvailability = financialConnectionsAvailability
         )
     }
 

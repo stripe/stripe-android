@@ -1,7 +1,7 @@
 package com.stripe.android.payments.bankaccount
 
 import androidx.activity.result.ActivityResultLauncher
-import com.stripe.android.financialconnections.FinancialConnectionsMode
+import com.stripe.android.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -34,7 +34,7 @@ class CollectBankAccountForACHLauncherTest {
                 configuration = CONFIGURATION,
                 attachToIntent = true,
                 hostedSurface = null,
-                financialConnectionsMode = FinancialConnectionsMode.Full
+                financialConnectionsAvailability = FinancialConnectionsAvailability.Full
             )
         )
     }
@@ -58,7 +58,7 @@ class CollectBankAccountForACHLauncherTest {
                 configuration = CONFIGURATION,
                 attachToIntent = false,
                 hostedSurface = "payment_element",
-                financialConnectionsMode = FinancialConnectionsMode.Full
+                financialConnectionsAvailability = FinancialConnectionsAvailability.Full
             )
         )
     }
@@ -82,7 +82,7 @@ class CollectBankAccountForACHLauncherTest {
                 configuration = CONFIGURATION,
                 attachToIntent = true,
                 hostedSurface = null,
-                financialConnectionsMode = FinancialConnectionsMode.Full
+                financialConnectionsAvailability = FinancialConnectionsAvailability.Full
             )
         )
     }
@@ -106,7 +106,7 @@ class CollectBankAccountForACHLauncherTest {
                 configuration = CONFIGURATION,
                 attachToIntent = false,
                 hostedSurface = "payment_element",
-                financialConnectionsMode = FinancialConnectionsMode.Full
+                financialConnectionsAvailability = FinancialConnectionsAvailability.Full
             )
         )
     }
@@ -137,7 +137,7 @@ class CollectBankAccountForACHLauncherTest {
                 amount = 1000,
                 currency = "usd",
                 hostedSurface = null,
-                financialConnectionsMode = FinancialConnectionsMode.Full
+                financialConnectionsAvailability = FinancialConnectionsAvailability.Full
             )
         )
     }
@@ -164,7 +164,7 @@ class CollectBankAccountForACHLauncherTest {
                 customerId = "customer_id",
                 onBehalfOf = "on_behalf_of_id",
                 hostedSurface = null,
-                financialConnectionsMode = FinancialConnectionsMode.Full
+                financialConnectionsAvailability = FinancialConnectionsAvailability.Full
             )
         )
     }
@@ -175,7 +175,7 @@ class CollectBankAccountForACHLauncherTest {
         return CollectBankAccountForACHLauncher(
             mockHostActivityLauncher,
             hostedSurface = hostedSurface,
-            financialConnectionsMode = FinancialConnectionsMode.Full
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
 

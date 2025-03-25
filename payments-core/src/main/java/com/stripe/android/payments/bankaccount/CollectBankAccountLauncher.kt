@@ -7,12 +7,12 @@ import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
 import com.stripe.android.financialconnections.ElementsSessionContext
-import com.stripe.android.financialconnections.FinancialConnectionsMode
+import com.stripe.android.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.payments.bankaccount.navigation.toUSBankAccountResult
-import com.stripe.android.payments.financialconnections.GetFinancialConnectionsMode
+import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -87,7 +87,7 @@ interface CollectBankAccountLauncher {
                     callback(it.toUSBankAccountResult())
                 },
                 hostedSurface = null,
-                financialConnectionsMode = GetFinancialConnectionsMode(elementsSession = null),
+                financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null),
             )
         }
 
@@ -107,7 +107,7 @@ interface CollectBankAccountLauncher {
                     callback(it.toUSBankAccountResult())
                 },
                 hostedSurface = null,
-                financialConnectionsMode = GetFinancialConnectionsMode(elementsSession = null),
+                financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null),
             )
         }
 
@@ -117,13 +117,13 @@ interface CollectBankAccountLauncher {
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun createForPaymentSheet(
             hostedSurface: String,
-            financialConnectionsMode: FinancialConnectionsMode,
+            financialConnectionsAvailability: FinancialConnectionsAvailability?,
             activityResultRegistryOwner: ActivityResultRegistryOwner,
             callback: (CollectBankAccountResultInternal) -> Unit,
         ): CollectBankAccountLauncher {
             return CollectBankAccountForACHLauncher(
                 hostedSurface = hostedSurface,
-                financialConnectionsMode = financialConnectionsMode,
+                financialConnectionsAvailability = financialConnectionsAvailability,
                 hostActivityLauncher = activityResultRegistryOwner.activityResultRegistry.register(
                     LAUNCHER_KEY,
                     CollectBankAccountContract(),

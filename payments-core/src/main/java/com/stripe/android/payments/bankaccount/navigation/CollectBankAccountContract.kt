@@ -8,7 +8,7 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
-import com.stripe.android.financialconnections.FinancialConnectionsMode
+import com.stripe.android.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountActivity
 import kotlinx.parcelize.Parcelize
@@ -47,7 +47,7 @@ class CollectBankAccountContract :
         open val clientSecret: String?,
         open val configuration: CollectBankAccountConfiguration,
         open val attachToIntent: Boolean,
-        open val financialConnectionsMode: FinancialConnectionsMode,
+        open val financialConnectionsAvailability: FinancialConnectionsAvailability?,
         open val hostedSurface: String?
     ) : Parcelable {
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
@@ -67,7 +67,7 @@ class CollectBankAccountContract :
             override val clientSecret: String,
             override val configuration: CollectBankAccountConfiguration,
             override val attachToIntent: Boolean,
-            override val financialConnectionsMode: FinancialConnectionsMode,
+            override val financialConnectionsAvailability: FinancialConnectionsAvailability?,
             override val hostedSurface: String?
         ) : Args(
             publishableKey = publishableKey,
@@ -75,7 +75,7 @@ class CollectBankAccountContract :
             hostedSurface = hostedSurface,
             clientSecret = clientSecret,
             configuration = configuration,
-            financialConnectionsMode = financialConnectionsMode,
+            financialConnectionsAvailability = financialConnectionsAvailability,
             attachToIntent = attachToIntent
         )
 
@@ -87,7 +87,7 @@ class CollectBankAccountContract :
             override val clientSecret: String,
             override val configuration: CollectBankAccountConfiguration,
             override val attachToIntent: Boolean,
-            override val financialConnectionsMode: FinancialConnectionsMode,
+            override val financialConnectionsAvailability: FinancialConnectionsAvailability?,
             override val hostedSurface: String?
         ) : Args(
             publishableKey = publishableKey,
@@ -95,7 +95,7 @@ class CollectBankAccountContract :
             hostedSurface = hostedSurface,
             clientSecret = clientSecret,
             configuration = configuration,
-            financialConnectionsMode = financialConnectionsMode,
+            financialConnectionsAvailability = financialConnectionsAvailability,
             attachToIntent = attachToIntent
         )
 
@@ -105,7 +105,7 @@ class CollectBankAccountContract :
             override val publishableKey: String,
             override val stripeAccountId: String?,
             override val configuration: CollectBankAccountConfiguration,
-            override val financialConnectionsMode: FinancialConnectionsMode,
+            override val financialConnectionsAvailability: FinancialConnectionsAvailability?,
             override val hostedSurface: String?,
             val elementsSessionId: String,
             val customerId: String?,
@@ -118,7 +118,7 @@ class CollectBankAccountContract :
             hostedSurface = hostedSurface,
             clientSecret = null,
             configuration = configuration,
-            financialConnectionsMode = financialConnectionsMode,
+            financialConnectionsAvailability = financialConnectionsAvailability,
             attachToIntent = false,
         )
 
@@ -129,7 +129,7 @@ class CollectBankAccountContract :
             override val stripeAccountId: String?,
             override val configuration: CollectBankAccountConfiguration,
             override val hostedSurface: String?,
-            override val financialConnectionsMode: FinancialConnectionsMode,
+            override val financialConnectionsAvailability: FinancialConnectionsAvailability?,
             val elementsSessionId: String,
             val customerId: String?,
             val onBehalfOf: String?,
@@ -139,7 +139,7 @@ class CollectBankAccountContract :
             hostedSurface = hostedSurface,
             clientSecret = null,
             configuration = configuration,
-            financialConnectionsMode = financialConnectionsMode,
+            financialConnectionsAvailability = financialConnectionsAvailability,
             attachToIntent = false
         )
 

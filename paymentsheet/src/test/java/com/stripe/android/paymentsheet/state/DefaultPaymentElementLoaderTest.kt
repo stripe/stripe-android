@@ -6,7 +6,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.financialconnections.FinancialConnectionsMode
+import com.stripe.android.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
@@ -148,7 +148,7 @@ internal class DefaultPaymentElementLoaderTest {
                     linkMode = null,
                     cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all()),
                     hasCustomerConfiguration = true,
-                    financialConnectionsMode = FinancialConnectionsMode.Full
+                    financialConnectionsAvailability = FinancialConnectionsAvailability.Full
                 ),
             )
         )

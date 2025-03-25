@@ -7,7 +7,7 @@ import androidx.activity.viewModels
 import androidx.annotation.RestrictTo
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.financialconnections.FinancialConnectionsMode
+import com.stripe.android.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForInstantDebitsLauncher
@@ -47,7 +47,7 @@ class CollectBankAccountActivity : AppCompatActivity() {
             FinishWithResult(failure).launch()
         } else {
             val args = requireNotNull(starterArgs)
-            initConnectionsPaymentsProxy(args.configuration, args.financialConnectionsMode)
+            initConnectionsPaymentsProxy(args.configuration, args.financialConnectionsAvailability)
             lifecycleScope.launchWhenStarted {
                 viewModel.viewEffect.collect { viewEffect ->
                     when (viewEffect) {
@@ -61,7 +61,7 @@ class CollectBankAccountActivity : AppCompatActivity() {
 
     private fun initConnectionsPaymentsProxy(
         configuration: CollectBankAccountConfiguration,
-        financialConnectionsMode: FinancialConnectionsMode?
+        financialConnectionsAvailability: FinancialConnectionsAvailability?
     ) {
         financialConnectionsLauncher = when (configuration) {
             is InstantDebits -> FinancialConnectionsSheetForInstantDebitsLauncher(
@@ -69,7 +69,7 @@ class CollectBankAccountActivity : AppCompatActivity() {
                 callback = viewModel::onConnectionsForInstantDebitsResult,
                 intentBuilder = DefaultIntentBuilderProvider().provide(
                     context = this,
-                    isFullSdkAvailable = financialConnectionsMode == FinancialConnectionsMode.Full
+                    isFullSdkAvailable = financialConnectionsAvailability == FinancialConnectionsAvailability.Full
                 ).provider
             )
 
@@ -79,7 +79,7 @@ class CollectBankAccountActivity : AppCompatActivity() {
                 callback = viewModel::onConnectionsForACHResult,
                 intentBuilder = DefaultIntentBuilderProvider().provide(
                     context = this,
-                    isFullSdkAvailable = financialConnectionsMode == FinancialConnectionsMode.Full
+                    isFullSdkAvailable = financialConnectionsAvailability == FinancialConnectionsAvailability.Full
                 ).provider
             )
         }

@@ -1,13 +1,13 @@
 package com.stripe.android.payments.bankaccount
 
 import androidx.activity.result.ActivityResultLauncher
-import com.stripe.android.financialconnections.FinancialConnectionsMode
+import com.stripe.android.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 
 internal class CollectBankAccountForACHLauncher(
     private val hostActivityLauncher: ActivityResultLauncher<CollectBankAccountContract.Args>,
     private val hostedSurface: String?,
-    private val financialConnectionsMode: FinancialConnectionsMode
+    private val financialConnectionsAvailability: FinancialConnectionsAvailability?
 ) : CollectBankAccountLauncher {
 
     private val attachToIntent: Boolean
@@ -30,7 +30,7 @@ internal class CollectBankAccountForACHLauncher(
                 configuration = configuration,
                 hostedSurface = hostedSurface,
                 attachToIntent = attachToIntent,
-                financialConnectionsMode = financialConnectionsMode
+                financialConnectionsAvailability = financialConnectionsAvailability
             )
         )
     }
@@ -49,7 +49,7 @@ internal class CollectBankAccountForACHLauncher(
                 configuration = configuration,
                 hostedSurface = hostedSurface,
                 attachToIntent = attachToIntent,
-                financialConnectionsMode = financialConnectionsMode
+                financialConnectionsAvailability = financialConnectionsAvailability
             )
         )
     }
@@ -74,7 +74,7 @@ internal class CollectBankAccountForACHLauncher(
                 onBehalfOf = onBehalfOf,
                 amount = amount,
                 hostedSurface = hostedSurface,
-                financialConnectionsMode = financialConnectionsMode,
+                financialConnectionsAvailability = financialConnectionsAvailability,
                 currency = currency,
             )
         )
@@ -96,7 +96,7 @@ internal class CollectBankAccountForACHLauncher(
                 configuration = configuration,
                 customerId = customerId,
                 hostedSurface = hostedSurface,
-                financialConnectionsMode = financialConnectionsMode,
+                financialConnectionsAvailability = financialConnectionsAvailability,
                 onBehalfOf = onBehalfOf,
             )
         )

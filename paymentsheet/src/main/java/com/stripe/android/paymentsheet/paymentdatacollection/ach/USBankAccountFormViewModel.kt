@@ -14,7 +14,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.financialconnections.ElementsSessionContext
-import com.stripe.android.financialconnections.FinancialConnectionsMode
+import com.stripe.android.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.model.Address
@@ -297,14 +297,14 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             CollectBankAccountForInstantDebitsLauncher.createForPaymentSheet(
                 hostedSurface = args.hostedSurface,
                 activityResultRegistryOwner = activityResultRegistryOwner,
-                financialConnectionsMode = args.financialConnectionsMode,
+                financialConnectionsAvailability = args.financialConnectionsAvailability,
                 callback = ::handleInstantDebitsResult,
             )
         } else {
             CollectBankAccountLauncher.createForPaymentSheet(
                 hostedSurface = args.hostedSurface,
                 activityResultRegistryOwner = activityResultRegistryOwner,
-                financialConnectionsMode = args.financialConnectionsMode,
+                financialConnectionsAvailability = args.financialConnectionsAvailability,
                 callback = ::handleCollectBankAccountResult,
             )
         }
@@ -745,7 +745,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val savedPaymentMethod: PaymentSelection.New.USBankAccount?,
         val shippingDetails: AddressDetails?,
         val hostedSurface: String,
-        val financialConnectionsMode: FinancialConnectionsMode,
+        val financialConnectionsAvailability: FinancialConnectionsAvailability?,
         val setAsDefaultPaymentMethodEnabled: Boolean,
         val setAsDefaultMatchesSaveForFutureUse: Boolean,
     )
