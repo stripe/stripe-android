@@ -559,6 +559,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     }
 
     private suspend fun CommonConfiguration.isGooglePayReady(): Boolean {
+        if (googlePay == null) {
+            userFacingLogger.logWarningWithoutPii(
+                "GooglePayConfiguration is not set."
+            )
+        }
         return googlePay?.environment?.let { environment ->
             googlePayRepositoryFactory(
                 when (environment) {
