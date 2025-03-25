@@ -40,10 +40,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import com.stripe.android.common.ui.InlineContentTemplateBuilder
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.linkColors
-import com.stripe.android.link.utils.InlineContentTemplateBuilder
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeTheme
 

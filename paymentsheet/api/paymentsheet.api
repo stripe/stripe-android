@@ -9,6 +9,12 @@ public final class com/stripe/android/common/model/CommonConfiguration$Creator :
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/common/ui/ComposableSingletons$InlineContentTemplateBuilderKt {
+	public static final field INSTANCE Lcom/stripe/android/common/ui/ComposableSingletons$InlineContentTemplateBuilderKt;
+	public fun <init> ()V
+	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+}
+
 public abstract interface class com/stripe/android/customersheet/CustomerAdapter {
 	public static final field Companion Lcom/stripe/android/customersheet/CustomerAdapter$Companion;
 	public abstract fun attachPaymentMethod (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -478,12 +484,6 @@ public final class com/stripe/android/link/ui/wallet/ComposableSingletons$Wallet
 	public static final field INSTANCE Lcom/stripe/android/link/ui/wallet/ComposableSingletons$WalletScreenKt;
 	public fun <init> ()V
 	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
-}
-
-public final class com/stripe/android/link/utils/ComposableSingletons$InlineContentTemplateBuilderKt {
-	public static final field INSTANCE Lcom/stripe/android/link/utils/ComposableSingletons$InlineContentTemplateBuilderKt;
-	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/lpmfoundations/paymentmethod/CustomerMetadata$Creator : android/os/Parcelable$Creator {
