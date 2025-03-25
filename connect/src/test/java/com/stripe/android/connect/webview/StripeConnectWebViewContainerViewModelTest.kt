@@ -253,9 +253,9 @@ class StripeConnectWebViewContainerViewModelTest {
         val appearances = listOf(
             Appearance.default(),
             Appearance.Builder()
-                .setColors(
+                .colors(
                     Colors.Builder()
-                        .setPrimary(Color.CYAN)
+                        .primary(Color.CYAN)
                         .build()
                 )
                 .build()

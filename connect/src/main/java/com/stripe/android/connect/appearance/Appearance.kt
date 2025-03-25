@@ -34,55 +34,55 @@ class Appearance private constructor(
         /**
          * Describes the colors used in embedded components.
          */
-        fun setColors(colors: Colors) =
+        fun colors(colors: Colors) =
             apply { this.colors = colors }
 
         /**
          * Describes the corner radius used in embedded components.
          */
-        fun setCornerRadius(cornerRadius: CornerRadius) =
+        fun cornerRadius(cornerRadius: CornerRadius) =
             apply { this.cornerRadius = cornerRadius }
 
         /**
          * Describes the typography used for text.
          */
-        fun setTypography(typography: Typography) =
+        fun typography(typography: Typography) =
             apply { this.typography = typography }
 
         /**
          * Describes the primary button appearance settings.
          */
-        fun setButtonPrimary(buttonPrimary: Button) =
+        fun buttonPrimary(buttonPrimary: Button) =
             apply { this.buttonPrimary = buttonPrimary }
 
         /**
          * Describes the secondary button appearance settings.
          */
-        fun setButtonSecondary(buttonSecondary: Button) =
+        fun buttonSecondary(buttonSecondary: Button) =
             apply { this.buttonSecondary = buttonSecondary }
 
         /**
          * Describes the neutral badge appearance settings.
          */
-        fun setBadgeNeutral(badgeNeutral: Badge) =
+        fun badgeNeutral(badgeNeutral: Badge) =
             apply { this.badgeNeutral = badgeNeutral }
 
         /**
          * Describes the success badge appearance settings.
          */
-        fun setBadgeSuccess(badgeSuccess: Badge) =
+        fun badgeSuccess(badgeSuccess: Badge) =
             apply { this.badgeSuccess = badgeSuccess }
 
         /**
          * Describes the warning badge appearance settings.
          */
-        fun setBadgeWarning(badgeWarning: Badge) =
+        fun badgeWarning(badgeWarning: Badge) =
             apply { this.badgeWarning = badgeWarning }
 
         /**
          * Describes the danger badge appearance settings.
          */
-        fun setBadgeDanger(badgeDanger: Badge) =
+        fun badgeDanger(badgeDanger: Badge) =
             apply { this.badgeDanger = badgeDanger }
 
         fun build(): Appearance {

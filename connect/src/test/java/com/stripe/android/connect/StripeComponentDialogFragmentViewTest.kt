@@ -88,16 +88,16 @@ class StripeComponentDialogFragmentViewTest {
 
     private fun createAppearance(includeFont: Boolean = false) =
         Appearance.Builder()
-            .setColors(
+            .colors(
                 Colors.Builder()
-                    .setText(Color.argb(255, 255, 0, 0))
-                    .setBorder(Color.argb(255, 0, 255, 0))
-                    .setBackground(Color.argb(255, 0, 0, 255))
+                    .text(Color.argb(255, 255, 0, 0))
+                    .border(Color.argb(255, 0, 255, 0))
+                    .background(Color.argb(255, 0, 0, 255))
                     .build()
             )
-            .setTypography(
+            .typography(
                 Typography.Builder()
-                    .setFontFamily("doto".takeIf { includeFont })
+                    .fontFamily("doto".takeIf { includeFont })
                     .build()
             )
             .build()

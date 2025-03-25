@@ -65,16 +65,16 @@ public final class com/stripe/android/connect/appearance/Appearance : android/os
 public final class com/stripe/android/connect/appearance/Appearance$Builder {
 	public static final field $stable I
 	public fun <init> ()V
+	public final fun badgeDanger (Lcom/stripe/android/connect/appearance/Badge;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
+	public final fun badgeNeutral (Lcom/stripe/android/connect/appearance/Badge;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
+	public final fun badgeSuccess (Lcom/stripe/android/connect/appearance/Badge;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
+	public final fun badgeWarning (Lcom/stripe/android/connect/appearance/Badge;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
 	public final fun build ()Lcom/stripe/android/connect/appearance/Appearance;
-	public final fun setBadgeDanger (Lcom/stripe/android/connect/appearance/Badge;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
-	public final fun setBadgeNeutral (Lcom/stripe/android/connect/appearance/Badge;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
-	public final fun setBadgeSuccess (Lcom/stripe/android/connect/appearance/Badge;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
-	public final fun setBadgeWarning (Lcom/stripe/android/connect/appearance/Badge;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
-	public final fun setButtonPrimary (Lcom/stripe/android/connect/appearance/Button;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
-	public final fun setButtonSecondary (Lcom/stripe/android/connect/appearance/Button;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
-	public final fun setColors (Lcom/stripe/android/connect/appearance/Colors;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
-	public final fun setCornerRadius (Lcom/stripe/android/connect/appearance/CornerRadius;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
-	public final fun setTypography (Lcom/stripe/android/connect/appearance/Typography;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
+	public final fun buttonPrimary (Lcom/stripe/android/connect/appearance/Button;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
+	public final fun buttonSecondary (Lcom/stripe/android/connect/appearance/Button;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
+	public final fun colors (Lcom/stripe/android/connect/appearance/Colors;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
+	public final fun cornerRadius (Lcom/stripe/android/connect/appearance/CornerRadius;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
+	public final fun typography (Lcom/stripe/android/connect/appearance/Typography;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
 }
 
 public final class com/stripe/android/connect/appearance/Appearance$Creator : android/os/Parcelable$Creator {
@@ -141,19 +141,19 @@ public final class com/stripe/android/connect/appearance/Colors : android/os/Par
 public final class com/stripe/android/connect/appearance/Colors$Builder {
 	public static final field $stable I
 	public fun <init> ()V
+	public final fun actionPrimaryText (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
+	public final fun actionSecondaryText (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
+	public final fun background (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
+	public final fun border (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
 	public final fun build ()Lcom/stripe/android/connect/appearance/Colors;
-	public final fun setActionPrimaryText (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
-	public final fun setActionSecondaryText (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
-	public final fun setBackground (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
-	public final fun setBorder (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
-	public final fun setDanger (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
-	public final fun setFormAccent (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
-	public final fun setFormBackground (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
-	public final fun setFormHighlightBorder (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
-	public final fun setOffsetBackground (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
-	public final fun setPrimary (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
-	public final fun setSecondaryText (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
-	public final fun setText (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
+	public final fun danger (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
+	public final fun formAccent (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
+	public final fun formBackground (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
+	public final fun formHighlightBorder (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
+	public final fun offsetBackground (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
+	public final fun primary (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
+	public final fun secondaryText (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
+	public final fun text (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
 }
 
 public final class com/stripe/android/connect/appearance/Colors$Creator : android/os/Parcelable$Creator {
@@ -178,12 +178,12 @@ public final class com/stripe/android/connect/appearance/CornerRadius : android/
 public final class com/stripe/android/connect/appearance/CornerRadius$Builder {
 	public static final field $stable I
 	public fun <init> ()V
+	public final fun badge (Ljava/lang/Float;)Lcom/stripe/android/connect/appearance/CornerRadius$Builder;
+	public final fun base (Ljava/lang/Float;)Lcom/stripe/android/connect/appearance/CornerRadius$Builder;
 	public final fun build ()Lcom/stripe/android/connect/appearance/CornerRadius;
-	public final fun setBadge (Ljava/lang/Float;)Lcom/stripe/android/connect/appearance/CornerRadius$Builder;
-	public final fun setBase (Ljava/lang/Float;)Lcom/stripe/android/connect/appearance/CornerRadius$Builder;
-	public final fun setButton (Ljava/lang/Float;)Lcom/stripe/android/connect/appearance/CornerRadius$Builder;
-	public final fun setForm (Ljava/lang/Float;)Lcom/stripe/android/connect/appearance/CornerRadius$Builder;
-	public final fun setOverlay (Ljava/lang/Float;)Lcom/stripe/android/connect/appearance/CornerRadius$Builder;
+	public final fun button (Ljava/lang/Float;)Lcom/stripe/android/connect/appearance/CornerRadius$Builder;
+	public final fun form (Ljava/lang/Float;)Lcom/stripe/android/connect/appearance/CornerRadius$Builder;
+	public final fun overlay (Ljava/lang/Float;)Lcom/stripe/android/connect/appearance/CornerRadius$Builder;
 }
 
 public final class com/stripe/android/connect/appearance/CornerRadius$Creator : android/os/Parcelable$Creator {
@@ -218,18 +218,18 @@ public final class com/stripe/android/connect/appearance/Typography : android/os
 public final class com/stripe/android/connect/appearance/Typography$Builder {
 	public static final field $stable I
 	public fun <init> ()V
+	public final fun bodyMd (Lcom/stripe/android/connect/appearance/Typography$Style;)Lcom/stripe/android/connect/appearance/Typography$Builder;
+	public final fun bodySm (Lcom/stripe/android/connect/appearance/Typography$Style;)Lcom/stripe/android/connect/appearance/Typography$Builder;
 	public final fun build ()Lcom/stripe/android/connect/appearance/Typography;
-	public final fun setBodyMd (Lcom/stripe/android/connect/appearance/Typography$Style;)Lcom/stripe/android/connect/appearance/Typography$Builder;
-	public final fun setBodySm (Lcom/stripe/android/connect/appearance/Typography$Style;)Lcom/stripe/android/connect/appearance/Typography$Builder;
-	public final fun setFontFamily (Ljava/lang/String;)Lcom/stripe/android/connect/appearance/Typography$Builder;
-	public final fun setFontSizeBase (Ljava/lang/Float;)Lcom/stripe/android/connect/appearance/Typography$Builder;
-	public final fun setHeadingLg (Lcom/stripe/android/connect/appearance/Typography$Style;)Lcom/stripe/android/connect/appearance/Typography$Builder;
-	public final fun setHeadingMd (Lcom/stripe/android/connect/appearance/Typography$Style;)Lcom/stripe/android/connect/appearance/Typography$Builder;
-	public final fun setHeadingSm (Lcom/stripe/android/connect/appearance/Typography$Style;)Lcom/stripe/android/connect/appearance/Typography$Builder;
-	public final fun setHeadingXl (Lcom/stripe/android/connect/appearance/Typography$Style;)Lcom/stripe/android/connect/appearance/Typography$Builder;
-	public final fun setHeadingXs (Lcom/stripe/android/connect/appearance/Typography$Style;)Lcom/stripe/android/connect/appearance/Typography$Builder;
-	public final fun setLabelMd (Lcom/stripe/android/connect/appearance/Typography$Style;)Lcom/stripe/android/connect/appearance/Typography$Builder;
-	public final fun setLabelSm (Lcom/stripe/android/connect/appearance/Typography$Style;)Lcom/stripe/android/connect/appearance/Typography$Builder;
+	public final fun fontFamily (Ljava/lang/String;)Lcom/stripe/android/connect/appearance/Typography$Builder;
+	public final fun fontSizeBase (Ljava/lang/Float;)Lcom/stripe/android/connect/appearance/Typography$Builder;
+	public final fun headingLg (Lcom/stripe/android/connect/appearance/Typography$Style;)Lcom/stripe/android/connect/appearance/Typography$Builder;
+	public final fun headingMd (Lcom/stripe/android/connect/appearance/Typography$Style;)Lcom/stripe/android/connect/appearance/Typography$Builder;
+	public final fun headingSm (Lcom/stripe/android/connect/appearance/Typography$Style;)Lcom/stripe/android/connect/appearance/Typography$Builder;
+	public final fun headingXl (Lcom/stripe/android/connect/appearance/Typography$Style;)Lcom/stripe/android/connect/appearance/Typography$Builder;
+	public final fun headingXs (Lcom/stripe/android/connect/appearance/Typography$Style;)Lcom/stripe/android/connect/appearance/Typography$Builder;
+	public final fun labelMd (Lcom/stripe/android/connect/appearance/Typography$Style;)Lcom/stripe/android/connect/appearance/Typography$Builder;
+	public final fun labelSm (Lcom/stripe/android/connect/appearance/Typography$Style;)Lcom/stripe/android/connect/appearance/Typography$Builder;
 }
 
 public final class com/stripe/android/connect/appearance/Typography$Creator : android/os/Parcelable$Creator {
