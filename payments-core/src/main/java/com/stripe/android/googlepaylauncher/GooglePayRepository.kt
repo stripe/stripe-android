@@ -127,7 +127,7 @@ internal class DefaultGooglePayRepository(
             logger.error("Google Pay check failed.", it)
             userFacingLogger.logWarningWithoutPii(
                 "Google Pay api check failed. " +
-                    "See [Google Pay reference]"+
+                    "See [Google Pay reference]" +
                     "(https://developers.google.com/android/reference/com/google/android/gms/wallet/" +
                     "PaymentsClient#public-taskboolean-isreadytopay-isreadytopayrequest-request) " +
                     "for more details."
@@ -138,7 +138,7 @@ internal class DefaultGooglePayRepository(
         if (!isReady) {
             userFacingLogger.logWarningWithoutPii(
                 "Google Pay api check failed. " +
-                    "See [Google Pay reference]"+
+                    "See [Google Pay reference]" +
                     "(https://developers.google.com/android/reference/com/google/android/gms/wallet/" +
                     "PaymentsClient#public-taskboolean-isreadytopay-isreadytopayrequest-request) " +
                     "for more details."
