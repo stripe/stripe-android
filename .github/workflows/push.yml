@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - carlosmuvi/LINK_MOBILE-64_android-link-fc-lite-to-mpe
+      - carlosmuvi/distribute-fc-lite-to-mpe
 
 jobs:
   upload-identity:
