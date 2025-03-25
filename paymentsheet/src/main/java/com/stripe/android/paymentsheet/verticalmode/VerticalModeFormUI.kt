@@ -27,7 +27,6 @@ import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.paymentsheet.ui.PromoBadge
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.strings.resolve
-import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
