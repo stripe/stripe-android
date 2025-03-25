@@ -13,9 +13,13 @@ import com.stripe.android.camera.framework.TerminatingResultHandler
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.yield
 import org.junit.Test
@@ -71,7 +75,7 @@ class LoopTest {
             }
         }
 
-        job.joinTest()
+        job.joinTest(this)
         assertTrue { dataCount == resultCount.get() }
     }
 
@@ -126,7 +130,7 @@ class LoopTest {
             }
         }
 
-        job.joinTest()
+        job.joinTest(this)
         val dataProcessedCount = dataProcessMutex.withLock { resultCount }
         assertTrue { dataCount == dataProcessedCount }
 
@@ -212,7 +216,7 @@ class LoopTest {
 
         val job = loop.process((0 until dataCount).map { 2 }, this)
         assertNotNull(job)
-        job.joinTest()
+        job.joinTest(this)
 
         assertTrue(dataProcessed)
     }
@@ -258,7 +262,7 @@ class LoopTest {
 
         val job = loop.process((0 until dataCount).map { 2 }, this)
         assertNotNull(job)
-        job.joinTest()
+        job.joinTest(this)
 
         assertTrue { terminatedEarly }
     }
@@ -294,7 +298,7 @@ class LoopTest {
 
         val job = loop.process(emptyList(), this)
         assertNotNull(job)
-        job.joinTest()
+        job.joinTest(this)
 
         assertTrue { dataProcessed }
     }
@@ -313,9 +317,11 @@ class LoopTest {
         override suspend fun newInstance(): TestAnalyzer? = TestAnalyzer()
     }
 
-    private suspend fun Job.joinTest() {
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private suspend fun Job.joinTest(testScope: TestScope) {
         while (!isCompleted) {
-            yield()
+            currentCoroutineContext().ensureActive()
+            testScope.advanceUntilIdle()
         }
         join()
     }
