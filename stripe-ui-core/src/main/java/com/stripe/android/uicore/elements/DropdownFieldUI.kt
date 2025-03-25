@@ -4,7 +4,6 @@ import android.content.pm.PackageManager
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,7 +21,6 @@ import androidx.compose.material.DropdownMenu
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
@@ -101,14 +99,10 @@ fun DropDown(
     val selectedItemLabel by controller.selectedIndex.mapAsStateFlow {
         controller.getSelectedItemLabel(selectedIndex)
     }.collectAsState()
-    val interactionSource = remember { MutableInteractionSource() }
     val currentTextColor = if (shouldEnable) {
         MaterialTheme.stripeColors.onComponent
     } else {
-        TextFieldDefaults
-            .textFieldColors()
-            .indicatorColor(enabled = false, isError = false, interactionSource = interactionSource)
-            .value
+        MaterialTheme.stripeColors.onComponent.copy(alpha = 0.4f)
     }
 
     Box(
