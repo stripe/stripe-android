@@ -46,7 +46,9 @@ internal class InitialManageScreenFactoryTest {
         val customerStateHolder = CustomerStateHolder(
             savedStateHandle = SavedStateHandle(),
             selection = stateFlowOf(null),
-            customerMetadata = stateFlowOf(PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA),
+            customerMetadataPermissions = stateFlowOf(
+                PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.permissions
+            ),
         )
         val factory = InitialManageScreenFactory(
             customerStateHolder = customerStateHolder,

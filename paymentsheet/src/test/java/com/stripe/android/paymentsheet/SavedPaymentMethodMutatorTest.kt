@@ -776,6 +776,11 @@ class SavedPaymentMethodMutatorTest {
     private fun removeDuplicatesTest(shouldRemoveDuplicates: Boolean) {
         val repository = FakeCustomerRepository()
 
+        val customerSessionClientSecret = if (shouldRemoveDuplicates) {
+            "customer_session_client_secret"
+        } else {
+            null
+        }
         runScenario(
             customerRepository = repository,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
@@ -790,7 +795,7 @@ class SavedPaymentMethodMutatorTest {
                 CustomerState(
                     id = "cus_1",
                     ephemeralKeySecret = "ek_1",
-                    customerSessionClientSecret = null,
+                    customerSessionClientSecret = customerSessionClientSecret,
                     paymentMethods = listOf(),
                     defaultPaymentMethodId = null,
                 )
@@ -808,7 +813,7 @@ class SavedPaymentMethodMutatorTest {
                     customerInfo = CustomerRepository.CustomerInfo(
                         id = "cus_1",
                         ephemeralKeySecret = "ek_1",
-                        customerSessionClientSecret = null,
+                        customerSessionClientSecret = customerSessionClientSecret,
                     ),
                     canRemoveDuplicates = shouldRemoveDuplicates,
                 )
@@ -830,7 +835,8 @@ class SavedPaymentMethodMutatorTest {
         val customerStateHolder = CustomerStateHolder(
             savedStateHandle = SavedStateHandle(),
             selection = MutableStateFlow(null),
-            customerMetadata = stateFlowOf(PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA),
+            customerMetadataPermissions =
+            stateFlowOf(PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.permissions),
         )
         runScenario(
             customerStateHolder = customerStateHolder,
@@ -860,8 +866,9 @@ class SavedPaymentMethodMutatorTest {
         customerStateHolder: CustomerStateHolder = CustomerStateHolder(
             savedStateHandle = SavedStateHandle(),
             selection = selection,
-            customerMetadata = stateFlowOf(
-                paymentMethodMetadata?.customerMetadata ?: PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
+            customerMetadataPermissions = stateFlowOf(
+                paymentMethodMetadata?.customerMetadata?.permissions
+                    ?: PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.permissions
             ),
         ),
         block: suspend Scenario.() -> Unit

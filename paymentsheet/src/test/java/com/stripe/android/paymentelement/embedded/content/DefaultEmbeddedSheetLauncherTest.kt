@@ -190,7 +190,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val customerStateHolder = CustomerStateHolder(
             savedStateHandle = savedStateHandle,
             selection = selectionHolder.selection,
-            customerMetadata = stateFlowOf(paymentMethodMetadata.customerMetadata)
+            customerMetadataPermissions = stateFlowOf(paymentMethodMetadata.customerMetadata?.permissions)
         )
         val sheetStateHolder = SheetStateHolder(savedStateHandle)
         val errorReporter = FakeErrorReporter()

@@ -11,7 +11,7 @@ import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 internal class CustomerStateHolder(
-    private val customerMetadata: StateFlow<CustomerMetadata?>,
+    private val customerMetadataPermissions: StateFlow<CustomerMetadata.Permissions?>,
     private val savedStateHandle: SavedStateHandle,
     private val selection: StateFlow<PaymentSelection?>,
 ) {
@@ -34,11 +34,11 @@ internal class CustomerStateHolder(
 
     val canRemove: StateFlow<Boolean> = combineAsStateFlow(
         paymentMethods,
-        customerMetadata,
-    ) { paymentMethods, customerMetadata ->
-        customerMetadata?.run {
-            val hasRemovePermissions = customerMetadata.permissions.canRemovePaymentMethods
-            val hasRemoveLastPaymentMethodPermissions = customerMetadata.permissions.canRemoveLastPaymentMethod
+        customerMetadataPermissions,
+    ) { paymentMethods, customerMetadataPermissions ->
+        customerMetadataPermissions?.run {
+            val hasRemovePermissions = customerMetadataPermissions.canRemovePaymentMethods
+            val hasRemoveLastPaymentMethodPermissions = customerMetadataPermissions.canRemoveLastPaymentMethod
             when (paymentMethods.size) {
                 0 -> false
                 1 -> hasRemoveLastPaymentMethodPermissions && hasRemovePermissions
@@ -73,8 +73,8 @@ internal class CustomerStateHolder(
             return CustomerStateHolder(
                 savedStateHandle = viewModel.savedStateHandle,
                 selection = viewModel.selection,
-                customerMetadata = viewModel.paymentMethodMetadata.mapAsStateFlow {
-                    it?.customerMetadata
+                customerMetadataPermissions = viewModel.paymentMethodMetadata.mapAsStateFlow {
+                    it?.customerMetadata?.permissions
                 }
             )
         }

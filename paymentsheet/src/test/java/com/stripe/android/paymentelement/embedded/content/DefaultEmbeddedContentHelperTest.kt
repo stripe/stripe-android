@@ -118,7 +118,9 @@ internal class DefaultEmbeddedContentHelperTest {
             customerStateHolder = CustomerStateHolder(
                 savedStateHandle = savedStateHandle,
                 selection = selectionHolder.selection,
-                customerMetadata = stateFlowOf(PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA)
+                customerMetadataPermissions = stateFlowOf(
+                    PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.permissions
+                ),
             ),
             embeddedFormHelperFactory = embeddedFormHelperFactory,
             confirmationHandler = confirmationHandler,

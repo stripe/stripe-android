@@ -10,6 +10,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
@@ -347,7 +348,7 @@ internal class CustomerStateHolderTest {
         )
 
         val customerStateHolder = CustomerStateHolder(
-            customerMetadata = customerMetadata,
+            customerMetadataPermissions = customerMetadata.mapAsStateFlow { it.permissions },
             savedStateHandle = savedStateHandle,
             selection = selection,
         )
