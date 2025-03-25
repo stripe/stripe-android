@@ -1,11 +1,11 @@
-+--- androidx.databinding:viewbinding:8.8.1
++--- androidx.databinding:viewbinding:8.8.2
 |    \--- androidx.annotation:annotation:1.0.0 -> 1.8.1
 |         \--- androidx.annotation:annotation-jvm:1.8.1
 |              \--- org.jetbrains.kotlin:kotlin-stdlib:1.7.10 -> 2.1.10
 |                   \--- org.jetbrains:annotations:13.0 -> 23.0.0
 +--- org.jetbrains.kotlin:kotlin-stdlib:2.1.10 (*)
 +--- project :3ds2sdk
-|    +--- androidx.databinding:viewbinding:8.8.1 (*)
+|    +--- androidx.databinding:viewbinding:8.8.2 (*)
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.1.10 (*)
 |    +--- androidx.appcompat:appcompat:1.7.0
 |    |    +--- androidx.activity:activity:1.7.0 -> 1.9.3
