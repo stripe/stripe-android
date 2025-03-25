@@ -5,6 +5,7 @@ import com.stripe.android.common.coroutines.CoalescingOrchestrator
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
+import com.stripe.android.lpmfoundations.paymentmethod.CAN_REMOVE_DUPLICATES_CUSTOMER_SHEET_VALUE
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -114,7 +115,7 @@ internal class StripeCustomerAdapter @Inject internal constructor(
                     customerSessionClientSecret = null,
                 ),
                 paymentMethodId = paymentMethodId,
-                canRemoveDuplicates = false,
+                canRemoveDuplicates = CAN_REMOVE_DUPLICATES_CUSTOMER_SHEET_VALUE,
             ).getOrElse {
                 return CustomerAdapter.Result.failure(
                     cause = it,

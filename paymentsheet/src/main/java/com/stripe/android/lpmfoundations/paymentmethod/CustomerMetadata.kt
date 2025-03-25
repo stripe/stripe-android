@@ -7,6 +7,8 @@ import com.stripe.android.customersheet.data.CustomerSheetSession
 import com.stripe.android.model.ElementsSession
 import kotlinx.parcelize.Parcelize
 
+internal const val CAN_REMOVE_DUPLICATES_CUSTOMER_SHEET_VALUE = true
+
 @Parcelize
 internal data class CustomerMetadata(
     val hasCustomerConfiguration: Boolean,
@@ -76,7 +78,7 @@ internal data class CustomerMetadata(
                 return Permissions(
                     canRemovePaymentMethods = customerSheetSession.permissions.canRemovePaymentMethods,
                     canRemoveLastPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
-                    canRemoveDuplicates = true,
+                    canRemoveDuplicates = CAN_REMOVE_DUPLICATES_CUSTOMER_SHEET_VALUE,
                 )
             }
 

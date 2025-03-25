@@ -3,6 +3,7 @@ package com.stripe.android.customersheet.data
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.customersheet.util.filterToSupportedPaymentMethods
 import com.stripe.android.customersheet.util.getDefaultPaymentMethodsEnabledForCustomerSheet
+import com.stripe.android.lpmfoundations.paymentmethod.CAN_REMOVE_DUPLICATES_CUSTOMER_SHEET_VALUE
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -70,7 +71,7 @@ internal class CustomerSessionPaymentMethodDataSource @Inject constructor(
                         ephemeralKeySecret = ephemeralKey.ephemeralKey,
                         customerSessionClientSecret = ephemeralKey.customerSessionClientSecret,
                     ),
-                    canRemoveDuplicates = true,
+                    canRemoveDuplicates = CAN_REMOVE_DUPLICATES_CUSTOMER_SHEET_VALUE,
                     paymentMethodId = paymentMethodId,
                 ).getOrThrow()
             }.toCustomerSheetDataResult()
