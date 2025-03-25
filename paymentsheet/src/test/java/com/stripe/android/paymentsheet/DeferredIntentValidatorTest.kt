@@ -50,12 +50,30 @@ internal class DeferredIntentValidatorTest {
     }
 
     @Test
-    fun `Fails if PaymentIntent has different setupFutureUse than IntentConfiguration`() {
+    fun `Succeeds if PaymentIntent has different setupFutureUse than IntentConfiguration`() {
         val paymentIntent = PaymentIntentFactory.create(
             setupFutureUsage = StripeIntent.Usage.OnSession,
         )
         val intentConfiguration = makeIntentConfigurationForPayment(
             setupFutureUse = IntentConfiguration.SetupFutureUse.OffSession,
+        )
+
+        assertThat(
+            DeferredIntentValidator.validate(
+                stripeIntent = paymentIntent,
+                intentConfiguration = intentConfiguration,
+                allowsManualConfirmation = false,
+            )
+        ).isEqualTo(paymentIntent)
+    }
+
+    @Test
+    fun `Fails if PaymentIntent has setupFutureUse and IntentConfiguration was not set`() {
+        val paymentIntent = PaymentIntentFactory.create(
+            setupFutureUsage = StripeIntent.Usage.OnSession,
+        )
+        val intentConfiguration = makeIntentConfigurationForPayment(
+            setupFutureUse = null,
         )
 
         val failure = assertFailsWith<IllegalArgumentException> {
@@ -68,7 +86,7 @@ internal class DeferredIntentValidatorTest {
 
         assertThat(failure).hasMessageThat().isEqualTo(
             "Your PaymentIntent setupFutureUsage (on_session) does not match " +
-                "the PaymentSheet.IntentConfiguration setupFutureUsage (off_session)."
+                "the PaymentSheet.IntentConfiguration setupFutureUsage (null)."
         )
     }
 
@@ -177,24 +195,21 @@ internal class DeferredIntentValidatorTest {
     }
 
     @Test
-    fun `Fails if SetupIntent has different usage than IntentConfiguration`() {
-        val setupIntent = SetupIntentFixtures.SI_SUCCEEDED
+    fun `Succeeds if SetupIntent has different usage than IntentConfiguration`() {
+        val setupIntent = SetupIntentFixtures.SI_SUCCEEDED.copy(
+            usage = StripeIntent.Usage.OnSession,
+        )
         val intentConfiguration = makeIntentConfigurationForSetup(
-            usage = IntentConfiguration.SetupFutureUse.OnSession,
+            usage = IntentConfiguration.SetupFutureUse.OffSession,
         )
 
-        val failure = assertFailsWith<IllegalArgumentException> {
+        assertThat(
             DeferredIntentValidator.validate(
                 stripeIntent = setupIntent,
                 intentConfiguration = intentConfiguration,
                 allowsManualConfirmation = false,
             )
-        }
-
-        assertThat(failure).hasMessageThat().isEqualTo(
-            "Your SetupIntent usage (off_session) does not match " +
-                "the PaymentSheet.IntentConfiguration usage (off_session)."
-        )
+        ).isEqualTo(setupIntent)
     }
 
     @Test
