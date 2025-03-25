@@ -3,23 +3,15 @@ package com.stripe.android.camera.framework
 import androidx.annotation.RestrictTo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.buffer
-import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicInteger
 import kotlin.time.ComparableTimeMark
-import kotlin.time.Duration
 import kotlin.time.TimeSource
 
 internal object NoAnalyzersAvailableException : Exception()
@@ -60,7 +52,6 @@ interface AnalyzerLoopErrorListener {
 sealed class AnalyzerLoop<DataFrame, State, Output>(
     private val analyzerPool: AnalyzerPool<DataFrame, in State, Output>,
     private val analyzerLoopErrorListener: AnalyzerLoopErrorListener,
-    private val statsName: String? = null
 ) : ResultHandler<DataFrame, Output, Boolean> {
     private val started = AtomicBoolean(false)
     protected var startedAt: ComparableTimeMark? = null
@@ -170,11 +161,9 @@ class ProcessBoundAnalyzerLoop<DataFrame, State, Output>(
     private val analyzerPool: AnalyzerPool<DataFrame, in State, Output>,
     private val resultHandler: StatefulResultHandler<DataFrame, out State, Output, Boolean>,
     analyzerLoopErrorListener: AnalyzerLoopErrorListener,
-    statsName: String? = null
 ) : AnalyzerLoop<DataFrame, State, Output>(
     analyzerPool,
     analyzerLoopErrorListener,
-    statsName
 ) {
     /**
      * Subscribe to a flow. Loops can only subscribe to a single flow at a time.
@@ -192,88 +181,3 @@ class ProcessBoundAnalyzerLoop<DataFrame, State, Output>(
 
     override fun getState(): State = resultHandler.state
 }
-
-/**
- * This kind of [AnalyzerLoop] will process data provided as part of its constructor. Data will be
- * processed in the order provided.
- *
- * @param analyzerPool: A pool of analyzers to use in this loop.
- * @param resultHandler: A result handler that will be called with the results from the analyzers in
- *     this loop.
- * @param analyzerLoopErrorListener: An error handler for this loop
- * @param timeLimit: If specified, this is the maximum allowed time for the loop to run. If the loop
- *     exceeds this duration, the loop will terminate
- */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class FiniteAnalyzerLoop<DataFrame, State, Output>(
-    private val analyzerPool: AnalyzerPool<DataFrame, in State, Output>,
-    private val resultHandler: TerminatingResultHandler<DataFrame, out State, Output>,
-    analyzerLoopErrorListener: AnalyzerLoopErrorListener,
-    private val timeLimit: Duration = Duration.INFINITE,
-    statsName: String? = null
-) : AnalyzerLoop<DataFrame, State, Output>(
-    analyzerPool,
-    analyzerLoopErrorListener,
-    statsName
-) {
-    private val framesProcessed: AtomicInteger = AtomicInteger(0)
-    private var framesToProcess = 0
-
-    fun process(frames: Collection<DataFrame>, processingCoroutineScope: CoroutineScope): Job? {
-        val channel = Channel<DataFrame>(capacity = frames.size)
-        framesToProcess = frames.map { channel.trySend(it) }.count { it.isSuccess }
-        return if (framesToProcess > 0) {
-            subscribeToFlow(channel.receiveAsFlow(), processingCoroutineScope)
-        } else {
-            processingCoroutineScope.launch { resultHandler.onAllDataProcessed() }
-        }
-    }
-
-    fun cancel() = runBlocking { unsubscribeFromFlow() }
-
-    override suspend fun onResult(result: Output, data: DataFrame): Boolean {
-        val framesProcessed = this.framesProcessed.incrementAndGet()
-        val timeElapsed = startedAt?.elapsedNow() ?: Duration.ZERO
-        resultHandler.onResult(result, data)
-
-        if (framesProcessed >= framesToProcess) {
-            resultHandler.onAllDataProcessed()
-            unsubscribeFromFlow()
-        } else if (timeElapsed > timeLimit) {
-            resultHandler.onTerminatedEarly()
-            unsubscribeFromFlow()
-        }
-
-        val allFramesProcessed = framesProcessed >= framesToProcess
-        val exceededTimeLimit = timeElapsed > timeLimit
-        return allFramesProcessed || exceededTimeLimit
-    }
-
-    override fun getState(): State = resultHandler.state
-}
-
-/**
- * Consume this [Flow] using a channelFlow with no buffer. Elements emitted from [this] flow are
- * offered to the underlying [channelFlow]. If the consumer is not currently suspended and waiting
- * for the next element, the element is dropped.
- *
- * example:
- * ```
- * flow {
- *   (0..100).forEach {
- *     emit(it)
- *     delay(100)
- *   }
- * }.backPressureDrop().collect {
- *   delay(1000)
- *   println(it)
- * }
- * ```
- *
- * @return a flow that only emits elements when the downstream [Flow.collect] is waiting for the
- * next element
- */
-@ExperimentalCoroutinesApi
-internal suspend fun <T> Flow<T>.backPressureDrop(): Flow<T> =
-    channelFlow { this@backPressureDrop.collect { trySend(it) } }
-        .buffer(capacity = Channel.RENDEZVOUS)
