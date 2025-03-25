@@ -847,7 +847,7 @@ internal class PaymentMethodMetadataTest {
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             paymentMethodIncentive = null,
             elementsSessionId = "session_1234",
-            financialConnectionsMode = FinancialConnectionsMode.Lite
+            financialConnectionsMode = FinancialConnectionsMode.Full
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -918,7 +918,7 @@ internal class PaymentMethodMetadataTest {
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             paymentMethodIncentive = null,
             elementsSessionId = "session_1234",
-            financialConnectionsMode = FinancialConnectionsMode.Lite
+            financialConnectionsMode = FinancialConnectionsMode.Full
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
