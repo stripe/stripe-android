@@ -49,7 +49,7 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
                 settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
                 settings[CountrySettingsDefinition] = Country.US
                 settings[CustomerSettingsDefinition] = CustomerType.NEW
-                settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
+                settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT_WITH_SETUP
                 settings[CollectAddressSettingsDefinition] =
                     PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
                 settings[CustomerSessionSettingsDefinition] = true
@@ -71,7 +71,7 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
                 settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
                 settings[CountrySettingsDefinition] = Country.US
                 settings[CustomerSettingsDefinition] = CustomerType.NEW
-                settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
+                settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT_WITH_SETUP
                 settings[CollectAddressSettingsDefinition] =
                     PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
                 settings[CustomerSessionSettingsDefinition] = true
