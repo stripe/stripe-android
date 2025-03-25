@@ -9,6 +9,8 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.utils.RealUserFacingLogger
+import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -50,7 +52,8 @@ internal class DefaultGooglePayRepository(
     private val paymentsClientFactory: PaymentsClientFactory = DefaultPaymentsClientFactory(context),
     private val errorReporter: ErrorReporter,
     private val logger: Logger = Logger.noop(),
-    private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
+    private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+    private val userFacingLogger: UserFacingLogger = RealUserFacingLogger(context),
 ) : GooglePayRepository {
 
     @Inject
@@ -106,6 +109,9 @@ internal class DefaultGooglePayRepository(
             )
 
             logger.error("Google Pay json parsing failed.", it)
+            userFacingLogger.logWarningWithoutPii(
+                "Google Pay json parsing failed."
+            )
 
             return false
         }
@@ -119,9 +125,25 @@ internal class DefaultGooglePayRepository(
             )
 
             logger.error("Google Pay check failed.", it)
+            userFacingLogger.logWarningWithoutPii(
+                "Google Pay api check failed. " +
+                    "See [Google Pay reference]"+
+                    "(https://developers.google.com/android/reference/com/google/android/gms/wallet/" +
+                    "PaymentsClient#public-taskboolean-isreadytopay-isreadytopayrequest-request) " +
+                    "for more details."
+            )
         }.getOrDefault(false)
 
         logger.info("Google Pay ready? $isReady")
+        if (!isReady) {
+            userFacingLogger.logWarningWithoutPii(
+                "Google Pay api check failed. " +
+                    "See [Google Pay reference]"+
+                    "(https://developers.google.com/android/reference/com/google/android/gms/wallet/" +
+                    "PaymentsClient#public-taskboolean-isreadytopay-isreadytopayrequest-request) " +
+                    "for more details."
+            )
+        }
 
         return isReady
     }
