@@ -215,7 +215,7 @@ internal class AddPaymentMethodRequirementTest {
     }
 
     @Test
-    fun testInstantDebitsReturnsTruIfLinkDisplaySetToAutomaticAndOtherConditionsMet() {
+    fun testInstantDebitsReturnsTrueIfLinkDisplaySetToAutomaticAndOtherConditionsMet() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = createValidInstantDebitsPaymentIntent(),
             linkConfiguration = PaymentSheet.LinkConfiguration(
@@ -298,7 +298,7 @@ internal class AddPaymentMethodRequirementTest {
     }
 
     @Test
-    fun testLinkCardBrandReturnsTruIfLinkDisplaySetToAutomaticAndOtherConditionsMet() {
+    fun testLinkCardBrandReturnsTrueIfLinkDisplaySetToAutomaticAndOtherConditionsMet() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = createValidInstantDebitsPaymentIntent(),
             linkMode = LinkMode.LinkCardBrand,
