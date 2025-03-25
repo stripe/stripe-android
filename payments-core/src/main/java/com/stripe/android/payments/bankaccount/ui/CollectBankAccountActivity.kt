@@ -7,7 +7,6 @@ import androidx.activity.viewModels
 import androidx.annotation.RestrictTo
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.financialconnections.intentBuilder as fullIntentBuilder
 import com.stripe.android.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
@@ -23,6 +22,7 @@ import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountCont
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal.Failed
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithResult
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.OpenConnectionsFlow
+import com.stripe.android.financialconnections.intentBuilder as fullIntentBuilder
 
 /**
  * No-UI activity that will handle collect bank account logic.
