@@ -107,7 +107,7 @@ internal fun VerticalModeFormHeaderUI(
             )
         }
 
-        val textColor = MaterialTheme.stripeColors.onComponent
+        val textColor = MaterialTheme.colors.onSurface
         Text(
             text = formHeaderInformation.displayName.resolve(),
             style = MaterialTheme.typography.h4,
