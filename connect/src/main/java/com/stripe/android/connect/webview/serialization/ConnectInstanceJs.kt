@@ -1,9 +1,7 @@
 package com.stripe.android.connect.webview.serialization
 
-import com.stripe.android.connect.PrivateBetaConnectSDK
 import kotlinx.serialization.Serializable
 
-@PrivateBetaConnectSDK
 @Serializable
 internal data class ConnectInstanceJs(
     val appearance: AppearanceJs? = null,

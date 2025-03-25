@@ -276,13 +276,3 @@ public final class com/stripe/android/connect/appearance/fonts/CustomFontSource$
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class com/stripe/android/connect/webview/serialization/IntAsRgbHexStringSerializer : kotlinx/serialization/KSerializer {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/connect/webview/serialization/IntAsRgbHexStringSerializer;
-	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Integer;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun serialize (Lkotlinx/serialization/encoding/Encoder;I)V
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-}
-

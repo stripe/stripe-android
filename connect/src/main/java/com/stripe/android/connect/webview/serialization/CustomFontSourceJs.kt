@@ -8,14 +8,13 @@ import java.io.IOException
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
-@PrivateBetaConnectSDK
 @Serializable
 internal data class CustomFontSourceJs(
     val family: String,
     val src: String,
 )
 
-@PrivateBetaConnectSDK
+@OptIn(PrivateBetaConnectSDK::class)
 internal fun CustomFontSource.toJs(context: Context): CustomFontSourceJs {
     val base64FontData = convertFontFileToBase64String(context, assetsFilePath)
     return CustomFontSourceJs(
