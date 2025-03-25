@@ -11,10 +11,10 @@ object GetFinancialConnectionsAvailability {
 
     operator fun invoke(
         elementsSession: ElementsSession?,
-        isFinancialConnectionsFullSdkAvailable: IsFinancialConnectionsFullSdkAvailable = DefaultIsFinancialConnectionsAvailable,
+        isFullSdkAvailable: IsFinancialConnectionsFullSdkAvailable = DefaultIsFinancialConnectionsAvailable,
     ): FinancialConnectionsAvailability? {
         return when {
-            isFinancialConnectionsFullSdkAvailable() && financialConnectionsFullSdkUnavailable.isEnabled.not() -> {
+            isFullSdkAvailable() && financialConnectionsFullSdkUnavailable.isEnabled.not() -> {
                 FinancialConnectionsAvailability.Full
             }
             elementsSession.fcLiteKillSwitchEnabled().not() && financialConnectionsLiteKillswitch.isEnabled.not() -> {

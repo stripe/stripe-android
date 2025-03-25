@@ -20,7 +20,7 @@ class GetFinancialConnectionsModeTest {
             FinancialConnectionsAvailability.Full,
             GetFinancialConnectionsAvailability(
                 elementsSession = elementsSession,
-                isFinancialConnectionsFullSdkAvailable = isFinancialConnectionsFullSdkAvailable(true)
+                isFullSdkAvailable = isFinancialConnectionsFullSdkAvailable(true)
             )
         )
     }
@@ -35,7 +35,7 @@ class GetFinancialConnectionsModeTest {
             null,
             GetFinancialConnectionsAvailability(
                 elementsSession = elementsSession,
-                isFinancialConnectionsFullSdkAvailable = isFinancialConnectionsFullSdkAvailable(false)
+                isFullSdkAvailable = isFinancialConnectionsFullSdkAvailable(false)
             )
         )
     }
@@ -48,7 +48,7 @@ class GetFinancialConnectionsModeTest {
             FinancialConnectionsAvailability.Lite,
             GetFinancialConnectionsAvailability(
                 elementsSession = elementsSession,
-                isFinancialConnectionsFullSdkAvailable = isFinancialConnectionsFullSdkAvailable(false)
+                isFullSdkAvailable = isFinancialConnectionsFullSdkAvailable(false)
             )
         )
     }
