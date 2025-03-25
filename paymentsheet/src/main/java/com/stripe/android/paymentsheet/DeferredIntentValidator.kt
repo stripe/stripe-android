@@ -32,7 +32,7 @@ internal object DeferredIntentValidator {
                         "(${paymentMode.currency.lowercase()})."
                 }
 
-                require(paymentMode.setupFutureUsage == stripeIntent.setupFutureUsage) {
+                require(paymentMode.setupFutureUsage.isNull() == stripeIntent.setupFutureUsage.isNull()) {
                     "Your PaymentIntent setupFutureUsage (${stripeIntent.setupFutureUsage}) " +
                         "does not match the PaymentSheet.IntentConfiguration " +
                         "setupFutureUsage (${paymentMode.setupFutureUsage})."
@@ -53,7 +53,7 @@ internal object DeferredIntentValidator {
                         "but used a PaymentSheet.IntentConfiguration in payment mode."
                 }
 
-                require(setupMode.setupFutureUsage == stripeIntent.usage) {
+                require(setupMode.setupFutureUsage.isNull() == stripeIntent.usage.isNull()) {
                     "Your SetupIntent usage (${stripeIntent.usage}) does not match " +
                         "the PaymentSheet.IntentConfiguration usage (${stripeIntent.usage})."
                 }
@@ -62,4 +62,8 @@ internal object DeferredIntentValidator {
 
         return stripeIntent
     }
+}
+
+private fun Any?.isNull(): Boolean {
+    return this == null
 }
