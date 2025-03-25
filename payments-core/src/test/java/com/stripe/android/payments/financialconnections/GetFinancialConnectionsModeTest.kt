@@ -32,7 +32,7 @@ class GetFinancialConnectionsModeTest {
             mapOf(ELEMENTS_DISABLE_FC_LITE.flagValue to true)
         )
         assertEquals(
-            FinancialConnectionsAvailability.None,
+            null,
             GetFinancialConnectionsAvailability(
                 elementsSession = elementsSession,
                 isFinancialConnectionsFullSdkAvailable = isFinancialConnectionsFullSdkAvailable(false)

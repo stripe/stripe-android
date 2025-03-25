@@ -7,11 +7,14 @@ import androidx.activity.viewModels
 import androidx.annotation.RestrictTo
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.financialconnections.intentBuilder as fullIntentBuilder
 import com.stripe.android.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForInstantDebitsLauncher
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetLauncher
+import com.stripe.android.financialconnections.lite.liteIntentBuilder
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration.InstantDebits
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration.USBankAccount
@@ -20,7 +23,6 @@ import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountCont
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal.Failed
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithResult
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.OpenConnectionsFlow
-import com.stripe.android.payments.financialconnections.DefaultIntentBuilderProvider
 
 /**
  * No-UI activity that will handle collect bank account logic.
@@ -47,7 +49,8 @@ class CollectBankAccountActivity : AppCompatActivity() {
             FinishWithResult(failure).launch()
         } else {
             val args = requireNotNull(starterArgs)
-            initConnectionsPaymentsProxy(args.configuration, args.financialConnectionsAvailability)
+            val financialConnectionsAvailability = requireNotNull(args.financialConnectionsAvailability)
+            initConnectionsPaymentsProxy(args.configuration, financialConnectionsAvailability)
             lifecycleScope.launchWhenStarted {
                 viewModel.viewEffect.collect { viewEffect ->
                     when (viewEffect) {
@@ -61,27 +64,28 @@ class CollectBankAccountActivity : AppCompatActivity() {
 
     private fun initConnectionsPaymentsProxy(
         configuration: CollectBankAccountConfiguration,
-        financialConnectionsAvailability: FinancialConnectionsAvailability?
+        financialConnectionsAvailability: FinancialConnectionsAvailability
     ) {
         financialConnectionsLauncher = when (configuration) {
             is InstantDebits -> FinancialConnectionsSheetForInstantDebitsLauncher(
                 activity = this,
                 callback = viewModel::onConnectionsForInstantDebitsResult,
-                intentBuilder = DefaultIntentBuilderProvider().provide(
-                    context = this,
-                    isFullSdkAvailable = financialConnectionsAvailability == FinancialConnectionsAvailability.Full
-                ).provider
+                intentBuilder = financialConnectionsAvailability.getIntentBuilder()
             )
 
             is USBankAccount,
             is USBankAccountInternal -> FinancialConnectionsSheetForDataLauncher(
                 activity = this,
                 callback = viewModel::onConnectionsForACHResult,
-                intentBuilder = DefaultIntentBuilderProvider().provide(
-                    context = this,
-                    isFullSdkAvailable = financialConnectionsAvailability == FinancialConnectionsAvailability.Full
-                ).provider
+                intentBuilder = financialConnectionsAvailability.getIntentBuilder()
             )
+        }
+    }
+
+    fun FinancialConnectionsAvailability.getIntentBuilder(): (FinancialConnectionsSheetActivityArgs) -> Intent {
+        return when (this) {
+            FinancialConnectionsAvailability.Full -> fullIntentBuilder(this@CollectBankAccountActivity)
+            FinancialConnectionsAvailability.Lite -> liteIntentBuilder(this@CollectBankAccountActivity)
         }
     }
 
