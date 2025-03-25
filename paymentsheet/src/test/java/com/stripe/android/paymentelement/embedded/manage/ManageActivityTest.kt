@@ -82,7 +82,6 @@ internal class ManageActivityTest {
         assertCompletedResultSelection(PaymentMethodFixtures.CARD_ID)
     }
 
-    // manage activity already has all the state
     @Test
     fun `removing a payment method updates state when the user clicks back`() = launch {
         managePage.clickEdit()
