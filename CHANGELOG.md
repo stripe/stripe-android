@@ -2,11 +2,10 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
-* [ADDED][10439](https://github.com/stripe/stripe-android/pull/10439) Bank payments are now supported via a webview wrapper when the Connections SDK dependency is not included.
-
 ### PaymentSheet
 * [CHANGED][10480](https://github.com/stripe/stripe-android/pull/10480) Updated Afterpay branding in the US to be Cash App Afterpay.
 * [FIXED][10492](https://github.com/stripe/stripe-android/pull/10492) Update Add Payment Method screen to use `PaymentSheet.Appearance.Colors.onSurface` as the header text color when `PaymentMethodLayout` is `Vertical`.
+* [ADDED][10439](https://github.com/stripe/stripe-android/pull/10439) Bank payments are now supported via a webview wrapper when the Connections SDK dependency is not included.
 
 ## 21.7.1 - 2025-03-24
 
