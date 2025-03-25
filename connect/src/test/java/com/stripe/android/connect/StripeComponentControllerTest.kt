@@ -10,7 +10,7 @@ import com.stripe.android.connect.test.TestComponentController
 import com.stripe.android.connect.test.TestComponentView
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.mock
+import org.mockito.kotlin.verify
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowLooper
@@ -19,6 +19,12 @@ import org.robolectric.shadows.ShadowLooper
 class StripeComponentControllerTest {
 
     private val activityController = Robolectric.buildActivity(TestActivity::class.java)
+
+    @Test
+    fun `init checks context`() {
+        val activity = activityController.create().get()
+        verify(activity.embeddedComponentCoordinator).checkContextDuringCreate(activity)
+    }
 
     @Test
     fun `init initializes the dialog fragment with listeners`() {
@@ -48,13 +54,13 @@ class StripeComponentControllerTest {
         val activity = activityController.create().start().resume().get()
 
         // Use first controller to show the DF.
-        val controller = TestComponentController(activity, mock())
+        val controller = TestComponentController(activity, activity.embeddedComponentManager)
         val dialogFragment = controller.dialogFragment
         controller.show()
         awaitMainLooper()
 
         // Second controller should obtain the DF that was added.
-        val newController = TestComponentController(activity, mock())
+        val newController = TestComponentController(activity, activity.embeddedComponentManager)
         assertThat(newController.dialogFragment).isSameInstanceAs(dialogFragment)
     }
 

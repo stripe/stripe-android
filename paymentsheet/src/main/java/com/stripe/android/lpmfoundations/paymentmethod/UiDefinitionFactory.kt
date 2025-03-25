@@ -82,14 +82,16 @@ internal sealed interface UiDefinitionFactory {
 
     interface RequiresSharedDataSpec : UiDefinitionFactory {
         fun createSupportedPaymentMethod(
+            metadata: PaymentMethodMetadata,
             sharedDataSpec: SharedDataSpec,
         ): SupportedPaymentMethod
 
         fun createFormHeaderInformation(
+            metadata: PaymentMethodMetadata,
             sharedDataSpec: SharedDataSpec,
             incentive: PaymentMethodIncentive?,
         ): FormHeaderInformation {
-            return createSupportedPaymentMethod(sharedDataSpec).asFormHeaderInformation(incentive)
+            return createSupportedPaymentMethod(metadata, sharedDataSpec).asFormHeaderInformation(incentive)
         }
 
         fun createFormElements(
@@ -98,6 +100,7 @@ internal sealed interface UiDefinitionFactory {
             transformSpecToElements: TransformSpecToElements,
         ): List<FormElement> {
             return transformSpecToElements.transform(
+                metadata = metadata,
                 specs = sharedDataSpec.fields,
             )
         }
@@ -130,6 +133,7 @@ internal sealed interface UiDefinitionFactory {
     }
 
     fun supportedPaymentMethod(
+        metadata: PaymentMethodMetadata,
         definition: PaymentMethodDefinition,
         sharedDataSpecs: List<SharedDataSpec>,
     ): SupportedPaymentMethod? = when (this) {
@@ -140,7 +144,7 @@ internal sealed interface UiDefinitionFactory {
         is RequiresSharedDataSpec -> {
             val sharedDataSpec = sharedDataSpecs.firstOrNull { it.type == definition.type.code }
             if (sharedDataSpec != null) {
-                createSupportedPaymentMethod(sharedDataSpec)
+                createSupportedPaymentMethod(metadata, sharedDataSpec)
             } else {
                 null
             }
@@ -164,6 +168,7 @@ internal sealed interface UiDefinitionFactory {
             val sharedDataSpec = sharedDataSpecs.firstOrNull { it.type == definition.type.code }
             if (sharedDataSpec != null) {
                 createFormHeaderInformation(
+                    metadata = metadata,
                     sharedDataSpec = sharedDataSpec,
                     incentive = metadata.paymentMethodIncentive,
                 )

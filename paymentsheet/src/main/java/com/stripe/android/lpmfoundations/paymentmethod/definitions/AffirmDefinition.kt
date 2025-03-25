@@ -29,7 +29,10 @@ internal object AffirmDefinition : PaymentMethodDefinition {
 }
 
 private object AffirmUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSpec {
-    override fun createSupportedPaymentMethod(sharedDataSpec: SharedDataSpec) = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(
+        metadata: PaymentMethodMetadata,
+        sharedDataSpec: SharedDataSpec,
+    ) = SupportedPaymentMethod(
         paymentMethodDefinition = AffirmDefinition,
         sharedDataSpec = sharedDataSpec,
         displayNameResource = UiCoreR.string.stripe_paymentsheet_payment_method_affirm,

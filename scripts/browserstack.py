@@ -373,8 +373,11 @@ def waitForBuildComplete(buildId):
     while responseStatus == "running":
         time.sleep(10)
         print(".", end="")
-        response = get_build_status(buildId)
-        responseStatus = response.json()["status"]
+        try:
+            response = get_build_status(buildId)
+            responseStatus = response.json()["status"]
+        except:
+            print("Failed to get build status, trying again.")
     print("DONE.\nRESULT is: " + responseStatus)
     if responseStatus == "passed":
         return 0

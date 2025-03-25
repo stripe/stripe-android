@@ -16,6 +16,8 @@
   <string name="stripe_bank_account_with_last_4">Bank account ····%s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Confirm the payment in your bank\'s app within %s to complete the purchase.</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_cashapp_afterpay_subtitle">Buy now or pay later with Cash App Afterpay</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
   <string name="stripe_clearpay_subtitle">Buy now or pay later with Clearpay</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->

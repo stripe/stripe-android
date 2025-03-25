@@ -13,7 +13,7 @@ import kotlinx.parcelize.Parcelize
 
 @PrivateBetaConnectSDK
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class EmbeddedComponentManager(
+class EmbeddedComponentManager @JvmOverloads constructor(
     configuration: Configuration,
     fetchClientSecretCallback: FetchClientSecretCallback,
     appearance: Appearance = Appearance(),
@@ -38,7 +38,7 @@ class EmbeddedComponentManager(
      * @param title Optional title to display in the toolbar.
      * @param props Optional props to use for configuring the component.
      */
-    @PrivateBetaConnectSDK
+    @JvmOverloads
     fun createAccountOnboardingController(
         activity: FragmentActivity,
         title: String? = null,
@@ -60,14 +60,12 @@ class EmbeddedComponentManager(
      * @param props Optional props to use for configuring the view.
      * @param cacheKey Key to use for caching the internal WebView across configuration changes.
      */
-    @PrivateBetaConnectSDK
     internal fun createAccountOnboardingView(
         context: Context,
         listener: AccountOnboardingListener? = null,
         props: AccountOnboardingProps? = null,
         cacheKey: String? = null,
     ): AccountOnboardingView {
-        coordinator.checkContextDuringCreate(context)
         return AccountOnboardingView(
             context = context,
             embeddedComponentManager = this,
@@ -84,13 +82,11 @@ class EmbeddedComponentManager(
      * @param listener Optional [PayoutsListener] to use for handling events from the view.
      * @param cacheKey Key to use for caching the internal WebView within an Activity across configuration changes.
      */
-    @PrivateBetaConnectSDK
     internal fun createPayoutsView(
         context: Context,
         listener: PayoutsListener? = null,
         cacheKey: String? = null,
     ): PayoutsView {
-        coordinator.checkContextDuringCreate(context)
         return PayoutsView(
             context = context,
             embeddedComponentManager = this,
@@ -99,19 +95,12 @@ class EmbeddedComponentManager(
         )
     }
 
-    @PrivateBetaConnectSDK
     fun update(appearance: Appearance) {
         coordinator.update(appearance)
     }
 
-    @PrivateBetaConnectSDK
-    fun logout() {
-        throw NotImplementedError("Logout functionality is not yet implemented")
-    }
-
-    @PrivateBetaConnectSDK
-    @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
     data class Configuration(
         val publishableKey: String,
     ) : Parcelable
@@ -125,6 +114,7 @@ class EmbeddedComponentManager(
          * activity as [activity]. This must be called in all activities where an EmbeddedComponent
          * view is used.
          */
+        @JvmStatic
         fun onActivityCreate(activity: ComponentActivity) {
             EmbeddedComponentCoordinator.onActivityCreate(activity)
         }
