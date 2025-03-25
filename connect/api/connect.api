@@ -257,9 +257,6 @@ public final class com/stripe/android/connect/appearance/fonts/CustomFontSource 
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAssetsFilePath ()Ljava/lang/String;
-	public final fun getName ()Ljava/lang/String;
-	public final fun getWeight ()Ljava/lang/Integer;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }

@@ -17,17 +17,17 @@ class CustomFontSource(
     /**
      * The font family loaded from your assets folder.
      */
-    val assetsFilePath: String,
+    internal val assetsFilePath: String,
 
     /**
      * The name of this font family.
      */
-    val name: String,
+    internal val name: String,
 
     /**
      * The weight of this font by default (e.g., bold, normal) between 0-1000. If null the default will be used.
      */
-    val weight: Int? = null,
+    internal val weight: Int? = null,
 ) {
     init {
         @Suppress("MagicNumber")
