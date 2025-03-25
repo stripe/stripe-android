@@ -34,6 +34,7 @@ internal interface EventReporter {
      */
     fun onLoadSucceeded(
         paymentSelection: PaymentSelection?,
+        linkEnabled: Boolean,
         linkMode: LinkMode?,
         googlePaySupported: Boolean,
         linkDisplay: PaymentSheet.LinkConfiguration.Display,

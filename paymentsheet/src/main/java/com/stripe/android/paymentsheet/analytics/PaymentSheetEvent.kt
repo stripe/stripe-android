@@ -45,6 +45,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         orderedLpms: List<String>,
         duration: Duration?,
         linkMode: LinkMode?,
+        override val linkEnabled: Boolean,
         override val isDeferred: Boolean,
         override val googlePaySupported: Boolean,
         linkDisplay: PaymentSheet.LinkConfiguration.Display,
@@ -53,7 +54,6 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         setAsDefaultEnabled: Boolean? = null,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_load_succeeded"
-        override val linkEnabled: Boolean = linkMode != null
         override val additionalParams: Map<String, Any?> = buildMap {
             put(FIELD_DURATION, duration?.asSeconds)
             put(FIELD_SELECTED_LPM, paymentSelection.defaultAnalyticsValue)

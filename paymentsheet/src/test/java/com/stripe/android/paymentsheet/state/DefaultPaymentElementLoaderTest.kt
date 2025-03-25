@@ -1088,6 +1088,7 @@ internal class DefaultPaymentElementLoaderTest {
             paymentSelection = PaymentSelection.Saved(
                 paymentMethod = PAYMENT_METHODS.first()
             ),
+            linkEnabled = true,
             linkMode = LinkMode.LinkPaymentMethod,
             googlePaySupported = true,
             currency = "usd",
@@ -1146,6 +1147,7 @@ internal class DefaultPaymentElementLoaderTest {
         verify(eventReporter).onLoadStarted(eq(true))
         verify(eventReporter).onLoadSucceeded(
             paymentSelection = null,
+            linkEnabled = true,
             linkMode = LinkMode.LinkPaymentMethod,
             googlePaySupported = true,
             currency = "usd",
@@ -2234,6 +2236,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         verify(eventReporter).onLoadSucceeded(
             paymentSelection = null,
+            linkEnabled = false,
             linkMode = null,
             googlePaySupported = true,
             currency = "usd",
@@ -2263,6 +2266,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         verify(eventReporter).onLoadSucceeded(
             paymentSelection = null,
+            linkEnabled = true,
             linkMode = LinkMode.LinkPaymentMethod,
             googlePaySupported = true,
             currency = "usd",
@@ -2292,6 +2296,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         verify(eventReporter).onLoadSucceeded(
             paymentSelection = null,
+            linkEnabled = true,
             linkMode = LinkMode.Passthrough,
             googlePaySupported = true,
             currency = "usd",
@@ -2319,6 +2324,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         verify(eventReporter).onLoadSucceeded(
             paymentSelection = null,
+            linkEnabled = true,
             linkMode = LinkMode.LinkPaymentMethod,
             googlePaySupported = true,
             currency = "usd",
@@ -2356,6 +2362,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         verify(eventReporter).onLoadSucceeded(
             paymentSelection = null,
+            linkEnabled = true,
             linkMode = LinkMode.LinkPaymentMethod,
             googlePaySupported = true,
             currency = "usd",
@@ -2393,6 +2400,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         verify(eventReporter).onLoadSucceeded(
             paymentSelection = null,
+            linkEnabled = true,
             linkMode = LinkMode.LinkPaymentMethod,
             googlePaySupported = true,
             currency = "usd",
@@ -2524,6 +2532,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         verify(eventReporter).onLoadSucceeded(
             paymentSelection = anyOrNull(),
+            linkEnabled = eq(true),
             linkMode = anyOrNull(),
             googlePaySupported = any(),
             linkDisplay = eq(PaymentSheet.LinkConfiguration.Display.Automatic),
@@ -2584,6 +2593,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         verify(eventReporter).onLoadSucceeded(
             paymentSelection = anyOrNull(),
+            linkEnabled = eq(false),
             linkMode = anyOrNull(),
             googlePaySupported = any(),
             linkDisplay = eq(PaymentSheet.LinkConfiguration.Display.Never),
@@ -2715,6 +2725,7 @@ internal class DefaultPaymentElementLoaderTest {
         verify(eventReporter).onLoadStarted(eq(false))
         verify(eventReporter).onLoadSucceeded(
             paymentSelection = paymentSelection,
+            linkEnabled = true,
             linkMode = LinkMode.LinkPaymentMethod,
             googlePaySupported = true,
             currency = "usd",

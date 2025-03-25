@@ -727,6 +727,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             eventReporter.onLoadFailed(state.validationError)
         } else {
             eventReporter.onLoadSucceeded(
+                linkEnabled = state.paymentMethodMetadata.linkState != null,
                 linkMode = elementsSession.linkSettings?.linkMode,
                 googlePaySupported = isGooglePaySupported,
                 linkDisplay = linkDisplay,

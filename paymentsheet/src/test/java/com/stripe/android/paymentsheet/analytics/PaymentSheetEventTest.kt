@@ -392,6 +392,7 @@ class PaymentSheetEventTest {
     @Test
     fun `LoadSucceeded event should contain passthrough mode for Link if provided`() {
         val event = createLoadSucceededEvent(
+            linkEnabled = true,
             linkMode = LinkMode.Passthrough,
         )
 
@@ -402,6 +403,7 @@ class PaymentSheetEventTest {
     @Test
     fun `LoadSucceeded event should contain payment method mode for Link if provided`() {
         val event = createLoadSucceededEvent(
+            linkEnabled = true,
             linkMode = LinkMode.LinkPaymentMethod,
         )
 
@@ -1427,6 +1429,7 @@ class PaymentSheetEventTest {
 
     private fun createLoadSucceededEvent(
         isDeferred: Boolean = false,
+        linkEnabled: Boolean = false,
         linkMode: LinkMode? = null,
         googlePaySupported: Boolean = false,
         duration: Duration = (5L).seconds,
@@ -1439,6 +1442,7 @@ class PaymentSheetEventTest {
     ): PaymentSheetEvent.LoadSucceeded {
         return PaymentSheetEvent.LoadSucceeded(
             isDeferred = isDeferred,
+            linkEnabled = linkEnabled,
             linkMode = linkMode,
             googlePaySupported = googlePaySupported,
             duration = duration,

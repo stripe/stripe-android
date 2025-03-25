@@ -218,7 +218,7 @@ class DefaultEventReporterTest {
     fun `onShowNewPaymentOptions() should fire analytics request with expected event value`() =
         runTest(testDispatcher) {
             val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
-                simulateSuccessfulSetup(linkMode = null, googlePayReady = false)
+                simulateSuccessfulSetup(linkEnabled = false, googlePayReady = false)
             }
 
             analyticEventCallbackProvider.set { event ->
@@ -978,6 +978,7 @@ class DefaultEventReporterTest {
 
     private fun EventReporter.simulateSuccessfulSetup(
         paymentSelection: PaymentSelection = PaymentSelection.GooglePay,
+        linkEnabled: Boolean = true,
         linkMode: LinkMode? = LinkMode.LinkPaymentMethod,
         googlePayReady: Boolean = true,
         currency: String? = "usd",
@@ -995,6 +996,7 @@ class DefaultEventReporterTest {
         onLoadSucceeded(
             paymentSelection = paymentSelection,
             googlePaySupported = googlePayReady,
+            linkEnabled = linkEnabled,
             linkMode = linkMode,
             currency = currency,
             initializationMode = initializationMode,

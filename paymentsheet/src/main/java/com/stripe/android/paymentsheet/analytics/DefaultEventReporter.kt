@@ -36,12 +36,10 @@ internal class DefaultEventReporter @Inject internal constructor(
 ) : EventReporter {
 
     private var isDeferred: Boolean = false
+    private var linkEnabled: Boolean = false
     private var linkMode: LinkMode? = null
     private var googlePaySupported: Boolean = false
     private var currency: String? = null
-
-    private val linkEnabled: Boolean
-        get() = linkMode != null
 
     override fun onInit(
         commonConfiguration: CommonConfiguration,
@@ -74,6 +72,7 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     override fun onLoadSucceeded(
         paymentSelection: PaymentSelection?,
+        linkEnabled: Boolean,
         linkMode: LinkMode?,
         googlePaySupported: Boolean,
         linkDisplay: PaymentSheet.LinkConfiguration.Display,
@@ -85,6 +84,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         setAsDefaultEnabled: Boolean?,
     ) {
         this.currency = currency
+        this.linkEnabled = linkEnabled
         this.linkMode = linkMode
         this.googlePaySupported = googlePaySupported
 
@@ -97,6 +97,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 paymentSelection = paymentSelection,
                 duration = duration,
                 isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
                 linkMode = linkMode,
                 googlePaySupported = googlePaySupported,
                 linkDisplay = linkDisplay,
