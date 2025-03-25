@@ -30,6 +30,7 @@ import com.stripe.android.model.StripeIntent.Status.Succeeded
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.ConfigFixtures
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.FakePrefsRepository
@@ -286,7 +287,9 @@ internal class DefaultPaymentElementLoaderTest {
         runTest {
             prefsRepository.savePaymentSelection(null)
 
+            val userFacingLogger = FakeUserFacingLogger()
             val loader = createPaymentElementLoader(
+                userFacingLogger = userFacingLogger,
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 isGooglePayReady = true,
                 customerRepo = FakeCustomerRepository(paymentMethods = emptyList()),
@@ -301,6 +304,8 @@ internal class DefaultPaymentElementLoaderTest {
             ).getOrThrow()
 
             assertThat(result.paymentSelection).isNull()
+            assertThat(userFacingLogger.getLoggedMessages())
+                .containsExactlyElementsIn(listOf("GooglePayConfiguration is not set."))
         }
 
     @Test
@@ -2519,6 +2524,7 @@ internal class DefaultPaymentElementLoaderTest {
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
+                .googlePay(ConfigFixtures.GOOGLE_PAY)
                 .externalPaymentMethods(requestedExternalPaymentMethods).build(),
             initializedViaCompose = false,
         ).getOrThrow()
@@ -2545,6 +2551,7 @@ internal class DefaultPaymentElementLoaderTest {
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
+                .googlePay(ConfigFixtures.GOOGLE_PAY)
                 .customPaymentMethods(requestedCustomPaymentMethods).build(),
             initializedViaCompose = false,
         ).getOrThrow()
