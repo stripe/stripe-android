@@ -17,6 +17,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -845,7 +846,8 @@ internal class PaymentMethodMetadataTest {
             linkState = null,
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             paymentMethodIncentive = null,
-            elementsSessionId = "session_1234"
+            elementsSessionId = "session_1234",
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -886,7 +888,6 @@ internal class PaymentMethodMetadataTest {
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             sharedDataSpecs = listOf(SharedDataSpec("card")),
             isGooglePayReady = true,
-            isFinancialConnectionsAvailable = { false },
             isPaymentMethodSyncDefaultEnabled = false,
         )
 
@@ -911,8 +912,8 @@ internal class PaymentMethodMetadataTest {
             ),
             isGooglePayReady = true,
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
-            financialConnectionsAvailable = false,
             linkInlineConfiguration = null,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             linkMode = null,
             linkState = null,
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
