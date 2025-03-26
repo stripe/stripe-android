@@ -21,6 +21,7 @@ import com.stripe.android.uicore.stripeColors
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val TEST_TAG_ICON_FROM_RES = "PaymentMethodIconFomRes"
+private const val MIN_LUMINANCE_FOR_BLACK_TINT = 0.5
 
 @Composable
 internal fun PaymentMethodIcon(
@@ -34,7 +35,7 @@ internal fun PaymentMethodIcon(
     val color = MaterialTheme.stripeColors.component
     val colorFilter = remember(iconRequiresTinting) {
         if (iconRequiresTinting) {
-            val tintColor = if (color.luminance() < 0.5) Color.White else Color.Black
+            val tintColor = if (color.luminance() < MIN_LUMINANCE_FOR_BLACK_TINT) Color.White else Color.Black
             ColorFilter.tint(tintColor)
         } else {
             null
