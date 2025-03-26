@@ -35,7 +35,7 @@ class CvcConfig : CardDetailsTextFieldConfig {
             }
         } else if (isDigitLimit && number.length == numberAllowedDigits) {
             TextFieldStateConstants.Valid.Full
-        } else if (isDigitLimit && brand.cvcLength.contains(number.length)){
+        } else if (isDigitLimit && brand.cvcLength.contains(number.length)) {
             TextFieldStateConstants.Valid.Limitless
         } else if (isDigitLimit && number.length < numberAllowedDigits) {
             TextFieldStateConstants.Error.Incomplete(StripeR.string.stripe_invalid_cvc)
