@@ -1,9 +1,11 @@
 package com.stripe.android.payments.financialconnections
 
 import com.stripe.android.core.utils.FeatureFlags.financialConnectionsFullSdkUnavailable
-import com.stripe.android.core.utils.FeatureFlags.financialConnectionsLiteKillswitch
+import com.stripe.android.core.utils.FeatureFlags.financialConnectionsLiteEnabled
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_DISABLE_FC_LITE
+import com.stripe.android.testing.FeatureFlagTestRule
+import org.junit.Rule
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import kotlin.test.Test
@@ -11,9 +13,20 @@ import kotlin.test.assertEquals
 
 class GetFinancialConnectionsAvailabilityTest {
 
+    @get:Rule
+    val financialConnectionsFullSdkUnavailableFeatureFlagTestRule = FeatureFlagTestRule(
+        featureFlag = financialConnectionsFullSdkUnavailable,
+        isEnabled = false
+    )
+
+    @get:Rule
+    val financialConnectionsLiteEnabledFeatureFlagTestRule = FeatureFlagTestRule(
+        featureFlag = financialConnectionsLiteEnabled,
+        isEnabled = false
+    )
+
     @Test
     fun `when full SDK available and not unavailable should return full`() {
-        financialConnectionsFullSdkUnavailable.setEnabled(false)
         val elementsSession = createSession(emptyMap())
         assertEquals(
             FinancialConnectionsAvailability.Full,
@@ -26,7 +39,6 @@ class GetFinancialConnectionsAvailabilityTest {
 
     @Test
     fun `when lite killswitch is enabled and full not available should return None`() {
-        financialConnectionsLiteKillswitch.setEnabled(true)
         val elementsSession = createSession(
             mapOf(ELEMENTS_DISABLE_FC_LITE to true)
         )
@@ -41,7 +53,7 @@ class GetFinancialConnectionsAvailabilityTest {
 
     @Test
     fun `when full not available and killswitch not enabled, should return Lite`() {
-        financialConnectionsLiteKillswitch.setEnabled(false)
+        financialConnectionsLiteEnabledFeatureFlagTestRule.setEnabled(true)
         val elementsSession = createSession(flags = emptyMap())
         assertEquals(
             FinancialConnectionsAvailability.Lite,

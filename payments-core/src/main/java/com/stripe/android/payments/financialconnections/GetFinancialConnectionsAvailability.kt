@@ -2,7 +2,7 @@ package com.stripe.android.payments.financialconnections
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.utils.FeatureFlags.financialConnectionsFullSdkUnavailable
-import com.stripe.android.core.utils.FeatureFlags.financialConnectionsLiteKillswitch
+import com.stripe.android.core.utils.FeatureFlags.financialConnectionsLiteEnabled
 import com.stripe.android.model.ElementsSession
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -16,7 +16,7 @@ object GetFinancialConnectionsAvailability {
             isFullSdkAvailable() && financialConnectionsFullSdkUnavailable.isEnabled.not() -> {
                 FinancialConnectionsAvailability.Full
             }
-            elementsSession.fcLiteKillSwitchEnabled().not() && financialConnectionsLiteKillswitch.isEnabled.not() -> {
+            elementsSession.fcLiteKillSwitchEnabled().not() && financialConnectionsLiteEnabled.isEnabled -> {
                 FinancialConnectionsAvailability.Lite
             }
             else -> {
