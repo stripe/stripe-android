@@ -314,7 +314,7 @@ internal val PaymentSelection.drawableResourceId: Int
         is PaymentSelection.Link -> getLinkIcon()
         is PaymentSelection.New.Card -> brand.getCardBrandIcon()
         is PaymentSelection.New.GenericPaymentMethod -> iconResource
-        is PaymentSelection.New.LinkInline -> getLinkIcon()
+        is PaymentSelection.New.LinkInline -> brand.getCardBrandIcon()
         is PaymentSelection.New.USBankAccount -> iconResource
         is PaymentSelection.Saved -> getSavedIcon(this)
     }
