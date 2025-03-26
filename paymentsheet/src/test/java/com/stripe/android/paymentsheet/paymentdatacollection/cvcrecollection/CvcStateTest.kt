@@ -34,6 +34,23 @@ class CvcStateTest {
             cvc = ""
         )
 
+        val actual = state.updateCvc("55")
+        assertThat(actual).isEqualTo(
+            CvcState(
+                cardBrand = CardBrand.AmericanExpress,
+                cvc = "55"
+            )
+        )
+        assertThat(actual.isValid).isEqualTo(false)
+    }
+
+    @Test
+    fun `cvc should be valid for cvc length in CardBrand cvcLength set - amex`() {
+        val state = CvcState(
+            cardBrand = CardBrand.AmericanExpress,
+            cvc = ""
+        )
+
         val actual = state.updateCvc("555")
         assertThat(actual).isEqualTo(
             CvcState(
@@ -41,7 +58,7 @@ class CvcStateTest {
                 cvc = "555"
             )
         )
-        assertThat(actual.isValid).isEqualTo(false)
+        assertThat(actual.isValid).isEqualTo(true)
     }
 
     @Test
