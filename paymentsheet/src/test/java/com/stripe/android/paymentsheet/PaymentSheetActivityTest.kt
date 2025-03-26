@@ -20,6 +20,7 @@ import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
@@ -974,6 +975,7 @@ internal class PaymentSheetActivityTest {
                 .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
 
             viewModel.mandateHandler.updateMandateText(text.resolvableString, false)
+            mandateNode.performScrollTo()
             mandateNode.assertIsDisplayed()
 
             val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
