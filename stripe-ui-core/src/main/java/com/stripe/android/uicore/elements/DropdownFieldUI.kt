@@ -137,6 +137,7 @@ fun DropDown(
             if (controller.tinyMode) {
                 TinyDropdownLabel(
                     selectedItemLabel = selectedItemLabel,
+                    currentTextColor = currentTextColor,
                     shouldDisableDropdownWithSingleItem = shouldDisableDropdownWithSingleItem,
                     showChevron = showChevron
                 )
@@ -238,13 +239,14 @@ private fun LargeDropdownLabel(
 @Composable
 private fun TinyDropdownLabel(
     selectedItemLabel: String,
+    currentTextColor: Color,
     shouldDisableDropdownWithSingleItem: Boolean,
     showChevron: Boolean
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
             selectedItemLabel,
-            color = MaterialTheme.stripeColors.placeholderText
+            color = currentTextColor
         )
         if (!shouldDisableDropdownWithSingleItem && showChevron) {
             Icon(
