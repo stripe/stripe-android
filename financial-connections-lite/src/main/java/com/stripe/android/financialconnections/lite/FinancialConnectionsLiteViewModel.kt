@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.lite
 
 import android.content.Context
+import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -33,7 +34,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import androidx.core.net.toUri
 
 internal class FinancialConnectionsLiteViewModel(
     private val logger: Logger,

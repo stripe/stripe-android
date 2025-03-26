@@ -16,6 +16,7 @@ import androidx.activity.viewModels
 import androidx.annotation.RestrictTo
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
@@ -28,7 +29,6 @@ import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteView
 import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.OpenCustomTab
 import kotlinx.coroutines.launch
-import androidx.core.net.toUri
 
 internal class FinancialConnectionsSheetLiteActivity : ComponentActivity(R.layout.stripe_activity_lite) {
 
