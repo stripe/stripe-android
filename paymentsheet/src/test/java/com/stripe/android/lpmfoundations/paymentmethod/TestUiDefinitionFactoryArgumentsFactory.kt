@@ -9,12 +9,14 @@ import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 
 internal object TestUiDefinitionFactoryArgumentsFactory {
     fun create(
         paymentMethodCreateParams: PaymentMethodCreateParams? = null,
         paymentMethodExtraParams: PaymentMethodExtraParams? = null,
+        paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
         linkConfigurationCoordinator: LinkConfigurationCoordinator? = null,
         initialLinkUserInput: UserInput? = null,
         setAsDefaultMatchesSaveForFutureUse: Boolean = false,
@@ -27,6 +29,7 @@ internal object TestUiDefinitionFactoryArgumentsFactory {
         return UiDefinitionFactory.Arguments.Factory.Default(
             cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory(context),
             paymentMethodCreateParams = paymentMethodCreateParams,
+            paymentMethodOptionsParams = paymentMethodOptionsParams,
             paymentMethodExtraParams = paymentMethodExtraParams,
             linkConfigurationCoordinator = linkConfigurationCoordinator,
             initialLinkUserInput = initialLinkUserInput,
