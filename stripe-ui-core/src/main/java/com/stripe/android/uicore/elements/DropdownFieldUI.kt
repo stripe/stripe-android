@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -102,7 +103,7 @@ fun DropDown(
     val currentTextColor = if (shouldEnable) {
         MaterialTheme.stripeColors.onComponent
     } else {
-        MaterialTheme.stripeColors.onComponent.copy(alpha = 0.4f)
+        MaterialTheme.stripeColors.onComponent.copy(alpha = ContentAlpha.disabled)
     }
 
     Box(
@@ -136,14 +137,12 @@ fun DropDown(
             if (controller.tinyMode) {
                 TinyDropdownLabel(
                     selectedItemLabel = selectedItemLabel,
-                    currentTextColor = currentTextColor,
                     shouldDisableDropdownWithSingleItem = shouldDisableDropdownWithSingleItem,
                     showChevron = showChevron
                 )
             } else {
                 LargeDropdownLabel(
                     label = label,
-                    shouldEnable = shouldEnable,
                     selectedItemLabel = selectedItemLabel,
                     currentTextColor = currentTextColor,
                     shouldDisableDropdownWithSingleItem = shouldDisableDropdownWithSingleItem,
@@ -194,7 +193,6 @@ fun DropDown(
 @Composable
 private fun LargeDropdownLabel(
     label: Int?,
-    shouldEnable: Boolean,
     selectedItemLabel: String,
     currentTextColor: Color,
     shouldDisableDropdownWithSingleItem: Boolean,
@@ -212,7 +210,7 @@ private fun LargeDropdownLabel(
             )
         ) {
             label?.let {
-                FormLabel(stringResource(it), enabled = shouldEnable)
+                FormLabel(stringResource(it))
             }
             Row(
                 modifier = Modifier.fillMaxWidth(.9f),
@@ -240,14 +238,13 @@ private fun LargeDropdownLabel(
 @Composable
 private fun TinyDropdownLabel(
     selectedItemLabel: String,
-    currentTextColor: Color,
     shouldDisableDropdownWithSingleItem: Boolean,
     showChevron: Boolean
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
             selectedItemLabel,
-            color = currentTextColor
+            color = MaterialTheme.stripeColors.placeholderText
         )
         if (!shouldDisableDropdownWithSingleItem && showChevron) {
             Icon(
