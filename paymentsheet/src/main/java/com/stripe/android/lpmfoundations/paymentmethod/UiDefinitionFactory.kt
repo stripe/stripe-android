@@ -82,14 +82,9 @@ internal sealed interface UiDefinitionFactory {
                 }
 
                 private fun getSaveForFutureUseInitialValue(): Boolean {
-                    return when (paymentMethodOptionsParams) {
-                        is PaymentMethodOptionsParams.USBankAccount,
-                        is PaymentMethodOptionsParams.Card -> {
-                            paymentMethodOptionsParams.setupFutureUsage() !=
-                                ConfirmPaymentIntentParams.SetupFutureUsage.Blank
-                        }
-                        else -> false
-                    }
+                    return paymentMethodOptionsParams?.setupFutureUsage()?.let {
+                        it != ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+                    } ?: false
                 }
             }
         }

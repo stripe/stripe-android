@@ -32,8 +32,6 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest {
     @get:Rule
     val intentsRule = IntentsRule()
 
-    val integrationType: ProductIntegrationType = ProductIntegrationType.FlowController
-
     @TestParameter(valuesProvider = ConfirmationTypeProvider::class)
     lateinit var confirmationType: ConfirmationType
 

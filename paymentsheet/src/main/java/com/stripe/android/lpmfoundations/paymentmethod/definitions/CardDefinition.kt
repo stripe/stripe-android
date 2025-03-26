@@ -227,11 +227,9 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
     private fun getSetAsDefaultInitialValueFromArguments(
         arguments: UiDefinitionFactory.Arguments
     ): Boolean {
-        return arguments.initialValues.get(
-            IdentifierSpec.SetAsDefaultPaymentMethod.copy(
-                v1 = "card[${IdentifierSpec.SetAsDefaultPaymentMethod.v1}]"
-            )
-        )?.toBoolean() ?: false
+        return arguments.initialValues.entries.firstOrNull {
+            it.key.v1.contains(IdentifierSpec.SetAsDefaultPaymentMethod.v1)
+        }?.value?.toBoolean() ?: false
     }
 }
 
