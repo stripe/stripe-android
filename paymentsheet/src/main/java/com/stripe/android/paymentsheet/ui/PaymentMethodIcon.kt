@@ -9,7 +9,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -29,10 +31,11 @@ internal fun PaymentMethodIcon(
     modifier: Modifier,
     contentAlignment: Alignment = Alignment.TopStart,
 ) {
-    val color = MaterialTheme.stripeColors.onComponent
+    val color = MaterialTheme.stripeColors.component
     val colorFilter = remember(iconRequiresTinting) {
         if (iconRequiresTinting) {
-            ColorFilter.tint(color)
+            val tintColor = if (color.luminance() < 0.5) Color.White else Color.Black
+            ColorFilter.tint(tintColor)
         } else {
             null
         }
