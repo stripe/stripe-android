@@ -16,6 +16,7 @@ import androidx.activity.viewModels
 import androidx.annotation.RestrictTo
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
@@ -61,7 +62,7 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity(R.layou
 
     private fun setupProgressBar() {
         val color = when (getArgs(intent)) {
-            null, is ForData, is ForToken -> R.color.stripe_blurple
+            null, is ForData, is ForToken -> R.color.stripe_financial_connections
             is ForInstantDebits -> R.color.stripe_link
         }.let { ContextCompat.getColor(this, it) }
         progressBar.progressDrawable.setTint(color)
@@ -89,18 +90,18 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity(R.layou
         }
     }
 
-    private fun openCustomTab(uri: Uri) {
+    private fun openCustomTab(uri: String) {
         CustomTabsIntent.Builder()
             .setShowTitle(true)
             .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
             .setBookmarksButtonEnabled(false)
             .build()
-            .launchUrl(this, uri)
+            .launchUrl(this, uri.toUri())
     }
 
     private fun handleUrl(uri: Uri?): Boolean {
         if (uri != null) {
-            viewModel.handleUrl(uri)
+            viewModel.handleUrl(uri.toString())
             return true
         }
         return false

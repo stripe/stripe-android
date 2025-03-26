@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.lite
 
 import android.content.Context
-import android.net.Uri
+import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -73,17 +73,21 @@ internal class FinancialConnectionsLiteViewModel(
         }
     }
 
-    fun handleUrl(uri: Uri) = withState { state ->
+    fun handleUrl(uri: String) = withState { state ->
         when {
-            uri.toString().contains(state.successUrl) -> {
+            uri.contains(state.successUrl) -> {
                 when (args) {
-                    is ForData -> onSuccessFromDataFlow()
+                    is ForData -> onSuccessFromDataFlow(userCancelled = false)
+                    is ForToken -> onSuccessFromTokenFlow(userCancelled = false)
                     is ForInstantDebits -> onSuccessFromInstantDebits(uri)
-                    is ForToken -> onSuccessFromTokenFlow()
                 }
             }
-            uri.toString().contains(state.cancelUrl) -> {
-                onAuthFlowCanceled()
+            uri.contains(state.cancelUrl) -> {
+                when (args) {
+                    is ForData -> onSuccessFromDataFlow(userCancelled = true)
+                    is ForToken -> onSuccessFromTokenFlow(userCancelled = true)
+                    is ForInstantDebits -> onAuthFlowCanceled()
+                }
             }
             else -> {
                 launchInBrowser(uri)
@@ -91,37 +95,45 @@ internal class FinancialConnectionsLiteViewModel(
         }
     }
 
-    private fun onSuccessFromTokenFlow() {
+    private fun onSuccessFromTokenFlow(userCancelled: Boolean) {
         viewModelScope.launch(workContext) {
             runCatching {
                 val session = repository.getFinancialConnectionsSession(args.configuration).getOrThrow()
-                _viewEffects.emit(
-                    FinishWithResult(
-                        Completed(
-                            financialConnectionsSession = session,
-                            token = requireNotNull(session.parsedToken)
+                if (session.paymentAccount == null && userCancelled) {
+                    _viewEffects.emit(FinishWithResult(result = Canceled))
+                } else {
+                    _viewEffects.emit(
+                        FinishWithResult(
+                            Completed(
+                                financialConnectionsSession = session,
+                                token = requireNotNull(session.parsedToken)
+                            )
                         )
                     )
-                )
+                }
             }.onFailure {
                 handleError(it, "Failed to complete session for token flow")
             }
         }
     }
 
-    private fun onSuccessFromDataFlow() {
+    private fun onSuccessFromDataFlow(userCancelled: Boolean) {
         viewModelScope.launch(workContext) {
             runCatching {
                 val session = repository.getFinancialConnectionsSession(args.configuration).getOrThrow()
-                _viewEffects.emit(FinishWithResult(Completed(financialConnectionsSession = session)))
+                if (session.paymentAccount == null && userCancelled) {
+                    _viewEffects.emit(FinishWithResult(result = Canceled))
+                } else {
+                    _viewEffects.emit(FinishWithResult(result = Completed(financialConnectionsSession = session)))
+                }
             }.onFailure {
                 handleError(it, "Failed to complete session for data flow")
             }
         }
     }
 
-    private fun onSuccessFromInstantDebits(url: Uri) = viewModelScope.launch {
-        InstantDebitsResultBuilder.fromUri(url)
+    private fun onSuccessFromInstantDebits(url: String) = viewModelScope.launch {
+        InstantDebitsResultBuilder.fromUri(url.toUri())
             .onSuccess {
                 _viewEffects.emit(
                     FinishWithResult(
@@ -137,7 +149,13 @@ internal class FinancialConnectionsLiteViewModel(
             }
     }
 
-    private fun launchInBrowser(uri: Uri) {
+    private fun onAuthFlowCanceled() {
+        viewModelScope.launch {
+            _viewEffects.emit(FinishWithResult(result = Canceled))
+        }
+    }
+
+    private fun launchInBrowser(uri: String) {
         viewModelScope.launch {
             _viewEffects.emit(OpenCustomTab(uri))
         }
@@ -147,12 +165,6 @@ internal class FinancialConnectionsLiteViewModel(
         block(requireNotNull(_state.value))
     }.onFailure {
         handleError(it, "State is null")
-    }
-
-    private fun onAuthFlowCanceled() {
-        viewModelScope.launch {
-            _viewEffects.emit(FinishWithResult(result = Canceled))
-        }
     }
 
     private fun handleError(error: Throwable, message: String) {
@@ -170,7 +182,7 @@ internal class FinancialConnectionsLiteViewModel(
 
     internal sealed class ViewEffect {
         data class OpenAuthFlowWithUrl(val url: String) : ViewEffect()
-        data class OpenCustomTab(val url: Uri) : ViewEffect()
+        data class OpenCustomTab(val url: String) : ViewEffect()
         data class FinishWithResult(val result: FinancialConnectionsSheetActivityResult) : ViewEffect()
     }
 
