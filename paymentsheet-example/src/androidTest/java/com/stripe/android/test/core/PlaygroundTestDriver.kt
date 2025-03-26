@@ -1362,80 +1362,80 @@ internal class PlaygroundTestDriver(
                 when (val authAction = testParameters.authorizationAction) {
                     is AuthorizeAction.DisplayQrCode -> {
                         if (!testParameters.isSetupMode) {
-                            closeButton.wait(5000)
+                            closeButton.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
                             onView(withText("CLOSE")).perform(click())
                         }
                     }
 
                     is AuthorizeAction.Authorize3ds2 -> {
-                        closeButton.wait(5000)
+                        closeButton.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
 
                         val completeButton = UiAutomatorText("COMPLETE", device = device)
 
-                        completeButton.wait(5000)
+                        completeButton.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
                         completeButton.click()
                     }
 
                     is AuthorizeAction.Test3DS2.HSBCHTML -> {
                         val otpButton = UiAutomatorText("OTP", labelMatchesExactly = true, device = device)
 
-                        otpButton.wait(5000)
+                        otpButton.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
                         otpButton.click()
 
                         val submitButton = UiAutomatorText("Submit", labelMatchesExactly = true, device = device)
-                        submitButton.wait(5000)
+                        submitButton.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
                         submitButton.click()
 
                         val enterOTPField = UiAutomatorText("", labelMatchesExactly = true, device = device)
-                        enterOTPField.wait(5000)
+                        enterOTPField.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
                         enterOTPField.click()
                         enterOTPField.setText("555555")
 
                         val otpSubmit = UiAutomatorText("Submit", labelMatchesExactly = true, device = device)
-                        otpSubmit.wait(5000)
+                        otpSubmit.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
                         otpSubmit.click()
                     }
 
                     is AuthorizeAction.Test3DS2.SingleSelect -> {
                         val completeAuthentication = UiAutomatorText("Complete Authentication", labelMatchesExactly = true, device = device)
-                        completeAuthentication.wait(5000)
+                        completeAuthentication.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
                         completeAuthentication.click()
 
                         val submitButton = UiAutomatorText("Submit", labelMatchesExactly = true, device = device)
-                        submitButton.wait(5000)
+                        submitButton.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
                         submitButton.click()
                     }
 
                     is AuthorizeAction.Test3DS2.MultiSelect -> {
                         UiSelector().textContains("Complete Authentication")
                         val completeAuthentication = UiAutomatorText("Complete Authentication", labelMatchesExactly = true, device = device)
-                        completeAuthentication.wait(5000)
+                        completeAuthentication.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
                         device.findObject(UiSelector().textContains("Complete Authentication").index(0)).click()
                         device.findObject(UiSelector().textContains("Complete Authentication").index(1)).click()
                         device.findObject(UiSelector().textContains("Complete Authentication").index(2)).click()
 
                         val submitButton = UiAutomatorText("Submit", labelMatchesExactly = true, device = device)
-                        submitButton.wait(5000)
+                        submitButton.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
                         submitButton.click()
                     }
 
                     is AuthorizeAction.Test3DS2.OOB -> {
                         val completeAuthentication = UiAutomatorText("Complete Authentication", labelMatchesExactly = true, device = device)
-                        completeAuthentication.wait(5000)
+                        completeAuthentication.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
                         completeAuthentication.click()
                     }
 
                     is AuthorizeAction.Test3DS2.OTP -> {
                         val explanationText = UiAutomatorText("For this test", labelMatchesExactly = true, device = device)
-                        explanationText.wait(10000)
+                        explanationText.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
 
                         val enterOTPField = UiAutomatorText("Enter your code below:", labelMatchesExactly = true, className = "android.widget.EditText", device = device)
-                        enterOTPField.wait(5000)
+                        enterOTPField.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
                         enterOTPField.click()
                         enterOTPField.setText("424242")
 
                         val submitButton = UiAutomatorText("Submit", labelMatchesExactly = true, device = device)
-                        submitButton.wait(5000)
+                        submitButton.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
                         submitButton.click()
                     }
 
