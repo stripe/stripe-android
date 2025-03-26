@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.webkit.ValueCallback
 import android.widget.FrameLayout
 import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
 import androidx.core.view.isVisible
 import androidx.core.view.updateMargins
 import androidx.lifecycle.ViewModelProvider
@@ -19,6 +20,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.MutableCreationExtras
 import com.stripe.android.connect.di.StripeConnectComponent
 import com.stripe.android.connect.util.AndroidClock
+import com.stripe.android.connect.util.Clock
 import com.stripe.android.connect.webview.MobileInput
 import com.stripe.android.connect.webview.StripeConnectWebView
 import com.stripe.android.connect.webview.StripeConnectWebViewContainer
@@ -46,6 +48,7 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
     props: Props?,
     private val listenerDelegate: ComponentListenerDelegate<Listener> = ComponentListenerDelegate(),
     private val logger: Logger = StripeConnectComponent.instance.logger,
+    private val clock: Clock = AndroidClock(),
 ) : FrameLayout(context, attrs, defStyleAttr),
     StripeConnectWebViewContainer<Listener, Props>
     where Listener : StripeEmbeddedComponentListener,
@@ -143,14 +146,11 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
 
     private val onAttachStateChangeListener = object : OnAttachStateChangeListener {
         override fun onViewAttachedToWindow(v: View) {
-            val containerView = v as ViewGroup
+            val containerView = this@StripeComponentView
 
             val viewModel = checkNotNull(getViewModelFromViewModelStoreOwner(containerView))
                 .also { this@StripeComponentView.viewModel = it }
-            populateContainerView(
-                containerView = containerView,
-                viewModel = viewModel
-            )
+            populateContainerView(viewModel = viewModel)
 
             val lifecycleOwner = checkNotNull(containerView.findViewTreeLifecycleOwner())
 
@@ -211,12 +211,12 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
         return viewModelProvider[viewModelKey, StripeConnectWebViewContainerViewModel::class]
     }
 
-    private fun populateContainerView(containerView: ViewGroup, viewModel: StripeConnectWebViewContainerViewModel) {
+    private fun populateContainerView(viewModel: StripeConnectWebViewContainerViewModel) {
         // Sync props to VM.
         viewModel.propsJson = this.propsJson
 
         // Start from a clean slate.
-        containerView.removeAllViews()
+        removeAllViews()
 
         // Add VM's WebView.
         val webView = viewModel.webView
@@ -226,19 +226,10 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
                     ViewGroup.LayoutParams.MATCH_PARENT
                 )
             }
-        containerView.addView(webView)
+        addView(webView)
 
         // Add progress bar on top of WebView.
-        val progressBar = StripeWebViewSpinner(containerView.context)
-            .apply {
-                // Try to match size and position with web spinner.
-                val size = context.resources.getDimensionPixelSize(R.dimen.stripe_web_view_spinner_size)
-                val topMargin = context.resources.getDimensionPixelSize(R.dimen.stripe_web_view_spinner_top_margin)
-                layoutParams = LayoutParams(size, size, Gravity.TOP or Gravity.CENTER_HORIZONTAL)
-                    .apply { updateMargins(top = topMargin) }
-            }
-        this.progressBar = progressBar
-        containerView.addView(progressBar)
+        addProgressBar()
     }
 
     internal fun setPropsFromXml(props: Props) {
@@ -248,15 +239,43 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
         }
     }
 
-    private fun bindViewModelState(state: StripeConnectWebViewContainerState) {
-        val webView = this.webView ?: return
-        val progressBar = this.progressBar ?: return
+    @VisibleForTesting
+    internal fun addProgressBar() {
+        val progressBar = StripeWebViewSpinner(context, clock = clock)
+            .apply {
+                // Try to match size and position with web spinner.
+                val size = context.resources.getDimensionPixelSize(R.dimen.stripe_web_view_spinner_size)
+                val topMargin = context.resources.getDimensionPixelSize(R.dimen.stripe_web_view_spinner_top_margin)
+                layoutParams = LayoutParams(size, size, Gravity.TOP or Gravity.CENTER_HORIZONTAL)
+                    .apply { updateMargins(top = topMargin) }
+                // Hide until explicitly shown. This is important for configuration changes where
+                // this view is recreated but the WebView is reused and has already loaded.
+                isVisible = false
+            }
+        this.progressBar = progressBar
+        addView(progressBar)
+    }
 
+    @VisibleForTesting
+    internal fun bindViewModelState(state: StripeConnectWebViewContainerState) {
         logger.debug("($loggerTag) Binding view state: $state")
+
         _receivedCloseWebView.value = state.receivedCloseWebView
         setBackgroundColor(state.backgroundColor)
+
+        webView?.let { bindWebView(it, state) }
+        progressBar?.let { bindProgressBar(it, state) }
+    }
+
+    private fun bindWebView(
+        webView: StripeConnectWebView,
+        state: StripeConnectWebViewContainerState
+    ) {
         webView.setBackgroundColor(state.backgroundColor)
         webView.isVisible = !state.isNativeLoadingIndicatorVisible
+    }
+
+    private fun bindProgressBar(progressBar: StripeWebViewSpinner, state: StripeConnectWebViewContainerState) {
         progressBar.setColor(state.nativeLoadingIndicatorColor)
         if (state.isNativeLoadingIndicatorVisible) {
             progressBar.clearAnimation()

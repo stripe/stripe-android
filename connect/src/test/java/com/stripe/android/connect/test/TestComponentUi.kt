@@ -64,6 +64,7 @@ internal class TestComponentView(
     embeddedComponentManager = null,
     listener = null,
     props = null,
+    clock = TestClock(),
 ) {
     override var listener: TestComponentListener? = null
 

@@ -12,6 +12,8 @@ import android.widget.ImageView
 import androidx.annotation.ColorInt
 import androidx.core.widget.ImageViewCompat
 import com.stripe.android.connect.R
+import com.stripe.android.connect.util.AndroidClock
+import com.stripe.android.connect.util.Clock
 
 /**
  * A spinner that mimics the loading spinner used in web components.
@@ -20,6 +22,7 @@ internal class StripeWebViewSpinner @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
+    clock: Clock = AndroidClock(),
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
     private val image: ImageView
@@ -36,7 +39,7 @@ internal class StripeWebViewSpinner @JvmOverloads constructor(
                     // Rotation is deterministic based on the current time in order to sync with
                     // the web spinner for a more seamless transition.
                     val rotationPercent =
-                        (System.currentTimeMillis() % MILLIS_PER_ROTATION) / MILLIS_PER_ROTATION.toFloat()
+                        (clock.millis() % MILLIS_PER_ROTATION) / MILLIS_PER_ROTATION.toFloat()
                     image.rotation = MAX_DEGREES * rotationPercent
                 }
             }
