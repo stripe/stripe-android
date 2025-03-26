@@ -2,16 +2,15 @@ package com.stripe.android.connect
 
 import android.app.Application
 import android.content.Context
-import android.content.res.ColorStateList
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.ValueCallback
 import android.widget.FrameLayout
-import android.widget.ProgressBar
 import androidx.annotation.RestrictTo
 import androidx.core.view.isVisible
+import androidx.core.view.updateMargins
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.findViewTreeLifecycleOwner
@@ -25,6 +24,7 @@ import com.stripe.android.connect.webview.StripeConnectWebView
 import com.stripe.android.connect.webview.StripeConnectWebViewContainer
 import com.stripe.android.connect.webview.StripeConnectWebViewContainerState
 import com.stripe.android.connect.webview.StripeConnectWebViewContainerViewModel
+import com.stripe.android.connect.webview.StripeWebViewSpinner
 import com.stripe.android.core.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -55,7 +55,7 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
 
     private var viewModel: StripeConnectWebViewContainerViewModel? = null
 
-    private var progressBar: ProgressBar? = null
+    private var progressBar: StripeWebViewSpinner? = null
 
     // See StripeConnectWebViewContainerViewModel for why we're getting a WebView from a ViewModel.
     private val webView: StripeConnectWebView? get() = viewModel?.webView
@@ -229,13 +229,13 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
         containerView.addView(webView)
 
         // Add progress bar on top of WebView.
-        val progressBar = ProgressBar(containerView.context)
+        val progressBar = StripeWebViewSpinner(containerView.context)
             .apply {
-                layoutParams = LayoutParams(
-                    LayoutParams.WRAP_CONTENT,
-                    LayoutParams.WRAP_CONTENT,
-                    Gravity.CENTER,
-                )
+                // Try to match size and position with web spinner.
+                val size = context.resources.getDimensionPixelSize(R.dimen.stripe_web_view_spinner_size)
+                val topMargin = context.resources.getDimensionPixelSize(R.dimen.stripe_web_view_spinner_top_margin)
+                layoutParams = LayoutParams(size, size, Gravity.TOP or Gravity.CENTER_HORIZONTAL)
+                    .apply { updateMargins(top = topMargin) }
             }
         this.progressBar = progressBar
         containerView.addView(progressBar)
@@ -256,10 +256,23 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
         _receivedCloseWebView.value = state.receivedCloseWebView
         setBackgroundColor(state.backgroundColor)
         webView.setBackgroundColor(state.backgroundColor)
-        progressBar.isVisible = state.isNativeLoadingIndicatorVisible
         webView.isVisible = !state.isNativeLoadingIndicatorVisible
+        progressBar.setColor(state.nativeLoadingIndicatorColor)
         if (state.isNativeLoadingIndicatorVisible) {
-            progressBar.indeterminateTintList = ColorStateList.valueOf(state.nativeLoadingIndicatorColor)
+            progressBar.clearAnimation()
+            progressBar.alpha = 1f
+            progressBar.isVisible = true
+        } else if (progressBar.isVisible) {
+            @Suppress("MagicNumber")
+            progressBar.animate()
+                // Delay a bit to allow the web spinner to appear.
+                .setStartDelay(200L)
+                // Fade out to reduce visual impact from minor UI discrepancies.
+                .setDuration(200L)
+                .alpha(0f)
+                .withStartAction { progressBar.alpha = 1f }
+                .withEndAction { progressBar.isVisible = false }
+                .start()
         }
     }
 
