@@ -53,13 +53,27 @@ class GetFinancialConnectionsAvailabilityTest {
 
     @Test
     fun `when full not available and killswitch not enabled, should return Lite`() {
-        financialConnectionsLiteEnabledFeatureFlagTestRule.setEnabled(true)
+        financialConnectionsLiteEnabled.setEnabled(true)
         val elementsSession = createSession(flags = emptyMap())
         assertEquals(
             FinancialConnectionsAvailability.Lite,
             GetFinancialConnectionsAvailability(
                 elementsSession = elementsSession,
                 isFullSdkAvailable = isFinancialConnectionsFullSdkAvailable(false)
+            )
+        )
+    }
+
+    @Test
+    fun `when full client flag on and killswitch not enabled, should return Lite`() {
+        financialConnectionsFullSdkUnavailableFeatureFlagTestRule.setEnabled(true)
+        financialConnectionsLiteEnabled.setEnabled(true)
+        val elementsSession = createSession(flags = emptyMap())
+        assertEquals(
+            FinancialConnectionsAvailability.Lite,
+            GetFinancialConnectionsAvailability(
+                elementsSession = elementsSession,
+                isFullSdkAvailable = isFinancialConnectionsFullSdkAvailable(true)
             )
         )
     }
