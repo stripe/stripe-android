@@ -24,7 +24,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
+import com.stripe.android.payments.financialconnections.IsFinancialConnectionsSdkAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
@@ -518,7 +518,8 @@ class DefaultCustomerSheetLoaderTest {
         isGooglePayReady: Boolean = true,
         isLiveModeProvider: () -> Boolean = { false },
         isCbcEligible: Boolean? = null,
-        isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable = IsFinancialConnectionsAvailable { false },
+        isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable =
+            IsFinancialConnectionsSdkAvailable { false },
         intent: StripeIntent = STRIPE_INTENT,
         paymentMethods: List<PaymentMethod> = listOf(),
         savedSelection: SavedSelection? = null,
@@ -591,6 +592,7 @@ class DefaultCustomerSheetLoaderTest {
             externalPaymentMethodData = null,
             customPaymentMethods = emptyList(),
             paymentMethodSpecs = null,
+            flags = emptyMap(),
             elementsSessionId = "session_1234"
         )
     }
@@ -599,7 +601,8 @@ class DefaultCustomerSheetLoaderTest {
         initializationDataSourceProvider: Single<CustomerSheetInitializationDataSource>,
         isGooglePayReady: Boolean = true,
         isLiveModeProvider: () -> Boolean = { false },
-        isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable = IsFinancialConnectionsAvailable { false },
+        isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable =
+            IsFinancialConnectionsSdkAvailable { false },
         lpmRepository: LpmRepository = this.lpmRepository,
         errorReporter: ErrorReporter = FakeErrorReporter(),
         workContext: CoroutineContext = UnconfinedTestDispatcher()
