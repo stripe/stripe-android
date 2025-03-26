@@ -7,14 +7,12 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.buyButtonLabel
-import com.stripe.android.paymentsheet.utils.combine
 import com.stripe.android.paymentsheet.utils.continueButtonLabel
 import com.stripe.android.ui.core.Amount
-import kotlinx.coroutines.flow.Flow
+import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
 
 internal class PrimaryButtonUiStateMapper(
     private val config: PaymentSheet.Configuration,
@@ -28,8 +26,8 @@ internal class PrimaryButtonUiStateMapper(
     private val onClick: () -> Unit,
 ) {
 
-    fun forCompleteFlow(): Flow<PrimaryButton.UIState?> {
-        return combine(
+    fun forCompleteFlow(): StateFlow<PrimaryButton.UIState?> {
+        return combineAsStateFlow(
             currentScreenFlow,
             buttonsEnabledFlow,
             amountFlow,
@@ -37,7 +35,7 @@ internal class PrimaryButtonUiStateMapper(
             customPrimaryButtonUiStateFlow,
             cvcCompleteFlow
         ) { screen, buttonsEnabled, amount, selection, customPrimaryButton, cvcComplete ->
-            screen.buyButtonState.map { buyButtonState ->
+            screen.buyButtonState.mapAsStateFlow { buyButtonState ->
                 customPrimaryButton ?: PrimaryButton.UIState(
                     label = buyButtonState.buyButtonOverride?.label ?: buyButtonLabel(
                         amount,
@@ -50,11 +48,11 @@ internal class PrimaryButtonUiStateMapper(
                     lockVisible = buyButtonState.buyButtonOverride?.lockEnabled ?: true,
                 ).takeIf { buyButtonState.visible }
             }
-        }.flatMapLatest { it }
+        }.flatMapLatestAsStateFlow { it }
     }
 
-    fun forCustomFlow(): Flow<PrimaryButton.UIState?> {
-        return combine(
+    fun forCustomFlow(): StateFlow<PrimaryButton.UIState?> {
+        return combineAsStateFlow(
             currentScreenFlow,
             buttonsEnabledFlow,
             selectionFlow,
