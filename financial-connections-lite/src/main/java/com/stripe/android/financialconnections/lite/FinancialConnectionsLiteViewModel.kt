@@ -1,7 +1,6 @@
 package com.stripe.android.financialconnections.lite
 
 import android.content.Context
-import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
