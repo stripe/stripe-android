@@ -1036,7 +1036,9 @@ constructor(
      * [sepa_debit](https://stripe.com/docs/api/payment_methods/object#payment_method_object-sepa_debit)
      */
     @Parcelize
-    data class SepaDebit internal constructor(
+    data class SepaDebit
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
         /**
          * Bank code of bank associated with the bank account.
          *
@@ -1087,7 +1089,9 @@ constructor(
     }
 
     @Parcelize
-    data class BacsDebit internal constructor(
+    data class BacsDebit
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
         @JvmField val fingerprint: String?,
         @JvmField val last4: String?,
         @JvmField val sortCode: String?

@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntent.ConfirmationMethod.Manual
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 
@@ -61,6 +62,68 @@ internal object DeferredIntentValidator {
         }
 
         return stripeIntent
+    }
+
+    fun validatePaymentMethod(
+        intent: StripeIntent,
+        paymentMethod: PaymentMethod
+    ) {
+        val attachedPaymentMethod = intent.paymentMethodId ?: intent.paymentMethod?.id
+
+        require(
+            attachedPaymentMethod == null ||
+                attachedPaymentMethod == paymentMethod.id ||
+                isSimilarPaymentMethod(paymentMethod, intent.paymentMethod)
+        ) {
+            "Your payment method ($attachedPaymentMethod) attached to the intent does not match the " +
+                "provided payment method (${paymentMethod.id})!"
+        }
+    }
+
+    private fun isSimilarPaymentMethod(
+        providedPaymentMethod: PaymentMethod,
+        attachedPaymentMethod: PaymentMethod?,
+    ): Boolean {
+        if (
+            attachedPaymentMethod == null ||
+            providedPaymentMethod.type != attachedPaymentMethod.type
+        ) {
+            return false
+        }
+
+        return when (providedPaymentMethod.type) {
+            PaymentMethod.Type.Card -> isSameFingerprint(providedPaymentMethod, attachedPaymentMethod) {
+                card?.fingerprint
+            }
+            PaymentMethod.Type.USBankAccount -> isSameFingerprint(providedPaymentMethod, attachedPaymentMethod) {
+                usBankAccount?.fingerprint
+            }
+            PaymentMethod.Type.AuBecsDebit -> isSameFingerprint(providedPaymentMethod, attachedPaymentMethod) {
+                auBecsDebit?.fingerprint
+            }
+            PaymentMethod.Type.BacsDebit -> isSameFingerprint(providedPaymentMethod, attachedPaymentMethod) {
+                bacsDebit?.fingerprint
+            }
+            PaymentMethod.Type.SepaDebit -> isSameFingerprint(providedPaymentMethod, attachedPaymentMethod) {
+                sepaDebit?.fingerprint
+            }
+            else -> false
+        }
+    }
+
+    private fun isSameFingerprint(
+        firstPaymentMethod: PaymentMethod,
+        secondPaymentMethod: PaymentMethod,
+        fingerprintProvider: PaymentMethod.() -> String?,
+    ): Boolean {
+        val firstFingerprint = fingerprintProvider(firstPaymentMethod)
+        val secondFingerprint = fingerprintProvider(secondPaymentMethod)
+
+        if (firstFingerprint == null || secondFingerprint == null) {
+            return false
+        }
+
+        return firstFingerprint == secondFingerprint
     }
 }
 

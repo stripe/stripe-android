@@ -23,7 +23,8 @@ object PaymentMethodFactory {
     fun PaymentMethod.update(
         last4: String?,
         addCbcNetworks: Boolean,
-        brand: CardBrand = CardBrand.Visa
+        brand: CardBrand = CardBrand.Visa,
+        fingerprint: String? = null,
     ): PaymentMethod {
         return copy(
             card = card?.copy(
@@ -36,6 +37,7 @@ object PaymentMethodFactory {
                 },
                 displayBrand = "cartes_bancaries".takeIf { addCbcNetworks },
                 brand = brand,
+                fingerprint = fingerprint,
             )
         )
     }
@@ -140,6 +142,26 @@ object PaymentMethodFactory {
             liveMode = false,
             type = PaymentMethod.Type.BacsDebit,
             code = PaymentMethod.Type.BacsDebit.code,
+            bacsDebit = PaymentMethod.BacsDebit(
+                last4 = "2345",
+                sortCode = "108800",
+                fingerprint = "fingerprint",
+            ),
+        )
+    }
+
+    fun auBecsDebit(): PaymentMethod {
+        return PaymentMethod(
+            id = "pm_1234",
+            created = 123456789L,
+            liveMode = false,
+            type = PaymentMethod.Type.AuBecsDebit,
+            code = PaymentMethod.Type.AuBecsDebit.code,
+            auBecsDebit = PaymentMethod.AuBecsDebit(
+                last4 = "2345",
+                bsbNumber = "100000",
+                fingerprint = "fingerprint",
+            ),
         )
     }
 
@@ -150,6 +172,13 @@ object PaymentMethodFactory {
             liveMode = false,
             type = PaymentMethod.Type.SepaDebit,
             code = PaymentMethod.Type.SepaDebit.code,
+            sepaDebit = PaymentMethod.SepaDebit(
+                bankCode = "01",
+                branchCode = "01425",
+                country = "FR",
+                last4 = "2345",
+                fingerprint = "fingerprint",
+            )
         )
     }
 
