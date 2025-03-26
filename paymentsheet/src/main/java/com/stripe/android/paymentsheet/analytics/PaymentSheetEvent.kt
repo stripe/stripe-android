@@ -601,7 +601,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     }
 }
 
-private fun PaymentSelection.getSetAsDefaultPaymentMethodFromPaymentSelection(): Boolean? {
+internal fun PaymentSelection.getSetAsDefaultPaymentMethodFromPaymentSelection(): Boolean? {
     return when (this) {
         is PaymentSelection.New.Card -> {
             (this.paymentMethodExtraParams as? PaymentMethodExtraParams.Card)?.setAsDefault

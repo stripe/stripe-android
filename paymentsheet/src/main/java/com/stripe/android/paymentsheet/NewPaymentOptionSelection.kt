@@ -4,6 +4,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
 internal sealed interface NewPaymentOptionSelection {
@@ -18,7 +19,9 @@ internal sealed interface NewPaymentOptionSelection {
 
     fun getPaymentMethodExtraParams(): PaymentMethodExtraParams?
 
-    data class New(override val paymentSelection: PaymentSelection.New) : NewPaymentOptionSelection {
+    fun getPaymentMethodOptionParams(): PaymentMethodOptionsParams?
+
+    data class New(override val paymentSelection: PaymentSelection.New) : NewOrExternalPaymentSelection {
 
         override fun getPaymentMethodCode(): PaymentMethodCode {
             return when (paymentSelection) {
@@ -36,6 +39,9 @@ internal sealed interface NewPaymentOptionSelection {
 
         override fun getPaymentMethodExtraParams(): PaymentMethodExtraParams? =
             paymentSelection.paymentMethodExtraParams
+
+        override fun getPaymentMethodOptionParams(): PaymentMethodOptionsParams? =
+            paymentSelection.paymentMethodOptionsParams
     }
 
     data class External(override val paymentSelection: PaymentSelection.ExternalPaymentMethod) :
@@ -48,6 +54,8 @@ internal sealed interface NewPaymentOptionSelection {
         override fun getPaymentMethodCreateParams(): PaymentMethodCreateParams? = null
 
         override fun getPaymentMethodExtraParams(): PaymentMethodExtraParams? = null
+
+        override fun getPaymentMethodOptionParams(): PaymentMethodOptionsParams? = null
     }
 
     data class Custom(override val paymentSelection: PaymentSelection.CustomPaymentMethod) :
@@ -60,5 +68,7 @@ internal sealed interface NewPaymentOptionSelection {
         override fun getPaymentMethodCreateParams(): PaymentMethodCreateParams? = null
 
         override fun getPaymentMethodExtraParams(): PaymentMethodExtraParams? = null
+
+        override fun getPaymentMethodOptionParams(): PaymentMethodOptionsParams? = null
     }
 }
