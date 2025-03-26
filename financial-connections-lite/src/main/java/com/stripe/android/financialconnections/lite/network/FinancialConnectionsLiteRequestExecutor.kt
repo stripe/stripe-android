@@ -16,9 +16,8 @@ import com.stripe.android.core.networking.responseJson
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import java.net.HttpURLConnection
-import javax.inject.Inject
 
-internal class FinancialConnectionsLiteRequestExecutor @Inject constructor(
+internal class FinancialConnectionsLiteRequestExecutor(
     private val stripeNetworkClient: StripeNetworkClient,
     private val json: Json,
     private val logger: Logger,

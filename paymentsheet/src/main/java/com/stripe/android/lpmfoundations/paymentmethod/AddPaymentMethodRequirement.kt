@@ -43,7 +43,7 @@ internal enum class AddPaymentMethodRequirement {
     /** Requires that the FinancialConnections SDK has been linked. */
     FinancialConnectionsSdk {
         override fun isMetBy(metadata: PaymentMethodMetadata): Boolean {
-            return metadata.financialConnectionsAvailable
+            return metadata.financialConnectionsAvailability != null
         }
     },
 

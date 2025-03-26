@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
@@ -845,7 +846,8 @@ internal class PaymentMethodMetadataTest {
             linkState = null,
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             paymentMethodIncentive = null,
-            elementsSessionId = "session_1234"
+            elementsSessionId = "session_1234",
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -886,7 +888,6 @@ internal class PaymentMethodMetadataTest {
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             sharedDataSpecs = listOf(SharedDataSpec("card")),
             isGooglePayReady = true,
-            isFinancialConnectionsAvailable = { false },
             isPaymentMethodSyncDefaultEnabled = false,
         )
 
@@ -911,13 +912,13 @@ internal class PaymentMethodMetadataTest {
             ),
             isGooglePayReady = true,
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
-            financialConnectionsAvailable = false,
             linkInlineConfiguration = null,
             linkMode = null,
             linkState = null,
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             paymentMethodIncentive = null,
-            elementsSessionId = "session_1234"
+            elementsSessionId = "session_1234",
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
@@ -1026,7 +1027,8 @@ internal class PaymentMethodMetadataTest {
             customPaymentMethods = customPaymentMethods,
             externalPaymentMethodData = null,
             paymentMethodSpecs = null,
-            elementsSessionId = "session_1234"
+            elementsSessionId = "session_1234",
+            flags = emptyMap()
         )
     }
 

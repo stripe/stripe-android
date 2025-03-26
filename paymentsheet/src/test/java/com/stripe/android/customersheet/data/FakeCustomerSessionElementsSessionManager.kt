@@ -53,6 +53,7 @@ internal class FakeCustomerSessionElementsSessionManager(
                 customer = customer,
                 cardBrandChoice = null,
                 elementsSessionId = "session_1234",
+                flags = emptyMap()
             ),
             customer = customer,
             ephemeralKey = CachedCustomerEphemeralKey(

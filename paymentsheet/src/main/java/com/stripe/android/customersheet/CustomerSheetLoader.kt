@@ -20,7 +20,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.validate
@@ -37,7 +36,6 @@ internal interface CustomerSheetLoader {
 internal class DefaultCustomerSheetLoader(
     @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
-    private val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
     private val lpmRepository: LpmRepository,
     private val initializationDataSourceProvider: Single<CustomerSheetInitializationDataSource>,
     private val errorReporter: ErrorReporter,
@@ -47,14 +45,12 @@ internal class DefaultCustomerSheetLoader(
     @Inject constructor(
         @Named(IS_LIVE_MODE) isLiveModeProvider: () -> Boolean,
         googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
-        isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
         lpmRepository: LpmRepository,
         errorReporter: ErrorReporter,
         @IOContext workContext: CoroutineContext
     ) : this(
         isLiveModeProvider = isLiveModeProvider,
         googlePayRepositoryFactory = googlePayRepositoryFactory,
-        isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
         lpmRepository = lpmRepository,
         initializationDataSourceProvider = CustomerSheetHacks.initializationDataSource,
         errorReporter = errorReporter,
@@ -131,7 +127,6 @@ internal class DefaultCustomerSheetLoader(
             paymentMethodSaveConsentBehavior = customerSheetSession.paymentMethodSaveConsentBehavior,
             sharedDataSpecs = sharedDataSpecs,
             isGooglePayReady = isGooglePayReadyAndEnabled,
-            isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             isPaymentMethodSyncDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
         )
     }

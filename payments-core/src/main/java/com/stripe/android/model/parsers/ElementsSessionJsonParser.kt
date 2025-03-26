@@ -46,6 +46,8 @@ internal class ElementsSessionJsonParser(
         val linkSettings = json.optJSONObject(FIELD_LINK_SETTINGS)
         val linkFundingSources = linkSettings?.optJSONArray(FIELD_LINK_FUNDING_SOURCES)
 
+        val flags = json.optJSONObject(FIELD_FLAGS)?.let { flags -> parseSessionFlags(json = flags) } ?: emptyMap()
+
         val stripeIntent = parseStripeIntent(
             elementsSessionId = elementsSessionId,
             paymentMethodPreference = paymentMethodPreference,
@@ -73,6 +75,7 @@ internal class ElementsSessionJsonParser(
                 isGooglePayEnabled = googlePayPreference != "disabled",
                 externalPaymentMethodData = externalPaymentMethodData,
                 customPaymentMethods = customPaymentMethods,
+                flags = flags,
                 elementsSessionId = elementsSessionId.takeIf { it.isNotBlank() } ?: UUID.randomUUID().toString()
             )
         } else {
@@ -342,6 +345,28 @@ internal class ElementsSessionJsonParser(
         return flags.toMap()
     }
 
+    /**
+     * Parse the flags from the [json] object.
+     * @param json the json object to parse
+     * @param relevantFlags the flags to parse. If null, all flags will be parsed.
+     */
+    private fun parseSessionFlags(json: JSONObject): Map<ElementsSession.Flag, Boolean> {
+        val flags = mutableMapOf<ElementsSession.Flag, Boolean>()
+
+        json.keys().forEach { key ->
+            val value = json.get(key)
+            ElementsSession.Flag.entries
+                .firstOrNull { it.flagValue == key }
+                ?.let { flag ->
+                    if (value is Boolean) {
+                        flags[flag] = value
+                    }
+                }
+        }
+
+        return flags.toMap()
+    }
+
     internal companion object {
         private const val FIELD_OBJECT = "object"
         private const val FIELD_ELEMENTS_SESSION_ID = "session_id"
@@ -350,6 +375,7 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_ORDERED_PAYMENT_METHOD_TYPES = "ordered_payment_method_types"
         private const val FIELD_LINK_SETTINGS = "link_settings"
         private const val FIELD_LINK_FUNDING_SOURCES = "link_funding_sources"
+        private const val FIELD_FLAGS = "flags"
         private const val FIELD_LINK_PASSTHROUGH_MODE_ENABLED = "link_passthrough_mode_enabled"
         private const val FIELD_LINK_MODE = "link_mode"
         private const val FIELD_DISABLE_LINK_SIGNUP = "link_mobile_disable_signup"

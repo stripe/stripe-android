@@ -29,7 +29,7 @@ import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteView
 import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.OpenCustomTab
 import kotlinx.coroutines.launch
 
-internal class FinancialConnectionsSheetLiteActivity : ComponentActivity(R.layout.stripe_activity_lite) {
+internal class FinancialConnectionsSheetLiteActivity : ComponentActivity() {
 
     private lateinit var webView: WebView
     private lateinit var progressBar: ProgressBar
@@ -61,7 +61,7 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity(R.layou
 
     private fun setupProgressBar() {
         val color = when (getArgs(intent)) {
-            null, is ForData, is ForToken -> R.color.stripe_blurple
+            null, is ForData, is ForToken -> R.color.stripe_financial_connections
             is ForInstantDebits -> R.color.stripe_link
         }.let { ContextCompat.getColor(this, it) }
         progressBar.progressDrawable.setTint(color)
@@ -114,7 +114,6 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity(R.layou
     companion object {
         fun intent(context: Context, args: FinancialConnectionsSheetActivityArgs): Intent {
             return Intent(context, FinancialConnectionsSheetLiteActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
                 putExtra(EXTRA_ARGS, args)
             }
         }
@@ -131,7 +130,7 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity(R.layou
  * @param context the context to use for creating the intent
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun intentBuilder(context: Context): (FinancialConnectionsSheetActivityArgs) -> Intent =
+fun liteIntentBuilder(context: Context): (FinancialConnectionsSheetActivityArgs) -> Intent =
     { args: FinancialConnectionsSheetActivityArgs ->
         FinancialConnectionsSheetLiteActivity.intent(
             context = context,

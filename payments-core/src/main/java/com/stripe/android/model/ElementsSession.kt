@@ -15,6 +15,7 @@ data class ElementsSession(
     val paymentMethodSpecs: String?,
     val externalPaymentMethodData: String?,
     val stripeIntent: StripeIntent,
+    val flags: Map<Flag, Boolean>,
     val customer: Customer?,
     val merchantCountry: String?,
     val cardBrandChoice: CardBrandChoice?,
@@ -145,6 +146,14 @@ data class ElementsSession(
         }
     }
 
+    /**
+     * Flags declared here will be parsed and include in the [ElementsSession] object.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    enum class Flag(val flagValue: String) {
+        ELEMENTS_DISABLE_FC_LITE("elements_disable_fc_lite")
+    }
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         fun createFromFallback(
@@ -156,6 +165,7 @@ data class ElementsSession(
                 linkSettings = null,
                 paymentMethodSpecs = null,
                 externalPaymentMethodData = null,
+                flags = emptyMap(),
                 stripeIntent = stripeIntent,
                 customer = null,
                 customPaymentMethods = listOf(),
