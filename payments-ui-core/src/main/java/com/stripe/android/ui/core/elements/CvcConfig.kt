@@ -33,12 +33,14 @@ class CvcConfig : CardDetailsTextFieldConfig {
                 numberAllowedDigits -> TextFieldStateConstants.Valid.Full
                 else -> TextFieldStateConstants.Valid.Limitless
             }
+        } else if (isDigitLimit && number.length == numberAllowedDigits) {
+            TextFieldStateConstants.Valid.Full
+        } else if (isDigitLimit && brand.cvcLength.contains(number.length)){
+            TextFieldStateConstants.Valid.Limitless
         } else if (isDigitLimit && number.length < numberAllowedDigits) {
             TextFieldStateConstants.Error.Incomplete(StripeR.string.stripe_invalid_cvc)
         } else if (isDigitLimit && number.length > numberAllowedDigits) {
             TextFieldStateConstants.Error.Invalid(StripeR.string.stripe_invalid_cvc)
-        } else if (isDigitLimit && number.length == numberAllowedDigits) {
-            TextFieldStateConstants.Valid.Full
         } else {
             TextFieldStateConstants.Error.Invalid(StripeR.string.stripe_invalid_cvc)
         }
