@@ -4,6 +4,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
 internal sealed interface NewOrExternalPaymentSelection {
@@ -17,6 +18,8 @@ internal sealed interface NewOrExternalPaymentSelection {
     fun getPaymentMethodCreateParams(): PaymentMethodCreateParams?
 
     fun getPaymentMethodExtraParams(): PaymentMethodExtraParams?
+
+    fun getPaymentMethodOptionParams(): PaymentMethodOptionsParams?
 
     data class New(override val paymentSelection: PaymentSelection.New) : NewOrExternalPaymentSelection {
 
@@ -36,6 +39,9 @@ internal sealed interface NewOrExternalPaymentSelection {
 
         override fun getPaymentMethodExtraParams(): PaymentMethodExtraParams? =
             paymentSelection.paymentMethodExtraParams
+
+        override fun getPaymentMethodOptionParams(): PaymentMethodOptionsParams? =
+            paymentSelection.paymentMethodOptionsParams
     }
 
     data class External(override val paymentSelection: PaymentSelection.ExternalPaymentMethod) :
@@ -48,5 +54,7 @@ internal sealed interface NewOrExternalPaymentSelection {
         override fun getPaymentMethodCreateParams(): PaymentMethodCreateParams? = null
 
         override fun getPaymentMethodExtraParams(): PaymentMethodExtraParams? = null
+
+        override fun getPaymentMethodOptionParams(): PaymentMethodOptionsParams? = null
     }
 }

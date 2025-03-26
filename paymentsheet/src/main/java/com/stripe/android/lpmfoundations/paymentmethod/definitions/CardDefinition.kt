@@ -198,7 +198,11 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
         arguments: UiDefinitionFactory.Arguments,
     ): Boolean {
         val saveForFutureUseElement =
-            SaveForFutureUseElement(arguments.saveForFutureUseInitialValue, arguments.merchantName)
+            SaveForFutureUseElement(
+                initialValue = arguments.saveForFutureUseInitialValue,
+                merchantName = arguments.merchantName
+            )
+
         val isSaveForFutureUseCheckedFlow = saveForFutureUseElement.controller.saveForFutureUse
         val isSetAsDefaultPaymentMethodEnabled = metadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
             ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
@@ -210,7 +214,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
         if (canChangeSaveForFutureUsage && isSetAsDefaultPaymentMethodEnabled) {
             add(
                 SetAsDefaultPaymentMethodElement(
-                    initialValue = false,
+                    initialValue = getSetAsDefaultInitialValueFromArguments(arguments),
                     saveForFutureUseCheckedFlow = isSaveForFutureUseCheckedFlow,
                     setAsDefaultMatchesSaveForFutureUse = arguments.setAsDefaultMatchesSaveForFutureUse,
                 )
@@ -218,6 +222,16 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
         }
 
         return true
+    }
+
+    private fun getSetAsDefaultInitialValueFromArguments(
+        arguments: UiDefinitionFactory.Arguments
+    ): Boolean {
+        return arguments.initialValues.get(
+            IdentifierSpec.SetAsDefaultPaymentMethod.copy(
+                v1 = "card[${IdentifierSpec.SetAsDefaultPaymentMethod.v1}]"
+            )
+        )?.toBoolean() ?: false
     }
 }
 
