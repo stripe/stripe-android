@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import androidx.core.net.toUri
 
 internal class FinancialConnectionsLiteViewModel(
     private val logger: Logger,
@@ -73,16 +74,16 @@ internal class FinancialConnectionsLiteViewModel(
         }
     }
 
-    fun handleUrl(uri: Uri) = withState { state ->
+    fun handleUrl(uri: String) = withState { state ->
         when {
-            uri.toString().contains(state.successUrl) -> {
+            uri.contains(state.successUrl) -> {
                 when (args) {
                     is ForData -> onSuccessFromDataFlow(userCancelled = false)
                     is ForToken -> onSuccessFromTokenFlow(userCancelled = false)
                     is ForInstantDebits -> onSuccessFromInstantDebits(uri)
                 }
             }
-            uri.toString().contains(state.cancelUrl) -> {
+            uri.contains(state.cancelUrl) -> {
                 when (args) {
                     is ForData -> onSuccessFromDataFlow(userCancelled = true)
                     is ForToken -> onSuccessFromTokenFlow(userCancelled = true)
@@ -132,8 +133,8 @@ internal class FinancialConnectionsLiteViewModel(
         }
     }
 
-    private fun onSuccessFromInstantDebits(url: Uri) = viewModelScope.launch {
-        InstantDebitsResultBuilder.fromUri(url)
+    private fun onSuccessFromInstantDebits(url: String) = viewModelScope.launch {
+        InstantDebitsResultBuilder.fromUri(url.toUri())
             .onSuccess {
                 _viewEffects.emit(
                     FinishWithResult(
@@ -155,7 +156,7 @@ internal class FinancialConnectionsLiteViewModel(
         }
     }
 
-    private fun launchInBrowser(uri: Uri) {
+    private fun launchInBrowser(uri: String) {
         viewModelScope.launch {
             _viewEffects.emit(OpenCustomTab(uri))
         }
@@ -182,7 +183,7 @@ internal class FinancialConnectionsLiteViewModel(
 
     internal sealed class ViewEffect {
         data class OpenAuthFlowWithUrl(val url: String) : ViewEffect()
-        data class OpenCustomTab(val url: Uri) : ViewEffect()
+        data class OpenCustomTab(val url: String) : ViewEffect()
         data class FinishWithResult(val result: FinancialConnectionsSheetActivityResult) : ViewEffect()
     }
 
