@@ -9,7 +9,10 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkFormElement
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfiguration
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethodExtraParams
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
@@ -186,6 +189,38 @@ class CardDefinitionTest {
     }
 
     @Test
+    fun `saveForFutureUse field true, setAsDefault field false, when initialized`() {
+        testSetAsDefaultElements(
+            setAsDefaultMatchesSaveForFutureUse = true,
+            paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+            ),
+            paymentMethodExtraParams = null
+        ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
+
+            assertThat(saveForFutureUseElement.controller.saveForFutureUse.value).isTrue()
+            assertThat(setAsDefaultPaymentMethodElement.controller.setAsDefaultPaymentMethodChecked.value).isFalse()
+        }
+    }
+
+    @Test
+    fun `saveForFutureUse field true, setAsDefault field true, when initialized`() {
+        testSetAsDefaultElements(
+            setAsDefaultMatchesSaveForFutureUse = true,
+            paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+            ),
+            paymentMethodExtraParams = PaymentMethodExtraParams.Card(
+                setAsDefault = true
+            )
+        ) { saveForFutureUseElement, setAsDefaultPaymentMethodElement ->
+
+            assertThat(saveForFutureUseElement.controller.saveForFutureUse.value).isTrue()
+            assertThat(setAsDefaultPaymentMethodElement.controller.setAsDefaultPaymentMethodChecked.value).isTrue()
+        }
+    }
+
+    @Test
     fun `createFormElements returns mandate when has intent to setup`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
@@ -267,11 +302,15 @@ class CardDefinitionTest {
 
     private fun testSetAsDefaultElements(
         setAsDefaultMatchesSaveForFutureUse: Boolean,
+        paymentMethodExtraParams: PaymentMethodExtraParams? = null,
+        paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
         block: (SaveForFutureUseElement, SetAsDefaultPaymentMethodElement) -> Unit
     ) {
         val formElements = getFormElementsWithSaveForFutureUseAndSetAsDefaultPaymentMethod(
             isPaymentMethodSetAsDefaultEnabled = true,
             setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
+            paymentMethodExtraParams = paymentMethodExtraParams,
+            paymentMethodOptionsParams = paymentMethodOptionsParams,
         )
 
         val saveForFutureUseElement = formElements[1] as SaveForFutureUseElement
@@ -283,6 +322,8 @@ class CardDefinitionTest {
     private fun getFormElementsWithSaveForFutureUseAndSetAsDefaultPaymentMethod(
         isPaymentMethodSetAsDefaultEnabled: Boolean,
         setAsDefaultMatchesSaveForFutureUse: Boolean = false,
+        paymentMethodExtraParams: PaymentMethodExtraParams? = null,
+        paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
     ): List<FormElement> {
         return CardDefinition.formElements(
             metadata = PaymentMethodMetadataFactory.create(
@@ -293,6 +334,8 @@ class CardDefinitionTest {
                 isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
             ),
             setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
+            paymentMethodExtraParams = paymentMethodExtraParams,
+            paymentMethodOptionsParams = paymentMethodOptionsParams,
         )
     }
 }
