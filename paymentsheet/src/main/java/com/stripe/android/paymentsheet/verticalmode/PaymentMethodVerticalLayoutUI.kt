@@ -2,11 +2,12 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -95,7 +96,7 @@ internal fun PaymentMethodVerticalLayoutUI(
     imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(modifier = modifier) {
         val textStyle = MaterialTheme.typography.subtitle1
         val textColor = MaterialTheme.stripeColors.onComponent
 
@@ -106,6 +107,7 @@ internal fun PaymentMethodVerticalLayoutUI(
                 color = textColor,
                 modifier = Modifier.testTag(TEST_TAG_SAVED_TEXT),
             )
+            Spacer(Modifier.size(16.dp))
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = displayedSavedPaymentMethod,
                 isEnabled = isEnabled,
@@ -119,7 +121,9 @@ internal fun PaymentMethodVerticalLayoutUI(
                     )
                 }
             )
+            Spacer(Modifier.size(24.dp))
             Text(stringResource(id = R.string.stripe_paymentsheet_new_pm), style = textStyle, color = textColor)
+            Spacer(Modifier.size(16.dp))
         }
 
         val selectedIndex = remember(selection, paymentMethods) {
