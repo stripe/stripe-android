@@ -21,6 +21,7 @@ import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResp
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithResult
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.OpenConnectionsFlow
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -514,7 +515,8 @@ class CollectBankAccountViewModelTest {
                 email
             ),
             attachToIntent = attachToIntent,
-            hostedSurface = "payment_element"
+            hostedSurface = "payment_element",
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
 
@@ -530,7 +532,8 @@ class CollectBankAccountViewModelTest {
                 email
             ),
             attachToIntent = attachToIntent,
-            hostedSurface = "payment_element"
+            hostedSurface = "payment_element",
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
 
@@ -547,7 +550,8 @@ class CollectBankAccountViewModelTest {
             onBehalfOf = "on_behalf_of_id",
             amount = 1000,
             currency = "usd",
-            hostedSurface = "payment_element"
+            hostedSurface = "payment_element",
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
 
@@ -562,7 +566,8 @@ class CollectBankAccountViewModelTest {
             elementsSessionId = "elements_session_id",
             customerId = "customer_id",
             onBehalfOf = "on_behalf_of_id",
-            hostedSurface = "payment_element"
+            hostedSurface = "payment_element",
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
 }

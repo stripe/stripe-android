@@ -29,6 +29,7 @@ import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountForInstantDebitsResult
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponseInternal
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
@@ -296,12 +297,14 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             CollectBankAccountForInstantDebitsLauncher.createForPaymentSheet(
                 hostedSurface = args.hostedSurface,
                 activityResultRegistryOwner = activityResultRegistryOwner,
+                financialConnectionsAvailability = args.financialConnectionsAvailability,
                 callback = ::handleInstantDebitsResult,
             )
         } else {
             CollectBankAccountLauncher.createForPaymentSheet(
                 hostedSurface = args.hostedSurface,
                 activityResultRegistryOwner = activityResultRegistryOwner,
+                financialConnectionsAvailability = args.financialConnectionsAvailability,
                 callback = ::handleCollectBankAccountResult,
             )
         }
@@ -742,6 +745,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val savedPaymentMethod: PaymentSelection.New.USBankAccount?,
         val shippingDetails: AddressDetails?,
         val hostedSurface: String,
+        val financialConnectionsAvailability: FinancialConnectionsAvailability?,
         val setAsDefaultPaymentMethodEnabled: Boolean,
         val setAsDefaultMatchesSaveForFutureUse: Boolean,
     )

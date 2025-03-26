@@ -17,8 +17,8 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
-import com.stripe.android.payments.financialconnections.IsFinancialConnectionsSdkAvailable
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
+import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
@@ -59,7 +59,7 @@ internal data class PaymentMethodMetadata(
     val linkMode: LinkMode?,
     val linkState: LinkState?,
     val paymentMethodIncentive: PaymentMethodIncentive?,
-    val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
+    val financialConnectionsAvailability: FinancialConnectionsAvailability?,
     val cardBrandFilter: CardBrandFilter,
     val elementsSessionId: String
 ) : Parcelable {
@@ -276,6 +276,7 @@ internal data class PaymentMethodMetadata(
                 isGooglePayReady = isGooglePayReady,
                 displayableCustomPaymentMethods = elementsSession.toDisplayableCustomPaymentMethods(configuration),
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
+                financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession),
                 elementsSessionId = elementsSession.elementsSessionId
             )
         }
@@ -286,7 +287,6 @@ internal data class PaymentMethodMetadata(
             paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
             sharedDataSpecs: List<SharedDataSpec>,
             isGooglePayReady: Boolean,
-            isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable,
             isPaymentMethodSyncDefaultEnabled: Boolean,
         ): PaymentMethodMetadata {
             return PaymentMethodMetadata(
@@ -309,7 +309,6 @@ internal data class PaymentMethodMetadata(
                 sharedDataSpecs = sharedDataSpecs,
                 isGooglePayReady = isGooglePayReady,
                 linkInlineConfiguration = null,
-                financialConnectionsAvailable = isFinancialConnectionsAvailable(),
                 paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
                 linkMode = elementsSession.linkSettings?.linkMode,
                 linkState = null,
@@ -317,7 +316,8 @@ internal data class PaymentMethodMetadata(
                 externalPaymentMethodSpecs = emptyList(),
                 displayableCustomPaymentMethods = emptyList(),
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
-                elementsSessionId = elementsSession.elementsSessionId
+                elementsSessionId = elementsSession.elementsSessionId,
+                financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession)
             )
         }
 
@@ -351,7 +351,8 @@ internal data class PaymentMethodMetadata(
                 isGooglePayReady = false,
                 displayableCustomPaymentMethods = emptyList(),
                 cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all()),
-                elementsSessionId = configuration.elementsSessionId
+                elementsSessionId = configuration.elementsSessionId,
+                financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null)
             )
         }
 

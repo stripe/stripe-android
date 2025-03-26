@@ -2,6 +2,9 @@ package com.stripe.android.payments.bankaccount
 
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability.Full
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability.Lite
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -16,7 +19,9 @@ class CollectBankAccountForACHLauncherTest {
 
     @Test
     fun `presentWithPaymentIntent - launches CollectBankAccountActivity with correct arguments`() {
-        val launcher = makeLauncher()
+        val launcher = makeLauncher(
+            financialConnectionsAvailability = Lite
+        )
 
         launcher.presentWithPaymentIntent(
             publishableKey = PUBLISHABLE_KEY,
@@ -32,14 +37,18 @@ class CollectBankAccountForACHLauncherTest {
                 clientSecret = CLIENT_SECRET,
                 configuration = CONFIGURATION,
                 attachToIntent = true,
-                hostedSurface = null
+                hostedSurface = null,
+                financialConnectionsAvailability = Lite
             )
         )
     }
 
     @Test
     fun `presentWithPaymentIntent - launches with correct attachToIntent if hostedSurface not null`() {
-        val launcher = makeLauncher(hostedSurface = "payment_element")
+        val launcher = makeLauncher(
+            hostedSurface = "payment_element",
+            financialConnectionsAvailability = Full
+        )
 
         launcher.presentWithPaymentIntent(
             publishableKey = PUBLISHABLE_KEY,
@@ -56,6 +65,7 @@ class CollectBankAccountForACHLauncherTest {
                 configuration = CONFIGURATION,
                 attachToIntent = false,
                 hostedSurface = "payment_element",
+                financialConnectionsAvailability = FinancialConnectionsAvailability.Full
             )
         )
     }
@@ -78,7 +88,8 @@ class CollectBankAccountForACHLauncherTest {
                 clientSecret = CLIENT_SECRET,
                 configuration = CONFIGURATION,
                 attachToIntent = true,
-                hostedSurface = null
+                hostedSurface = null,
+                financialConnectionsAvailability = Full
             )
         )
     }
@@ -102,13 +113,16 @@ class CollectBankAccountForACHLauncherTest {
                 configuration = CONFIGURATION,
                 attachToIntent = false,
                 hostedSurface = "payment_element",
+                financialConnectionsAvailability = Full
             )
         )
     }
 
     @Test
     fun `presentWithDeferredPayment - launches CollectBankAccountActivity with correct arguments`() {
-        val launcher = makeLauncher()
+        val launcher = makeLauncher(
+            financialConnectionsAvailability = Lite
+        )
 
         launcher.presentWithDeferredPayment(
             publishableKey = PUBLISHABLE_KEY,
@@ -131,7 +145,8 @@ class CollectBankAccountForACHLauncherTest {
                 onBehalfOf = "on_behalf_of_id",
                 amount = 1000,
                 currency = "usd",
-                hostedSurface = null
+                hostedSurface = null,
+                financialConnectionsAvailability = Lite
             )
         )
     }
@@ -157,17 +172,20 @@ class CollectBankAccountForACHLauncherTest {
                 elementsSessionId = "elements_session_id",
                 customerId = "customer_id",
                 onBehalfOf = "on_behalf_of_id",
-                hostedSurface = null
+                hostedSurface = null,
+                financialConnectionsAvailability = Full
             )
         )
     }
 
     private fun makeLauncher(
         hostedSurface: String? = null,
+        financialConnectionsAvailability: FinancialConnectionsAvailability = Full
     ): CollectBankAccountForACHLauncher {
         return CollectBankAccountForACHLauncher(
             mockHostActivityLauncher,
             hostedSurface = hostedSurface,
+            financialConnectionsAvailability = financialConnectionsAvailability
         )
     }
 

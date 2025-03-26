@@ -9,6 +9,8 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability.Full
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability.Lite
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
@@ -130,14 +132,20 @@ internal class AddPaymentMethodRequirementTest {
     }
 
     @Test
-    fun testFinancialConnectionsSdkReturnsTrue() {
-        val metadata = PaymentMethodMetadataFactory.create(financialConnectionsAvailable = true)
+    fun testFinancialConnectionsWithLiteSdkReturnsTrue() {
+        val metadata = PaymentMethodMetadataFactory.create(financialConnectionsAvailability = Lite)
+        assertThat(AddPaymentMethodRequirement.FinancialConnectionsSdk.isMetBy(metadata)).isTrue()
+    }
+
+    @Test
+    fun testFinancialConnectionsWithFullSdkReturnsTrue() {
+        val metadata = PaymentMethodMetadataFactory.create(financialConnectionsAvailability = Full)
         assertThat(AddPaymentMethodRequirement.FinancialConnectionsSdk.isMetBy(metadata)).isTrue()
     }
 
     @Test
     fun testFinancialConnectionsSdkReturnsFalse() {
-        val metadata = PaymentMethodMetadataFactory.create(financialConnectionsAvailable = false)
+        val metadata = PaymentMethodMetadataFactory.create(financialConnectionsAvailability = null)
         assertThat(AddPaymentMethodRequirement.FinancialConnectionsSdk.isMetBy(metadata)).isFalse()
     }
 
