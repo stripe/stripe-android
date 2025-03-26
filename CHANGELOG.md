@@ -2,6 +2,10 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [CHANGED][10480](https://github.com/stripe/stripe-android/pull/10480) Updated Afterpay branding in the US to be Cash App Afterpay.
+* [FIXED][10492](https://github.com/stripe/stripe-android/pull/10492) Update Add Payment Method screen to use `PaymentSheet.Appearance.Colors.onSurface` as the header text color when `PaymentMethodLayout` is `Vertical`.
+
 ## 21.7.1 - 2025-03-24
 
 ### PaymentSheet

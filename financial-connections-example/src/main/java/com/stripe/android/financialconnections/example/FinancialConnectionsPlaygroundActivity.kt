@@ -65,6 +65,7 @@ import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountForInstantDebitsLauncher
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher.Companion.HOSTED_SURFACE_PAYMENT_ELEMENT
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.rememberPaymentSheet
 
@@ -93,6 +94,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
             hostedSurface = HOSTED_SURFACE_PAYMENT_ELEMENT,
             activityResultRegistryOwner = this,
             callback = viewModel::onCollectBankAccountForInstantDebitsLauncherResult,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
 
         setContent {

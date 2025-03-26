@@ -48,7 +48,7 @@ internal class EmbeddedComponentCoordinator @Inject constructor(
     private val fetchClientSecretCallback: FetchClientSecretCallback,
     private val logger: Logger,
     appearance: Appearance,
-    private val customFonts: List<CustomFontSource>,
+    internal val customFonts: List<CustomFontSource>,
 ) {
     private val _appearanceFlow = MutableStateFlow(appearance)
     internal val appearanceFlow: StateFlow<Appearance> get() = _appearanceFlow.asStateFlow()

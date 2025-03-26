@@ -38,7 +38,6 @@ class EmbeddedComponentManager @JvmOverloads constructor(
      * @param title Optional title to display in the toolbar.
      * @param props Optional props to use for configuring the component.
      */
-    @PrivateBetaConnectSDK
     @JvmOverloads
     fun createAccountOnboardingController(
         activity: FragmentActivity,
@@ -61,7 +60,6 @@ class EmbeddedComponentManager @JvmOverloads constructor(
      * @param props Optional props to use for configuring the view.
      * @param cacheKey Key to use for caching the internal WebView across configuration changes.
      */
-    @PrivateBetaConnectSDK
     internal fun createAccountOnboardingView(
         context: Context,
         listener: AccountOnboardingListener? = null,
@@ -84,7 +82,6 @@ class EmbeddedComponentManager @JvmOverloads constructor(
      * @param listener Optional [PayoutsListener] to use for handling events from the view.
      * @param cacheKey Key to use for caching the internal WebView within an Activity across configuration changes.
      */
-    @PrivateBetaConnectSDK
     internal fun createPayoutsView(
         context: Context,
         listener: PayoutsListener? = null,
@@ -98,14 +95,12 @@ class EmbeddedComponentManager @JvmOverloads constructor(
         )
     }
 
-    @PrivateBetaConnectSDK
     fun update(appearance: Appearance) {
         coordinator.update(appearance)
     }
 
-    @PrivateBetaConnectSDK
-    @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
     data class Configuration(
         val publishableKey: String,
     ) : Parcelable

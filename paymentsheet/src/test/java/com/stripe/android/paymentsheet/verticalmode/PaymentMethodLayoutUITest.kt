@@ -88,7 +88,11 @@ internal class PaymentMethodLayoutUITest(
         runScenario(
             initialState = createState(
                 displayablePaymentMethods = listOf(
-                    CardDefinition.uiDefinitionFactory().supportedPaymentMethod(CardDefinition, emptyList())!!
+                    CardDefinition.uiDefinitionFactory().supportedPaymentMethod(
+                        metadata = PaymentMethodMetadataFactory.create(),
+                        definition = CardDefinition,
+                        sharedDataSpecs = emptyList()
+                    )!!
                         .asDisplayablePaymentMethod(
                             customerSavedPaymentMethods = emptyList(),
                             incentive = null,

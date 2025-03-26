@@ -16,7 +16,7 @@ class FinancialConnectionsPaymentsProxyTest {
             "com.stripe.android.financialconnections.FinancialConnectionsSheet"
     }
 
-    private val mockIsFinancialConnectionsAvailable: IsFinancialConnectionsAvailable = mock()
+    private val mockIsFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable = mock()
     private val mockActivity: AppCompatActivity = mock()
 
     private class FakeProxy : FinancialConnectionsPaymentsProxy {
@@ -37,7 +37,7 @@ class FinancialConnectionsPaymentsProxyTest {
             FinancialConnectionsPaymentsProxy.createForACH(
                 activity = mockActivity,
                 onComplete = {},
-                isFinancialConnectionsAvailable = mockIsFinancialConnectionsAvailable
+                isFullSdkAvailable = mockIsFinancialConnectionsAvailable
             ) is UnsupportedFinancialConnectionsPaymentsProxy
         )
     }
@@ -60,7 +60,7 @@ class FinancialConnectionsPaymentsProxyTest {
             FinancialConnectionsPaymentsProxy.createForACH(
                 activity = mockActivity,
                 onComplete = {},
-                isFinancialConnectionsAvailable = mockIsFinancialConnectionsAvailable
+                isFullSdkAvailable = mockIsFinancialConnectionsAvailable
             ).present(
                 financialConnectionsSessionClientSecret = "",
                 publishableKey = "",

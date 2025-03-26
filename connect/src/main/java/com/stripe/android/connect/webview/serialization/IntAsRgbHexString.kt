@@ -13,14 +13,14 @@ import kotlinx.serialization.encoding.Encoder
  * Note that typealias's such as this are only serializable when in a class, and cannot be
  * directly serialized on their own. See https://youtrack.jetbrains.com/issue/KT-64920/Json.encodeToString-yields-different-results-depending-on-whether-typealias-is-used#focus=Comments-27-9092520.0-0.
  */
-typealias IntAsRgbHexString =
+internal typealias IntAsRgbHexString =
     @Serializable(IntAsRgbHexStringSerializer::class)
     Int
 
 /**
  * A [KSerializer] for serializing an [Int] as a hex color string, e.g. "#FF0000".
  */
-object IntAsRgbHexStringSerializer : KSerializer<Int> {
+internal object IntAsRgbHexStringSerializer : KSerializer<Int> {
 
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("IntAsRgbHexString", PrimitiveKind.STRING)

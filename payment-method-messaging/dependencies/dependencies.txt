@@ -328,7 +328,7 @@
 |    |    +--- androidx.core:core-ktx:1.13.1 (*)
 |    |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0 (*)
 |    |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.1.10 (*)
-|    +--- androidx.databinding:viewbinding:8.8.1
+|    +--- androidx.databinding:viewbinding:8.8.2
 |    |    \--- androidx.annotation:annotation:1.0.0 -> 1.9.1 (*)
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.1.10 (*)
 |    +--- project :hcaptcha
@@ -692,7 +692,7 @@
 |    |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0 (*)
 |    |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.1.10 (*)
 |    +--- project :3ds2sdk
-|    |    +--- androidx.databinding:viewbinding:8.8.1 (*)
+|    |    +--- androidx.databinding:viewbinding:8.8.2 (*)
 |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.1.10 (*)
 |    |    +--- androidx.appcompat:appcompat:1.7.0 (*)
 |    |    +--- com.google.android.material:material:1.12.0
@@ -876,7 +876,7 @@
 |    +--- com.google.android.instantapps:instantapps:1.1.0
 |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.1.10 (*)
 +--- project :payments-ui-core
-|    +--- androidx.databinding:viewbinding:8.8.1 (*)
+|    +--- androidx.databinding:viewbinding:8.8.2 (*)
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:2.1.10 (*)
 |    +--- project :stripe-core (*)
 |    +--- project :payments-core (*)
