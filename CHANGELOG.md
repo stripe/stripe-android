@@ -7,6 +7,9 @@
 * [FIXED][10492](https://github.com/stripe/stripe-android/pull/10492) Update Add Payment Method screen to use `PaymentSheet.Appearance.Colors.onSurface` as the header text color when `PaymentMethodLayout` is `Vertical`.
 * [Added][10496](https://github.com/stripe/stripe-android/pull/10496) Improve Google Pay troubleshooting with detailed user facing logs.
 
+### Connect (Private Preview)
+* [Added] Connect SDK to add connected account dashboard functionality to your app using [Connect embedded components](https://docs.stripe.com/connect/get-started-connect-embedded-components?platform=android).
+
 ## 21.7.1 - 2025-03-24
 
 ### PaymentSheet
