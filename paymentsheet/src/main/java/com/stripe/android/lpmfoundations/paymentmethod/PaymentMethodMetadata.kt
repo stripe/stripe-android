@@ -18,7 +18,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
-import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
+import com.stripe.android.payments.financialconnections.IsFinancialConnectionsSdkAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
@@ -286,7 +286,7 @@ internal data class PaymentMethodMetadata(
             paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
             sharedDataSpecs: List<SharedDataSpec>,
             isGooglePayReady: Boolean,
-            isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
+            isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable,
             isPaymentMethodSyncDefaultEnabled: Boolean,
         ): PaymentMethodMetadata {
             return PaymentMethodMetadata(

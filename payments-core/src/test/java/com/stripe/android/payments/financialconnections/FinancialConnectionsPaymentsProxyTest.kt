@@ -16,7 +16,7 @@ class FinancialConnectionsPaymentsProxyTest {
             "com.stripe.android.financialconnections.FinancialConnectionsSheet"
     }
 
-    private val mockIsFinancialConnectionsAvailable: IsFinancialConnectionsAvailable = mock()
+    private val mockIsFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable = mock()
     private val mockActivity: AppCompatActivity = mock()
 
     private class FakeProxy : FinancialConnectionsPaymentsProxy {

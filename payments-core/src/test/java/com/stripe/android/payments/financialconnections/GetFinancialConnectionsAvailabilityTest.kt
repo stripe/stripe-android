@@ -58,8 +58,8 @@ class GetFinancialConnectionsAvailabilityTest {
         }
     }
 
-    private fun isFinancialConnectionsFullSdkAvailable(available: Boolean): IsFinancialConnectionsFullSdkAvailable =
-        object : IsFinancialConnectionsFullSdkAvailable {
+    private fun isFinancialConnectionsFullSdkAvailable(available: Boolean): IsFinancialConnectionsSdkAvailable =
+        object : IsFinancialConnectionsSdkAvailable {
             override fun invoke(): Boolean = available
         }
 }

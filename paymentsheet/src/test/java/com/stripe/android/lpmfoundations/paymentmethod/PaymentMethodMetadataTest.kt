@@ -1026,7 +1026,8 @@ internal class PaymentMethodMetadataTest {
             customPaymentMethods = customPaymentMethods,
             externalPaymentMethodData = null,
             paymentMethodSpecs = null,
-            elementsSessionId = "session_1234"
+            elementsSessionId = "session_1234",
+            flags = emptyMap()
         )
     }
 

@@ -37,7 +37,7 @@ internal interface FinancialConnectionsPaymentsProxy {
                     )
                 )
             },
-            isFullSdkAvailable: IsFinancialConnectionsFullSdkAvailable = DefaultIsFinancialConnectionsAvailable
+            isFullSdkAvailable: IsFinancialConnectionsSdkAvailable = DefaultIsFinancialConnectionsAvailable
         ): FinancialConnectionsPaymentsProxy {
             return if (isFullSdkAvailable()) {
                 provider()
@@ -58,7 +58,7 @@ internal interface FinancialConnectionsPaymentsProxy {
                     )
                 )
             },
-            isFullSdkAvailable: IsFinancialConnectionsFullSdkAvailable = DefaultIsFinancialConnectionsAvailable
+            isFullSdkAvailable: IsFinancialConnectionsSdkAvailable = DefaultIsFinancialConnectionsAvailable
         ): FinancialConnectionsPaymentsProxy {
             return if (isFullSdkAvailable()) {
                 provider()
