@@ -24,7 +24,7 @@ object PaymentMethodFactory {
         last4: String?,
         addCbcNetworks: Boolean,
         brand: CardBrand = CardBrand.Visa,
-        fingerprint: String? = null,
+        fingerprint: String? = card?.fingerprint,
     ): PaymentMethod {
         return copy(
             card = card?.copy(

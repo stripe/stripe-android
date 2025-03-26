@@ -440,7 +440,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         intent: StripeIntent,
         paymentMethod: PaymentMethod
     ): NextStep {
-        return kotlin.runCatching {
+        return runCatching {
             DeferredIntentValidator.validatePaymentMethod(intent, paymentMethod)
             NextStep.HandleNextAction(clientSecret)
         }.getOrElse {
