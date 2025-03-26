@@ -86,6 +86,9 @@ internal class PlaygroundTestDriver(
     private val composeTestRule: ComposeTestRule,
 ) : ScreenshotTest {
     @Volatile
+    private var resultCountDownLatch: CountDownLatch? = null
+
+    @Volatile
     private var resultValue: String? = null
     private lateinit var testParameters: TestParameters
     private lateinit var selectors: Selectors
@@ -288,6 +291,7 @@ internal class PlaygroundTestDriver(
 
         pressContinue()
 
+        resultCountDownLatch = testParameters.countDownLatch()
         selectors.playgroundBuyButton.click()
 
         doAuthorization()
@@ -323,6 +327,7 @@ internal class PlaygroundTestDriver(
 
         beforeBuyAction(selectors)
 
+        resultCountDownLatch = testParameters.countDownLatch()
         selectors.playgroundBuyButton.click()
 
         afterBuyAction(selectors)
@@ -793,6 +798,7 @@ internal class PlaygroundTestDriver(
 
         launchCustom(false)
 
+        resultCountDownLatch = testParameters.countDownLatch()
         selectors.playgroundBuyButton.click()
 
         selectors.getCardCvc().performTextInput("123")
@@ -1503,6 +1509,9 @@ internal class PlaygroundTestDriver(
                     }
 
                     waitForPlaygroundActivity()
+                    resultCountDownLatch?.let {
+                        assertThat(it.await(5, TimeUnit.SECONDS)).isTrue()
+                    }
                     assertThat(resultValue).isEqualTo(SUCCESS_RESULT)
                 } else if (integrationType.isCustomerFlow()) {
                     waitForCustomerSheetConfirmButton()
@@ -1654,6 +1663,9 @@ internal class PlaygroundTestDriver(
             activity.lifecycleScope.launch {
                 activity.viewModel.status.collect {
                     resultValue = it?.message
+                    if (it?.message != null) {
+                        resultCountDownLatch?.countDown()
+                    }
                 }
             }
 
@@ -1673,6 +1685,8 @@ internal class PlaygroundTestDriver(
         application?.unregisterActivityLifecycleCallbacks(activityLifecycleCallbacks)
         playgroundState = null
         currentActivity = null
+        resultValue = null
+        resultCountDownLatch = null
     }
 
     private fun isSelectPaymentMethodScreen(): Boolean {
@@ -1712,5 +1726,13 @@ internal class PlaygroundTestDriver(
         const val ADD_PAYMENT_METHOD_NODE_TAG = "${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_+ Add"
         const val FINANCIAL_CONNECTIONS_ACTIVITY =
             "com.stripe.android.financialconnections.FinancialConnectionsSheetActivity"
+    }
+}
+
+private fun TestParameters.countDownLatch(): CountDownLatch? {
+    return if (authorizationAction?.isConsideredDone == true) {
+        CountDownLatch(1)
+    } else {
+        null
     }
 }
