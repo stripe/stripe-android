@@ -92,7 +92,6 @@ class FinancialConnectionsLiteViewModelTest {
 
         viewModel.viewEffects.test {
             viewModel.handleUrl(syncResponse.manifest.successUrl!!)
-            testDispatcher.scheduler.advanceUntilIdle()
             val viewEffect = awaitItem() as ViewEffect.FinishWithResult
             val completedResult = viewEffect.result as FinancialConnectionsSheetActivityResult.Completed
             assertEquals(financialConnectionsSessionNoAccounts, completedResult.financialConnectionsSession)
@@ -112,7 +111,6 @@ class FinancialConnectionsLiteViewModelTest {
 
         viewModel.viewEffects.test {
             viewModel.handleUrl(syncResponse.manifest.cancelUrl!!)
-            testDispatcher.scheduler.advanceUntilIdle()
             val viewEffect = awaitItem() as ViewEffect.FinishWithResult
             val canceledResult = viewEffect.result as FinancialConnectionsSheetActivityResult.Canceled
             assertEquals(FinancialConnectionsSheetActivityResult.Canceled, canceledResult)
