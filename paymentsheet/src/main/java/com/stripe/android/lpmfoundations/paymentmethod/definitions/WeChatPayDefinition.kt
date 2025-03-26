@@ -26,7 +26,10 @@ internal object WeChatPayDefinition : PaymentMethodDefinition {
 }
 
 private object WeChatPayUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSpec {
-    override fun createSupportedPaymentMethod(sharedDataSpec: SharedDataSpec) = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(
+        metadata: PaymentMethodMetadata,
+        sharedDataSpec: SharedDataSpec,
+    ) = SupportedPaymentMethod(
         paymentMethodDefinition = WeChatPayDefinition,
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_wechat,

@@ -29,7 +29,10 @@ internal object SofortDefinition : PaymentMethodDefinition {
 }
 
 private object SofortUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSpec {
-    override fun createSupportedPaymentMethod(sharedDataSpec: SharedDataSpec) = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(
+        metadata: PaymentMethodMetadata,
+        sharedDataSpec: SharedDataSpec,
+    ) = SupportedPaymentMethod(
         paymentMethodDefinition = SofortDefinition,
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_sofort,
@@ -42,6 +45,7 @@ private object SofortUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDat
         transformSpecToElements: TransformSpecToElements
     ): List<FormElement> {
         return transformSpecToElements.transform(
+            metadata = metadata,
             specs = sharedDataSpec.fields,
             placeholderOverrideList = if (metadata.hasIntentToSetup()) {
                 listOf(IdentifierSpec.Name, IdentifierSpec.Email)

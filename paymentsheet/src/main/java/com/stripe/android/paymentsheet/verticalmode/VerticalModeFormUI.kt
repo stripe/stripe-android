@@ -27,7 +27,6 @@ import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.paymentsheet.ui.PromoBadge
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.strings.resolve
-import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -107,7 +106,7 @@ internal fun VerticalModeFormHeaderUI(
             )
         }
 
-        val textColor = MaterialTheme.stripeColors.onComponent
+        val textColor = MaterialTheme.colors.onSurface
         Text(
             text = formHeaderInformation.displayName.resolve(),
             style = MaterialTheme.typography.h4,

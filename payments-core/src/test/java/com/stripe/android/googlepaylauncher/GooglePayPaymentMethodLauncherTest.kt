@@ -40,6 +40,8 @@ class GooglePayPaymentMethodLauncherTest {
             integrationTypes = listOf(LauncherIntegrationType.Activity),
             expectResult = false,
         ) { activity, _ ->
+            GooglePayPaymentMethodLauncher.HAS_SENT_INIT_ANALYTIC_EVENT = false
+
             val firedEvents = mutableListOf<String>()
 
             val launcher = GooglePayPaymentMethodLauncher(
@@ -58,6 +60,52 @@ class GooglePayPaymentMethodLauncherTest {
                 cardBrandFilter = DefaultCardBrandFilter
             )
             launcher.present(currencyCode = "usd")
+
+            assertThat(firedEvents).containsExactly("stripe_android.googlepaypaymentmethodlauncher_init")
+        }
+    }
+
+    @Test
+    fun `init should fire expected event only on first init`() {
+        runGooglePayPaymentMethodLauncherTest(
+            integrationTypes = listOf(LauncherIntegrationType.Activity),
+            expectResult = false,
+        ) { activity, _ ->
+            GooglePayPaymentMethodLauncher.HAS_SENT_INIT_ANALYTIC_EVENT = false
+
+            val firedEvents = mutableListOf<String>()
+
+            GooglePayPaymentMethodLauncher(
+                lifecycleScope = activity.lifecycleScope,
+                config = CONFIG,
+                readyCallback = mock(),
+                activityResultLauncher = mock(),
+                skipReadyCheck = true,
+                context = activity,
+                googlePayRepositoryFactory = mock(),
+                paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
+                    context = activity,
+                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                ),
+                analyticsRequestExecutor = { firedEvents += it.params["event"].toString() },
+                cardBrandFilter = DefaultCardBrandFilter
+            )
+
+            GooglePayPaymentMethodLauncher(
+                lifecycleScope = activity.lifecycleScope,
+                config = CONFIG,
+                readyCallback = mock(),
+                activityResultLauncher = mock(),
+                skipReadyCheck = true,
+                context = activity,
+                googlePayRepositoryFactory = mock(),
+                paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
+                    context = activity,
+                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                ),
+                analyticsRequestExecutor = { firedEvents += it.params["event"].toString() },
+                cardBrandFilter = DefaultCardBrandFilter
+            )
 
             assertThat(firedEvents).containsExactly("stripe_android.googlepaypaymentmethodlauncher_init")
         }

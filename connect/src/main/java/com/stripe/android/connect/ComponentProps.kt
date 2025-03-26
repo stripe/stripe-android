@@ -13,14 +13,14 @@ import kotlinx.serialization.json.jsonObject
  * Customizable properties for an embedded component.
  */
 @PrivateBetaConnectSDK
-@RestrictTo(RestrictTo.Scope.LIBRARY)
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed interface ComponentProps : Parcelable
 
 /**
  * Empty props.
  */
 @PrivateBetaConnectSDK
-@RestrictTo(RestrictTo.Scope.LIBRARY)
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
 data object EmptyProps : ComponentProps
 

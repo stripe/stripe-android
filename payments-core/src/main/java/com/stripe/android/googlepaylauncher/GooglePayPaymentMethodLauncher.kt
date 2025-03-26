@@ -19,7 +19,6 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
-import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher.Result
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -148,9 +147,12 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
     )
 
     init {
-        analyticsRequestExecutor.executeAsync(
-            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.GooglePayPaymentMethodLauncherInit)
-        )
+        if (!HAS_SENT_INIT_ANALYTIC_EVENT) {
+            HAS_SENT_INIT_ANALYTIC_EVENT = true
+            analyticsRequestExecutor.executeAsync(
+                paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.GooglePayPaymentMethodLauncherInit)
+            )
+        }
 
         if (!skipReadyCheck) {
             lifecycleScope.launch {
@@ -347,6 +349,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
 
     companion object {
         internal const val PRODUCT_USAGE_TOKEN = "GooglePayPaymentMethodLauncher"
+        internal var HAS_SENT_INIT_ANALYTIC_EVENT: Boolean = false
 
         // Generic internal error
         const val INTERNAL_ERROR = 1

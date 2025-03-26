@@ -34,7 +34,7 @@ class AddressLauncher internal constructor(
     ) : this(
         application = activity.application,
         activityResultLauncher = activity.registerForActivityResult(
-            AddressElementActivityContract()
+            AddressElementActivityContract
         ) {
             callback.onAddressLauncherResult(it)
         },
@@ -52,7 +52,7 @@ class AddressLauncher internal constructor(
     ) : this(
         application = fragment.requireActivity().application,
         activityResultLauncher = fragment.registerForActivityResult(
-            AddressElementActivityContract()
+            AddressElementActivityContract
         ) {
             callback.onAddressLauncherResult(it)
         },
@@ -217,7 +217,7 @@ fun rememberAddressLauncher(
     callback: AddressLauncherResultCallback
 ): AddressLauncher {
     val activityResultLauncher = rememberLauncherForActivityResult(
-        contract = AddressElementActivityContract(),
+        contract = AddressElementActivityContract,
         onResult = callback::onAddressLauncherResult
     )
 

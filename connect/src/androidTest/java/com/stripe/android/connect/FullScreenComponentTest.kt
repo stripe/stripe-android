@@ -1,7 +1,6 @@
 package com.stripe.android.connect
 
 import android.content.pm.ActivityInfo
-import androidx.appcompat.widget.Toolbar
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.onView
@@ -13,7 +12,6 @@ import androidx.test.espresso.matcher.RootMatchers
 import androidx.test.espresso.matcher.ViewMatchers.isAssignableFrom
 import androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withClassName
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withParent
 import androidx.test.espresso.matcher.ViewMatchers.withText
@@ -30,10 +28,8 @@ import androidx.test.ext.junit.rules.activityScenarioRule
 import com.stripe.android.connect.webview.serialization.AlertJs
 import com.stripe.android.connect.webview.serialization.ConnectJson
 import org.hamcrest.Matchers.allOf
-import org.hamcrest.Matchers.containsString
 import org.hamcrest.Matchers.equalTo
 import org.junit.After
-import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -58,8 +54,11 @@ class FullScreenComponentTest {
     private val toolbar
         get() = allOf(withId(R.id.toolbar), isDescendantOfA(rootView))
 
-    private val toolbarNavigationButton
-        get() = allOf(withParent(toolbar), withClassName(containsString("ImageButton")))
+    private val closeButton
+        get() = allOf(withParent(toolbar), withId(R.id.close_button))
+
+    private val titleText
+        get() = allOf(withParent(toolbar), withId(R.id.title_text))
 
     private val testAlertJs
         get() = AlertJs(
@@ -88,8 +87,7 @@ class FullScreenComponentTest {
     @Test
     fun testShowWithTitleAndDummyPage() {
         checkDialogIsDisplayed()
-        onView(toolbar)
-            .check { view, _ -> assertEquals((view as Toolbar).title, title) }
+        onView(titleText).check(matches(withText(title)))
         onWebView()
             // Sanity check that dummy page is loaded.
             .withElement(findElement(Locator.ID, "top"))
@@ -122,7 +120,7 @@ class FullScreenComponentTest {
     @Test
     fun testCloseButtonDismissesByDefault() {
         checkDialogIsDisplayed()
-        onView(toolbarNavigationButton).perform(click())
+        onView(closeButton).perform(click())
         checkDialogDoesNotExist()
     }
 
@@ -144,7 +142,7 @@ class FullScreenComponentTest {
     fun testCustomJsAlertContents() {
         checkDialogIsDisplayed()
         val alertJs = testAlertJs
-        performWebViewAlert(ALERT, alertJs)
+        performWebViewAlertWithoutChecks(ALERT, alertJs)
         onView(withText(alertJs.title)).check(matches(isDisplayed()))
         onView(withText(alertJs.message)).check(matches(isDisplayed()))
         onView(withText(alertJs.buttons!!.ok)).check(matches(isDisplayed()))
@@ -155,7 +153,7 @@ class FullScreenComponentTest {
     fun testCustomJsAlertDefaultContents() {
         checkDialogIsDisplayed()
         val alertJs = AlertJs(message = testAlertJs.message)
-        performWebViewAlert(ALERT, alertJs)
+        performWebViewAlertWithoutChecks(ALERT, alertJs)
         onView(withText(alertJs.message)).check(matches(isDisplayed()))
         onView(withText("OK")).check(matches(isDisplayed()))
     }
@@ -164,7 +162,7 @@ class FullScreenComponentTest {
     fun testCustomJsConfirmDefaultContents() {
         checkDialogIsDisplayed()
         val alertJs = AlertJs(message = testAlertJs.message)
-        performWebViewAlert(CONFIRM, alertJs)
+        performWebViewAlertWithoutChecks(CONFIRM, alertJs)
         onView(withText(alertJs.message)).check(matches(isDisplayed()))
         onView(withText("OK")).check(matches(isDisplayed()))
         onView(withText("Cancel")).check(matches(isDisplayed()))
@@ -187,7 +185,7 @@ class FullScreenComponentTest {
             DismissActionTestCase(CONFIRM, pressCancel, "false"),
             DismissActionTestCase(CONFIRM, pressOk, "true"),
         ).forEach { testCase ->
-            performWebViewAlert(testCase.method, alertJs)
+            performWebViewAlertWithoutChecks(testCase.method, alertJs)
             testCase.action()
             checkDialogIsDisplayed()
             checkWebViewAlertResult(testCase.expected)
@@ -205,7 +203,7 @@ class FullScreenComponentTest {
         checkDialogIsDisplayed()
         val alertJs = testAlertJs
         // Show the alert then rotate the screen.
-        performWebViewAlert(ALERT, alertJs)
+        performWebViewAlertWithoutChecks(ALERT, alertJs)
         onView(withText(alertJs.message)).check(matches(isDisplayed()))
         activityRule.scenario.onActivity {
             it.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE
@@ -216,7 +214,7 @@ class FullScreenComponentTest {
             .check(doesNotExist())
         // Show the alert again. If the alert is *not* shown, it's an indication that the
         // WebView is hanging because it never got a result from the first alert.
-        performWebViewAlert(ALERT, alertJs)
+        performWebViewAlertWithoutChecks(ALERT, alertJs)
         onView(withText(alertJs.message)).check(matches(isDisplayed()))
     }
 
@@ -224,7 +222,7 @@ class FullScreenComponentTest {
     fun testPlainJsAlertWorks() {
         checkDialogIsDisplayed()
         val message = testAlertJs.message
-        performWebViewAlert(ALERT, message)
+        performWebViewAlertWithoutChecks(ALERT, message)
         onView(withText(message)).check(matches(isDisplayed()))
         onView(withText("OK")).check(matches(isDisplayed()))
     }
@@ -233,7 +231,7 @@ class FullScreenComponentTest {
     fun testPlainJsConfirmWorks() {
         checkDialogIsDisplayed()
         val message = testAlertJs.message
-        performWebViewAlert(CONFIRM, message)
+        performWebViewAlertWithoutChecks(CONFIRM, message)
         onView(withText(message)).check(matches(isDisplayed()))
         onView(withText("OK")).check(matches(isDisplayed()))
         onView(withText("Cancel")).check(matches(isDisplayed()))
@@ -253,20 +251,19 @@ class FullScreenComponentTest {
             .check(doesNotExist())
     }
 
-    private fun performWebViewAlert(method: String, alertJs: AlertJs) {
+    private fun performWebViewAlertWithoutChecks(method: String, alertJs: AlertJs) {
         val alertString = ConnectJson.encodeToString(alertJs)
-        performWebViewAlert(method, alertString)
+        performWebViewAlertWithoutChecks(method, alertString)
     }
 
-    private fun performWebViewAlert(method: String, message: String) {
+    private fun performWebViewAlertWithoutChecks(method: String, message: String) {
         try {
             onWebView()
-                .withTimeout(500L, TimeUnit.MILLISECONDS)
+                .withTimeout(5_000L, TimeUnit.MILLISECONDS) // Allow slower CI machines more time.
                 .perform(script("function performWebViewAlert() { $ALERT_RESULT_VAR = $method(`$message`); }"))
         } catch (_: NoMatchingViewException) {
             // HACK: After the JS executes, the alert dialog prevents the WebView from
-            //  being interacted with. Assume the alert was shown -- we'll be verifying
-            //  the dialog below anyway.
+            //  being interacted with. Assume the alert was shown.
         }
     }
 

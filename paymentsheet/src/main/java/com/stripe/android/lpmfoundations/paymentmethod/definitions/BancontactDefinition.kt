@@ -29,7 +29,10 @@ internal object BancontactDefinition : PaymentMethodDefinition {
 }
 
 private object BancontactUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSpec {
-    override fun createSupportedPaymentMethod(sharedDataSpec: SharedDataSpec) = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(
+        metadata: PaymentMethodMetadata,
+        sharedDataSpec: SharedDataSpec,
+    ) = SupportedPaymentMethod(
         paymentMethodDefinition = BancontactDefinition,
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_bancontact,
@@ -42,6 +45,7 @@ private object BancontactUiDefinitionFactory : UiDefinitionFactory.RequiresShare
         transformSpecToElements: TransformSpecToElements
     ): List<FormElement> {
         return transformSpecToElements.transform(
+            metadata = metadata,
             specs = sharedDataSpec.fields,
             placeholderOverrideList = if (metadata.hasIntentToSetup()) {
                 listOf(IdentifierSpec.Name, IdentifierSpec.Email)

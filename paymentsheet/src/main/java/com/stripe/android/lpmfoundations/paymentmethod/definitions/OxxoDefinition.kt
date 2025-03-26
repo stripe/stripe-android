@@ -27,7 +27,10 @@ internal object OxxoDefinition : PaymentMethodDefinition {
 }
 
 private object OxxoUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSpec {
-    override fun createSupportedPaymentMethod(sharedDataSpec: SharedDataSpec) = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(
+        metadata: PaymentMethodMetadata,
+        sharedDataSpec: SharedDataSpec,
+    ) = SupportedPaymentMethod(
         code = OxxoDefinition.type.code,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_oxxo,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_oxxo,

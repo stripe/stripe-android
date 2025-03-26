@@ -26,7 +26,10 @@ internal object ZipDefinition : PaymentMethodDefinition {
 }
 
 private object ZipUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSpec {
-    override fun createSupportedPaymentMethod(sharedDataSpec: SharedDataSpec) = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(
+        metadata: PaymentMethodMetadata,
+        sharedDataSpec: SharedDataSpec,
+    ) = SupportedPaymentMethod(
         paymentMethodDefinition = ZipDefinition,
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_zip,

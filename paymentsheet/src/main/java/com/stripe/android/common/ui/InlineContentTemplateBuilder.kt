@@ -1,6 +1,7 @@
-package com.stripe.android.link.utils
+package com.stripe.android.common.ui
 
 import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
@@ -8,7 +9,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.em
 
 /**
- * Wrapper for Text` Jetpack Compose component that provides a clean interface for building
+ * Wrapper for [Text] Jetpack Compose component that provides a clean interface for building
  * inline content components.
  */
 internal class InlineContentTemplateBuilder {

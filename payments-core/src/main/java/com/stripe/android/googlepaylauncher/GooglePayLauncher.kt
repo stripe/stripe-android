@@ -15,7 +15,6 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
-import com.stripe.android.googlepaylauncher.GooglePayLauncher.Result
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.PaymentAnalyticsEvent
@@ -142,9 +141,12 @@ class GooglePayLauncher internal constructor(
     )
 
     init {
-        analyticsRequestExecutor.executeAsync(
-            paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.GooglePayLauncherInit)
-        )
+        if (!HAS_SENT_INIT_ANALYTIC_EVENT) {
+            HAS_SENT_INIT_ANALYTIC_EVENT = true
+            analyticsRequestExecutor.executeAsync(
+                paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.GooglePayLauncherInit)
+            )
+        }
 
         lifecycleScope.launch {
             val repository = googlePayRepositoryFactory(config.environment)
@@ -315,6 +317,7 @@ class GooglePayLauncher internal constructor(
 
     companion object {
         internal const val PRODUCT_USAGE = "GooglePayLauncher"
+        internal var HAS_SENT_INIT_ANALYTIC_EVENT: Boolean = false
 
         /**
          * Create a [GooglePayLauncher] used for Jetpack Compose.
