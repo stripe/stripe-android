@@ -554,16 +554,26 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             userFacingLogger.logWarningWithoutPii(
                 "Google Pay is not enabled for this session."
             )
+        } else if (configuration.googlePay == null) {
+            userFacingLogger.logWarningWithoutPii(
+                "GooglePayConfiguration is not set."
+            )
+        } else if (!configuration.isGooglePayReady()) {
+            @Suppress("MaxLineLength")
+            userFacingLogger.logWarningWithoutPii(
+                """
+                    Google Pay API check failed.
+                    Possible reasons:
+                    - Google Play service is not available on this device.
+                    - Google account is not signed in on this device.
+                    See https://developers.google.com/android/reference/com/google/android/gms/wallet/PaymentsClient#public-taskboolean-isreadytopay-isreadytopayrequest-request for more details.
+                """.trimIndent()
+            )
         }
         return elementsSession.isGooglePayEnabled && configuration.isGooglePayReady()
     }
 
     private suspend fun CommonConfiguration.isGooglePayReady(): Boolean {
-        if (googlePay == null) {
-            userFacingLogger.logWarningWithoutPii(
-                "GooglePayConfiguration is not set."
-            )
-        }
         return googlePay?.environment?.let { environment ->
             googlePayRepositoryFactory(
                 when (environment) {
