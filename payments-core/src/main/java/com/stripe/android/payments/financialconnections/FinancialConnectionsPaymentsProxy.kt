@@ -37,9 +37,9 @@ internal interface FinancialConnectionsPaymentsProxy {
                     )
                 )
             },
-            isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable = DefaultIsFinancialConnectionsAvailable
+            isFullSdkAvailable: IsFinancialConnectionsFullSdkAvailable = DefaultIsFinancialConnectionsAvailable
         ): FinancialConnectionsPaymentsProxy {
-            return if (isFinancialConnectionsAvailable()) {
+            return if (isFullSdkAvailable()) {
                 provider()
             } else {
                 UnsupportedFinancialConnectionsPaymentsProxy()
@@ -58,9 +58,9 @@ internal interface FinancialConnectionsPaymentsProxy {
                     )
                 )
             },
-            isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable = DefaultIsFinancialConnectionsAvailable
+            isFullSdkAvailable: IsFinancialConnectionsFullSdkAvailable = DefaultIsFinancialConnectionsAvailable
         ): FinancialConnectionsPaymentsProxy {
-            return if (isFinancialConnectionsAvailable()) {
+            return if (isFullSdkAvailable()) {
                 provider()
             } else {
                 UnsupportedFinancialConnectionsPaymentsProxy()

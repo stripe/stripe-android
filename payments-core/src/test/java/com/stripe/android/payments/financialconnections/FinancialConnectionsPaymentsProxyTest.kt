@@ -37,7 +37,7 @@ class FinancialConnectionsPaymentsProxyTest {
             FinancialConnectionsPaymentsProxy.createForACH(
                 activity = mockActivity,
                 onComplete = {},
-                isFinancialConnectionsAvailable = mockIsFinancialConnectionsAvailable
+                isFullSdkAvailable = mockIsFinancialConnectionsAvailable
             ) is UnsupportedFinancialConnectionsPaymentsProxy
         )
     }
@@ -60,7 +60,7 @@ class FinancialConnectionsPaymentsProxyTest {
             FinancialConnectionsPaymentsProxy.createForACH(
                 activity = mockActivity,
                 onComplete = {},
-                isFinancialConnectionsAvailable = mockIsFinancialConnectionsAvailable
+                isFullSdkAvailable = mockIsFinancialConnectionsAvailable
             ).present(
                 financialConnectionsSessionClientSecret = "",
                 publishableKey = "",
