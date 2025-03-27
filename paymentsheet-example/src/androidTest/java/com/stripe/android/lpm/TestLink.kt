@@ -47,6 +47,7 @@ internal class TestLink : BasePlaygroundTest() {
         ) { settings ->
             settings[SupportedPaymentMethodsSettingsDefinition] = if (passthroughMode) "card" else "card,link"
             settings[CountrySettingsDefinition] = Country.US
+            settings[LinkSettingsDefinition] = true
             settings[LinkTypeSettingsDefinition] = LinkType.Native
             settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.On
         }
