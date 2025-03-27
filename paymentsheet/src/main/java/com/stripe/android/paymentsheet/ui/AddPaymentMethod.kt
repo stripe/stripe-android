@@ -19,13 +19,14 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.utils.collectAsState
+import kotlinx.coroutines.Dispatchers
 
 @Composable
 internal fun AddPaymentMethod(
     interactor: AddPaymentMethodInteractor,
     modifier: Modifier = Modifier,
 ) {
-    val state by interactor.state.collectAsState()
+    val state by interactor.state.collectAsState(Dispatchers.Main)
 
     PaymentElement(
         enabled = !state.processing,

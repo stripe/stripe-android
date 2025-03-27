@@ -10,7 +10,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 private class DefaultProduceStateScope<T>(
     state: MutableState<T>,
@@ -40,9 +42,17 @@ private fun <T> produceState(
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
-fun <T> StateFlow<T>.collectAsState(): State<T> = produceState(
+fun <T> StateFlow<T>.collectAsState(
+    context: CoroutineContext = EmptyCoroutineContext
+): State<T> = produceState(
     produceInitialValue = remember { { value } },
     key = this
 ) {
-    collect { value = it }
+    if (context == EmptyCoroutineContext) {
+        collect { value = it }
+    } else {
+        withContext(context) {
+            collect { value = it }
+        }
+    }
 }
