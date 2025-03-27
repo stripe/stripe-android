@@ -41,118 +41,96 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest {
     private val layoutType: PaymentSheetLayoutType = PaymentSheetLayoutType.Vertical()
 
     @Test
-    fun relaunchesIntoFormPageWithSaveForFutureUseChecked() = runFlowControllerTest(
-        networkRule = networkRule,
-        createIntentCallback = confirmationType.createIntentCallback,
-        integrationType = IntegrationType.Compose,
-        resultCallback = ::assertCompleted,
-    ) { testContext ->
-        val page = PaymentSheetPage(composeTestRule)
+    fun relaunchesIntoFormPageWithSaveForFutureUseChecked() = relaunchIntoFormPage(
+        expectedSetAsDefault = false,
+        firstLaunchBlock = { page ->
+            page.assertSaveForFutureCheckboxNotChecked()
+            page.assertNoSetAsDefaultCheckbox()
 
-        val cards = listOf(
-            PaymentMethodFactory.card(last4 = "4242", id = "pm_1"),
-            PaymentMethodFactory.card(last4 = "1001", id = "pm_2")
-        )
+            page.fillOutCardDetails()
+            page.checkSaveForFuture()
 
-        DefaultPaymentMethodsUtils.enqueueElementsSessionResponse(
-            networkRule = networkRule,
-            cards = cards,
-            isDeferredIntent = confirmationType.isDeferredIntent,
-        )
-
-        DefaultPaymentMethodsUtils.launch(
-            testContext = ProductIntegrationTestRunnerContext.WithFlowController(testContext),
-            composeTestRule = composeTestRule,
-            paymentMethodLayout = layoutType.paymentMethodLayout,
-            hasSavedPaymentMethods = true,
-            isDeferredIntent = confirmationType.isDeferredIntent,
-            paymentMethodType = paymentMethodType,
-        )
-
-        page.clickOnLpm("card", forVerticalMode = true)
-
-        page.assertSaveForFutureCheckboxNotChecked()
-        page.assertNoSetAsDefaultCheckbox()
-
-        page.fillOutCardDetails()
-        page.checkSaveForFuture()
-
-        page.assertSaveForFutureUseCheckboxChecked()
-
-        confirmationType.enqueuePaymentIntentConfirmWithExpectedSetAsDefault(
-            networkRule = networkRule,
-            setAsDefault = false
-        )
-        page.clickPrimaryButton()
-
-        assertThat(testContext.configureCallbackTurbine.awaitItem()?.label).endsWith("4242")
-
-        composeTestRule.waitForIdle()
-
-        testContext.flowController.presentPaymentOptions()
-
-        page.assertSaveForFutureUseCheckboxChecked()
-        page.assertSetAsDefaultCheckboxNotChecked()
-
-        testContext.markTestSucceeded()
-    }
+            page.assertSaveForFutureUseCheckboxChecked()
+        },
+        secondLaunchBlock = { page ->
+            page.assertSaveForFutureUseCheckboxChecked()
+            page.assertSetAsDefaultCheckboxNotChecked()
+        }
+    )
 
     @Test
-    fun relaunchesIntoFormPageWithBothChecked() = runFlowControllerTest(
-        networkRule = networkRule,
-        createIntentCallback = confirmationType.createIntentCallback,
-        integrationType = IntegrationType.Compose,
-        resultCallback = ::assertCompleted,
-    ) { testContext ->
-        val page = PaymentSheetPage(composeTestRule)
+    fun relaunchesIntoFormPageWithBothChecked() = relaunchIntoFormPage(
+        expectedSetAsDefault = true,
+        firstLaunchBlock = { page ->
+            page.assertSaveForFutureCheckboxNotChecked()
+            page.assertNoSetAsDefaultCheckbox()
 
-        val cards = listOf(
-            PaymentMethodFactory.card(last4 = "4242", id = "pm_1"),
-            PaymentMethodFactory.card(last4 = "1001", id = "pm_2")
-        )
+            page.fillOutCardDetails()
+            page.checkSaveForFuture()
+            page.checkSetAsDefaultCheckbox()
 
-        DefaultPaymentMethodsUtils.enqueueElementsSessionResponse(
+            page.assertSaveForFutureUseCheckboxChecked()
+            page.assertSetAsDefaultCheckboxChecked()
+        },
+        secondLaunchBlock = { page ->
+            page.assertSaveForFutureUseCheckboxChecked()
+            page.assertSetAsDefaultCheckboxChecked()
+        }
+    )
+
+    private fun relaunchIntoFormPage(
+        expectedSetAsDefault: Boolean,
+        firstLaunchBlock: (PaymentSheetPage) -> Unit,
+        secondLaunchBlock: (PaymentSheetPage) -> Unit,
+    ) {
+        runFlowControllerTest(
             networkRule = networkRule,
-            cards = cards,
-            isDeferredIntent = confirmationType.isDeferredIntent,
-        )
+            createIntentCallback = confirmationType.createIntentCallback,
+            integrationType = IntegrationType.Compose,
+            resultCallback = ::assertCompleted,
+        ) { testContext ->
+            val page = PaymentSheetPage(composeTestRule)
 
-        DefaultPaymentMethodsUtils.launch(
-            testContext = ProductIntegrationTestRunnerContext.WithFlowController(testContext),
-            composeTestRule = composeTestRule,
-            paymentMethodLayout = layoutType.paymentMethodLayout,
-            hasSavedPaymentMethods = true,
-            isDeferredIntent = confirmationType.isDeferredIntent,
-            paymentMethodType = PaymentMethodType.Card,
-        )
+            val cards = listOf(
+                PaymentMethodFactory.card(last4 = "4242", id = "pm_1"),
+                PaymentMethodFactory.card(last4 = "1001", id = "pm_2")
+            )
 
-        page.clickOnLpm("card", forVerticalMode = true)
+            DefaultPaymentMethodsUtils.enqueueElementsSessionResponse(
+                networkRule = networkRule,
+                cards = cards,
+                isDeferredIntent = confirmationType.isDeferredIntent,
+            )
 
-        page.assertSaveForFutureCheckboxNotChecked()
-        page.assertNoSetAsDefaultCheckbox()
+            DefaultPaymentMethodsUtils.launch(
+                testContext = ProductIntegrationTestRunnerContext.WithFlowController(testContext),
+                composeTestRule = composeTestRule,
+                paymentMethodLayout = layoutType.paymentMethodLayout,
+                hasSavedPaymentMethods = true,
+                isDeferredIntent = confirmationType.isDeferredIntent,
+                paymentMethodType = paymentMethodType,
+            )
 
-        page.fillOutCardDetails()
-        page.checkSaveForFuture()
-        page.checkSetAsDefaultCheckbox()
+            page.clickOnLpm("card", forVerticalMode = true)
 
-        page.assertSaveForFutureUseCheckboxChecked()
-        page.assertSetAsDefaultCheckboxChecked()
+            firstLaunchBlock(page)
 
-        confirmationType.enqueuePaymentIntentConfirmWithExpectedSetAsDefault(
-            networkRule = networkRule,
-            setAsDefault = true
-        )
-        page.clickPrimaryButton()
+            confirmationType.enqueuePaymentIntentConfirmWithExpectedSetAsDefault(
+                networkRule = networkRule,
+                setAsDefault = expectedSetAsDefault
+            )
+            page.clickPrimaryButton()
 
-        assertThat(testContext.configureCallbackTurbine.awaitItem()?.label).endsWith("4242")
+            assertThat(testContext.configureCallbackTurbine.awaitItem()?.label).endsWith("4242")
 
-        composeTestRule.waitForIdle()
+            composeTestRule.waitForIdle()
 
-        testContext.flowController.presentPaymentOptions()
+            testContext.flowController.presentPaymentOptions()
 
-        page.assertSaveForFutureUseCheckboxChecked()
-        page.assertSetAsDefaultCheckboxChecked()
+            composeTestRule.waitForIdle()
+            secondLaunchBlock(page)
 
-        testContext.markTestSucceeded()
+            testContext.markTestSucceeded()
+        }
     }
 }
