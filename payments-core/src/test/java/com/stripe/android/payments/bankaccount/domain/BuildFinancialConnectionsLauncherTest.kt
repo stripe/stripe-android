@@ -2,18 +2,14 @@ package com.stripe.android.payments.bankaccount.domain
 
 import androidx.activity.ComponentActivity
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
-import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForInstantDebitsLauncher
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetInstantDebitsResult
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.MockitoAnnotations
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertEquals
@@ -23,15 +19,8 @@ class BuildFinancialConnectionsLauncherTest {
 
     private lateinit var activity: ComponentActivity
 
-    @Mock
-    private lateinit var instantDebitsCallback: (FinancialConnectionsSheetInstantDebitsResult) -> Unit
-
-    @Mock
-    private lateinit var achCallback: (FinancialConnectionsSheetResult) -> Unit
-
     @Before
     fun setup() {
-        MockitoAnnotations.openMocks(this)
         activity = Robolectric.buildActivity(ComponentActivity::class.java).get()
     }
 
@@ -55,8 +44,8 @@ class BuildFinancialConnectionsLauncherTest {
             activity = activity,
             configuration = config,
             financialConnectionsAvailability = availability,
-            onConnectionsForInstantDebitsResult = instantDebitsCallback,
-            onConnectionsForACHResult = achCallback
+            onConnectionsForInstantDebitsResult = { },
+            onConnectionsForACHResult = { }
         ) as FinancialConnectionsSheetForDataLauncher
 
         val resultContract = launcher.activityResultLauncher.contract
@@ -87,8 +76,8 @@ class BuildFinancialConnectionsLauncherTest {
             activity = activity,
             configuration = config,
             financialConnectionsAvailability = availability,
-            onConnectionsForInstantDebitsResult = instantDebitsCallback,
-            onConnectionsForACHResult = achCallback
+            onConnectionsForInstantDebitsResult = { },
+            onConnectionsForACHResult = { }
         ) as FinancialConnectionsSheetForDataLauncher
 
         val resultContract = launcher.activityResultLauncher.contract
@@ -119,8 +108,8 @@ class BuildFinancialConnectionsLauncherTest {
             activity = activity,
             configuration = config,
             financialConnectionsAvailability = availability,
-            onConnectionsForInstantDebitsResult = instantDebitsCallback,
-            onConnectionsForACHResult = achCallback
+            onConnectionsForInstantDebitsResult = { },
+            onConnectionsForACHResult = { }
         ) as FinancialConnectionsSheetForInstantDebitsLauncher
 
         val resultContract = launcher.activityResultLauncher.contract
@@ -151,8 +140,8 @@ class BuildFinancialConnectionsLauncherTest {
             activity = activity,
             configuration = config,
             financialConnectionsAvailability = availability,
-            onConnectionsForInstantDebitsResult = instantDebitsCallback,
-            onConnectionsForACHResult = achCallback
+            onConnectionsForInstantDebitsResult = { },
+            onConnectionsForACHResult = { }
         ) as FinancialConnectionsSheetForInstantDebitsLauncher
 
         val resultContract = launcher.activityResultLauncher.contract
