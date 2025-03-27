@@ -189,7 +189,7 @@ class CardDefinitionTest {
     }
 
     @Test
-    fun `saveForFutureUse field true, setAsDefault field false, when initialized`() {
+    fun `when initialized with setupFutureUsage set, saveForFutureUse checked, setAsDefault unchecked`() {
         testSetAsDefaultElements(
             setAsDefaultMatchesSaveForFutureUse = true,
             paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
@@ -204,7 +204,7 @@ class CardDefinitionTest {
     }
 
     @Test
-    fun `saveForFutureUse field true, setAsDefault field true, when initialized`() {
+    fun `when initialized with setupFutureUsage & setAsDefault set, saveForFutureUse checked, setAsDefault checked`() {
         testSetAsDefaultElements(
             setAsDefaultMatchesSaveForFutureUse = true,
             paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
