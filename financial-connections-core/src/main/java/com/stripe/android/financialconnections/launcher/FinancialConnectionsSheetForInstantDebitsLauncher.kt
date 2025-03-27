@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.Fragment
 import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
@@ -13,7 +14,8 @@ import org.jetbrains.annotations.TestOnly
 @Suppress("unused")
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class FinancialConnectionsSheetForInstantDebitsLauncher(
-    private val activityResultLauncher: ActivityResultLauncher<FinancialConnectionsSheetActivityArgs.ForInstantDebits>
+    @get:VisibleForTesting
+    val activityResultLauncher: ActivityResultLauncher<FinancialConnectionsSheetActivityArgs.ForInstantDebits>
 ) : FinancialConnectionsSheetLauncher {
 
     constructor(

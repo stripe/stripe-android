@@ -24,16 +24,11 @@ dependencies {
     implementation libs.androidx.activity
     implementation libs.androidx.fragment
     implementation libs.androidx.annotation
-    implementation libs.dagger
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.serialization
 
-    debugImplementation libs.showkase
-
     testImplementation testLibs.json
     testImplementation testLibs.junit
-
-    androidTestUtil testLibs.testOrchestrator
 }
 
 android {
