@@ -146,7 +146,7 @@ class ElementsSessionJsonParserTest {
             ElementsSessionFixtures.EXPANDED_SETUP_INTENT_WITH_LINK_SIGNUP_DISABLED_JSON
         )!!
 
-        assertThat(elementsSession.linkSettings?.disableLinkSignup).isTrue()
+        assertThat(elementsSession.linkSettings?.disableInlineSignup).isTrue()
     }
 
     @Test
@@ -163,7 +163,7 @@ class ElementsSessionJsonParserTest {
             ElementsSessionFixtures.EXPANDED_SETUP_INTENT_WITH_LINK_SIGNUP_DISABLED_FLAG_FALSE_JSON
         )!!
 
-        assertThat(elementsSession.linkSettings?.disableLinkSignup).isFalse()
+        assertThat(elementsSession.linkSettings?.disableInlineSignup).isFalse()
     }
 
     @Test

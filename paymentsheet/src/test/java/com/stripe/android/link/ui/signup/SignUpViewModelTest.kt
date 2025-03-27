@@ -528,6 +528,27 @@ internal class SignUpViewModelTest {
         assertThat(movedToWeb).isFalse()
     }
 
+    @Test
+    fun `fails if signup is disabled in configuration`() = runTest(dispatcher) {
+        val linkAuth = FakeLinkAuth().apply {
+            lookupResult = LinkAuthResult.NoLinkAccountFound
+        }
+
+        val viewModel = createViewModel(
+            configuration = TestFactory.LINK_CONFIGURATION.copy(
+                signupDisabled = true,
+            ),
+            linkAuth = linkAuth,
+        )
+
+        viewModel.emailController.onRawValueChange("valid@email.com")
+        advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
+
+        assertThat(viewModel.state.value.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
+        assertThat(viewModel.state.value.errorMessage)
+            .isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
+    }
+
     private fun SignUpViewModel.performValidSignup() {
         emailController.onRawValueChange("email@valid.co")
         phoneNumberController.onRawValueChange("1234567890")

@@ -146,7 +146,7 @@ internal class ElementsSessionJsonParser(
         json: JSONObject?,
         linkFundingSources: JSONArray?,
     ): ElementsSession.LinkSettings {
-        val disableLinkSignup = json?.optBoolean(FIELD_DISABLE_LINK_SIGNUP) ?: false
+        val disableLinkInlineSignup = json?.optBoolean(FIELD_DISABLE_LINK_SIGNUP) ?: false
         val linkPassthroughModeEnabled = json?.optBoolean(FIELD_LINK_PASSTHROUGH_MODE_ENABLED) ?: false
         val useLinkAttestationEndpoints = json?.optBoolean(FIELD_USE_LINK_ATTESTATION_ENDPOINTS) ?: false
         val suppressLink2faModal = json?.optBoolean(FIELD_LINK_SUPPRESS_2FA_MODAL) ?: false
@@ -171,7 +171,7 @@ internal class ElementsSessionJsonParser(
             linkPassthroughModeEnabled = linkPassthroughModeEnabled,
             linkMode = linkMode,
             linkFlags = linkFlags,
-            disableLinkSignup = disableLinkSignup,
+            disableInlineSignup = disableLinkInlineSignup,
             linkConsumerIncentive = linkConsumerIncentive,
             useAttestationEndpoints = useLinkAttestationEndpoints,
             suppress2faModal = suppressLink2faModal

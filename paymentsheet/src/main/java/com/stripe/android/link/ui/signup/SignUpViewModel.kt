@@ -13,6 +13,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkScreen
+import com.stripe.android.link.LinkSignupDisabledException
 import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.account.LinkAuthResult
@@ -150,8 +151,7 @@ internal class SignUpViewModel @Inject constructor(
                 linkEventsReporter.onSignupCompleted()
             }
             LinkAuthResult.NoLinkAccountFound -> {
-                updateSignUpState(SignUpState.InputtingRemainingFields)
-                onError(null)
+                handleNoAccountFound()
             }
             is LinkAuthResult.AccountError -> {
                 lookupResult.handle()
@@ -201,6 +201,15 @@ internal class SignUpViewModel @Inject constructor(
             // The sign up screen stays in the back stack.
             // Clean up the state in case the user comes back.
             emailController.onValueChange("")
+        }
+    }
+
+    private fun handleNoAccountFound() {
+        if (configuration.signupDisabled) {
+            onError(LinkSignupDisabledException())
+        } else {
+            updateSignUpState(SignUpState.InputtingRemainingFields)
+            onError(null)
         }
     }
 

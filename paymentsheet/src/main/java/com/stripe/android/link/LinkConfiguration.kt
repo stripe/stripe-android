@@ -19,6 +19,8 @@ internal data class LinkConfiguration(
     val cardBrandChoice: CardBrandChoice?,
     val useAttestationEndpointsForLink: Boolean,
     val suppress2faModal: Boolean,
+    val signupDisabled: Boolean,
+    val inlineSignupDisabled: Boolean,
     val initializationMode: PaymentElementLoader.InitializationMode,
     val elementsSessionId: String,
     val linkMode: LinkMode?,

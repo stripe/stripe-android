@@ -32,7 +32,10 @@ data class ElementsSession(
         get() = linkSettings?.linkFlags ?: emptyMap()
 
     val disableLinkSignup: Boolean
-        get() = linkSettings?.disableLinkSignup ?: false
+        get() = linkFlags["link_elements_pageload_sign_up_disabled"] == true
+
+    val disableLinkInlineSignup: Boolean
+        get() = linkSettings?.disableInlineSignup == true
 
     val isLinkEnabled: Boolean
         get() {
@@ -54,7 +57,7 @@ data class ElementsSession(
         val linkPassthroughModeEnabled: Boolean,
         val linkMode: LinkMode?,
         val linkFlags: Map<String, Boolean>,
-        val disableLinkSignup: Boolean,
+        val disableInlineSignup: Boolean,
         val linkConsumerIncentive: LinkConsumerIncentive?,
         val useAttestationEndpoints: Boolean,
         val suppress2faModal: Boolean

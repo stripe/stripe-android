@@ -64,6 +64,8 @@ internal object LinkTestUtils {
             shippingDetails = null,
             useAttestationEndpointsForLink = false,
             suppress2faModal = false,
+            signupDisabled = false,
+            inlineSignupDisabled = false,
             initializationMode = PaymentSheetFixtures.INITIALIZATION_MODE_PAYMENT_INTENT,
             elementsSessionId = "session_1234",
             linkMode = LinkMode.LinkPaymentMethod,

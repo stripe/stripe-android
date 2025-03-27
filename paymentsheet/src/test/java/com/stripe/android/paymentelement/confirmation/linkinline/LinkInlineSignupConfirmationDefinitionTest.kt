@@ -661,6 +661,8 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 cardBrandChoice = null,
                 useAttestationEndpointsForLink = false,
                 suppress2faModal = false,
+                signupDisabled = false,
+                inlineSignupDisabled = false,
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                     clientSecret = "pi_123_secret_123",
                 ),

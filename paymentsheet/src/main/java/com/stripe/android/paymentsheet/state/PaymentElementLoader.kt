@@ -409,7 +409,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 elementsSession = elementsSession,
                 merchantCountry = elementsSession.merchantCountry,
                 passthroughModeEnabled = elementsSession.linkPassthroughModeEnabled,
-                linkSignUpDisabled = elementsSession.disableLinkSignup,
+                signUpDisabled = elementsSession.disableLinkSignup,
+                inlineSignupDisabled = elementsSession.disableLinkInlineSignup,
                 useAttestationEndpointsForLink = elementsSession.useAttestationEndpointsForLink,
                 suppress2faModal = elementsSession.suppressLink2faModal,
                 flags = elementsSession.linkFlags,
@@ -426,7 +427,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         elementsSession: ElementsSession,
         merchantCountry: String?,
         passthroughModeEnabled: Boolean,
-        linkSignUpDisabled: Boolean,
+        signUpDisabled: Boolean,
+        inlineSignupDisabled: Boolean,
         flags: Map<String, Boolean>,
         useAttestationEndpointsForLink: Boolean,
         suppress2faModal: Boolean,
@@ -441,6 +443,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             flags = flags,
             useAttestationEndpointsForLink = useAttestationEndpointsForLink,
             suppress2faModal = suppress2faModal,
+            signupDisabled = signUpDisabled,
+            inlineSignupDisabled = inlineSignupDisabled,
             initializationMode = initializationMode
         )
 
@@ -462,7 +466,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         )
         val hasUsedLink = linkStore.hasUsedLink()
 
-        val linkSignupMode = if (hasUsedLink || linkSignUpDisabled) {
+        val linkSignupMode = if (hasUsedLink || inlineSignupDisabled) {
             null
         } else if (isSaveForFutureUseValueChangeable) {
             LinkSignupMode.AlongsideSaveForFutureUse
@@ -493,6 +497,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         flags: Map<String, Boolean>,
         useAttestationEndpointsForLink: Boolean,
         suppress2faModal: Boolean,
+        signupDisabled: Boolean,
+        inlineSignupDisabled: Boolean,
         initializationMode: PaymentElementLoader.InitializationMode
     ): LinkConfiguration {
         val shippingDetails: AddressDetails? = configuration.shippingDetails
@@ -540,6 +546,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             flags = flags,
             useAttestationEndpointsForLink = useAttestationEndpointsForLink,
             suppress2faModal = suppress2faModal,
+            signupDisabled = signupDisabled,
+            inlineSignupDisabled = inlineSignupDisabled,
             elementsSessionId = elementsSession.elementsSessionId,
             initializationMode = initializationMode,
             linkMode = elementsSession.linkSettings?.linkMode,
