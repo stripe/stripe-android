@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.MaterialTheme
@@ -45,7 +46,7 @@ internal fun NewPaymentMethodTab(
         ),
         verticalArrangement = Arrangement.Top,
         modifier = modifier
-            .height(60.dp)
+            .heightIn(min = 60.dp)
             .widthIn(min = minViewWidth),
     ) {
         Row(
@@ -72,7 +73,7 @@ internal fun NewPaymentMethodTab(
             text = title,
             isEnabled = isEnabled,
             textColor = MaterialTheme.stripeColors.onComponent,
-            modifier = Modifier.padding(top = 6.dp),
+            modifier = Modifier.padding(vertical = 6.dp),
         )
     }
 }
