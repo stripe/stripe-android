@@ -32,6 +32,7 @@ import com.stripe.android.connect.util.findActivity
 import com.stripe.android.connect.util.isInInstrumentationTest
 import com.stripe.android.connect.webview.serialization.AccountSessionClaimedMessage
 import com.stripe.android.connect.webview.serialization.AlertJs
+import com.stripe.android.connect.webview.serialization.AppInfoJs
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.ConnectJson
 import com.stripe.android.connect.webview.serialization.OpenAuthenticatedWebViewMessage
@@ -443,6 +444,12 @@ internal class StripeConnectWebView private constructor(
             val initialParams = delegate.getInitialParams(context)
             logger.debug("($loggerTag) InitParams fetched: ${initialParams.toDebugString()}")
             return ConnectJson.encodeToString(initialParams)
+        }
+
+        @JavascriptInterface
+        fun fetchAppInfo(): String {
+            logger.debug("($loggerTag) fetchAppInfo called")
+            return ConnectJson.encodeToString(AppInfoJs(applicationId = context.packageName))
         }
 
         @JavascriptInterface
