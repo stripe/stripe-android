@@ -13,6 +13,7 @@ import androidx.activity.ComponentActivity
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.webview.serialization.AccountSessionClaimedMessage
+import com.stripe.android.connect.webview.serialization.AppInfoJs
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.ConnectJson
 import com.stripe.android.connect.webview.serialization.CustomFontSourceJs
@@ -126,6 +127,12 @@ class StripeConnectWebViewTest {
         whenever(mockDelegate.getInitialParams(any())).doReturn(params)
         assertThat(webView.stripeJsInterface.fetchInitParams())
             .isEqualTo(ConnectJson.encodeToString(params))
+    }
+
+    @Test
+    fun `JS fetchAppInfo is handled`() {
+        val appInfo = ConnectJson.decodeFromString<AppInfoJs>(webView.stripeJsInterface.fetchAppInfo())
+        assertThat(appInfo.applicationId).startsWith("com.stripe")
     }
 
     @Test
