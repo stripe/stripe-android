@@ -136,6 +136,15 @@ internal class StripeConnectWebView private constructor(
         )
     }
 
+    fun returnedFromAuthenticatedWebView(url: String?) {
+        evaluateSdkJs(
+            function = "returnedFromAuthenticatedWebView",
+            payload = buildJsonObject {
+                put("url", url)
+            },
+        )
+    }
+
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         // We need the Activity context for some UI to work, like web-triggered dialogs
