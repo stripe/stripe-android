@@ -3163,6 +3163,8 @@ public final class com/stripe/android/model/PaymentMethod$BacsDebit : com/stripe
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/PaymentMethod$BacsDebit;
+	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentMethod$BacsDebit;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethod$BacsDebit;
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getType ()Lcom/stripe/android/model/PaymentMethod$Type;
@@ -3484,6 +3486,8 @@ public final class com/stripe/android/model/PaymentMethod$SepaDebit : com/stripe
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Ljava/lang/String;
 	public final fun component5 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/PaymentMethod$SepaDebit;
+	public static synthetic fun copy$default (Lcom/stripe/android/model/PaymentMethod$SepaDebit;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethod$SepaDebit;
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun getType ()Lcom/stripe/android/model/PaymentMethod$Type;

@@ -414,16 +414,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                 failIfSetAsDefaultFeatureIsEnabled(paymentMethodExtraParams)
                 NextStep.Complete(isForceSuccess = false)
             } else if (intent.requiresAction()) {
-                val attachedPaymentMethodId = intent.paymentMethodId
-
-                if (attachedPaymentMethodId != null && attachedPaymentMethodId != paymentMethod.id) {
-                    NextStep.Fail(
-                        cause = InvalidDeferredIntentUsageException(),
-                        message = resolvableString(R.string.stripe_paymentsheet_invalid_deferred_intent_usage),
-                    )
-                } else {
-                    NextStep.HandleNextAction(clientSecret)
-                }
+                createHandleNextActionStep(clientSecret, intent, paymentMethod)
             } else {
                 DeferredIntentValidator.validate(intent, intentConfiguration, allowsManualConfirmation)
                 createConfirmStep(
@@ -440,6 +431,22 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             NextStep.Fail(
                 cause = error,
                 message = resolvableString(GENERIC_STRIPE_MESSAGE),
+            )
+        }
+    }
+
+    private fun createHandleNextActionStep(
+        clientSecret: String,
+        intent: StripeIntent,
+        paymentMethod: PaymentMethod
+    ): NextStep {
+        return runCatching {
+            DeferredIntentValidator.validatePaymentMethod(intent, paymentMethod)
+            NextStep.HandleNextAction(clientSecret)
+        }.getOrElse {
+            NextStep.Fail(
+                cause = InvalidDeferredIntentUsageException(),
+                message = resolvableString(R.string.stripe_paymentsheet_invalid_deferred_intent_usage),
             )
         }
     }
