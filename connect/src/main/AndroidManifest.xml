@@ -13,6 +13,7 @@
     <application>
         <activity
             android:name=".StripeConnectRedirectActivity"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:launchMode="singleTask"
             android:exported="true">
             <intent-filter>
