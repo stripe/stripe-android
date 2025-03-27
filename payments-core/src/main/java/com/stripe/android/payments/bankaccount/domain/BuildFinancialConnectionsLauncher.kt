@@ -12,6 +12,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.financialconnections.lite.intentBuilder as liteIntentBuilder
+
 internal object BuildFinancialConnectionsLauncher {
     operator fun invoke(
         activity: ComponentActivity,
