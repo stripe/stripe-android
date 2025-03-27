@@ -462,7 +462,9 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
 
     LaunchedEffect(viewModel, button) {
         viewModel.primaryButtonUiState.collect { uiState ->
-            button?.updateUiState(uiState)
+            withContext(Dispatchers.Main) {
+                button?.updateUiState(uiState)
+            }
         }
     }
 

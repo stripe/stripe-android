@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
@@ -34,10 +33,8 @@ import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
@@ -118,11 +115,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             else -> null
         }
 
-    override val primaryButtonUiState = primaryButtonUiStateMapper.forCustomFlow().stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = null,
-    )
+    override val primaryButtonUiState = primaryButtonUiStateMapper.forCustomFlow()
 
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)

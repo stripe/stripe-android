@@ -19,12 +19,12 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
@@ -40,7 +40,6 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.ui.getLabel
-import com.stripe.android.testing.RetryRule
 import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
@@ -60,7 +59,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.robolectric.annotation.Config
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
 @RunWith(AndroidJUnit4::class)
@@ -73,7 +71,7 @@ internal class PaymentOptionsActivityTest {
     val rule = RuleChain.emptyRuleChain()
         .around(InstantTaskExecutorRule())
         .around(composeTestRule)
-        .around(RetryRule(3))
+//        .around(RetryRule(3))
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -89,11 +87,6 @@ internal class PaymentOptionsActivityTest {
             ApplicationProvider.getApplicationContext(),
             ApiKeyFixtures.FAKE_PUBLISHABLE_KEY
         )
-    }
-
-    @AfterTest
-    fun cleanup() {
-        WeakMapInjectorRegistry.clear()
     }
 
     @Test
@@ -197,6 +190,7 @@ internal class PaymentOptionsActivityTest {
                     .onNodeWithTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_+ Add")
                     .performClick()
 
+                Espresso.onIdle()
                 assertThat(activity.continueButton.isVisible).isTrue()
 
                 // Navigate back to payment options list
