@@ -29,7 +29,6 @@ internal class StripeConnectRedirectActivityTest {
     private val redirectIntentMatcher
         get() = hasComponent(StripeConnectRedirectActivity::class.java.name)
 
-
     private fun chromeIntentMatcher(url: String? = null): Matcher<Intent> {
         val matchers = listOfNotNull(
             IntentMatchers.hasAction(Intent.ACTION_VIEW),

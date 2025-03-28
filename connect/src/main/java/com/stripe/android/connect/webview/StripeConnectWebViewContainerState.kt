@@ -36,7 +36,7 @@ internal data class StripeConnectWebViewContainerState(
     val receivedCloseWebView: Boolean = false,
 
     /**
-     * Message from the last `receivedOpenAuthenticatedWebViewUrl` message.
+     * Message from the last `openAuthenticatedWebView` message.
      */
     val receivedOpenAuthenticatedWebViewMessage: OpenAuthenticatedWebViewMessage? = null,
 
