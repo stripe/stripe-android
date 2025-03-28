@@ -7,6 +7,8 @@ import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSheetPaymentMethodModeDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
+import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.FeatureFlagSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodMode
 import com.stripe.android.test.core.AuthorizeAction
@@ -47,6 +49,7 @@ internal class TestUsBankAccountInCustomerSheet : BasePlaygroundTest() {
             testParameters = testParameters.copy(
                 authorizationAction = AuthorizeAction.Cancel,
             ).copyPlaygroundSettings {
+                it[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
                 it[FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsLiteEnabled)] = true
                 it[FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsFullSdkUnavailable)] = true
             }
@@ -73,6 +76,7 @@ internal class TestUsBankAccountInCustomerSheet : BasePlaygroundTest() {
                 authorizationAction = AuthorizeAction.Cancel,
             ).copyPlaygroundSettings { settings ->
                 settings[CustomerSessionSettingsDefinition] = true
+                settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
                 settings[FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsLiteEnabled)] = true
                 settings[FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsFullSdkUnavailable)] = true
             }
