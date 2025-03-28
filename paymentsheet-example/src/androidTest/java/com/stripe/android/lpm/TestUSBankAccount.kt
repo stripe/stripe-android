@@ -6,6 +6,7 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
@@ -13,6 +14,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.CurrencySetti
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.FeatureFlagSettingsDefinition
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TEST_TAG_ACCOUNT_DETAILS
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.test.core.AuthorizeAction
@@ -23,7 +25,12 @@ import com.stripe.android.test.core.ui.PaymentSelection
 import com.stripe.android.utils.ForceNativeBankFlowTestRule
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TestRule
 import org.junit.runner.RunWith
+
+
+import org.junit.runner.Description
+import org.junit.runners.model.Statement
 
 @RunWith(AndroidJUnit4::class)
 internal class TestUSBankAccount : BasePlaygroundTest() {
@@ -46,6 +53,21 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
         testDriver.confirmUSBankAccount(
             testParameters = testParameters.copyPlaygroundSettings {
                 it[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
+            },
+            afterAuthorization = { _, _ ->
+                ComposeButton(rules.compose, hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
+                    .waitFor(isEnabled())
+            }
+        )
+    }
+
+    @Test
+    fun testUSBankAccountLiteSuccess() {
+        testDriver.confirmUSBankAccountLite(
+            testParameters = testParameters.copyPlaygroundSettings {
+                it[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
+                it[FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsLiteEnabled)] = true
+                it[FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsFullSdkUnavailable)] = true
             },
             afterAuthorization = { _, _ ->
                 ComposeButton(rules.compose, hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
@@ -107,6 +129,22 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
     fun testUSBankAccountCancelAllowsUserToContinue() {
         testDriver.confirmUSBankAccount(
             testParameters = testParameters.copy(
+                authorizationAction = AuthorizeAction.Cancel,
+            ),
+            afterAuthorization = { _, _ ->
+                ComposeButton(rules.compose, hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
+                    .waitFor(isEnabled())
+            }
+        )
+    }
+
+    @Test
+    fun testUSBankAccountLiteCancelAllowsUserToContinue() {
+        testDriver.confirmUSBankAccountLite(
+            testParameters = testParameters.copyPlaygroundSettings {
+                it[FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsLiteEnabled)] = true
+                it[FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsFullSdkUnavailable)] = true
+            }.copy(
                 authorizationAction = AuthorizeAction.Cancel,
             ),
             afterAuthorization = { _, _ ->

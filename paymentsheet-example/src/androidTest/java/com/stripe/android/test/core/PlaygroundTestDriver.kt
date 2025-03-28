@@ -887,6 +887,18 @@ internal class PlaygroundTestDriver(
         )
     }
 
+    fun confirmUSBankAccountLite(
+        testParameters: TestParameters,
+        afterAuthorization: (Selectors, FieldPopulator) -> Unit = { _, _ -> },
+    ): PlaygroundState? {
+        return confirmBankAccount(
+            testParameters = testParameters,
+            executeFlow = { doUSBankAccountLiteAuthorization(testParameters.authorizationAction) },
+            afterCollectingBankInfo = afterAuthorization,
+            confirmIntent = true,
+        )
+    }
+
     fun confirmCustomUSBankAccount(
         testParameters: TestParameters,
         afterAuthorization: (Selectors) -> Unit = {},
@@ -1539,6 +1551,36 @@ internal class PlaygroundTestDriver(
         Espresso.pressBack()
     }
 
+    private fun executeUsBankAccountLiteFlow() {
+        while (currentActivity?.javaClass?.name != FINANCIAL_CONNECTIONS_LITE_ACTIVITY) {
+            TimeUnit.MILLISECONDS.sleep(250)
+        }
+
+        // The FC Lite flow is hosted on a web-view, so we interact with it via UiAutomator.
+        val consentText = UiAutomatorText("Agree and continue", labelMatchesExactly = false, device = device)
+        consentText.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
+        consentText.click()
+
+        val institutionTile = UiAutomatorText("Test Institution", labelMatchesExactly = false, device = device)
+        institutionTile.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
+        institutionTile.click()
+
+        val successBankAccountItem = UiAutomatorText("Success", labelMatchesExactly = false, device = device)
+        successBankAccountItem.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
+        successBankAccountItem.click()
+        clickOnBottomSheetCtaByPosition()
+
+        val saveAccountTitle = UiAutomatorText("Save account", labelMatchesExactly = false, device = device)
+        saveAccountTitle.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
+        // close auto-opened keyboard and skip saving account to link on the bottom sheet modal.
+        device.pressBack()
+        clickOnBottomSheetCtaByPosition()
+
+        val successTitle = UiAutomatorText("Success", labelMatchesExactly = false, device = device)
+        successTitle.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
+        clickOnBottomSheetCtaByPosition()
+    }
+
     private fun executeUsBankAccountFlow() {
         while (currentActivity?.javaClass?.name != FINANCIAL_CONNECTIONS_ACTIVITY) {
             TimeUnit.MILLISECONDS.sleep(250)
@@ -1590,6 +1632,27 @@ internal class PlaygroundTestDriver(
         }
     }
 
+    private fun doUSBankAccountLiteAuthorization(authAction: AuthorizeAction?) {
+        if (authAction == AuthorizeAction.Cancel) {
+            cancelAchLiteFlowOnLaunch()
+        } else {
+            executeUsBankAccountLiteFlow()
+        }
+    }
+
+    private fun cancelAchLiteFlowOnLaunch() {
+        while (currentActivity?.javaClass?.name != FINANCIAL_CONNECTIONS_LITE_ACTIVITY) {
+            TimeUnit.MILLISECONDS.sleep(250)
+        }
+
+        val consentText = UiAutomatorText("Agree and continue", labelMatchesExactly = false, device = device)
+        consentText.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
+
+        if (testParameters.authorizationAction == AuthorizeAction.Cancel) {
+            selectors.authorizeAction?.click()
+        }
+    }
+
     private fun cancelAchFlowOnLaunch() {
         while (currentActivity?.javaClass?.name != FINANCIAL_CONNECTIONS_ACTIVITY) {
             TimeUnit.MILLISECONDS.sleep(250)
@@ -1627,6 +1690,14 @@ internal class PlaygroundTestDriver(
         }
 
         composeTestRule.onNodeWithTag(tag).performClick()
+    }
+
+    private fun clickOnBottomSheetCtaByPosition() {
+        // Unfortunately text matchers don't work within bottom modals within web views.
+        // This clicks CTA at the bottom of the screen by position on these scenarios.
+        val x = (device.displayWidth * 0.50).toInt()
+        val y = (device.displayHeight * 0.92).toInt()
+        device.click(x, y)
     }
 
     internal fun setup(testParameters: TestParameters) {
@@ -1726,6 +1797,8 @@ internal class PlaygroundTestDriver(
         const val ADD_PAYMENT_METHOD_NODE_TAG = "${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_+ Add"
         const val FINANCIAL_CONNECTIONS_ACTIVITY =
             "com.stripe.android.financialconnections.FinancialConnectionsSheetActivity"
+        const val FINANCIAL_CONNECTIONS_LITE_ACTIVITY =
+            "com.stripe.android.financialconnections.lite.FinancialConnectionsSheetLiteActivity"
     }
 }
 
