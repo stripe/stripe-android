@@ -1,6 +1,5 @@
 package com.stripe.android.lpm
 
-
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.onAllNodesWithTag
