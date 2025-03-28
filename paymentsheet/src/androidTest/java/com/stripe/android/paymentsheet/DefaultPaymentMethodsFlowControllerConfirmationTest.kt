@@ -1,18 +1,10 @@
 package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.isOff
-import androidx.compose.ui.test.isToggleable
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import com.stripe.android.core.utils.urlEncode
-import com.stripe.android.networktesting.RequestMatchers.bodyPart
-import com.stripe.android.networktesting.RequestMatchers.method
-import com.stripe.android.networktesting.RequestMatchers.not
-import com.stripe.android.networktesting.RequestMatchers.path
-import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TEST_TAG_ACCOUNT_DETAILS
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TEST_TAG_BILLING_DETAILS
 import com.stripe.android.paymentsheet.utils.ConfirmationType
@@ -30,7 +22,6 @@ import com.stripe.android.testing.PaymentMethodFactory
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.verify
 
 @RunWith(TestParameterInjector::class)
 internal class DefaultPaymentMethodsFlowControllerConfirmationTest {
@@ -43,11 +34,11 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest {
     @get:Rule
     val intentsRule = IntentsRule()
 
-//    @TestParameter(valuesProvider = ConfirmationTypeProvider::class)
-    var confirmationType: ConfirmationType = ConfirmationType.DeferredClientSideConfirmation()
+    @TestParameter(valuesProvider = ConfirmationTypeProvider::class)
+    lateinit var confirmationType: ConfirmationType
 
-//    @TestParameter(valuesProvider = PaymentMethodTypeProvider::class)
-    var paymentMethodType: PaymentMethodType = PaymentMethodType.UsBankAccount
+    @TestParameter(valuesProvider = PaymentMethodTypeProvider::class)
+    lateinit var paymentMethodType: PaymentMethodType
 
     // Confirmation behavior between horizontal and vertical doesn't differ, so we're testing with vertical mode only.
     private val layoutType: PaymentSheetLayoutType = PaymentSheetLayoutType.Vertical()
@@ -98,6 +89,7 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest {
         runFlowControllerTest(
             networkRule = networkRule,
             createIntentCallback = confirmationType.createIntentCallback,
+            callConfirmOnPaymentOptionCallback = false,
             integrationType = IntegrationType.Compose,
             resultCallback = ::assertCompleted,
         ) { testContext ->
@@ -151,12 +143,6 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest {
 
             firstLaunchBlock(page)
 
-            confirmationType.enqueuePaymentIntentConfirmWithExpectedSetAsDefault(
-                networkRule = networkRule,
-                paymentMethodType = paymentMethodType,
-                setAsDefault = expectedSetAsDefault
-            )
-
             page.clickPrimaryButton()
             composeTestRule.waitForIdle()
 
@@ -169,13 +155,14 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest {
             composeTestRule.waitForIdle()
             secondLaunchBlock(page)
             composeTestRule.waitForIdle()
-
             page.clickPrimaryButton()
-            testContext.flowController.confirm()
-//            Thread.sleep(250L)
-//            networkRule.validate()
 
-//            testContext.markTestSucceeded()
+            confirmationType.enqueuePaymentIntentConfirmWithExpectedSetAsDefault(
+                networkRule = networkRule,
+                paymentMethodType = paymentMethodType,
+                setAsDefault = expectedSetAsDefault
+            )
+            testContext.flowController.confirm()
         }
     }
 
