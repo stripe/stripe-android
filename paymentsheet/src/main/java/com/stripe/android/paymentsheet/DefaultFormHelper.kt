@@ -128,6 +128,7 @@ internal class DefaultFormHelper(
                 linkConfigurationCoordinator = linkConfigurationCoordinator,
                 onLinkInlineSignupStateChanged = linkInlineHandler::onStateUpdated,
                 paymentMethodCreateParams = currentSelection?.getPaymentMethodCreateParams(),
+                paymentMethodOptionsParams = currentSelection?.getPaymentMethodOptionParams(),
                 paymentMethodExtraParams = currentSelection?.getPaymentMethodExtraParams(),
                 initialLinkUserInput = when (val selection = currentSelection?.paymentSelection) {
                     is PaymentSelection.New.LinkInline -> selection.input

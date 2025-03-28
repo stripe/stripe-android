@@ -11,6 +11,7 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
+import androidx.compose.ui.test.isOff
 import androidx.compose.ui.test.isOn
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.isToggleable
@@ -259,6 +260,17 @@ internal class PaymentSheetPage(
         ).fetchSemanticsNodes().isEmpty()
     }
 
+    fun assertSetAsDefaultCheckboxNotChecked() {
+        val testTag = SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG
+        composeTestRule.waitUntil(
+            timeoutMillis = 5000L
+        ) {
+            composeTestRule.onAllNodes(
+                hasTestTag(testTag).and(isToggleable()).and(isOff())
+            ).fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
     fun assertSetAsDefaultCheckboxChecked() {
         val testTag = SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG
         composeTestRule.waitUntil(
@@ -267,6 +279,37 @@ internal class PaymentSheetPage(
             composeTestRule.onAllNodes(
                 hasTestTag(testTag).and(isToggleable()).and(isOn())
             ).fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
+    fun assertSaveForFutureCheckboxNotChecked() {
+        val testTag = SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
+        composeTestRule.waitUntil(
+            timeoutMillis = 5000L
+        ) {
+            composeTestRule.onAllNodes(
+                hasTestTag(testTag).and(isToggleable()).and(isOff())
+            ).fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
+    fun assertSaveForFutureUseCheckboxChecked() {
+        val testTag = SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
+        composeTestRule.waitUntil(
+            timeoutMillis = 5000L
+        ) {
+            composeTestRule.onAllNodes(
+                hasTestTag(testTag).and(isToggleable()).and(isOn())
+            ).fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
+    fun waitUntilVisible() {
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onAllNodes(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
         }
     }
 
