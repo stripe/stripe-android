@@ -7,8 +7,8 @@ import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.connect.ClientSecretProvider
 import com.stripe.android.connect.EmbeddedComponentManager
-import com.stripe.android.connect.FetchClientSecretCallback
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.core.Logger
@@ -22,8 +22,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
-import org.mockito.kotlin.any
-import org.mockito.kotlin.whenever
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.wheneverBlocking
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
@@ -38,7 +38,7 @@ import kotlin.test.assertTrue
 class EmbeddedComponentCoordinatorTest {
 
     private lateinit var configuration: EmbeddedComponentManager.Configuration
-    private lateinit var mockFetchClientSecretCallback: FetchClientSecretCallback
+    private lateinit var mockClientSecretProvider: ClientSecretProvider
     private lateinit var coordinator: EmbeddedComponentCoordinator
     private lateinit var testActivityController: ActivityController<ComponentActivity>
     private val testActivity: ComponentActivity get() = testActivityController.get()
@@ -46,11 +46,11 @@ class EmbeddedComponentCoordinatorTest {
     @Before
     fun setup() {
         configuration = EmbeddedComponentManager.Configuration("test_publishable_key")
-        mockFetchClientSecretCallback = mock()
+        mockClientSecretProvider = mock()
         coordinator =
             EmbeddedComponentCoordinator(
                 configuration = configuration,
-                fetchClientSecretCallback = mockFetchClientSecretCallback,
+                clientSecretProvider = mockClientSecretProvider,
                 logger = Logger.noop(),
                 appearance = Appearance.default(),
                 customFonts = emptyList(),
@@ -74,28 +74,21 @@ class EmbeddedComponentCoordinatorTest {
     fun `fetchClientSecret should return client secret when callback provides it`() = runTest {
         val expectedSecret = "test_client_secret"
 
-        whenever(mockFetchClientSecretCallback.fetchClientSecret(any())).thenAnswer { invocation ->
-            val callback = invocation.getArgument<FetchClientSecretCallback.ClientSecretResultCallback>(0)
-            callback.onResult(expectedSecret)
-        }
+        wheneverBlocking { mockClientSecretProvider.provideClientSecret() }.doReturn(expectedSecret)
 
         val result = coordinator.fetchClientSecret()
 
         assertEquals(expectedSecret, result)
-        verify(mockFetchClientSecretCallback).fetchClientSecret(any())
     }
 
     @Test
     fun `fetchClientSecret should return null when callback provides null`() = runTest {
-        whenever(mockFetchClientSecretCallback.fetchClientSecret(any())).thenAnswer { invocation ->
-            val callback = invocation.getArgument<FetchClientSecretCallback.ClientSecretResultCallback>(0)
-            callback.onResult(null)
-        }
+        wheneverBlocking { mockClientSecretProvider.provideClientSecret() }.doReturn(null)
 
         val result = coordinator.fetchClientSecret()
 
         assertNull(result)
-        verify(mockFetchClientSecretCallback).fetchClientSecret(any())
+        verify(mockClientSecretProvider).provideClientSecret()
     }
 
     @Test

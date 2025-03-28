@@ -15,7 +15,7 @@ import kotlinx.parcelize.Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class EmbeddedComponentManager @JvmOverloads constructor(
     configuration: Configuration,
-    fetchClientSecretCallback: FetchClientSecretCallback,
+    clientSecretProvider: ClientSecretProvider,
     appearance: Appearance = Appearance.default(),
     customFonts: List<CustomFontSource> = emptyList(),
 ) {
@@ -25,7 +25,7 @@ class EmbeddedComponentManager @JvmOverloads constructor(
             .get()
             .build(
                 configuration = configuration,
-                fetchClientSecretCallback = fetchClientSecretCallback,
+                clientSecretProvider = clientSecretProvider,
                 customFonts = customFonts,
                 appearance = appearance,
             )
