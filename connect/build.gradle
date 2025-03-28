@@ -68,6 +68,7 @@ dependencies {
     androidTestImplementation (testLibs.espresso.contrib) {
         exclude group: 'org.checkerframework', module: 'checker'
     }
+    androidTestImplementation testLibs.espresso.intents
     androidTestImplementation testLibs.espresso.web
     androidTestImplementation testLibs.mockito.core
     androidTestImplementation testLibs.mockito.inline

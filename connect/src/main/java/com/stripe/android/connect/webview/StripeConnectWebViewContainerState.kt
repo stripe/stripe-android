@@ -5,6 +5,7 @@ import androidx.annotation.ColorInt
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.util.getContrastingColor
+import com.stripe.android.connect.webview.serialization.OpenAuthenticatedWebViewMessage
 
 @OptIn(PrivateBetaConnectSDK::class)
 internal data class StripeConnectWebViewContainerState(
@@ -33,6 +34,11 @@ internal data class StripeConnectWebViewContainerState(
      * True if we received the 'closeWebView' message.
      */
     val receivedCloseWebView: Boolean = false,
+
+    /**
+     * Message from the last `openAuthenticatedWebView` message.
+     */
+    val receivedOpenAuthenticatedWebViewMessage: OpenAuthenticatedWebViewMessage? = null,
 
     /**
      * The appearance to use for the view.
