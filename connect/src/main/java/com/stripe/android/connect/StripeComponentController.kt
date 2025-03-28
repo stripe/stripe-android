@@ -1,5 +1,6 @@
 package com.stripe.android.connect
 
+import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.FragmentActivity
@@ -18,7 +19,7 @@ abstract class StripeComponentController<Listener, Props> internal constructor(
     private val dfClass: Class<out StripeComponentDialogFragment<*, Listener, Props>>
 )
     where Listener : StripeEmbeddedComponentListener,
-          Props : ComponentProps {
+          Props : Parcelable {
 
     private val tag: String = dfClass.name
 

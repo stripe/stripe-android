@@ -1,7 +1,6 @@
 package com.stripe.android.connect
 
 import android.content.Context
-import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.FragmentActivity
@@ -9,13 +8,12 @@ import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.fonts.CustomFontSource
 import com.stripe.android.connect.di.StripeConnectComponent
 import com.stripe.android.connect.manager.EmbeddedComponentCoordinator
-import kotlinx.parcelize.Parcelize
 
 @PrivateBetaConnectSDK
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class EmbeddedComponentManager @JvmOverloads constructor(
-    configuration: Configuration,
-    fetchClientSecretCallback: FetchClientSecretCallback,
+    publishableKey: String,
+    clientSecretProvider: ClientSecretProvider,
     appearance: Appearance = Appearance.default(),
     customFonts: List<CustomFontSource> = emptyList(),
 ) {
@@ -24,8 +22,8 @@ class EmbeddedComponentManager @JvmOverloads constructor(
             .coordinatorComponentProvider
             .get()
             .build(
-                configuration = configuration,
-                fetchClientSecretCallback = fetchClientSecretCallback,
+                publishableKey = publishableKey,
+                clientSecretProvider = clientSecretProvider,
                 customFonts = customFonts,
                 appearance = appearance,
             )
@@ -98,12 +96,6 @@ class EmbeddedComponentManager @JvmOverloads constructor(
     fun update(appearance: Appearance) {
         coordinator.update(appearance)
     }
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    @Parcelize
-    data class Configuration(
-        val publishableKey: String,
-    ) : Parcelable
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {

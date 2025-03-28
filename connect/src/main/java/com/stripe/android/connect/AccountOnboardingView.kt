@@ -105,7 +105,7 @@ class AccountOnboardingProps(
      * Specifying `eventually_due` collects both `eventually_due` and `currently_due` requirements.
      */
     val collectionOptions: CollectionOptions? = null,
-) : ComponentProps {
+) : Parcelable {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
