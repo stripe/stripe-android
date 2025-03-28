@@ -1,5 +1,6 @@
 package com.stripe.android.lpm
 
+
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -25,12 +26,7 @@ import com.stripe.android.test.core.ui.PaymentSelection
 import com.stripe.android.utils.ForceNativeBankFlowTestRule
 import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.TestRule
 import org.junit.runner.RunWith
-
-
-import org.junit.runner.Description
-import org.junit.runners.model.Statement
 
 @RunWith(AndroidJUnit4::class)
 internal class TestUSBankAccount : BasePlaygroundTest() {
