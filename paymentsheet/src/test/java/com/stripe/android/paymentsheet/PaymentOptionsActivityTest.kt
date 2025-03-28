@@ -19,7 +19,6 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
@@ -190,12 +189,13 @@ internal class PaymentOptionsActivityTest {
                     .onNodeWithTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_+ Add")
                     .performClick()
 
-                Espresso.onIdle()
+                composeTestRule.waitForIdle()
                 assertThat(activity.continueButton.isVisible).isTrue()
 
                 // Navigate back to payment options list
                 pressBack()
 
+                composeTestRule.waitForIdle()
                 assertThat(activity.continueButton.isVisible).isFalse()
             }
         }

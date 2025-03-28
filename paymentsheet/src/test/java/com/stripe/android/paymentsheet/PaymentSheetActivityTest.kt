@@ -27,7 +27,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
@@ -209,11 +208,11 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity { activity ->
-            Espresso.onIdle()
+            composeTestRule.waitForIdle()
             assertThat(activity.buyButton.isEnabled).isTrue()
 
             startEditing()
-            Espresso.onIdle()
+            composeTestRule.waitForIdle()
             assertThat(activity.buyButton.isEnabled).isFalse()
         }
     }
@@ -501,12 +500,12 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
             // Initially empty card
-            assertThat(activity.buyButton.isVisible).isTrue()
+            composeTestRule.waitUntil { activity.buyButton.isVisible }
             assertThat(activity.buyButton.isEnabled).isFalse()
 
             // Update to Google Pay
             viewModel.checkoutWithGooglePay()
-            assertThat(activity.buyButton.isVisible).isTrue()
+            composeTestRule.waitUntil { activity.buyButton.isVisible }
             assertThat(activity.buyButton.isEnabled).isFalse()
             assertThat(viewModel.contentVisible.value).isFalse()
 
@@ -517,11 +516,13 @@ internal class PaymentSheetActivityTest {
             viewModel.updateSelection(
                 PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             )
+            composeTestRule.waitForIdle()
             assertThat(activity.buyButton.isVisible).isTrue()
             assertThat(activity.buyButton.isEnabled).isTrue()
 
             // Back to empty/invalid card
             viewModel.updateSelection(null)
+            composeTestRule.waitForIdle()
             assertThat(activity.buyButton.isVisible).isTrue()
             assertThat(activity.buyButton.isEnabled).isFalse()
 
@@ -533,6 +534,7 @@ internal class PaymentSheetActivityTest {
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
                 )
             )
+            composeTestRule.waitForIdle()
             assertThat(activity.buyButton.isVisible).isTrue()
             assertThat(activity.buyButton.isEnabled).isTrue()
         }
@@ -608,13 +610,13 @@ internal class PaymentSheetActivityTest {
             viewModel.updateSelection(
                 PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             )
-            Espresso.onIdle()
+            composeTestRule.waitForIdle()
             assertThat(activity.buyButton.isEnabled)
                 .isTrue()
 
             activity.buyButton.performClick()
 
-            Espresso.onIdle()
+            composeTestRule.waitForIdle()
             assertThat(activity.buyButton.isEnabled)
                 .isFalse()
         }
@@ -1107,10 +1109,10 @@ internal class PaymentSheetActivityTest {
 
         scenario.launch(intent).onActivity { activity ->
             testDispatcher.scheduler.advanceTimeBy(50)
-            Espresso.onIdle()
+            composeTestRule.waitForIdle()
             assertThat(activity.buyButton.externalLabel?.resolve(context)).isEqualTo("Pay")
             testDispatcher.scheduler.advanceTimeBy(250)
-            Espresso.onIdle()
+            composeTestRule.waitForIdle()
             assertThat(activity.buyButton.externalLabel?.resolve(context)).isEqualTo("Pay CA\$99.99")
         }
     }
