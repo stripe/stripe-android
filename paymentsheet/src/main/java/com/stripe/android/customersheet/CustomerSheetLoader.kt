@@ -141,7 +141,6 @@ internal class DefaultCustomerSheetLoader(
             paymentMethodSaveConsentBehavior = customerSheetSession.paymentMethodSaveConsentBehavior,
             sharedDataSpecs = sharedDataSpecs,
             isGooglePayReady = isGooglePayReadyAndEnabled,
-            isPaymentMethodSyncDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
             customerMetadata = customerMetadata,
         )
     }

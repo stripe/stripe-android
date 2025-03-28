@@ -285,7 +285,6 @@ internal data class PaymentMethodMetadata(
             paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
             sharedDataSpecs: List<SharedDataSpec>,
             isGooglePayReady: Boolean,
-            isPaymentMethodSyncDefaultEnabled: Boolean,
             customerMetadata: CustomerMetadata,
         ): PaymentMethodMetadata {
             return PaymentMethodMetadata(
