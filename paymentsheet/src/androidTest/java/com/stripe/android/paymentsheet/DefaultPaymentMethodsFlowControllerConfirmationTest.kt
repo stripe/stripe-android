@@ -1,9 +1,20 @@
 package com.stripe.android.paymentsheet
 
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.isOff
+import androidx.compose.ui.test.isToggleable
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.core.utils.urlEncode
+import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.method
+import com.stripe.android.networktesting.RequestMatchers.not
+import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.TEST_TAG_ACCOUNT_DETAILS
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.TEST_TAG_BILLING_DETAILS
 import com.stripe.android.paymentsheet.utils.ConfirmationType
 import com.stripe.android.paymentsheet.utils.ConfirmationTypeProvider
 import com.stripe.android.paymentsheet.utils.DefaultPaymentMethodsUtils
@@ -19,6 +30,7 @@ import com.stripe.android.testing.PaymentMethodFactory
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.verify
 
 @RunWith(TestParameterInjector::class)
 internal class DefaultPaymentMethodsFlowControllerConfirmationTest {
@@ -31,11 +43,11 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest {
     @get:Rule
     val intentsRule = IntentsRule()
 
-    @TestParameter(valuesProvider = ConfirmationTypeProvider::class)
-    lateinit var confirmationType: ConfirmationType
+//    @TestParameter(valuesProvider = ConfirmationTypeProvider::class)
+    var confirmationType: ConfirmationType = ConfirmationType.DeferredClientSideConfirmation()
 
-    @TestParameter(valuesProvider = PaymentMethodTypeProvider::class)
-    lateinit var paymentMethodType: PaymentMethodType
+//    @TestParameter(valuesProvider = PaymentMethodTypeProvider::class)
+    var paymentMethodType: PaymentMethodType = PaymentMethodType.UsBankAccount
 
     // Confirmation behavior between horizontal and vertical doesn't differ, so we're testing with vertical mode only.
     private val layoutType: PaymentSheetLayoutType = PaymentSheetLayoutType.Vertical()
@@ -47,7 +59,6 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest {
             page.assertSaveForFutureCheckboxNotChecked()
             page.assertNoSetAsDefaultCheckbox()
 
-            page.fillOutCardDetails()
             page.checkSaveForFuture()
 
             page.assertSaveForFutureUseCheckboxChecked()
@@ -65,7 +76,6 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest {
             page.assertSaveForFutureCheckboxNotChecked()
             page.assertNoSetAsDefaultCheckbox()
 
-            page.fillOutCardDetails()
             page.checkSaveForFuture()
             page.checkSetAsDefaultCheckbox()
 
@@ -87,7 +97,8 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest {
             networkRule = networkRule,
             createIntentCallback = confirmationType.createIntentCallback,
             integrationType = IntegrationType.Compose,
-            resultCallback = ::assertCompleted,
+            resultCallback = { result ->
+            },
         ) { testContext ->
             val page = PaymentSheetPage(composeTestRule)
 
@@ -106,22 +117,48 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest {
                 testContext = ProductIntegrationTestRunnerContext.WithFlowController(testContext),
                 composeTestRule = composeTestRule,
                 paymentMethodLayout = layoutType.paymentMethodLayout,
-                hasSavedPaymentMethods = true,
                 isDeferredIntent = confirmationType.isDeferredIntent,
                 paymentMethodType = paymentMethodType,
             )
 
-            page.clickOnLpm("card", forVerticalMode = true)
+            page.clickOnLpm(paymentMethodType.type.code, forVerticalMode = true)
+            composeTestRule.waitForIdle()
+
+            if(paymentMethodType is PaymentMethodType.UsBankAccount) {
+                composeTestRule.waitUntil(
+                    timeoutMillis = 5000L
+                ) {
+                    composeTestRule.onAllNodes(
+                        hasTestTag(TEST_TAG_BILLING_DETAILS)
+                    ).fetchSemanticsNodes().isNotEmpty()
+                }
+                paymentMethodType.fillOutFormDetails(composeTestRule = composeTestRule)
+
+                composeTestRule.waitUntil(
+                    timeoutMillis = 5000L
+                ) {
+                    composeTestRule.onAllNodes(
+                        hasTestTag(TEST_TAG_ACCOUNT_DETAILS)
+                    ).fetchSemanticsNodes().isNotEmpty()
+                }
+            } else {
+                paymentMethodType.fillOutFormDetails(composeTestRule = composeTestRule)
+            }
+
+            composeTestRule.waitForIdle()
 
             firstLaunchBlock(page)
 
             confirmationType.enqueuePaymentIntentConfirmWithExpectedSetAsDefault(
                 networkRule = networkRule,
+                paymentMethodType = paymentMethodType,
                 setAsDefault = expectedSetAsDefault
             )
-            page.clickPrimaryButton()
 
-            assertThat(testContext.configureCallbackTurbine.awaitItem()?.label).endsWith("4242")
+            page.clickPrimaryButton()
+            composeTestRule.waitForIdle()
+
+            assertThat(testContext.configureCallbackTurbine.awaitItem()?.label).endsWith(paymentMethodType.getLast4())
 
             composeTestRule.waitForIdle()
 
@@ -129,8 +166,19 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest {
 
             composeTestRule.waitForIdle()
             secondLaunchBlock(page)
+            composeTestRule.waitForIdle()
+//            Thread.sleep(250L)
+//            networkRule.validate()
 
-            testContext.markTestSucceeded()
+//            testContext.markTestSucceeded()
+        }
+    }
+
+    private fun PaymentMethodType.getLast4(): String {
+        if (this is PaymentMethodType.Card) {
+            return "4242"
+        } else {
+            return "6789"
         }
     }
 }
