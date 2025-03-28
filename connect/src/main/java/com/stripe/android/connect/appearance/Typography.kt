@@ -41,70 +41,70 @@ class Typography private constructor(
          * The font family used throughout the application. Refers to the [CustomFontSource] field.
          * If null the default will be used.
          */
-        fun fontFamily(fontFamily: String?) =
+        fun fontFamily(fontFamily: String?): Builder =
             apply { this.fontFamily = fontFamily }
 
         /**
          * The base font size used for typography in sp.
          * This scales the value of other font size variables. If null the default will be used.
          */
-        fun fontSizeBase(fontSizeBase: Float?) =
+        fun fontSizeBase(fontSizeBase: Float?): Builder =
             apply { this.fontSizeBase = fontSizeBase }
 
         /**
          * The style for extra-large headings. If null the default will be used.
          */
-        fun headingXl(headingXl: Style?) =
+        fun headingXl(headingXl: Style?): Builder =
             apply { this.headingXl = headingXl }
 
         /**
          * The style for large headings. If null the default will be used.
          */
-        fun headingLg(headingLg: Style?) =
+        fun headingLg(headingLg: Style?): Builder =
             apply { this.headingLg = headingLg }
 
         /**
          * The style for medium headings. If null the default will be used.
          */
-        fun headingMd(headingMd: Style?) =
+        fun headingMd(headingMd: Style?): Builder =
             apply { this.headingMd = headingMd }
 
         /**
          * The style for small headings. If null the default will be used.
          */
-        fun headingSm(headingSm: Style?) =
+        fun headingSm(headingSm: Style?): Builder =
             apply { this.headingSm = headingSm }
 
         /**
          * The style for extra-small headings. If null the default will be used.
          */
-        fun headingXs(headingXs: Style?) =
+        fun headingXs(headingXs: Style?): Builder =
             apply { this.headingXs = headingXs }
 
         /**
          * The style for medium body text. If null the default will be used.
          * The `textTransform` property is ignored.
          */
-        fun bodyMd(bodyMd: Style?) =
+        fun bodyMd(bodyMd: Style?): Builder =
             apply { this.bodyMd = bodyMd }
 
         /**
          * The style for small body text. If null the default will be used.
          * The `textTransform` property is ignored.
          */
-        fun bodySm(bodySm: Style?) =
+        fun bodySm(bodySm: Style?): Builder =
             apply { this.bodySm = bodySm }
 
         /**
          * The style for medium label text. If null the default will be used.
          */
-        fun labelMd(labelMd: Style?) =
+        fun labelMd(labelMd: Style?): Builder =
             apply { this.labelMd = labelMd }
 
         /**
          * The style for small label text. If null the default will be used.
          */
-        fun labelSm(labelSm: Style?) =
+        fun labelSm(labelSm: Style?): Builder =
             apply { this.labelSm = labelSm }
 
         fun build(): Typography {

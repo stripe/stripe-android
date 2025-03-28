@@ -53,74 +53,74 @@ class Colors private constructor(
         /**
          * The primary color used throughout the components. If null the default will be used.
          */
-        fun primary(@ColorInt primary: Int?) =
+        fun primary(@ColorInt primary: Int?): Builder =
             apply { this.primary = primary }
 
         /**
          * The background color for components. If null the default will be used.
          */
-        fun background(@ColorInt background: Int?) =
+        fun background(@ColorInt background: Int?): Builder =
             apply { this.background = background }
 
         /**
          * The primary text color used for regular content. If null the default will be used.
          */
-        fun text(@ColorInt text: Int?) =
+        fun text(@ColorInt text: Int?): Builder =
             apply { this.text = text }
 
         /**
          * The secondary text color used for less emphasized content. If null the default will be used.
          */
-        fun secondaryText(@ColorInt secondaryText: Int?) =
+        fun secondaryText(@ColorInt secondaryText: Int?): Builder =
             apply { this.secondaryText = secondaryText }
 
         /**
          * The color used to indicate errors or destructive actions. If null the default will be used.
          */
-        fun danger(@ColorInt danger: Int?) =
+        fun danger(@ColorInt danger: Int?): Builder =
             apply { this.danger = danger }
 
         /**
          * The color used for component borders. If null the default will be used.
          */
-        fun border(@ColorInt border: Int?) =
+        fun border(@ColorInt border: Int?): Builder =
             apply { this.border = border }
 
         /**
          * The color used for primary actions and link text. If null the default will be used.
          */
-        fun actionPrimaryText(@ColorInt actionPrimaryText: Int?) =
+        fun actionPrimaryText(@ColorInt actionPrimaryText: Int?): Builder =
             apply { this.actionPrimaryText = actionPrimaryText }
 
         /**
          * The color used for secondary actions and link text. If null the default will be used.
          */
-        fun actionSecondaryText(@ColorInt actionSecondaryText: Int?) =
+        fun actionSecondaryText(@ColorInt actionSecondaryText: Int?): Builder =
             apply { this.actionSecondaryText = actionSecondaryText }
 
         /**
          * The background color used to highlight information. If null the default will be used.
          */
-        fun offsetBackground(@ColorInt offsetBackground: Int?) =
+        fun offsetBackground(@ColorInt offsetBackground: Int?): Builder =
             apply { this.offsetBackground = offsetBackground }
 
         /**
          * The background color used for form fields. If null the default will be used.
          */
-        fun formBackground(@ColorInt formBackground: Int?) =
+        fun formBackground(@ColorInt formBackground: Int?): Builder =
             apply { this.formBackground = formBackground }
 
         /**
          * The border color used to highlight form items when focused. If null the default will be used.
          */
-        fun formHighlightBorder(@ColorInt formHighlightBorder: Int?) =
+        fun formHighlightBorder(@ColorInt formHighlightBorder: Int?): Builder =
             apply { this.formHighlightBorder = formHighlightBorder }
 
         /**
          * The accent color used for filling form elements like checkboxes or radio buttons.
          * If null the default will be used.
          */
-        fun formAccent(@ColorInt formAccent: Int?) =
+        fun formAccent(@ColorInt formAccent: Int?): Builder =
             apply { this.formAccent = formAccent }
 
         fun build(): Colors {

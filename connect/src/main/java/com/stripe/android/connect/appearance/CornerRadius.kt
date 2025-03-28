@@ -26,31 +26,31 @@ class CornerRadius private constructor(
         /**
          * The general border radius used throughout the components in dp.
          */
-        fun base(base: Float?) =
+        fun base(base: Float?): Builder =
             apply { this.base = base }
 
         /**
          * The corner radius used specifically for buttons in dp.
          */
-        fun button(button: Float?) =
+        fun button(button: Float?): Builder =
             apply { this.button = button }
 
         /**
          * The corner radius used specifically for badges in dp.
          */
-        fun badge(badge: Float?) =
+        fun badge(badge: Float?): Builder =
             apply { this.badge = badge }
 
         /**
          * The corner radius used for overlays in dp.
          */
-        fun overlay(overlay: Float?) =
+        fun overlay(overlay: Float?): Builder =
             apply { this.overlay = overlay }
 
         /**
          * The corner radius used for form elements in dp.
          */
-        fun form(form: Float?) =
+        fun form(form: Float?): Builder =
             apply { this.form = form }
 
         fun build(): CornerRadius {
