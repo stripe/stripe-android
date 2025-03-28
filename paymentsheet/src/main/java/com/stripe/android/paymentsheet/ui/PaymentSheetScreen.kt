@@ -312,6 +312,7 @@ private fun PaymentSheetContent(
 }
 
 @Composable
+@Suppress("LongMethod")
 private fun PaymentSheetContent(
     viewModel: BaseSheetViewModel,
     uiState: PaymentSheetScreenContentState,
