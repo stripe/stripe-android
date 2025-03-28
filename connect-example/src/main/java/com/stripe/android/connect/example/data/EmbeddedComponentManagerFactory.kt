@@ -29,9 +29,7 @@ class EmbeddedComponentManagerFactory @Inject constructor(
             ?: return null
 
         return EmbeddedComponentManager(
-            configuration = EmbeddedComponentManager.Configuration(
-                publishableKey = publishableKey,
-            ),
+            publishableKey = publishableKey,
             clientSecretProvider = ::fetchClientSecret,
             customFonts = listOf(
                 CustomFontSource(

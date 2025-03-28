@@ -17,9 +17,7 @@ class EmptyEmbeddedComponentActivity : FragmentActivity() {
         val title = intent.extras?.getString(KEY_TITLE)
 
         manager = EmbeddedComponentManager(
-            configuration = EmbeddedComponentManager.Configuration(
-                publishableKey = "fake_pk"
-            ),
+            publishableKey = "fake_pk",
             clientSecretProvider = { "fake_secret" },
         )
         controller = manager.createAccountOnboardingController(this, title)
