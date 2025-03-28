@@ -180,7 +180,7 @@ class PrimaryButtonTest {
             PrimaryButton.State.FinishProcessing(onComplete = {})
         )
 
-        // Setting lock visible after we start processing should still keep the lock hidden
+        // Setting lock visible after we finish processing should still keep the lock hidden
         primaryButton.updateUiState(
             PrimaryButton.UIState(
                 label = "Pay $50".resolvableString,
