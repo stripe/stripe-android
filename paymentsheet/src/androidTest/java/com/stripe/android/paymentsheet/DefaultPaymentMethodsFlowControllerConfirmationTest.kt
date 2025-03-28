@@ -118,7 +118,7 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest {
             page.clickOnLpm(paymentMethodType.type.code, forVerticalMode = true)
             composeTestRule.waitForIdle()
 
-            if(paymentMethodType is PaymentMethodType.UsBankAccount) {
+            if (paymentMethodType is PaymentMethodType.UsBankAccount) {
                 composeTestRule.waitUntil(
                     timeoutMillis = 5000L
                 ) {
