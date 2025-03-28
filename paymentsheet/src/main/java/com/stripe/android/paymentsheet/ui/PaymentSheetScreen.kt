@@ -224,13 +224,10 @@ internal fun PaymentSheetScreenContent(
     Column(modifier) {
         PaymentSheetContent(
             viewModel = viewModel,
-            headerText = uiState.headerText,
-            walletsState = uiState.actualWalletsState,
+            uiState = uiState,
             walletsProcessingState = walletsProcessingState,
             error = error,
-            currentScreen = uiState.currentScreen,
             mandateText = mandateText,
-            primaryButtonUiState = uiState.primaryButtonUiState,
         )
 
         PaymentSheetContentPadding()
@@ -286,30 +283,24 @@ private fun BoxScope.ProgressOverlay(walletsProcessingState: WalletsProcessingSt
 @Composable
 private fun PaymentSheetContent(
     viewModel: BaseSheetViewModel,
-    headerText: ResolvableString?,
-    walletsState: WalletsState?,
+    uiState: PaymentSheetScreenContentState,
     walletsProcessingState: WalletsProcessingState?,
     error: ResolvableString?,
-    currentScreen: PaymentSheetScreen,
     mandateText: MandateText?,
-    primaryButtonUiState: PrimaryButton.UIState?,
 ) {
     @Composable
     fun Content(modifier: Modifier) {
         PaymentSheetContent(
             viewModel = viewModel,
-            headerText = headerText,
-            walletsState = walletsState,
+            uiState = uiState,
             walletsProcessingState = walletsProcessingState,
             error = error,
-            currentScreen = currentScreen,
             mandateText = mandateText,
-            primaryButtonUiState = primaryButtonUiState,
             modifier = modifier
         )
     }
 
-    when (currentScreen.animationStyle) {
+    when (uiState.currentScreen.animationStyle) {
         PaymentSheetScreen.AnimationStyle.PrimaryButtonAnchored -> {
             Content(modifier = Modifier.animateContentSize())
         }
@@ -324,18 +315,15 @@ private fun PaymentSheetContent(
 @Composable
 private fun PaymentSheetContent(
     viewModel: BaseSheetViewModel,
-    headerText: ResolvableString?,
-    walletsState: WalletsState?,
+    uiState: PaymentSheetScreenContentState,
     walletsProcessingState: WalletsProcessingState?,
     error: ResolvableString?,
-    currentScreen: PaymentSheetScreen,
     mandateText: MandateText?,
-    primaryButtonUiState: PrimaryButton.UIState?,
     modifier: Modifier
 ) {
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
-    Column(modifier = modifier.padding(bottom = currentScreen.bottomContentPadding)) {
-        headerText?.let { text ->
+    Column(modifier = modifier.padding(bottom = uiState.currentScreen.bottomContentPadding)) {
+        uiState.headerText?.let { text ->
             H4Text(
                 text = text.resolve(),
                 modifier = Modifier
@@ -344,14 +332,14 @@ private fun PaymentSheetContent(
             )
         }
 
-        walletsState?.let { state ->
-            val bottomSpacing = currentScreen.walletsDividerSpacing - currentScreen.topContentPadding
+        uiState.actualWalletsState?.let { state ->
+            val bottomSpacing = uiState.currentScreen.walletsDividerSpacing - uiState.currentScreen.topContentPadding
             Wallet(
                 state = state,
                 processingState = walletsProcessingState,
                 onGooglePayPressed = state.onGooglePayPressed,
                 onLinkPressed = state.onLinkPressed,
-                dividerSpacing = currentScreen.walletsDividerSpacing,
+                dividerSpacing = uiState.currentScreen.walletsDividerSpacing,
                 modifier = Modifier.padding(bottom = bottomSpacing),
                 cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance)
             )
@@ -359,13 +347,13 @@ private fun PaymentSheetContent(
 
         Column(modifier = Modifier.fillMaxWidth()) {
             EventReporterProvider(viewModel.eventReporter) {
-                currentScreen.Content(
+                uiState.currentScreen.Content(
                     modifier = Modifier.padding(bottom = 8.dp),
                 )
             }
         }
 
-        if (mandateText?.showAbovePrimaryButton == true && currentScreen.showsMandates) {
+        if (mandateText?.showAbovePrimaryButton == true && uiState.currentScreen.showsMandates) {
             Mandate(
                 mandateText = mandateText.text?.resolve(),
                 modifier = Modifier
@@ -386,10 +374,10 @@ private fun PaymentSheetContent(
         }
     }
 
-    PrimaryButton(viewModel, primaryButtonUiState)
+    PrimaryButton(viewModel, uiState.primaryButtonUiState)
 
     Box(modifier = modifier) {
-        if (mandateText?.showAbovePrimaryButton == false && currentScreen.showsMandates) {
+        if (mandateText?.showAbovePrimaryButton == false && uiState.currentScreen.showsMandates) {
             Mandate(
                 mandateText = mandateText.text?.resolve(),
                 modifier = Modifier
