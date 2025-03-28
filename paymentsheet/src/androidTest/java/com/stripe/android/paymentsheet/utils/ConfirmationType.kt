@@ -36,11 +36,13 @@ internal sealed class ConfirmationType(
         ) {
             if (paymentMethodType is PaymentMethodType.Card) {
                 enqueuePaymentIntentConfirmWithExpectedSetAsDefault_Card(
-                    networkRule, setAsDefault
+                    networkRule = networkRule,
+                    setAsDefault = setAsDefault,
                 )
             } else {
                 enqueuePaymentIntentConfirmWithExpectedSetAsDefault_USBankAccount(
-                    networkRule, setAsDefault
+                    networkRule = networkRule,
+                    setAsDefault = setAsDefault,
                 )
             }
         }
@@ -48,7 +50,7 @@ internal sealed class ConfirmationType(
         private fun enqueuePaymentIntentConfirmWithExpectedSetAsDefault_Card(
             networkRule: NetworkRule,
             setAsDefault: Boolean
-        ){
+        ) {
             return networkRule.enqueue(
                 method("POST"),
                 path("/v1/payment_intents/pi_example/confirm"),
@@ -62,7 +64,7 @@ internal sealed class ConfirmationType(
         private fun enqueuePaymentIntentConfirmWithExpectedSetAsDefault_USBankAccount(
             networkRule: NetworkRule,
             setAsDefault: Boolean
-        ){
+        ) {
             return networkRule.enqueue(
                 method("POST"),
                 path("/v1/payment_intents/pi_example/confirm"),
@@ -98,11 +100,13 @@ internal sealed class ConfirmationType(
         ) {
             if (paymentMethodType is PaymentMethodType.Card) {
                 enqueuePaymentIntentConfirmWithExpectedSetAsDefault_Card(
-                    networkRule, setAsDefault
+                    networkRule = networkRule,
+                    setAsDefault = setAsDefault,
                 )
             } else {
                 enqueuePaymentIntentConfirmWithExpectedSetAsDefault_USBankAccount(
-                    networkRule, setAsDefault
+                    networkRule = networkRule,
+                    setAsDefault = setAsDefault,
                 )
             }
         }

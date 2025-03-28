@@ -64,6 +64,8 @@ import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val TEST_TAG_BILLING_DETAILS = "TEST_TAG_BILLING_DETAILS"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val TEST_TAG_ACCOUNT_DETAILS = "TEST_TAG_ACCOUNT_DETAILS"
 
 @Composable
