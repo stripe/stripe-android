@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import androidx.annotation.RestrictTo
 import androidx.browser.customtabs.CustomTabsIntent
 
 /**
@@ -19,6 +20,7 @@ import androidx.browser.customtabs.CustomTabsIntent
  *      it was closed
  *    - no additional task is added to the Android "Recents" screen
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class StripeConnectRedirectActivity : Activity() {
     private var didPause = false
 
@@ -65,7 +67,7 @@ class StripeConnectRedirectActivity : Activity() {
         didPause = true
     }
 
-    companion object {
+    internal companion object {
         private const val EXTRA_CUSTOM_TAB_URL = "custom_tab_url"
 
         fun customTabIntent(context: Context, url: String): Intent {
