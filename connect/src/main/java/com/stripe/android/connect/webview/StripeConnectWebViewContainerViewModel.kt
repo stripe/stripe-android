@@ -153,11 +153,7 @@ internal class StripeConnectWebViewContainerViewModel(
     }
 
     override fun onResume(owner: LifecycleOwner) {
-        val receivedOpenAuthenticatedWebViewUrl = stateFlow.value.receivedOpenAuthenticatedWebViewUrl
-        if (receivedOpenAuthenticatedWebViewUrl != null) {
-            updateState { copy(receivedOpenAuthenticatedWebViewUrl = null) }
-            webView.returnedFromAuthenticatedWebView(receivedOpenAuthenticatedWebViewUrl)
-        }
+        handleAuthenticatedWebViewStateOnResume()
     }
 
     @VisibleForTesting
@@ -329,7 +325,7 @@ internal class StripeConnectWebViewContainerViewModel(
             message: OpenAuthenticatedWebViewMessage
         ) {
             stripeIntentLauncher.launchSecureExternalWebTab(activity, message.url.toUri())
-            updateState { copy(receivedOpenAuthenticatedWebViewUrl = message.url) }
+            updateState { copy(receivedOpenAuthenticatedWebViewMessage = message) }
             analyticsService.track(
                 ConnectAnalyticsEvent.AuthenticatedWebOpened(
                     pageViewId = stateFlow.value.pageViewId,
@@ -397,6 +393,20 @@ internal class StripeConnectWebViewContainerViewModel(
             }
             _eventFlow.tryEmit(ComponentEvent.Message(message))
         }
+    }
+
+    private fun handleAuthenticatedWebViewStateOnResume() {
+        val message = stateFlow.value.receivedOpenAuthenticatedWebViewMessage
+            ?: return
+
+        updateState { copy(receivedOpenAuthenticatedWebViewMessage = null) }
+        analyticsService.track(
+            ConnectAnalyticsEvent.AuthenticatedWebRedirected(
+                pageViewId = stateFlow.value.pageViewId,
+                authenticatedViewId = message.id,
+            )
+        )
+        webView.returnedFromAuthenticatedWebView(message.url)
     }
 
     private inline fun updateState(

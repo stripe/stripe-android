@@ -322,6 +322,7 @@ class StripeConnectWebViewContainerViewModelTest {
 
     @Test
     fun `should invoke returnedFromAuthenticatedWebView when resumed from ChromeCustomTab`() {
+        val pageViewId = "pv-id"
         val uri = Uri.parse("https://test.stripe.com/")
         val message = OpenAuthenticatedWebViewMessage(
             id = "message-id",
@@ -331,13 +332,20 @@ class StripeConnectWebViewContainerViewModelTest {
         viewModel.onResume(lifecycleOwner)
         verify(webView, never()).returnedFromAuthenticatedWebView(anyOrNull())
 
+        viewModel.delegate.onReceivedPageDidLoad(pageViewId)
         viewModel.delegate.onReceivedOpenAuthenticatedWebView(mockActivity, message)
-        assertThat(viewModel.stateFlow.value.receivedOpenAuthenticatedWebViewUrl)
-            .isEqualTo(uri.toString())
+        assertThat(viewModel.stateFlow.value.receivedOpenAuthenticatedWebViewMessage)
+            .isEqualTo(message)
 
         viewModel.onResume(lifecycleOwner)
         verify(webView).returnedFromAuthenticatedWebView(uri.toString())
-        assertThat(viewModel.stateFlow.value.receivedOpenAuthenticatedWebViewUrl)
+        verify(analyticsService).track(
+            ConnectAnalyticsEvent.AuthenticatedWebRedirected(
+                pageViewId = pageViewId,
+                authenticatedViewId = message.id,
+            )
+        )
+        assertThat(viewModel.stateFlow.value.receivedOpenAuthenticatedWebViewMessage)
             .isNull()
     }
 
