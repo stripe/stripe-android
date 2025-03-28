@@ -74,13 +74,12 @@ import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBackgroundColor
 import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
 
 @Composable
@@ -191,14 +190,14 @@ internal fun PaymentSheetScreenContent(
     val mandateText by viewModel.mandateHandler.mandateText.collectAsState()
     val uiState by remember(type) {
         val isCompleteFlow = type == Complete
-        val result: Flow<PaymentSheetScreenContentState> =
-            combine(
+        val result: StateFlow<PaymentSheetScreenContentState> =
+            combineAsStateFlow(
                 viewModel.navigationHandler.currentScreen,
                 viewModel.walletsState,
                 viewModel.primaryButtonUiState,
             ) { currentScreen, walletsState, primaryButtonUiState ->
                 Triple(currentScreen, walletsState, primaryButtonUiState)
-            }.flatMapLatest { (currentScreen, walletsState, primaryButtonUiState) ->
+            }.flatMapLatestAsStateFlow { (currentScreen, walletsState, primaryButtonUiState) ->
                 currentScreen.showsWalletsHeader(isCompleteFlow)
                     .flatMapLatestAsStateFlow { showsWalletsHeader ->
                         val actualWalletsState = walletsState.takeIf { showsWalletsHeader }
@@ -217,7 +216,7 @@ internal fun PaymentSheetScreenContent(
                     }
             }
         result
-    }.collectAsState(initial = PaymentSheetScreenContentState())
+    }.collectAsState()
 
     ResetScroll(scrollState = scrollState, currentScreen = uiState.currentScreen)
 
