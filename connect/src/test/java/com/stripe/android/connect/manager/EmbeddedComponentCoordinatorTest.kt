@@ -52,7 +52,7 @@ class EmbeddedComponentCoordinatorTest {
                 configuration = configuration,
                 fetchClientSecretCallback = mockFetchClientSecretCallback,
                 logger = Logger.noop(),
-                appearance = Appearance(),
+                appearance = Appearance.default(),
                 customFonts = emptyList(),
             )
         testActivityController = Robolectric.buildActivity(ComponentActivity::class.java).create()
