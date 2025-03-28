@@ -891,7 +891,6 @@ internal class PaymentMethodMetadataTest {
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             sharedDataSpecs = listOf(SharedDataSpec("card")),
             isGooglePayReady = true,
-            isPaymentMethodSyncDefaultEnabled = false,
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
         )
 
