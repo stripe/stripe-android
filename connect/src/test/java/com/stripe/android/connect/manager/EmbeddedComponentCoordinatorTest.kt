@@ -8,7 +8,6 @@ import androidx.activity.ComponentActivity
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.connect.ClientSecretProvider
-import com.stripe.android.connect.EmbeddedComponentManager
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.core.Logger
@@ -37,7 +36,7 @@ import kotlin.test.assertTrue
 @RunWith(RobolectricTestRunner::class)
 class EmbeddedComponentCoordinatorTest {
 
-    private lateinit var configuration: EmbeddedComponentManager.Configuration
+    private lateinit var publishableKey: String
     private lateinit var mockClientSecretProvider: ClientSecretProvider
     private lateinit var coordinator: EmbeddedComponentCoordinator
     private lateinit var testActivityController: ActivityController<ComponentActivity>
@@ -45,11 +44,11 @@ class EmbeddedComponentCoordinatorTest {
 
     @Before
     fun setup() {
-        configuration = EmbeddedComponentManager.Configuration("test_publishable_key")
+        publishableKey = "test_publishable_key"
         mockClientSecretProvider = mock()
         coordinator =
             EmbeddedComponentCoordinator(
-                configuration = configuration,
+                publishableKey = publishableKey,
                 clientSecretProvider = mockClientSecretProvider,
                 logger = Logger.noop(),
                 appearance = Appearance.default(),
