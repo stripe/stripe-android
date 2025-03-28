@@ -74,12 +74,13 @@ import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBackgroundColor
 import com.stripe.android.uicore.strings.resolve
-import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.withContext
 
 @Composable
@@ -171,10 +172,11 @@ private fun PaymentSheetScreen(
 }
 
 internal data class PaymentSheetScreenContentState(
-    val showsWalletsHeader: Boolean,
-    val actualWalletsState: WalletsState?,
-    val headerText: ResolvableString?,
-    val currentScreen: PaymentSheetScreen,
+    val showsWalletsHeader: Boolean = false,
+    val actualWalletsState: WalletsState? = null,
+    val headerText: ResolvableString? = null,
+    val currentScreen: PaymentSheetScreen = PaymentSheetScreen.Loading,
+    val primaryButtonUiState: PrimaryButton.UIState? = null,
 )
 
 @Composable
@@ -189,13 +191,14 @@ internal fun PaymentSheetScreenContent(
     val mandateText by viewModel.mandateHandler.mandateText.collectAsState()
     val uiState by remember(type) {
         val isCompleteFlow = type == Complete
-        val result: StateFlow<PaymentSheetScreenContentState> =
-            combineAsStateFlow(
+        val result: Flow<PaymentSheetScreenContentState> =
+            combine(
                 viewModel.navigationHandler.currentScreen,
                 viewModel.walletsState,
-            ) { currentScreen, walletsState ->
-                currentScreen to walletsState
-            }.flatMapLatestAsStateFlow { (currentScreen, walletsState) ->
+                viewModel.primaryButtonUiState,
+            ) { currentScreen, walletsState, primaryButtonUiState ->
+                Triple(currentScreen, walletsState, primaryButtonUiState)
+            }.flatMapLatest { (currentScreen, walletsState, primaryButtonUiState) ->
                 currentScreen.showsWalletsHeader(isCompleteFlow)
                     .flatMapLatestAsStateFlow { showsWalletsHeader ->
                         val actualWalletsState = walletsState.takeIf { showsWalletsHeader }
@@ -208,12 +211,13 @@ internal fun PaymentSheetScreenContent(
                                 actualWalletsState = actualWalletsState,
                                 headerText = headerText,
                                 currentScreen = currentScreen,
+                                primaryButtonUiState = primaryButtonUiState
                             )
                         }
                     }
             }
         result
-    }.collectAsState()
+    }.collectAsState(initial = PaymentSheetScreenContentState())
 
     ResetScroll(scrollState = scrollState, currentScreen = uiState.currentScreen)
 
@@ -226,6 +230,7 @@ internal fun PaymentSheetScreenContent(
             error = error,
             currentScreen = uiState.currentScreen,
             mandateText = mandateText,
+            primaryButtonUiState = uiState.primaryButtonUiState,
         )
 
         PaymentSheetContentPadding()
@@ -287,6 +292,7 @@ private fun PaymentSheetContent(
     error: ResolvableString?,
     currentScreen: PaymentSheetScreen,
     mandateText: MandateText?,
+    primaryButtonUiState: PrimaryButton.UIState?,
 ) {
     @Composable
     fun Content(modifier: Modifier) {
@@ -298,6 +304,7 @@ private fun PaymentSheetContent(
             error = error,
             currentScreen = currentScreen,
             mandateText = mandateText,
+            primaryButtonUiState = primaryButtonUiState,
             modifier = modifier
         )
     }
@@ -323,6 +330,7 @@ private fun PaymentSheetContent(
     error: ResolvableString?,
     currentScreen: PaymentSheetScreen,
     mandateText: MandateText?,
+    primaryButtonUiState: PrimaryButton.UIState?,
     modifier: Modifier
 ) {
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
@@ -378,7 +386,7 @@ private fun PaymentSheetContent(
         }
     }
 
-//    PrimaryButton(viewModel)
+    PrimaryButton(viewModel, primaryButtonUiState)
 
     Box(modifier = modifier) {
         if (mandateText?.showAbovePrimaryButton == false && currentScreen.showsMandates) {
@@ -448,15 +456,11 @@ internal fun Wallet(
 }
 
 @Composable
-private fun PrimaryButton(viewModel: BaseSheetViewModel) {
-    val uiState = viewModel.primaryButtonUiState.collectAsState()
-
+private fun PrimaryButton(viewModel: BaseSheetViewModel, currentState: PrimaryButton.UIState?) {
     val modifier = Modifier
         .testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
         .semantics {
             role = Role.Button
-
-            val currentState = uiState.value
 
             if (currentState == null || !currentState.enabled) {
                 disabled()
@@ -483,16 +487,11 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
             )
             binding
         },
+        update = {
+            button?.updateUiState(currentState)
+        },
         modifier = modifier,
     )
-
-    LaunchedEffect(viewModel, button) {
-        viewModel.primaryButtonUiState.collect { uiState ->
-            withContext(Dispatchers.Main) {
-                button?.updateUiState(uiState)
-            }
-        }
-    }
 
     LaunchedEffect(viewModel, button) {
         (viewModel as? PaymentSheetViewModel)?.buyButtonState?.collect { state ->
