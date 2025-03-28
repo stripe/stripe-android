@@ -26,6 +26,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -73,9 +74,12 @@ import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBackgroundColor
 import com.stripe.android.uicore.strings.resolve
-import com.stripe.android.uicore.utils.collectAsState
+import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
 
 @Composable
@@ -166,6 +170,13 @@ private fun PaymentSheetScreen(
     }
 }
 
+internal data class PaymentSheetScreenContentState(
+    val showsWalletsHeader: Boolean,
+    val actualWalletsState: WalletsState?,
+    val headerText: ResolvableString?,
+    val currentScreen: PaymentSheetScreen,
+)
+
 @Composable
 internal fun PaymentSheetScreenContent(
     viewModel: BaseSheetViewModel,
@@ -173,32 +184,47 @@ internal fun PaymentSheetScreenContent(
     modifier: Modifier = Modifier,
     scrollState: ScrollState,
 ) {
-    val walletsState by viewModel.walletsState.collectAsState()
     val walletsProcessingState by viewModel.walletsProcessingState.collectAsState()
     val error by viewModel.error.collectAsState()
     val mandateText by viewModel.mandateHandler.mandateText.collectAsState()
-    val currentScreen by viewModel.navigationHandler.currentScreen.collectAsState()
-
-    ResetScroll(scrollState = scrollState, currentScreen = currentScreen)
-
-    val showsWalletsHeader by remember(currentScreen, type) {
-        currentScreen.showsWalletsHeader(isCompleteFlow = type == Complete)
+    val uiState by remember(type) {
+        val isCompleteFlow = type == Complete
+        val result: StateFlow<PaymentSheetScreenContentState> =
+            combineAsStateFlow(
+                viewModel.navigationHandler.currentScreen,
+                viewModel.walletsState,
+            ) { currentScreen, walletsState ->
+                currentScreen to walletsState
+            }.flatMapLatestAsStateFlow { (currentScreen, walletsState) ->
+                currentScreen.showsWalletsHeader(isCompleteFlow)
+                    .flatMapLatestAsStateFlow { showsWalletsHeader ->
+                        val actualWalletsState = walletsState.takeIf { showsWalletsHeader }
+                        currentScreen.title(
+                            isCompleteFlow = isCompleteFlow,
+                            isWalletEnabled = actualWalletsState != null
+                        ).mapAsStateFlow { headerText ->
+                            PaymentSheetScreenContentState(
+                                showsWalletsHeader = showsWalletsHeader,
+                                actualWalletsState = actualWalletsState,
+                                headerText = headerText,
+                                currentScreen = currentScreen,
+                            )
+                        }
+                    }
+            }
+        result
     }.collectAsState()
 
-    val actualWalletsState = walletsState.takeIf { showsWalletsHeader }
-
-    val headerText by remember(currentScreen, type, actualWalletsState != null) {
-        currentScreen.title(isCompleteFlow = type == Complete, isWalletEnabled = actualWalletsState != null)
-    }.collectAsState()
+    ResetScroll(scrollState = scrollState, currentScreen = uiState.currentScreen)
 
     Column(modifier) {
         PaymentSheetContent(
             viewModel = viewModel,
-            headerText = headerText,
-            walletsState = actualWalletsState,
+            headerText = uiState.headerText,
+            walletsState = uiState.actualWalletsState,
             walletsProcessingState = walletsProcessingState,
             error = error,
-            currentScreen = currentScreen,
+            currentScreen = uiState.currentScreen,
             mandateText = mandateText,
         )
 
@@ -352,7 +378,7 @@ private fun PaymentSheetContent(
         }
     }
 
-    PrimaryButton(viewModel)
+//    PrimaryButton(viewModel)
 
     Box(modifier = modifier) {
         if (mandateText?.showAbovePrimaryButton == false && currentScreen.showsMandates) {
