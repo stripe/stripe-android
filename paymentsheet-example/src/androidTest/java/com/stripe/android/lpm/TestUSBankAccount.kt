@@ -46,6 +46,7 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
     @Test
     fun testUSBankAccountSuccess() {
         testDriver.confirmUSBankAccount(
+            financialConnectionsLiteEnabled = false,
             testParameters = testParameters.copyPlaygroundSettings {
                 it[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
             },
@@ -58,7 +59,8 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
 
     @Test
     fun testUSBankAccountLiteSuccess() {
-        testDriver.confirmUSBankAccountLite(
+        testDriver.confirmUSBankAccount(
+            financialConnectionsLiteEnabled = true,
             testParameters = testParameters.copyPlaygroundSettings {
                 it[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
                 it[FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsLiteEnabled)] = true
@@ -75,6 +77,7 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
     fun testUSBankAccountSuccessWithIndecisiveUser() {
         // Select another LPM before coming back to the linked bank account
         testDriver.confirmUSBankAccount(
+            financialConnectionsLiteEnabled = false,
             testParameters = testParameters.copyPlaygroundSettings {
                 it[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
             },
@@ -101,6 +104,7 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
     fun testCardAfterConfirmingUSBankAccount() {
         // Link a bank account, but pay with a card instead
         testDriver.confirmUSBankAccount(
+            financialConnectionsLiteEnabled = false,
             testParameters = testParameters.copyPlaygroundSettings {
                 it[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
             },
@@ -123,6 +127,7 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
     @Test
     fun testUSBankAccountCancelAllowsUserToContinue() {
         testDriver.confirmUSBankAccount(
+            financialConnectionsLiteEnabled = false,
             testParameters = testParameters.copy(
                 authorizationAction = AuthorizeAction.Cancel,
             ),
@@ -135,7 +140,8 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
 
     @Test
     fun testUSBankAccountLiteCancelAllowsUserToContinue() {
-        testDriver.confirmUSBankAccountLite(
+        testDriver.confirmUSBankAccount(
+            financialConnectionsLiteEnabled = true,
             testParameters = testParameters.copyPlaygroundSettings {
                 it[FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsLiteEnabled)] = true
                 it[FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsFullSdkUnavailable)] = true

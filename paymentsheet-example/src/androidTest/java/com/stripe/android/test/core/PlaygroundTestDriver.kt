@@ -881,24 +881,19 @@ internal class PlaygroundTestDriver(
     }
 
     fun confirmUSBankAccount(
+        financialConnectionsLiteEnabled: Boolean,
         testParameters: TestParameters,
         afterAuthorization: (Selectors, FieldPopulator) -> Unit = { _, _ -> },
     ): PlaygroundState? {
         return confirmBankAccount(
             testParameters = testParameters,
-            executeFlow = { doUSBankAccountAuthorization(testParameters.authorizationAction) },
-            afterCollectingBankInfo = afterAuthorization,
-            confirmIntent = true,
-        )
-    }
-
-    fun confirmUSBankAccountLite(
-        testParameters: TestParameters,
-        afterAuthorization: (Selectors, FieldPopulator) -> Unit = { _, _ -> },
-    ): PlaygroundState? {
-        return confirmBankAccount(
-            testParameters = testParameters,
-            executeFlow = { doUSBankAccountLiteAuthorization(testParameters.authorizationAction) },
+            executeFlow = {
+                if (financialConnectionsLiteEnabled) {
+                    doUSBankAccountLiteAuthorization(testParameters.authorizationAction)
+                } else {
+                    doUSBankAccountAuthorization(testParameters.authorizationAction)
+                }
+            },
             afterCollectingBankInfo = afterAuthorization,
             confirmIntent = true,
         )
@@ -1420,7 +1415,8 @@ internal class PlaygroundTestDriver(
                     }
 
                     is AuthorizeAction.Test3DS2.SingleSelect -> {
-                        val completeAuthentication = UiAutomatorText("Complete Authentication", labelMatchesExactly = true, device = device)
+                        val completeAuthentication =
+                            UiAutomatorText("Complete Authentication", labelMatchesExactly = true, device = device)
                         completeAuthentication.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
                         completeAuthentication.click()
 
@@ -1431,7 +1427,8 @@ internal class PlaygroundTestDriver(
 
                     is AuthorizeAction.Test3DS2.MultiSelect -> {
                         UiSelector().textContains("Complete Authentication")
-                        val completeAuthentication = UiAutomatorText("Complete Authentication", labelMatchesExactly = true, device = device)
+                        val completeAuthentication =
+                            UiAutomatorText("Complete Authentication", labelMatchesExactly = true, device = device)
                         completeAuthentication.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
                         device.findObject(UiSelector().textContains("Complete Authentication").index(0)).click()
                         device.findObject(UiSelector().textContains("Complete Authentication").index(1)).click()
@@ -1443,16 +1440,23 @@ internal class PlaygroundTestDriver(
                     }
 
                     is AuthorizeAction.Test3DS2.OOB -> {
-                        val completeAuthentication = UiAutomatorText("Complete Authentication", labelMatchesExactly = true, device = device)
+                        val completeAuthentication =
+                            UiAutomatorText("Complete Authentication", labelMatchesExactly = true, device = device)
                         completeAuthentication.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
                         completeAuthentication.click()
                     }
 
                     is AuthorizeAction.Test3DS2.OTP -> {
-                        val explanationText = UiAutomatorText("For this test", labelMatchesExactly = true, device = device)
+                        val explanationText =
+                            UiAutomatorText("For this test", labelMatchesExactly = true, device = device)
                         explanationText.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
 
-                        val enterOTPField = UiAutomatorText("Enter your code below:", labelMatchesExactly = true, className = "android.widget.EditText", device = device)
+                        val enterOTPField = UiAutomatorText(
+                            "Enter your code below:",
+                            labelMatchesExactly = true,
+                            className = "android.widget.EditText",
+                            device = device
+                        )
                         enterOTPField.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
                         enterOTPField.click()
                         enterOTPField.setText("424242")
