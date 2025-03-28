@@ -379,6 +379,7 @@ internal class PlaygroundTestDriver(
     }
 
     fun saveUsBankAccountInCustomerSheet(
+        financialConnectionsLiteEnabled: Boolean,
         testParameters: TestParameters,
         values: FieldPopulator.Values = FieldPopulator.Values(),
         populateCustomLpmFields: FieldPopulator.() -> Unit = {},
@@ -416,7 +417,11 @@ internal class PlaygroundTestDriver(
 
         pressCustomerSheetSave()
 
-        executeUsBankAccountFlow()
+        if (financialConnectionsLiteEnabled) {
+            executeUsBankAccountLiteFlow()
+        } else {
+            executeUsBankAccountFlow()
+        }
 
         waitForCustomerSheetSaveButton()
 
