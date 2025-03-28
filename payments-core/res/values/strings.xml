@@ -149,6 +149,8 @@
   <string name="stripe_invalid_card_number">Your card\'s number is invalid.</string>
   <!-- Error message for card entry form when CVC/CVV is invalid -->
   <string name="stripe_invalid_cvc">Your card\'s security code is invalid.</string>
+  <!-- Error message for card entry form when card has insufficient funds -->
+  <string name="stripe_insufficient_funds">Your card has insufficient funds. Try a different card.</string>
   <!-- Error when customer's name is invalid -->
   <string name="stripe_invalid_owner_name">Your name is invalid.</string>
   <!-- Shipping form error message -->

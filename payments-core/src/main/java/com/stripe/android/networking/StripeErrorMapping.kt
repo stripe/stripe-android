@@ -9,31 +9,19 @@ import java.util.Locale
 import com.stripe.android.uicore.R as UiCoreR
 
 internal fun StripeError.withLocalizedMessage(context: Context): StripeError {
-    val newMessage = if (shouldFallBackToLocalizedError) {
-        context.mapErrorCodeToLocalizedMessage(code)
-    } else {
-        message ?: context.mapErrorCodeToLocalizedMessage(code)
-    }
+    val newMessage = context.mapErrorCodeToLocalizedMessage(code) ?: message
 
     return copy(message = newMessage)
 }
 
 internal fun PaymentIntent.Error.withLocalizedMessage(context: Context): PaymentIntent.Error {
-    val newMessage = if (shouldFallBackToLocalizedError) {
-        context.mapErrorCodeToLocalizedMessage(code)
-    } else {
-        message ?: context.mapErrorCodeToLocalizedMessage(code)
-    }
+    val newMessage = context.mapErrorCodeToLocalizedMessage(code) ?: message
 
     return copy(message = newMessage)
 }
 
 internal fun SetupIntent.Error.withLocalizedMessage(context: Context): SetupIntent.Error {
-    val newMessage = if (shouldFallBackToLocalizedError) {
-        context.mapErrorCodeToLocalizedMessage(code)
-    } else {
-        message ?: context.mapErrorCodeToLocalizedMessage(code)
-    }
+    val newMessage = context.mapErrorCodeToLocalizedMessage(code) ?: message
 
     return copy(message = newMessage)
 }
@@ -47,6 +35,7 @@ internal fun Context.mapErrorCodeToLocalizedMessage(code: String?): String? {
         "invalid_cvc" -> R.string.stripe_invalid_cvc
         "expired_card" -> R.string.stripe_expired_card
         "incorrect_cvc" -> R.string.stripe_invalid_cvc
+        "insufficient_funds" -> R.string.stripe_insufficient_funds
         "card_declined" -> R.string.stripe_card_declined
         "processing_error" -> R.string.stripe_processing_error
         "invalid_owner_name" -> R.string.stripe_invalid_owner_name
@@ -56,14 +45,3 @@ internal fun Context.mapErrorCodeToLocalizedMessage(code: String?): String? {
     }
     return messageResourceId?.let { getString(it) }
 }
-
-/**
- * For some language tags, our backend is unable to provide translated error messages. For these
- * languages, we fall back to local error messages. As of right now, the only languages for which we
- * are aware of this issue are Spanish languages outside of Spain, such as in Argentina or Chile.
- */
-private val shouldFallBackToLocalizedError: Boolean
-    get() {
-        val locale = Locale.getDefault()
-        return locale.language.lowercase() == "es" && locale.country.lowercase() != "es"
-    }
