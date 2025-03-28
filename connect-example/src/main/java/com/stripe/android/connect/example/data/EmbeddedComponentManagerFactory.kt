@@ -2,13 +2,11 @@ package com.stripe.android.connect.example.data
 
 import com.github.kittinunf.fuel.core.FuelError
 import com.stripe.android.connect.EmbeddedComponentManager
-import com.stripe.android.connect.FetchClientSecretCallback.ClientSecretResultCallback
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.appearance.fonts.CustomFontSource
 import com.stripe.android.core.Logger
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -21,7 +19,6 @@ class EmbeddedComponentManagerFactory @Inject constructor(
     private val logger: Logger,
 ) {
     private val loggingTag = this::class.java.simpleName
-    private val ioScope: CoroutineScope by lazy { CoroutineScope(Dispatchers.IO) }
 
     /**
      * Creates an instance of [EmbeddedComponentManager].
@@ -35,7 +32,7 @@ class EmbeddedComponentManagerFactory @Inject constructor(
             configuration = EmbeddedComponentManager.Configuration(
                 publishableKey = publishableKey,
             ),
-            fetchClientSecretCallback = ::fetchClientSecret,
+            clientSecretProvider = ::fetchClientSecret,
             customFonts = listOf(
                 CustomFontSource(
                     assetsFilePath = "fonts/doto.ttf",
@@ -49,22 +46,18 @@ class EmbeddedComponentManagerFactory @Inject constructor(
     /**
      * Helper wrapper around [fetchClientSecret] that fetches the client secret
      */
-    @OptIn(PrivateBetaConnectSDK::class)
-    private fun fetchClientSecret(clientSecretResultCallback: ClientSecretResultCallback) {
+    private suspend fun fetchClientSecret(): String? = withContext(Dispatchers.IO) {
         val account: String = settingsService.getSelectedMerchant()
-            ?: return clientSecretResultCallback.onResult(null)
+            ?: return@withContext null
 
-        ioScope.launch {
-            try {
-                val clientSecret = embeddedComponentService.fetchClientSecret(account)
-                clientSecretResultCallback.onResult(clientSecret)
-            } catch (e: FuelError) {
-                logger.error("($loggingTag) Failed to fetch client secret", e)
-                clientSecretResultCallback.onResult(null)
-            } catch (e: IOException) {
-                logger.error("($loggingTag) Failed to fetch client secret", e)
-                clientSecretResultCallback.onResult(null)
-            }
+        try {
+            embeddedComponentService.fetchClientSecret(account)
+        } catch (e: FuelError) {
+            logger.error("($loggingTag) Failed to fetch client secret", e)
+            null
+        } catch (e: IOException) {
+            logger.error("($loggingTag) Failed to fetch client secret", e)
+            null
         }
     }
 }

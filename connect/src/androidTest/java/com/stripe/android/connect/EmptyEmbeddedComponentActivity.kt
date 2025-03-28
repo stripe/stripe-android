@@ -20,7 +20,7 @@ class EmptyEmbeddedComponentActivity : FragmentActivity() {
             configuration = EmbeddedComponentManager.Configuration(
                 publishableKey = "fake_pk"
             ),
-            fetchClientSecretCallback = { it.onResult("fake_secret") },
+            clientSecretProvider = { "fake_secret" },
         )
         controller = manager.createAccountOnboardingController(this, title)
     }

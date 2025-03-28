@@ -15,7 +15,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat.checkSelfPermission
 import com.stripe.android.connect.BuildConfig
 import com.stripe.android.connect.EmbeddedComponentManager.Configuration
-import com.stripe.android.connect.FetchClientSecretCallback
+import com.stripe.android.connect.ClientSecretProvider
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.analytics.ComponentAnalyticsService
@@ -45,7 +45,7 @@ import kotlin.coroutines.resume
 @EmbeddedComponentManagerScope
 internal class EmbeddedComponentCoordinator @Inject constructor(
     private val configuration: Configuration,
-    private val fetchClientSecretCallback: FetchClientSecretCallback,
+    private val clientSecretProvider: ClientSecretProvider,
     private val logger: Logger,
     appearance: Appearance,
     internal val customFonts: List<CustomFontSource>,
@@ -82,14 +82,7 @@ internal class EmbeddedComponentCoordinator @Inject constructor(
      * Fetch the client secret from the consumer of the SDK.
      */
     internal suspend fun fetchClientSecret(): String? {
-        return suspendCancellableCoroutine { continuation ->
-            val resultCallback = object : FetchClientSecretCallback.ClientSecretResultCallback {
-                override fun onResult(secret: String?) {
-                    continuation.resume(secret)
-                }
-            }
-            fetchClientSecretCallback.fetchClientSecret(resultCallback)
-        }
+        return clientSecretProvider.provideClientSecret()
     }
 
     /**
