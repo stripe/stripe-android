@@ -45,11 +45,13 @@ class StripeComponentViewTest {
                 bindViewModelState(
                     StripeConnectWebViewContainerState(
                         isNativeLoadingIndicatorVisible = true,
-                        appearance = Appearance(
-                            colors = Colors(
-                                secondaryText = Color.RED
+                        appearance = Appearance.Builder()
+                            .colors(
+                                Colors.Builder()
+                                    .secondaryText(Color.RED)
+                                    .build()
                             )
-                        )
+                            .build()
                     )
                 )
             }
