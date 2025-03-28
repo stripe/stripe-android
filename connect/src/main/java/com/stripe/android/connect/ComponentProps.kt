@@ -1,7 +1,6 @@
 package com.stripe.android.connect
 
 import android.os.Parcelable
-import androidx.annotation.RestrictTo
 import com.stripe.android.connect.webview.serialization.ConnectJson
 import com.stripe.android.connect.webview.serialization.toJs
 import kotlinx.parcelize.Parcelize
@@ -22,6 +21,5 @@ internal fun Any.toComponentPropsJsonObject(): JsonObject {
  * Empty props.
  */
 @PrivateBetaConnectSDK
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Parcelize
 internal data object EmptyProps : Parcelable
