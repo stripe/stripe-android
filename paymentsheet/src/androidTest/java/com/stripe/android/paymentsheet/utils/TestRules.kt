@@ -4,7 +4,6 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.testing.RetryRule
-import com.stripe.android.testing.ShampooRule
 import leakcanary.DetectLeaksAfterTestSuccess
 import org.junit.rules.RuleChain
 import org.junit.rules.TestRule
@@ -31,14 +30,12 @@ class TestRules private constructor(
             networkRule: NetworkRule = NetworkRule(),
             block: RuleChain.() -> RuleChain = { this }
         ): TestRules {
-            val chain =
-                RuleChain.emptyRuleChain()
-                    .around(DetectLeaksAfterTestSuccess())
-                    .around(composeTestRule)
-                    .around(RetryRule(5))
-                    .around(networkRule)
-                    .block()
-
+            val chain = RuleChain.emptyRuleChain()
+                .around(DetectLeaksAfterTestSuccess())
+                .around(composeTestRule)
+                .around(RetryRule(5))
+                .around(networkRule)
+                .block()
             return TestRules(chain, composeTestRule, networkRule)
         }
     }
