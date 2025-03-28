@@ -64,6 +64,7 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest {
             page.assertSaveForFutureUseCheckboxChecked()
         },
         secondLaunchBlock = { page ->
+            page.waitUntilVisible()
             page.assertSaveForFutureUseCheckboxChecked()
             page.assertSetAsDefaultCheckboxNotChecked()
         }
@@ -83,6 +84,7 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest {
             page.assertSetAsDefaultCheckboxChecked()
         },
         secondLaunchBlock = { page ->
+            page.waitUntilVisible()
             page.assertSaveForFutureUseCheckboxChecked()
             page.assertSetAsDefaultCheckboxChecked()
         }
@@ -97,8 +99,7 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest {
             networkRule = networkRule,
             createIntentCallback = confirmationType.createIntentCallback,
             integrationType = IntegrationType.Compose,
-            resultCallback = { result ->
-            },
+            resultCallback = ::assertCompleted,
         ) { testContext ->
             val page = PaymentSheetPage(composeTestRule)
 
@@ -117,6 +118,7 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest {
                 testContext = ProductIntegrationTestRunnerContext.WithFlowController(testContext),
                 composeTestRule = composeTestRule,
                 paymentMethodLayout = layoutType.paymentMethodLayout,
+                hasSavedPaymentMethods = true,
                 isDeferredIntent = confirmationType.isDeferredIntent,
                 paymentMethodType = paymentMethodType,
             )
@@ -167,6 +169,9 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest {
             composeTestRule.waitForIdle()
             secondLaunchBlock(page)
             composeTestRule.waitForIdle()
+
+            page.clickPrimaryButton()
+            testContext.flowController.confirm()
 //            Thread.sleep(250L)
 //            networkRule.validate()
 

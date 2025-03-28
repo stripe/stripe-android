@@ -138,12 +138,12 @@ internal sealed class ConfirmationType(
             networkRule: NetworkRule,
             setAsDefault: Boolean
         ) {
-            networkRule.enqueue(
-                method("POST"),
-                path("/v1/payment_methods"),
-            ) { response ->
-                response.testBodyFromFile("payment-methods-create-us_bank_account.json")
-            }
+//            networkRule.enqueue(
+//                method("POST"),
+//                path("/v1/payment_methods"),
+//            ) { response ->
+//                response.testBodyFromFile("payment-methods-create-us_bank_account.json")
+//            }
 
             networkRule.enqueue(
                 method("GET"),
