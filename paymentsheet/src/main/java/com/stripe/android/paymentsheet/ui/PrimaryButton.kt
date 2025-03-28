@@ -174,6 +174,7 @@ internal class PrimaryButton @JvmOverloads constructor(
     }
 
     private fun onReadyState() {
+        updateLockVisibility(canShow = true)
         isClickable = true
         originalLabel?.let {
             setLabel(it)
@@ -186,7 +187,7 @@ internal class PrimaryButton @JvmOverloads constructor(
     }
 
     private fun onStartProcessing() {
-        viewBinding.lockIcon.isVisible = false
+        updateLockVisibility(canShow = false)
         viewBinding.confirmingIcon.isVisible = true
         isClickable = false
         setLabel(
@@ -195,6 +196,7 @@ internal class PrimaryButton @JvmOverloads constructor(
     }
 
     private fun onFinishProcessing(onAnimationEnd: () -> Unit) {
+        updateLockVisibility(canShow = false)
         isClickable = false
         backgroundTintList = ColorStateList.valueOf(finishedBackgroundColor)
         confirmedIcon.imageTintList = ColorStateList.valueOf(finishedOnBackgroundColor)
@@ -223,14 +225,16 @@ internal class PrimaryButton @JvmOverloads constructor(
         isVisible = uiState != null
 
         if (uiState != null) {
+            lockVisible = uiState.lockVisible
+
             if (state !is State.StartProcessing && state !is State.FinishProcessing) {
                 // If we're processing or finishing, we're not overriding the label
                 setLabel(uiState.label)
+                updateLockVisibility(canShow = true)
             }
 
             isEnabled = uiState.enabled
-            lockVisible = uiState.lockVisible
-            viewBinding.lockIcon.isVisible = lockVisible
+
             setOnClickListener { uiState.onClick() }
 
             contentDescription = uiState.label.resolve(context)
@@ -253,6 +257,10 @@ internal class PrimaryButton @JvmOverloads constructor(
             }
             null -> {}
         }
+    }
+
+    private fun updateLockVisibility(canShow: Boolean) {
+        viewBinding.lockIcon.isVisible = lockVisible && canShow
     }
 
     private fun updateAlpha() {
