@@ -7,6 +7,8 @@ import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.getDefaultCustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.AffirmDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfiguration
 import com.stripe.android.model.CardBrand
@@ -800,6 +802,7 @@ internal class PaymentMethodMetadataTest {
             isGooglePayReady = false,
             linkInlineConfiguration = linkInlineConfiguration,
             linkState = null,
+            customerMetadata = DEFAULT_CUSTOMER_METADATA
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -835,9 +838,8 @@ internal class PaymentMethodMetadataTest {
                 )
             ),
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
-            customerMetadata = CustomerMetadata(
-                hasCustomerConfiguration = true,
-                isPaymentMethodSetAsDefaultEnabled = false,
+            customerMetadata = getDefaultCustomerMetadata(
+                isPaymentMethodSetAsDefaultEnabled = false
             ),
             paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
             isGooglePayReady = false,
@@ -889,7 +891,7 @@ internal class PaymentMethodMetadataTest {
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             sharedDataSpecs = listOf(SharedDataSpec("card")),
             isGooglePayReady = true,
-            isPaymentMethodSyncDefaultEnabled = false,
+            customerMetadata = DEFAULT_CUSTOMER_METADATA,
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -907,9 +909,8 @@ internal class PaymentMethodMetadataTest {
             sharedDataSpecs = listOf(SharedDataSpec("card")),
             displayableCustomPaymentMethods = emptyList(),
             externalPaymentMethodSpecs = listOf(),
-            customerMetadata = CustomerMetadata(
-                hasCustomerConfiguration = true,
-                isPaymentMethodSetAsDefaultEnabled = false,
+            customerMetadata = getDefaultCustomerMetadata(
+                isPaymentMethodSetAsDefaultEnabled = false
             ),
             isGooglePayReady = true,
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
@@ -991,6 +992,7 @@ internal class PaymentMethodMetadataTest {
             isGooglePayReady = false,
             linkInlineConfiguration = null,
             linkState = null,
+            customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
         )
     }
 

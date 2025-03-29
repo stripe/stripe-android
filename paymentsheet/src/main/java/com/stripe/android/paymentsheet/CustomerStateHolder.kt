@@ -1,14 +1,17 @@
 package com.stripe.android.paymentsheet
 
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 internal class CustomerStateHolder(
+    private val customerMetadataPermissions: StateFlow<CustomerMetadata.Permissions?>,
     private val savedStateHandle: SavedStateHandle,
     private val selection: StateFlow<PaymentSelection?>,
 ) {
@@ -29,11 +32,13 @@ internal class CustomerStateHolder(
         initialValue = (selection.value as? PaymentSelection.Saved)?.paymentMethod
     )
 
-    val canRemove: StateFlow<Boolean> = customer.mapAsStateFlow { customerState ->
-        customerState?.run {
-            val hasRemovePermissions = customerState.permissions.canRemovePaymentMethods
-            val hasRemoveLastPaymentMethodPermissions = customerState.permissions.canRemoveLastPaymentMethod
-
+    val canRemove: StateFlow<Boolean> = combineAsStateFlow(
+        paymentMethods,
+        customerMetadataPermissions,
+    ) { paymentMethods, customerMetadataPermissions ->
+        customerMetadataPermissions?.run {
+            val hasRemovePermissions = customerMetadataPermissions.canRemovePaymentMethods
+            val hasRemoveLastPaymentMethodPermissions = customerMetadataPermissions.canRemoveLastPaymentMethod
             when (paymentMethods.size) {
                 0 -> false
                 1 -> hasRemoveLastPaymentMethodPermissions && hasRemovePermissions
@@ -68,6 +73,9 @@ internal class CustomerStateHolder(
             return CustomerStateHolder(
                 savedStateHandle = viewModel.savedStateHandle,
                 selection = viewModel.selection,
+                customerMetadataPermissions = viewModel.paymentMethodMetadata.mapAsStateFlow {
+                    it?.customerMetadata?.permissions
+                }
             )
         }
     }
