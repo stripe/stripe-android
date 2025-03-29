@@ -38,6 +38,10 @@ internal class FormElementsBuilder(
         headerFormElements += formElement
     }
 
+    fun ignoreContactInformationRequirements() = apply {
+        requiredContactInformationCollectionModes.clear()
+    }
+
     fun requireContactInformationIfAllowed(type: ContactInformationCollectionMode): FormElementsBuilder = apply {
         if (type.isAllowed(arguments.billingDetailsCollectionConfiguration)) {
             requiredContactInformationCollectionModes += type
@@ -46,6 +50,10 @@ internal class FormElementsBuilder(
 
     fun element(formElement: FormElement): FormElementsBuilder = apply {
         uiFormElements += formElement
+    }
+
+    fun ignoreBillingAddressRequirements() = apply {
+        requireBillingAddressCollection = false
     }
 
     fun requireBillingAddressIfAllowed(

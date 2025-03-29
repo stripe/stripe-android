@@ -8,6 +8,7 @@ import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.CustomPaymentMethodUiDefinitionFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPaymentMethodUiDefinitionFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.LinkCardBrandDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfiguration
@@ -78,7 +79,7 @@ internal data class PaymentMethodMetadata(
     fun supportedPaymentMethodTypes(): List<String> {
         return supportedPaymentMethodDefinitions().map { paymentMethodDefinition ->
             paymentMethodDefinition.type.code
-        }.plus(externalPaymentMethodTypes()).run {
+        }.plus(externalPaymentMethodTypes()).plus(customPaymentMethodIds()).run {
             if (paymentMethodOrder.isEmpty()) {
                 // Optimization to early out if we don't have a client side order.
                 this
@@ -104,6 +105,8 @@ internal data class PaymentMethodMetadata(
     ): SupportedPaymentMethod? {
         return if (isExternalPaymentMethod(code)) {
             getUiDefinitionFactoryForExternalPaymentMethod(code)?.createSupportedPaymentMethod()
+        } else if (isCustomPaymentMethod(code)) {
+            getUiDefinitionFactoryForCustomPaymentMethod(code)?.createSupportedPaymentMethod()
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
             definition.uiDefinitionFactory().supportedPaymentMethod(this, definition, sharedDataSpecs)
@@ -115,7 +118,10 @@ internal data class PaymentMethodMetadata(
     }
 
     private fun orderedPaymentMethodTypes(): List<String> {
-        val originalOrderedTypes = stripeIntent.paymentMethodTypes.plus(externalPaymentMethodTypes()).toMutableList()
+        val originalOrderedTypes = stripeIntent.paymentMethodTypes
+            .plus(externalPaymentMethodTypes())
+            .plus(customPaymentMethodIds())
+            .toMutableList()
         val result = mutableListOf<String>()
         // 1. Add each PM in paymentMethodOrder first
         for (pm in paymentMethodOrder) {
@@ -141,8 +147,24 @@ internal data class PaymentMethodMetadata(
         return externalPaymentMethodSpecs.map { it.type }
     }
 
+    private fun customPaymentMethodIds(): List<String> {
+        return displayableCustomPaymentMethods.map { it.id }
+    }
+
     fun isExternalPaymentMethod(code: String): Boolean {
         return externalPaymentMethodTypes().contains(code)
+    }
+
+    fun isCustomPaymentMethod(code: String): Boolean {
+        return customPaymentMethodIds().contains(code)
+    }
+
+    private fun getUiDefinitionFactoryForCustomPaymentMethod(code: String): UiDefinitionFactory.Simple? {
+        val displayableCustomPaymentMethodForCode = displayableCustomPaymentMethods.firstOrNull {
+            it.id == code
+        } ?: return null
+
+        return CustomPaymentMethodUiDefinitionFactory(displayableCustomPaymentMethodForCode)
     }
 
     private fun getUiDefinitionFactoryForExternalPaymentMethod(code: String): UiDefinitionFactory.Simple? {
@@ -190,6 +212,11 @@ internal data class PaymentMethodMetadata(
                 customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
                 incentive = null,
             )
+        } else if (isCustomPaymentMethod(code)) {
+            getUiDefinitionFactoryForCustomPaymentMethod(code)?.createFormHeaderInformation(
+                customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
+                incentive = null,
+            )
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
 
@@ -208,8 +235,13 @@ internal data class PaymentMethodMetadata(
     ): List<FormElement>? {
         return if (isExternalPaymentMethod(code)) {
             getUiDefinitionFactoryForExternalPaymentMethod(code)?.createFormElements(
-                this,
-                uiDefinitionFactoryArgumentsFactory.create(this, requiresMandate = false)
+                metadata = this,
+                arguments = uiDefinitionFactoryArgumentsFactory.create(this, requiresMandate = false)
+            )
+        } else if (isCustomPaymentMethod(code)) {
+            getUiDefinitionFactoryForCustomPaymentMethod(code)?.createFormElements(
+                metadata = this,
+                arguments = uiDefinitionFactoryArgumentsFactory.create(this, requiresMandate = false)
             )
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null

@@ -1,24 +1,25 @@
 package com.stripe.android.model.parsers
 
+import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.ElementsSession
 import org.json.JSONObject
 
 internal class CustomPaymentMethodJsonParser : ModelJsonParser<ElementsSession.CustomPaymentMethod> {
     override fun parse(json: JSONObject): ElementsSession.CustomPaymentMethod? {
-        val type = json.optString(FIELD_TYPE) ?: return null
+        val type = optString(json, FIELD_TYPE) ?: return null
 
-        val error = json.optString(FIELD_ERROR)
+        val error = optString(json, FIELD_ERROR)
 
-        if (error.isNotEmpty()) {
+        error?.let {
             return ElementsSession.CustomPaymentMethod.Unavailable(
                 type = type,
-                error = error,
+                error = it,
             )
         }
 
-        val displayName = json.optString(FIELD_DISPLAY_NAME) ?: return null
-        val logoUrl = json.optString(FIELD_LOGO_URL) ?: return null
+        val displayName = optString(json, FIELD_DISPLAY_NAME) ?: return null
+        val logoUrl = optString(json, FIELD_LOGO_URL) ?: return null
 
         return ElementsSession.CustomPaymentMethod.Available(
             type = type,
