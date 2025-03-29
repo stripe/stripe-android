@@ -79,7 +79,6 @@ import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
 
 @Composable
@@ -188,34 +187,48 @@ internal fun PaymentSheetScreenContent(
     val walletsProcessingState by viewModel.walletsProcessingState.collectAsState()
     val error by viewModel.error.collectAsState()
     val mandateText by viewModel.mandateHandler.mandateText.collectAsState()
-    val uiState by remember(type) {
+
+    /**
+     * State Dependency Graph:
+     *
+     *     walletState      currentScreen     primaryButtonUiState
+     *       \              |         |              |
+     *        \             v         |              |
+     *         \   showsWalletsHeader |              |
+     *          \          |          |              |
+     *           v         v          v              |
+     *          actualWalletsState -> headerText     |
+     *                    \          /               |
+     *                     v        v                v
+     *                  PaymentSheetScreenContentState
+     *
+     */
+    val uiState: PaymentSheetScreenContentState by remember(type) {
         val isCompleteFlow = type == Complete
-        val result: StateFlow<PaymentSheetScreenContentState> =
-            combineAsStateFlow(
-                viewModel.navigationHandler.currentScreen,
-                viewModel.walletsState,
-                viewModel.primaryButtonUiState,
-            ) { currentScreen, walletsState, primaryButtonUiState ->
-                Triple(currentScreen, walletsState, primaryButtonUiState)
-            }.flatMapLatestAsStateFlow { (currentScreen, walletsState, primaryButtonUiState) ->
-                currentScreen.showsWalletsHeader(isCompleteFlow)
-                    .flatMapLatestAsStateFlow { showsWalletsHeader ->
-                        val actualWalletsState = walletsState.takeIf { showsWalletsHeader }
-                        currentScreen.title(
-                            isCompleteFlow = isCompleteFlow,
-                            isWalletEnabled = actualWalletsState != null
-                        ).mapAsStateFlow { headerText ->
-                            PaymentSheetScreenContentState(
-                                showsWalletsHeader = showsWalletsHeader,
-                                actualWalletsState = actualWalletsState,
-                                headerText = headerText,
-                                currentScreen = currentScreen,
-                                primaryButtonUiState = primaryButtonUiState
-                            )
-                        }
+        combineAsStateFlow(
+            viewModel.navigationHandler.currentScreen,
+            viewModel.walletsState,
+            viewModel.primaryButtonUiState,
+        ) { currentScreen, walletsState, primaryButtonUiState ->
+            Triple(currentScreen, walletsState, primaryButtonUiState)
+        }.flatMapLatestAsStateFlow { (currentScreen, walletsState, primaryButtonUiState) ->
+            currentScreen.showsWalletsHeader(isCompleteFlow)
+                .flatMapLatestAsStateFlow { showsWalletsHeader ->
+                    val actualWalletsState = walletsState.takeIf { showsWalletsHeader }
+                    currentScreen.title(
+                        isCompleteFlow = isCompleteFlow,
+                        isWalletEnabled = actualWalletsState != null
+                    ).mapAsStateFlow { headerText ->
+                        PaymentSheetScreenContentState(
+                            showsWalletsHeader = showsWalletsHeader,
+                            actualWalletsState = actualWalletsState,
+                            headerText = headerText,
+                            currentScreen = currentScreen,
+                            primaryButtonUiState = primaryButtonUiState
+                        )
                     }
-            }
-        result
+                }
+        }
     }.collectAsState()
 
     ResetScroll(scrollState = scrollState, currentScreen = uiState.currentScreen)
