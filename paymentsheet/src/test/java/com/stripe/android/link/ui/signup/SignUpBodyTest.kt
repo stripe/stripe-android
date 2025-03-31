@@ -135,7 +135,8 @@ internal class SignUpBodyTest {
                     signUpEnabled = isReadyToSignUp,
                     requiresNameCollection = requiresNameCollection,
                     errorMessage = errorMessage,
-                    signUpState = signUpState
+                    signUpState = signUpState,
+                    showKeyboardOnOpen = false,
                 ),
                 onSignUpClick = {}
             )

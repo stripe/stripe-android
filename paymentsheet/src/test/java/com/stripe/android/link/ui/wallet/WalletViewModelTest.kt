@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui.wallet
 
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
@@ -24,7 +25,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import kotlin.Result
 import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
@@ -161,6 +161,23 @@ class WalletViewModelTest {
 
         assertThat(viewModel.uiState.value.expiryDateInput).isEqualTo(FormFieldEntry("", isComplete = false))
         assertThat(viewModel.uiState.value.cvcInput).isEqualTo(FormFieldEntry("", isComplete = false))
+    }
+
+    @Test
+    fun `selecting a payment method closes the payment method picker`() = runTest(dispatcher) {
+        val viewModel = createViewModel()
+
+        viewModel.uiState.test {
+            assertThat(awaitItem().isExpanded).isFalse()
+
+            viewModel.onExpandedChanged(expanded = true)
+
+            val expandedState = awaitItem()
+            assertThat(expandedState.isExpanded).isTrue()
+
+            viewModel.onItemSelected(item = expandedState.paymentDetailsList.last())
+            assertThat(awaitItem().isExpanded).isFalse()
+        }
     }
 
     @Test
