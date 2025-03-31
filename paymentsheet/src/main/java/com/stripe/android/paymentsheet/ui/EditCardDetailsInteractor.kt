@@ -14,7 +14,7 @@ internal typealias BrandChoiceCallback = (CardBrand) -> Unit
 /**
  * Interface for handling UI interactions when editing card details.
  */
-internal interface CardEditUIHandler {
+internal interface EditCardDetailsInteractor {
     /**
      * The card being edited.
      */
@@ -90,6 +90,6 @@ internal interface CardEditUIHandler {
             showCardBrandDropdown: Boolean,
             paymentMethodIcon: Int,
             onCardDetailsChanged: CardDetailsCallback
-        ): CardEditUIHandler
+        ): EditCardDetailsInteractor
     }
 }
