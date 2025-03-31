@@ -71,7 +71,7 @@ class PaymentSelectionUpdaterTest {
         val newSelection = PaymentSelection.Saved(
             PaymentMethodFactory.card(id = "pm_abcd").update(
                 brand = CardBrand.AmericanExpress,
-                last4 ="0005",
+                last4 = "0005",
                 addCbcNetworks = false
             )
         )

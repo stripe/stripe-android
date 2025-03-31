@@ -25,10 +25,11 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
         newState: PaymentSheetState.Full,
         newConfig: PaymentSheet.Configuration,
     ): PaymentSelection? {
-        return newState.paymentSelection?.takeIf { canUseSelection(it, newState) } ?:
-        currentSelection?.takeIf { selection ->
-            canUseSelection(selection, newState) && previousConfig?.let { previousConfig ->
-                !previousConfig.asCommonConfiguration().containsVolatileDifferences(newConfig.asCommonConfiguration())
+        return newState.paymentSelection?.takeIf {
+            canUseSelection(it, newState)
+        } ?: currentSelection?.takeIf { selection ->
+            canUseSelection(selection, newState) && previousConfig?.let {
+                !it.asCommonConfiguration().containsVolatileDifferences(newConfig.asCommonConfiguration())
             } != false
         }
     }
