@@ -307,9 +307,9 @@ internal class SignUpViewModelTest {
             linkEventsReporter = object : SignUpLinkEventsReporter() {
                 override fun onSignupCompleted(isInline: Boolean) = Unit
             },
-            navigate = { screen ->
+            navigateAndClearStack = { screen ->
                 screens.add(screen)
-            }
+            },
         )
 
         val linkAccount = LinkAccount(
