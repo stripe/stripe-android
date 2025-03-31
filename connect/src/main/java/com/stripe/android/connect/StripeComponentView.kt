@@ -51,8 +51,7 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
     private val clock: Clock = AndroidClock(),
 ) : FrameLayout(context, attrs, defStyleAttr),
     StripeConnectWebViewContainer<Listener, Props>
-    where Listener : StripeEmbeddedComponentListener,
-          Props : ComponentProps {
+    where Listener : StripeEmbeddedComponentListener {
 
     private val loggerTag = javaClass.simpleName
 
@@ -98,7 +97,7 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
             initializeInternal(
                 embeddedComponentManager = embeddedComponentManager,
                 listener = listener,
-                propsJson = props?.toJsonObject()
+                propsJson = props?.toComponentPropsJsonObject()
             )
         }
     }
@@ -117,7 +116,7 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
         initializeInternal(
             embeddedComponentManager = embeddedComponentManager,
             listener = listener,
-            propsJson = props.toJsonObject()
+            propsJson = props?.toComponentPropsJsonObject()
         )
     }
 
@@ -235,7 +234,7 @@ abstract class StripeComponentView<Listener, Props> internal constructor(
     internal fun setPropsFromXml(props: Props) {
         // Only set props if uninitialized.
         if (this.embeddedComponentManager == null) {
-            this.propsJson = props.toJsonObject()
+            this.propsJson = props?.toComponentPropsJsonObject()
         }
     }
 
