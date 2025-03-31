@@ -145,7 +145,6 @@ private fun Screens(
 
         composable(LinkScreen.SignUp.route) {
             SignUpRoute(
-                navigate = navigate,
                 navigateAndClearStack = navigateAndClearStack,
                 moveToWeb = moveToWeb
             )
@@ -185,14 +184,12 @@ private fun Screens(
 
 @Composable
 private fun SignUpRoute(
-    navigate: (route: LinkScreen) -> Unit,
     navigateAndClearStack: (route: LinkScreen) -> Unit,
     moveToWeb: () -> Unit
 ) {
     val viewModel: SignUpViewModel = linkViewModel { parentComponent ->
         SignUpViewModel.factory(
             parentComponent = parentComponent,
-            navigate = navigate,
             navigateAndClearStack = navigateAndClearStack,
             moveToWeb = moveToWeb
         )

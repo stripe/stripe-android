@@ -570,7 +570,6 @@ internal class SignUpViewModelTest {
         },
         logger: Logger = FakeLogger(),
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
-        navigate: (LinkScreen) -> Unit = {},
         navigateAndClearStack: (LinkScreen) -> Unit = {},
         moveToWeb: () -> Unit = {}
     ): SignUpViewModel {
@@ -588,7 +587,6 @@ internal class SignUpViewModelTest {
             linkEventsReporter = linkEventsReporter,
             logger = logger,
             savedStateHandle = savedStateHandle,
-            navigate = navigate,
             navigateAndClearStack = navigateAndClearStack,
             moveToWeb = moveToWeb,
         )

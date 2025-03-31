@@ -13,7 +13,10 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -71,11 +74,15 @@ internal fun SignUpBody(
     signUpScreenState: SignUpScreenState,
     onSignUpClick: () -> Unit
 ) {
+    var didFocusField by rememberSaveable { mutableStateOf(false) }
     val emailFocusRequester = remember { FocusRequester() }
 
-    LaunchedEffect(Unit) {
-        delay(LINK_DEFAULT_ANIMATION_DELAY_MILLIS)
-        emailFocusRequester.requestFocus()
+    if (!didFocusField && signUpScreenState.showKeyboardOnOpen) {
+        LaunchedEffect(Unit) {
+            delay(LINK_DEFAULT_ANIMATION_DELAY_MILLIS)
+            emailFocusRequester.requestFocus()
+            didFocusField = true
+        }
     }
 
     Column(
@@ -266,6 +273,7 @@ private fun SignUpScreenPreview() {
                     signUpEnabled = false,
                     signUpState = SignUpState.InputtingRemainingFields,
                     requiresNameCollection = true,
+                    showKeyboardOnOpen = false,
                 ),
                 onSignUpClick = {}
             )

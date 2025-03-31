@@ -46,7 +46,6 @@ internal class SignUpViewModel @Inject constructor(
     private val logger: Logger,
     private val linkAuth: LinkAuth,
     private val savedStateHandle: SavedStateHandle,
-    private val navigate: (LinkScreen) -> Unit,
     private val navigateAndClearStack: (LinkScreen) -> Unit,
     private val moveToWeb: () -> Unit
 ) : ViewModel() {
@@ -74,7 +73,8 @@ internal class SignUpViewModel @Inject constructor(
                     is SetupIntent -> stripeIntent.countryCode
                 }
                 countryCode != CountryCode.US.value
-            }
+            },
+            showKeyboardOnOpen = customerInfo?.email == null,
         )
     )
 
@@ -263,7 +263,6 @@ internal class SignUpViewModel @Inject constructor(
 
         fun factory(
             parentComponent: NativeLinkComponent,
-            navigate: (LinkScreen) -> Unit,
             navigateAndClearStack: (LinkScreen) -> Unit,
             moveToWeb: () -> Unit
         ): ViewModelProvider.Factory {
@@ -275,7 +274,6 @@ internal class SignUpViewModel @Inject constructor(
                         logger = parentComponent.logger,
                         linkAuth = parentComponent.linkAuth,
                         savedStateHandle = parentComponent.savedStateHandle,
-                        navigate = navigate,
                         navigateAndClearStack = navigateAndClearStack,
                         moveToWeb = moveToWeb
                     )
