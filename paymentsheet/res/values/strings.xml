@@ -202,7 +202,7 @@
   <!-- Two factor authentication screen heading -->
   <string name="stripe_verification_header_prefilled">Use your saved info to check out faster</string>
   <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
-  <string name="stripe_verification_message">Enter the code sent to %s to use Link to pay by default.</string>
+  <string name="stripe_verification_message">Enter the code sent to %s to use your saved information.</string>
   <!-- Text of a label for confirming an email address. E.g., 'Not user@example.com?' -->
   <string name="stripe_verification_not_email">Not %s?</string>
   <!-- Label for a button that re-sends the a login code when tapped -->
