@@ -14,7 +14,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-internal class DefaultCardEditUIHandlerTest {
+internal class DefaultEditCardDetailsInteractorTest {
 
     @Test
     fun testInitialStateForCardWithNetworks() {
@@ -85,14 +85,14 @@ internal class DefaultCardEditUIHandlerTest {
         assertThat(newBrandChoice).isEqualTo(CardBrand.Visa)
     }
 
-    private fun DefaultCardEditUIHandler.brandChanged(cardBrand: CardBrand) {
+    private fun DefaultEditCardDetailsInteractor.brandChanged(cardBrand: CardBrand) {
         onBrandChoiceChanged(CardBrandChoice(brand = cardBrand, enabled = true))
     }
 
-    private val DefaultCardEditUIHandler.uiState
+    private val DefaultEditCardDetailsInteractor.uiState
         get() = this.state.value
 
-    private val DefaultCardEditUIHandler.selectedBrand
+    private val DefaultEditCardDetailsInteractor.selectedBrand
         get() = uiState.selectedCardBrand.brand
 
     private fun cardUpdateParams(
@@ -115,8 +115,8 @@ internal class DefaultCardEditUIHandlerTest {
         showCardBrandDropdown: Boolean = true,
         onBrandChoiceChanged: (CardBrand) -> Unit = {},
         onCardDetailsChanged: (CardUpdateParams?) -> Unit = {}
-    ): DefaultCardEditUIHandler {
-        return DefaultCardEditUIHandler(
+    ): DefaultEditCardDetailsInteractor {
+        return DefaultEditCardDetailsInteractor(
             card = card,
             cardBrandFilter = cardBrandFilter,
             paymentMethodIcon = 0,
