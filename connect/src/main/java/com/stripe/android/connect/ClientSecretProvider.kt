@@ -1,6 +1,5 @@
 package com.stripe.android.connect
 
-import androidx.annotation.RestrictTo
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -9,7 +8,6 @@ import kotlin.coroutines.suspendCoroutine
  * Implement the [provideClientSecret] method to provide your client secret to the Connect SDK.
  */
 @PrivateBetaConnectSDK
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun interface ClientSecretProvider {
 
     /**
@@ -30,7 +28,6 @@ fun interface ClientSecretProvider {
  * from Java.
  */
 @PrivateBetaConnectSDK
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 abstract class ClientSecretProviderListenerWrapper : ClientSecretProvider {
     override suspend fun provideClientSecret(): String? {
         return suspendCoroutine { continuation ->
@@ -54,7 +51,6 @@ abstract class ClientSecretProviderListenerWrapper : ClientSecretProvider {
      * The interface used to pass your client secret to the SDK.
      */
     @PrivateBetaConnectSDK
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun interface ClientSecretResultListener {
         /**
          * Once you have retrieved your client Secret, call [onResult] with the client secret
