@@ -6,6 +6,7 @@ import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -30,7 +31,8 @@ internal interface LinkConfigurationCoordinator {
 
     suspend fun signInWithUserInput(
         configuration: LinkConfiguration,
-        userInput: UserInput
+        userInput: UserInput,
+        emailSource: EmailSource
     ): Result<Boolean>
 
     suspend fun attachNewCardToAccount(
@@ -82,10 +84,11 @@ internal class RealLinkConfigurationCoordinator @Inject internal constructor(
      */
     override suspend fun signInWithUserInput(
         configuration: LinkConfiguration,
-        userInput: UserInput
+        userInput: UserInput,
+        emailSource: EmailSource
     ): Result<Boolean> = getLinkPaymentLauncherComponent(configuration)
         .linkAccountManager
-        .signInWithUserInput(userInput)
+        .signInWithUserInput(userInput, emailSource)
         .map { true }
 
     /**

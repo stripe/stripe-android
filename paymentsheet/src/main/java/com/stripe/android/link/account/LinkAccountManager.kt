@@ -32,6 +32,7 @@ internal interface LinkAccountManager {
      */
     suspend fun lookupConsumer(
         email: String,
+        emailSource: EmailSource,
         startSession: Boolean = true,
     ): Result<LinkAccount?>
 
@@ -78,7 +79,8 @@ internal interface LinkAccountManager {
      * account, starting verification if needed.
      */
     suspend fun signInWithUserInput(
-        userInput: UserInput
+        userInput: UserInput,
+        emailSource: EmailSource
     ): Result<LinkAccount>
 
     suspend fun logOut(): Result<ConsumerSession>

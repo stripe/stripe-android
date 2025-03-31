@@ -25,6 +25,7 @@ internal interface LinkRepository {
      */
     suspend fun lookupConsumer(
         email: String,
+        emailSource: EmailSource
     ): Result<ConsumerSessionLookup>
 
     suspend fun mobileLookupConsumer(
