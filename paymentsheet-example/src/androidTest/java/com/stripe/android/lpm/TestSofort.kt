@@ -12,10 +12,12 @@ import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymen
 import com.stripe.android.paymentsheet.example.playground.settings.GooglePaySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.test.core.TestParameters
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
+@Ignore("#ir-agitate-surround")
 internal class TestSofort : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "sofort",

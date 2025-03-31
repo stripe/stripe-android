@@ -77,7 +77,7 @@ workflows:
     meta:
       bitrise.io:
         stack: osx-xcode-16.2.x    # Specify Mac stack just for this workflow
-        machine_type_id: g2.8core # Appropriate Mac instance
+        machine_type_id: g2.mac.large # Appropriate Mac instance
     before_run:
       - prepare_all
     after_run:
