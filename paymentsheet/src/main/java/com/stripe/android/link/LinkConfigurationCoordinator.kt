@@ -31,8 +31,7 @@ internal interface LinkConfigurationCoordinator {
 
     suspend fun signInWithUserInput(
         configuration: LinkConfiguration,
-        userInput: UserInput,
-        emailSource: EmailSource
+        userInput: UserInput
     ): Result<Boolean>
 
     suspend fun attachNewCardToAccount(
@@ -84,11 +83,10 @@ internal class RealLinkConfigurationCoordinator @Inject internal constructor(
      */
     override suspend fun signInWithUserInput(
         configuration: LinkConfiguration,
-        userInput: UserInput,
-        emailSource: EmailSource
+        userInput: UserInput
     ): Result<Boolean> = getLinkPaymentLauncherComponent(configuration)
         .linkAccountManager
-        .signInWithUserInput(userInput, emailSource)
+        .signInWithUserInput(userInput, EmailSource.USER_ACTION)
         .map { true }
 
     /**
