@@ -7,6 +7,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
@@ -17,6 +18,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.testing.PaymentMethodFactory.update
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import org.junit.runner.RunWith
@@ -30,16 +32,123 @@ class PaymentSelectionUpdaterTest {
     private val defaultPaymentSheetConfiguration: PaymentSheet.Configuration = PaymentSheet.Configuration("Some name")
 
     @Test
-    fun `Uses new payment selection if there's no existing one`() {
+    fun `Uses new payment selection if it exists`() {
         val newState = mockPaymentSheetStateWithPaymentIntent(paymentSelection = PaymentSelection.GooglePay)
         val updater = createUpdater()
         val result = updater(
             currentSelection = null,
-            previousConfig = null,
+            previousConfig = defaultPaymentSheetConfiguration,
             newState = newState,
             newConfig = defaultPaymentSheetConfiguration,
         )
         assertThat(result).isEqualTo(PaymentSelection.GooglePay)
+    }
+
+    @Test
+    fun `Uses new payment selection if it exists and is part of paymentMethods`() {
+        val newSelection = PaymentSelection.Saved(
+            paymentMethod = PaymentMethodFactory.card(id = "pm_1234")
+        )
+        val newState = mockPaymentSheetStateWithPaymentIntent(
+            paymentSelection = newSelection,
+            customerPaymentMethods = listOf(newSelection.paymentMethod)
+        )
+        val updater = createUpdater()
+        val result = updater(
+            currentSelection = null,
+            previousConfig = defaultPaymentSheetConfiguration,
+            newState = newState,
+            newConfig = defaultPaymentSheetConfiguration,
+        )
+        assertThat(result).isEqualTo(newSelection)
+    }
+
+    @Test
+    fun `Uses new payment selection over current selection`() {
+        val existingSelection = PaymentSelection.Saved(
+            PaymentMethodFactory.card(id = "pm_1234")
+        )
+        val newSelection = PaymentSelection.Saved(
+            PaymentMethodFactory.card(id = "pm_abcd").update(
+                brand = CardBrand.AmericanExpress,
+                last4 ="0005",
+                addCbcNetworks = false
+            )
+        )
+
+        val newState = mockPaymentSheetStateWithPaymentIntent(
+            paymentMethodTypes = listOf("card"),
+            customerPaymentMethods = listOf(
+                existingSelection.paymentMethod,
+                newSelection.paymentMethod,
+            ),
+            paymentSelection = newSelection
+        )
+        val updater = createUpdater()
+        val result = updater(
+            currentSelection = existingSelection,
+            previousConfig = defaultPaymentSheetConfiguration,
+            newState = newState,
+            newConfig = defaultPaymentSheetConfiguration,
+        )
+        assertThat(result).isEqualTo(newSelection)
+    }
+
+    @Test
+    fun `Uses current payment selection if new selection does not exist`() {
+        val existingSelection = PaymentSelection.Saved(
+            PaymentMethodFactory.card(id = "pm_1234")
+        )
+
+        val newConfig = PaymentSheet.Configuration(
+            merchantDisplayName = "Example, Inc.",
+            allowsDelayedPaymentMethods = true,
+        )
+        val newState = mockPaymentSheetStateWithPaymentIntent(
+            paymentMethodTypes = listOf("card", "sofort"),
+            customerPaymentMethods = listOf(
+                existingSelection.paymentMethod,
+            ),
+            config = newConfig
+        )
+
+        val updater = createUpdater()
+        val result = updater(
+            currentSelection = existingSelection,
+            previousConfig = defaultPaymentSheetConfiguration,
+            newState = newState,
+            newConfig = defaultPaymentSheetConfiguration,
+        )
+        assertThat(result).isEqualTo(existingSelection)
+    }
+
+    @Test
+    fun `Uses current payment selection if new selection type is no longer supported`() {
+        val existingSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        val newSelection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
+
+        val newConfig = PaymentSheet.Configuration(
+            merchantDisplayName = "Example, Inc.",
+            allowsDelayedPaymentMethods = true,
+        )
+        val newState = mockPaymentSheetStateWithPaymentIntent(
+            paymentSelection = newSelection,
+            customerPaymentMethods = listOf(
+                existingSelection.paymentMethod,
+                newSelection.paymentMethod,
+            ),
+            paymentMethodTypes = listOf("card", "sofort"),
+            config = newConfig
+        )
+
+        val updater = createUpdater()
+        val result = updater(
+            currentSelection = existingSelection,
+            previousConfig = defaultPaymentSheetConfiguration,
+            newState = newState,
+            newConfig = defaultPaymentSheetConfiguration,
+        )
+        assertThat(result).isEqualTo(existingSelection)
     }
 
     @Test
