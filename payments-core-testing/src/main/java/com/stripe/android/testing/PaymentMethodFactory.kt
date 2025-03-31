@@ -82,14 +82,6 @@ object PaymentMethodFactory {
         )
     }
 
-    fun amexCard(): PaymentMethod {
-        return card(random = false).update(
-            last4 = "0005",
-            addCbcNetworks = false,
-            brand = CardBrand.AmericanExpress,
-        )
-    }
-
     fun cashAppPay(): PaymentMethod {
         return PaymentMethod(
             id = "pm_1234",

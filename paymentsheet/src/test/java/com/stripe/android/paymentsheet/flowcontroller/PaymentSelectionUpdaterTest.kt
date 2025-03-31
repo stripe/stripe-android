@@ -100,16 +100,11 @@ class PaymentSelectionUpdaterTest {
             PaymentMethodFactory.card(id = "pm_1234")
         )
 
-        val newConfig = PaymentSheet.Configuration(
-            merchantDisplayName = "Example, Inc.",
-            allowsDelayedPaymentMethods = true,
-        )
         val newState = mockPaymentSheetStateWithPaymentIntent(
             paymentMethodTypes = listOf("card", "sofort"),
             customerPaymentMethods = listOf(
                 existingSelection.paymentMethod,
             ),
-            config = newConfig
         )
 
         val updater = createUpdater()
@@ -127,10 +122,6 @@ class PaymentSelectionUpdaterTest {
         val existingSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         val newSelection = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
 
-        val newConfig = PaymentSheet.Configuration(
-            merchantDisplayName = "Example, Inc.",
-            allowsDelayedPaymentMethods = true,
-        )
         val newState = mockPaymentSheetStateWithPaymentIntent(
             paymentSelection = newSelection,
             customerPaymentMethods = listOf(
@@ -138,7 +129,6 @@ class PaymentSelectionUpdaterTest {
                 newSelection.paymentMethod,
             ),
             paymentMethodTypes = listOf("card", "sofort"),
-            config = newConfig
         )
 
         val updater = createUpdater()
