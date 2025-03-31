@@ -5,8 +5,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Test
 import java.util.Locale
-import kotlin.collections.containsKey
-import kotlin.text.get
 
 class SignUpParamsTest {
 
