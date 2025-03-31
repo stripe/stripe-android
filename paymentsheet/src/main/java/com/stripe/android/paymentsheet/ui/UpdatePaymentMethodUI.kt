@@ -12,7 +12,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -54,12 +53,13 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
         modifier = modifier.padding(horizontal = horizontalPadding).testTag(UPDATE_PM_SCREEN_TEST_TAG),
     ) {
         when (val savedPaymentMethod = interactor.displayableSavedPaymentMethod.savedPaymentMethod) {
-            is SavedPaymentMethod.Card -> {
-                CardDetailsUI(
-                    savedPaymentMethod = savedPaymentMethod,
-                    interactor = interactor,
-                )
-            }
+            is SavedPaymentMethod.Card -> CardDetailsUI(
+                displayableSavedPaymentMethod = interactor.displayableSavedPaymentMethod,
+                shouldShowCardBrandDropdown = shouldShowCardBrandDropdown,
+                selectedBrand = state.cardBrandChoice,
+                card = savedPaymentMethod.card,
+                interactor = interactor,
+            )
             is SavedPaymentMethod.SepaDebit -> SepaDebitUI(
                 name = interactor.displayableSavedPaymentMethod.paymentMethod.billingDetails?.name,
                 email = interactor.displayableSavedPaymentMethod.paymentMethod.billingDetails?.email,
@@ -163,15 +163,24 @@ private fun UpdatePaymentMethodButtons(
 
 @Composable
 private fun CardDetailsUI(
-    savedPaymentMethod: SavedPaymentMethod.Card,
+    displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
+    shouldShowCardBrandDropdown: Boolean,
+    selectedBrand: CardBrandChoice,
+    card: PaymentMethod.Card,
     interactor: UpdatePaymentMethodInteractor,
 ) {
-    val cardEditUIHandler = remember(savedPaymentMethod) {
-        interactor.cardUiHandlerFactory(savedPaymentMethod)
-    }
     CardDetailsEditUI(
-        cardEditUIHandler = cardEditUIHandler,
-        isExpiredCard = interactor.isExpiredCard
+        shouldShowCardBrandDropdown = shouldShowCardBrandDropdown,
+        selectedBrand = selectedBrand,
+        card = card,
+        isExpired = interactor.isExpiredCard,
+        cardBrandFilter = interactor.cardBrandFilter,
+        paymentMethodIcon = displayableSavedPaymentMethod
+            .paymentMethod
+            .getSavedPaymentMethodIcon(forVerticalMode = true),
+        onBrandChoiceChanged = {
+            interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(it))
+        }
     )
 }
 
