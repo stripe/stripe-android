@@ -44,7 +44,7 @@ class EmbeddedComponentCoordinatorTest {
 
     @Before
     fun setup() {
-        publishableKey = "test_publishable_key"
+        publishableKey = "pk_test_123"
         mockClientSecretProvider = mock()
         coordinator =
             EmbeddedComponentCoordinator(
