@@ -1,3 +1,7 @@
+
+
+
+
 package com.stripe.android.link.ui.signup
 
 import androidx.compose.animation.AnimatedVisibility
@@ -101,7 +105,7 @@ internal fun SignUpBody(
             color = MaterialTheme.colors.onSurface
         )
         Text(
-            text = stringResource(R.string.stripe_sign_up_message, signUpScreenState.merchantName),
+            text = stringResource(R.string.stripe_sign_up_message),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 4.dp, bottom = 30.dp),

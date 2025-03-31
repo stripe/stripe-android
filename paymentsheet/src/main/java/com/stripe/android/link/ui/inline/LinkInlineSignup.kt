@@ -204,7 +204,7 @@ private fun LinkCheckbox(
                     .copy(alpha = contentAlpha)
             )
             Text(
-                text = stringResource(R.string.stripe_sign_up_message, merchantName),
+                text = stringResource(R.string.stripe_sign_up_message),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 4.dp),

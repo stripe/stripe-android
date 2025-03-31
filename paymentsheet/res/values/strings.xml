@@ -164,9 +164,9 @@
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_sign_up">Join Link</string>
   <!-- Title for the Link signup screen -->
-  <string name="stripe_sign_up_header">Secure 1⁠-⁠click checkout</string>
+  <string name="stripe_sign_up_header">Fast, secure 1⁠-⁠click checkout</string>
   <!-- Label describing the benefit of signing up for Link. Pay faster at {Merchant Name} and thousands of merchants. e.g, 'Pay faster at Example, Inc. and thousands of merchants.' -->
-  <string name="stripe_sign_up_message">Pay faster at %s and thousands of businesses.</string>
+  <string name="stripe_sign_up_message">Save your payment information with Link, and securely check out in 1-click on Link-supported sites.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_sign_up_terms"><![CDATA[By joining Link, you agree to the <terms>Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
