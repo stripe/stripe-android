@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntent.ConfirmationMethod.Manual
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 
@@ -32,16 +33,10 @@ internal object DeferredIntentValidator {
                         "(${paymentMode.currency.lowercase()})."
                 }
 
-                require(paymentMode.setupFutureUsage == stripeIntent.setupFutureUsage) {
+                require(paymentMode.setupFutureUsage.isNull() == stripeIntent.setupFutureUsage.isNull()) {
                     "Your PaymentIntent setupFutureUsage (${stripeIntent.setupFutureUsage}) " +
                         "does not match the PaymentSheet.IntentConfiguration " +
                         "setupFutureUsage (${paymentMode.setupFutureUsage})."
-                }
-
-                require(paymentMode.captureMethod == stripeIntent.captureMethod) {
-                    "Your PaymentIntent captureMethod (${stripeIntent.captureMethod}) does not " +
-                        "match the PaymentSheet.IntentConfiguration " +
-                        "captureMethod (${paymentMode.captureMethod})."
                 }
 
                 // Manual confirmation is only available using FlowController because merchants own
@@ -59,7 +54,7 @@ internal object DeferredIntentValidator {
                         "but used a PaymentSheet.IntentConfiguration in payment mode."
                 }
 
-                require(setupMode.setupFutureUsage == stripeIntent.usage) {
+                require(setupMode.setupFutureUsage.isNull() == stripeIntent.usage.isNull()) {
                     "Your SetupIntent usage (${stripeIntent.usage}) does not match " +
                         "the PaymentSheet.IntentConfiguration usage (${stripeIntent.usage})."
                 }
@@ -68,4 +63,70 @@ internal object DeferredIntentValidator {
 
         return stripeIntent
     }
+
+    fun validatePaymentMethod(
+        intent: StripeIntent,
+        paymentMethod: PaymentMethod
+    ) {
+        val attachedPaymentMethod = intent.paymentMethodId ?: intent.paymentMethod?.id
+
+        require(
+            attachedPaymentMethod == null ||
+                attachedPaymentMethod == paymentMethod.id ||
+                isSimilarPaymentMethod(paymentMethod, intent.paymentMethod)
+        ) {
+            "Your payment method ($attachedPaymentMethod) attached to the intent does not match the " +
+                "provided payment method (${paymentMethod.id})!"
+        }
+    }
+
+    private fun isSimilarPaymentMethod(
+        providedPaymentMethod: PaymentMethod,
+        attachedPaymentMethod: PaymentMethod?,
+    ): Boolean {
+        if (
+            attachedPaymentMethod == null ||
+            providedPaymentMethod.type != attachedPaymentMethod.type
+        ) {
+            return false
+        }
+
+        return when (providedPaymentMethod.type) {
+            PaymentMethod.Type.Card -> isSameFingerprint(providedPaymentMethod, attachedPaymentMethod) {
+                card?.fingerprint
+            }
+            PaymentMethod.Type.USBankAccount -> isSameFingerprint(providedPaymentMethod, attachedPaymentMethod) {
+                usBankAccount?.fingerprint
+            }
+            PaymentMethod.Type.AuBecsDebit -> isSameFingerprint(providedPaymentMethod, attachedPaymentMethod) {
+                auBecsDebit?.fingerprint
+            }
+            PaymentMethod.Type.BacsDebit -> isSameFingerprint(providedPaymentMethod, attachedPaymentMethod) {
+                bacsDebit?.fingerprint
+            }
+            PaymentMethod.Type.SepaDebit -> isSameFingerprint(providedPaymentMethod, attachedPaymentMethod) {
+                sepaDebit?.fingerprint
+            }
+            else -> false
+        }
+    }
+
+    private fun isSameFingerprint(
+        firstPaymentMethod: PaymentMethod,
+        secondPaymentMethod: PaymentMethod,
+        fingerprintProvider: PaymentMethod.() -> String?,
+    ): Boolean {
+        val firstFingerprint = fingerprintProvider(firstPaymentMethod)
+        val secondFingerprint = fingerprintProvider(secondPaymentMethod)
+
+        if (firstFingerprint == null || secondFingerprint == null) {
+            return false
+        }
+
+        return firstFingerprint == secondFingerprint
+    }
+}
+
+private fun Any?.isNull(): Boolean {
+    return this == null
 }

@@ -16,6 +16,8 @@
   <string name="stripe_bank_account_with_last_4">Bank account ····%s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Confirm the payment in your bank\'s app within %s to complete the purchase.</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_cashapp_afterpay_subtitle">Buy now or pay later with Cash App Afterpay</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
   <string name="stripe_clearpay_subtitle">Buy now or pay later with Clearpay</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
@@ -67,7 +69,7 @@
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">By providing your card information, you allow %s to charge your card for future payments in accordance with their terms.</string>
   <!-- Error message displayed when updating a card fails. -->
-  <string name="stripe_paymentsheet_card_updates_failed_error_message">An error occurred. Please try again.</string>
+  <string name="stripe_paymentsheet_card_updates_failed_error_message">Card was not updated. Please try again.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Choose a payment method</string>
   <string name="stripe_paymentsheet_close">Close</string>
@@ -144,7 +146,7 @@
   <!-- Text displayed on manage SEPA debit screen when SEPA debit details are not editable. -->
   <string name="stripe_paymentsheet_sepa_debit_details_cannot_be_changed">SEPA debit details cannot be changed.</string>
   <!-- Error message displayed when setting a default payment method fails. -->
-  <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">Default payment method was not updated. Please try again.</string>
+  <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">Default payment method was not changed. Please try again.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Total: %s</string>
   <!-- Error message displayed when updating card brand fails. -->

@@ -2,7 +2,6 @@ package com.stripe.android.connect.example.ui.appearance
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.connect.BuildConfig
 import com.stripe.android.connect.example.data.SettingsService
 import com.stripe.android.core.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,9 +16,8 @@ import javax.inject.Inject
 @HiltViewModel
 class AppearanceViewModel @Inject constructor(
     private val settingsService: SettingsService,
+    private val logger: Logger,
 ) : ViewModel() {
-
-    private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
     private val loggingTag = this::class.java.simpleName
 
     private val _state = MutableStateFlow(AppearanceState())

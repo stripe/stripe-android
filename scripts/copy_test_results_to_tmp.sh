@@ -17,6 +17,7 @@ touch "/tmp/test_results/.keep"
 
 copy_test_results ".*/build/reports/tests/testDebugUnitTest$"
 copy_test_results ".*/build/reports/androidTests/connected$"
+copy_test_results ".*/build/reports/androidTests/managedDevice$"
 
 # If screenshots were requested, and it's a failure.
 if [ "$INCLUDE_SCREENSHOT_ON_FAILURE" == "true" ] && [ "$BITRISE_BUILD_STATUS" == 1 ]; then

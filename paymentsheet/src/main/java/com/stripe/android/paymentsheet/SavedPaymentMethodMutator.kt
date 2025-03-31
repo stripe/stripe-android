@@ -5,7 +5,6 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -53,7 +52,7 @@ internal class SavedPaymentMethodMutator(
         DisplayableSavedPaymentMethod,
         canRemove: Boolean,
         performRemove: suspend () -> Throwable?,
-        updateExecutor: suspend (brand: CardBrand) -> Result<PaymentMethod>,
+        updateExecutor: suspend (cardUpdateParams: CardUpdateParams) -> Result<PaymentMethod>,
         setDefaultPaymentMethodExecutor: suspend (paymentMethod: PaymentMethod) -> Result<Unit>,
     ) -> Unit,
     isLinkEnabled: StateFlow<Boolean?>,
@@ -63,12 +62,10 @@ internal class SavedPaymentMethodMutator(
         customerStateHolder.customer,
         paymentMethodMetadataFlow
     ) { customer, paymentMethodMetadata ->
-        paymentMethodMetadata?.customerMetadata?.isPaymentMethodSetAsDefaultEnabled?.let { isEnabled ->
-            if (isEnabled) {
-                customer?.defaultPaymentMethodId
-            } else {
-                null
-            }
+        if (paymentMethodMetadata?.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true) {
+            customer?.defaultPaymentMethodId
+        } else {
+            null
         }
     }
 
@@ -221,12 +218,17 @@ internal class SavedPaymentMethodMutator(
             ),
             paymentMethodId = paymentMethod.id,
         ).onFailure { error ->
-            eventReporter.onSetAsDefaultPaymentMethodFailed(error = error)
+            eventReporter.onSetAsDefaultPaymentMethodFailed(
+                paymentMethodType = paymentMethod.type?.code,
+                error = error
+            )
         }.onSuccess {
             customerStateHolder.setDefaultPaymentMethod(paymentMethod = paymentMethod)
             setSelection(PaymentSelection.Saved(paymentMethod = paymentMethod))
 
-            eventReporter.onSetAsDefaultPaymentMethodSucceeded()
+            eventReporter.onSetAsDefaultPaymentMethodSucceeded(
+                paymentMethodType = paymentMethod.type?.code,
+            )
         }.map {}
     }
 
@@ -246,7 +248,7 @@ internal class SavedPaymentMethodMutator(
 
     suspend fun modifyCardPaymentMethod(
         paymentMethod: PaymentMethod,
-        brand: CardBrand,
+        cardUpdateParams: CardUpdateParams,
         onSuccess: (PaymentMethod) -> Unit = {},
     ): Result<PaymentMethod> {
         // TODO(samer-stripe): Send 'unexpected_error' here
@@ -265,9 +267,14 @@ internal class SavedPaymentMethodMutator(
             ),
             paymentMethodId = paymentMethod.id!!,
             params = PaymentMethodUpdateParams.createCard(
-                networks = PaymentMethodUpdateParams.Card.Networks(
-                    preferred = brand.code
-                ),
+                networks = cardUpdateParams.cardBrand?.let {
+                    PaymentMethodUpdateParams.Card.Networks(
+                        preferred = it.code
+                    )
+                },
+                billingDetails = cardUpdateParams.billingDetails,
+                expiryMonth = cardUpdateParams.expiryMonth,
+                expiryYear = cardUpdateParams.expiryYear,
                 productUsageTokens = setOf("PaymentSheet"),
             )
         ).onSuccess { updatedMethod ->
@@ -292,11 +299,11 @@ internal class SavedPaymentMethodMutator(
             }
 
             eventReporter.onUpdatePaymentMethodSucceeded(
-                selectedBrand = brand
+                selectedBrand = cardUpdateParams.cardBrand
             )
         }.onFailure { error ->
             eventReporter.onUpdatePaymentMethodFailed(
-                selectedBrand = brand,
+                selectedBrand = cardUpdateParams.cardBrand,
                 error = error,
             )
         }
@@ -347,7 +354,7 @@ internal class SavedPaymentMethodMutator(
             displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
             canRemove: Boolean,
             performRemove: suspend () -> Throwable?,
-            updateCardBrandExecutor: suspend (brand: CardBrand) -> Result<PaymentMethod>,
+            updatePaymentMethodExecutor: suspend (cardUpdateParams: CardUpdateParams) -> Result<PaymentMethod>,
             setDefaultPaymentMethodExecutor: suspend (paymentMethod: PaymentMethod) -> Result<Unit>,
         ) {
             if (displayableSavedPaymentMethod.savedPaymentMethod != SavedPaymentMethod.Unexpected) {
@@ -362,18 +369,12 @@ internal class SavedPaymentMethodMutator(
                             removeExecutor = { method ->
                                 performRemove()
                             },
-                            updateCardBrandExecutor = { method, brand ->
-                                updateCardBrandExecutor(brand)
+                            updatePaymentMethodExecutor = { method, cardUpdateParams ->
+                                updatePaymentMethodExecutor(cardUpdateParams)
                             },
                             setDefaultPaymentMethodExecutor = setDefaultPaymentMethodExecutor,
-                            onBrandChoiceOptionsShown = {
-                                viewModel.eventReporter.onShowPaymentOptionBrands(
-                                    source = EventReporter.CardBrandChoiceEventSource.Edit,
-                                    selectedBrand = it
-                                )
-                            },
-                            onBrandChoiceOptionsDismissed = {
-                                viewModel.eventReporter.onHidePaymentOptionBrands(
+                            onBrandChoiceSelected = {
+                                viewModel.eventReporter.onBrandChoiceSelected(
                                     source = EventReporter.CardBrandChoiceEventSource.Edit,
                                     selectedBrand = it
                                 )
@@ -381,11 +382,13 @@ internal class SavedPaymentMethodMutator(
                             shouldShowSetAsDefaultCheckbox = (
                                 viewModel
                                     .paymentMethodMetadata
-                                    .value?.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true &&
-                                    !displayableSavedPaymentMethod.isDefaultPaymentMethod(
-                                        defaultPaymentMethodId =
-                                        viewModel.customerStateHolder.customer.value?.defaultPaymentMethodId
-                                    )
+                                    .value?.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true
+                                ),
+                            isDefaultPaymentMethod = (
+                                displayableSavedPaymentMethod.isDefaultPaymentMethod(
+                                    defaultPaymentMethodId =
+                                    viewModel.customerStateHolder.customer.value?.defaultPaymentMethodId
+                                )
                                 ),
                             onUpdateSuccess = viewModel.navigationHandler::pop,
                         )
@@ -409,17 +412,19 @@ internal class SavedPaymentMethodMutator(
                     navigateBackOnPaymentMethodRemoved(viewModel)
                 },
                 postPaymentMethodRemoveActions = {},
-                onUpdatePaymentMethod = { displayableSavedPaymentMethod,
-                                          canRemove,
-                                          performRemove,
-                                          updateCardBrandExecutor,
-                                          setDefaultPaymentMethodExecutor, ->
+                onUpdatePaymentMethod = {
+                        displayableSavedPaymentMethod,
+                        canRemove,
+                        performRemove,
+                        updatePaymentMethodExecutor,
+                        setDefaultPaymentMethodExecutor,
+                    ->
                     onUpdatePaymentMethod(
                         viewModel = viewModel,
                         displayableSavedPaymentMethod = displayableSavedPaymentMethod,
                         canRemove = canRemove,
                         performRemove = performRemove,
-                        updateCardBrandExecutor = updateCardBrandExecutor,
+                        updatePaymentMethodExecutor = updatePaymentMethodExecutor,
                         setDefaultPaymentMethodExecutor = setDefaultPaymentMethodExecutor,
                     )
                 },

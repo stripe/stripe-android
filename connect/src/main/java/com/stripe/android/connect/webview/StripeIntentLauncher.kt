@@ -6,7 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
 import com.stripe.android.connect.R
-import com.stripe.android.core.BuildConfig
+import com.stripe.android.connect.di.StripeConnectComponent
 import com.stripe.android.core.Logger
 
 internal interface StripeIntentLauncher {
@@ -28,7 +28,7 @@ internal interface StripeIntentLauncher {
 
 internal class StripeIntentLauncherImpl(
     private val toastManagerImpl: StripeToastManagerImpl = StripeToastManagerImpl(),
-    private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
+    private val logger: Logger = StripeConnectComponent.instance.logger,
 ) : StripeIntentLauncher {
 
     override fun launchSecureExternalWebTab(context: Context, uri: Uri) {

@@ -20,12 +20,14 @@ import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
@@ -51,11 +53,13 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.createTestConfirmationHandlerFactory
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherFactory
-import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
@@ -80,6 +84,7 @@ import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.utils.prefilledBuilder
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
@@ -163,7 +168,8 @@ internal class PaymentSheetActivityTest {
                 clientSecret = "pi_1234_secret_5678",
             ),
             config = PaymentSheetFixtures.CONFIG_CUSTOMER,
-            statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR
+            statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
+            paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
         )
     )
 
@@ -203,9 +209,11 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity { activity ->
+            Espresso.onIdle()
             assertThat(activity.buyButton.isEnabled).isTrue()
 
             startEditing()
+            Espresso.onIdle()
             assertThat(activity.buyButton.isEnabled).isFalse()
         }
     }
@@ -600,11 +608,13 @@ internal class PaymentSheetActivityTest {
             viewModel.updateSelection(
                 PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             )
+            Espresso.onIdle()
             assertThat(activity.buyButton.isEnabled)
                 .isTrue()
 
             activity.buyButton.performClick()
 
+            Espresso.onIdle()
             assertThat(activity.buyButton.isEnabled)
                 .isFalse()
         }
@@ -746,13 +756,27 @@ internal class PaymentSheetActivityTest {
     }
 
     @Test
-    fun `successful payment should dismiss bottom sheet`() {
-        val viewModel = createViewModel()
+    fun `successful payment should dismiss bottom sheet`() = runTest {
+        val confirmationHandler = FakeConfirmationHandler()
+
+        confirmationHandler.awaitResultTurbine.add(null)
+        confirmationHandler.awaitResultTurbine.add(null)
+
+        val viewModel = createViewModel(
+            confirmationHandlerFactory = {
+                confirmationHandler
+            }
+        )
         val scenario = activityScenario(viewModel)
 
         scenario.launchForResult(intent).onActivity {
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomBuy
-            viewModel.onPaymentResult(PaymentResult.Completed)
+            confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+                result = ConfirmationHandler.Result.Succeeded(
+                    intent = PAYMENT_INTENT,
+                    deferredIntentConfirmationType = null,
+                )
+            )
         }
 
         composeTestRule.waitForIdle()
@@ -942,9 +966,9 @@ internal class PaymentSheetActivityTest {
     @Test
     fun `mandate text is shown above primary button when in vertical mode`() {
         val args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-            config = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
-                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
-            )
+            config = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY.config.prefilledBuilder()
+                .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
+                .build()
         )
         val viewModel = createViewModel(args = args)
         val scenario = activityScenario(viewModel)
@@ -956,6 +980,7 @@ internal class PaymentSheetActivityTest {
                 .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
 
             viewModel.mandateHandler.updateMandateText(text.resolvableString, false)
+            mandateNode.performScrollTo()
             mandateNode.assertIsDisplayed()
 
             val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
@@ -996,6 +1021,7 @@ internal class PaymentSheetActivityTest {
                 customer = invalidCustomerConfig,
             ),
             statusBarColor = null,
+            paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
         )
 
         val intent = contract.createIntent(context, args)
@@ -1019,6 +1045,7 @@ internal class PaymentSheetActivityTest {
                 merchantDisplayName = "Some name",
             ),
             statusBarColor = null,
+            paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
         )
 
         val intent = contract.createIntent(context, args)
@@ -1080,8 +1107,10 @@ internal class PaymentSheetActivityTest {
 
         scenario.launch(intent).onActivity { activity ->
             testDispatcher.scheduler.advanceTimeBy(50)
+            Espresso.onIdle()
             assertThat(activity.buyButton.externalLabel?.resolve(context)).isEqualTo("Pay")
             testDispatcher.scheduler.advanceTimeBy(250)
+            Espresso.onIdle()
             assertThat(activity.buyButton.externalLabel?.resolve(context)).isEqualTo("Pay CA\$99.99")
         }
     }
@@ -1133,6 +1162,7 @@ internal class PaymentSheetActivityTest {
         initialPaymentSelection: PaymentSelection? = paymentMethods.firstOrNull()?.let { PaymentSelection.Saved(it) },
         args: PaymentSheetContractV2.Args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
         cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
+        confirmationHandlerFactory: ConfirmationHandler.Factory? = null,
     ): PaymentSheetViewModel = runBlocking {
         val coordinator = FakeLinkConfigurationCoordinator(
             accountStatus = AccountStatus.SignedOut,
@@ -1164,7 +1194,8 @@ internal class PaymentSheetActivityTest {
                 workContext = testDispatcher,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
-                confirmationHandlerFactory = createTestConfirmationHandlerFactory(
+                confirmationHandlerFactory = confirmationHandlerFactory ?: createTestConfirmationHandlerFactory(
+                    paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
                     intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
                     savedStateHandle = savedStateHandle,
                     stripePaymentLauncherAssistedFactory = stripePaymentLauncherAssistedFactory,

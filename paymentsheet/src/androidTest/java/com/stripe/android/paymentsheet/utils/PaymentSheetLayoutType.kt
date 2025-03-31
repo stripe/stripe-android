@@ -2,6 +2,8 @@ package com.stripe.android.paymentsheet.utils
 
 import android.content.Context
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.junit4.ComposeTestRule
@@ -30,11 +32,20 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
 
     abstract fun setDefaultPaymentMethod(
         composeTestRule: ComposeTestRule,
-        newDefaultPaymentMethod: PaymentMethod
+        newDefaultPaymentMethod: PaymentMethod,
+    )
+
+    abstract fun assertSetDefaultPaymentMethodCheckboxDisplayedAndDisabled(
+        composeTestRule: ComposeTestRule,
+        paymentMethod: PaymentMethod,
     )
 
     abstract fun assertDefaultPaymentMethodBadgeDisplayed(
-        composeTestRule: ComposeTestRule
+        composeTestRule: ComposeTestRule,
+    )
+
+    abstract fun openNewCardForm(
+        composeTestRule: ComposeTestRule,
     )
 
     class Horizontal : PaymentSheetLayoutType(paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal) {
@@ -49,6 +60,22 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
                 .assertIsSelected()
         }
 
+        override fun assertSetDefaultPaymentMethodCheckboxDisplayedAndDisabled(
+            composeTestRule: ComposeTestRule,
+            paymentMethod: PaymentMethod,
+        ) {
+            val savedPaymentMethodsPage = SavedPaymentMethodsPage(composeTestRule)
+            val editPage = EditPage(composeTestRule)
+
+            navigateToEditPage(
+                savedPaymentMethodsPage = savedPaymentMethodsPage,
+                editPage = editPage,
+                paymentMethod = paymentMethod,
+            )
+
+            assertSetAsDefaultCheckboxDisplayedAndDisabled(editPage = editPage)
+        }
+
         override fun setDefaultPaymentMethod(
             composeTestRule: ComposeTestRule,
             newDefaultPaymentMethod: PaymentMethod
@@ -56,13 +83,12 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
             val savedPaymentMethodsPage = SavedPaymentMethodsPage(composeTestRule)
             val editPage = EditPage(composeTestRule)
 
-            savedPaymentMethodsPage.onEditButton().performClick()
+            navigateToEditPage(
+                savedPaymentMethodsPage = savedPaymentMethodsPage,
+                editPage = editPage,
+                paymentMethod = newDefaultPaymentMethod,
+            )
 
-            savedPaymentMethodsPage.onModifyBadgeFor(
-                newDefaultPaymentMethod.card!!.last4!!
-            ).performClick()
-
-            editPage.waitUntilVisible()
             editPage.clickSetAsDefaultCheckbox()
 
             editPage.update()
@@ -78,6 +104,28 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
             savedPaymentMethodsPage.onEditButton().performClick()
 
             assertExactlyOneDefaultLabelShown(composeTestRule)
+        }
+
+        private fun navigateToEditPage(
+            savedPaymentMethodsPage: SavedPaymentMethodsPage,
+            editPage: EditPage,
+            paymentMethod: PaymentMethod,
+        ) {
+            savedPaymentMethodsPage.onEditButton().performClick()
+
+            savedPaymentMethodsPage.onModifyBadgeFor(
+                paymentMethod.card!!.last4!!
+            ).performClick()
+
+            editPage.waitUntilVisible()
+        }
+
+        override fun openNewCardForm(
+            composeTestRule: ComposeTestRule,
+        ) {
+            val savedPaymentMethodsPage = SavedPaymentMethodsPage(composeTestRule)
+
+            savedPaymentMethodsPage.clickNewCardButton()
         }
     }
 
@@ -101,18 +149,36 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
             Espresso.pressBack()
         }
 
+        override fun assertSetDefaultPaymentMethodCheckboxDisplayedAndDisabled(
+            composeTestRule: ComposeTestRule,
+            paymentMethod: PaymentMethod
+        ) {
+            val verticalModePage = VerticalModePage(composeTestRule)
+            val managePage = ManagePage(composeTestRule)
+            val editPage = EditPage(composeTestRule)
+
+            navigateToEditPage(
+                verticalModePage = verticalModePage,
+                managePage = managePage,
+                editPage = editPage,
+                paymentMethod = paymentMethod,
+            )
+
+            assertSetAsDefaultCheckboxDisplayedAndDisabled(editPage = editPage)
+        }
+
         override fun setDefaultPaymentMethod(composeTestRule: ComposeTestRule, newDefaultPaymentMethod: PaymentMethod) {
             val verticalModePage = VerticalModePage(composeTestRule)
             val managePage = ManagePage(composeTestRule)
             val editPage = EditPage(composeTestRule)
 
-            verticalModePage.clickViewMore()
-            managePage.waitUntilVisible()
+            navigateToEditPage(
+                verticalModePage = verticalModePage,
+                managePage = managePage,
+                editPage = editPage,
+                paymentMethod = newDefaultPaymentMethod,
+            )
 
-            managePage.clickEdit()
-            managePage.clickEdit(newDefaultPaymentMethod.id!!)
-
-            editPage.waitUntilVisible()
             editPage.clickSetAsDefaultCheckbox()
 
             editPage.update()
@@ -133,6 +199,29 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
 
             assertExactlyOneDefaultLabelShown(composeTestRule)
         }
+
+        private fun navigateToEditPage(
+            verticalModePage: VerticalModePage,
+            managePage: ManagePage,
+            editPage: EditPage,
+            paymentMethod: PaymentMethod,
+        ) {
+            verticalModePage.clickViewMore()
+            managePage.waitUntilVisible()
+
+            managePage.clickEdit()
+            managePage.clickEdit(paymentMethod.id!!)
+
+            editPage.waitUntilVisible()
+        }
+
+        override fun openNewCardForm(
+            composeTestRule: ComposeTestRule,
+        ) {
+            val verticalModePage = VerticalModePage(composeTestRule)
+
+            verticalModePage.clickNewPaymentMethodButton(PaymentMethod.Type.Card.code)
+        }
     }
 
     private companion object {
@@ -141,6 +230,13 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
                 TEST_TAG_DEFAULT_PAYMENT_METHOD_LABEL,
                 useUnmergedTree = true
             ).assertCountEquals(1)
+        }
+
+        fun assertSetAsDefaultCheckboxDisplayedAndDisabled(
+            editPage: EditPage,
+        ) {
+            editPage.onSetAsDefaultCheckbox().assertIsDisplayed()
+            editPage.onSetAsDefaultCheckbox().assertIsNotEnabled()
         }
     }
 }

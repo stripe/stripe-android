@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.domain
 
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -14,7 +14,7 @@ import javax.inject.Inject
 internal class PostAuthSessionEvent @Inject constructor(
     private val repository: FinancialConnectionsManifestRepository,
     private val logger: Logger,
-    private val configuration: FinancialConnectionsSheet.Configuration,
+    private val configuration: FinancialConnectionsSheetConfiguration,
 ) {
 
     @OptIn(DelicateCoroutinesApi::class)

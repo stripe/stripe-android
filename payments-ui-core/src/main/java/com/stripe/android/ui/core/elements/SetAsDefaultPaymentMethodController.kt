@@ -6,6 +6,7 @@ import com.stripe.android.uicore.elements.FieldError
 import com.stripe.android.uicore.elements.InputController
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,18 +14,23 @@ import kotlinx.coroutines.flow.StateFlow
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class SetAsDefaultPaymentMethodController(
     setAsDefaultPaymentMethodInitialValue: Boolean = false,
-    shouldShowElementFlow: StateFlow<Boolean>,
+    saveForFutureUseCheckedFlow: StateFlow<Boolean>,
+    setAsDefaultMatchesSaveForFutureUse: Boolean,
 ) : InputController {
     override val label: StateFlow<Int> = MutableStateFlow(R.string.stripe_set_as_default_payment_method)
 
-    private val _setAsDefaultPaymentMethod = MutableStateFlow(setAsDefaultPaymentMethodInitialValue)
-    val setAsDefaultPaymentMethod: StateFlow<Boolean> = _setAsDefaultPaymentMethod
+    private val _setAsDefaultPaymentMethodChecked = MutableStateFlow(setAsDefaultPaymentMethodInitialValue)
+    val setAsDefaultPaymentMethodChecked: StateFlow<Boolean> = _setAsDefaultPaymentMethodChecked
 
-    override val fieldValue: StateFlow<String> = combineAsStateFlow(
-        shouldShowElementFlow,
-        setAsDefaultPaymentMethod
-    ) { shouldShowElementFlow, setAsDefaultPaymentMethod ->
-        (shouldShowElementFlow && setAsDefaultPaymentMethod).toString()
+    val shouldPaymentMethodBeSetAsDefault: StateFlow<Boolean> = combineAsStateFlow(
+        saveForFutureUseCheckedFlow,
+        setAsDefaultPaymentMethodChecked,
+    ) { saveForFutureUseCheckedFlow, setAsDefaultPaymentMethodChecked ->
+        (saveForFutureUseCheckedFlow && (setAsDefaultMatchesSaveForFutureUse || setAsDefaultPaymentMethodChecked))
+    }
+
+    override val fieldValue: StateFlow<String> = shouldPaymentMethodBeSetAsDefault.mapAsStateFlow {
+        it.toString()
     }
 
     override val rawFieldValue: StateFlow<String?> = fieldValue
@@ -37,8 +43,8 @@ class SetAsDefaultPaymentMethodController(
             FormFieldEntry(value, complete)
         }
 
-    fun onValueChange(setAsDefaultPaymentMethod: Boolean) {
-        _setAsDefaultPaymentMethod.value = setAsDefaultPaymentMethod
+    fun onValueChange(setAsDefaultPaymentMethodChecked: Boolean) {
+        _setAsDefaultPaymentMethodChecked.value = setAsDefaultPaymentMethodChecked
     }
 
     override fun onRawValueChange(rawValue: String) {

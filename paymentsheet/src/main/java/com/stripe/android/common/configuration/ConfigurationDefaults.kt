@@ -16,6 +16,7 @@ internal object ConfigurationDefaults {
         PaymentSheet.BillingDetailsCollectionConfiguration()
     val customer: PaymentSheet.CustomerConfiguration? = null
     val googlePay: PaymentSheet.GooglePayConfiguration? = null
+    val link: PaymentSheet.LinkConfiguration = PaymentSheet.LinkConfiguration()
     const val googlePayEnabled: Boolean = false
     val headerTextForSelectionScreen: String? = null
     val paymentMethodOrder: List<String> = emptyList()
@@ -26,5 +27,7 @@ internal object ConfigurationDefaults {
     val externalPaymentMethods: List<String> = emptyList()
     val paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.Automatic
     val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = PaymentSheet.CardBrandAcceptance.All
+    val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod> = emptyList()
+
     const val embeddedViewDisplaysMandateText: Boolean = true
 }

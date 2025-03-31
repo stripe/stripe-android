@@ -23,7 +23,7 @@ internal class FormController @Inject constructor(
     transformSpecToElement: TransformSpecToElements,
 ) {
     val elements: StateFlow<List<FormElement>> =
-        stateFlowOf(transformSpecToElement.transform(formSpec.items))
+        stateFlowOf(transformSpecToElement.transform(null, formSpec.items))
 
     private val cardBillingElement = elements.mapAsStateFlow { elementsList ->
         elementsList

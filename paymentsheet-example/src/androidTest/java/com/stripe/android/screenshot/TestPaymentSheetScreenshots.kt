@@ -16,6 +16,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomerSetti
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.LinkSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.test.core.TestParameters
 import org.junit.Assume.assumeFalse
@@ -33,6 +34,7 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
     ) { settings ->
         settings[AutomaticPaymentMethodsSettingsDefinition] = false
         settings[SupportedPaymentMethodsSettingsDefinition] = "card"
+        settings[LinkSettingsDefinition] = true
     }
 
     @Before
@@ -49,7 +51,7 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
                 settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
                 settings[CountrySettingsDefinition] = Country.US
                 settings[CustomerSettingsDefinition] = CustomerType.NEW
-                settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
+                settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT_WITH_SETUP
                 settings[CollectAddressSettingsDefinition] =
                     PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
                 settings[CustomerSessionSettingsDefinition] = true
@@ -71,7 +73,7 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
                 settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
                 settings[CountrySettingsDefinition] = Country.US
                 settings[CustomerSettingsDefinition] = CustomerType.NEW
-                settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
+                settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT_WITH_SETUP
                 settings[CollectAddressSettingsDefinition] =
                     PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
                 settings[CustomerSessionSettingsDefinition] = true

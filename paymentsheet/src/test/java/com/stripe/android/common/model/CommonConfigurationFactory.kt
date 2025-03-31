@@ -19,7 +19,9 @@ internal object CommonConfigurationFactory {
         allowsRemovalOfLastSavedPaymentMethod: Boolean = true,
         paymentMethodOrder: List<String> = emptyList(),
         externalPaymentMethods: List<String> = emptyList(),
+        customPaymentMethods: List<PaymentSheet.CustomPaymentMethod> = emptyList(),
         cardBrandAcceptance: PaymentSheet.CardBrandAcceptance = PaymentSheet.CardBrandAcceptance.all(),
+        link: PaymentSheet.LinkConfiguration = PaymentSheet.LinkConfiguration(),
     ): CommonConfiguration = CommonConfiguration(
         merchantDisplayName = merchantDisplayName,
         customer = customer,
@@ -33,6 +35,8 @@ internal object CommonConfigurationFactory {
         allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
         paymentMethodOrder = paymentMethodOrder,
         externalPaymentMethods = externalPaymentMethods,
+        customPaymentMethods = customPaymentMethods,
         cardBrandAcceptance = cardBrandAcceptance,
+        link = link,
     )
 }

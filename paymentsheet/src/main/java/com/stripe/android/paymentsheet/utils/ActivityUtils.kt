@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet.utils
 
+import android.app.Activity
 import android.app.ActivityManager
 import android.content.Context.ACTIVITY_SERVICE
-import androidx.appcompat.app.AppCompatActivity
 
-internal fun AppCompatActivity.applicationIsTaskOwner(): Boolean {
+internal fun Activity.applicationIsTaskOwner(): Boolean {
     val activityManager = getSystemService(ACTIVITY_SERVICE) as ActivityManager
 
     /*

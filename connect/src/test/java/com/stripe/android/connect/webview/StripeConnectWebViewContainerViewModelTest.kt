@@ -18,7 +18,9 @@ import com.stripe.android.connect.analytics.ComponentAnalyticsService
 import com.stripe.android.connect.analytics.ConnectAnalyticsEvent
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.Colors
+import com.stripe.android.connect.manager.EmbeddedComponentCoordinator
 import com.stripe.android.connect.util.Clock
+import com.stripe.android.connect.webview.serialization.OpenAuthenticatedWebViewMessage
 import com.stripe.android.connect.webview.serialization.OpenFinancialConnectionsMessage
 import com.stripe.android.connect.webview.serialization.SetOnLoadError
 import com.stripe.android.connect.webview.serialization.SetOnLoadError.LoadError
@@ -41,6 +43,8 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.inOrder
@@ -67,10 +71,13 @@ class StripeConnectWebViewContainerViewModelTest {
     private val mockPermissionRequest: PermissionRequest = mock()
     private val analyticsService: ComponentAnalyticsService = mock()
     private val androidClock: Clock = mock()
-    private val embeddedComponentManager: EmbeddedComponentManager = mock()
+    private val componentCoordinator: EmbeddedComponentCoordinator = mock()
+    private val embeddedComponentManager: EmbeddedComponentManager = mock {
+        on { this.coordinator } doReturn componentCoordinator
+    }
     private val embeddedComponent: StripeEmbeddedComponent = StripeEmbeddedComponent.PAYOUTS
 
-    private val appearanceFlow = MutableStateFlow(Appearance())
+    private val appearanceFlow = MutableStateFlow(Appearance.default())
     private val receivedComponentEvents = mutableListOf<ComponentEvent>()
 
     private val mockStripeIntentLauncher: StripeIntentLauncher = mock()
@@ -83,8 +90,8 @@ class StripeConnectWebViewContainerViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
 
-        whenever(embeddedComponentManager.appearanceFlow) doReturn appearanceFlow
-        whenever(embeddedComponentManager.getStripeURL(any())) doReturn "https://example.com"
+        whenever(componentCoordinator.appearanceFlow) doReturn appearanceFlow
+        whenever(componentCoordinator.getStripeURL(any())) doReturn "https://example.com"
         whenever(androidClock.millis()) doReturn -1L
 
         viewModel = StripeConnectWebViewContainerViewModel(
@@ -108,10 +115,11 @@ class StripeConnectWebViewContainerViewModelTest {
     fun `WebView delegate is set`() {
         val viewModel = StripeConnectWebViewContainerViewModel(
             application = RuntimeEnvironment.getApplication(),
-            analyticsService = analyticsService,
             clock = androidClock,
             embeddedComponentManager = embeddedComponentManager,
             embeddedComponent = embeddedComponent,
+            analyticsService = analyticsService,
+            logger = Logger.noop(),
             // Default `createWebView` value
         )
         assertThat(viewModel.webView.delegate).isEqualTo(viewModel.delegate)
@@ -120,7 +128,7 @@ class StripeConnectWebViewContainerViewModelTest {
     @Test
     fun `should load URL when view is attached`() {
         val url = "https://connect-js.stripe.com/v1.0/android_webview.html#component=payouts&publicKey=pk_test_123"
-        whenever(embeddedComponentManager.getStripeURL(embeddedComponent)) doReturn url
+        whenever(componentCoordinator.getStripeURL(embeddedComponent)) doReturn url
 
         viewModel.onViewAttached()
         verify(webView).loadUrl(url)
@@ -173,7 +181,7 @@ class StripeConnectWebViewContainerViewModelTest {
         assertThat(viewModel.stateFlow.value.appearance).isNull()
 
         viewModel.onCreate(lifecycleOwner)
-        val newAppearance = Appearance()
+        val newAppearance = Appearance.default()
         appearanceFlow.emit(newAppearance)
 
         assertThat(viewModel.stateFlow.value.appearance).isEqualTo(newAppearance)
@@ -242,7 +250,16 @@ class StripeConnectWebViewContainerViewModelTest {
 
     @Test
     fun `view should update appearance`() = runTest(testDispatcher) {
-        val appearances = listOf(Appearance(), Appearance(colors = Colors(primary = Color.CYAN)))
+        val appearances = listOf(
+            Appearance.default(),
+            Appearance.Builder()
+                .colors(
+                    Colors.Builder()
+                        .primary(Color.CYAN)
+                        .build()
+                )
+                .build()
+        )
         viewModel.onCreate(lifecycleOwner)
 
         // Shouldn't update appearance until pageDidLoad is received.
@@ -270,7 +287,7 @@ class StripeConnectWebViewContainerViewModelTest {
         val intent = Intent()
         val expected = arrayOf(Uri.parse("content://path/to/file"))
         var actual: Array<Uri>? = null
-        wheneverBlocking { embeddedComponentManager.chooseFile(mockActivity, intent) } doReturn expected
+        wheneverBlocking { componentCoordinator.chooseFile(mockActivity, intent) } doReturn expected
 
         viewModel.delegate.onChooseFile(
             activity = mockActivity,
@@ -282,6 +299,27 @@ class StripeConnectWebViewContainerViewModelTest {
     }
 
     @Test
+    fun `onReceivedOpenAuthenticatedWebView should launch ChromeCustomTab`() = runTest(testDispatcher) {
+        val pageViewId = "pv-id"
+        val uri = Uri.parse("https://test.stripe.com/")
+        val message = OpenAuthenticatedWebViewMessage(
+            id = "message-id",
+            url = uri.toString(),
+        )
+        viewModel.delegate.onReceivedPageDidLoad(pageViewId)
+        viewModel.delegate.onReceivedOpenAuthenticatedWebView(mockActivity, message)
+        verify(mockStripeIntentLauncher).launchSecureExternalWebTab(mockActivity, uri)
+        val captor = argumentCaptor<ConnectAnalyticsEvent>()
+        verify(analyticsService, atLeastOnce()).track(captor.capture())
+        assertThat(captor.lastValue).isEqualTo(
+            ConnectAnalyticsEvent.AuthenticatedWebOpened(
+                pageViewId = pageViewId,
+                authenticatedViewId = message.id,
+            )
+        )
+    }
+
+    @Test
     fun `onOpenFinancialConnections should delegate to manager`() = runTest(testDispatcher) {
         val message = OpenFinancialConnectionsMessage(
             id = "id",
@@ -290,7 +328,7 @@ class StripeConnectWebViewContainerViewModelTest {
         )
         val expected = FinancialConnectionsSheetResult.Canceled
         wheneverBlocking {
-            embeddedComponentManager.presentFinancialConnections(
+            componentCoordinator.presentFinancialConnections(
                 activity = mockActivity,
                 clientSecret = message.clientSecret,
                 connectedAccountId = message.connectedAccountId,
@@ -326,7 +364,7 @@ class StripeConnectWebViewContainerViewModelTest {
             PackageManager.PERMISSION_DENIED
 
         whenever(mockPermissionRequest.resources) doReturn arrayOf(PermissionRequest.RESOURCE_VIDEO_CAPTURE)
-        wheneverBlocking { embeddedComponentManager.requestCameraPermission(any()) } doReturn true
+        wheneverBlocking { componentCoordinator.requestCameraPermission(any()) } doReturn true
 
         viewModel.delegate.onPermissionRequest(mockActivity, mockPermissionRequest)
 
@@ -339,7 +377,7 @@ class StripeConnectWebViewContainerViewModelTest {
             PackageManager.PERMISSION_DENIED
 
         whenever(mockPermissionRequest.resources) doReturn arrayOf(PermissionRequest.RESOURCE_VIDEO_CAPTURE)
-        wheneverBlocking { embeddedComponentManager.requestCameraPermission(any()) } doReturn false
+        wheneverBlocking { componentCoordinator.requestCameraPermission(any()) } doReturn false
 
         viewModel.delegate.onPermissionRequest(mockActivity, mockPermissionRequest)
 
@@ -372,7 +410,7 @@ class StripeConnectWebViewContainerViewModelTest {
     @Test
     fun `emit unexpected navigation analytic if non-stripe url page started`() {
         whenever(
-            embeddedComponentManager.getStripeURL(embeddedComponent)
+            componentCoordinator.getStripeURL(embeddedComponent)
         ) doReturn "https://stripe.com/test?foo=bar#mytest"
 
         viewModel.delegate.onPageStarted("https://example.com/test?foo=bar#mytest")
@@ -386,7 +424,7 @@ class StripeConnectWebViewContainerViewModelTest {
     @Test
     fun `dont emit unexpected navigation analytic if expected stripe url is used on page started`() {
         whenever(
-            embeddedComponentManager.getStripeURL(any())
+            componentCoordinator.getStripeURL(any())
         ) doReturn "https://stripe.com/test?foo=bar#mytest"
 
         viewModel.delegate.onPageStarted("https://stripe.com/test")

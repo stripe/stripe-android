@@ -3,7 +3,25 @@
 ## XX.XX.XX - 20XX-XX-XX
 
 ### PaymentSheet
+* [CHANGED][10480](https://github.com/stripe/stripe-android/pull/10480) Updated Afterpay branding in the US to be Cash App Afterpay.
+* [FIXED][10492](https://github.com/stripe/stripe-android/pull/10492) Update Add Payment Method screen to use `PaymentSheet.Appearance.Colors.onSurface` as the header text color when `PaymentMethodLayout` is `Vertical`.
+* [Added][10496](https://github.com/stripe/stripe-android/pull/10496) Improve Google Pay troubleshooting with detailed user facing logs.
+
+### Connect (Private Preview)
+* [Added] Connect SDK to add connected account dashboard functionality to your app using [Connect embedded components](https://docs.stripe.com/connect/get-started-connect-embedded-components?platform=android).
+
+## 21.7.1 - 2025-03-24
+
+### PaymentSheet
+* [CHANGED][https://github.com/stripe/stripe-android/pull/10421] Afterpay no longer requires a shipping address to be shown.
+* [CHANGED][10382](https://github.com/stripe/stripe-android/pull/10382) Don't show price as $0.00 in Google Pay for setup intents in US and CA.
+* [FIXED][10436](https://github.com/stripe/stripe-android/pull/10436) Update payment method rows to use `PaymentSheet.Appearance.Colors.placeholderText` as the subtitle color when `PaymentMethodLayout` is `Vertical`.
+
+## 21.7.0 - 2025-03-17
+
+### PaymentSheet
 * [FIXED][10327](https://github.com/stripe/stripe-android/pull/10327) Improve accessibility for postal code.
+* [ADDED] Support for default payment methods in private beta.
 
 ## 21.6.0 - 2025-03-03
 

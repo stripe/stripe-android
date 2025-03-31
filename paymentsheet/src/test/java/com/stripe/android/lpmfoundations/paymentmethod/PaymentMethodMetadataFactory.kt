@@ -6,6 +6,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfigurat
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -23,15 +24,16 @@ internal object PaymentMethodMetadataFactory {
             PaymentSheet.BillingDetailsCollectionConfiguration(),
         allowsDelayedPaymentMethods: Boolean = true,
         allowsPaymentMethodsRequiringShippingAddress: Boolean = false,
-        financialConnectionsAvailable: Boolean = true,
         paymentMethodOrder: List<String> = emptyList(),
         shippingDetails: AddressDetails? = null,
         cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
         hasCustomerConfiguration: Boolean = false,
         sharedDataSpecs: List<SharedDataSpec> = createSharedDataSpecs(),
         externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec> = emptyList(),
+        displayableCustomPaymentMethods: List<DisplayableCustomPaymentMethod> = emptyList(),
         isGooglePayReady: Boolean = false,
         paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
+        linkConfiguration: PaymentSheet.LinkConfiguration = PaymentSheet.LinkConfiguration(),
         linkInlineConfiguration: LinkInlineConfiguration? = null,
         linkMode: LinkMode? = LinkMode.LinkPaymentMethod,
         linkState: LinkState? = null,
@@ -39,13 +41,14 @@ internal object PaymentMethodMetadataFactory {
         defaultBillingDetails: PaymentSheet.BillingDetails = PaymentSheet.BillingDetails(),
         paymentMethodIncentive: PaymentMethodIncentive? = null,
         isPaymentMethodSetAsDefaultEnabled: Boolean = IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
+        elementsSessionId: String = "session_1234",
+        financialConnectionsAvailability: FinancialConnectionsAvailability? = FinancialConnectionsAvailability.Lite
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
             allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
-            financialConnectionsAvailable = financialConnectionsAvailable,
             paymentMethodOrder = paymentMethodOrder,
             cbcEligibility = cbcEligibility,
             merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
@@ -58,12 +61,16 @@ internal object PaymentMethodMetadataFactory {
             sharedDataSpecs = sharedDataSpecs,
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
+            displayableCustomPaymentMethods = displayableCustomPaymentMethods,
             isGooglePayReady = isGooglePayReady,
+            linkConfiguration = linkConfiguration,
             linkInlineConfiguration = linkInlineConfiguration,
             linkMode = linkMode,
             linkState = linkState,
             cardBrandFilter = cardBrandFilter,
             paymentMethodIncentive = paymentMethodIncentive,
+            elementsSessionId = elementsSessionId,
+            financialConnectionsAvailability = financialConnectionsAvailability
         )
     }
 

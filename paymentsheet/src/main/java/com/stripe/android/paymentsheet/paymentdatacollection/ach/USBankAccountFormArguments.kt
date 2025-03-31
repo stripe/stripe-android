@@ -7,6 +7,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -17,6 +18,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.verticalmode.BankFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import kotlinx.coroutines.flow.update
 
 /**
@@ -59,7 +61,9 @@ internal class USBankAccountFormArguments(
     val onUpdatePrimaryButtonUIState: ((PrimaryButton.UIState?) -> (PrimaryButton.UIState?)) -> Unit,
     val onUpdatePrimaryButtonState: (PrimaryButton.State) -> Unit,
     val onError: (ResolvableString?) -> Unit,
-    val shouldShowSetAsDefaultCheckbox: Boolean
+    val setAsDefaultPaymentMethodEnabled: Boolean,
+    val financialConnectionsAvailability: FinancialConnectionsAvailability?,
+    val setAsDefaultMatchesSaveForFutureUse: Boolean,
 ) {
     companion object {
         fun create(
@@ -103,9 +107,11 @@ internal class USBankAccountFormArguments(
                 onUpdatePrimaryButtonState = viewModel::updatePrimaryButtonState,
                 onError = viewModel::onError,
                 incentive = paymentMethodMetadata.paymentMethodIncentive,
-                shouldShowSetAsDefaultCheckbox =
+                setAsDefaultPaymentMethodEnabled =
                 paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
                     ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
+                financialConnectionsAvailability = paymentMethodMetadata.financialConnectionsAvailability,
+                setAsDefaultMatchesSaveForFutureUse = viewModel.customerStateHolder.paymentMethods.value.isEmpty(),
             )
         }
 
@@ -150,9 +156,11 @@ internal class USBankAccountFormArguments(
                 },
                 onError = onError,
                 incentive = paymentMethodMetadata.paymentMethodIncentive,
-                shouldShowSetAsDefaultCheckbox =
+                setAsDefaultPaymentMethodEnabled =
                 paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
                     ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
+                financialConnectionsAvailability = paymentMethodMetadata.financialConnectionsAvailability,
+                setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
             )
         }
     }

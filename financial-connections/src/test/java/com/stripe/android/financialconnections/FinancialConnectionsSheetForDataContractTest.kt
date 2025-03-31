@@ -6,6 +6,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataContract
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.mock
 import org.robolectric.RobolectricTestRunner
 import java.security.InvalidParameterException
 import kotlin.test.assertFailsWith
@@ -15,13 +16,13 @@ class FinancialConnectionsSheetForDataContractTest {
 
     @Test
     fun `parseResult() with missing data should return failed result`() {
-        assertThat(FinancialConnectionsSheetForDataContract().parseResult(0, Intent()))
+        assertThat(FinancialConnectionsSheetForDataContract(intentBuilder(mock())).parseResult(0, Intent()))
             .isInstanceOf(FinancialConnectionsSheetResult.Failed::class.java)
     }
 
     @Test
     fun `validate() valid args`() {
-        val configuration = FinancialConnectionsSheet.Configuration(
+        val configuration = FinancialConnectionsSheetConfiguration(
             ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
             ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
         )
@@ -31,7 +32,7 @@ class FinancialConnectionsSheetForDataContractTest {
 
     @Test
     fun `validate() missing session client secret`() {
-        val configuration = FinancialConnectionsSheet.Configuration(
+        val configuration = FinancialConnectionsSheetConfiguration(
             " ",
             ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
         )
@@ -45,7 +46,7 @@ class FinancialConnectionsSheetForDataContractTest {
 
     @Test
     fun `validate() missing publishable key`() {
-        val configuration = FinancialConnectionsSheet.Configuration(
+        val configuration = FinancialConnectionsSheetConfiguration(
             ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
             " "
         )

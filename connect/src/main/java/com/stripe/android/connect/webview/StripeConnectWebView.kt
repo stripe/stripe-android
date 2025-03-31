@@ -5,10 +5,12 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.content.Intent
+import android.content.MutableContextWrapper
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
 import android.webkit.JavascriptInterface
+import android.webkit.JsResult
 import android.webkit.PermissionRequest
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
@@ -17,19 +19,26 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.ComponentActivity
 import androidx.annotation.VisibleForTesting
+import androidx.appcompat.app.AlertDialog
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.util.findActivity
+import com.stripe.android.connect.util.isInInstrumentationTest
 import com.stripe.android.connect.webview.serialization.AccountSessionClaimedMessage
+import com.stripe.android.connect.webview.serialization.AlertJs
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.ConnectJson
+import com.stripe.android.connect.webview.serialization.OpenAuthenticatedWebViewMessage
 import com.stripe.android.connect.webview.serialization.OpenFinancialConnectionsMessage
 import com.stripe.android.connect.webview.serialization.PageLoadMessage
-import com.stripe.android.connect.webview.serialization.SecureWebViewMessage
 import com.stripe.android.connect.webview.serialization.SetCollectMobileFinancialConnectionsResultPayloadJs
+import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
 import com.stripe.android.connect.webview.serialization.toJs
 import com.stripe.android.core.Logger
@@ -37,6 +46,7 @@ import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
@@ -50,11 +60,21 @@ import kotlinx.serialization.json.put
 @SuppressLint("ViewConstructor")
 @Suppress("TooManyFunctions")
 @OptIn(PrivateBetaConnectSDK::class)
-internal class StripeConnectWebView(
-    application: Application,
+internal class StripeConnectWebView private constructor(
+    private val mutableContext: MutableContextWrapper,
     @property:VisibleForTesting internal val delegate: Delegate,
     private val logger: Logger,
-) : WebView(application) {
+) : WebView(mutableContext), WebViewForPaparazzi {
+
+    constructor(
+        application: Application,
+        delegate: Delegate,
+        logger: Logger,
+    ) : this(
+        mutableContext = MutableContextWrapper(application),
+        delegate = delegate,
+        logger = logger,
+    )
 
     private val loggerTag = javaClass.simpleName
 
@@ -63,6 +83,9 @@ internal class StripeConnectWebView(
 
     @VisibleForTesting
     internal val stripeWebChromeClient = StripeConnectWebChromeClient()
+
+    @VisibleForTesting
+    internal val stripeJsInterface = StripeJsInterface()
 
     private val webViewLifecycleScope get() = findViewTreeLifecycleOwner()?.lifecycleScope
 
@@ -80,7 +103,7 @@ internal class StripeConnectWebView(
         }
 
         setDownloadListener(StripeDownloadListener(context))
-        addJavascriptInterface(StripeJsInterface(), ANDROID_JS_INTERFACE)
+        addJavascriptInterface(stripeJsInterface, ANDROID_JS_INTERFACE)
     }
 
     fun updateConnectInstance(appearance: Appearance) {
@@ -93,13 +116,34 @@ internal class StripeConnectWebView(
 
     fun setCollectMobileFinancialConnectionsResult(
         id: String,
-        result: FinancialConnectionsSheetResult?
+        result: FinancialConnectionsSheetResult
     ) {
         val payload = SetCollectMobileFinancialConnectionsResultPayloadJs.from(id, result)
         callSetterWithSerializableValue(
             setter = "setCollectMobileFinancialConnectionsResult",
             value = ConnectJson.encodeToJsonElement(payload).jsonObject
         )
+    }
+
+    fun mobileInputReceived(input: MobileInput, resultCallback: ValueCallback<Result<String>>) {
+        evaluateSdkJs(
+            function = "mobileInputReceived",
+            payload = buildJsonObject {
+                put("input", input.value)
+            },
+            resultCallback = resultCallback
+        )
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        // We need the Activity context for some UI to work, like web-triggered dialogs
+        mutableContext.baseContext = requireNotNull(findActivity())
+    }
+
+    override fun onDetachedFromWindow() {
+        mutableContext.baseContext = mutableContext.applicationContext
+        super.onDetachedFromWindow()
     }
 
     interface Delegate {
@@ -177,9 +221,19 @@ internal class StripeConnectWebView(
         fun onMerchantIdChanged(merchantId: String)
 
         /**
+         * Callback to invoke upon receiving 'openAuthenticatedWebView' message.
+         */
+        fun onReceivedOpenAuthenticatedWebView(activity: Activity, message: OpenAuthenticatedWebViewMessage)
+
+        /**
          * Callback to invoke upon receiving 'openFinancialConnections' message.
          */
         suspend fun onOpenFinancialConnections(activity: Activity, message: OpenFinancialConnectionsMessage)
+
+        /**
+         * Callback to invoke upon receiving 'closeWebView' message.
+         */
+        fun onCloseWebView()
 
         /**
          * Callback to invoke upon failing to deserialize a web message.
@@ -195,6 +249,15 @@ internal class StripeConnectWebView(
 
         override fun onPageFinished(view: WebView, url: String) {
             delegate.onPageFinished(url)
+            if (isInInstrumentationTest()) {
+                // Fake sending this message to simulate stripe.js loading,
+                // which disappears the native loading spinner.
+                delegate.onReceivedSetterFunctionCalled(
+                    SetterFunctionCalledMessage(
+                        SetOnLoaderStart("test")
+                    )
+                )
+            }
         }
 
         override fun onReceivedHttpError(
@@ -237,6 +300,87 @@ internal class StripeConnectWebView(
      * A [WebChromeClient] that provides additional functionality for Stripe Connect Embedded Component WebViews.
      */
     internal inner class StripeConnectWebChromeClient : WebChromeClient() {
+        override fun onJsConfirm(view: WebView, url: String, message: String, result: JsResult): Boolean {
+            return handleJsAlert(view, message, result, isConfirm = true)
+        }
+
+        override fun onJsAlert(view: WebView, url: String, message: String, result: JsResult): Boolean {
+            return handleJsAlert(view, message, result, isConfirm = false)
+        }
+
+        private fun handleJsAlert(view: WebView, message: String, result: JsResult, isConfirm: Boolean): Boolean {
+            val alert =
+                try {
+                    ConnectJson.decodeFromString<AlertJs>(message.removeSurrounding("\""))
+                } catch (e: SerializationException) {
+                    logger.error("($loggerTag) Error parsing alert message: $message", e)
+                    AlertJs(message = message)
+                }
+
+            // The following code is awkward because:
+            //  * WebViews will hang until a result is returned,
+            //  * this WebView is kept across configuration changes,
+            //  * Dialog dismiss listener is not called on configuration changes, and
+            //  * Dialog lifecycle pause/stop/destroy callbacks are not called on configuration changes.
+            //
+            // So, the approach is to return the result in two places:
+            //  1. On Dialog dismiss. This is always called in typical UX flows (cancel, OK, tap outside, back button).
+            //  2. On Activity destroy. This is called on configuration changes.
+
+            var didConfirm = false
+            fun returnResult() {
+                if (didConfirm) {
+                    result.confirm()
+                } else {
+                    result.cancel()
+                }
+            }
+
+            // Hook into the Activity lifecycle
+            val activity = (view.findActivity() as? ComponentActivity)
+            val activityLifecycleObserver =
+                object : DefaultLifecycleObserver {
+                    override fun onDestroy(owner: LifecycleOwner) {
+                        // Invoked on configuration changes but not normal dialog dismissals.
+                        // No need to clean up the observer since the activity is being destroyed.
+                        returnResult()
+                    }
+                }
+            activity?.lifecycle?.addObserver(activityLifecycleObserver)
+
+            val okText = alert.buttons?.ok
+                ?: view.context.getString(android.R.string.ok)
+            val cancelText = alert.buttons?.cancel
+                ?: view.context.getString(android.R.string.cancel).takeIf { isConfirm }
+
+            // Prepare and show the dialog.
+            AlertDialog.Builder(view.context)
+                .setCancelable(true)
+                .setOnCancelListener {
+                    didConfirm = false
+                }
+                .setOnDismissListener {
+                    // Invoked on dialog dismissals but not configuration changes.
+                    returnResult()
+                    // Clean up the observer.
+                    activity?.lifecycle?.removeObserver(activityLifecycleObserver)
+                }
+                .setMessage(alert.message)
+                .setPositiveButton(okText) { _, _ ->
+                    didConfirm = true
+                }
+                .apply {
+                    alert.title?.let { setTitle(it) }
+                    cancelText?.let {
+                        setNegativeButton(it) { _, _ ->
+                            didConfirm = false
+                        }
+                    }
+                }
+                .show()
+            return true
+        }
+
         override fun onPermissionRequest(request: PermissionRequest) {
             val activity = findActivity()
                 ?: return request.deny()
@@ -276,7 +420,8 @@ internal class StripeConnectWebView(
         }
     }
 
-    private inner class StripeJsInterface {
+    @VisibleForTesting
+    internal inner class StripeJsInterface {
         @JavascriptInterface
         fun debug(message: String) {
             logger.debug("($loggerTag) Debug log from JS: $message")
@@ -312,12 +457,16 @@ internal class StripeConnectWebView(
         }
 
         @JavascriptInterface
-        fun openSecureWebView(message: String) {
-            val secureWebViewData = tryDeserializeWebMessage<SecureWebViewMessage>(
-                webFunctionName = "openSecureWebView",
+        fun openAuthenticatedWebView(message: String) {
+            val activity = findActivity()
+                ?: return
+            val parsed = tryDeserializeWebMessage<OpenAuthenticatedWebViewMessage>(
+                webFunctionName = "openAuthenticatedWebView",
                 message = message,
-            )
-            logger.debug("($loggerTag) Open secure web view with data: $secureWebViewData")
+            ) ?: return
+
+            logger.debug("($loggerTag) Open authenticated WebView: $parsed")
+            delegate.onReceivedOpenAuthenticatedWebView(activity, parsed)
         }
 
         @JavascriptInterface
@@ -347,7 +496,10 @@ internal class StripeConnectWebView(
             val activity = findActivity()
                 ?: return
 
-            val parsed = ConnectJson.decodeFromString<OpenFinancialConnectionsMessage>(message)
+            val parsed = tryDeserializeWebMessage<OpenFinancialConnectionsMessage>(
+                webFunctionName = "openFinancialConnections",
+                message = message
+            ) ?: return
             logger.debug("($loggerTag) Open FinancialConnections: $parsed")
 
             webViewLifecycleScope?.launch {
@@ -363,6 +515,12 @@ internal class StripeConnectWebView(
             return runBlocking {
                 checkNotNull(delegate.fetchClientSecret())
             }
+        }
+
+        @JavascriptInterface
+        fun closeWebView() {
+            logger.debug("($loggerTag) Close WebView")
+            delegate.onCloseWebView()
         }
     }
 
@@ -391,15 +549,41 @@ internal class StripeConnectWebView(
         )
     }
 
-    private fun WebView.evaluateSdkJs(function: String, payload: JsonObject) {
+    private fun WebView.evaluateSdkJs(
+        function: String,
+        payload: JsonObject,
+        resultCallback: ValueCallback<Result<String>>? = null
+    ) {
         val command = "$ANDROID_JS_INTERFACE.$function($payload)"
+        // language=JavaScript
+        val wrappedCommand = """
+            (function () {
+                try {
+                    return $command;
+                } catch (error) {
+                    return "$EVALUATE_SDK_JS_ERROR_PREFIX" + error;
+                }
+            })()
+        """.trimIndent()
         post {
             logger.debug("($loggerTag) Evaluating JS: $command")
-            evaluateJavascript(command, null)
+            evaluateJavascript(wrappedCommand) { result ->
+                val unquotedResult = result.removeSurrounding("\"")
+                val wrappedResult =
+                    if (!unquotedResult.startsWith(EVALUATE_SDK_JS_ERROR_PREFIX)) {
+                        Result.success(result)
+                    } else {
+                        val errorMessage = unquotedResult.removePrefix(EVALUATE_SDK_JS_ERROR_PREFIX)
+                        logger.error("($loggerTag) Error evaluating JS: $errorMessage")
+                        Result.failure(RuntimeException(errorMessage))
+                    }
+                resultCallback?.onReceiveValue(wrappedResult)
+            }
         }
     }
 
     internal companion object {
         private const val ANDROID_JS_INTERFACE = "Android"
+        private const val EVALUATE_SDK_JS_ERROR_PREFIX = "__STRIPE_EVALUATE_SDK_JS_ERROR__:"
     }
 }

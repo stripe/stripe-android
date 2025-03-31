@@ -1,0 +1,5 @@
+# We don't directly reference enum fields annotated with @Serializable
+-keep @kotlinx.serialization.Serializable enum com.stripe.android.financialconnections.** {
+    *;
+}
+

@@ -5,6 +5,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
@@ -13,6 +14,7 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.LinkSignupMode.AlongsideSaveForFutureUse
 import com.stripe.android.link.ui.inline.LinkSignupMode.InsteadOfSaveForFutureUse
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.CardBrand
@@ -26,11 +28,15 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeIntent.Status.Canceled
 import com.stripe.android.model.StripeIntent.Status.Succeeded
 import com.stripe.android.model.wallets.Wallet
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
+import com.stripe.android.paymentsheet.ConfigFixtures
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.MERCHANT_DISPLAY_NAME
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
@@ -50,12 +56,13 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.eq
 import org.mockito.Captor
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.capture
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
@@ -63,6 +70,7 @@ import org.mockito.kotlin.whenever
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
+@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 internal class DefaultPaymentElementLoaderTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -143,6 +151,7 @@ internal class DefaultPaymentElementLoaderTest {
                     linkMode = null,
                     cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all()),
                     hasCustomerConfiguration = true,
+                    financialConnectionsAvailability = FinancialConnectionsAvailability.Full
                 ),
             )
         )
@@ -280,7 +289,9 @@ internal class DefaultPaymentElementLoaderTest {
         runTest {
             prefsRepository.savePaymentSelection(null)
 
+            val userFacingLogger = FakeUserFacingLogger()
             val loader = createPaymentElementLoader(
+                userFacingLogger = userFacingLogger,
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 isGooglePayReady = true,
                 customerRepo = FakeCustomerRepository(paymentMethods = emptyList()),
@@ -295,6 +306,8 @@ internal class DefaultPaymentElementLoaderTest {
             ).getOrThrow()
 
             assertThat(result.paymentSelection).isNull()
+            assertThat(userFacingLogger.getLoggedMessages())
+                .containsExactlyElementsIn(listOf("GooglePayConfiguration is not set."))
         }
 
     @Test
@@ -1075,6 +1088,7 @@ internal class DefaultPaymentElementLoaderTest {
             paymentSelection = PaymentSelection.Saved(
                 paymentMethod = PAYMENT_METHODS.first()
             ),
+            linkEnabled = true,
             linkMode = LinkMode.LinkPaymentMethod,
             googlePaySupported = true,
             currency = "usd",
@@ -1083,6 +1097,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
+            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
         )
     }
 
@@ -1132,6 +1147,7 @@ internal class DefaultPaymentElementLoaderTest {
         verify(eventReporter).onLoadStarted(eq(true))
         verify(eventReporter).onLoadSucceeded(
             paymentSelection = null,
+            linkEnabled = true,
             linkMode = LinkMode.LinkPaymentMethod,
             googlePaySupported = true,
             currency = "usd",
@@ -1140,6 +1156,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
+            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
         )
     }
 
@@ -1398,6 +1415,63 @@ internal class DefaultPaymentElementLoaderTest {
             expectedLogMessages = emptyList(),
         )
     }
+
+    @Test
+    fun `When CPMs are requested and returned by elements session, CPMs are available`() = testCustomPaymentMethods(
+        requestedCustomPaymentMethods = listOf(
+            PaymentSheet.CustomPaymentMethod(
+                id = "cpmt_123",
+                subtitle = "Pay now".resolvableString,
+                disableBillingDetailCollection = false,
+            ),
+            PaymentSheet.CustomPaymentMethod(
+                id = "cpmt_456",
+                subtitle = "Pay later".resolvableString,
+                disableBillingDetailCollection = true,
+            ),
+            PaymentSheet.CustomPaymentMethod(
+                id = "cpmt_789",
+                subtitle = "Pay later".resolvableString,
+                disableBillingDetailCollection = true,
+            )
+        ),
+        returnedCustomPaymentMethods = listOf(
+            ElementsSession.CustomPaymentMethod.Available(
+                type = "cpmt_123",
+                displayName = "CPM #1",
+                logoUrl = "https://image1",
+            ),
+            ElementsSession.CustomPaymentMethod.Available(
+                type = "cpmt_456",
+                displayName = "CPM #2",
+                logoUrl = "https://image2",
+            ),
+            ElementsSession.CustomPaymentMethod.Unavailable(
+                type = "cpmt_789",
+                error = "not_found",
+            ),
+        ),
+        expectedCustomPaymentMethods = listOf(
+            DisplayableCustomPaymentMethod(
+                id = "cpmt_123",
+                displayName = "CPM #1",
+                subtitle = "Pay now".resolvableString,
+                logoUrl = "https://image1",
+                doesNotCollectBillingDetails = false,
+            ),
+            DisplayableCustomPaymentMethod(
+                id = "cpmt_456",
+                displayName = "CPM #2",
+                subtitle = "Pay later".resolvableString,
+                logoUrl = "https://image2",
+                doesNotCollectBillingDetails = true,
+            )
+        ),
+        expectedLogMessages = listOf(
+            "Requested custom payment method cpmt_789 contained an " +
+                "error \"not_found\"!"
+        ),
+    )
 
     @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
@@ -2162,6 +2236,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         verify(eventReporter).onLoadSucceeded(
             paymentSelection = null,
+            linkEnabled = false,
             linkMode = null,
             googlePaySupported = true,
             currency = "usd",
@@ -2170,6 +2245,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
+            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
         )
     }
 
@@ -2190,6 +2266,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         verify(eventReporter).onLoadSucceeded(
             paymentSelection = null,
+            linkEnabled = true,
             linkMode = LinkMode.LinkPaymentMethod,
             googlePaySupported = true,
             currency = "usd",
@@ -2198,6 +2275,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
+            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
         )
     }
 
@@ -2218,6 +2296,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         verify(eventReporter).onLoadSucceeded(
             paymentSelection = null,
+            linkEnabled = true,
             linkMode = LinkMode.Passthrough,
             googlePaySupported = true,
             currency = "usd",
@@ -2226,6 +2305,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
+            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
         )
     }
 
@@ -2244,6 +2324,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         verify(eventReporter).onLoadSucceeded(
             paymentSelection = null,
+            linkEnabled = true,
             linkMode = LinkMode.LinkPaymentMethod,
             googlePaySupported = true,
             currency = "usd",
@@ -2252,6 +2333,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = true,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
+            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
         )
     }
 
@@ -2280,6 +2362,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         verify(eventReporter).onLoadSucceeded(
             paymentSelection = null,
+            linkEnabled = true,
             linkMode = LinkMode.LinkPaymentMethod,
             googlePaySupported = true,
             currency = "usd",
@@ -2288,6 +2371,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = true,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
+            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
         )
     }
 
@@ -2316,6 +2400,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         verify(eventReporter).onLoadSucceeded(
             paymentSelection = null,
+            linkEnabled = true,
             linkMode = LinkMode.LinkPaymentMethod,
             googlePaySupported = true,
             currency = "usd",
@@ -2324,6 +2409,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
+            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
         )
     }
 
@@ -2398,6 +2484,128 @@ internal class DefaultPaymentElementLoaderTest {
             assertThat(permissions.canRemoveLastPaymentMethod).isTrue()
         }
 
+    @Test
+    fun `Allows Link if Link display is set to 'automatic'`() = runTest {
+        val loader = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+        )
+
+        val config = PaymentSheet.Configuration(
+            merchantDisplayName = MERCHANT_DISPLAY_NAME,
+            link = PaymentSheet.LinkConfiguration(
+                display = PaymentSheet.LinkConfiguration.Display.Automatic,
+            ),
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = config,
+            initializedViaCompose = false,
+        ).getOrThrow()
+
+        assertThat(result.paymentMethodMetadata.linkState).isNotNull()
+        assertThat(result.paymentMethodMetadata.supportedPaymentMethodTypes()).contains("link")
+    }
+
+    @Test
+    fun `Emits correct load event if Link display is set to 'automatic'`() = runTest {
+        val loader = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+        )
+
+        val config = PaymentSheet.Configuration(
+            merchantDisplayName = MERCHANT_DISPLAY_NAME,
+            link = PaymentSheet.LinkConfiguration(
+                display = PaymentSheet.LinkConfiguration.Display.Automatic,
+            ),
+        )
+
+        loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = config,
+            initializedViaCompose = false,
+        ).getOrThrow()
+
+        verify(eventReporter).onLoadSucceeded(
+            paymentSelection = anyOrNull(),
+            linkEnabled = eq(true),
+            linkMode = anyOrNull(),
+            googlePaySupported = any(),
+            linkDisplay = eq(PaymentSheet.LinkConfiguration.Display.Automatic),
+            currency = anyOrNull(),
+            initializationMode = any(),
+            orderedLpms = any(),
+            requireCvcRecollection = any(),
+            hasDefaultPaymentMethod = anyOrNull(),
+            setAsDefaultEnabled = anyOrNull(),
+        )
+    }
+
+    @Test
+    fun `Hides Link if Link display is set to 'never'`() = runTest {
+        val loader = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+        )
+
+        val config = PaymentSheet.Configuration(
+            merchantDisplayName = MERCHANT_DISPLAY_NAME,
+            link = PaymentSheet.LinkConfiguration(
+                display = PaymentSheet.LinkConfiguration.Display.Never,
+            ),
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = config,
+            initializedViaCompose = false,
+        ).getOrThrow()
+
+        assertThat(result.paymentMethodMetadata.linkState).isNull()
+        assertThat(result.paymentMethodMetadata.supportedPaymentMethodTypes()).doesNotContain("link")
+    }
+
+    @Test
+    fun `Emits correct load event if Link display is set to 'never'`() = runTest {
+        val loader = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+        )
+
+        val config = PaymentSheet.Configuration(
+            merchantDisplayName = MERCHANT_DISPLAY_NAME,
+            link = PaymentSheet.LinkConfiguration(
+                display = PaymentSheet.LinkConfiguration.Display.Never,
+            ),
+        )
+
+        loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = config,
+            initializedViaCompose = false,
+        ).getOrThrow()
+
+        verify(eventReporter).onLoadSucceeded(
+            paymentSelection = anyOrNull(),
+            linkEnabled = eq(false),
+            linkMode = anyOrNull(),
+            googlePaySupported = any(),
+            linkDisplay = eq(PaymentSheet.LinkConfiguration.Display.Never),
+            currency = anyOrNull(),
+            initializationMode = any(),
+            orderedLpms = any(),
+            requireCvcRecollection = any(),
+            hasDefaultPaymentMethod = anyOrNull(),
+            setAsDefaultEnabled = anyOrNull(),
+        )
+    }
+
     private fun removeLastPaymentMethodTest(
         customer: PaymentSheet.CustomerConfiguration,
         shouldDisableMobilePaymentElement: Boolean = false,
@@ -2456,12 +2664,41 @@ internal class DefaultPaymentElementLoaderTest {
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
+                .googlePay(ConfigFixtures.GOOGLE_PAY)
                 .externalPaymentMethods(requestedExternalPaymentMethods).build(),
             initializedViaCompose = false,
         ).getOrThrow()
 
         val actualExternalPaymentMethods = result.paymentMethodMetadata.externalPaymentMethodSpecs.map { it.type }
         assertThat(actualExternalPaymentMethods).isEqualTo(expectedExternalPaymentMethods)
+        assertThat(userFacingLogger.getLoggedMessages()).containsExactlyElementsIn(expectedLogMessages)
+    }
+
+    private fun testCustomPaymentMethods(
+        requestedCustomPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
+        returnedCustomPaymentMethods: List<ElementsSession.CustomPaymentMethod>,
+        expectedCustomPaymentMethods: List<DisplayableCustomPaymentMethod>,
+        expectedLogMessages: List<String>,
+    ) = runTest {
+        val userFacingLogger = FakeUserFacingLogger()
+        val loader = createPaymentElementLoader(
+            customPaymentMethods = returnedCustomPaymentMethods,
+            userFacingLogger = userFacingLogger
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
+                .googlePay(ConfigFixtures.GOOGLE_PAY)
+                .customPaymentMethods(requestedCustomPaymentMethods).build(),
+            initializedViaCompose = false,
+        ).getOrThrow()
+
+        assertThat(result.paymentMethodMetadata.displayableCustomPaymentMethods)
+            .isEqualTo(expectedCustomPaymentMethods)
+
         assertThat(userFacingLogger.getLoggedMessages()).containsExactlyElementsIn(expectedLogMessages)
     }
 
@@ -2488,6 +2725,7 @@ internal class DefaultPaymentElementLoaderTest {
         verify(eventReporter).onLoadStarted(eq(false))
         verify(eventReporter).onLoadSucceeded(
             paymentSelection = paymentSelection,
+            linkEnabled = true,
             linkMode = LinkMode.LinkPaymentMethod,
             googlePaySupported = true,
             currency = "usd",
@@ -2496,6 +2734,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = false,
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
+            linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
         )
     }
 
@@ -2573,6 +2812,7 @@ internal class DefaultPaymentElementLoaderTest {
         customer: ElementsSession.Customer? = null,
         externalPaymentMethodData: String? = null,
         errorReporter: ErrorReporter = FakeErrorReporter(),
+        customPaymentMethods: List<ElementsSession.CustomPaymentMethod> = emptyList(),
         elementsSessionRepository: ElementsSessionRepository = FakeElementsSessionRepository(
             stripeIntent = stripeIntent,
             error = error,
@@ -2581,6 +2821,7 @@ internal class DefaultPaymentElementLoaderTest {
             sessionsCustomer = customer,
             isGooglePayEnabled = isGooglePayEnabledFromBackend,
             cardBrandChoice = cardBrandChoice,
+            customPaymentMethods = customPaymentMethods,
             externalPaymentMethodData = externalPaymentMethodData,
         ),
         userFacingLogger: FakeUserFacingLogger = FakeUserFacingLogger(),

@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
@@ -14,7 +13,6 @@ import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
-import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
@@ -35,10 +33,8 @@ import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
@@ -119,11 +115,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             else -> null
         }
 
-    override val primaryButtonUiState = primaryButtonUiStateMapper.forCustomFlow().stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = null,
-    )
+    override val primaryButtonUiState = primaryButtonUiStateMapper.forCustomFlow()
 
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
@@ -137,7 +129,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
             setPaymentMethodMetadata(args.state.paymentMethodMetadata)
         }
         customerStateHolder.setCustomerState(args.state.customer)
-        savedStateHandle[SAVE_PROCESSING] = false
 
         updateSelection(args.state.paymentSelection)
 
@@ -195,10 +186,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 is PaymentSelection.ExternalPaymentMethod -> processNewOrExternalPaymentMethod(paymentSelection)
             }
         }
-    }
-
-    override fun onPaymentResult(paymentResult: PaymentResult) {
-        savedStateHandle[SAVE_PROCESSING] = false
     }
 
     override fun handlePaymentMethodSelected(selection: PaymentSelection?) {
@@ -291,6 +278,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 .context(application)
                 .productUsage(starterArgs.productUsage)
                 .savedStateHandle(savedStateHandle)
+                .paymentElementCallbackIdentifier(starterArgs.paymentElementCallbackIdentifier)
                 .build()
                 .paymentOptionsViewModelSubcomponentBuilder
                 .application(application)

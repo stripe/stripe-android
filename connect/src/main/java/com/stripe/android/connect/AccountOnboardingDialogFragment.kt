@@ -1,6 +1,6 @@
 package com.stripe.android.connect
 
-@PrivateBetaConnectSDK
+@OptIn(PrivateBetaConnectSDK::class)
 internal class AccountOnboardingDialogFragment :
     StripeComponentDialogFragment<AccountOnboardingView, AccountOnboardingListener, AccountOnboardingProps>() {
 
@@ -9,7 +9,7 @@ internal class AccountOnboardingDialogFragment :
             context = requireContext(),
             listener = listener,
             props = props,
-            cacheKey = cacheKey,
+            cacheKey = this.javaClass.simpleName
         )
     }
 }

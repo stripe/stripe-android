@@ -88,7 +88,9 @@ internal fun USBankAccountForm(
                 onBehalfOf = usBankAccountFormArgs.onBehalfOf,
                 savedPaymentMethod = usBankAccountFormArgs.draftPaymentSelection as? New.USBankAccount,
                 shippingDetails = usBankAccountFormArgs.shippingDetails,
-                shouldShowSetAsDefaultCheckbox = usBankAccountFormArgs.shouldShowSetAsDefaultCheckbox
+                setAsDefaultPaymentMethodEnabled = usBankAccountFormArgs.setAsDefaultPaymentMethodEnabled,
+                financialConnectionsAvailability = usBankAccountFormArgs.financialConnectionsAvailability,
+                setAsDefaultMatchesSaveForFutureUse = usBankAccountFormArgs.setAsDefaultMatchesSaveForFutureUse,
             )
         },
     )
@@ -136,7 +138,7 @@ internal fun BankAccountForm(
     lastTextFieldIdentifier: IdentifierSpec?,
     sameAsShippingElement: SameAsShippingElement?,
     saveForFutureUseElement: SaveForFutureUseElement,
-    setAsDefaultPaymentMethodElement: SetAsDefaultPaymentMethodElement,
+    setAsDefaultPaymentMethodElement: SetAsDefaultPaymentMethodElement?,
     modifier: Modifier = Modifier,
     enabled: Boolean,
     onRemoveAccount: () -> Unit,
@@ -378,7 +380,7 @@ private fun AccountDetailsForm(
     last4: String?,
     promoBadgeState: PromoBadgeState?,
     saveForFutureUseElement: SaveForFutureUseElement,
-    setAsDefaultPaymentMethodElement: SetAsDefaultPaymentMethodElement,
+    setAsDefaultPaymentMethodElement: SetAsDefaultPaymentMethodElement?,
     onRemoveAccount: () -> Unit,
 ) {
     var openDialog by rememberSaveable { mutableStateOf(false) }
@@ -404,16 +406,18 @@ private fun AccountDetailsForm(
         )
         if (showCheckboxes) {
             SaveForFutureUseElementUI(
-                enabled = true,
+                enabled = enabled,
                 element = saveForFutureUseElement,
                 modifier = Modifier.padding(top = 8.dp)
             )
 
-            SetAsDefaultPaymentMethodElementUI(
-                enabled = true,
-                element = setAsDefaultPaymentMethodElement,
-                modifier = Modifier.padding(top = 8.dp),
-            )
+            setAsDefaultPaymentMethodElement?.let {
+                SetAsDefaultPaymentMethodElementUI(
+                    enabled = enabled,
+                    element = it,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
         }
     }
 

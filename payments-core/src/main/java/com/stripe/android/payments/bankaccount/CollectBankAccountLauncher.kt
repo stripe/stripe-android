@@ -6,11 +6,13 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
-import com.stripe.android.financialconnections.FinancialConnectionsSheet.ElementsSessionContext
+import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.payments.bankaccount.navigation.toUSBankAccountResult
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
+import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -84,7 +86,8 @@ interface CollectBankAccountLauncher {
                 hostedSurface = null,
                 hostActivityLauncher = activity.registerForActivityResult(CollectBankAccountContract()) {
                     callback(it.toUSBankAccountResult())
-                }
+                },
+                financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null),
             )
         }
 
@@ -103,7 +106,8 @@ interface CollectBankAccountLauncher {
                 hostedSurface = null,
                 hostActivityLauncher = fragment.registerForActivityResult(CollectBankAccountContract()) {
                     callback(it.toUSBankAccountResult())
-                }
+                },
+                financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null)
             )
         }
 
@@ -113,6 +117,7 @@ interface CollectBankAccountLauncher {
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun createForPaymentSheet(
             hostedSurface: String,
+            financialConnectionsAvailability: FinancialConnectionsAvailability?,
             activityResultRegistryOwner: ActivityResultRegistryOwner,
             callback: (CollectBankAccountResultInternal) -> Unit,
         ): CollectBankAccountLauncher {
@@ -122,7 +127,8 @@ interface CollectBankAccountLauncher {
                     LAUNCHER_KEY,
                     CollectBankAccountContract(),
                     callback,
-                )
+                ),
+                financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null)
             )
         }
     }

@@ -6,13 +6,12 @@ import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.TextTransform
 import kotlinx.serialization.Serializable
 
-@PrivateBetaConnectSDK
 @Serializable
 internal data class AppearanceJs(
     val variables: AppearanceVariablesJs,
 )
 
-@PrivateBetaConnectSDK
+@OptIn(PrivateBetaConnectSDK::class)
 @Serializable
 internal data class AppearanceVariablesJs(
     /**
@@ -363,7 +362,7 @@ internal data class AppearanceVariablesJs(
     val labelSmTextTransform: TextTransform?,
 )
 
-@PrivateBetaConnectSDK
+@OptIn(PrivateBetaConnectSDK::class)
 @Suppress("LongMethod")
 internal fun Appearance.toJs(): AppearanceJs {
     return AppearanceJs(

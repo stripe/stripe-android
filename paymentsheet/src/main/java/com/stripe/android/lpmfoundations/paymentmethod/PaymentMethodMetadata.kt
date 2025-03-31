@@ -17,8 +17,8 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
-import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
+import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
@@ -50,16 +50,19 @@ internal data class PaymentMethodMetadata(
     val defaultBillingDetails: PaymentSheet.BillingDetails?,
     val shippingDetails: AddressDetails?,
     val sharedDataSpecs: List<SharedDataSpec>,
+    val displayableCustomPaymentMethods: List<DisplayableCustomPaymentMethod>,
     val externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
     val customerMetadata: CustomerMetadata?,
     val isGooglePayReady: Boolean,
+    val linkConfiguration: PaymentSheet.LinkConfiguration,
     val linkInlineConfiguration: LinkInlineConfiguration?,
     val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
     val linkMode: LinkMode?,
     val linkState: LinkState?,
     val paymentMethodIncentive: PaymentMethodIncentive?,
-    val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
+    val financialConnectionsAvailability: FinancialConnectionsAvailability?,
     val cardBrandFilter: CardBrandFilter,
+    val elementsSessionId: String
 ) : Parcelable {
     fun hasIntentToSetup(): Boolean {
         return when (stripeIntent) {
@@ -103,7 +106,7 @@ internal data class PaymentMethodMetadata(
             getUiDefinitionFactoryForExternalPaymentMethod(code)?.createSupportedPaymentMethod()
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
-            definition.uiDefinitionFactory().supportedPaymentMethod(definition, sharedDataSpecs)
+            definition.uiDefinitionFactory().supportedPaymentMethod(this, definition, sharedDataSpecs)
         }
     }
 
@@ -233,7 +236,7 @@ internal data class PaymentMethodMetadata(
     }
 
     internal companion object {
-        internal fun create(
+        internal fun createForPaymentElement(
             elementsSession: ElementsSession,
             configuration: CommonConfiguration,
             sharedDataSpecs: List<SharedDataSpec>,
@@ -268,11 +271,15 @@ internal data class PaymentMethodMetadata(
                 externalPaymentMethodSpecs = externalPaymentMethodSpecs,
                 paymentMethodSaveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
                 linkInlineConfiguration = linkInlineConfiguration,
+                linkConfiguration = configuration.link,
                 linkMode = linkSettings?.linkMode,
                 linkState = linkState,
                 paymentMethodIncentive = linkSettings?.linkConsumerIncentive?.toPaymentMethodIncentive(),
                 isGooglePayReady = isGooglePayReady,
-                cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
+                displayableCustomPaymentMethods = elementsSession.toDisplayableCustomPaymentMethods(configuration),
+                cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
+                financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession),
+                elementsSessionId = elementsSession.elementsSessionId
             )
         }
 
@@ -282,7 +289,6 @@ internal data class PaymentMethodMetadata(
             paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
             sharedDataSpecs: List<SharedDataSpec>,
             isGooglePayReady: Boolean,
-            isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
             isPaymentMethodSyncDefaultEnabled: Boolean,
         ): PaymentMethodMetadata {
             return PaymentMethodMetadata(
@@ -305,17 +311,20 @@ internal data class PaymentMethodMetadata(
                 sharedDataSpecs = sharedDataSpecs,
                 isGooglePayReady = isGooglePayReady,
                 linkInlineConfiguration = null,
-                financialConnectionsAvailable = isFinancialConnectionsAvailable(),
                 paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
+                linkConfiguration = PaymentSheet.LinkConfiguration(),
                 linkMode = elementsSession.linkSettings?.linkMode,
                 linkState = null,
                 paymentMethodIncentive = null,
                 externalPaymentMethodSpecs = emptyList(),
-                cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance)
+                displayableCustomPaymentMethods = emptyList(),
+                cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
+                elementsSessionId = elementsSession.elementsSessionId,
+                financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession)
             )
         }
 
-        internal fun create(
+        internal fun createForNativeLink(
             configuration: LinkConfiguration,
         ): PaymentMethodMetadata {
             return PaymentMethodMetadata(
@@ -339,11 +348,15 @@ internal data class PaymentMethodMetadata(
                 externalPaymentMethodSpecs = emptyList(),
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(null),
                 linkInlineConfiguration = null,
+                linkConfiguration = PaymentSheet.LinkConfiguration(),
                 linkMode = null,
                 linkState = null,
                 paymentMethodIncentive = null,
                 isGooglePayReady = false,
-                cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all())
+                displayableCustomPaymentMethods = emptyList(),
+                cardBrandFilter = PaymentSheetCardBrandFilter(PaymentSheet.CardBrandAcceptance.all()),
+                elementsSessionId = configuration.elementsSessionId,
+                financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null)
             )
         }
 

@@ -23,7 +23,7 @@ internal data class StripeAccountIdSetting(
     )
 
     override fun shouldDisplay(merchant: Merchant, flow: Flow, experience: Experience): Boolean {
-        return experience == Experience.FinancialConnections && flow == Flow.Data
+        return experience == Experience.FinancialConnections
     }
 
     override fun valueUpdated(

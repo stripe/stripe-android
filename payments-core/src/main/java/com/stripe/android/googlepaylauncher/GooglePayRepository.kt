@@ -50,7 +50,7 @@ internal class DefaultGooglePayRepository(
     private val paymentsClientFactory: PaymentsClientFactory = DefaultPaymentsClientFactory(context),
     private val errorReporter: ErrorReporter,
     private val logger: Logger = Logger.noop(),
-    private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter
+    private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
 ) : GooglePayRepository {
 
     @Inject

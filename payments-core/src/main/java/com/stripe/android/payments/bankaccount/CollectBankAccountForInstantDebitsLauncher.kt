@@ -6,11 +6,13 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountForInstantDebitsResult
 import com.stripe.android.payments.bankaccount.navigation.toInstantDebitsResult
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CollectBankAccountForInstantDebitsLauncher(
     private val hostActivityLauncher: ActivityResultLauncher<CollectBankAccountContract.Args>,
-    private val hostedSurface: String?
+    private val financialConnectionsAvailability: FinancialConnectionsAvailability?,
+    private val hostedSurface: String?,
 ) : CollectBankAccountLauncher {
 
     override fun presentWithPaymentIntent(
@@ -26,6 +28,7 @@ class CollectBankAccountForInstantDebitsLauncher(
                 clientSecret = clientSecret,
                 configuration = configuration,
                 hostedSurface = hostedSurface,
+                financialConnectionsAvailability = financialConnectionsAvailability,
                 attachToIntent = true
             )
         )
@@ -44,6 +47,7 @@ class CollectBankAccountForInstantDebitsLauncher(
                 clientSecret = clientSecret,
                 configuration = configuration,
                 hostedSurface = hostedSurface,
+                financialConnectionsAvailability = financialConnectionsAvailability,
                 attachToIntent = true
             )
         )
@@ -69,6 +73,7 @@ class CollectBankAccountForInstantDebitsLauncher(
                 onBehalfOf = onBehalfOf,
                 amount = amount,
                 hostedSurface = hostedSurface,
+                financialConnectionsAvailability = financialConnectionsAvailability,
                 currency = currency,
             )
         )
@@ -90,6 +95,7 @@ class CollectBankAccountForInstantDebitsLauncher(
                 configuration = configuration,
                 customerId = customerId,
                 onBehalfOf = onBehalfOf,
+                financialConnectionsAvailability = financialConnectionsAvailability,
                 hostedSurface = hostedSurface,
             )
         )
@@ -107,6 +113,7 @@ class CollectBankAccountForInstantDebitsLauncher(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun createForPaymentSheet(
             hostedSurface: String,
+            financialConnectionsAvailability: FinancialConnectionsAvailability?,
             activityResultRegistryOwner: ActivityResultRegistryOwner,
             callback: (CollectBankAccountForInstantDebitsResult) -> Unit,
         ): CollectBankAccountLauncher {
@@ -114,6 +121,7 @@ class CollectBankAccountForInstantDebitsLauncher(
                 // TODO@carlosmuvi: if exposing this as an L1 (standalone) integration,
                 // use a separate method and ensure the correct hostedSurface is set.
                 hostedSurface = hostedSurface,
+                financialConnectionsAvailability = financialConnectionsAvailability,
                 hostActivityLauncher = activityResultRegistryOwner.activityResultRegistry.register(
                     LAUNCHER_KEY,
                     CollectBankAccountContract()

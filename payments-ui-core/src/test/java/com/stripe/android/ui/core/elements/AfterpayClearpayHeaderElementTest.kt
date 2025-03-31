@@ -3,8 +3,11 @@ package com.stripe.android.ui.core.elements
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.testing.LocaleTestRule
+import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement.Companion.isCashappAfterpay
 import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement.Companion.isClearpay
 import com.stripe.android.uicore.elements.IdentifierSpec
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -13,10 +16,14 @@ import java.util.Locale
 @RunWith(RobolectricTestRunner::class)
 class AfterpayClearpayHeaderElementTest {
 
+    @get:Rule
+    val localeRule = LocaleTestRule()
+
     @Test
     fun `Verify label is correct`() {
         val element = AfterpayClearpayHeaderElement(
             IdentifierSpec.Generic("test"),
+            currency = "EUR",
         )
 
         assertThat(
@@ -28,6 +35,7 @@ class AfterpayClearpayHeaderElementTest {
     fun `Verify infoUrl is correct`() {
         val element = AfterpayClearpayHeaderElement(
             IdentifierSpec.Generic("test"),
+            currency = "EUR",
         )
 
         assertThat(element.infoUrl)
@@ -36,24 +44,26 @@ class AfterpayClearpayHeaderElementTest {
 
     @Test
     fun `Verify infoUrl is updated as locale changes`() {
-        Locale.setDefault(Locale.UK)
+        localeRule.setTemporarily(Locale.UK)
         val element = AfterpayClearpayHeaderElement(
             IdentifierSpec.Generic("test"),
+            currency = "GBP",
         )
 
         assertThat(element.infoUrl)
             .isEqualTo("https://static.afterpay.com/modal/en_GB.html")
 
-        Locale.setDefault(Locale.FRANCE)
+        localeRule.setTemporarily(Locale.FRANCE)
         assertThat(element.infoUrl)
             .isEqualTo("https://static.afterpay.com/modal/fr_FR.html")
     }
 
     @Test
     fun `Verify infoUrl is localized for GB`() {
-        Locale.setDefault(Locale.UK)
+        localeRule.setTemporarily(Locale.UK)
         val element = AfterpayClearpayHeaderElement(
             IdentifierSpec.Generic("test"),
+            currency = "GBP",
         )
 
         assertThat(element.infoUrl)
@@ -62,9 +72,10 @@ class AfterpayClearpayHeaderElementTest {
 
     @Test
     fun `Verify infoUrl is localized for France`() {
-        Locale.setDefault(Locale.FRANCE)
+        localeRule.setTemporarily(Locale.FRANCE)
         val element = AfterpayClearpayHeaderElement(
             IdentifierSpec.Generic("test"),
+            currency = "EUR",
         )
 
         assertThat(element.infoUrl)
@@ -73,19 +84,14 @@ class AfterpayClearpayHeaderElementTest {
 
     @Test
     fun `Verify check if clearpay or afterpay`() {
-        Locale.setDefault(Locale.UK)
-        assertThat(isClearpay()).isTrue()
+        assertThat(isClearpay("GBP")).isTrue()
+        assertThat(isClearpay("EUR")).isFalse()
+    }
 
-        Locale.setDefault(Locale.FRANCE)
-        assertThat(isClearpay()).isTrue()
-
-        Locale.setDefault(Locale.Builder().setRegion("ES").build())
-        assertThat(isClearpay()).isTrue()
-
-        Locale.setDefault(Locale.Builder().setRegion("IT").build())
-        assertThat(isClearpay()).isTrue()
-
-        Locale.setDefault(Locale.US)
-        assertThat(isClearpay()).isFalse()
+    @Test
+    fun `Verify check if cash app afterpay`() {
+        assertThat(isCashappAfterpay("GBP")).isFalse()
+        assertThat(isCashappAfterpay("EUR")).isFalse()
+        assertThat(isCashappAfterpay("USD")).isTrue()
     }
 }

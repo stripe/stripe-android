@@ -16,10 +16,12 @@ import com.stripe.android.link.account.LinkAuth
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmationModule
 import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
+import com.stripe.android.ui.core.di.CardScanModule
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Named
@@ -37,6 +39,7 @@ internal annotation class NativeLinkScope
         ApplicationIdModule::class,
         DefaultConfirmationModule::class,
         LinkPassthroughConfirmationModule::class,
+        CardScanModule::class
     ]
 )
 internal interface NativeLinkComponent {
@@ -62,6 +65,11 @@ internal interface NativeLinkComponent {
 
         @BindsInstance
         fun stripeAccountIdProvider(@Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?): Builder
+
+        @BindsInstance
+        fun paymentElementCallbackIdentifier(
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String
+        ): Builder
 
         @BindsInstance
         fun context(context: Context): Builder

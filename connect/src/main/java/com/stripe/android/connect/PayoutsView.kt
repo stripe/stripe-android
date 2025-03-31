@@ -5,39 +5,39 @@ import android.util.AttributeSet
 import androidx.annotation.RestrictTo
 import androidx.core.content.withStyledAttributes
 import com.stripe.android.connect.webview.StripeConnectWebViewContainer
-import com.stripe.android.connect.webview.StripeConnectWebViewContainerImpl
 
 @PrivateBetaConnectSDK
-class PayoutsView private constructor(
+internal class PayoutsView internal constructor(
     context: Context,
-    attrs: AttributeSet?,
-    defStyleAttr: Int,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0,
+    embeddedComponentManager: EmbeddedComponentManager?,
+    listener: PayoutsListener?,
     cacheKey: String?,
-    webViewContainerBehavior: StripeConnectWebViewContainerImpl<PayoutsListener, EmptyProps>,
-) : StripeComponentView<PayoutsListener, EmptyProps>(context, attrs, defStyleAttr),
-    StripeConnectWebViewContainer<PayoutsListener, EmptyProps> by webViewContainerBehavior {
+) :
+    StripeComponentView<PayoutsListener, EmptyProps>(
+        context = context,
+        attrs = attrs,
+        defStyleAttr = defStyleAttr,
+        embeddedComponent = StripeEmbeddedComponent.PAYOUTS,
+        embeddedComponentManager = embeddedComponentManager,
+        listener = listener,
+        props = EmptyProps,
+    ),
+    StripeConnectWebViewContainer<PayoutsListener, EmptyProps> {
 
     @JvmOverloads
-    @RestrictTo(RestrictTo.Scope.LIBRARY)
     constructor(
         context: Context,
         attrs: AttributeSet? = null,
         defStyleAttr: Int = 0,
-        embeddedComponentManager: EmbeddedComponentManager? = null,
-        listener: PayoutsListener? = null,
-        cacheKey: String? = null,
     ) : this(
         context = context,
         attrs = attrs,
         defStyleAttr = defStyleAttr,
-        cacheKey = cacheKey,
-        webViewContainerBehavior = StripeConnectWebViewContainerImpl(
-            context = context,
-            embeddedComponent = StripeEmbeddedComponent.PAYOUTS,
-            embeddedComponentManager = embeddedComponentManager,
-            listener = listener,
-            props = EmptyProps,
-        )
+        embeddedComponentManager = null,
+        listener = null,
+        cacheKey = null,
     )
 
     init {
@@ -45,10 +45,10 @@ class PayoutsView private constructor(
         context.withStyledAttributes(attrs, R.styleable.StripeConnectWebViewContainer, defStyleAttr, 0) {
             xmlCacheKey = getString(R.styleable.StripeConnectWebViewContainer_stripeWebViewCacheKey)
         }
-        webViewContainerBehavior.initializeView(this, cacheKey ?: xmlCacheKey)
+        initializeView(cacheKey ?: xmlCacheKey)
     }
 }
 
 @PrivateBetaConnectSDK
-@RestrictTo(RestrictTo.Scope.LIBRARY)
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface PayoutsListener : StripeEmbeddedComponentListener

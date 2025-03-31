@@ -4,9 +4,11 @@ import androidx.compose.foundation.lazy.LazyListState
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPaymentMethodUiDefinitionFactory
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.ui.core.R
 import com.stripe.android.utils.MockPaymentMethodsFactory
+import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.mock
@@ -16,13 +18,19 @@ class PaymentMethodsUIScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule()
 
+    @get:Rule
+    val paparazziRuleWithStyleChanges = PaparazziRule(
+        PaymentSheetAppearance.entries,
+        FontSize.entries,
+    )
+
     private val paymentMethods: List<SupportedPaymentMethod> by lazy {
         MockPaymentMethodsFactory.create()
     }
 
     @Test
     fun testInitialState() {
-        paparazziRule.snapshot {
+        paparazziRuleWithStyleChanges.snapshot {
             NewPaymentMethodTabLayoutUI(
                 paymentMethods = paymentMethods,
                 selectedIndex = 0,
@@ -38,13 +46,13 @@ class PaymentMethodsUIScreenshotTest {
     fun testLongPaymentMethodName() {
         val bankPaymentMethod = MockPaymentMethodsFactory.mockPaymentMethod(
             code = "us_bank_account",
-            displayNameResource = R.string.stripe_paymentsheet_payment_method_us_bank_account,
+            displayName = "Greatest US bank account",
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
             iconRequiresTinting = true
         )
         val paymentMethods = paymentMethods.toMutableList()
         paymentMethods.add(1, bankPaymentMethod)
-        paparazziRule.snapshot {
+        paparazziRuleWithStyleChanges.snapshot {
             NewPaymentMethodTabLayoutUI(
                 paymentMethods = paymentMethods,
                 selectedIndex = 0,

@@ -3,13 +3,15 @@ package com.stripe.android.paymentsheet.ui
 import android.os.Build
 import android.os.Parcel
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.test.assertContentDescriptionEquals
+import androidx.compose.ui.test.assertAll
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
-import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.isEnabled
+import androidx.compose.ui.test.isNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onChild
+import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
@@ -38,113 +40,6 @@ class UpdatePaymentMethodUITest {
 
     @get:Rule
     val composeRule = createComposeRule()
-
-    @Test
-    fun missingExpiryDate_displaysDots() {
-        val card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
-            card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card!!.copy(
-                expiryMonth = null,
-            )
-        )
-
-        runScenario(displayableSavedPaymentMethod = card.toDisplayableSavedPaymentMethod()) {
-            assertExpiryDateEquals(
-                "••/••"
-            )
-        }
-    }
-
-    @Test
-    fun invalidExpiryMonth_displaysDots() {
-        val card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
-            card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card!!.copy(
-                expiryMonth = -1,
-            )
-        )
-
-        runScenario(displayableSavedPaymentMethod = card.toDisplayableSavedPaymentMethod()) {
-            assertExpiryDateEquals(
-                "••/••"
-            )
-        }
-    }
-
-    @Test
-    fun invalidExpiryYear_displaysDots() {
-        val card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
-            card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card!!.copy(
-                expiryYear = 202,
-            )
-        )
-
-        runScenario(displayableSavedPaymentMethod = card.toDisplayableSavedPaymentMethod()) {
-            assertExpiryDateEquals(
-                "••/••"
-            )
-        }
-    }
-
-    @Test
-    fun singleDigitExpiryMonth_hasLeadingZero() {
-        val card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
-            card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card!!.copy(
-                expiryMonth = 8,
-                expiryYear = 2029,
-            )
-        )
-
-        runScenario(displayableSavedPaymentMethod = card.toDisplayableSavedPaymentMethod()) {
-            assertExpiryDateEquals(
-                "08/29"
-            )
-        }
-    }
-
-    @Test
-    fun doubleDigitExpiryMonth_doesNotHaveLeadingZero() {
-        val card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
-            card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card!!.copy(
-                expiryMonth = 11,
-                expiryYear = 2029,
-            )
-        )
-
-        runScenario(displayableSavedPaymentMethod = card.toDisplayableSavedPaymentMethod()) {
-            assertExpiryDateEquals(
-                "11/29"
-            )
-        }
-    }
-
-    @Test
-    fun threeDigitCvcCardBrand_displaysThreeDotsForCvc() {
-        val card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
-            card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card!!.copy(
-                brand = CardBrand.Visa
-            )
-        )
-
-        runScenario(displayableSavedPaymentMethod = card.toDisplayableSavedPaymentMethod()) {
-            assertCvcEquals(
-                "•••"
-            )
-        }
-    }
-
-    @Test
-    fun fourDigitCvcCardBrand_displaysFourDotsForCvc() {
-        val card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
-            card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card!!.copy(
-                brand = CardBrand.AmericanExpress
-            )
-        )
-
-        runScenario(displayableSavedPaymentMethod = card.toDisplayableSavedPaymentMethod()) {
-            assertCvcEquals(
-                "••••"
-            )
-        }
-    }
 
     @Test
     fun canRemoveIsFalse_removeButtonHidden() = runScenario(
@@ -183,40 +78,35 @@ class UpdatePaymentMethodUITest {
     }
 
     @Test
-    fun isModifiablePMIsTrue_saveButtonHidden() = runScenario(
-        isModifiablePaymentMethod = true,
+    fun shouldShowSaveButton_saveButtonIsDisplayed() = runScenario(
+        shouldShowSaveButton = true,
     ) {
-        composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).assertExists()
+        composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).assertIsDisplayed()
     }
 
     @Test
-    fun cardBrandHasNotBeenChanged_saveButtonNotEnabled() = runScenario(
-        isModifiablePaymentMethod = true,
-        cardBrandHasBeenChanged = false,
+    fun shouldNotShowSaveButton_saveButtonIsHidden() = runScenario(
+        shouldShowSaveButton = false,
     ) {
-        // The actual button is a child of the composable used for this button.
-        composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).onChild().assertIsNotEnabled()
+        composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).assertDoesNotExist()
     }
 
     @Test
-    fun cardBrandHasBeenChanged_saveButtonEnabled() = runScenario(
-        isModifiablePaymentMethod = true,
-        cardBrandHasBeenChanged = true,
+    fun isSaveButtonEnabled_saveButtonIsEnabled() = runScenario(
+        shouldShowSaveButton = true,
+        isSaveButtonEnabled = true,
     ) {
-        // The actual button is a child of the composable used for this button.
-        composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).onChild().assertIsEnabled()
+        composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).assertIsDisplayed()
+        composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).onChildren().assertAll(isEnabled())
     }
 
     @Test
-    fun clickingSaveButton_sendsSaveButtonPressedAction() = runScenario(
-        isModifiablePaymentMethod = true,
-        cardBrandHasBeenChanged = true,
+    fun isSaveButtonEnabledIsFalse_saveButtonIsNotEnabled() = runScenario(
+        shouldShowSaveButton = true,
+        isSaveButtonEnabled = false,
     ) {
-        assertThat(viewActionRecorder.viewActions).isEmpty()
-        composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).performClick()
-
-        viewActionRecorder.consume(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
-        assertThat(viewActionRecorder.viewActions).isEmpty()
+        composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).assertIsDisplayed()
+        composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG).onChildren().assertAll(isNotEnabled())
     }
 
     @Test
@@ -350,80 +240,11 @@ class UpdatePaymentMethodUITest {
     }
 
     @Test
-    fun modifiableCard_cbcDropdownIsShown() {
-        runScenario(
-            displayableSavedPaymentMethod = PaymentMethodFixtures
-                .CARD_WITH_NETWORKS_PAYMENT_METHOD
-                .toDisplayableSavedPaymentMethod()
-        ) {
-            composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).assertExists()
-        }
-    }
-
-    @Test
-    fun notModifiableCard_cbcDropdownIsNotShown() {
-        runScenario(
-            displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard()
-        ) {
-            composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).assertDoesNotExist()
-        }
-    }
-
-    @Test
     fun bankAccount_cbcDropdownIsNotShown() {
         runScenario(
             displayableSavedPaymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT.toDisplayableSavedPaymentMethod()
         ) {
             composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).assertDoesNotExist()
-        }
-    }
-
-    @Test
-    fun isNotModifiablePM_cbcDropdownIsNotShown() {
-        runScenario(
-            displayableSavedPaymentMethod = PaymentMethodFixtures
-                .CARD_WITH_NETWORKS_PAYMENT_METHOD
-                .toDisplayableSavedPaymentMethod(),
-            isModifiablePaymentMethod = false,
-        ) {
-            // Even if the card itself is modifiable, if we set isModifiablePaymentMethod to false, CBC is hidden.
-            composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).assertDoesNotExist()
-        }
-    }
-
-    @Test
-    fun openingCardBrandDropdown_sendsOnBrandChoicesShownAction() {
-        runScenario(
-            displayableSavedPaymentMethod = PaymentMethodFixtures
-                .CARD_WITH_NETWORKS_PAYMENT_METHOD
-                .toDisplayableSavedPaymentMethod()
-        ) {
-            assertThat(viewActionRecorder.viewActions).isEmpty()
-            composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).performClick()
-
-            viewActionRecorder.consume(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsShown)
-            assertThat(viewActionRecorder.viewActions).isEmpty()
-        }
-    }
-
-    @Test
-    fun closingCardBrandDropdown_sendsOnBrandChoicesDismissedAction() {
-        runScenario(
-            displayableSavedPaymentMethod = PaymentMethodFixtures
-                .CARD_WITH_NETWORKS_PAYMENT_METHOD
-                .toDisplayableSavedPaymentMethod()
-        ) {
-            assertThat(viewActionRecorder.viewActions).isEmpty()
-            composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).performClick()
-
-            viewActionRecorder.consume(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsShown)
-            assertThat(viewActionRecorder.viewActions).isEmpty()
-
-            // Click the card brand dropdown again to dismiss it.
-            composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).performClick()
-
-            viewActionRecorder.consume(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsDismissed)
-            assertThat(viewActionRecorder.viewActions).isEmpty()
         }
     }
 
@@ -437,9 +258,6 @@ class UpdatePaymentMethodUITest {
             assertThat(viewActionRecorder.viewActions).isEmpty()
             composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).performClick()
 
-            viewActionRecorder.consume(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceOptionsShown)
-            assertThat(viewActionRecorder.viewActions).isEmpty()
-
             composeRule.onNodeWithTag("${TEST_TAG_DROP_DOWN_CHOICE}_Visa").performClick()
 
             viewActionRecorder.consume(
@@ -452,22 +270,21 @@ class UpdatePaymentMethodUITest {
     }
 
     @Test
-    fun `Card drop down has accessibility label`() {
+    fun `When should show set as default checkbox, checkbox is visible and enabled`() {
         runScenario(
-            displayableSavedPaymentMethod = PaymentMethodFixtures
-                .CARD_WITH_NETWORKS_PAYMENT_METHOD
-                .toDisplayableSavedPaymentMethod(),
-            initialCardBrand = CardBrand.Visa,
+            shouldShowSetAsDefaultCheckbox = true,
         ) {
-            composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
-                .assertContentDescriptionEquals("Visa")
+            val setAsDefaultCheckbox = composeRule.onNodeWithTag(UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG)
+
+            setAsDefaultCheckbox.assertExists()
         }
     }
 
     @Test
-    fun `When should show set as default checkbox, checkbox is visible and enabled`() {
+    fun `setAsDefaultCheckboxEnabled true -- set as default checkbox is enabled`() {
         runScenario(
             shouldShowSetAsDefaultCheckbox = true,
+            setAsDefaultCheckboxEnabled = true,
         ) {
             val setAsDefaultCheckbox = composeRule.onNodeWithTag(UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG)
 
@@ -477,15 +294,15 @@ class UpdatePaymentMethodUITest {
     }
 
     @Test
-    fun `When set as default checkbox is checked, save button is visible and enabled`() {
+    fun `setAsDefaultCheckboxEnabled false -- set as default checkbox is not enabled`() {
         runScenario(
             shouldShowSetAsDefaultCheckbox = true,
-            setAsDefaultCheckboxChecked = true,
+            setAsDefaultCheckboxEnabled = false,
         ) {
-            val setAsDefaultCheckbox = composeRule.onNodeWithTag(UPDATE_PM_SAVE_BUTTON_TEST_TAG)
+            val setAsDefaultCheckbox = composeRule.onNodeWithTag(UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG)
 
             setAsDefaultCheckbox.assertExists()
-            setAsDefaultCheckbox.assertIsEnabled()
+            setAsDefaultCheckbox.assertIsNotEnabled()
         }
     }
 
@@ -507,30 +324,20 @@ class UpdatePaymentMethodUITest {
         }
     }
 
-    private fun assertExpiryDateEquals(text: String) {
-        composeRule.onNodeWithTag(UPDATE_PM_EXPIRY_FIELD_TEST_TAG).assertTextContains(
-            text
-        )
-    }
-
-    private fun assertCvcEquals(text: String) {
-        composeRule.onNodeWithTag(UPDATE_PM_CVC_FIELD_TEST_TAG).assertTextContains(
-            text
-        )
-    }
-
     private fun runScenario(
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
         isExpiredCard: Boolean = false,
         errorMessage: ResolvableString? = null,
         initialCardBrand: CardBrand = CardBrand.Unknown,
-        cardBrandHasBeenChanged: Boolean = false,
         canRemove: Boolean = true,
         isModifiablePaymentMethod: Boolean = true,
         hasValidBrandChoices: Boolean = true,
         setAsDefaultCheckboxChecked: Boolean = false,
+        setAsDefaultCheckboxEnabled: Boolean = true,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
         shouldShowSetAsDefaultCheckbox: Boolean = false,
+        shouldShowSaveButton: Boolean = false,
+        isSaveButtonEnabled: Boolean = false,
         testBlock: Scenario.() -> Unit,
     ) {
         val viewActionRecorder = ViewActionRecorder<UpdatePaymentMethodInteractor.ViewAction>()
@@ -543,12 +350,14 @@ class UpdatePaymentMethodUITest {
             viewActionRecorder = viewActionRecorder,
             hasValidBrandChoices = hasValidBrandChoices,
             shouldShowSetAsDefaultCheckbox = shouldShowSetAsDefaultCheckbox,
+            shouldShowSaveButton = shouldShowSaveButton,
+            setAsDefaultCheckboxEnabled = setAsDefaultCheckboxEnabled,
             initialState = UpdatePaymentMethodInteractor.State(
                 error = errorMessage,
                 status = UpdatePaymentMethodInteractor.Status.Idle,
                 cardBrandChoice = CardBrandChoice(brand = initialCardBrand, enabled = true),
-                cardBrandHasBeenChanged = cardBrandHasBeenChanged,
                 setAsDefaultCheckboxChecked = setAsDefaultCheckboxChecked,
+                isSaveButtonEnabled = isSaveButtonEnabled,
             ),
         )
 

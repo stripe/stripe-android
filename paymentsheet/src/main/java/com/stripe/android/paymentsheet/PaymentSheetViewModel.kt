@@ -29,9 +29,9 @@ import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmation
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
+import com.stripe.android.paymentsheet.analytics.primaryButtonColorUsage
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
@@ -51,6 +51,7 @@ import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.utils.canSave
+import com.stripe.android.paymentsheet.utils.toConfirmationError
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
@@ -59,12 +60,10 @@ import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
@@ -171,11 +170,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
         }
 
-    override val primaryButtonUiState = primaryButtonUiStateMapper.forCompleteFlow().stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = null,
-    )
+    override val primaryButtonUiState = primaryButtonUiStateMapper.forCompleteFlow()
 
     override val error: StateFlow<ResolvableString?> = buyButtonState.mapAsStateFlow { it?.errorMessage?.message }
 
@@ -218,8 +213,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         val isDeferred = args.initializationMode is PaymentElementLoader.InitializationMode.DeferredIntent
 
         eventReporter.onInit(
-            configuration = config,
+            commonConfiguration = config.asCommonConfiguration(),
+            primaryButtonColor = config.primaryButtonColorUsage(),
+            paymentMethodLayout = config.paymentMethodLayout,
             isDeferred = isDeferred,
+            appearance = config.appearance
         )
 
         viewModelScope.launch(workContext) {
@@ -310,7 +308,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     }
                     is ConfirmationHandler.State.Complete -> {
                         setContentVisible(true)
-                        processIntentResult(state.result)
+                        processConfirmationResult(state.result)
                     }
                 }
             }
@@ -478,7 +476,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
                 errorReporter.report(event, StripeException.create(exception))
 
-                processIntentResult(
+                processConfirmationResult(
                     ConfirmationHandler.Result.Failed(
                         cause = exception,
                         message = exception.stripeErrorMessage(),
@@ -486,13 +484,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     )
                 )
             }
-        }
-    }
-
-    override fun onPaymentResult(paymentResult: PaymentResult) {
-        viewModelScope.launch(workContext) {
-            val stripeIntent = awaitStripeIntent()
-            processPayment(stripeIntent, paymentResult)
         }
     }
 
@@ -551,57 +542,34 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    private fun processIntentResult(result: ConfirmationHandler.Result?) {
+    private fun processConfirmationResult(result: ConfirmationHandler.Result?) {
         when (result) {
             is ConfirmationHandler.Result.Succeeded -> handlePaymentCompleted(
                 intent = result.intent,
                 deferredIntentConfirmationType = result.deferredIntentConfirmationType,
                 finishImmediately = false,
             )
-            is ConfirmationHandler.Result.Failed -> processIntentFailure(result)
+            is ConfirmationHandler.Result.Failed -> processConfirmationFailure(result)
             is ConfirmationHandler.Result.Canceled,
             null -> resetViewState()
         }
     }
 
-    private fun processIntentFailure(failure: ConfirmationHandler.Result.Failed) {
+    private fun processConfirmationFailure(failure: ConfirmationHandler.Result.Failed) {
         when (failure.type) {
-            ConfirmationHandler.Result.Failed.ErrorType.Payment -> handlePaymentFailed(
-                error = PaymentSheetConfirmationError.Stripe(failure.cause),
-                message = failure.message,
-            )
-            ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod -> handlePaymentFailed(
-                error = PaymentSheetConfirmationError.ExternalPaymentMethod,
-                message = failure.message,
-            )
-            is ConfirmationHandler.Result.Failed.ErrorType.GooglePay -> handlePaymentFailed(
-                error = PaymentSheetConfirmationError.GooglePay(failure.type.errorCode),
-                message = failure.message,
-            )
+            ConfirmationHandler.Result.Failed.ErrorType.Payment,
+            ConfirmationHandler.Result.Failed.ErrorType.ExternalPaymentMethod,
+            is ConfirmationHandler.Result.Failed.ErrorType.GooglePay -> {
+                failure.toConfirmationError()?.let { confirmationError ->
+                    handlePaymentFailed(
+                        error = confirmationError,
+                        message = failure.message,
+                    )
+                }
+            }
             ConfirmationHandler.Result.Failed.ErrorType.Fatal -> onFatal(failure.cause)
             ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration,
             ConfirmationHandler.Result.Failed.ErrorType.Internal -> onError(failure.message)
-        }
-    }
-
-    private fun processPayment(stripeIntent: StripeIntent, paymentResult: PaymentResult) {
-        when (paymentResult) {
-            is PaymentResult.Completed -> {
-                handlePaymentCompleted(
-                    intent = stripeIntent,
-                    deferredIntentConfirmationType = null,
-                    finishImmediately = false
-                )
-            }
-            is PaymentResult.Failed -> {
-                handlePaymentFailed(
-                    error = PaymentSheetConfirmationError.Stripe(paymentResult.throwable),
-                    message = paymentResult.throwable.stripeErrorMessage(),
-                )
-            }
-            is PaymentResult.Canceled -> {
-                resetViewState()
-            }
         }
     }
 
@@ -685,14 +653,16 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             val application = extras.requireApplication()
             val savedStateHandle = extras.createSavedStateHandle()
+            val arguments = starterArgsSupplier()
 
             val component = DaggerPaymentSheetLauncherComponent
                 .builder()
                 .application(application)
                 .savedStateHandle(savedStateHandle)
+                .paymentElementCallbackIdentifier(arguments.paymentElementCallbackIdentifier)
                 .build()
                 .paymentSheetViewModelSubcomponentBuilder
-                .paymentSheetViewModelModule(PaymentSheetViewModelModule(starterArgsSupplier()))
+                .paymentSheetViewModelModule(PaymentSheetViewModelModule(arguments))
                 .build()
 
             return component.viewModel as T

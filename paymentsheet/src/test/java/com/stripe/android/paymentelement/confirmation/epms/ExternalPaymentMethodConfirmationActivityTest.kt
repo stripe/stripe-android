@@ -16,6 +16,8 @@ import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentElementConfirmationTestActivity
 import com.stripe.android.paymentelement.confirmation.assertCanceled
@@ -24,18 +26,16 @@ import com.stripe.android.paymentelement.confirmation.assertConfirming
 import com.stripe.android.paymentelement.confirmation.assertFailed
 import com.stripe.android.paymentelement.confirmation.assertIdle
 import com.stripe.android.paymentelement.confirmation.assertSucceeded
-import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
-import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import com.stripe.android.paymentsheet.ExternalPaymentMethodResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.createTestActivityRule
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
+import com.stripe.android.utils.PaymentElementCallbackTestRule
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -54,17 +54,16 @@ internal class ExternalPaymentMethodConfirmationActivityTest {
     @get:Rule
     val testActivityRule = createTestActivityRule<PaymentElementConfirmationTestActivity>()
 
+    @get:Rule
+    val paymentElementCallbackTestRule = PaymentElementCallbackTestRule()
+
     @Before
     fun setup() {
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler =
-            ExternalPaymentMethodConfirmHandler { _, _ ->
+        PaymentElementCallbackReferences["ConfirmationTestIdentifier"] = PaymentElementCallbacks.Builder()
+            .externalPaymentMethodConfirmHandler { _, _ ->
                 error("Should not be called!")
             }
-    }
-
-    @After
-    fun teardown() {
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
+            .build()
     }
 
     @Test

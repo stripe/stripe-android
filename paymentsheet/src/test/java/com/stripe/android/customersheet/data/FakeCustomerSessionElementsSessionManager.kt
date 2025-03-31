@@ -49,9 +49,11 @@ internal class FakeCustomerSessionElementsSessionManager(
                 isGooglePayEnabled = true,
                 sessionsError = null,
                 externalPaymentMethodData = null,
+                customPaymentMethods = emptyList(),
                 customer = customer,
                 cardBrandChoice = null,
                 elementsSessionId = "session_1234",
+                flags = emptyMap()
             ),
             customer = customer,
             ephemeralKey = CachedCustomerEphemeralKey(

@@ -1,5 +1,6 @@
 apply from: configs.androidLibrary
 
+apply plugin: 'com.google.devtools.ksp'
 apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 
@@ -7,6 +8,11 @@ dependencies {
     api project(":stripe-core")
     implementation project(":camera-core")
     implementation project(":ml-core:cardscan")
+    implementation project(":payments-core")
+
+    // DI
+    implementation libs.dagger
+    ksp libs.daggerCompiler
 
     implementation libs.androidx.appCompat
     implementation libs.androidx.constraintLayout
@@ -15,6 +21,9 @@ dependencies {
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.coroutinesAndroid
     implementation libs.kotlin.serialization
+
+
+    testImplementation project(':payments-core-testing')
 
     testImplementation testLibs.androidx.core
     testImplementation testLibs.androidx.testRunner
@@ -25,6 +34,7 @@ dependencies {
     testImplementation testLibs.mockito.kotlin
     testImplementation testLibs.robolectric
     testImplementation testLibs.truth
+    testImplementation testLibs.turbine
 
     androidTestImplementation testLibs.androidx.coreKtx
     androidTestImplementation testLibs.androidx.testRules

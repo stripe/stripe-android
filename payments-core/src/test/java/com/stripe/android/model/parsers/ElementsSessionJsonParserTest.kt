@@ -8,6 +8,7 @@ import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionFixtures
 import com.stripe.android.model.ElementsSessionFixtures.createPaymentIntentWithCustomerSession
+import com.stripe.android.model.ElementsSessionFixtures.createWithCustomPaymentMethods
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.LinkConsumerIncentive
 import com.stripe.android.model.PaymentIntent
@@ -34,6 +35,7 @@ class ElementsSessionJsonParserTest {
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = false
@@ -61,6 +63,7 @@ class ElementsSessionJsonParserTest {
             ElementsSessionParams.SetupIntentType(
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = false
@@ -87,6 +90,7 @@ class ElementsSessionJsonParserTest {
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = false
@@ -105,6 +109,7 @@ class ElementsSessionJsonParserTest {
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = false
@@ -133,6 +138,7 @@ class ElementsSessionJsonParserTest {
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = false
@@ -149,6 +155,7 @@ class ElementsSessionJsonParserTest {
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = false
@@ -165,6 +172,7 @@ class ElementsSessionJsonParserTest {
             ElementsSessionParams.SetupIntentType(
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = false
@@ -183,6 +191,7 @@ class ElementsSessionJsonParserTest {
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = false
@@ -206,6 +215,7 @@ class ElementsSessionJsonParserTest {
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = false
@@ -230,6 +240,7 @@ class ElementsSessionJsonParserTest {
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = false
@@ -255,6 +266,7 @@ class ElementsSessionJsonParserTest {
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = false
@@ -280,6 +292,7 @@ class ElementsSessionJsonParserTest {
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = false
@@ -303,6 +316,7 @@ class ElementsSessionJsonParserTest {
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = false
@@ -325,6 +339,7 @@ class ElementsSessionJsonParserTest {
             ElementsSessionParams.SetupIntentType(
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = false
@@ -347,6 +362,7 @@ class ElementsSessionJsonParserTest {
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = false
@@ -377,6 +393,7 @@ class ElementsSessionJsonParserTest {
                     onBehalfOf = null,
                 ),
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = false,
@@ -421,6 +438,7 @@ class ElementsSessionJsonParserTest {
                     onBehalfOf = null,
                 ),
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = false,
@@ -459,6 +477,7 @@ class ElementsSessionJsonParserTest {
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = false,
@@ -477,6 +496,7 @@ class ElementsSessionJsonParserTest {
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = false,
@@ -495,6 +515,7 @@ class ElementsSessionJsonParserTest {
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = false,
@@ -512,6 +533,7 @@ class ElementsSessionJsonParserTest {
             ElementsSessionParams.SetupIntentType(
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = false,
@@ -530,6 +552,7 @@ class ElementsSessionJsonParserTest {
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
                 externalPaymentMethods = listOf("external_venmo"),
+                customPaymentMethods = listOf(),
                 appId = APP_ID
             ),
             isLiveMode = false,
@@ -548,6 +571,7 @@ class ElementsSessionJsonParserTest {
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
                 externalPaymentMethods = listOf(venmo),
+                customPaymentMethods = listOf(),
                 appId = APP_ID
             ),
             isLiveMode = false,
@@ -560,12 +584,77 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
+    fun `ElementsSession has custom payment methods when they are included in response`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = listOf(),
+                customPaymentMethods = listOf("cpmt_123", "cpmt_456"),
+                appId = APP_ID
+            ),
+            isLiveMode = false,
+        )
+
+        val intent = createWithCustomPaymentMethods(
+            """
+                [
+                    {
+                        "type": "cpmt_123",
+                        "display_name": "CPM #1",
+                        "logo_url": "https://image1"
+                    },
+                    {
+                        "type": "cpmt_456",
+                        "display_name": "CPM #2",
+                        "logo_url": "https://image2"
+                    }
+                ]
+            """.trimIndent()
+        )
+
+        val session = parser.parse(intent)
+
+        assertThat(session?.customPaymentMethods).containsExactly(
+            ElementsSession.CustomPaymentMethod.Available(
+                type = "cpmt_123",
+                displayName = "CPM #1",
+                logoUrl = "https://image1",
+            ),
+            ElementsSession.CustomPaymentMethod.Available(
+                type = "cpmt_456",
+                displayName = "CPM #2",
+                logoUrl = "https://image2",
+            ),
+        )
+    }
+
+    @Test
+    fun `ElementsSession has no custom payment methods when they are not included in response`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = listOf(),
+                customPaymentMethods = listOf(),
+                appId = APP_ID
+            ),
+            isLiveMode = false,
+        )
+
+        val intent = createWithCustomPaymentMethods(customPaymentMethodData = "null")
+
+        val session = parser.parse(intent)
+
+        assertThat(session?.customPaymentMethods).isEmpty()
+    }
+
+    @Test
     fun `ElementsSession has expected customer session information in the response`() {
         val parser = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
                 customerSessionClientSecret = "customer_session_client_secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = false,
@@ -743,6 +832,7 @@ class ElementsSessionJsonParserTest {
                 clientSecret = "secret",
                 customerSessionClientSecret = "customer_session_client_secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = false,
@@ -800,6 +890,7 @@ class ElementsSessionJsonParserTest {
                 clientSecret = "secret",
                 customerSessionClientSecret = "customer_session_client_secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = false,
@@ -832,6 +923,7 @@ class ElementsSessionJsonParserTest {
                 clientSecret = "secret",
                 customerSessionClientSecret = "customer_session_client_secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = false,
@@ -896,6 +988,7 @@ class ElementsSessionJsonParserTest {
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = false
@@ -919,6 +1012,7 @@ class ElementsSessionJsonParserTest {
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = true,
@@ -939,6 +1033,7 @@ class ElementsSessionJsonParserTest {
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = true,
@@ -964,6 +1059,7 @@ class ElementsSessionJsonParserTest {
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = true,
@@ -980,6 +1076,7 @@ class ElementsSessionJsonParserTest {
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = true,
@@ -997,6 +1094,7 @@ class ElementsSessionJsonParserTest {
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = true,
@@ -1014,6 +1112,7 @@ class ElementsSessionJsonParserTest {
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = true,
@@ -1034,6 +1133,7 @@ class ElementsSessionJsonParserTest {
                 clientSecret = "secret",
                 customerSessionClientSecret = "customer_session_client_secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = false,
@@ -1061,6 +1161,7 @@ class ElementsSessionJsonParserTest {
                 clientSecret = "secret",
                 customerSessionClientSecret = "customer_session_client_secret",
                 externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
                 appId = APP_ID
             ),
             isLiveMode = false,

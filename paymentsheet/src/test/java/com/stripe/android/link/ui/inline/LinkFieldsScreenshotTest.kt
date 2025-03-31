@@ -6,7 +6,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.unit.dp
-import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
@@ -132,7 +131,7 @@ class LinkFieldsScreenshotTest {
                 enabled = true,
                 signUpState = SignUpState.InputtingRemainingFields,
                 requiresNameCollection = true,
-                errorMessage = ErrorMessage.Raw("Something went wrong"),
+                errorMessage = "Something went wrong",
                 sectionController = SectionController(null, listOf()),
                 emailController = EmailConfig.createController(
                     initialValue = "email@em"

@@ -1,23 +1,25 @@
 package com.stripe.android.paymentsheet
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.model.PaymentMethod
 
-internal sealed class PaymentOptionsItem {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed class PaymentOptionsItem {
 
     abstract val viewType: ViewType
     abstract val isEnabledDuringEditing: Boolean
 
-    object AddCard : PaymentOptionsItem() {
+    internal object AddCard : PaymentOptionsItem() {
         override val viewType: ViewType = ViewType.AddCard
         override val isEnabledDuringEditing: Boolean = false
     }
 
-    object GooglePay : PaymentOptionsItem() {
+    internal object GooglePay : PaymentOptionsItem() {
         override val viewType: ViewType = ViewType.GooglePay
         override val isEnabledDuringEditing: Boolean = false
     }
 
-    object Link : PaymentOptionsItem() {
+    internal object Link : PaymentOptionsItem() {
         override val viewType: ViewType = ViewType.Link
         override val isEnabledDuringEditing: Boolean = false
     }
@@ -25,7 +27,7 @@ internal sealed class PaymentOptionsItem {
     /**
      * Represents a [PaymentMethod] that is already saved and attached to the current customer.
      */
-    data class SavedPaymentMethod(
+    internal data class SavedPaymentMethod(
         val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     ) : PaymentOptionsItem() {
         override val viewType: ViewType = ViewType.SavedPaymentMethod
@@ -37,6 +39,7 @@ internal sealed class PaymentOptionsItem {
         override val isEnabledDuringEditing: Boolean = true
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class ViewType {
         SavedPaymentMethod,
         AddCard,

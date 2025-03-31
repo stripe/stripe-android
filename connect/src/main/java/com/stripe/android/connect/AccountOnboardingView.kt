@@ -3,53 +3,53 @@ package com.stripe.android.connect
 import android.content.Context
 import android.os.Parcelable
 import android.util.AttributeSet
-import androidx.annotation.RestrictTo
 import androidx.core.content.withStyledAttributes
 import com.stripe.android.connect.webview.StripeConnectWebViewContainer
-import com.stripe.android.connect.webview.StripeConnectWebViewContainerImpl
 import com.stripe.android.connect.webview.serialization.SetOnExit
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 @PrivateBetaConnectSDK
-class AccountOnboardingView private constructor(
+internal class AccountOnboardingView internal constructor(
     context: Context,
-    attrs: AttributeSet?,
-    defStyleAttr: Int,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0,
+    embeddedComponentManager: EmbeddedComponentManager?,
+    listener: AccountOnboardingListener?,
+    props: AccountOnboardingProps?,
     cacheKey: String?,
-    webViewContainerBehavior: StripeConnectWebViewContainerImpl<AccountOnboardingListener, AccountOnboardingProps>,
-) : StripeComponentView<AccountOnboardingListener, AccountOnboardingProps>(context, attrs, defStyleAttr),
-    StripeConnectWebViewContainer<AccountOnboardingListener, AccountOnboardingProps> by webViewContainerBehavior {
+) :
+    StripeComponentView<AccountOnboardingListener, AccountOnboardingProps>(
+        context = context,
+        attrs = attrs,
+        defStyleAttr = defStyleAttr,
+        embeddedComponent = StripeEmbeddedComponent.ACCOUNT_ONBOARDING,
+        embeddedComponentManager = embeddedComponentManager,
+        listener = listener,
+        listenerDelegate = AccountOnboardingListenerDelegate,
+        props = props,
+    ),
+    StripeConnectWebViewContainer<AccountOnboardingListener, AccountOnboardingProps> {
 
     @JvmOverloads
-    @RestrictTo(RestrictTo.Scope.LIBRARY)
     constructor(
         context: Context,
         attrs: AttributeSet? = null,
         defStyleAttr: Int = 0,
-        embeddedComponentManager: EmbeddedComponentManager? = null,
-        listener: AccountOnboardingListener? = null,
-        props: AccountOnboardingProps? = null,
-        cacheKey: String? = null,
     ) : this(
         context = context,
         attrs = attrs,
         defStyleAttr = defStyleAttr,
-        cacheKey = cacheKey,
-        webViewContainerBehavior = StripeConnectWebViewContainerImpl(
-            context = context,
-            embeddedComponent = StripeEmbeddedComponent.ACCOUNT_ONBOARDING,
-            embeddedComponentManager = embeddedComponentManager,
-            listener = listener,
-            listenerDelegate = AccountOnboardingListenerDelegate,
-            props = props,
-        )
+        embeddedComponentManager = null,
+        listener = null,
+        props = null,
+        cacheKey = null,
     )
 
     init {
         context.withStyledAttributes(attrs, R.styleable.StripeAccountOnboardingView, defStyleAttr, 0) {
-            val props = AccountOnboardingProps(
+            val xmlProps = AccountOnboardingProps(
                 fullTermsOfServiceUrl = getString(
                     R.styleable.StripeAccountOnboardingView_stripeFullTermsOfServiceUrl
                 ),
@@ -60,18 +60,17 @@ class AccountOnboardingView private constructor(
                     R.styleable.StripeAccountOnboardingView_stripePrivacyPolicyUrl
                 ),
             )
-            webViewContainerBehavior.setPropsFromXml(props)
+            setPropsFromXml(xmlProps)
         }
         var xmlCacheKey: String? = null
         context.withStyledAttributes(attrs, R.styleable.StripeConnectWebViewContainer, defStyleAttr, 0) {
             xmlCacheKey = getString(R.styleable.StripeConnectWebViewContainer_stripeWebViewCacheKey)
         }
-        webViewContainerBehavior.initializeView(this, cacheKey ?: xmlCacheKey)
+        initializeView(cacheKey ?: xmlCacheKey)
     }
 }
 
 @PrivateBetaConnectSDK
-@RestrictTo(RestrictTo.Scope.LIBRARY)
 @Parcelize
 @Poko
 class AccountOnboardingProps(
@@ -104,10 +103,8 @@ class AccountOnboardingProps(
      * Specifying `eventually_due` collects both `eventually_due` and `currently_due` requirements.
      */
     val collectionOptions: CollectionOptions? = null,
-) : ComponentProps {
+) : Parcelable {
 
-    @PrivateBetaConnectSDK
-    @RestrictTo(RestrictTo.Scope.LIBRARY)
     @Parcelize
     @Poko
     class CollectionOptions(
@@ -115,15 +112,11 @@ class AccountOnboardingProps(
         val futureRequirements: FutureRequirementOption? = null,
     ) : Parcelable
 
-    @PrivateBetaConnectSDK
-    @RestrictTo(RestrictTo.Scope.LIBRARY)
     enum class FieldOption(internal val value: String) {
         CURRENTLY_DUE("currently_due"),
         EVENTUALLY_DUE("eventually_due"),
     }
 
-    @PrivateBetaConnectSDK
-    @RestrictTo(RestrictTo.Scope.LIBRARY)
     enum class FutureRequirementOption(internal val value: String) {
         OMIT("omit"),
         INCLUDE("include"),
@@ -131,7 +124,6 @@ class AccountOnboardingProps(
 }
 
 @PrivateBetaConnectSDK
-@RestrictTo(RestrictTo.Scope.LIBRARY)
 interface AccountOnboardingListener : StripeEmbeddedComponentListener {
     /**
      * The connected account has exited the onboarding process.

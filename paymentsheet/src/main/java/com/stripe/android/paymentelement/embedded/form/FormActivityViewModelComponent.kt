@@ -12,23 +12,20 @@ import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
-import com.stripe.android.link.LinkConfigurationCoordinator
-import com.stripe.android.link.RealLinkConfigurationCoordinator
 import com.stripe.android.link.account.LinkAccountHolder
-import com.stripe.android.link.gate.DefaultLinkGate
-import com.stripe.android.link.gate.LinkGate
-import com.stripe.android.link.injection.LinkAnalyticsComponent
-import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
+import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
+import com.stripe.android.ui.core.di.CardScanModule
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
@@ -47,7 +44,9 @@ import kotlin.coroutines.CoroutineContext
         EmbeddedCommonModule::class,
         FormActivityViewModelModule::class,
         ExtendedPaymentElementConfirmationModule::class,
-        GooglePayLauncherModule::class
+        GooglePayLauncherModule::class,
+        CardScanModule::class,
+        EmbeddedLinkExtrasModule::class
     ]
 )
 @Singleton
@@ -77,6 +76,11 @@ internal interface FormActivityViewModelComponent {
         fun initializationMode(initializationMode: PaymentElementLoader.InitializationMode): Builder
 
         @BindsInstance
+        fun paymentElementCallbackIdentifier(
+            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
+        ): Builder
+
+        @BindsInstance
         fun application(application: Application): Builder
 
         @BindsInstance
@@ -88,8 +92,6 @@ internal interface FormActivityViewModelComponent {
 
 @Module(
     subcomponents = [
-        LinkAnalyticsComponent::class,
-        LinkComponent::class,
         FormActivitySubcomponent::class
     ]
 )
@@ -100,13 +102,7 @@ internal interface FormActivityViewModelModule {
     ): CardAccountRangeRepository.Factory
 
     @Binds
-    fun bindsLinkConfigurationCoordinator(impl: RealLinkConfigurationCoordinator): LinkConfigurationCoordinator
-
-    @Binds
     fun bindsUserFacingLogger(impl: RealUserFacingLogger): UserFacingLogger
-
-    @Binds
-    fun bindLinkGateFactory(linkGateFactory: DefaultLinkGate.Factory): LinkGate.Factory
 
     @Binds
     fun bindsFormActivityStateHelper(helper: DefaultFormActivityStateHelper): FormActivityStateHelper

@@ -1,3 +1,50 @@
+public final class com/stripe/android/connect/AccountOnboardingController : com/stripe/android/connect/StripeComponentController {
+	public static final field $stable I
+}
+
+public abstract interface class com/stripe/android/connect/AccountOnboardingListener : com/stripe/android/connect/StripeEmbeddedComponentListener {
+	public abstract fun onExit ()V
+}
+
+public final class com/stripe/android/connect/AccountOnboardingListener$DefaultImpls {
+	public static fun onExit (Lcom/stripe/android/connect/AccountOnboardingListener;)V
+	public static fun onLoadError (Lcom/stripe/android/connect/AccountOnboardingListener;Ljava/lang/Throwable;)V
+	public static fun onLoaderStart (Lcom/stripe/android/connect/AccountOnboardingListener;)V
+}
+
+public final class com/stripe/android/connect/AccountOnboardingProps : android/os/Parcelable {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/connect/AccountOnboardingProps$CollectionOptions;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Boolean;Lcom/stripe/android/connect/AccountOnboardingProps$CollectionOptions;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getCollectionOptions ()Lcom/stripe/android/connect/AccountOnboardingProps$CollectionOptions;
+	public final fun getFullTermsOfServiceUrl ()Ljava/lang/String;
+	public final fun getPrivacyPolicyUrl ()Ljava/lang/String;
+	public final fun getRecipientTermsOfServiceUrl ()Ljava/lang/String;
+	public final fun getSkipTermsOfServiceCollection ()Ljava/lang/Boolean;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/connect/AccountOnboardingProps$CollectionOptions : android/os/Parcelable {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public fun <init> ()V
+	public fun <init> (Lcom/stripe/android/connect/AccountOnboardingProps$FieldOption;Lcom/stripe/android/connect/AccountOnboardingProps$FutureRequirementOption;)V
+	public synthetic fun <init> (Lcom/stripe/android/connect/AccountOnboardingProps$FieldOption;Lcom/stripe/android/connect/AccountOnboardingProps$FutureRequirementOption;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFields ()Lcom/stripe/android/connect/AccountOnboardingProps$FieldOption;
+	public final fun getFutureRequirements ()Lcom/stripe/android/connect/AccountOnboardingProps$FutureRequirementOption;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
 public final class com/stripe/android/connect/AccountOnboardingProps$CollectionOptions$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/connect/AccountOnboardingProps$CollectionOptions;
@@ -14,12 +61,20 @@ public final class com/stripe/android/connect/AccountOnboardingProps$Creator : a
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/connect/AccountOnboardingView : com/stripe/android/connect/StripeComponentView, com/stripe/android/connect/webview/StripeConnectWebViewContainer {
-	public static final field $stable I
-	public synthetic fun getListener ()Lcom/stripe/android/connect/StripeEmbeddedComponentListener;
-	public fun initialize (Lcom/stripe/android/connect/EmbeddedComponentManager;Lcom/stripe/android/connect/AccountOnboardingListener;Lcom/stripe/android/connect/AccountOnboardingProps;)V
-	public synthetic fun initialize (Lcom/stripe/android/connect/EmbeddedComponentManager;Lcom/stripe/android/connect/StripeEmbeddedComponentListener;Lcom/stripe/android/connect/ComponentProps;)V
-	public synthetic fun setListener (Lcom/stripe/android/connect/StripeEmbeddedComponentListener;)V
+public final class com/stripe/android/connect/AccountOnboardingProps$FieldOption : java/lang/Enum {
+	public static final field CURRENTLY_DUE Lcom/stripe/android/connect/AccountOnboardingProps$FieldOption;
+	public static final field EVENTUALLY_DUE Lcom/stripe/android/connect/AccountOnboardingProps$FieldOption;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/connect/AccountOnboardingProps$FieldOption;
+	public static fun values ()[Lcom/stripe/android/connect/AccountOnboardingProps$FieldOption;
+}
+
+public final class com/stripe/android/connect/AccountOnboardingProps$FutureRequirementOption : java/lang/Enum {
+	public static final field INCLUDE Lcom/stripe/android/connect/AccountOnboardingProps$FutureRequirementOption;
+	public static final field OMIT Lcom/stripe/android/connect/AccountOnboardingProps$FutureRequirementOption;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/connect/AccountOnboardingProps$FutureRequirementOption;
+	public static fun values ()[Lcom/stripe/android/connect/AccountOnboardingProps$FutureRequirementOption;
 }
 
 public final class com/stripe/android/connect/BuildConfig {
@@ -29,12 +84,38 @@ public final class com/stripe/android/connect/BuildConfig {
 	public fun <init> ()V
 }
 
-public final class com/stripe/android/connect/EmbeddedComponentManager$Configuration$Creator : android/os/Parcelable$Creator {
+public abstract interface class com/stripe/android/connect/ClientSecretProvider {
+	public abstract fun provideClientSecret (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract class com/stripe/android/connect/ClientSecretProviderListenerWrapper : com/stripe/android/connect/ClientSecretProvider {
+	public static final field $stable I
 	public fun <init> ()V
-	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/connect/EmbeddedComponentManager$Configuration;
-	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
-	public final fun newArray (I)[Lcom/stripe/android/connect/EmbeddedComponentManager$Configuration;
-	public synthetic fun newArray (I)[Ljava/lang/Object;
+	public abstract fun provideClientSecret (Lcom/stripe/android/connect/ClientSecretProviderListenerWrapper$ClientSecretResultListener;)V
+	public fun provideClientSecret (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class com/stripe/android/connect/ClientSecretProviderListenerWrapper$ClientSecretResultListener {
+	public abstract fun onResult (Ljava/lang/String;)V
+}
+
+public final class com/stripe/android/connect/EmbeddedComponentManager {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/connect/EmbeddedComponentManager$Companion;
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/connect/ClientSecretProvider;)V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/connect/ClientSecretProvider;Lcom/stripe/android/connect/appearance/Appearance;)V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/connect/ClientSecretProvider;Lcom/stripe/android/connect/appearance/Appearance;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcom/stripe/android/connect/ClientSecretProvider;Lcom/stripe/android/connect/appearance/Appearance;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun createAccountOnboardingController (Landroidx/fragment/app/FragmentActivity;)Lcom/stripe/android/connect/AccountOnboardingController;
+	public final fun createAccountOnboardingController (Landroidx/fragment/app/FragmentActivity;Ljava/lang/String;)Lcom/stripe/android/connect/AccountOnboardingController;
+	public final fun createAccountOnboardingController (Landroidx/fragment/app/FragmentActivity;Ljava/lang/String;Lcom/stripe/android/connect/AccountOnboardingProps;)Lcom/stripe/android/connect/AccountOnboardingController;
+	public static synthetic fun createAccountOnboardingController$default (Lcom/stripe/android/connect/EmbeddedComponentManager;Landroidx/fragment/app/FragmentActivity;Ljava/lang/String;Lcom/stripe/android/connect/AccountOnboardingProps;ILjava/lang/Object;)Lcom/stripe/android/connect/AccountOnboardingController;
+	public static final fun onActivityCreate (Landroidx/activity/ComponentActivity;)V
+	public final fun update (Lcom/stripe/android/connect/appearance/Appearance;)V
+}
+
+public final class com/stripe/android/connect/EmbeddedComponentManager$Companion {
+	public final fun onActivityCreate (Landroidx/activity/ComponentActivity;)V
 }
 
 public final class com/stripe/android/connect/EmptyProps$Creator : android/os/Parcelable$Creator {
@@ -45,12 +126,17 @@ public final class com/stripe/android/connect/EmptyProps$Creator : android/os/Pa
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/connect/PayoutsView : com/stripe/android/connect/StripeComponentView, com/stripe/android/connect/webview/StripeConnectWebViewContainer {
+public abstract interface annotation class com/stripe/android/connect/PrivateBetaConnectSDK : java/lang/annotation/Annotation {
+}
+
+public abstract class com/stripe/android/connect/StripeComponentController {
 	public static final field $stable I
-	public synthetic fun getListener ()Lcom/stripe/android/connect/StripeEmbeddedComponentListener;
-	public fun initialize (Lcom/stripe/android/connect/EmbeddedComponentManager;Lcom/stripe/android/connect/PayoutsListener;Lcom/stripe/android/connect/EmptyProps;)V
-	public synthetic fun initialize (Lcom/stripe/android/connect/EmbeddedComponentManager;Lcom/stripe/android/connect/StripeEmbeddedComponentListener;Lcom/stripe/android/connect/ComponentProps;)V
-	public synthetic fun setListener (Lcom/stripe/android/connect/StripeEmbeddedComponentListener;)V
+	public final fun dismiss ()V
+	public final fun getListener ()Lcom/stripe/android/connect/StripeEmbeddedComponentListener;
+	public final fun getOnDismissListener ()Lcom/stripe/android/connect/StripeComponentController$OnDismissListener;
+	public final fun setListener (Lcom/stripe/android/connect/StripeEmbeddedComponentListener;)V
+	public final fun setOnDismissListener (Lcom/stripe/android/connect/StripeComponentController$OnDismissListener;)V
+	public final fun show ()V
 }
 
 public abstract interface class com/stripe/android/connect/StripeComponentController$OnDismissListener {
@@ -70,23 +156,27 @@ public final class com/stripe/android/connect/StripeEmbeddedComponentListener$De
 public final class com/stripe/android/connect/appearance/Appearance : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> ()V
-	public fun <init> (Lcom/stripe/android/connect/appearance/Colors;Lcom/stripe/android/connect/appearance/CornerRadius;Lcom/stripe/android/connect/appearance/Typography;Lcom/stripe/android/connect/appearance/Button;Lcom/stripe/android/connect/appearance/Button;Lcom/stripe/android/connect/appearance/Badge;Lcom/stripe/android/connect/appearance/Badge;Lcom/stripe/android/connect/appearance/Badge;Lcom/stripe/android/connect/appearance/Badge;)V
-	public synthetic fun <init> (Lcom/stripe/android/connect/appearance/Colors;Lcom/stripe/android/connect/appearance/CornerRadius;Lcom/stripe/android/connect/appearance/Typography;Lcom/stripe/android/connect/appearance/Button;Lcom/stripe/android/connect/appearance/Button;Lcom/stripe/android/connect/appearance/Badge;Lcom/stripe/android/connect/appearance/Badge;Lcom/stripe/android/connect/appearance/Badge;Lcom/stripe/android/connect/appearance/Badge;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lcom/stripe/android/connect/appearance/Colors;Lcom/stripe/android/connect/appearance/CornerRadius;Lcom/stripe/android/connect/appearance/Typography;Lcom/stripe/android/connect/appearance/Button;Lcom/stripe/android/connect/appearance/Button;Lcom/stripe/android/connect/appearance/Badge;Lcom/stripe/android/connect/appearance/Badge;Lcom/stripe/android/connect/appearance/Badge;Lcom/stripe/android/connect/appearance/Badge;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getBadgeDanger ()Lcom/stripe/android/connect/appearance/Badge;
-	public final fun getBadgeNeutral ()Lcom/stripe/android/connect/appearance/Badge;
-	public final fun getBadgeSuccess ()Lcom/stripe/android/connect/appearance/Badge;
-	public final fun getBadgeWarning ()Lcom/stripe/android/connect/appearance/Badge;
-	public final fun getButtonPrimary ()Lcom/stripe/android/connect/appearance/Button;
-	public final fun getButtonSecondary ()Lcom/stripe/android/connect/appearance/Button;
-	public final fun getColors ()Lcom/stripe/android/connect/appearance/Colors;
-	public final fun getCornerRadius ()Lcom/stripe/android/connect/appearance/CornerRadius;
-	public final fun getTypography ()Lcom/stripe/android/connect/appearance/Typography;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/connect/appearance/Appearance$Builder {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun badgeDanger (Lcom/stripe/android/connect/appearance/Badge;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
+	public final fun badgeNeutral (Lcom/stripe/android/connect/appearance/Badge;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
+	public final fun badgeSuccess (Lcom/stripe/android/connect/appearance/Badge;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
+	public final fun badgeWarning (Lcom/stripe/android/connect/appearance/Badge;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
+	public final fun build ()Lcom/stripe/android/connect/appearance/Appearance;
+	public final fun buttonPrimary (Lcom/stripe/android/connect/appearance/Button;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
+	public final fun buttonSecondary (Lcom/stripe/android/connect/appearance/Button;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
+	public final fun colors (Lcom/stripe/android/connect/appearance/Colors;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
+	public final fun cornerRadius (Lcom/stripe/android/connect/appearance/CornerRadius;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
+	public final fun typography (Lcom/stripe/android/connect/appearance/Typography;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
 }
 
 public final class com/stripe/android/connect/appearance/Appearance$Creator : android/os/Parcelable$Creator {
@@ -105,9 +195,6 @@ public final class com/stripe/android/connect/appearance/Badge : android/os/Parc
 	public synthetic fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getColorBackground ()Ljava/lang/Integer;
-	public final fun getColorBorder ()Ljava/lang/Integer;
-	public final fun getColorText ()Ljava/lang/Integer;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
@@ -129,9 +216,6 @@ public final class com/stripe/android/connect/appearance/Button : android/os/Par
 	public synthetic fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getColorBackground ()Ljava/lang/Integer;
-	public final fun getColorBorder ()Ljava/lang/Integer;
-	public final fun getColorText ()Ljava/lang/Integer;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
@@ -148,26 +232,30 @@ public final class com/stripe/android/connect/appearance/Button$Creator : androi
 public final class com/stripe/android/connect/appearance/Colors : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> ()V
-	public fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;)V
-	public synthetic fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Ljava/lang/Integer;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getActionPrimaryText ()Ljava/lang/Integer;
-	public final fun getActionSecondaryText ()Ljava/lang/Integer;
-	public final fun getBackground ()Ljava/lang/Integer;
-	public final fun getBorder ()Ljava/lang/Integer;
-	public final fun getDanger ()Ljava/lang/Integer;
-	public final fun getFormAccent ()Ljava/lang/Integer;
-	public final fun getFormBackground ()Ljava/lang/Integer;
-	public final fun getFormHighlightBorder ()Ljava/lang/Integer;
-	public final fun getOffsetBackground ()Ljava/lang/Integer;
-	public final fun getPrimary ()Ljava/lang/Integer;
-	public final fun getSecondaryText ()Ljava/lang/Integer;
-	public final fun getText ()Ljava/lang/Integer;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/connect/appearance/Colors$Builder {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun actionPrimaryText (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
+	public final fun actionSecondaryText (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
+	public final fun background (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
+	public final fun border (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
+	public final fun build ()Lcom/stripe/android/connect/appearance/Colors;
+	public final fun danger (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
+	public final fun formAccent (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
+	public final fun formBackground (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
+	public final fun formHighlightBorder (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
+	public final fun offsetBackground (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
+	public final fun primary (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
+	public final fun secondaryText (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
+	public final fun text (Ljava/lang/Integer;)Lcom/stripe/android/connect/appearance/Colors$Builder;
 }
 
 public final class com/stripe/android/connect/appearance/Colors$Creator : android/os/Parcelable$Creator {
@@ -181,19 +269,23 @@ public final class com/stripe/android/connect/appearance/Colors$Creator : androi
 public final class com/stripe/android/connect/appearance/CornerRadius : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> ()V
-	public fun <init> (Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;)V
-	public synthetic fun <init> (Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Ljava/lang/Float;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getBadge ()Ljava/lang/Float;
-	public final fun getBase ()Ljava/lang/Float;
-	public final fun getButton ()Ljava/lang/Float;
-	public final fun getForm ()Ljava/lang/Float;
-	public final fun getOverlay ()Ljava/lang/Float;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/connect/appearance/CornerRadius$Builder {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun badge (Ljava/lang/Float;)Lcom/stripe/android/connect/appearance/CornerRadius$Builder;
+	public final fun base (Ljava/lang/Float;)Lcom/stripe/android/connect/appearance/CornerRadius$Builder;
+	public final fun build ()Lcom/stripe/android/connect/appearance/CornerRadius;
+	public final fun button (Ljava/lang/Float;)Lcom/stripe/android/connect/appearance/CornerRadius$Builder;
+	public final fun form (Ljava/lang/Float;)Lcom/stripe/android/connect/appearance/CornerRadius$Builder;
+	public final fun overlay (Ljava/lang/Float;)Lcom/stripe/android/connect/appearance/CornerRadius$Builder;
 }
 
 public final class com/stripe/android/connect/appearance/CornerRadius$Creator : android/os/Parcelable$Creator {
@@ -217,25 +309,29 @@ public final class com/stripe/android/connect/appearance/TextTransform : java/la
 public final class com/stripe/android/connect/appearance/Typography : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> ()V
-	public fun <init> (Ljava/lang/String;Ljava/lang/Float;Lcom/stripe/android/connect/appearance/Typography$Style;Lcom/stripe/android/connect/appearance/Typography$Style;Lcom/stripe/android/connect/appearance/Typography$Style;Lcom/stripe/android/connect/appearance/Typography$Style;Lcom/stripe/android/connect/appearance/Typography$Style;Lcom/stripe/android/connect/appearance/Typography$Style;Lcom/stripe/android/connect/appearance/Typography$Style;Lcom/stripe/android/connect/appearance/Typography$Style;Lcom/stripe/android/connect/appearance/Typography$Style;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Float;Lcom/stripe/android/connect/appearance/Typography$Style;Lcom/stripe/android/connect/appearance/Typography$Style;Lcom/stripe/android/connect/appearance/Typography$Style;Lcom/stripe/android/connect/appearance/Typography$Style;Lcom/stripe/android/connect/appearance/Typography$Style;Lcom/stripe/android/connect/appearance/Typography$Style;Lcom/stripe/android/connect/appearance/Typography$Style;Lcom/stripe/android/connect/appearance/Typography$Style;Lcom/stripe/android/connect/appearance/Typography$Style;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/Float;Lcom/stripe/android/connect/appearance/Typography$Style;Lcom/stripe/android/connect/appearance/Typography$Style;Lcom/stripe/android/connect/appearance/Typography$Style;Lcom/stripe/android/connect/appearance/Typography$Style;Lcom/stripe/android/connect/appearance/Typography$Style;Lcom/stripe/android/connect/appearance/Typography$Style;Lcom/stripe/android/connect/appearance/Typography$Style;Lcom/stripe/android/connect/appearance/Typography$Style;Lcom/stripe/android/connect/appearance/Typography$Style;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getBodyMd ()Lcom/stripe/android/connect/appearance/Typography$Style;
-	public final fun getBodySm ()Lcom/stripe/android/connect/appearance/Typography$Style;
-	public final fun getFontFamily ()Ljava/lang/String;
-	public final fun getFontSizeBase ()Ljava/lang/Float;
-	public final fun getHeadingLg ()Lcom/stripe/android/connect/appearance/Typography$Style;
-	public final fun getHeadingMd ()Lcom/stripe/android/connect/appearance/Typography$Style;
-	public final fun getHeadingSm ()Lcom/stripe/android/connect/appearance/Typography$Style;
-	public final fun getHeadingXl ()Lcom/stripe/android/connect/appearance/Typography$Style;
-	public final fun getHeadingXs ()Lcom/stripe/android/connect/appearance/Typography$Style;
-	public final fun getLabelMd ()Lcom/stripe/android/connect/appearance/Typography$Style;
-	public final fun getLabelSm ()Lcom/stripe/android/connect/appearance/Typography$Style;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/connect/appearance/Typography$Builder {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun bodyMd (Lcom/stripe/android/connect/appearance/Typography$Style;)Lcom/stripe/android/connect/appearance/Typography$Builder;
+	public final fun bodySm (Lcom/stripe/android/connect/appearance/Typography$Style;)Lcom/stripe/android/connect/appearance/Typography$Builder;
+	public final fun build ()Lcom/stripe/android/connect/appearance/Typography;
+	public final fun fontFamily (Ljava/lang/String;)Lcom/stripe/android/connect/appearance/Typography$Builder;
+	public final fun fontSizeBase (Ljava/lang/Float;)Lcom/stripe/android/connect/appearance/Typography$Builder;
+	public final fun headingLg (Lcom/stripe/android/connect/appearance/Typography$Style;)Lcom/stripe/android/connect/appearance/Typography$Builder;
+	public final fun headingMd (Lcom/stripe/android/connect/appearance/Typography$Style;)Lcom/stripe/android/connect/appearance/Typography$Builder;
+	public final fun headingSm (Lcom/stripe/android/connect/appearance/Typography$Style;)Lcom/stripe/android/connect/appearance/Typography$Builder;
+	public final fun headingXl (Lcom/stripe/android/connect/appearance/Typography$Style;)Lcom/stripe/android/connect/appearance/Typography$Builder;
+	public final fun headingXs (Lcom/stripe/android/connect/appearance/Typography$Style;)Lcom/stripe/android/connect/appearance/Typography$Builder;
+	public final fun labelMd (Lcom/stripe/android/connect/appearance/Typography$Style;)Lcom/stripe/android/connect/appearance/Typography$Builder;
+	public final fun labelSm (Lcom/stripe/android/connect/appearance/Typography$Style;)Lcom/stripe/android/connect/appearance/Typography$Builder;
 }
 
 public final class com/stripe/android/connect/appearance/Typography$Creator : android/os/Parcelable$Creator {
@@ -253,9 +349,9 @@ public final class com/stripe/android/connect/appearance/Typography$Style : andr
 	public fun <init> (Ljava/lang/Float;Ljava/lang/Integer;Lcom/stripe/android/connect/appearance/TextTransform;)V
 	public synthetic fun <init> (Ljava/lang/Float;Ljava/lang/Integer;Lcom/stripe/android/connect/appearance/TextTransform;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun describeContents ()I
-	public final fun getFontSize ()Ljava/lang/Float;
-	public final fun getFontWeight ()Ljava/lang/Integer;
-	public final fun getTextTransform ()Lcom/stripe/android/connect/appearance/TextTransform;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -290,25 +386,5 @@ public synthetic class com/stripe/android/connect/appearance/fonts/CustomFontSou
 
 public final class com/stripe/android/connect/appearance/fonts/CustomFontSource$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class com/stripe/android/connect/databinding/StripeFullScreenComponentBinding : androidx/viewbinding/ViewBinding {
-	public final field divider Landroid/view/View;
-	public final field toolbar Landroidx/appcompat/widget/Toolbar;
-	public static fun bind (Landroid/view/View;)Lcom/stripe/android/connect/databinding/StripeFullScreenComponentBinding;
-	public synthetic fun getRoot ()Landroid/view/View;
-	public fun getRoot ()Landroid/widget/LinearLayout;
-	public static fun inflate (Landroid/view/LayoutInflater;)Lcom/stripe/android/connect/databinding/StripeFullScreenComponentBinding;
-	public static fun inflate (Landroid/view/LayoutInflater;Landroid/view/ViewGroup;Z)Lcom/stripe/android/connect/databinding/StripeFullScreenComponentBinding;
-}
-
-public final class com/stripe/android/connect/webview/serialization/IntAsRgbHexStringSerializer : kotlinx/serialization/KSerializer {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/connect/webview/serialization/IntAsRgbHexStringSerializer;
-	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Integer;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public fun serialize (Lkotlinx/serialization/encoding/Encoder;I)V
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 }
 

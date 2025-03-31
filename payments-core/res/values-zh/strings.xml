@@ -79,7 +79,7 @@
   <!-- Legal text shown when using AUBECS. -->
   <string name="stripe_au_becs_mandate">提供您的银行账户详情并确认这笔付款即表示您同意该“直接借记请求”以及&lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;“直接借记请求”服务协议&lt;/a&gt;，并授权 Stripe Payments Australia Pty Ltd ACN 160 180 343，直接借记用户 ID 507156 (\"Stripe\") 通过“批量电子清算系统” (BECS) 代 %s（“商家”）向您收取“商家”单独与您议定的金额。您确认您是上述所列账户的账户持有人或授权签字者。</string>
   <!-- BECS Debit Widget - mandate acceptance -->
-  <string name="stripe_becs_mandate_acceptance">\n    通过提供您的银行账户信息并确认该笔付款，\n    表示您同意本“直接借记请求”及其服务条款，并授权\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID\n    number 507156 (“Stripe”) 通过批量电子清算系统 (BECS)\n    代 %1$s（“商家”）向您的账户扣取商家单独告知您的金额。\n    您确认您是账户持有人或上述账户的授权签署人。\n    \n    </string>
+  <string name="stripe_becs_mandate_acceptance">\n    通过提供您的银行账户信息并确认该笔付款，\n    表示您同意本“直接借记请求”及其服务条款，并授权\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID\n    number 507156 (“Stripe”) 通过批量电子清算系统 (BECS)\n    代 %1$s（“商家”）向您的账户扣取商家单独告知您的金额。\n    您确认您是账户持有人或上述账户的授权签字人。\n    \n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
   <string name="stripe_becs_widget_account_number">账号</string>
   <!-- Error description for incomplete account number -->

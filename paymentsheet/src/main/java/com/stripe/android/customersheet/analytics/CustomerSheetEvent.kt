@@ -179,26 +179,46 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
         }
     }
 
+    class BrandChoiceSelected(
+        source: Source,
+        selectedBrand: CardBrand
+    ) : CustomerSheetEvent() {
+        override val eventName: String = CS_CARD_BRAND_SELECTED
+
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_CBC_EVENT_SOURCE to source.value,
+            FIELD_SELECTED_CARD_BRAND to selectedBrand.code
+        )
+
+        enum class Source(val value: String) {
+            Edit(VALUE_EDIT_CBC_EVENT_SOURCE), Add(VALUE_ADD_CBC_EVENT_SOURCE)
+        }
+    }
+
     class UpdatePaymentOptionSucceeded(
-        selectedBrand: CardBrand,
+        selectedBrand: CardBrand?,
     ) : CustomerSheetEvent() {
         override val eventName: String = CS_UPDATE_PAYMENT_METHOD
 
-        override val additionalParams: Map<String, Any?> = mapOf(
-            FIELD_SELECTED_CARD_BRAND to selectedBrand.code
-        )
+        override val additionalParams: Map<String, Any?> = buildMap {
+            if (selectedBrand != null) {
+                put(FIELD_SELECTED_CARD_BRAND, selectedBrand.code)
+            }
+        }
     }
 
     class UpdatePaymentOptionFailed(
-        selectedBrand: CardBrand,
+        selectedBrand: CardBrand?,
         error: Throwable,
     ) : CustomerSheetEvent() {
         override val eventName: String = CS_UPDATE_PAYMENT_METHOD_FAILED
 
-        override val additionalParams: Map<String, Any?> = mapOf(
-            FIELD_SELECTED_CARD_BRAND to selectedBrand.code,
-            FIELD_ERROR_MESSAGE to error.message,
-        )
+        override val additionalParams: Map<String, Any?> = buildMap {
+            if (selectedBrand != null) {
+                put(FIELD_SELECTED_CARD_BRAND, selectedBrand.code)
+            }
+            put(FIELD_ERROR_MESSAGE, error.message)
+        }
     }
 
     class CardBrandDisallowed(
@@ -264,6 +284,7 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
 
         const val CS_SHOW_PAYMENT_OPTION_BRANDS = "cs_open_cbc_dropdown"
         const val CS_HIDE_PAYMENT_OPTION_BRANDS = "cs_close_cbc_dropdown"
+        const val CS_CARD_BRAND_SELECTED = "cs_cbc_selected"
 
         const val CS_UPDATE_PAYMENT_METHOD = "cs_update_card"
         const val CS_UPDATE_PAYMENT_METHOD_FAILED = "cs_update_card_failed"

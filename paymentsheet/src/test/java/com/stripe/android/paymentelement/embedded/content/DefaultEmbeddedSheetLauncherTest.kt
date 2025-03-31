@@ -4,7 +4,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
-import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -43,6 +42,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             hasSavedPaymentMethods = false,
             configuration = state.configuration,
             initializationMode = state.initializationMode,
+            paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
             statusBarColor = null
         )
 
@@ -89,10 +89,10 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val callback = formRegisterCall.callback.asCallbackFor<FormResult>()
 
         callback.onActivityResult(result)
-        assertThat(selectionHolder.selection.value).isNull()
+        assertThat(callbackHelper.stateHelper.stateTurbine.awaitItem()).isNull()
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
         assertThat(selectionHolder.temporarySelection.value).isNull()
-        assertThat(resultCallbackTurbine.awaitItem()).isInstanceOf<EmbeddedPaymentElement.Result.Completed>()
+        assertThat(callbackHelper.callbackTurbine.awaitItem()).isInstanceOf<EmbeddedPaymentElement.Result.Completed>()
     }
 
     @Test
@@ -106,14 +106,19 @@ internal class DefaultEmbeddedSheetLauncherTest {
         assertThat(selectionHolder.selection.value).isEqualTo(null)
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
         assertThat(selectionHolder.temporarySelection.value).isNull()
-        resultCallbackTurbine.expectNoEvents()
+        callbackHelper.callbackTurbine.expectNoEvents()
     }
 
     @Test
     fun `launchManage launches activity with correct parameters`() = testScenario {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
-        val expectedArgs = ManageContract.Args(paymentMethodMetadata, customerState, PaymentSelection.GooglePay)
+        val expectedArgs = ManageContract.Args(
+            paymentMethodMetadata,
+            customerState,
+            PaymentSelection.GooglePay,
+            "EmbeddedFormTestIdentifier"
+        )
 
         sheetLauncher.launchManage(paymentMethodMetadata, customerState, PaymentSelection.GooglePay)
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall()
@@ -183,7 +188,10 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val customerStateHolder = CustomerStateHolder(savedStateHandle, selectionHolder.selection)
         val sheetStateHolder = SheetStateHolder(savedStateHandle)
         val errorReporter = FakeErrorReporter()
-        val resultCallbackTurbine = Turbine<EmbeddedPaymentElement.Result>()
+        val stateHelper = FakeEmbeddedStateHelper()
+        val callbackHelper = FakeEmbeddedResultCallbackHelper(
+            stateHelper = stateHelper
+        )
 
         DummyActivityResultCaller.test {
             val sheetLauncher = DefaultEmbeddedSheetLauncher(
@@ -194,9 +202,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 sheetStateHolder = sheetStateHolder,
                 errorReporter = errorReporter,
                 statusBarColor = null,
-                resultCallback = {
-                    resultCallbackTurbine.add(it)
-                }
+                paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
+                embeddedResultCallbackHelper = callbackHelper
             )
             val formRegisterCall = awaitRegisterCall()
             val manageRegisterCall = awaitRegisterCall()
@@ -222,10 +229,10 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 sheetLauncher = sheetLauncher,
                 sheetStateHolder = sheetStateHolder,
                 errorReporter = errorReporter,
-                resultCallbackTurbine = resultCallbackTurbine
+                callbackHelper = callbackHelper,
             ).block()
 
-            resultCallbackTurbine.ensureAllEventsConsumed()
+            callbackHelper.validate()
         }
     }
 
@@ -241,6 +248,6 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val sheetLauncher: EmbeddedSheetLauncher,
         val sheetStateHolder: SheetStateHolder,
         val errorReporter: FakeErrorReporter,
-        val resultCallbackTurbine: Turbine<EmbeddedPaymentElement.Result>
+        val callbackHelper: FakeEmbeddedResultCallbackHelper
     )
 }

@@ -41,6 +41,8 @@ import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlayground
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.SUCCESS_RESULT
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
+import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
+import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
@@ -83,6 +85,9 @@ internal class PlaygroundTestDriver(
     private val device: UiDevice,
     private val composeTestRule: ComposeTestRule,
 ) : ScreenshotTest {
+    @Volatile
+    private var resultCountDownLatch: CountDownLatch? = null
+
     @Volatile
     private var resultValue: String? = null
     private lateinit var testParameters: TestParameters
@@ -286,6 +291,7 @@ internal class PlaygroundTestDriver(
 
         pressContinue()
 
+        resultCountDownLatch = testParameters.countDownLatch()
         selectors.playgroundBuyButton.click()
 
         doAuthorization()
@@ -321,6 +327,7 @@ internal class PlaygroundTestDriver(
 
         beforeBuyAction(selectors)
 
+        resultCountDownLatch = testParameters.countDownLatch()
         selectors.playgroundBuyButton.click()
 
         afterBuyAction(selectors)
@@ -425,13 +432,15 @@ internal class PlaygroundTestDriver(
     }
 
     fun confirmWithGooglePay(
-        country: Country
+        country: Country,
+        checkoutMode: CheckoutMode = CheckoutMode.PAYMENT,
     ) {
         setup(
             TestParameters.create(
                 paymentMethodCode = "card",
             ) { settings ->
                 settings[CountrySettingsDefinition] = country
+                settings[CheckoutModeSettingsDefinition] = checkoutMode
             }
         )
 
@@ -789,6 +798,7 @@ internal class PlaygroundTestDriver(
 
         launchCustom(false)
 
+        resultCountDownLatch = testParameters.countDownLatch()
         selectors.playgroundBuyButton.click()
 
         selectors.getCardCvc().performTextInput("123")
@@ -1358,80 +1368,80 @@ internal class PlaygroundTestDriver(
                 when (val authAction = testParameters.authorizationAction) {
                     is AuthorizeAction.DisplayQrCode -> {
                         if (!testParameters.isSetupMode) {
-                            closeButton.wait(5000)
+                            closeButton.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
                             onView(withText("CLOSE")).perform(click())
                         }
                     }
 
                     is AuthorizeAction.Authorize3ds2 -> {
-                        closeButton.wait(5000)
+                        closeButton.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
 
                         val completeButton = UiAutomatorText("COMPLETE", device = device)
 
-                        completeButton.wait(5000)
+                        completeButton.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
                         completeButton.click()
                     }
 
                     is AuthorizeAction.Test3DS2.HSBCHTML -> {
                         val otpButton = UiAutomatorText("OTP", labelMatchesExactly = true, device = device)
 
-                        otpButton.wait(5000)
+                        otpButton.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
                         otpButton.click()
 
                         val submitButton = UiAutomatorText("Submit", labelMatchesExactly = true, device = device)
-                        submitButton.wait(5000)
+                        submitButton.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
                         submitButton.click()
 
                         val enterOTPField = UiAutomatorText("", labelMatchesExactly = true, device = device)
-                        enterOTPField.wait(5000)
+                        enterOTPField.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
                         enterOTPField.click()
                         enterOTPField.setText("555555")
 
                         val otpSubmit = UiAutomatorText("Submit", labelMatchesExactly = true, device = device)
-                        otpSubmit.wait(5000)
+                        otpSubmit.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
                         otpSubmit.click()
                     }
 
                     is AuthorizeAction.Test3DS2.SingleSelect -> {
                         val completeAuthentication = UiAutomatorText("Complete Authentication", labelMatchesExactly = true, device = device)
-                        completeAuthentication.wait(5000)
+                        completeAuthentication.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
                         completeAuthentication.click()
 
                         val submitButton = UiAutomatorText("Submit", labelMatchesExactly = true, device = device)
-                        submitButton.wait(5000)
+                        submitButton.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
                         submitButton.click()
                     }
 
                     is AuthorizeAction.Test3DS2.MultiSelect -> {
                         UiSelector().textContains("Complete Authentication")
                         val completeAuthentication = UiAutomatorText("Complete Authentication", labelMatchesExactly = true, device = device)
-                        completeAuthentication.wait(5000)
+                        completeAuthentication.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
                         device.findObject(UiSelector().textContains("Complete Authentication").index(0)).click()
                         device.findObject(UiSelector().textContains("Complete Authentication").index(1)).click()
                         device.findObject(UiSelector().textContains("Complete Authentication").index(2)).click()
 
                         val submitButton = UiAutomatorText("Submit", labelMatchesExactly = true, device = device)
-                        submitButton.wait(5000)
+                        submitButton.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
                         submitButton.click()
                     }
 
                     is AuthorizeAction.Test3DS2.OOB -> {
                         val completeAuthentication = UiAutomatorText("Complete Authentication", labelMatchesExactly = true, device = device)
-                        completeAuthentication.wait(5000)
+                        completeAuthentication.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
                         completeAuthentication.click()
                     }
 
                     is AuthorizeAction.Test3DS2.OTP -> {
                         val explanationText = UiAutomatorText("For this test", labelMatchesExactly = true, device = device)
-                        explanationText.wait(10000)
+                        explanationText.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
 
                         val enterOTPField = UiAutomatorText("Enter your code below:", labelMatchesExactly = true, className = "android.widget.EditText", device = device)
-                        enterOTPField.wait(5000)
+                        enterOTPField.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
                         enterOTPField.click()
                         enterOTPField.setText("424242")
 
                         val submitButton = UiAutomatorText("Submit", labelMatchesExactly = true, device = device)
-                        submitButton.wait(5000)
+                        submitButton.wait(DEFAULT_UI_TIMEOUT.inWholeMilliseconds)
                         submitButton.click()
                     }
 
@@ -1499,6 +1509,9 @@ internal class PlaygroundTestDriver(
                     }
 
                     waitForPlaygroundActivity()
+                    resultCountDownLatch?.let {
+                        assertThat(it.await(5, TimeUnit.SECONDS)).isTrue()
+                    }
                     assertThat(resultValue).isEqualTo(SUCCESS_RESULT)
                 } else if (integrationType.isCustomerFlow()) {
                     waitForCustomerSheetConfirmButton()
@@ -1650,6 +1663,9 @@ internal class PlaygroundTestDriver(
             activity.lifecycleScope.launch {
                 activity.viewModel.status.collect {
                     resultValue = it?.message
+                    if (it?.message != null) {
+                        resultCountDownLatch?.countDown()
+                    }
                 }
             }
 
@@ -1669,6 +1685,8 @@ internal class PlaygroundTestDriver(
         application?.unregisterActivityLifecycleCallbacks(activityLifecycleCallbacks)
         playgroundState = null
         currentActivity = null
+        resultValue = null
+        resultCountDownLatch = null
     }
 
     private fun isSelectPaymentMethodScreen(): Boolean {
@@ -1708,5 +1726,13 @@ internal class PlaygroundTestDriver(
         const val ADD_PAYMENT_METHOD_NODE_TAG = "${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_+ Add"
         const val FINANCIAL_CONNECTIONS_ACTIVITY =
             "com.stripe.android.financialconnections.FinancialConnectionsSheetActivity"
+    }
+}
+
+private fun TestParameters.countDownLatch(): CountDownLatch? {
+    return if (authorizationAction?.isConsideredDone == true) {
+        CountDownLatch(1)
+    } else {
+        null
     }
 }

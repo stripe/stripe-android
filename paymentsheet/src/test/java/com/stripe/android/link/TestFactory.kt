@@ -192,6 +192,7 @@ internal object TestFactory {
         publishableKey = "",
         stripeAccountId = "",
         startWithVerificationDialog = false,
-        linkAccount = LINK_ACCOUNT
+        linkAccount = LINK_ACCOUNT,
+        paymentElementCallbackIdentifier = "LinkNativeTestIdentifier",
     )
 }

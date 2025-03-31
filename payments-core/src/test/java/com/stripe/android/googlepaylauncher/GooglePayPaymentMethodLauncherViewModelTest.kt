@@ -101,19 +101,59 @@ class GooglePayPaymentMethodLauncherViewModelTest {
     }
 
     @Test
-    fun `createTransactionInfo() with 0 amount should create expected TransactionInfo`() {
-        val transactionInfo = viewModel.createTransactionInfo(ARGS.copy(amount = 0))
-        assertThat(transactionInfo)
-            .isEqualTo(
-                GooglePayJsonFactory.TransactionInfo(
+    fun `createTransactionInfo() with 0 amount in US and CA should expect TotalPriceStatus NOT_CURRENTLY_KNOWN`() {
+        for (countryCode in listOf("us", "ca")) {
+            val transactionInfo = viewModel.createTransactionInfo(
+                GooglePayPaymentMethodLauncherContractV2.Args(
+                    GooglePayPaymentMethodLauncher.Config(
+                        GooglePayEnvironment.Test,
+                        merchantCountryCode = countryCode,
+                        merchantName = "Widget, Inc."
+                    ),
                     currencyCode = "usd",
-                    totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
-                    countryCode = "us",
-                    transactionId = null,
-                    totalPrice = 0,
-                    checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
+                    amount = 0
                 )
             )
+            assertThat(transactionInfo)
+                .isEqualTo(
+                    GooglePayJsonFactory.TransactionInfo(
+                        currencyCode = "usd",
+                        totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.NotCurrentlyKnown,
+                        countryCode = countryCode,
+                        transactionId = null,
+                        totalPrice = null,
+                        checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
+                    )
+                )
+        }
+    }
+
+    @Test
+    fun `createTransactionInfo() with 0 amount outside US and CA should honor the price`() {
+        for (countryCode in listOf("de", "fr", "gb", "jp", "mx")) {
+            val transactionInfo = viewModel.createTransactionInfo(
+                GooglePayPaymentMethodLauncherContractV2.Args(
+                    GooglePayPaymentMethodLauncher.Config(
+                        GooglePayEnvironment.Test,
+                        merchantCountryCode = countryCode,
+                        merchantName = "Widget, Inc."
+                    ),
+                    currencyCode = "usd",
+                    amount = 0
+                )
+            )
+            assertThat(transactionInfo)
+                .isEqualTo(
+                    GooglePayJsonFactory.TransactionInfo(
+                        currencyCode = "usd",
+                        totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
+                        countryCode = countryCode,
+                        transactionId = null,
+                        totalPrice = 0,
+                        checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
+                    )
+                )
+        }
     }
 
     @Test

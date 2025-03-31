@@ -7,20 +7,25 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
-import com.stripe.android.paymentsheet.CreateIntentCallback
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
+import com.stripe.android.paymentsheet.FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.primaryButtonColorUsage
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.SessionTestRule
 import com.stripe.android.utils.FakePaymentElementLoader
-import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
+import com.stripe.android.utils.PaymentElementCallbackTestRule
 import com.stripe.android.utils.RelayingPaymentElementLoader
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
@@ -41,10 +46,11 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.time.Duration.Companion.seconds
 
 @RunWith(RobolectricTestRunner::class)
+@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 class FlowControllerConfigurationHandlerTest {
 
     @get:Rule
-    val intentConfirmationInterceptorTestRule = IntentConfirmationInterceptorTestRule()
+    val paymentElementCallbackTestRule = PaymentElementCallbackTestRule()
 
     @get:Rule
     val sessionRule = SessionTestRule()
@@ -66,6 +72,7 @@ class FlowControllerConfigurationHandlerTest {
         viewModel = FlowControllerViewModel(
             application = ApplicationProvider.getApplicationContext(),
             handle = SavedStateHandle(),
+            paymentElementCallbackIdentifier = FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER,
             statusBarColor = null,
         )
     }
@@ -92,8 +99,13 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(configurationHandler.isConfigured).isTrue()
         assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link())
         assertThat(viewModel.state).isNotNull()
+
+        val config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         verify(eventReporter).onInit(
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            commonConfiguration = config.asCommonConfiguration(),
+            appearance = config.appearance,
+            primaryButtonColor = config.primaryButtonColorUsage(),
+            paymentMethodLayout = config.paymentMethodLayout,
             isDeferred = false,
         )
         // Configure should regenerate the analytics sessionId.
@@ -131,8 +143,12 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
 
         // We're running ONLY the second config run, so we don't expect any interactions.
+        val config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         verify(eventReporter, never()).onInit(
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            commonConfiguration = config.asCommonConfiguration(),
+            appearance = config.appearance,
+            primaryButtonColor = config.primaryButtonColorUsage(),
+            paymentMethodLayout = config.paymentMethodLayout,
             isDeferred = false,
         )
 
@@ -172,8 +188,12 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link())
 
         // We're running a new config, so we DO expect an interaction.
+        val config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         verify(eventReporter).onInit(
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            commonConfiguration = config.asCommonConfiguration(),
+            appearance = config.appearance,
+            primaryButtonColor = config.primaryButtonColorUsage(),
+            paymentMethodLayout = config.paymentMethodLayout,
             isDeferred = false,
         )
     }
@@ -211,8 +231,12 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link())
 
         // We're running a new config, so we DO expect an interaction.
+        val config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         verify(eventReporter).onInit(
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            commonConfiguration = config.asCommonConfiguration(),
+            appearance = config.appearance,
+            primaryButtonColor = config.primaryButtonColorUsage(),
+            paymentMethodLayout = config.paymentMethodLayout,
             isDeferred = false,
         )
     }
@@ -437,7 +461,10 @@ class FlowControllerConfigurationHandlerTest {
         configureTurbine.awaitComplete()
 
         verify(eventReporter).onInit(
-            configuration = any(),
+            commonConfiguration = any(),
+            appearance = any(),
+            primaryButtonColor = any(),
+            paymentMethodLayout = any(),
             isDeferred = eq(false),
         )
     }
@@ -447,9 +474,17 @@ class FlowControllerConfigurationHandlerTest {
         val configureTurbine = Turbine<Throwable?>()
         val configurationHandler = createConfigurationHandler()
 
-        IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
-            throw AssertionError("Not expected to be called")
-        }
+        PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks.Builder()
+            .createIntentCallback { _, _ ->
+                error("Should not be called!")
+            }
+            .confirmCustomPaymentMethodCallback { _, _ ->
+                error("Should not be called!")
+            }
+            .externalPaymentMethodConfirmHandler { _, _ ->
+                error("Should not be called!")
+            }
+            .build()
 
         configurationHandler.configure(
             scope = this,
@@ -470,7 +505,10 @@ class FlowControllerConfigurationHandlerTest {
         configureTurbine.awaitComplete()
 
         verify(eventReporter).onInit(
-            configuration = any(),
+            commonConfiguration = any(),
+            appearance = any(),
+            primaryButtonColor = any(),
+            paymentMethodLayout = any(),
             isDeferred = eq(true),
         )
     }
@@ -480,10 +518,17 @@ class FlowControllerConfigurationHandlerTest {
         val configureTurbine = Turbine<Throwable?>()
         val configurationHandler = createConfigurationHandler()
 
-        IntentConfirmationInterceptor.createIntentCallback =
-            CreateIntentCallback { _, _ ->
-                throw AssertionError("Not expected to be called")
+        PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks.Builder()
+            .createIntentCallback { _, _ ->
+                error("Should not be called!")
             }
+            .confirmCustomPaymentMethodCallback { _, _ ->
+                error("Should not be called!")
+            }
+            .externalPaymentMethodConfirmHandler { _, _ ->
+                error("Should not be called!")
+            }
+            .build()
 
         configurationHandler.configure(
             scope = this,
@@ -504,7 +549,10 @@ class FlowControllerConfigurationHandlerTest {
         configureTurbine.awaitComplete()
 
         verify(eventReporter).onInit(
-            configuration = any(),
+            commonConfiguration = any(),
+            appearance = any(),
+            primaryButtonColor = any(),
+            paymentMethodLayout = any(),
             isDeferred = eq(true),
         )
     }

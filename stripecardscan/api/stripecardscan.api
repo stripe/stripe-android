@@ -5,6 +5,14 @@ public final class com/stripe/android/stripecardscan/BuildConfig {
 	public fun <init> ()V
 }
 
+public final class com/stripe/android/stripecardscan/cardscan/CardScanConfiguration$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/stripecardscan/cardscan/CardScanConfiguration;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/stripecardscan/cardscan/CardScanConfiguration;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/stripecardscan/cardscan/CardScanFragment : com/stripe/android/stripecardscan/scanui/ScanFragment, com/stripe/android/camera/scanui/SimpleScanStateful {
 	public fun <init> ()V
 	public synthetic fun changeScanState (Lcom/stripe/android/camera/scanui/ScanState;)Z

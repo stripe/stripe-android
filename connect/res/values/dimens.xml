@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="stripe_web_view_spinner_size">24dp</dimen>
+    <dimen name="stripe_web_view_spinner_top_margin">56dp</dimen>
+</resources>

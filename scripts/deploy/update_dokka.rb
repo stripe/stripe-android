@@ -11,13 +11,18 @@ def generate_dokka()
     dokka_change_description = "Generate dokka for #{@version}"
 
     begin
-        switch_to_new_branch(dokka_branch_name, @deploy_branch)
         execute_or_fail("rm -rf docs/")
         execute_or_fail("./gradlew clean")
         execute_or_fail("./gradlew dokkaHtmlMultiModule")
 
+        if docs_did_not_change
+            rputs "Skipping updating dokka because there are no dokka changes."
+            return
+        end
+
+        switch_to_new_branch(dokka_branch_name, @deploy_branch)
         execute_or_fail("git add -A docs/*")
-        execute_or_fail("git commit -m \"#{dokka_change_description}\"")
+        execute_or_fail("git commit -m \"#{dokka_change_description}\" --no-verify")
     rescue
         execute("git restore --staged docs") # unstage any staged docs files
         execute("git clean -fd docs") # remove any newly added docs files
@@ -54,4 +59,10 @@ end
 
 private def dokka_branch_name
     "generateDokkaFor#{@version}"
+end
+
+private def docs_did_not_change
+    stdout, stderr, status = Open3.capture3("git status --porcelain docs/*")
+
+    return stdout.empty?
 end

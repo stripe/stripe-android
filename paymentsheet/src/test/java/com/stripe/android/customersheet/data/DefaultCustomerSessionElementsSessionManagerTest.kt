@@ -55,6 +55,7 @@ class DefaultCustomerSessionElementsSessionManagerTest {
 
         assertThat(lastParams?.savedPaymentMethodSelectionId).isEqualTo("pm_123")
         assertThat(lastParams?.externalPaymentMethods).isEmpty()
+        assertThat(lastParams?.customPaymentMethods).isEmpty()
 
         val initializationMode = lastParams?.initializationMode
         assertThat(initializationMode).isInstanceOf(InitializationMode.DeferredIntent::class.java)

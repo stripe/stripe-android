@@ -147,6 +147,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val elementsSession = retrieveElementsSession(
             initializationMode = initializationMode,
             customer = configuration.customer,
+            customPaymentMethods = configuration.customPaymentMethods,
             externalPaymentMethods = configuration.externalPaymentMethods,
             savedPaymentMethodSelectionId = savedPaymentMethodSelection?.id,
         ).getOrThrow()
@@ -226,6 +227,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             state = state,
             isReloadingAfterProcessDeath = isReloadingAfterProcessDeath,
             isGooglePaySupported = isGooglePaySupported(),
+            linkDisplay = configuration.link.display,
             initializationMode = initializationMode,
             customerInfo = customerInfo,
             paymentMethodMetadata = paymentMethodMetadata
@@ -237,6 +239,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private suspend fun retrieveElementsSession(
         initializationMode: PaymentElementLoader.InitializationMode,
         customer: PaymentSheet.CustomerConfiguration?,
+        customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
     ): Result<ElementsSession> {
@@ -244,6 +247,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             initializationMode = initializationMode,
             customer = customer,
             externalPaymentMethods = externalPaymentMethods,
+            customPaymentMethods = customPaymentMethods,
             savedPaymentMethodSelectionId = savedPaymentMethodSelectionId
         )
     }
@@ -272,7 +276,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             actualExternalPaymentMethods = externalPaymentMethodSpecs
         )
 
-        return PaymentMethodMetadata.create(
+        logCustomPaymentMethodErrors(elementsSession.customPaymentMethods)
+
+        return PaymentMethodMetadata.createForPaymentElement(
             elementsSession = elementsSession,
             configuration = configuration,
             sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
@@ -394,10 +400,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         customer: CustomerInfo?,
         initializationMode: PaymentElementLoader.InitializationMode
     ): LinkState? {
-        return if (elementsSession.isLinkEnabled &&
-            !configuration.billingDetailsCollectionConfiguration.collectsAnything &&
-            configuration.cardBrandAcceptance == PaymentSheet.CardBrandAcceptance.all()
-        ) {
+        return if (configuration.allowsLink && elementsSession.isLinkEnabled) {
             loadLinkState(
                 configuration = configuration,
                 customer = customer,
@@ -545,6 +548,26 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         configuration: CommonConfiguration,
         elementsSession: ElementsSession,
     ): Boolean {
+        if (!elementsSession.isGooglePayEnabled) {
+            userFacingLogger.logWarningWithoutPii(
+                "Google Pay is not enabled for this session."
+            )
+        } else if (configuration.googlePay == null) {
+            userFacingLogger.logWarningWithoutPii(
+                "GooglePayConfiguration is not set."
+            )
+        } else if (!configuration.isGooglePayReady()) {
+            @Suppress("MaxLineLength")
+            userFacingLogger.logWarningWithoutPii(
+                """
+                    Google Pay API check failed.
+                    Possible reasons:
+                    - Google Play service is not available on this device.
+                    - Google account is not signed in on this device.
+                    See https://developers.google.com/android/reference/com/google/android/gms/wallet/PaymentsClient#public-taskboolean-isreadytopay-isreadytopayrequest-request for more details.
+                """.trimIndent()
+            )
+        }
         return elementsSession.isGooglePayEnabled && configuration.isGooglePayReady()
     }
 
@@ -678,6 +701,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         state: PaymentElementLoader.State,
         isReloadingAfterProcessDeath: Boolean,
         isGooglePaySupported: Boolean,
+        linkDisplay: PaymentSheet.LinkConfiguration.Display,
         initializationMode: PaymentElementLoader.InitializationMode,
         customerInfo: CustomerInfo?,
         paymentMethodMetadata: PaymentMethodMetadata,
@@ -703,8 +727,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             eventReporter.onLoadFailed(state.validationError)
         } else {
             eventReporter.onLoadSucceeded(
+                linkEnabled = state.paymentMethodMetadata.linkState != null,
                 linkMode = elementsSession.linkSettings?.linkMode,
                 googlePaySupported = isGooglePaySupported,
+                linkDisplay = linkDisplay,
                 currency = elementsSession.stripeIntent.currency,
                 paymentSelection = state.paymentSelection,
                 initializationMode = initializationMode,
@@ -746,6 +772,24 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                         "available-external-payment-methods"
                 )
             }
+        }
+    }
+
+    private fun logCustomPaymentMethodErrors(
+        customPaymentMethods: List<ElementsSession.CustomPaymentMethod>,
+    ) {
+        if (customPaymentMethods.isEmpty()) {
+            return
+        }
+
+        val unavailableCustomPaymentMethods = customPaymentMethods
+            .filterIsInstance<ElementsSession.CustomPaymentMethod.Unavailable>()
+
+        for (unavailableCustomPaymentMethod in unavailableCustomPaymentMethods) {
+            userFacingLogger.logWarningWithoutPii(
+                "Requested custom payment method ${unavailableCustomPaymentMethod.type} contained an " +
+                    "error \"${unavailableCustomPaymentMethod.error}\"!"
+            )
         }
     }
 
@@ -792,3 +836,8 @@ private suspend fun List<PaymentMethod>.withDefaultPaymentMethodOrLastUsedPaymen
 private fun PaymentMethod.toPaymentSelection(): PaymentSelection.Saved {
     return PaymentSelection.Saved(this)
 }
+
+private val CommonConfiguration.allowsLink: Boolean
+    get() = link.shouldDisplay &&
+        !billingDetailsCollectionConfiguration.collectsAnything &&
+        cardBrandAcceptance == PaymentSheet.CardBrandAcceptance.all()

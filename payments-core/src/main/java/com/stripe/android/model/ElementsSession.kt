@@ -15,11 +15,13 @@ data class ElementsSession(
     val paymentMethodSpecs: String?,
     val externalPaymentMethodData: String?,
     val stripeIntent: StripeIntent,
+    val flags: Map<Flag, Boolean>,
     val customer: Customer?,
     val merchantCountry: String?,
     val cardBrandChoice: CardBrandChoice?,
     val isGooglePayEnabled: Boolean,
     val sessionsError: Throwable? = null,
+    val customPaymentMethods: List<CustomPaymentMethod>,
     val elementsSessionId: String,
 ) : StripeModel {
 
@@ -64,6 +66,27 @@ data class ElementsSession(
         val eligible: Boolean,
         val preferredNetworks: List<String>,
     ) : StripeModel
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
+    sealed interface CustomPaymentMethod : StripeModel {
+        val type: String
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        data class Available(
+            override val type: String,
+            val displayName: String,
+            val logoUrl: String,
+        ) : CustomPaymentMethod
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        data class Unavailable(
+            override val type: String,
+            val error: String,
+        ) : CustomPaymentMethod
+    }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
@@ -123,6 +146,14 @@ data class ElementsSession(
         }
     }
 
+    /**
+     * Flags declared here will be parsed and include in the [ElementsSession] object.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    enum class Flag(val flagValue: String) {
+        ELEMENTS_DISABLE_FC_LITE("elements_disable_fc_lite")
+    }
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         fun createFromFallback(
@@ -134,13 +165,15 @@ data class ElementsSession(
                 linkSettings = null,
                 paymentMethodSpecs = null,
                 externalPaymentMethodData = null,
+                flags = emptyMap(),
                 stripeIntent = stripeIntent,
                 customer = null,
+                customPaymentMethods = listOf(),
                 merchantCountry = null,
                 cardBrandChoice = null,
                 isGooglePayEnabled = true,
                 sessionsError = sessionsError,
-                elementsSessionId = elementsSessionId
+                elementsSessionId = elementsSessionId,
             )
         }
     }

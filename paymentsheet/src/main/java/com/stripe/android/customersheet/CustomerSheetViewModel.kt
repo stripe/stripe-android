@@ -50,6 +50,8 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
+import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
@@ -66,6 +68,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.Dispatchers
@@ -501,25 +504,30 @@ internal class CustomerSheetViewModel(
 
     private suspend fun modifyCardPaymentMethod(
         paymentMethod: PaymentMethod,
-        brand: CardBrand
+        cardUpdateParams: CardUpdateParams
     ): CustomerSheetDataResult<PaymentMethod> {
         return awaitPaymentMethodDataSource().updatePaymentMethod(
             paymentMethodId = paymentMethod.id!!,
             params = PaymentMethodUpdateParams.createCard(
-                networks = PaymentMethodUpdateParams.Card.Networks(
-                    preferred = brand.code
-                ),
+                networks = cardUpdateParams.cardBrand?.let {
+                    PaymentMethodUpdateParams.Card.Networks(
+                        preferred = it.code
+                    )
+                },
+                billingDetails = cardUpdateParams.billingDetails,
+                expiryMonth = cardUpdateParams.expiryMonth,
+                expiryYear = cardUpdateParams.expiryYear,
                 productUsageTokens = setOf("CustomerSheet"),
             )
         ).onSuccess { updatedMethod ->
             updatePaymentMethodInState(updatedMethod)
 
             eventReporter.onUpdatePaymentMethodSucceeded(
-                selectedBrand = brand
+                selectedBrand = cardUpdateParams.cardBrand
             )
         }.onFailure { cause, _ ->
             eventReporter.onUpdatePaymentMethodFailed(
-                selectedBrand = brand,
+                selectedBrand = cardUpdateParams.cardBrand,
                 error = cause
             )
         }
@@ -543,23 +551,18 @@ internal class CustomerSheetViewModel(
                     displayableSavedPaymentMethod = paymentMethod,
                     cardBrandFilter = PaymentSheetCardBrandFilter(customerState.configuration.cardBrandAcceptance),
                     removeExecutor = ::removeExecutor,
-                    onBrandChoiceOptionsShown = {
-                        eventReporter.onShowPaymentOptionBrands(
+                    onBrandChoiceSelected = { brand ->
+                        eventReporter.onBrandChoiceSelected(
                             source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
-                            selectedBrand = it
-                        )
-                    },
-                    onBrandChoiceOptionsDismissed = {
-                        eventReporter.onHidePaymentOptionBrands(
-                            source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
-                            selectedBrand = it
+                            selectedBrand = brand
                         )
                     },
                     onUpdateSuccess = ::onBackPressed,
-                    updateCardBrandExecutor = ::updateCardBrandExecutor,
+                    updatePaymentMethodExecutor = ::updatePaymentMethodExecutor,
                     workContext = workContext,
                     // This checkbox is never displayed in CustomerSheet.
                     shouldShowSetAsDefaultCheckbox = false,
+                    isDefaultPaymentMethod = false,
                     // Should never be called from CustomerSheet, because we don't enable the set as default checkbox.
                     setDefaultPaymentMethodExecutor = {
                         Result.failure(
@@ -579,8 +582,11 @@ internal class CustomerSheetViewModel(
         }.failureOrNull()?.cause
     }
 
-    private suspend fun updateCardBrandExecutor(paymentMethod: PaymentMethod, brand: CardBrand): Result<PaymentMethod> {
-        return when (val result = modifyCardPaymentMethod(paymentMethod, brand)) {
+    private suspend fun updatePaymentMethodExecutor(
+        paymentMethod: PaymentMethod,
+        cardUpdateParams: CardUpdateParams
+    ): Result<PaymentMethod> {
+        return when (val result = modifyCardPaymentMethod(paymentMethod, cardUpdateParams)) {
             is CustomerSheetDataResult.Success -> Result.success(result.value)
             is CustomerSheetDataResult.Failure -> Result.failure(result.cause)
         }
@@ -838,7 +844,9 @@ internal class CustomerSheetViewModel(
             onError = { error ->
                 handleViewAction(CustomerSheetViewAction.OnFormError(error))
             },
-            shouldShowSetAsDefaultCheckbox = false,
+            setAsDefaultPaymentMethodEnabled = false,
+            financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null),
+            setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
         )
     }
 

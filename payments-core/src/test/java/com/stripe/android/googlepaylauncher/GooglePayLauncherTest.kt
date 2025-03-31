@@ -34,10 +34,56 @@ internal class GooglePayLauncherTest {
             integrationTypes = listOf(LauncherIntegrationType.Activity),
             expectResult = false,
         ) { activity, _ ->
+            GooglePayLauncher.HAS_SENT_INIT_ANALYTIC_EVENT = false
             val firedEvents = mutableListOf<String>()
 
             // Have to use the internal constructor here to provide a mock request executor
             // ¯\_(ツ)_/¯
+            GooglePayLauncher(
+                lifecycleScope = activity.lifecycleScope,
+                config = CONFIG,
+                readyCallback = mock(),
+                activityResultLauncher = mock(),
+                googlePayRepositoryFactory = {
+                    FakeGooglePayRepository(value = true)
+                },
+                paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
+                    context = activity,
+                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                ),
+                analyticsRequestExecutor = { firedEvents += it.params["event"].toString() },
+            )
+
+            assertThat(firedEvents).containsExactly("stripe_android.googlepaylauncher_init")
+        }
+    }
+
+    @Test
+    fun `init should fire expected event on init`() {
+        runGooglePayLauncherTest(
+            integrationTypes = listOf(LauncherIntegrationType.Activity),
+            expectResult = false,
+        ) { activity, _ ->
+            GooglePayLauncher.HAS_SENT_INIT_ANALYTIC_EVENT = false
+            val firedEvents = mutableListOf<String>()
+
+            // Have to use the internal constructor here to provide a mock request executor
+            // ¯\_(ツ)_/¯
+            GooglePayLauncher(
+                lifecycleScope = activity.lifecycleScope,
+                config = CONFIG,
+                readyCallback = mock(),
+                activityResultLauncher = mock(),
+                googlePayRepositoryFactory = {
+                    FakeGooglePayRepository(value = true)
+                },
+                paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
+                    context = activity,
+                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                ),
+                analyticsRequestExecutor = { firedEvents += it.params["event"].toString() },
+            )
+
             GooglePayLauncher(
                 lifecycleScope = activity.lifecycleScope,
                 config = CONFIG,

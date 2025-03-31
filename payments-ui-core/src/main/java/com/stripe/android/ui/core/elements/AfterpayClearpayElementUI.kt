@@ -34,12 +34,12 @@ fun AfterpayClearpayElementUI(
         enabled = enabled,
         imageLoader = mapOf(
             "afterpay" to EmbeddableImage.Drawable(
-                if (isClearpay()) {
+                if (isClearpay(element.currency)) {
                     R.drawable.stripe_ic_clearpay_logo
                 } else {
                     R.drawable.stripe_ic_afterpay_logo
                 },
-                if (isClearpay()) {
+                if (isClearpay(element.currency)) {
                     R.string.stripe_paymentsheet_payment_method_clearpay
                 } else {
                     R.string.stripe_paymentsheet_payment_method_afterpay

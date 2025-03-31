@@ -2,10 +2,12 @@ package com.stripe.android.payments.bankaccount
 
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 
 internal class CollectBankAccountForACHLauncher(
     private val hostActivityLauncher: ActivityResultLauncher<CollectBankAccountContract.Args>,
-    private val hostedSurface: String?
+    private val hostedSurface: String?,
+    private val financialConnectionsAvailability: FinancialConnectionsAvailability?
 ) : CollectBankAccountLauncher {
 
     private val attachToIntent: Boolean
@@ -28,6 +30,7 @@ internal class CollectBankAccountForACHLauncher(
                 configuration = configuration,
                 hostedSurface = hostedSurface,
                 attachToIntent = attachToIntent,
+                financialConnectionsAvailability = financialConnectionsAvailability
             )
         )
     }
@@ -46,6 +49,7 @@ internal class CollectBankAccountForACHLauncher(
                 configuration = configuration,
                 hostedSurface = hostedSurface,
                 attachToIntent = attachToIntent,
+                financialConnectionsAvailability = financialConnectionsAvailability
             )
         )
     }
@@ -70,6 +74,7 @@ internal class CollectBankAccountForACHLauncher(
                 onBehalfOf = onBehalfOf,
                 amount = amount,
                 hostedSurface = hostedSurface,
+                financialConnectionsAvailability = financialConnectionsAvailability,
                 currency = currency,
             )
         )
@@ -91,6 +96,7 @@ internal class CollectBankAccountForACHLauncher(
                 configuration = configuration,
                 customerId = customerId,
                 hostedSurface = hostedSurface,
+                financialConnectionsAvailability = financialConnectionsAvailability,
                 onBehalfOf = onBehalfOf,
             )
         )

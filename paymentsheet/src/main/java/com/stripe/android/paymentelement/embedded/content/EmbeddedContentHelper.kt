@@ -43,6 +43,8 @@ internal interface EmbeddedContentHelper {
         embeddedViewDisplaysMandateText: Boolean,
     )
 
+    fun clearEmbeddedContent()
+
     fun setSheetLauncher(sheetLauncher: EmbeddedSheetLauncher)
 
     fun clearSheetLauncher()
@@ -100,11 +102,16 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
         rowStyle: Embedded.RowStyle,
         embeddedViewDisplaysMandateText: Boolean,
     ) {
+        eventReporter.onShowNewPaymentOptions()
         savedStateHandle[STATE_KEY_EMBEDDED_CONTENT] = State(
             paymentMethodMetadata = paymentMethodMetadata,
             rowStyle = rowStyle,
             embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
         )
+    }
+
+    override fun clearEmbeddedContent() {
+        savedStateHandle[STATE_KEY_EMBEDDED_CONTENT] = null
     }
 
     override fun setSheetLauncher(sheetLauncher: EmbeddedSheetLauncher) {

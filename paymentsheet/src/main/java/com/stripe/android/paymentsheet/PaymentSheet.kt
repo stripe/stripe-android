@@ -7,20 +7,28 @@ import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.common.configuration.ConfigurationDefaults
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentelement.AnalyticEventCallback
+import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
+import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
-import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.Colors
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentOption
@@ -66,7 +74,11 @@ class PaymentSheet internal constructor(
     ) : this(
         DefaultPaymentSheetLauncher(activity, callback)
     ) {
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
+        setPaymentSheetCallbacks(
+            PaymentElementCallbacks.Builder()
+                .externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
+                .build()
+        )
     }
 
     /**
@@ -85,7 +97,11 @@ class PaymentSheet internal constructor(
     ) : this(
         DefaultPaymentSheetLauncher(activity, paymentResultCallback)
     ) {
-        IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+        setPaymentSheetCallbacks(
+            PaymentElementCallbacks.Builder()
+                .createIntentCallback(createIntentCallback)
+                .build()
+        )
     }
 
     /**
@@ -107,8 +123,12 @@ class PaymentSheet internal constructor(
     ) : this(
         DefaultPaymentSheetLauncher(activity, paymentResultCallback)
     ) {
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
-        IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+        setPaymentSheetCallbacks(
+            PaymentElementCallbacks.Builder()
+                .createIntentCallback(createIntentCallback)
+                .externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
+                .build()
+        )
     }
 
     /**
@@ -139,7 +159,11 @@ class PaymentSheet internal constructor(
     ) : this(
         DefaultPaymentSheetLauncher(fragment, callback)
     ) {
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
+        setPaymentSheetCallbacks(
+            PaymentElementCallbacks.Builder()
+                .externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
+                .build()
+        )
     }
 
     /**
@@ -158,7 +182,11 @@ class PaymentSheet internal constructor(
     ) : this(
         DefaultPaymentSheetLauncher(fragment, paymentResultCallback)
     ) {
-        IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+        setPaymentSheetCallbacks(
+            PaymentElementCallbacks.Builder()
+                .createIntentCallback(createIntentCallback)
+                .build()
+        )
     }
 
     /**
@@ -180,8 +208,12 @@ class PaymentSheet internal constructor(
     ) : this(
         DefaultPaymentSheetLauncher(fragment, paymentResultCallback)
     ) {
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
-        IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+        setPaymentSheetCallbacks(
+            PaymentElementCallbacks.Builder()
+                .createIntentCallback(createIntentCallback)
+                .externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
+                .build()
+        )
     }
 
     /**
@@ -190,17 +222,24 @@ class PaymentSheet internal constructor(
      * @param resultCallback Called with the result of the payment after [PaymentSheet] is dismissed.
      */
     class Builder(internal val resultCallback: PaymentSheetResultCallback) {
-        internal var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null
-            private set
-        internal var createIntentCallback: CreateIntentCallback? = null
-            private set
+        private val callbacksBuilder = PaymentElementCallbacks.Builder()
 
         /**
          * @param handler Called when a user confirms payment for an external payment method. Use with
          * [Configuration.Builder.externalPaymentMethods] to specify external payment methods.
          */
         fun externalPaymentMethodConfirmHandler(handler: ExternalPaymentMethodConfirmHandler) = apply {
-            externalPaymentMethodConfirmHandler = handler
+            callbacksBuilder.externalPaymentMethodConfirmHandler(handler)
+        }
+
+        /**
+         * @param callback Called when a user confirms payment for a custom payment method. Use with
+         * [Configuration.Builder.customPaymentMethods] to specify custom payment methods.
+         */
+        @ExperimentalCustomPaymentMethodsApi
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun confirmCustomPaymentMethodCallback(callback: ConfirmCustomPaymentMethodCallback) = apply {
+            callbacksBuilder.confirmCustomPaymentMethodCallback(callback)
         }
 
         /**
@@ -208,7 +247,16 @@ class PaymentSheet internal constructor(
          * Only used when [presentWithIntentConfiguration] is called for a deferred flow.
          */
         fun createIntentCallback(callback: CreateIntentCallback) = apply {
-            createIntentCallback = callback
+            callbacksBuilder.createIntentCallback(callback)
+        }
+
+        /**
+         * @param callback Called when an analytic event occurs.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @ExperimentalAnalyticEventCallbackApi
+        fun analyticEventCallback(callback: AnalyticEventCallback) = apply {
+            callbacksBuilder.analyticEventCallback(callback)
         }
 
         /**
@@ -236,17 +284,17 @@ class PaymentSheet internal constructor(
          */
         @Composable
         fun build(): PaymentSheet {
-            initializeCallbacks()
-            return rememberPaymentSheet(resultCallback)
+            /*
+             * Callbacks are initialized & updated internally by the internal composable function
+             */
+            return internalRememberPaymentSheet(
+                callbacks = callbacksBuilder.build(),
+                paymentResultCallback = resultCallback,
+            )
         }
 
         private fun initializeCallbacks() {
-            createIntentCallback?.let {
-                IntentConfirmationInterceptor.createIntentCallback = it
-            }
-            externalPaymentMethodConfirmHandler?.let {
-                ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = it
-            }
+            setPaymentSheetCallbacks(callbacksBuilder.build())
         }
     }
 
@@ -571,6 +619,11 @@ class PaymentSheet internal constructor(
         internal val paymentMethodLayout: PaymentMethodLayout = ConfigurationDefaults.paymentMethodLayout,
 
         internal val cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
+
+        internal val customPaymentMethods: List<CustomPaymentMethod> =
+            ConfigurationDefaults.customPaymentMethods,
+
+        internal val link: LinkConfiguration = ConfigurationDefaults.link,
     ) : Parcelable {
 
         @JvmOverloads
@@ -693,6 +746,7 @@ class PaymentSheet internal constructor(
             preferredNetworks = preferredNetworks,
             allowsRemovalOfLastSavedPaymentMethod = ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
             externalPaymentMethods = ConfigurationDefaults.externalPaymentMethods,
+            customPaymentMethods = ConfigurationDefaults.customPaymentMethods,
         )
 
         /**
@@ -721,6 +775,10 @@ class PaymentSheet internal constructor(
             private var externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods
             private var paymentMethodLayout: PaymentMethodLayout = ConfigurationDefaults.paymentMethodLayout
             private var cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance
+            private var link: PaymentSheet.LinkConfiguration = ConfigurationDefaults.link
+
+            private var customPaymentMethods: List<CustomPaymentMethod> =
+                ConfigurationDefaults.customPaymentMethods
 
             fun merchantDisplayName(merchantDisplayName: String) =
                 apply { this.merchantDisplayName = merchantDisplayName }
@@ -831,6 +889,26 @@ class PaymentSheet internal constructor(
                 this.cardBrandAcceptance = cardBrandAcceptance
             }
 
+            /**
+             * Configuration related to custom payment methods.
+             *
+             * If set, Payment Sheet will display the defined list of custom payment methods in the UI.
+             */
+            @ExperimentalCustomPaymentMethodsApi
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun customPaymentMethods(
+                customPaymentMethods: List<CustomPaymentMethod>,
+            ) = apply {
+                this.customPaymentMethods = customPaymentMethods
+            }
+
+            /**
+             * Configuration related to Link.
+             */
+            fun link(link: PaymentSheet.LinkConfiguration): Builder = apply {
+                this.link = link
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -849,6 +927,8 @@ class PaymentSheet internal constructor(
                 externalPaymentMethods = externalPaymentMethods,
                 paymentMethodLayout = paymentMethodLayout,
                 cardBrandAcceptance = cardBrandAcceptance,
+                customPaymentMethods = customPaymentMethods,
+                link = link,
             )
         }
 
@@ -1914,6 +1994,77 @@ class PaymentSheet internal constructor(
         ) : CardBrandAcceptance()
     }
 
+    /**
+     * Defines a custom payment method type that can be displayed in Payment Element.
+     */
+    @Poko
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    class CustomPaymentMethod internal constructor(
+        val id: String,
+        internal val subtitle: ResolvableString?,
+        internal val disableBillingDetailCollection: Boolean,
+    ) : Parcelable {
+        @ExperimentalCustomPaymentMethodsApi
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        constructor(
+            /**
+             * The unique identifier for this custom payment method type in the format of "cmpt_...".
+             *
+             * Obtained from the Stripe Dashboard at https://dashboard.stripe.com/settings/custom_payment_methods
+             */
+            id: String,
+
+            /**
+             * Optional subtitle text to be displayed below the custom payment method's display name.
+             */
+            @StringRes subtitle: Int?,
+
+            /**
+             * When true, Payment Element will not collect billing details for this custom payment method type
+             * irregardless of the [PaymentSheet.Configuration.billingDetailsCollectionConfiguration] settings.
+             *
+             * This has no effect if [PaymentSheet.Configuration.billingDetailsCollectionConfiguration] is not
+             * configured.
+             */
+            disableBillingDetailCollection: Boolean = true,
+        ) : this(
+            id = id,
+            subtitle = subtitle?.resolvableString,
+            disableBillingDetailCollection = disableBillingDetailCollection,
+        )
+
+        @ExperimentalCustomPaymentMethodsApi
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        constructor(
+            /**
+             * The unique identifier for this custom payment method type in the format of "cmpt_...".
+             *
+             * Obtained from the Stripe Dashboard at https://dashboard.stripe.com/settings/custom_payment_methods
+             */
+            id: String,
+
+            /**
+             * Optional subtitle text string resource to be resolved and displayed below the custom payment method's
+             * display name.
+             */
+            subtitle: String?,
+
+            /**
+             * When true, Payment Element will not collect billing details for this custom payment method type
+             * irregardless of the [PaymentSheet.Configuration.billingDetailsCollectionConfiguration] settings.
+             *
+             * This has no effect if [PaymentSheet.Configuration.billingDetailsCollectionConfiguration] is not
+             * configured.
+             */
+            disableBillingDetailCollection: Boolean = true,
+        ) : this(
+            id = id,
+            subtitle = subtitle?.resolvableString,
+            disableBillingDetailCollection = disableBillingDetailCollection,
+        )
+    }
+
     internal sealed interface CustomerAccessType : Parcelable {
         val analyticsValue: String
 
@@ -2051,6 +2202,43 @@ class PaymentSheet internal constructor(
     }
 
     /**
+     * Configuration related to Link.
+     */
+    @Poko
+    @Parcelize
+    class LinkConfiguration @JvmOverloads constructor(
+        internal val display: Display = Display.Automatic,
+    ) : Parcelable {
+
+        internal val shouldDisplay: Boolean
+            get() = when (display) {
+                Display.Automatic -> true
+                Display.Never -> false
+            }
+
+        /**
+         * Display configuration for Link
+         */
+        enum class Display {
+            /**
+             * Link will be displayed when available.
+             */
+            Automatic,
+
+            /**
+             * Link will never be displayed.
+             */
+            Never;
+
+            internal val analyticsValue: String
+                get() = when (this) {
+                    Automatic -> "automatic"
+                    Never -> "never"
+                }
+        }
+    }
+
+    /**
      * A class that presents the individual steps of a payment sheet flow.
      */
     interface FlowController {
@@ -2124,23 +2312,38 @@ class PaymentSheet internal constructor(
             internal val resultCallback: PaymentSheetResultCallback,
             internal val paymentOptionCallback: PaymentOptionCallback
         ) {
-            internal var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null
-                private set
-            internal var createIntentCallback: CreateIntentCallback? = null
-                private set
+            private val callbacksBuilder = PaymentElementCallbacks.Builder()
 
             /**
              * @param handler Called when a user confirms payment for an external payment method.
              */
             fun externalPaymentMethodConfirmHandler(handler: ExternalPaymentMethodConfirmHandler) = apply {
-                externalPaymentMethodConfirmHandler = handler
+                callbacksBuilder.externalPaymentMethodConfirmHandler(handler)
+            }
+
+            /**
+             * @param callback Called when a user confirms payment for a custom payment method.
+             */
+            @ExperimentalCustomPaymentMethodsApi
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun confirmCustomPaymentMethodCallback(callback: ConfirmCustomPaymentMethodCallback) = apply {
+                callbacksBuilder.confirmCustomPaymentMethodCallback(callback)
             }
 
             /**
              * @param callback If specified, called when the customer confirms the payment or setup.
              */
             fun createIntentCallback(callback: CreateIntentCallback) = apply {
-                createIntentCallback = callback
+                callbacksBuilder.createIntentCallback(callback)
+            }
+
+            /**
+             * @param callback If specified, called when an analytic event occurs.
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @ExperimentalAnalyticEventCallbackApi
+            fun analyticEventCallback(callback: AnalyticEventCallback) = apply {
+                callbacksBuilder.analyticEventCallback(callback)
             }
 
             /**
@@ -2168,17 +2371,18 @@ class PaymentSheet internal constructor(
              */
             @Composable
             fun build(): FlowController {
-                initializeCallbacks()
-                return rememberPaymentSheetFlowController(this)
+                /*
+                 * Callbacks are initialized & updated internally by the internal composable function
+                 */
+                return internalRememberPaymentSheetFlowController(
+                    callbacks = callbacksBuilder.build(),
+                    paymentOptionCallback = paymentOptionCallback,
+                    paymentResultCallback = resultCallback,
+                )
             }
 
             private fun initializeCallbacks() {
-                createIntentCallback?.let {
-                    IntentConfirmationInterceptor.createIntentCallback = it
-                }
-                externalPaymentMethodConfirmHandler?.let {
-                    ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = it
-                }
+                setFlowControllerCallbacks(callbacks = callbacksBuilder.build())
             }
         }
 
@@ -2242,8 +2446,11 @@ class PaymentSheet internal constructor(
                 paymentOptionCallback: PaymentOptionCallback,
                 paymentResultCallback: PaymentSheetResultCallback
             ): FlowController {
-                ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler =
-                    externalPaymentMethodConfirmHandler
+                setFlowControllerCallbacks(
+                    PaymentElementCallbacks.Builder()
+                        .externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
+                        .build()
+                )
                 return FlowControllerFactory(
                     activity,
                     paymentOptionCallback,
@@ -2269,7 +2476,11 @@ class PaymentSheet internal constructor(
                 createIntentCallback: CreateIntentCallback,
                 paymentResultCallback: PaymentSheetResultCallback,
             ): FlowController {
-                IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+                setFlowControllerCallbacks(
+                    PaymentElementCallbacks.Builder()
+                        .createIntentCallback(createIntentCallback)
+                        .build()
+                )
                 return FlowControllerFactory(
                     activity,
                     paymentOptionCallback,
@@ -2300,9 +2511,12 @@ class PaymentSheet internal constructor(
                 createIntentCallback: CreateIntentCallback,
                 paymentResultCallback: PaymentSheetResultCallback,
             ): FlowController {
-                IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
-                ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler =
-                    externalPaymentMethodConfirmHandler
+                setFlowControllerCallbacks(
+                    PaymentElementCallbacks.Builder()
+                        .createIntentCallback(createIntentCallback)
+                        .externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
+                        .build()
+                )
                 return FlowControllerFactory(
                     activity,
                     paymentOptionCallback,
@@ -2350,8 +2564,11 @@ class PaymentSheet internal constructor(
                 paymentOptionCallback: PaymentOptionCallback,
                 paymentResultCallback: PaymentSheetResultCallback
             ): FlowController {
-                ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler =
-                    externalPaymentMethodConfirmHandler
+                setFlowControllerCallbacks(
+                    PaymentElementCallbacks.Builder()
+                        .externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
+                        .build()
+                )
                 return FlowControllerFactory(
                     fragment,
                     paymentOptionCallback,
@@ -2377,7 +2594,11 @@ class PaymentSheet internal constructor(
                 createIntentCallback: CreateIntentCallback,
                 paymentResultCallback: PaymentSheetResultCallback,
             ): FlowController {
-                IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+                setFlowControllerCallbacks(
+                    PaymentElementCallbacks.Builder()
+                        .createIntentCallback(createIntentCallback)
+                        .build()
+                )
                 return FlowControllerFactory(
                     fragment,
                     paymentOptionCallback,
@@ -2408,9 +2629,12 @@ class PaymentSheet internal constructor(
                 externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
                 paymentResultCallback: PaymentSheetResultCallback,
             ): FlowController {
-                ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler =
-                    externalPaymentMethodConfirmHandler
-                IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+                setFlowControllerCallbacks(
+                    PaymentElementCallbacks.Builder()
+                        .createIntentCallback(createIntentCallback)
+                        .externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
+                        .build()
+                )
                 return FlowControllerFactory(
                     fragment,
                     paymentOptionCallback,
@@ -2421,6 +2645,14 @@ class PaymentSheet internal constructor(
     }
 
     companion object {
+        private fun setPaymentSheetCallbacks(callbacks: PaymentElementCallbacks) {
+            PaymentElementCallbackReferences[PAYMENT_SHEET_DEFAULT_CALLBACK_IDENTIFIER] = callbacks
+        }
+
+        private fun setFlowControllerCallbacks(callbacks: PaymentElementCallbacks) {
+            PaymentElementCallbackReferences[FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER] = callbacks
+        }
+
         /**
          * Deletes all persisted authentication state associated with a customer.
          *

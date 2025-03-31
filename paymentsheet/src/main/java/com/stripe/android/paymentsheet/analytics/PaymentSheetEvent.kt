@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.analytics
 import com.stripe.android.common.analytics.getExternalPaymentMethodsAnalyticsValue
 import com.stripe.android.common.analytics.toAnalyticsMap
 import com.stripe.android.common.analytics.toAnalyticsValue
+import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
@@ -44,14 +45,15 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         orderedLpms: List<String>,
         duration: Duration?,
         linkMode: LinkMode?,
+        override val linkEnabled: Boolean,
         override val isDeferred: Boolean,
         override val googlePaySupported: Boolean,
+        linkDisplay: PaymentSheet.LinkConfiguration.Display,
         requireCvcRecollection: Boolean = false,
         hasDefaultPaymentMethod: Boolean? = null,
         setAsDefaultEnabled: Boolean? = null,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_load_succeeded"
-        override val linkEnabled: Boolean = linkMode != null
         override val additionalParams: Map<String, Any?> = buildMap {
             put(FIELD_DURATION, duration?.asSeconds)
             put(FIELD_SELECTED_LPM, paymentSelection.defaultAnalyticsValue)
@@ -64,6 +66,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             setAsDefaultEnabled?.let {
                 put(FIELD_SET_AS_DEFAULT_ENABLED, it)
             }
+            put(FIELD_LINK_DISPLAY, linkDisplay.analyticsValue)
             if (setAsDefaultEnabled == true && hasDefaultPaymentMethod != null) {
                 put(FIELD_HAS_DEFAULT_PAYMENT_METHOD, hasDefaultPaymentMethod)
             }
@@ -118,45 +121,52 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
     class Init(
         private val mode: EventReporter.Mode,
-        private val configuration: PaymentSheet.Configuration,
-        override val isDeferred: Boolean,
+        private val configuration: CommonConfiguration,
+        private val appearance: PaymentSheet.Appearance,
+        private val primaryButtonColor: Boolean?,
+        private val paymentMethodLayout: PaymentSheet.PaymentMethodLayout?,
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
+        override val isDeferred: Boolean,
+        private val isStripeCardScanAvailable: Boolean
     ) : PaymentSheetEvent() {
 
         override val eventName: String
             get() {
-                val configValue = listOfNotNull(
-                    FIELD_CUSTOMER.takeIf { configuration.customer != null },
-                    FIELD_GOOGLE_PAY.takeIf { configuration.googlePay != null }
-                ).takeUnless { it.isEmpty() }?.joinToString(separator = "_") ?: "default"
-                return formatEventName(mode, "init_$configValue")
+                return if (mode == EventReporter.Mode.Embedded) {
+                    formatEventName(mode, "init")
+                } else {
+                    val configValue = listOfNotNull(
+                        FIELD_CUSTOMER.takeIf { configuration.customer != null },
+                        FIELD_GOOGLE_PAY.takeIf { configuration.googlePay != null }
+                    ).takeUnless { it.isEmpty() }?.joinToString(separator = "_") ?: "default"
+                    formatEventName(mode, "init_$configValue")
+                }
             }
 
         override val additionalParams: Map<String, Any?>
             get() {
 
-                @Suppress("DEPRECATION")
                 val configurationMap = mapOf(
                     FIELD_CUSTOMER to (configuration.customer != null),
                     FIELD_CUSTOMER_ACCESS_PROVIDER to (configuration.customer?.accessType?.analyticsValue),
                     FIELD_GOOGLE_PAY to (configuration.googlePay != null),
-                    FIELD_PRIMARY_BUTTON_COLOR to (configuration.primaryButtonColor != null),
+                    FIELD_PRIMARY_BUTTON_COLOR to primaryButtonColor,
                     FIELD_BILLING to (configuration.defaultBillingDetails?.isFilledOut() == true),
                     FIELD_DELAYED_PMS to configuration.allowsDelayedPaymentMethods,
-                    FIELD_APPEARANCE to configuration.appearance.toAnalyticsMap(),
+                    FIELD_APPEARANCE to appearance.toAnalyticsMap(mode == EventReporter.Mode.Embedded),
                     FIELD_PAYMENT_METHOD_ORDER to configuration.paymentMethodOrder,
                     FIELD_ALLOWS_PAYMENT_METHODS_REQUIRING_SHIPPING_ADDRESS to
                         configuration.allowsPaymentMethodsRequiringShippingAddress,
                     FIELD_ALLOWS_REMOVAL_OF_LAST_SAVED_PAYMENT_METHOD to
                         configuration.allowsRemovalOfLastSavedPaymentMethod,
-                    FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION to (
-                        configuration.billingDetailsCollectionConfiguration.toAnalyticsMap()
-                        ),
+                    FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION to
+                        configuration.billingDetailsCollectionConfiguration.toAnalyticsMap(),
                     FIELD_PREFERRED_NETWORKS to configuration.preferredNetworks.toAnalyticsValue(),
                     FIELD_EXTERNAL_PAYMENT_METHODS to configuration.getExternalPaymentMethodsAnalyticsValue(),
-                    FIELD_PAYMENT_METHOD_LAYOUT to configuration.paymentMethodLayout.toAnalyticsValue(),
+                    FIELD_PAYMENT_METHOD_LAYOUT to paymentMethodLayout?.toAnalyticsValue(),
                     FIELD_CARD_BRAND_ACCEPTANCE to configuration.cardBrandAcceptance.toAnalyticsValue(),
+                    FIELD_CARD_SCAN_AVAILABLE to isStripeCardScanAvailable
                 )
                 return mapOf(
                     FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION to configurationMap,
@@ -194,6 +204,19 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val googlePaySupported: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = formatEventName(mode, "sheet_savedpm_show")
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_CURRENCY to currency,
+        )
+    }
+
+    class ShowManagePaymentMethods(
+        mode: EventReporter.Mode,
+        currency: String?,
+        override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = formatEventName(mode, "manage_savedpm_show")
         override val additionalParams: Map<String, Any?> = mapOf(
             FIELD_CURRENCY to currency,
         )
@@ -307,7 +330,11 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     ) : PaymentSheetEvent() {
 
         override val eventName: String =
-            formatEventName(mode, "payment_${analyticsValue(paymentSelection)}_${result.analyticsValue}")
+            if (mode == EventReporter.Mode.Embedded) {
+                formatEventName(mode, "payment_${result.analyticsValue}")
+            } else {
+                formatEventName(mode, "payment_${analyticsValue(paymentSelection)}_${result.analyticsValue}")
+            }
 
         override val additionalParams: Map<String, Any?> = buildMap {
             put(FIELD_DURATION, duration?.asSeconds)
@@ -389,37 +416,18 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val additionalParams: Map<String, Any?> = emptyMap()
     }
 
-    class ShowPaymentOptionBrands(
+    class CardBrandSelected(
         source: Source,
         selectedBrand: CardBrand,
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
     ) : PaymentSheetEvent() {
-        override val eventName: String = "mc_open_cbc_dropdown"
+        override val eventName: String = "mc_cbc_selected"
 
         override val additionalParams: Map<String, Any?> = mapOf(
             FIELD_CBC_EVENT_SOURCE to source.value,
             FIELD_SELECTED_CARD_BRAND to selectedBrand.code
-        )
-
-        enum class Source(val value: String) {
-            Edit(VALUE_EDIT_CBC_EVENT_SOURCE), Add(VALUE_ADD_CBC_EVENT_SOURCE)
-        }
-    }
-
-    class HidePaymentOptionBrands(
-        source: Source,
-        selectedBrand: CardBrand?,
-        override val isDeferred: Boolean,
-        override val linkEnabled: Boolean,
-        override val googlePaySupported: Boolean,
-    ) : PaymentSheetEvent() {
-        override val eventName: String = "mc_close_cbc_dropdown"
-
-        override val additionalParams: Map<String, Any?> = mapOf(
-            FIELD_CBC_EVENT_SOURCE to source.value,
-            FIELD_SELECTED_CARD_BRAND to selectedBrand?.code
         )
 
         enum class Source(val value: String) {
@@ -431,10 +439,13 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
+        val paymentMethodType: String?,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_set_default_payment_method"
 
-        override val additionalParams: Map<String, Any?> = emptyMap()
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_PAYMENT_METHOD_TYPE to paymentMethodType,
+        )
     }
 
     class SetAsDefaultPaymentMethodFailed(
@@ -442,29 +453,33 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
+        paymentMethodType: String?,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_set_default_payment_method_failed"
 
         override val additionalParams: Map<String, Any?> = mapOf(
             FIELD_ERROR_MESSAGE to error.message,
+            FIELD_PAYMENT_METHOD_TYPE to paymentMethodType,
         ).plus(ErrorReporter.getAdditionalParamsFromError(error))
     }
 
     class UpdatePaymentOptionSucceeded(
-        selectedBrand: CardBrand,
+        selectedBrand: CardBrand?,
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_update_card"
 
-        override val additionalParams: Map<String, Any?> = mapOf(
-            FIELD_SELECTED_CARD_BRAND to selectedBrand.code
-        )
+        override val additionalParams: Map<String, Any?> = buildMap {
+            if (selectedBrand != null) {
+                put(FIELD_SELECTED_CARD_BRAND, selectedBrand.code)
+            }
+        }
     }
 
     class UpdatePaymentOptionFailed(
-        selectedBrand: CardBrand,
+        selectedBrand: CardBrand?,
         error: Throwable,
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,
@@ -472,10 +487,12 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_update_card_failed"
 
-        override val additionalParams: Map<String, Any?> = mapOf(
-            FIELD_SELECTED_CARD_BRAND to selectedBrand.code,
-            FIELD_ERROR_MESSAGE to error.message,
-        ).plus(ErrorReporter.getAdditionalParamsFromError(error))
+        override val additionalParams: Map<String, Any?> = buildMap {
+            if (selectedBrand != null) {
+                put(FIELD_SELECTED_CARD_BRAND, selectedBrand.code)
+            }
+            put(FIELD_ERROR_MESSAGE, error.message)
+        }.plus(ErrorReporter.getAdditionalParamsFromError(error))
     }
 
     class CannotProperlyReturnFromLinkAndLPMs(
@@ -543,6 +560,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_ERROR_MESSAGE = "error_message"
         const val FIELD_ERROR_CODE = "error_code"
         const val FIELD_CBC_EVENT_SOURCE = "cbc_event_source"
+        const val FIELD_PAYMENT_METHOD_TYPE = "payment_method_type"
         const val FIELD_SET_AS_DEFAULT_ENABLED = "set_as_default_enabled"
         const val FIELD_HAS_DEFAULT_PAYMENT_METHOD = "has_default_payment_method"
         const val FIELD_SELECTED_CARD_BRAND = "selected_card_brand"
@@ -556,6 +574,8 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_ORDERED_LPMS = "ordered_lpms"
         const val FIELD_REQUIRE_CVC_RECOLLECTION = "require_cvc_recollection"
         const val FIELD_CARD_BRAND_ACCEPTANCE = "card_brand_acceptance"
+        const val FIELD_CARD_SCAN_AVAILABLE = "card_scan_available"
+        const val FIELD_LINK_DISPLAY = "link_display"
 
         const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
         const val VALUE_ADD_CBC_EVENT_SOURCE = "add"
@@ -612,3 +632,6 @@ internal fun PaymentSelection?.linkContext(): String? {
         null -> null
     }
 }
+
+@Suppress("DEPRECATION")
+internal fun PaymentSheet.Configuration.primaryButtonColorUsage(): Boolean = primaryButtonColor != null

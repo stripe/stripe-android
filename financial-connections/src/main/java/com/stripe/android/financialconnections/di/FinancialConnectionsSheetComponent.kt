@@ -2,7 +2,7 @@ package com.stripe.android.financialconnections.di
 
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.FinancialConnectionsSheetState
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewModel
 import dagger.BindsInstance
@@ -31,7 +31,7 @@ internal interface FinancialConnectionsSheetComponent {
         fun initialState(initialState: FinancialConnectionsSheetState): Builder
 
         @BindsInstance
-        fun configuration(configuration: FinancialConnectionsSheet.Configuration): Builder
+        fun configuration(configuration: FinancialConnectionsSheetConfiguration): Builder
 
         fun sharedComponent(component: FinancialConnectionsSingletonSharedComponent): Builder
 

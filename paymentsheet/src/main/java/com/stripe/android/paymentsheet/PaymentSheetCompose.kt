@@ -6,11 +6,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.stripe.android.common.ui.UpdateExternalPaymentMethodConfirmHandler
-import com.stripe.android.common.ui.UpdateIntentConfirmationInterceptor
+import com.stripe.android.common.ui.UpdateCallbacks
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.utils.rememberActivity
+import java.util.UUID
 
 /**
  * Creates a [PaymentSheet] that is remembered across compositions.
@@ -23,31 +25,15 @@ import com.stripe.android.utils.rememberActivity
 fun rememberPaymentSheet(
     paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet {
-    val onResult by rememberUpdatedState(newValue = paymentResultCallback::onPaymentSheetResult)
+    val callbacks = remember {
+        PaymentElementCallbacks.Builder()
+            .build()
+    }
 
-    val activityResultLauncher = rememberLauncherForActivityResult(
-        contract = PaymentSheetContractV2(),
-        onResult = onResult,
+    return internalRememberPaymentSheet(
+        callbacks = callbacks,
+        paymentResultCallback = paymentResultCallback,
     )
-
-    val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
-
-    val activity = rememberActivity {
-        "PaymentSheet must be created in the context of an Activity"
-    }
-
-    return remember(paymentResultCallback) {
-        val launcher = DefaultPaymentSheetLauncher(
-            activityResultLauncher = activityResultLauncher,
-            activity = activity,
-            application = context.applicationContext as Application,
-            lifecycleOwner = lifecycleOwner,
-            callback = paymentResultCallback,
-            initializedViaCompose = true,
-        )
-        PaymentSheet(launcher)
-    }
 }
 
 /**
@@ -65,8 +51,16 @@ fun rememberPaymentSheet(
     createIntentCallback: CreateIntentCallback,
     paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet {
-    UpdateIntentConfirmationInterceptor(createIntentCallback)
-    return rememberPaymentSheet(paymentResultCallback)
+    val callbacks = remember(createIntentCallback) {
+        PaymentElementCallbacks.Builder()
+            .createIntentCallback(createIntentCallback)
+            .build()
+    }
+
+    return internalRememberPaymentSheet(
+        callbacks = callbacks,
+        paymentResultCallback = paymentResultCallback,
+    )
 }
 
 /**
@@ -88,10 +82,54 @@ fun rememberPaymentSheet(
     externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
     paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet {
-    UpdateExternalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
-    return if (createIntentCallback == null) {
-        rememberPaymentSheet(paymentResultCallback)
-    } else {
-        rememberPaymentSheet(createIntentCallback, paymentResultCallback)
+    val callbacks = remember(createIntentCallback, externalPaymentMethodConfirmHandler) {
+        PaymentElementCallbacks.Builder()
+            .createIntentCallback(createIntentCallback)
+            .externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
+            .build()
+    }
+
+    return internalRememberPaymentSheet(
+        callbacks = callbacks,
+        paymentResultCallback = paymentResultCallback,
+    )
+}
+
+@Composable
+internal fun internalRememberPaymentSheet(
+    callbacks: PaymentElementCallbacks,
+    paymentResultCallback: PaymentSheetResultCallback,
+): PaymentSheet {
+    val paymentElementCallbackIdentifier = rememberSaveable {
+        UUID.randomUUID().toString()
+    }
+
+    UpdateCallbacks(paymentElementCallbackIdentifier, callbacks)
+
+    val onResult by rememberUpdatedState(newValue = paymentResultCallback::onPaymentSheetResult)
+
+    val activityResultLauncher = rememberLauncherForActivityResult(
+        contract = PaymentSheetContractV2(),
+        onResult = onResult,
+    )
+
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    val activity = rememberActivity {
+        "PaymentSheet must be created in the context of an Activity"
+    }
+
+    return remember(paymentResultCallback) {
+        val launcher = DefaultPaymentSheetLauncher(
+            activityResultLauncher = activityResultLauncher,
+            activity = activity,
+            application = context.applicationContext as Application,
+            lifecycleOwner = lifecycleOwner,
+            callback = paymentResultCallback,
+            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
+            initializedViaCompose = true,
+        )
+        PaymentSheet(launcher)
     }
 }

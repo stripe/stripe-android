@@ -1,13 +1,15 @@
 package com.stripe.android.connect.analytics
 
 import android.app.Application
-import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory
 import com.stripe.android.core.networking.DefaultAnalyticsRequestV2Executor
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.RealAnalyticsRequestV2Storage
 import com.stripe.android.core.utils.RealIsWorkManagerAvailable
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -21,9 +23,15 @@ internal interface ConnectAnalyticsService {
     fun track(eventName: String, params: Map<String, Any?>)
 }
 
-internal class DefaultConnectAnalyticsService(application: Application) : ConnectAnalyticsService {
+internal interface ConnectAnalyticsServiceFactory {
+    fun create(application: Application): ConnectAnalyticsService
+}
+
+internal class DefaultConnectAnalyticsService @AssistedInject constructor(
+    @Assisted application: Application,
+    logger: Logger,
+) : ConnectAnalyticsService {
     private val analyticsRequestStorage = RealAnalyticsRequestV2Storage(application)
-    private val logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
     private val networkClient = DefaultStripeNetworkClient()
     private val isWorkerAvailable = RealIsWorkManagerAvailable(
         isEnabledForMerchant = { true }
@@ -53,6 +61,11 @@ internal class DefaultConnectAnalyticsService(application: Application) : Connec
             )
             requestExecutor.enqueue(request)
         }
+    }
+
+    @AssistedFactory
+    interface Factory : ConnectAnalyticsServiceFactory {
+        override fun create(application: Application): DefaultConnectAnalyticsService
     }
 
     internal companion object {

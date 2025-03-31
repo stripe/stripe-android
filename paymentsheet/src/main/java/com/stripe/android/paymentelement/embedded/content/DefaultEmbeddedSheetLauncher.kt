@@ -7,6 +7,8 @@ import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.embedded.EmbeddedResultCallbackHelper
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.FormContract
 import com.stripe.android.paymentelement.embedded.form.FormResult
@@ -45,7 +47,8 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     private val sheetStateHolder: SheetStateHolder,
     private val errorReporter: ErrorReporter,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
-    resultCallback: EmbeddedPaymentElement.ResultCallback
+    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
+    embeddedResultCallbackHelper: EmbeddedResultCallbackHelper
 ) : EmbeddedSheetLauncher {
 
     init {
@@ -65,8 +68,9 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             sheetStateHolder.sheetIsOpen = false
             selectionHolder.setTemporary(null)
             if (result is FormResult.Complete) {
-                resultCallback.onResult(EmbeddedPaymentElement.Result.Completed())
-                selectionHolder.set(null)
+                embeddedResultCallbackHelper.setResult(
+                    EmbeddedPaymentElement.Result.Completed()
+                )
             }
         }
 
@@ -103,6 +107,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             hasSavedPaymentMethods = hasSavedPaymentMethods,
             configuration = embeddedConfirmationState.configuration,
             initializationMode = embeddedConfirmationState.initializationMode,
+            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor
         )
         formActivityLauncher.launch(args)
@@ -119,6 +124,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             paymentMethodMetadata = paymentMethodMetadata,
             customerState = customerState,
             selection = selection,
+            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
         )
         manageActivityLauncher.launch(args)
     }

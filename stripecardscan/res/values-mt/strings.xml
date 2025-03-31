@@ -2,7 +2,7 @@
 <resources>
   <string name="stripe_camera_permission_settings_message">Jekk jogħġbok agħti l-aċċess lill-kamera mill-għażliet biex tiskennja l-karta tiegħek</string>
   <string name="stripe_card_scan_instructions">Skennja l-Karta Tiegħek</string>
-  <string name="stripe_card_scan_privacy_link_text"><![CDATA[Naħdmu ma\' Stripe biex nivverifikaw id-dettalji tal-karta tiegħek. Stripe tista\' tuża u taħżen id-dejta tiegħek skont il-politika tal-privatezza tagħha. <a href="https://support.stripe.com/questions/stripes-card-image-verification"><u>Sir af iktar</u></a>]]></string>
+  <string name="stripe_card_scan_privacy_link_text"><![CDATA[Naħdmu ma\' Stripe biex nivverifikaw id-dettalji tal-karta tiegħek. Stripe tista\' tuża u taħżen id-dejta tiegħek skont il-politika tal-privatezza tagħha. <a href=\"https://support.stripe.com/questions/stripes-card-image-verification\"><u>Sir af iktar</u></a>]]></string>
   <string name="stripe_card_scan_title">Qiegħed il-karta tiegħek f\'nofs il-gwarniċ biex tiskennjaha</string>
   <string name="stripe_close_button_description">Agħlaq</string>
   <string name="stripe_swap_camera_button_description">Ibdel il-Kamera</string>

@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.utils
 
-import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import com.google.common.truth.Truth.assertThat
@@ -52,31 +52,13 @@ internal fun runPaymentSheetTest(
 ) {
     val countDownLatch = CountDownLatch(1)
 
-    val factory = PaymentSheetTestFactory(
-        integrationType = integrationType,
-        createIntentCallback = createIntentCallback,
-        resultCallback = { result ->
-            resultCallback.onPaymentSheetResult(result)
-            countDownLatch.countDown()
-        }
-    )
+    val paymentSheetBuilder = PaymentSheet.Builder { result ->
+        resultCallback.onPaymentSheetResult(result)
+        countDownLatch.countDown()
+    }.apply {
+        createIntentCallback?.let { createIntentCallback(it) }
+    }
 
-    runPaymentSheetTestInternal(
-        networkRule = networkRule,
-        countDownLatch = countDownLatch,
-        countDownLatchTimeoutSeconds = successTimeoutSeconds,
-        makePaymentSheet = factory::make,
-        block = block,
-    )
-}
-
-private fun runPaymentSheetTestInternal(
-    networkRule: NetworkRule,
-    countDownLatch: CountDownLatch,
-    countDownLatchTimeoutSeconds: Long,
-    makePaymentSheet: (ComponentActivity) -> PaymentSheet,
-    block: (PaymentSheetTestRunnerContext) -> Unit,
-) {
     ActivityScenario.launch(MainActivity::class.java).use { scenario ->
         scenario.moveToState(Lifecycle.State.CREATED)
         scenario.onActivity {
@@ -85,8 +67,16 @@ private fun runPaymentSheetTestInternal(
         }
 
         lateinit var paymentSheet: PaymentSheet
-        scenario.onActivity {
-            paymentSheet = makePaymentSheet(it)
+
+        scenario.onActivity { activity ->
+            when (integrationType) {
+                IntegrationType.Compose -> activity.setContent {
+                    paymentSheet = paymentSheetBuilder.build()
+                }
+                IntegrationType.Activity -> {
+                    paymentSheet = paymentSheetBuilder.build(activity)
+                }
+            }
         }
 
         scenario.moveToState(Lifecycle.State.RESUMED)
@@ -94,8 +84,97 @@ private fun runPaymentSheetTestInternal(
         val testContext = PaymentSheetTestRunnerContext(scenario, paymentSheet, countDownLatch)
         block(testContext)
 
-        val didCompleteSuccessfully = countDownLatch.await(countDownLatchTimeoutSeconds, TimeUnit.SECONDS)
+        val didCompleteSuccessfully = countDownLatch.await(successTimeoutSeconds, TimeUnit.SECONDS)
         networkRule.validate()
         assertThat(didCompleteSuccessfully).isTrue()
+    }
+}
+
+internal fun runMultiplePaymentSheetInstancesTest(
+    networkRule: NetworkRule,
+    testType: MultipleInstancesTestType,
+    createIntentCallback: CreateIntentCallback,
+    successTimeoutSeconds: Long = 5L,
+    resultCallback: PaymentSheetResultCallback,
+    block: (PaymentSheetTestRunnerContext) -> Unit,
+) {
+    var firstCreateIntentCallbackCalled = false
+    var secondCreateIntentCallbackCalled = false
+
+    val countDownLatch = CountDownLatch(1)
+
+    val firstPaymentSheetBuilder = PaymentSheet.Builder { result ->
+        if (testType == MultipleInstancesTestType.RunWithFirst) {
+            resultCallback.onPaymentSheetResult(result)
+            countDownLatch.countDown()
+        } else {
+            error("Should not have been called!")
+        }
+    }.createIntentCallback { paymentMethod, shouldSavePaymentMethod ->
+        if (testType == MultipleInstancesTestType.RunWithFirst) {
+            firstCreateIntentCallbackCalled = true
+
+            createIntentCallback.onCreateIntent(paymentMethod, shouldSavePaymentMethod)
+        } else {
+            error("Should not have been called!")
+        }
+    }
+
+    val secondPaymentSheetBuilder = PaymentSheet.Builder { result ->
+        if (testType == MultipleInstancesTestType.RunWithSecond) {
+            resultCallback.onPaymentSheetResult(result)
+            countDownLatch.countDown()
+        } else {
+            error("Should not have been called!")
+        }
+    }.createIntentCallback { paymentMethod, shouldSavePaymentMethod ->
+        if (testType == MultipleInstancesTestType.RunWithSecond) {
+            secondCreateIntentCallbackCalled = true
+
+            createIntentCallback.onCreateIntent(paymentMethod, shouldSavePaymentMethod)
+        } else {
+            error("Should not have been called!")
+        }
+    }
+
+    ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+        scenario.moveToState(Lifecycle.State.CREATED)
+        scenario.onActivity {
+            PaymentConfiguration.init(it, "pk_test_123")
+            LinkStore(it.applicationContext).clear()
+        }
+
+        lateinit var firstPaymentSheet: PaymentSheet
+        lateinit var secondPaymentSheet: PaymentSheet
+
+        scenario.onActivity { activity ->
+            activity.setContent {
+                firstPaymentSheet = firstPaymentSheetBuilder.build()
+                secondPaymentSheet = secondPaymentSheetBuilder.build()
+            }
+        }
+
+        scenario.moveToState(Lifecycle.State.RESUMED)
+
+        val paymentSheet = if (testType == MultipleInstancesTestType.RunWithFirst) {
+            firstPaymentSheet
+        } else {
+            secondPaymentSheet
+        }
+
+        val testContext = PaymentSheetTestRunnerContext(scenario, paymentSheet, countDownLatch)
+        block(testContext)
+
+        val didCompleteSuccessfully = countDownLatch.await(successTimeoutSeconds, TimeUnit.SECONDS)
+        networkRule.validate()
+        assertThat(didCompleteSuccessfully).isTrue()
+
+        if (testType == MultipleInstancesTestType.RunWithFirst) {
+            assertThat(firstCreateIntentCallbackCalled).isTrue()
+            assertThat(secondCreateIntentCallbackCalled).isFalse()
+        } else {
+            assertThat(firstCreateIntentCallbackCalled).isFalse()
+            assertThat(secondCreateIntentCallbackCalled).isTrue()
+        }
     }
 }

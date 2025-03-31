@@ -423,6 +423,8 @@ class GooglePayJsonFactory internal constructor(
             /**
              * Used for a capability check. Do not use this property if the transaction is
              * processed in an EEA country.
+             * See [trailhead](https://trailhead.corp.stripe.com/docs/mobile-sdk/payments/tribal-knowledge#google-pay)
+             * for more context.
              */
             NotCurrentlyKnown("NOT_CURRENTLY_KNOWN"),
 

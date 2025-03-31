@@ -8,7 +8,9 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
-import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.EmbeddedResultCallbackHelper
+import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.utils.reportPaymentResult
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -20,11 +22,11 @@ internal interface EmbeddedConfirmationHelper {
 @EmbeddedPaymentElementScope
 internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
     private val confirmationStarter: EmbeddedConfirmationStarter,
-    private val resultCallback: EmbeddedPaymentElement.ResultCallback,
     private val activityResultCaller: ActivityResultCaller,
     private val lifecycleOwner: LifecycleOwner,
     private val confirmationStateHolder: EmbeddedConfirmationStateHolder,
-    private val selectionHolder: EmbeddedSelectionHolder,
+    private val eventReporter: EventReporter,
+    private val embeddedResultCallbackHelper: EmbeddedResultCallbackHelper
 ) : EmbeddedConfirmationHelper {
     init {
         confirmationStarter.register(
@@ -34,12 +36,8 @@ internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
 
         lifecycleOwner.lifecycleScope.launch {
             confirmationStarter.result.collect { result ->
-                resultCallback.onResult(result.asEmbeddedResult())
-
-                if (result is ConfirmationHandler.Result.Succeeded) {
-                    confirmationStateHolder.state = null
-                    selectionHolder.set(null)
-                }
+                eventReporter.reportPaymentResult(result, confirmationStateHolder.state?.selection)
+                embeddedResultCallbackHelper.setResult(result.asEmbeddedResult())
             }
         }
     }
@@ -48,7 +46,7 @@ internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
         confirmationArgs()?.let { confirmationArgs ->
             confirmationStarter.start(confirmationArgs)
         } ?: run {
-            resultCallback.onResult(
+            embeddedResultCallbackHelper.setResult(
                 EmbeddedPaymentElement.Result.Failed(IllegalStateException("Not in a state that's confirmable."))
             )
         }

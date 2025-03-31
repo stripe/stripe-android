@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.analytics
 
 import androidx.annotation.Keep
+import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCode
@@ -15,7 +16,10 @@ internal interface EventReporter {
      * PaymentSheet has been instantiated or FlowController has finished its configuration.
      */
     fun onInit(
-        configuration: PaymentSheet.Configuration,
+        commonConfiguration: CommonConfiguration,
+        appearance: PaymentSheet.Appearance,
+        primaryButtonColor: Boolean?,
+        paymentMethodLayout: PaymentSheet.PaymentMethodLayout?,
         isDeferred: Boolean,
     )
 
@@ -30,8 +34,10 @@ internal interface EventReporter {
      */
     fun onLoadSucceeded(
         paymentSelection: PaymentSelection?,
+        linkEnabled: Boolean,
         linkMode: LinkMode?,
         googlePaySupported: Boolean,
+        linkDisplay: PaymentSheet.LinkConfiguration.Display,
         currency: String?,
         initializationMode: PaymentElementLoader.InitializationMode,
         orderedLpms: List<String>,
@@ -60,6 +66,8 @@ internal interface EventReporter {
      * methods.
      */
     fun onShowExistingPaymentOptions()
+
+    fun onShowManageSavedPaymentMethods()
 
     /**
      * PaymentSheet is now being displayed and its first screen shows new payment methods.
@@ -147,46 +155,40 @@ internal interface EventReporter {
     fun onHideEditablePaymentOption()
 
     /**
-     * The customer has chosen to show the payment option brands for an editable payment option.
+     * User selected a card brand from the card brand choice dropdown.
      */
-    fun onShowPaymentOptionBrands(
+    fun onBrandChoiceSelected(
         source: CardBrandChoiceEventSource,
         selectedBrand: CardBrand,
     )
 
     /**
-     * The customer has chosen to hide the payment option brands for an editable payment option. The customer may
-     * have also chosen a new card brand selection as well.
+     * The customer has successfully updated the details of a payment method.
      */
-    fun onHidePaymentOptionBrands(
-        source: CardBrandChoiceEventSource,
+    fun onUpdatePaymentMethodSucceeded(
         selectedBrand: CardBrand?,
     )
 
     /**
-     * The customer has successfully updated a payment method with a new card brand selection.
-     */
-    fun onUpdatePaymentMethodSucceeded(
-        selectedBrand: CardBrand,
-    )
-
-    /**
-     * The customer has failed to update a payment method with a new card brand selection.
+     * The customer has failed to update the details of a payment method.
      */
     fun onUpdatePaymentMethodFailed(
-        selectedBrand: CardBrand,
+        selectedBrand: CardBrand?,
         error: Throwable,
     )
 
     /**
      * The customer has successfully set a payment method as the default.
      */
-    fun onSetAsDefaultPaymentMethodSucceeded()
+    fun onSetAsDefaultPaymentMethodSucceeded(
+        paymentMethodType: String?,
+    )
 
     /**
      * The customer has failed to set a payment method as the default.
      */
     fun onSetAsDefaultPaymentMethodFailed(
+        paymentMethodType: String?,
         error: Throwable,
     )
 

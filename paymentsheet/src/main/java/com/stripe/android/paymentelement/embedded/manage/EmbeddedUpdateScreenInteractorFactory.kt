@@ -32,7 +32,7 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
         return DefaultUpdatePaymentMethodInteractor(
             isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             canRemove = customerStateHolder.canRemove.value,
-            displayableSavedPaymentMethod,
+            displayableSavedPaymentMethod = displayableSavedPaymentMethod,
             cardBrandFilter = paymentMethodMetadata.cardBrandFilter,
             removeExecutor = { method ->
                 val result = savedPaymentMethodMutatorProvider.get().removePaymentMethodInEditScreen(method)
@@ -44,10 +44,10 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
                 }
                 result
             },
-            updateCardBrandExecutor = { method, brand ->
+            updatePaymentMethodExecutor = { method, cardUpdateParams ->
                 savedPaymentMethodMutatorProvider.get().modifyCardPaymentMethod(
                     paymentMethod = method,
-                    brand = brand,
+                    cardUpdateParams = cardUpdateParams,
                     onSuccess = { paymentMethod ->
                         val currentSelection = selectionHolder.selection.value
                         if (paymentMethod.id == (currentSelection as? PaymentSelection.Saved)?.paymentMethod?.id) {
@@ -59,23 +59,19 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
             setDefaultPaymentMethodExecutor = { method ->
                 savedPaymentMethodMutatorProvider.get().setDefaultPaymentMethod(method)
             },
-            onBrandChoiceOptionsShown = {
-                eventReporter.onShowPaymentOptionBrands(
-                    source = EventReporter.CardBrandChoiceEventSource.Edit,
-                    selectedBrand = it
-                )
-            },
-            onBrandChoiceOptionsDismissed = {
-                eventReporter.onHidePaymentOptionBrands(
+            onBrandChoiceSelected = {
+                eventReporter.onBrandChoiceSelected(
                     source = EventReporter.CardBrandChoiceEventSource.Edit,
                     selectedBrand = it
                 )
             },
             shouldShowSetAsDefaultCheckbox = (
-                paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true &&
-                    !displayableSavedPaymentMethod.isDefaultPaymentMethod(
-                        defaultPaymentMethodId = customerStateHolder.customer.value?.defaultPaymentMethodId
-                    )
+                paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true
+                ),
+            isDefaultPaymentMethod = (
+                displayableSavedPaymentMethod.isDefaultPaymentMethod(
+                    defaultPaymentMethodId = customerStateHolder.customer.value?.defaultPaymentMethodId
+                )
                 ),
             onUpdateSuccess = {
                 manageNavigatorProvider.get().performAction(ManageNavigator.Action.Back)

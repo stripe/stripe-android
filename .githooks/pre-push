@@ -2,7 +2,7 @@
 
 echo "Running static analysis"
 
-./gradlew ktlint detekt lintRelease apiCheck verifyReleaseResources
+./gradlew ktlint detekt lintRelease apiCheck verifyReleaseResources verifyPaparazziDebug
 
 status=$?
 

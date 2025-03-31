@@ -13,12 +13,14 @@ internal class FakeElementsSessionRepository(
     private val linkSettings: ElementsSession.LinkSettings?,
     private val sessionsCustomer: ElementsSession.Customer? = null,
     private val isGooglePayEnabled: Boolean = true,
+    private val customPaymentMethods: List<ElementsSession.CustomPaymentMethod> = emptyList(),
     private val cardBrandChoice: ElementsSession.CardBrandChoice? = null,
     private val externalPaymentMethodData: String? = null,
 ) : ElementsSessionRepository {
     data class Params(
         val initializationMode: PaymentElementLoader.InitializationMode,
         val customer: PaymentSheet.CustomerConfiguration?,
+        val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         val externalPaymentMethods: List<String>,
         val savedPaymentMethodSelectionId: String?
     )
@@ -28,6 +30,7 @@ internal class FakeElementsSessionRepository(
     override suspend fun get(
         initializationMode: PaymentElementLoader.InitializationMode,
         customer: PaymentSheet.CustomerConfiguration?,
+        customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         externalPaymentMethods: List<String>,
         savedPaymentMethodSelectionId: String?,
     ): Result<ElementsSession> {
@@ -35,6 +38,7 @@ internal class FakeElementsSessionRepository(
             initializationMode = initializationMode,
             customer = customer,
             externalPaymentMethods = externalPaymentMethods,
+            customPaymentMethods = customPaymentMethods,
             savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
         )
         return if (error != null) {
@@ -51,7 +55,9 @@ internal class FakeElementsSessionRepository(
                     externalPaymentMethodData = externalPaymentMethodData,
                     customer = sessionsCustomer,
                     cardBrandChoice = cardBrandChoice,
-                    elementsSessionId = "session_1234"
+                    customPaymentMethods = this.customPaymentMethods,
+                    elementsSessionId = "session_1234",
+                    flags = emptyMap()
                 )
             )
         }

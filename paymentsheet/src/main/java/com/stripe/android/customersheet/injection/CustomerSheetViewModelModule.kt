@@ -22,12 +22,13 @@ import com.stripe.android.customersheet.CustomerSheetLoader
 import com.stripe.android.customersheet.DefaultCustomerSheetLoader
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.analytics.DefaultCustomerSheetEventReporter
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
-import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
+import com.stripe.android.payments.financialconnections.IsFinancialConnectionsSdkAvailable
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
@@ -77,7 +78,14 @@ internal interface CustomerSheetViewModelModule {
         }
 
         @Provides
-        fun providesIsFinancialConnectionsAvailable(): IsFinancialConnectionsAvailable {
+        @PaymentElementCallbackIdentifier
+        fun providesPaymentElementCallbackIdentifier(): String {
+            // We currently do not support multiple instances of Customer Sheet
+            return "CustomerSheet"
+        }
+
+        @Provides
+        fun providesIsFinancialConnectionsAvailable(): IsFinancialConnectionsSdkAvailable {
             return DefaultIsFinancialConnectionsAvailable
         }
 

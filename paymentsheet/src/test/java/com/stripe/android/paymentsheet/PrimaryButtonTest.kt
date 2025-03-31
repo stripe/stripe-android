@@ -11,6 +11,7 @@ import android.view.View
 import android.view.View.GONE
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -124,6 +125,74 @@ class PrimaryButtonTest {
         ).isEqualTo(
             "Processing…"
         )
+    }
+
+    @Test
+    fun `onStartProcessing() should hide lock`() {
+        primaryButton.updateUiState(
+            PrimaryButton.UIState(
+                label = "Pay $50".resolvableString,
+                lockVisible = true,
+                enabled = true,
+                onClick = {},
+            )
+        )
+
+        assertThat(
+            primaryButton.viewBinding.lockIcon.isVisible
+        ).isTrue()
+
+        primaryButton.updateState(
+            PrimaryButton.State.StartProcessing
+        )
+
+        // Setting lock visible after we start processing should still keep the lock hidden
+        primaryButton.updateUiState(
+            PrimaryButton.UIState(
+                label = "Pay $50".resolvableString,
+                lockVisible = true,
+                enabled = true,
+                onClick = {},
+            )
+        )
+
+        assertThat(
+            primaryButton.viewBinding.lockIcon.isVisible
+        ).isFalse()
+    }
+
+    @Test
+    fun `onFinishProcessing() should hide lock`() {
+        primaryButton.updateUiState(
+            PrimaryButton.UIState(
+                label = "Pay $50".resolvableString,
+                lockVisible = true,
+                enabled = true,
+                onClick = {},
+            )
+        )
+
+        assertThat(
+            primaryButton.viewBinding.lockIcon.isVisible
+        ).isTrue()
+
+        primaryButton.updateState(
+            PrimaryButton.State.FinishProcessing(onComplete = {})
+        )
+
+        // Setting lock visible after we finish processing should still keep the lock hidden
+        primaryButton.updateUiState(
+            PrimaryButton.UIState(
+                label = "Pay $50".resolvableString,
+                lockVisible = true,
+                enabled = true,
+                onClick = {},
+            )
+        )
+
+        assertThat(
+            primaryButton.viewBinding.lockIcon.isVisible
+        ).isFalse()
     }
 
     @Test

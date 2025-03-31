@@ -22,8 +22,6 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContra
 import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.model.AccountStatus
-import com.stripe.android.link.ui.inline.SignUpConsentAction
-import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
@@ -38,9 +36,11 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.wallets.Wallet
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.createTestConfirmationHandlerFactory
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
-import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationInterceptor
 import com.stripe.android.paymentelement.confirmation.intent.InvalidDeferredIntentUsageException
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
@@ -48,18 +48,15 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
-import com.stripe.android.paymentsheet.CreateIntentCallback
-import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
-import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
-import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.PaymentOptionResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER
 import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.R
@@ -94,7 +91,7 @@ import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
-import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
+import com.stripe.android.utils.PaymentElementCallbackTestRule
 import com.stripe.android.utils.RelayingPaymentElementLoader
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -123,10 +120,11 @@ import kotlin.test.Test
 
 @Suppress("DEPRECATION")
 @RunWith(RobolectricTestRunner::class)
+@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 internal class DefaultFlowControllerTest {
 
     @get:Rule
-    val intentConfirmationInterceptorRule = IntentConfirmationInterceptorTestRule()
+    val intentConfirmationInterceptorRule = PaymentElementCallbackTestRule()
 
     private val paymentOptionCallback = mock<PaymentOptionCallback>()
     private val paymentResultCallback = mock<PaymentSheetResultCallback>()
@@ -458,7 +456,8 @@ internal class DefaultFlowControllerTest {
             ),
             configuration = PaymentSheet.Configuration("com.stripe.android.paymentsheet.test"),
             enableLogging = ENABLE_LOGGING,
-            productUsage = PRODUCT_USAGE
+            productUsage = PRODUCT_USAGE,
+            paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER
         )
 
         verify(paymentOptionActivityLauncher).launch(eq(expectedArgs), anyOrNull())
@@ -844,20 +843,7 @@ internal class DefaultFlowControllerTest {
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
             )
 
-            val paymentSelection = PaymentSelection.New.LinkInline(
-                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                paymentMethodOptionsParams = null,
-                paymentMethodExtraParams = null,
-                brand = CardBrand.Visa,
-                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
-                input = UserInput.SignUp(
-                    email = "email@email",
-                    phone = "2267007611",
-                    country = "CA",
-                    name = "John Doe",
-                    consentAction = SignUpConsentAction.Checkbox,
-                ),
-            )
+            val paymentSelection = PaymentMethodFixtures.LINK_INLINE_PAYMENT_SELECTION
 
             flowController.onPaymentOptionResult(
                 PaymentOptionResult.Succeeded(
@@ -890,20 +876,7 @@ internal class DefaultFlowControllerTest {
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         )
 
-        val paymentSelection = PaymentSelection.New.LinkInline(
-            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-            paymentMethodOptionsParams = null,
-            paymentMethodExtraParams = null,
-            brand = CardBrand.Visa,
-            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
-            input = UserInput.SignUp(
-                email = "email@email",
-                phone = "2267007611",
-                country = "CA",
-                name = "John Doe",
-                consentAction = SignUpConsentAction.Checkbox,
-            ),
-        )
+        val paymentSelection = PaymentMethodFixtures.LINK_INLINE_PAYMENT_SELECTION
 
         flowController.onPaymentOptionResult(
             PaymentOptionResult.Succeeded(paymentSelection)
@@ -948,20 +921,7 @@ internal class DefaultFlowControllerTest {
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
             )
 
-            val paymentSelection = PaymentSelection.New.LinkInline(
-                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                paymentMethodOptionsParams = null,
-                paymentMethodExtraParams = null,
-                brand = CardBrand.Visa,
-                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
-                input = UserInput.SignUp(
-                    email = "email@email",
-                    phone = "2267007611",
-                    country = "CA",
-                    name = "John Doe",
-                    consentAction = SignUpConsentAction.Checkbox,
-                ),
-            )
+            val paymentSelection = PaymentMethodFixtures.LINK_INLINE_PAYMENT_SELECTION
 
             flowController.onPaymentOptionResult(
                 PaymentOptionResult.Succeeded(paymentSelection)
@@ -1505,9 +1465,18 @@ internal class DefaultFlowControllerTest {
         )
 
         for ((clientSecret, deferredIntentConfirmationType) in clientSecrets) {
-            IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
-                CreateIntentResult.Success(clientSecret)
-            }
+            PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] =
+                PaymentElementCallbacks.Builder()
+                    .createIntentCallback { _, _ ->
+                        error("Should not be called!")
+                    }
+                    .confirmCustomPaymentMethodCallback { _, _ ->
+                        error("Should not be called!")
+                    }
+                    .externalPaymentMethodConfirmHandler { _, _ ->
+                        error("Should not be called!")
+                    }
+                    .build()
 
             val flowController = createAndConfigureFlowControllerForDeferredIntent()
             val savedSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
@@ -1940,45 +1909,93 @@ internal class DefaultFlowControllerTest {
 
     @Test
     fun `Clears out CreateIntentCallback when lifecycle owner is destroyed`() {
-        IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
-            error("I’m alive")
-        }
+        PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks.Builder()
+            .createIntentCallback { _, _ ->
+                error("I’m alive")
+            }
+            .build()
 
         createFlowController()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-        assertThat(IntentConfirmationInterceptor.createIntentCallback).isNotNull()
+        assertThat(
+            PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER]
+                ?.createIntentCallback
+        ).isNotNull()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
-        assertThat(IntentConfirmationInterceptor.createIntentCallback).isNotNull()
+        assertThat(
+            PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER]
+                ?.createIntentCallback
+        ).isNotNull()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        assertThat(IntentConfirmationInterceptor.createIntentCallback).isNull()
+        assertThat(
+            PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER]
+                ?.createIntentCallback
+        ).isNull()
     }
 
     @Test
     fun `Clears out externalPaymentMethodConfirmHandler when lifecycle owner is destroyed`() {
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler =
-            ExternalPaymentMethodConfirmHandler { _, _ ->
+        PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks.Builder()
+            .externalPaymentMethodConfirmHandler { _, _ ->
                 error("I’m alive")
             }
+            .build()
 
         createFlowController()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-        assertThat(ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler).isNotNull()
+        assertThat(
+            PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER]
+                ?.externalPaymentMethodConfirmHandler
+        ).isNotNull()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
-        assertThat(ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler).isNotNull()
+        assertThat(
+            PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER]
+                ?.externalPaymentMethodConfirmHandler
+        ).isNotNull()
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        assertThat(ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler).isNull()
+        assertThat(
+            PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER]
+                ?.externalPaymentMethodConfirmHandler
+        ).isNull()
+    }
+
+    @Test
+    fun `Clears out confirmCustomPaymentMethodCallback when lifecycle owner is destroyed`() {
+        PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER] = PaymentElementCallbacks.Builder()
+            .confirmCustomPaymentMethodCallback { _, _ ->
+                error("I’m alive")
+            }
+            .build()
+
+        createFlowController()
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+        assertThat(
+            PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER]
+                ?.confirmCustomPaymentMethodCallback
+        ).isNotNull()
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
+        assertThat(
+            PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER]
+                ?.confirmCustomPaymentMethodCallback
+        ).isNotNull()
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        assertThat(
+            PaymentElementCallbackReferences[FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER]
+                ?.confirmCustomPaymentMethodCallback
+        ).isNull()
     }
 
     @Test
     fun `On external payment error, should report external payment method failure`() = runTest {
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
-
         val eventReporter = FakeEventReporter()
         val flowController = createFlowController(
             eventReporter = eventReporter,
@@ -2340,7 +2357,9 @@ internal class DefaultFlowControllerTest {
         errorReporter = errorReporter,
         initializedViaCompose = false,
         linkHandler = mock(),
+        paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
         confirmationHandler = createTestConfirmationHandlerFactory(
+            paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
             bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
             googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
             intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
@@ -2362,6 +2381,7 @@ internal class DefaultFlowControllerTest {
             application = ApplicationProvider.getApplicationContext(),
             handle = SavedStateHandle(),
             statusBarColor = STATUS_BAR_COLOR,
+            paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
         )
     }
 

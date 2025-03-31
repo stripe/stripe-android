@@ -61,6 +61,8 @@ dependencies {
     testImplementation project(':payment-element-test-pages')
     testImplementation project(':screenshot-testing')
 
+    testImplementation libs.fuel
+    testImplementation libs.fuelCoroutines
     testImplementation testLibs.androidx.archCore
     testImplementation testLibs.androidx.composeUi
     testImplementation testLibs.androidx.core
@@ -114,6 +116,7 @@ dependencies {
     androidTestImplementation testLibs.testParameterInjector
     androidTestImplementation testLibs.truth
     androidTestImplementation testLibs.turbine
+    androidTestImplementation project(':financial-connections')
 
     androidTestUtil testLibs.testOrchestrator
 }

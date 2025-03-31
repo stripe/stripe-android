@@ -2,15 +2,15 @@
 
 package com.stripe.android.connect
 
-import android.content.Context
-import android.os.Bundle
 import android.view.ViewGroup
 import androidx.core.view.children
-import androidx.fragment.app.FragmentActivity
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.connect.test.TestActivity
+import com.stripe.android.connect.test.TestComponentController
+import com.stripe.android.connect.test.TestComponentView
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.mock
+import org.mockito.kotlin.verify
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.shadows.ShadowLooper
@@ -19,6 +19,12 @@ import org.robolectric.shadows.ShadowLooper
 class StripeComponentControllerTest {
 
     private val activityController = Robolectric.buildActivity(TestActivity::class.java)
+
+    @Test
+    fun `init checks context`() {
+        val activity = activityController.create().get()
+        verify(activity.embeddedComponentCoordinator).checkContextDuringCreate(activity)
+    }
 
     @Test
     fun `init initializes the dialog fragment with listeners`() {
@@ -48,13 +54,13 @@ class StripeComponentControllerTest {
         val activity = activityController.create().start().resume().get()
 
         // Use first controller to show the DF.
-        val controller = createController(activity, mock())
+        val controller = TestComponentController(activity, activity.embeddedComponentManager)
         val dialogFragment = controller.dialogFragment
         controller.show()
         awaitMainLooper()
 
         // Second controller should obtain the DF that was added.
-        val newController = createController(activity, mock())
+        val newController = TestComponentController(activity, activity.embeddedComponentManager)
         assertThat(newController.dialogFragment).isSameInstanceAs(dialogFragment)
     }
 
@@ -86,61 +92,4 @@ class StripeComponentControllerTest {
     private fun awaitMainLooper() {
         ShadowLooper.shadowMainLooper().idle()
     }
-
-    internal class TestActivity : FragmentActivity() {
-        lateinit var controller: StripeComponentControllerImpl<*, TestComponentListener, *>
-        lateinit var embeddedComponentManager: EmbeddedComponentManager
-        val onDismissListener = StripeComponentController.OnDismissListener { }
-        val listener = object : TestComponentListener {}
-
-        override fun onCreate(savedInstanceState: Bundle?) {
-            super.onCreate(savedInstanceState)
-            embeddedComponentManager = mock()
-            controller = createController(this, embeddedComponentManager)
-            controller.onDismissListener = onDismissListener
-            controller.listener = listener
-        }
-    }
-
-    companion object {
-        private fun createController(
-            activity: FragmentActivity,
-            embeddedComponentManager: EmbeddedComponentManager
-        ) = StripeComponentControllerImpl(
-            cls = TestComponentDialogFragment::class.java,
-            activity = activity,
-            embeddedComponentManager = embeddedComponentManager,
-        )
-    }
-
-    internal class TestComponentDialogFragment :
-        StripeComponentDialogFragment<TestComponentView, TestComponentListener, EmptyProps>() {
-
-        override fun createComponentView(
-            embeddedComponentManager: EmbeddedComponentManager
-        ): TestComponentView {
-            return TestComponentView(requireContext())
-        }
-    }
-
-    internal class TestComponentView(
-        context: Context
-    ) : StripeComponentView<TestComponentListener, EmptyProps>(
-        context = context,
-        attrs = null,
-        defStyleAttr = 0,
-    ) {
-
-        override var listener: TestComponentListener? = null
-
-        override fun initialize(
-            embeddedComponentManager: EmbeddedComponentManager,
-            listener: TestComponentListener?,
-            props: EmptyProps
-        ) {
-            // Nothing.
-        }
-    }
-
-    internal interface TestComponentListener : StripeEmbeddedComponentListener
 }

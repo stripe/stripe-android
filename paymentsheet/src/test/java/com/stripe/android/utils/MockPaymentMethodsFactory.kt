@@ -1,5 +1,6 @@
 package com.stripe.android.utils
 
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.ui.core.R
 
@@ -40,6 +41,22 @@ internal object MockPaymentMethodsFactory {
         return SupportedPaymentMethod(
             code = code,
             displayNameResource = displayNameResource,
+            iconResource = iconResource,
+            lightThemeIconUrl = null,
+            darkThemeIconUrl = null,
+            iconRequiresTinting = iconRequiresTinting,
+        )
+    }
+
+    fun mockPaymentMethod(
+        code: String,
+        displayName: String,
+        iconResource: Int,
+        iconRequiresTinting: Boolean = false
+    ): SupportedPaymentMethod {
+        return SupportedPaymentMethod(
+            code = code,
+            displayName = displayName.resolvableString,
             iconResource = iconResource,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,

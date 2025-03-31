@@ -15,6 +15,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
@@ -75,7 +76,9 @@ internal class CustomerSheetScreenshotTest {
         onUpdatePrimaryButtonState = { },
         onUpdatePrimaryButtonUIState = { },
         onError = { },
-        shouldShowSetAsDefaultCheckbox = false
+        setAsDefaultPaymentMethodEnabled = false,
+        financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
+        setAsDefaultMatchesSaveForFutureUse = false,
     )
 
     private val selectPaymentMethodViewState = CustomerSheetViewState.SelectPaymentMethod(
@@ -350,15 +353,15 @@ internal class CustomerSheetScreenshotTest {
             updatePaymentMethodInteractor = DefaultUpdatePaymentMethodInteractor(
                 displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
                 removeExecutor = { null },
-                updateCardBrandExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
+                updatePaymentMethodExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
                 setDefaultPaymentMethodExecutor = { _ -> Result.success(Unit) },
                 canRemove = canRemove,
                 isLiveMode = true,
                 cardBrandFilter = DefaultCardBrandFilter,
-                onBrandChoiceOptionsDismissed = {},
-                onBrandChoiceOptionsShown = {},
+                onBrandChoiceSelected = {},
                 // This checkbox is never displayed in CustomerSheet.
                 shouldShowSetAsDefaultCheckbox = false,
+                isDefaultPaymentMethod = false,
                 onUpdateSuccess = {},
             ),
             isLiveMode = true,
