@@ -3,6 +3,8 @@ package com.stripe.android.paymentsheet.model
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.link.ui.inline.SignUpConsentAction
+import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
@@ -114,6 +116,26 @@ class PaymentOptionFactoryTest {
         )
         assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_google_pay_mark)
         assertThat(paymentOption.label).isEqualTo("Google Pay")
+    }
+
+    @Test
+    fun `create() with card and Link inline signup should return card icon and label`() {
+        val paymentOption = factory.create(
+            PaymentSelection.New.LinkInline(
+                paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                brand = CardBrand.Visa,
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
+                input = UserInput.SignUp(
+                    email = "new_user@link.com",
+                    phone = "+15555555555",
+                    country = "US",
+                    name = null,
+                    consentAction = SignUpConsentAction.Checkbox,
+                )
+            )
+        )
+        assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa_ref)
+        assertThat(paymentOption.label).isEqualTo("···· 4242")
     }
 
     private fun card(
