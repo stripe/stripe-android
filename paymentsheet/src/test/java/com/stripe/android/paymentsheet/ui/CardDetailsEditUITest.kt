@@ -157,7 +157,7 @@ internal class CardDetailsEditUITest {
     @Test
     fun `Card drop down has accessibility label`() {
         runScenario(
-            card = visaCard()
+            card = PaymentMethodFixtures.CARD_WITH_NETWORKS
         ) {
             composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
                 .assertContentDescriptionEquals("Visa")
@@ -195,15 +195,5 @@ internal class CardDetailsEditUITest {
                 onBrandChoiceChanged = onBrandChoiceChanged,
             )
         }
-    }
-
-    private fun visaCard(): PaymentMethod.Card {
-        return PaymentMethodFixtures.CARD_WITH_NETWORKS.copy(
-            brand = CardBrand.Visa,
-            networks = PaymentMethodFixtures.CARD_WITH_NETWORKS.networks?.copy(
-                preferred = "visa"
-            ),
-            displayBrand = "visa"
-        )
     }
 }
