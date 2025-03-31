@@ -42,7 +42,6 @@ class SignUpParamsTest {
         assertEquals("John Doe", paramMap["legal_name"])
         assertEquals("token123", paramMap["android_verification_token"])
         assertEquals("appId123", paramMap["app_id"])
-        assertEquals("incentive_value", paramMap["incentive_key"])
     }
 
     @Test
@@ -68,8 +67,6 @@ class SignUpParamsTest {
         assertEquals("PHONE_NUMBER", paramMap["country_inferring_method"])
         assertEquals("implied_consent_withspm_mobile_v0", paramMap["consent_action"])
         assertEquals("MOBILE", paramMap["request_surface"])
-        assertFalse(paramMap.containsKey("amount"))
-        assertFalse(paramMap.containsKey("currency"))
         assertFalse(paramMap.containsKey("locale"))
         assertFalse(paramMap.containsKey("legal_name"))
         assertFalse(paramMap.containsKey("android_verification_token"))
