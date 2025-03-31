@@ -67,7 +67,6 @@ internal class DefaultCardEditUIHandler(
 
     private fun uiState(cardBrandChoice: CardBrandChoice = defaultCardBrandChoice()): CardEditUIHandler.State {
         return CardEditUIHandler.State(
-            card = card,
             selectedCardBrand = cardBrandChoice
         )
     }

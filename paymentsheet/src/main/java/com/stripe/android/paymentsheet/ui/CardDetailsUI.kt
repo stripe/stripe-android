@@ -13,6 +13,7 @@ import androidx.compose.material.Card
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -29,6 +30,27 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
+import com.stripe.android.uicore.utils.collectAsState
+
+@Composable
+internal fun CardDetailsEditUI(
+    cardEditUIHandler: CardEditUIHandler,
+    isExpiredCard: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val state by cardEditUIHandler.state.collectAsState()
+
+    CardDetailsEditUI(
+        modifier = modifier,
+        isExpired = isExpiredCard,
+        selectedBrand = state.selectedCardBrand,
+        card = cardEditUIHandler.card,
+        shouldShowCardBrandDropdown = cardEditUIHandler.showCardBrandDropdown,
+        cardBrandFilter = cardEditUIHandler.cardBrandFilter,
+        paymentMethodIcon = cardEditUIHandler.paymentMethodIcon,
+        onBrandChoiceChanged = cardEditUIHandler::onBrandChoiceChanged
+    )
+}
 
 @Composable
 internal fun CardDetailsEditUI(
@@ -38,6 +60,7 @@ internal fun CardDetailsEditUI(
     isExpired: Boolean,
     cardBrandFilter: CardBrandFilter,
     @DrawableRes paymentMethodIcon: Int,
+    modifier: Modifier = Modifier,
     onBrandChoiceChanged: (CardBrandChoice) -> Unit
 ) {
     val dividerHeight = remember { mutableStateOf(0.dp) }
@@ -45,7 +68,7 @@ internal fun CardDetailsEditUI(
     Card(
         border = MaterialTheme.getBorderStroke(false),
         elevation = 0.dp,
-        modifier = Modifier.testTag(UPDATE_PM_CARD_TEST_TAG),
+        modifier = modifier.testTag(UPDATE_PM_CARD_TEST_TAG),
     ) {
         Column {
             CardNumberField(

@@ -62,12 +62,10 @@ internal interface CardEditUIHandler {
     /**
      * Represents the current state of the card edit UI.
      *
-     * @property card The current card details
      * @property selectedCardBrand The currently selected card brand
      */
     @Immutable
     data class State(
-        val card: PaymentMethod.Card,
         val selectedCardBrand: CardBrandChoice
     )
 
