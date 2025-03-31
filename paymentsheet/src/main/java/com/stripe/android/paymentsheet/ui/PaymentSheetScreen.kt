@@ -74,7 +74,6 @@ import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBackgroundColor
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
-import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.Dispatchers
@@ -184,9 +183,12 @@ internal fun PaymentSheetScreenContent(
     modifier: Modifier = Modifier,
     scrollState: ScrollState,
 ) {
+    val walletsState by viewModel.walletsState.collectAsState()
     val walletsProcessingState by viewModel.walletsProcessingState.collectAsState()
     val error by viewModel.error.collectAsState()
     val mandateText by viewModel.mandateHandler.mandateText.collectAsState()
+    val currentScreen by viewModel.navigationHandler.currentScreen.collectAsState()
+    val primaryButtonUiState by viewModel.primaryButtonUiState.collectAsState()
 
     /**
      * State Dependency Graph:
@@ -203,15 +205,9 @@ internal fun PaymentSheetScreenContent(
      *                  PaymentSheetScreenContentState
      *
      */
-    val uiState: PaymentSheetScreenContentState by remember(type) {
-        val isCompleteFlow = type == Complete
-        combineAsStateFlow(
-            viewModel.navigationHandler.currentScreen,
-            viewModel.walletsState,
-            viewModel.primaryButtonUiState,
-        ) { currentScreen, walletsState, primaryButtonUiState ->
-            Triple(currentScreen, walletsState, primaryButtonUiState)
-        }.flatMapLatestAsStateFlow { (currentScreen, walletsState, primaryButtonUiState) ->
+    val uiState: PaymentSheetScreenContentState
+        by remember(type, walletsState, currentScreen, primaryButtonUiState) {
+            val isCompleteFlow = type == Complete
             currentScreen.showsWalletsHeader(isCompleteFlow)
                 .flatMapLatestAsStateFlow { showsWalletsHeader ->
                     val actualWalletsState = walletsState.takeIf { showsWalletsHeader }
@@ -228,8 +224,7 @@ internal fun PaymentSheetScreenContent(
                         )
                     }
                 }
-        }
-    }.collectAsState()
+        }.collectAsState()
 
     ResetScroll(scrollState = scrollState, currentScreen = uiState.currentScreen)
 
