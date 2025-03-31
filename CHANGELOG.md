@@ -5,7 +5,8 @@
 ### PaymentSheet
 * [CHANGED][10480](https://github.com/stripe/stripe-android/pull/10480) Updated Afterpay branding in the US to be Cash App Afterpay.
 * [FIXED][10492](https://github.com/stripe/stripe-android/pull/10492) Update Add Payment Method screen to use `PaymentSheet.Appearance.Colors.onSurface` as the header text color when `PaymentMethodLayout` is `Vertical`.
-* [Added][10496](https://github.com/stripe/stripe-android/pull/10496) Improve Google Pay troubleshooting with detailed user facing logs.
+* [ADDED][10496](https://github.com/stripe/stripe-android/pull/10496) Improve Google Pay troubleshooting with detailed user facing logs.
+* [ADDED][10437](https://github.com/stripe/stripe-android/pull/10437) Added `LinkConfiguration` to allow control over Link in PaymentSheet.
 
 ### Connect (Private Preview)
 * [Added] Connect SDK to add connected account dashboard functionality to your app using [Connect embedded components](https://docs.stripe.com/connect/get-started-connect-embedded-components?platform=android).
