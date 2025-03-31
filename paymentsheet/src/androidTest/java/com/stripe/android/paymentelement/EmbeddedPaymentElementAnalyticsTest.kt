@@ -32,6 +32,7 @@ import org.junit.Rule
 import org.junit.Test
 import kotlin.time.Duration.Companion.seconds
 
+@OptIn(ExperimentalAnalyticEventCallbackApi::class)
 internal class EmbeddedPaymentElementAnalyticsTest {
     private val networkRule = NetworkRule(
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
@@ -48,6 +49,8 @@ internal class EmbeddedPaymentElementAnalyticsTest {
 
     private val card1 = CardPaymentMethodDetails("pm_12345", "4242")
     private val card2 = CardPaymentMethodDetails("pm_67890", "5544")
+
+    private val analyticMatcher = AnalyticMatcher()
 
     @Before
     fun setup() {
@@ -69,6 +72,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             CreateIntentResult.Success("pi_example_secret_12345")
         },
         resultCallback = ::assertCompleted,
+        analyticEventCallback = analyticMatcher,
     ) { testContext ->
         networkRule.enqueue(
             host("api.stripe.com"),
@@ -93,6 +97,8 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         testContext.configure()
         embeddedContentPage.clickOnLpm("card")
         formPage.fillOutCardDetails()
+
+        analyticMatcher.validateAnalyticEvent(AnalyticEvent.PresentedSheet())
 
         networkRule.enqueue(
             method("POST"),
