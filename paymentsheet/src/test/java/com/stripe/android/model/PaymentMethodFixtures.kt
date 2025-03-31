@@ -16,7 +16,7 @@ import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
 
 internal object PaymentMethodFixtures {
-    val CARD = PaymentMethod.Card(
+    private val CARD = PaymentMethod.Card(
         brand = CardBrand.Visa,
         checks = PaymentMethod.Card.Checks(
             addressLine1Check = "unchecked",
