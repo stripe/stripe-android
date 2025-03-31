@@ -1,6 +1,5 @@
 package com.stripe.android.connect
 
-import androidx.annotation.RestrictTo
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
