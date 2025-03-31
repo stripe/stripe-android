@@ -522,7 +522,7 @@ private fun PreviewUpdatePaymentMethodUI() {
         )
     )
     UpdatePaymentMethodUI(
-        interactor = DefaultUpdatePaymentMethodInteractor(
+        interactor = DefaultUpdatePaymentMethodInteractor.factory(
             isLiveMode = false,
             canRemove = true,
             displayableSavedPaymentMethod = exampleCard,

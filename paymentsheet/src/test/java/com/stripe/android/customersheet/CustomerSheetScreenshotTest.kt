@@ -350,7 +350,7 @@ internal class CustomerSheetScreenshotTest {
         canRemove: Boolean,
     ): CustomerSheetViewState {
         return CustomerSheetViewState.UpdatePaymentMethod(
-            updatePaymentMethodInteractor = DefaultUpdatePaymentMethodInteractor(
+            updatePaymentMethodInteractor = DefaultUpdatePaymentMethodInteractor.factory(
                 displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
                 removeExecutor = { null },
                 updatePaymentMethodExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },

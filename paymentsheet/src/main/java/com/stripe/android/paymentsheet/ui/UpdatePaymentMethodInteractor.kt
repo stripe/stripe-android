@@ -313,6 +313,36 @@ internal class DefaultUpdatePaymentMethodInteractor(
         @VisibleForTesting
         internal val updatesFailedErrorMessage =
             R.string.stripe_paymentsheet_card_updates_failed_error_message.resolvableString
+
+        fun factory(
+            isLiveMode: Boolean,
+            canRemove: Boolean,
+            isDefaultPaymentMethod: Boolean,
+            displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
+            cardBrandFilter: CardBrandFilter,
+            shouldShowSetAsDefaultCheckbox: Boolean,
+            removeExecutor: PaymentMethodRemoveOperation,
+            updatePaymentMethodExecutor: UpdateCardPaymentMethodOperation,
+            setDefaultPaymentMethodExecutor: PaymentMethodSetAsDefaultOperation,
+            onBrandChoiceSelected: (CardBrand) -> Unit,
+            onUpdateSuccess: () -> Unit,
+            workContext: CoroutineContext = Dispatchers.Default,
+        ): DefaultUpdatePaymentMethodInteractor {
+            return DefaultUpdatePaymentMethodInteractor(
+                isLiveMode = isLiveMode,
+                canRemove = canRemove,
+                displayableSavedPaymentMethod = displayableSavedPaymentMethod,
+                cardBrandFilter = cardBrandFilter,
+                shouldShowSetAsDefaultCheckbox = shouldShowSetAsDefaultCheckbox,
+                removeExecutor = removeExecutor,
+                updatePaymentMethodExecutor = updatePaymentMethodExecutor,
+                setDefaultPaymentMethodExecutor = setDefaultPaymentMethodExecutor,
+                onUpdateSuccess = onUpdateSuccess,
+                onBrandChoiceSelected = onBrandChoiceSelected,
+                workContext = workContext,
+                isDefaultPaymentMethod = isDefaultPaymentMethod
+            )
+        }
     }
 }
 

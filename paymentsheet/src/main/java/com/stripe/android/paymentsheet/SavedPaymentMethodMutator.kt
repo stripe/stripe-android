@@ -361,10 +361,10 @@ internal class SavedPaymentMethodMutator(
                 val isLiveMode = requireNotNull(viewModel.paymentMethodMetadata.value).stripeIntent.isLiveMode
                 viewModel.navigationHandler.transitionTo(
                     PaymentSheetScreen.UpdatePaymentMethod(
-                        DefaultUpdatePaymentMethodInteractor(
+                        DefaultUpdatePaymentMethodInteractor.factory(
                             isLiveMode = isLiveMode,
                             canRemove = canRemove,
-                            displayableSavedPaymentMethod,
+                            displayableSavedPaymentMethod = displayableSavedPaymentMethod,
                             cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
                             removeExecutor = { method ->
                                 performRemove()

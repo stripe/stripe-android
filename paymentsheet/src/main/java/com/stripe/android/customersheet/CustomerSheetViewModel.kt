@@ -545,7 +545,7 @@ internal class CustomerSheetViewModel(
 
         transition(
             to = CustomerSheetViewState.UpdatePaymentMethod(
-                updatePaymentMethodInteractor = DefaultUpdatePaymentMethodInteractor(
+                updatePaymentMethodInteractor = DefaultUpdatePaymentMethodInteractor.factory(
                     isLiveMode = isLiveModeProvider(),
                     canRemove = customerState.canRemove,
                     displayableSavedPaymentMethod = paymentMethod,

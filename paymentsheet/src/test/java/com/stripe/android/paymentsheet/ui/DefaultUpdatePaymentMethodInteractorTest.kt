@@ -713,7 +713,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         testBlock: suspend TestParams.() -> Unit
     ) {
         editSavedCardPaymentMethodEnabledFeatureFlagTestRule.setEnabled(editSavedCardPaymentMethodEnabled)
-        val interactor = DefaultUpdatePaymentMethodInteractor(
+        val interactor = DefaultUpdatePaymentMethodInteractor.factory(
             isLiveMode = isLiveMode,
             canRemove = canRemove,
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
