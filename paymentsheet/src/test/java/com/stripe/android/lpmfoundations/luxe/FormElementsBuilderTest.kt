@@ -94,6 +94,38 @@ class FormElementsBuilderTest {
         assertThat(formElements[5].identifier.v1).isEqualTo("footer2")
     }
 
+    @Test
+    fun `build returns no billing address fields if ignored`() {
+        val arguments = arguments(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            )
+        )
+        val formElements = FormElementsBuilder(arguments)
+            .element(EmptyFormElement(identifier = IdentifierSpec(v1 = "element")))
+            .ignoreBillingAddressRequirements()
+            .build()
+        assertThat(formElements).hasSize(1)
+        assertThat(formElements[0].identifier.v1).isEqualTo("element")
+    }
+
+    @Test
+    fun `build returns no contact information fields if ignored`() {
+        val arguments = arguments(
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            )
+        )
+        val formElements = FormElementsBuilder(arguments)
+            .element(EmptyFormElement(identifier = IdentifierSpec(v1 = "element")))
+            .ignoreContactInformationRequirements()
+            .build()
+        assertThat(formElements).hasSize(1)
+        assertThat(formElements[0].identifier.v1).isEqualTo("element")
+    }
+
     private fun arguments(
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
             PaymentSheet.BillingDetailsCollectionConfiguration(),
