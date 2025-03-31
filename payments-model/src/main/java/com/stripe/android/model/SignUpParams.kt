@@ -34,7 +34,7 @@ data class SignUpParams(
             params["locale"] = it.toLanguageTag()
         }
 
-        name?.takeIf { it.isNotBlank() }.let {
+        name?.takeIf { it.isNotBlank() }?.let {
             params["legal_name"] = it
         }
 
