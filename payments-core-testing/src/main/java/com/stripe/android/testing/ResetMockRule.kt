@@ -15,6 +15,7 @@ class ResetMockRule(vararg mocks: Any) : TestRule {
         return object : Statement() {
             @Throws
             override fun evaluate() {
+                base.evaluate()
                 @Suppress("SpreadOperator") // Spread operator is required for desired behavior.
                 reset(*mocksArray)
             }

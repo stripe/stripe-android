@@ -1031,7 +1031,10 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `On confirmation result, should update ViewState and save preferences`() =
         runTest {
-            val confirmationHandler = FakeConfirmationHandler()
+            val confirmationHandler = FakeConfirmationHandler().apply {
+                awaitResultTurbine.add(null)
+                awaitResultTurbine.add(null)
+            }
             val viewModel = createViewModel(
                 confirmationHandlerFactory = {
                     confirmationHandler
@@ -1086,9 +1089,12 @@ internal class PaymentSheetViewModelTest {
         }
 
     @Test
-    fun `onPaymentResult() should update ViewState and not save new payment method`() =
+    fun `On confirmation result, should update ViewState and not save new payment method`() =
         runTest {
-            val confirmationHandler = FakeConfirmationHandler()
+            val confirmationHandler = FakeConfirmationHandler().apply {
+                awaitResultTurbine.add(null)
+                awaitResultTurbine.add(null)
+            }
             val viewModel = createViewModel(
                 stripeIntent = PAYMENT_INTENT,
                 confirmationHandlerFactory = {
@@ -1145,8 +1151,11 @@ internal class PaymentSheetViewModelTest {
         }
 
     @Test
-    fun `onPaymentResult() with non-success outcome should report failure event`() = runTest {
-        val confirmationHandler = FakeConfirmationHandler()
+    fun `On confirmation result, with non-success outcome should report failure event`() = runTest {
+        val confirmationHandler = FakeConfirmationHandler().apply {
+            awaitResultTurbine.add(null)
+            awaitResultTurbine.add(null)
+        }
         val viewModel = createViewModel(
             confirmationHandlerFactory = {
                 confirmationHandler
@@ -1201,9 +1210,12 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `onPaymentResult() should update emit generic error on IOExceptions`() =
+    fun `on confirmation result, should update emit generic error on IOExceptions`() =
         runTest {
-            val confirmationHandler = FakeConfirmationHandler()
+            val confirmationHandler = FakeConfirmationHandler().apply {
+                awaitResultTurbine.add(null)
+                awaitResultTurbine.add(null)
+            }
             val viewModel = createViewModel(
                 confirmationHandlerFactory = {
                     confirmationHandler
@@ -1235,9 +1247,12 @@ internal class PaymentSheetViewModelTest {
         }
 
     @Test
-    fun `onPaymentResult() should update emit Stripe API errors`() =
+    fun `On confirmation result, should update emit Stripe API errors`() =
         runTest {
-            val confirmationHandler = FakeConfirmationHandler()
+            val confirmationHandler = FakeConfirmationHandler().apply {
+                awaitResultTurbine.add(null)
+                awaitResultTurbine.add(null)
+            }
             val viewModel = createViewModel(
                 confirmationHandlerFactory = {
                     confirmationHandler
@@ -1290,7 +1305,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Verify supported payment methods exclude afterpay if no shipping and no allow flag`() {
+    fun `Verify supported payment methods includes afterpay if no shipping and no allow flag`() {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.prefilledBuilder()
@@ -1304,7 +1319,7 @@ internal class PaymentSheetViewModelTest {
             ),
         )
 
-        assertThat(viewModel.supportedPaymentMethodTypes).isEmpty()
+        assertThat(viewModel.supportedPaymentMethodTypes).containsExactly("afterpay_clearpay")
     }
 
     @Test
@@ -2157,7 +2172,10 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `Sends no deferred_intent_confirmation_type for non-deferred intent confirmation`() = runTest {
-        val confirmationHandler = FakeConfirmationHandler()
+        val confirmationHandler = FakeConfirmationHandler().apply {
+            awaitResultTurbine.add(null)
+            awaitResultTurbine.add(null)
+        }
         val viewModel = createViewModel(
             confirmationHandlerFactory = {
                 confirmationHandler
