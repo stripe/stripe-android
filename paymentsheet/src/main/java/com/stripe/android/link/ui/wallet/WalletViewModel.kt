@@ -149,7 +149,10 @@ internal class WalletViewModel @Inject constructor(
     fun onPrimaryButtonClicked() {
         val paymentDetail = _uiState.value.selectedItem ?: return
         _uiState.update {
-            it.copy(isProcessing = true)
+            it.copy(
+                isProcessing = true,
+                errorMessage = null,
+            )
         }
 
         viewModelScope.launch {
