@@ -63,6 +63,6 @@ abstract class ClientSecretProviderListenerWrapper : ClientSecretProvider {
          * [onResult] must be called exactly once. Subsequent calls after the first one
          * will be ignored.
          */
-        fun onResult(secret: String?)
+        fun onResult(clientSecret: String?)
     }
 }
