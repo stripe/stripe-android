@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-internal class DefaultCardEditUIHandler(
+internal class DefaultEditCardDetailsInteractor(
     override val card: PaymentMethod.Card,
     override val cardBrandFilter: CardBrandFilter,
     override val paymentMethodIcon: Int,
@@ -20,12 +20,12 @@ internal class DefaultCardEditUIHandler(
     private val scope: CoroutineScope,
     override val onBrandChoiceChanged: BrandChoiceCallback,
     override val onCardDetailsChanged: CardDetailsCallback
-) : CardEditUIHandler {
+) : EditCardDetailsInteractor {
     private val cardDetailsEntry = MutableStateFlow(
         value = buildDefaultCardEntry()
     )
 
-    override val state: StateFlow<CardEditUIHandler.State> = cardDetailsEntry.mapLatest { inputState ->
+    override val state: StateFlow<EditCardDetailsInteractor.State> = cardDetailsEntry.mapLatest { inputState ->
         uiState(inputState.cardBrandChoice)
     }.stateIn(
         scope = scope,
@@ -65,8 +65,8 @@ internal class DefaultCardEditUIHandler(
 
     private fun defaultCardBrandChoice() = card.getPreferredChoice(cardBrandFilter)
 
-    private fun uiState(cardBrandChoice: CardBrandChoice = defaultCardBrandChoice()): CardEditUIHandler.State {
-        return CardEditUIHandler.State(
+    private fun uiState(cardBrandChoice: CardBrandChoice = defaultCardBrandChoice()): EditCardDetailsInteractor.State {
+        return EditCardDetailsInteractor.State(
             card = card,
             selectedCardBrand = cardBrandChoice
         )
@@ -75,15 +75,15 @@ internal class DefaultCardEditUIHandler(
     class Factory(
         private val scope: CoroutineScope,
         private val onBrandChoiceChanged: BrandChoiceCallback,
-    ) : CardEditUIHandler.Factory {
+    ) : EditCardDetailsInteractor.Factory {
         override fun create(
             card: PaymentMethod.Card,
             cardBrandFilter: CardBrandFilter,
             showCardBrandDropdown: Boolean,
             paymentMethodIcon: Int,
             onCardDetailsChanged: CardDetailsCallback
-        ): CardEditUIHandler {
-            return DefaultCardEditUIHandler(
+        ): EditCardDetailsInteractor {
+            return DefaultEditCardDetailsInteractor(
                 card = card,
                 cardBrandFilter = cardBrandFilter,
                 paymentMethodIcon = paymentMethodIcon,
