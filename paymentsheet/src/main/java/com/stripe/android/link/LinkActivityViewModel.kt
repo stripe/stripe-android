@@ -25,6 +25,7 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.link.ui.signup.SignUpViewModel
+import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -258,7 +259,7 @@ internal class LinkActivityViewModel @Inject constructor(
 
         // We add a tiny delay, which gives the loading screen a chance to fully inflate.
         // Otherwise, we get a weird scaling animation when we display the first non-loading screen.
-        delay(250)
+        delay(LINK_DEFAULT_ANIMATION_DELAY_MILLIS)
 
         val screen = when (accountStatus) {
             AccountStatus.Verified -> {

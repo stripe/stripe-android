@@ -36,6 +36,7 @@ import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.ProgressIndicatorTestTag
+import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
@@ -73,7 +74,7 @@ internal fun SignUpBody(
     val emailFocusRequester = remember { FocusRequester() }
 
     LaunchedEffect(Unit) {
-        delay(250)
+        delay(LINK_DEFAULT_ANIMATION_DELAY_MILLIS)
         emailFocusRequester.requestFocus()
     }
 
