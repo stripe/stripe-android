@@ -7,9 +7,9 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CardUpdateParams
 import kotlinx.coroutines.flow.StateFlow
 
-internal typealias CardDetailsCallback = (CardUpdateParams?) -> Unit
+internal typealias CardUpdateParamsCallback = (CardUpdateParams?) -> Unit
 
-internal typealias BrandChoiceCallback = (CardBrand) -> Unit
+internal typealias CardBrandCallback = (CardBrand) -> Unit
 
 /**
  * Interface for handling UI interactions when editing card details.
@@ -33,7 +33,7 @@ internal interface EditCardDetailsInteractor {
     /**
      * Whether to show the card brand dropdown.
      */
-    val showCardBrandDropdown: Boolean
+    val shouldShowCardBrandDropdown: Boolean
 
     /**
      * Current state of the card edit UI.
@@ -42,14 +42,15 @@ internal interface EditCardDetailsInteractor {
 
     /**
      * Callback for when the card brand choice changes.
+     * This is used for analytics.
      */
-    val onBrandChoiceChanged: BrandChoiceCallback
+    val onBrandChoiceChanged: CardBrandCallback
 
     /**
      * Callback for when card details change. It provides the values needed to
      * update the card, if any.
      */
-    val onCardDetailsChanged: CardDetailsCallback
+    val onCardDetailsChanged: CardUpdateParamsCallback
 
     /**
      * Handle a change in the selected card brand. This will be called from the UI when
@@ -89,7 +90,7 @@ internal interface EditCardDetailsInteractor {
             cardBrandFilter: CardBrandFilter,
             showCardBrandDropdown: Boolean,
             paymentMethodIcon: Int,
-            onCardDetailsChanged: CardDetailsCallback
+            onCardDetailsChanged: CardUpdateParamsCallback
         ): EditCardDetailsInteractor
     }
 }
