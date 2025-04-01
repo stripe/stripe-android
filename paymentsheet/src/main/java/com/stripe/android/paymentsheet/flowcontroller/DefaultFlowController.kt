@@ -284,7 +284,6 @@ internal class DefaultFlowController @Inject internal constructor(
                     appearance = state.config.appearance,
                     initializationMode = initializationMode,
                 )
-                viewModel.paymentSelection = null
             }
             is PaymentSelection.Saved -> confirmSavedPaymentMethod(
                 paymentSelection = paymentSelection,
@@ -500,6 +499,10 @@ internal class DefaultFlowController @Inject internal constructor(
 
         if (paymentResult is PaymentResult.Completed && selection != null && selection.isLink) {
             linkHandler.logOut()
+        }
+
+        if (paymentResult is PaymentResult.Completed) {
+            viewModel.paymentSelection = null
         }
 
         viewModelScope.launch {
