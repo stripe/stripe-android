@@ -284,7 +284,7 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
-    fun `successful payment should clear viewmodel paymentSelection`() = runTest {
+    fun `successful payment should clear viewmodel state`() = runTest {
         val viewModel = createViewModel()
         val flowController = createFlowController(viewModel = viewModel)
 
@@ -299,6 +299,7 @@ internal class DefaultFlowControllerTest {
         flowController.onPaymentResult(PaymentResult.Completed)
 
         assertThat(viewModel.paymentSelection).isNull()
+        assertThat(viewModel.state).isNull()
     }
 
     @Test

@@ -501,6 +501,7 @@ internal class DefaultFlowController @Inject internal constructor(
 
         if (paymentResult is PaymentResult.Completed) {
             viewModel.paymentSelection = null
+            viewModel.state = null
         }
 
         viewModelScope.launch {
