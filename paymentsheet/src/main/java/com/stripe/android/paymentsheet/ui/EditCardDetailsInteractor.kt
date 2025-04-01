@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.runtime.Immutable
-import com.stripe.android.CardBrandFilter
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CardUpdateParams
@@ -11,86 +10,30 @@ internal typealias CardUpdateParamsCallback = (CardUpdateParams?) -> Unit
 
 internal typealias CardBrandCallback = (CardBrand) -> Unit
 
-/**
- * Interface for handling UI interactions when editing card details.
- */
 internal interface EditCardDetailsInteractor {
-    /**
-     * The card being edited.
-     */
-    val card: PaymentMethod.Card
-
-    /**
-     * Filter for determining which card brands are available.
-     */
-    val cardBrandFilter: CardBrandFilter
-
-    /**
-     * Icon resource ID for the payment method.
-     */
-    val paymentMethodIcon: Int
-
-    /**
-     * Whether to show the card brand dropdown.
-     */
-    val shouldShowCardBrandDropdown: Boolean
-
-    /**
-     * Current state of the card edit UI.
-     */
     val state: StateFlow<State>
 
-    /**
-     * Callback for when the card brand choice changes.
-     * This is used for analytics.
-     */
-    val onBrandChoiceChanged: CardBrandCallback
+    val onCardUpdateParamsChanged: CardUpdateParamsCallback
 
-    /**
-     * Callback for when card details change. It provides the values needed to
-     * update the card, if any.
-     */
-    val onCardDetailsChanged: CardUpdateParamsCallback
+    fun handleViewAction(viewAction: ViewAction)
 
-    /**
-     * Handle a change in the selected card brand. This will be called from the UI when
-     * the users selects a card brand.
-     *
-     * @param cardBrandChoice The newly selected card brand choice
-     */
-    fun onBrandChoiceChanged(cardBrandChoice: CardBrandChoice)
-
-    /**
-     * Represents the current state of the card edit UI.
-     *
-     * @property card The current card details
-     * @property selectedCardBrand The currently selected card brand
-     */
     @Immutable
     data class State(
         val card: PaymentMethod.Card,
-        val selectedCardBrand: CardBrandChoice
+        val selectedCardBrand: CardBrandChoice,
+        val paymentMethodIcon: Int,
+        val shouldShowCardBrandDropdown: Boolean,
+        val availableNetworks: List<CardBrandChoice>
     )
 
-    /**
-     * Factory for creating CardEditUIHandler instances.
-     */
+    sealed interface ViewAction {
+        data class BrandChoiceChanged(val cardBrandChoice: CardBrandChoice) : ViewAction
+    }
+
     fun interface Factory {
-        /**
-         * Create a new CardEditUIHandler instance.
-         *
-         * @param card The card to edit
-         * @param cardBrandFilter Filter for available card brands
-         * @param showCardBrandDropdown Whether to show the card brand dropdown
-         * @param paymentMethodIcon Icon resource for the payment method
-         * @param onCardDetailsChanged Callback for card value changes
-         */
         fun create(
             card: PaymentMethod.Card,
-            cardBrandFilter: CardBrandFilter,
-            showCardBrandDropdown: Boolean,
-            paymentMethodIcon: Int,
-            onCardDetailsChanged: CardUpdateParamsCallback
+            onCardUpdateParamsChanged: CardUpdateParamsCallback
         ): EditCardDetailsInteractor
     }
 }

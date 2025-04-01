@@ -16,21 +16,33 @@ internal fun PaymentMethod.getSavedPaymentMethodIcon(
 ): Int {
     return when (type) {
         PaymentMethod.Type.Card -> {
-            val brand = CardBrand.fromCode(card?.displayBrand).takeIf { it != Unknown } ?: card?.brand
-
-            // Vertical mode icons are the same for light & dark
-            if (forVerticalMode) {
-                brand?.getCardBrandIconForVerticalMode()
-            } else {
-                brand?.getCardBrandIconForHorizontalMode(
-                    showNightIcon = showNightIcon,
-                )
-            }
+            card?.getSavedPaymentMethodIcon(
+                forVerticalMode = forVerticalMode,
+                showNightIcon = showNightIcon
+            )
         }
         PaymentMethod.Type.SepaDebit -> getSepaIcon(showNightIcon = showNightIcon)
         PaymentMethod.Type.USBankAccount -> usBankAccount?.bankName?.let { TransformToBankIcon(it) }
         else -> null
     } ?: R.drawable.stripe_ic_paymentsheet_card_unknown_ref
+}
+
+@DrawableRes
+internal fun PaymentMethod.Card?.getSavedPaymentMethodIcon(
+    forVerticalMode: Boolean = false,
+    showNightIcon: Boolean? = null,
+): Int {
+    this ?: return R.drawable.stripe_ic_paymentsheet_card_unknown_ref
+    val brand = CardBrand.fromCode(displayBrand).takeIf { it != Unknown } ?: brand
+
+    // Vertical mode icons are the same for light & dark
+    return if (forVerticalMode) {
+        brand.getCardBrandIconForVerticalMode()
+    } else {
+        brand.getCardBrandIconForHorizontalMode(
+            showNightIcon = showNightIcon,
+        )
+    }
 }
 
 @DrawableRes
