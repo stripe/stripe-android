@@ -7,14 +7,19 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.CardUpdateParams
-import kotlinx.coroutines.test.TestScope
+import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultEditCardDetailsInteractorTest {
+    private val testDispatcher = UnconfinedTestDispatcher()
+
+    @get:Rule
+    val testRule = CoroutineTestRule(testDispatcher)
 
     @Test
     fun testInitialStateForCardWithNetworks() {
@@ -40,7 +45,7 @@ internal class DefaultEditCardDetailsInteractorTest {
 
         assertThat(handler.selectedBrand).isEqualTo(CardBrand.CartesBancaires)
 
-        handler.brandChanged(CardBrand.Visa)
+        handler.updateCardBrand(CardBrand.Visa)
 
         assertThat(handler.selectedBrand).isEqualTo(CardBrand.Visa)
     }
@@ -49,15 +54,15 @@ internal class DefaultEditCardDetailsInteractorTest {
     fun cardUpdateParamsIsUpdatedWhenNewCardBrandIsSelected() {
         var cardUpdateParams: CardUpdateParams? = null
         val handler = handler(
-            onCardDetailsChanged = {
+            onCardUpdateParamsChanged = {
                 cardUpdateParams = it
             }
         )
 
-        handler.brandChanged(CardBrand.Visa)
+        handler.updateCardBrand(CardBrand.Visa)
         assertThat(cardUpdateParams).isEqualTo(cardUpdateParams(cardBrand = CardBrand.Visa))
 
-        handler.brandChanged(CardBrand.CartesBancaires)
+        handler.updateCardBrand(CardBrand.CartesBancaires)
 
         assertThat(cardUpdateParams).isNull()
     }
@@ -66,12 +71,12 @@ internal class DefaultEditCardDetailsInteractorTest {
     fun cardUpdateParamsIsNotUpdatedWhenCurrentCardBrandIsSelected() {
         var cardUpdateParams: CardUpdateParams? = null
         val handler = handler(
-            onCardDetailsChanged = {
+            onCardUpdateParamsChanged = {
                 cardUpdateParams = it
             }
         )
 
-        handler.brandChanged(CardBrand.CartesBancaires)
+        handler.updateCardBrand(CardBrand.CartesBancaires)
         assertThat(cardUpdateParams).isNull()
     }
 
@@ -86,17 +91,13 @@ internal class DefaultEditCardDetailsInteractorTest {
 
         assertThat(handler.selectedBrand).isEqualTo(CardBrand.CartesBancaires)
 
-        handler.brandChanged(CardBrand.CartesBancaires)
+        handler.updateCardBrand(CardBrand.CartesBancaires)
 
         assertThat(newBrandChoice).isNull()
 
-        handler.brandChanged(CardBrand.Visa)
+        handler.updateCardBrand(CardBrand.Visa)
 
         assertThat(newBrandChoice).isEqualTo(CardBrand.Visa)
-    }
-
-    private fun DefaultEditCardDetailsInteractor.brandChanged(cardBrand: CardBrand) {
-        onBrandChoiceChanged(CardBrandChoice(brand = cardBrand, enabled = true))
     }
 
     private val DefaultEditCardDetailsInteractor.uiState
@@ -122,18 +123,18 @@ internal class DefaultEditCardDetailsInteractorTest {
     private fun handler(
         card: PaymentMethod.Card = PaymentMethodFixtures.CARD_WITH_NETWORKS,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
-        showCardBrandDropdown: Boolean = true,
+        isModifiable: Boolean = true,
         onBrandChoiceChanged: (CardBrand) -> Unit = {},
-        onCardDetailsChanged: (CardUpdateParams?) -> Unit = {}
+        onCardUpdateParamsChanged: (CardUpdateParams?) -> Unit = {}
     ): DefaultEditCardDetailsInteractor {
-        return DefaultEditCardDetailsInteractor(
-            card = card,
+        return DefaultEditCardDetailsInteractor.Factory(
             cardBrandFilter = cardBrandFilter,
-            paymentMethodIcon = 0,
-            shouldShowCardBrandDropdown = showCardBrandDropdown,
-            scope = TestScope(UnconfinedTestDispatcher()),
             onBrandChoiceChanged = onBrandChoiceChanged,
-            onCardDetailsChanged = onCardDetailsChanged
-        )
+            workContext = testDispatcher,
+            isModifiable = isModifiable,
+        ).create(
+            card = card,
+            onCardUpdateParamsChanged = onCardUpdateParamsChanged
+        ) as DefaultEditCardDetailsInteractor
     }
 }
