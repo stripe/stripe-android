@@ -1167,6 +1167,7 @@ internal class PaymentSheetViewModelTest {
         val error = APIException()
 
         viewModel.updateSelection(selection)
+        viewModel.checkout()
 
         viewModel.paymentMethodMetadata.test {
             confirmationHandler.state.value = ConfirmationHandler.State.Complete(
@@ -2597,6 +2598,37 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
+    fun `On checkout with Google Pay, should report failure as expected`() = runTest {
+        val confirmationHandler = FakeConfirmationHandler().apply {
+            awaitResultTurbine.add(null)
+            awaitResultTurbine.add(null)
+        }
+        val eventReporter = FakeEventReporter()
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
+            isGooglePayReady = true,
+            eventReporter = eventReporter,
+            confirmationHandlerFactory = {
+                confirmationHandler
+            }
+        )
+
+        viewModel.checkoutWithGooglePay()
+
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+            ConfirmationHandler.Result.Failed(
+                cause = IllegalStateException("This failed!"),
+                message = "This failed".resolvableString,
+                type = ConfirmationHandler.Result.Failed.ErrorType.GooglePay(errorCode = 10),
+            )
+        )
+
+        val paymentFailureCall = eventReporter.paymentFailureCalls.awaitItem()
+
+        assertThat(paymentFailureCall.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+    }
+
+    @Test
     fun `On checkout with Link, should report success as expected`() = runTest {
         val confirmationHandler = FakeConfirmationHandler().apply {
             awaitResultTurbine.add(null)
@@ -2631,6 +2663,41 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
+    fun `On checkout with Link, should report failure as expected`() = runTest {
+        val confirmationHandler = FakeConfirmationHandler().apply {
+            awaitResultTurbine.add(null)
+            awaitResultTurbine.add(null)
+        }
+        val eventReporter = FakeEventReporter()
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
+            linkState = LinkState(
+                configuration = LINK_CONFIG,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null
+            ),
+            eventReporter = eventReporter,
+            confirmationHandlerFactory = {
+                confirmationHandler
+            }
+        )
+
+        viewModel.checkoutWithLink()
+
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+            ConfirmationHandler.Result.Failed(
+                cause = IllegalStateException("This failed!"),
+                message = "This failed".resolvableString,
+                type = ConfirmationHandler.Result.Failed.ErrorType.GooglePay(errorCode = 10),
+            )
+        )
+
+        val paymentFailureCall = eventReporter.paymentFailureCalls.awaitItem()
+
+        assertThat(paymentFailureCall.paymentSelection).isEqualTo(PaymentSelection.Link(useLinkExpress = false))
+    }
+
+    @Test
     fun `On checkout with Link Express, should report success as expected`() = runTest {
         val confirmationHandler = FakeConfirmationHandler().apply {
             awaitResultTurbine.add(null)
@@ -2662,6 +2729,41 @@ internal class PaymentSheetViewModelTest {
         val paymentSuccessCall = eventReporter.paymentSuccessCalls.awaitItem()
 
         assertThat(paymentSuccessCall.paymentSelection).isEqualTo(PaymentSelection.Link(useLinkExpress = true))
+    }
+
+    @Test
+    fun `On checkout with Link Express, should report failure as expected`() = runTest {
+        val confirmationHandler = FakeConfirmationHandler().apply {
+            awaitResultTurbine.add(null)
+            awaitResultTurbine.add(null)
+        }
+        val eventReporter = FakeEventReporter()
+
+        createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
+            linkState = LinkState(
+                configuration = LINK_CONFIG,
+                loginState = LinkState.LoginState.LoggedIn,
+                signupMode = null
+            ),
+            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+            eventReporter = eventReporter,
+            confirmationHandlerFactory = {
+                confirmationHandler
+            }
+        )
+
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+            ConfirmationHandler.Result.Failed(
+                cause = IllegalStateException("This failed!"),
+                message = "This failed".resolvableString,
+                type = ConfirmationHandler.Result.Failed.ErrorType.GooglePay(errorCode = 10),
+            )
+        )
+
+        val paymentFailureCall = eventReporter.paymentFailureCalls.awaitItem()
+
+        assertThat(paymentFailureCall.paymentSelection).isEqualTo(PaymentSelection.Link(useLinkExpress = true))
     }
 
     @Test

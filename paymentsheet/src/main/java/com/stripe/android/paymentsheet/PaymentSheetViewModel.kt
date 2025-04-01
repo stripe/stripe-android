@@ -502,7 +502,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         message: ResolvableString
     ) {
         eventReporter.onPaymentFailure(
-            paymentSelection = selection.value,
+            paymentSelection = inProgressSelection,
             error = error,
         )
 
