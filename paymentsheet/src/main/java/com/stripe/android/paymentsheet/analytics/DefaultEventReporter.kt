@@ -48,8 +48,8 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     private val analyticsRequestV2Factory = AnalyticsRequestV2Factory(
         context,
-        clientId = "CLIENT_ID",
-        origin = "ORIGIN",
+        clientId = CLIENT_ID,
+        origin = ORIGIN,
     )
 
     override fun onInit(
@@ -501,5 +501,10 @@ internal class DefaultEventReporter @Inject internal constructor(
         } else {
             null
         }
+    }
+
+    private companion object {
+        const val CLIENT_ID = "mobile-elements-sdk"
+        const val ORIGIN = "stripe-elements-android"
     }
 }

@@ -13,14 +13,9 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
-import com.stripe.android.core.networking.AnalyticsRequestV2Executor
-import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
-import com.stripe.android.core.networking.DefaultAnalyticsRequestV2Executor
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.NetworkTypeDetector
-import com.stripe.android.core.networking.RealAnalyticsRequestV2Storage
 import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
@@ -43,8 +38,6 @@ import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.LinkApiRepository
 import com.stripe.android.link.repositories.LinkRepository
-import com.stripe.android.networking.StripeApiRepository
-import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier

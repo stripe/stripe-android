@@ -93,7 +93,7 @@ internal interface FinancialConnectionsSheetSharedModule {
     fun bindsIsNetworkingRelinkSession(impl: RealIsNetworkingRelinkSession): IsNetworkingRelinkSession
 
     @Binds
-    fun bindsContext(application: Application) : Context
+    fun bindsContext(application: Application): Context
 
     companion object {
 

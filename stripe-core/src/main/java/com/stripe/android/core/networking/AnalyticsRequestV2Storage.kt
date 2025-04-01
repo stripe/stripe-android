@@ -1,6 +1,5 @@
 package com.stripe.android.core.networking
 
-import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.annotation.RestrictTo
