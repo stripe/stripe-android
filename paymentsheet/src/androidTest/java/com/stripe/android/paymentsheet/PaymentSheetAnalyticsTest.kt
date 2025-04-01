@@ -17,6 +17,8 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.paymentelement.AnalyticEvent
+import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runFlowControllerTest
@@ -28,6 +30,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import kotlin.time.Duration.Companion.seconds
 
+@OptIn(ExperimentalAnalyticEventCallbackApi::class)
 @RunWith(TestParameterInjector::class)
 internal class PaymentSheetAnalyticsTest {
     private val networkRule = NetworkRule(
@@ -39,6 +42,7 @@ internal class PaymentSheetAnalyticsTest {
     val testRules: TestRules = TestRules.create(networkRule = networkRule)
 
     private val composeTestRule = testRules.compose
+    private val analyticEventRule = testRules.analyticEventRule
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
@@ -66,6 +70,7 @@ internal class PaymentSheetAnalyticsTest {
     @Test
     fun testSuccessfulCardPayment() = runPaymentSheetTest(
         networkRule = networkRule,
+        analyticEventCallback = analyticEventRule,
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
@@ -88,6 +93,8 @@ internal class PaymentSheetAnalyticsTest {
                 configuration = horizontalModeConfiguration,
             )
         }
+
+        analyticEventRule.validateAnalyticEvent(AnalyticEvent.PresentedSheet())
 
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         validateAnalyticsRequest(eventName = "mc_form_interacted")
@@ -188,6 +195,7 @@ internal class PaymentSheetAnalyticsTest {
     @Test
     fun testSuccessfulCardPaymentInVerticalMode() = runPaymentSheetTest(
         networkRule = networkRule,
+        analyticEventCallback = analyticEventRule,
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
@@ -211,6 +219,8 @@ internal class PaymentSheetAnalyticsTest {
                 configuration = verticalModeConfiguration,
             )
         }
+
+        analyticEventRule.validateAnalyticEvent(AnalyticEvent.PresentedSheet())
 
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         validateAnalyticsRequest(eventName = "mc_form_interacted")

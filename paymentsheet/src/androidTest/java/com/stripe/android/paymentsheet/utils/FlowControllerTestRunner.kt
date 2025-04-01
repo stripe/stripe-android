@@ -8,6 +8,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
@@ -51,6 +52,7 @@ internal fun runFlowControllerTest(
     integrationType: IntegrationType = IntegrationType.Compose,
     callConfirmOnPaymentOptionCallback: Boolean = true,
     createIntentCallback: CreateIntentCallback? = null,
+    analyticEventCallback: AnalyticEventCallback? = null,
     resultCallback: PaymentSheetResultCallback,
     block: suspend (FlowControllerTestRunnerContext) -> Unit,
 ) {
