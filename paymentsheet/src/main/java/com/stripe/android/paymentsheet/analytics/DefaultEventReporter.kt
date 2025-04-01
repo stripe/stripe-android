@@ -1,8 +1,11 @@
 package com.stripe.android.paymentsheet.analytics
 
+import android.content.Context
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.AnalyticsRequestV2Executor
+import com.stripe.android.core.networking.AnalyticsRequestV2Factory
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.model.CardBrand
@@ -25,8 +28,10 @@ import kotlin.coroutines.CoroutineContext
 
 @OptIn(ExperimentalAnalyticEventCallbackApi::class)
 internal class DefaultEventReporter @Inject internal constructor(
+    context: Context,
     private val mode: EventReporter.Mode,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
+    private val analyticsRequestV2Executor: AnalyticsRequestV2Executor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     private val durationProvider: DurationProvider,
     private val analyticEventCallbackProvider: Provider<AnalyticEventCallback?>,
@@ -40,6 +45,12 @@ internal class DefaultEventReporter @Inject internal constructor(
     private var linkMode: LinkMode? = null
     private var googlePaySupported: Boolean = false
     private var currency: String? = null
+
+    private val analyticsRequestV2Factory = AnalyticsRequestV2Factory(
+        context,
+        clientId = "CLIENT_ID",
+        origin = "ORIGIN",
+    )
 
     override fun onInit(
         commonConfiguration: CommonConfiguration,
@@ -449,6 +460,17 @@ internal class DefaultEventReporter @Inject internal constructor(
             analyticsRequestExecutor.executeAsync(
                 paymentAnalyticsRequestFactory.createRequest(
                     event = event,
+                    additionalParams = event.params,
+                )
+            )
+        }
+    }
+
+    private fun fireV2Event(event: PaymentSheetEvent) {
+        CoroutineScope(workContext).launch {
+            analyticsRequestV2Executor.enqueue(
+                analyticsRequestV2Factory.createRequest(
+                    eventName = event.eventName,
                     additionalParams = event.params,
                 )
             )

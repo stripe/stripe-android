@@ -27,8 +27,8 @@ class RealAnalyticsRequestV2Storage private constructor(
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : AnalyticsRequestV2Storage {
 
-    @Inject constructor(application: Application) : this(
-        sharedPrefs = application.getSharedPreferences(
+    @Inject constructor(context: Context) : this(
+        sharedPrefs = context.getSharedPreferences(
             AnalyticsRequestV2StorageName,
             Context.MODE_PRIVATE,
         ),

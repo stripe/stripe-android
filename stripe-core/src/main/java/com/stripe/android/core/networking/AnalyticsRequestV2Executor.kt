@@ -1,6 +1,6 @@
 package com.stripe.android.core.networking
 
-import android.app.Application
+import android.content.Context
 import androidx.annotation.RestrictTo
 import androidx.work.Constraints
 import androidx.work.NetworkType
@@ -18,7 +18,7 @@ fun interface AnalyticsRequestV2Executor {
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class DefaultAnalyticsRequestV2Executor @Inject constructor(
-    private val application: Application,
+    private val context: Context,
     private val networkClient: StripeNetworkClient,
     private val logger: Logger,
     private val storage: AnalyticsRequestV2Storage,
@@ -33,7 +33,7 @@ class DefaultAnalyticsRequestV2Executor @Inject constructor(
     }
 
     private suspend fun enqueueRequest(request: AnalyticsRequestV2): Boolean {
-        val workManager = WorkManager.getInstance(application)
+        val workManager = WorkManager.getInstance(context)
         val id = storage.store(request)
         val inputData = SendAnalyticsRequestV2Worker.createInputData(id)
 
