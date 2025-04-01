@@ -131,6 +131,7 @@ internal class PaymentSheetAnalyticsTest {
     @Test
     fun testSuccessfulCardPaymentInFlowController() = runFlowControllerTest(
         networkRule = networkRule,
+        analyticEventCallback = analyticEventRule,
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
@@ -158,6 +159,8 @@ internal class PaymentSheetAnalyticsTest {
                 }
             )
         }
+
+        analyticEventRule.validateAnalyticEvent(AnalyticEvent.PresentedSheet())
 
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         validateAnalyticsRequest(eventName = "mc_custom_paymentoption_newpm_select")
