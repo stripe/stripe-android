@@ -9,6 +9,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.AnalyticsRequestV2Executor
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
@@ -57,6 +58,7 @@ class DefaultEventReporterTest {
 
     private val durationProvider = FakeDurationProvider()
     private val analyticsRequestExecutor = mock<AnalyticsRequestExecutor>()
+    private val analyticsV2RequestExecutor = mock<AnalyticsRequestV2Executor>()
     private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
         ApplicationProvider.getApplicationContext(),
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
@@ -664,8 +666,10 @@ class DefaultEventReporterTest {
         PaymentConfiguration.clearInstance()
         // Would crash if it tries to read from the uninitialized PaymentConfiguration
         DefaultEventReporter(
+            mock(),
             EventReporter.Mode.Complete,
             analyticsRequestExecutor,
+            analyticsV2RequestExecutor,
             analyticsRequestFactory,
             durationProvider,
             analyticEventCallbackProvider,
@@ -925,8 +929,10 @@ class DefaultEventReporterTest {
         configure: EventReporter.() -> Unit = {},
     ): EventReporter {
         val reporter = DefaultEventReporter(
+            context = ApplicationProvider.getApplicationContext(),
             mode = mode,
             analyticsRequestExecutor = analyticsRequestExecutor,
+            analyticsRequestV2Executor = analyticsV2RequestExecutor,
             paymentAnalyticsRequestFactory = analyticsRequestFactory,
             durationProvider = FakeDurationProvider(duration),
             analyticEventCallbackProvider = analyticEventCallbackProvider,
@@ -949,8 +955,10 @@ class DefaultEventReporterTest {
         configure: EventReporter.() -> Unit = {},
     ): EventReporter {
         val reporter = DefaultEventReporter(
+            context = ApplicationProvider.getApplicationContext(),
             mode = mode,
             analyticsRequestExecutor = analyticsRequestExecutor,
+            analyticsRequestV2Executor = analyticsV2RequestExecutor,
             paymentAnalyticsRequestFactory = analyticsRequestFactory,
             durationProvider = durationProvider,
             analyticEventCallbackProvider = analyticEventCallbackProvider,

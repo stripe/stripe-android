@@ -466,6 +466,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         }
     }
 
+    @Suppress("UnusedPrivateMember")
     private fun fireV2Event(event: PaymentSheetEvent) {
         CoroutineScope(workContext).launch {
             analyticsRequestV2Executor.enqueue(
