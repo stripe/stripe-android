@@ -16,10 +16,10 @@ internal class DefaultEditCardDetailsInteractor(
     override val card: PaymentMethod.Card,
     override val cardBrandFilter: CardBrandFilter,
     override val paymentMethodIcon: Int,
-    override val showCardBrandDropdown: Boolean,
+    override val shouldShowCardBrandDropdown: Boolean,
     private val scope: CoroutineScope,
-    override val onBrandChoiceChanged: BrandChoiceCallback,
-    override val onCardDetailsChanged: CardDetailsCallback
+    override val onBrandChoiceChanged: CardBrandCallback,
+    override val onCardDetailsChanged: CardUpdateParamsCallback
 ) : EditCardDetailsInteractor {
     private val cardDetailsEntry = MutableStateFlow(
         value = buildDefaultCardEntry()
@@ -74,20 +74,20 @@ internal class DefaultEditCardDetailsInteractor(
 
     class Factory(
         private val scope: CoroutineScope,
-        private val onBrandChoiceChanged: BrandChoiceCallback,
+        private val onBrandChoiceChanged: CardBrandCallback,
     ) : EditCardDetailsInteractor.Factory {
         override fun create(
             card: PaymentMethod.Card,
             cardBrandFilter: CardBrandFilter,
             showCardBrandDropdown: Boolean,
             paymentMethodIcon: Int,
-            onCardDetailsChanged: CardDetailsCallback
+            onCardDetailsChanged: CardUpdateParamsCallback
         ): EditCardDetailsInteractor {
             return DefaultEditCardDetailsInteractor(
                 card = card,
                 cardBrandFilter = cardBrandFilter,
                 paymentMethodIcon = paymentMethodIcon,
-                showCardBrandDropdown = showCardBrandDropdown,
+                shouldShowCardBrandDropdown = showCardBrandDropdown,
                 scope = scope,
                 onBrandChoiceChanged = onBrandChoiceChanged,
                 onCardDetailsChanged = onCardDetailsChanged
