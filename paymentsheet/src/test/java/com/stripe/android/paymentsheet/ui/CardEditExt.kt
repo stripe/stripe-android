@@ -18,3 +18,9 @@ internal fun EditCardDetailsInteractor.updateCardBrand(cardBrand: CardBrand) {
         )
     )
 }
+
+internal fun EditCardDetailsInteractor.updateExpiryDate(text: String) {
+    handleViewAction(
+        viewAction = EditCardDetailsInteractor.ViewAction.DateChanged(text)
+    )
+}

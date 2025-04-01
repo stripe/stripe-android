@@ -61,7 +61,7 @@ internal class DefaultEditCardDetailsInteractorTest {
         )
 
         handler.updateCardBrand(CardBrand.Visa)
-        assertThat(cardUpdateParams).isEqualTo(cardUpdateParams(cardBrand = CardBrand.Visa))
+        assertThat(cardUpdateParams?.cardBrand).isEqualTo(CardBrand.Visa)
 
         handler.updateCardBrand(CardBrand.CartesBancaires)
 
@@ -79,6 +79,36 @@ internal class DefaultEditCardDetailsInteractorTest {
 
         handler.updateCardBrand(CardBrand.CartesBancaires)
         assertThat(cardUpdateParams).isNull()
+    }
+
+    @Test
+    fun validExpiryDateChangeShouldProduceNewCardParams() {
+        var cardUpdateParams: CardUpdateParams? = null
+        val handler = handler(
+            onCardUpdateParamsChanged = {
+                cardUpdateParams = it
+            }
+        )
+
+        handler.updateExpiryDate(text = "1240")
+
+        assertThat(cardUpdateParams?.expiryMonth).isEqualTo(12)
+        assertThat(cardUpdateParams?.expiryYear).isEqualTo(2040)
+    }
+
+    @Test
+    fun invalidExpiryDateChangeShouldProduceNewCardParams() {
+        var cardUpdateParams: CardUpdateParams? = null
+        val handler = handler(
+            onCardUpdateParamsChanged = {
+                cardUpdateParams = it
+            }
+        )
+
+        handler.updateExpiryDate(text = "12/40")
+
+        assertThat(cardUpdateParams?.expiryMonth).isNull()
+        assertThat(cardUpdateParams?.expiryYear).isNull()
     }
 
     @Test
@@ -157,6 +187,7 @@ internal class DefaultEditCardDetailsInteractorTest {
             isModifiable = isModifiable,
             card = card,
             onCardUpdateParamsChanged = onCardUpdateParamsChanged,
+            isCardDetailEditSupported = true,
         )
     }
 }
