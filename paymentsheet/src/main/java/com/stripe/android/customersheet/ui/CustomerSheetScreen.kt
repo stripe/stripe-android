@@ -41,13 +41,14 @@ import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReport
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
+import kotlinx.coroutines.Dispatchers
 import com.stripe.android.R as PaymentsCoreR
 
 @Composable
 internal fun CustomerSheetScreen(
     viewModel: CustomerSheetViewModel,
 ) {
-    val viewState by viewModel.viewState.collectAsState()
+    val viewState by viewModel.viewState.collectAsState(Dispatchers.Main)
 
     CustomerSheetScreen(
         viewState = viewState,
