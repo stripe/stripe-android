@@ -719,7 +719,6 @@ public class StripeTest {
     }
 
     @Test
-    @Ignore("#ir-agitate-surround")
     public void createSourceSynchronous_withSofortParams_passesIntegrationTest()
             throws StripeException {
         SourceParams params = SourceParams.createSofortParams(
