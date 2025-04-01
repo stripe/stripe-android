@@ -284,6 +284,24 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
+    fun `successful payment should clear viewmodel paymentSelection`() = runTest {
+        val viewModel = createViewModel()
+        val flowController = createFlowController(viewModel = viewModel)
+
+        flowController.configureExpectingSuccess()
+
+        viewModel.paymentSelection = PaymentSelection.New.Card(
+            PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            mock(),
+            mock()
+        )
+
+        flowController.onPaymentResult(PaymentResult.Completed)
+
+        assertThat(viewModel.paymentSelection).isNull()
+    }
+
+    @Test
     fun `failed payment should fire analytics event`() = runTest {
         val viewModel = createViewModel()
         val flowController = createFlowController(viewModel = viewModel)
