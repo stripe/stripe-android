@@ -257,8 +257,6 @@ internal fun LinkFields(
 
             AnimatedVisibility(visible = signUpState == InputtingRemainingFields) {
                 LinkTerms(
-                    isOptional = false,
-                    isShowingPhoneFirst = false,
                     modifier = Modifier.padding(top = 16.dp),
                     textAlign = TextAlign.Start,
                 )

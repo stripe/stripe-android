@@ -232,9 +232,7 @@ private fun SecondaryFields(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp, bottom = 16.dp),
-                textAlign = TextAlign.Center,
-                isShowingPhoneFirst = true,
-                isOptional = true
+                textAlign = TextAlign.Center
             )
         }
         AnimatedVisibility(visible = signUpScreenState.errorMessage != null) {

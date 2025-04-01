@@ -152,8 +152,6 @@ internal fun LinkOptionalInlineSignup(
         )
 
         LinkTerms(
-            isOptional = true,
-            isShowingPhoneFirst = isShowingPhoneFirst,
             textAlign = TextAlign.Start,
             modifier = Modifier
                 .padding(top = 8.dp)
