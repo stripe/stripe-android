@@ -38,9 +38,13 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
         validationTimeout = 1.seconds, // Analytics requests happen async.
     )
+    private val analyticEventRule = AnalyticEventRule()
 
     @get:Rule
-    val testRules: TestRules = TestRules.create(networkRule = networkRule)
+    val testRules: TestRules = TestRules.create(
+        networkRule = networkRule,
+        analyticEventRule = analyticEventRule
+    )
 
     private val embeddedContentPage = EmbeddedContentPage(testRules.compose)
     private val formPage = EmbeddedFormPage(testRules.compose)
@@ -49,8 +53,6 @@ internal class EmbeddedPaymentElementAnalyticsTest {
 
     private val card1 = CardPaymentMethodDetails("pm_12345", "4242")
     private val card2 = CardPaymentMethodDetails("pm_67890", "5544")
-
-    private val analyticMatcher = AnalyticMatcher()
 
     @Before
     fun setup() {
@@ -72,7 +74,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             CreateIntentResult.Success("pi_example_secret_12345")
         },
         resultCallback = ::assertCompleted,
-        analyticEventCallback = analyticMatcher,
+        analyticEventCallback = analyticEventRule,
     ) { testContext ->
         networkRule.enqueue(
             host("api.stripe.com"),
@@ -98,7 +100,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         embeddedContentPage.clickOnLpm("card")
         formPage.fillOutCardDetails()
 
-        analyticMatcher.validateAnalyticEvent(AnalyticEvent.PresentedSheet())
+        analyticEventRule.validateAnalyticEvent(AnalyticEvent.PresentedSheet())
 
         networkRule.enqueue(
             method("POST"),
