@@ -54,14 +54,24 @@ internal class DefaultEditCardDetailsInteractorTest {
             }
         )
 
-        assertThat(handler.selectedBrand).isEqualTo(CardBrand.CartesBancaires)
-
         handler.brandChanged(CardBrand.Visa)
-
         assertThat(cardUpdateParams).isEqualTo(cardUpdateParams(cardBrand = CardBrand.Visa))
 
         handler.brandChanged(CardBrand.CartesBancaires)
 
+        assertThat(cardUpdateParams).isNull()
+    }
+
+    @Test
+    fun cardUpdateParamsIsNotUpdatedWhenCurrentCardBrandIsSelected() {
+        var cardUpdateParams: CardUpdateParams? = null
+        val handler = handler(
+            onCardDetailsChanged = {
+                cardUpdateParams = it
+            }
+        )
+
+        handler.brandChanged(CardBrand.CartesBancaires)
         assertThat(cardUpdateParams).isNull()
     }
 
@@ -120,7 +130,7 @@ internal class DefaultEditCardDetailsInteractorTest {
             card = card,
             cardBrandFilter = cardBrandFilter,
             paymentMethodIcon = 0,
-            showCardBrandDropdown = showCardBrandDropdown,
+            shouldShowCardBrandDropdown = showCardBrandDropdown,
             scope = TestScope(UnconfinedTestDispatcher()),
             onBrandChoiceChanged = onBrandChoiceChanged,
             onCardDetailsChanged = onCardDetailsChanged
