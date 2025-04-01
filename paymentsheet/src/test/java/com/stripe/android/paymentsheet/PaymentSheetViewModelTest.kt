@@ -1043,6 +1043,7 @@ internal class PaymentSheetViewModelTest {
 
             val selection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
             viewModel.updateSelection(selection)
+            viewModel.checkout()
 
             turbineScope {
                 val resultTurbine = viewModel.paymentSheetResult.testIn(this)
@@ -1108,6 +1109,7 @@ internal class PaymentSheetViewModelTest {
                 customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
             )
             viewModel.updateSelection(selection)
+            viewModel.checkout()
 
             turbineScope {
                 val resultTurbine = viewModel.paymentSheetResult.testIn(this)
@@ -2562,6 +2564,104 @@ internal class PaymentSheetViewModelTest {
         assertThat(isEmailRequired).isFalse()
         assertThat(isBillingRequired).isFalse()
         assertThat(isPhoneRequired).isFalse()
+    }
+
+    @Test
+    fun `On checkout with Google Pay, should report success as expected`() = runTest {
+        val confirmationHandler = FakeConfirmationHandler().apply {
+            awaitResultTurbine.add(null)
+            awaitResultTurbine.add(null)
+        }
+        val eventReporter = FakeEventReporter()
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
+            isGooglePayReady = true,
+            eventReporter = eventReporter,
+            confirmationHandlerFactory = {
+                confirmationHandler
+            }
+        )
+
+        viewModel.checkoutWithGooglePay()
+
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+            ConfirmationHandler.Result.Succeeded(
+                intent = PaymentIntentFixtures.PI_SUCCEEDED,
+                deferredIntentConfirmationType = null,
+            )
+        )
+
+        val paymentSuccessCall = eventReporter.paymentSuccessCalls.awaitItem()
+
+        assertThat(paymentSuccessCall.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+    }
+
+    @Test
+    fun `On checkout with Link, should report success as expected`() = runTest {
+        val confirmationHandler = FakeConfirmationHandler().apply {
+            awaitResultTurbine.add(null)
+            awaitResultTurbine.add(null)
+        }
+        val eventReporter = FakeEventReporter()
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
+            linkState = LinkState(
+                configuration = LINK_CONFIG,
+                loginState = LinkState.LoginState.LoggedOut,
+                signupMode = null
+            ),
+            eventReporter = eventReporter,
+            confirmationHandlerFactory = {
+                confirmationHandler
+            }
+        )
+
+        viewModel.checkoutWithLink()
+
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+            ConfirmationHandler.Result.Succeeded(
+                intent = PaymentIntentFixtures.PI_SUCCEEDED,
+                deferredIntentConfirmationType = null,
+            )
+        )
+
+        val paymentSuccessCall = eventReporter.paymentSuccessCalls.awaitItem()
+
+        assertThat(paymentSuccessCall.paymentSelection).isEqualTo(PaymentSelection.Link(useLinkExpress = false))
+    }
+
+    @Test
+    fun `On checkout with Link Express, should report success as expected`() = runTest {
+        val confirmationHandler = FakeConfirmationHandler().apply {
+            awaitResultTurbine.add(null)
+            awaitResultTurbine.add(null)
+        }
+        val eventReporter = FakeEventReporter()
+
+        createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
+            linkState = LinkState(
+                configuration = LINK_CONFIG,
+                loginState = LinkState.LoginState.LoggedIn,
+                signupMode = null
+            ),
+            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+            eventReporter = eventReporter,
+            confirmationHandlerFactory = {
+                confirmationHandler
+            }
+        )
+
+        confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+            ConfirmationHandler.Result.Succeeded(
+                intent = PaymentIntentFixtures.PI_SUCCEEDED,
+                deferredIntentConfirmationType = null,
+            )
+        )
+
+        val paymentSuccessCall = eventReporter.paymentSuccessCalls.awaitItem()
+
+        assertThat(paymentSuccessCall.paymentSelection).isEqualTo(PaymentSelection.Link(useLinkExpress = true))
     }
 
     @Test
