@@ -277,12 +277,15 @@ internal class DefaultFlowController @Inject internal constructor(
             is PaymentSelection.GooglePay,
             is PaymentSelection.ExternalPaymentMethod,
             is PaymentSelection.New,
-            null -> confirmPaymentSelection(
-                paymentSelection = paymentSelection,
-                state = state.paymentSheetState,
-                appearance = state.config.appearance,
-                initializationMode = initializationMode,
-            )
+            null -> {
+                confirmPaymentSelection(
+                    paymentSelection = paymentSelection,
+                    state = state.paymentSheetState,
+                    appearance = state.config.appearance,
+                    initializationMode = initializationMode,
+                )
+                viewModel.paymentSelection = null
+            }
             is PaymentSelection.Saved -> confirmSavedPaymentMethod(
                 paymentSelection = paymentSelection,
                 state = state.paymentSheetState,
