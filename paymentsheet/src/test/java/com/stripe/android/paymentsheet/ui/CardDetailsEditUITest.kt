@@ -1,12 +1,15 @@
 package com.stripe.android.paymentsheet.ui
 
 import android.os.Build
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertContentDescriptionEquals
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import com.stripe.android.DefaultCardBrandFilter
+import androidx.compose.ui.test.performTextReplacement
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -14,7 +17,6 @@ import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
 import com.stripe.android.uicore.elements.TEST_TAG_DROP_DOWN_CHOICE
-import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
@@ -34,11 +36,12 @@ internal class CardDetailsEditUITest {
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
     @Test
-    fun missingExpiryDate_displaysDots() {
+    fun missingExpiryDate_displaysDots_whenExpDateIsReadOnly() {
         runScenario(
             card = PaymentMethodFixtures.CARD_WITH_NETWORKS.copy(
                 expiryMonth = null
-            )
+            ),
+            shouldAllowExpDateEdit = false
         ) {
             assertExpiryDateEquals(
                 "••/••"
@@ -47,11 +50,12 @@ internal class CardDetailsEditUITest {
     }
 
     @Test
-    fun invalidExpiryMonth_displaysDots() {
+    fun invalidExpiryMonth_displaysDots_whenExpDateIsReadOnly() {
         runScenario(
             card = PaymentMethodFixtures.CARD_WITH_NETWORKS.copy(
                 expiryMonth = -1
-            )
+            ),
+            shouldAllowExpDateEdit = false
         ) {
             assertExpiryDateEquals(
                 "••/••"
@@ -60,15 +64,25 @@ internal class CardDetailsEditUITest {
     }
 
     @Test
-    fun invalidExpiryYear_displaysDots() {
+    fun invalidExpiryYear_displaysDots_whenExpDateIsReadOnly() {
         runScenario(
             card = PaymentMethodFixtures.CARD_WITH_NETWORKS.copy(
                 expiryMonth = 202
-            )
+            ),
+            shouldAllowExpDateEdit = false
         ) {
             assertExpiryDateEquals(
                 "••/••"
             )
+        }
+    }
+
+    @Test
+    fun expiryDateFieldDisabled_whenExpDateIsReadOnly() {
+        runScenario(
+            shouldAllowExpDateEdit = false
+        ) {
+            composeRule.onNodeWithTag(UPDATE_PM_EXPIRY_FIELD_TEST_TAG).assertIsNotEnabled()
         }
     }
 
@@ -78,10 +92,10 @@ internal class CardDetailsEditUITest {
             card = PaymentMethodFixtures.CARD_WITH_NETWORKS.copy(
                 expiryMonth = 8,
                 expiryYear = 2029,
-            )
+            ),
         ) {
             assertExpiryDateEquals(
-                "08/29"
+                "08 / 29"
             )
         }
     }
@@ -95,7 +109,7 @@ internal class CardDetailsEditUITest {
             )
         ) {
             assertExpiryDateEquals(
-                "11/29"
+                "11 / 29"
             )
         }
     }
@@ -166,6 +180,56 @@ internal class CardDetailsEditUITest {
     }
 
     @Test
+    fun validExpiryDateInput_textIsCorrectlyFormatted() {
+        runScenario(
+            card = PaymentMethodFixtures.CARD_WITH_NETWORKS,
+        ) {
+            performExpiryDateInput("1255")
+
+            assertExpiryDateEquals("12 / 55")
+            composeRule.onNodeWithTag(CARD_EDIT_UI_ERROR_MESSAGE).assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun incompleteExpiryDateInput_textIsCorrectlyFormatted_errorMessageIsDisplayed() {
+        runScenario(
+            card = PaymentMethodFixtures.CARD_WITH_NETWORKS,
+        ) {
+            performExpiryDateInput("12")
+
+            assertExpiryDateEquals("12 / ")
+            composeRule.onNodeWithTag(CARD_EDIT_UI_ERROR_MESSAGE).assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun invalidExpiryDateInput_textIsCorrectlyFormatted_errorMessageIsDisplayed() {
+        runScenario(
+            card = PaymentMethodFixtures.CARD_WITH_NETWORKS,
+        ) {
+            performExpiryDateInput("1221")
+
+            assertExpiryDateEquals("12 / 21")
+            composeRule.onNodeWithTag(CARD_EDIT_UI_ERROR_MESSAGE)
+                .assert(hasText("Your card's expiration year is invalid."))
+        }
+    }
+
+    @Test
+    fun expiryDateInput_invokesCorrectViwAction() {
+        runScenario(
+            card = PaymentMethodFixtures.CARD_WITH_NETWORKS,
+        ) {
+            performExpiryDateInput("1229")
+
+            viewActionRecorder.consume(
+                viewAction = EditCardDetailsInteractor.ViewAction.DateChanged("1229")
+            )
+        }
+    }
+
+    @Test
     fun `Card drop down has accessibility label`() {
         runScenario(
             card = PaymentMethodFixtures.CARD_WITH_NETWORKS
@@ -181,6 +245,10 @@ internal class CardDetailsEditUITest {
         )
     }
 
+    private fun performExpiryDateInput(text: String) {
+        composeRule.onNodeWithTag(UPDATE_PM_EXPIRY_FIELD_TEST_TAG).performTextReplacement(text)
+    }
+
     private fun assertCvcEquals(text: String) {
         composeRule.onNodeWithTag(UPDATE_PM_CVC_FIELD_TEST_TAG).assertTextContains(
             text
@@ -190,28 +258,17 @@ internal class CardDetailsEditUITest {
     private fun runScenario(
         card: PaymentMethod.Card = PaymentMethodFixtures.CARD_WITH_NETWORKS,
         showCardBrandDropdown: Boolean = true,
-        isExpiredCard: Boolean = false,
+        shouldAllowExpDateEdit: Boolean = true,
         block: TestScenario.() -> Unit
     ) {
         val editCardDetailsInteractor = FakeEditCardDetailsInteractor(
+            card = card,
             shouldShowCardBrandDropdown = showCardBrandDropdown,
-            state = stateFlowOf(
-                value = EditCardDetailsInteractor.State(
-                    card = card,
-                    selectedCardBrand = CardBrandChoice(
-                        brand = CardBrand.CartesBancaires,
-                        enabled = true
-                    ),
-                    paymentMethodIcon = 0,
-                    shouldShowCardBrandDropdown = showCardBrandDropdown,
-                    availableNetworks = card.getAvailableNetworks(DefaultCardBrandFilter)
-                )
-            ),
+            shouldAllowExpDateEdit = shouldAllowExpDateEdit,
         )
         composeRule.setContent {
             CardDetailsEditUI(
                 editCardDetailsInteractor = editCardDetailsInteractor,
-                isExpired = isExpiredCard
             )
         }
         block(TestScenario(editCardDetailsInteractor.viewActionRecorder))

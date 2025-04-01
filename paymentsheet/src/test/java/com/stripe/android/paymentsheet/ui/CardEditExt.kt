@@ -33,3 +33,9 @@ internal fun UpdatePaymentMethodInteractor.cardParamsUpdateAction(cardBrand: Car
 internal fun UpdatePaymentMethodInteractor.nullCardParamsUpdateAction() {
     handleViewAction(UpdatePaymentMethodInteractor.ViewAction.CardUpdateParamsChanged(null))
 }
+
+internal fun EditCardDetailsInteractor.updateExpiryDate(text: String) {
+    handleViewAction(
+        viewAction = EditCardDetailsInteractor.ViewAction.DateChanged(text)
+    )
+}
