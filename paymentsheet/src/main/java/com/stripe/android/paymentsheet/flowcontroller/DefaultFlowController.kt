@@ -499,6 +499,11 @@ internal class DefaultFlowController @Inject internal constructor(
             linkHandler.logOut()
         }
 
+        if (paymentResult is PaymentResult.Completed) {
+            viewModel.paymentSelection = null
+            viewModel.state = null
+        }
+
         viewModelScope.launch {
             paymentResultCallback.onPaymentSheetResult(
                 paymentResult.convertToPaymentSheetResult()
