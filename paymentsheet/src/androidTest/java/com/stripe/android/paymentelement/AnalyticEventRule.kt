@@ -1,6 +1,5 @@
 package com.stripe.android.paymentelement
 
-import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import org.junit.rules.TestRule
@@ -9,26 +8,25 @@ import org.junit.runners.model.Statement
 
 @OptIn(ExperimentalAnalyticEventCallbackApi::class)
 class AnalyticEventRule : TestRule, AnalyticEventCallback {
-    private var _events = Turbine<AnalyticEvent>()
-    private val events: ReceiveTurbine<AnalyticEvent> = _events
+    private lateinit var events: Turbine<AnalyticEvent>
 
     override fun onEvent(event: AnalyticEvent) {
-        _events.add(event)
+        events.add(event)
     }
 
-    suspend fun validateAnalyticEvent(event: AnalyticEvent) {
+    suspend fun assertMatchesExpectedEvent(event: AnalyticEvent) {
         assertThat(events.awaitItem()).isEqualTo(event)
     }
 
-    override fun apply(base: Statement?, description: Description?): Statement {
+    override fun apply(base: Statement, description: Description): Statement {
         return object : Statement() {
             override fun evaluate() {
+                events = Turbine()
                 try {
-                    base?.evaluate()
-                    _events.expectNoEvents()
+                    base.evaluate()
+                    events.expectNoEvents()
                 } finally {
-                    _events.close()
-                    _events = Turbine()
+                    events.close()
                 }
             }
         }

@@ -38,10 +38,12 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
         validationTimeout = 1.seconds, // Analytics requests happen async.
     )
+    private val analyticEventRule = AnalyticEventRule()
 
     @get:Rule
-    val testRules: TestRules = TestRules.create(networkRule = networkRule)
-    private val analyticEventRule = testRules.analyticEventRule
+    val testRules: TestRules = TestRules.create(networkRule = networkRule) {
+        it.around(analyticEventRule)
+    }
 
     private val embeddedContentPage = EmbeddedContentPage(testRules.compose)
     private val formPage = EmbeddedFormPage(testRules.compose)
@@ -95,7 +97,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
 
         testContext.configure()
 
-        analyticEventRule.validateAnalyticEvent(AnalyticEvent.PresentedSheet())
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
 
         embeddedContentPage.clickOnLpm("card")
         formPage.fillOutCardDetails()
@@ -171,7 +173,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
         }
 
-        analyticEventRule.validateAnalyticEvent(AnalyticEvent.PresentedSheet())
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
 
         embeddedContentPage.assertHasSelectedSavedPaymentMethod("pm_12345")
 
@@ -236,7 +238,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
         }
 
-        analyticEventRule.validateAnalyticEvent(AnalyticEvent.PresentedSheet())
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
 
         validateAnalyticsRequest(eventName = "mc_embedded_manage_savedpm_show")
         embeddedContentPage.clickViewMore()

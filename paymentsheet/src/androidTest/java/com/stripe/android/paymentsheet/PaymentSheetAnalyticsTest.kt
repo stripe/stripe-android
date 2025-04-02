@@ -18,6 +18,7 @@ import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.AnalyticEvent
+import com.stripe.android.paymentelement.AnalyticEventRule
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
@@ -37,12 +38,14 @@ internal class PaymentSheetAnalyticsTest {
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
         validationTimeout = 1.seconds, // Analytics requests happen async.
     )
+    private val analyticEventRule = AnalyticEventRule()
 
     @get:Rule
-    val testRules: TestRules = TestRules.create(networkRule = networkRule)
+    val testRules: TestRules = TestRules.create(networkRule = networkRule) {
+        it.around(analyticEventRule)
+    }
 
     private val composeTestRule = testRules.compose
-    private val analyticEventRule = testRules.analyticEventRule
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
@@ -94,7 +97,7 @@ internal class PaymentSheetAnalyticsTest {
             )
         }
 
-        analyticEventRule.validateAnalyticEvent(AnalyticEvent.PresentedSheet())
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
 
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         validateAnalyticsRequest(eventName = "mc_form_interacted")
@@ -160,7 +163,7 @@ internal class PaymentSheetAnalyticsTest {
             )
         }
 
-        analyticEventRule.validateAnalyticEvent(AnalyticEvent.PresentedSheet())
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
 
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         validateAnalyticsRequest(eventName = "mc_custom_paymentoption_newpm_select")
@@ -223,7 +226,7 @@ internal class PaymentSheetAnalyticsTest {
             )
         }
 
-        analyticEventRule.validateAnalyticEvent(AnalyticEvent.PresentedSheet())
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
 
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         validateAnalyticsRequest(eventName = "mc_form_interacted")
