@@ -5,7 +5,7 @@ import com.stripe.android.model.CardBrand
 internal fun UpdatePaymentMethodInteractor.editCardDetailsInteractorHelper(
     block: EditCardDetailsInteractor.() -> Unit = {}
 ): EditCardDetailsInteractor {
-    return editCardDetailsInteractor().apply(block)
+    return editCardDetailsInteractor.apply(block)
 }
 
 internal fun EditCardDetailsInteractor.updateCardBrand(cardBrand: CardBrand) {

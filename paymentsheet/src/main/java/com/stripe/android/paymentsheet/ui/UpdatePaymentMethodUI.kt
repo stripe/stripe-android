@@ -12,7 +12,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -24,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.R
+import com.stripe.android.common.ui.PrimaryButton
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
@@ -37,7 +37,6 @@ import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.mapAsStateFlow
-import com.stripe.android.common.ui.PrimaryButton as PrimaryButton
 import com.stripe.android.paymentsheet.R as PaymentSheetR
 
 @Composable
@@ -55,9 +54,9 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
     ) {
         when (val savedPaymentMethod = interactor.displayableSavedPaymentMethod.savedPaymentMethod) {
             is SavedPaymentMethod.Card -> {
-                CardDetailsUI(
-                    savedPaymentMethod = savedPaymentMethod,
-                    interactor = interactor,
+                CardDetailsEditUI(
+                    editCardDetailsInteractor = interactor.editCardDetailsInteractor,
+                    isExpired = interactor.isExpiredCard
                 )
             }
             is SavedPaymentMethod.SepaDebit -> SepaDebitUI(
@@ -159,20 +158,6 @@ private fun UpdatePaymentMethodButtons(
         Spacer(modifier = Modifier.requiredHeight(spacerHeight))
         DeletePaymentMethodUi(interactor)
     }
-}
-
-@Composable
-private fun CardDetailsUI(
-    savedPaymentMethod: SavedPaymentMethod.Card,
-    interactor: UpdatePaymentMethodInteractor,
-) {
-    val editCardDetailsInteractor = remember(savedPaymentMethod) {
-        interactor.editCardDetailsInteractor()
-    }
-    CardDetailsEditUI(
-        editCardDetailsInteractor = editCardDetailsInteractor,
-        isExpired = interactor.isExpiredCard
-    )
 }
 
 @Composable

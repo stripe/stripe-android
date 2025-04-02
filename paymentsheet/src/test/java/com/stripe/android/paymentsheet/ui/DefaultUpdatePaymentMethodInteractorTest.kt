@@ -17,6 +17,7 @@ import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.C
 import com.stripe.android.testing.FeatureFlagTestRule
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertThrows
 import org.junit.Rule
 import org.junit.Test
 
@@ -583,9 +584,25 @@ class DefaultUpdatePaymentMethodInteractorTest {
         // No exceptions thrown here indicates that the executors were not called.
     }
 
+    @Test
+    fun shouldCreateEditCardInteractor_whenPaymentMethodIsCard() = runScenario {
+        assertThat(interactor.editCardDetailsInteractor).isNotNull()
+    }
+
+    @Test
+    fun shouldNotCreateEditCardInteractor_whenPaymentMethodIsNotCard() = runScenario(
+        displayableSavedPaymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT.toDisplayableSavedPaymentMethod()
+    ) {
+        val exception = assertThrows(IllegalStateException::class.java) {
+            interactor.editCardDetailsInteractor
+        }
+        assertThat(exception)
+            .hasMessageThat()
+            .isEqualTo("card payment method required for creating editCardDetailsInteractor")
+    }
+
     private fun updateCardAndDefaultPaymentMethod(
         interactor: UpdatePaymentMethodInteractor,
-        editCardDetailsInteractor: EditCardDetailsInteractor = interactor.editCardDetailsInteractor()
     ) {
         interactor.handleViewAction(
             UpdatePaymentMethodInteractor.ViewAction.SetAsDefaultCheckboxChanged(
@@ -593,11 +610,12 @@ class DefaultUpdatePaymentMethodInteractorTest {
             )
         )
 
-        editCardDetailsInteractor.onCardUpdateParamsChanged(
-            CardUpdateParams(
-                cardBrand = CardBrand.Visa
+        interactor.editCardDetailsInteractor
+            .onCardUpdateParamsChanged(
+                CardUpdateParams(
+                    cardBrand = CardBrand.Visa
+                )
             )
-        )
 
         interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
     }
@@ -635,7 +653,6 @@ class DefaultUpdatePaymentMethodInteractorTest {
             shouldShowSetAsDefaultCheckbox = shouldShowSetAsDefaultCheckbox,
             isDefaultPaymentMethod = isDefaultPaymentMethod,
             onUpdateSuccess = onUpdateSuccess,
-            editCardDetailsInteractorFactory = FakeEditCardDetailsInteractorFactory()
         )
 
         TestParams(interactor).apply { runTest { testBlock() } }

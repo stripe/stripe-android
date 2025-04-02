@@ -30,22 +30,19 @@ internal class FakeUpdatePaymentMethodInteractor(
     ),
     override val setAsDefaultCheckboxEnabled: Boolean = true,
     override val allowCardEdit: Boolean = false,
-    override val editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory =
-        FakeEditCardDetailsInteractorFactory(
-            shouldShowCardBrandDropdown = isModifiablePaymentMethod
-        )
 ) : UpdatePaymentMethodInteractor {
     override val state: StateFlow<UpdatePaymentMethodInteractor.State> = MutableStateFlow(initialState)
     override val screenTitle: ResolvableString? = UpdatePaymentMethodInteractor.screenTitle(
         displayableSavedPaymentMethod
     )
 
-    override fun editCardDetailsInteractor(): EditCardDetailsInteractor {
+    override val editCardDetailsInteractor: EditCardDetailsInteractor by lazy {
         val savedPaymentMethodCard = displayableSavedPaymentMethod.savedPaymentMethod as? SavedPaymentMethod.Card
         requireNotNull(savedPaymentMethodCard)
-        return editCardDetailsInteractorFactory.create(
+        FakeEditCardDetailsInteractor(
             card = savedPaymentMethodCard.card,
-            onCardUpdateParamsChanged = {},
+            shouldShowCardBrandDropdown = isModifiablePaymentMethod,
+            onCardUpdateParamsChanged = {}
         )
     }
 

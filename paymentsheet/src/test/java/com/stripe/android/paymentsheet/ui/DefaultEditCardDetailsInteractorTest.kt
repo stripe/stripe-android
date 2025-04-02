@@ -122,10 +122,10 @@ internal class DefaultEditCardDetailsInteractorTest {
         assertThat(state.shouldShowCardBrandDropdown).isFalse()
     }
 
-    private val DefaultEditCardDetailsInteractor.uiState
+    private val EditCardDetailsInteractor.uiState
         get() = this.state.value
 
-    private val DefaultEditCardDetailsInteractor.selectedBrand
+    private val EditCardDetailsInteractor.selectedBrand
         get() = uiState.selectedCardBrand.brand
 
     private fun cardUpdateParams(
@@ -148,15 +148,14 @@ internal class DefaultEditCardDetailsInteractorTest {
         isModifiable: Boolean = true,
         onBrandChoiceChanged: (CardBrand) -> Unit = {},
         onCardUpdateParamsChanged: (CardUpdateParams?) -> Unit = {}
-    ): DefaultEditCardDetailsInteractor {
-        return DefaultEditCardDetailsInteractor.Factory(
+    ): EditCardDetailsInteractor {
+        return EditCardDetailsInteractor.create(
             cardBrandFilter = cardBrandFilter,
             onBrandChoiceChanged = onBrandChoiceChanged,
             workContext = testDispatcher,
             isModifiable = isModifiable,
-        ).create(
             card = card,
-            onCardUpdateParamsChanged = onCardUpdateParamsChanged
-        ) as DefaultEditCardDetailsInteractor
+            onCardUpdateParamsChanged = onCardUpdateParamsChanged,
+        )
     }
 }

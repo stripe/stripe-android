@@ -36,9 +36,7 @@ internal interface UpdatePaymentMethodInteractor {
     val setAsDefaultCheckboxEnabled: Boolean
     val shouldShowSaveButton: Boolean
     val allowCardEdit: Boolean
-    val editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory?
-
-    fun editCardDetailsInteractor(): EditCardDetailsInteractor
+    val editCardDetailsInteractor: EditCardDetailsInteractor
 
     val state: StateFlow<State>
 
@@ -100,13 +98,6 @@ internal class DefaultUpdatePaymentMethodInteractor(
     private val onBrandChoiceSelected: (CardBrand) -> Unit,
     private val onUpdateSuccess: () -> Unit,
     private val workContext: CoroutineContext = Dispatchers.Default,
-    override val editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = DefaultEditCardDetailsInteractor
-        .Factory(
-            workContext = workContext,
-            onBrandChoiceChanged = onBrandChoiceSelected,
-            isModifiable = displayableSavedPaymentMethod.isModifiable(),
-            cardBrandFilter = cardBrandFilter
-        )
 ) : UpdatePaymentMethodInteractor {
     private val coroutineScope = CoroutineScope(workContext + SupervisorJob())
     private val error = MutableStateFlow(getInitialError())
@@ -142,25 +133,19 @@ internal class DefaultUpdatePaymentMethodInteractor(
     private val _setAsDefaultValueChanged = setAsDefaultCheckboxChecked.mapAsStateFlow { setAsDefaultCheckboxChecked ->
         setAsDefaultCheckboxChecked != initialSetAsDefaultCheckedValue
     }
-    private val editCardDetailsInteractor = run {
+    override val editCardDetailsInteractor by lazy {
         if (displayableSavedPaymentMethod.savedPaymentMethod is SavedPaymentMethod.Card) {
-            createEditCardDetailsInteractor(displayableSavedPaymentMethod.savedPaymentMethod)
+            EditCardDetailsInteractor.create(
+                card = displayableSavedPaymentMethod.savedPaymentMethod.card,
+                onCardUpdateParamsChanged = ::onCardUpdateParamsChanged,
+                workContext = workContext,
+                isModifiable = displayableSavedPaymentMethod.isModifiable(),
+                cardBrandFilter = cardBrandFilter,
+                onBrandChoiceChanged = onBrandChoiceSelected,
+            )
         } else {
-            null
+            throw IllegalStateException("card payment method required for creating editCardDetailsInteractor")
         }
-    }
-
-    private fun createEditCardDetailsInteractor(
-        savedPaymentMethod: SavedPaymentMethod.Card
-    ): EditCardDetailsInteractor {
-        return editCardDetailsInteractorFactory.create(
-            card = savedPaymentMethod.card,
-            onCardUpdateParamsChanged = ::onCardUpdateParamsChanged,
-        )
-    }
-
-    override fun editCardDetailsInteractor(): EditCardDetailsInteractor {
-        return editCardDetailsInteractor ?: throw IllegalStateException("No editCardDetailsInteractor found")
     }
 
     private fun onCardUpdateParamsChanged(cardUpdateParams: CardUpdateParams?) {
