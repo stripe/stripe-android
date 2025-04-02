@@ -7,11 +7,14 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.paymentelement.AnalyticEventCallback
+import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
+import kotlinx.coroutines.test.runTest
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -48,7 +51,29 @@ internal fun runPaymentSheetTest(
     createIntentCallback: CreateIntentCallback? = null,
     successTimeoutSeconds: Long = 5L,
     resultCallback: PaymentSheetResultCallback,
-    block: (PaymentSheetTestRunnerContext) -> Unit,
+    block: suspend (PaymentSheetTestRunnerContext) -> Unit,
+) {
+    @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+    runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        createIntentCallback = createIntentCallback,
+        analyticEventCallback = null,
+        successTimeoutSeconds = successTimeoutSeconds,
+        resultCallback = resultCallback,
+        block = block
+    )
+}
+
+@OptIn(ExperimentalAnalyticEventCallbackApi::class)
+internal fun runPaymentSheetTest(
+    networkRule: NetworkRule,
+    integrationType: IntegrationType = IntegrationType.Compose,
+    createIntentCallback: CreateIntentCallback? = null,
+    analyticEventCallback: AnalyticEventCallback? = null,
+    successTimeoutSeconds: Long = 5L,
+    resultCallback: PaymentSheetResultCallback,
+    block: suspend (PaymentSheetTestRunnerContext) -> Unit,
 ) {
     val countDownLatch = CountDownLatch(1)
 
@@ -57,6 +82,7 @@ internal fun runPaymentSheetTest(
         countDownLatch.countDown()
     }.apply {
         createIntentCallback?.let { createIntentCallback(it) }
+        analyticEventCallback?.let { analyticEventCallback(it) }
     }
 
     ActivityScenario.launch(MainActivity::class.java).use { scenario ->
@@ -82,7 +108,9 @@ internal fun runPaymentSheetTest(
         scenario.moveToState(Lifecycle.State.RESUMED)
 
         val testContext = PaymentSheetTestRunnerContext(scenario, paymentSheet, countDownLatch)
-        block(testContext)
+        runTest {
+            block(testContext)
+        }
 
         val didCompleteSuccessfully = countDownLatch.await(successTimeoutSeconds, TimeUnit.SECONDS)
         networkRule.validate()

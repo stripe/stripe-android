@@ -52,10 +52,12 @@ internal class EmbeddedPaymentElementTestRunnerContext(
     }
 }
 
+@OptIn(ExperimentalAnalyticEventCallbackApi::class)
 internal fun runEmbeddedPaymentElementTest(
     networkRule: NetworkRule,
     createIntentCallback: CreateIntentCallback,
     resultCallback: EmbeddedPaymentElement.ResultCallback,
+    analyticEventCallback: AnalyticEventCallback? = null,
     successTimeoutSeconds: Long = 5L,
     block: suspend (EmbeddedPaymentElementTestRunnerContext) -> Unit,
 ) {
@@ -69,7 +71,9 @@ internal fun runEmbeddedPaymentElementTest(
                 resultCallback.onResult(result)
                 countDownLatch.countDown()
             },
-        )
+        ).analyticEventCallback { event ->
+            analyticEventCallback?.onEvent(event)
+        }
         it.setContent {
             embeddedPaymentElement = rememberEmbeddedPaymentElement(builder)
             val scrollState = rememberScrollState()
