@@ -666,16 +666,16 @@ class DefaultEventReporterTest {
         PaymentConfiguration.clearInstance()
         // Would crash if it tries to read from the uninitialized PaymentConfiguration
         DefaultEventReporter(
-            mock(),
-            EventReporter.Mode.Complete,
-            analyticsRequestExecutor,
-            analyticsV2RequestExecutor,
-            analyticsRequestFactory,
-            durationProvider,
-            analyticEventCallbackProvider,
-            testDispatcher,
-            FakeIsStripeCardScanAvailable(),
-            fakeUserFacingLogger,
+            context = ApplicationProvider.getApplicationContext(),
+            mode = EventReporter.Mode.Complete,
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            analyticsRequestV2Executor = analyticsV2RequestExecutor,
+            paymentAnalyticsRequestFactory = analyticsRequestFactory,
+            durationProvider = durationProvider,
+            analyticEventCallbackProvider = analyticEventCallbackProvider,
+            workContext = testDispatcher,
+            isStripeCardScanAvailable = FakeIsStripeCardScanAvailable(),
+            logger = fakeUserFacingLogger,
         )
     }
 
