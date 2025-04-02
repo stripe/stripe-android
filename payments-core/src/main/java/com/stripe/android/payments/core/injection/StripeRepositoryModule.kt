@@ -34,6 +34,7 @@ abstract class StripeRepositoryModule {
         stripeApiRepository: StripeApiRepository
     ): StripeRepository
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         @Provides
         fun providesAnalyticsRequestV2Executor(
