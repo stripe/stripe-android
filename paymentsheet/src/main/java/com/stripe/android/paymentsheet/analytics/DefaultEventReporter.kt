@@ -505,7 +505,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     private companion object {
-        const val CLIENT_ID = "mobile-elements-sdk"
-        const val ORIGIN = "stripe-elements-android"
+        const val CLIENT_ID = "stripe-mobile-sdk"
+        const val ORIGIN = "stripe-mobile-sdk-android"
     }
 }
