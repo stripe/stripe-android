@@ -13,6 +13,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcCompletionState
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionPaymentSheetScreen
+import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.AddPaymentMethod
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
@@ -79,7 +80,7 @@ internal sealed interface PaymentSheetScreen {
 
     fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?>
 
-    fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean>
+    fun showsWalletsHeader(isCompleteFlow: Boolean, walletsState: WalletsState?): Boolean
 
     @Composable
     fun Content(modifier: Modifier)
@@ -103,9 +104,7 @@ internal sealed interface PaymentSheetScreen {
             return stateFlowOf(null)
         }
 
-        override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
-            return stateFlowOf(false)
-        }
+        override fun showsWalletsHeader(isCompleteFlow: Boolean, walletsState: WalletsState?) = false
 
         @Composable
         override fun Content(modifier: Modifier) {
@@ -158,9 +157,7 @@ internal sealed interface PaymentSheetScreen {
             )
         }
 
-        override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
-            return stateFlowOf(isCompleteFlow)
-        }
+        override fun showsWalletsHeader(isCompleteFlow: Boolean, walletsState: WalletsState?) = isCompleteFlow
 
         @Composable
         override fun Content(modifier: Modifier) {
@@ -213,9 +210,7 @@ internal sealed interface PaymentSheetScreen {
             }
         }
 
-        override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
-            return stateFlowOf(isCompleteFlow)
-        }
+        override fun showsWalletsHeader(isCompleteFlow: Boolean, walletsState: WalletsState?) = isCompleteFlow
 
         @Composable
         override fun Content(modifier: Modifier) {
@@ -265,9 +260,7 @@ internal sealed interface PaymentSheetScreen {
             }
         }
 
-        override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
-            return stateFlowOf(true)
-        }
+        override fun showsWalletsHeader(isCompleteFlow: Boolean, walletsState: WalletsState?) = true
 
         @Composable
         override fun Content(modifier: Modifier) {
@@ -311,9 +304,8 @@ internal sealed interface PaymentSheetScreen {
             )
         }
 
-        override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
-            return interactor.showsWalletsHeader
-        }
+        override fun showsWalletsHeader(isCompleteFlow: Boolean, walletsState: WalletsState?) =
+            interactor.showsWalletsHeader(walletsState)
 
         @Composable
         override fun Content(modifier: Modifier) {
@@ -348,9 +340,7 @@ internal sealed interface PaymentSheetScreen {
             return stateFlowOf(null)
         }
 
-        override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> {
-            return stateFlowOf(showsWalletHeader)
-        }
+        override fun showsWalletsHeader(isCompleteFlow: Boolean, walletsState: WalletsState?) = showsWalletHeader
 
         @Composable
         override fun Content(modifier: Modifier) {
@@ -384,8 +374,7 @@ internal sealed interface PaymentSheetScreen {
             }
         }
 
-        override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> =
-            stateFlowOf(false)
+        override fun showsWalletsHeader(isCompleteFlow: Boolean, walletsState: WalletsState?) = false
 
         @Composable
         override fun Content(modifier: Modifier) {
@@ -428,7 +417,7 @@ internal sealed interface PaymentSheetScreen {
 
         override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean) = stateFlowOf(null)
 
-        override fun showsWalletsHeader(isCompleteFlow: Boolean) = stateFlowOf(false)
+        override fun showsWalletsHeader(isCompleteFlow: Boolean, walletsState: WalletsState?) = false
 
         @Composable
         override fun Content(modifier: Modifier) {
@@ -454,7 +443,7 @@ internal sealed interface PaymentSheetScreen {
             return stateFlowOf(interactor.screenTitle)
         }
 
-        override fun showsWalletsHeader(isCompleteFlow: Boolean): StateFlow<Boolean> = stateFlowOf(false)
+        override fun showsWalletsHeader(isCompleteFlow: Boolean, walletsState: WalletsState?) = false
 
         @Composable
         override fun Content(modifier: Modifier) {

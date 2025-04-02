@@ -37,7 +37,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
 
     val state: StateFlow<State>
 
-    val showsWalletsHeader: StateFlow<Boolean>
+    fun showsWalletsHeader(walletsState: WalletsState?): Boolean
 
     fun handleViewAction(viewAction: ViewAction)
 
@@ -237,8 +237,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         )
     }
 
-    override val showsWalletsHeader: StateFlow<Boolean> = walletsState.mapAsStateFlow { walletsState ->
-        !showsWalletsInline(walletsState)
+    override fun showsWalletsHeader(walletsState: WalletsState?): Boolean {
+        return !showsWalletsInline(walletsState)
     }
 
     init {
