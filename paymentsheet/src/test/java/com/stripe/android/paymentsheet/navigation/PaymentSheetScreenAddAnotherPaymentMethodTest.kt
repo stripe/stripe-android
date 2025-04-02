@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.navigation
 
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -20,19 +21,19 @@ internal class PaymentSheetScreenAddAnotherPaymentMethodTest {
     @Test
     fun `title returns null when isWalletEnabled`() = runTest {
         val interactor = FakeAddPaymentMethodInteractor(createState())
-        assertThat(
-            PaymentSheetScreen.AddAnotherPaymentMethod(interactor)
-                .title(isCompleteFlow = false, isWalletEnabled = true)
-        ).isNull()
+        PaymentSheetScreen.AddAnotherPaymentMethod(interactor)
+            .title(isCompleteFlow = false, isWalletEnabled = true).test {
+                assertThat(awaitItem()).isNull()
+            }
     }
 
     @Test
     fun `title returns null when isCompleteFlow`() = runTest {
         val interactor = FakeAddPaymentMethodInteractor(createState())
-        assertThat(
-            PaymentSheetScreen.AddAnotherPaymentMethod(interactor)
-                .title(isCompleteFlow = true, isWalletEnabled = false)
-        ).isNull()
+        PaymentSheetScreen.AddAnotherPaymentMethod(interactor)
+            .title(isCompleteFlow = true, isWalletEnabled = false).test {
+                assertThat(awaitItem()).isNull()
+            }
     }
 
     @Test
@@ -45,10 +46,10 @@ internal class PaymentSheetScreenAddAnotherPaymentMethodTest {
             )
         )
         val interactor = FakeAddPaymentMethodInteractor(state)
-        assertThat(
-            PaymentSheetScreen.AddAnotherPaymentMethod(interactor)
-                .title(isCompleteFlow = false, isWalletEnabled = false)
-        ).isEqualTo(PaymentsCoreR.string.stripe_title_add_a_card.resolvableString)
+        PaymentSheetScreen.AddAnotherPaymentMethod(interactor)
+            .title(isCompleteFlow = false, isWalletEnabled = false).test {
+                assertThat(awaitItem()).isEqualTo(PaymentsCoreR.string.stripe_title_add_a_card.resolvableString)
+            }
     }
 
     @Test
@@ -62,18 +63,18 @@ internal class PaymentSheetScreenAddAnotherPaymentMethodTest {
             )
         )
         val interactor = FakeAddPaymentMethodInteractor(state)
-        assertThat(
-            PaymentSheetScreen.AddAnotherPaymentMethod(interactor)
-                .title(isCompleteFlow = false, isWalletEnabled = false)
-        ).isEqualTo(R.string.stripe_paymentsheet_choose_payment_method.resolvableString)
+        PaymentSheetScreen.AddAnotherPaymentMethod(interactor)
+            .title(isCompleteFlow = false, isWalletEnabled = false).test {
+                assertThat(awaitItem()).isEqualTo(R.string.stripe_paymentsheet_choose_payment_method.resolvableString)
+            }
     }
 
     @Test
     fun `title returns choose payment method with more than one supported payment method`() = runTest {
         val interactor = FakeAddPaymentMethodInteractor(createState())
-        assertThat(
-            PaymentSheetScreen.AddAnotherPaymentMethod(interactor)
-                .title(isCompleteFlow = false, isWalletEnabled = false)
-        ).isEqualTo(R.string.stripe_paymentsheet_choose_payment_method.resolvableString)
+        PaymentSheetScreen.AddAnotherPaymentMethod(interactor)
+            .title(isCompleteFlow = false, isWalletEnabled = false).test {
+                assertThat(awaitItem()).isEqualTo(R.string.stripe_paymentsheet_choose_payment_method.resolvableString)
+            }
     }
 }

@@ -196,14 +196,16 @@ internal fun rememberPaymentSheetScreenContentState(
     currentScreen: PaymentSheetScreen,
     primaryButtonUiState: PrimaryButton.UIState?
 ): PaymentSheetScreenContentState {
-    return remember(type, walletsState, currentScreen, primaryButtonUiState) {
-        val isCompleteFlow = type == Complete
-        val showsWalletsHeader = currentScreen.showsWalletsHeader(isCompleteFlow, walletsState)
-        val actualWalletsState = walletsState.takeIf { showsWalletsHeader }
-        val headerText = currentScreen.title(
-            isCompleteFlow = isCompleteFlow,
-            isWalletEnabled = actualWalletsState != null
-        )
+    val showsWalletsHeader = currentScreen.showsWalletsHeader(
+        isCompleteFlow = type == Complete,
+        walletsState = walletsState
+    )
+    val actualWalletsState = walletsState.takeIf { showsWalletsHeader }
+    val headerText by currentScreen.title(
+        isCompleteFlow = type == Complete,
+        isWalletEnabled = actualWalletsState != null
+    ).collectAsState()
+    return remember(type, actualWalletsState, headerText, currentScreen, primaryButtonUiState) {
         PaymentSheetScreenContentState(
             showsWalletsHeader = showsWalletsHeader,
             actualWalletsState = actualWalletsState,
