@@ -42,7 +42,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
 
     @get:Rule
     val testRules: TestRules = TestRules.create(networkRule = networkRule) {
-        it.around(analyticEventRule)
+        around(analyticEventRule)
     }
 
     private val embeddedContentPage = EmbeddedContentPage(testRules.compose)
