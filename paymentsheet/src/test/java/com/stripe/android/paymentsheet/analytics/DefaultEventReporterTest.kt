@@ -48,7 +48,6 @@ import org.robolectric.RobolectricTestRunner
 import java.io.IOException
 import javax.inject.Provider
 import kotlin.test.Test
-import kotlin.text.get
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -616,8 +615,6 @@ class DefaultEventReporterTest {
             val experiment = LoggableExperiment.LinkGlobalHoldback(
                 arbId = "random_arb_id",
                 group = ExperimentGroup.TREATMENT,
-                isReturningLinkUser = true,
-                isLinkNative = false,
             )
             completeEventReporter.onExperimentExposure(experiment)
 
@@ -629,11 +626,6 @@ class DefaultEventReporterTest {
                         params["arb_id"] == "random_arb_id" &&
                         params["assignment_group"] == "treatment" &&
                         params["integration_type"] == "dimensions-integration_type=mpe" &&
-                        params["link_default_opt_in"] == "dimensions-link_default_opt_in=true" &&
-                        params["is_returning_link_user"] == "dimensions-is_returning_link_user=true" &&
-                        params["dvs_provided"] == "dimensions-dvs_provided=" &&
-                        params["recognition_type"] == "dimensions-recognition_type=email" &&
-                        params["link_native"] == "dimensions-link_native=false" &&
                         params["sdk_platform"] == "android" &&
                         params["plugin_type"] == "native"
                 }
