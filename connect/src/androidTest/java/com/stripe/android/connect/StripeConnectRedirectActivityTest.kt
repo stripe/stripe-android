@@ -6,21 +6,33 @@ import android.net.Uri
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.matcher.IntentMatchers
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
+import androidx.test.espresso.intent.rule.IntentsRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.UiSelector
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import org.hamcrest.CoreMatchers
 import org.hamcrest.Matcher
-import org.junit.After
-import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 @RunWith(AndroidJUnit4::class)
 internal class StripeConnectRedirectActivityTest {
+
+    @get:Rule
+    val intentsTestRule = IntentsRule()
 
     private val packageName = ApplicationProvider.getApplicationContext<Application>().packageName
     private val deepLinkUri = "stripe-connect://$packageName"
@@ -36,11 +48,6 @@ internal class StripeConnectRedirectActivityTest {
             url?.let { IntentMatchers.hasData(Uri.parse(it)) }
         )
         return CoreMatchers.allOf(matchers)
-    }
-
-    @Before
-    fun setUp() {
-        Intents.init()
     }
 
     @Test
@@ -71,6 +78,15 @@ internal class StripeConnectRedirectActivityTest {
         }
     }
 
+    @Test
+    fun testClosingCustomTabClosesActivity() = runTest {
+        launchWithCustomTabUrl(customTabUrl).use {
+            assertThat(it.state).isEqualTo(Lifecycle.State.CREATED)
+            closeCustomTab()
+            pollUntil(10.seconds) { it.state == Lifecycle.State.DESTROYED }
+        }
+    }
+
     private fun viewIntent(uri: String): Intent {
         return Intent(Intent.ACTION_VIEW, Uri.parse(uri))
     }
@@ -88,8 +104,21 @@ internal class StripeConnectRedirectActivityTest {
         return ActivityScenario.launch(intent)
     }
 
-    @After
-    fun tearDown() {
-        Intents.release()
+    private fun closeCustomTab() {
+        val result = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+            .findObject(UiSelector().descriptionContains("Close tab"))
+            .click()
+        assertThat(result).isTrue()
+    }
+
+    private suspend inline fun pollUntil(timeout: Duration, crossinline condition: () -> Boolean) {
+        withContext(Dispatchers.Default.limitedParallelism(1)) {
+            withTimeout(timeout) {
+                while (!condition()) {
+                    // Poll.
+                    delay(50L)
+                }
+            }
+        }
     }
 }
