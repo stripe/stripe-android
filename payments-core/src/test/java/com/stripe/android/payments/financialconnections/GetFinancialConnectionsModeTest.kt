@@ -2,7 +2,6 @@ package com.stripe.android.payments.financialconnections
 
 import com.stripe.android.core.utils.FeatureFlags.financialConnectionsFullSdkUnavailable
 import com.stripe.android.core.utils.FeatureFlags.financialConnectionsLiteKillswitch
-import com.stripe.android.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_DISABLE_FC_LITE
 import org.mockito.kotlin.doReturn

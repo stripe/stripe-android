@@ -8,7 +8,6 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.core.os.bundleOf
-import com.stripe.android.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountActivity
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability

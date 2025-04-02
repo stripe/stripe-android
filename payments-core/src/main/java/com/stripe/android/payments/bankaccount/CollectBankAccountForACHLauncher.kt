@@ -1,7 +1,6 @@
 package com.stripe.android.payments.bankaccount
 
 import androidx.activity.result.ActivityResultLauncher
-import com.stripe.android.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 

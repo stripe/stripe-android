@@ -6,7 +6,6 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
