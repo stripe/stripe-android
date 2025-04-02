@@ -14,7 +14,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat.checkSelfPermission
 import com.stripe.android.connect.BuildConfig
-import com.stripe.android.connect.ClientSecretProvider
+import com.stripe.android.connect.FetchClientSecret
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.analytics.ComponentAnalyticsService
@@ -42,7 +42,7 @@ import javax.inject.Inject
 @EmbeddedComponentManagerScope
 internal class EmbeddedComponentCoordinator @Inject constructor(
     @PublishableKey private val publishableKey: String,
-    private val clientSecretProvider: ClientSecretProvider,
+    val fetchClientSecret: FetchClientSecret,
     private val logger: Logger,
     appearance: Appearance,
     internal val customFonts: List<CustomFontSource>,
@@ -73,13 +73,6 @@ internal class EmbeddedComponentCoordinator @Inject constructor(
             append("#component=${component.componentName}")
             append("&publicKey=$publishableKey")
         }
-    }
-
-    /**
-     * Fetch the client secret from the consumer of the SDK.
-     */
-    internal suspend fun fetchClientSecret(): String? {
-        return clientSecretProvider.provideClientSecret()
     }
 
     /**
