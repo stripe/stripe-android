@@ -78,7 +78,7 @@ internal sealed interface PaymentSheetScreen {
 
     fun topBarState(): StateFlow<PaymentSheetTopBarState?>
 
-    fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?>
+    fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): ResolvableString?
 
     fun showsWalletsHeader(isCompleteFlow: Boolean, walletsState: WalletsState?): Boolean
 
@@ -100,8 +100,8 @@ internal sealed interface PaymentSheetScreen {
             return stateFlowOf(null)
         }
 
-        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?> {
-            return stateFlowOf(null)
+        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): ResolvableString? {
+            return null
         }
 
         override fun showsWalletsHeader(isCompleteFlow: Boolean, walletsState: WalletsState?) = false
@@ -147,14 +147,12 @@ internal sealed interface PaymentSheetScreen {
             }
         }
 
-        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?> {
-            return stateFlowOf(
-                if (isCompleteFlow && isWalletEnabled) {
-                    null
-                } else {
-                    R.string.stripe_paymentsheet_select_your_payment_method.resolvableString
-                }
-            )
+        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): ResolvableString? {
+            return if (isCompleteFlow && isWalletEnabled) {
+                null
+            } else {
+                R.string.stripe_paymentsheet_select_your_payment_method.resolvableString
+            }
         }
 
         override fun showsWalletsHeader(isCompleteFlow: Boolean, walletsState: WalletsState?) = isCompleteFlow
@@ -196,16 +194,16 @@ internal sealed interface PaymentSheetScreen {
             )
         }
 
-        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?> {
-            return interactor.state.mapAsStateFlow { state ->
-                if (isWalletEnabled || isCompleteFlow) {
-                    null
+        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): ResolvableString? {
+            return if (isWalletEnabled || isCompleteFlow) {
+                null
+            } else {
+                if (interactor.state.value.supportedPaymentMethods.singleOrNull()?.code ==
+                    PaymentMethod.Type.Card.code
+                ) {
+                    PaymentsCoreR.string.stripe_title_add_a_card.resolvableString
                 } else {
-                    if (state.supportedPaymentMethods.singleOrNull()?.code == PaymentMethod.Type.Card.code) {
-                        PaymentsCoreR.string.stripe_title_add_a_card.resolvableString
-                    } else {
-                        R.string.stripe_paymentsheet_choose_payment_method.resolvableString
-                    }
+                    R.string.stripe_paymentsheet_choose_payment_method.resolvableString
                 }
             }
         }
@@ -244,18 +242,18 @@ internal sealed interface PaymentSheetScreen {
             )
         }
 
-        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?> {
-            return interactor.state.mapAsStateFlow { state ->
-                if (isWalletEnabled) {
-                    null
-                } else if (isCompleteFlow) {
-                    R.string.stripe_paymentsheet_add_payment_method_title.resolvableString
+        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): ResolvableString? {
+            return if (isWalletEnabled) {
+                null
+            } else if (isCompleteFlow) {
+                R.string.stripe_paymentsheet_add_payment_method_title.resolvableString
+            } else {
+                if (interactor.state.value.supportedPaymentMethods.singleOrNull()?.code ==
+                    PaymentMethod.Type.Card.code
+                ) {
+                    PaymentsCoreR.string.stripe_title_add_a_card.resolvableString
                 } else {
-                    if (state.supportedPaymentMethods.singleOrNull()?.code == PaymentMethod.Type.Card.code) {
-                        PaymentsCoreR.string.stripe_title_add_a_card.resolvableString
-                    } else {
-                        R.string.stripe_paymentsheet_choose_payment_method.resolvableString
-                    }
+                    R.string.stripe_paymentsheet_choose_payment_method.resolvableString
                 }
             }
         }
@@ -292,16 +290,14 @@ internal sealed interface PaymentSheetScreen {
             )
         }
 
-        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?> {
-            return stateFlowOf(
-                if (isWalletEnabled) {
-                    null
-                } else if (isCompleteFlow) {
-                    R.string.stripe_paymentsheet_select_payment_method.resolvableString
-                } else {
-                    R.string.stripe_paymentsheet_choose_payment_method.resolvableString
-                }
-            )
+        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): ResolvableString? {
+            return if (isWalletEnabled) {
+                null
+            } else if (isCompleteFlow) {
+                R.string.stripe_paymentsheet_select_payment_method.resolvableString
+            } else {
+                R.string.stripe_paymentsheet_choose_payment_method.resolvableString
+            }
         }
 
         override fun showsWalletsHeader(isCompleteFlow: Boolean, walletsState: WalletsState?) =
@@ -336,8 +332,8 @@ internal sealed interface PaymentSheetScreen {
             )
         }
 
-        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?> {
-            return stateFlowOf(null)
+        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): ResolvableString? {
+            return null
         }
 
         override fun showsWalletsHeader(isCompleteFlow: Boolean, walletsState: WalletsState?) = showsWalletHeader
@@ -368,10 +364,8 @@ internal sealed interface PaymentSheetScreen {
             }
         }
 
-        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?> {
-            return interactor.state.mapAsStateFlow { state ->
-                state.title
-            }
+        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): ResolvableString? {
+            return interactor.state.value.title
         }
 
         override fun showsWalletsHeader(isCompleteFlow: Boolean, walletsState: WalletsState?) = false
@@ -415,7 +409,7 @@ internal sealed interface PaymentSheetScreen {
             }
         }
 
-        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean) = stateFlowOf(null)
+        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): ResolvableString? = null
 
         override fun showsWalletsHeader(isCompleteFlow: Boolean, walletsState: WalletsState?) = false
 
@@ -439,8 +433,8 @@ internal sealed interface PaymentSheetScreen {
 
         override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(interactor.topBarState)
 
-        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): StateFlow<ResolvableString?> {
-            return stateFlowOf(interactor.screenTitle)
+        override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): ResolvableString? {
+            return interactor.screenTitle
         }
 
         override fun showsWalletsHeader(isCompleteFlow: Boolean, walletsState: WalletsState?) = false
