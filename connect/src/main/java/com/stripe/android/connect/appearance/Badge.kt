@@ -6,26 +6,20 @@ import com.stripe.android.connect.PrivateBetaConnectSDK
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
+/**
+ * @param colorBackground The background color of the badge. If null the default will be used.
+ * @param colorBorder The border color of the badge. If null the default will be used.
+ * @param colorText The text color of the badge. If null the default will be used.
+ */
 @PrivateBetaConnectSDK
 @Parcelize
 @Poko
 class Badge(
-    /**
-     * The background color of the badge. If null the default will be used.
-     */
-    @ColorInt val colorBackground: Int? = null,
-
-    /**
-     * The text color of the badge. If null the default will be used.
-     */
-    @ColorInt val colorText: Int? = null,
-
-    /**
-     * The border color of the badge. If null the default will be used.
-     */
-    @ColorInt val colorBorder: Int? = null,
+    @ColorInt internal val colorBackground: Int? = null,
+    @ColorInt internal val colorBorder: Int? = null,
+    @ColorInt internal val colorText: Int? = null,
 ) : Parcelable {
     internal companion object {
-        internal val default = Badge()
+        internal fun default() = Badge()
     }
 }

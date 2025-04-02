@@ -302,7 +302,8 @@ class PaymentSheetEventTest {
                 "selected_lpm" to "none",
                 "intent_type" to "payment_intent",
                 "ordered_lpms" to "card,klarna",
-                "require_cvc_recollection" to false
+                "require_cvc_recollection" to false,
+                "link_display" to "automatic",
             )
         )
     }
@@ -391,6 +392,7 @@ class PaymentSheetEventTest {
     @Test
     fun `LoadSucceeded event should contain passthrough mode for Link if provided`() {
         val event = createLoadSucceededEvent(
+            linkEnabled = true,
             linkMode = LinkMode.Passthrough,
         )
 
@@ -401,6 +403,7 @@ class PaymentSheetEventTest {
     @Test
     fun `LoadSucceeded event should contain payment method mode for Link if provided`() {
         val event = createLoadSucceededEvent(
+            linkEnabled = true,
             linkMode = LinkMode.LinkPaymentMethod,
         )
 
@@ -1426,6 +1429,7 @@ class PaymentSheetEventTest {
 
     private fun createLoadSucceededEvent(
         isDeferred: Boolean = false,
+        linkEnabled: Boolean = false,
         linkMode: LinkMode? = null,
         googlePaySupported: Boolean = false,
         duration: Duration = (5L).seconds,
@@ -1434,9 +1438,11 @@ class PaymentSheetEventTest {
         orderedLpms: List<String> = listOf("card"),
         hasDefaultPaymentMethod: Boolean? = null,
         setAsDefaultEnabled: Boolean? = null,
+        linkDisplay: PaymentSheet.LinkConfiguration.Display = PaymentSheet.LinkConfiguration.Display.Automatic,
     ): PaymentSheetEvent.LoadSucceeded {
         return PaymentSheetEvent.LoadSucceeded(
             isDeferred = isDeferred,
+            linkEnabled = linkEnabled,
             linkMode = linkMode,
             googlePaySupported = googlePaySupported,
             duration = duration,
@@ -1445,6 +1451,7 @@ class PaymentSheetEventTest {
             orderedLpms = orderedLpms,
             hasDefaultPaymentMethod = hasDefaultPaymentMethod,
             setAsDefaultEnabled = setAsDefaultEnabled,
+            linkDisplay = linkDisplay,
         )
     }
 

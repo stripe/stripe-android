@@ -45,14 +45,15 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         orderedLpms: List<String>,
         duration: Duration?,
         linkMode: LinkMode?,
+        override val linkEnabled: Boolean,
         override val isDeferred: Boolean,
         override val googlePaySupported: Boolean,
+        linkDisplay: PaymentSheet.LinkConfiguration.Display,
         requireCvcRecollection: Boolean = false,
         hasDefaultPaymentMethod: Boolean? = null,
         setAsDefaultEnabled: Boolean? = null,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_load_succeeded"
-        override val linkEnabled: Boolean = linkMode != null
         override val additionalParams: Map<String, Any?> = buildMap {
             put(FIELD_DURATION, duration?.asSeconds)
             put(FIELD_SELECTED_LPM, paymentSelection.defaultAnalyticsValue)
@@ -65,6 +66,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             setAsDefaultEnabled?.let {
                 put(FIELD_SET_AS_DEFAULT_ENABLED, it)
             }
+            put(FIELD_LINK_DISPLAY, linkDisplay.analyticsValue)
             if (setAsDefaultEnabled == true && hasDefaultPaymentMethod != null) {
                 put(FIELD_HAS_DEFAULT_PAYMENT_METHOD, hasDefaultPaymentMethod)
             }
@@ -573,6 +575,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_REQUIRE_CVC_RECOLLECTION = "require_cvc_recollection"
         const val FIELD_CARD_BRAND_ACCEPTANCE = "card_brand_acceptance"
         const val FIELD_CARD_SCAN_AVAILABLE = "card_scan_available"
+        const val FIELD_LINK_DISPLAY = "link_display"
 
         const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
         const val VALUE_ADD_CBC_EVENT_SOURCE = "add"

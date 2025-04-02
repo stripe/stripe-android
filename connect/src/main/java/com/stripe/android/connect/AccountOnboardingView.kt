@@ -3,7 +3,6 @@ package com.stripe.android.connect
 import android.content.Context
 import android.os.Parcelable
 import android.util.AttributeSet
-import androidx.annotation.RestrictTo
 import androidx.core.content.withStyledAttributes
 import com.stripe.android.connect.webview.StripeConnectWebViewContainer
 import com.stripe.android.connect.webview.serialization.SetOnExit
@@ -72,7 +71,6 @@ internal class AccountOnboardingView internal constructor(
 }
 
 @PrivateBetaConnectSDK
-@RestrictTo(RestrictTo.Scope.LIBRARY)
 @Parcelize
 @Poko
 class AccountOnboardingProps(
@@ -105,10 +103,8 @@ class AccountOnboardingProps(
      * Specifying `eventually_due` collects both `eventually_due` and `currently_due` requirements.
      */
     val collectionOptions: CollectionOptions? = null,
-) : ComponentProps {
+) : Parcelable {
 
-    @PrivateBetaConnectSDK
-    @RestrictTo(RestrictTo.Scope.LIBRARY)
     @Parcelize
     @Poko
     class CollectionOptions(
@@ -116,15 +112,11 @@ class AccountOnboardingProps(
         val futureRequirements: FutureRequirementOption? = null,
     ) : Parcelable
 
-    @PrivateBetaConnectSDK
-    @RestrictTo(RestrictTo.Scope.LIBRARY)
     enum class FieldOption(internal val value: String) {
         CURRENTLY_DUE("currently_due"),
         EVENTUALLY_DUE("eventually_due"),
     }
 
-    @PrivateBetaConnectSDK
-    @RestrictTo(RestrictTo.Scope.LIBRARY)
     enum class FutureRequirementOption(internal val value: String) {
         OMIT("omit"),
         INCLUDE("include"),
@@ -132,7 +124,6 @@ class AccountOnboardingProps(
 }
 
 @PrivateBetaConnectSDK
-@RestrictTo(RestrictTo.Scope.LIBRARY)
 interface AccountOnboardingListener : StripeEmbeddedComponentListener {
     /**
      * The connected account has exited the onboarding process.

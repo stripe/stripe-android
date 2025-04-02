@@ -16,7 +16,7 @@ import kotlin.reflect.KClass
 @Singleton
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class EmbeddedPaymentElementViewModel @Inject constructor(
-    val embeddedPaymentElementSubcomponentBuilder: EmbeddedPaymentElementSubcomponent.Builder,
+    val embeddedPaymentElementSubcomponentFactory: EmbeddedPaymentElementSubcomponent.Factory,
     @ViewModelScope private val customViewModelScope: CoroutineScope,
 ) : ViewModel() {
     override fun onCleared() {
@@ -28,12 +28,12 @@ internal class EmbeddedPaymentElementViewModel @Inject constructor(
         private val statusBarColor: Int?,
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: KClass<T>, extras: CreationExtras): T {
-            val component = DaggerEmbeddedPaymentElementViewModelComponent.builder()
-                .savedStateHandle(extras.createSavedStateHandle())
-                .application(extras.requireApplication())
-                .paymentElementCallbackIdentifier(paymentElementCallbackIdentifier)
-                .statusBarColor(statusBarColor)
-                .build()
+            val component = DaggerEmbeddedPaymentElementViewModelComponent.factory().build(
+                savedStateHandle = extras.createSavedStateHandle(),
+                application = extras.requireApplication(),
+                paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
+                statusBarColor = statusBarColor,
+            )
             @Suppress("UNCHECKED_CAST")
             return component.viewModel as T
         }

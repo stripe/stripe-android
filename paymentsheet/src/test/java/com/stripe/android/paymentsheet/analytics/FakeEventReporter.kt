@@ -79,8 +79,10 @@ internal class FakeEventReporter : EventReporter {
 
     override fun onLoadSucceeded(
         paymentSelection: PaymentSelection?,
+        linkEnabled: Boolean,
         linkMode: LinkMode?,
         googlePaySupported: Boolean,
+        linkDisplay: PaymentSheet.LinkConfiguration.Display,
         currency: String?,
         initializationMode: PaymentElementLoader.InitializationMode,
         orderedLpms: List<String>,

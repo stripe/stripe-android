@@ -60,12 +60,10 @@ import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
@@ -132,6 +130,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     internal val isProcessingPaymentIntent
         get() = args.initializationMode.isProcessingPayment
 
+    private var inProgressSelection: PaymentSelection?
+        get() = savedStateHandle[IN_PROGRESS_SELECTION]
+        set(value) {
+            savedStateHandle[IN_PROGRESS_SELECTION] = value
+        }
+
     override var newPaymentSelection: NewOrExternalPaymentSelection? = null
 
     private val googlePayButtonType: GooglePayButtonType =
@@ -172,11 +176,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
         }
 
-    override val primaryButtonUiState = primaryButtonUiStateMapper.forCompleteFlow().stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = null,
-    )
+    override val primaryButtonUiState = primaryButtonUiStateMapper.forCompleteFlow()
 
     override val error: StateFlow<ResolvableString?> = buyButtonState.mapAsStateFlow { it?.errorMessage?.message }
 
@@ -451,6 +451,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
         viewModelScope.launch(workContext) {
+            inProgressSelection = paymentSelection
+
             val confirmationOption = paymentSelectionWithCvcIfEnabled(paymentSelection)
                 ?.toConfirmationOption(
                     configuration = config.asCommonConfiguration(),
@@ -470,6 +472,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     ),
                 )
             } ?: run {
+                inProgressSelection = null
+
                 val message = paymentSelection?.let {
                     "Cannot confirm using a ${it::class.qualifiedName} payment selection!"
                 } ?: "Cannot confirm without a payment selection!"
@@ -498,7 +502,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         message: ResolvableString
     ) {
         eventReporter.onPaymentFailure(
-            paymentSelection = selection.value,
+            paymentSelection = inProgressSelection,
             error = error,
         )
 
@@ -512,7 +516,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         deferredIntentConfirmationType: DeferredIntentConfirmationType?,
         finishImmediately: Boolean
     ) {
-        val currentSelection = selection.value
+        val currentSelection = inProgressSelection
         eventReporter.onPaymentSuccess(
             paymentSelection = currentSelection,
             deferredIntentConfirmationType = deferredIntentConfirmationType,
@@ -539,6 +543,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             prefsRepository.savePaymentSelection(it)
         }
 
+        inProgressSelection = null
+
         if (finishImmediately) {
             _paymentSheetResult.tryEmit(PaymentSheetResult.Completed)
         } else {
@@ -559,6 +565,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             is ConfirmationHandler.Result.Canceled,
             null -> resetViewState()
         }
+
+        inProgressSelection = null
     }
 
     private fun processConfirmationFailure(failure: ConfirmationHandler.Result.Failed) {
@@ -683,6 +691,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         SheetTopWallet,
         SheetBottomBuy,
         None
+    }
+
+    private companion object {
+        const val IN_PROGRESS_SELECTION = "IN_PROGRESS_PAYMENT_SELECTION"
     }
 }
 

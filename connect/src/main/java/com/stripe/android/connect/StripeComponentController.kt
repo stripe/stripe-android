@@ -1,6 +1,6 @@
 package com.stripe.android.connect
 
-import androidx.annotation.RestrictTo
+import android.os.Parcelable
 import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModelProvider
@@ -9,7 +9,6 @@ import androidx.lifecycle.ViewModelProvider
  * Controller for a full screen component.
  */
 @PrivateBetaConnectSDK
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 abstract class StripeComponentController<Listener, Props> internal constructor(
     private val activity: FragmentActivity,
     private val embeddedComponentManager: EmbeddedComponentManager,
@@ -18,7 +17,7 @@ abstract class StripeComponentController<Listener, Props> internal constructor(
     private val dfClass: Class<out StripeComponentDialogFragment<*, Listener, Props>>
 )
     where Listener : StripeEmbeddedComponentListener,
-          Props : ComponentProps {
+          Props : Parcelable {
 
     private val tag: String = dfClass.name
 
@@ -44,6 +43,8 @@ abstract class StripeComponentController<Listener, Props> internal constructor(
         }
 
     init {
+        embeddedComponentManager.coordinator.checkContextDuringCreate(activity)
+
         val existingDialogFragment = getExistingDialogFragment()
         if (existingDialogFragment?.isAdded == true) {
             // The DF may already be added during re-creation after process death.

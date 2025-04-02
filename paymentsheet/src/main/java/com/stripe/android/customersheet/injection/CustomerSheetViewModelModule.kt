@@ -28,7 +28,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
-import com.stripe.android.payments.financialconnections.IsFinancialConnectionsFullSdkAvailable
+import com.stripe.android.payments.financialconnections.IsFinancialConnectionsSdkAvailable
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
@@ -85,7 +85,7 @@ internal interface CustomerSheetViewModelModule {
         }
 
         @Provides
-        fun providesIsFinancialConnectionsAvailable(): IsFinancialConnectionsFullSdkAvailable {
+        fun providesIsFinancialConnectionsAvailable(): IsFinancialConnectionsSdkAvailable {
             return DefaultIsFinancialConnectionsAvailable
         }
 

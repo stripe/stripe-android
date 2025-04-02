@@ -9,6 +9,8 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability.Full
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability.Lite
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
@@ -130,6 +132,24 @@ internal class AddPaymentMethodRequirementTest {
     }
 
     @Test
+    fun testFinancialConnectionsWithLiteSdkReturnsTrue() {
+        val metadata = PaymentMethodMetadataFactory.create(financialConnectionsAvailability = Lite)
+        assertThat(AddPaymentMethodRequirement.FinancialConnectionsSdk.isMetBy(metadata)).isTrue()
+    }
+
+    @Test
+    fun testFinancialConnectionsWithFullSdkReturnsTrue() {
+        val metadata = PaymentMethodMetadataFactory.create(financialConnectionsAvailability = Full)
+        assertThat(AddPaymentMethodRequirement.FinancialConnectionsSdk.isMetBy(metadata)).isTrue()
+    }
+
+    @Test
+    fun testFinancialConnectionsSdkReturnsFalse() {
+        val metadata = PaymentMethodMetadataFactory.create(financialConnectionsAvailability = null)
+        assertThat(AddPaymentMethodRequirement.FinancialConnectionsSdk.isMetBy(metadata)).isFalse()
+    }
+
+    @Test
     fun testValidUsBankVerificationMethodReturnsTrueWithDeferredFlow() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(clientSecret = null)
@@ -195,6 +215,30 @@ internal class AddPaymentMethodRequirementTest {
     }
 
     @Test
+    fun testInstantDebitsReturnsTrueIfLinkDisplaySetToAutomaticAndOtherConditionsMet() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = createValidInstantDebitsPaymentIntent(),
+            linkConfiguration = PaymentSheet.LinkConfiguration(
+                display = PaymentSheet.LinkConfiguration.Display.Automatic,
+            ),
+        )
+
+        assertThat(InstantDebits.isMetBy(metadata)).isTrue()
+    }
+
+    @Test
+    fun testInstantDebitsReturnsFalseIfLinkDisplaySetToNever() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = createValidInstantDebitsPaymentIntent(),
+            linkConfiguration = PaymentSheet.LinkConfiguration(
+                display = PaymentSheet.LinkConfiguration.Display.Never,
+            ),
+        )
+
+        assertThat(InstantDebits.isMetBy(metadata)).isFalse()
+    }
+
+    @Test
     fun testLinkCardBrandReturnsTrueForCorrectLinkMode() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = createValidInstantDebitsPaymentIntent(),
@@ -251,6 +295,32 @@ internal class AddPaymentMethodRequirementTest {
         )
 
         assertThat(LinkCardBrand.isMetBy(metadata)).isTrue()
+    }
+
+    @Test
+    fun testLinkCardBrandReturnsTrueIfLinkDisplaySetToAutomaticAndOtherConditionsMet() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = createValidInstantDebitsPaymentIntent(),
+            linkMode = LinkMode.LinkCardBrand,
+            linkConfiguration = PaymentSheet.LinkConfiguration(
+                display = PaymentSheet.LinkConfiguration.Display.Automatic,
+            ),
+        )
+
+        assertThat(LinkCardBrand.isMetBy(metadata)).isTrue()
+    }
+
+    @Test
+    fun testLinkCardBrandReturnsFalseIfLinkDisplaySetToNever() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = createValidInstantDebitsPaymentIntent(),
+            linkMode = LinkMode.LinkCardBrand,
+            linkConfiguration = PaymentSheet.LinkConfiguration(
+                display = PaymentSheet.LinkConfiguration.Display.Never,
+            ),
+        )
+
+        assertThat(LinkCardBrand.isMetBy(metadata)).isFalse()
     }
 
     private fun createValidInstantDebitsPaymentIntent(): PaymentIntent {

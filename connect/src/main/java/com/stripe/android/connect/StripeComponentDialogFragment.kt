@@ -3,6 +3,7 @@ package com.stripe.android.connect
 import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
+import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -94,7 +95,7 @@ import kotlinx.coroutines.launch
 internal abstract class StripeComponentDialogFragment<ComponentView, Listener, Props> : DialogFragment()
     where ComponentView : StripeComponentView<Listener, Props>,
           Listener : StripeEmbeddedComponentListener,
-          Props : ComponentProps {
+          Props : Parcelable {
 
     private val viewModel: StripeComponentDialogFragmentViewModel by viewModels()
 
@@ -220,7 +221,8 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
     }
 
     private fun bindAppearance(appearance: Appearance) {
-        rootView.bindAppearance(appearance)
+        val customFonts = viewModel.embeddedComponentManager.value?.coordinator?.customFonts
+        rootView.bindAppearance(appearance, customFonts)
         dialog?.window?.setBackgroundDrawable(rootView.background)
     }
 
@@ -259,7 +261,7 @@ internal abstract class StripeComponentDialogFragment<ComponentView, Listener, P
             props: Props? = null,
         ): DF
             where DF : StripeComponentDialogFragment<*, *, Props>,
-                  Props : ComponentProps {
+                  Props : Parcelable {
             val fragment = cls.getDeclaredConstructor().newInstance()
             return fragment.apply {
                 arguments = Bundle().apply {

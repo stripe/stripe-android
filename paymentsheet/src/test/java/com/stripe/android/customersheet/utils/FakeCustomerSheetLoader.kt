@@ -10,6 +10,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability.Full
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import kotlinx.coroutines.delay
@@ -27,6 +29,7 @@ internal class FakeCustomerSheetLoader(
     private val isGooglePayAvailable: Boolean = false,
     private val delay: Duration = Duration.ZERO,
     private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
+    private val financialConnectionsAvailability: FinancialConnectionsAvailability = Full,
     private val permissions: CustomerPermissions = CustomerPermissions(
         canRemovePaymentMethods = true,
         canRemoveLastPaymentMethod = true,
@@ -45,6 +48,7 @@ internal class FakeCustomerSheetLoader(
                     PaymentMethodMetadataFactory.create(
                         stripeIntent = stripeIntent,
                         cbcEligibility = cbcEligibility,
+                        financialConnectionsAvailability = financialConnectionsAvailability,
                         paymentMethodOrder = configuration.paymentMethodOrder,
                         isGooglePayReady = isGooglePayAvailable,
                         isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSyncDefaultEnabled,

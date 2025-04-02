@@ -7,8 +7,7 @@ import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.connect.EmbeddedComponentManager
-import com.stripe.android.connect.FetchClientSecretCallback
+import com.stripe.android.connect.FetchClientSecret
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.core.Logger
@@ -22,11 +21,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
-import org.mockito.kotlin.any
-import org.mockito.kotlin.whenever
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.wheneverBlocking
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
+import org.robolectric.android.controller.ActivityController
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -36,52 +36,58 @@ import kotlin.test.assertTrue
 @RunWith(RobolectricTestRunner::class)
 class EmbeddedComponentCoordinatorTest {
 
-    private lateinit var configuration: EmbeddedComponentManager.Configuration
-    private lateinit var mockFetchClientSecretCallback: FetchClientSecretCallback
+    private lateinit var publishableKey: String
+    private lateinit var mockFetchClientSecret: FetchClientSecret
     private lateinit var coordinator: EmbeddedComponentCoordinator
-    private lateinit var testActivity: ComponentActivity
+    private lateinit var testActivityController: ActivityController<ComponentActivity>
+    private val testActivity: ComponentActivity get() = testActivityController.get()
 
     @Before
     fun setup() {
-        configuration = EmbeddedComponentManager.Configuration("test_publishable_key")
-        mockFetchClientSecretCallback = mock()
+        publishableKey = "pk_test_123"
+        mockFetchClientSecret = mock()
         coordinator =
             EmbeddedComponentCoordinator(
-                configuration = configuration,
-                fetchClientSecretCallback = mockFetchClientSecretCallback,
+                publishableKey = publishableKey,
+                fetchClientSecret = mockFetchClientSecret,
                 logger = Logger.noop(),
-                appearance = Appearance(),
+                appearance = Appearance.default(),
                 customFonts = emptyList(),
             )
-        testActivity = Robolectric.buildActivity(ComponentActivity::class.java).create().get()
+        testActivityController = Robolectric.buildActivity(ComponentActivity::class.java).create()
+    }
+
+    @Test
+    fun `onActivityCreate registers Activity in mappings and unregisters on destroy`() {
+        EmbeddedComponentCoordinator.onActivityCreate(testActivity)
+        assertThat(EmbeddedComponentCoordinator.requestPermissionLaunchers[testActivity]).isNotNull()
+        assertThat(EmbeddedComponentCoordinator.chooseFileLaunchers[testActivity]).isNotNull()
+        assertThat(EmbeddedComponentCoordinator.financialConnectionsSheets[testActivity]).isNotNull()
+        testActivityController.destroy()
+        assertThat(EmbeddedComponentCoordinator.requestPermissionLaunchers[testActivity]).isNull()
+        assertThat(EmbeddedComponentCoordinator.chooseFileLaunchers[testActivity]).isNull()
+        assertThat(EmbeddedComponentCoordinator.financialConnectionsSheets[testActivity]).isNull()
     }
 
     @Test
     fun `fetchClientSecret should return client secret when callback provides it`() = runTest {
         val expectedSecret = "test_client_secret"
 
-        whenever(mockFetchClientSecretCallback.fetchClientSecret(any())).thenAnswer { invocation ->
-            val callback = invocation.getArgument<FetchClientSecretCallback.ClientSecretResultCallback>(0)
-            callback.onResult(expectedSecret)
-        }
+        wheneverBlocking { mockFetchClientSecret.invoke() }.doReturn(expectedSecret)
 
         val result = coordinator.fetchClientSecret()
 
         assertEquals(expectedSecret, result)
-        verify(mockFetchClientSecretCallback).fetchClientSecret(any())
     }
 
     @Test
     fun `fetchClientSecret should return null when callback provides null`() = runTest {
-        whenever(mockFetchClientSecretCallback.fetchClientSecret(any())).thenAnswer { invocation ->
-            val callback = invocation.getArgument<FetchClientSecretCallback.ClientSecretResultCallback>(0)
-            callback.onResult(null)
-        }
+        wheneverBlocking { mockFetchClientSecret.invoke() }.doReturn(null)
 
         val result = coordinator.fetchClientSecret()
 
         assertNull(result)
-        verify(mockFetchClientSecretCallback).fetchClientSecret(any())
+        verify(mockFetchClientSecret).invoke()
     }
 
     @Test
@@ -89,7 +95,7 @@ class EmbeddedComponentCoordinatorTest {
         val shadowApplication = shadowOf(ApplicationProvider.getApplicationContext() as Application)
         shadowApplication.grantPermissions(Manifest.permission.CAMERA)
 
-        assertTrue(coordinator.requestCameraPermission(testActivity)!!)
+        assertTrue(coordinator.requestCameraPermission(testActivity))
     }
 
     @Test
@@ -119,14 +125,6 @@ class EmbeddedComponentCoordinatorTest {
         val resultTrue = resultTrueAsync.await()
         assertNotNull(resultTrue)
         assertTrue(resultTrue)
-    }
-
-    @Test
-    fun `requestCameraPermission returns null when not initialized in Activity onCreate`() = runTest {
-        val shadowApplication = shadowOf(ApplicationProvider.getApplicationContext() as Application)
-        shadowApplication.denyPermissions(Manifest.permission.CAMERA)
-
-        assertNull(coordinator.requestCameraPermission(testActivity))
     }
 
     @Test

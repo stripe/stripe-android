@@ -6,6 +6,8 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.embedded.DefaultEmbeddedResultCallbackHelper
+import com.stripe.android.paymentelement.embedded.EmbeddedResultCallbackHelper
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Module
@@ -21,18 +23,13 @@ internal interface EmbeddedPaymentElementSubcomponent {
     val embeddedPaymentElement: EmbeddedPaymentElement
     val initializer: EmbeddedPaymentElementInitializer
 
-    @Subcomponent.Builder
-    interface Builder {
-        @BindsInstance
-        fun activityResultCaller(activityResultCaller: ActivityResultCaller): Builder
-
-        @BindsInstance
-        fun lifecycleOwner(lifecycleOwner: LifecycleOwner): Builder
-
-        @BindsInstance
-        fun resultCallback(resultCallback: EmbeddedPaymentElement.ResultCallback): Builder
-
-        fun build(): EmbeddedPaymentElementSubcomponent
+    @Subcomponent.Factory
+    interface Factory {
+        fun build(
+            @BindsInstance activityResultCaller: ActivityResultCaller,
+            @BindsInstance lifecycleOwner: LifecycleOwner,
+            @BindsInstance resultCallback: EmbeddedPaymentElement.ResultCallback,
+        ): EmbeddedPaymentElementSubcomponent
     }
 }
 
@@ -47,4 +44,7 @@ internal interface EmbeddedPaymentElementModule {
     fun bindsConfirmationHelper(
         confirmationHelper: DefaultEmbeddedConfirmationHelper
     ): EmbeddedConfirmationHelper
+
+    @Binds
+    fun bindsEmbeddedResultCallbackHelper(helper: DefaultEmbeddedResultCallbackHelper): EmbeddedResultCallbackHelper
 }

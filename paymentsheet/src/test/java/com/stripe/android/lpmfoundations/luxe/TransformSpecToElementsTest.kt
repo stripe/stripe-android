@@ -6,6 +6,8 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.R
@@ -63,6 +65,7 @@ internal class TransformSpecToElementsTest {
         runBlocking {
             val countrySection = CountrySpec(allowedCountryCodes = setOf("AT"))
             val formElement = transformSpecToElements.transform(
+                PaymentMethodMetadataFactory.create(),
                 listOf(countrySection),
             )
 
@@ -85,6 +88,7 @@ internal class TransformSpecToElementsTest {
         runBlocking {
             val idealSection = IDEAL_BANK_CONFIG
             val formElement = transformSpecToElements.transform(
+                PaymentMethodMetadataFactory.create(),
                 listOf(idealSection),
             )
 
@@ -102,6 +106,7 @@ internal class TransformSpecToElementsTest {
     @Test
     fun `Add a name section spec sets up the name element correctly`() = runBlocking {
         val formElement = transformSpecToElements.transform(
+            PaymentMethodMetadataFactory.create(),
             listOf(nameSection),
         )
 
@@ -123,6 +128,7 @@ internal class TransformSpecToElementsTest {
     @Test
     fun `Add a simple text section spec sets up the text element correctly`() = runBlocking {
         val formElement = transformSpecToElements.transform(
+            PaymentMethodMetadataFactory.create(),
             listOf(
                 SimpleTextSpec(
                     IdentifierSpec.Generic("simple"),
@@ -146,6 +152,7 @@ internal class TransformSpecToElementsTest {
     @Test
     fun `Add a email section spec sets up the email element correctly`() = runBlocking {
         val formElement = transformSpecToElements.transform(
+            PaymentMethodMetadataFactory.create(),
             listOf(emailSection),
         )
 
@@ -164,13 +171,14 @@ internal class TransformSpecToElementsTest {
             stringResId = R.string.stripe_sepa_mandate
         )
         val formElement = transformSpecToElements.transform(
+            PaymentMethodMetadataFactory.create(),
             listOf(staticText),
         )
 
         val staticTextElement = formElement.first() as StaticTextElement
 
         assertThat(staticTextElement.controller).isNull()
-        assertThat(staticTextElement.stringResId).isEqualTo(staticText.stringResId)
+        assertThat(staticTextElement.text).isEqualTo(staticText.stringResId.resolvableString)
         assertThat(staticTextElement.identifier).isEqualTo(staticText.apiPath)
     }
 
@@ -178,6 +186,7 @@ internal class TransformSpecToElementsTest {
     fun `Add a phone section spec sets up the phone element correctly`() = runBlocking {
         val phoneSpec = PhoneSpec()
         val formElement = transformSpecToElements.transform(
+            PaymentMethodMetadataFactory.create(),
             listOf(phoneSpec),
         )
 
@@ -199,6 +208,7 @@ internal class TransformSpecToElementsTest {
                 address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
             )
         ).transform(
+            PaymentMethodMetadataFactory.create(),
             listOf(placeholderSpec),
         )
 
@@ -220,6 +230,7 @@ internal class TransformSpecToElementsTest {
                 phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
             )
         ).transform(
+            PaymentMethodMetadataFactory.create(),
             listOf(placeholderSpec),
         )
 
@@ -241,6 +252,7 @@ internal class TransformSpecToElementsTest {
                 name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
             )
         ).transform(
+            PaymentMethodMetadataFactory.create(),
             listOf(placeholderSpec),
         )
 
@@ -262,6 +274,7 @@ internal class TransformSpecToElementsTest {
                 email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
             )
         ).transform(
+            PaymentMethodMetadataFactory.create(),
             listOf(placeholderSpec),
         )
 
@@ -281,6 +294,7 @@ internal class TransformSpecToElementsTest {
         val formElement = TransformSpecToElementsFactory.create(
             requiresMandate = true
         ).transform(
+            PaymentMethodMetadataFactory.create(),
             listOf(placeholderSpec),
         )
 
@@ -298,6 +312,7 @@ internal class TransformSpecToElementsTest {
         val formElement = TransformSpecToElementsFactory.create(
             requiresMandate = false
         ).transform(
+            PaymentMethodMetadataFactory.create(),
             listOf(placeholderSpec),
         )
 

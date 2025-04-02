@@ -4,7 +4,6 @@ import android.content.pm.PackageManager
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,11 +17,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
@@ -101,14 +100,10 @@ fun DropDown(
     val selectedItemLabel by controller.selectedIndex.mapAsStateFlow {
         controller.getSelectedItemLabel(selectedIndex)
     }.collectAsState()
-    val interactionSource = remember { MutableInteractionSource() }
     val currentTextColor = if (shouldEnable) {
         MaterialTheme.stripeColors.onComponent
     } else {
-        TextFieldDefaults
-            .textFieldColors()
-            .indicatorColor(enabled = false, isError = false, interactionSource = interactionSource)
-            .value
+        MaterialTheme.stripeColors.onComponent.copy(alpha = ContentAlpha.disabled)
     }
 
     Box(
@@ -149,7 +144,6 @@ fun DropDown(
             } else {
                 LargeDropdownLabel(
                     label = label,
-                    shouldEnable = shouldEnable,
                     selectedItemLabel = selectedItemLabel,
                     currentTextColor = currentTextColor,
                     shouldDisableDropdownWithSingleItem = shouldDisableDropdownWithSingleItem,
@@ -200,7 +194,6 @@ fun DropDown(
 @Composable
 private fun LargeDropdownLabel(
     label: Int?,
-    shouldEnable: Boolean,
     selectedItemLabel: String,
     currentTextColor: Color,
     shouldDisableDropdownWithSingleItem: Boolean,
@@ -218,7 +211,7 @@ private fun LargeDropdownLabel(
             )
         ) {
             label?.let {
-                FormLabel(stringResource(it), enabled = shouldEnable)
+                FormLabel(stringResource(it))
             }
             Row(
                 modifier = Modifier.fillMaxWidth(.9f),

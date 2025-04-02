@@ -6,6 +6,7 @@ import app.cash.turbine.test
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForData
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
 import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect
 import com.stripe.android.financialconnections.lite.TextFixtures.configuration
@@ -75,6 +76,44 @@ class FinancialConnectionsLiteViewModelTest {
             val viewEffect = awaitItem() as ViewEffect.FinishWithResult
             val failedResult = viewEffect.result as Failed
             assertEquals(expectedError, (failedResult.error))
+        }
+    }
+
+    @Test
+    fun `handleUrl - success URL should complete session for data flow`() = testScope.runTest {
+        val viewModel = viewModel(
+            repository = TestFinancialConnectionsLiteRepository(
+                synchronizeResponse = Result.success(syncResponse),
+                sessionResponse = Result.success(financialConnectionsSessionNoAccounts)
+            )
+        )
+
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.viewEffects.test {
+            viewModel.handleUrl(syncResponse.manifest.successUrl!!)
+            val viewEffect = awaitItem() as ViewEffect.FinishWithResult
+            val completedResult = viewEffect.result as FinancialConnectionsSheetActivityResult.Completed
+            assertEquals(financialConnectionsSessionNoAccounts, completedResult.financialConnectionsSession)
+        }
+    }
+
+    @Test
+    fun `handleUrl - cancel URL should cancel session for data flow`() = testScope.runTest {
+        val viewModel = viewModel(
+            repository = TestFinancialConnectionsLiteRepository(
+                synchronizeResponse = Result.success(syncResponse),
+                sessionResponse = Result.success(financialConnectionsSessionNoAccounts)
+            )
+        )
+
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.viewEffects.test {
+            viewModel.handleUrl(syncResponse.manifest.cancelUrl!!)
+            val viewEffect = awaitItem() as ViewEffect.FinishWithResult
+            val canceledResult = viewEffect.result as FinancialConnectionsSheetActivityResult.Canceled
+            assertEquals(FinancialConnectionsSheetActivityResult.Canceled, canceledResult)
         }
     }
 }

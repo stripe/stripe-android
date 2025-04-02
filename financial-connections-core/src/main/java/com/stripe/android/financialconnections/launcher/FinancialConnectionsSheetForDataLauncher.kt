@@ -5,15 +5,18 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
 import androidx.fragment.app.Fragment
 import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResultCallback
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForData
 import org.jetbrains.annotations.TestOnly
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class FinancialConnectionsSheetForDataLauncher(
-    private val activityResultLauncher: ActivityResultLauncher<FinancialConnectionsSheetActivityArgs.ForData>
+    @get:VisibleForTesting
+    val activityResultLauncher: ActivityResultLauncher<ForData>
 ) : FinancialConnectionsSheetLauncher {
 
     constructor(
@@ -60,7 +63,7 @@ class FinancialConnectionsSheetForDataLauncher(
         elementsSessionContext: ElementsSessionContext?
     ) {
         activityResultLauncher.launch(
-            FinancialConnectionsSheetActivityArgs.ForData(
+            ForData(
                 configuration = configuration,
                 elementsSessionContext = elementsSessionContext,
             )

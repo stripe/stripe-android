@@ -1,15 +1,12 @@
 package com.stripe.android.stripecardscan.framework
 
-import androidx.test.filters.MediumTest
 import androidx.test.filters.SmallTest
 import com.stripe.android.camera.framework.Analyzer
 import com.stripe.android.camera.framework.AnalyzerFactory
 import com.stripe.android.camera.framework.AnalyzerLoopErrorListener
 import com.stripe.android.camera.framework.AnalyzerPool
-import com.stripe.android.camera.framework.FiniteAnalyzerLoop
 import com.stripe.android.camera.framework.ProcessBoundAnalyzerLoop
 import com.stripe.android.camera.framework.StatefulResultHandler
-import com.stripe.android.camera.framework.TerminatingResultHandler
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -25,8 +22,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.test.fail
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.nanoseconds
 
 class LoopTest {
 
@@ -169,134 +164,6 @@ class LoopTest {
         val job = loop.subscribeTo(channel.receiveAsFlow(), this)
         assertNull(job)
         assertTrue { analyzerFailure }
-    }
-
-    @Test(timeout = 2000)
-    @SmallTest
-    @ExperimentalCoroutinesApi
-    fun finiteAnalyzerLoop_analyzeData() = runTest {
-        val dataCount = 3
-        var dataProcessed = false
-        val resultCount = AtomicInteger(0)
-
-        class TestResultHandler : TerminatingResultHandler<Int, Int, String>(1) {
-            override suspend fun onResult(result: String, data: Int) {
-                assertEquals(1, state)
-                resultCount.incrementAndGet()
-            }
-
-            override suspend fun onAllDataProcessed() {
-                assertEquals(dataCount, resultCount.get())
-                dataProcessed = true
-            }
-
-            override suspend fun onTerminatedEarly() {
-                fail()
-            }
-        }
-
-        val analyzerPool = AnalyzerPool.of(
-            analyzerFactory = TestAnalyzerFactory(),
-            desiredAnalyzerCount = 12
-        )
-
-        val loop = FiniteAnalyzerLoop(
-            analyzerPool = analyzerPool,
-            analyzerLoopErrorListener = object : AnalyzerLoopErrorListener {
-                override fun onAnalyzerFailure(t: Throwable): Boolean { fail(t.message) }
-                override fun onResultFailure(t: Throwable): Boolean { fail(t.message) }
-            },
-            resultHandler = TestResultHandler(),
-            timeLimit = Duration.INFINITE
-        )
-
-        val job = loop.process((0 until dataCount).map { 2 }, this)
-        assertNotNull(job)
-        job.joinTest()
-
-        assertTrue(dataProcessed)
-    }
-
-    @Test(timeout = 2000)
-    @MediumTest
-    @ExperimentalCoroutinesApi
-    fun finiteAnalyzerLoop_analyzeDataTimeout() = runTest {
-        val dataCount = 10000
-        val resultCount = AtomicInteger(0)
-        var terminatedEarly = false
-
-        class TestResultHandler : TerminatingResultHandler<Int, Int, String>(1) {
-            override suspend fun onResult(result: String, data: Int) {
-                assertEquals(1, state)
-                resultCount.incrementAndGet()
-            }
-
-            override suspend fun onAllDataProcessed() {
-                fail()
-            }
-
-            override suspend fun onTerminatedEarly() {
-                assertTrue { resultCount.get() < dataCount }
-                terminatedEarly = true
-            }
-        }
-
-        val analyzerPool = AnalyzerPool.of(
-            analyzerFactory = TestAnalyzerFactory(),
-            desiredAnalyzerCount = 12
-        )
-
-        val loop = FiniteAnalyzerLoop(
-            analyzerPool = analyzerPool,
-            analyzerLoopErrorListener = object : AnalyzerLoopErrorListener {
-                override fun onAnalyzerFailure(t: Throwable): Boolean { fail(t.message) }
-                override fun onResultFailure(t: Throwable): Boolean { fail(t.message) }
-            },
-            resultHandler = TestResultHandler(),
-            timeLimit = 1.nanoseconds
-        )
-
-        val job = loop.process((0 until dataCount).map { 2 }, this)
-        assertNotNull(job)
-        job.joinTest()
-
-        assertTrue { terminatedEarly }
-    }
-
-    @Test(timeout = 2000)
-    @SmallTest
-    @ExperimentalCoroutinesApi
-    fun finiteAnalyzerLoop_analyzeDataNoData() = runTest {
-        var dataProcessed = false
-
-        class TestResultHandler : TerminatingResultHandler<Int, Int, String>(1) {
-            override suspend fun onResult(result: String, data: Int) { fail() }
-
-            override suspend fun onAllDataProcessed() { dataProcessed = true }
-
-            override suspend fun onTerminatedEarly() { fail() }
-        }
-
-        val analyzerPool = AnalyzerPool.of(
-            analyzerFactory = TestAnalyzerFactory(),
-            desiredAnalyzerCount = 12
-        )
-
-        val loop = FiniteAnalyzerLoop(
-            analyzerPool = analyzerPool,
-            analyzerLoopErrorListener = object : AnalyzerLoopErrorListener {
-                override fun onAnalyzerFailure(t: Throwable): Boolean { fail(t.message) }
-                override fun onResultFailure(t: Throwable): Boolean { fail(t.message) }
-            },
-            resultHandler = TestResultHandler(),
-            timeLimit = Duration.INFINITE
-        )
-
-        val job = loop.process(emptyList(), this)
-        assertNotNull(job)
-        job.joinTest()
-
-        assertTrue { dataProcessed }
     }
 
     private class TestAnalyzer : Analyzer<Int, Int, String> {

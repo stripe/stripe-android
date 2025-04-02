@@ -14,6 +14,7 @@ internal data class CommonConfiguration(
     val merchantDisplayName: String,
     val customer: PaymentSheet.CustomerConfiguration?,
     val googlePay: PaymentSheet.GooglePayConfiguration?,
+    val link: PaymentSheet.LinkConfiguration,
     val defaultBillingDetails: PaymentSheet.BillingDetails?,
     val shippingDetails: AddressDetails?,
     val allowsDelayedPaymentMethods: Boolean,
@@ -135,6 +136,7 @@ internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfigura
     externalPaymentMethods = externalPaymentMethods,
     cardBrandAcceptance = cardBrandAcceptance,
     customPaymentMethods = customPaymentMethods,
+    link = link,
 )
 
 @ExperimentalEmbeddedPaymentElementApi
@@ -153,6 +155,7 @@ internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): Commo
     externalPaymentMethods = externalPaymentMethods,
     cardBrandAcceptance = cardBrandAcceptance,
     customPaymentMethods = customPaymentMethods,
+    link = link,
 )
 
 private fun String.isEKClientSecretValid(): Boolean {

@@ -5,10 +5,10 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.customersheet.CustomerSheet
-import com.stripe.android.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.CustomPaymentMethodUiDefinitionFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPaymentMethodUiDefinitionFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.LinkCardBrandDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkInlineConfiguration
@@ -18,6 +18,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -54,6 +55,7 @@ internal data class PaymentMethodMetadata(
     val externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
     val customerMetadata: CustomerMetadata?,
     val isGooglePayReady: Boolean,
+    val linkConfiguration: PaymentSheet.LinkConfiguration,
     val linkInlineConfiguration: LinkInlineConfiguration?,
     val paymentMethodSaveConsentBehavior: PaymentMethodSaveConsentBehavior,
     val linkMode: LinkMode?,
@@ -77,7 +79,7 @@ internal data class PaymentMethodMetadata(
     fun supportedPaymentMethodTypes(): List<String> {
         return supportedPaymentMethodDefinitions().map { paymentMethodDefinition ->
             paymentMethodDefinition.type.code
-        }.plus(externalPaymentMethodTypes()).run {
+        }.plus(externalPaymentMethodTypes()).plus(customPaymentMethodIds()).run {
             if (paymentMethodOrder.isEmpty()) {
                 // Optimization to early out if we don't have a client side order.
                 this
@@ -103,9 +105,11 @@ internal data class PaymentMethodMetadata(
     ): SupportedPaymentMethod? {
         return if (isExternalPaymentMethod(code)) {
             getUiDefinitionFactoryForExternalPaymentMethod(code)?.createSupportedPaymentMethod()
+        } else if (isCustomPaymentMethod(code)) {
+            getUiDefinitionFactoryForCustomPaymentMethod(code)?.createSupportedPaymentMethod()
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
-            definition.uiDefinitionFactory().supportedPaymentMethod(definition, sharedDataSpecs)
+            definition.uiDefinitionFactory().supportedPaymentMethod(this, definition, sharedDataSpecs)
         }
     }
 
@@ -114,7 +118,10 @@ internal data class PaymentMethodMetadata(
     }
 
     private fun orderedPaymentMethodTypes(): List<String> {
-        val originalOrderedTypes = stripeIntent.paymentMethodTypes.plus(externalPaymentMethodTypes()).toMutableList()
+        val originalOrderedTypes = stripeIntent.paymentMethodTypes
+            .plus(externalPaymentMethodTypes())
+            .plus(customPaymentMethodIds())
+            .toMutableList()
         val result = mutableListOf<String>()
         // 1. Add each PM in paymentMethodOrder first
         for (pm in paymentMethodOrder) {
@@ -140,8 +147,24 @@ internal data class PaymentMethodMetadata(
         return externalPaymentMethodSpecs.map { it.type }
     }
 
+    private fun customPaymentMethodIds(): List<String> {
+        return displayableCustomPaymentMethods.map { it.id }
+    }
+
     fun isExternalPaymentMethod(code: String): Boolean {
         return externalPaymentMethodTypes().contains(code)
+    }
+
+    fun isCustomPaymentMethod(code: String): Boolean {
+        return customPaymentMethodIds().contains(code)
+    }
+
+    private fun getUiDefinitionFactoryForCustomPaymentMethod(code: String): UiDefinitionFactory.Simple? {
+        val displayableCustomPaymentMethodForCode = displayableCustomPaymentMethods.firstOrNull {
+            it.id == code
+        } ?: return null
+
+        return CustomPaymentMethodUiDefinitionFactory(displayableCustomPaymentMethodForCode)
     }
 
     private fun getUiDefinitionFactoryForExternalPaymentMethod(code: String): UiDefinitionFactory.Simple? {
@@ -189,6 +212,11 @@ internal data class PaymentMethodMetadata(
                 customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
                 incentive = null,
             )
+        } else if (isCustomPaymentMethod(code)) {
+            getUiDefinitionFactoryForCustomPaymentMethod(code)?.createFormHeaderInformation(
+                customerHasSavedPaymentMethods = customerHasSavedPaymentMethods,
+                incentive = null,
+            )
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
 
@@ -207,8 +235,13 @@ internal data class PaymentMethodMetadata(
     ): List<FormElement>? {
         return if (isExternalPaymentMethod(code)) {
             getUiDefinitionFactoryForExternalPaymentMethod(code)?.createFormElements(
-                this,
-                uiDefinitionFactoryArgumentsFactory.create(this, requiresMandate = false)
+                metadata = this,
+                arguments = uiDefinitionFactoryArgumentsFactory.create(this, requiresMandate = false)
+            )
+        } else if (isCustomPaymentMethod(code)) {
+            getUiDefinitionFactoryForCustomPaymentMethod(code)?.createFormElements(
+                metadata = this,
+                arguments = uiDefinitionFactoryArgumentsFactory.create(this, requiresMandate = false)
             )
         } else {
             val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
@@ -270,6 +303,7 @@ internal data class PaymentMethodMetadata(
                 externalPaymentMethodSpecs = externalPaymentMethodSpecs,
                 paymentMethodSaveConsentBehavior = elementsSession.toPaymentSheetSaveConsentBehavior(),
                 linkInlineConfiguration = linkInlineConfiguration,
+                linkConfiguration = configuration.link,
                 linkMode = linkSettings?.linkMode,
                 linkState = linkState,
                 paymentMethodIncentive = linkSettings?.linkConsumerIncentive?.toPaymentMethodIncentive(),
@@ -310,6 +344,7 @@ internal data class PaymentMethodMetadata(
                 isGooglePayReady = isGooglePayReady,
                 linkInlineConfiguration = null,
                 paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,
+                linkConfiguration = PaymentSheet.LinkConfiguration(),
                 linkMode = elementsSession.linkSettings?.linkMode,
                 linkState = null,
                 paymentMethodIncentive = null,
@@ -345,6 +380,7 @@ internal data class PaymentMethodMetadata(
                 externalPaymentMethodSpecs = emptyList(),
                 paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Disabled(null),
                 linkInlineConfiguration = null,
+                linkConfiguration = PaymentSheet.LinkConfiguration(),
                 linkMode = null,
                 linkState = null,
                 paymentMethodIncentive = null,

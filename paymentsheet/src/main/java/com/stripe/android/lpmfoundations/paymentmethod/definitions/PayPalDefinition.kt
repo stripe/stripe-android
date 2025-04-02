@@ -28,7 +28,10 @@ internal object PayPalDefinition : PaymentMethodDefinition {
 }
 
 private object PayPalUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSpec {
-    override fun createSupportedPaymentMethod(sharedDataSpec: SharedDataSpec) = SupportedPaymentMethod(
+    override fun createSupportedPaymentMethod(
+        metadata: PaymentMethodMetadata,
+        sharedDataSpec: SharedDataSpec,
+    ) = SupportedPaymentMethod(
         paymentMethodDefinition = PayPalDefinition,
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_paypal,
@@ -47,6 +50,7 @@ private object PayPalUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDat
         }
 
         return transformSpecToElements.transform(
+            metadata = metadata,
             specs = sharedDataSpec.fields + localLayoutSpecs,
         )
     }

@@ -52,13 +52,12 @@ internal fun runPaymentSheetTest(
 ) {
     val countDownLatch = CountDownLatch(1)
 
-    val factory = PaymentSheetTestFactory(
-        createIntentCallback = createIntentCallback,
-        resultCallback = { result ->
-            resultCallback.onPaymentSheetResult(result)
-            countDownLatch.countDown()
-        }
-    )
+    val paymentSheetBuilder = PaymentSheet.Builder { result ->
+        resultCallback.onPaymentSheetResult(result)
+        countDownLatch.countDown()
+    }.apply {
+        createIntentCallback?.let { createIntentCallback(it) }
+    }
 
     ActivityScenario.launch(MainActivity::class.java).use { scenario ->
         scenario.moveToState(Lifecycle.State.CREATED)
@@ -72,10 +71,10 @@ internal fun runPaymentSheetTest(
         scenario.onActivity { activity ->
             when (integrationType) {
                 IntegrationType.Compose -> activity.setContent {
-                    paymentSheet = factory.make()
+                    paymentSheet = paymentSheetBuilder.build()
                 }
                 IntegrationType.Activity -> {
-                    paymentSheet = factory.make(activity)
+                    paymentSheet = paymentSheetBuilder.build(activity)
                 }
             }
         }
@@ -104,45 +103,39 @@ internal fun runMultiplePaymentSheetInstancesTest(
 
     val countDownLatch = CountDownLatch(1)
 
-    val firstPaymentSheetFactory = PaymentSheetTestFactory(
-        createIntentCallback = { paymentMethod, shouldSavePaymentMethod ->
-            if (testType == MultipleInstancesTestType.RunWithFirst) {
-                firstCreateIntentCallbackCalled = true
-
-                createIntentCallback.onCreateIntent(paymentMethod, shouldSavePaymentMethod)
-            } else {
-                error("Should not have been called!")
-            }
-        },
-        resultCallback = { result ->
-            if (testType == MultipleInstancesTestType.RunWithFirst) {
-                resultCallback.onPaymentSheetResult(result)
-                countDownLatch.countDown()
-            } else {
-                error("Should not have been called!")
-            }
+    val firstPaymentSheetBuilder = PaymentSheet.Builder { result ->
+        if (testType == MultipleInstancesTestType.RunWithFirst) {
+            resultCallback.onPaymentSheetResult(result)
+            countDownLatch.countDown()
+        } else {
+            error("Should not have been called!")
         }
-    )
+    }.createIntentCallback { paymentMethod, shouldSavePaymentMethod ->
+        if (testType == MultipleInstancesTestType.RunWithFirst) {
+            firstCreateIntentCallbackCalled = true
 
-    val secondPaymentSheetFactory = PaymentSheetTestFactory(
-        createIntentCallback = { paymentMethod, shouldSavePaymentMethod ->
-            if (testType == MultipleInstancesTestType.RunWithSecond) {
-                secondCreateIntentCallbackCalled = true
-
-                createIntentCallback.onCreateIntent(paymentMethod, shouldSavePaymentMethod)
-            } else {
-                error("Should not have been called!")
-            }
-        },
-        resultCallback = { result ->
-            if (testType == MultipleInstancesTestType.RunWithSecond) {
-                resultCallback.onPaymentSheetResult(result)
-                countDownLatch.countDown()
-            } else {
-                error("Should not have been called!")
-            }
+            createIntentCallback.onCreateIntent(paymentMethod, shouldSavePaymentMethod)
+        } else {
+            error("Should not have been called!")
         }
-    )
+    }
+
+    val secondPaymentSheetBuilder = PaymentSheet.Builder { result ->
+        if (testType == MultipleInstancesTestType.RunWithSecond) {
+            resultCallback.onPaymentSheetResult(result)
+            countDownLatch.countDown()
+        } else {
+            error("Should not have been called!")
+        }
+    }.createIntentCallback { paymentMethod, shouldSavePaymentMethod ->
+        if (testType == MultipleInstancesTestType.RunWithSecond) {
+            secondCreateIntentCallbackCalled = true
+
+            createIntentCallback.onCreateIntent(paymentMethod, shouldSavePaymentMethod)
+        } else {
+            error("Should not have been called!")
+        }
+    }
 
     ActivityScenario.launch(MainActivity::class.java).use { scenario ->
         scenario.moveToState(Lifecycle.State.CREATED)
@@ -156,8 +149,8 @@ internal fun runMultiplePaymentSheetInstancesTest(
 
         scenario.onActivity { activity ->
             activity.setContent {
-                firstPaymentSheet = firstPaymentSheetFactory.make()
-                secondPaymentSheet = secondPaymentSheetFactory.make()
+                firstPaymentSheet = firstPaymentSheetBuilder.build()
+                secondPaymentSheet = secondPaymentSheetBuilder.build()
             }
         }
 

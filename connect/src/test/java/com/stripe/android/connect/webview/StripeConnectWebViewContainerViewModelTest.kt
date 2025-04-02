@@ -77,7 +77,7 @@ class StripeConnectWebViewContainerViewModelTest {
     }
     private val embeddedComponent: StripeEmbeddedComponent = StripeEmbeddedComponent.PAYOUTS
 
-    private val appearanceFlow = MutableStateFlow(Appearance())
+    private val appearanceFlow = MutableStateFlow(Appearance.default())
     private val receivedComponentEvents = mutableListOf<ComponentEvent>()
 
     private val mockStripeIntentLauncher: StripeIntentLauncher = mock()
@@ -181,7 +181,7 @@ class StripeConnectWebViewContainerViewModelTest {
         assertThat(viewModel.stateFlow.value.appearance).isNull()
 
         viewModel.onCreate(lifecycleOwner)
-        val newAppearance = Appearance()
+        val newAppearance = Appearance.default()
         appearanceFlow.emit(newAppearance)
 
         assertThat(viewModel.stateFlow.value.appearance).isEqualTo(newAppearance)
@@ -250,7 +250,16 @@ class StripeConnectWebViewContainerViewModelTest {
 
     @Test
     fun `view should update appearance`() = runTest(testDispatcher) {
-        val appearances = listOf(Appearance(), Appearance(colors = Colors(primary = Color.CYAN)))
+        val appearances = listOf(
+            Appearance.default(),
+            Appearance.Builder()
+                .colors(
+                    Colors.Builder()
+                        .primary(Color.CYAN)
+                        .build()
+                )
+                .build()
+        )
         viewModel.onCreate(lifecycleOwner)
 
         // Shouldn't update appearance until pageDidLoad is received.

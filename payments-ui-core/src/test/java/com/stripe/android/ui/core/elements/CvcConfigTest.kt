@@ -59,4 +59,23 @@ class CvcConfigTest {
         Truth.assertThat(state)
             .isInstanceOf<TextFieldStateConstants.Valid.Full>()
     }
+
+    @Test
+    fun `cvc is valid for lengths 3 and 4 for amex`() {
+        var state = cvcConfig.determineState(
+            brand = CardBrand.AmericanExpress,
+            number = "123",
+            numberAllowedDigits = CardBrand.AmericanExpress.maxCvcLength
+        )
+        Truth.assertThat(state)
+            .isInstanceOf<TextFieldStateConstants.Valid.Limitless>()
+
+        state = cvcConfig.determineState(
+            brand = CardBrand.AmericanExpress,
+            number = "1234",
+            numberAllowedDigits = CardBrand.AmericanExpress.maxCvcLength
+        )
+        Truth.assertThat(state)
+            .isInstanceOf<TextFieldStateConstants.Valid.Full>()
+    }
 }

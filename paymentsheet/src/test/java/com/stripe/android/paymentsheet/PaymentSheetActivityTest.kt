@@ -20,12 +20,14 @@ import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import app.cash.turbine.test
@@ -207,9 +209,11 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity { activity ->
+            Espresso.onIdle()
             assertThat(activity.buyButton.isEnabled).isTrue()
 
             startEditing()
+            Espresso.onIdle()
             assertThat(activity.buyButton.isEnabled).isFalse()
         }
     }
@@ -604,11 +608,13 @@ internal class PaymentSheetActivityTest {
             viewModel.updateSelection(
                 PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             )
+            Espresso.onIdle()
             assertThat(activity.buyButton.isEnabled)
                 .isTrue()
 
             activity.buyButton.performClick()
 
+            Espresso.onIdle()
             assertThat(activity.buyButton.isEnabled)
                 .isFalse()
         }
@@ -974,6 +980,7 @@ internal class PaymentSheetActivityTest {
                 .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
 
             viewModel.mandateHandler.updateMandateText(text.resolvableString, false)
+            mandateNode.performScrollTo()
             mandateNode.assertIsDisplayed()
 
             val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
@@ -1100,8 +1107,10 @@ internal class PaymentSheetActivityTest {
 
         scenario.launch(intent).onActivity { activity ->
             testDispatcher.scheduler.advanceTimeBy(50)
+            Espresso.onIdle()
             assertThat(activity.buyButton.externalLabel?.resolve(context)).isEqualTo("Pay")
             testDispatcher.scheduler.advanceTimeBy(250)
+            Espresso.onIdle()
             assertThat(activity.buyButton.externalLabel?.resolve(context)).isEqualTo("Pay CA\$99.99")
         }
     }

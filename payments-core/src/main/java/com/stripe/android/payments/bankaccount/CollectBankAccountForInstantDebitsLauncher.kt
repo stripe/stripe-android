@@ -7,6 +7,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountForInstantDebitsResult
 import com.stripe.android.payments.bankaccount.navigation.toInstantDebitsResult
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CollectBankAccountForInstantDebitsLauncher(

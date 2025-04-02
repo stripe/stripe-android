@@ -11,6 +11,7 @@ import androidx.core.os.bundleOf
 import com.stripe.android.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountActivity
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import kotlinx.parcelize.Parcelize
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
