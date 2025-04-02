@@ -30,7 +30,7 @@ import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteView
 import com.stripe.android.financialconnections.lite.FinancialConnectionsLiteViewModel.ViewEffect.OpenCustomTab
 import kotlinx.coroutines.launch
 
-internal class FinancialConnectionsSheetLiteActivity : ComponentActivity() {
+internal class FinancialConnectionsSheetLiteActivity : ComponentActivity(R.layout.stripe_activity_lite) {
 
     private lateinit var webView: WebView
     private lateinit var progressBar: ProgressBar
@@ -115,6 +115,7 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity() {
     companion object {
         fun intent(context: Context, args: FinancialConnectionsSheetActivityArgs): Intent {
             return Intent(context, FinancialConnectionsSheetLiteActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
                 putExtra(EXTRA_ARGS, args)
             }
         }
@@ -131,7 +132,7 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity() {
  * @param context the context to use for creating the intent
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun liteIntentBuilder(context: Context): (FinancialConnectionsSheetActivityArgs) -> Intent =
+fun intentBuilder(context: Context): (FinancialConnectionsSheetActivityArgs) -> Intent =
     { args: FinancialConnectionsSheetActivityArgs ->
         FinancialConnectionsSheetLiteActivity.intent(
             context = context,

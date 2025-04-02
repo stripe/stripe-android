@@ -123,7 +123,7 @@ android {
             firebaseAppDistribution {
                 appId = "1:577365562050:android:5b7e92d18f8ca8d1e9a15b"
                 groups = "elements-mobile"
-                releaseNotes = "Financial Connections Lite testing build (1)"
+                releaseNotes = "Financial Connections Lite testing build (2)"
             }
         }
     }
