@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.analytics
 
 import android.content.Context
+import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -432,6 +433,19 @@ internal class DefaultEventReporter @Inject internal constructor(
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
                 paymentMethodType = paymentMethodType,
+            )
+        )
+    }
+
+    override fun onExperimentExposure(
+        experiment: LoggableExperiment
+    ) {
+        fireV2Event(
+            PaymentSheetEvent.ExperimentExposure(
+                experiment = experiment,
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
             )
         )
     }

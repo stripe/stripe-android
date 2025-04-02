@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.analytics
 
 import androidx.annotation.Keep
+import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
@@ -182,6 +183,13 @@ internal interface EventReporter {
      */
     fun onSetAsDefaultPaymentMethodSucceeded(
         paymentMethodType: String?,
+    )
+
+    /**
+     * The customer has been exposed to an experiment.
+     */
+    fun onExperimentExposure(
+        experiment: LoggableExperiment
     )
 
     /**

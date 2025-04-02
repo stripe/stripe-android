@@ -5,11 +5,16 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.analytics.experiment.ExperimentGroup
+import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.AnalyticsRequestV2
 import com.stripe.android.core.networking.AnalyticsRequestV2Executor
+import com.stripe.android.core.networking.toMap
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
@@ -32,6 +37,8 @@ import com.stripe.android.ui.core.IsStripeCardScanAvailable
 import com.stripe.android.utils.FakeDurationProvider
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonObject
 import org.json.JSONException
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -44,6 +51,7 @@ import org.robolectric.RobolectricTestRunner
 import java.io.IOException
 import javax.inject.Provider
 import kotlin.test.Test
+import kotlin.text.get
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -65,14 +73,17 @@ class DefaultEventReporterTest {
     )
 
     private val analyticEventCall = Turbine<AnalyticEvent>()
+
     private class FakeAnalyticEventCallbackProvider : Provider<AnalyticEventCallback?> {
         private var callback: AnalyticEventCallback? = null
 
         fun set(callback: AnalyticEventCallback?) {
             this.callback = callback
         }
+
         override fun get(): AnalyticEventCallback? = callback
     }
+
     private val analyticEventCallbackProvider = FakeAnalyticEventCallbackProvider()
 
     private val fakeUserFacingLoggerCall = Turbine<String>()
@@ -591,12 +602,46 @@ class DefaultEventReporterTest {
         )
 
         verify(analyticsRequestExecutor).executeAsync(
-            argWhere { req ->
+            argWhere { req: AnalyticsRequest ->
                 req.params["event"] == "mc_set_default_payment_method" &&
                     req.params["payment_method_type"] == "card"
             }
         )
     }
+
+    @Test
+    fun `onExperimentExposure() should fire v2 analytics request with expected event value`() =
+        runTest(testDispatcher) {
+            val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+                simulateSuccessfulSetup()
+            }
+
+            val experiment = LoggableExperiment.LinkGlobalHoldback(
+                arbId = "random_arb_id",
+                group = ExperimentGroup.TREATMENT,
+                isReturningLinkUser = true,
+                isLinkNative = false,
+            )
+            completeEventReporter.onExperimentExposure(experiment)
+
+            verify(analyticsV2RequestExecutor).enqueue(
+                argWhere { req: AnalyticsRequestV2 ->
+                    val params = req.params.toMap()
+                    req.eventName == "elements.experiment_exposure" &&
+                        params["experiment_retrieved"] == "link_global_holdback" &&
+                        params["arb_id"] == "random_arb_id" &&
+                        params["assignment_group"] == "treatment" &&
+                        params["integration_type"] == "dimensions-integration_type=mpe" &&
+                        params["link_default_opt_in"] == "dimensions-link_default_opt_in=true" &&
+                        params["is_returning_link_user"] == "dimensions-is_returning_link_user=true" &&
+                        params["dvs_provided"] == "dimensions-dvs_provided=" &&
+                        params["recognition_type"] == "dimensions-recognition_type=email" &&
+                        params["link_native"] == "dimensions-link_native=false" &&
+                        params["sdk_platform"] == "android" &&
+                        params["plugin_type"] == "native"
+                }
+            )
+        }
 
     @Test
     fun `onSetAsDefaultPaymentMethodFailed() should fire analytics request with expected event value`() {
