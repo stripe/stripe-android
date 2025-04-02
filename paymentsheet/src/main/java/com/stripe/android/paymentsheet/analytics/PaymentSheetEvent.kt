@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.analytics
 
-import com.stripe.android.common.analytics.experiment.ExperimentGroup
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.analytics.getExternalPaymentMethodsAnalyticsValue
 import com.stripe.android.common.analytics.toAnalyticsMap

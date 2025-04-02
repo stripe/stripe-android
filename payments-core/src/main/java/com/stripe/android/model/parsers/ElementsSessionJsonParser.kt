@@ -426,7 +426,6 @@ internal class ElementsSessionJsonParser(
         const val FIELD_GOOGLE_PAY_PREFERENCE = "google_pay_preference"
         private const val FIELD_EXPERIMENTS_DATA = "experiments_data"
         private const val ARB_ID = "arb_id"
-        private const val EXPERIMENT_ASSIGNMENTS = "experiment_assignments"
 
         private val PAYMENT_METHOD_JSON_PARSER = PaymentMethodJsonParser()
         private val CUSTOM_PAYMENT_METHOD_JSON_PARSER = CustomPaymentMethodJsonParser()

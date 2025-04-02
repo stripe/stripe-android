@@ -9,7 +9,6 @@ import com.stripe.android.common.analytics.experiment.ExperimentGroup
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.exception.APIException
-import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestV2
@@ -37,8 +36,6 @@ import com.stripe.android.ui.core.IsStripeCardScanAvailable
 import com.stripe.android.utils.FakeDurationProvider
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonObject
 import org.json.JSONException
 import org.junit.Rule
 import org.junit.runner.RunWith

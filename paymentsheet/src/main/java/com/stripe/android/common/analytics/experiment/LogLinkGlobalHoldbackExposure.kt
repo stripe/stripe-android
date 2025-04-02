@@ -16,17 +16,11 @@ internal class LogLinkGlobalHoldbackExposure @Inject constructor(
         elementsSession: ElementsSession,
     ) = runCatching {
         if (FeatureFlags.linkGlobalHoldbackExposureEnabled.isEnabled) {
-            // TODO(carlosmuvi): call lookup to retrieve the returning link user status
-            val isReturningLinkUser = false
-            // TODO(carlosmuvi): call lookup to retrieve the link native status
-            val isLinkNative = false
             val experimentsData = requireNotNull(elementsSession.experimentsData)
             val holdbackOn = elementsSession.linkSettings?.linkGlobalHoldbackOn == true
             eventReporter.onExperimentExposure(
                 experiment = LinkGlobalHoldback(
                     arbId = experimentsData.arbId,
-                    isReturningLinkUser = isReturningLinkUser,
-                    isLinkNative = isLinkNative,
                     group = if (holdbackOn) TREATMENT else CONTROL,
                 ),
             )
