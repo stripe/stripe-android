@@ -48,6 +48,7 @@ import org.robolectric.RobolectricTestRunner
 import java.io.IOException
 import javax.inject.Provider
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -62,7 +63,7 @@ class DefaultEventReporterTest {
 
     private val durationProvider = FakeDurationProvider()
     private val analyticsRequestExecutor = mock<AnalyticsRequestExecutor>()
-    private val analyticsV2RequestExecutor = mock<AnalyticsRequestV2Executor>()
+    private val analyticsV2RequestExecutor = FakeAnalyticsRequestV2Executor()
     private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
         ApplicationProvider.getApplicationContext(),
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
@@ -618,18 +619,16 @@ class DefaultEventReporterTest {
             )
             completeEventReporter.onExperimentExposure(experiment)
 
-            verify(analyticsV2RequestExecutor).enqueue(
-                argWhere { req: AnalyticsRequestV2 ->
-                    val params = req.params.toMap()
-                    req.eventName == "elements.experiment_exposure" &&
-                        params["experiment_retrieved"] == "link_global_holdback" &&
-                        params["arb_id"] == "random_arb_id" &&
-                        params["assignment_group"] == "treatment" &&
-                        params["integration_type"] == "dimensions-integration_type=mpe" &&
-                        params["sdk_platform"] == "android" &&
-                        params["plugin_type"] == "native"
-                }
-            )
+            val request = analyticsV2RequestExecutor.enqueueCalls.awaitItem()
+            val params = request.params.toMap()
+
+            assertEquals(request.eventName, "elements.experiment_exposure")
+            assertEquals(params["experiment_retrieved"], "link_global_holdback")
+            assertEquals(params["arb_id"], "random_arb_id")
+            assertEquals(params["assignment_group"], "treatment")
+            assertEquals(params["integration_type"], "dimensions-integration_type=mpe")
+            assertEquals(params["sdk_platform"], "android")
+            assertEquals(params["plugin_type"], "native")
         }
 
     @Test
