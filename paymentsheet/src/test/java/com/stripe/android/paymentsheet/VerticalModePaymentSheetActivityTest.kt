@@ -321,6 +321,7 @@ internal class VerticalModePaymentSheetActivityTest {
 
         verticalModePage.clickOnNewLpm("card")
         formPage.waitUntilVisible()
+        Espresso.onIdle()
         Espresso.pressBack()
 
         verticalModePage.waitUntilVisible()

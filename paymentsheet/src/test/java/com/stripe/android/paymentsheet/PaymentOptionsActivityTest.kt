@@ -7,6 +7,7 @@ import android.os.Build
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
@@ -19,6 +20,7 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
@@ -167,6 +169,7 @@ internal class PaymentOptionsActivityTest {
         }
     }
 
+    @OptIn(ExperimentalTestApi::class)
     @Test
     fun `ContinueButton should be hidden when returning to payment options`() {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
@@ -189,11 +192,13 @@ internal class PaymentOptionsActivityTest {
                     .onNodeWithTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_+ Add")
                     .performClick()
 
+                Espresso.onIdle()
                 composeTestRule.waitUntil { activity.continueButton.isVisible }
 
                 // Navigate back to payment options list
                 pressBack()
 
+                Espresso.onIdle()
                 composeTestRule.waitUntil { !activity.continueButton.isVisible }
             }
         }
