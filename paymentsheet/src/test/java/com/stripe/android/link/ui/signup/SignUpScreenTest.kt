@@ -236,6 +236,6 @@ internal class SignUpScreenTest {
     private fun onEmailField() = composeTestRule.onNodeWithText("Email")
     private fun onPhoneField() = composeTestRule.onNodeWithText("Phone number")
     private fun onNameField() = composeTestRule.onNodeWithText("Full name")
-    private fun onSignUpButton() = composeTestRule.onNodeWithText("Join Link")
+    private fun onSignUpButton() = composeTestRule.onNodeWithText("Agree and continue")
     private fun onErrorSection() = composeTestRule.onNodeWithTag(SIGN_UP_ERROR_TAG)
 }
