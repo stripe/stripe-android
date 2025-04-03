@@ -18,6 +18,7 @@ class Appearance private constructor(
     internal val badgeSuccess: Badge,
     internal val badgeWarning: Badge,
     internal val badgeDanger: Badge,
+    internal val spacingUnit: Float?
 ) : Parcelable {
 
     class Builder {
@@ -30,6 +31,7 @@ class Appearance private constructor(
         private var badgeSuccess: Badge = Badge.default()
         private var badgeWarning: Badge = Badge.default()
         private var badgeDanger: Badge = Badge.default()
+        private var spacingUnit: Float? = null
 
         /**
          * Describes the colors used in embedded components.
@@ -85,6 +87,12 @@ class Appearance private constructor(
         fun badgeDanger(badgeDanger: Badge): Builder =
             apply { this.badgeDanger = badgeDanger }
 
+        /**
+         * Describes the spacing unit appearance settings.
+         */
+        fun spacingUnit(spacingUnit: Float): Builder =
+            apply { this.spacingUnit = spacingUnit }
+
         fun build(): Appearance {
             return Appearance(
                 colors = colors,
@@ -95,7 +103,8 @@ class Appearance private constructor(
                 badgeNeutral = badgeNeutral,
                 badgeSuccess = badgeSuccess,
                 badgeWarning = badgeWarning,
-                badgeDanger = badgeDanger
+                badgeDanger = badgeDanger,
+                spacingUnit = spacingUnit,
             )
         }
     }

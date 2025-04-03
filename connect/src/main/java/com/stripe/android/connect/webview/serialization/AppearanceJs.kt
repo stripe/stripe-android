@@ -29,13 +29,13 @@ internal data class AppearanceVariablesJs(
      * The base spacing unit in dp that derives all spacing values. Increase or decrease this value to make your layout
      * more or less spacious.
      */
-    val spacingUnit: Float?,
+    val spacingUnit: String?,
 
     /**
      * The general border radius in dp used in embedded components. This sets the default border radius for all
      * components.
      */
-    val borderRadius: Float?,
+    val borderRadius: String?,
 
     /**
      * The primary color used throughout embedded components. Set this to your primary brand color.
@@ -369,8 +369,8 @@ internal fun Appearance.toJs(): AppearanceJs {
         variables = AppearanceVariablesJs(
             fontFamily = typography.fontFamily,
             fontSizeBase = typography.fontSizeBase,
-            spacingUnit = null,
-            borderRadius = cornerRadius.base,
+            spacingUnit = spacingUnit?.let { "${it.toString().removeSuffix(".0")}px" },
+            borderRadius = cornerRadius.base?.let { "${it.toString().removeSuffix(".0")}px" },
             colorPrimary = colors.primary,
             colorBackground = colors.background,
             colorText = colors.text,
