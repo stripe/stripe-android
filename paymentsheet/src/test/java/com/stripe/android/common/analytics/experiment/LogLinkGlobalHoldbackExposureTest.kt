@@ -75,7 +75,6 @@ class LogLinkGlobalHoldbackExposureTest {
         eventReporter.experimentExposureCalls.expectNoEvents()
     }
 
-
     @Test
     fun `invoke should log error when exception occurs`() {
         FeatureFlags.linkGlobalHoldbackExposureEnabled.setEnabled(true)
