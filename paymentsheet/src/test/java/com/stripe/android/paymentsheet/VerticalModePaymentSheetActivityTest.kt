@@ -320,8 +320,8 @@ internal class VerticalModePaymentSheetActivityTest {
         verticalModePage.assertPrimaryButton(isEnabled())
 
         verticalModePage.clickOnNewLpm("card")
-        formPage.waitUntilVisible()
         Espresso.onIdle()
+        formPage.waitUntilVisible()
         Espresso.pressBack()
 
         verticalModePage.waitUntilVisible()
@@ -332,6 +332,7 @@ internal class VerticalModePaymentSheetActivityTest {
         verticalModePage.assertLpmIsSelected("cashapp")
 
         verticalModePage.clickOnNewLpm("card")
+        Espresso.onIdle()
         formPage.waitUntilVisible()
         Espresso.pressBack()
 
