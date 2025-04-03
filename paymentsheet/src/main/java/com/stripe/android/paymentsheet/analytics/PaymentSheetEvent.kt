@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.analytics
 
+import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.analytics.getExternalPaymentMethodsAnalyticsValue
 import com.stripe.android.common.analytics.toAnalyticsMap
 import com.stripe.android.common.analytics.toAnalyticsValue
@@ -505,6 +506,20 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val eventName: String = formatEventName(mode, "cannot_return_from_link_and_lpms")
 
         override val additionalParams: Map<String, Any?> = mapOf()
+    }
+
+    class ExperimentExposure(
+        override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+        experiment: LoggableExperiment
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "elements.experiment_exposure"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            "experiment_retrieved" to experiment.name,
+            "arb_id" to experiment.arbId,
+            "assignment_group" to experiment.group.groupName
+        ) + experiment.dimensions.mapValues { "dimensions-$it" }
     }
 
     private fun standardParams(

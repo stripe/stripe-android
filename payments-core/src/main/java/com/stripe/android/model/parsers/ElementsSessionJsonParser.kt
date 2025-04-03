@@ -57,6 +57,13 @@ internal class ElementsSessionJsonParser(
             countryCode = countryCode
         )
 
+        val experimentsData: ElementsSession.ExperimentsData? =
+            json.optJSONObject(FIELD_EXPERIMENTS_DATA)?.let { experimentsDataJson ->
+                ElementsSession.ExperimentsData(
+                    arbId = experimentsDataJson.optString(ARB_ID),
+                )
+            }
+
         val customPaymentMethods = parseCustomPaymentMethods(json.optJSONArray(FIELD_CUSTOM_PAYMENT_METHODS_DATA))
 
         val cardBrandChoice = parseCardBrandChoice(json)
@@ -76,6 +83,7 @@ internal class ElementsSessionJsonParser(
                 externalPaymentMethodData = externalPaymentMethodData,
                 customPaymentMethods = customPaymentMethods,
                 flags = flags,
+                experimentsData = experimentsData,
                 elementsSessionId = elementsSessionId.takeIf { it.isNotBlank() } ?: UUID.randomUUID().toString()
             )
         } else {
@@ -146,10 +154,11 @@ internal class ElementsSessionJsonParser(
         json: JSONObject?,
         linkFundingSources: JSONArray?,
     ): ElementsSession.LinkSettings {
-        val disableLinkSignup = json?.optBoolean(FIELD_DISABLE_LINK_SIGNUP) ?: false
-        val linkPassthroughModeEnabled = json?.optBoolean(FIELD_LINK_PASSTHROUGH_MODE_ENABLED) ?: false
-        val useLinkAttestationEndpoints = json?.optBoolean(FIELD_USE_LINK_ATTESTATION_ENDPOINTS) ?: false
-        val suppressLink2faModal = json?.optBoolean(FIELD_LINK_SUPPRESS_2FA_MODAL) ?: false
+        val disableLinkSignup = json?.optBoolean(FIELD_DISABLE_LINK_SIGNUP) == true
+        val linkGlobalHoldbackOn = json?.optBoolean(LINK_GLOBAL_HOLDBACK_ON) == true
+        val linkPassthroughModeEnabled = json?.optBoolean(FIELD_LINK_PASSTHROUGH_MODE_ENABLED) == true
+        val useLinkAttestationEndpoints = json?.optBoolean(FIELD_USE_LINK_ATTESTATION_ENDPOINTS) == true
+        val suppressLink2faModal = json?.optBoolean(FIELD_LINK_SUPPRESS_2FA_MODAL) == true
 
         val linkMode = json?.optString(FIELD_LINK_MODE)?.let { mode ->
             LinkMode.entries.firstOrNull { it.value == mode }
@@ -174,6 +183,7 @@ internal class ElementsSessionJsonParser(
             disableLinkSignup = disableLinkSignup,
             linkConsumerIncentive = linkConsumerIncentive,
             useAttestationEndpoints = useLinkAttestationEndpoints,
+            linkGlobalHoldbackOn = linkGlobalHoldbackOn,
             suppress2faModal = suppressLink2faModal
         )
     }
@@ -379,6 +389,7 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_LINK_PASSTHROUGH_MODE_ENABLED = "link_passthrough_mode_enabled"
         private const val FIELD_LINK_MODE = "link_mode"
         private const val FIELD_DISABLE_LINK_SIGNUP = "link_mobile_disable_signup"
+        private const val LINK_GLOBAL_HOLDBACK_ON = "link_global_holdback_on"
         private const val FIELD_USE_LINK_ATTESTATION_ENDPOINTS = "link_mobile_use_attestation_endpoints"
         private const val FIELD_LINK_SUPPRESS_2FA_MODAL = "link_mobile_suppress_2fa_modal"
         private const val FIELD_MERCHANT_COUNTRY = "merchant_country"
@@ -413,6 +424,8 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_PAYMENT_METHOD_SYNC_DEFAULT = "payment_method_sync_default"
         private const val VALUE_ENABLED = FIELD_ENABLED
         const val FIELD_GOOGLE_PAY_PREFERENCE = "google_pay_preference"
+        private const val FIELD_EXPERIMENTS_DATA = "experiments_data"
+        private const val ARB_ID = "arb_id"
 
         private val PAYMENT_METHOD_JSON_PARSER = PaymentMethodJsonParser()
         private val CUSTOM_PAYMENT_METHOD_JSON_PARSER = CustomPaymentMethodJsonParser()
