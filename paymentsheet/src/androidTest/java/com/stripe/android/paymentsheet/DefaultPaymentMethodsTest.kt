@@ -10,6 +10,7 @@ import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.DefaultPaymentMethodsUtils
 import com.stripe.android.paymentsheet.utils.PaymentSheetLayoutType
+import com.stripe.android.paymentsheet.utils.PaymentSheetLayoutTypeProvider
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
 import com.stripe.android.paymentsheet.utils.ProductIntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -33,7 +34,8 @@ internal class DefaultPaymentMethodsTest {
     @TestParameter(valuesProvider = ProductIntegrationTypeProvider::class)
     lateinit var integrationType: ProductIntegrationType
 
-    var layoutType: PaymentSheetLayoutType = PaymentSheetLayoutType.Horizontal()
+    @TestParameter(valuesProvider = PaymentSheetLayoutTypeProvider::class)
+    lateinit var layoutType: PaymentSheetLayoutType
 
     @Test
     fun setDefaultCard_selectsCard() = runProductIntegrationTest(
