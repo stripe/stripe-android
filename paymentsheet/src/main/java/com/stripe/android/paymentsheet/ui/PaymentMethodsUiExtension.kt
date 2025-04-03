@@ -28,11 +28,10 @@ internal fun PaymentMethod.getSavedPaymentMethodIcon(
 }
 
 @DrawableRes
-internal fun PaymentMethod.Card?.getSavedPaymentMethodIcon(
+internal fun PaymentMethod.Card.getSavedPaymentMethodIcon(
     forVerticalMode: Boolean = false,
     showNightIcon: Boolean? = null,
 ): Int {
-    this ?: return R.drawable.stripe_ic_paymentsheet_card_unknown_ref
     val brand = CardBrand.fromCode(displayBrand).takeIf { it != Unknown } ?: brand
 
     // Vertical mode icons are the same for light & dark
