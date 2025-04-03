@@ -36,6 +36,7 @@ import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkTerms
+import com.stripe.android.link.ui.LinkTermsType
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.ProgressIndicatorTestTag
@@ -229,8 +230,7 @@ private fun SecondaryFields(
                     .fillMaxWidth()
                     .padding(top = 8.dp, bottom = 16.dp),
                 textAlign = TextAlign.Center,
-                isShowingPhoneFirst = false,
-                isOptional = false,
+                type = LinkTermsType.Full,
             )
         }
         AnimatedVisibility(visible = signUpScreenState.errorMessage != null) {

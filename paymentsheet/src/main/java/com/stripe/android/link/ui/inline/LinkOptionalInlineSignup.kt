@@ -38,6 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.LinkTerms
+import com.stripe.android.link.ui.LinkTermsType
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.CircularProgressIndicator
@@ -152,8 +153,11 @@ internal fun LinkOptionalInlineSignup(
         )
 
         LinkTerms(
-            isOptional = true,
-            isShowingPhoneFirst = isShowingPhoneFirst,
+            type = if (isShowingPhoneFirst) {
+                LinkTermsType.InlineOptionalWithPhoneFirst
+            } else {
+                LinkTermsType.InlineOptional
+            },
             textAlign = TextAlign.Start,
             modifier = Modifier
                 .padding(top = 8.dp)

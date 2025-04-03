@@ -10,19 +10,32 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.StripeTheme
 
+internal enum class LinkTermsType {
+    InlineOptionalWithPhoneFirst,
+    InlineOptional,
+    Inline,
+    Full,
+}
+
 @Composable
 internal fun LinkTerms(
-    isOptional: Boolean,
-    isShowingPhoneFirst: Boolean,
+    type: LinkTermsType,
     modifier: Modifier = Modifier,
     textAlign: TextAlign = TextAlign.Center,
 ) {
-    val text = if (isShowingPhoneFirst) {
-        stringResource(R.string.stripe_sign_up_terms_alternative_with_phone_number)
-    } else if (isOptional) {
-        stringResource(R.string.stripe_sign_up_terms_alternative)
-    } else {
-        stringResource(R.string.stripe_link_sign_up_terms)
+    val text = when (type) {
+        LinkTermsType.InlineOptionalWithPhoneFirst -> {
+            stringResource(R.string.stripe_sign_up_terms_alternative_with_phone_number)
+        }
+        LinkTermsType.InlineOptional -> {
+            stringResource(R.string.stripe_sign_up_terms_alternative)
+        }
+        LinkTermsType.Inline -> {
+            stringResource(R.string.stripe_sign_up_terms)
+        }
+        LinkTermsType.Full -> {
+            stringResource(R.string.stripe_link_sign_up_terms)
+        }
     }
 
     Mandate(
@@ -46,8 +59,7 @@ private fun LinkTermsPreview() {
     StripeTheme {
         Surface {
             LinkTerms(
-                isOptional = true,
-                isShowingPhoneFirst = false,
+                type = LinkTermsType.InlineOptional,
             )
         }
     }
