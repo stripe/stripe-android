@@ -36,7 +36,7 @@ fun MockResponse.testBodyFromFile(filename: String): MockResponse {
     val inputStream = MockResponse::class.java.classLoader!!.getResourceAsStream(filename)
     val buffer = Buffer()
     buffer.readFrom(inputStream)
-    assertIsValidJsonString(buffer.readUtf8(), filename)
+    assertIsValidJsonString(buffer.clone().readUtf8(), filename)
     setBody(buffer)
 
     return this
