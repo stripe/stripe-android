@@ -174,48 +174,6 @@ internal data class PaymentSheetScreenContentState(
     val primaryButtonUiState: PrimaryButton.UIState? = null,
 )
 
-/**
- * State Dependency Graph:
- *
- *     walletState      currentScreen     primaryButtonUiState
- *       \              |         |              |
- *        \             v         |              |
- *         \   showsWalletsHeader |              |
- *          \          |          |              |
- *           v         v          v              |
- *          actualWalletsState -> headerText     |
- *                    \          /               |
- *                     v        v                v
- *                  PaymentSheetScreenContentState
- *
- */
-@Composable
-internal fun rememberPaymentSheetScreenContentState(
-    type: PaymentSheetFlowType,
-    walletsState: WalletsState?,
-    currentScreen: PaymentSheetScreen,
-    primaryButtonUiState: PrimaryButton.UIState?
-): PaymentSheetScreenContentState {
-    val showsWalletsHeader = currentScreen.showsWalletsHeader(
-        isCompleteFlow = type == Complete,
-        walletsState = walletsState
-    )
-    val actualWalletsState = walletsState.takeIf { showsWalletsHeader }
-    val headerText by currentScreen.title(
-        isCompleteFlow = type == Complete,
-        isWalletEnabled = actualWalletsState != null
-    ).collectAsState()
-    return remember(type, actualWalletsState, headerText, currentScreen, primaryButtonUiState) {
-        PaymentSheetScreenContentState(
-            showsWalletsHeader = showsWalletsHeader,
-            actualWalletsState = actualWalletsState,
-            headerText = headerText,
-            currentScreen = currentScreen,
-            primaryButtonUiState = primaryButtonUiState
-        )
-    }
-}
-
 @Composable
 internal fun PaymentSheetScreenContent(
     viewModel: BaseSheetViewModel,
@@ -230,12 +188,11 @@ internal fun PaymentSheetScreenContent(
     val currentScreen by viewModel.navigationHandler.currentScreen.collectAsState()
     val primaryButtonUiState by viewModel.primaryButtonUiState.collectAsState()
 
-    val uiState = rememberPaymentSheetScreenContentState(
+    val uiState by currentScreen.paymentSheetScreenContentState(
         type = type,
         walletsState = walletsState,
-        currentScreen = currentScreen,
         primaryButtonUiState = primaryButtonUiState
-    )
+    ).collectAsState()
 
     ResetScroll(scrollState = scrollState, currentScreen = uiState.currentScreen)
 
