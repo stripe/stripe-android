@@ -21,6 +21,7 @@ import com.stripe.android.financialconnections.features.networkingsavetolinkveri
 import com.stripe.android.financialconnections.features.notice.NoticeSheetViewModel
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthViewModel
 import com.stripe.android.financialconnections.features.reset.ResetViewModel
+import com.stripe.android.financialconnections.features.streamlinedconsent.IDConsentContentViewModel
 import com.stripe.android.financialconnections.features.success.SuccessViewModel
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState
@@ -44,6 +45,7 @@ internal interface FinancialConnectionsSheetNativeComponent {
     val viewModel: FinancialConnectionsSheetNativeViewModel
 
     val consentViewModelFactory: ConsentViewModel.Factory
+    val idConsentContentViewModelFactory: IDConsentContentViewModel.Factory
     val institutionPickerViewModelFactory: InstitutionPickerViewModel.Factory
     val accountPickerViewModelFactory: AccountPickerViewModel.Factory
     val manualEntryViewModelFactory: ManualEntryViewModel.Factory
