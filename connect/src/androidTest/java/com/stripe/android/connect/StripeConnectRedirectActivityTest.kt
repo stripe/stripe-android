@@ -83,7 +83,7 @@ internal class StripeConnectRedirectActivityTest {
         launchWithCustomTabUrl(customTabUrl).use {
             assertThat(it.state).isEqualTo(Lifecycle.State.CREATED)
             closeCustomTab()
-            pollUntil(10.seconds) { it.state == Lifecycle.State.DESTROYED }
+            pollUntil(5.seconds) { it.state == Lifecycle.State.DESTROYED }
         }
     }
 
@@ -105,10 +105,9 @@ internal class StripeConnectRedirectActivityTest {
     }
 
     private fun closeCustomTab() {
-        val result = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-            .findObject(UiSelector().descriptionContains("Close tab"))
-            .click()
-        assertThat(result).isTrue()
+        val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+        device.findObject(UiSelector().packageName("com.android.chrome")).waitForExists(5_000L)
+        device.pressBack()
     }
 
     private suspend inline fun pollUntil(timeout: Duration, crossinline condition: () -> Boolean) {
