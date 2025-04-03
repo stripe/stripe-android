@@ -18,7 +18,7 @@ class EmptyEmbeddedComponentActivity : FragmentActivity() {
 
         manager = EmbeddedComponentManager(
             publishableKey = "pk_test_123",
-            clientSecretProvider = { "fake_secret" },
+            fetchClientSecret = { "fake_secret" },
         )
         controller = manager.createAccountOnboardingController(this, title)
     }

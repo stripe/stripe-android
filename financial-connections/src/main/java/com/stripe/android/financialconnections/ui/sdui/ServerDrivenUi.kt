@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.ui.sdui
 
+import FinancialConnectionsGenericInfoScreen.Body.Entry.Bullets.GenericBulletPoint
 import android.os.Build
 import android.text.Html
 import android.text.Spanned
@@ -19,6 +20,12 @@ internal data class BulletUI(
 ) {
     companion object {
         fun from(bullet: Bullet): BulletUI = BulletUI(
+            imageResource = bullet.icon?.default?.let { ImageResource.Network(it) },
+            title = bullet.title?.let { TextResource.Text(fromHtml(it)) },
+            content = bullet.content?.let { TextResource.Text(fromHtml(it)) },
+        )
+
+        fun from(bullet: GenericBulletPoint): BulletUI = BulletUI(
             imageResource = bullet.icon?.default?.let { ImageResource.Network(it) },
             title = bullet.title?.let { TextResource.Text(fromHtml(it)) },
             content = bullet.content?.let { TextResource.Text(fromHtml(it)) },

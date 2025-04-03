@@ -136,11 +136,11 @@ internal class PaymentSheetPage(
             .performClick()
     }
 
-    fun assertPrimaryButton(expectedContentDescription: String, canPay: Boolean) {
+    fun assertPrimaryButton(expectedStateDescription: String, canPay: Boolean) {
         onView(withId(R.id.primary_button)).check { view, _ ->
             val nodeInfo = AccessibilityNodeInfo()
             view.onInitializeAccessibilityNodeInfo(nodeInfo)
-            assertThat(nodeInfo.contentDescription).isEqualTo(expectedContentDescription)
+            assertThat(nodeInfo.stateDescription).isEqualTo(expectedStateDescription)
             assertThat(nodeInfo.className).isEqualTo(Button::class.java.name)
             if (canPay) {
                 assertThat(nodeInfo.isClickable).isTrue()

@@ -61,11 +61,13 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
     fun testUSBankAccountLiteSuccess() {
         testDriver.confirmUSBankAccount(
             financialConnectionsLiteEnabled = true,
-            testParameters = testParameters.copyPlaygroundSettings {
-                it[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
-                it[FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsLiteEnabled)] = true
-                it[FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsFullSdkUnavailable)] = true
-            },
+            testParameters = testParameters
+                .copyPlaygroundSettings {
+                    it[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
+                    it[FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsLiteEnabled)] = true
+                    it[FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsFullSdkUnavailable)] = true
+                }
+                .copy(executeInNightlyRun = false),
             afterAuthorization = { _, _ ->
                 ComposeButton(rules.compose, hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
                     .waitFor(isEnabled())
@@ -142,12 +144,14 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
     fun testUSBankAccountLiteCancelAllowsUserToContinue() {
         testDriver.confirmUSBankAccount(
             financialConnectionsLiteEnabled = true,
-            testParameters = testParameters.copyPlaygroundSettings {
-                it[FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsLiteEnabled)] = true
-                it[FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsFullSdkUnavailable)] = true
-            }.copy(
-                authorizationAction = AuthorizeAction.Cancel,
-            ),
+            testParameters = testParameters
+                .copyPlaygroundSettings {
+                    it[FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsLiteEnabled)] = true
+                    it[FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsFullSdkUnavailable)] = true
+                }.copy(
+                    authorizationAction = AuthorizeAction.Cancel,
+                    executeInNightlyRun = false
+                ),
             afterAuthorization = { _, _ ->
                 ComposeButton(rules.compose, hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
                     .waitFor(isEnabled())

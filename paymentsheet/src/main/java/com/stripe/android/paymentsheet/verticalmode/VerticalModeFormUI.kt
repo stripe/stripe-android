@@ -28,6 +28,7 @@ import com.stripe.android.paymentsheet.ui.PromoBadge
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
+import kotlinx.coroutines.Dispatchers
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val TEST_TAG_HEADER_TITLE = "TEST_TAG_HEADER_TITLE"
@@ -43,7 +44,7 @@ internal fun VerticalModeFormUI(
     )
 
     var hasSentInteractionEvent by remember { mutableStateOf(false) }
-    val state by interactor.state.collectAsState()
+    val state by interactor.state.collectAsState(Dispatchers.Main)
 
     Column(modifier) {
         val headerInformation = state.headerInformation

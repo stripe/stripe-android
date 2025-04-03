@@ -84,28 +84,13 @@ public final class com/stripe/android/connect/BuildConfig {
 	public fun <init> ()V
 }
 
-public abstract interface class com/stripe/android/connect/ClientSecretProvider {
-	public abstract fun provideClientSecret (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public abstract class com/stripe/android/connect/ClientSecretProviderListenerWrapper : com/stripe/android/connect/ClientSecretProvider {
-	public static final field $stable I
-	public fun <init> ()V
-	public abstract fun provideClientSecret (Lcom/stripe/android/connect/ClientSecretProviderListenerWrapper$ClientSecretResultListener;)V
-	public fun provideClientSecret (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-}
-
-public abstract interface class com/stripe/android/connect/ClientSecretProviderListenerWrapper$ClientSecretResultListener {
-	public abstract fun onResult (Ljava/lang/String;)V
-}
-
 public final class com/stripe/android/connect/EmbeddedComponentManager {
 	public static final field $stable I
 	public static final field Companion Lcom/stripe/android/connect/EmbeddedComponentManager$Companion;
-	public fun <init> (Ljava/lang/String;Lcom/stripe/android/connect/ClientSecretProvider;)V
-	public fun <init> (Ljava/lang/String;Lcom/stripe/android/connect/ClientSecretProvider;Lcom/stripe/android/connect/appearance/Appearance;)V
-	public fun <init> (Ljava/lang/String;Lcom/stripe/android/connect/ClientSecretProvider;Lcom/stripe/android/connect/appearance/Appearance;Ljava/util/List;)V
-	public synthetic fun <init> (Ljava/lang/String;Lcom/stripe/android/connect/ClientSecretProvider;Lcom/stripe/android/connect/appearance/Appearance;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/connect/FetchClientSecret;)V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/connect/FetchClientSecret;Lcom/stripe/android/connect/appearance/Appearance;)V
+	public fun <init> (Ljava/lang/String;Lcom/stripe/android/connect/FetchClientSecret;Lcom/stripe/android/connect/appearance/Appearance;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Lcom/stripe/android/connect/FetchClientSecret;Lcom/stripe/android/connect/appearance/Appearance;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun createAccountOnboardingController (Landroidx/fragment/app/FragmentActivity;)Lcom/stripe/android/connect/AccountOnboardingController;
 	public final fun createAccountOnboardingController (Landroidx/fragment/app/FragmentActivity;Ljava/lang/String;)Lcom/stripe/android/connect/AccountOnboardingController;
 	public final fun createAccountOnboardingController (Landroidx/fragment/app/FragmentActivity;Ljava/lang/String;Lcom/stripe/android/connect/AccountOnboardingProps;)Lcom/stripe/android/connect/AccountOnboardingController;
@@ -124,6 +109,21 @@ public final class com/stripe/android/connect/EmptyProps$Creator : android/os/Pa
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/connect/EmptyProps;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public abstract interface class com/stripe/android/connect/FetchClientSecret {
+	public abstract fun invoke (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract class com/stripe/android/connect/FetchClientSecretTask : com/stripe/android/connect/FetchClientSecret {
+	public static final field $stable I
+	public fun <init> ()V
+	public abstract fun fetchClientSecret (Lcom/stripe/android/connect/FetchClientSecretTask$ResultCallback;)V
+	public fun invoke (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public abstract interface class com/stripe/android/connect/FetchClientSecretTask$ResultCallback {
+	public abstract fun onResult (Ljava/lang/String;)V
 }
 
 public abstract interface annotation class com/stripe/android/connect/PrivateBetaConnectSDK : java/lang/annotation/Annotation {

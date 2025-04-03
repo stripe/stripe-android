@@ -243,7 +243,9 @@ internal sealed interface PaymentSheetScreen {
                 null
             } else {
                 // supportedPaymentMethods does not change
-                if (interactor.state.value.supportedPaymentMethods.singleOrNull()?.code == PaymentMethod.Type.Card.code) {
+                if (interactor.state.value.supportedPaymentMethods.singleOrNull()?.code ==
+                    PaymentMethod.Type.Card.code
+                ) {
                     PaymentsCoreR.string.stripe_title_add_a_card.resolvableString
                 } else {
                     R.string.stripe_paymentsheet_choose_payment_method.resolvableString
@@ -292,7 +294,9 @@ internal sealed interface PaymentSheetScreen {
                 R.string.stripe_paymentsheet_add_payment_method_title.resolvableString
             } else {
                 // supportedPaymentMethods does not change
-                if (interactor.state.value.supportedPaymentMethods.singleOrNull()?.code == PaymentMethod.Type.Card.code) {
+                if (interactor.state.value.supportedPaymentMethods.singleOrNull()?.code ==
+                    PaymentMethod.Type.Card.code
+                ) {
                     PaymentsCoreR.string.stripe_title_add_a_card.resolvableString
                 } else {
                     R.string.stripe_paymentsheet_choose_payment_method.resolvableString
@@ -406,9 +410,9 @@ internal sealed interface PaymentSheetScreen {
             }
         }
 
-
         override fun title(isCompleteFlow: Boolean, isWalletEnabled: Boolean): ResolvableString? {
             // Should never be used
+            // headerText of this screen is set in paymentSheetScreenContentState
             return interactor.state.value.title
         }
 

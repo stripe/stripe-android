@@ -118,9 +118,9 @@ private fun PaymentSheetScreen(
     scrollState: ScrollState,
     content: @Composable () -> Unit,
 ) {
-    val processing by viewModel.processing.collectAsState()
+    val processing by viewModel.processing.collectAsState(Dispatchers.Main)
 
-    val walletsProcessingState by viewModel.walletsProcessingState.collectAsState()
+    val walletsProcessingState by viewModel.walletsProcessingState.collectAsState(Dispatchers.Main)
 
     val density = LocalDensity.current
     var contentHeight by remember { mutableStateOf(0.dp) }
@@ -129,7 +129,7 @@ private fun PaymentSheetScreen(
 
     BottomSheetScaffold(
         topBar = {
-            val currentScreen by viewModel.navigationHandler.currentScreen.collectAsState()
+            val currentScreen by viewModel.navigationHandler.currentScreen.collectAsState(Dispatchers.Main)
             val topBarState by remember(currentScreen) {
                 currentScreen.topBarState()
             }.collectAsState()
@@ -186,7 +186,7 @@ internal fun PaymentSheetScreenContent(
     val error by viewModel.error.collectAsState()
     val mandateText by viewModel.mandateHandler.mandateText.collectAsState()
     val currentScreen by viewModel.navigationHandler.currentScreen.collectAsState()
-    val primaryButtonUiState by viewModel.primaryButtonUiState.collectAsState()
+    val primaryButtonUiState by viewModel.primaryButtonUiState.collectAsState(Dispatchers.Main)
 
     val uiState by currentScreen.paymentSheetScreenContentState(
         type = type,

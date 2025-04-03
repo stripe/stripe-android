@@ -43,16 +43,14 @@ internal class WalletScreenScreenshotTest {
     @Test
     fun testExpandedState() {
         snapshot(
-            state = walletUiState(),
-            isExpanded = true
+            state = walletUiState(isExpanded = true),
         )
     }
 
     @Test
     fun testPayButtonCompletedState() {
         snapshot(
-            state = walletUiState(),
-            isExpanded = true
+            state = walletUiState(isExpanded = true),
         )
     }
 
@@ -61,8 +59,8 @@ internal class WalletScreenScreenshotTest {
         snapshot(
             state = walletUiState(
                 isProcessing = true,
+                isExpanded = true,
             ),
-            isExpanded = true
         )
     }
 
@@ -79,8 +77,8 @@ internal class WalletScreenScreenshotTest {
             state = walletUiState(
                 paymentDetailsList = paymentDetailsList,
                 selectedItem = paymentDetailsList.firstOrNull(),
+                isExpanded = true,
             ),
-            isExpanded = true
         )
     }
 
@@ -97,8 +95,8 @@ internal class WalletScreenScreenshotTest {
             state = walletUiState(
                 paymentDetailsList = paymentDetailsList,
                 selectedItem = paymentDetailsList.firstOrNull(),
+                isExpanded = true,
             ),
-            isExpanded = true
         )
     }
 
@@ -109,8 +107,8 @@ internal class WalletScreenScreenshotTest {
                 selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull {
                     it is ConsumerPaymentDetails.BankAccount
                 },
+                isExpanded = true,
             ),
-            isExpanded = true
         )
     }
 
@@ -118,9 +116,9 @@ internal class WalletScreenScreenshotTest {
     fun testAlertMessage() {
         snapshot(
             state = walletUiState(
-                alertMessage = "Something went wrong".resolvableString
+                alertMessage = "Something went wrong".resolvableString,
+                isExpanded = true,
             ),
-            isExpanded = true
         )
     }
 
@@ -133,9 +131,9 @@ internal class WalletScreenScreenshotTest {
                     CONSUMER_PAYMENT_DETAILS_CARD.copy(
                         id = "${card.id}_$index"
                     )
-                }
+                },
+                isExpanded = true,
             ),
-            isExpanded = true
         )
     }
 
@@ -144,8 +142,8 @@ internal class WalletScreenScreenshotTest {
         snapshot(
             state = walletUiState(
                 canAddNewPaymentMethod = false,
+                isExpanded = true,
             ),
-            isExpanded = true
         )
     }
 
@@ -159,6 +157,7 @@ internal class WalletScreenScreenshotTest {
         cvcInput: FormFieldEntry = FormFieldEntry(null),
         alertMessage: ResolvableString? = null,
         canAddNewPaymentMethod: Boolean = true,
+        isExpanded: Boolean = false,
     ): WalletUiState {
         return WalletUiState(
             paymentDetailsList = paymentDetailsList,
@@ -169,19 +168,16 @@ internal class WalletScreenScreenshotTest {
             expiryDateInput = expiryDateInput,
             cvcInput = cvcInput,
             alertMessage = alertMessage,
-            canAddNewPaymentMethod = canAddNewPaymentMethod
+            canAddNewPaymentMethod = canAddNewPaymentMethod,
+            isExpanded = isExpanded,
         )
     }
 
-    private fun snapshot(
-        state: WalletUiState,
-        isExpanded: Boolean = false
-    ) {
+    private fun snapshot(state: WalletUiState) {
         paparazziRule.snapshot {
             DefaultLinkTheme {
                 WalletBody(
                     state = state,
-                    isExpanded = isExpanded,
                     onItemSelected = {},
                     onExpandedChanged = {},
                     onPrimaryButtonClick = {},
