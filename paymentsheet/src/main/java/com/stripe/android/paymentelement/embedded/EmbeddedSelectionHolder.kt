@@ -1,6 +1,6 @@
 package com.stripe.android.paymentelement.embedded
 
-import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.core.mainthread.MainThreadSavedStateHandle
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.flow.StateFlow
@@ -9,7 +9,7 @@ import javax.inject.Singleton
 
 @Singleton
 internal class EmbeddedSelectionHolder @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
+    private val savedStateHandle: MainThreadSavedStateHandle,
 ) {
     val selection: StateFlow<PaymentSelection?> = savedStateHandle.getStateFlow(EMBEDDED_SELECTION_KEY, null)
     val temporarySelection: StateFlow<String?> = savedStateHandle.getStateFlow(EMBEDDED_TEMPORARY_SELECTION_KEY, null)
