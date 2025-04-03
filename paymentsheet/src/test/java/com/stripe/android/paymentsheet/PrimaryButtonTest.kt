@@ -85,7 +85,7 @@ class PrimaryButtonTest {
     }
 
     @Test
-    fun `onReadyState() should update label`() {
+    fun `onReadyState() should update label & state description`() {
         primaryButton.updateUiState(
             PrimaryButton.UIState(
                 label = "Pay $10.99".resolvableString,
@@ -103,6 +103,11 @@ class PrimaryButtonTest {
         ).isEqualTo(
             "Processing…"
         )
+        assertThat(
+            primaryButton.stateDescription
+        ).isEqualTo(
+            "Processing…"
+        )
 
         primaryButton.updateState(
             PrimaryButton.State.Ready
@@ -110,6 +115,11 @@ class PrimaryButtonTest {
 
         assertThat(
             primaryButton.externalLabel?.resolve(context)
+        ).isEqualTo(
+            "Pay $10.99"
+        )
+        assertThat(
+            primaryButton.stateDescription
         ).isEqualTo(
             "Pay $10.99"
         )
@@ -124,6 +134,23 @@ class PrimaryButtonTest {
             primaryButton.externalLabel?.resolve(context)
         ).isEqualTo(
             "Processing…"
+        )
+        assertThat(
+            primaryButton.stateDescription
+        ).isEqualTo(
+            "Processing…"
+        )
+    }
+
+    @Test
+    fun `onFinishProcessing() should update state description`() {
+        primaryButton.updateState(
+            PrimaryButton.State.FinishProcessing({})
+        )
+        assertThat(
+            primaryButton.stateDescription
+        ).isEqualTo(
+            "Transaction complete"
         )
     }
 
