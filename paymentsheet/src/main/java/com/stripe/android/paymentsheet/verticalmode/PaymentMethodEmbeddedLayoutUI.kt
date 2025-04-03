@@ -24,6 +24,7 @@ import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
+import kotlinx.coroutines.Dispatchers
 import org.jetbrains.annotations.VisibleForTesting
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -44,7 +45,7 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
         StripeImageLoader(context.applicationContext)
     }
 
-    val state by interactor.state.collectAsState()
+    val state by interactor.state.collectAsState(Dispatchers.Main)
 
     PaymentMethodEmbeddedLayoutUI(
         paymentMethods = state.displayablePaymentMethods,
