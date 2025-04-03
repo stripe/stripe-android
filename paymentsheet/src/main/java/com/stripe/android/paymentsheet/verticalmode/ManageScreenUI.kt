@@ -14,6 +14,7 @@ import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.utils.collectAsState
+import kotlinx.coroutines.Dispatchers
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
@@ -22,7 +23,7 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
         id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal
     )
 
-    val state by interactor.state.collectAsState()
+    val state by interactor.state.collectAsState(Dispatchers.Main)
 
     Column(
         modifier = Modifier
