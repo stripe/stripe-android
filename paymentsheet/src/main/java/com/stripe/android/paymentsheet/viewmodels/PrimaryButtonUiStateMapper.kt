@@ -65,6 +65,9 @@ internal class PrimaryButtonUiStateMapper(
                 lockVisible = false,
             ).takeIf {
                 screen.showsContinueButton ||
+                    // If a screen shows mandates, then we should show the continue button for payment methods
+                    // that require a mandate. The buyer needs to be able to click the terms link before proceeding
+                    // to use said payment method.
                     (selection?.requiresConfirmation == true && screen.showsMandates)
             }
         }
