@@ -55,6 +55,13 @@ internal class LogLinkGlobalHoldbackExposure @Inject constructor(
 
         val isReturningUser: Boolean = customerEmail?.let { isReturningUser(state = state, email = it) } == true
 
+        logger.debug(
+            """Link Global Holdback exposure: 
+                |arbId=${experimentsData.arbId},
+                |isReturningLinkConsumer=$isReturningUser,
+                |group=${if (holdbackOn) TREATMENT else CONTROL}
+            """.trimMargin()
+        )
         eventReporter.onExperimentExposure(
             experiment = LinkGlobalHoldback(
                 arbId = experimentsData.arbId,
