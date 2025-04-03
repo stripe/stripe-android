@@ -154,7 +154,6 @@ import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
@@ -323,6 +322,7 @@ internal class PaymentSheetViewModelTest {
     @Suppress("LongMethod")
     fun `modifyPaymentMethod updates payment methods and sends event on successful update`() = runTest {
         Dispatchers.setMain(testDispatcher)
+        val eventReporter = FakeEventReporter()
         val paymentMethods = PaymentMethodFixtures.createCards(5)
 
         val firstPaymentMethod = paymentMethods.first()
@@ -344,7 +344,8 @@ internal class PaymentSheetViewModelTest {
         )
         val viewModel = createViewModel(
             customer = EMPTY_CUSTOMER_STATE.copy(paymentMethods = paymentMethods),
-            customerRepository = customerRepository
+            customerRepository = customerRepository,
+            eventReporter = eventReporter
         )
 
         viewModel.navigationHandler.currentScreen.test {
@@ -376,7 +377,9 @@ internal class PaymentSheetViewModelTest {
             assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
         }
 
-        verify(eventReporter).onUpdatePaymentMethodSucceeded(CardBrand.Visa)
+        val updatePaymentMethodSucceededCall = eventReporter.updatePaymentMethodSucceededCalls.awaitItem()
+        eventReporter.updatePaymentMethodSucceededCalls.ensureAllEventsConsumed()
+        assertThat(updatePaymentMethodSucceededCall.selectedBrand).isEqualTo(CardBrand.Visa)
 
         val idCaptor = argumentCaptor<String>()
         val paramsCaptor = argumentCaptor<PaymentMethodUpdateParams>()
@@ -406,6 +409,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `modifyPaymentMethod sends event on failed update`() = runTest {
+        val eventReporter = FakeEventReporter()
         val paymentMethods = PaymentMethodFixtures.createCards(5)
 
         val firstPaymentMethod = paymentMethods.first()
@@ -419,7 +423,8 @@ internal class PaymentSheetViewModelTest {
         )
         val viewModel = createViewModel(
             customer = EMPTY_CUSTOMER_STATE.copy(paymentMethods = paymentMethods),
-            customerRepository = customerRepository
+            customerRepository = customerRepository,
+            eventReporter = eventReporter
         )
 
         viewModel.navigationHandler.currentScreen.test {
@@ -449,12 +454,10 @@ internal class PaymentSheetViewModelTest {
             }
         }
 
-        verify(eventReporter).onUpdatePaymentMethodFailed(
-            selectedBrand = eq(CardBrand.Visa),
-            error = argThat {
-                message == "No network found!"
-            }
-        )
+        val onUpdatePaymentMethodFailedCall = eventReporter.updatePaymentMethodFailedCalls.awaitItem()
+        eventReporter.updatePaymentMethodFailedCalls.ensureAllEventsConsumed()
+        assertThat(onUpdatePaymentMethodFailedCall.selectedBrand).isEqualTo(CardBrand.Visa)
+        assertThat(onUpdatePaymentMethodFailedCall.error.message).isEqualTo("No network found!")
     }
 
     @Test
