@@ -228,7 +228,6 @@ internal class SignUpScreenTest {
             linkEventsReporter = linkEventsReporter,
             logger = logger,
             savedStateHandle = SavedStateHandle(),
-            navigate = {},
             navigateAndClearStack = {},
             moveToWeb = moveToWeb
         )

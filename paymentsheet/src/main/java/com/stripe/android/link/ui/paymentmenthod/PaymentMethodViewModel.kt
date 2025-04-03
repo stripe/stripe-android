@@ -73,6 +73,7 @@ internal class PaymentMethodViewModel @Inject constructor(
             return
         }
         viewModelScope.launch {
+            clearErrorMessage()
             updateButtonState(PrimaryButtonState.Processing)
             linkAccountManager.createCardPaymentDetails(paymentMethodCreateParams)
                 .fold(
@@ -129,6 +130,12 @@ internal class PaymentMethodViewModel @Inject constructor(
             it.copy(
                 primaryButtonState = state
             )
+        }
+    }
+
+    private fun clearErrorMessage() {
+        _state.update {
+            it.copy(errorMessage = null)
         }
     }
 

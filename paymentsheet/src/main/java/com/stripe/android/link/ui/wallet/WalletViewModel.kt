@@ -35,7 +35,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.Result
 import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
 internal class WalletViewModel @Inject constructor(
@@ -128,20 +127,32 @@ internal class WalletViewModel @Inject constructor(
     }
 
     fun onItemSelected(item: ConsumerPaymentDetails.PaymentDetails) {
-        if (item == uiState.value.selectedItem) return
-
-        expiryDateController.onRawValueChange("")
-        cvcController.onRawValueChange("")
+        if (item != uiState.value.selectedItem) {
+            expiryDateController.onRawValueChange("")
+            cvcController.onRawValueChange("")
+        }
 
         _uiState.update {
-            it.copy(selectedItem = item)
+            it.copy(
+                selectedItem = item,
+                isExpanded = false,
+            )
+        }
+    }
+
+    fun onExpandedChanged(expanded: Boolean) {
+        _uiState.update {
+            it.copy(isExpanded = expanded)
         }
     }
 
     fun onPrimaryButtonClicked() {
         val paymentDetail = _uiState.value.selectedItem ?: return
         _uiState.update {
-            it.copy(isProcessing = true)
+            it.copy(
+                isProcessing = true,
+                errorMessage = null,
+            )
         }
 
         viewModelScope.launch {
