@@ -27,6 +27,15 @@ internal interface LinkRepository {
         email: String,
     ): Result<ConsumerSessionLookup>
 
+    /**
+     * Performs a lookup of a consumer session  without triggering any
+     * back end logging events. This is currently only being used by the
+     * Link global holdback to look up consumers in the event Link is disabled.
+     */
+    suspend fun lookupConsumerWithoutBackendLoggingForExposure(
+        email: String
+    ): Result<ConsumerSessionLookup>
+
     suspend fun mobileLookupConsumer(
         email: String,
         emailSource: EmailSource,
