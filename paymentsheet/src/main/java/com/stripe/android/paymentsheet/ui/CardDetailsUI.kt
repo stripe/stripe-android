@@ -13,6 +13,7 @@ import androidx.compose.material.Card
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -22,21 +23,41 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.stripe.android.CardBrandFilter
 import com.stripe.android.R
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
+import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
 internal fun CardDetailsEditUI(
+    editCardDetailsInteractor: EditCardDetailsInteractor,
+    isExpired: Boolean,
+) {
+    val state by editCardDetailsInteractor.state.collectAsState()
+
+    CardDetailsEditUI(
+        shouldShowCardBrandDropdown = state.shouldShowCardBrandDropdown,
+        selectedBrand = state.selectedCardBrand,
+        card = state.card,
+        isExpired = isExpired,
+        availableNetworks = state.availableNetworks,
+        paymentMethodIcon = state.paymentMethodIcon,
+        onBrandChoiceChanged = {
+            editCardDetailsInteractor.handleViewAction(EditCardDetailsInteractor.ViewAction.BrandChoiceChanged(it))
+        }
+    )
+}
+
+@Composable
+private fun CardDetailsEditUI(
     shouldShowCardBrandDropdown: Boolean,
     selectedBrand: CardBrandChoice,
     card: PaymentMethod.Card,
     isExpired: Boolean,
-    cardBrandFilter: CardBrandFilter,
+    availableNetworks: List<CardBrandChoice>,
     @DrawableRes paymentMethodIcon: Int,
     onBrandChoiceChanged: (CardBrandChoice) -> Unit
 ) {
@@ -52,7 +73,7 @@ internal fun CardDetailsEditUI(
                 card = card,
                 selectedBrand = selectedBrand,
                 shouldShowCardBrandDropdown = shouldShowCardBrandDropdown,
-                cardBrandFilter = cardBrandFilter,
+                availableNetworks = availableNetworks,
                 savedPaymentMethodIcon = paymentMethodIcon,
                 onBrandChoiceChanged = onBrandChoiceChanged,
             )
@@ -88,7 +109,7 @@ internal fun CardDetailsEditUI(
 private fun CardNumberField(
     card: PaymentMethod.Card,
     selectedBrand: CardBrandChoice,
-    cardBrandFilter: CardBrandFilter,
+    availableNetworks: List<CardBrandChoice>,
     shouldShowCardBrandDropdown: Boolean,
     savedPaymentMethodIcon: Int,
     onBrandChoiceChanged: (CardBrandChoice) -> Unit,
@@ -100,7 +121,7 @@ private fun CardNumberField(
             if (shouldShowCardBrandDropdown) {
                 CardBrandDropdown(
                     selectedBrand = selectedBrand,
-                    availableBrands = card.getAvailableNetworks(cardBrandFilter),
+                    availableBrands = availableNetworks,
                     onBrandChoiceChanged = onBrandChoiceChanged,
                 )
             } else {

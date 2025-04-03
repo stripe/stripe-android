@@ -6,14 +6,16 @@ import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import com.google.common.truth.Truth.assertThat
-import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.ViewActionRecorder
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
 import com.stripe.android.uicore.elements.TEST_TAG_DROP_DOWN_CHOICE
+import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -25,6 +27,11 @@ import org.robolectric.annotation.Config
 internal class CardDetailsEditUITest {
     @get:Rule
     val composeRule = createComposeRule()
+
+    private val testDispatcher = UnconfinedTestDispatcher()
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
     @Test
     fun missingExpiryDate_displaysDots() {
@@ -129,9 +136,10 @@ internal class CardDetailsEditUITest {
     }
 
     @Test
-    fun notModifiableCard_cbcDropdownIsNotShown() {
+    fun showCardBrandDropdownIsFalse_cbcDropdownIsNotShown() {
         runScenario(
-            card = PaymentMethodFixtures.CARD_WITH_NETWORKS
+            card = PaymentMethodFixtures.CARD_WITH_NETWORKS,
+            showCardBrandDropdown = false
         ) {
             composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).assertDoesNotExist()
         }
@@ -139,19 +147,22 @@ internal class CardDetailsEditUITest {
 
     @Test
     fun selectingCardBrandDropdown_sendsOnBrandChoiceChangedAction() {
-        var brandChange: CardBrand? = null
         runScenario(
             card = PaymentMethodFixtures.CARD_WITH_NETWORKS,
-            onBrandChoiceChanged = {
-                brandChange = it.brand
-            }
-        )
+        ) {
+            composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).performClick()
 
-        composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).performClick()
+            composeRule.onNodeWithTag("${TEST_TAG_DROP_DOWN_CHOICE}_Visa").performClick()
 
-        composeRule.onNodeWithTag("${TEST_TAG_DROP_DOWN_CHOICE}_Visa").performClick()
-
-        assertThat(brandChange).isEqualTo(CardBrand.Visa)
+            viewActionRecorder.consume(
+                viewAction = EditCardDetailsInteractor.ViewAction.BrandChoiceChanged(
+                    cardBrandChoice = CardBrandChoice(
+                        brand = CardBrand.Visa,
+                        enabled = true
+                    )
+                )
+            )
+        }
     }
 
     @Test
@@ -160,7 +171,7 @@ internal class CardDetailsEditUITest {
             card = PaymentMethodFixtures.CARD_WITH_NETWORKS
         ) {
             composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
-                .assertContentDescriptionEquals("Visa")
+                .assertContentDescriptionEquals("Cartes Bancaires")
         }
     }
 
@@ -178,22 +189,36 @@ internal class CardDetailsEditUITest {
 
     private fun runScenario(
         card: PaymentMethod.Card = PaymentMethodFixtures.CARD_WITH_NETWORKS,
-        selectedCardBrand: CardBrandChoice = CardBrandChoice(CardBrand.Visa, enabled = true),
-        cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
         showCardBrandDropdown: Boolean = true,
         isExpiredCard: Boolean = false,
-        onBrandChoiceChanged: (CardBrandChoice) -> Unit = {},
+        block: TestScenario.() -> Unit
     ) {
+        val editCardDetailsInteractor = FakeEditCardDetailsInteractor(
+            shouldShowCardBrandDropdown = showCardBrandDropdown,
+            state = stateFlowOf(
+                value = EditCardDetailsInteractor.State(
+                    card = card,
+                    selectedCardBrand = CardBrandChoice(
+                        brand = CardBrand.CartesBancaires,
+                        enabled = true
+                    ),
+                    paymentMethodIcon = 0,
+                    shouldShowCardBrandDropdown = showCardBrandDropdown,
+                    availableNetworks = card.getAvailableNetworks(DefaultCardBrandFilter)
+                )
+            ),
+            onCardUpdateParamsChanged = {}
+        )
         composeRule.setContent {
             CardDetailsEditUI(
-                shouldShowCardBrandDropdown = showCardBrandDropdown,
-                selectedBrand = selectedCardBrand,
-                card = card,
-                isExpired = isExpiredCard,
-                cardBrandFilter = cardBrandFilter,
-                paymentMethodIcon = com.stripe.payments.model.R.drawable.stripe_ic_visa_unpadded,
-                onBrandChoiceChanged = onBrandChoiceChanged,
+                editCardDetailsInteractor = editCardDetailsInteractor,
+                isExpired = isExpiredCard
             )
         }
+        block(TestScenario(editCardDetailsInteractor.viewActionRecorder))
     }
+
+    data class TestScenario(
+        val viewActionRecorder: ViewActionRecorder<EditCardDetailsInteractor.ViewAction>
+    )
 }

@@ -23,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.R
+import com.stripe.android.common.ui.PrimaryButton
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
@@ -36,7 +37,6 @@ import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.mapAsStateFlow
-import com.stripe.android.common.ui.PrimaryButton as PrimaryButton
 import com.stripe.android.paymentsheet.R as PaymentSheetR
 
 @Composable
@@ -53,13 +53,12 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
         modifier = modifier.padding(horizontal = horizontalPadding).testTag(UPDATE_PM_SCREEN_TEST_TAG),
     ) {
         when (val savedPaymentMethod = interactor.displayableSavedPaymentMethod.savedPaymentMethod) {
-            is SavedPaymentMethod.Card -> CardDetailsUI(
-                displayableSavedPaymentMethod = interactor.displayableSavedPaymentMethod,
-                shouldShowCardBrandDropdown = shouldShowCardBrandDropdown,
-                selectedBrand = state.cardBrandChoice,
-                card = savedPaymentMethod.card,
-                interactor = interactor,
-            )
+            is SavedPaymentMethod.Card -> {
+                CardDetailsEditUI(
+                    editCardDetailsInteractor = interactor.editCardDetailsInteractor,
+                    isExpired = interactor.isExpiredCard
+                )
+            }
             is SavedPaymentMethod.SepaDebit -> SepaDebitUI(
                 name = interactor.displayableSavedPaymentMethod.paymentMethod.billingDetails?.name,
                 email = interactor.displayableSavedPaymentMethod.paymentMethod.billingDetails?.email,
@@ -159,29 +158,6 @@ private fun UpdatePaymentMethodButtons(
         Spacer(modifier = Modifier.requiredHeight(spacerHeight))
         DeletePaymentMethodUi(interactor)
     }
-}
-
-@Composable
-private fun CardDetailsUI(
-    displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
-    shouldShowCardBrandDropdown: Boolean,
-    selectedBrand: CardBrandChoice,
-    card: PaymentMethod.Card,
-    interactor: UpdatePaymentMethodInteractor,
-) {
-    CardDetailsEditUI(
-        shouldShowCardBrandDropdown = shouldShowCardBrandDropdown,
-        selectedBrand = selectedBrand,
-        card = card,
-        isExpired = interactor.isExpiredCard,
-        cardBrandFilter = interactor.cardBrandFilter,
-        paymentMethodIcon = displayableSavedPaymentMethod
-            .paymentMethod
-            .getSavedPaymentMethodIcon(forVerticalMode = true),
-        onBrandChoiceChanged = {
-            interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(it))
-        }
-    )
 }
 
 @Composable

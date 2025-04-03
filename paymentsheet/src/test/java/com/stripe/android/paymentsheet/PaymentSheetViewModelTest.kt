@@ -118,6 +118,8 @@ import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.ui.CardBrandChoice
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
+import com.stripe.android.paymentsheet.ui.editCardDetailsInteractorHelper
+import com.stripe.android.paymentsheet.ui.updateCardBrand
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.paymentsheet.utils.prefillCreate
 import com.stripe.android.paymentsheet.utils.prefilledBuilder
@@ -286,14 +288,9 @@ internal class PaymentSheetViewModelTest {
             if (currentScreen is PaymentSheetScreen.UpdatePaymentMethod) {
                 val interactor = currentScreen.interactor
 
-                interactor.handleViewAction(
-                    UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                        CardBrandChoice(
-                            CardBrand.Visa,
-                            enabled = true
-                        )
-                    )
-                )
+                interactor.editCardDetailsInteractorHelper {
+                    updateCardBrand(CardBrand.Visa)
+                }
 
                 interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
             }
@@ -362,14 +359,9 @@ internal class PaymentSheetViewModelTest {
             if (currentScreen is PaymentSheetScreen.UpdatePaymentMethod) {
                 val interactor = currentScreen.interactor
 
-                interactor.handleViewAction(
-                    UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                        CardBrandChoice(
-                            CardBrand.Visa,
-                            enabled = true
-                        )
-                    )
-                )
+                interactor.editCardDetailsInteractorHelper {
+                    updateCardBrand(CardBrand.Visa)
+                }
 
                 interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
             }
@@ -409,6 +401,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `modifyPaymentMethod sends event on failed update`() = runTest {
+        Dispatchers.setMain(testDispatcher)
         val eventReporter = FakeEventReporter()
         val paymentMethods = PaymentMethodFixtures.createCards(5)
 
@@ -441,14 +434,9 @@ internal class PaymentSheetViewModelTest {
             if (currentScreen is PaymentSheetScreen.UpdatePaymentMethod) {
                 val interactor = currentScreen.interactor
 
-                interactor.handleViewAction(
-                    UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                        CardBrandChoice(
-                            CardBrand.Visa,
-                            enabled = true
-                        )
-                    )
-                )
+                interactor.editCardDetailsInteractorHelper {
+                    updateCardBrand(CardBrand.Visa)
+                }
 
                 interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
             }
@@ -3001,15 +2989,9 @@ internal class PaymentSheetViewModelTest {
 
             if (currentScreen is PaymentSheetScreen.UpdatePaymentMethod) {
                 val interactor = currentScreen.interactor
-
-                interactor.handleViewAction(
-                    UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                        CardBrandChoice(
-                            CardBrand.Visa,
-                            enabled = true
-                        )
-                    )
-                )
+                interactor.editCardDetailsInteractorHelper {
+                    updateCardBrand(CardBrand.Visa)
+                }
 
                 verify(customerRepository, never()).updatePaymentMethod(any(), any(), any())
             }
