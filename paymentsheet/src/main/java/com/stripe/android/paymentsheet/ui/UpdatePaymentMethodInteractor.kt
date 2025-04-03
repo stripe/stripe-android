@@ -138,7 +138,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
             EditCardDetailsInteractor.create(
                 card = displayableSavedPaymentMethod.savedPaymentMethod.card,
                 onCardUpdateParamsChanged = ::onCardUpdateParamsChanged,
-                workContext = workContext,
+                coroutineScope = coroutineScope,
                 isModifiable = displayableSavedPaymentMethod.isModifiable(),
                 cardBrandFilter = cardBrandFilter,
                 onBrandChoiceChanged = onBrandChoiceSelected,

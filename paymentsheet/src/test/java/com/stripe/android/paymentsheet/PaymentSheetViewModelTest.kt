@@ -401,6 +401,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `modifyPaymentMethod sends event on failed update`() = runTest {
+        Dispatchers.setMain(testDispatcher)
         val eventReporter = FakeEventReporter()
         val paymentMethods = PaymentMethodFixtures.createCards(5)
 

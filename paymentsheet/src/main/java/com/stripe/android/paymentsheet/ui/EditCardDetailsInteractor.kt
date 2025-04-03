@@ -8,7 +8,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CardUpdateParams
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.coroutines.CoroutineContext
 
 internal typealias CardUpdateParamsCallback = (CardUpdateParams?) -> Unit
 
@@ -45,7 +44,7 @@ internal interface EditCardDetailsInteractor {
 
     companion object {
         fun create(
-            workContext: CoroutineContext,
+            coroutineScope: CoroutineScope,
             isModifiable: Boolean,
             cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
             card: PaymentMethod.Card,
@@ -55,7 +54,7 @@ internal interface EditCardDetailsInteractor {
             return DefaultEditCardDetailsInteractor(
                 card = card,
                 cardBrandFilter = cardBrandFilter,
-                scope = CoroutineScope(workContext + SupervisorJob()),
+                coroutineScope = coroutineScope,
                 onBrandChoiceChanged = onBrandChoiceChanged,
                 onCardUpdateParamsChanged = onCardUpdateParamsChanged,
                 isModifiable = isModifiable
@@ -68,7 +67,7 @@ private class DefaultEditCardDetailsInteractor(
     private val card: PaymentMethod.Card,
     private val cardBrandFilter: CardBrandFilter,
     private val isModifiable: Boolean,
-    private val scope: CoroutineScope,
+    coroutineScope: CoroutineScope,
     private val onBrandChoiceChanged: CardBrandCallback,
     override val onCardUpdateParamsChanged: CardUpdateParamsCallback
 ) : EditCardDetailsInteractor {
@@ -79,13 +78,13 @@ private class DefaultEditCardDetailsInteractor(
     override val state: StateFlow<EditCardDetailsInteractor.State> = cardDetailsEntry.mapLatest { inputState ->
         uiState(inputState.cardBrandChoice)
     }.stateIn(
-        scope = scope,
+        scope = coroutineScope,
         started = SharingStarted.Eagerly,
         initialValue = uiState()
     )
 
     init {
-        scope.launch {
+        coroutineScope.launch(Dispatchers.Main) {
             cardDetailsEntry.collectLatest { state ->
                 val newParams = state.takeIf {
                     it.hasChanged(

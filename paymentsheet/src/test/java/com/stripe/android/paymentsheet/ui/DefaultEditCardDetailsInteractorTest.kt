@@ -8,6 +8,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.testing.CoroutineTestRule
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
@@ -152,7 +153,7 @@ internal class DefaultEditCardDetailsInteractorTest {
         return EditCardDetailsInteractor.create(
             cardBrandFilter = cardBrandFilter,
             onBrandChoiceChanged = onBrandChoiceChanged,
-            workContext = testDispatcher,
+            coroutineScope = TestScope(testDispatcher),
             isModifiable = isModifiable,
             card = card,
             onCardUpdateParamsChanged = onCardUpdateParamsChanged,
