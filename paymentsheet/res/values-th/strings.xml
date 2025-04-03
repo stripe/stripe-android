@@ -24,6 +24,16 @@
   <string name="stripe_confirm_close_form_title">แน่ใจไหมว่าต้องการปิดแบบฟอร์มนี้</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">บันทึกข้อมูลของคุณไว้เพื่อการชำระเงินที่ปลอดภัยในคลิกเดียวด้วย Link</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_link_sign_up">ยอมรับและดำเนินการต่อ</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header">การชำระเงินที่รวดเร็วและปลอดภัยในคลิกเดียว</string>
+  <!-- Label describing the benefit of signing up for Link. -->
+  <string name="stripe_link_sign_up_message">บันทึกข้อมูลการชำระเงินของคุณด้วย Link แล้วชำระเงินอย่างปลอดภัยในคลิกเดียวบนเว็บไซต์ที่ Link รองรับ</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_link_sign_up_terms"><![CDATA[การดำเนินการต่อหมายความว่าคุณยอมรับ<terms>ข้อกำหนด</terms>และ<privacy>นโยบายความเป็นส่วนตัว</privacy>]]></string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message">ป้อนรหัสยืนยันที่ส่งไปยัง %s เพื่อใช้ข้อมูลที่บันทึกไว้</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">ออกจากระบบ Link</string>
   <!-- Text that is displayed when a network error occurs -->

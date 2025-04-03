@@ -24,6 +24,16 @@
   <string name="stripe_confirm_close_form_title">Θέλετε να κλείσετε αυτή τη φόρμα;</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Αποθήκευση των στοιχείων σας για ασφαλή ολοκλήρωση αγοράς με 1 κλικ μέσω Link</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_link_sign_up">Αποδοχή και συνέχεια</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header">Γρήγορη και ασφαλής ολοκλήρωση αγοράς με 1 κλικ</string>
+  <!-- Label describing the benefit of signing up for Link. -->
+  <string name="stripe_link_sign_up_message">Αποθηκεύστε τα στοιχεία πληρωμής σας με το Link, για ασφαλή ολοκλήρωση αγοράς με 1 κλικ στους ιστότοπους που υποστηρίζονται από το Link.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_link_sign_up_terms"><![CDATA[Αν συνεχίσετε, συμφωνείτε με τους <terms>Όρους</terms> και την <privacy>Πολιτική απορρήτου</privacy>.]]></string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message">Εισαγάγετε τον κωδικό που στάλθηκε στο %s για να χρησιμοποιήσετε τα αποθηκευμένα στοιχεία σας.</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Αποσύνδεση από το Link</string>
   <!-- Text that is displayed when a network error occurs -->

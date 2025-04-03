@@ -24,6 +24,16 @@
   <string name="stripe_confirm_close_form_title">Trid tagħlaq din il-formola?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Erfa\' l-informazzjoni tiegħek biex tkun tista\' tħallas f\'pass wieħed grazzi għal Link</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_link_sign_up">Aqbel u kompli</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header">Ħallas malajr, b\'mod sigur, b\'mossa waħda</string>
+  <!-- Label describing the benefit of signing up for Link. -->
+  <string name="stripe_link_sign_up_message">Erfa\' l-informazzjoni dwar il-pagament tiegħek permezz ta\' Link u ħallas b\'mod sigur b\'mossa waħda fuq siti tal-internet li jaċċettaw Link.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_link_sign_up_terms"><![CDATA[Meta tkompli tkun qed taqbel mar-<terms>Regoli</terms> u l-<privacy>Politika tal-Privatezza</privacy>.]]></string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message">Daħħal il-kodiċi li bgħatna fuq %s biex tuża l-informazzjoni merfugħa tiegħek.</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Oħroġ minn Link</string>
   <!-- Text that is displayed when a network error occurs -->

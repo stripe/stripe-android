@@ -24,6 +24,16 @@
   <string name="stripe_confirm_close_form_title">Ali želite zapreti ta obrazec?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Shranite svoje podatke za varno izvedbo plačila z enim klikom s storitvijo Link</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_link_sign_up">Strinjam se in nadaljuj</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header">Hitra in varna izvedba plačila z enim klikom</string>
+  <!-- Label describing the benefit of signing up for Link. -->
+  <string name="stripe_link_sign_up_message">Shranite svoje podatke o plačilu v storitev Link za varno izvedbo plačila z enim klikom na spletnih mestih, ki podpirajo Link.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_link_sign_up_terms"><![CDATA[Če nadaljujete postopek, se strinjate s <terms>pogoji</terms> in <privacy>pravilnikom o zasebnosti</privacy>.]]></string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message">Vnesite kodo, ki smo jo poslali na telefonsko številko %s, da boste lahko uporabili shranjene podatke.</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Odjava iz storitve Link</string>
   <!-- Text that is displayed when a network error occurs -->
