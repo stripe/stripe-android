@@ -64,7 +64,8 @@ internal class PrimaryButtonUiStateMapper(
                 enabled = buttonsEnabled && selection != null,
                 lockVisible = false,
             ).takeIf {
-                screen.showsContinueButton || selection?.requiresConfirmation == true
+                screen.showsContinueButton ||
+                    (selection?.requiresConfirmation == true && screen.showsMandates)
             }
         }
     }
