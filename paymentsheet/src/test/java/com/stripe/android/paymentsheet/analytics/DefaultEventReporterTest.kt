@@ -627,6 +627,8 @@ class DefaultEventReporterTest {
             assertEquals(params["integration_type"], "dimensions-integration_type=mpe")
             assertEquals(params["sdk_platform"], "android")
             assertEquals(params["plugin_type"], "native")
+
+            analyticsV2RequestExecutor.validate()
         }
 
     @Test

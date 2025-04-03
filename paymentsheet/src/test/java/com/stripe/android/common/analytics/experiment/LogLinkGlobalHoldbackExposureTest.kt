@@ -6,6 +6,7 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.FakeLogger
+import com.stripe.android.testing.FeatureFlagTestRule
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -23,6 +24,12 @@ class LogLinkGlobalHoldbackExposureTest {
     @get:Rule
     var rule: TestRule = InstantTaskExecutorRule()
 
+    @get:Rule
+    val linkGlobalHoldbackExposureEnabledRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.linkGlobalHoldbackExposureEnabled,
+        isEnabled = true,
+    )
+
     @Before
     fun setUp() {
         eventReporter = FakeEventReporter()
@@ -32,7 +39,6 @@ class LogLinkGlobalHoldbackExposureTest {
 
     @Test
     fun `invoke should log exposure TREATMENT when feature flag is enabled and holdback is on`() = runTest {
-        FeatureFlags.linkGlobalHoldbackExposureEnabled.setEnabled(true)
         val elementsSession = createElementsSession(
             linkSettings = createLinkSettings(holdbackOn = true),
             experimentsData = ElementsSession.ExperimentsData(arbId = "test_arb_id")
@@ -48,7 +54,6 @@ class LogLinkGlobalHoldbackExposureTest {
 
     @Test
     fun `invoke should log exposure CONTROL when feature flag is enabled and holdback is off`() = runTest {
-        FeatureFlags.linkGlobalHoldbackExposureEnabled.setEnabled(true)
         val elementsSession = createElementsSession(
             linkSettings = createLinkSettings(holdbackOn = false),
             experimentsData = ElementsSession.ExperimentsData(arbId = "test_arb_id")
@@ -64,7 +69,7 @@ class LogLinkGlobalHoldbackExposureTest {
 
     @Test
     fun `invoke should not log exposure when feature flag is disabled`() = runTest {
-        FeatureFlags.linkGlobalHoldbackExposureEnabled.setEnabled(false)
+        linkGlobalHoldbackExposureEnabledRule.setEnabled(false)
         val elementsSession = createElementsSession(
             linkSettings = createLinkSettings(holdbackOn = false),
             experimentsData = ElementsSession.ExperimentsData(arbId = "test_arb_id")
@@ -77,7 +82,6 @@ class LogLinkGlobalHoldbackExposureTest {
 
     @Test
     fun `invoke should log error when exception occurs`() {
-        FeatureFlags.linkGlobalHoldbackExposureEnabled.setEnabled(true)
         val elementsSession = createElementsSession(
             linkSettings = createLinkSettings(holdbackOn = false),
             experimentsData = null
