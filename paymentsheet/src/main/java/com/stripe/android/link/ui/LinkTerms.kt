@@ -12,11 +12,21 @@ import com.stripe.android.uicore.StripeTheme
 
 @Composable
 internal fun LinkTerms(
+    isOptional: Boolean,
+    isShowingPhoneFirst: Boolean,
     modifier: Modifier = Modifier,
     textAlign: TextAlign = TextAlign.Center,
 ) {
+    val text = if (isShowingPhoneFirst) {
+        stringResource(R.string.stripe_sign_up_terms_alternative_with_phone_number)
+    } else if (isOptional) {
+        stringResource(R.string.stripe_sign_up_terms_alternative)
+    } else {
+        stringResource(R.string.stripe_link_sign_up_terms)
+    }
+
     Mandate(
-        mandateText = stringResource(R.string.stripe_sign_up_terms).replaceHyperlinks(),
+        mandateText = text.replaceHyperlinks(),
         modifier = modifier,
         textAlign = textAlign,
     )
@@ -35,7 +45,10 @@ private fun String.replaceHyperlinks() = this.replace(
 private fun LinkTermsPreview() {
     StripeTheme {
         Surface {
-            LinkTerms()
+            LinkTerms(
+                isOptional = true,
+                isShowingPhoneFirst = false,
+            )
         }
     }
 }

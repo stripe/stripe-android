@@ -1,7 +1,3 @@
-
-
-
-
 package com.stripe.android.link.ui.signup
 
 import androidx.compose.animation.AnimatedVisibility
@@ -96,7 +92,7 @@ internal fun SignUpBody(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = stringResource(R.string.stripe_sign_up_header),
+            text = stringResource(R.string.stripe_link_sign_up_header),
             modifier = Modifier
                 .testTag(SIGN_UP_HEADER_TAG)
                 .padding(vertical = 4.dp),
@@ -105,7 +101,7 @@ internal fun SignUpBody(
             color = MaterialTheme.colors.onSurface
         )
         Text(
-            text = stringResource(R.string.stripe_sign_up_message),
+            text = stringResource(R.string.stripe_link_sign_up_message),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 4.dp, bottom = 30.dp),
@@ -232,7 +228,9 @@ private fun SecondaryFields(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp, bottom = 16.dp),
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                isShowingPhoneFirst = false,
+                isOptional = false,
             )
         }
         AnimatedVisibility(visible = signUpScreenState.errorMessage != null) {
@@ -244,7 +242,7 @@ private fun SecondaryFields(
             )
         }
         PrimaryButton(
-            label = stringResource(R.string.stripe_sign_up),
+            label = stringResource(R.string.stripe_link_sign_up),
             state = if (signUpScreenState.signUpEnabled) {
                 PrimaryButtonState.Enabled
             } else {

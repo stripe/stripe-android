@@ -106,7 +106,7 @@ internal fun VerificationBody(
         )
 
         Text(
-            text = stringResource(R.string.stripe_verification_message, state.redactedPhoneNumber),
+            text = stringResource(R.string.stripe_link_verification_message, state.redactedPhoneNumber),
             modifier = Modifier
                 .testTag(VERIFICATION_SUBTITLE_TAG)
                 .fillMaxWidth()
@@ -198,7 +198,7 @@ private fun Header(
         )
     } else {
         Text(
-            text = stringResource(R.string.stripe_verification_header),
+            text = stringResource(R.string.stripe_verification_dialog_header),
             modifier = Modifier
                 .testTag(VERIFICATION_TITLE_TAG)
                 .padding(vertical = 4.dp),
