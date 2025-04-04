@@ -24,6 +24,16 @@
   <string name="stripe_confirm_close_form_title">Anda ingin menutup formulir ini?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Simpan info Anda untuk checkout aman dengan 1 klik dengan Link</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_link_sign_up">Setuju dan lanjutkan</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header">Checkout sekali klik yang aman dan cepat</string>
+  <!-- Label describing the benefit of signing up for Link. -->
+  <string name="stripe_link_sign_up_message">Simpan informasi pembayaran Anda dengan Link, dan proses pembayaran secara aman dalam sekali klik pada situs yang didukung Link.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_link_sign_up_terms"><![CDATA[Dengan melanjutkan, berarti Anda menyetujui <terms>Ketentuan</terms> dan <privacy>Kebijakan Privasi</privacy>.]]></string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message">Masukkan kode yang dikirim ke %s untuk menggunakan informasi tersimpan Anda.</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Keluar dari Link</string>
   <!-- Text that is displayed when a network error occurs -->

@@ -41,6 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.LinkTerms
+import com.stripe.android.link.ui.LinkTermsType
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.link.ui.signup.SignUpState.InputtingRemainingFields
 import com.stripe.android.paymentsheet.R
@@ -257,8 +258,7 @@ internal fun LinkFields(
 
             AnimatedVisibility(visible = signUpState == InputtingRemainingFields) {
                 LinkTerms(
-                    isOptional = false,
-                    isShowingPhoneFirst = false,
+                    type = LinkTermsType.Inline,
                     modifier = Modifier.padding(top = 16.dp),
                     textAlign = TextAlign.Start,
                 )

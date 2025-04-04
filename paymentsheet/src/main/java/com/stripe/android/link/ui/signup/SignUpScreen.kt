@@ -36,6 +36,7 @@ import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkTerms
+import com.stripe.android.link.ui.LinkTermsType
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.ProgressIndicatorTestTag
@@ -92,7 +93,7 @@ internal fun SignUpBody(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = stringResource(R.string.stripe_sign_up_header),
+            text = stringResource(R.string.stripe_link_sign_up_header),
             modifier = Modifier
                 .testTag(SIGN_UP_HEADER_TAG)
                 .padding(vertical = 4.dp),
@@ -101,7 +102,7 @@ internal fun SignUpBody(
             color = MaterialTheme.colors.onSurface
         )
         Text(
-            text = stringResource(R.string.stripe_sign_up_message, signUpScreenState.merchantName),
+            text = stringResource(R.string.stripe_link_sign_up_message),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 4.dp, bottom = 30.dp),
@@ -229,8 +230,7 @@ private fun SecondaryFields(
                     .fillMaxWidth()
                     .padding(top = 8.dp, bottom = 16.dp),
                 textAlign = TextAlign.Center,
-                isShowingPhoneFirst = true,
-                isOptional = true
+                type = LinkTermsType.Full,
             )
         }
         AnimatedVisibility(visible = signUpScreenState.errorMessage != null) {
@@ -242,7 +242,7 @@ private fun SecondaryFields(
             )
         }
         PrimaryButton(
-            label = stringResource(R.string.stripe_sign_up),
+            label = stringResource(R.string.stripe_link_sign_up),
             state = if (signUpScreenState.signUpEnabled) {
                 PrimaryButtonState.Enabled
             } else {

@@ -24,6 +24,16 @@
   <string name="stripe_confirm_close_form_title">Haluatko sulkea tämän lomakkeen?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Tallenna tiedot turvalliselle yhden napsautuksen maksamiselle Link-palvelulla</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_link_sign_up">Hyväksy ja jatka</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header">Nopea, turvallinen kerran napsautettava maksaminen</string>
+  <!-- Label describing the benefit of signing up for Link. -->
+  <string name="stripe_link_sign_up_message">Tallenna maksutiedot Link-palveluun ja maksa turvallisesti yhdellä napsautuksella Link-palvelun tukemilla sivustoilla.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_link_sign_up_terms"><![CDATA[Jatkamalla hyväksyt <terms>ehdot</terms> ja <privacy>tietosuojaselosteen</privacy>.]]></string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message">Syötä kohteeseen %s lähetetty koodi käyttääksesi tallennettuja tietoja.</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Kirjaudu ulos Link-palvelusta</string>
   <!-- Text that is displayed when a network error occurs -->
