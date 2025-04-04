@@ -6,6 +6,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.R
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils
@@ -27,6 +28,32 @@ class PaymentLauncherConfirmationActivityTest {
         on { it.internalPaymentResult } doReturn MutableStateFlow(null)
     }
     private val testFactory = TestUtils.viewModelFactoryFor(viewModel)
+
+    @Test
+    fun `Ensure title is 'Confirming transaction'`() {
+        mockViewModelActivityScenario().launch(
+            Intent(
+                ApplicationProvider.getApplicationContext(),
+                PaymentLauncherConfirmationActivity::class.java
+            ).putExtras(
+                PaymentLauncherContract.Args.IntentConfirmationArgs(
+                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                    stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                    enableLogging = false,
+                    productUsage = PRODUCT_USAGE,
+                    includePaymentSheetNextHandlers = false,
+                    confirmStripeIntentParams = mock(),
+                    statusBarColor = Color.CYAN
+                ).toBundle()
+            )
+        ).use {
+            it.onActivity { activity ->
+                assertThat(activity.title).isEqualTo(
+                    activity.resources.getString(R.string.stripe_confirming_transaction_status)
+                )
+            }
+        }
+    }
 
     @Test
     fun `statusBarColor is set to transparent on window`() {
