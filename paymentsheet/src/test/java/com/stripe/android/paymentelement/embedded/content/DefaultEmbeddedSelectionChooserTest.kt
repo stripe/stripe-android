@@ -292,7 +292,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
         )
         Scenario(
             chooser = DefaultEmbeddedSelectionChooser(
-                savedStateHandle = savedStateHandle,
+                savedStateHandle = MainThreadSavedStateHandle(savedStateHandle),
                 formHelperFactory = formHelperFactory,
                 coroutineScope = CoroutineScope(Dispatchers.Unconfined),
             ),

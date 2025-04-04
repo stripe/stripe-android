@@ -2,10 +2,10 @@
 
 package com.stripe.android.paymentelement.embedded.content
 
-import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.containsVolatileDifferences
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.core.mainthread.MainThreadSavedStateHandle
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
@@ -15,7 +15,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
-import kotlin.collections.contains
 
 internal fun interface EmbeddedSelectionChooser {
     fun choose(
@@ -28,7 +27,7 @@ internal fun interface EmbeddedSelectionChooser {
 }
 
 internal class DefaultEmbeddedSelectionChooser @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
+    private val savedStateHandle: MainThreadSavedStateHandle,
     private val formHelperFactory: EmbeddedFormHelperFactory,
     @ViewModelScope private val coroutineScope: CoroutineScope,
 ) : EmbeddedSelectionChooser {

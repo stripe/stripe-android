@@ -2,7 +2,7 @@ package com.stripe.android.paymentelement.embedded.content
 
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.core.mainthread.MainThreadSavedStateHandle
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -14,7 +14,7 @@ internal class EmbeddedPaymentElementInitializer @Inject constructor(
     private val sheetLauncher: EmbeddedSheetLauncher,
     private val contentHelper: EmbeddedContentHelper,
     private val lifecycleOwner: LifecycleOwner,
-    private val savedStateHandle: SavedStateHandle,
+    private val savedStateHandle: MainThreadSavedStateHandle,
     private val eventReporter: EventReporter,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
 ) {
