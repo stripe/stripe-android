@@ -21,8 +21,7 @@ internal sealed interface NewPaymentOptionSelection {
 
     fun getPaymentMethodOptionParams(): PaymentMethodOptionsParams?
 
-    data class New(override val paymentSelection: PaymentSelection.New) : NewOrExternalPaymentSelection {
-
+    data class New(override val paymentSelection: PaymentSelection.New) : NewPaymentOptionSelection {
         override fun getPaymentMethodCode(): PaymentMethodCode {
             return when (paymentSelection) {
                 is PaymentSelection.New.LinkInline -> PaymentMethod.Type.Card.code
