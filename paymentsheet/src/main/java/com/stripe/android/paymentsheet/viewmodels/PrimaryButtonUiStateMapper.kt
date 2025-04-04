@@ -64,7 +64,16 @@ internal class PrimaryButtonUiStateMapper(
                 enabled = buttonsEnabled && selection != null,
                 lockVisible = false,
             ).takeIf {
-                screen.showsContinueButton || selection?.requiresConfirmation == true
+                /**
+                 * PaymentMethods requireConfirmation when they have mandates / terms of service
+                 * that must be shown to buyers
+                 * Check which ones require confirmation here [PaymentSelection.Saved.mandateText]
+                 * The continue button is required to obtain the buyers implicit consent on screens
+                 * where mandates are shown.
+                 */
+                val needsUserConsentForSelectedPaymentMethodWithMandate =
+                    selection?.requiresConfirmation == true && screen.showsMandates
+                screen.showsContinueButton || needsUserConsentForSelectedPaymentMethodWithMandate
             }
         }
     }
