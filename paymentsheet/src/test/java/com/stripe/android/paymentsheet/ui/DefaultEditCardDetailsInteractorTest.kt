@@ -105,7 +105,32 @@ internal class DefaultEditCardDetailsInteractorTest {
             }
         )
 
+        handler.updateExpiryDate(text = "1240")
+
+        assertThat(cardUpdateParams?.expiryMonth).isEqualTo(12)
+        assertThat(cardUpdateParams?.expiryYear).isEqualTo(2040)
+
         handler.updateExpiryDate(text = "12/40")
+
+        assertThat(cardUpdateParams?.expiryMonth).isNull()
+        assertThat(cardUpdateParams?.expiryYear).isNull()
+    }
+
+    @Test
+    fun pastExpiryDateChangeShouldProduceNewCardParams() {
+        var cardUpdateParams: CardUpdateParams? = null
+        val handler = handler(
+            onCardUpdateParamsChanged = {
+                cardUpdateParams = it
+            }
+        )
+
+        handler.updateExpiryDate(text = "1240")
+
+        assertThat(cardUpdateParams?.expiryMonth).isEqualTo(12)
+        assertThat(cardUpdateParams?.expiryYear).isEqualTo(2040)
+
+        handler.updateExpiryDate(text = "1215")
 
         assertThat(cardUpdateParams?.expiryMonth).isNull()
         assertThat(cardUpdateParams?.expiryYear).isNull()

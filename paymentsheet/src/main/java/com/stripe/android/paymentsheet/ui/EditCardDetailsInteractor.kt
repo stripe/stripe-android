@@ -123,6 +123,17 @@ private class DefaultEditCardDetailsInteractor(
     }
 
     private fun onDateChanged(text: String) {
+        val isValid = dateConfig.determineState(text).isValid()
+        if (isValid.not()) {
+            cardDetailsEntry.update { entry ->
+                entry.copy(
+                    expYear = null,
+                    expMonth = null,
+                )
+            }
+            return
+        }
+
         val map = CardDetailsUtil.createExpiryDateFormFieldValues(FormFieldEntry(text))
         cardDetailsEntry.update { entry ->
             entry.copy(
