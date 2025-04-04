@@ -149,6 +149,8 @@ internal class SavedPaymentMethodMutator(
             )
         )
 
+        val canRemoveDuplicates = customerStateHolder.canRemoveDuplicate.value
+
         val currentSelection = (selection.value as? PaymentSelection.Saved)?.paymentMethod?.id
         val didRemoveSelectedItem = currentSelection == paymentMethodId
 
@@ -165,7 +167,7 @@ internal class SavedPaymentMethodMutator(
                 customerSessionClientSecret = currentCustomer.customerSessionClientSecret,
             ),
             paymentMethodId = paymentMethodId,
-            canRemoveDuplicates = currentCustomer.permissions.canRemoveDuplicates,
+            canRemoveDuplicates = canRemoveDuplicates,
         )
     }
 

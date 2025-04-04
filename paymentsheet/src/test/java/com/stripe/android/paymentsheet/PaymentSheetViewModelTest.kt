@@ -264,11 +264,6 @@ internal class PaymentSheetViewModelTest {
                 ephemeralKeySecret = "ek_123",
                 customerSessionClientSecret = null,
                 paymentMethods = paymentMethods,
-                permissions = CustomerState.Permissions(
-                    canRemovePaymentMethods = true,
-                    canRemoveLastPaymentMethod = true,
-                    canRemoveDuplicates = false,
-                ),
                 defaultPaymentMethodId = null,
             ),
             customerRepository = customerRepository

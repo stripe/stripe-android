@@ -42,7 +42,9 @@ internal object PaymentMethodMetadataFactory {
         paymentMethodIncentive: PaymentMethodIncentive? = null,
         isPaymentMethodSetAsDefaultEnabled: Boolean = IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
         elementsSessionId: String = "session_1234",
-        financialConnectionsAvailability: FinancialConnectionsAvailability? = FinancialConnectionsAvailability.Lite
+        financialConnectionsAvailability: FinancialConnectionsAvailability? = FinancialConnectionsAvailability.Lite,
+        customerMetadataPermissions: CustomerMetadata.Permissions =
+            PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA_PERMISSIONS,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -57,6 +59,7 @@ internal object PaymentMethodMetadataFactory {
             customerMetadata = CustomerMetadata(
                 hasCustomerConfiguration = hasCustomerConfiguration,
                 isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
+                permissions = customerMetadataPermissions
             ),
             sharedDataSpecs = sharedDataSpecs,
             paymentMethodSaveConsentBehavior = paymentMethodSaveConsentBehavior,

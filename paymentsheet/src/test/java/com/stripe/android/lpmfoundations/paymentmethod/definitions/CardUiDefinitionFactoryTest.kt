@@ -1,7 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
-import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.getDefaultCustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.model.PaymentIntentFixtures
@@ -90,9 +90,8 @@ class CardUiDefinitionFactoryTest {
         paparazziRule.snapshot {
             CardDefinition.CreateFormUi(
                 metadata = metadata.copy(
-                    customerMetadata = CustomerMetadata(
-                        hasCustomerConfiguration = true,
-                        isPaymentMethodSetAsDefaultEnabled = false,
+                    customerMetadata = getDefaultCustomerMetadata(
+                        isPaymentMethodSetAsDefaultEnabled = false
                     ),
                 )
             )
@@ -103,9 +102,8 @@ class CardUiDefinitionFactoryTest {
     fun testCardWithSaveForLaterAndSetAsDefaultShown() {
         val formElements = CardDefinition.formElements(
             metadata = metadata.copy(
-                customerMetadata = CustomerMetadata(
-                    hasCustomerConfiguration = true,
-                    isPaymentMethodSetAsDefaultEnabled = true,
+                customerMetadata = getDefaultCustomerMetadata(
+                    isPaymentMethodSetAsDefaultEnabled = true
                 ),
             )
         )
@@ -168,8 +166,7 @@ class CardUiDefinitionFactoryTest {
                         paymentMethodTypes = listOf("card"),
                     ),
                     paymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Enabled,
-                    customerMetadata = CustomerMetadata(
-                        hasCustomerConfiguration = true,
+                    customerMetadata = getDefaultCustomerMetadata(
                         isPaymentMethodSetAsDefaultEnabled = false,
                     ),
                 ),

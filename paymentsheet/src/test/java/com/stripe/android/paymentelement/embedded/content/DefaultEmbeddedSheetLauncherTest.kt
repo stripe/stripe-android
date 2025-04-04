@@ -21,6 +21,7 @@ import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.DummyActivityResultCaller.RegisterCall
 import kotlinx.coroutines.test.runTest
@@ -186,7 +187,12 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val lifecycleOwner = TestLifecycleOwner()
         val savedStateHandle = SavedStateHandle()
         val selectionHolder = EmbeddedSelectionHolder(MainThreadSavedStateHandle(savedStateHandle))
-        val customerStateHolder = CustomerStateHolder(savedStateHandle, selectionHolder.selection)
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
+        val customerStateHolder = CustomerStateHolder(
+            savedStateHandle = savedStateHandle,
+            selection = selectionHolder.selection,
+            customerMetadataPermissions = stateFlowOf(paymentMethodMetadata.customerMetadata?.permissions)
+        )
         val sheetStateHolder = SheetStateHolder(savedStateHandle)
         val errorReporter = FakeErrorReporter()
         val stateHelper = FakeEmbeddedStateHelper()
