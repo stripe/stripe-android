@@ -25,8 +25,6 @@ internal typealias CardBrandCallback = (CardBrand) -> Unit
 internal interface EditCardDetailsInteractor {
     val state: StateFlow<State>
 
-    val onCardUpdateParamsChanged: CardUpdateParamsCallback
-
     fun handleViewAction(viewAction: ViewAction)
 
     @Immutable
@@ -40,6 +38,10 @@ internal interface EditCardDetailsInteractor {
 
     sealed interface ViewAction {
         data class BrandChoiceChanged(val cardBrandChoice: CardBrandChoice) : ViewAction
+    }
+
+    fun interface Factory {
+        fun create(onCardUpdateParamsChanged: CardUpdateParamsCallback): EditCardDetailsInteractor
     }
 
     companion object {
@@ -63,13 +65,13 @@ internal interface EditCardDetailsInteractor {
     }
 }
 
-private class DefaultEditCardDetailsInteractor(
+internal class DefaultEditCardDetailsInteractor(
     private val card: PaymentMethod.Card,
     private val cardBrandFilter: CardBrandFilter,
     private val isModifiable: Boolean,
     coroutineScope: CoroutineScope,
     private val onBrandChoiceChanged: CardBrandCallback,
-    override val onCardUpdateParamsChanged: CardUpdateParamsCallback
+    private val onCardUpdateParamsChanged: CardUpdateParamsCallback
 ) : EditCardDetailsInteractor {
     private val cardDetailsEntry = MutableStateFlow(
         value = buildDefaultCardEntry()

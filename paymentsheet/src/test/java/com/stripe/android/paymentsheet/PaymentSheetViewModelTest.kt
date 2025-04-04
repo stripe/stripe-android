@@ -118,8 +118,7 @@ import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.ui.CardBrandChoice
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
-import com.stripe.android.paymentsheet.ui.editCardDetailsInteractorHelper
-import com.stripe.android.paymentsheet.ui.updateCardBrand
+import com.stripe.android.paymentsheet.ui.cardParamsUpdateAction
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.paymentsheet.utils.prefillCreate
 import com.stripe.android.paymentsheet.utils.prefilledBuilder
@@ -288,9 +287,7 @@ internal class PaymentSheetViewModelTest {
             if (currentScreen is PaymentSheetScreen.UpdatePaymentMethod) {
                 val interactor = currentScreen.interactor
 
-                interactor.editCardDetailsInteractorHelper {
-                    updateCardBrand(CardBrand.Visa)
-                }
+                interactor.cardParamsUpdateAction(CardBrand.Visa)
 
                 interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
             }
@@ -359,9 +356,7 @@ internal class PaymentSheetViewModelTest {
             if (currentScreen is PaymentSheetScreen.UpdatePaymentMethod) {
                 val interactor = currentScreen.interactor
 
-                interactor.editCardDetailsInteractorHelper {
-                    updateCardBrand(CardBrand.Visa)
-                }
+                interactor.cardParamsUpdateAction(CardBrand.Visa)
 
                 interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
             }
@@ -434,9 +429,7 @@ internal class PaymentSheetViewModelTest {
             if (currentScreen is PaymentSheetScreen.UpdatePaymentMethod) {
                 val interactor = currentScreen.interactor
 
-                interactor.editCardDetailsInteractorHelper {
-                    updateCardBrand(CardBrand.Visa)
-                }
+                interactor.cardParamsUpdateAction(CardBrand.Visa)
 
                 interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
             }
@@ -2989,9 +2982,7 @@ internal class PaymentSheetViewModelTest {
 
             if (currentScreen is PaymentSheetScreen.UpdatePaymentMethod) {
                 val interactor = currentScreen.interactor
-                interactor.editCardDetailsInteractorHelper {
-                    updateCardBrand(CardBrand.Visa)
-                }
+                interactor.cardParamsUpdateAction(CardBrand.Visa)
 
                 verify(customerRepository, never()).updatePaymentMethod(any(), any(), any())
             }
