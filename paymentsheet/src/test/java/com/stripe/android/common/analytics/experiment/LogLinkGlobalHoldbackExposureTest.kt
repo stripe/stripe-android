@@ -159,7 +159,6 @@ class LogLinkGlobalHoldbackExposureTest {
             )
         )
 
-
         linkRepository.lookupConsumerWithoutBackendLoggingResult = Result.success(
             ConsumerSessionLookup(
                 exists = true,
@@ -201,7 +200,6 @@ class LogLinkGlobalHoldbackExposureTest {
             )
         )
 
-
         linkRepository.lookupConsumerWithoutBackendLoggingResult = Result.success(
             ConsumerSessionLookup(
                 // simulate a non-returning user
@@ -241,7 +239,6 @@ class LogLinkGlobalHoldbackExposureTest {
             experimentsData = experimentsData
         )
     }
-
 
     private fun createElementsState(
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create()
