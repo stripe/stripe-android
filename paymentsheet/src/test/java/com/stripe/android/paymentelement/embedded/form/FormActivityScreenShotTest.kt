@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.core.mainthread.MainThreadSavedStateHandle
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -99,7 +100,7 @@ internal class FormActivityScreenShotTest {
         usBankMandate: ResolvableString? = null
     ) {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
-        val selectionHolder = EmbeddedSelectionHolder(SavedStateHandle())
+        val selectionHolder = EmbeddedSelectionHolder(MainThreadSavedStateHandle(SavedStateHandle()))
         val stateHolder = DefaultFormActivityStateHelper(
             paymentMethodMetadata = paymentMethodMetadata,
             selectionHolder = selectionHolder,

@@ -96,6 +96,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val reportFormShown: (PaymentMethodCode) -> Unit,
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     dispatcher: CoroutineContext = Dispatchers.Default,
+    mainDispatcher: CoroutineContext = Dispatchers.Main.immediate,
 ) : PaymentMethodVerticalLayoutInteractor {
 
     companion object {
@@ -242,7 +243,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     }
 
     init {
-        coroutineScope.launch {
+        coroutineScope.launch(mainDispatcher) {
             selection.collect {
                 if (it == null && !isCurrentScreen.value) {
                     return@collect
@@ -258,7 +259,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             }
         }
 
-        coroutineScope.launch {
+        coroutineScope.launch(mainDispatcher) {
             // When PaymentSheet opens with no existing selection, a saved PM will be selected by default, but
             // mostRecentlySelectedSavedPaymentMethod may not have been set. So we drop its first value, to ensure that
             // we correctly set the initial selection.
@@ -272,7 +273,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             }
         }
 
-        coroutineScope.launch {
+        coroutineScope.launch(mainDispatcher) {
             isCurrentScreen.collect { isCurrentScreen ->
                 if (isCurrentScreen) {
                     updateSelection(verticalModeScreenSelection.value)

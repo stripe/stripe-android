@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.embedded.content
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.mainthread.MainThreadSavedStateHandle
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
@@ -97,7 +98,7 @@ internal class DefaultEmbeddedContentHelperTest {
     ) = runTest {
         val savedStateHandle = SavedStateHandle()
         savedStateHandle.setup()
-        val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
+        val selectionHolder = EmbeddedSelectionHolder(MainThreadSavedStateHandle(savedStateHandle))
         val embeddedFormHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
@@ -107,7 +108,7 @@ internal class DefaultEmbeddedContentHelperTest {
         val eventReporter = FakeEventReporter()
         val embeddedContentHelper = DefaultEmbeddedContentHelper(
             coroutineScope = CoroutineScope(Dispatchers.Unconfined),
-            savedStateHandle = savedStateHandle,
+            savedStateHandle = MainThreadSavedStateHandle(savedStateHandle),
             eventReporter = eventReporter,
             workContext = Dispatchers.Unconfined,
             uiContext = Dispatchers.Unconfined,
@@ -118,7 +119,7 @@ internal class DefaultEmbeddedContentHelperTest {
             embeddedFormHelperFactory = embeddedFormHelperFactory,
             confirmationHandler = confirmationHandler,
             confirmationStateHolder = EmbeddedConfirmationStateHolder(
-                savedStateHandle = savedStateHandle,
+                savedStateHandle = MainThreadSavedStateHandle(savedStateHandle),
                 selectionHolder = selectionHolder,
                 coroutineScope = CoroutineScope(Dispatchers.Unconfined),
             ),

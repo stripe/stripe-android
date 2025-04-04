@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.mainthread.MainThreadSavedStateHandle
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
@@ -257,7 +258,7 @@ class DefaultFormActivityStateHelperTest {
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = stripeIntent)
-        val selectionHolder = EmbeddedSelectionHolder(SavedStateHandle())
+        val selectionHolder = EmbeddedSelectionHolder(MainThreadSavedStateHandle(SavedStateHandle()))
         val onClickOverrideDelegate = OnClickDelegateOverrideImpl()
         val stateHolder = DefaultFormActivityStateHelper(
             paymentMethodMetadata = paymentMethodMetadata,

@@ -3,13 +3,12 @@
 package com.stripe.android.paymentelement.embedded.content
 
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.core.mainthread.MainThreadOnlyMutableStateFlow
 import com.stripe.android.paymentelement.EmbeddedPaymentElement.PaymentOptionDisplayData
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -25,7 +24,7 @@ internal class DefaultPaymentOptionDisplayDataHolder @Inject constructor(
     private val confirmationStateSupplier: () -> EmbeddedConfirmationStateHolder.State?,
     private val paymentOptionDisplayDataFactory: PaymentOptionDisplayDataFactory,
 ) : PaymentOptionDisplayDataHolder {
-    private val _paymentOption: MutableStateFlow<PaymentOptionDisplayData?> = MutableStateFlow(null)
+    private val _paymentOption = MainThreadOnlyMutableStateFlow<PaymentOptionDisplayData?>(null)
     override val paymentOption: StateFlow<PaymentOptionDisplayData?> = _paymentOption.asStateFlow()
 
     init {
