@@ -212,7 +212,7 @@ class PaymentSelectionUpdaterTest {
             PaymentMethodFixtures.createCustomPaymentMethod(PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD)
 
         val newState = mockPaymentSheetStateWithPaymentIntent(
-            externalPaymentMethodSpecs = emptyList()
+            displayableCustomPaymentMethods = emptyList()
         )
         val updater = createUpdater()
 
