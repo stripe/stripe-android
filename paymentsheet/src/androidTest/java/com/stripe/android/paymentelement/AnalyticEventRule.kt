@@ -24,7 +24,7 @@ class AnalyticEventRule : TestRule, AnalyticEventCallback {
                 events = Turbine()
                 try {
                     base.evaluate()
-                    events.expectNoEvents()
+                    events.ensureAllEventsConsumed()
                 } finally {
                     events.close()
                 }

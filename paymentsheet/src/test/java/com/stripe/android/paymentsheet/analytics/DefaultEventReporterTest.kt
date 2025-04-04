@@ -22,7 +22,6 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.AnalyticEvent
-import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -31,6 +30,7 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.IsStripeCardScanAvailable
+import com.stripe.android.utils.AnalyticEventCallbackRule
 import com.stripe.android.utils.FakeDurationProvider
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -44,7 +44,6 @@ import org.mockito.kotlin.reset
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import java.io.IOException
-import javax.inject.Provider
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.time.Duration
@@ -59,6 +58,9 @@ class DefaultEventReporterTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
+    @get:Rule
+    val analyticEventCallbackRule = AnalyticEventCallbackRule()
+
     private val durationProvider = FakeDurationProvider()
     private val analyticsRequestExecutor = mock<AnalyticsRequestExecutor>()
     private val analyticsV2RequestExecutor = FakeAnalyticsRequestV2Executor()
@@ -66,20 +68,6 @@ class DefaultEventReporterTest {
         ApplicationProvider.getApplicationContext(),
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )
-
-    private val analyticEventCall = Turbine<AnalyticEvent>()
-
-    private class FakeAnalyticEventCallbackProvider : Provider<AnalyticEventCallback?> {
-        private var callback: AnalyticEventCallback? = null
-
-        fun set(callback: AnalyticEventCallback?) {
-            this.callback = callback
-        }
-
-        override fun get(): AnalyticEventCallback? = callback
-    }
-
-    private val analyticEventCallbackProvider = FakeAnalyticEventCallbackProvider()
 
     private val fakeUserFacingLoggerCall = Turbine<String>()
     private val fakeUserFacingLogger = object : UserFacingLogger {
@@ -229,13 +217,9 @@ class DefaultEventReporterTest {
                 simulateSuccessfulSetup(linkEnabled = false, googlePayReady = false)
             }
 
-            analyticEventCallbackProvider.set { event ->
-                analyticEventCall.add(event)
-            }
-
             completeEventReporter.onShowNewPaymentOptions()
 
-            assertThat(analyticEventCall.awaitItem()).isEqualTo(AnalyticEvent.PresentedSheet())
+            analyticEventCallbackRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
             verify(analyticsRequestExecutor).executeAsync(
                 argWhere { req ->
                     req.params["event"] == "mc_complete_sheet_newpm_show" &&
@@ -245,7 +229,6 @@ class DefaultEventReporterTest {
                         req.params["locale"] == "en_US"
                 }
             )
-            analyticEventCall.ensureAllEventsConsumed()
         }
 
     @Test
@@ -705,7 +688,7 @@ class DefaultEventReporterTest {
             analyticsRequestV2Executor = analyticsV2RequestExecutor,
             paymentAnalyticsRequestFactory = analyticsRequestFactory,
             durationProvider = durationProvider,
-            analyticEventCallbackProvider = analyticEventCallbackProvider,
+            analyticEventCallbackProvider = analyticEventCallbackRule,
             workContext = testDispatcher,
             isStripeCardScanAvailable = FakeIsStripeCardScanAvailable(),
             logger = fakeUserFacingLogger,
@@ -931,7 +914,7 @@ class DefaultEventReporterTest {
         }
 
         val e = RuntimeException("Something went wrong")
-        analyticEventCallbackProvider.set {
+        analyticEventCallbackRule.setCallback {
             @Suppress("TooGenericExceptionThrown")
             throw e
         }
@@ -950,7 +933,7 @@ class DefaultEventReporterTest {
             simulateSuccessfulSetup(linkMode = null, googlePayReady = false)
         }
 
-        analyticEventCallbackProvider.set(null)
+        analyticEventCallbackRule.setCallback(null)
 
         completeEventReporter.onShowNewPaymentOptions()
     }
@@ -968,7 +951,7 @@ class DefaultEventReporterTest {
             analyticsRequestV2Executor = analyticsV2RequestExecutor,
             paymentAnalyticsRequestFactory = analyticsRequestFactory,
             durationProvider = FakeDurationProvider(duration),
-            analyticEventCallbackProvider = analyticEventCallbackProvider,
+            analyticEventCallbackProvider = analyticEventCallbackRule,
             workContext = testDispatcher,
             isStripeCardScanAvailable = FakeIsStripeCardScanAvailable(),
             logger = fakeUserFacingLogger,
@@ -994,7 +977,7 @@ class DefaultEventReporterTest {
             analyticsRequestV2Executor = analyticsV2RequestExecutor,
             paymentAnalyticsRequestFactory = analyticsRequestFactory,
             durationProvider = durationProvider,
-            analyticEventCallbackProvider = analyticEventCallbackProvider,
+            analyticEventCallbackProvider = analyticEventCallbackRule,
             workContext = testDispatcher,
             isStripeCardScanAvailable = FakeIsStripeCardScanAvailable(),
             logger = fakeUserFacingLogger,
