@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.runtime.Immutable
 import com.stripe.android.CardBrandFilter
-import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.utils.DateUtils
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -25,8 +24,6 @@ internal typealias CardBrandCallback = (CardBrand) -> Unit
 internal interface EditCardDetailsInteractor {
     val state: StateFlow<State>
 
-    val onCardUpdateParamsChanged: CardUpdateParamsCallback
-
     fun handleViewAction(viewAction: ViewAction)
 
     @Immutable
@@ -42,34 +39,25 @@ internal interface EditCardDetailsInteractor {
         data class BrandChoiceChanged(val cardBrandChoice: CardBrandChoice) : ViewAction
     }
 
-    companion object {
+    fun interface Factory {
         fun create(
             coroutineScope: CoroutineScope,
             isModifiable: Boolean,
-            cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+            cardBrandFilter: CardBrandFilter,
             card: PaymentMethod.Card,
             onBrandChoiceChanged: CardBrandCallback,
             onCardUpdateParamsChanged: CardUpdateParamsCallback
-        ): EditCardDetailsInteractor {
-            return DefaultEditCardDetailsInteractor(
-                card = card,
-                cardBrandFilter = cardBrandFilter,
-                coroutineScope = coroutineScope,
-                onBrandChoiceChanged = onBrandChoiceChanged,
-                onCardUpdateParamsChanged = onCardUpdateParamsChanged,
-                isModifiable = isModifiable
-            )
-        }
+        ): EditCardDetailsInteractor
     }
 }
 
-private class DefaultEditCardDetailsInteractor(
+internal class DefaultEditCardDetailsInteractor(
     private val card: PaymentMethod.Card,
     private val cardBrandFilter: CardBrandFilter,
     private val isModifiable: Boolean,
     coroutineScope: CoroutineScope,
     private val onBrandChoiceChanged: CardBrandCallback,
-    override val onCardUpdateParamsChanged: CardUpdateParamsCallback
+    private val onCardUpdateParamsChanged: CardUpdateParamsCallback
 ) : EditCardDetailsInteractor {
     private val cardDetailsEntry = MutableStateFlow(
         value = buildDefaultCardEntry()
@@ -143,5 +131,25 @@ private class DefaultEditCardDetailsInteractor(
                 expiryMonth = cardExpiryMonth,
                 expiryYear = cardExpiryYear,
             )
+    }
+
+    class Factory : EditCardDetailsInteractor.Factory {
+        override fun create(
+            coroutineScope: CoroutineScope,
+            isModifiable: Boolean,
+            cardBrandFilter: CardBrandFilter,
+            card: PaymentMethod.Card,
+            onBrandChoiceChanged: CardBrandCallback,
+            onCardUpdateParamsChanged: CardUpdateParamsCallback
+        ): EditCardDetailsInteractor {
+            return DefaultEditCardDetailsInteractor(
+                card = card,
+                cardBrandFilter = cardBrandFilter,
+                isModifiable = isModifiable,
+                coroutineScope = coroutineScope,
+                onBrandChoiceChanged = onBrandChoiceChanged,
+                onCardUpdateParamsChanged = onCardUpdateParamsChanged
+            )
+        }
     }
 }

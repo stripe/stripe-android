@@ -59,6 +59,7 @@ internal interface UpdatePaymentMethodInteractor {
         data object RemovePaymentMethod : ViewAction()
         data object SaveButtonPressed : ViewAction()
         data class SetAsDefaultCheckboxChanged(val isChecked: Boolean) : ViewAction()
+        data class CardUpdateParamsChanged(val cardUpdateParams: CardUpdateParams?) : ViewAction()
     }
 
     companion object {
@@ -98,6 +99,8 @@ internal class DefaultUpdatePaymentMethodInteractor(
     private val onBrandChoiceSelected: (CardBrand) -> Unit,
     private val onUpdateSuccess: () -> Unit,
     private val workContext: CoroutineContext = Dispatchers.Default,
+    val editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = DefaultEditCardDetailsInteractor
+        .Factory()
 ) : UpdatePaymentMethodInteractor {
     private val coroutineScope = CoroutineScope(workContext + SupervisorJob())
     private val error = MutableStateFlow(getInitialError())
@@ -134,18 +137,22 @@ internal class DefaultUpdatePaymentMethodInteractor(
         setAsDefaultCheckboxChecked != initialSetAsDefaultCheckedValue
     }
     override val editCardDetailsInteractor by lazy {
-        if (displayableSavedPaymentMethod.savedPaymentMethod is SavedPaymentMethod.Card) {
-            EditCardDetailsInteractor.create(
-                card = displayableSavedPaymentMethod.savedPaymentMethod.card,
-                onCardUpdateParamsChanged = ::onCardUpdateParamsChanged,
-                coroutineScope = coroutineScope,
-                isModifiable = displayableSavedPaymentMethod.isModifiable(),
-                cardBrandFilter = cardBrandFilter,
-                onBrandChoiceChanged = onBrandChoiceSelected,
-            )
-        } else {
-            throw IllegalStateException("card payment method required for creating editCardDetailsInteractor")
+        val savedPaymentMethodCard = displayableSavedPaymentMethod.savedPaymentMethod as? SavedPaymentMethod.Card
+        requireNotNull(savedPaymentMethodCard) {
+            "Card payment method required for creating EditCardDetailsInteractor"
         }
+        editCardDetailsInteractorFactory.create(
+            card = savedPaymentMethodCard.card,
+            onCardUpdateParamsChanged = { cardUpdateParams ->
+                handleViewAction(
+                    viewAction = UpdatePaymentMethodInteractor.ViewAction.CardUpdateParamsChanged(cardUpdateParams)
+                )
+            },
+            coroutineScope = coroutineScope,
+            isModifiable = displayableSavedPaymentMethod.isModifiable(),
+            cardBrandFilter = cardBrandFilter,
+            onBrandChoiceChanged = onBrandChoiceSelected,
+        )
     }
 
     private fun onCardUpdateParamsChanged(cardUpdateParams: CardUpdateParams?) {
@@ -182,6 +189,9 @@ internal class DefaultUpdatePaymentMethodInteractor(
             is UpdatePaymentMethodInteractor.ViewAction.SetAsDefaultCheckboxChanged -> onSetAsDefaultCheckboxChanged(
                 isChecked = viewAction.isChecked
             )
+            is UpdatePaymentMethodInteractor.ViewAction.CardUpdateParamsChanged -> {
+                onCardUpdateParamsChanged(viewAction.cardUpdateParams)
+            }
         }
     }
 
