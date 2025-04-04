@@ -7,7 +7,7 @@ import android.net.Uri
 import androidx.activity.ComponentActivity
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.connect.ClientSecretProvider
+import com.stripe.android.connect.FetchClientSecret
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.core.Logger
@@ -37,7 +37,7 @@ import kotlin.test.assertTrue
 class EmbeddedComponentCoordinatorTest {
 
     private lateinit var publishableKey: String
-    private lateinit var mockClientSecretProvider: ClientSecretProvider
+    private lateinit var mockFetchClientSecret: FetchClientSecret
     private lateinit var coordinator: EmbeddedComponentCoordinator
     private lateinit var testActivityController: ActivityController<ComponentActivity>
     private val testActivity: ComponentActivity get() = testActivityController.get()
@@ -45,11 +45,11 @@ class EmbeddedComponentCoordinatorTest {
     @Before
     fun setup() {
         publishableKey = "pk_test_123"
-        mockClientSecretProvider = mock()
+        mockFetchClientSecret = mock()
         coordinator =
             EmbeddedComponentCoordinator(
                 publishableKey = publishableKey,
-                clientSecretProvider = mockClientSecretProvider,
+                fetchClientSecret = mockFetchClientSecret,
                 logger = Logger.noop(),
                 appearance = Appearance.default(),
                 customFonts = emptyList(),
@@ -73,7 +73,7 @@ class EmbeddedComponentCoordinatorTest {
     fun `fetchClientSecret should return client secret when callback provides it`() = runTest {
         val expectedSecret = "test_client_secret"
 
-        wheneverBlocking { mockClientSecretProvider.provideClientSecret() }.doReturn(expectedSecret)
+        wheneverBlocking { mockFetchClientSecret.invoke() }.doReturn(expectedSecret)
 
         val result = coordinator.fetchClientSecret()
 
@@ -82,12 +82,12 @@ class EmbeddedComponentCoordinatorTest {
 
     @Test
     fun `fetchClientSecret should return null when callback provides null`() = runTest {
-        wheneverBlocking { mockClientSecretProvider.provideClientSecret() }.doReturn(null)
+        wheneverBlocking { mockFetchClientSecret.invoke() }.doReturn(null)
 
         val result = coordinator.fetchClientSecret()
 
         assertNull(result)
-        verify(mockClientSecretProvider).provideClientSecret()
+        verify(mockFetchClientSecret).invoke()
     }
 
     @Test

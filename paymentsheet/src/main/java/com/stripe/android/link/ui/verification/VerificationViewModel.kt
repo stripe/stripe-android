@@ -104,7 +104,7 @@ internal class VerificationViewModel @Inject constructor(
             updateViewState {
                 it.copy(
                     isSendingNewCode = false,
-                    didSendNewCode = error == null,
+                    didSendNewCode = it.isSendingNewCode && error == null,
                     errorMessage = error?.errorMessage,
                 )
             }

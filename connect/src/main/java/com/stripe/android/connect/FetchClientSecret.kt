@@ -4,34 +4,29 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 /**
- * Listener to provide the Connect SDK client secret from your server.
- * Implement the [provideClientSecret] method to provide your client secret to the Connect SDK.
+ * Lambda to fetch the Connect SDK client secret from your server.
+ * Implement [invoke] to provide your client secret to the Connect SDK.
  */
 @PrivateBetaConnectSDK
-fun interface ClientSecretProvider {
+fun interface FetchClientSecret {
 
     /**
      * Called when the Connect SDK needs a client secret from your server.
      * Implement a secure network call to your server here to fetch your client secret.
      * If you're unable to provide a client secret for any reason, return null.
      */
-    suspend fun provideClientSecret(): String?
+    suspend operator fun invoke(): String?
 }
 
 /**
- * Listener to provide the Connect SDK client secret from your server.
- * Implement the [provideClientSecret] method and use the listener parameter
- * to provide your client secret to the Connect SDK.
- *
- * This listener wraps [ClientSecretProvider] and is intended to be used by consumers
- * who don't wish to use coroutines in their applications, or who are calling the SDK
- * from Java.
+ * Task implementing [FetchClientSecret] to be used by consumers who don't wish to use
+ * coroutines in their applications, or who are calling the SDK from Java.
  */
 @PrivateBetaConnectSDK
-abstract class ClientSecretProviderListenerWrapper : ClientSecretProvider {
-    override suspend fun provideClientSecret(): String? {
+abstract class FetchClientSecretTask : FetchClientSecret {
+    override suspend fun invoke(): String? {
         return suspendCoroutine { continuation ->
-            provideClientSecret { result ->
+            fetchClientSecret { result ->
                 continuation.resume(result)
             }
         }
@@ -40,18 +35,18 @@ abstract class ClientSecretProviderListenerWrapper : ClientSecretProvider {
     /**
      * Called when the Connect SDK needs a client secret from your server.
      * Implement a secure network call to your server here to fetch your client secret
-     * and use [resultListener] to pass it to the Connect SDK.
+     * and use [callback] to pass it to the Connect SDK.
      *
-     * @param resultListener the listener used to pass the client secret to
+     * @param callback the callback used to pass the client secret to
      * to the Connect SDK.
      */
-    abstract fun provideClientSecret(resultListener: ClientSecretResultListener)
+    abstract fun fetchClientSecret(callback: ResultCallback)
 
     /**
      * The interface used to pass your client secret to the SDK.
      */
     @PrivateBetaConnectSDK
-    fun interface ClientSecretResultListener {
+    fun interface ResultCallback {
         /**
          * Once you have retrieved your client Secret, call [onResult] with the client secret
          * as the parameter. If there is an error or you're unable to provide a client secret,

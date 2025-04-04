@@ -1,6 +1,6 @@
 package com.stripe.android.connect.manager
 
-import com.stripe.android.connect.ClientSecretProvider
+import com.stripe.android.connect.FetchClientSecret
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.fonts.CustomFontSource
@@ -19,7 +19,7 @@ internal interface EmbeddedComponentManagerComponent {
         fun build(
             @BindsInstance @PublishableKey
             publishableKey: String,
-            @BindsInstance clientSecretProvider: ClientSecretProvider,
+            @BindsInstance fetchClientSecret: FetchClientSecret,
             @BindsInstance customFonts: List<CustomFontSource>,
             @BindsInstance appearance: Appearance,
         ): EmbeddedComponentManagerComponent

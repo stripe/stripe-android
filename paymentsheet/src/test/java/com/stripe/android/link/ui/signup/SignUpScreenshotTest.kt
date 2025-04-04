@@ -60,7 +60,8 @@ internal class SignUpScreenshotTest(
                                     signUpEnabled = signUpEnabled,
                                     requiresNameCollection = requiresNameCollection,
                                     signUpState = signUpState,
-                                    errorMessage = errorMessage
+                                    errorMessage = errorMessage,
+                                    showKeyboardOnOpen = false,
                                 )
                             )
                         }

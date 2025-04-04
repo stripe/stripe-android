@@ -30,7 +30,7 @@ class EmbeddedComponentManagerFactory @Inject constructor(
 
         return EmbeddedComponentManager(
             publishableKey = publishableKey,
-            clientSecretProvider = ::fetchClientSecret,
+            fetchClientSecret = ::fetchClientSecret,
             customFonts = listOf(
                 CustomFontSource(
                     assetsFilePath = "fonts/doto.ttf",

@@ -11,7 +11,7 @@ import com.stripe.android.connect.manager.EmbeddedComponentCoordinator
 @PrivateBetaConnectSDK
 class EmbeddedComponentManager @JvmOverloads constructor(
     publishableKey: String,
-    clientSecretProvider: ClientSecretProvider,
+    fetchClientSecret: FetchClientSecret,
     appearance: Appearance = Appearance.default(),
     customFonts: List<CustomFontSource> = emptyList(),
 ) {
@@ -21,7 +21,7 @@ class EmbeddedComponentManager @JvmOverloads constructor(
             .get()
             .build(
                 publishableKey = publishableKey,
-                clientSecretProvider = clientSecretProvider,
+                fetchClientSecret = fetchClientSecret,
                 customFonts = customFonts,
                 appearance = appearance,
             )

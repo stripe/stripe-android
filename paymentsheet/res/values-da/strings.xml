@@ -24,6 +24,16 @@
   <string name="stripe_confirm_close_form_title">Vil du lukke denne formular?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Gem dine oplysninger om sikker betaling med 1 klik med Link</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_link_sign_up">Acceptér og fortsæt</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header">Hurtig og sikker betaling med ét klik</string>
+  <!-- Label describing the benefit of signing up for Link. -->
+  <string name="stripe_link_sign_up_message">Gem dine betalingsoplysninger med Link, og betal sikkert med et enkelt klik på sider, der understøtter Link.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_link_sign_up_terms"><![CDATA[Ved at tilmelde dig Link accepterer du <terms>vilkårene</terms> og <privacy>privatlivspolitikken</privacy>.]]></string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message">Indtast koden, der blev sendt til %s, for at bruge dine gemte oplysninger.</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Log ud af Link</string>
   <!-- Text that is displayed when a network error occurs -->

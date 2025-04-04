@@ -24,6 +24,16 @@
   <string name="stripe_confirm_close_form_title">Kas soovite selle vormi sulgeda?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Salvesta oma teave, et võimaldada turvaline ühe klõpsuga makse lõpuleviimine Linkiga</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_link_sign_up">Nõustu ja jätka</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header">Kiire, turvaline ühe klõpsuga makse lõpuleviimine</string>
+  <!-- Label describing the benefit of signing up for Link. -->
+  <string name="stripe_link_sign_up_message">Salvestage oma makseteave Linki ja võimaldage Linki toetusega saitidel turvaline ühe klõpsuga makse lõpuleviimine.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_link_sign_up_terms"><![CDATA[Jätkates, nõustute <terms>tingimuste</terms> ja <privacy>privaatsuseeskirjadega</privacy>.]]></string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message">Oma salvestatud teabe kasutamiseks sisestage telefoninumbrile %s saadetud kood.</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Logi Link välja</string>
   <!-- Text that is displayed when a network error occurs -->

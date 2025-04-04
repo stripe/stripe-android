@@ -2,6 +2,11 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### Connect (Private Preview)
+* [CHANGED][10548](https://github.com/stripe/stripe-android/pull/10548) Replaced `ClientSecretProvider` with `FetchClientSecret`
+
+## 21.8.0 - 2025-04-01
+
 ### PaymentSheet
 * [CHANGED][10480](https://github.com/stripe/stripe-android/pull/10480) Updated Afterpay branding in the US to be Cash App Afterpay.
 * [FIXED][10492](https://github.com/stripe/stripe-android/pull/10492) Update Add Payment Method screen to use `PaymentSheet.Appearance.Colors.onSurface` as the header text color when `PaymentMethodLayout` is `Vertical`.

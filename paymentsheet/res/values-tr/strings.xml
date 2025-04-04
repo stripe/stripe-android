@@ -24,6 +24,16 @@
   <string name="stripe_confirm_close_form_title">Bu formu kapatmak istiyor musunuz?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Link ile tek tıklamayla güvenli ödeme yapmak için bilgilerinizi kaydedin</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_link_sign_up">Kabul et ve devam et</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header">Hızlı, güvenli, tek tıklamayla ödeme</string>
+  <!-- Label describing the benefit of signing up for Link. -->
+  <string name="stripe_link_sign_up_message">Bilgilerinizi Link\'e kaydedin ve Link tarafından desteklenen sitelerde 1 tıklamayla güvenle ödeme yapın.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_link_sign_up_terms"><![CDATA[Devam ettiğinizde <terms>Koşulları</terms> ve <privacy>Gizlilik Politikasını</privacy> kabul etmiş olursunuz.]]></string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message">Kaydedilmiş bilgilerinizi kullanmak için %s numaralı telefona gönderilen kodu girin.</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Link\'ten çıkış yap</string>
   <!-- Text that is displayed when a network error occurs -->

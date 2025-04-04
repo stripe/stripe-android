@@ -6,6 +6,7 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.FakeLogger
+import com.stripe.android.testing.FeatureFlagTestRule
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -22,6 +23,12 @@ class LogLinkGlobalHoldbackExposureTest {
 
     @get:Rule
     var rule: TestRule = InstantTaskExecutorRule()
+
+    @get:Rule
+    val linkGlobalHoldbackExposureEnabledRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.linkGlobalHoldbackExposureEnabled,
+        isEnabled = true,
+    )
 
     @Before
     fun setUp() {
@@ -64,7 +71,7 @@ class LogLinkGlobalHoldbackExposureTest {
 
     @Test
     fun `invoke should not log exposure when feature flag is disabled`() = runTest {
-        FeatureFlags.linkGlobalHoldbackExposureEnabled.setEnabled(false)
+        linkGlobalHoldbackExposureEnabledRule.setEnabled(false)
         val elementsSession = createElementsSession(
             linkSettings = createLinkSettings(holdbackOn = false),
             experimentsData = ElementsSession.ExperimentsData(arbId = "test_arb_id")

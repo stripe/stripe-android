@@ -24,6 +24,16 @@
   <string name="stripe_confirm_close_form_title">Voleu tancar el formulari?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Deseu la vostra informació per al pagament segur amb 1 clic amb Link</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_link_sign_up">Accepteu i continueu</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header">Pagament ràpid i segur amb 1 clic</string>
+  <!-- Label describing the benefit of signing up for Link. -->
+  <string name="stripe_link_sign_up_message">Deseu la vostra informació de pagament amb Link i pagueu amb seguretat en 1 clic als llocs compatibles.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_link_sign_up_terms"><![CDATA[En continuar, accepteu els <terms>Termes</terms> i la <privacy>Política de privacitat</privacy>.]]></string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message"></string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Tanca la sessió a Link</string>
   <!-- Text that is displayed when a network error occurs -->

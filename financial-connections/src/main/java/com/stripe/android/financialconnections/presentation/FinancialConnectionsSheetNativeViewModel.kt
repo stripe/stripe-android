@@ -197,7 +197,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 
         if (topAppBarState.error != null) {
             onCloseFromErrorClick(topAppBarState.error)
-        } else if (pane.destination.closeWithoutConfirmation) {
+        } else if (topAppBarState.canCloseWithoutConfirmation) {
             onCloseNoConfirmationClick(pane)
         } else {
             onCloseWithConfirmationClick(pane)

@@ -24,6 +24,16 @@
   <string name="stripe_confirm_close_form_title">Wil je dit formulier sluiten?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Bewaar je gegevens zodat je veilig met één klik kunt afrekenen met Link</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_link_sign_up">Akkoord en doorgaan</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header">Snel en veilig met één klik afrekenen</string>
+  <!-- Label describing the benefit of signing up for Link. -->
+  <string name="stripe_link_sign_up_message">Sla je betaalgegevens op met Link, en je kunt veilig met één klik afrekenen op sites die door Link worden ondersteund.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_link_sign_up_terms"><![CDATA[Als je doorgaat, ga je akkoord met de <terms>voorwaarden</terms> en het <privacy>privacybeleid</privacy>.]]></string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message">Voer de code in die is verzonden naar %s om je opgeslagen gegevens te gebruiken.</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Afmelden bij Link</string>
   <!-- Text that is displayed when a network error occurs -->

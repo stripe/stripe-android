@@ -47,6 +47,7 @@ internal class TestUsBankAccountInCustomerSheet : BasePlaygroundTest() {
         testDriver.saveUsBankAccountInCustomerSheet(
             financialConnectionsLiteEnabled = true,
             testParameters = testParameters.copy(
+                executeInNightlyRun = false,
                 authorizationAction = AuthorizeAction.Cancel,
             ).copyPlaygroundSettings {
                 it[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
@@ -73,6 +74,7 @@ internal class TestUsBankAccountInCustomerSheet : BasePlaygroundTest() {
         testDriver.saveUsBankAccountInCustomerSheet(
             financialConnectionsLiteEnabled = true,
             testParameters = testParameters.copy(
+                executeInNightlyRun = false,
                 authorizationAction = AuthorizeAction.Cancel,
             ).copyPlaygroundSettings { settings ->
                 settings[CustomerSessionSettingsDefinition] = true

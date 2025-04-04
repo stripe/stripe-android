@@ -24,6 +24,16 @@
   <string name="stripe_confirm_close_form_title">Закрыть форму?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Сохраните свои данные в Link для безопасного оформления покупок нажатием одной кнопки</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_link_sign_up">Согласиться и продолжить</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header">Быстрое, безопасное оформление оплаты одним щелчком</string>
+  <!-- Label describing the benefit of signing up for Link. -->
+  <string name="stripe_link_sign_up_message">Сохраните платежные реквизиты в Link, чтобы безопасно оформлять заказы одним щелчком на всех сайтах, поддерживающих Link.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_link_sign_up_terms"><![CDATA[Продолжая, вы тем самым принимаете соответствующие <terms>Условия</terms> и <privacy>политику конфиденциальности</privacy>.]]></string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message">Чтобы использовать ранее сохраненные данные, введите код, отправленный на %s.</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Выйти из Link</string>
   <!-- Text that is displayed when a network error occurs -->
