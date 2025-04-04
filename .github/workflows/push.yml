@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - master
+      - carlosmuvi/distribute-fc-lite-to-mpe
 
 jobs:
   upload-identity:
