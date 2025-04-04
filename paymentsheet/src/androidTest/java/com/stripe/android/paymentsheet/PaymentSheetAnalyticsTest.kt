@@ -233,6 +233,8 @@ internal class PaymentSheetAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_card_number_completed")
 
         page.clickOnLpm("card", forVerticalMode = true)
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.SelectedPaymentMethodType("card"))
+
         page.fillOutCardDetails()
 
         networkRule.enqueue(
@@ -264,6 +266,7 @@ internal class PaymentSheetAnalyticsTest {
     @Test
     fun testSuccessfulCardPaymentInFlowControllerInVerticalMode() = runFlowControllerTest(
         networkRule = networkRule,
+        analyticEventCallback = analyticEventRule,
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
@@ -291,6 +294,7 @@ internal class PaymentSheetAnalyticsTest {
                 }
             )
         }
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
 
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         validateAnalyticsRequest(eventName = "mc_carousel_payment_method_tapped")
@@ -299,6 +303,8 @@ internal class PaymentSheetAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_card_number_completed")
 
         page.clickOnLpm("card", forVerticalMode = true)
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.SelectedPaymentMethodType("card"))
+
         page.fillOutCardDetails()
 
         networkRule.enqueue(

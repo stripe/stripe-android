@@ -448,14 +448,7 @@ internal class PaymentSheetPlaygroundViewModel(
 
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
     fun analyticCallback(event: AnalyticEvent) {
-        when (event) {
-            is AnalyticEvent.PresentedSheet -> {
-                Log.d("AnalyticEvent", "Event: $event")
-            }
-            is AnalyticEvent.DisplayedPaymentMethodForm -> {
-                Log.d("AnalyticEvent", "Event: $event, PM: ${event.paymentMethodType}")
-            }
-        }
+        Log.d("AnalyticEvent", "Event: $event")
     }
 
     @OptIn(DelicatePaymentSheetApi::class)

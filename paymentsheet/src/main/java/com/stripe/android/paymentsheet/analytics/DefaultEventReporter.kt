@@ -198,6 +198,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onSelectPaymentMethod(
         code: PaymentMethodCode,
     ) {
+        fireAnalyticEvent(AnalyticEvent.SelectedPaymentMethodType(code))
         fireEvent(
             PaymentSheetEvent.SelectPaymentMethod(
                 code = code,

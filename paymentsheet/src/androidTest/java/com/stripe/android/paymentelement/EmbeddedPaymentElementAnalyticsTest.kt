@@ -96,10 +96,11 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_card_number_completed")
 
         testContext.configure()
-
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
 
         embeddedContentPage.clickOnLpm("card")
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.SelectedPaymentMethodType("card"))
+
         formPage.fillOutCardDetails()
 
         networkRule.enqueue(

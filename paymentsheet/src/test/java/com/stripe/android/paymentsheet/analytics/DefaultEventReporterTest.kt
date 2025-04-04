@@ -781,36 +781,42 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `Send correct link_mode when selecting Bank payment method type for Instant Debits`() {
-        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
-            simulateInit()
-            simulateSuccessfulSetup(linkMode = LinkMode.LinkPaymentMethod)
+    fun `Send correct link_mode when selecting Bank payment method type for Instant Debits`() =
+        runTest(testDispatcher) {
+            val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+                simulateInit()
+                simulateSuccessfulSetup(linkMode = LinkMode.LinkPaymentMethod)
+            }
+
+            completeEventReporter.onSelectPaymentMethod("link")
+
+            analyticEventCallbackRule.assertMatchesExpectedEvent(AnalyticEvent.SelectedPaymentMethodType("link"))
+
+            val argumentCaptor = argumentCaptor<AnalyticsRequest>()
+            verify(analyticsRequestExecutor).executeAsync(argumentCaptor.capture())
+
+            val errorType = argumentCaptor.firstValue.params["link_context"] as String
+            assertThat(errorType).isEqualTo("instant_debits")
         }
-
-        completeEventReporter.onSelectPaymentMethod("link")
-
-        val argumentCaptor = argumentCaptor<AnalyticsRequest>()
-        verify(analyticsRequestExecutor).executeAsync(argumentCaptor.capture())
-
-        val errorType = argumentCaptor.firstValue.params["link_context"] as String
-        assertThat(errorType).isEqualTo("instant_debits")
-    }
 
     @Test
-    fun `Send correct link_mode when selecting Bank payment method type for Link Card Brand`() {
-        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
-            simulateInit()
-            simulateSuccessfulSetup(linkMode = LinkMode.LinkCardBrand)
+    fun `Send correct link_mode when selecting Bank payment method type for Link Card Brand`() =
+        runTest(testDispatcher) {
+            val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+                simulateInit()
+                simulateSuccessfulSetup(linkMode = LinkMode.LinkCardBrand)
+            }
+
+            completeEventReporter.onSelectPaymentMethod("link")
+
+            analyticEventCallbackRule.assertMatchesExpectedEvent(AnalyticEvent.SelectedPaymentMethodType("link"))
+
+            val argumentCaptor = argumentCaptor<AnalyticsRequest>()
+            verify(analyticsRequestExecutor).executeAsync(argumentCaptor.capture())
+
+            val errorType = argumentCaptor.firstValue.params["link_context"] as String
+            assertThat(errorType).isEqualTo("link_card_brand")
         }
-
-        completeEventReporter.onSelectPaymentMethod("link")
-
-        val argumentCaptor = argumentCaptor<AnalyticsRequest>()
-        verify(analyticsRequestExecutor).executeAsync(argumentCaptor.capture())
-
-        val errorType = argumentCaptor.firstValue.params["link_context"] as String
-        assertThat(errorType).isEqualTo("link_card_brand")
-    }
 
     @Test
     fun `Send correct link_context when pressing confirm button for Instant Debits`() {
