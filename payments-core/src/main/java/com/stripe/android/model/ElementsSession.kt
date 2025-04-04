@@ -16,6 +16,7 @@ data class ElementsSession(
     val externalPaymentMethodData: String?,
     val stripeIntent: StripeIntent,
     val flags: Map<Flag, Boolean>,
+    val experimentsData: ExperimentsData?,
     val customer: Customer?,
     val merchantCountry: String?,
     val cardBrandChoice: CardBrandChoice?,
@@ -56,8 +57,15 @@ data class ElementsSession(
         val linkFlags: Map<String, Boolean>,
         val disableLinkSignup: Boolean,
         val linkConsumerIncentive: LinkConsumerIncentive?,
+        val linkGlobalHoldbackOn: Boolean,
         val useAttestationEndpoints: Boolean,
         val suppress2faModal: Boolean
+    ) : StripeModel
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
+    data class ExperimentsData(
+        val arbId: String,
     ) : StripeModel
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -167,6 +175,7 @@ data class ElementsSession(
                 externalPaymentMethodData = null,
                 flags = emptyMap(),
                 stripeIntent = stripeIntent,
+                experimentsData = null,
                 customer = null,
                 customPaymentMethods = listOf(),
                 merchantCountry = null,

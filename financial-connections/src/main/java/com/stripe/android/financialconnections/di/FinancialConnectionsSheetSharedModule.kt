@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.di
 
 import android.app.Application
+import android.content.Context
 import androidx.core.os.LocaleListCompat
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
@@ -90,6 +91,9 @@ internal interface FinancialConnectionsSheetSharedModule {
 
     @Binds
     fun bindsIsNetworkingRelinkSession(impl: RealIsNetworkingRelinkSession): IsNetworkingRelinkSession
+
+    @Binds
+    fun bindsContext(application: Application): Context
 
     companion object {
 

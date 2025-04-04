@@ -12,6 +12,7 @@ object FeatureFlags {
     val editSavedCardPaymentMethodEnabled = FeatureFlag("Edit Saved Card Payment Method")
     val financialConnectionsLiteEnabled = FeatureFlag("FC Lite enabled")
     val financialConnectionsFullSdkUnavailable = FeatureFlag("FC Full SDK Unavailable")
+    val linkGlobalHoldbackExposureEnabled = FeatureFlag("Link Global Holdback Exposure enabled")
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
