@@ -149,8 +149,7 @@ internal class SavedPaymentMethodMutator(
             )
         )
 
-        // You can remove duplicates in CustomerSessions and not with ephemeral keys
-        val canRemoveDuplicates = currentCustomer.customerSessionClientSecret != null
+        val canRemoveDuplicates = customerStateHolder.canRemoveDuplicate.value
 
         val currentSelection = (selection.value as? PaymentSelection.Saved)?.paymentMethod?.id
         val didRemoveSelectedItem = currentSelection == paymentMethodId

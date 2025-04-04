@@ -32,6 +32,13 @@ internal class CustomerStateHolder(
         initialValue = (selection.value as? PaymentSelection.Saved)?.paymentMethod
     )
 
+    val canRemoveDuplicate: StateFlow<Boolean> = combineAsStateFlow(
+        customer,
+        customerMetadataPermissions,
+    ) { customerState, customerMetadataPermissions ->
+        return@combineAsStateFlow customerMetadataPermissions?.canRemoveDuplicates ?: false
+    }
+
     val canRemove: StateFlow<Boolean> = combineAsStateFlow(
         paymentMethods,
         customerMetadataPermissions,
