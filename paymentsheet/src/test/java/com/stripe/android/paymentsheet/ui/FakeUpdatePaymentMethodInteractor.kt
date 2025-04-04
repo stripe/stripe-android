@@ -30,7 +30,7 @@ internal class FakeUpdatePaymentMethodInteractor(
     ),
     override val setAsDefaultCheckboxEnabled: Boolean = true,
     override val allowCardEdit: Boolean = false,
-    override val editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = DefaultEditCardDetailsInteractor
+    private val editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = DefaultEditCardDetailsInteractor
         .Factory(),
 ) : UpdatePaymentMethodInteractor {
     override val state: StateFlow<UpdatePaymentMethodInteractor.State> = MutableStateFlow(initialState)

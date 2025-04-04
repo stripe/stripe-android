@@ -22,7 +22,6 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
-import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
@@ -300,24 +299,6 @@ class UpdatePaymentMethodUITest {
                 )
             )
             assertThat(viewActionRecorder.viewActions).isEmpty()
-        }
-    }
-
-    @Test
-    fun `CardUpdateParams action is recorded when card form is changed`() {
-        val editCardDetailsInteractorFactory = FakeEditCardDetailsInteractorFactory()
-        val cardUpdateParams = CardUpdateParams(cardBrand = CardBrand.Visa)
-
-        runScenario(
-            editCardDetailsInteractorFactory = editCardDetailsInteractorFactory
-        ) {
-            composeRule.waitForIdle()
-
-            editCardDetailsInteractorFactory.onCardUpdateParamsChanged?.invoke(cardUpdateParams)
-
-            viewActionRecorder.consume(
-                viewAction = UpdatePaymentMethodInteractor.ViewAction.CardUpdateParamsChanged(cardUpdateParams)
-            )
         }
     }
 

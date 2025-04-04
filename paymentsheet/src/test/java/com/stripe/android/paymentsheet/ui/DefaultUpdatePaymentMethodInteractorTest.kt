@@ -582,7 +582,38 @@ class DefaultUpdatePaymentMethodInteractorTest {
         }
         assertThat(exception)
             .hasMessageThat()
-            .isEqualTo("card payment method required for creating EditCardDetailsInteractor")
+            .isEqualTo("Card payment method required for creating EditCardDetailsInteractor")
+    }
+
+    @Test
+    fun editCardDetailsInteractorCallback_updatesSaveButtonStateCorrectly() {
+        val editCardDetailsInteractorFactory = FakeEditCardDetailsInteractorFactory()
+        runScenario(
+            editCardDetailsInteractorFactory = editCardDetailsInteractorFactory
+        ) {
+            interactor.editCardDetailsInteractor
+            editCardDetailsInteractorFactory.onCardUpdateParamsChanged?.invoke(
+                CardUpdateParams(cardBrand = CardBrand.Visa)
+            )
+
+            assertThat(interactor.state.value.isSaveButtonEnabled).isTrue()
+        }
+    }
+
+    @Test
+    fun editCardDetailsInteractorCallback_nullValue_updatesSaveButtonStateCorrectly() {
+        val editCardDetailsInteractorFactory = FakeEditCardDetailsInteractorFactory()
+        runScenario(
+            editCardDetailsInteractorFactory = editCardDetailsInteractorFactory
+        ) {
+            interactor.editCardDetailsInteractor
+            editCardDetailsInteractorFactory.onCardUpdateParamsChanged?.invoke(
+                CardUpdateParams(cardBrand = CardBrand.Visa)
+            )
+            editCardDetailsInteractorFactory.onCardUpdateParamsChanged?.invoke(null)
+
+            assertThat(interactor.state.value.isSaveButtonEnabled).isFalse()
+        }
     }
 
     private fun updateCardAndDefaultPaymentMethod(
@@ -615,6 +646,8 @@ class DefaultUpdatePaymentMethodInteractorTest {
         shouldShowSetAsDefaultCheckbox: Boolean = false,
         isDefaultPaymentMethod: Boolean = false,
         editSavedCardPaymentMethodEnabled: Boolean = false,
+        editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = DefaultEditCardDetailsInteractor
+            .Factory(),
         onBrandChoiceSelected: (CardBrand) -> Unit = {},
         testBlock: suspend TestParams.() -> Unit
     ) {
@@ -632,6 +665,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             shouldShowSetAsDefaultCheckbox = shouldShowSetAsDefaultCheckbox,
             isDefaultPaymentMethod = isDefaultPaymentMethod,
             onUpdateSuccess = onUpdateSuccess,
+            editCardDetailsInteractorFactory = editCardDetailsInteractorFactory
         )
 
         TestParams(interactor).apply { runTest { testBlock() } }

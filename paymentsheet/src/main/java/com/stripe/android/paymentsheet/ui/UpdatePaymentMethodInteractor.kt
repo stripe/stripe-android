@@ -36,8 +36,6 @@ internal interface UpdatePaymentMethodInteractor {
     val setAsDefaultCheckboxEnabled: Boolean
     val shouldShowSaveButton: Boolean
     val allowCardEdit: Boolean
-    val editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory
-
     val editCardDetailsInteractor: EditCardDetailsInteractor
 
     val state: StateFlow<State>
@@ -101,7 +99,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     private val onBrandChoiceSelected: (CardBrand) -> Unit,
     private val onUpdateSuccess: () -> Unit,
     private val workContext: CoroutineContext = Dispatchers.Default,
-    override val editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = DefaultEditCardDetailsInteractor
+    val editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = DefaultEditCardDetailsInteractor
         .Factory()
 ) : UpdatePaymentMethodInteractor {
     private val coroutineScope = CoroutineScope(workContext + SupervisorJob())
