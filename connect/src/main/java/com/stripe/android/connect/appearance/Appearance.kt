@@ -12,26 +12,26 @@ class Appearance private constructor(
     internal val colors: Colors,
     internal val cornerRadius: CornerRadius,
     internal val typography: Typography,
+    internal val spacingUnit: Float?,
     internal val buttonPrimary: Button,
     internal val buttonSecondary: Button,
     internal val badgeNeutral: Badge,
     internal val badgeSuccess: Badge,
     internal val badgeWarning: Badge,
     internal val badgeDanger: Badge,
-    internal val spacingUnit: Float?
 ) : Parcelable {
 
     class Builder {
         private var colors: Colors = Colors.default()
         private var cornerRadius: CornerRadius = CornerRadius.default()
         private var typography: Typography = Typography.default()
+        private var spacingUnit: Float? = null
         private var buttonPrimary: Button = Button.default()
         private var buttonSecondary: Button = Button.default()
         private var badgeNeutral: Badge = Badge.default()
         private var badgeSuccess: Badge = Badge.default()
         private var badgeWarning: Badge = Badge.default()
         private var badgeDanger: Badge = Badge.default()
-        private var spacingUnit: Float? = null
 
         /**
          * Describes the colors used in embedded components.
@@ -50,6 +50,12 @@ class Appearance private constructor(
          */
         fun typography(typography: Typography): Builder =
             apply { this.typography = typography }
+
+        /**
+         * Describes the spacing unit appearance settings.
+         */
+        fun spacingUnit(spacingUnit: Float): Builder =
+            apply { this.spacingUnit = spacingUnit }
 
         /**
          * Describes the primary button appearance settings.
@@ -87,21 +93,18 @@ class Appearance private constructor(
         fun badgeDanger(badgeDanger: Badge): Builder =
             apply { this.badgeDanger = badgeDanger }
 
-        fun spacingUnit(spacingUnit: Float): Builder =
-            apply { this.spacingUnit = spacingUnit }
-
         fun build(): Appearance {
             return Appearance(
                 colors = colors,
                 cornerRadius = cornerRadius,
                 typography = typography,
+                spacingUnit = spacingUnit,
                 buttonPrimary = buttonPrimary,
                 buttonSecondary = buttonSecondary,
                 badgeNeutral = badgeNeutral,
                 badgeSuccess = badgeSuccess,
                 badgeWarning = badgeWarning,
                 badgeDanger = badgeDanger,
-                spacingUnit = spacingUnit,
             )
         }
     }
