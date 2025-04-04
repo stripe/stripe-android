@@ -159,7 +159,6 @@ internal class ElementsSessionJsonParser(
         linkFundingSources: JSONArray?,
     ): ElementsSession.LinkSettings {
         val disableLinkSignup = json?.optBoolean(FIELD_DISABLE_LINK_SIGNUP) == true
-        val linkGlobalHoldbackOn = json?.optBoolean(LINK_GLOBAL_HOLDBACK_ON) == true
         val linkPassthroughModeEnabled = json?.optBoolean(FIELD_LINK_PASSTHROUGH_MODE_ENABLED) == true
         val useLinkAttestationEndpoints = json?.optBoolean(FIELD_USE_LINK_ATTESTATION_ENDPOINTS) == true
         val suppressLink2faModal = json?.optBoolean(FIELD_LINK_SUPPRESS_2FA_MODAL) == true
@@ -411,7 +410,6 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_LINK_PASSTHROUGH_MODE_ENABLED = "link_passthrough_mode_enabled"
         private const val FIELD_LINK_MODE = "link_mode"
         private const val FIELD_DISABLE_LINK_SIGNUP = "link_mobile_disable_signup"
-        private const val LINK_GLOBAL_HOLDBACK_ON = "link_global_holdback_on"
         private const val FIELD_USE_LINK_ATTESTATION_ENDPOINTS = "link_mobile_use_attestation_endpoints"
         private const val FIELD_LINK_SUPPRESS_2FA_MODAL = "link_mobile_suppress_2fa_modal"
         private const val FIELD_MERCHANT_COUNTRY = "merchant_country"
