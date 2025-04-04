@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentIntentFixtures
@@ -44,7 +45,8 @@ internal class AddPaymentMethodTest {
         stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
             paymentMethodTypes = listOf("card", "klarna")
         ),
-        externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC)
+        externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
+        displayableCustomPaymentMethods = listOf(PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD),
     )
 
     @Test
@@ -95,6 +97,44 @@ internal class AddPaymentMethodTest {
         assertThat(externalPaymentSelection.iconResource).isEqualTo(0)
         assertThat(externalPaymentSelection.billingDetails?.name).isEqualTo(name)
         assertThat(externalPaymentSelection.billingDetails?.address?.line1).isEqualTo(addressLine1)
+    }
+
+    @Test
+    fun `transformToPaymentSelection transforms custom payment methods correctly`() {
+        val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+        val paypalCpm = PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD
+        val name = "Joe"
+        val addressLine1 = "123 Main Street"
+
+        val formFieldValues = FormFieldValues(
+            fieldValuePairs = mapOf(
+                IdentifierSpec.Name to FormFieldEntry(name, true),
+                IdentifierSpec.Line1 to FormFieldEntry(addressLine1, true)
+            ),
+            userRequestedReuse = customerRequestedSave,
+        )
+
+        val customPaymentMethod = metadata.supportedPaymentMethodForCode(paypalCpm.id)
+
+        assertThat(customPaymentMethod).isNotNull()
+
+        val paymentSelection = formFieldValues.transformToPaymentSelection(
+            customPaymentMethod!!,
+            metadata
+        )
+
+        assertThat(paymentSelection).isNotNull()
+        assertThat(paymentSelection).isInstanceOf<PaymentSelection.CustomPaymentMethod>()
+
+        val customPaymentSelection = paymentSelection as PaymentSelection.CustomPaymentMethod
+
+        assertThat(customPaymentSelection.id).isEqualTo(PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD.id)
+        assertThat(customPaymentSelection.label.resolve(context)).isEqualTo(paypalCpm.displayName)
+        assertThat(customPaymentSelection.lightThemeIconUrl).isEqualTo(paypalCpm.logoUrl)
+        assertThat(customPaymentSelection.darkThemeIconUrl).isEqualTo(paypalCpm.logoUrl)
+        assertThat(customPaymentSelection.iconResource).isEqualTo(0)
+        assertThat(customPaymentSelection.billingDetails?.name).isEqualTo(name)
+        assertThat(customPaymentSelection.billingDetails?.address?.line1).isEqualTo(addressLine1)
     }
 
     @Test

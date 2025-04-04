@@ -1824,7 +1824,7 @@ internal class PaymentSheetViewModelTest {
             assertThat(awaitItem())
                 .isEqualTo(newSelection)
             assertThat(viewModel.newPaymentSelection).isEqualTo(
-                NewOrExternalPaymentSelection.New(
+                NewPaymentOptionSelection.New(
                     newSelection
                 )
             )
@@ -1848,7 +1848,31 @@ internal class PaymentSheetViewModelTest {
             viewModel.updateSelection(newSelection)
             assertThat(awaitItem()).isEqualTo(newSelection)
             assertThat(viewModel.newPaymentSelection).isEqualTo(
-                NewOrExternalPaymentSelection.External(
+                NewPaymentOptionSelection.External(
+                    newSelection
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `updateSelection with custom payment method updates the current selection`() = runTest {
+        val viewModel = createViewModel(initialPaymentSelection = null)
+
+        viewModel.selection.test {
+            val newSelection = PaymentSelection.CustomPaymentMethod(
+                id = "cpmt_1",
+                billingDetails = null,
+                label = "BufoPay".resolvableString,
+                iconResource = 0,
+                lightThemeIconUrl = "some_url",
+                darkThemeIconUrl = "some_url",
+            )
+            assertThat(awaitItem()).isNull()
+            viewModel.updateSelection(newSelection)
+            assertThat(awaitItem()).isEqualTo(newSelection)
+            assertThat(viewModel.newPaymentSelection).isEqualTo(
+                NewPaymentOptionSelection.Custom(
                     newSelection
                 )
             )

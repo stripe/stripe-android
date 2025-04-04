@@ -136,7 +136,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             savedStateHandle[IN_PROGRESS_SELECTION] = value
         }
 
-    override var newPaymentSelection: NewOrExternalPaymentSelection? = null
+    override var newPaymentSelection: NewPaymentOptionSelection? = null
 
     private val googlePayButtonType: GooglePayButtonType =
         when (args.config.googlePay?.buttonType) {

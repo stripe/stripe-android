@@ -541,6 +541,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             is PaymentSelection.Link,
             is PaymentSelection.New.LinkInline -> "link"
             is PaymentSelection.ExternalPaymentMethod,
+            is PaymentSelection.CustomPaymentMethod,
             is PaymentSelection.New -> "newpm"
             null -> "unknown"
         }
@@ -624,6 +625,7 @@ internal fun PaymentSelection?.code(): String? {
         is PaymentSelection.New -> paymentMethodCreateParams.typeCode
         is PaymentSelection.Saved -> paymentMethod.type?.code
         is PaymentSelection.ExternalPaymentMethod -> type
+        is PaymentSelection.CustomPaymentMethod -> id
         null -> null
     }
 }
@@ -643,6 +645,7 @@ internal fun PaymentSelection?.linkContext(): String? {
         is PaymentSelection.GooglePay,
         is PaymentSelection.New,
         is PaymentSelection.Saved,
+        is PaymentSelection.CustomPaymentMethod,
         is PaymentSelection.ExternalPaymentMethod,
         null -> null
     }

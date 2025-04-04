@@ -118,6 +118,15 @@ internal fun FormFieldValues.transformToPaymentSelection(
             lightThemeIconUrl = paymentMethod.lightThemeIconUrl,
             darkThemeIconUrl = paymentMethod.darkThemeIconUrl,
         )
+    } else if (paymentMethodMetadata.isCustomPaymentMethod(paymentMethod.code)) {
+        PaymentSelection.CustomPaymentMethod(
+            id = paymentMethod.code,
+            billingDetails = params.billingDetails,
+            label = paymentMethod.displayName,
+            iconResource = paymentMethod.iconResource,
+            lightThemeIconUrl = paymentMethod.lightThemeIconUrl,
+            darkThemeIconUrl = paymentMethod.darkThemeIconUrl,
+        )
     } else {
         PaymentSelection.New.GenericPaymentMethod(
             label = paymentMethod.displayName,

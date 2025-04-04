@@ -638,6 +638,38 @@ class PaymentSheetEventTest {
     }
 
     @Test
+    fun `Custom payment method event should return expected event`() {
+        val newPMEvent = paymentMethodEvent(
+            paymentSelection = PaymentSelection.CustomPaymentMethod(
+                id = "cpmt_1",
+                billingDetails = null,
+                label = "BufoPay".resolvableString,
+                iconResource = 0,
+                lightThemeIconUrl = "some_url",
+                darkThemeIconUrl = "some_url",
+            ),
+            result = PaymentSheetEvent.Payment.Result.Success,
+        )
+        assertThat(
+            newPMEvent.eventName
+        ).isEqualTo(
+            "mc_complete_payment_newpm_success"
+        )
+        assertThat(
+            newPMEvent.params
+        ).isEqualTo(
+            mapOf(
+                "currency" to "usd",
+                "duration" to 0.001F,
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
+                "selected_lpm" to "cpmt_1",
+            )
+        )
+    }
+
+    @Test
     fun `External payment method failure event should return expected event`() {
         val newPMEvent = paymentMethodEvent(
             paymentSelection = PaymentSelection.ExternalPaymentMethod(
@@ -668,6 +700,43 @@ class PaymentSheetEventTest {
                 "google_pay_enabled" to false,
                 "selected_lpm" to "external_fawry",
                 "error_message" to "externalPaymentMethodError",
+            )
+        )
+    }
+
+    @Test
+    fun `Custom payment method failure event should return expected event`() {
+        val newPMEvent = paymentMethodEvent(
+            paymentSelection = PaymentSelection.CustomPaymentMethod(
+                id = "cpmt_1",
+                billingDetails = null,
+                label = "BufoPay".resolvableString,
+                iconResource = 0,
+                lightThemeIconUrl = "some_url",
+                darkThemeIconUrl = "some_url",
+            ),
+            result = PaymentSheetEvent.Payment.Result.Failure(
+                error = PaymentSheetConfirmationError.Stripe(
+                    cause = IllegalStateException("An error occurred!")
+                ),
+            ),
+        )
+        assertThat(
+            newPMEvent.eventName
+        ).isEqualTo(
+            "mc_complete_payment_newpm_failure"
+        )
+        assertThat(
+            newPMEvent.params
+        ).isEqualTo(
+            mapOf(
+                "currency" to "usd",
+                "duration" to 0.001F,
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
+                "selected_lpm" to "cpmt_1",
+                "error_message" to "java.lang.IllegalStateException",
             )
         )
     }

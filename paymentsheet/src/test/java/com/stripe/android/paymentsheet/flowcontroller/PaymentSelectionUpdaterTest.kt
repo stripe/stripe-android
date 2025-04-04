@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -187,6 +188,44 @@ class PaymentSelectionUpdaterTest {
     }
 
     @Test
+    fun `Can use custom payment method if it's supported`() {
+        val paymentSelection =
+            PaymentMethodFixtures.createCustomPaymentMethod(PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD)
+
+        val newState = mockPaymentSheetStateWithPaymentIntent(
+            displayableCustomPaymentMethods = listOf(PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD)
+        )
+        val updater = createUpdater()
+
+        val result = updater(
+            currentSelection = paymentSelection,
+            previousConfig = null,
+            newState = newState,
+            newConfig = defaultPaymentSheetConfiguration,
+        )
+        assertThat(result).isEqualTo(paymentSelection)
+    }
+
+    @Test
+    fun `Can't use custom payment method if it's not returned by backend`() {
+        val paymentSelection =
+            PaymentMethodFixtures.createCustomPaymentMethod(PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD)
+
+        val newState = mockPaymentSheetStateWithPaymentIntent(
+            externalPaymentMethodSpecs = emptyList()
+        )
+        val updater = createUpdater()
+
+        val result = updater(
+            currentSelection = paymentSelection,
+            previousConfig = null,
+            newState = newState,
+            newConfig = defaultPaymentSheetConfiguration,
+        )
+        assertThat(result).isNull()
+    }
+
+    @Test
     fun `PaymentSelection is reset when payment method requires mandate after updating intent`() {
         val existingSelection = PaymentSelection.New.GenericPaymentMethod(
             label = "paypal".resolvableString,
@@ -350,6 +389,7 @@ class PaymentSelectionUpdaterTest {
         customerPaymentMethods: List<PaymentMethod> = emptyList(),
         config: PaymentSheet.Configuration = defaultPaymentSheetConfiguration,
         externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec> = emptyList(),
+        displayableCustomPaymentMethods: List<DisplayableCustomPaymentMethod> = emptyList(),
     ): PaymentSheetState.Full {
         val intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
 
@@ -370,6 +410,7 @@ class PaymentSelectionUpdaterTest {
                     SharedDataSpec("sofort"),
                 ),
                 externalPaymentMethodSpecs = externalPaymentMethodSpecs,
+                displayableCustomPaymentMethods = displayableCustomPaymentMethods,
                 isGooglePayReady = true,
             ),
         )

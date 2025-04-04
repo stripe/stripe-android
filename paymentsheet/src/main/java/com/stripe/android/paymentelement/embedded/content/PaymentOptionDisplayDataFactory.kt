@@ -41,8 +41,9 @@ internal class PaymentOptionDisplayDataFactory @Inject constructor(
                     paymentMethodMetadata.hasIntentToSetup()
                 )
             }
-            is PaymentSelection.ExternalPaymentMethod -> null
-            PaymentSelection.GooglePay -> null
+            is PaymentSelection.CustomPaymentMethod,
+            is PaymentSelection.ExternalPaymentMethod,
+            is PaymentSelection.GooglePay,
             is PaymentSelection.Link -> null
         }
 

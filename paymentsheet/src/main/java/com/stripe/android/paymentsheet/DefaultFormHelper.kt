@@ -30,7 +30,7 @@ internal class DefaultFormHelper(
     private val linkInlineHandler: LinkInlineHandler,
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     private val paymentMethodMetadata: PaymentMethodMetadata,
-    private val newPaymentSelectionProvider: () -> NewOrExternalPaymentSelection?,
+    private val newPaymentSelectionProvider: () -> NewPaymentOptionSelection?,
     private val selectionUpdater: (PaymentSelection?) -> Unit,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
     private val setAsDefaultMatchesSaveForFutureUse: Boolean,
