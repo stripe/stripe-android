@@ -24,6 +24,16 @@
   <string name="stripe_confirm_close_form_title">Doriți să închideți acest formular?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Salvați-vă informațiile pentru o finalizare securizată a comenzii cu un singur clic cu Link</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_link_sign_up">Confirmare și continuare</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header">Finalizare a comenzii sigură și rapidă cu un singur clic</string>
+  <!-- Label describing the benefit of signing up for Link. -->
+  <string name="stripe_link_sign_up_message">Salvați-vă informațiile privind plata cu Link și finalizați comanda în siguranță cu un singur clic pe site-urile acceptate de Link.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_link_sign_up_terms"><![CDATA[Continuând, sunteți de acord cu <terms>Termenii</terms> și <privacy>Politica de confidențialitate</privacy>.]]></string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message">Introduceți codul pe care vi l-am trimis la %s pentru a utiliza informațiile dvs. salvate.</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Deconectare de la Link</string>
   <!-- Text that is displayed when a network error occurs -->

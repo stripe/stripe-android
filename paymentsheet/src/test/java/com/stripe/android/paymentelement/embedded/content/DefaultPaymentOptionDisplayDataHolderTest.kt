@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.mainthread.MainThreadSavedStateHandle
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -47,7 +48,7 @@ internal class DefaultPaymentOptionDisplayDataHolderTest {
             iconLoader = mock(),
             context = ApplicationProvider.getApplicationContext(),
         )
-        val selectionHolder = EmbeddedSelectionHolder(savedStateHandle = SavedStateHandle())
+        val selectionHolder = EmbeddedSelectionHolder(savedStateHandle = MainThreadSavedStateHandle(SavedStateHandle()))
         Scenario(
             paymentOptionDisplayDataHolder = DefaultPaymentOptionDisplayDataHolder(
                 coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),

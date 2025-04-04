@@ -24,6 +24,16 @@
   <string name="stripe_confirm_close_form_title">Chcete zatvoriť tento formulár?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Uložte svoje údaje pre bezpečnú platbu jedným kliknutím pomocou služby Link</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_link_sign_up">Súhlasiť a pokračovať</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header">Rýchla, bezpečná platba jedným kliknutím</string>
+  <!-- Label describing the benefit of signing up for Link. -->
+  <string name="stripe_link_sign_up_message">Uložte si svoje platobné údaje pomocou služby Link a bezpečne plaťte jedným kliknutím na stránkach podporovaných službou Link.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_link_sign_up_terms"><![CDATA[Pokračovaním súhlasíte s <terms>podmienkami</terms> a <privacy>zásadami ochrany osobných údajov</privacy>.]]></string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message">Zadajte kód zaslaný na telefónne číslo %s a používajte svoje uložené údaje.</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Odhlásiť sa zo služby Link</string>
   <!-- Text that is displayed when a network error occurs -->

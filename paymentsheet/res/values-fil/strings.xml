@@ -24,6 +24,16 @@
   <string name="stripe_confirm_close_form_title">Gusto mo bang isara ang form na ito?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">I-save ang iyong impormasyon para sa ligtas na 1-click na pag-checkout sa Link</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_link_sign_up">Sumang-ayon at magpatuloy</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header">Mabilis, ligtas, 1⁠-⁠click checkout</string>
+  <!-- Label describing the benefit of signing up for Link. -->
+  <string name="stripe_link_sign_up_message">I-save ang iyong impormasyon ng pagbabayad sa Link, at ligtas na mag-check out nang 1-click sa mga site na suportado ng Link.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_link_sign_up_terms"><![CDATA[Sa pagpapatuloy, sumasang-ayon ka sa <terms>Mga Tuntunin</terms> at <privacy>Patakaran sa Pagkapribado</privacy>.]]></string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message">Ilagay ang code na ipinadala sa %s para gamitin ang naka-save na impormasyon mo.</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Mag-log out sa Link</string>
   <!-- Text that is displayed when a network error occurs -->

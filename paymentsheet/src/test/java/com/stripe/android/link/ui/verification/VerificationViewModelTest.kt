@@ -144,14 +144,20 @@ internal class VerificationViewModelTest {
             }
         }
 
-        val viewModel = createViewModel(linkAccountManager = linkAccountManager).apply {
-            resendCode()
-        }
+        val viewModel = createViewModel(linkAccountManager = linkAccountManager)
 
         viewModel.viewState.test {
+            val originalState = awaitItem()
+            assertThat(originalState.isSendingNewCode).isFalse()
+            assertThat(originalState.didSendNewCode).isFalse()
+
+            viewModel.resendCode()
+
             val intermediateState = awaitItem()
             assertThat(intermediateState.isSendingNewCode).isTrue()
             assertThat(intermediateState.didSendNewCode).isFalse()
+
+            // The delay in the FakeLinkAccountManager will cause the state to be updated
 
             val finalState = awaitItem()
             assertThat(finalState.isSendingNewCode).isFalse()
@@ -168,15 +174,22 @@ internal class VerificationViewModelTest {
             }
         }
 
-        val viewModel = createViewModel(linkAccountManager = linkAccountManager).apply {
-            resendCode()
-        }
+        val viewModel = createViewModel(linkAccountManager = linkAccountManager)
 
         viewModel.viewState.test {
+            val originalState = awaitItem()
+            assertThat(originalState.isSendingNewCode).isFalse()
+            assertThat(originalState.didSendNewCode).isFalse()
+            assertThat(originalState.errorMessage).isNull()
+
+            viewModel.resendCode()
+
             val intermediateState = awaitItem()
             assertThat(intermediateState.isSendingNewCode).isTrue()
             assertThat(intermediateState.didSendNewCode).isFalse()
             assertThat(intermediateState.errorMessage).isNull()
+
+            // The delay in the FakeLinkAccountManager will cause the state to be updated
 
             val finalState = awaitItem()
             assertThat(finalState.isSendingNewCode).isFalse()

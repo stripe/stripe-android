@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.core.mainthread.MainThreadSavedStateHandle
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
@@ -134,6 +135,41 @@ internal class DefaultEmbeddedSelectionChooserTest {
         val selection = chooser.choose(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 externalPaymentMethodSpecs = listOf(),
+            ),
+            paymentMethods = PaymentMethodFixtures.createCards(3),
+            previousSelection = previousSelection,
+            newSelection = null,
+            newConfiguration = defaultConfiguration,
+        )
+        assertThat(selection).isNull()
+    }
+
+    @Test
+    fun `Can use custom payment method if it's supported`() = runScenario {
+        val previousSelection =
+            PaymentMethodFixtures.createCustomPaymentMethod(PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD)
+
+        val selection = chooser.choose(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                displayableCustomPaymentMethods = listOf(PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD),
+                isGooglePayReady = true,
+            ),
+            paymentMethods = PaymentMethodFixtures.createCards(3),
+            previousSelection = previousSelection,
+            newSelection = PaymentSelection.GooglePay,
+            newConfiguration = defaultConfiguration,
+        )
+        assertThat(selection).isEqualTo(previousSelection)
+    }
+
+    @Test
+    fun `Can't use custom payment method if it's not returned by backend`() = runScenario {
+        val previousSelection =
+            PaymentMethodFixtures.createCustomPaymentMethod(PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD)
+
+        val selection = chooser.choose(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                displayableCustomPaymentMethods = listOf(),
             ),
             paymentMethods = PaymentMethodFixtures.createCards(3),
             previousSelection = previousSelection,
@@ -286,12 +322,12 @@ internal class DefaultEmbeddedSelectionChooserTest {
         val savedStateHandle = SavedStateHandle()
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-            embeddedSelectionHolder = EmbeddedSelectionHolder(savedStateHandle),
+            embeddedSelectionHolder = EmbeddedSelectionHolder(MainThreadSavedStateHandle(savedStateHandle)),
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
         )
         Scenario(
             chooser = DefaultEmbeddedSelectionChooser(
-                savedStateHandle = savedStateHandle,
+                savedStateHandle = MainThreadSavedStateHandle(savedStateHandle),
                 formHelperFactory = formHelperFactory,
                 coroutineScope = CoroutineScope(Dispatchers.Unconfined),
             ),

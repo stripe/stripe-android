@@ -1,22 +1,18 @@
 package com.stripe.android.connect
 
 import android.content.Context
-import android.os.Parcelable
 import androidx.activity.ComponentActivity
-import androidx.annotation.RestrictTo
 import androidx.fragment.app.FragmentActivity
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.fonts.CustomFontSource
 import com.stripe.android.connect.di.StripeConnectComponent
 import com.stripe.android.connect.manager.EmbeddedComponentCoordinator
-import kotlinx.parcelize.Parcelize
 
 @PrivateBetaConnectSDK
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class EmbeddedComponentManager @JvmOverloads constructor(
-    configuration: Configuration,
-    fetchClientSecretCallback: FetchClientSecretCallback,
-    appearance: Appearance = Appearance(),
+    publishableKey: String,
+    fetchClientSecret: FetchClientSecret,
+    appearance: Appearance = Appearance.default(),
     customFonts: List<CustomFontSource> = emptyList(),
 ) {
     internal val coordinator: EmbeddedComponentCoordinator =
@@ -24,8 +20,8 @@ class EmbeddedComponentManager @JvmOverloads constructor(
             .coordinatorComponentProvider
             .get()
             .build(
-                configuration = configuration,
-                fetchClientSecretCallback = fetchClientSecretCallback,
+                publishableKey = publishableKey,
+                fetchClientSecret = fetchClientSecret,
                 customFonts = customFonts,
                 appearance = appearance,
             )
@@ -99,13 +95,6 @@ class EmbeddedComponentManager @JvmOverloads constructor(
         coordinator.update(appearance)
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    @Parcelize
-    data class Configuration(
-        val publishableKey: String,
-    ) : Parcelable
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         /**
          * Hooks the [EmbeddedComponentManager] into this activity's lifecycle.

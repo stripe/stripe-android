@@ -392,14 +392,14 @@ internal class PaymentSheetTest {
         page.fillOutCardDetails()
 
         page.assertPrimaryButton(
-            expectedContentDescription = "Pay \$50.99",
+            expectedStateDescription = "Pay \$50.99",
             canPay = true
         )
 
         page.clearCard()
 
         page.assertPrimaryButton(
-            expectedContentDescription = "Pay \$50.99",
+            expectedStateDescription = "Pay \$50.99",
             canPay = false
         )
 

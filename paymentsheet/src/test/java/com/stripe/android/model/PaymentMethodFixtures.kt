@@ -3,6 +3,7 @@ package com.stripe.android.model
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -15,7 +16,7 @@ import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
 
 internal object PaymentMethodFixtures {
-    private val CARD = PaymentMethod.Card(
+    internal val CARD = PaymentMethod.Card(
         brand = CardBrand.Visa,
         checks = PaymentMethod.Card.Checks(
             addressLine1Check = "unchecked",
@@ -34,7 +35,7 @@ internal object PaymentMethodFixtures {
         wallet = null
     )
 
-    private val CARD_WITH_NETWORKS = CARD.copy(
+    internal val CARD_WITH_NETWORKS = CARD.copy(
         displayBrand = "cartes_bancaires",
         networks = PaymentMethod.Card.Networks(
             available = setOf("visa", "cartes_bancaires"),
@@ -177,6 +178,14 @@ internal object PaymentMethodFixtures {
         label = "PayPal",
         lightImageUrl = "example_url",
         darkImageUrl = null
+    )
+
+    val PAYPAL_CUSTOM_PAYMENT_METHOD = DisplayableCustomPaymentMethod(
+        id = "cpmt_paypal",
+        displayName = "PayPal",
+        subtitle = "Pay now with PayPal".resolvableString,
+        logoUrl = "example_url",
+        doesNotCollectBillingDetails = true,
     )
 
     //
@@ -596,6 +605,16 @@ internal object PaymentMethodFixtures {
             iconResource = 0,
             lightThemeIconUrl = spec.lightImageUrl,
             darkThemeIconUrl = spec.darkImageUrl,
+            billingDetails = null,
+        )
+    }
+
+    fun createCustomPaymentMethod(cpm: DisplayableCustomPaymentMethod): PaymentSelection.CustomPaymentMethod {
+        return PaymentSelection.CustomPaymentMethod(
+            id = cpm.id,
+            label = cpm.displayName.resolvableString,
+            lightThemeIconUrl = cpm.logoUrl,
+            darkThemeIconUrl = cpm.logoUrl,
             billingDetails = null,
         )
     }

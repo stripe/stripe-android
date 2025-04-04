@@ -62,23 +62,17 @@ import kotlin.coroutines.CoroutineContext
 internal interface EmbeddedPaymentElementViewModelComponent {
     val viewModel: EmbeddedPaymentElementViewModel
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
-
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        @BindsInstance
-        fun paymentElementCallbackIdentifier(
-            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
-        ): Builder
-
-        @BindsInstance
-        fun statusBarColor(@Named(STATUS_BAR_COLOR) statusBarColor: Int?): Builder
-
-        fun build(): EmbeddedPaymentElementViewModelComponent
+    @Component.Factory
+    interface Factory {
+        fun build(
+            @BindsInstance savedStateHandle: SavedStateHandle,
+            @BindsInstance application: Application,
+            @BindsInstance @PaymentElementCallbackIdentifier
+            paymentElementCallbackIdentifier: String,
+            @BindsInstance
+            @Named(STATUS_BAR_COLOR)
+            statusBarColor: Int?,
+        ): EmbeddedPaymentElementViewModelComponent
     }
 }
 

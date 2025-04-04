@@ -57,7 +57,8 @@ internal class FakeElementsSessionRepository(
                     cardBrandChoice = cardBrandChoice,
                     customPaymentMethods = this.customPaymentMethods,
                     elementsSessionId = "session_1234",
-                    flags = emptyMap()
+                    flags = emptyMap(),
+                    experimentsData = null
                 )
             )
         }

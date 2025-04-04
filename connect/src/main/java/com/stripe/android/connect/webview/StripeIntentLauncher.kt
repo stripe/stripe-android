@@ -4,8 +4,8 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.browser.customtabs.CustomTabsIntent
 import com.stripe.android.connect.R
+import com.stripe.android.connect.StripeConnectRedirectActivity
 import com.stripe.android.connect.di.StripeConnectComponent
 import com.stripe.android.core.Logger
 
@@ -32,8 +32,12 @@ internal class StripeIntentLauncherImpl(
 ) : StripeIntentLauncher {
 
     override fun launchSecureExternalWebTab(context: Context, uri: Uri) {
-        val customTabsIntent = CustomTabsIntent.Builder().build()
-        customTabsIntent.launchUrl(context, uri)
+        context.startActivity(
+            StripeConnectRedirectActivity.customTabIntent(
+                context = context,
+                url = uri.toString()
+            )
+        )
     }
 
     override fun launchUrlWithSystemHandler(context: Context, uri: Uri) {

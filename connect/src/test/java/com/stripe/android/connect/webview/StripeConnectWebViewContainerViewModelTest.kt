@@ -43,6 +43,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.doReturn
@@ -77,7 +78,7 @@ class StripeConnectWebViewContainerViewModelTest {
     }
     private val embeddedComponent: StripeEmbeddedComponent = StripeEmbeddedComponent.PAYOUTS
 
-    private val appearanceFlow = MutableStateFlow(Appearance())
+    private val appearanceFlow = MutableStateFlow(Appearance.default())
     private val receivedComponentEvents = mutableListOf<ComponentEvent>()
 
     private val mockStripeIntentLauncher: StripeIntentLauncher = mock()
@@ -181,7 +182,7 @@ class StripeConnectWebViewContainerViewModelTest {
         assertThat(viewModel.stateFlow.value.appearance).isNull()
 
         viewModel.onCreate(lifecycleOwner)
-        val newAppearance = Appearance()
+        val newAppearance = Appearance.default()
         appearanceFlow.emit(newAppearance)
 
         assertThat(viewModel.stateFlow.value.appearance).isEqualTo(newAppearance)
@@ -250,7 +251,16 @@ class StripeConnectWebViewContainerViewModelTest {
 
     @Test
     fun `view should update appearance`() = runTest(testDispatcher) {
-        val appearances = listOf(Appearance(), Appearance(colors = Colors(primary = Color.CYAN)))
+        val appearances = listOf(
+            Appearance.default(),
+            Appearance.Builder()
+                .colors(
+                    Colors.Builder()
+                        .primary(Color.CYAN)
+                        .build()
+                )
+                .build()
+        )
         viewModel.onCreate(lifecycleOwner)
 
         // Shouldn't update appearance until pageDidLoad is received.
@@ -308,6 +318,35 @@ class StripeConnectWebViewContainerViewModelTest {
                 authenticatedViewId = message.id,
             )
         )
+    }
+
+    @Test
+    fun `should invoke returnedFromAuthenticatedWebView when resumed from ChromeCustomTab`() {
+        val pageViewId = "pv-id"
+        val uri = Uri.parse("https://test.stripe.com/")
+        val message = OpenAuthenticatedWebViewMessage(
+            id = "message-id",
+            url = uri.toString(),
+        )
+
+        viewModel.onResume(lifecycleOwner)
+        verify(webView, never()).returnedFromAuthenticatedWebView(anyOrNull())
+
+        viewModel.delegate.onReceivedPageDidLoad(pageViewId)
+        viewModel.delegate.onReceivedOpenAuthenticatedWebView(mockActivity, message)
+        assertThat(viewModel.stateFlow.value.receivedOpenAuthenticatedWebViewMessage)
+            .isEqualTo(message)
+
+        viewModel.onResume(lifecycleOwner)
+        verify(webView).returnedFromAuthenticatedWebView(uri.toString())
+        verify(analyticsService).track(
+            ConnectAnalyticsEvent.AuthenticatedWebRedirected(
+                pageViewId = pageViewId,
+                authenticatedViewId = message.id,
+            )
+        )
+        assertThat(viewModel.stateFlow.value.receivedOpenAuthenticatedWebViewMessage)
+            .isNull()
     }
 
     @Test

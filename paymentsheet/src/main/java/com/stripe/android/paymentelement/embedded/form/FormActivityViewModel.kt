@@ -26,17 +26,17 @@ internal class FormActivityViewModel @Inject constructor(
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             val args = argSupplier()
-            val component = DaggerFormActivityViewModelComponent.builder()
-                .paymentMethodMetadata(args.paymentMethodMetadata)
-                .selectedPaymentMethodCode(args.selectedPaymentMethodCode)
-                .hasSavedPaymentMethods(args.hasSavedPaymentMethods)
-                .configuration(args.configuration)
-                .initializationMode(args.initializationMode)
-                .statusBarColor(args.statusBarColor)
-                .application(extras.requireApplication())
-                .paymentElementCallbackIdentifier(args.paymentElementCallbackIdentifier)
-                .savedStateHandle(extras.createSavedStateHandle())
-                .build()
+            val component = DaggerFormActivityViewModelComponent.factory().build(
+                paymentMethodMetadata = args.paymentMethodMetadata,
+                selectedPaymentMethodCode = args.selectedPaymentMethodCode,
+                hasSavedPaymentMethods = args.hasSavedPaymentMethods,
+                configuration = args.configuration,
+                initializationMode = args.initializationMode,
+                statusBarColor = args.statusBarColor,
+                application = extras.requireApplication(),
+                paymentElementCallbackIdentifier = args.paymentElementCallbackIdentifier,
+                savedStateHandle = extras.createSavedStateHandle(),
+            )
 
             return component.viewModel as T
         }

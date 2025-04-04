@@ -23,18 +23,13 @@ internal interface EmbeddedPaymentElementSubcomponent {
     val embeddedPaymentElement: EmbeddedPaymentElement
     val initializer: EmbeddedPaymentElementInitializer
 
-    @Subcomponent.Builder
-    interface Builder {
-        @BindsInstance
-        fun activityResultCaller(activityResultCaller: ActivityResultCaller): Builder
-
-        @BindsInstance
-        fun lifecycleOwner(lifecycleOwner: LifecycleOwner): Builder
-
-        @BindsInstance
-        fun resultCallback(resultCallback: EmbeddedPaymentElement.ResultCallback): Builder
-
-        fun build(): EmbeddedPaymentElementSubcomponent
+    @Subcomponent.Factory
+    interface Factory {
+        fun build(
+            @BindsInstance activityResultCaller: ActivityResultCaller,
+            @BindsInstance lifecycleOwner: LifecycleOwner,
+            @BindsInstance resultCallback: EmbeddedPaymentElement.ResultCallback,
+        ): EmbeddedPaymentElementSubcomponent
     }
 }
 

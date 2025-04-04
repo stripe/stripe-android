@@ -24,6 +24,16 @@
   <string name="stripe_confirm_close_form_title">Deseja fechar este formulário?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Salve seus dados para fazer checkout seguro em 1 clique com o Link</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_link_sign_up">Concordar e continuar</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header">Checkout rápido e seguro em 1 clique</string>
+  <!-- Label describing the benefit of signing up for Link. -->
+  <string name="stripe_link_sign_up_message">Salve seus dados de pagamento com o Link e faça checkout com segurança em 1 clique em sites compatíveis com o Link.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_link_sign_up_terms"><![CDATA[Ao continuar, você concorda com os <terms>Termos</terms> e a <privacy>Política de Privacidade</privacy>.]]></string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message">Insira o código enviado para %s para usar seus dados salvos.</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Sair do Link</string>
   <!-- Text that is displayed when a network error occurs -->

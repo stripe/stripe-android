@@ -88,7 +88,8 @@ private fun List<PaymentOptionsItem>.findSelectedItem(paymentSelection: PaymentS
                     else -> false
                 }
             }
-            is PaymentSelection.New -> false
+            is PaymentSelection.New,
+            is PaymentSelection.CustomPaymentMethod,
             is PaymentSelection.ExternalPaymentMethod -> false
         }
     }

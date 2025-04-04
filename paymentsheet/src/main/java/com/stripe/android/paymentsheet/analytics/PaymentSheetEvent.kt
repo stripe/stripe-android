@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.analytics
 
+import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.analytics.getExternalPaymentMethodsAnalyticsValue
 import com.stripe.android.common.analytics.toAnalyticsMap
 import com.stripe.android.common.analytics.toAnalyticsValue
@@ -507,6 +508,20 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val additionalParams: Map<String, Any?> = mapOf()
     }
 
+    class ExperimentExposure(
+        override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+        experiment: LoggableExperiment
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "elements.experiment_exposure"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            "experiment_retrieved" to experiment.name,
+            "arb_id" to experiment.arbId,
+            "assignment_group" to experiment.group.groupName
+        ) + experiment.dimensions.mapValues { "dimensions-$it" }
+    }
+
     private fun standardParams(
         isDecoupled: Boolean,
         linkEnabled: Boolean,
@@ -526,6 +541,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             is PaymentSelection.Link,
             is PaymentSelection.New.LinkInline -> "link"
             is PaymentSelection.ExternalPaymentMethod,
+            is PaymentSelection.CustomPaymentMethod,
             is PaymentSelection.New -> "newpm"
             null -> "unknown"
         }
@@ -609,6 +625,7 @@ internal fun PaymentSelection?.code(): String? {
         is PaymentSelection.New -> paymentMethodCreateParams.typeCode
         is PaymentSelection.Saved -> paymentMethod.type?.code
         is PaymentSelection.ExternalPaymentMethod -> type
+        is PaymentSelection.CustomPaymentMethod -> id
         null -> null
     }
 }
@@ -628,6 +645,7 @@ internal fun PaymentSelection?.linkContext(): String? {
         is PaymentSelection.GooglePay,
         is PaymentSelection.New,
         is PaymentSelection.Saved,
+        is PaymentSelection.CustomPaymentMethod,
         is PaymentSelection.ExternalPaymentMethod,
         null -> null
     }

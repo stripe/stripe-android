@@ -24,6 +24,16 @@
   <string name="stripe_confirm_close_form_title">このフォームを閉じてもよいですか？</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Link を使用して安全なワンクリック決済の情報を保存する</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_link_sign_up">同意して続行</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header">スピーディーで安全なワンクリック決済</string>
+  <!-- Label describing the benefit of signing up for Link. -->
+  <string name="stripe_link_sign_up_message">支払い情報を Link に保存すると、Link に対応したサイトで安全にワンクリックで決済することができます。</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_link_sign_up_terms"><![CDATA[続行すると、<terms>規約</terms>と<privacy>プライバシーポリシー</privacy>に同意したことになります。]]></string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message">保存されている情報を使用するには、%s に送信されたコードを入力してください。</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Link からログアウト</string>
   <!-- Text that is displayed when a network error occurs -->

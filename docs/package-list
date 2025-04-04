@@ -12,6 +12,10 @@ com.stripe.android.stripe3ds2.transaction
 com.stripe.android.stripe3ds2.transactions
 com.stripe.android.stripe3ds2.utils
 com.stripe.android.stripe3ds2.views
+module:connect
+com.stripe.android.connect
+com.stripe.android.connect.appearance
+com.stripe.android.connect.appearance.fonts
 module:financial-connections
 com.stripe.android.financialconnections
 com.stripe.android.financialconnections.analytics

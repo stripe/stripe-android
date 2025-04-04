@@ -24,6 +24,16 @@
   <string name="stripe_confirm_close_form_title">您確定要保存此表單嗎？</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">保存您的資訊，用 Link 安全地一鍵結帳</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_link_sign_up">同意並繼續</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header">快速安全地一鍵結帳</string>
+  <!-- Label describing the benefit of signing up for Link. -->
+  <string name="stripe_link_sign_up_message">用 Link 保存您的支付資訊，並在支援 Link 的網站上一鍵安全結帳。</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_link_sign_up_terms"><![CDATA[繼續即表示您同意<terms>條款</terms>和<privacy>隱私政策</privacy>。]]></string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message">輸入發送到 %s 的驗證碼來使用您保存的資訊。</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">退出 Link</string>
   <!-- Text that is displayed when a network error occurs -->

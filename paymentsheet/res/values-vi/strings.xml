@@ -24,6 +24,16 @@
   <string name="stripe_confirm_close_form_title">Bạn có muốn đóng biểu mẫu này không?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Lưu thông tin của bạn để thanh toán an toàn bằng 1 cú nhấp chuột với Link</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_link_sign_up">Đồng ý và tiếp tục</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header">Thanh toán nhanh, bảo mật bằng một cú nhấp chuột</string>
+  <!-- Label describing the benefit of signing up for Link. -->
+  <string name="stripe_link_sign_up_message">Lưu thông tin thanh toán với Link và thanh toán an toàn bằng 1 cú nhấp chuột trên các trang web có hỗ trợ Link.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_link_sign_up_terms"><![CDATA[Bằng việc tiếp tục, bạn đồng ý với <terms>Điều khoản</terms> và <privacy>Chính sách Quyền riêng tư</privacy>.]]></string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message">Nhập mã đã được gửi đến %sđể sử dụng thông tin đã lưu của mình.</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Đăng xuất khỏi Link</string>
   <!-- Text that is displayed when a network error occurs -->

@@ -12,7 +12,6 @@ import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.injection.PaymentSheetLauncherComponent.Builder
 import com.stripe.android.ui.core.di.CardScanModule
 import com.stripe.android.uicore.utils.stateFlowOf
 import dagger.Binds
@@ -39,23 +38,15 @@ internal interface ManageComponent {
     val selectionHolder: EmbeddedSelectionHolder
     fun inject(activity: ManageActivity)
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
-
-        @BindsInstance
-        fun paymentMethodMetadata(paymentMethodMetadata: PaymentMethodMetadata): Builder
-
-        @BindsInstance
-        fun context(context: Context): Builder
-
-        @BindsInstance
-        fun paymentElementCallbackIdentifier(
-            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String
-        ): Builder
-
-        fun build(): ManageComponent
+    @Component.Factory
+    interface Factory {
+        fun build(
+            @BindsInstance savedStateHandle: SavedStateHandle,
+            @BindsInstance paymentMethodMetadata: PaymentMethodMetadata,
+            @BindsInstance context: Context,
+            @BindsInstance @PaymentElementCallbackIdentifier
+            paymentElementCallbackIdentifier: String,
+        ): ManageComponent
     }
 }
 

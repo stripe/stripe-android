@@ -14,8 +14,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.ContextCompat.checkSelfPermission
 import com.stripe.android.connect.BuildConfig
-import com.stripe.android.connect.EmbeddedComponentManager.Configuration
-import com.stripe.android.connect.FetchClientSecretCallback
+import com.stripe.android.connect.FetchClientSecret
 import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.StripeEmbeddedComponent
 import com.stripe.android.connect.analytics.ComponentAnalyticsService
@@ -37,15 +36,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
-import kotlin.coroutines.resume
 
 @OptIn(PrivateBetaConnectSDK::class)
 @EmbeddedComponentManagerScope
 internal class EmbeddedComponentCoordinator @Inject constructor(
-    private val configuration: Configuration,
-    private val fetchClientSecretCallback: FetchClientSecretCallback,
+    @PublishableKey private val publishableKey: String,
+    val fetchClientSecret: FetchClientSecret,
     private val logger: Logger,
     appearance: Appearance,
     internal val customFonts: List<CustomFontSource>,
@@ -74,21 +71,7 @@ internal class EmbeddedComponentCoordinator @Inject constructor(
         return buildString {
             append("https://connect-js.stripe.com/v1.0/android_webview.html")
             append("#component=${component.componentName}")
-            append("&publicKey=${configuration.publishableKey}")
-        }
-    }
-
-    /**
-     * Fetch the client secret from the consumer of the SDK.
-     */
-    internal suspend fun fetchClientSecret(): String? {
-        return suspendCancellableCoroutine { continuation ->
-            val resultCallback = object : FetchClientSecretCallback.ClientSecretResultCallback {
-                override fun onResult(secret: String?) {
-                    continuation.resume(secret)
-                }
-            }
-            fetchClientSecretCallback.fetchClientSecret(resultCallback)
+            append("&publicKey=$publishableKey")
         }
     }
 
@@ -124,7 +107,7 @@ internal class EmbeddedComponentCoordinator @Inject constructor(
         financialConnectionsSheets[activity]!!.present(
             FinancialConnectionsSheet.Configuration(
                 financialConnectionsSessionClientSecret = clientSecret,
-                publishableKey = configuration.publishableKey,
+                publishableKey = publishableKey,
                 stripeAccountId = connectedAccountId,
             )
         )
@@ -137,10 +120,10 @@ internal class EmbeddedComponentCoordinator @Inject constructor(
         val analyticsService = checkNotNull(connectAnalyticsService) {
             "ConnectAnalyticsService is not initialized"
         }
-        val publishableKeyToLog = if (configuration.publishableKey.startsWith("uk_")) {
+        val publishableKeyToLog = if (publishableKey.startsWith("uk_")) {
             null // don't log "uk_" keys
         } else {
-            configuration.publishableKey
+            publishableKey
         }
         return ComponentAnalyticsService(
             analyticsService = analyticsService,

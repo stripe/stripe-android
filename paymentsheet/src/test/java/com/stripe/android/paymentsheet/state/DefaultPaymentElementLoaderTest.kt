@@ -706,6 +706,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkConsumerIncentive = null,
                 useAttestationEndpoints = false,
                 suppress2faModal = false,
+                linkGlobalHoldbackOn = false
             )
         )
 
@@ -740,6 +741,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkConsumerIncentive = null,
                 useAttestationEndpoints = false,
                 suppress2faModal = false,
+                linkGlobalHoldbackOn = false
             )
         )
 
@@ -818,6 +820,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkConsumerIncentive = null,
                 useAttestationEndpoints = false,
                 suppress2faModal = false,
+                linkGlobalHoldbackOn = false
             ),
             linkStore = mock {
                 on { hasUsedLink() } doReturn true
@@ -847,6 +850,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkConsumerIncentive = null,
                 useAttestationEndpoints = false,
                 suppress2faModal = false,
+                linkGlobalHoldbackOn = false
             )
         )
 
@@ -2749,6 +2753,7 @@ internal class DefaultPaymentElementLoaderTest {
             linkConsumerIncentive = null,
             useAttestationEndpoints = false,
             suppress2faModal = false,
+            linkGlobalHoldbackOn = false
         )
     }
 

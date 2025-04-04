@@ -24,6 +24,16 @@
   <string name="stripe_confirm_close_form_title">Ar norite uždaryti šią formą?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Išsaugokite savo informaciją saugiam atsiskaitymui vienu spustelėjimu su \"Link\"</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_link_sign_up">Sutikti ir tęsti</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header">Greitas ir saugus atsiskaitymas vienu spustelėjimu</string>
+  <!-- Label describing the benefit of signing up for Link. -->
+  <string name="stripe_link_sign_up_message">Išsaugokite savo mokėjimų informaciją naudodami \"Link\" ir saugiai atsiskaitykite vienu spustelėjimu \"Link\" palaikomose svetainėse.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_link_sign_up_terms"><![CDATA[Tęsdami sutinkate su <terms>sąlygomis</terms> ir <privacy>privatumo politika</privacy>.]]></string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message">Norėdami naudoti savo išsaugotą informaciją, įveskite %s gautą kodą.</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Atsijungti nuo \"Link\"</string>
   <!-- Text that is displayed when a network error occurs -->

@@ -10,7 +10,6 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.ViewActionRecorder
-import com.stripe.android.paymentsheet.ui.CardBrandChoice
 import com.stripe.android.paymentsheet.ui.FakeUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
@@ -63,7 +62,6 @@ internal class InitialManageScreenFactoryTest {
                     initialState = UpdatePaymentMethodInteractor.State(
                         error = null,
                         status = UpdatePaymentMethodInteractor.Status.Idle,
-                        cardBrandChoice = CardBrandChoice(brand = CardBrand.Visa, enabled = true),
                         setAsDefaultCheckboxChecked = false,
                         isSaveButtonEnabled = false,
                     ),

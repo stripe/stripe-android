@@ -53,40 +53,25 @@ import kotlin.coroutines.CoroutineContext
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal interface FormActivityViewModelComponent {
     val viewModel: FormActivityViewModel
-    val subcomponentBuilder: FormActivitySubcomponent.Builder
+    val subcomponentFactory: FormActivitySubcomponent.Factory
 
-    @Component.Builder
-    interface Builder {
-        @BindsInstance
-        fun paymentMethodMetadata(paymentMethodMetadata: PaymentMethodMetadata): Builder
-
-        @BindsInstance
-        fun selectedPaymentMethodCode(selectedPaymentMethodCode: PaymentMethodCode): Builder
-
-        @BindsInstance
-        fun hasSavedPaymentMethods(hasSavedPaymentMethods: Boolean): Builder
-
-        @BindsInstance
-        fun statusBarColor(@Named(STATUS_BAR_COLOR) statusBarColor: Int?): Builder
-
-        @BindsInstance
-        fun configuration(configuration: EmbeddedPaymentElement.Configuration): Builder
-
-        @BindsInstance
-        fun initializationMode(initializationMode: PaymentElementLoader.InitializationMode): Builder
-
-        @BindsInstance
-        fun paymentElementCallbackIdentifier(
-            @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
-        ): Builder
-
-        @BindsInstance
-        fun application(application: Application): Builder
-
-        @BindsInstance
-        fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
-
-        fun build(): FormActivityViewModelComponent
+    @Component.Factory
+    interface Factory {
+        fun build(
+            @BindsInstance paymentMethodMetadata: PaymentMethodMetadata,
+            @BindsInstance selectedPaymentMethodCode: PaymentMethodCode,
+            @BindsInstance hasSavedPaymentMethods: Boolean,
+            @BindsInstance
+            @Named(STATUS_BAR_COLOR)
+            statusBarColor: Int?,
+            @BindsInstance configuration: EmbeddedPaymentElement.Configuration,
+            @BindsInstance initializationMode: PaymentElementLoader.InitializationMode,
+            @BindsInstance
+            @PaymentElementCallbackIdentifier
+            paymentElementCallbackIdentifier: String,
+            @BindsInstance application: Application,
+            @BindsInstance savedStateHandle: SavedStateHandle,
+        ): FormActivityViewModelComponent
     }
 }
 
@@ -157,15 +142,12 @@ internal interface FormActivityViewModelModule {
 internal interface FormActivitySubcomponent {
     fun inject(activity: FormActivity)
 
-    @Subcomponent.Builder
-    interface Builder {
-        @BindsInstance
-        fun activityResultCaller(activityResultCaller: ActivityResultCaller): Builder
-
-        @BindsInstance
-        fun lifecycleOwner(lifecycleOwner: LifecycleOwner): Builder
-
-        fun build(): FormActivitySubcomponent
+    @Subcomponent.Factory
+    interface Factory {
+        fun build(
+            @BindsInstance activityResultCaller: ActivityResultCaller,
+            @BindsInstance lifecycleOwner: LifecycleOwner,
+        ): FormActivitySubcomponent
     }
 }
 

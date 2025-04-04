@@ -6,26 +6,20 @@ import com.stripe.android.connect.PrivateBetaConnectSDK
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
+/**
+ * @param colorBackground The background color of the button. If null the default will be used.
+ * @param colorBorder The border color of the button. If null the default will be used.
+ * @param colorText The text color of the button. If null the default will be used.
+ */
 @PrivateBetaConnectSDK
 @Parcelize
 @Poko
 class Button(
-    /**
-     * The background color of the button. If null the default will be used.
-     */
-    @ColorInt val colorBackground: Int? = null,
-
-    /**
-     * The border color of the button. If null the default will be used.
-     */
-    @ColorInt val colorBorder: Int? = null,
-
-    /**
-     * The text color of the button. If null the default will be used.
-     */
-    @ColorInt val colorText: Int? = null,
+    @ColorInt internal val colorBackground: Int? = null,
+    @ColorInt internal val colorBorder: Int? = null,
+    @ColorInt internal val colorText: Int? = null,
 ) : Parcelable {
     internal companion object {
-        internal val default = Button()
+        internal fun default() = Button()
     }
 }

@@ -568,11 +568,11 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 modelClass = EmbeddedPaymentElementViewModel::class.java,
             )
 
-            val embeddedPaymentElementSubcomponent = viewModel.embeddedPaymentElementSubcomponentBuilder
-                .resultCallback(resultCallback)
-                .activityResultCaller(activityResultCaller)
-                .lifecycleOwner(lifecycleOwner)
-                .build()
+            val embeddedPaymentElementSubcomponent = viewModel.embeddedPaymentElementSubcomponentFactory.build(
+                activityResultCaller = activityResultCaller,
+                lifecycleOwner = lifecycleOwner,
+                resultCallback = resultCallback,
+            )
 
             embeddedPaymentElementSubcomponent.initializer.initialize(activity.applicationIsTaskOwner())
 

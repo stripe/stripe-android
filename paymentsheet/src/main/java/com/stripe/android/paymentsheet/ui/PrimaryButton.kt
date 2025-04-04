@@ -23,6 +23,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.withStyledAttributes
+import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
 import androidx.core.view.setPadding
 import com.stripe.android.core.strings.ResolvableString
@@ -174,8 +175,10 @@ internal class PrimaryButton @JvmOverloads constructor(
     }
 
     private fun onReadyState() {
+        updateLockVisibility(canShow = true)
         isClickable = true
         originalLabel?.let {
+            ViewCompat.setStateDescription(this, it.resolve(context))
             setLabel(it)
         }
         defaultTintList?.let {
@@ -186,16 +189,23 @@ internal class PrimaryButton @JvmOverloads constructor(
     }
 
     private fun onStartProcessing() {
-        viewBinding.lockIcon.isVisible = false
+        updateLockVisibility(canShow = false)
         viewBinding.confirmingIcon.isVisible = true
         isClickable = false
-        setLabel(
-            R.string.stripe_paymentsheet_primary_button_processing.resolvableString
-        )
+
+        val processingLabel = R.string.stripe_paymentsheet_primary_button_processing.resolvableString
+
+        ViewCompat.setStateDescription(this, processingLabel.resolve(context))
+        setLabel(processingLabel)
     }
 
     private fun onFinishProcessing(onAnimationEnd: () -> Unit) {
+        updateLockVisibility(canShow = false)
         isClickable = false
+        ViewCompat.setStateDescription(
+            this,
+            R.string.stripe_successful_transaction_description.resolvableString.resolve(context)
+        )
         backgroundTintList = ColorStateList.valueOf(finishedBackgroundColor)
         confirmedIcon.imageTintList = ColorStateList.valueOf(finishedOnBackgroundColor)
 
@@ -223,17 +233,18 @@ internal class PrimaryButton @JvmOverloads constructor(
         isVisible = uiState != null
 
         if (uiState != null) {
+            lockVisible = uiState.lockVisible
+
             if (state !is State.StartProcessing && state !is State.FinishProcessing) {
                 // If we're processing or finishing, we're not overriding the label
                 setLabel(uiState.label)
+                ViewCompat.setStateDescription(this, uiState.label.resolve(context))
+                updateLockVisibility(canShow = true)
             }
 
             isEnabled = uiState.enabled
-            lockVisible = uiState.lockVisible
-            viewBinding.lockIcon.isVisible = lockVisible
-            setOnClickListener { uiState.onClick() }
 
-            contentDescription = uiState.label.resolve(context)
+            setOnClickListener { uiState.onClick() }
         }
     }
 
@@ -253,6 +264,10 @@ internal class PrimaryButton @JvmOverloads constructor(
             }
             null -> {}
         }
+    }
+
+    private fun updateLockVisibility(canShow: Boolean) {
+        viewBinding.lockIcon.isVisible = lockVisible && canShow
     }
 
     private fun updateAlpha() {

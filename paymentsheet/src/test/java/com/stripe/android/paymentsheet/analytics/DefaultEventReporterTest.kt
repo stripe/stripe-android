@@ -5,10 +5,13 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.analytics.experiment.ExperimentGroup
+import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.toMap
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
@@ -43,6 +46,7 @@ import org.robolectric.RobolectricTestRunner
 import java.io.IOException
 import javax.inject.Provider
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -57,20 +61,24 @@ class DefaultEventReporterTest {
 
     private val durationProvider = FakeDurationProvider()
     private val analyticsRequestExecutor = mock<AnalyticsRequestExecutor>()
+    private val analyticsV2RequestExecutor = FakeAnalyticsRequestV2Executor()
     private val analyticsRequestFactory = PaymentAnalyticsRequestFactory(
         ApplicationProvider.getApplicationContext(),
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
     )
 
     private val analyticEventCall = Turbine<AnalyticEvent>()
+
     private class FakeAnalyticEventCallbackProvider : Provider<AnalyticEventCallback?> {
         private var callback: AnalyticEventCallback? = null
 
         fun set(callback: AnalyticEventCallback?) {
             this.callback = callback
         }
+
         override fun get(): AnalyticEventCallback? = callback
     }
+
     private val analyticEventCallbackProvider = FakeAnalyticEventCallbackProvider()
 
     private val fakeUserFacingLoggerCall = Turbine<String>()
@@ -589,12 +597,39 @@ class DefaultEventReporterTest {
         )
 
         verify(analyticsRequestExecutor).executeAsync(
-            argWhere { req ->
+            argWhere { req: AnalyticsRequest ->
                 req.params["event"] == "mc_set_default_payment_method" &&
                     req.params["payment_method_type"] == "card"
             }
         )
     }
+
+    @Test
+    fun `onExperimentExposure() should fire v2 analytics request with expected event value`() =
+        runTest(testDispatcher) {
+            val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+                simulateSuccessfulSetup()
+            }
+
+            val experiment = LoggableExperiment.LinkGlobalHoldback(
+                arbId = "random_arb_id",
+                group = ExperimentGroup.TREATMENT,
+            )
+            completeEventReporter.onExperimentExposure(experiment)
+
+            val request = analyticsV2RequestExecutor.enqueueCalls.awaitItem()
+            val params = request.params.toMap()
+
+            assertEquals(request.eventName, "elements.experiment_exposure")
+            assertEquals(params["experiment_retrieved"], "link_global_holdback")
+            assertEquals(params["arb_id"], "random_arb_id")
+            assertEquals(params["assignment_group"], "treatment")
+            assertEquals(params["integration_type"], "dimensions-integration_type=mpe")
+            assertEquals(params["sdk_platform"], "android")
+            assertEquals(params["plugin_type"], "native")
+
+            analyticsV2RequestExecutor.validate()
+        }
 
     @Test
     fun `onSetAsDefaultPaymentMethodFailed() should fire analytics request with expected event value`() {
@@ -664,14 +699,16 @@ class DefaultEventReporterTest {
         PaymentConfiguration.clearInstance()
         // Would crash if it tries to read from the uninitialized PaymentConfiguration
         DefaultEventReporter(
-            EventReporter.Mode.Complete,
-            analyticsRequestExecutor,
-            analyticsRequestFactory,
-            durationProvider,
-            analyticEventCallbackProvider,
-            testDispatcher,
-            FakeIsStripeCardScanAvailable(),
-            fakeUserFacingLogger,
+            context = ApplicationProvider.getApplicationContext(),
+            mode = EventReporter.Mode.Complete,
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            analyticsRequestV2Executor = analyticsV2RequestExecutor,
+            paymentAnalyticsRequestFactory = analyticsRequestFactory,
+            durationProvider = durationProvider,
+            analyticEventCallbackProvider = analyticEventCallbackProvider,
+            workContext = testDispatcher,
+            isStripeCardScanAvailable = FakeIsStripeCardScanAvailable(),
+            logger = fakeUserFacingLogger,
         )
     }
 
@@ -925,8 +962,10 @@ class DefaultEventReporterTest {
         configure: EventReporter.() -> Unit = {},
     ): EventReporter {
         val reporter = DefaultEventReporter(
+            context = ApplicationProvider.getApplicationContext(),
             mode = mode,
             analyticsRequestExecutor = analyticsRequestExecutor,
+            analyticsRequestV2Executor = analyticsV2RequestExecutor,
             paymentAnalyticsRequestFactory = analyticsRequestFactory,
             durationProvider = FakeDurationProvider(duration),
             analyticEventCallbackProvider = analyticEventCallbackProvider,
@@ -949,8 +988,10 @@ class DefaultEventReporterTest {
         configure: EventReporter.() -> Unit = {},
     ): EventReporter {
         val reporter = DefaultEventReporter(
+            context = ApplicationProvider.getApplicationContext(),
             mode = mode,
             analyticsRequestExecutor = analyticsRequestExecutor,
+            analyticsRequestV2Executor = analyticsV2RequestExecutor,
             paymentAnalyticsRequestFactory = analyticsRequestFactory,
             durationProvider = durationProvider,
             analyticEventCallbackProvider = analyticEventCallbackProvider,

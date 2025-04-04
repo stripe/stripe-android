@@ -24,6 +24,16 @@
   <string name="stripe_confirm_close_form_title">이 양식을 닫으시겠습니까?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Link로 안전한 원클릭 결제를 위해 사용자 정보 저장</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_link_sign_up">동의하고 계속</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header">빠른 보안 원클릭 체크아웃</string>
+  <!-- Label describing the benefit of signing up for Link. -->
+  <string name="stripe_link_sign_up_message">Link에서 결제 정보를 저장하고 Link 지원 사이트에서 원클릭으로 안전하게 체크아웃하십시오.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_link_sign_up_terms"><![CDATA[계속하면 <terms>약관</terms>과 <privacy>개인정보정책</privacy>에 동의하는 것입니다.]]></string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message">저장된 정보를 사용하려면 %s(으)로 보낸 코드를 입력하십시오.</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Link 로그아웃</string>
   <!-- Text that is displayed when a network error occurs -->

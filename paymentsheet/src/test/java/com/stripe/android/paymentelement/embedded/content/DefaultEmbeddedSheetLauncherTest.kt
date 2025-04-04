@@ -5,6 +5,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.mainthread.MainThreadSavedStateHandle
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
@@ -185,7 +186,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
     ) = runTest {
         val lifecycleOwner = TestLifecycleOwner()
         val savedStateHandle = SavedStateHandle()
-        val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
+        val selectionHolder = EmbeddedSelectionHolder(MainThreadSavedStateHandle(savedStateHandle))
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val customerStateHolder = CustomerStateHolder(
             savedStateHandle = savedStateHandle,
