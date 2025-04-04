@@ -106,9 +106,6 @@ internal sealed class PaymentSelection : Parcelable {
         val id: String,
         val billingDetails: PaymentMethod.BillingDetails?,
         val label: ResolvableString,
-        // In practice, we don't have an iconResource for custom payment methods.
-        @DrawableRes val iconResource: Int,
-        // In practice, we always have a lightThemeIconUrl for custom payment methods.
         val lightThemeIconUrl: String?,
         val darkThemeIconUrl: String?,
     ) : PaymentSelection() {
@@ -333,7 +330,7 @@ internal val PaymentSelection.isSaved: Boolean
 internal val PaymentSelection.drawableResourceId: Int
     get() = when (this) {
         is PaymentSelection.ExternalPaymentMethod -> iconResource
-        is PaymentSelection.CustomPaymentMethod -> iconResource
+        is PaymentSelection.CustomPaymentMethod -> 0
         PaymentSelection.GooglePay -> R.drawable.stripe_google_pay_mark
         is PaymentSelection.Link -> getLinkIcon()
         is PaymentSelection.New.Card -> brand.getCardBrandIcon()

@@ -123,7 +123,6 @@ internal fun FormFieldValues.transformToPaymentSelection(
             id = paymentMethod.code,
             billingDetails = params.billingDetails,
             label = paymentMethod.displayName,
-            iconResource = paymentMethod.iconResource,
             lightThemeIconUrl = paymentMethod.lightThemeIconUrl,
             darkThemeIconUrl = paymentMethod.darkThemeIconUrl,
         )

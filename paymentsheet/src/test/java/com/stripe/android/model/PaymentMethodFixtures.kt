@@ -613,7 +613,6 @@ internal object PaymentMethodFixtures {
         return PaymentSelection.CustomPaymentMethod(
             id = cpm.id,
             label = cpm.displayName.resolvableString,
-            iconResource = 0,
             lightThemeIconUrl = cpm.logoUrl,
             darkThemeIconUrl = cpm.logoUrl,
             billingDetails = null,

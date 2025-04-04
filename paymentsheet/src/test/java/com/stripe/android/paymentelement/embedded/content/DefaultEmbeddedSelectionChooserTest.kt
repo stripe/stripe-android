@@ -169,7 +169,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
 
         val selection = chooser.choose(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                externalPaymentMethodSpecs = listOf(),
+                displayableCustomPaymentMethods = listOf(),
             ),
             paymentMethods = PaymentMethodFixtures.createCards(3),
             previousSelection = previousSelection,

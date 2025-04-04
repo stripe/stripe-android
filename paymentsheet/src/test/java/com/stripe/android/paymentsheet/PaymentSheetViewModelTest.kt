@@ -1864,7 +1864,6 @@ internal class PaymentSheetViewModelTest {
                 id = "cpmt_1",
                 billingDetails = null,
                 label = "BufoPay".resolvableString,
-                iconResource = 0,
                 lightThemeIconUrl = "some_url",
                 darkThemeIconUrl = "some_url",
             )
