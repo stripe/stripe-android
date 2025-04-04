@@ -366,6 +366,11 @@ private fun Float?.toPx(): String? {
     return this?.let { "${it.toString().removeSuffix(".0")}px" }
 }
 
+/**
+ * We need to send the user's customization options to ConnectJS which is only aware of web.
+ * While the integrator specifics font and spacing overrides with unscaled floats, we convert this to pixels
+ * and append `px` to that value before sending it to ConnectJS.
+ */
 @OptIn(PrivateBetaConnectSDK::class)
 @Suppress("LongMethod")
 internal fun Appearance.toJs(): AppearanceJs {

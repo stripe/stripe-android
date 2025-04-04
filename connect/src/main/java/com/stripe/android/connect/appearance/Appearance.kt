@@ -87,9 +87,6 @@ class Appearance private constructor(
         fun badgeDanger(badgeDanger: Badge): Builder =
             apply { this.badgeDanger = badgeDanger }
 
-        /**
-         * Describes the spacing unit appearance settings.
-         */
         fun spacingUnit(spacingUnit: Float): Builder =
             apply { this.spacingUnit = spacingUnit }
 
