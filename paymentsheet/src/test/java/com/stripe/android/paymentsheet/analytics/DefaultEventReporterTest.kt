@@ -624,7 +624,7 @@ class DefaultEventReporterTest {
             assertEquals(params["experiment_retrieved"], "link_global_holdback")
             assertEquals(params["arb_id"], "random_arb_id")
             assertEquals(params["assignment_group"], "treatment")
-            assertEquals(params["dimensions-integration_type"], "mpe")
+            assertEquals(params["dimensions-integration_type"], "mpe_android")
             assertEquals(params["sdk_platform"], "android")
             assertEquals(params["plugin_type"], "native")
 

@@ -18,7 +18,7 @@ internal sealed class LoggableExperiment(
         group = group,
         name = "link_global_holdback",
         dimensions = mapOf(
-            "integration_type" to "mpe",
+            "integration_type" to "mpe_android",
             "is_returning_link_consumer" to isReturningLinkConsumer.toString(),
         )
     )
