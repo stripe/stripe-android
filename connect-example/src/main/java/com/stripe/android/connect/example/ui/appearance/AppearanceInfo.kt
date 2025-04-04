@@ -187,7 +187,7 @@ data class AppearanceInfo(
                         .base(5f)
                         .build()
                 )
-                .spacingUnit(9f)
+                .spacingUnit(11f)
                 .build()
         )
 
