@@ -17,6 +17,7 @@ internal sealed class ConfirmationType(
 ) {
     abstract fun enqueuePaymentIntentConfirmWithExpectedSetAsDefault(
         networkRule: NetworkRule,
+        paymentMethodType: PaymentMethodType = PaymentMethodType.Card,
         setAsDefault: Boolean,
     )
 
@@ -29,6 +30,38 @@ internal sealed class ConfirmationType(
         isDeferredIntent = false,
     ) {
         override fun enqueuePaymentIntentConfirmWithExpectedSetAsDefault(
+            networkRule: NetworkRule,
+            paymentMethodType: PaymentMethodType,
+            setAsDefault: Boolean
+        ) {
+            if (paymentMethodType is PaymentMethodType.Card) {
+                enqueuePaymentIntentConfirmWithExpectedSetAsDefault_Card(
+                    networkRule = networkRule,
+                    setAsDefault = setAsDefault,
+                )
+            } else {
+                enqueuePaymentIntentConfirmWithExpectedSetAsDefault_USBankAccount(
+                    networkRule = networkRule,
+                    setAsDefault = setAsDefault,
+                )
+            }
+        }
+
+        private fun enqueuePaymentIntentConfirmWithExpectedSetAsDefault_Card(
+            networkRule: NetworkRule,
+            setAsDefault: Boolean
+        ) {
+            return networkRule.enqueue(
+                method("POST"),
+                path("/v1/payment_intents/pi_example/confirm"),
+                bodyPart(urlEncode("payment_method_data[allow_redisplay]"), "always"),
+                bodyPart(urlEncode("set_as_default_payment_method"), setAsDefault.toString())
+            ) { response ->
+                response.testBodyFromFile("payment-intent-confirm.json")
+            }
+        }
+
+        private fun enqueuePaymentIntentConfirmWithExpectedSetAsDefault_USBankAccount(
             networkRule: NetworkRule,
             setAsDefault: Boolean
         ) {
@@ -62,13 +95,31 @@ internal sealed class ConfirmationType(
     ) {
         override fun enqueuePaymentIntentConfirmWithExpectedSetAsDefault(
             networkRule: NetworkRule,
+            paymentMethodType: PaymentMethodType,
+            setAsDefault: Boolean
+        ) {
+            if (paymentMethodType is PaymentMethodType.Card) {
+                enqueuePaymentIntentConfirmWithExpectedSetAsDefault_Card(
+                    networkRule = networkRule,
+                    setAsDefault = setAsDefault,
+                )
+            } else {
+                enqueuePaymentIntentConfirmWithExpectedSetAsDefault_USBankAccount(
+                    networkRule = networkRule,
+                    setAsDefault = setAsDefault,
+                )
+            }
+        }
+
+        private fun enqueuePaymentIntentConfirmWithExpectedSetAsDefault_Card(
+            networkRule: NetworkRule,
             setAsDefault: Boolean
         ) {
             networkRule.enqueue(
                 method("POST"),
                 path("/v1/payment_methods"),
             ) { response ->
-                response.testBodyFromFile("payment-methods-create.json")
+                response.testBodyFromFile("payment-methods-create-us_bank_account.json")
             }
 
             networkRule.enqueue(
@@ -87,12 +138,39 @@ internal sealed class ConfirmationType(
             }
         }
 
+        private fun enqueuePaymentIntentConfirmWithExpectedSetAsDefault_USBankAccount(
+            networkRule: NetworkRule,
+            setAsDefault: Boolean
+        ) {
+            networkRule.enqueue(
+                method("POST"),
+                path("/v1/payment_methods"),
+            ) { response ->
+                response.testBodyFromFile("payment-methods-create-us_bank_account.json")
+            }
+
+            networkRule.enqueue(
+                method("GET"),
+                path("/v1/payment_intents/pi_example"),
+            ) { response ->
+                response.testBodyFromFile("payment-intent-get-requires_payment_method-us_bank_account.json")
+            }
+
+            networkRule.enqueue(
+                method("POST"),
+                path("/v1/payment_intents/pi_example/confirm"),
+                bodyPart(urlEncode("set_as_default_payment_method"), setAsDefault.toString()),
+            ) { response ->
+                response.testBodyFromFile("payment-intent-confirm-us_bank_account.json")
+            }
+        }
+
         override fun enqueuePaymentIntentConfirmWithoutSetAsDefault(networkRule: NetworkRule) {
             networkRule.enqueue(
                 method("POST"),
                 path("/v1/payment_methods"),
             ) { response ->
-                response.testBodyFromFile("payment-methods-create.json")
+                response.testBodyFromFile("payment-methods-create-us_bank_account.json")
             }
 
             networkRule.enqueue(
