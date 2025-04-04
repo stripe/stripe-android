@@ -609,6 +609,16 @@ internal object PaymentMethodFixtures {
         )
     }
 
+    fun createCustomPaymentMethod(cpm: DisplayableCustomPaymentMethod): PaymentSelection.CustomPaymentMethod {
+        return PaymentSelection.CustomPaymentMethod(
+            id = cpm.id,
+            label = cpm.displayName.resolvableString,
+            lightThemeIconUrl = cpm.logoUrl,
+            darkThemeIconUrl = cpm.logoUrl,
+            billingDetails = null,
+        )
+    }
+
     private fun createLast4(): String {
         return ThreadLocalRandom.current().nextInt(1000, 9999).toString()
     }

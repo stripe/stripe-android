@@ -276,6 +276,7 @@ internal class DefaultFlowController @Inject internal constructor(
             is PaymentSelection.New.LinkInline,
             is PaymentSelection.GooglePay,
             is PaymentSelection.ExternalPaymentMethod,
+            is PaymentSelection.CustomPaymentMethod,
             is PaymentSelection.New,
             null -> confirmPaymentSelection(
                 paymentSelection = paymentSelection,

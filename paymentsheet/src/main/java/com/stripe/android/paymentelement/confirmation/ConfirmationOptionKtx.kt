@@ -18,6 +18,7 @@ internal fun PaymentSelection.toConfirmationOption(
     return when (this) {
         is PaymentSelection.Saved -> toConfirmationOption()
         is PaymentSelection.ExternalPaymentMethod -> toConfirmationOption()
+        is PaymentSelection.CustomPaymentMethod -> null
         is PaymentSelection.New.USBankAccount -> toConfirmationOption()
         is PaymentSelection.New.LinkInline -> toConfirmationOption(linkConfiguration)
         is PaymentSelection.New -> toConfirmationOption()
