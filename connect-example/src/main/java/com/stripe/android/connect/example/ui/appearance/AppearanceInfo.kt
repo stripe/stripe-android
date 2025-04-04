@@ -257,6 +257,7 @@ data class AppearanceInfo(
                 .typography(
                     Typography.Builder()
                         .fontFamily("doto")
+                        .fontSizeBase(24f)
                         .build()
                 )
                 .build()
