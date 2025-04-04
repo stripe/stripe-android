@@ -212,11 +212,12 @@ internal class PaymentSheetActivityTest {
 
         scenario.launch(intent).onActivity { activity ->
             Espresso.onIdle()
-            assertThat(activity.buyButton.isEnabled).isTrue()
+            composeTestRule.waitUntil { activity.buyButton.isEnabled }
 
             startEditing()
+
             Espresso.onIdle()
-            assertThat(activity.buyButton.isEnabled).isFalse()
+            composeTestRule.waitUntil { !activity.buyButton.isEnabled }
         }
     }
 
@@ -503,12 +504,12 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
             // Initially empty card
-            assertThat(activity.buyButton.isVisible).isTrue()
+            composeTestRule.waitUntil { activity.buyButton.isVisible }
             assertThat(activity.buyButton.isEnabled).isFalse()
 
             // Update to Google Pay
             viewModel.checkoutWithGooglePay()
-            assertThat(activity.buyButton.isVisible).isTrue()
+            composeTestRule.waitUntil { activity.buyButton.isVisible }
             assertThat(activity.buyButton.isEnabled).isFalse()
             assertThat(viewModel.contentVisible.value).isFalse()
 
@@ -519,13 +520,15 @@ internal class PaymentSheetActivityTest {
             viewModel.updateSelection(
                 PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             )
-            assertThat(activity.buyButton.isVisible).isTrue()
-            assertThat(activity.buyButton.isEnabled).isTrue()
+            composeTestRule.waitUntil {
+                activity.buyButton.isVisible && activity.buyButton.isEnabled
+            }
 
             // Back to empty/invalid card
             viewModel.updateSelection(null)
-            assertThat(activity.buyButton.isVisible).isTrue()
-            assertThat(activity.buyButton.isEnabled).isFalse()
+            composeTestRule.waitUntil {
+                activity.buyButton.isVisible && !activity.buyButton.isEnabled
+            }
 
             // New valid card
             viewModel.updateSelection(
@@ -535,8 +538,9 @@ internal class PaymentSheetActivityTest {
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
                 )
             )
-            assertThat(activity.buyButton.isVisible).isTrue()
-            assertThat(activity.buyButton.isEnabled).isTrue()
+            composeTestRule.waitUntil {
+                activity.buyButton.isVisible && activity.buyButton.isEnabled
+            }
         }
     }
 
@@ -611,14 +615,12 @@ internal class PaymentSheetActivityTest {
                 PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             )
             Espresso.onIdle()
-            assertThat(activity.buyButton.isEnabled)
-                .isTrue()
+            composeTestRule.waitUntil { activity.buyButton.isEnabled }
 
             activity.buyButton.performClick()
 
             Espresso.onIdle()
-            assertThat(activity.buyButton.isEnabled)
-                .isFalse()
+            composeTestRule.waitUntil { !activity.buyButton.isEnabled }
         }
     }
 
@@ -1090,6 +1092,7 @@ internal class PaymentSheetActivityTest {
         )
         val scenario = activityScenario(viewModel)
         scenario.launch(intent).onActivity { activity ->
+            Espresso.onIdle()
             assertThat(activity.buyButton.externalLabel?.resolve(context)).isEqualTo("Pay CA\$99.99")
         }
     }
@@ -1108,12 +1111,11 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity { activity ->
-            testDispatcher.scheduler.advanceTimeBy(50)
             Espresso.onIdle()
-            assertThat(activity.buyButton.externalLabel?.resolve(context)).isEqualTo("Pay")
+            composeTestRule.waitUntil { activity.buyButton.externalLabel?.resolve(context) == "Pay" }
             testDispatcher.scheduler.advanceTimeBy(250)
             Espresso.onIdle()
-            assertThat(activity.buyButton.externalLabel?.resolve(context)).isEqualTo("Pay CA\$99.99")
+            composeTestRule.waitUntil { activity.buyButton.externalLabel?.resolve(context) == "Pay CA\$99.99" }
         }
     }
 
