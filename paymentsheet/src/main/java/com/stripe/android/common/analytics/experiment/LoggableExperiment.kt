@@ -6,12 +6,12 @@ package com.stripe.android.common.analytics.experiment
 internal sealed class LoggableExperiment(
     open val name: String,
     open val arbId: String,
-    open val group: ExperimentGroup,
+    open val group: String,
     open val dimensions: Map<String, String>
 ) {
     data class LinkGlobalHoldback(
         override val arbId: String,
-        override val group: ExperimentGroup,
+        override val group: String,
         val isReturningLinkConsumer: Boolean,
     ) : LoggableExperiment(
         arbId = arbId,
@@ -22,9 +22,4 @@ internal sealed class LoggableExperiment(
             "is_returning_link_consumer" to isReturningLinkConsumer.toString(),
         )
     )
-}
-
-internal enum class ExperimentGroup(val groupName: String) {
-    CONTROL("control"),
-    TREATMENT("treatment")
 }

@@ -5,7 +5,6 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.common.analytics.experiment.ExperimentGroup
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.exception.APIException
@@ -613,7 +612,8 @@ class DefaultEventReporterTest {
 
             val experiment = LoggableExperiment.LinkGlobalHoldback(
                 arbId = "random_arb_id",
-                group = "holdlback",
+                isReturningLinkConsumer = false,
+                group = "holdback",
             )
             completeEventReporter.onExperimentExposure(experiment)
 

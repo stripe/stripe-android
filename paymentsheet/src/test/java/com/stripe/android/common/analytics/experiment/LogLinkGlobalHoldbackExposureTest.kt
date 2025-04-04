@@ -1,11 +1,19 @@
 package com.stripe.android.common.analytics.experiment
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.stripe.android.common.model.CommonConfigurationFactory
 import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.link.repositories.FakeLinkRepository
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.FakeLogger
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.utils.FakeCustomerRepository
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import com.stripe.android.testing.FeatureFlagTestRule
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -19,10 +27,14 @@ class LogLinkGlobalHoldbackExposureTest {
 
     private lateinit var eventReporter: FakeEventReporter
     private lateinit var logger: FakeLogger
+    private lateinit var linkRepsository: FakeLinkRepository
     private lateinit var logLinkGlobalHoldbackExposure: LogLinkGlobalHoldbackExposure
+    private lateinit var customerRepository: FakeCustomerRepository
 
     @get:Rule
     var rule: TestRule = InstantTaskExecutorRule()
+
+    private val testDispatcher = UnconfinedTestDispatcher()
 
     @get:Rule
     val linkGlobalHoldbackExposureEnabledRule = FeatureFlagTestRule(
@@ -34,7 +46,16 @@ class LogLinkGlobalHoldbackExposureTest {
     fun setUp() {
         eventReporter = FakeEventReporter()
         logger = FakeLogger()
-        logLinkGlobalHoldbackExposure = LogLinkGlobalHoldbackExposure(eventReporter, logger)
+        linkRepsository = FakeLinkRepository()
+        customerRepository = FakeCustomerRepository()
+
+        logLinkGlobalHoldbackExposure = DefaultLogLinkGlobalHoldbackExposure(
+            linkDisabledApiRepository = linkRepsository,
+            eventReporter = eventReporter,
+            logger = logger,
+            customerRepository = customerRepository,
+            workContext = testDispatcher
+        )
     }
 
     @Test
@@ -42,15 +63,21 @@ class LogLinkGlobalHoldbackExposureTest {
         FeatureFlags.linkGlobalHoldbackExposureEnabled.setEnabled(true)
         val elementsSession = createElementsSession(
             linkSettings = createLinkSettings(holdbackOn = true),
-            experimentsData = ElementsSession.ExperimentsData(arbId = "test_arb_id")
+            experimentsData = ElementsSession.ExperimentsData(
+                arbId = "test_arb_id",
+                experimentAssignments = mapOf(
+                    LINK_GLOBAL_HOLD_BACK to "holdback"
+                )
+            )
         )
+        val state = createElementsState()
 
-        logLinkGlobalHoldbackExposure(elementsSession)
+        logLinkGlobalHoldbackExposure(elementsSession, state)
 
         val exposureCall = eventReporter.experimentExposureCalls.awaitItem()
 
         assertTrue(exposureCall.experiment is LoggableExperiment.LinkGlobalHoldback)
-        assertEquals(exposureCall.experiment.group, ExperimentGroup.TREATMENT)
+        assertEquals(exposureCall.experiment.group, "holdback")
     }
 
     @Test
@@ -58,15 +85,21 @@ class LogLinkGlobalHoldbackExposureTest {
         FeatureFlags.linkGlobalHoldbackExposureEnabled.setEnabled(true)
         val elementsSession = createElementsSession(
             linkSettings = createLinkSettings(holdbackOn = false),
-            experimentsData = ElementsSession.ExperimentsData(arbId = "test_arb_id")
+            experimentsData = ElementsSession.ExperimentsData(
+                arbId = "test_arb_id",
+                experimentAssignments = mapOf(
+                    LINK_GLOBAL_HOLD_BACK to "control"
+                )
+            )
         )
+        val state = createElementsState()
 
-        logLinkGlobalHoldbackExposure(elementsSession)
+        logLinkGlobalHoldbackExposure(elementsSession, state)
 
         val exposureCall = eventReporter.experimentExposureCalls.awaitItem()
 
         assertTrue(exposureCall.experiment is LoggableExperiment.LinkGlobalHoldback)
-        assertEquals(exposureCall.experiment.group, ExperimentGroup.CONTROL)
+        assertEquals(exposureCall.experiment.group, "control")
     }
 
     @Test
@@ -74,10 +107,16 @@ class LogLinkGlobalHoldbackExposureTest {
         linkGlobalHoldbackExposureEnabledRule.setEnabled(false)
         val elementsSession = createElementsSession(
             linkSettings = createLinkSettings(holdbackOn = false),
-            experimentsData = ElementsSession.ExperimentsData(arbId = "test_arb_id")
+            experimentsData = ElementsSession.ExperimentsData(
+                arbId = "test_arb_id",
+                experimentAssignments = mapOf(
+                    LINK_GLOBAL_HOLD_BACK to "holdback"
+                )
+            )
         )
+        val state = createElementsState()
 
-        logLinkGlobalHoldbackExposure(elementsSession)
+        logLinkGlobalHoldbackExposure(elementsSession, state)
 
         eventReporter.experimentExposureCalls.expectNoEvents()
     }
@@ -89,8 +128,9 @@ class LogLinkGlobalHoldbackExposureTest {
             linkSettings = createLinkSettings(holdbackOn = false),
             experimentsData = null
         )
+        val state = createElementsState()
 
-        logLinkGlobalHoldbackExposure(elementsSession)
+        logLinkGlobalHoldbackExposure(elementsSession, state)
 
         val loggedError = logger.errorLogs.first()
         assertEquals(
@@ -120,7 +160,6 @@ class LogLinkGlobalHoldbackExposureTest {
     }
 
     private fun createLinkSettings(holdbackOn: Boolean) = ElementsSession.LinkSettings(
-        linkGlobalHoldbackOn = holdbackOn,
         linkFundingSources = emptyList(),
         linkPassthroughModeEnabled = false,
         linkFlags = emptyMap(),
@@ -130,4 +169,24 @@ class LogLinkGlobalHoldbackExposureTest {
         suppress2faModal = true,
         useAttestationEndpoints = holdbackOn
     )
+
+    private fun createElementsState(): PaymentElementLoader.State {
+        val configuration = CommonConfigurationFactory.create()
+        return PaymentElementLoader.State(
+            config = configuration,
+            customer = null,
+            paymentSelection = null,
+            validationError = null,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                billingDetailsCollectionConfiguration = configuration
+                    .billingDetailsCollectionConfiguration,
+                allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
+                allowsPaymentMethodsRequiringShippingAddress = configuration
+                    .allowsPaymentMethodsRequiringShippingAddress,
+                isGooglePayReady = true,
+                cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+            ),
+        )
+    }
 }

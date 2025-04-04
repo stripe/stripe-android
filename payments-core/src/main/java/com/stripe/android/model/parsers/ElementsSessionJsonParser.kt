@@ -6,6 +6,7 @@ import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArray
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
@@ -61,6 +62,9 @@ internal class ElementsSessionJsonParser(
             json.optJSONObject(FIELD_EXPERIMENTS_DATA)?.let { experimentsDataJson ->
                 ElementsSession.ExperimentsData(
                     arbId = experimentsDataJson.optString(ARB_ID),
+                    experimentAssignments = experimentsDataJson.optJSONObject(FIELD_EXPERIMENTS_ASSIGNMENTS)?.let {
+                        parseExperimentAssignments(it)
+                    } ?: emptyMap()
                 )
             }
 
@@ -183,7 +187,6 @@ internal class ElementsSessionJsonParser(
             disableLinkSignup = disableLinkSignup,
             linkConsumerIncentive = linkConsumerIncentive,
             useAttestationEndpoints = useLinkAttestationEndpoints,
-            linkGlobalHoldbackOn = linkGlobalHoldbackOn,
             suppress2faModal = suppressLink2faModal
         )
     }
@@ -358,7 +361,6 @@ internal class ElementsSessionJsonParser(
     /**
      * Parse the flags from the [json] object.
      * @param json the json object to parse
-     * @param relevantFlags the flags to parse. If null, all flags will be parsed.
      */
     private fun parseSessionFlags(json: JSONObject): Map<ElementsSession.Flag, Boolean> {
         val flags = mutableMapOf<ElementsSession.Flag, Boolean>()
@@ -375,6 +377,26 @@ internal class ElementsSessionJsonParser(
         }
 
         return flags.toMap()
+    }
+
+    /**
+     * Parse the experiment assignments from the [json] object.
+     * @param json the json object to parse
+     */
+    private fun parseExperimentAssignments(json: JSONObject): Map<ExperimentAssignment, String> {
+        val specs = mutableMapOf<ExperimentAssignment, String>()
+        json.keys().forEach { key ->
+            val value = json.get(key)
+            ExperimentAssignment.entries
+                .firstOrNull { it.experimentValue == key }
+                ?.let { flag ->
+                    if (value is String) {
+                        specs[flag] = value
+                    }
+                }
+        }
+
+        return specs.toMap()
     }
 
     internal companion object {
@@ -425,6 +447,7 @@ internal class ElementsSessionJsonParser(
         private const val VALUE_ENABLED = FIELD_ENABLED
         const val FIELD_GOOGLE_PAY_PREFERENCE = "google_pay_preference"
         private const val FIELD_EXPERIMENTS_DATA = "experiments_data"
+        private const val FIELD_EXPERIMENTS_ASSIGNMENTS = "experiment_assignments"
         private const val ARB_ID = "arb_id"
 
         private val PAYMENT_METHOD_JSON_PARSER = PaymentMethodJsonParser()

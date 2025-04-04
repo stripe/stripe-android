@@ -1,14 +1,12 @@
 package com.stripe.android.common.analytics.experiment
 
-import com.stripe.android.common.analytics.experiment.ExperimentGroup.CONTROL
-import com.stripe.android.common.analytics.experiment.ExperimentGroup.TREATMENT
 import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkGlobalHoldback
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.utils.FeatureFlags
-import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.LinkDisabledApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
@@ -18,16 +16,28 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
-internal class LogLinkGlobalHoldbackExposure @Inject constructor(
+internal interface LogLinkGlobalHoldbackExposure {
+    /**
+     * Logs the exposure of the Link Global Holdback experiment.
+     *
+     * @param elementsSession The session containing the experiment data.
+     * @param state The current state of the payment element loader.
+     */
+    operator fun invoke(
+        elementsSession: ElementsSession,
+        state: PaymentElementLoader.State
+    )
+}
+
+internal class DefaultLogLinkGlobalHoldbackExposure @Inject constructor(
     private val eventReporter: EventReporter,
     @LinkDisabledApiRepository private val linkDisabledApiRepository: LinkRepository,
     @IOContext private val workContext: CoroutineContext,
     private val customerRepository: CustomerRepository,
-    private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val logger: Logger
-) {
+) : LogLinkGlobalHoldbackExposure {
 
-    operator fun invoke(
+    override operator fun invoke(
         elementsSession: ElementsSession,
         state: PaymentElementLoader.State
     ) {
@@ -49,51 +59,42 @@ internal class LogLinkGlobalHoldbackExposure @Inject constructor(
         val experimentsData = requireNotNull(
             elementsSession.experimentsData
         ) { "Experiments data required to log exposures" }
-        val holdbackOn = elementsSession.linkSettings?.linkGlobalHoldbackOn == true
+        val experimentGroup: String = elementsSession.experimentsData
+            ?.experimentAssignments[LINK_GLOBAL_HOLD_BACK] ?: "control"
 
         val customerEmail = state.getEmail()
 
-        val isReturningUser: Boolean = customerEmail?.let { isReturningUser(state = state, email = it) } == true
+        val isReturningUser: Boolean = customerEmail?.let { isReturningUser(email = it) } == true
 
         logger.debug(
             """Link Global Holdback exposure: 
                 |arbId=${experimentsData.arbId},
                 |isReturningLinkConsumer=$isReturningUser,
-                |group=${if (holdbackOn) TREATMENT else CONTROL}
+                |group=$experimentGroup
             """.trimMargin()
         )
         eventReporter.onExperimentExposure(
             experiment = LinkGlobalHoldback(
                 arbId = experimentsData.arbId,
                 isReturningLinkConsumer = isReturningUser,
-                group = if (holdbackOn) TREATMENT else CONTROL,
+                group = experimentGroup,
             ),
         )
     }
 
     suspend fun isReturningUser(
-        state: PaymentElementLoader.State,
         email: String,
     ): Boolean {
-        val linkConfiguration = state.paymentMethodMetadata.linkState?.configuration
-        return if (linkConfiguration == null) {
-            // Link is disabled: Make a transient lookup call uniquely for exposure logging purposes.
-            linkDisabledApiRepository
-                .lookupConsumerWithoutBackendLoggingForExposure(email)
-                .map { it.exists }
-        } else {
-            // Link is enabled and available: Use existing configuration to make a lookup call and cache it for later use
-            linkConfigurationCoordinator.getComponent(linkConfiguration)
-                .linkAccountManager
-                .lookupConsumer(email = email)
-                .map { it != null }
-        }.fold(
-            onSuccess = { it },
-            onFailure = {
-                logger.error("Failed to check if user is returning", it)
-                false
-            }
-        )
+        return linkDisabledApiRepository
+            .lookupConsumerWithoutBackendLoggingForExposure(email)
+            .map { it.exists }
+            .fold(
+                onSuccess = { it },
+                onFailure = {
+                    logger.error("Failed to check if user is returning", it)
+                    false
+                }
+            )
     }
 
     private suspend fun PaymentElementLoader.State.getEmail(): String? =

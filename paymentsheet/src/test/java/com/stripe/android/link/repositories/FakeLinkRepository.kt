@@ -33,6 +33,8 @@ internal open class FakeLinkRepository : LinkRepository {
 
     override suspend fun lookupConsumer(email: String) = lookupConsumerResult
 
+    override suspend fun lookupConsumerWithoutBackendLoggingForExposure(email: String) = lookupConsumerResult
+
     override suspend fun mobileLookupConsumer(
         email: String,
         emailSource: EmailSource,

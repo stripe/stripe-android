@@ -2,6 +2,8 @@ package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
 import com.stripe.android.Stripe
+import com.stripe.android.common.analytics.experiment.DefaultLogLinkGlobalHoldbackExposure
+import com.stripe.android.common.analytics.experiment.LogLinkGlobalHoldbackExposure
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
@@ -28,9 +30,22 @@ import kotlin.coroutines.CoroutineContext
  * This coordinator requires a [com.stripe.android.link.LinkConfiguration] object to be passed in.
  * For scenarios where Link is disabled and no configuration is available but we still need to make Link
  * requests (mainly for the Link Global Holdback) we need to provide a configuration-less [LinkApiRepository].
+ *
+ *  Qualifier to distinguish between the [LinkApiRepository] provided by
+ *  the [com.stripe.android.link.LinkConfigurationCoordinator] and the one provided by the [LinkDisabledModule].
  */
+@Qualifier
+internal annotation class LinkDisabledApiRepository
+
 @Module
 internal class LinkDisabledModule {
+
+    @Provides
+    fun providesLogLinkGlobalHoldbackExposure(
+        default: DefaultLogLinkGlobalHoldbackExposure
+    ): LogLinkGlobalHoldbackExposure {
+        return default
+    }
 
     @Provides
     @LinkDisabledApiRepository
@@ -65,10 +80,3 @@ internal class LinkDisabledModule {
         )
     }
 }
-
-/**
- * Qualifier to distinguish between the [LinkApiRepository] provided by
- * the [com.stripe.android.link.LinkConfigurationCoordinator] and the one provided by the [LinkDisabledModule].
- */
-@Qualifier
-internal annotation class LinkDisabledApiRepository
