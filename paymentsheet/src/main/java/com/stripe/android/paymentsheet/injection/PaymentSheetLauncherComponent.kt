@@ -25,7 +25,8 @@ import javax.inject.Singleton
         CoreCommonModule::class,
         ResourceRepositoryModule::class,
         ApplicationIdModule::class,
-        CardScanModule::class
+        CardScanModule::class,
+        LinkDisabledModule::class,
     ]
 )
 internal interface PaymentSheetLauncherComponent {

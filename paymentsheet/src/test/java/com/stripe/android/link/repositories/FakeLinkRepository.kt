@@ -15,6 +15,7 @@ import com.stripe.android.model.StripeIntent
 
 internal open class FakeLinkRepository : LinkRepository {
     var lookupConsumerResult = Result.success(TestFactory.CONSUMER_SESSION_LOOKUP)
+    var lookupConsumerWithoutBackendLoggingResult = Result.success(TestFactory.CONSUMER_SESSION_LOOKUP)
     var mobileLookupConsumerResult = Result.success(TestFactory.CONSUMER_SESSION_LOOKUP)
     var consumerSignUpResult = Result.success(TestFactory.CONSUMER_SESSION_SIGN_UP)
     var mobileConsumerSignUpResult = Result.success(TestFactory.CONSUMER_SESSION_SIGN_UP)
@@ -28,10 +29,28 @@ internal open class FakeLinkRepository : LinkRepository {
     var updatePaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
     var deletePaymentDetailsResult = Result.success(Unit)
 
+    private val lookupConsumerCalls = Turbine<LookupCall>()
+    private val lookupConsumerWithoutBackendLoggingCalls = Turbine<LookupCall>()
     private val mobileLookupCalls = Turbine<MobileLookupCall>()
     private val mobileSignUpCalls = Turbine<MobileSignUpCall>()
 
-    override suspend fun lookupConsumer(email: String) = lookupConsumerResult
+    override suspend fun lookupConsumer(email: String): Result<ConsumerSessionLookup> {
+        lookupConsumerCalls.add(
+            item = LookupCall(
+                email = email
+            )
+        )
+        return lookupConsumerResult
+    }
+
+    override suspend fun lookupConsumerWithoutBackendLoggingForExposure(email: String): Result<ConsumerSessionLookup> {
+        lookupConsumerWithoutBackendLoggingCalls.add(
+            item = LookupCall(
+                email = email
+            )
+        )
+        return lookupConsumerWithoutBackendLoggingResult
+    }
 
     override suspend fun mobileLookupConsumer(
         email: String,
@@ -150,6 +169,14 @@ internal open class FakeLinkRepository : LinkRepository {
         return mobileLookupCalls.awaitItem()
     }
 
+    suspend fun awaitLookup(): LookupCall {
+        return lookupConsumerCalls.awaitItem()
+    }
+
+    suspend fun awaitLookupWithoutBackendLogging(): LookupCall {
+        return lookupConsumerWithoutBackendLoggingCalls.awaitItem()
+    }
+
     suspend fun awaitMobileSignup(): MobileSignUpCall {
         return mobileSignUpCalls.awaitItem()
     }
@@ -158,6 +185,10 @@ internal open class FakeLinkRepository : LinkRepository {
         mobileSignUpCalls.ensureAllEventsConsumed()
         mobileLookupCalls.ensureAllEventsConsumed()
     }
+
+    data class LookupCall(
+        val email: String
+    )
 
     data class MobileLookupCall(
         val email: String,

@@ -23,6 +23,7 @@ import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.injection.LinkDisabledModule
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
 import com.stripe.android.paymentsheet.state.DefaultLinkAccountStatusProvider
@@ -53,7 +54,8 @@ import kotlin.coroutines.CoroutineContext
         EmbeddedCommonModule::class,
         ApplicationIdModule::class,
         CardScanModule::class,
-        EmbeddedLinkExtrasModule::class
+        EmbeddedLinkExtrasModule::class,
+        LinkDisabledModule::class
     ],
 )
 internal interface EmbeddedPaymentElementViewModelComponent {

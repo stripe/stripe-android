@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
+import com.stripe.android.common.analytics.experiment.LogLinkGlobalHoldbackExposure
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.Logger
@@ -127,6 +128,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val errorReporter: ErrorReporter,
     @IOContext private val workContext: CoroutineContext,
     private val accountStatusProvider: LinkAccountStatusProvider,
+    private val logLinkGlobalHoldbackExposure: LogLinkGlobalHoldbackExposure,
     private val linkStore: LinkStore,
     private val externalPaymentMethodsRepository: ExternalPaymentMethodsRepository,
     private val userFacingLogger: UserFacingLogger,
@@ -220,6 +222,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             paymentSelection = initialPaymentSelection.await(),
             validationError = stripeIntent.validate(),
             paymentMethodMetadata = paymentMethodMetadata,
+        )
+
+        logLinkGlobalHoldbackExposure(
+            elementsSession = elementsSession,
+            state = state
         )
 
         reportSuccessfulLoad(

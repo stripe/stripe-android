@@ -518,8 +518,8 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val additionalParams: Map<String, Any?> = mapOf(
             "experiment_retrieved" to experiment.name,
             "arb_id" to experiment.arbId,
-            "assignment_group" to experiment.group.groupName
-        ) + experiment.dimensions.mapValues { "dimensions-$it" }
+            "assignment_group" to experiment.group
+        ) + experiment.dimensions.mapKeys { "dimensions-${it.key}" }
     }
 
     private fun standardParams(

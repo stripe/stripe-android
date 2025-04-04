@@ -91,6 +91,7 @@ class LinkApiRepositoryTest {
             override suspend fun lookupConsumerSession(
                 email: String,
                 requestSurface: String,
+                doNotLogConsumerFunnelEvent: Boolean,
                 requestOptions: ApiRequest.Options
             ): ConsumerSessionLookup {
                 throw error
