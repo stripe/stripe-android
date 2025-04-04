@@ -142,6 +142,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
                 isModifiable = displayableSavedPaymentMethod.isModifiable(),
                 cardBrandFilter = cardBrandFilter,
                 onBrandChoiceChanged = onBrandChoiceSelected,
+                isCardDetailEditSupported = allowCardEdit
             )
         } else {
             throw IllegalStateException("card payment method required for creating editCardDetailsInteractor")

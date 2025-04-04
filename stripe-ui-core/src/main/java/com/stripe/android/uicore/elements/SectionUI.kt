@@ -94,12 +94,15 @@ fun SectionCard(
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
-fun SectionError(error: String) {
+fun SectionError(
+    error: String,
+    modifier: Modifier = Modifier
+) {
     Text(
         text = error,
         color = MaterialTheme.colors.error,
         style = MaterialTheme.typography.h6,
-        modifier = Modifier
+        modifier = modifier
             .padding(top = 2.dp)
             .semantics(mergeDescendants = true) { }
     )
