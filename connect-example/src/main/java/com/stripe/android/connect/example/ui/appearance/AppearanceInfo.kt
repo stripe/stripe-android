@@ -187,6 +187,7 @@ data class AppearanceInfo(
                         .base(5f)
                         .build()
                 )
+                .spacingUnit(11f)
                 .build()
         )
 
@@ -256,6 +257,7 @@ data class AppearanceInfo(
                 .typography(
                     Typography.Builder()
                         .fontFamily("doto")
+                        .fontSizeBase(24f)
                         .build()
                 )
                 .build()

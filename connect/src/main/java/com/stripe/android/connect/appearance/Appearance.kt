@@ -12,6 +12,7 @@ class Appearance private constructor(
     internal val colors: Colors,
     internal val cornerRadius: CornerRadius,
     internal val typography: Typography,
+    internal val spacingUnit: Float?,
     internal val buttonPrimary: Button,
     internal val buttonSecondary: Button,
     internal val badgeNeutral: Badge,
@@ -24,6 +25,7 @@ class Appearance private constructor(
         private var colors: Colors = Colors.default()
         private var cornerRadius: CornerRadius = CornerRadius.default()
         private var typography: Typography = Typography.default()
+        private var spacingUnit: Float? = null
         private var buttonPrimary: Button = Button.default()
         private var buttonSecondary: Button = Button.default()
         private var badgeNeutral: Badge = Badge.default()
@@ -48,6 +50,12 @@ class Appearance private constructor(
          */
         fun typography(typography: Typography): Builder =
             apply { this.typography = typography }
+
+        /**
+         * Describes the spacing unit appearance settings.
+         */
+        fun spacingUnit(spacingUnit: Float): Builder =
+            apply { this.spacingUnit = spacingUnit }
 
         /**
          * Describes the primary button appearance settings.
@@ -90,12 +98,13 @@ class Appearance private constructor(
                 colors = colors,
                 cornerRadius = cornerRadius,
                 typography = typography,
+                spacingUnit = spacingUnit,
                 buttonPrimary = buttonPrimary,
                 buttonSecondary = buttonSecondary,
                 badgeNeutral = badgeNeutral,
                 badgeSuccess = badgeSuccess,
                 badgeWarning = badgeWarning,
-                badgeDanger = badgeDanger
+                badgeDanger = badgeDanger,
             )
         }
     }
