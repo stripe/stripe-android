@@ -362,15 +362,19 @@ internal data class AppearanceVariablesJs(
     val labelSmTextTransform: TextTransform?,
 )
 
+private fun Float?.toPx(): String? {
+    return this?.let { "${it.toString().removeSuffix(".0")}px" }
+}
+
 @OptIn(PrivateBetaConnectSDK::class)
 @Suppress("LongMethod")
 internal fun Appearance.toJs(): AppearanceJs {
     return AppearanceJs(
         variables = AppearanceVariablesJs(
             fontFamily = typography.fontFamily,
-            fontSizeBase = typography.fontSizeBase?.let { "${it.toString().removeSuffix(".0")}px" },
-            spacingUnit = spacingUnit?.let { "${it.toString().removeSuffix(".0")}px" },
-            borderRadius = cornerRadius.base?.let { "${it.toString().removeSuffix(".0")}px" },
+            fontSizeBase = typography.fontSizeBase.toPx(),
+            spacingUnit = spacingUnit.toPx(),
+            borderRadius = cornerRadius.base.toPx(),
             colorPrimary = colors.primary,
             colorBackground = colors.background,
             colorText = colors.text,
@@ -403,34 +407,34 @@ internal fun Appearance.toJs(): AppearanceJs {
             colorBorder = colors.border,
             formHighlightColorBorder = colors.formHighlightBorder,
             formAccentColor = colors.formAccent,
-            buttonBorderRadius = cornerRadius.button?.let { "${it.toString().removeSuffix(".0")}px" },
-            formBorderRadius = cornerRadius.form?.let { "${it.toString().removeSuffix(".0")}px" },
-            badgeBorderRadius = cornerRadius.badge?.let { "${it.toString().removeSuffix(".0")}px" },
-            overlayBorderRadius = cornerRadius.overlay?.let { "${it.toString().removeSuffix(".0")}px" },
+            buttonBorderRadius = cornerRadius.button.toPx(),
+            formBorderRadius = cornerRadius.form.toPx(),
+            badgeBorderRadius = cornerRadius.badge.toPx(),
+            overlayBorderRadius = cornerRadius.overlay.toPx(),
             overlayBackdropColor = null,
-            bodyMdFontSize = typography.bodyMd?.fontSize?.let { "${it.toString().removeSuffix(".0")}px" },
+            bodyMdFontSize = typography.bodyMd?.fontSize.toPx(),
             bodyMdFontWeight = typography.bodyMd?.fontWeight,
-            bodySmFontSize = typography.bodySm?.fontSize?.let { "${it.toString().removeSuffix(".0")}px" },
+            bodySmFontSize = typography.bodySm?.fontSize.toPx(),
             bodySmFontWeight = typography.bodySm?.fontWeight,
-            headingXlFontSize = typography.headingXl?.fontSize?.let { "${it.toString().removeSuffix(".0")}px" },
+            headingXlFontSize = typography.headingXl?.fontSize.toPx(),
             headingXlFontWeight = typography.headingXl?.fontWeight,
             headingXlTextTransform = typography.headingXl?.textTransform,
-            headingLgFontSize = typography.headingLg?.fontSize?.let { "${it.toString().removeSuffix(".0")}px" },
+            headingLgFontSize = typography.headingLg?.fontSize.toPx(),
             headingLgFontWeight = typography.headingLg?.fontWeight,
             headingLgTextTransform = typography.headingLg?.textTransform,
-            headingMdFontSize = typography.headingMd?.fontSize?.let { "${it.toString().removeSuffix(".0")}px" },
+            headingMdFontSize = typography.headingMd?.fontSize.toPx(),
             headingMdFontWeight = typography.headingMd?.fontWeight,
             headingMdTextTransform = typography.headingMd?.textTransform,
-            headingSmFontSize = typography.headingSm?.fontSize?.let { "${it.toString().removeSuffix(".0")}px" },
+            headingSmFontSize = typography.headingSm?.fontSize.toPx(),
             headingSmFontWeight = typography.headingSm?.fontWeight,
             headingSmTextTransform = typography.headingSm?.textTransform,
-            headingXsFontSize = typography.headingXs?.fontSize?.let { "${it.toString().removeSuffix(".0")}px" },
+            headingXsFontSize = typography.headingXs?.fontSize.toPx(),
             headingXsFontWeight = typography.headingXs?.fontWeight,
             headingXsTextTransform = typography.headingXs?.textTransform,
-            labelMdFontSize = typography.labelMd?.fontSize?.let { "${it.toString().removeSuffix(".0")}px" },
+            labelMdFontSize = typography.labelMd?.fontSize.toPx(),
             labelMdFontWeight = typography.labelMd?.fontWeight,
             labelMdTextTransform = typography.labelMd?.textTransform,
-            labelSmFontSize = typography.labelSm?.fontSize?.let { "${it.toString().removeSuffix(".0")}px" },
+            labelSmFontSize = typography.labelSm?.fontSize.toPx(),
             labelSmFontWeight = typography.labelSm?.fontWeight,
             labelSmTextTransform = typography.labelSm?.textTransform,
         )
