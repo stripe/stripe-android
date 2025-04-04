@@ -559,7 +559,7 @@ internal class CustomerSheetViewModel(
                     },
                     onUpdateSuccess = ::onBackPressed,
                     updatePaymentMethodExecutor = ::updatePaymentMethodExecutor,
-                    coroutineScope = DefaultUpdatePaymentMethodInteractor.Scope(workContext),
+                    workContext = workContext,
                     // This checkbox is never displayed in CustomerSheet.
                     shouldShowSetAsDefaultCheckbox = false,
                     isDefaultPaymentMethod = false,

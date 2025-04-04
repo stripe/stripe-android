@@ -570,7 +570,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
 
     @Test
     fun shouldCreateEditCardInteractor_whenPaymentMethodIsCard() = runScenario {
-        assertThat(interactor.editCardDetailsInteractorFactory.create {}).isNotNull()
+        assertThat(interactor.editCardDetailsInteractor).isNotNull()
     }
 
     @Test
@@ -578,7 +578,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         displayableSavedPaymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT.toDisplayableSavedPaymentMethod()
     ) {
         val exception = assertThrows(IllegalArgumentException::class.java) {
-            interactor.editCardDetailsInteractorFactory.create {}
+            interactor.editCardDetailsInteractor
         }
         assertThat(exception)
             .hasMessageThat()
@@ -626,7 +626,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             removeExecutor = onRemovePaymentMethod,
             updatePaymentMethodExecutor = updatePaymentMethodExecutor,
             setDefaultPaymentMethodExecutor = onSetDefaultPaymentMethod,
-            coroutineScope = DefaultUpdatePaymentMethodInteractor.Scope(testDispatcher),
+            workContext = testDispatcher,
             cardBrandFilter = DefaultCardBrandFilter,
             onBrandChoiceSelected = onBrandChoiceSelected,
             shouldShowSetAsDefaultCheckbox = shouldShowSetAsDefaultCheckbox,

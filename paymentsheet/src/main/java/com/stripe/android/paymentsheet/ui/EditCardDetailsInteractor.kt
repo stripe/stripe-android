@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.runtime.Immutable
 import com.stripe.android.CardBrandFilter
-import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.utils.DateUtils
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -41,27 +40,14 @@ internal interface EditCardDetailsInteractor {
     }
 
     fun interface Factory {
-        fun create(onCardUpdateParamsChanged: CardUpdateParamsCallback): EditCardDetailsInteractor
-    }
-
-    companion object {
         fun create(
             coroutineScope: CoroutineScope,
             isModifiable: Boolean,
-            cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
+            cardBrandFilter: CardBrandFilter,
             card: PaymentMethod.Card,
             onBrandChoiceChanged: CardBrandCallback,
             onCardUpdateParamsChanged: CardUpdateParamsCallback
-        ): EditCardDetailsInteractor {
-            return DefaultEditCardDetailsInteractor(
-                card = card,
-                cardBrandFilter = cardBrandFilter,
-                coroutineScope = coroutineScope,
-                onBrandChoiceChanged = onBrandChoiceChanged,
-                onCardUpdateParamsChanged = onCardUpdateParamsChanged,
-                isModifiable = isModifiable
-            )
-        }
+        ): EditCardDetailsInteractor
     }
 }
 
@@ -145,5 +131,25 @@ internal class DefaultEditCardDetailsInteractor(
                 expiryMonth = cardExpiryMonth,
                 expiryYear = cardExpiryYear,
             )
+    }
+
+    class Factory : EditCardDetailsInteractor.Factory {
+        override fun create(
+            coroutineScope: CoroutineScope,
+            isModifiable: Boolean,
+            cardBrandFilter: CardBrandFilter,
+            card: PaymentMethod.Card,
+            onBrandChoiceChanged: CardBrandCallback,
+            onCardUpdateParamsChanged: CardUpdateParamsCallback
+        ): EditCardDetailsInteractor {
+            return DefaultEditCardDetailsInteractor(
+                card = card,
+                cardBrandFilter = cardBrandFilter,
+                isModifiable = isModifiable,
+                coroutineScope = coroutineScope,
+                onBrandChoiceChanged = onBrandChoiceChanged,
+                onCardUpdateParamsChanged = onCardUpdateParamsChanged
+            )
+        }
     }
 }

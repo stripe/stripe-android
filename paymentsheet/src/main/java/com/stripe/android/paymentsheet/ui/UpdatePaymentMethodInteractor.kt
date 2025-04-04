@@ -38,6 +38,8 @@ internal interface UpdatePaymentMethodInteractor {
     val allowCardEdit: Boolean
     val editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory
 
+    val editCardDetailsInteractor: EditCardDetailsInteractor
+
     val state: StateFlow<State>
 
     data class State(
@@ -98,23 +100,11 @@ internal class DefaultUpdatePaymentMethodInteractor(
     private val setDefaultPaymentMethodExecutor: PaymentMethodSetAsDefaultOperation,
     private val onBrandChoiceSelected: (CardBrand) -> Unit,
     private val onUpdateSuccess: () -> Unit,
-    private val coroutineScope: Scope = Scope(),
-    override val editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = EditCardDetailsInteractor
-        .Factory { onCardUpdateParamsChanged ->
-            val savedPaymentMethodCard = displayableSavedPaymentMethod.savedPaymentMethod as? SavedPaymentMethod.Card
-            requireNotNull(savedPaymentMethodCard) {
-                "card payment method required for creating EditCardDetailsInteractor"
-            }
-            DefaultEditCardDetailsInteractor(
-                card = savedPaymentMethodCard.card,
-                cardBrandFilter = cardBrandFilter,
-                isModifiable = displayableSavedPaymentMethod.isModifiable(),
-                coroutineScope = coroutineScope,
-                onBrandChoiceChanged = onBrandChoiceSelected,
-                onCardUpdateParamsChanged = onCardUpdateParamsChanged,
-            )
-        }
+    private val workContext: CoroutineContext = Dispatchers.Default,
+    override val editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = DefaultEditCardDetailsInteractor
+        .Factory()
 ) : UpdatePaymentMethodInteractor {
+    private val coroutineScope = CoroutineScope(workContext + SupervisorJob())
     private val error = MutableStateFlow(getInitialError())
     private val status = MutableStateFlow(UpdatePaymentMethodInteractor.Status.Idle)
     private val initialSetAsDefaultCheckedValue = isDefaultPaymentMethod
@@ -147,6 +137,24 @@ internal class DefaultUpdatePaymentMethodInteractor(
 
     private val _setAsDefaultValueChanged = setAsDefaultCheckboxChecked.mapAsStateFlow { setAsDefaultCheckboxChecked ->
         setAsDefaultCheckboxChecked != initialSetAsDefaultCheckedValue
+    }
+    override val editCardDetailsInteractor by lazy {
+        val savedPaymentMethodCard = displayableSavedPaymentMethod.savedPaymentMethod as? SavedPaymentMethod.Card
+        requireNotNull(savedPaymentMethodCard) {
+            "Card payment method required for creating EditCardDetailsInteractor"
+        }
+        editCardDetailsInteractorFactory.create(
+            card = savedPaymentMethodCard.card,
+            onCardUpdateParamsChanged = { cardUpdateParams ->
+                handleViewAction(
+                    viewAction = UpdatePaymentMethodInteractor.ViewAction.CardUpdateParamsChanged(cardUpdateParams)
+                )
+            },
+            coroutineScope = coroutineScope,
+            isModifiable = displayableSavedPaymentMethod.isModifiable(),
+            cardBrandFilter = cardBrandFilter,
+            onBrandChoiceChanged = onBrandChoiceSelected,
+        )
     }
 
     private fun onCardUpdateParamsChanged(cardUpdateParams: CardUpdateParams?) {
@@ -292,14 +300,6 @@ internal class DefaultUpdatePaymentMethodInteractor(
         data class Error(val errorMessage: ResolvableString?) : UpdateResult()
         data object Success : UpdateResult()
         data object NoUpdatesMade : UpdateResult()
-    }
-
-    class Scope(
-        coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob()),
-    ) : CoroutineScope by coroutineScope {
-        constructor(workContext: CoroutineContext) : this(
-            coroutineScope = CoroutineScope(workContext + SupervisorJob())
-        )
     }
 
     companion object {

@@ -6,7 +6,7 @@ import com.stripe.android.paymentsheet.CardUpdateParams
 internal fun UpdatePaymentMethodInteractor.editCardDetailsInteractorHelper(
     block: EditCardDetailsInteractor.() -> Unit = {}
 ): EditCardDetailsInteractor {
-    return editCardDetailsInteractorFactory.create {}.apply(block)
+    return editCardDetailsInteractor.apply(block)
 }
 
 internal fun EditCardDetailsInteractor.updateCardBrand(cardBrand: CardBrand) {

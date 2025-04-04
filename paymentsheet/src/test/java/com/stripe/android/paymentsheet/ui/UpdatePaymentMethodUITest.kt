@@ -24,7 +24,6 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
-import com.stripe.android.paymentsheet.SavedPaymentMethod
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import com.stripe.android.ui.core.elements.TEST_TAG_SIMPLE_DIALOG
@@ -335,14 +334,7 @@ class UpdatePaymentMethodUITest {
         shouldShowSetAsDefaultCheckbox: Boolean = false,
         shouldShowSaveButton: Boolean = false,
         isSaveButtonEnabled: Boolean = false,
-        editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = EditCardDetailsInteractor.Factory {
-            val savedPaymentMethodCard = displayableSavedPaymentMethod.savedPaymentMethod as? SavedPaymentMethod.Card
-            requireNotNull(savedPaymentMethodCard)
-            FakeEditCardDetailsInteractor(
-                card = savedPaymentMethodCard.card,
-                shouldShowCardBrandDropdown = isModifiablePaymentMethod,
-            )
-        },
+        editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = FakeEditCardDetailsInteractorFactory(),
         testBlock: Scenario.() -> Unit,
     ) {
         val viewActionRecorder = ViewActionRecorder<UpdatePaymentMethodInteractor.ViewAction>()
