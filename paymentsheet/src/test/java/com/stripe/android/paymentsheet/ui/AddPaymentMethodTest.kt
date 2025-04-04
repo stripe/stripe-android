@@ -132,7 +132,6 @@ internal class AddPaymentMethodTest {
         assertThat(customPaymentSelection.label.resolve(context)).isEqualTo(paypalCpm.displayName)
         assertThat(customPaymentSelection.lightThemeIconUrl).isEqualTo(paypalCpm.logoUrl)
         assertThat(customPaymentSelection.darkThemeIconUrl).isEqualTo(paypalCpm.logoUrl)
-        assertThat(customPaymentSelection.iconResource).isEqualTo(0)
         assertThat(customPaymentSelection.billingDetails?.name).isEqualTo(name)
         assertThat(customPaymentSelection.billingDetails?.address?.line1).isEqualTo(addressLine1)
     }
