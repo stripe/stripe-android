@@ -36,6 +36,7 @@ import com.stripe.android.test.core.HOOKS_PAGE_LOAD_TIMEOUT
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.ui.core.elements.MANDATE_TEST_TAG
 import com.stripe.android.ui.core.elements.SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
+import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
 import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.R as StripeR
 import com.stripe.android.core.R as CoreR
@@ -342,6 +343,13 @@ internal class Selectors(
     fun getCvcRecollectionScreenConfirm() = composeTestRule.onNode(
         hasTestTag(CVC_RECOLLECTION_SCREEN_CONFIRM)
     )
+
+    fun selectCardBrand(displayName: String) {
+        composeTestRule.onNode(hasTestTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG))
+            .performClick()
+        composeTestRule.onNodeWithTextAfterWaiting(displayName)
+            .performClick()
+    }
 
     private fun ComposeTestRule.onNodeWithTextAfterWaiting(text: String): SemanticsNodeInteraction {
         this.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {

@@ -193,6 +193,10 @@ internal class FieldPopulator(
         }
     }
 
+    fun selectCardBrand(displayName: String) {
+        selectors.selectCardBrand(displayName)
+    }
+
     fun populateAddress() {
         selectors
             .getLine1()

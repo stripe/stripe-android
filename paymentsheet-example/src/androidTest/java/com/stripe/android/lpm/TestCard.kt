@@ -11,6 +11,8 @@ import com.stripe.android.paymentsheet.example.playground.settings.CollectAddres
 import com.stripe.android.paymentsheet.example.playground.settings.CollectEmailSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectNameSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectPhoneSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Country
+import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PAYMENT_METHOD_SELECTOR_TEST_TAG
@@ -305,6 +307,38 @@ internal class TestCard : BasePlaygroundTest() {
         testDriver.confirmCustomWithSavePaymentMethodAndCvcRecollection(
             customerId = state?.asPaymentState()?.customerConfig?.id,
             testParameters = testParameters
+        )
+    }
+
+    @Test
+    fun testCardWithCardBrandChoiceComplete() {
+        testDriver.confirmNewOrGuestComplete(
+            testParameters = testParameters.copyPlaygroundSettings { settings ->
+                settings[CountrySettingsDefinition] = Country.FR
+            },
+            values = FieldPopulator.Values(
+                cardNumber = "4000002500001001"
+            ),
+            populateCustomLpmFields = {
+                populateCardDetails()
+                selectCardBrand("Cartes Bancaires")
+            }
+        )
+    }
+
+    @Test
+    fun testCardWithCardBrandChoiceCustom() {
+        testDriver.confirmCustom(
+            testParameters = testParameters.copyPlaygroundSettings { settings ->
+                settings[CountrySettingsDefinition] = Country.FR
+            },
+            values = FieldPopulator.Values(
+                cardNumber = "4000002500001001"
+            ),
+            populateCustomLpmFields = {
+                populateCardDetails()
+                selectCardBrand("Cartes Bancaires")
+            }
         )
     }
 }
