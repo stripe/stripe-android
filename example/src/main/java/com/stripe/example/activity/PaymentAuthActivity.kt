@@ -23,12 +23,23 @@ class PaymentAuthActivity : StripeIntentActivity() {
         KeyboardController(this)
     }
 
+    private var usePaymentLauncher = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(viewBinding.root)
 
         viewModel.inProgress.observe(this, { enableUi(!it) })
         viewModel.status.observe(this, Observer(viewBinding.status::setText))
+        viewModel.requiresActionSecret.observe(this, {
+            println("3ds2 intent secret: $it")
+            if (usePaymentLauncher) {
+                paymentLauncher.handleNextActionForPaymentIntent(it)
+            } else {
+                viewModel.stripe.handleNextActionForPayment(this, it)
+            }
+
+        })
 
         val stripeAccountId = Settings(this).stripeAccountId
 
@@ -64,12 +75,23 @@ class PaymentAuthActivity : StripeIntentActivity() {
         viewBinding.confirmWithNewCardButton.setOnClickListener {
             keyboardController.hide()
             viewBinding.cardInputWidget.paymentMethodCreateParams?.let {
-                createAndConfirmPaymentIntent(
-                    "us",
-                    it,
-                    shippingDetails = SHIPPING,
-                    stripeAccountId = stripeAccountId
-                )
+                createPaymentMethod(it)
+            }
+        }
+
+        viewBinding.confirmWithPaymentLauncher.setOnClickListener {
+            keyboardController.hide()
+            usePaymentLauncher = true
+            viewBinding.cardInputWidget.paymentMethodCreateParams?.let {
+                createPaymentMethod(it)
+            }
+        }
+
+        viewBinding.confirmWithStripeKt.setOnClickListener {
+            keyboardController.hide()
+            usePaymentLauncher = false
+            viewBinding.cardInputWidget.paymentMethodCreateParams?.let {
+                createPaymentMethod(it)
             }
         }
 

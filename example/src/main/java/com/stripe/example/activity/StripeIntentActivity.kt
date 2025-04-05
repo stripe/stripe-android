@@ -26,7 +26,7 @@ abstract class StripeIntentActivity : AppCompatActivity() {
         Settings(this).stripeAccountId
     }
 
-    private lateinit var paymentLauncher: PaymentLauncher
+    lateinit var paymentLauncher: PaymentLauncher
     private var isPaymentIntent: Boolean = true
 
     private val keyboardController: KeyboardController by lazy {
@@ -190,6 +190,10 @@ abstract class StripeIntentActivity : AppCompatActivity() {
     protected fun confirmPaymentIntent(params: ConfirmPaymentIntentParams) {
         isPaymentIntent = true
         paymentLauncher.confirm(params)
+    }
+
+    fun createPaymentMethod(params: PaymentMethodCreateParams) {
+        viewModel.createPaymentMethod(params)
     }
 
     private fun handleCreateSetupIntentResponse(

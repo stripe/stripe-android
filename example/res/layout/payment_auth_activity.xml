@@ -57,6 +57,20 @@
             android:layout_marginBottom="12dp"
             android:text="@string/confirm_with_new_card_button" />
 
+        <Button
+            android:id="@+id/confirm_with_payment_launcher"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:text="Confirm with PaymentLauncher" />
+
+        <Button
+            android:id="@+id/confirm_with_stripe.kt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:text="Confirm with Stripe.kt" />
+
         <View style="@style/Divider"
             android:layout_marginTop="12dp"
             android:layout_marginBottom="12dp"/>
