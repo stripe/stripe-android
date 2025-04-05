@@ -57,6 +57,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -271,28 +272,30 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private suspend fun initializeWithState(state: PaymentSheetState.Full) {
-        customerStateHolder.setCustomerState(state.customer)
+        withContext(Dispatchers.Main.immediate) {
+            customerStateHolder.setCustomerState(state.customer)
 
-        updateSelection(state.paymentSelection)
+            updateSelection(state.paymentSelection)
 
-        setPaymentMethodMetadata(state.paymentMethodMetadata)
+            setPaymentMethodMetadata(state.paymentMethodMetadata)
 
-        val shouldLaunchEagerly = linkHandler.setupLinkWithEagerLaunch(state.paymentMethodMetadata.linkState)
+            val shouldLaunchEagerly = linkHandler.setupLinkWithEagerLaunch(state.paymentMethodMetadata.linkState)
 
-        val pendingFailedPaymentResult = confirmationHandler.awaitResult()
-            as? ConfirmationHandler.Result.Failed
-        val errorMessage = pendingFailedPaymentResult?.cause?.stripeErrorMessage()
+            val pendingFailedPaymentResult = confirmationHandler.awaitResult()
+                as? ConfirmationHandler.Result.Failed
+            val errorMessage = pendingFailedPaymentResult?.cause?.stripeErrorMessage()
 
-        resetViewState(errorMessage)
-        navigationHandler.resetTo(
-            determineInitialBackStack(
-                paymentMethodMetadata = state.paymentMethodMetadata,
-                customerStateHolder = customerStateHolder,
+            resetViewState(errorMessage)
+            navigationHandler.resetTo(
+                determineInitialBackStack(
+                    paymentMethodMetadata = state.paymentMethodMetadata,
+                    customerStateHolder = customerStateHolder,
+                )
             )
-        )
 
-        if (shouldLaunchEagerly) {
-            checkoutWithLinkExpress()
+            if (shouldLaunchEagerly) {
+                checkoutWithLinkExpress()
+            }
         }
 
         viewModelScope.launch {
