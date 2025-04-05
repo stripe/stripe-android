@@ -4,9 +4,15 @@ import android.app.Application
 import androidx.annotation.StringRes
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.liveData
+import androidx.lifecycle.viewModelScope
+import com.stripe.android.createPaymentMethod
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.example.R
+import com.stripe.example.StripeFactory
 import com.stripe.example.activity.BaseViewModel
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
 import org.json.JSONObject
@@ -19,6 +25,8 @@ internal class StripeIntentViewModel(
     val status = MutableLiveData<String>()
 
     val paymentResultLiveData = MutableLiveData<PaymentResult>()
+    val requiresActionSecret = MutableLiveData<String>()
+    val stripe = StripeFactory(application).create()
 
     fun createPaymentIntent(
         country: String,
@@ -46,6 +54,39 @@ internal class StripeIntentViewModel(
                 )
                 .toMutableMap()
         )
+    }
+
+    private fun confirmPaymentIntent(paymentMethodId: String) {
+        viewModelScope.launch {
+            runCatching {
+                backendApi.confirmPaymentIntent(
+                    mapOf("payment_method_id" to paymentMethodId).toMutableMap()
+                )
+            }.onSuccess {
+                val response = JSONObject(it.string())
+                println(response)
+                if (response.getBoolean("requires_action")) {
+                    requiresActionSecret.postValue(response.getString("secret"))
+                }
+            }.onFailure {
+                println(it)
+            }
+        }
+
+    }
+
+    internal fun createPaymentMethod(
+        params: PaymentMethodCreateParams
+    ) {
+        viewModelScope.launch {
+            runCatching {
+                stripe.createPaymentMethod(params)
+            }.onSuccess { paymentMethod ->
+                confirmPaymentIntent(paymentMethod.id!!)
+            }.onFailure {
+                println(it)
+            }
+        }
     }
 
     fun createSetupIntent(
