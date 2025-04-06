@@ -57,7 +57,8 @@ internal class NetworkDispatcher(private val validationTimeout: Duration?) : Dis
                 exceptionMessage.append('\n')
             }
             exceptionMessage.append(
-                "Extra requests is not empty. Remaining: ${extraRequests.size}.\n${extraRequestDescriptions()}"
+                "Production code made extra requests that your test did not enqueue. Remaining: " +
+                    "${extraRequests.size}.\n${extraRequestDescriptions()}"
             )
         }
         if (exceptionMessage.isNotEmpty()) {

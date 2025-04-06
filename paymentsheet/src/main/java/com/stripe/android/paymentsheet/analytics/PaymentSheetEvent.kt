@@ -8,7 +8,6 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
-import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.analyticsValue
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -16,6 +15,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.asPaymentSheetLoadingException
+import com.stripe.android.paymentsheet.utils.getSetAsDefaultPaymentMethodFromPaymentSelection
 import com.stripe.android.utils.filterNotNullValues
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -598,20 +598,6 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val VALUE_CARD_BRAND = "brand"
 
         const val MAX_EXTERNAL_PAYMENT_METHODS = 10
-    }
-}
-
-private fun PaymentSelection.getSetAsDefaultPaymentMethodFromPaymentSelection(): Boolean? {
-    return when (this) {
-        is PaymentSelection.New.Card -> {
-            (this.paymentMethodExtraParams as? PaymentMethodExtraParams.Card)?.setAsDefault
-        }
-        is PaymentSelection.New.USBankAccount -> {
-            (this.paymentMethodExtraParams as? PaymentMethodExtraParams.USBankAccount)?.setAsDefault
-        }
-        else -> {
-            null
-        }
     }
 }
 
