@@ -86,7 +86,7 @@ workflows:
       - script@1:
           timeout: 1200
           inputs:
-            - content: ./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest --continue
+            - content: ./scripts/retry.sh 3 ./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest --continue
   build-connections-debug:
     envs:
       - BUILD_VARIANT: debug
@@ -257,7 +257,7 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./gradlew :paymentsheet:pixel2api33DebugAndroidTest
+            - content: ./scripts/retry.sh 3 ./gradlew :paymentsheet:pixel2api33DebugAndroidTest
     meta:
       bitrise.io:
         stack: linux-docker-android-22.04
