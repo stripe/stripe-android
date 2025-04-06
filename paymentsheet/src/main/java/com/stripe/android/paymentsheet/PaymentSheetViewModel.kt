@@ -451,13 +451,15 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
         viewModelScope.launch(workContext) {
-            inProgressSelection = paymentSelection
+            val confirmationOption = withContext(viewModelScope.coroutineContext) {
+                inProgressSelection = paymentSelection
 
-            val confirmationOption = paymentSelectionWithCvcIfEnabled(paymentSelection)
-                ?.toConfirmationOption(
-                    configuration = config.asCommonConfiguration(),
-                    linkConfiguration = linkHandler.linkConfiguration.value,
-                )
+                paymentSelectionWithCvcIfEnabled(paymentSelection)
+                    ?.toConfirmationOption(
+                        configuration = config.asCommonConfiguration(),
+                        linkConfiguration = linkHandler.linkConfiguration.value,
+                    )
+            }
 
             confirmationOption?.let { option ->
                 val stripeIntent = awaitStripeIntent()
