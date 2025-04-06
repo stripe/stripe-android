@@ -5,11 +5,11 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
-import com.stripe.android.paymentsheet.SavedPaymentMethod
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.test.TestScope
 
 internal class FakeUpdatePaymentMethodInteractor(
     override val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod = PaymentMethodFactory.visaCard()
@@ -30,19 +30,21 @@ internal class FakeUpdatePaymentMethodInteractor(
     ),
     override val setAsDefaultCheckboxEnabled: Boolean = true,
     override val allowCardEdit: Boolean = false,
+    private val editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = DefaultEditCardDetailsInteractor
+        .Factory(),
 ) : UpdatePaymentMethodInteractor {
     override val state: StateFlow<UpdatePaymentMethodInteractor.State> = MutableStateFlow(initialState)
     override val screenTitle: ResolvableString? = UpdatePaymentMethodInteractor.screenTitle(
         displayableSavedPaymentMethod
     )
-
     override val editCardDetailsInteractor: EditCardDetailsInteractor by lazy {
-        val savedPaymentMethodCard = displayableSavedPaymentMethod.savedPaymentMethod as? SavedPaymentMethod.Card
-        requireNotNull(savedPaymentMethodCard)
-        FakeEditCardDetailsInteractor(
-            card = savedPaymentMethodCard.card,
-            shouldShowCardBrandDropdown = isModifiablePaymentMethod,
-            onCardUpdateParamsChanged = {}
+        editCardDetailsInteractorFactory.create(
+            coroutineScope = TestScope(),
+            isModifiable = isModifiablePaymentMethod,
+            cardBrandFilter = cardBrandFilter,
+            card = displayableSavedPaymentMethod.paymentMethod.card!!,
+            onBrandChoiceChanged = {},
+            onCardUpdateParamsChanged = {},
         )
     }
 

@@ -150,7 +150,7 @@ internal class DefaultEditCardDetailsInteractorTest {
         onBrandChoiceChanged: (CardBrand) -> Unit = {},
         onCardUpdateParamsChanged: (CardUpdateParams?) -> Unit = {}
     ): EditCardDetailsInteractor {
-        return EditCardDetailsInteractor.create(
+        return DefaultEditCardDetailsInteractor.Factory().create(
             cardBrandFilter = cardBrandFilter,
             onBrandChoiceChanged = onBrandChoiceChanged,
             coroutineScope = TestScope(testDispatcher),
