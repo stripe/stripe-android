@@ -41,6 +41,7 @@ import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
+import com.stripe.android.paymentsheet.example.playground.activity.CustomPaymentMethodActivity
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.network.PlaygroundRequester
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
@@ -302,7 +303,14 @@ internal class EmbeddedPlaygroundActivity :
         customPaymentMethod: PaymentSheet.CustomPaymentMethod,
         billingDetails: PaymentMethod.BillingDetails
     ) {
-        error("Currently cannot handle custom payment methods!")
+        startActivity(
+            Intent().setClass(
+                this,
+                CustomPaymentMethodActivity::class.java
+            )
+                .putExtra(CustomPaymentMethodActivity.EXTRA_CUSTOM_PAYMENT_METHOD_TYPE, customPaymentMethod)
+                .putExtra(CustomPaymentMethodActivity.EXTRA_BILLING_DETAILS, billingDetails)
+        )
     }
 
     override fun onEvent(event: AnalyticEvent) {
