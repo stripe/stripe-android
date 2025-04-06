@@ -56,17 +56,7 @@ internal interface EditCardDetailsInteractor {
             card: PaymentMethod.Card,
             onBrandChoiceChanged: CardBrandCallback,
             onCardUpdateParamsChanged: CardUpdateParamsCallback
-        ): EditCardDetailsInteractor {
-            return DefaultEditCardDetailsInteractor(
-                card = card,
-                cardBrandFilter = cardBrandFilter,
-                coroutineScope = coroutineScope,
-                onBrandChoiceChanged = onBrandChoiceChanged,
-                onCardUpdateParamsChanged = onCardUpdateParamsChanged,
-                isModifiable = isModifiable,
-                isCardDetailEditSupported = isCardDetailEditSupported
-            )
-        }
+        ): EditCardDetailsInteractor
     }
 }
 
@@ -203,7 +193,8 @@ internal class DefaultEditCardDetailsInteractor(
                 isModifiable = isModifiable,
                 coroutineScope = coroutineScope,
                 onBrandChoiceChanged = onBrandChoiceChanged,
-                onCardUpdateParamsChanged = onCardUpdateParamsChanged
+                onCardUpdateParamsChanged = onCardUpdateParamsChanged,
+                isCardDetailEditSupported = isCardDetailEditSupported
             )
         }
     }
