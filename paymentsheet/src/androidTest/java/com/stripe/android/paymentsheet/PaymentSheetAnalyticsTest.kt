@@ -105,6 +105,7 @@ internal class PaymentSheetAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_card_number_completed")
 
         page.fillOutCardDetails()
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.StartedInteractionWithPaymentMethodForm("card"))
 
         networkRule.enqueue(
             host("api.stripe.com"),
@@ -173,6 +174,7 @@ internal class PaymentSheetAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_card_number_completed")
 
         page.fillOutCardDetails()
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.StartedInteractionWithPaymentMethodForm("card"))
 
         networkRule.enqueue(
             host("api.stripe.com"),
@@ -239,6 +241,7 @@ internal class PaymentSheetAnalyticsTest {
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.DisplayedPaymentMethodForm("card"))
 
         page.fillOutCardDetails()
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.StartedInteractionWithPaymentMethodForm("card"))
 
         networkRule.enqueue(
             host("api.stripe.com"),
@@ -310,6 +313,7 @@ internal class PaymentSheetAnalyticsTest {
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.DisplayedPaymentMethodForm("card"))
 
         page.fillOutCardDetails()
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.StartedInteractionWithPaymentMethodForm("card"))
 
         networkRule.enqueue(
             host("api.stripe.com"),

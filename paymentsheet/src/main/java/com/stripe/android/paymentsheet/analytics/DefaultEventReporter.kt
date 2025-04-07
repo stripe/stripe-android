@@ -226,6 +226,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onPaymentMethodFormInteraction(code: PaymentMethodCode) {
+        fireAnalyticEvent(AnalyticEvent.StartedInteractionWithPaymentMethodForm(code))
         fireEvent(
             PaymentSheetEvent.PaymentOptionFormInteraction(
                 code = code,
