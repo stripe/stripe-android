@@ -8,6 +8,7 @@ import com.stripe.android.Stripe
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.example.Settings
 import com.stripe.example.databinding.PaymentAuthActivityBinding
 
@@ -31,14 +32,14 @@ class PaymentAuthActivity : StripeIntentActivity() {
 
         viewModel.inProgress.observe(this, { enableUi(!it) })
         viewModel.status.observe(this, Observer(viewBinding.status::setText))
-        viewModel.requiresActionSecret.observe(this, {
-            println("3ds2 intent secret: $it")
-            if (usePaymentLauncher) {
-                paymentLauncher.handleNextActionForPaymentIntent(it)
-            } else {
-                viewModel.stripe.handleNextActionForPayment(this, it)
+        viewModel.requiresAction.observe(this, { requiresAction ->
+            if (requiresAction) {
+                if (usePaymentLauncher) {
+                    paymentLauncher.handleNextActionForPaymentIntent(viewModel.piSecret!!)
+                } else {
+                    viewModel.stripe.handleNextActionForPayment(this, viewModel.piSecret!!)
+                }
             }
-
         })
 
         val stripeAccountId = Settings(this).stripeAccountId
@@ -93,6 +94,10 @@ class PaymentAuthActivity : StripeIntentActivity() {
             viewBinding.cardInputWidget.paymentMethodCreateParams?.let {
                 createPaymentMethod(it)
             }
+        }
+
+        viewBinding.confirmAfter3ds2.setOnClickListener {
+            viewModel.confirmPaymentIntentWithIntentId()
         }
 
         viewBinding.setupButton.setOnClickListener {
