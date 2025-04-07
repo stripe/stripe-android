@@ -204,7 +204,7 @@ internal interface EventReporter {
      * The customer has completed all required payment form fields
      */
     fun onPaymentMethodFormCompleted(
-        paymentMethodType: String,
+        code: PaymentMethodCode,
     )
 
     /**

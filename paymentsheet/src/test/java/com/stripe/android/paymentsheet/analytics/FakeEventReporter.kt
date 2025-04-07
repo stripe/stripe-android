@@ -125,6 +125,9 @@ internal class FakeEventReporter : EventReporter {
     override fun onPaymentMethodFormInteraction(code: PaymentMethodCode) {
     }
 
+    override fun onPaymentMethodFormCompleted(code: String) {
+    }
+
     override fun onCardNumberCompleted() {
     }
 
