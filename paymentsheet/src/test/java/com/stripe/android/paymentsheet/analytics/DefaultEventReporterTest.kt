@@ -386,47 +386,55 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `onPaymentMethodFormShown() should fire analytics request with expected event value`() {
-        val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
-            simulateSuccessfulSetup()
-        }
-
-        customEventReporter.onPaymentMethodFormShown(
-            code = "card",
-        )
-
-        verify(analyticsRequestExecutor).executeAsync(
-            argWhere { req ->
-                req.params["event"] == "mc_form_shown" &&
-                    req.params["selected_lpm"] == "card"
+    fun `onPaymentMethodFormShown() should fire analytics request with expected event value`() =
+        runTest(testDispatcher){
+            val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
+                simulateSuccessfulSetup()
             }
-        )
-    }
+
+            customEventReporter.onPaymentMethodFormShown(
+                code = "card",
+            )
+            analyticEventCallbackRule.assertMatchesExpectedEvent(
+                AnalyticEvent.DisplayedPaymentMethodForm("card")
+            )
+
+            verify(analyticsRequestExecutor).executeAsync(
+                argWhere { req ->
+                    req.params["event"] == "mc_form_shown" &&
+                        req.params["selected_lpm"] == "card"
+                }
+            )
+        }
 
     @Test
-    fun `onPaymentMethodFormShown() should restart duration on call`() {
-        val durationProvider = FakeDurationProvider()
+    fun `onPaymentMethodFormShown() should restart duration on call`() =
+        runTest(testDispatcher) {
+            val durationProvider = FakeDurationProvider()
 
-        val customEventReporter = createEventReporter(
-            mode = EventReporter.Mode.Custom,
-            durationProvider = durationProvider
-        ) {
-            simulateSuccessfulSetup()
-        }
+            val customEventReporter = createEventReporter(
+                mode = EventReporter.Mode.Custom,
+                durationProvider = durationProvider
+            ) {
+                simulateSuccessfulSetup()
+            }
 
-        customEventReporter.onPaymentMethodFormShown(
-            code = "card",
-        )
-
-        assertThat(
-            durationProvider.has(
-                FakeDurationProvider.Call.Start(
-                    key = DurationProvider.Key.ConfirmButtonClicked,
-                    reset = true
-                )
+            customEventReporter.onPaymentMethodFormShown(
+                code = "card",
             )
-        ).isTrue()
-    }
+            analyticEventCallbackRule.assertMatchesExpectedEvent(
+                AnalyticEvent.DisplayedPaymentMethodForm("card")
+            )
+
+            assertThat(
+                durationProvider.has(
+                    FakeDurationProvider.Call.Start(
+                        key = DurationProvider.Key.ConfirmButtonClicked,
+                        reset = true
+                    )
+                )
+            ).isTrue()
+        }
 
     @Test
     fun `onPaymentMethodFormInteraction() should fire analytics request with expected event value`() {

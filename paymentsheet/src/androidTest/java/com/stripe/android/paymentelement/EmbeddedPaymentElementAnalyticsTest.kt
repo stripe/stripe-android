@@ -100,6 +100,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
 
         embeddedContentPage.clickOnLpm("card")
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.SelectedPaymentMethodType("card"))
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.DisplayedPaymentMethodForm("card"))
 
         formPage.fillOutCardDetails()
 

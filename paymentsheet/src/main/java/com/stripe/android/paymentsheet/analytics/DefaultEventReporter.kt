@@ -214,6 +214,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onPaymentMethodFormShown(code: PaymentMethodCode) {
         durationProvider.start(DurationProvider.Key.ConfirmButtonClicked)
 
+        fireAnalyticEvent(AnalyticEvent.DisplayedPaymentMethodForm(code))
         fireEvent(
             PaymentSheetEvent.ShowPaymentOptionForm(
                 code = code,

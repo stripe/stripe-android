@@ -97,6 +97,7 @@ internal class PaymentSheetAnalyticsTest {
             )
         }
 
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.DisplayedPaymentMethodForm("card"))
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
 
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
@@ -163,6 +164,7 @@ internal class PaymentSheetAnalyticsTest {
             )
         }
 
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.DisplayedPaymentMethodForm("card"))
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
 
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
@@ -234,6 +236,7 @@ internal class PaymentSheetAnalyticsTest {
 
         page.clickOnLpm("card", forVerticalMode = true)
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.SelectedPaymentMethodType("card"))
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.DisplayedPaymentMethodForm("card"))
 
         page.fillOutCardDetails()
 
@@ -304,6 +307,7 @@ internal class PaymentSheetAnalyticsTest {
 
         page.clickOnLpm("card", forVerticalMode = true)
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.SelectedPaymentMethodType("card"))
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.DisplayedPaymentMethodForm("card"))
 
         page.fillOutCardDetails()
 
