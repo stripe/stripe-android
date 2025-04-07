@@ -30,6 +30,7 @@ import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
+import com.stripe.android.testing.createComposeCleanupRule
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import org.junit.Rule
@@ -40,6 +41,9 @@ import kotlin.test.Test
 class LinkFormElementTest {
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     @Test
     fun `If initial user input is provided, should be displayed to the user when alongside SFU`() {

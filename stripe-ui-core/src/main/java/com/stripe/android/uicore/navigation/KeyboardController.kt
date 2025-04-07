@@ -8,7 +8,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.platform.LocalTextInputService
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -35,15 +35,12 @@ class KeyboardController(
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun rememberKeyboardController(): KeyboardController {
-    val textInputService = LocalTextInputService.current
+    val keyboardController = LocalSoftwareKeyboardController.current
     val keyboardState = isKeyboardVisibleAsState()
 
     return KeyboardController(
         dismissKeyboard = {
-            // We're using this method because LocalSoftwareKeyboardController is
-            // still experimental in Compose 1.5. We should switch over once we update
-            // to Compose 1.6, in which the experimental state has been removed.
-            textInputService?.hideSoftwareKeyboard()
+            keyboardController?.hide()
         },
         isKeyboardVisible = keyboardState,
     )

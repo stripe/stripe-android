@@ -7,6 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Rule
@@ -21,6 +22,9 @@ class PaymentMethodFormTest {
 
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     @Test
     fun `Changing payment method emits only form values of newly selected payment method`() {
