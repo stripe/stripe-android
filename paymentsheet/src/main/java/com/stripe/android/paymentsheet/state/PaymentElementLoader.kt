@@ -127,6 +127,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val eventReporter: EventReporter,
     private val errorReporter: ErrorReporter,
     @IOContext private val workContext: CoroutineContext,
+    private val retrieveCustomerEmail: RetrieveCustomerEmail,
     private val accountStatusProvider: LinkAccountStatusProvider,
     private val logLinkGlobalHoldbackExposure: LogLinkGlobalHoldbackExposure,
     private val linkStore: LinkStore,
@@ -508,15 +509,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             configuration.defaultBillingDetails?.phone
         }
 
-        val customerEmail = configuration.defaultBillingDetails?.email ?: customer?.let {
-            customerRepository.retrieveCustomer(
-                CustomerRepository.CustomerInfo(
-                    id = it.id,
-                    ephemeralKeySecret = it.ephemeralKeySecret,
-                    customerSessionClientSecret = (it as? CustomerInfo.CustomerSession)?.customerSessionClientSecret,
-                )
-            )
-        }?.email
+        val customerEmail = retrieveCustomerEmail(
+            configuration = configuration,
+            customer = customer?.toCustomerInfo()
+        )
 
         val merchantName = configuration.merchantDisplayName
 
@@ -820,6 +816,12 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             override val ephemeralKeySecret: String = accessType.ephemeralKeySecret
         }
     }
+
+    private fun CustomerInfo.toCustomerInfo() = CustomerRepository.CustomerInfo(
+        id = id,
+        ephemeralKeySecret = ephemeralKeySecret,
+        customerSessionClientSecret = (this as? CustomerInfo.CustomerSession)?.customerSessionClientSecret,
+    )
 }
 
 private suspend fun List<PaymentMethod>.withDefaultPaymentMethodOrLastUsedPaymentMethodFirst(

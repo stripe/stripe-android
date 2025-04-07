@@ -10,7 +10,9 @@ import com.stripe.android.model.ElementsSession.ExperimentAssignment.LINK_GLOBAL
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.LinkDisabledApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -33,7 +35,7 @@ internal class DefaultLogLinkGlobalHoldbackExposure @Inject constructor(
     private val eventReporter: EventReporter,
     @LinkDisabledApiRepository private val linkDisabledApiRepository: LinkRepository,
     @IOContext private val workContext: CoroutineContext,
-    private val customerRepository: CustomerRepository,
+    private val retrieveCustomerEmail: RetrieveCustomerEmail,
     private val logger: Logger
 ) : LogLinkGlobalHoldbackExposure {
 
@@ -64,7 +66,7 @@ internal class DefaultLogLinkGlobalHoldbackExposure @Inject constructor(
 
         val customerEmail = state.getEmail()
 
-        val isReturningUser: Boolean = customerEmail?.let { isReturningUser(email = it) } == true
+        val isReturningUser: Boolean = customerEmail != null && isReturningUser(customerEmail)
 
         logger.debug(
             """Link Global Holdback exposure: 
@@ -88,25 +90,21 @@ internal class DefaultLogLinkGlobalHoldbackExposure @Inject constructor(
         return linkDisabledApiRepository
             .lookupConsumerWithoutBackendLoggingForExposure(email)
             .map { it.exists }
-            .fold(
-                onSuccess = { it },
-                onFailure = {
-                    logger.error("Failed to check if user is returning", it)
-                    false
-                }
-            )
+            .getOrElse {
+                logger.error("Failed to check if user is returning", it)
+                false
+            }
     }
 
     private suspend fun PaymentElementLoader.State.getEmail(): String? =
-        paymentMethodMetadata.linkState?.configuration?.customerInfo?.email
-            ?: config.defaultBillingDetails?.email
-            ?: customer?.let {
-                customerRepository.retrieveCustomer(
-                    CustomerRepository.CustomerInfo(
-                        id = it.id,
-                        ephemeralKeySecret = it.ephemeralKeySecret,
-                        customerSessionClientSecret = it.customerSessionClientSecret
-                    )
+        paymentMethodMetadata.linkState?.configuration?.customerInfo?.email ?: retrieveCustomerEmail(
+            configuration = config,
+            customer = customer?.let {
+                CustomerRepository.CustomerInfo(
+                    id = it.id,
+                    ephemeralKeySecret = it.ephemeralKeySecret,
+                    customerSessionClientSecret = it.customerSessionClientSecret
                 )
-            }?.email
+            }
+        )
 }

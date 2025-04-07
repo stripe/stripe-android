@@ -1,6 +1,7 @@
 package com.stripe.android.common.analytics.experiment
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.CommonConfigurationFactory
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.TestFactory
@@ -14,8 +15,10 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.state.DefaultRetrieveCustomerEmail
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.utils.FakeCustomerRepository
@@ -26,7 +29,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class LogLinkGlobalHoldbackExposureTest {
@@ -36,6 +38,7 @@ class LogLinkGlobalHoldbackExposureTest {
     private lateinit var linkRepository: FakeLinkRepository
     private lateinit var logLinkGlobalHoldbackExposure: LogLinkGlobalHoldbackExposure
     private lateinit var customerRepository: FakeCustomerRepository
+    private lateinit var retrieveCustomerEmail: RetrieveCustomerEmail
 
     @get:Rule
     var rule: TestRule = InstantTaskExecutorRule()
@@ -54,13 +57,14 @@ class LogLinkGlobalHoldbackExposureTest {
         logger = FakeLogger()
         linkRepository = FakeLinkRepository()
         customerRepository = FakeCustomerRepository()
+        retrieveCustomerEmail = DefaultRetrieveCustomerEmail(customerRepository)
 
         logLinkGlobalHoldbackExposure = DefaultLogLinkGlobalHoldbackExposure(
             linkDisabledApiRepository = linkRepository,
             eventReporter = eventReporter,
             logger = logger,
-            customerRepository = customerRepository,
-            workContext = testDispatcher
+            workContext = testDispatcher,
+            retrieveCustomerEmail = retrieveCustomerEmail
         )
     }
 
@@ -174,9 +178,11 @@ class LogLinkGlobalHoldbackExposureTest {
         assertEquals(lookupCall.email, TestFactory.LINK_CONFIGURATION.customerInfo.email!!)
 
         val exposureCall = eventReporter.experimentExposureCalls.awaitItem()
-        assertTrue(exposureCall.experiment is LoggableExperiment.LinkGlobalHoldback)
-        assertEquals(exposureCall.experiment.group, "holdback")
-        assertTrue((exposureCall.experiment.isReturningLinkConsumer))
+        val experiment = exposureCall.experiment
+        assertTrue(experiment is LoggableExperiment.LinkGlobalHoldback)
+        assertThat(experiment).isInstanceOf(LoggableExperiment.LinkGlobalHoldback::class.java)
+        assertThat(experiment.group).isEqualTo("holdback")
+        assertThat(experiment.isReturningLinkConsumer).isTrue()
     }
 
     @Test
@@ -217,8 +223,8 @@ class LogLinkGlobalHoldbackExposureTest {
 
         val exposureCall = eventReporter.experimentExposureCalls.awaitItem()
         assertTrue(exposureCall.experiment is LoggableExperiment.LinkGlobalHoldback)
-        assertEquals(exposureCall.experiment.group, "holdback")
-        assertFalse((exposureCall.experiment.isReturningLinkConsumer))
+        assertThat(exposureCall.experiment.group).isEqualTo("holdback")
+        assertThat(exposureCall.experiment.isReturningLinkConsumer).isFalse()
     }
 
     private fun createElementsSession(

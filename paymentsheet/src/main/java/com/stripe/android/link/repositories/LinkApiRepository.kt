@@ -64,6 +64,7 @@ internal class LinkApiRepository @Inject constructor(
                 consumersApiService.lookupConsumerSession(
                     email = email,
                     requestSurface = REQUEST_SURFACE,
+                    doNotLogConsumerFunnelEvent = false,
                     requestOptions = buildRequestOptions(),
                 )
             )

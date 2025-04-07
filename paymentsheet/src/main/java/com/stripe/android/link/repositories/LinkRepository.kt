@@ -28,7 +28,7 @@ internal interface LinkRepository {
     ): Result<ConsumerSessionLookup>
 
     /**
-     * Performs a lookup of a consumer session  without triggering any
+     * Performs a lookup of a consumer session without triggering any
      * back end logging events. This is currently only being used by the
      * Link global holdback to look up consumers in the event Link is disabled.
      */

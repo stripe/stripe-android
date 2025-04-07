@@ -2844,7 +2844,8 @@ internal class DefaultPaymentElementLoaderTest {
             externalPaymentMethodsRepository = ExternalPaymentMethodsRepository(errorReporter = FakeErrorReporter()),
             userFacingLogger = userFacingLogger,
             cvcRecollectionHandler = CvcRecollectionHandlerImpl(),
-            logLinkGlobalHoldbackExposure = FakeLogLinkGlobalHoldbackExposure()
+            logLinkGlobalHoldbackExposure = FakeLogLinkGlobalHoldbackExposure(),
+            retrieveCustomerEmail = DefaultRetrieveCustomerEmail(customerRepository)
         )
     }
 

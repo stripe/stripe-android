@@ -45,7 +45,7 @@ interface ConsumersApiService {
     suspend fun lookupConsumerSession(
         email: String,
         requestSurface: String,
-        doNotLogConsumerFunnelEvent: Boolean = false,
+        doNotLogConsumerFunnelEvent: Boolean,
         requestOptions: ApiRequest.Options
     ): ConsumerSessionLookup
 
