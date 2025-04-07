@@ -24,7 +24,7 @@ import com.stripe.android.uicore.elements.compat.errorSemanticsWithDefault
 @SuppressWarnings("SpreadOperator")
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun ExpiryTextField(
+internal fun ExpiryTextField(
     modifier: Modifier = Modifier,
     expDate: String,
     enabled: Boolean,
