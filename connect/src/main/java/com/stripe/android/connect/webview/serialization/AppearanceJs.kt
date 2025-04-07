@@ -363,7 +363,7 @@ internal data class AppearanceVariablesJs(
 )
 
 private fun Float?.toPx(): String? {
-    return this?.let { "${it.toString().removeSuffix(".0")}px" }
+    return this?.let { "${roundToInt()}px" }
 }
 
 /**
