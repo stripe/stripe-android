@@ -15,7 +15,7 @@ import kotlin.coroutines.CoroutineContext
  *
  * Pulled from: https://github.com/robolectric/robolectric/issues/7055#issuecomment-1551119229
  */
-class ComposeCleanupRule internal constructor() : TestWatcher() {
+private class ComposeCleanupRule : TestWatcher() {
     override fun finished(description: Description?) {
         val clazz = javaClass.classLoader!!.loadClass("androidx.compose.ui.platform.AndroidUiDispatcher")
         val combinedContextClass = javaClass.classLoader!!.loadClass("kotlin.coroutines.CombinedContext")
@@ -56,4 +56,4 @@ class ComposeCleanupRule internal constructor() : TestWatcher() {
     }
 }
 
-fun createComposeCleanupRule() = ComposeCleanupRule()
+fun createComposeCleanupRule(): TestWatcher = ComposeCleanupRule()
