@@ -79,7 +79,7 @@ internal fun ExpiryTextField(
             topEnd = ZeroCornerSize,
             bottomEnd = ZeroCornerSize,
         ),
-        shouldShowError = textFieldState.shouldShowError(true),
+        shouldShowError = isError,
         visualTransformation = if (enabled) {
             ExpiryDateVisualTransformation()
         } else {
