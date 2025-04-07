@@ -39,7 +39,7 @@ internal fun ExpiryTextField(
     val textFieldState = remember(date) {
         validator(date)
     }
-    val isError = textFieldState.shouldShowError(true)
+    val isError = enabled && textFieldState.shouldShowError(hasFocus = true)
     val sectionErrorString = textFieldState.getError()?.takeIf {
         isError
     }?.let {
@@ -56,7 +56,7 @@ internal fun ExpiryTextField(
     CommonTextField(
         modifier = modifier
             .indicatorLine(
-                enabled = true,
+                enabled = enabled,
                 isError = isError,
                 interactionSource = interactionSource,
                 colors = colors

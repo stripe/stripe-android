@@ -164,7 +164,6 @@ internal class CardDetailsEntryTest {
         assertThat(params.expiryYear).isNull()
     }
 
-    // Helper methods for creating test objects
     private fun createEntry(
         cardBrandChoice: CardBrandChoice = CardBrandChoice(CardBrand.Visa, true),
         expMonth: Int? = 12,
