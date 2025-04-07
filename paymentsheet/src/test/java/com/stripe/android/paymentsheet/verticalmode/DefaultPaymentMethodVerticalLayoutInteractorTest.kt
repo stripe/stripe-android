@@ -26,6 +26,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import com.stripe.android.paymentsheet.R as PaymentSheetR
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
@@ -496,9 +498,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 assertThat(displayablePaymentMethods.map { it.code }).containsNoneOf("link", "google_pay")
             }
         }
-        interactor.showsWalletsHeader.test {
-            assertThat(awaitItem()).isTrue()
-        }
+        assertTrue(interactor.showsWalletsHeader(walletsState.value))
     }
 
     @Test
@@ -528,9 +528,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                     .isEqualTo(listOf("link", "google_pay", "card", "cashapp"))
             }
         }
-        interactor.showsWalletsHeader.test {
-            assertThat(awaitItem()).isFalse()
-        }
+        assertFalse(interactor.showsWalletsHeader(walletsState.value))
     }
 
     @Test
@@ -590,9 +588,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                     .isEqualTo(listOf("card", "cashapp"))
             }
         }
-        interactor.showsWalletsHeader.test {
-            assertThat(awaitItem()).isTrue()
-        }
+        assertTrue(interactor.showsWalletsHeader(walletsState.value))
     }
 
     @Test
@@ -622,9 +618,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                     .isEqualTo(listOf("google_pay", "card", "cashapp"))
             }
         }
-        interactor.showsWalletsHeader.test {
-            assertThat(awaitItem()).isFalse()
-        }
+        assertFalse(interactor.showsWalletsHeader(walletsState.value))
     }
 
     @Test

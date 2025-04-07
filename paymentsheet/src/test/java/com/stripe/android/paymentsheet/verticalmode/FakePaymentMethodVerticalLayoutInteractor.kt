@@ -4,12 +4,13 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentsheet.ViewActionRecorder
+import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 
 internal class FakePaymentMethodVerticalLayoutInteractor(
     initialState: PaymentMethodVerticalLayoutInteractor.State,
-    initialShowsWalletsHeader: Boolean = false,
+    private val initialShowsWalletsHeader: Boolean = false,
     private val viewActionRecorder: ViewActionRecorder<PaymentMethodVerticalLayoutInteractor.ViewAction>
 ) : PaymentMethodVerticalLayoutInteractor {
     companion object {
@@ -48,7 +49,7 @@ internal class FakePaymentMethodVerticalLayoutInteractor(
 
     override val isLiveMode: Boolean = true
     override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = stateFlowOf(initialState)
-    override val showsWalletsHeader: StateFlow<Boolean> = stateFlowOf(initialShowsWalletsHeader)
+    override fun showsWalletsHeader(walletsState: WalletsState?): Boolean = initialShowsWalletsHeader
 
     override fun handleViewAction(viewAction: PaymentMethodVerticalLayoutInteractor.ViewAction) {
         viewActionRecorder.record(viewAction)

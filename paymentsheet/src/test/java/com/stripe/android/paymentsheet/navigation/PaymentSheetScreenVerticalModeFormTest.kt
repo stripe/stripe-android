@@ -13,9 +13,9 @@ internal class PaymentSheetScreenVerticalModeFormTest {
     @Test
     fun `title returns null`() = runTest {
         val interactor = FakeVerticalModeFormInteractor()
-        PaymentSheetScreen.VerticalModeForm(interactor).title(isCompleteFlow = true, isWalletEnabled = true).test {
-            assertThat(awaitItem()).isNull()
-        }
+        assertThat(
+            PaymentSheetScreen.VerticalModeForm(interactor).title(isCompleteFlow = true, isWalletEnabled = true)
+        ).isNull()
     }
 
     @Test

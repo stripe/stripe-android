@@ -166,6 +166,14 @@ private fun PaymentSheetScreen(
     }
 }
 
+internal data class PaymentSheetScreenContentState(
+    val showsWalletsHeader: Boolean = false,
+    val actualWalletsState: WalletsState? = null,
+    val headerText: ResolvableString? = null,
+    val currentScreen: PaymentSheetScreen = PaymentSheetScreen.Loading,
+    val primaryButtonUiState: PrimaryButton.UIState? = null,
+)
+
 @Composable
 internal fun PaymentSheetScreenContent(
     viewModel: BaseSheetViewModel,
@@ -178,27 +186,22 @@ internal fun PaymentSheetScreenContent(
     val error by viewModel.error.collectAsState()
     val mandateText by viewModel.mandateHandler.mandateText.collectAsState()
     val currentScreen by viewModel.navigationHandler.currentScreen.collectAsState()
+    val primaryButtonUiState by viewModel.primaryButtonUiState.collectAsState(Dispatchers.Main)
 
-    ResetScroll(scrollState = scrollState, currentScreen = currentScreen)
+    val uiState by currentScreen.paymentSheetScreenContentState(
+        type = type,
+        walletsState = walletsState,
+        primaryButtonUiState = primaryButtonUiState
+    ).collectAsState()
 
-    val showsWalletsHeader by remember(currentScreen, type) {
-        currentScreen.showsWalletsHeader(isCompleteFlow = type == Complete)
-    }.collectAsState()
-
-    val actualWalletsState = walletsState.takeIf { showsWalletsHeader }
-
-    val headerText by remember(currentScreen, type, actualWalletsState != null) {
-        currentScreen.title(isCompleteFlow = type == Complete, isWalletEnabled = actualWalletsState != null)
-    }.collectAsState()
+    ResetScroll(scrollState = scrollState, currentScreen = uiState.currentScreen)
 
     Column(modifier) {
         PaymentSheetContent(
             viewModel = viewModel,
-            headerText = headerText,
-            walletsState = actualWalletsState,
+            uiState = uiState,
             walletsProcessingState = walletsProcessingState,
             error = error,
-            currentScreen = currentScreen,
             mandateText = mandateText,
         )
 
@@ -255,28 +258,24 @@ private fun BoxScope.ProgressOverlay(walletsProcessingState: WalletsProcessingSt
 @Composable
 private fun PaymentSheetContent(
     viewModel: BaseSheetViewModel,
-    headerText: ResolvableString?,
-    walletsState: WalletsState?,
+    uiState: PaymentSheetScreenContentState,
     walletsProcessingState: WalletsProcessingState?,
     error: ResolvableString?,
-    currentScreen: PaymentSheetScreen,
     mandateText: MandateText?,
 ) {
     @Composable
     fun Content(modifier: Modifier) {
         PaymentSheetContent(
             viewModel = viewModel,
-            headerText = headerText,
-            walletsState = walletsState,
+            uiState = uiState,
             walletsProcessingState = walletsProcessingState,
             error = error,
-            currentScreen = currentScreen,
             mandateText = mandateText,
             modifier = modifier
         )
     }
 
-    when (currentScreen.animationStyle) {
+    when (uiState.currentScreen.animationStyle) {
         PaymentSheetScreen.AnimationStyle.PrimaryButtonAnchored -> {
             Content(modifier = Modifier.animateContentSize())
         }
@@ -291,17 +290,15 @@ private fun PaymentSheetContent(
 @Composable
 private fun PaymentSheetContent(
     viewModel: BaseSheetViewModel,
-    headerText: ResolvableString?,
-    walletsState: WalletsState?,
+    uiState: PaymentSheetScreenContentState,
     walletsProcessingState: WalletsProcessingState?,
     error: ResolvableString?,
-    currentScreen: PaymentSheetScreen,
     mandateText: MandateText?,
     modifier: Modifier
 ) {
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
-    Column(modifier = modifier.padding(bottom = currentScreen.bottomContentPadding)) {
-        headerText?.let { text ->
+    Column(modifier = modifier.padding(bottom = uiState.currentScreen.bottomContentPadding)) {
+        uiState.headerText?.let { text ->
             H4Text(
                 text = text.resolve(),
                 modifier = Modifier
@@ -310,14 +307,14 @@ private fun PaymentSheetContent(
             )
         }
 
-        walletsState?.let { state ->
-            val bottomSpacing = currentScreen.walletsDividerSpacing - currentScreen.topContentPadding
+        uiState.actualWalletsState?.let { state ->
+            val bottomSpacing = uiState.currentScreen.walletsDividerSpacing - uiState.currentScreen.topContentPadding
             Wallet(
                 state = state,
                 processingState = walletsProcessingState,
                 onGooglePayPressed = state.onGooglePayPressed,
                 onLinkPressed = state.onLinkPressed,
-                dividerSpacing = currentScreen.walletsDividerSpacing,
+                dividerSpacing = uiState.currentScreen.walletsDividerSpacing,
                 modifier = Modifier.padding(bottom = bottomSpacing),
                 cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance)
             )
@@ -325,13 +322,13 @@ private fun PaymentSheetContent(
 
         Column(modifier = Modifier.fillMaxWidth()) {
             EventReporterProvider(viewModel.eventReporter) {
-                currentScreen.Content(
+                uiState.currentScreen.Content(
                     modifier = Modifier.padding(bottom = 8.dp),
                 )
             }
         }
 
-        if (mandateText?.showAbovePrimaryButton == true && currentScreen.showsMandates) {
+        if (mandateText?.showAbovePrimaryButton == true && uiState.currentScreen.showsMandates) {
             Mandate(
                 mandateText = mandateText.text?.resolve(),
                 modifier = Modifier
@@ -352,10 +349,10 @@ private fun PaymentSheetContent(
         }
     }
 
-    PrimaryButton(viewModel)
+    PrimaryButton(viewModel, uiState.primaryButtonUiState)
 
     Box(modifier = modifier) {
-        if (mandateText?.showAbovePrimaryButton == false && currentScreen.showsMandates) {
+        if (mandateText?.showAbovePrimaryButton == false && uiState.currentScreen.showsMandates) {
             Mandate(
                 mandateText = mandateText.text?.resolve(),
                 modifier = Modifier
@@ -422,15 +419,11 @@ internal fun Wallet(
 }
 
 @Composable
-private fun PrimaryButton(viewModel: BaseSheetViewModel) {
-    val uiState = viewModel.primaryButtonUiState.collectAsState(Dispatchers.Main)
-
+private fun PrimaryButton(viewModel: BaseSheetViewModel, currentState: PrimaryButton.UIState?) {
     val modifier = Modifier
         .testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
         .semantics {
             role = Role.Button
-
-            val currentState = uiState.value
 
             if (currentState == null || !currentState.enabled) {
                 disabled()
@@ -457,16 +450,11 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
             )
             binding
         },
+        update = {
+            button?.updateUiState(currentState)
+        },
         modifier = modifier,
     )
-
-    LaunchedEffect(viewModel, button) {
-        viewModel.primaryButtonUiState.collect { uiState ->
-            withContext(Dispatchers.Main) {
-                button?.updateUiState(uiState)
-            }
-        }
-    }
 
     LaunchedEffect(viewModel, button) {
         (viewModel as? PaymentSheetViewModel)?.buyButtonState?.collect { state ->
