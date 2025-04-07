@@ -5,6 +5,7 @@ import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.TextTransform
 import kotlinx.serialization.Serializable
+import kotlin.math.roundToInt
 
 @Serializable
 internal data class AppearanceJs(
