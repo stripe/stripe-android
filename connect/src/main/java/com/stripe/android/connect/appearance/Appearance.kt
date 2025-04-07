@@ -52,7 +52,8 @@ class Appearance private constructor(
             apply { this.typography = typography }
 
         /**
-         * Describes the spacing unit appearance settings.
+         * The base spacing unit that derives all spacing values.
+         * Increase or decrease this value to make your layout more or less spacious.
          */
         fun spacingUnit(spacingUnit: Float): Builder =
             apply { this.spacingUnit = spacingUnit }
