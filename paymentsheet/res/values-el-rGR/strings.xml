@@ -16,6 +16,8 @@
   <string name="stripe_bank_account_with_last_4">Τραπεζικός λογαριασμός ····%s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Επιβεβαιώστε την πληρωμή στην εφαρμογή της τράπεζάς σας μέσα σε %s για την ολοκλήρωση της αγοράς.</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_cashapp_afterpay_subtitle">Αγορά τώρα ή πληρωμή αργότερα με Cash App Afterpay</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
   <string name="stripe_clearpay_subtitle">Αγορά τώρα ή πληρωμή αργότερα με Clearpay</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
@@ -91,6 +93,8 @@
   <string name="stripe_paymentsheet_manage_bank_account">Διαχείριση τραπεζικού λογαριασμού στις Ηνωμένες Πολιτείες</string>
   <!-- Title shown above a view containing a customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_card">Διαχείριση κάρτας</string>
+  <!-- Title shown above a view containing the customer's cards that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_cards">Διαχείριση καρτών</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Διαχείριση μεθόδων πληρωμής</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
@@ -147,6 +151,8 @@
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Αποθηκεύστε αυτή την κάρτα για μελλοντικές %s πληρωμές</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">Αποθηκεύτηκε</string>
+  <!-- Title shown above a view containing the customer's cards -->
+  <string name="stripe_paymentsheet_select_card">Επιλογή κάρτας</string>
   <!-- Title shown above a view containing the customer's payment methods -->
   <string name="stripe_paymentsheet_select_payment_method">Επιλέξτε μέθοδο πληρωμής</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->

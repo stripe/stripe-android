@@ -16,6 +16,8 @@
   <string name="stripe_bank_account_with_last_4">Rekening bank ····%s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Konfirmasikan pembayaran di aplikasi bank Anda dalam %s untuk menyelesaikan pembelian.</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_cashapp_afterpay_subtitle">Beli sekarang atau bayar nanti dengan Cash App Afterpay</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
   <string name="stripe_clearpay_subtitle">Beli sekarang atau bayar nanti dengan Clearpay</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
@@ -91,6 +93,8 @@
   <string name="stripe_paymentsheet_manage_bank_account">Kelola rekening bank AS</string>
   <!-- Title shown above a view containing a customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_card">Kelola kartu</string>
+  <!-- Title shown above a view containing the customer's cards that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_cards">Kelola kartu</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Kelola metode pembayaran</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
@@ -147,6 +151,8 @@
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Simpan kartu ini untuk pembayaran %s mendatang</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">Disimpan</string>
+  <!-- Title shown above a view containing the customer's cards -->
+  <string name="stripe_paymentsheet_select_card">Pilih kartu</string>
   <!-- Title shown above a view containing the customer's payment methods -->
   <string name="stripe_paymentsheet_select_payment_method">Pilih metode pembayaran</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->

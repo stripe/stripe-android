@@ -16,6 +16,8 @@
   <string name="stripe_bank_account_with_last_4">은행 계좌 ····%s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">%s 이내에 은행 앱에서 결제를 확인하여 구매를 완료하십시오.</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_cashapp_afterpay_subtitle">지금 구매하거나 Cash App Afterpay로 나중에 결제</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
   <string name="stripe_clearpay_subtitle">지금 구매하거나 Clearpay로 나중에 결제</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
@@ -91,6 +93,8 @@
   <string name="stripe_paymentsheet_manage_bank_account">미국 은행 계좌 관리</string>
   <!-- Title shown above a view containing a customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_card">카드 관리</string>
+  <!-- Title shown above a view containing the customer's cards that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_cards">카드 관리</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">결제 방식 관리</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
@@ -147,6 +151,8 @@
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">이 카드를 향후 %s 결제에 사용하도록 저장</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">저장함</string>
+  <!-- Title shown above a view containing the customer's cards -->
+  <string name="stripe_paymentsheet_select_card">카드 선택</string>
   <!-- Title shown above a view containing the customer's payment methods -->
   <string name="stripe_paymentsheet_select_payment_method">결제 방식 선택</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->

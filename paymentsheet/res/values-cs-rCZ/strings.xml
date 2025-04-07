@@ -16,6 +16,8 @@
   <string name="stripe_bank_account_with_last_4">Bankovní účet ····%s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Dokončete nákup potvrzením platby v bankovní aplikaci do  %s.</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_cashapp_afterpay_subtitle">Koupit nyní nebo zaplatit později s Cash App Afterpay</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
   <string name="stripe_clearpay_subtitle">Koupit nyní nebo zaplatit pomocí Clearpay</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
@@ -91,6 +93,8 @@
   <string name="stripe_paymentsheet_manage_bank_account">Správa bankovního účtu v USA</string>
   <!-- Title shown above a view containing a customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_card">Spravovat kartu</string>
+  <!-- Title shown above a view containing the customer's cards that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_cards">Spravovat karty</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Spravovat způsoby platby</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
@@ -147,6 +151,8 @@
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Uložit tuto kartu pro budoucí platby %s</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">Uloženo</string>
+  <!-- Title shown above a view containing the customer's cards -->
+  <string name="stripe_paymentsheet_select_card">Vybrat kartu</string>
   <!-- Title shown above a view containing the customer's payment methods -->
   <string name="stripe_paymentsheet_select_payment_method">Vybrat způsob platby</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
