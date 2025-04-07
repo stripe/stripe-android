@@ -2,14 +2,10 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
-## 21.10.0 - 2025-04-11
-
-### Payments
-* [FIXED][10590](https://github.com/stripe/stripe-android/pull/10590) Fix 3DS2 Challenge Response parsing error.
-* [FIXED][10612](https://github.com/stripe/stripe-android/pull/10612) Fix JWS validation error in 3DS2 flow.
-
-### PaymentSheet
-* [ADDED][10587](https://github.com/stripe/stripe-android/pull/10587) Embedded Payment Element is now in private beta.
+Dependencies updated in [10579](https://github.com/stripe/stripe-android/pull/10579):
+* Bumped Accompanist from 0.34.0 to 0.36.0.
+* Bumped Compose from 1.6.8 to 1.7.6.
+* Bumped Androidx Navigation from 2.7.7 to 2.8.5.
 
 ## 21.9.0 - 2025-04-07
 

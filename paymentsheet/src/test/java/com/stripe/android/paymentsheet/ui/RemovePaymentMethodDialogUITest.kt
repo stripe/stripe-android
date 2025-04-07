@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
+import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.elements.TEST_TAG_SIMPLE_DIALOG
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -21,6 +22,9 @@ class RemovePaymentMethodDialogUITest {
 
     @get:Rule
     val composeRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     @Test
     fun removeDescription_usesSelectedBrandIfAvailable() {
