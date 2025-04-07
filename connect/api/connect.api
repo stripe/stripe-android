@@ -156,7 +156,7 @@ public final class com/stripe/android/connect/StripeEmbeddedComponentListener$De
 public final class com/stripe/android/connect/appearance/Appearance : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public synthetic fun <init> (Lcom/stripe/android/connect/appearance/Colors;Lcom/stripe/android/connect/appearance/CornerRadius;Lcom/stripe/android/connect/appearance/Typography;Lcom/stripe/android/connect/appearance/Button;Lcom/stripe/android/connect/appearance/Button;Lcom/stripe/android/connect/appearance/Badge;Lcom/stripe/android/connect/appearance/Badge;Lcom/stripe/android/connect/appearance/Badge;Lcom/stripe/android/connect/appearance/Badge;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun <init> (Lcom/stripe/android/connect/appearance/Colors;Lcom/stripe/android/connect/appearance/CornerRadius;Lcom/stripe/android/connect/appearance/Typography;Ljava/lang/Float;Lcom/stripe/android/connect/appearance/Button;Lcom/stripe/android/connect/appearance/Button;Lcom/stripe/android/connect/appearance/Badge;Lcom/stripe/android/connect/appearance/Badge;Lcom/stripe/android/connect/appearance/Badge;Lcom/stripe/android/connect/appearance/Badge;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
@@ -176,6 +176,7 @@ public final class com/stripe/android/connect/appearance/Appearance$Builder {
 	public final fun buttonSecondary (Lcom/stripe/android/connect/appearance/Button;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
 	public final fun colors (Lcom/stripe/android/connect/appearance/Colors;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
 	public final fun cornerRadius (Lcom/stripe/android/connect/appearance/CornerRadius;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
+	public final fun spacingUnit (F)Lcom/stripe/android/connect/appearance/Appearance$Builder;
 	public final fun typography (Lcom/stripe/android/connect/appearance/Typography;)Lcom/stripe/android/connect/appearance/Appearance$Builder;
 }
 
