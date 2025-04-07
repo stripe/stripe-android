@@ -36,12 +36,12 @@ internal class CardDetailsEditUITest {
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
     @Test
-    fun missingExpiryDate_displaysDots_whenExpDateIsReadOnly() {
+    fun missingExpiryMonth_displaysDots_whenExpDateIsReadOnly() {
         runScenario(
             card = PaymentMethodFixtures.CARD_WITH_NETWORKS.copy(
                 expiryMonth = null
             ),
-            shouldAllowExpDateEdit = false
+            expiryDateEditEnabled = false
         ) {
             assertExpiryDateEquals(
                 "••/••"
@@ -50,12 +50,12 @@ internal class CardDetailsEditUITest {
     }
 
     @Test
-    fun invalidExpiryMonth_displaysDots_whenExpDateIsReadOnly() {
+    fun missingExpiryYear_displaysDots_whenExpDateIsReadOnly() {
         runScenario(
             card = PaymentMethodFixtures.CARD_WITH_NETWORKS.copy(
-                expiryMonth = -1
+                expiryYear = null
             ),
-            shouldAllowExpDateEdit = false
+            expiryDateEditEnabled = false
         ) {
             assertExpiryDateEquals(
                 "••/••"
@@ -64,15 +64,136 @@ internal class CardDetailsEditUITest {
     }
 
     @Test
-    fun invalidExpiryYear_displaysDots_whenExpDateIsReadOnly() {
+    fun invalidExpiryMonth_below1_displaysDots_whenExpDateIsReadOnly() {
+        runScenario(
+            card = PaymentMethodFixtures.CARD_WITH_NETWORKS.copy(
+                expiryMonth = 0
+            ),
+            expiryDateEditEnabled = false
+        ) {
+            assertExpiryDateEquals(
+                "••/••"
+            )
+        }
+    }
+
+    @Test
+    fun invalidExpiryMonth_above12_displaysDots_whenExpDateIsReadOnly() {
+        runScenario(
+            card = PaymentMethodFixtures.CARD_WITH_NETWORKS.copy(
+                expiryMonth = 13
+            ),
+            expiryDateEditEnabled = false
+        ) {
+            assertExpiryDateEquals(
+                "••/••"
+            )
+        }
+    }
+
+    @Test
+    fun invalidExpiryYear_below2000_displaysDots_whenExpDateIsReadOnly() {
+        runScenario(
+            card = PaymentMethodFixtures.CARD_WITH_NETWORKS.copy(
+                expiryYear = 1999
+            ),
+            expiryDateEditEnabled = false
+        ) {
+            assertExpiryDateEquals(
+                "••/••"
+            )
+        }
+    }
+
+    @Test
+    fun invalidExpiryYear_above2100_displaysDots_whenExpDateIsReadOnly() {
+        runScenario(
+            card = PaymentMethodFixtures.CARD_WITH_NETWORKS.copy(
+                expiryYear = 2101
+            ),
+            expiryDateEditEnabled = false
+        ) {
+            assertExpiryDateEquals(
+                "••/••"
+            )
+        }
+    }
+
+    @Test
+    fun invalidExpiryMonth_below1_displaysDots_whenExpDateIsEditable() {
+        runScenario(
+            card = PaymentMethodFixtures.CARD_WITH_NETWORKS.copy(
+                expiryMonth = 0
+            ),
+            expiryDateEditEnabled = false
+        ) {
+            assertExpiryDateEquals(
+                "••/••"
+            )
+        }
+    }
+
+    @Test
+    fun invalidExpiryMonth_over12_displaysDots_whenExpDateIsEditable() {
         runScenario(
             card = PaymentMethodFixtures.CARD_WITH_NETWORKS.copy(
                 expiryMonth = 202
             ),
-            shouldAllowExpDateEdit = false
         ) {
             assertExpiryDateEquals(
-                "••/••"
+                "00 / 29"
+            )
+        }
+    }
+
+    @Test
+    fun invalidExpiryYear_below2000_displaysDots_whenExpDateIsEditable() {
+        runScenario(
+            card = PaymentMethodFixtures.CARD_WITH_NETWORKS.copy(
+                expiryYear = 1999
+            ),
+        ) {
+            assertExpiryDateEquals(
+                "08 / 00"
+            )
+        }
+    }
+
+    @Test
+    fun invalidExpiryYear_above2100_displaysDots_whenExpDateIsEditable() {
+        runScenario(
+            card = PaymentMethodFixtures.CARD_WITH_NETWORKS.copy(
+                expiryYear = 2101
+            ),
+        ) {
+            assertExpiryDateEquals(
+                "08 / 00"
+            )
+        }
+    }
+
+    @Test
+    fun missingExpiryMonth_displaysDots_whenExpDateIsEditable() {
+        runScenario(
+            card = PaymentMethodFixtures.CARD_WITH_NETWORKS.copy(
+                expiryMonth = null
+            ),
+        ) {
+            assertExpiryDateEquals(
+                "00 / 29"
+            )
+        }
+    }
+
+    @Test
+    fun missingExpiryYear_displaysDots_whenExpDateIsEditable() {
+        runScenario(
+            card = PaymentMethodFixtures.CARD_WITH_NETWORKS.copy(
+                expiryYear = null
+            ),
+        ) {
+            assertExpiryDateEquals(
+                "08 / 00"
             )
         }
     }
@@ -80,7 +201,7 @@ internal class CardDetailsEditUITest {
     @Test
     fun expiryDateFieldDisabled_whenExpDateIsReadOnly() {
         runScenario(
-            shouldAllowExpDateEdit = false
+            expiryDateEditEnabled = false
         ) {
             composeRule.onNodeWithTag(UPDATE_PM_EXPIRY_FIELD_TEST_TAG).assertIsNotEnabled()
         }
@@ -258,13 +379,13 @@ internal class CardDetailsEditUITest {
     private fun runScenario(
         card: PaymentMethod.Card = PaymentMethodFixtures.CARD_WITH_NETWORKS,
         showCardBrandDropdown: Boolean = true,
-        shouldAllowExpDateEdit: Boolean = true,
+        expiryDateEditEnabled: Boolean = true,
         block: TestScenario.() -> Unit
     ) {
         val editCardDetailsInteractor = FakeEditCardDetailsInteractor(
             card = card,
             shouldShowCardBrandDropdown = showCardBrandDropdown,
-            shouldAllowExpDateEdit = shouldAllowExpDateEdit,
+            expiryDateEditEnabled = expiryDateEditEnabled,
         )
         composeRule.setContent {
             CardDetailsEditUI(

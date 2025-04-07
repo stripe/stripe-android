@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 internal class FakeEditCardDetailsInteractor(
     private val card: PaymentMethod.Card = PaymentMethodFixtures.CARD_WITH_NETWORKS,
     private val shouldShowCardBrandDropdown: Boolean = true,
-    private val shouldAllowExpDateEdit: Boolean = true,
+    private val expiryDateEditEnabled: Boolean = true,
     private val dateValidator: (String) -> TextFieldState = {
         DateConfig().determineState(it)
     },
@@ -27,7 +27,7 @@ internal class FakeEditCardDetailsInteractor(
                 CardBrandChoice(CardBrand.CartesBancaires, enabled = true),
                 CardBrandChoice(CardBrand.Visa, enabled = true),
             ),
-            shouldAllowExpDateEdit = shouldAllowExpDateEdit,
+            expiryDateEditEnabled = expiryDateEditEnabled,
             dateValidator = dateValidator
         )
     ),

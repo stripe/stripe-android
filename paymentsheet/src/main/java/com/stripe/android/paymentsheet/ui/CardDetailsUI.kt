@@ -26,7 +26,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.R
-import com.stripe.android.model.Card
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.uicore.elements.SectionError
@@ -46,7 +45,7 @@ internal fun CardDetailsEditUI(
         shouldShowCardBrandDropdown = state.shouldShowCardBrandDropdown,
         selectedBrand = state.selectedCardBrand,
         card = state.card,
-        expEditEnabled = state.shouldAllowExpDateEdit,
+        expiryDateEditEnabled = state.expiryDateEditEnabled,
         availableNetworks = state.availableNetworks,
         paymentMethodIcon = state.paymentMethodIcon,
         validateDate = {
@@ -66,7 +65,7 @@ private fun CardDetailsEditUI(
     shouldShowCardBrandDropdown: Boolean,
     selectedBrand: CardBrandChoice,
     card: PaymentMethod.Card,
-    expEditEnabled: Boolean,
+    expiryDateEditEnabled: Boolean,
     availableNetworks: List<CardBrandChoice>,
     @DrawableRes paymentMethodIcon: Int,
     validateDate: (String) -> TextFieldState,
@@ -104,8 +103,8 @@ private fun CardDetailsEditUI(
                                     (it.height / Resources.getSystem().displayMetrics.density).dp
                             },
                         validator = validateDate,
-                        expDate = card.formattedExpiryDate(expEditEnabled),
-                        enabled = expEditEnabled,
+                        expDate = card.formattedExpiryDate(expiryDateEditEnabled),
+                        enabled = expiryDateEditEnabled,
                         onErrorChanged = {
                             errorMessage = it
                         },
@@ -184,13 +183,13 @@ private fun ExpiryField(
 }
 
 private fun PaymentMethod.Card.formattedExpiryDate(
-    allowEdit: Boolean
+    expiryDateEditEnabled: Boolean
 ): String {
     val expiryMonth = this.expiryMonth
     val expiryYear = this.expiryYear
     @Suppress("ComplexCondition")
     if (
-        allowEdit.not() &&
+        expiryDateEditEnabled.not() &&
         (monthIsInvalid(expiryMonth) || yearIsInvalid(expiryYear))
     ) {
         return "••/••"
@@ -209,7 +208,7 @@ private fun PaymentMethod.Card.formattedExpiryDate(
     }
 
     val formattedExpiryYear = when {
-        expiryMonth == null || yearIsInvalid(expiryYear) -> {
+        expiryYear == null || yearIsInvalid(expiryYear) -> {
             "00"
         }
         else -> {

@@ -21,6 +21,7 @@ import com.stripe.android.uicore.elements.TextFieldState
 import com.stripe.android.uicore.elements.canAcceptInput
 import com.stripe.android.uicore.elements.compat.errorSemanticsWithDefault
 
+@SuppressWarnings("SpreadOperator")
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ExpiryTextField(

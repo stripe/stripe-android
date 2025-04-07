@@ -6,13 +6,13 @@ import com.stripe.android.core.utils.DateUtils
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CardUpdateParams
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import com.stripe.android.ui.core.elements.CardDetailsUtil
 import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.TextFieldState
 import com.stripe.android.uicore.forms.FormFieldEntry
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -37,7 +37,7 @@ internal interface EditCardDetailsInteractor {
         val selectedCardBrand: CardBrandChoice,
         val paymentMethodIcon: Int,
         val shouldShowCardBrandDropdown: Boolean,
-        val shouldAllowExpDateEdit: Boolean,
+        val expiryDateEditEnabled: Boolean,
         val availableNetworks: List<CardBrandChoice>,
         val dateValidator: (String) -> TextFieldState
     )
@@ -157,7 +157,7 @@ internal class DefaultEditCardDetailsInteractor(
             selectedCardBrand = cardBrandChoice,
             paymentMethodIcon = card.getSavedPaymentMethodIcon(forVerticalMode = true),
             shouldShowCardBrandDropdown = isModifiable && isExpired().not(),
-            shouldAllowExpDateEdit = isCardDetailEditSupported,
+            expiryDateEditEnabled = isCardDetailEditSupported,
             availableNetworks = card.getAvailableNetworks(cardBrandFilter),
             dateValidator = { date ->
                 dateConfig.determineState(date)
