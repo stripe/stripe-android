@@ -10,7 +10,6 @@ import com.stripe.android.model.ElementsSession.ExperimentAssignment.LINK_GLOBAL
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.LinkDisabledApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
 import kotlinx.coroutines.CoroutineScope
@@ -90,10 +89,9 @@ internal class DefaultLogLinkGlobalHoldbackExposure @Inject constructor(
         return linkDisabledApiRepository
             .lookupConsumerWithoutBackendLoggingForExposure(email)
             .map { it.exists }
-            .getOrElse {
+            .onFailure {
                 logger.error("Failed to check if user is returning", it)
-                false
-            }
+            }.getOrThrow()
     }
 
     private suspend fun PaymentElementLoader.State.getEmail(): String? =

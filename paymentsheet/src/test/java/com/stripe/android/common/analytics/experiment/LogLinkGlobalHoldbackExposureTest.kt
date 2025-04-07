@@ -186,6 +186,37 @@ class LogLinkGlobalHoldbackExposureTest {
     }
 
     @Test
+    fun `invoke should not log exposure and log local error if lookup fails`() = runTest {
+        val elementsSession = createElementsSession(
+            experimentsData = ElementsSession.ExperimentsData(
+                arbId = "test_arb_id",
+                experimentAssignments = mapOf(
+                    LINK_GLOBAL_HOLD_BACK to "holdback"
+                )
+            )
+        )
+        val state = createElementsState(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                linkState = LinkState(
+                    // preset link configuration with existing email.
+                    configuration = TestFactory.LINK_CONFIGURATION,
+                    loginState = LinkState.LoginState.NeedsVerification,
+                    signupMode = null
+                )
+            )
+        )
+
+        linkRepository.lookupConsumerWithoutBackendLoggingResult = Result.failure<ConsumerSessionLookup>(
+            IllegalArgumentException("Test exception")
+        )
+
+        logLinkGlobalHoldbackExposure(elementsSession, state)
+
+        eventReporter.experimentExposureCalls.expectNoEvents()
+        assertThat(logger.errorLogs.last().first).isEqualTo("Failed to log Global holdback exposure")
+    }
+
+    @Test
     fun `invoke should log exposure with non-returning user when user is not returning`() = runTest {
         val elementsSession = createElementsSession(
             experimentsData = ElementsSession.ExperimentsData(
