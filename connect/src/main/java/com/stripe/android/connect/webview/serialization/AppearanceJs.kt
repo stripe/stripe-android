@@ -368,8 +368,8 @@ private fun Float?.toPx(): String? {
 
 /**
  * We need to send the user's customization options to ConnectJS which is only aware of web.
- * While the integrator specifics font and spacing overrides with unscaled floats, we convert this to pixels
- * and append `px` to that value before sending it to ConnectJS.
+ * Unscaled floats are sent without conversion since browsers will appropriately
+ * scale `px` values.
  */
 @OptIn(PrivateBetaConnectSDK::class)
 @Suppress("LongMethod")
