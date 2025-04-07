@@ -58,7 +58,8 @@ fun ExpiryTextField(
             .indicatorLine(
                 enabled = true,
                 isError = isError,
-                interactionSource, colors
+                interactionSource = interactionSource,
+                colors = colors
             )
             .errorSemanticsWithDefault(isError, sectionErrorString),
         value = date,

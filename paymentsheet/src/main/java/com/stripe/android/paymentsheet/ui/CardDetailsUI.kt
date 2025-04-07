@@ -217,7 +217,11 @@ private fun PaymentMethod.Card.formattedExpiryDate(
         }
     }
 
-    return "$formattedExpiryMonth$formattedExpiryYear"
+    return if (expiryDateEditEnabled) {
+        "$formattedExpiryMonth$formattedExpiryYear"
+    } else {
+        "$formattedExpiryMonth/$formattedExpiryYear"
+    }
 }
 
 private fun monthIsInvalid(expiryMonth: Int?): Boolean {

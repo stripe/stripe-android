@@ -208,7 +208,37 @@ internal class CardDetailsEditUITest {
     }
 
     @Test
-    fun singleDigitExpiryMonth_hasLeadingZero() {
+    fun singleDigitExpiryMonth_hasLeadingZero_whenExpDateIsReadOnly() {
+        runScenario(
+            card = PaymentMethodFixtures.CARD_WITH_NETWORKS.copy(
+                expiryMonth = 8,
+                expiryYear = 2029,
+            ),
+            expiryDateEditEnabled = false
+        ) {
+            assertExpiryDateEquals(
+                "08/29"
+            )
+        }
+    }
+
+    @Test
+    fun doubleDigitExpiryMonth_doesNotHaveLeadingZero_whenExpDateIsReadOnly() {
+        runScenario(
+            card = PaymentMethodFixtures.CARD_WITH_NETWORKS.copy(
+                expiryMonth = 11,
+                expiryYear = 2029,
+            ),
+            expiryDateEditEnabled = false
+        ) {
+            assertExpiryDateEquals(
+                "11/29"
+            )
+        }
+    }
+
+    @Test
+    fun singleDigitExpiryMonth_hasLeadingZero_whenExpDateIsEditable() {
         runScenario(
             card = PaymentMethodFixtures.CARD_WITH_NETWORKS.copy(
                 expiryMonth = 8,
@@ -222,7 +252,7 @@ internal class CardDetailsEditUITest {
     }
 
     @Test
-    fun doubleDigitExpiryMonth_doesNotHaveLeadingZero() {
+    fun doubleDigitExpiryMonth_doesNotHaveLeadingZero_whenExpDateIsEditable() {
         runScenario(
             card = PaymentMethodFixtures.CARD_WITH_NETWORKS.copy(
                 expiryMonth = 11,

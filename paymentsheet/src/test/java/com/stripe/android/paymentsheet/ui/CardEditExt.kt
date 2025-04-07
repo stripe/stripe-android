@@ -20,11 +20,17 @@ internal fun EditCardDetailsInteractor.updateCardBrand(cardBrand: CardBrand) {
     )
 }
 
-internal fun UpdatePaymentMethodInteractor.cardParamsUpdateAction(cardBrand: CardBrand) {
+internal fun UpdatePaymentMethodInteractor.cardParamsUpdateAction(
+    cardBrand: CardBrand,
+    expiryMonth: Int? = null,
+    expiryYear: Int? = null,
+) {
     handleViewAction(
         viewAction = UpdatePaymentMethodInteractor.ViewAction.CardUpdateParamsChanged(
             cardUpdateParams = CardUpdateParams(
-                cardBrand = cardBrand
+                cardBrand = cardBrand,
+                expiryMonth = expiryMonth,
+                expiryYear = expiryYear,
             )
         )
     )
