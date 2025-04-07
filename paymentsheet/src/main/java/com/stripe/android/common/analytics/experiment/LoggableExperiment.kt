@@ -17,7 +17,9 @@ internal sealed class LoggableExperiment(
         val isReturningLinkConsumer: Boolean,
         val useLinkNative: Boolean,
         val emailRecognitionSource: EmailRecognitionSource?,
-        val providedDefaultValues: ProvidedDefaultValues
+        val providedDefaultValues: ProvidedDefaultValues,
+        val spmEnabled: Boolean,
+        val integrationShape: String
     ) : LoggableExperiment(
         arbId = arbId,
         group = group,
@@ -28,6 +30,8 @@ internal sealed class LoggableExperiment(
             "dvs_provided" to providedDefaultValues.toDimension(),
             "use_link_native" to useLinkNative.toString(),
             "email_recognition_source" to emailRecognitionSource?.dimension,
+            "spm_enabled" to spmEnabled.toString(),
+            "integration_shape" to integrationShape,
         ).filterNotNullValues()
     ) {
         enum class EmailRecognitionSource(val dimension: String) {

@@ -9,6 +9,8 @@ import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.ElementsSession.Customer.Components.MobilePaymentElement
+import com.stripe.android.model.ElementsSession.Customer.Components.MobilePaymentElement.Enabled
 import com.stripe.android.model.ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.LinkDisabledApiRepository
@@ -39,6 +41,7 @@ internal class DefaultLogLinkGlobalHoldbackExposure @Inject constructor(
     @IOContext private val workContext: CoroutineContext,
     private val retrieveCustomerEmail: RetrieveCustomerEmail,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
+    private val mode: EventReporter.Mode,
     private val logger: Logger
 ) : LogLinkGlobalHoldbackExposure {
 
@@ -77,6 +80,10 @@ internal class DefaultLogLinkGlobalHoldbackExposure @Inject constructor(
 
         val emailRecognitionSource = EmailRecognitionSource.EMAIL.takeIf { customerEmail != null }
 
+        val integrationShape = mode.code
+
+        val isSpmEnabled: Boolean = elementsSession.isSpmEnabled()
+
         logger.debug(
             """Link Global Holdback exposure: 
                 |arbId=${experimentsData.arbId},
@@ -84,15 +91,19 @@ internal class DefaultLogLinkGlobalHoldbackExposure @Inject constructor(
                 |group=$experimentGroup,
                 |defaultValues=$defaultValues,
                 |useLinkNative=$useLinkNative,
-                |emailRecognitionSource=$emailRecognitionSource
+                |emailRecognitionSource=$emailRecognitionSource,
+                |spmEnabled=$isSpmEnabled,
+                |integrationShape=$integrationShape
             """.trimMargin()
         )
         eventReporter.onExperimentExposure(
             experiment = LinkGlobalHoldback(
                 arbId = experimentsData.arbId,
                 isReturningLinkConsumer = isReturningUser,
-                providedDefaultValues = state.getDefaultValues(),
+                providedDefaultValues = defaultValues,
                 useLinkNative = useLinkNative,
+                spmEnabled = isSpmEnabled,
+                integrationShape = integrationShape,
                 emailRecognitionSource = emailRecognitionSource,
                 group = experimentGroup,
             ),
@@ -130,4 +141,11 @@ internal class DefaultLogLinkGlobalHoldbackExposure @Inject constructor(
                 )
             }
         )
+
+    private fun ElementsSession.isSpmEnabled(): Boolean {
+        val elementsConfiguration: MobilePaymentElement? = customer?.session
+            ?.components
+            ?.mobilePaymentElement
+        return elementsConfiguration is Enabled && elementsConfiguration.isPaymentMethodSaveEnabled == true
+    }
 }
