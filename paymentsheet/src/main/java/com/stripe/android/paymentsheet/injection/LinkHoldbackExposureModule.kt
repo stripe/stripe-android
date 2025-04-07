@@ -32,13 +32,13 @@ import kotlin.coroutines.CoroutineContext
  * requests (mainly for the Link Global Holdback) we need to provide a configuration-less [LinkApiRepository].
  *
  *  Qualifier to distinguish between the [LinkApiRepository] provided by
- *  the [com.stripe.android.link.LinkConfigurationCoordinator] and the one provided by the [LinkDisabledModule].
+ *  the [com.stripe.android.link.LinkConfigurationCoordinator] and the one provided by the [LinkHoldbackExposureModule].
  */
 @Qualifier
 internal annotation class LinkDisabledApiRepository
 
 @Module
-internal class LinkDisabledModule {
+internal class LinkHoldbackExposureModule {
 
     @Provides
     fun providesLogLinkGlobalHoldbackExposure(

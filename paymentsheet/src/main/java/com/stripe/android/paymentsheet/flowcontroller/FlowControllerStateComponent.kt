@@ -12,7 +12,7 @@ import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
-import com.stripe.android.paymentsheet.injection.LinkDisabledModule
+import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetCommonModule
 import com.stripe.android.ui.core.di.CardScanModule
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
@@ -34,7 +34,7 @@ import javax.inject.Singleton
         ResourceRepositoryModule::class,
         ApplicationIdModule::class,
         CardScanModule::class,
-        LinkDisabledModule::class
+        LinkHoldbackExposureModule::class
     ]
 )
 internal interface FlowControllerStateComponent {

@@ -171,7 +171,7 @@ class ConsumersApiServiceImpl(
         requestOptions: ApiRequest.Options
     ): ConsumerSessionLookup {
         val avoidConsumerLoggingParams: Map<String, Boolean> = if (doNotLogConsumerFunnelEvent) {
-            mapOf("TEMPORARY_AND_DANGEROUS__do_not_log_consumer_funnel_event" to true)
+            mapOf("do_not_log_consumer_funnel_event" to true)
         } else {
             emptyMap()
         }
