@@ -1,16 +1,22 @@
 package com.stripe.example.activity
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.PaymentAuthConfig
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
+import com.stripe.android.getPaymentIntentResult
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.example.Settings
 import com.stripe.example.databinding.PaymentAuthActivityBinding
+import kotlinx.coroutines.launch
 
 /**
  * An example of creating a PaymentIntent, then confirming it with [Stripe.confirmPayment]
@@ -83,6 +89,7 @@ class PaymentAuthActivity : StripeIntentActivity() {
         viewBinding.confirmWithPaymentLauncher.setOnClickListener {
             keyboardController.hide()
             usePaymentLauncher = true
+            viewBinding.confirmAfter3ds2.isEnabled = true
             viewBinding.cardInputWidget.paymentMethodCreateParams?.let {
                 createPaymentMethod(it)
             }
@@ -91,13 +98,14 @@ class PaymentAuthActivity : StripeIntentActivity() {
         viewBinding.confirmWithStripeKt.setOnClickListener {
             keyboardController.hide()
             usePaymentLauncher = false
+            viewBinding.confirmAfter3ds2.isEnabled = false
             viewBinding.cardInputWidget.paymentMethodCreateParams?.let {
                 createPaymentMethod(it)
             }
         }
 
         viewBinding.confirmAfter3ds2.setOnClickListener {
-            viewModel.confirmPaymentIntentWithIntentId()
+            viewModel.intentId?.let { viewModel.confirmPaymentIntentWithIntentId(it) }
         }
 
         viewBinding.setupButton.setOnClickListener {
@@ -106,6 +114,32 @@ class PaymentAuthActivity : StripeIntentActivity() {
                 confirmParams3ds2,
                 stripeAccountId = stripeAccountId
             )
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (viewModel.stripe.isPaymentResult(requestCode, data)) {
+            lifecycleScope.launch {
+                runCatching {
+                    viewModel.stripe.getPaymentIntentResult(requestCode, data!!)
+                }.fold(
+                    onSuccess = { result ->
+                        val paymentIntent = result.intent
+                        val status = paymentIntent.status
+
+                        viewBinding.status.text = "Status: ${status?.toString()}"
+                        if (status == StripeIntent.Status.RequiresConfirmation) {
+                            viewBinding.status.text = "Confirming intent ${paymentIntent.id}"
+                            viewModel.confirmPaymentIntentWithIntentId(paymentIntent.id!!)
+                        }
+                    },
+                    onFailure = {
+                        viewBinding.status.text = "Failed: ${it.message}"
+                    }
+                )
+            }
         }
     }
 

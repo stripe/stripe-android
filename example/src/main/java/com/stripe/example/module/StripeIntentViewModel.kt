@@ -27,6 +27,10 @@ internal class StripeIntentViewModel(
     val requiresAction = MutableLiveData<Boolean>()
     var piSecret: String? = null
     val stripe = StripeFactory(application).create()
+    var intentId: String? = null
+        get() {
+            return piSecret?.let { getIntentId(it) }
+        }
 
     fun createPaymentIntent(
         country: String,
@@ -78,8 +82,7 @@ internal class StripeIntentViewModel(
         }
     }
 
-    fun confirmPaymentIntentWithIntentId() {
-        val intentId = getIntentId(piSecret!!)
+    fun confirmPaymentIntentWithIntentId(intentId: String) {
         println("StripeSdk confirming intent id: $intentId")
         status.postValue("Confirming intent after 3ds2 auth: $intentId")
         viewModelScope.launch {

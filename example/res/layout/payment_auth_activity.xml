@@ -76,7 +76,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="12dp"
-            android:text="Confirm Intent (After 3ds2 Auth)" />
+            android:enabled="false"
+            android:text="Confirm Intent (After 3ds2 Auth) Payment Launcher only" />
 
         <View style="@style/Divider"
             android:layout_marginTop="12dp"
