@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet
 
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.core.mainthread.MainThreadOnlyMutableStateFlow
+import com.stripe.android.core.mainthread.update
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -22,9 +24,7 @@ import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
@@ -98,7 +98,7 @@ internal class SavedPaymentMethodMutator(
         }
     }
 
-    private val _editing = MutableStateFlow(false)
+    private val _editing = MainThreadOnlyMutableStateFlow(false)
     internal val editing: StateFlow<Boolean> = _editing
 
     init {
