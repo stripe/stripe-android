@@ -1,9 +1,12 @@
 package com.stripe.android.common.analytics.experiment
 
 import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkGlobalHoldback
+import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkGlobalHoldback.EmailRecognitionSource
+import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkGlobalHoldback.ProvidedDefaultValues
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK
@@ -35,6 +38,7 @@ internal class DefaultLogLinkGlobalHoldbackExposure @Inject constructor(
     @LinkDisabledApiRepository private val linkDisabledApiRepository: LinkRepository,
     @IOContext private val workContext: CoroutineContext,
     private val retrieveCustomerEmail: RetrieveCustomerEmail,
+    private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val logger: Logger
 ) : LogLinkGlobalHoldbackExposure {
 
@@ -67,19 +71,40 @@ internal class DefaultLogLinkGlobalHoldbackExposure @Inject constructor(
 
         val isReturningUser: Boolean = customerEmail != null && isReturningUser(customerEmail)
 
+        val useLinkNative: Boolean = state.paymentMethodMetadata.linkState?.configuration?.let {
+            linkConfigurationCoordinator.getComponent(it).linkGate.useNativeLink
+        } == true
+
+        val emailRecognitionSource = EmailRecognitionSource.EMAIL.takeIf { customerEmail != null }
+
         logger.debug(
             """Link Global Holdback exposure: 
                 |arbId=${experimentsData.arbId},
                 |isReturningLinkConsumer=$isReturningUser,
-                |group=$experimentGroup
+                |group=$experimentGroup,
+                |defaultValues=$defaultValues,
+                |useLinkNative=$useLinkNative,
+                |emailRecognitionSource=$emailRecognitionSource
             """.trimMargin()
         )
         eventReporter.onExperimentExposure(
             experiment = LinkGlobalHoldback(
                 arbId = experimentsData.arbId,
                 isReturningLinkConsumer = isReturningUser,
+                providedDefaultValues = state.getDefaultValues(),
+                useLinkNative = useLinkNative,
+                emailRecognitionSource = emailRecognitionSource,
                 group = experimentGroup,
             ),
+        )
+    }
+
+    private fun PaymentElementLoader.State.getDefaultValues(): ProvidedDefaultValues {
+        val defaultValues = config.defaultBillingDetails
+        return ProvidedDefaultValues(
+            email = defaultValues?.email != null,
+            phone = defaultValues?.phone != null,
+            name = defaultValues?.name != null,
         )
     }
 

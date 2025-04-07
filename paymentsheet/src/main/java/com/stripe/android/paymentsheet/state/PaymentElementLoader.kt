@@ -146,7 +146,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         eventReporter.onLoadStarted(initializedViaCompose)
 
         val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(configuration)
-
         val elementsSession = retrieveElementsSession(
             initializationMode = initializationMode,
             customer = configuration.customer,
