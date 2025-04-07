@@ -244,17 +244,23 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
 
     init {
         coroutineScope.launch(mainDispatcher) {
-            selection.collect {
-                if (it == null && !isCurrentScreen.value) {
+            selection.collect { currentSelection ->
+                if (currentSelection == null && !isCurrentScreen.value) {
                     return@collect
                 }
 
-                val paymentMethodCode = (it as? PaymentSelection.New).code()
-                    ?: (it as? PaymentSelection.ExternalPaymentMethod).code()
+                val paymentMethodCode = when (currentSelection) {
+                    is PaymentSelection.New,
+                    is PaymentSelection.ExternalPaymentMethod,
+                    is PaymentSelection.CustomPaymentMethod -> currentSelection.code()
+                    else -> null
+                }
+
                 val requiresFormScreen = paymentMethodCode != null &&
                     formTypeForCode(paymentMethodCode) == FormType.UserInteractionRequired
+
                 if (!requiresFormScreen) {
-                    _verticalModeScreenSelection.value = it
+                    _verticalModeScreenSelection.value = currentSelection
                 }
             }
         }
@@ -434,4 +440,5 @@ private fun PaymentSelection.asVerticalSelection(): PaymentMethodVerticalLayoutI
     is PaymentSelection.Link -> PaymentMethodVerticalLayoutInteractor.Selection.New("link")
     is PaymentSelection.New -> PaymentMethodVerticalLayoutInteractor.Selection.New(paymentMethodCreateParams.typeCode)
     is PaymentSelection.ExternalPaymentMethod -> PaymentMethodVerticalLayoutInteractor.Selection.New(type)
+    is PaymentSelection.CustomPaymentMethod -> PaymentMethodVerticalLayoutInteractor.Selection.New(id)
 }

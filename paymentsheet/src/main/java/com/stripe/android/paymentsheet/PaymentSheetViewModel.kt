@@ -57,6 +57,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -136,7 +137,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             savedStateHandle[IN_PROGRESS_SELECTION] = value
         }
 
-    override var newPaymentSelection: NewOrExternalPaymentSelection? = null
+    override var newPaymentSelection: NewPaymentOptionSelection? = null
 
     private val googlePayButtonType: GooglePayButtonType =
         when (args.config.googlePay?.buttonType) {
@@ -271,28 +272,30 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private suspend fun initializeWithState(state: PaymentSheetState.Full) {
-        customerStateHolder.setCustomerState(state.customer)
+        withContext(Dispatchers.Main.immediate) {
+            customerStateHolder.setCustomerState(state.customer)
 
-        updateSelection(state.paymentSelection)
+            updateSelection(state.paymentSelection)
 
-        setPaymentMethodMetadata(state.paymentMethodMetadata)
+            setPaymentMethodMetadata(state.paymentMethodMetadata)
 
-        val shouldLaunchEagerly = linkHandler.setupLinkWithEagerLaunch(state.paymentMethodMetadata.linkState)
+            val shouldLaunchEagerly = linkHandler.setupLinkWithEagerLaunch(state.paymentMethodMetadata.linkState)
 
-        val pendingFailedPaymentResult = confirmationHandler.awaitResult()
-            as? ConfirmationHandler.Result.Failed
-        val errorMessage = pendingFailedPaymentResult?.cause?.stripeErrorMessage()
+            val pendingFailedPaymentResult = confirmationHandler.awaitResult()
+                as? ConfirmationHandler.Result.Failed
+            val errorMessage = pendingFailedPaymentResult?.cause?.stripeErrorMessage()
 
-        resetViewState(errorMessage)
-        navigationHandler.resetTo(
-            determineInitialBackStack(
-                paymentMethodMetadata = state.paymentMethodMetadata,
-                customerStateHolder = customerStateHolder,
+            resetViewState(errorMessage)
+            navigationHandler.resetTo(
+                determineInitialBackStack(
+                    paymentMethodMetadata = state.paymentMethodMetadata,
+                    customerStateHolder = customerStateHolder,
+                )
             )
-        )
 
-        if (shouldLaunchEagerly) {
-            checkoutWithLinkExpress()
+            if (shouldLaunchEagerly) {
+                checkoutWithLinkExpress()
+            }
         }
 
         viewModelScope.launch {
@@ -451,13 +454,15 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
         viewModelScope.launch(workContext) {
-            inProgressSelection = paymentSelection
+            val confirmationOption = withContext(viewModelScope.coroutineContext) {
+                inProgressSelection = paymentSelection
 
-            val confirmationOption = paymentSelectionWithCvcIfEnabled(paymentSelection)
-                ?.toConfirmationOption(
-                    configuration = config.asCommonConfiguration(),
-                    linkConfiguration = linkHandler.linkConfiguration.value,
-                )
+                paymentSelectionWithCvcIfEnabled(paymentSelection)
+                    ?.toConfirmationOption(
+                        configuration = config.asCommonConfiguration(),
+                        linkConfiguration = linkHandler.linkConfiguration.value,
+                    )
+            }
 
             confirmationOption?.let { option ->
                 val stripeIntent = awaitStripeIntent()

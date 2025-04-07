@@ -315,6 +315,7 @@ class UpdatePaymentMethodUITest {
         shouldShowSetAsDefaultCheckbox: Boolean = false,
         shouldShowSaveButton: Boolean = false,
         isSaveButtonEnabled: Boolean = false,
+        editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = FakeEditCardDetailsInteractorFactory(),
         testBlock: Scenario.() -> Unit,
     ) {
         val viewActionRecorder = ViewActionRecorder<UpdatePaymentMethodInteractor.ViewAction>()
@@ -335,6 +336,7 @@ class UpdatePaymentMethodUITest {
                 setAsDefaultCheckboxChecked = setAsDefaultCheckboxChecked,
                 isSaveButtonEnabled = isSaveButtonEnabled,
             ),
+            editCardDetailsInteractorFactory = editCardDetailsInteractorFactory
         )
 
         composeRule.setContent {

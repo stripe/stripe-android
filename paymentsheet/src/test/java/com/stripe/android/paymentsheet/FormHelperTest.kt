@@ -77,7 +77,7 @@ internal class FormHelperTest {
                 )
             ),
             newPaymentSelectionProvider = {
-                NewOrExternalPaymentSelection.New(
+                NewPaymentOptionSelection.New(
                     PaymentSelection.New.GenericPaymentMethod(
                         label = "Cash App".resolvableString,
                         iconResource = 0,
@@ -108,7 +108,7 @@ internal class FormHelperTest {
                 )
             ),
             newPaymentSelectionProvider = {
-                NewOrExternalPaymentSelection.New(
+                NewPaymentOptionSelection.New(
                     PaymentSelection.New.GenericPaymentMethod(
                         label = "Klarna".resolvableString,
                         iconResource = 0,
@@ -508,7 +508,7 @@ internal class FormHelperTest {
     private fun createFormHelper(
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         linkInlineHandler: LinkInlineHandler = LinkInlineHandler.create(),
-        newPaymentSelectionProvider: () -> NewOrExternalPaymentSelection? = { throw AssertionError("Not implemented") },
+        newPaymentSelectionProvider: () -> NewPaymentOptionSelection? = { throw AssertionError("Not implemented") },
         selectionUpdater: (PaymentSelection?) -> Unit = { throw AssertionError("Not implemented") },
     ): FormHelper {
         return DefaultFormHelper(

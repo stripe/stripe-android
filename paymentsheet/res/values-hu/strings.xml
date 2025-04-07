@@ -16,6 +16,8 @@
   <string name="stripe_bank_account_with_last_4">Bankszámla ····%s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">A vásárlás befejezéséhez %s percen belül erősítse meg a fizetést bankja alkalmazásában.</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_cashapp_afterpay_subtitle">Vegye meg most, vagy fizessen később Cash App Afterpayjel</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
   <string name="stripe_clearpay_subtitle">Vegye meg most, vagy fizessen később Clearpayjel</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
@@ -91,6 +93,8 @@
   <string name="stripe_paymentsheet_manage_bank_account">USA bankszámla kezelése</string>
   <!-- Title shown above a view containing a customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_card">Kártya kezelése</string>
+  <!-- Title shown above a view containing the customer's cards that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_cards">Kártyák kezelése</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Fizetési módok kezelése</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
@@ -147,6 +151,8 @@
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">A kártya mentése a(z) %s részére történő fizetésekhez</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">Mentett</string>
+  <!-- Title shown above a view containing the customer's cards -->
+  <string name="stripe_paymentsheet_select_card">Kártya kiválasztása</string>
   <!-- Title shown above a view containing the customer's payment methods -->
   <string name="stripe_paymentsheet_select_payment_method">Fizetési mód választása</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->

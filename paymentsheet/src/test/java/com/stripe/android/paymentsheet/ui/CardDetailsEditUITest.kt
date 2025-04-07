@@ -207,7 +207,6 @@ internal class CardDetailsEditUITest {
                     availableNetworks = card.getAvailableNetworks(DefaultCardBrandFilter)
                 )
             ),
-            onCardUpdateParamsChanged = {}
         )
         composeRule.setContent {
             CardDetailsEditUI(

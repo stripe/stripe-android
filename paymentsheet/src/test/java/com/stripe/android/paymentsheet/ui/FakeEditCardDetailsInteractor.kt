@@ -23,7 +23,6 @@ internal class FakeEditCardDetailsInteractor(
             )
         )
     ),
-    override val onCardUpdateParamsChanged: CardUpdateParamsCallback
 ) : EditCardDetailsInteractor {
     val viewActionRecorder = ViewActionRecorder<EditCardDetailsInteractor.ViewAction>()
 

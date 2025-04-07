@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class SetAsDefaultPaymentMethodController(
-    setAsDefaultPaymentMethodInitialValue: Boolean = false,
+    setAsDefaultPaymentMethodInitialValue: Boolean,
     saveForFutureUseCheckedFlow: StateFlow<Boolean>,
     setAsDefaultMatchesSaveForFutureUse: Boolean,
 ) : InputController {
