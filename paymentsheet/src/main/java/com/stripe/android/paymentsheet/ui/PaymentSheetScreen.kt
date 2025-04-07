@@ -352,7 +352,7 @@ private fun PaymentSheetContent(
         }
     }
 
-    PrimaryButton(viewModel)
+    PrimaryButton(viewModel, currentScreen)
 
     Box(modifier = modifier) {
         if (mandateText?.showAbovePrimaryButton == false && currentScreen.showsPaymentConfirmationMandates) {
@@ -422,8 +422,17 @@ internal fun Wallet(
 }
 
 @Composable
-private fun PrimaryButton(viewModel: BaseSheetViewModel) {
+private fun PrimaryButton(viewModel: BaseSheetViewModel, currentScreen: PaymentSheetScreen) {
     val uiState = viewModel.primaryButtonUiState.collectAsState(Dispatchers.Main)
+
+    var canEmitPMCompletedEvent = remember(currentScreen) {
+        when (currentScreen) {
+            is PaymentSheetScreen.AddFirstPaymentMethod -> true
+            is PaymentSheetScreen.AddAnotherPaymentMethod -> true
+            is PaymentSheetScreen.VerticalModeForm -> true
+            else -> false
+        }
+    }
 
     val modifier = Modifier
         .testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
@@ -460,10 +469,18 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
         modifier = modifier,
     )
 
-    LaunchedEffect(viewModel, button) {
+    LaunchedEffect(viewModel, button, canEmitPMCompletedEvent) {
         viewModel.primaryButtonUiState.collect { uiState ->
             withContext(Dispatchers.Main) {
                 button?.updateUiState(uiState)
+            }
+            if (canEmitPMCompletedEvent && uiState?.enabled == true) {
+                viewModel.newPaymentSelection?.let { newPaymentSelection ->
+                    canEmitPMCompletedEvent = false
+                    viewModel.eventReporter.onPaymentMethodFormCompleted(
+                        newPaymentSelection.getPaymentMethodCode()
+                    )
+                }
             }
         }
     }

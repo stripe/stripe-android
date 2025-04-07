@@ -201,6 +201,13 @@ internal interface EventReporter {
     )
 
     /**
+     * The customer has completed all required payment form fields
+     */
+    fun onPaymentMethodFormCompleted(
+        paymentMethodType: String,
+    )
+
+    /**
      * The customer cannot properly return from Link payments or other LPM payments using
      * browser intents.
      *
