@@ -22,7 +22,8 @@ internal data class AppearanceVariablesJs(
     val fontFamily: String?,
 
     /**
-     * The baseline font size in px set on the embedded component root. This scales the value of other font size variables.
+     * The baseline font size in px set on the embedded component root.
+     * This scales the value of other font size variables.
      */
     val fontSizeBase: String?,
 

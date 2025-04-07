@@ -21,6 +21,7 @@ class Appearance private constructor(
     internal val badgeDanger: Badge,
 ) : Parcelable {
 
+    @SuppressWarnings("TooManyFunctions")
     class Builder {
         private var colors: Colors = Colors.default()
         private var cornerRadius: CornerRadius = CornerRadius.default()
