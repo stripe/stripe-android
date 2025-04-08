@@ -51,7 +51,7 @@ internal interface EditCardDetailsInteractor {
         fun create(
             coroutineScope: CoroutineScope,
             isModifiable: Boolean,
-            isCardDetailEditSupported: Boolean,
+            areExpiryDateAndAddressModificationSupported: Boolean,
             cardBrandFilter: CardBrandFilter,
             card: PaymentMethod.Card,
             onBrandChoiceChanged: CardBrandCallback,
@@ -64,7 +64,10 @@ internal class DefaultEditCardDetailsInteractor(
     private val card: PaymentMethod.Card,
     private val cardBrandFilter: CardBrandFilter,
     private val isModifiable: Boolean,
-    private val isCardDetailEditSupported: Boolean,
+    // Local flag for whether expiry date and address can be edited.
+    // This flag has no effect on Card Brand Choice.
+    // It will be removed before release.
+    private val areExpiryDateAndAddressModificationSupported: Boolean,
     coroutineScope: CoroutineScope,
     private val onBrandChoiceChanged: CardBrandCallback,
     private val onCardUpdateParamsChanged: CardUpdateParamsCallback
@@ -90,7 +93,7 @@ internal class DefaultEditCardDetailsInteractor(
                         card = card,
                         originalCardBrandChoice = defaultCardBrandChoice(),
                     )
-                    val isComplete = it.isComplete(expiryDateEditable = isCardDetailEditSupported)
+                    val isComplete = it.isComplete(expiryDateEditable = areExpiryDateAndAddressModificationSupported)
                     hasChanged && isComplete
                 }?.toUpdateParams()
                 onCardUpdateParamsChanged(newParams)
@@ -157,7 +160,7 @@ internal class DefaultEditCardDetailsInteractor(
             selectedCardBrand = cardBrandChoice,
             paymentMethodIcon = card.getSavedPaymentMethodIcon(forVerticalMode = true),
             shouldShowCardBrandDropdown = isModifiable && isExpired().not(),
-            expiryDateEditEnabled = isCardDetailEditSupported,
+            expiryDateEditEnabled = isModifiable && areExpiryDateAndAddressModificationSupported,
             availableNetworks = card.getAvailableNetworks(cardBrandFilter),
             dateValidator = { date ->
                 dateConfig.determineState(date)
@@ -181,7 +184,7 @@ internal class DefaultEditCardDetailsInteractor(
         override fun create(
             coroutineScope: CoroutineScope,
             isModifiable: Boolean,
-            isCardDetailEditSupported: Boolean,
+            areExpiryDateAndAddressModificationSupported: Boolean,
             cardBrandFilter: CardBrandFilter,
             card: PaymentMethod.Card,
             onBrandChoiceChanged: CardBrandCallback,
@@ -194,7 +197,7 @@ internal class DefaultEditCardDetailsInteractor(
                 coroutineScope = coroutineScope,
                 onBrandChoiceChanged = onBrandChoiceChanged,
                 onCardUpdateParamsChanged = onCardUpdateParamsChanged,
-                isCardDetailEditSupported = isCardDetailEditSupported
+                areExpiryDateAndAddressModificationSupported = areExpiryDateAndAddressModificationSupported
             )
         }
     }

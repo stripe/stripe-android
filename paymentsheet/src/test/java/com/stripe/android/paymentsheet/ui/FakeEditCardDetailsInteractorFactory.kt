@@ -11,7 +11,7 @@ internal class FakeEditCardDetailsInteractorFactory : EditCardDetailsInteractor.
     override fun create(
         coroutineScope: CoroutineScope,
         isModifiable: Boolean,
-        isCardDetailEditSupported: Boolean,
+        areExpiryDateAndAddressModificationSupported: Boolean,
         cardBrandFilter: CardBrandFilter,
         card: PaymentMethod.Card,
         onBrandChoiceChanged: CardBrandCallback,
@@ -21,7 +21,7 @@ internal class FakeEditCardDetailsInteractorFactory : EditCardDetailsInteractor.
         return FakeEditCardDetailsInteractor(
             card = card,
             shouldShowCardBrandDropdown = isModifiable,
-            expiryDateEditEnabled = isCardDetailEditSupported,
+            expiryDateEditEnabled = areExpiryDateAndAddressModificationSupported,
         )
     }
 }

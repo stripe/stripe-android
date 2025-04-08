@@ -212,7 +212,7 @@ internal class DefaultEditCardDetailsInteractorTest {
             isModifiable = isModifiable,
             card = card,
             onCardUpdateParamsChanged = onCardUpdateParamsChanged,
-            isCardDetailEditSupported = true,
+            areExpiryDateAndAddressModificationSupported = true,
         )
     }
 }
