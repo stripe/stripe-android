@@ -26,6 +26,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -425,16 +426,7 @@ internal fun Wallet(
 private fun PrimaryButton(viewModel: BaseSheetViewModel, currentScreen: PaymentSheetScreen) {
     val uiState = viewModel.primaryButtonUiState.collectAsState(Dispatchers.Main)
 
-    var canEmitPMCompletedEvent by remember(currentScreen) {
-        mutableStateOf(
-            when (currentScreen) {
-                is PaymentSheetScreen.AddFirstPaymentMethod -> true
-                is PaymentSheetScreen.AddAnotherPaymentMethod -> true
-                is PaymentSheetScreen.VerticalModeForm -> true
-                else -> false
-            }
-        )
-    }
+    var canEmitPMCompletedEvent by rememberCanEmitPMCompletedEvent(currentScreen)
 
     val modifier = Modifier
         .testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
@@ -448,10 +440,7 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel, currentScreen: PaymentS
             }
         }
 
-    var button by remember {
-        mutableStateOf<PrimaryButton?>(null)
-    }
-
+    var button by remember { mutableStateOf<PrimaryButton?>(null) }
     val context = LocalContext.current
 
     AndroidViewBinding(
@@ -493,6 +482,20 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel, currentScreen: PaymentS
                 button?.updateState(state?.convert())
             }
         }
+    }
+}
+
+@Composable
+private fun rememberCanEmitPMCompletedEvent(currentScreen: PaymentSheetScreen): MutableState<Boolean> {
+    return remember(currentScreen) {
+        mutableStateOf(
+            when (currentScreen) {
+                is PaymentSheetScreen.AddFirstPaymentMethod -> true
+                is PaymentSheetScreen.AddAnotherPaymentMethod -> true
+                is PaymentSheetScreen.VerticalModeForm -> true
+                else -> false
+            }
+        )
     }
 }
 
