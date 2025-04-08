@@ -43,9 +43,7 @@ internal class CardDetailsEditUITest {
             ),
             expiryDateEditEnabled = false
         ) {
-            assertExpiryDateEquals(
-                "••/••"
-            )
+            assertExpiryDateEquals(CARD_EDIT_UI_FALLBACK_EXPIRY_DATE)
         }
     }
 
@@ -57,9 +55,7 @@ internal class CardDetailsEditUITest {
             ),
             expiryDateEditEnabled = false
         ) {
-            assertExpiryDateEquals(
-                "••/••"
-            )
+            assertExpiryDateEquals(CARD_EDIT_UI_FALLBACK_EXPIRY_DATE)
         }
     }
 
@@ -71,9 +67,7 @@ internal class CardDetailsEditUITest {
             ),
             expiryDateEditEnabled = false
         ) {
-            assertExpiryDateEquals(
-                "••/••"
-            )
+            assertExpiryDateEquals(CARD_EDIT_UI_FALLBACK_EXPIRY_DATE)
         }
     }
 
@@ -85,9 +79,7 @@ internal class CardDetailsEditUITest {
             ),
             expiryDateEditEnabled = false
         ) {
-            assertExpiryDateEquals(
-                "••/••"
-            )
+            assertExpiryDateEquals(CARD_EDIT_UI_FALLBACK_EXPIRY_DATE)
         }
     }
 
@@ -99,9 +91,7 @@ internal class CardDetailsEditUITest {
             ),
             expiryDateEditEnabled = false
         ) {
-            assertExpiryDateEquals(
-                "••/••"
-            )
+            assertExpiryDateEquals(CARD_EDIT_UI_FALLBACK_EXPIRY_DATE)
         }
     }
 
@@ -113,9 +103,7 @@ internal class CardDetailsEditUITest {
             ),
             expiryDateEditEnabled = false
         ) {
-            assertExpiryDateEquals(
-                "••/••"
-            )
+            assertExpiryDateEquals(CARD_EDIT_UI_FALLBACK_EXPIRY_DATE)
         }
     }
 
@@ -127,9 +115,7 @@ internal class CardDetailsEditUITest {
             ),
             expiryDateEditEnabled = false
         ) {
-            assertExpiryDateEquals(
-                "••/••"
-            )
+            assertExpiryDateEquals(CARD_EDIT_UI_FALLBACK_EXPIRY_DATE)
         }
     }
 
@@ -217,7 +203,7 @@ internal class CardDetailsEditUITest {
             expiryDateEditEnabled = false
         ) {
             assertExpiryDateEquals(
-                "08/29"
+                "08 / 29"
             )
         }
     }
@@ -232,7 +218,7 @@ internal class CardDetailsEditUITest {
             expiryDateEditEnabled = false
         ) {
             assertExpiryDateEquals(
-                "11/29"
+                "11 / 29"
             )
         }
     }

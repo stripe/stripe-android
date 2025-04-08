@@ -10,6 +10,7 @@ import com.stripe.android.ui.core.elements.CardDetailsUtil
 import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.TextFieldState
+import com.stripe.android.uicore.elements.TextFieldStateConstants
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -160,12 +161,17 @@ internal class DefaultEditCardDetailsInteractor(
             selectedCardBrand = cardBrandChoice,
             paymentMethodIcon = card.getSavedPaymentMethodIcon(forVerticalMode = true),
             shouldShowCardBrandDropdown = isModifiable && isExpired().not(),
-            expiryDateEditEnabled = isModifiable && areExpiryDateAndAddressModificationSupported,
+            expiryDateEditEnabled = areExpiryDateAndAddressModificationSupported,
             availableNetworks = card.getAvailableNetworks(cardBrandFilter),
-            dateValidator = { date ->
-                dateConfig.determineState(date)
-            }
+            dateValidator = ::validateDate
         )
+    }
+
+    private fun validateDate(text: String): TextFieldState {
+        if (text == CARD_EDIT_UI_FALLBACK_EXPIRY_DATE) {
+            return TextFieldStateConstants.Error.Blank
+        }
+        return dateConfig.determineState(text)
     }
 
     private fun isExpired(): Boolean {

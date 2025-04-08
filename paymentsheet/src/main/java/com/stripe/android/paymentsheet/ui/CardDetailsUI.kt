@@ -192,7 +192,7 @@ private fun PaymentMethod.Card.formattedExpiryDate(
         expiryDateEditEnabled.not() &&
         (monthIsInvalid(expiryMonth) || yearIsInvalid(expiryYear))
     ) {
-        return "••/••"
+        return CARD_EDIT_UI_FALLBACK_EXPIRY_DATE
     }
 
     val formattedExpiryMonth = when {
@@ -217,11 +217,7 @@ private fun PaymentMethod.Card.formattedExpiryDate(
         }
     }
 
-    return if (expiryDateEditEnabled) {
-        "$formattedExpiryMonth$formattedExpiryYear"
-    } else {
-        "$formattedExpiryMonth/$formattedExpiryYear"
-    }
+    return "$formattedExpiryMonth$formattedExpiryYear"
 }
 
 private fun monthIsInvalid(expiryMonth: Int?): Boolean {
@@ -266,3 +262,4 @@ private const val YEAR_2000 = 2000
 private const val YEAR_2100 = 2100
 
 internal const val CARD_EDIT_UI_ERROR_MESSAGE = "card_edit_ui_error_message"
+internal const val CARD_EDIT_UI_FALLBACK_EXPIRY_DATE = "•• / ••"

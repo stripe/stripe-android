@@ -14,7 +14,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.uicore.elements.ExpiryDateVisualTransformation
 import com.stripe.android.uicore.elements.TextFieldColors
 import com.stripe.android.uicore.elements.TextFieldState
@@ -39,9 +38,9 @@ internal fun ExpiryTextField(
     val textFieldState = remember(date) {
         validator(date)
     }
-    val isError = enabled && textFieldState.shouldShowError(hasFocus = true)
+    val isError = textFieldState.shouldShowError(hasFocus = true)
     val sectionErrorString = textFieldState.getError()?.takeIf {
-        isError
+        isError && enabled
     }?.let {
         it.formatArgs?.let { args ->
             stringResource(
@@ -57,7 +56,7 @@ internal fun ExpiryTextField(
         modifier = modifier
             .indicatorLine(
                 enabled = enabled,
-                isError = isError,
+                isError = isError && enabled,
                 interactionSource = interactionSource,
                 colors = colors
             )
@@ -80,11 +79,8 @@ internal fun ExpiryTextField(
             bottomEnd = ZeroCornerSize,
         ),
         shouldShowError = isError,
-        visualTransformation = if (enabled) {
-            ExpiryDateVisualTransformation()
-        } else {
-            VisualTransformation.None
-        }
+        visualTransformation = ExpiryDateVisualTransformation(CARD_EDIT_UI_FALLBACK_EXPIRY_DATE),
+        colors = colors
     )
 
     LaunchedEffect(sectionErrorString) {
