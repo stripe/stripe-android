@@ -131,6 +131,7 @@ internal class PaymentSheetAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_complete_payment_newpm_success", hasQueryParam("duration"))
 
         page.clickPrimaryButton()
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.TappedConfirmButton("card"))
     }
 
     @Test
@@ -200,6 +201,7 @@ internal class PaymentSheetAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_custom_payment_newpm_success", hasQueryParam("duration"))
 
         page.clickPrimaryButton()
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.TappedConfirmButton("card"))
     }
 
     @Test
@@ -267,6 +269,7 @@ internal class PaymentSheetAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_complete_payment_newpm_success", hasQueryParam("duration"))
 
         page.clickPrimaryButton()
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.TappedConfirmButton("card"))
     }
 
     @Test
@@ -339,6 +342,7 @@ internal class PaymentSheetAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_custom_payment_newpm_success", hasQueryParam("duration"))
 
         page.clickPrimaryButton()
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.TappedConfirmButton("card"))
     }
 
     private fun validateAnalyticsRequest(

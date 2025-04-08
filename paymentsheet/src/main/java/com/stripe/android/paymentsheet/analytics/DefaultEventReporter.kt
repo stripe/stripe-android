@@ -276,6 +276,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onPressConfirmButton(paymentSelection: PaymentSelection?) {
         val duration = durationProvider.end(DurationProvider.Key.ConfirmButtonClicked)
 
+        fireAnalyticEvent(AnalyticEvent.TappedConfirmButton(paymentSelection.code()))
         fireEvent(
             PaymentSheetEvent.PressConfirmButton(
                 currency = currency,
