@@ -177,7 +177,11 @@ private fun Screens(
         composable(LinkScreen.PaymentMethod.route) {
             val linkAccount = getLinkAccount()
                 ?: return@composable dismissWithResult(noLinkAccountResult())
-            PaymentMethodRoute(linkAccount = linkAccount, dismissWithResult = dismissWithResult)
+            PaymentMethodRoute(
+                linkAccount = linkAccount,
+                dismissWithResult = dismissWithResult,
+                goBack = goBack
+            )
         }
     }
 }
@@ -225,6 +229,7 @@ private fun VerificationRoute(
 private fun PaymentMethodRoute(
     linkAccount: LinkAccount,
     dismissWithResult: (LinkActivityResult) -> Unit,
+    goBack: () -> Unit
 ) {
     val viewModel: PaymentMethodViewModel = linkViewModel { parentComponent ->
         PaymentMethodViewModel.factory(
@@ -233,7 +238,10 @@ private fun PaymentMethodRoute(
             dismissWithResult = dismissWithResult
         )
     }
-    PaymentMethodScreen(viewModel)
+    PaymentMethodScreen(
+        viewModel = viewModel,
+        onCancelClicked = goBack,
+    )
 }
 
 @Composable
