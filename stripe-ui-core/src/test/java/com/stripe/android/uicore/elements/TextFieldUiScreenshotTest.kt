@@ -2,6 +2,7 @@ package com.stripe.android.uicore.elements
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
@@ -10,6 +11,8 @@ import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.uicore.R
+import com.stripe.android.uicore.elements.TextFieldTest.TestTextFieldConfig
+import com.stripe.android.uicore.utils.collectAsState
 import org.junit.Rule
 import org.junit.Test
 
@@ -26,7 +29,15 @@ class TextFieldUiScreenshotTest {
 
     @Test
     fun testFilled() {
+
         paparazziRule.snapshot {
+            val simpleTextFieldController = SimpleTextFieldController(
+                textFieldConfig = TestTextFieldConfig(
+                    maxInputLength = 6
+                ),
+                initialValue = ""
+            )
+            val state by simpleTextFieldController.fieldState.collectAsState()
             TextFieldUi(
                 label = "Search",
                 value = TextFieldValue("John Doe"),
@@ -36,7 +47,10 @@ class TextFieldUiScreenshotTest {
                 shouldShowError = false,
                 errorMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                textFieldController = simpleTextFieldController,
+                onTextStateChanged = {},
+                fieldState = state
             )
         }
     }
@@ -44,6 +58,13 @@ class TextFieldUiScreenshotTest {
     @Test
     fun testFilledAndDisabled() {
         paparazziRule.snapshot {
+            val simpleTextFieldController = SimpleTextFieldController(
+                textFieldConfig = TestTextFieldConfig(
+                    maxInputLength = 6
+                ),
+                initialValue = ""
+            )
+            val state by simpleTextFieldController.fieldState.collectAsState()
             TextFieldUi(
                 label = "Search",
                 value = TextFieldValue("John Doe"),
@@ -53,7 +74,10 @@ class TextFieldUiScreenshotTest {
                 shouldShowError = false,
                 errorMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                textFieldController = simpleTextFieldController,
+                onTextStateChanged = {},
+                fieldState = state
             )
         }
     }
@@ -61,6 +85,13 @@ class TextFieldUiScreenshotTest {
     @Test
     fun testFilledWithError() {
         paparazziRule.snapshot {
+            val simpleTextFieldController = SimpleTextFieldController(
+                textFieldConfig = TestTextFieldConfig(
+                    maxInputLength = 6
+                ),
+                initialValue = ""
+            )
+            val state by simpleTextFieldController.fieldState.collectAsState()
             TextFieldUi(
                 label = "Search",
                 value = TextFieldValue("John Doe"),
@@ -70,7 +101,10 @@ class TextFieldUiScreenshotTest {
                 shouldShowError = true,
                 errorMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                textFieldController = simpleTextFieldController,
+                onTextStateChanged = {},
+                fieldState = state
             )
         }
     }
@@ -78,6 +112,13 @@ class TextFieldUiScreenshotTest {
     @Test
     fun testFilledWithOptionalLabel() {
         paparazziRule.snapshot {
+            val simpleTextFieldController = SimpleTextFieldController(
+                textFieldConfig = TestTextFieldConfig(
+                    maxInputLength = 6
+                ),
+                initialValue = ""
+            )
+            val state by simpleTextFieldController.fieldState.collectAsState()
             TextFieldUi(
                 label = "Search",
                 value = TextFieldValue("John Doe"),
@@ -87,7 +128,10 @@ class TextFieldUiScreenshotTest {
                 shouldShowError = false,
                 errorMessage = null,
                 showOptionalLabel = true,
-                trailingIcon = null
+                trailingIcon = null,
+                textFieldController = simpleTextFieldController,
+                onTextStateChanged = {},
+                fieldState = state
             )
         }
     }
@@ -95,6 +139,13 @@ class TextFieldUiScreenshotTest {
     @Test
     fun testFilledWithTrailingIcon() {
         paparazziRule.snapshot {
+            val simpleTextFieldController = SimpleTextFieldController(
+                textFieldConfig = TestTextFieldConfig(
+                    maxInputLength = 6
+                ),
+                initialValue = ""
+            )
+            val state by simpleTextFieldController.fieldState.collectAsState()
             TextFieldUi(
                 label = "Search",
                 value = TextFieldValue("John Doe"),
@@ -107,7 +158,10 @@ class TextFieldUiScreenshotTest {
                 trailingIcon = TextFieldIcon.Trailing(
                     idRes = R.drawable.stripe_ic_search,
                     isTintable = true,
-                )
+                ),
+                textFieldController = simpleTextFieldController,
+                onTextStateChanged = {},
+                fieldState = state
             )
         }
     }
@@ -115,6 +169,13 @@ class TextFieldUiScreenshotTest {
     @Test
     fun testFilledWithEnabledDropdown() {
         paparazziRule.snapshot {
+            val simpleTextFieldController = SimpleTextFieldController(
+                textFieldConfig = TestTextFieldConfig(
+                    maxInputLength = 6
+                ),
+                initialValue = ""
+            )
+            val state by simpleTextFieldController.fieldState.collectAsState()
             TextFieldUi(
                 label = "Search",
                 value = TextFieldValue("John Doe"),
@@ -139,7 +200,10 @@ class TextFieldUiScreenshotTest {
                             icon = R.drawable.stripe_ic_card_visa
                         )
                     )
-                )
+                ),
+                textFieldController = simpleTextFieldController,
+                onTextStateChanged = {},
+                fieldState = state
             )
         }
     }
@@ -147,6 +211,13 @@ class TextFieldUiScreenshotTest {
     @Test
     fun testFilledWithDisabledDropdown() {
         paparazziRule.snapshot {
+            val simpleTextFieldController = SimpleTextFieldController(
+                textFieldConfig = TestTextFieldConfig(
+                    maxInputLength = 6
+                ),
+                initialValue = ""
+            )
+            val state by simpleTextFieldController.fieldState.collectAsState()
             TextFieldUi(
                 label = "Card number",
                 value = TextFieldValue("4000 0025 0000 1001"),
@@ -171,7 +242,10 @@ class TextFieldUiScreenshotTest {
                             icon = R.drawable.stripe_ic_card_visa
                         )
                     )
-                )
+                ),
+                textFieldController = simpleTextFieldController,
+                onTextStateChanged = {},
+                fieldState = state
             )
         }
     }
@@ -179,6 +253,13 @@ class TextFieldUiScreenshotTest {
     @Test
     fun testEmpty() {
         paparazziRule.snapshot {
+            val simpleTextFieldController = SimpleTextFieldController(
+                textFieldConfig = TestTextFieldConfig(
+                    maxInputLength = 6
+                ),
+                initialValue = ""
+            )
+            val state by simpleTextFieldController.fieldState.collectAsState()
             TextFieldUi(
                 label = "Search",
                 value = TextFieldValue(""),
@@ -188,7 +269,10 @@ class TextFieldUiScreenshotTest {
                 shouldShowError = false,
                 errorMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                textFieldController = simpleTextFieldController,
+                onTextStateChanged = {},
+                fieldState = state
             )
         }
     }
@@ -196,6 +280,13 @@ class TextFieldUiScreenshotTest {
     @Test
     fun testEmptyAndDisabled() {
         paparazziRule.snapshot {
+            val simpleTextFieldController = SimpleTextFieldController(
+                textFieldConfig = TestTextFieldConfig(
+                    maxInputLength = 6
+                ),
+                initialValue = ""
+            )
+            val state by simpleTextFieldController.fieldState.collectAsState()
             TextFieldUi(
                 label = "Search",
                 value = TextFieldValue("John Doe"),
@@ -205,7 +296,10 @@ class TextFieldUiScreenshotTest {
                 shouldShowError = false,
                 errorMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                textFieldController = simpleTextFieldController,
+                onTextStateChanged = {},
+                fieldState = state
             )
         }
     }
@@ -213,6 +307,13 @@ class TextFieldUiScreenshotTest {
     @Test
     fun testEmptyWithPlaceholder() {
         paparazziRule.snapshot {
+            val simpleTextFieldController = SimpleTextFieldController(
+                textFieldConfig = TestTextFieldConfig(
+                    maxInputLength = 6
+                ),
+                initialValue = ""
+            )
+            val state by simpleTextFieldController.fieldState.collectAsState()
             TextFieldUi(
                 label = "Search",
                 value = TextFieldValue(""),
@@ -222,7 +323,10 @@ class TextFieldUiScreenshotTest {
                 shouldShowError = false,
                 errorMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                textFieldController = simpleTextFieldController,
+                onTextStateChanged = {},
+                fieldState = state
             )
         }
     }
@@ -230,6 +334,13 @@ class TextFieldUiScreenshotTest {
     @Test
     fun testEmptyWithPlaceholderDisabled() {
         paparazziRule.snapshot {
+            val simpleTextFieldController = SimpleTextFieldController(
+                textFieldConfig = TestTextFieldConfig(
+                    maxInputLength = 6
+                ),
+                initialValue = ""
+            )
+            val state by simpleTextFieldController.fieldState.collectAsState()
             TextFieldUi(
                 label = "Search",
                 value = TextFieldValue(""),
@@ -239,7 +350,10 @@ class TextFieldUiScreenshotTest {
                 shouldShowError = false,
                 errorMessage = null,
                 showOptionalLabel = false,
-                trailingIcon = null
+                trailingIcon = null,
+                textFieldController = simpleTextFieldController,
+                onTextStateChanged = {},
+                fieldState = state
             )
         }
     }
