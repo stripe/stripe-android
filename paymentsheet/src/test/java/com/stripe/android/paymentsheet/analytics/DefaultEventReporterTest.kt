@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
+import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkGlobalHoldback.EmailRecognitionSource
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequest
@@ -597,6 +598,16 @@ class DefaultEventReporterTest {
                 arbId = "random_arb_id",
                 isReturningLinkConsumer = false,
                 group = "holdback",
+                useLinkNative = true,
+                emailRecognitionSource = EmailRecognitionSource.EMAIL,
+                providedDefaultValues = LoggableExperiment.LinkGlobalHoldback.ProvidedDefaultValues(
+                    email = true,
+                    name = false,
+                    phone = true,
+                ),
+                spmEnabled = true,
+                integrationShape = "complete",
+                linkEnabled = true
             )
             completeEventReporter.onExperimentExposure(experiment)
 
@@ -608,6 +619,7 @@ class DefaultEventReporterTest {
             assertEquals(params["arb_id"], "random_arb_id")
             assertEquals(params["assignment_group"], "holdback")
             assertEquals(params["dimensions-integration_type"], "mpe_android")
+            assertEquals(params["dimensions-is_returning_link_consumer"], "false")
             assertEquals(params["sdk_platform"], "android")
             assertEquals(params["plugin_type"], "native")
 

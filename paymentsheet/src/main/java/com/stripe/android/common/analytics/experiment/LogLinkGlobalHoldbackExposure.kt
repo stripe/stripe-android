@@ -77,7 +77,7 @@ internal class DefaultLogLinkGlobalHoldbackExposure @Inject constructor(
         val isReturningUser: Boolean = customerEmail != null && isReturningUser(customerEmail)
 
         val useLinkNative: Boolean = state.paymentMethodMetadata.linkState?.configuration?.let {
-            linkConfigurationCoordinator.getComponent(it).linkGate.useNativeLink
+            linkConfigurationCoordinator.linkGate(it).useNativeLink
         } == true
 
         val emailRecognitionSource = EmailRecognitionSource.EMAIL.takeIf { customerEmail != null }
