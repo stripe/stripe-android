@@ -10,9 +10,11 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.FormHelper.FormType
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
@@ -34,6 +36,7 @@ internal class DefaultFormHelper(
     private val selectionUpdater: (PaymentSelection?) -> Unit,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
     private val setAsDefaultMatchesSaveForFutureUse: Boolean,
+    private val eventReporter: EventReporter?,
 ) : FormHelper {
     companion object {
         fun create(
@@ -54,6 +57,7 @@ internal class DefaultFormHelper(
                     viewModel.updateSelection(it)
                 },
                 setAsDefaultMatchesSaveForFutureUse = viewModel.customerStateHolder.paymentMethods.value.isEmpty(),
+                eventReporter = viewModel.eventReporter,
             )
         }
 
@@ -71,6 +75,7 @@ internal class DefaultFormHelper(
                 linkConfigurationCoordinator = null,
                 selectionUpdater = {},
                 setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
+                eventReporter = null,
             )
         }
     }
@@ -110,10 +115,26 @@ internal class DefaultFormHelper(
         }
     }
 
+    private var previouslyCompletedForm: PaymentMethodCode? = null
+    private fun reportFieldCompleted(code: PaymentMethodCode) {
+        /*
+         * Prevents this event from being reported multiple times on field interactions
+         * on the same payment form. We should have one field interaction event for
+         * every form shown event triggered.
+         */
+        if (previouslyCompletedForm != code) {
+            eventReporter?.onPaymentMethodFormCompleted(code)
+            previouslyCompletedForm = code
+        }
+    }
+
     init {
         coroutineScope.launch {
             paymentSelection.collect { selection ->
                 selectionUpdater(selection)
+                selection?.let {
+                    reportFieldCompleted(it.paymentMethodType)
+                }
             }
         }
     }

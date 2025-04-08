@@ -45,15 +45,6 @@ class PaymentSheetAnalyticsListenerTest {
     }
 
     @Test
-    fun `on multiple field completion with same payment form, should report event only once`() = runScenario {
-        analyticsListener.reportFieldCompleted("card")
-        analyticsListener.reportFieldCompleted("card")
-        analyticsListener.reportFieldCompleted("card")
-
-        verify(eventReporter, times(1)).onPaymentMethodFormCompleted("card")
-    }
-
-    @Test
     fun `reportPaymentSheetHidden reports for UpdatePaymentMethod`() = runScenario {
         analyticsListener.reportPaymentSheetHidden(mock<PaymentSheetScreen.UpdatePaymentMethod>())
 
