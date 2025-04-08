@@ -80,6 +80,8 @@ internal class DefaultLogLinkGlobalHoldbackExposure @Inject constructor(
 
         val emailRecognitionSource = EmailRecognitionSource.EMAIL.takeIf { customerEmail != null }
 
+        val isLinkEnabled = state.paymentMethodMetadata.linkState != null
+
         val integrationShape = mode.code
 
         val isSpmEnabled: Boolean = elementsSession.isSpmEnabled()
@@ -93,7 +95,8 @@ internal class DefaultLogLinkGlobalHoldbackExposure @Inject constructor(
                 |useLinkNative=$useLinkNative,
                 |emailRecognitionSource=$emailRecognitionSource,
                 |spmEnabled=$isSpmEnabled,
-                |integrationShape=$integrationShape
+                |integrationShape=$integrationShape,
+                |isLinkEnabled=$isLinkEnabled
             """.trimMargin()
         )
         eventReporter.onExperimentExposure(
@@ -101,6 +104,7 @@ internal class DefaultLogLinkGlobalHoldbackExposure @Inject constructor(
                 arbId = experimentsData.arbId,
                 isReturningLinkConsumer = isReturningUser,
                 providedDefaultValues = defaultValues,
+                linkEnabled = isLinkEnabled,
                 useLinkNative = useLinkNative,
                 spmEnabled = isSpmEnabled,
                 integrationShape = integrationShape,

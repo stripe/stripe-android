@@ -19,7 +19,8 @@ internal sealed class LoggableExperiment(
         val emailRecognitionSource: EmailRecognitionSource?,
         val providedDefaultValues: ProvidedDefaultValues,
         val spmEnabled: Boolean,
-        val integrationShape: String
+        val integrationShape: String,
+        val linkEnabled: Boolean
     ) : LoggableExperiment(
         arbId = arbId,
         group = group,
@@ -32,6 +33,7 @@ internal sealed class LoggableExperiment(
             "email_recognition_source" to emailRecognitionSource?.dimension,
             "spm_enabled" to spmEnabled.toString(),
             "integration_shape" to integrationShape,
+            "is_link_enabled" to linkEnabled.toString(),
         ).filterNotNullValues()
     ) {
         enum class EmailRecognitionSource(val dimension: String) {
