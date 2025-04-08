@@ -281,7 +281,6 @@ data class ChallengeResponseData constructor(
 
     internal companion object {
         private const val FIELD_SERVER_TRANS_ID = "threeDSServerTransID"
-        private const val FIELD_ACS_COUNTER_ACS_TO_SDK = "acsCounterAtoS"
         private const val FIELD_ACS_TRANS_ID = "acsTransID"
         private const val FIELD_ACS_HTML = "acsHTML"
         private const val FIELD_ACS_HTML_REFRESH = "acsHTMLRefresh"
@@ -326,7 +325,7 @@ data class ChallengeResponseData constructor(
          * @throws ChallengeResponseParseException if the JSON format or data fails validation
          */
         @Throws(ChallengeResponseParseException::class)
-        @Suppress("LongMethod")
+        @Suppress("LongMethod", "CyclomaticComplexMethod", "MaximumLineLength", "MaxLineLength")
         internal fun fromJson(cresJson: JSONObject): ChallengeResponseData {
             checkMessageType(cresJson)
 
@@ -348,6 +347,14 @@ data class ChallengeResponseData constructor(
             val oobContinueLabel = uiType?.let { getOobContinueLabel(cresJson, uiType) }
             val challengeSelectOptions =
                 ChallengeSelectOption.fromJson(challengeSelectOptionsJsonArray)
+            val acsHtmlRefresh = if (isChallengedCompleted) null else decodeHtml(cresJson.optString(FIELD_ACS_HTML_REFRESH))
+            val challengeInfoHeader = if (isChallengedCompleted) null else cresJson.optString(FIELD_CHALLENGE_INFO_HEADER)
+            val challengeInfoLabel = if (isChallengedCompleted) null else cresJson.optString(FIELD_CHALLENGE_INFO_LABEL)
+            val challengeInfoText = if (isChallengedCompleted) null else cresJson.optString(FIELD_CHALLENGE_INFO_TEXT)
+            val challengeAdditionalInfoText = if (isChallengedCompleted) null else cresJson.optString(FIELD_CHALLENGE_ADDITIONAL_INFO_TEXT)
+            val whitelistingInfoText = if (isChallengedCompleted) null else cresJson.optString(FIELD_WHITELISTING_INFO_TEXT)
+            val whyInfoLabel = if (isChallengedCompleted) null else cresJson.optString(FIELD_WHY_INFO_LABEL)
+            val whyInfoText = if (isChallengedCompleted) null else cresJson.optString(FIELD_WHY_INFO_TEXT)
 
             val cresData = ChallengeResponseData(
                 serverTransId = serverTransId,
@@ -357,14 +364,12 @@ data class ChallengeResponseData constructor(
                 messageVersion = messageVersion,
                 messageExtensions = messageExtensions,
                 acsHtml = acsHtml,
-                acsHtmlRefresh = if (isChallengedCompleted) null else decodeHtml(cresJson.optString(FIELD_ACS_HTML_REFRESH)),
+                acsHtmlRefresh = acsHtmlRefresh,
                 uiType = uiType,
-                challengeInfoHeader = if (isChallengedCompleted) null else cresJson.optString(FIELD_CHALLENGE_INFO_HEADER),
-                challengeInfoLabel = if (isChallengedCompleted) null else cresJson.optString(FIELD_CHALLENGE_INFO_LABEL),
-                challengeInfoText = if (isChallengedCompleted) null else cresJson.optString(FIELD_CHALLENGE_INFO_TEXT),
-                challengeAdditionalInfoText = if (isChallengedCompleted) null else cresJson.optString(
-                    FIELD_CHALLENGE_ADDITIONAL_INFO_TEXT
-                ),
+                challengeInfoHeader = challengeInfoHeader,
+                challengeInfoLabel = challengeInfoLabel,
+                challengeInfoText = challengeInfoText,
+                challengeAdditionalInfoText = challengeAdditionalInfoText,
                 shouldShowChallengeInfoTextIndicator = shouldShowChallengeInfoTextIndicator,
                 challengeSelectOptions = challengeSelectOptions,
                 expandInfoLabel = if (isChallengedCompleted) null else cresJson.optString(FIELD_EXPAND_INFO_LABEL),
@@ -380,9 +385,9 @@ data class ChallengeResponseData constructor(
                 ),
                 resendInformationLabel = resendInformationLabel,
                 submitAuthenticationLabel = submitAuthenticationLabel,
-                whitelistingInfoText = if (isChallengedCompleted) null else cresJson.optString(FIELD_WHITELISTING_INFO_TEXT),
-                whyInfoLabel = if (isChallengedCompleted) null else cresJson.optString(FIELD_WHY_INFO_LABEL),
-                whyInfoText = if (isChallengedCompleted) null else cresJson.optString(FIELD_WHY_INFO_TEXT),
+                whitelistingInfoText = whitelistingInfoText,
+                whyInfoLabel = whyInfoLabel,
+                whyInfoText = whyInfoText,
                 transStatus = if (isChallengedCompleted) getTransStatus(cresJson).code else ""
             )
 
