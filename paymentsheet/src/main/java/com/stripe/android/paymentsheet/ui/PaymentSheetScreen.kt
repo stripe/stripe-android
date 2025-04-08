@@ -425,13 +425,15 @@ internal fun Wallet(
 private fun PrimaryButton(viewModel: BaseSheetViewModel, currentScreen: PaymentSheetScreen) {
     val uiState = viewModel.primaryButtonUiState.collectAsState(Dispatchers.Main)
 
-    var canEmitPMCompletedEvent = remember(currentScreen) {
-        when (currentScreen) {
-            is PaymentSheetScreen.AddFirstPaymentMethod -> true
-            is PaymentSheetScreen.AddAnotherPaymentMethod -> true
-            is PaymentSheetScreen.VerticalModeForm -> true
-            else -> false
-        }
+    var canEmitPMCompletedEvent by remember(currentScreen) {
+        mutableStateOf(
+            when (currentScreen) {
+                is PaymentSheetScreen.AddFirstPaymentMethod -> true
+                is PaymentSheetScreen.AddAnotherPaymentMethod -> true
+                is PaymentSheetScreen.VerticalModeForm -> true
+                else -> false
+            }
+        )
     }
 
     val modifier = Modifier
@@ -469,17 +471,17 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel, currentScreen: PaymentS
         modifier = modifier,
     )
 
-    LaunchedEffect(viewModel, button, canEmitPMCompletedEvent) {
+    LaunchedEffect(viewModel, button, currentScreen) {
         viewModel.primaryButtonUiState.collect { uiState ->
             withContext(Dispatchers.Main) {
                 button?.updateUiState(uiState)
             }
             if (canEmitPMCompletedEvent && uiState?.enabled == true) {
                 viewModel.newPaymentSelection?.let { newPaymentSelection ->
-                    canEmitPMCompletedEvent = false
                     viewModel.eventReporter.onPaymentMethodFormCompleted(
                         newPaymentSelection.getPaymentMethodCode()
                     )
+                    canEmitPMCompletedEvent = false
                 }
             }
         }
