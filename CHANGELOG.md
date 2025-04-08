@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [ADDED][10587](https://github.com/stripe/stripe-android/pull/10587) Embedded Payment Element is now in private beta.
+
 ## 21.9.0 - 2025-04-07
 
 ### Connect (Private Preview)
