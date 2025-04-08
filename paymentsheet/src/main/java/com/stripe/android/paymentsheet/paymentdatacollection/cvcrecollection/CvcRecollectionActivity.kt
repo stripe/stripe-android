@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection
 
 import android.app.Activity
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -33,6 +34,10 @@ internal class CvcRecollectionActivity : AppCompatActivity() {
 
         args.appearance.parseAppearance()
         setContent {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                window.isNavigationBarContrastEnforced = false
+            }
+
             StripeTheme {
                 val bottomSheetState = rememberStripeBottomSheetState()
                 val state by viewModel.viewState.collectAsState()

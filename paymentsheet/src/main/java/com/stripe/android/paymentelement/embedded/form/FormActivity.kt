@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.embedded.form
 
 import android.app.Activity
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -50,14 +51,16 @@ internal class FormActivity : AppCompatActivity() {
             return
         }
 
-        renderEdgeToEdge()
-
         viewModel.component.subcomponentFactory.build(
             activityResultCaller = this,
             lifecycleOwner = this,
         ).inject(this)
 
         setContent {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                window.isNavigationBarContrastEnforced = false
+            }
+
             StripeTheme {
                 val state by formActivityStateHelper.state.collectAsState()
                 val bottomSheetState = rememberStripeBottomSheetState(

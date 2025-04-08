@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -54,10 +55,14 @@ internal class AddressElementActivity : ComponentActivity() {
             finish()
             return
         }
-        
+
         starterArgs.config?.appearance?.parseAppearance()
 
         setContent {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                window.isNavigationBarContrastEnforced = false
+            }
+
             val coroutineScope = rememberCoroutineScope()
 
             val navController = rememberNavController()

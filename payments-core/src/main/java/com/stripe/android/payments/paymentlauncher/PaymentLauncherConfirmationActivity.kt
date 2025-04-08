@@ -2,8 +2,10 @@ package com.stripe.android.payments.paymentlauncher
 
 import android.app.Activity
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.addCallback
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
@@ -35,9 +37,14 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
     internal val viewModel: PaymentLauncherViewModel by viewModels { viewModelFactory }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         title = resources.getString(R.string.stripe_confirming_transaction_status)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
+        }
 
         val args = runCatching {
             requireNotNull(starterArgs) {
