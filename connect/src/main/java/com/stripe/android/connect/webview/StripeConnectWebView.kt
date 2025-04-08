@@ -101,6 +101,10 @@ internal class StripeConnectWebView private constructor(
             loadWithOverviewMode = true
             useWideViewPort = true
             userAgentString = "$userAgentString - stripe-android/${StripeSdkVersion.VERSION_NAME}"
+
+            // Fixes front camera "paused" issue on Samsung devices with Gelato selfie verification
+            // by allowing camera activation without requiring explicit user interaction first
+            mediaPlaybackRequiresUserGesture = false
         }
 
         setDownloadListener(StripeDownloadListener(context))
