@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetAnalyticsListener
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
@@ -144,7 +145,12 @@ internal abstract class BaseSheetViewModel(
 
     fun updateSelection(selection: PaymentSelection?) {
         when (selection) {
-            is PaymentSelection.New -> newPaymentSelection = NewPaymentOptionSelection.New(selection)
+            is PaymentSelection.New -> {
+                analyticsListener.reportFieldCompleted(
+                    selection.paymentMethodType
+                )
+                newPaymentSelection = NewPaymentOptionSelection.New(selection)
+            }
             is PaymentSelection.CustomPaymentMethod ->
                 newPaymentSelection = NewPaymentOptionSelection.Custom(selection)
             is PaymentSelection.ExternalPaymentMethod ->

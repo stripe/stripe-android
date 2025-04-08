@@ -9,11 +9,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -48,18 +44,8 @@ internal fun FormActivityUI(
 ) {
     val scrollState = rememberScrollState()
     val interactorState by interactor.state.collectAsState()
-    var hasEmitPMCompletedEvent by rememberSaveable { mutableStateOf(true) }
 
     DismissKeyboardOnProcessing(interactorState.isProcessing)
-
-    LaunchedEffect(state) {
-        if (state.isEnabled && hasEmitPMCompletedEvent) {
-            eventReporter.onPaymentMethodFormCompleted(
-                interactorState.selectedPaymentMethodCode
-            )
-            hasEmitPMCompletedEvent = false
-        }
-    }
 
     EventReporterProvider(eventReporter) {
         BottomSheetScaffold(

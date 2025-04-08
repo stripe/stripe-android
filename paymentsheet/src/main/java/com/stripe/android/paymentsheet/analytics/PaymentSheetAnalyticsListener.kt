@@ -35,6 +35,12 @@ internal class PaymentSheetAnalyticsListener(
             savedStateHandle[PREVIOUSLY_INTERACTION_PAYMENT_FORM] = value
         }
 
+    private var previouslyCompletedForm: PaymentMethodCode?
+        get() = savedStateHandle[PREVIOUSLY_COMPLETED_PAYMENT_FORM]
+        set(value) {
+            savedStateHandle[PREVIOUSLY_COMPLETED_PAYMENT_FORM] = value
+        }
+
     init {
         coroutineScope.launch {
             currentScreen.collectLatest { screen ->
@@ -60,6 +66,18 @@ internal class PaymentSheetAnalyticsListener(
         if (previouslyInteractedForm != code) {
             eventReporter.onPaymentMethodFormInteraction(code)
             previouslyInteractedForm = code
+        }
+    }
+
+    fun reportFieldCompleted(code: PaymentMethodCode) {
+        /*
+         * Prevents this event from being reported multiple times on field interactions
+         * on the same payment form. We should have one field interaction event for
+         * every form shown event triggered.
+         */
+        if (previouslyCompletedForm != code) {
+            eventReporter.onPaymentMethodFormCompleted(code)
+            previouslyCompletedForm = code
         }
     }
 
@@ -117,6 +135,7 @@ internal class PaymentSheetAnalyticsListener(
     companion object {
         internal const val PREVIOUSLY_SHOWN_PAYMENT_FORM = "previously_shown_payment_form"
         internal const val PREVIOUSLY_INTERACTION_PAYMENT_FORM = "previously_interacted_payment_form"
+        internal const val PREVIOUSLY_COMPLETED_PAYMENT_FORM = "previously_completed_payment_form"
         internal const val PREVIOUSLY_SENT_DEEP_LINK_EVENT = "previously_sent_deep_link_event"
     }
 }

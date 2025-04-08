@@ -7,6 +7,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher.Companion.HOSTED_SURFACE_PAYMENT_ELEMENT
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
@@ -24,20 +25,26 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
     private val formActivityStateHelper: FormActivityStateHelper,
     private val eventReporter: EventReporter
 ) {
+    private var hasSentCompletionEvent = false
+    private fun updateSelection(paymentSelection: PaymentSelection?) {
+        embeddedSelectionHolder.set(paymentSelection)
+        if (paymentSelection != null && !hasSentCompletionEvent) {
+            eventReporter.onPaymentMethodFormCompleted(paymentMethodCode)
+            hasSentCompletionEvent = true
+        }
+    }
     fun create(): DefaultVerticalModeFormInteractor {
         val formHelper = embeddedFormHelperFactory.create(
             coroutineScope = viewModelScope,
             paymentMethodMetadata = paymentMethodMetadata,
-            selectionUpdater = {
-                embeddedSelectionHolder.set(it)
-            }
+            selectionUpdater = ::updateSelection,
         )
 
         val usBankAccountFormArguments = USBankAccountFormArguments.create(
             paymentMethodMetadata = paymentMethodMetadata,
             selectedPaymentMethodCode = paymentMethodCode,
             hostedSurface = HOSTED_SURFACE_PAYMENT_ELEMENT,
-            setSelection = embeddedSelectionHolder::set,
+            setSelection = ::updateSelection,
             onMandateTextChanged = { mandateText, _ ->
                 formActivityStateHelper.updateMandate(mandateText)
             },

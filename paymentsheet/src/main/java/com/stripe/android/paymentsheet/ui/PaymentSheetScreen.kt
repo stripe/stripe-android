@@ -426,8 +426,6 @@ internal fun Wallet(
 private fun PrimaryButton(viewModel: BaseSheetViewModel, currentScreen: PaymentSheetScreen) {
     val uiState = viewModel.primaryButtonUiState.collectAsState(Dispatchers.Main)
 
-    var canEmitPMCompletedEvent by rememberCanEmitPMCompletedEvent(currentScreen)
-
     val modifier = Modifier
         .testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
         .semantics {
@@ -464,14 +462,6 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel, currentScreen: PaymentS
         viewModel.primaryButtonUiState.collect { uiState ->
             withContext(Dispatchers.Main) {
                 button?.updateUiState(uiState)
-            }
-            if (canEmitPMCompletedEvent && uiState?.enabled == true) {
-                viewModel.newPaymentSelection?.let { newPaymentSelection ->
-                    viewModel.eventReporter.onPaymentMethodFormCompleted(
-                        newPaymentSelection.getPaymentMethodCode()
-                    )
-                    canEmitPMCompletedEvent = false
-                }
             }
         }
     }
