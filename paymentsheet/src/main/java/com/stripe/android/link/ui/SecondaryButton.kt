@@ -44,7 +44,7 @@ internal fun SecondaryButton(
 
 @Composable
 @Preview
-internal fun SecondaryButtonPreview() {
+private fun SecondaryButtonPreview() {
     DefaultLinkTheme {
         SecondaryButton(
             enabled = true,
