@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.bacs
 
 import android.app.Activity
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.addCallback
 import androidx.activity.compose.setContent
@@ -43,6 +44,10 @@ internal class BacsMandateConfirmationActivity : AppCompatActivity() {
         starterArgs.appearance.parseAppearance()
 
         setContent {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                window.isNavigationBarContrastEnforced = false
+            }
+
             StripeTheme {
                 val bottomSheetState = rememberStripeBottomSheetState()
 

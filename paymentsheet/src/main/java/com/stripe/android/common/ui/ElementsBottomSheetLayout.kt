@@ -51,8 +51,8 @@ internal fun ElementsBottomSheetLayout(
         val activity = context.getActivity()
         activity?.enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.auto(
-                lightScrim = layoutInfo.scrimColor.toArgb(),
-                darkScrim = layoutInfo.scrimColor.toArgb()
+                lightScrim = layoutInfo.scrimColor.copy(statusBarColorAlpha).toArgb(),
+                darkScrim = layoutInfo.scrimColor.copy(statusBarColorAlpha).toArgb()
             ),
             navigationBarStyle = SystemBarStyle.auto(
                 lightScrim = Color.Transparent.toArgb(),
