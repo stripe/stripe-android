@@ -9,6 +9,7 @@ import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetState.DismissalType
@@ -36,12 +37,17 @@ fun StripeBottomSheetLayout(
     onDismissed: () -> Unit,
     sheetContent: @Composable () -> Unit,
 ) {
-    LaunchedEffect(Unit) {
-        state.show()
+    /*
+     * When inspecting, we should simply respect the `ModalBottomSheetState` provided to the component.
+     */
+    if (!LocalInspectionMode.current) {
+        LaunchedEffect(Unit) {
+            state.show()
 
-        val dismissalType = state.awaitDismissal()
-        if (dismissalType == DismissalType.SwipedDownByUser) {
-            onDismissed()
+            val dismissalType = state.awaitDismissal()
+            if (dismissalType == DismissalType.SwipedDownByUser) {
+                onDismissed()
+            }
         }
     }
 
