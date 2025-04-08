@@ -12,7 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,16 +48,16 @@ internal fun FormActivityUI(
 ) {
     val scrollState = rememberScrollState()
     val interactorState by interactor.state.collectAsState()
-    var canEmitPMCompletedEvent by remember { mutableStateOf(true) }
+    var hasEmitPMCompletedEvent by rememberSaveable { mutableStateOf(true) }
 
     DismissKeyboardOnProcessing(interactorState.isProcessing)
 
     LaunchedEffect(state) {
-        if (state.isEnabled && canEmitPMCompletedEvent) {
+        if (state.isEnabled && hasEmitPMCompletedEvent) {
             eventReporter.onPaymentMethodFormCompleted(
                 interactorState.selectedPaymentMethodCode
             )
-            canEmitPMCompletedEvent = false
+            hasEmitPMCompletedEvent = false
         }
     }
 
