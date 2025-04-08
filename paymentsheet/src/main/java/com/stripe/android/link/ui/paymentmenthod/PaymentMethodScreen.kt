@@ -77,6 +77,7 @@ internal fun PaymentMethodBody(
         }
 
         PrimaryButton(
+            modifier = Modifier.padding(vertical = 16.dp),
             label = state.primaryButtonLabel.resolve(context),
             state = state.primaryButtonState,
             onButtonClick = onPayClicked

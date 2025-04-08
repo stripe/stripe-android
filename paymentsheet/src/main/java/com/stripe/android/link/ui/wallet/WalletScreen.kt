@@ -234,7 +234,8 @@ private fun ActionSection(
     Column {
         PrimaryButton(
             modifier = Modifier
-                .testTag(WALLET_SCREEN_PAY_BUTTON),
+                .testTag(WALLET_SCREEN_PAY_BUTTON)
+                .padding(vertical = 16.dp),
             label = state.primaryButtonLabel.resolve(LocalContext.current),
             state = state.primaryButtonState,
             onButtonClick = onPrimaryButtonClick,
