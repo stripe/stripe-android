@@ -37,17 +37,14 @@ fun StripeBottomSheetLayout(
     onDismissed: () -> Unit,
     sheetContent: @Composable () -> Unit,
 ) {
-    /*
-     * When inspecting, we should simply respect the `ModalBottomSheetState` provided to the component.
-     */
-    if (!LocalInspectionMode.current) {
-        LaunchedEffect(Unit) {
+    LaunchedEffect(Unit) {
+        if (!state.modalBottomSheetState.isVisible) {
             state.show()
+        }
 
-            val dismissalType = state.awaitDismissal()
-            if (dismissalType == DismissalType.SwipedDownByUser) {
-                onDismissed()
-            }
+        val dismissalType = state.awaitDismissal()
+        if (dismissalType == DismissalType.SwipedDownByUser) {
+            onDismissed()
         }
     }
 
