@@ -26,7 +26,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -353,7 +352,7 @@ private fun PaymentSheetContent(
         }
     }
 
-    PrimaryButton(viewModel, currentScreen)
+    PrimaryButton(viewModel)
 
     Box(modifier = modifier) {
         if (mandateText?.showAbovePrimaryButton == false && currentScreen.showsPaymentConfirmationMandates) {
@@ -423,7 +422,7 @@ internal fun Wallet(
 }
 
 @Composable
-private fun PrimaryButton(viewModel: BaseSheetViewModel, currentScreen: PaymentSheetScreen) {
+private fun PrimaryButton(viewModel: BaseSheetViewModel) {
     val uiState = viewModel.primaryButtonUiState.collectAsState(Dispatchers.Main)
 
     val modifier = Modifier
@@ -438,7 +437,10 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel, currentScreen: PaymentS
             }
         }
 
-    var button by remember { mutableStateOf<PrimaryButton?>(null) }
+    var button by remember {
+        mutableStateOf<PrimaryButton?>(null)
+    }
+
     val context = LocalContext.current
 
     AndroidViewBinding(
@@ -458,7 +460,7 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel, currentScreen: PaymentS
         modifier = modifier,
     )
 
-    LaunchedEffect(viewModel, button, currentScreen) {
+    LaunchedEffect(viewModel, button) {
         viewModel.primaryButtonUiState.collect { uiState ->
             withContext(Dispatchers.Main) {
                 button?.updateUiState(uiState)
@@ -472,20 +474,6 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel, currentScreen: PaymentS
                 button?.updateState(state?.convert())
             }
         }
-    }
-}
-
-@Composable
-private fun rememberCanEmitPMCompletedEvent(currentScreen: PaymentSheetScreen): MutableState<Boolean> {
-    return remember(currentScreen) {
-        mutableStateOf(
-            when (currentScreen) {
-                is PaymentSheetScreen.AddFirstPaymentMethod -> true
-                is PaymentSheetScreen.AddAnotherPaymentMethod -> true
-                is PaymentSheetScreen.VerticalModeForm -> true
-                else -> false
-            }
-        )
     }
 }
 
