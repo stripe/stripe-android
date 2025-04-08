@@ -18,7 +18,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [Build.VERSION_CODES.TIRAMISU])
+@Config(sdk = [Build.VERSION_CODES.Q])
 internal class CvcRecollectionScreenTest {
     @get:Rule
     val composeRule = createComposeRule()
