@@ -197,7 +197,6 @@ internal class FormHelperTest {
                     paymentMethodTypes = listOf("card", "klarna"),
                 )
             ),
-            newPaymentSelectionProvider = { null }
         ).onFormFieldValuesChanged(formFieldValues, "klarna")
         val event = eventReporter.formCompletedCalls.awaitItem()
         assertThat(event.code).isEqualTo("klarna")
@@ -534,8 +533,8 @@ internal class FormHelperTest {
     private fun createFormHelper(
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         linkInlineHandler: LinkInlineHandler = LinkInlineHandler.create(),
-        newPaymentSelectionProvider: () -> NewPaymentOptionSelection? = { throw AssertionError("Not implemented") },
-        selectionUpdater: (PaymentSelection?) -> Unit = { throw AssertionError("Not implemented") },
+        newPaymentSelectionProvider: () -> NewPaymentOptionSelection? = { null },
+        selectionUpdater: (PaymentSelection?) -> Unit = { },
     ): FormHelper {
         return DefaultFormHelper(
             coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
