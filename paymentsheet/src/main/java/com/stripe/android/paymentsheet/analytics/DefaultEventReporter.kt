@@ -197,10 +197,14 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     override fun onSelectPaymentMethod(
         code: PaymentMethodCode,
+        isSaved: Boolean,
     ) {
+        if (isSaved) {
+            fireAnalyticEvent(AnalyticEvent.SelectedSavedPaymentMethod(code))
+        }
         fireEvent(
             PaymentSheetEvent.SelectPaymentMethod(
-                code = code,
+                code = if (isSaved) "saved" else code,
                 isDeferred = isDeferred,
                 currency = currency,
                 linkEnabled = linkEnabled,

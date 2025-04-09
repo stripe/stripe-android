@@ -120,7 +120,7 @@ internal class FakeEventReporter : EventReporter {
         _showNewPaymentOptionsCalls.add(Unit)
     }
 
-    override fun onSelectPaymentMethod(code: PaymentMethodCode) {
+    override fun onSelectPaymentMethod(code: PaymentMethodCode, isSaved: Boolean) {
     }
 
     override fun onPaymentMethodFormShown(code: PaymentMethodCode) {

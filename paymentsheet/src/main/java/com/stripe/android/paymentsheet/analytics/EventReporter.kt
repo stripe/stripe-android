@@ -80,6 +80,7 @@ internal interface EventReporter {
      */
     fun onSelectPaymentMethod(
         code: PaymentMethodCode,
+        isSaved: Boolean,
     )
 
     /**
