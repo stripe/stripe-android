@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded.manage
 
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -9,6 +10,8 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -25,6 +28,7 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
     private val selectionHolder: EmbeddedSelectionHolder,
     private val eventReporter: EventReporter,
     private val manageNavigatorProvider: Provider<ManageNavigator>,
+    @ViewModelScope private val viewModelScope: CoroutineScope,
 ) : EmbeddedUpdateScreenInteractorFactory {
     override fun createUpdateScreenInteractor(
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod
@@ -39,7 +43,9 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
                 if (result == null) {
                     val currentSelection = selectionHolder.selection.value
                     if (method.id == (currentSelection as? PaymentSelection.Saved)?.paymentMethod?.id) {
-                        selectionHolder.set(null)
+                        viewModelScope.launch {
+                            selectionHolder.set(null)
+                        }
                     }
                 }
                 result

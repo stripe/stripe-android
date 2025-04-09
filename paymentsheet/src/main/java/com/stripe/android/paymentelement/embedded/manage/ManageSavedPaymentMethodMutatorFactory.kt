@@ -15,6 +15,7 @@ import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Provider
@@ -41,7 +42,11 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
             uiContext = uiContext,
             customerRepository = customerRepository,
             selection = selectionHolder.selection,
-            setSelection = selectionHolder::set,
+            setSelection = {
+                viewModelScope.launch {
+                    selectionHolder::set
+                }
+            },
             customerStateHolder = customerStateHolder,
             prePaymentMethodRemoveActions = {
                 if (customerStateHolder.paymentMethods.value.size > 1) {
