@@ -155,7 +155,9 @@ internal class SavedPaymentMethodMutator(
         if (didRemoveSelectedItem) {
             // Remove the current selection. The new selection will be set when we're computing
             // the next PaymentOptionsState.
-            setSelection(null)
+            withContext(uiContext) {
+                setSelection(null)
+            }
         }
 
         return customerRepository.detachPaymentMethod(
@@ -180,11 +182,11 @@ internal class SavedPaymentMethodMutator(
             )
         )
 
-        if ((selection.value as? PaymentSelection.Saved)?.paymentMethod?.id == paymentMethodId) {
-            setSelection(null)
-        }
-
         withContext(uiContext) {
+            if ((selection.value as? PaymentSelection.Saved)?.paymentMethod?.id == paymentMethodId) {
+                setSelection(null)
+            }
+
             postPaymentMethodRemoveActions()
         }
     }
@@ -223,8 +225,10 @@ internal class SavedPaymentMethodMutator(
                 error = error
             )
         }.onSuccess {
-            customerStateHolder.setDefaultPaymentMethod(paymentMethod = paymentMethod)
-            setSelection(PaymentSelection.Saved(paymentMethod = paymentMethod))
+            withContext(uiContext) {
+                customerStateHolder.setDefaultPaymentMethod(paymentMethod = paymentMethod)
+                setSelection(PaymentSelection.Saved(paymentMethod = paymentMethod))
+            }
 
             eventReporter.onSetAsDefaultPaymentMethodSucceeded(
                 paymentMethodType = paymentMethod.type?.code,
