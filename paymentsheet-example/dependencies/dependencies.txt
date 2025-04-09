@@ -1166,7 +1166,6 @@
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.1 (*)
 |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0 (*)
 |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:2.1.10 (*)
-+--- androidx.compose.foundation:foundation:1.7.8 (*)
 +--- androidx.activity:activity-ktx:1.9.3 (*)
 +--- androidx.appcompat:appcompat:1.7.0 (*)
 +--- androidx.constraintlayout:constraintlayout:2.2.0 (*)
@@ -1246,6 +1245,7 @@
 |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.6.0 -> 2.1.10 (*)
 +--- androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.7 (*)
 +--- androidx.activity:activity-compose:1.9.3 (*)
++--- androidx.compose.foundation:foundation:1.7.8 (*)
 +--- androidx.compose.runtime:runtime-livedata:1.7.8
 |    +--- androidx.compose.runtime:runtime:1.7.8 (*)
 |    +--- androidx.lifecycle:lifecycle-livedata:2.6.1 -> 2.8.7 (*)

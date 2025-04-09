@@ -1,11 +1,6 @@
 apply from: configs.androidLibrary
 apply plugin: 'org.jetbrains.kotlin.plugin.compose'
 
-configurations {
-    cleanedAnnotations
-    implementation.exclude group: 'org.jetbrains' , module:'annotations'
-}
-
 dependencies {
     implementation project(':stripe-ui-core')
     implementation libs.compose.ui
@@ -19,6 +14,7 @@ dependencies {
         exclude group: 'jakarta.activation'
         exclude group: 'androidx.annotation', module: 'annotation-jvm'
         exclude group: 'com.android.tools.ddms', module: 'ddmlib'
+        exclude group: 'com.android.tools.layoutlib', module: 'layoutlib'
         exclude module: 'layoutlib-native-jdk11'
     }
 }
