@@ -16,7 +16,10 @@ import kotlinx.parcelize.Parcelize
 internal sealed interface FormResult : Parcelable {
 
     @Parcelize
-    data class Complete(val selection: PaymentSelection?) : FormResult
+    data class Complete(
+        val selection: PaymentSelection?,
+        val hasBeenConfirmed: Boolean,
+    ) : FormResult
 
     @Parcelize
     object Cancelled : FormResult
