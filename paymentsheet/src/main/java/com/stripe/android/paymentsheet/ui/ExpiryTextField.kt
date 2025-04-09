@@ -6,72 +6,44 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextFieldDefaults.indicatorLine
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.stripe.android.uicore.elements.ExpiryDateVisualTransformation
 import com.stripe.android.uicore.elements.TextFieldColors
-import com.stripe.android.uicore.elements.TextFieldState
-import com.stripe.android.uicore.elements.canAcceptInput
 import com.stripe.android.uicore.elements.compat.errorSemanticsWithDefault
+import com.stripe.android.uicore.strings.resolve
 
 @SuppressWarnings("SpreadOperator")
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 internal fun ExpiryTextField(
     modifier: Modifier = Modifier,
-    expDate: String,
-    enabled: Boolean,
-    validator: (String) -> TextFieldState,
+    state: ExpiryDateState,
     onValueChange: (String) -> Unit,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    onErrorChanged: (String?) -> Unit
 ) {
-    var date by rememberSaveable("date") {
-        mutableStateOf(expDate)
-    }
-    val textFieldState = remember(date) {
-        validator(date)
-    }
-    val isError = textFieldState.shouldShowError(hasFocus = true)
-    val sectionErrorString = textFieldState.getError()?.takeIf {
-        isError && enabled
-    }?.let {
-        it.formatArgs?.let { args ->
-            stringResource(
-                it.errorMessage,
-                *args
-            )
-        } ?: stringResource(it.errorMessage)
-    }
+    val isError = state.shouldShowError()
     val colors = TextFieldColors(
         shouldShowError = isError,
     )
     CommonTextField(
         modifier = modifier
             .indicatorLine(
-                enabled = enabled,
-                isError = isError && enabled,
+                enabled = state.enabled,
+                isError = isError && state.enabled,
                 interactionSource = interactionSource,
                 colors = colors
             )
-            .errorSemanticsWithDefault(isError, sectionErrorString),
-        value = date,
-        onValueChange = { newValue ->
-            val canAcceptInput = textFieldState.canAcceptInput(
-                currentValue = date,
-                proposedValue = newValue
-            )
-            if (canAcceptInput.not()) return@CommonTextField
-            date = newValue
-            onValueChange(newValue)
-        },
-        enabled = enabled,
+            .errorSemanticsWithDefault(
+                isError = isError,
+                errorMessage = state.sectionError()?.resolve()
+            ),
+        value = state.text,
+        onValueChange = onValueChange,
+        enabled = state.enabled,
         label = stringResource(id = com.stripe.android.uicore.R.string.stripe_expiration_date_hint),
         shape = MaterialTheme.shapes.small.copy(
             topStart = ZeroCornerSize,
@@ -82,8 +54,4 @@ internal fun ExpiryTextField(
         visualTransformation = ExpiryDateVisualTransformation(CARD_EDIT_UI_FALLBACK_EXPIRY_DATE),
         colors = colors
     )
-
-    LaunchedEffect(sectionErrorString) {
-        onErrorChanged(sectionErrorString)
-    }
 }

@@ -6,12 +6,6 @@ import com.stripe.android.core.utils.DateUtils
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CardUpdateParams
-import com.stripe.android.ui.core.elements.CardDetailsUtil
-import com.stripe.android.uicore.elements.DateConfig
-import com.stripe.android.uicore.elements.IdentifierSpec
-import com.stripe.android.uicore.elements.TextFieldState
-import com.stripe.android.uicore.elements.TextFieldStateConstants
-import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,9 +32,8 @@ internal interface EditCardDetailsInteractor {
         val selectedCardBrand: CardBrandChoice,
         val paymentMethodIcon: Int,
         val shouldShowCardBrandDropdown: Boolean,
-        val expiryDateEditEnabled: Boolean,
         val availableNetworks: List<CardBrandChoice>,
-        val dateValidator: (String) -> TextFieldState
+        val expiryDateState: ExpiryDateState
     )
 
     sealed interface ViewAction {
@@ -73,13 +66,15 @@ internal class DefaultEditCardDetailsInteractor(
     private val onBrandChoiceChanged: CardBrandCallback,
     private val onCardUpdateParamsChanged: CardUpdateParamsCallback
 ) : EditCardDetailsInteractor {
-    private val dateConfig = DateConfig()
     private val cardDetailsEntry = MutableStateFlow(
         value = buildDefaultCardEntry()
     )
 
     override val state: StateFlow<EditCardDetailsInteractor.State> = cardDetailsEntry.mapLatest { inputState ->
-        uiState(inputState.cardBrandChoice)
+        uiState(
+            cardBrandChoice = inputState.cardBrandChoice,
+            expiryDateState = inputState.expiryDateState
+        )
     }.stateIn(
         scope = coroutineScope,
         started = SharingStarted.Eagerly,
@@ -94,7 +89,7 @@ internal class DefaultEditCardDetailsInteractor(
                         card = card,
                         originalCardBrandChoice = defaultCardBrandChoice(),
                     )
-                    val isComplete = it.isComplete(expiryDateEditable = areExpiryDateAndAddressModificationSupported)
+                    val isComplete = it.isComplete()
                     hasChanged && isComplete
                 }?.toUpdateParams()
                 onCardUpdateParamsChanged(newParams)
@@ -114,22 +109,9 @@ internal class DefaultEditCardDetailsInteractor(
     }
 
     private fun onDateChanged(text: String) {
-        val isValid = dateConfig.determineState(text).isValid()
-        if (isValid.not()) {
-            cardDetailsEntry.update { entry ->
-                entry.copy(
-                    expYear = null,
-                    expMonth = null,
-                )
-            }
-            return
-        }
-
-        val map = CardDetailsUtil.createExpiryDateFormFieldValues(FormFieldEntry(text))
         cardDetailsEntry.update { entry ->
             entry.copy(
-                expYear = map[IdentifierSpec.CardExpYear]?.value?.toIntOrNull()?.takeIf { it > 0 },
-                expMonth = map[IdentifierSpec.CardExpMonth]?.value?.toIntOrNull()?.takeIf { it > 0 },
+                expiryDateState = entry.expiryDateState.onDateChanged(text),
             )
         }
     }
@@ -148,30 +130,31 @@ internal class DefaultEditCardDetailsInteractor(
     private fun buildDefaultCardEntry(): CardDetailsEntry {
         return CardDetailsEntry(
             cardBrandChoice = defaultCardBrandChoice(),
-            expMonth = card.expiryMonth,
-            expYear = card.expiryYear
+            expiryDateState = defaultExpiryDateState()
         )
     }
 
     private fun defaultCardBrandChoice() = card.getPreferredChoice(cardBrandFilter)
 
-    private fun uiState(cardBrandChoice: CardBrandChoice = defaultCardBrandChoice()): EditCardDetailsInteractor.State {
+    private fun defaultExpiryDateState(): ExpiryDateState {
+        return ExpiryDateState.create(
+            card = card,
+            enabled = areExpiryDateAndAddressModificationSupported
+        )
+    }
+
+    private fun uiState(
+        cardBrandChoice: CardBrandChoice = defaultCardBrandChoice(),
+        expiryDateState: ExpiryDateState = defaultExpiryDateState()
+    ): EditCardDetailsInteractor.State {
         return EditCardDetailsInteractor.State(
             card = card,
             selectedCardBrand = cardBrandChoice,
             paymentMethodIcon = card.getSavedPaymentMethodIcon(forVerticalMode = true),
             shouldShowCardBrandDropdown = isModifiable && isExpired().not(),
-            expiryDateEditEnabled = areExpiryDateAndAddressModificationSupported,
             availableNetworks = card.getAvailableNetworks(cardBrandFilter),
-            dateValidator = ::validateDate
+            expiryDateState = expiryDateState
         )
-    }
-
-    private fun validateDate(text: String): TextFieldState {
-        if (text == CARD_EDIT_UI_FALLBACK_EXPIRY_DATE) {
-            return TextFieldStateConstants.Error.Blank
-        }
-        return dateConfig.determineState(text)
     }
 
     private fun isExpired(): Boolean {

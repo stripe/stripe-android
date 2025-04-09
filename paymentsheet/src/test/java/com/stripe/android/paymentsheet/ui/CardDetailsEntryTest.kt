@@ -10,34 +10,34 @@ internal class CardDetailsEntryTest {
 
     @Test
     fun `isComplete() should be true when expiry is editable and both expiry fields are present`() {
-        val entry = createEntry(expMonth = 12, expYear = 2030)
-        assertThat(entry.isComplete(expiryDateEditable = true)).isTrue()
+        val entry = createEntry(expMonth = 12, expYear = 2030, expiryDateEditable = true)
+        assertThat(entry.isComplete()).isTrue()
     }
 
     @Test
     fun `isComplete() should be false when expiry is editable and expiry month is null`() {
-        val entry = createEntry(expMonth = null, expYear = 2030)
-        assertThat(entry.isComplete(expiryDateEditable = true)).isFalse()
+        val entry = createEntry(expMonth = null, expYear = 2030, expiryDateEditable = true)
+        assertThat(entry.isComplete()).isFalse()
     }
 
     @Test
     fun `isComplete() should be false when expiry is editable and expiry year is null`() {
-        val entry = createEntry(expMonth = 12, expYear = null)
-        assertThat(entry.isComplete(expiryDateEditable = true)).isFalse()
+        val entry = createEntry(expMonth = 12, expYear = null, expiryDateEditable = true)
+        assertThat(entry.isComplete()).isFalse()
     }
 
     @Test
     fun `isComplete() should be false when expiry is editable and both expiry fields are null`() {
-        val entry = createEntry(expMonth = null, expYear = null)
-        assertThat(entry.isComplete(expiryDateEditable = true)).isFalse()
+        val entry = createEntry(expMonth = null, expYear = null, expiryDateEditable = true)
+        assertThat(entry.isComplete()).isFalse()
     }
 
     @Test
     fun `isComplete() should be true when expiry is not editable regardless of expiry values`() {
-        assertThat(createEntry(expMonth = 12, expYear = 2030).isComplete(expiryDateEditable = false)).isTrue()
-        assertThat(createEntry(expMonth = null, expYear = 2030).isComplete(expiryDateEditable = false)).isTrue()
-        assertThat(createEntry(expMonth = 12, expYear = null).isComplete(expiryDateEditable = false)).isTrue()
-        assertThat(createEntry(expMonth = null, expYear = null).isComplete(expiryDateEditable = false)).isTrue()
+        assertThat(createEntry(expMonth = 12, expYear = 2030, expiryDateEditable = false).isComplete()).isTrue()
+        assertThat(createEntry(expMonth = null, expYear = 2030, expiryDateEditable = false).isComplete()).isTrue()
+        assertThat(createEntry(expMonth = 12, expYear = null, expiryDateEditable = false).isComplete()).isTrue()
+        assertThat(createEntry(expMonth = null, expYear = null, expiryDateEditable = false).isComplete()).isTrue()
     }
 
     @Test
@@ -167,11 +167,14 @@ internal class CardDetailsEntryTest {
     private fun createEntry(
         cardBrandChoice: CardBrandChoice = CardBrandChoice(CardBrand.Visa, true),
         expMonth: Int? = 12,
-        expYear: Int? = 2030
+        expYear: Int? = 2030,
+        expiryDateEditable: Boolean = true
     ) = CardDetailsEntry(
         cardBrandChoice = cardBrandChoice,
-        expMonth = expMonth,
-        expYear = expYear
+        expiryDateState = ExpiryDateState.create(
+            card = createCard(expiryMonth = expMonth, expiryYear = expYear),
+            enabled = expiryDateEditable
+        )
     )
 
     private fun createCard(

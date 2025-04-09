@@ -17,7 +17,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
@@ -29,8 +28,8 @@ import com.stripe.android.R
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.uicore.elements.SectionError
-import com.stripe.android.uicore.elements.TextFieldState
 import com.stripe.android.uicore.getBorderStroke
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
 import com.stripe.android.uicore.utils.collectAsState
@@ -45,12 +44,9 @@ internal fun CardDetailsEditUI(
         shouldShowCardBrandDropdown = state.shouldShowCardBrandDropdown,
         selectedBrand = state.selectedCardBrand,
         card = state.card,
-        expiryDateEditEnabled = state.expiryDateEditEnabled,
         availableNetworks = state.availableNetworks,
         paymentMethodIcon = state.paymentMethodIcon,
-        validateDate = {
-            state.dateValidator(it)
-        },
+        expiryDateState = state.expiryDateState,
         onBrandChoiceChanged = {
             editCardDetailsInteractor.handleViewAction(EditCardDetailsInteractor.ViewAction.BrandChoiceChanged(it))
         },
@@ -65,15 +61,13 @@ private fun CardDetailsEditUI(
     shouldShowCardBrandDropdown: Boolean,
     selectedBrand: CardBrandChoice,
     card: PaymentMethod.Card,
-    expiryDateEditEnabled: Boolean,
+    expiryDateState: ExpiryDateState,
     availableNetworks: List<CardBrandChoice>,
     @DrawableRes paymentMethodIcon: Int,
-    validateDate: (String) -> TextFieldState,
     onBrandChoiceChanged: (CardBrandChoice) -> Unit,
     onExpDateChanged: (String) -> Unit
 ) {
     val dividerHeight = remember { mutableStateOf(0.dp) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     Column {
         Card(
@@ -102,12 +96,7 @@ private fun CardDetailsEditUI(
                                 dividerHeight.value =
                                     (it.height / Resources.getSystem().displayMetrics.density).dp
                             },
-                        validator = validateDate,
-                        expDate = card.formattedExpiryDate(expiryDateEditEnabled),
-                        enabled = expiryDateEditEnabled,
-                        onErrorChanged = {
-                            errorMessage = it
-                        },
+                        state = expiryDateState,
                         onValueChanged = onExpDateChanged
                     )
                     Divider(
@@ -121,6 +110,7 @@ private fun CardDetailsEditUI(
             }
         }
 
+        val errorMessage = expiryDateState.sectionError()?.resolve()
         AnimatedVisibility(errorMessage != null) {
             SectionError(
                 modifier = Modifier
@@ -164,70 +154,16 @@ private fun CardNumberField(
 
 @Composable
 private fun ExpiryField(
-    expDate: String,
-    enabled: Boolean,
     modifier: Modifier,
-    validator: (String) -> TextFieldState,
-    onErrorChanged: (String?) -> Unit,
+    state: ExpiryDateState,
     onValueChanged: (String) -> Unit
 ) {
     ExpiryTextField(
         modifier = modifier
             .testTag(UPDATE_PM_EXPIRY_FIELD_TEST_TAG),
-        expDate = expDate,
-        enabled = enabled,
-        validator = validator,
+        state = state,
         onValueChange = onValueChanged,
-        onErrorChanged = onErrorChanged
     )
-}
-
-private fun PaymentMethod.Card.formattedExpiryDate(
-    expiryDateEditEnabled: Boolean
-): String {
-    val expiryMonth = this.expiryMonth
-    val expiryYear = this.expiryYear
-    @Suppress("ComplexCondition")
-    if (
-        expiryDateEditEnabled.not() &&
-        (monthIsInvalid(expiryMonth) || yearIsInvalid(expiryYear))
-    ) {
-        return CARD_EDIT_UI_FALLBACK_EXPIRY_DATE
-    }
-
-    val formattedExpiryMonth = when {
-        expiryMonth == null || monthIsInvalid(expiryMonth) -> {
-            "00"
-        }
-        expiryMonth < OCTOBER -> {
-            "0$expiryMonth"
-        }
-        else -> {
-            expiryMonth.toString()
-        }
-    }
-
-    val formattedExpiryYear = when {
-        expiryYear == null || yearIsInvalid(expiryYear) -> {
-            "00"
-        }
-        else -> {
-            @Suppress("MagicNumber")
-            expiryYear.toString().substring(2, 4)
-        }
-    }
-
-    return "$formattedExpiryMonth$formattedExpiryYear"
-}
-
-private fun monthIsInvalid(expiryMonth: Int?): Boolean {
-    return expiryMonth == null || expiryMonth < JANUARY || expiryMonth > DECEMBER
-}
-
-private fun yearIsInvalid(expiryYear: Int?): Boolean {
-    // Since we use 2-digit years to represent the expiration year, we should keep dates to
-    // this century.
-    return expiryYear == null || expiryYear < YEAR_2000 || expiryYear > YEAR_2100
 }
 
 @Composable
@@ -254,12 +190,6 @@ private fun CvcField(cardBrand: CardBrand, modifier: Modifier) {
         },
     )
 }
-
-private const val JANUARY = 1
-private const val OCTOBER = 10
-private const val DECEMBER = 12
-private const val YEAR_2000 = 2000
-private const val YEAR_2100 = 2100
 
 internal const val CARD_EDIT_UI_ERROR_MESSAGE = "card_edit_ui_error_message"
 internal const val CARD_EDIT_UI_FALLBACK_EXPIRY_DATE = "•• / ••"
