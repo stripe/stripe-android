@@ -306,13 +306,6 @@ internal class EmbeddedPlaygroundActivity :
     }
 
     override fun onEvent(event: AnalyticEvent) {
-        when (event) {
-            is AnalyticEvent.PresentedSheet -> {
-                Log.d("AnalyticEvent", "Event: $event")
-            }
-            is AnalyticEvent.DisplayedPaymentMethodForm -> {
-                Log.d("AnalyticEvent", "Event: $event, PM: ${event.paymentMethodType}")
-            }
-        }
+        Log.d("AnalyticEvent", "Event: $event")
     }
 }

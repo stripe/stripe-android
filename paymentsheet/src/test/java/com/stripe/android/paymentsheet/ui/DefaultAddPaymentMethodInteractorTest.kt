@@ -68,15 +68,11 @@ class DefaultAddPaymentMethodInteractorTest {
     @Test
     fun handleViewAction_OnPaymentMethodSelected_selectsPaymentMethod() {
         var reportedSelectedPaymentMethodCode: PaymentMethodCode? = null
-        fun reportPaymentMethodSelected(code: PaymentMethodCode) {
-            reportedSelectedPaymentMethodCode = code
-        }
-
         val expectedCode = PaymentMethod.Type.CashAppPay.code
 
         runScenario(
             initiallySelectedPaymentMethodType = PaymentMethod.Type.Card.code,
-            reportPaymentMethodTypeSelected = ::reportPaymentMethodSelected,
+            reportPaymentMethodTypeSelected = { code, _ -> reportedSelectedPaymentMethodCode = code },
             clearErrorMessages = {},
         ) {
             interactor.handleViewAction(
@@ -97,15 +93,11 @@ class DefaultAddPaymentMethodInteractorTest {
     @Test
     fun handleViewAction_OnPaymentMethodSelected_withoutNewPaymentMethod_doesntReportSelection() {
         var reportedSelectedPaymentMethodCode: PaymentMethodCode? = null
-        fun reportPaymentMethodSelected(code: PaymentMethodCode) {
-            reportedSelectedPaymentMethodCode = code
-        }
-
         val expectedCode = PaymentMethod.Type.CashAppPay.code
 
         runScenario(
             initiallySelectedPaymentMethodType = expectedCode,
-            reportPaymentMethodTypeSelected = ::reportPaymentMethodSelected,
+            reportPaymentMethodTypeSelected = { code, _ -> reportedSelectedPaymentMethodCode = code },
         ) {
             interactor.handleViewAction(
                 AddPaymentMethodInteractor.ViewAction.OnPaymentMethodSelected(expectedCode)
@@ -178,7 +170,7 @@ class DefaultAddPaymentMethodInteractorTest {
             initiallySelectedPaymentMethodType = PaymentMethod.Type.Card.code,
             createFormArguments = ::createFormArguments,
             formElementsForCode = ::formElementsForCode,
-            reportPaymentMethodTypeSelected = {},
+            reportPaymentMethodTypeSelected = { _, _ -> },
             clearErrorMessages = {},
         ) {
             val newPaymentMethodCode = PaymentMethod.Type.CashAppPay.code
@@ -211,7 +203,7 @@ class DefaultAddPaymentMethodInteractorTest {
         runScenario(
             initiallySelectedPaymentMethodType = PaymentMethod.Type.Card.code,
             clearErrorMessages = ::clearErrorMessages,
-            reportPaymentMethodTypeSelected = {},
+            reportPaymentMethodTypeSelected = { _, _ -> },
         ) {
             interactor.handleViewAction(
                 AddPaymentMethodInteractor.ViewAction.OnPaymentMethodSelected(
@@ -249,7 +241,7 @@ class DefaultAddPaymentMethodInteractorTest {
         clearErrorMessages: () -> Unit = { notImplemented() },
         reportFieldInteraction: (PaymentMethodCode) -> Unit = { notImplemented() },
         onFormFieldValuesChanged: (FormFieldValues?, String) -> Unit = { _, _ -> notImplemented() },
-        reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit = { notImplemented() },
+        reportPaymentMethodTypeSelected: (PaymentMethodCode, Boolean) -> Unit = { _, _ -> notImplemented() },
         createUSBankAccountFormArguments: (PaymentMethodCode) -> USBankAccountFormArguments = { mock() },
         testBlock: suspend TestParams.() -> Unit
     ) {
