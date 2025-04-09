@@ -1,4 +1,6 @@
-package com.stripe.android.network
+@file:Suppress("MagicNumber")
+
+package com.stripe.paymentelementnetwork
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.utils.urlEncode
@@ -7,11 +9,10 @@ import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
-import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
-internal fun NetworkRule.setupPaymentMethodDetachResponse(
+fun NetworkRule.setupPaymentMethodDetachResponse(
     paymentMethodId: String,
 ) {
     enqueue(
@@ -23,7 +24,7 @@ internal fun NetworkRule.setupPaymentMethodDetachResponse(
     }
 }
 
-internal fun NetworkRule.setupPaymentMethodUpdateResponse(
+fun NetworkRule.setupPaymentMethodUpdateResponse(
     paymentMethodDetails: CardPaymentMethodDetails,
     cardBrand: String,
     countDownLatch: CountDownLatch = CountDownLatch(0),
