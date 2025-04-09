@@ -3,8 +3,10 @@ package com.stripe.android.paymentsheet.ui
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,6 +48,8 @@ internal class FakeUpdatePaymentMethodInteractor(
             onBrandChoiceChanged = {},
             onCardUpdateParamsChanged = {},
             areExpiryDateAndAddressModificationSupported = allowCardEdit,
+            billingDetails = PaymentMethodFixtures.BILLING_DETAILS,
+            addressCollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
         )
     }
 

@@ -16,6 +16,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
@@ -436,7 +437,9 @@ internal class CardDetailsEditUITest {
                 cardBrandFilter = DefaultCardBrandFilter,
                 card = card,
                 onBrandChoiceChanged = {},
-                onCardUpdateParamsChanged = {}
+                onCardUpdateParamsChanged = {},
+                billingDetails = PaymentMethodFixtures.BILLING_DETAILS,
+                addressCollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
             )
         composeRule.setContent {
             CardDetailsEditUI(

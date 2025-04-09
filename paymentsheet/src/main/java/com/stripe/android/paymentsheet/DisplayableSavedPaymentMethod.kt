@@ -84,7 +84,14 @@ internal data class DisplayableSavedPaymentMethod private constructor(
             shouldShowDefaultBadge: Boolean = false
         ): DisplayableSavedPaymentMethod {
             val savedPaymentMethod = when (paymentMethod.type) {
-                PaymentMethod.Type.Card -> paymentMethod.card?.let { SavedPaymentMethod.Card(it) }
+                PaymentMethod.Type.Card -> {
+                    paymentMethod.card?.let { card ->
+                        SavedPaymentMethod.Card(
+                            card = card,
+                            billingDetails = paymentMethod.billingDetails
+                        )
+                    }
+                }
                 PaymentMethod.Type.USBankAccount -> paymentMethod.usBankAccount?.let {
                     SavedPaymentMethod.USBankAccount(
                         it
@@ -106,7 +113,10 @@ internal data class DisplayableSavedPaymentMethod private constructor(
 }
 
 internal sealed interface SavedPaymentMethod {
-    data class Card(val card: PaymentMethod.Card) : SavedPaymentMethod {
+    data class Card(
+        val card: PaymentMethod.Card,
+        val billingDetails: PaymentMethod.BillingDetails?
+    ) : SavedPaymentMethod {
         fun isExpired(): Boolean {
             val cardExpiryMonth = card.expiryMonth
             val cardExpiryYear = card.expiryYear
@@ -119,6 +129,7 @@ internal sealed interface SavedPaymentMethod {
                 )
         }
     }
+
     data class USBankAccount(val usBankAccount: PaymentMethod.USBankAccount) : SavedPaymentMethod
     data class SepaDebit(val sepaDebit: PaymentMethod.SepaDebit) : SavedPaymentMethod
     data object Unexpected : SavedPaymentMethod

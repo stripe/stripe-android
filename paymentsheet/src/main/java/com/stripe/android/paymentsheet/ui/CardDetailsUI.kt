@@ -6,6 +6,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
@@ -47,11 +48,15 @@ internal fun CardDetailsEditUI(
         availableNetworks = state.availableNetworks,
         paymentMethodIcon = state.paymentMethodIcon,
         expiryDateState = state.expiryDateState,
+        billingAddressForm = state.billingAddressForm,
         onBrandChoiceChanged = {
             editCardDetailsInteractor.handleViewAction(EditCardDetailsInteractor.ViewAction.BrandChoiceChanged(it))
         },
         onExpDateChanged = {
             editCardDetailsInteractor.handleViewAction(EditCardDetailsInteractor.ViewAction.DateChanged(it))
+        },
+        onAddressChanged = {
+            editCardDetailsInteractor.handleViewAction(EditCardDetailsInteractor.ViewAction.BillingAddressChanged(it))
         }
     )
 }
@@ -62,10 +67,12 @@ private fun CardDetailsEditUI(
     selectedBrand: CardBrandChoice,
     card: PaymentMethod.Card,
     expiryDateState: ExpiryDateState,
+    billingAddressForm: BillingAddressForm?,
     availableNetworks: List<CardBrandChoice>,
     @DrawableRes paymentMethodIcon: Int,
     onBrandChoiceChanged: (CardBrandChoice) -> Unit,
-    onExpDateChanged: (String) -> Unit
+    onExpDateChanged: (String) -> Unit,
+    onAddressChanged: (BillingDetailsFormState) -> Unit
 ) {
     val dividerHeight = remember { mutableStateOf(0.dp) }
 
@@ -116,6 +123,15 @@ private fun CardDetailsEditUI(
                 modifier = Modifier
                     .testTag(CARD_EDIT_UI_ERROR_MESSAGE),
                 error = errorMessage.orEmpty()
+            )
+        }
+
+        if (billingAddressForm != null) {
+            Spacer(Modifier.height(32.dp))
+
+            AddressFormUI(
+                form = billingAddressForm,
+                onValuesChanged = onAddressChanged
             )
         }
     }

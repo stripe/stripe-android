@@ -13,7 +13,7 @@ import org.json.JSONObject
  * object in the Source api.
  */
 @Parcelize
-data class Address @VisibleForTesting constructor(
+data class Address(
     val city: String? = null,
     val country: String? = null, // two-character country code
     val line1: String? = null,
