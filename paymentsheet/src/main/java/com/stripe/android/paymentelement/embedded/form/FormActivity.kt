@@ -70,7 +70,13 @@ internal class FormActivity : AppCompatActivity() {
                         interactor = formInteractor,
                         eventReporter = eventReporter,
                         onDismissed = ::setCancelAndFinish,
-                        onClick = confirmationHelper::confirm,
+                        onClick = {
+                            confirmationHelper.confirm()?.let {
+                                // TODO: Add tests.
+                                setFormResult(it)
+                                finish()
+                            }
+                        },
                         onProcessingCompleted = ::setCompletedResultAndDismiss,
                         state = state
                     )
@@ -80,7 +86,7 @@ internal class FormActivity : AppCompatActivity() {
     }
 
     private fun setCompletedResultAndDismiss() {
-        setFormResult(FormResult.Complete(null))
+        setFormResult(FormResult.Complete(selection = null, hasBeenConfirmed = true))
         finish()
     }
 
