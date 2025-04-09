@@ -22,6 +22,7 @@ import com.stripe.android.model.PaymentMethodCreateParams.Companion.getNameFromP
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
@@ -42,6 +43,8 @@ import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 internal class FormHelperTest {
+
+    val eventReporter = FakeEventReporter()
 
     @Test
     fun `formElementsForCode with unknown code returns empty list`() = runTest {
@@ -176,6 +179,29 @@ internal class FormHelperTest {
             }
         ).onFormFieldValuesChanged(formFieldValues, "card")
         assertThat(hasCalledSelectionUpdater).isTrue()
+    }
+
+    @Test
+    fun `onPaymentMethodFormCompleted event emitted when form is filled`() = runTest {
+        val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+        val formFieldValues = FormFieldValues(
+            fieldValuePairs = mapOf(
+                IdentifierSpec.Country to FormFieldEntry("US", true),
+                IdentifierSpec.Email to FormFieldEntry("Joe@stripe.com", true),
+            ),
+            userRequestedReuse = customerRequestedSave,
+        )
+        createFormHelper(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "klarna"),
+                )
+            ),
+            newPaymentSelectionProvider = { null }
+        ).onFormFieldValuesChanged(formFieldValues, "klarna")
+        val event = eventReporter.formCompletedCalls.awaitItem()
+        assertThat(event.code).isEqualTo("klarna")
+        eventReporter.validate()
     }
 
     @Test
@@ -520,6 +546,7 @@ internal class FormHelperTest {
             linkInlineHandler = linkInlineHandler,
             selectionUpdater = selectionUpdater,
             setAsDefaultMatchesSaveForFutureUse = false,
+            eventReporter = eventReporter,
         )
     }
 }

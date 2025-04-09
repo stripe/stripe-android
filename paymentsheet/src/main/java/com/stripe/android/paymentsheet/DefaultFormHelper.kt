@@ -116,7 +116,10 @@ internal class DefaultFormHelper(
     }
 
     private var previouslyCompletedForm: PaymentMethodCode? = null
-    private fun reportFieldCompleted(code: PaymentMethodCode) {
+    private fun reportFieldCompleted(code: PaymentMethodCode?) {
+        if (code == null || formTypeForCode(code) != FormType.UserInteractionRequired) {
+            return
+        }
         /*
          * Prevents this event from being reported multiple times on field interactions
          * on the same payment form. We should have one field interaction event for
@@ -132,9 +135,7 @@ internal class DefaultFormHelper(
         coroutineScope.launch {
             paymentSelection.collect { selection ->
                 selectionUpdater(selection)
-                selection?.let {
-                    reportFieldCompleted(it.paymentMethodType)
-                }
+                reportFieldCompleted(selection?.paymentMethodType)
             }
         }
     }
