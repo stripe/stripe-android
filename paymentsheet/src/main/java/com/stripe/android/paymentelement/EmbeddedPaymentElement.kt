@@ -175,6 +175,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         internal val embeddedViewDisplaysMandateText: Boolean,
         internal val link: PaymentSheet.LinkConfiguration,
+        internal val formSheetAction: FormSheetAction,
     ) : Parcelable {
         @Suppress("TooManyFunctions")
         @ExperimentalEmbeddedPaymentElementApi
@@ -207,6 +208,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
             private var customPaymentMethods: List<PaymentSheet.CustomPaymentMethod> =
                 ConfigurationDefaults.customPaymentMethods
             private var link: PaymentSheet.LinkConfiguration = ConfigurationDefaults.link
+            private var formSheetAction: FormSheetAction = FormSheetAction.Confirm
 
             /**
              * If set, the customer can select a previously saved payment method.
@@ -397,6 +399,16 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 this.link = link
             }
 
+            /**
+             * The view can display payment methods like "Card" that, when tapped, open a sheet where customers enter
+             * their payment method details. The sheet has a button at the bottom. [formSheetAction] controls the action
+             * the button performs.
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun formSheetAction(formSheetAction: FormSheetAction): Builder = apply {
+                this.formSheetAction = formSheetAction
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -416,8 +428,30 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 customPaymentMethods = customPaymentMethods,
                 embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
                 link = link,
+                formSheetAction = formSheetAction,
             )
         }
+    }
+
+    /**
+     * The view can display payment methods like "Card" that, when tapped, open a form sheet where customers enter their
+     * payment method details. The sheet has a button at the bottom. [FormSheetAction] enumerates the actions the button
+     * can perform.
+     */
+    @ExperimentalEmbeddedPaymentElementApi
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    enum class FormSheetAction {
+
+        /**
+         * The button says "Continue". When tapped, the form sheet closes. The customer can confirm payment or setup
+         * back in your app.
+         */
+        Continue,
+
+        /**
+         * The button says "Pay" or "Setup". When tapped, we confirm the payment or setup in the form sheet.
+         */
+        Confirm
     }
 
     /**
