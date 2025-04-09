@@ -12,6 +12,7 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.Customer.Components.MobilePaymentElement
 import com.stripe.android.model.ElementsSession.Customer.Components.MobilePaymentElement.Enabled
 import com.stripe.android.model.ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK
+import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_DISABLE_LINK_GLOBAL_HOLDBACK_LOOKUP
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.LinkDisabledApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
@@ -64,6 +65,10 @@ internal class DefaultLogLinkGlobalHoldbackExposure @Inject constructor(
         elementsSession: ElementsSession,
         state: PaymentElementLoader.State
     ) {
+        // Don't log if the lookup kill-switch is disabled.
+        if (elementsSession.flags[ELEMENTS_DISABLE_LINK_GLOBAL_HOLDBACK_LOOKUP] == true) {
+            return
+        }
         val experimentsData = requireNotNull(
             elementsSession.experimentsData
         ) { "Experiments data required to log exposures" }

@@ -159,7 +159,8 @@ data class ElementsSession(
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class Flag(val flagValue: String) {
-        ELEMENTS_DISABLE_FC_LITE("elements_disable_fc_lite")
+        ELEMENTS_DISABLE_FC_LITE("elements_disable_fc_lite"),
+        ELEMENTS_DISABLE_LINK_GLOBAL_HOLDBACK_LOOKUP("elements_disable_link_global_holdback_lookup"),
     }
 
     /**

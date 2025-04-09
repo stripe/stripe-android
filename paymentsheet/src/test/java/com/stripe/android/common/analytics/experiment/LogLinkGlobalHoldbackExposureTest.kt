@@ -17,6 +17,7 @@ import com.stripe.android.model.ElementsSession.Customer.Components
 import com.stripe.android.model.ElementsSession.Customer.Components.CustomerSheet
 import com.stripe.android.model.ElementsSession.Customer.Components.MobilePaymentElement
 import com.stripe.android.model.ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK
+import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_DISABLE_LINK_GLOBAL_HOLDBACK_LOOKUP
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
@@ -128,6 +129,25 @@ class LogLinkGlobalHoldbackExposureTest {
                     LINK_GLOBAL_HOLD_BACK to "holdback"
                 )
             )
+        )
+        val state = createElementsState(PaymentMethodMetadataFactory.create())
+
+        logLinkGlobalHoldbackExposure(elementsSession, state)
+
+        eventReporter.experimentExposureCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `invoke should not log exposure when lookup kill-switch flag is on`() = runTest {
+        val elementsSession = createElementsSession(
+            experimentsData = ElementsSession.ExperimentsData(
+                arbId = "test_arb_id",
+                experimentAssignments = mapOf(
+                    LINK_GLOBAL_HOLD_BACK to "holdback"
+                )
+            )
+        ).copy(
+            flags = mapOf(ELEMENTS_DISABLE_LINK_GLOBAL_HOLDBACK_LOOKUP to true)
         )
         val state = createElementsState(PaymentMethodMetadataFactory.create())
 
