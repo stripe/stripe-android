@@ -170,6 +170,7 @@ internal class FormHelperTest {
         )
         var hasCalledSelectionUpdater = false
         createFormHelper(
+            newPaymentSelectionProvider = { null },
             selectionUpdater = { paymentSelection ->
                 val cardPaymentSelection = paymentSelection as PaymentSelection.New.Card
                 assertThat(cardPaymentSelection.brand.code).isEqualTo(cardBrand)
@@ -197,6 +198,8 @@ internal class FormHelperTest {
                     paymentMethodTypes = listOf("card", "klarna"),
                 )
             ),
+            newPaymentSelectionProvider = { null },
+            selectionUpdater = {},
         ).onFormFieldValuesChanged(formFieldValues, "klarna")
         val event = eventReporter.formCompletedCalls.awaitItem()
         assertThat(event.code).isEqualTo("klarna")
@@ -377,7 +380,8 @@ internal class FormHelperTest {
                 linkInlineHandler = linkInlineHandler,
                 selectionUpdater = { paymentSelection ->
                     selection.value = paymentSelection
-                }
+                },
+                newPaymentSelectionProvider = { null }
             )
 
             formHelper.onFormFieldValuesChanged(formFieldValues, "card")
@@ -518,7 +522,8 @@ internal class FormHelperTest {
                 linkInlineHandler = linkInlineHandler,
                 selectionUpdater = { paymentSelection ->
                     selection.value = paymentSelection
-                }
+                },
+                newPaymentSelectionProvider = { null },
             )
 
             formHelper.onFormFieldValuesChanged(formFieldValues, paymentMethodCode)
@@ -533,8 +538,8 @@ internal class FormHelperTest {
     private fun createFormHelper(
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         linkInlineHandler: LinkInlineHandler = LinkInlineHandler.create(),
-        newPaymentSelectionProvider: () -> NewPaymentOptionSelection? = { null },
-        selectionUpdater: (PaymentSelection?) -> Unit = { },
+        newPaymentSelectionProvider: () -> NewPaymentOptionSelection? = { throw AssertionError("Not implemented") },
+        selectionUpdater: (PaymentSelection?) -> Unit = { throw AssertionError("Not implemented") },
     ): FormHelper {
         return DefaultFormHelper(
             coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
