@@ -4,7 +4,7 @@ import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
@@ -150,6 +151,13 @@ internal fun VerificationBody(
             isSendingNewCode = state.isSendingNewCode,
             onClick = onResendCodeClick,
         )
+
+        Text(
+            modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
+            text = state.email,
+            style = MaterialTheme.typography.body2,
+            color = MaterialTheme.colors.onSecondary,
+        )
     }
 }
 
@@ -181,6 +189,10 @@ private fun Header(
                 onClick = onBackClicked
             ) {
                 Icon(
+                    modifier = Modifier
+                        .background(MaterialTheme.colors.secondary, CircleShape)
+                        .padding(10.dp)
+                        .size(12.dp),
                     painter = painterResource(R.drawable.stripe_link_close),
                     contentDescription = stringResource(com.stripe.android.R.string.stripe_cancel)
                 )
@@ -253,11 +265,6 @@ private fun ResendCodeButton(
         modifier = Modifier
             .testTag(VERIFICATION_RESEND_CODE_BUTTON_TAG)
             .padding(top = 12.dp)
-            .border(
-                width = 1.dp,
-                color = MaterialTheme.linkColors.componentBorder,
-                shape = MaterialTheme.linkShapes.extraSmall,
-            )
             .clip(shape = MaterialTheme.linkShapes.extraSmall)
             .clickable(
                 enabled = !isProcessing && !isSendingNewCode,
@@ -265,12 +272,10 @@ private fun ResendCodeButton(
             ),
         contentAlignment = Alignment.Center
     ) {
-        val textAlpha = if (isProcessing) {
-            ContentAlpha.disabled
-        } else if (isSendingNewCode) {
-            0f
-        } else {
-            ContentAlpha.high
+        val textAlpha = when {
+            isProcessing -> ContentAlpha.disabled
+            isSendingNewCode -> 0f
+            else -> 1f
         }
 
         Text(
