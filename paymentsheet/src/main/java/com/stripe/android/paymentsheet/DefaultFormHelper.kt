@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.link.LinkConfigurationCoordinator
@@ -36,7 +37,7 @@ internal class DefaultFormHelper(
     private val selectionUpdater: (PaymentSelection?) -> Unit,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
     private val setAsDefaultMatchesSaveForFutureUse: Boolean,
-    private val eventReporter: EventReporter?,
+    @get:VisibleForTesting val eventReporter: EventReporter,
 ) : FormHelper {
     companion object {
         fun create(
@@ -65,6 +66,7 @@ internal class DefaultFormHelper(
             coroutineScope: CoroutineScope,
             cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
             paymentMethodMetadata: PaymentMethodMetadata,
+            eventReporter: EventReporter,
         ): FormHelper {
             return DefaultFormHelper(
                 coroutineScope = coroutineScope,
@@ -75,7 +77,7 @@ internal class DefaultFormHelper(
                 linkConfigurationCoordinator = null,
                 selectionUpdater = {},
                 setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
-                eventReporter = null,
+                eventReporter = eventReporter,
             )
         }
     }
@@ -126,7 +128,7 @@ internal class DefaultFormHelper(
          * every form shown event triggered.
          */
         if (previouslyCompletedForm != code) {
-            eventReporter?.onPaymentMethodFormCompleted(code)
+            eventReporter.onPaymentMethodFormCompleted(code)
             previouslyCompletedForm = code
         }
     }

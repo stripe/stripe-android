@@ -54,6 +54,10 @@ internal class PaymentMethodViewModel @Inject constructor(
             formValues = formValues,
             selectedPaymentMethodCode = PaymentMethod.Type.Card.code
         )
+        formHelper.onFormFieldValuesChanged(
+            formValues = formValues,
+            selectedPaymentMethodCode = PaymentMethod.Type.Card.code
+        )
         _state.update {
             it.copy(
                 paymentMethodCreateParams = paymentMethodCreateParams,
@@ -160,6 +164,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                             paymentMethodMetadata = PaymentMethodMetadata.createForNativeLink(
                                 configuration = parentComponent.configuration,
                             ),
+                            eventReporter = parentComponent.eventReporter,
                         ),
                         logger = parentComponent.logger,
                         dismissWithResult = dismissWithResult

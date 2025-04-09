@@ -44,8 +44,6 @@ import kotlin.test.Test
 @RunWith(RobolectricTestRunner::class)
 internal class FormHelperTest {
 
-    val eventReporter = FakeEventReporter()
-
     @Test
     fun `formElementsForCode with unknown code returns empty list`() = runTest {
         val formHelper = createFormHelper(
@@ -192,7 +190,7 @@ internal class FormHelperTest {
             ),
             userRequestedReuse = customerRequestedSave,
         )
-        createFormHelper(
+        val formHelper = createFormHelper(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     paymentMethodTypes = listOf("card", "klarna"),
@@ -200,7 +198,9 @@ internal class FormHelperTest {
             ),
             newPaymentSelectionProvider = { null },
             selectionUpdater = {},
-        ).onFormFieldValuesChanged(formFieldValues, "klarna")
+        )
+        formHelper.onFormFieldValuesChanged(formFieldValues, "klarna")
+        val eventReporter = ((formHelper as DefaultFormHelper).eventReporter as FakeEventReporter)
         val event = eventReporter.formCompletedCalls.awaitItem()
         assertThat(event.code).isEqualTo("klarna")
         eventReporter.validate()
@@ -550,7 +550,7 @@ internal class FormHelperTest {
             linkInlineHandler = linkInlineHandler,
             selectionUpdater = selectionUpdater,
             setAsDefaultMatchesSaveForFutureUse = false,
-            eventReporter = eventReporter,
+            eventReporter = FakeEventReporter(),
         )
     }
 }

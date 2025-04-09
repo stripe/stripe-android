@@ -21,7 +21,7 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
     fun create(
         coroutineScope: CoroutineScope,
         paymentMethodMetadata: PaymentMethodMetadata,
-        eventReporter: EventReporter?,
+        eventReporter: EventReporter,
         selectionUpdater: (PaymentSelection?) -> Unit,
     ): FormHelper {
         return DefaultFormHelper(
