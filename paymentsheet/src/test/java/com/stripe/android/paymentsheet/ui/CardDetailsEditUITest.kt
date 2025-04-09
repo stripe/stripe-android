@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.ui
 import android.os.Build
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertContentDescriptionEquals
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.hasText
@@ -10,6 +11,8 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.printToString
+import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -17,6 +20,7 @@ import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
 import com.stripe.android.uicore.elements.TEST_TAG_DROP_DOWN_CHOICE
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
@@ -297,6 +301,31 @@ internal class CardDetailsEditUITest {
     }
 
     @Test
+    fun selectingCardBrandFromDropdown_displaysNewCardBrand() {
+        runScenario(
+            card = PaymentMethodFixtures.CARD_WITH_NETWORKS,
+        ) {
+            composeRule.onNodeWithTag(
+                testTag = "${SELECTED_CARD_BRAND_DROPDOWN_TAG}_Cartes Bancaires",
+                useUnmergedTree = true
+            ).assertIsDisplayed()
+
+            println(
+                composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG, useUnmergedTree = true)
+                    .printToString()
+            )
+            composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).performClick()
+
+            composeRule.onNodeWithTag("${TEST_TAG_DROP_DOWN_CHOICE}_Visa").performClick()
+
+            composeRule.onNodeWithTag(
+                testTag = "${SELECTED_CARD_BRAND_DROPDOWN_TAG}_Visa",
+                useUnmergedTree = true
+            ).assertIsDisplayed()
+        }
+    }
+
+    @Test
     fun selectingCardBrandDropdown_sendsOnBrandChoiceChangedAction() {
         runScenario(
             card = PaymentMethodFixtures.CARD_WITH_NETWORKS,
@@ -398,20 +427,39 @@ internal class CardDetailsEditUITest {
         expiryDateEditEnabled: Boolean = true,
         block: TestScenario.() -> Unit
     ) {
-        val editCardDetailsInteractor = FakeEditCardDetailsInteractor(
-            card = card,
-            shouldShowCardBrandDropdown = showCardBrandDropdown,
-            expiryDateEditEnabled = expiryDateEditEnabled,
-        )
+        val viewActionRecorder = ViewActionRecorder<EditCardDetailsInteractor.ViewAction>()
+        val editCardDetailsInteractor = DefaultEditCardDetailsInteractor.Factory()
+            .create(
+                coroutineScope = TestScope(testDispatcher),
+                isModifiable = showCardBrandDropdown,
+                areExpiryDateAndAddressModificationSupported = expiryDateEditEnabled,
+                cardBrandFilter = DefaultCardBrandFilter,
+                card = card,
+                onBrandChoiceChanged = {},
+                onCardUpdateParamsChanged = {}
+            )
         composeRule.setContent {
             CardDetailsEditUI(
-                editCardDetailsInteractor = editCardDetailsInteractor,
+                editCardDetailsInteractor = RealEditCardDetailsInteractorWithRecorder(
+                    viewActionRecorder = viewActionRecorder,
+                    editCardDetailsInteractor = editCardDetailsInteractor
+                ),
             )
         }
-        block(TestScenario(editCardDetailsInteractor.viewActionRecorder))
+        block(TestScenario(viewActionRecorder))
     }
 
     data class TestScenario(
         val viewActionRecorder: ViewActionRecorder<EditCardDetailsInteractor.ViewAction>
     )
+}
+
+private class RealEditCardDetailsInteractorWithRecorder(
+    private val viewActionRecorder: ViewActionRecorder<EditCardDetailsInteractor.ViewAction>,
+    private val editCardDetailsInteractor: EditCardDetailsInteractor
+) : EditCardDetailsInteractor by editCardDetailsInteractor {
+    override fun handleViewAction(viewAction: EditCardDetailsInteractor.ViewAction) {
+        viewActionRecorder.record(viewAction)
+        editCardDetailsInteractor.handleViewAction(viewAction)
+    }
 }
