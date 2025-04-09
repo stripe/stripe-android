@@ -168,7 +168,7 @@ private fun Header(
         ) {
             Image(
                 modifier = Modifier
-                    .align(Alignment.Center)
+                    .align(Alignment.CenterStart)
                     .testTag(VERIFICATION_HEADER_IMAGE_TAG),
                 painter = painterResource(R.drawable.stripe_link_logo),
                 contentDescription = stringResource(com.stripe.android.R.string.stripe_link),
