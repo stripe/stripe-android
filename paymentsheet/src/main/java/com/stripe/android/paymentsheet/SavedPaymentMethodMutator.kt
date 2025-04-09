@@ -245,6 +245,9 @@ internal class SavedPaymentMethodMutator(
                 prePaymentMethodRemoveActions()
                 removeDeletedPaymentMethodFromState(paymentMethodId = paymentMethodId)
             }
+            paymentMethod.code?.let {
+                eventReporter.onRemoveSavedPaymentMethod(it)
+            }
         }
 
         return result.exceptionOrNull()
