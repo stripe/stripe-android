@@ -342,11 +342,11 @@ internal class PaymentOptionsActivityTest {
 
         // We don't want the initial selection to be reported, as it's not a user selection
         verify(eventReporter, never()).onSelectPaymentMethod(
-            code = eq(PaymentMethod.Type.Card.code),
+            code = eq(PaymentMethod.Type.Card.code),,
         )
 
         verify(eventReporter).onSelectPaymentMethod(
-            code = eq(PaymentMethod.Type.CashAppPay.code),
+            code = eq(PaymentMethod.Type.CashAppPay.code),,
         )
     }
 

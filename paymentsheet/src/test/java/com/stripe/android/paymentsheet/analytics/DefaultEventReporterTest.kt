@@ -787,7 +787,7 @@ class DefaultEventReporterTest {
             simulateSuccessfulSetup(linkMode = LinkMode.LinkPaymentMethod)
         }
 
-        completeEventReporter.onSelectPaymentMethod("link")
+        completeEventReporter.onSelectPaymentMethod("link",)
 
         val argumentCaptor = argumentCaptor<AnalyticsRequest>()
         verify(analyticsRequestExecutor).executeAsync(argumentCaptor.capture())
@@ -803,7 +803,7 @@ class DefaultEventReporterTest {
             simulateSuccessfulSetup(linkMode = LinkMode.LinkCardBrand)
         }
 
-        completeEventReporter.onSelectPaymentMethod("link")
+        completeEventReporter.onSelectPaymentMethod("link",)
 
         val argumentCaptor = argumentCaptor<AnalyticsRequest>()
         verify(analyticsRequestExecutor).executeAsync(argumentCaptor.capture())
