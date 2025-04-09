@@ -48,7 +48,7 @@ internal fun VerificationDialogBody(
             }
         ) {
             DefaultLinkTheme {
-                Surface(shape = RoundedCornerShape(16.dp)) {
+                Surface(shape = RoundedCornerShape(24.dp)) {
                     VerificationScreen(viewModel)
                 }
             }
