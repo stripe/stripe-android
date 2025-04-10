@@ -135,8 +135,8 @@ internal class SavedPaymentMethodMutator(
         val paymentMethodId = paymentMethod.id ?: return
 
         coroutineScope.launch(workContext) {
-            removeDeletedPaymentMethodFromState(paymentMethodId)
             removePaymentMethodInternal(paymentMethodId)
+            removeDeletedPaymentMethodFromState(paymentMethodId)
         }
     }
 

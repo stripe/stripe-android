@@ -12,7 +12,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
-import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
@@ -261,6 +260,8 @@ class SavedPaymentMethodMutatorTest {
         }
 
         assertThat(postPaymentMethodRemovedTurbine.awaitItem()).isEqualTo(Unit)
+        assertThat(eventReporter.removePaymentMethodCalls.awaitItem().code).isEqualTo("card")
+        eventReporter.validate()
     }
 
     @Test
@@ -845,7 +846,7 @@ class SavedPaymentMethodMutatorTest {
     @Suppress("LongMethod")
     private fun runScenario(
         customerRepository: CustomerRepository = FakeCustomerRepository(),
-        eventReporter: EventReporter = FakeEventReporter(),
+        eventReporter: FakeEventReporter = FakeEventReporter(),
         selection: MutableStateFlow<PaymentSelection?> = MutableStateFlow(null),
         customerStateHolder: CustomerStateHolder = CustomerStateHolder(
             savedStateHandle = SavedStateHandle(),
@@ -904,6 +905,7 @@ class SavedPaymentMethodMutatorTest {
                 postPaymentMethodRemovedTurbine = postPaymentMethodRemovedTurbine,
                 updatePaymentMethodTurbine = updatePaymentMethodTurbine,
                 testScope = this,
+                eventReporter = eventReporter,
             ).apply {
                 block()
             }
@@ -924,6 +926,7 @@ class SavedPaymentMethodMutatorTest {
         val postPaymentMethodRemovedTurbine: ReceiveTurbine<Unit>,
         val updatePaymentMethodTurbine: ReceiveTurbine<UpdateCall>,
         val testScope: TestScope,
+        val eventReporter: FakeEventReporter,
     )
 
     private data class UpdateCall(

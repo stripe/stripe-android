@@ -57,7 +57,6 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -564,6 +563,7 @@ internal class PaymentOptionsViewModelTest {
 
     @Test
     fun `Falls back to no payment selection if user cancels after deleting initial payment method`() = runTest {
+        Dispatchers.setMain(testDispatcher)
         val paymentMethods = PaymentMethodFixtures.createCards(3)
         val selection = PaymentSelection.Saved(paymentMethod = paymentMethods.random())
 
@@ -587,7 +587,6 @@ internal class PaymentOptionsViewModelTest {
                     paymentMethods = paymentMethods - selection.paymentMethod,
                 )
             )
-            verify(eventReporter, never()).onRemoveSavedPaymentMethod(any())
         }
     }
 
@@ -732,8 +731,6 @@ internal class PaymentOptionsViewModelTest {
 
             paymentMethodsTurbine.ensureAllEventsConsumed()
             paymentMethodsTurbine.cancelAndIgnoreRemainingEvents()
-
-            verify(eventReporter).onRemoveSavedPaymentMethod("card")
         }
     }
 
