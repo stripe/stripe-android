@@ -23,6 +23,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.validateAnalyticsRequest
 import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
+import com.stripe.paymentelementnetwork.setupPaymentMethodDetachResponse
 import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse
 import com.stripe.paymentelementtestpages.EditPage
 import com.stripe.paymentelementtestpages.ManagePage
@@ -253,6 +254,60 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         managePage.waitUntilVisible()
         managePage.clickDone()
         Espresso.pressBack()
+
+        testContext.markTestSucceeded()
+    }
+
+    @Test
+    fun testRemoveCard() = runEmbeddedPaymentElementTest(
+        networkRule = networkRule,
+        createIntentCallback = { _, shouldSavePaymentMethod ->
+            assertThat(shouldSavePaymentMethod).isFalse()
+            CreateIntentResult.Success("pi_example_secret_12345")
+        },
+        analyticEventCallback = analyticEventRule,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
+        }
+        networkRule.setupV1PaymentMethodsResponse(card1, card2)
+
+        validateAnalyticsRequest(eventName = "mc_embedded_init")
+        validateAnalyticsRequest(eventName = "mc_load_started")
+        validateAnalyticsRequest(eventName = "mc_load_succeeded")
+        validateAnalyticsRequest(eventName = "stripe_android.retrieve_payment_methods")
+        validateAnalyticsRequest(eventName = "elements.customer_repository.get_saved_payment_methods_success")
+        validateAnalyticsRequest(eventName = "mc_embedded_sheet_newpm_show")
+
+        testContext.configure {
+            customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+        }
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
+
+        validateAnalyticsRequest(eventName = "mc_embedded_manage_savedpm_show")
+        embeddedContentPage.clickViewMore()
+
+        managePage.waitUntilVisible()
+        managePage.clickEdit()
+        validateAnalyticsRequest(eventName = "mc_open_edit_screen")
+        managePage.clickEdit(card1.id)
+        editPage.waitUntilVisible()
+
+        networkRule.setupPaymentMethodDetachResponse(card1.id)
+        validateAnalyticsRequest(eventName = "stripe_android.detach_payment_method")
+        validateAnalyticsRequest(eventName = "mc_cancel_edit_screen")
+
+        editPage.clickRemove()
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.RemovedSavedPaymentMethod("card"))
+
+        managePage.waitUntilVisible()
+        managePage.waitUntilGone(card1.id)
+        managePage.clickDone()
 
         testContext.markTestSucceeded()
     }
