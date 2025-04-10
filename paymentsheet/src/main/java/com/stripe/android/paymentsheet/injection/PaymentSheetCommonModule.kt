@@ -45,8 +45,10 @@ import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
 import com.stripe.android.paymentsheet.state.DefaultLinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.DefaultPaymentElementLoader
+import com.stripe.android.paymentsheet.state.DefaultRetrieveCustomerEmail
 import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
 import dagger.Binds
 import dagger.Lazy
 import dagger.Module
@@ -82,6 +84,11 @@ internal abstract class PaymentSheetCommonModule {
 
     @Binds
     abstract fun bindsPaymentSheetLoader(impl: DefaultPaymentElementLoader): PaymentElementLoader
+
+    @Binds
+    abstract fun bindsRetrieveCustomerEmail(
+        impl: DefaultRetrieveCustomerEmail,
+    ): RetrieveCustomerEmail
 
     @Binds
     abstract fun bindsUserFacingLogger(impl: RealUserFacingLogger): UserFacingLogger

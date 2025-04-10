@@ -5,7 +5,6 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.common.analytics.experiment.ExperimentGroup
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.exception.APIException
@@ -596,7 +595,8 @@ class DefaultEventReporterTest {
 
             val experiment = LoggableExperiment.LinkGlobalHoldback(
                 arbId = "random_arb_id",
-                group = ExperimentGroup.TREATMENT,
+                isReturningLinkConsumer = false,
+                group = "holdback",
             )
             completeEventReporter.onExperimentExposure(experiment)
 
@@ -606,8 +606,8 @@ class DefaultEventReporterTest {
             assertEquals(request.eventName, "elements.experiment_exposure")
             assertEquals(params["experiment_retrieved"], "link_global_holdback")
             assertEquals(params["arb_id"], "random_arb_id")
-            assertEquals(params["assignment_group"], "treatment")
-            assertEquals(params["integration_type"], "dimensions-integration_type=mpe")
+            assertEquals(params["assignment_group"], "holdback")
+            assertEquals(params["dimensions-integration_type"], "mpe_android")
             assertEquals(params["sdk_platform"], "android")
             assertEquals(params["plugin_type"], "native")
 
