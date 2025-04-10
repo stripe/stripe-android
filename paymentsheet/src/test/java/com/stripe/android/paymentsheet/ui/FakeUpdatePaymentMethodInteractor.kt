@@ -45,6 +45,7 @@ internal class FakeUpdatePaymentMethodInteractor(
             card = displayableSavedPaymentMethod.paymentMethod.card!!,
             onBrandChoiceChanged = {},
             onCardUpdateParamsChanged = {},
+            areExpiryDateAndAddressModificationSupported = allowCardEdit,
         )
     }
 

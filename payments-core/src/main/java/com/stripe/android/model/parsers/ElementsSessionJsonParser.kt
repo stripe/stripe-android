@@ -6,6 +6,7 @@ import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArray
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
@@ -61,6 +62,9 @@ internal class ElementsSessionJsonParser(
             json.optJSONObject(FIELD_EXPERIMENTS_DATA)?.let { experimentsDataJson ->
                 ElementsSession.ExperimentsData(
                     arbId = experimentsDataJson.optString(ARB_ID),
+                    experimentAssignments = experimentsDataJson.optJSONObject(FIELD_EXPERIMENTS_ASSIGNMENTS)?.let {
+                        parseExperimentAssignments(it)
+                    } ?: emptyMap()
                 )
             }
 
@@ -155,7 +159,6 @@ internal class ElementsSessionJsonParser(
         linkFundingSources: JSONArray?,
     ): ElementsSession.LinkSettings {
         val disableLinkSignup = json?.optBoolean(FIELD_DISABLE_LINK_SIGNUP) == true
-        val linkGlobalHoldbackOn = json?.optBoolean(LINK_GLOBAL_HOLDBACK_ON) == true
         val linkPassthroughModeEnabled = json?.optBoolean(FIELD_LINK_PASSTHROUGH_MODE_ENABLED) == true
         val useLinkAttestationEndpoints = json?.optBoolean(FIELD_USE_LINK_ATTESTATION_ENDPOINTS) == true
         val suppressLink2faModal = json?.optBoolean(FIELD_LINK_SUPPRESS_2FA_MODAL) == true
@@ -183,7 +186,6 @@ internal class ElementsSessionJsonParser(
             disableLinkSignup = disableLinkSignup,
             linkConsumerIncentive = linkConsumerIncentive,
             useAttestationEndpoints = useLinkAttestationEndpoints,
-            linkGlobalHoldbackOn = linkGlobalHoldbackOn,
             suppress2faModal = suppressLink2faModal
         )
     }
@@ -358,7 +360,6 @@ internal class ElementsSessionJsonParser(
     /**
      * Parse the flags from the [json] object.
      * @param json the json object to parse
-     * @param relevantFlags the flags to parse. If null, all flags will be parsed.
      */
     private fun parseSessionFlags(json: JSONObject): Map<ElementsSession.Flag, Boolean> {
         val flags = mutableMapOf<ElementsSession.Flag, Boolean>()
@@ -377,6 +378,26 @@ internal class ElementsSessionJsonParser(
         return flags.toMap()
     }
 
+    /**
+     * Parse the experiment assignments from the [json] object.
+     * @param json the json object to parse
+     */
+    private fun parseExperimentAssignments(json: JSONObject): Map<ExperimentAssignment, String> {
+        val specs = mutableMapOf<ExperimentAssignment, String>()
+        json.keys().forEach { key ->
+            val value = json.get(key)
+            ExperimentAssignment.entries
+                .firstOrNull { it.experimentValue == key }
+                ?.let { flag ->
+                    if (value is String) {
+                        specs[flag] = value
+                    }
+                }
+        }
+
+        return specs.toMap()
+    }
+
     internal companion object {
         private const val FIELD_OBJECT = "object"
         private const val FIELD_ELEMENTS_SESSION_ID = "session_id"
@@ -389,7 +410,6 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_LINK_PASSTHROUGH_MODE_ENABLED = "link_passthrough_mode_enabled"
         private const val FIELD_LINK_MODE = "link_mode"
         private const val FIELD_DISABLE_LINK_SIGNUP = "link_mobile_disable_signup"
-        private const val LINK_GLOBAL_HOLDBACK_ON = "link_global_holdback_on"
         private const val FIELD_USE_LINK_ATTESTATION_ENDPOINTS = "link_mobile_use_attestation_endpoints"
         private const val FIELD_LINK_SUPPRESS_2FA_MODAL = "link_mobile_suppress_2fa_modal"
         private const val FIELD_MERCHANT_COUNTRY = "merchant_country"
@@ -425,6 +445,7 @@ internal class ElementsSessionJsonParser(
         private const val VALUE_ENABLED = FIELD_ENABLED
         const val FIELD_GOOGLE_PAY_PREFERENCE = "google_pay_preference"
         private const val FIELD_EXPERIMENTS_DATA = "experiments_data"
+        private const val FIELD_EXPERIMENTS_ASSIGNMENTS = "experiment_assignments"
         private const val ARB_ID = "arb_id"
 
         private val PAYMENT_METHOD_JSON_PARSER = PaymentMethodJsonParser()

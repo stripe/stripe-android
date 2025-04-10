@@ -80,6 +80,14 @@ internal interface EventReporter {
      */
     fun onSelectPaymentMethod(
         code: PaymentMethodCode,
+        isSaved: Boolean,
+    )
+
+    /**
+     * The customer has removed a saved payment method.
+     */
+    fun onRemoveSavedPaymentMethod(
+        code: PaymentMethodCode,
     )
 
     /**

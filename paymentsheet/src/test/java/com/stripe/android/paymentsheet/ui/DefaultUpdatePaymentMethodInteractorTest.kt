@@ -544,20 +544,6 @@ class DefaultUpdatePaymentMethodInteractorTest {
     }
 
     @Test
-    fun shouldNotAllowCardEdit_whenCardEditFeatureFlagIsDisabled() = runScenario(
-        editSavedCardPaymentMethodEnabled = false
-    ) {
-        assertThat(interactor.allowCardEdit).isFalse()
-    }
-
-    @Test
-    fun shouldAllowCardEdit_whenCardEditFeatureFlagIsEnabled() = runScenario(
-        editSavedCardPaymentMethodEnabled = true
-    ) {
-        assertThat(interactor.allowCardEdit).isTrue()
-    }
-
-    @Test
     fun shouldNotCallSetDefaultPaymentMethod_ifPaymentMethodIsAlreadyDefault() = runScenario(
         isDefaultPaymentMethod = true,
         onSetDefaultPaymentMethod = { _ -> notImplemented() },

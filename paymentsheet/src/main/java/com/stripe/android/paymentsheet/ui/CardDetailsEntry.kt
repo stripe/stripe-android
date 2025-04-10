@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CardUpdateParams
 
 /**
@@ -9,6 +10,7 @@ import com.stripe.android.paymentsheet.CardUpdateParams
  */
 internal data class CardDetailsEntry(
     val cardBrandChoice: CardBrandChoice,
+    val expiryDateState: ExpiryDateState,
 ) {
     /**
      * Determines if the card details have changed compared to the provided values.
@@ -17,9 +19,17 @@ internal data class CardDetailsEntry(
      * @return True if any of the card details have changed, false otherwise.
      */
     fun hasChanged(
+        card: PaymentMethod.Card,
         originalCardBrandChoice: CardBrandChoice,
     ): Boolean {
-        return originalCardBrandChoice != this.cardBrandChoice
+        val expChanged =
+            card.expiryMonth != expiryDateState.expiryMonth || card.expiryYear != expiryDateState.expiryYear
+        return originalCardBrandChoice != this.cardBrandChoice || expChanged
+    }
+
+    fun isComplete(): Boolean {
+        if (expiryDateState.enabled.not()) return true
+        return expiryDateState.expiryMonth != null && expiryDateState.expiryYear != null
     }
 }
 
@@ -29,5 +39,9 @@ internal data class CardDetailsEntry(
  * @return CardUpdateParams containing the updated card brand.
  */
 internal fun CardDetailsEntry.toUpdateParams(): CardUpdateParams {
-    return CardUpdateParams(cardBrand = cardBrandChoice.brand)
+    return CardUpdateParams(
+        cardBrand = cardBrandChoice.brand,
+        expiryMonth = expiryDateState.expiryMonth,
+        expiryYear = expiryDateState.expiryYear
+    )
 }

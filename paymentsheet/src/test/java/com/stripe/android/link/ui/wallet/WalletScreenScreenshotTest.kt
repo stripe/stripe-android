@@ -10,6 +10,7 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
+import com.stripe.android.screenshottesting.Orientation
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.uicore.elements.DateConfig
@@ -21,7 +22,7 @@ import org.junit.Test
 
 internal class WalletScreenScreenshotTest {
     @get:Rule
-    val paparazziRule = PaparazziRule()
+    val paparazziRule = PaparazziRule(Orientation.entries)
 
     @Test
     fun testEmptyState() {

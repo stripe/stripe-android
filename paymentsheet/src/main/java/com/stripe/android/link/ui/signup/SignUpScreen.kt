@@ -242,6 +242,7 @@ private fun SecondaryFields(
             )
         }
         PrimaryButton(
+            modifier = Modifier.padding(vertical = 16.dp),
             label = stringResource(R.string.stripe_link_sign_up),
             state = if (signUpScreenState.signUpEnabled) {
                 PrimaryButtonState.Enabled

@@ -20,6 +20,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.strings.resolve
@@ -60,7 +61,9 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
         },
         onSelectSavedPaymentMethod = {
             interactor.handleViewAction(
-                PaymentMethodVerticalLayoutInteractor.ViewAction.SavedPaymentMethodSelected(it.paymentMethod)
+                PaymentMethodVerticalLayoutInteractor.ViewAction.SavedPaymentMethodSelected(
+                    PaymentSelection.Saved(it.paymentMethod)
+                )
             )
         },
         onManageOneSavedPaymentMethod = {
