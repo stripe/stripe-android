@@ -8,6 +8,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.mainthread.MainThreadSavedStateHandle
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -21,6 +22,7 @@ import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
+import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -102,7 +104,13 @@ internal class DefaultEmbeddedStateHelperTest {
     ) = runTest {
         val savedStateHandle = SavedStateHandle()
         val selectionHolder = EmbeddedSelectionHolder(MainThreadSavedStateHandle(savedStateHandle))
-        val customerStateHolder = CustomerStateHolder(savedStateHandle, selectionHolder.selection)
+        val customerStateHolder = CustomerStateHolder(
+            savedStateHandle = savedStateHandle,
+            selection = selectionHolder.selection,
+            customerMetadataPermissions = stateFlowOf(
+                PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA.permissions
+            ),
+        )
         val confirmationStateHolder = EmbeddedConfirmationStateHolder(
             savedStateHandle = MainThreadSavedStateHandle(savedStateHandle),
             selectionHolder = selectionHolder,
