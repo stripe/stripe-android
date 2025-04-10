@@ -112,7 +112,8 @@ internal class FormActivityScreenShotTest {
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             embeddedSelectionHolder = selectionHolder,
-            cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory
+            cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+            savedStateHandle = SavedStateHandle(),
         )
         val eventReporter = FakeEventReporter()
         val interactor = EmbeddedFormInteractorFactory(

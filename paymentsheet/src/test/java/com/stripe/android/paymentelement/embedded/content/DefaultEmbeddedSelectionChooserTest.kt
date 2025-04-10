@@ -325,6 +325,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             embeddedSelectionHolder = EmbeddedSelectionHolder(MainThreadSavedStateHandle(savedStateHandle)),
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+            savedStateHandle = savedStateHandle,
         )
         Scenario(
             chooser = DefaultEmbeddedSelectionChooser(

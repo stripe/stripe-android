@@ -122,7 +122,7 @@ internal class DefaultFormHelper(
         }
     }
 
-    private var previouslyCompletedForm : PaymentMethodCode?
+    private var previouslyCompletedForm: PaymentMethodCode?
         get() = savedStateHandle[PREVIOUSLY_COMPLETED_PAYMENT_FORM]
         set(value) {
             savedStateHandle[PREVIOUSLY_COMPLETED_PAYMENT_FORM] = value

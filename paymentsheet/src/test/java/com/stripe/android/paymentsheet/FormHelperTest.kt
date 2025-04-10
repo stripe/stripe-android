@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
@@ -181,7 +182,7 @@ internal class FormHelperTest {
     }
 
     @Test
-    fun `onPaymentMethodFormCompleted event emitted when form is filled`() = runTest {
+    fun `onPaymentMethodFormCompleted event emitted when form is filled`() = runScenario {
         val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
@@ -196,14 +197,13 @@ internal class FormHelperTest {
                     paymentMethodTypes = listOf("card", "klarna"),
                 )
             ),
+            eventReporter = eventReporter,
             newPaymentSelectionProvider = { null },
             selectionUpdater = {},
         )
         formHelper.onFormFieldValuesChanged(formFieldValues, "klarna")
-        val eventReporter = ((formHelper as DefaultFormHelper).eventReporter as FakeEventReporter)
         val event = eventReporter.formCompletedCalls.awaitItem()
         assertThat(event.code).isEqualTo("klarna")
-        eventReporter.validate()
     }
 
     @Test
@@ -538,6 +538,7 @@ internal class FormHelperTest {
     private fun createFormHelper(
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         linkInlineHandler: LinkInlineHandler = LinkInlineHandler.create(),
+        eventReporter: FakeEventReporter = FakeEventReporter(),
         newPaymentSelectionProvider: () -> NewPaymentOptionSelection? = { throw AssertionError("Not implemented") },
         selectionUpdater: (PaymentSelection?) -> Unit = { throw AssertionError("Not implemented") },
     ): FormHelper {
@@ -550,7 +551,26 @@ internal class FormHelperTest {
             linkInlineHandler = linkInlineHandler,
             selectionUpdater = selectionUpdater,
             setAsDefaultMatchesSaveForFutureUse = false,
-            eventReporter = FakeEventReporter(),
+            eventReporter = eventReporter,
+            savedStateHandle = SavedStateHandle()
         )
     }
+
+    private fun runScenario(
+        eventReporter: FakeEventReporter = FakeEventReporter(),
+        block: suspend Scenario.() -> Unit,
+    ) {
+        Scenario(
+            eventReporter = eventReporter,
+        ).apply {
+            runTest {
+                block()
+            }
+        }
+        eventReporter.validate()
+    }
+
+    private data class Scenario(
+        val eventReporter: FakeEventReporter,
+    )
 }
