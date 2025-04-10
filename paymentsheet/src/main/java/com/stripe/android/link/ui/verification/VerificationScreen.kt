@@ -150,6 +150,13 @@ internal fun VerificationBody(
             isSendingNewCode = state.isSendingNewCode,
             onClick = onResendCodeClick,
         )
+
+        Text(
+            modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
+            text = state.email,
+            style = MaterialTheme.typography.body2,
+            color = MaterialTheme.colors.onSecondary,
+        )
     }
 }
 
