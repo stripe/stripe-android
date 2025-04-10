@@ -84,6 +84,13 @@ internal interface EventReporter {
     )
 
     /**
+     * The customer has removed a saved payment method.
+     */
+    fun onRemoveSavedPaymentMethod(
+        code: PaymentMethodCode,
+    )
+
+    /**
      * The form shown in PaymentSheet after a user or system initiated change.
      */
     fun onPaymentMethodFormShown(

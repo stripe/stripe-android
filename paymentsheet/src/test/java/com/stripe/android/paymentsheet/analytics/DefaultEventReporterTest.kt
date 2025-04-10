@@ -927,6 +927,20 @@ class DefaultEventReporterTest {
             )
         }
 
+    @Test
+    fun `Send correct arguments when removing a saved payment method`() =
+        runTest(testDispatcher) {
+            val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+                simulateInit()
+            }
+
+            completeEventReporter.onRemoveSavedPaymentMethod("card")
+
+            analyticEventCallbackRule.assertMatchesExpectedEvent(
+                AnalyticEvent.RemovedSavedPaymentMethod("card")
+            )
+        }
+
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
     @Test
     fun `Throwable in analytic event callback should not be propagated`() = runTest(testDispatcher) {

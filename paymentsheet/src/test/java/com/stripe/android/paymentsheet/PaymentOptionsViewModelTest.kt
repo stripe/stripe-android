@@ -563,6 +563,7 @@ internal class PaymentOptionsViewModelTest {
 
     @Test
     fun `Falls back to no payment selection if user cancels after deleting initial payment method`() = runTest {
+        Dispatchers.setMain(testDispatcher)
         val paymentMethods = PaymentMethodFixtures.createCards(3)
         val selection = PaymentSelection.Saved(paymentMethod = paymentMethods.random())
 

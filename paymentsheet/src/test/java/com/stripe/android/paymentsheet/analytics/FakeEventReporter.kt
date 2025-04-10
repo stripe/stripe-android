@@ -55,6 +55,9 @@ internal class FakeEventReporter : EventReporter {
     private val _experimentExposureCalls = Turbine<ExperimentExposureCall>()
     val experimentExposureCalls: ReceiveTurbine<ExperimentExposureCall> = _experimentExposureCalls
 
+    private val _removePaymentMethodCalls = Turbine<RemovePaymentMethodCall>()
+    val removePaymentMethodCalls: ReceiveTurbine<RemovePaymentMethodCall> = _removePaymentMethodCalls
+
     fun validate() {
         _paymentFailureCalls.ensureAllEventsConsumed()
         _paymentSuccessCalls.ensureAllEventsConsumed()
@@ -68,6 +71,7 @@ internal class FakeEventReporter : EventReporter {
         _showNewPaymentOptionsCalls.ensureAllEventsConsumed()
         _showManageSavedPaymentMethods.ensureAllEventsConsumed()
         _experimentExposureCalls.ensureAllEventsConsumed()
+        _removePaymentMethodCalls.ensureAllEventsConsumed()
     }
 
     override fun onInit(
@@ -117,6 +121,10 @@ internal class FakeEventReporter : EventReporter {
     }
 
     override fun onSelectPaymentMethod(code: PaymentMethodCode, isSaved: Boolean) {
+    }
+
+    override fun onRemoveSavedPaymentMethod(code: PaymentMethodCode) {
+        _removePaymentMethodCalls.add(RemovePaymentMethodCall(code))
     }
 
     override fun onPaymentMethodFormShown(code: PaymentMethodCode) {
@@ -251,5 +259,9 @@ internal class FakeEventReporter : EventReporter {
 
     data class ExperimentExposureCall(
         val experiment: LoggableExperiment
+    )
+
+    data class RemovePaymentMethodCall(
+        val code: PaymentMethodCode
     )
 }
