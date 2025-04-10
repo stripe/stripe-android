@@ -149,14 +149,17 @@ internal class SavedPaymentMethodMutator(
             )
         )
 
-        val currentSelection = (selection.value as? PaymentSelection.Saved)?.paymentMethod?.id
-        val didRemoveSelectedItem = currentSelection == paymentMethodId
+        val currentSelection = (selection.value as? PaymentSelection.Saved)?.paymentMethod
+        val didRemoveSelectedItem = currentSelection?.id == paymentMethodId
 
         if (didRemoveSelectedItem) {
             // Remove the current selection. The new selection will be set when we're computing
             // the next PaymentOptionsState.
             withContext(uiContext) {
                 setSelection(null)
+            }
+            currentSelection?.code?.let {
+                eventReporter.onRemoveSavedPaymentMethod(it)
             }
         }
 
@@ -244,9 +247,6 @@ internal class SavedPaymentMethodMutator(
             coroutineScope.launch(uiContext) {
                 prePaymentMethodRemoveActions()
                 removeDeletedPaymentMethodFromState(paymentMethodId = paymentMethodId)
-            }
-            paymentMethod.code?.let {
-                eventReporter.onRemoveSavedPaymentMethod(it)
             }
         }
 

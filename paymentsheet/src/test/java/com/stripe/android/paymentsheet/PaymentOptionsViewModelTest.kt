@@ -57,6 +57,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -586,6 +587,7 @@ internal class PaymentOptionsViewModelTest {
                     paymentMethods = paymentMethods - selection.paymentMethod,
                 )
             )
+            verify(eventReporter, never()).onRemoveSavedPaymentMethod(any())
         }
     }
 
@@ -730,6 +732,8 @@ internal class PaymentOptionsViewModelTest {
 
             paymentMethodsTurbine.ensureAllEventsConsumed()
             paymentMethodsTurbine.cancelAndIgnoreRemainingEvents()
+
+            verify(eventReporter).onRemoveSavedPaymentMethod("card")
         }
     }
 
