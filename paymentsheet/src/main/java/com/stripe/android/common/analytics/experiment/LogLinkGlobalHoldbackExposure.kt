@@ -13,6 +13,7 @@ import com.stripe.android.model.ElementsSession.Customer.Components.MobilePaymen
 import com.stripe.android.model.ElementsSession.Customer.Components.MobilePaymentElement.Enabled
 import com.stripe.android.model.ElementsSession.ExperimentAssignment.LINK_GLOBAL_HOLD_BACK
 import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_DISABLE_LINK_GLOBAL_HOLDBACK_LOOKUP
+import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_ENABLE_LINK_SPM
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.LinkDisabledApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
@@ -87,11 +88,11 @@ internal class DefaultLogLinkGlobalHoldbackExposure @Inject constructor(
 
         val emailRecognitionSource = EmailRecognitionSource.EMAIL.takeIf { customerEmail != null }
 
-        val linkDisplayed = state.paymentMethodMetadata.linkState != null
+        val linkEnabled = state.paymentMethodMetadata.linkState != null
 
         val integrationShape = mode.code
 
-        val isSpmEnabled: Boolean = elementsSession.isSpmEnabled()
+        val isSpmEnabled: Boolean = elementsSession.isSpmEnabled(linkEnabled)
 
         logger.debug(
             """Link Global Holdback exposure: 
@@ -103,7 +104,7 @@ internal class DefaultLogLinkGlobalHoldbackExposure @Inject constructor(
                 |emailRecognitionSource=$emailRecognitionSource,
                 |spmEnabled=$isSpmEnabled,
                 |integrationShape=$integrationShape,
-                |linkDisplayed=$linkDisplayed
+                |linkDisplayed=$linkEnabled
             """.trimMargin()
         )
         eventReporter.onExperimentExposure(
@@ -111,7 +112,7 @@ internal class DefaultLogLinkGlobalHoldbackExposure @Inject constructor(
                 arbId = experimentsData.arbId,
                 isReturningLinkConsumer = isReturningUser,
                 providedDefaultValues = defaultValues,
-                linkDisplayed = linkDisplayed,
+                linkDisplayed = linkEnabled,
                 useLinkNative = useLinkNative,
                 spmEnabled = isSpmEnabled,
                 integrationShape = integrationShape,
@@ -153,10 +154,19 @@ internal class DefaultLogLinkGlobalHoldbackExposure @Inject constructor(
             }
         )
 
-    private fun ElementsSession.isSpmEnabled(): Boolean {
+    /**
+     * SPM is enabled when:
+     * 1. Session has a valid customer
+     * 2. Payment Method Save is enabled
+     * 3. Link is not enabled (unless an additional beta flag is enabled)
+     */
+    private fun ElementsSession.isSpmEnabled(linkEnabled: Boolean): Boolean {
         val elementsConfiguration: MobilePaymentElement? = customer?.session
             ?.components
             ?.mobilePaymentElement
-        return elementsConfiguration is Enabled && elementsConfiguration.isPaymentMethodSaveEnabled == true
+        val paymentMethodSaveEnabled =
+            elementsConfiguration is Enabled && elementsConfiguration.isPaymentMethodSaveEnabled == true
+        val linkEnabledOrEnableLinkSPMFlagEnabled = !linkEnabled || flags[ELEMENTS_ENABLE_LINK_SPM] == true
+        return paymentMethodSaveEnabled && linkEnabledOrEnableLinkSPMFlagEnabled
     }
 }
