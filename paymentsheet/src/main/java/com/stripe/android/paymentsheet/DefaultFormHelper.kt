@@ -127,20 +127,6 @@ internal class DefaultFormHelper(
         set(value) {
             savedStateHandle[PREVIOUSLY_COMPLETED_PAYMENT_FORM] = value
         }
-    private fun reportFieldCompleted(code: PaymentMethodCode?) {
-        if (code == null || formTypeForCode(code) != FormType.UserInteractionRequired) {
-            return
-        }
-        /*
-         * Prevents this event from being reported multiple times on field interactions
-         * on the same payment form. We should have one field interaction event for
-         * every form shown event triggered.
-         */
-        if (previouslyCompletedForm != code) {
-            eventReporter.onPaymentMethodFormCompleted(code)
-            previouslyCompletedForm = code
-        }
-    }
 
     init {
         coroutineScope.launch {
@@ -220,5 +206,20 @@ internal class DefaultFormHelper(
 
     private fun supportedPaymentMethodForCode(code: String): SupportedPaymentMethod {
         return requireNotNull(paymentMethodMetadata.supportedPaymentMethodForCode(code = code))
+    }
+
+    private fun reportFieldCompleted(code: PaymentMethodCode?) {
+        if (code == null || formTypeForCode(code) != FormType.UserInteractionRequired) {
+            return
+        }
+        /*
+         * Prevents this event from being reported multiple times on field interactions
+         * on the same payment form. We should have one field interaction event for
+         * every form shown event triggered.
+         */
+        if (previouslyCompletedForm != code) {
+            eventReporter.onPaymentMethodFormCompleted(code)
+            previouslyCompletedForm = code
+        }
     }
 }
