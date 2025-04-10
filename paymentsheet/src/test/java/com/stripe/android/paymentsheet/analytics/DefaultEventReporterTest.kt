@@ -607,7 +607,7 @@ class DefaultEventReporterTest {
                 ),
                 spmEnabled = true,
                 integrationShape = "complete",
-                linkEnabled = true
+                linkDisplayed = true
             )
             completeEventReporter.onExperimentExposure(experiment)
 
