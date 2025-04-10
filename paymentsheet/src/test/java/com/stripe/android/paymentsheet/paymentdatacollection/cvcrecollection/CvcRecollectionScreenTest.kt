@@ -8,6 +8,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.FakeCvcRecollectionInteractor
+import com.stripe.android.testing.createComposeCleanupRule
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -21,6 +22,9 @@ import org.robolectric.annotation.Config
 internal class CvcRecollectionScreenTest {
     @get:Rule
     val composeRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     private val cvcPage = CvcPage(composeRule)
 
