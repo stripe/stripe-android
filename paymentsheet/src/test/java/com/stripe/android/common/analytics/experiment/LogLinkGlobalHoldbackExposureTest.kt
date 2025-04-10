@@ -208,7 +208,6 @@ class LogLinkGlobalHoldbackExposureTest {
         val exposureCall = eventReporter.experimentExposureCalls.awaitItem()
         val experiment = exposureCall.experiment
         assertTrue(experiment is LoggableExperiment.LinkGlobalHoldback)
-        assertThat(experiment).isInstanceOf(LoggableExperiment.LinkGlobalHoldback::class.java)
         assertThat(experiment.group).isEqualTo("holdback")
         assertThat(experiment.isReturningLinkUser).isTrue()
     }
