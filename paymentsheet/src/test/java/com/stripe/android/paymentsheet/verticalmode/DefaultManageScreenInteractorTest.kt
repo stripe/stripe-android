@@ -10,15 +10,22 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 
 class DefaultManageScreenInteractorTest {
+
+    private val testDispatcher = UnconfinedTestDispatcher()
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
     @Test
     fun initializeState_nullCurrentSelection() {
@@ -335,7 +342,6 @@ class DefaultManageScreenInteractorTest {
         val editing = MutableStateFlow(isEditing)
         val canEdit = MutableStateFlow(true)
         val canRemove = MutableStateFlow(true)
-        val dispatcher = UnconfinedTestDispatcher()
         val defaultPaymentMethodId: MutableStateFlow<String?> = MutableStateFlow(null)
 
         val interactor = DefaultManageScreenInteractor(
@@ -353,7 +359,7 @@ class DefaultManageScreenInteractorTest {
             onUpdatePaymentMethod = { notImplemented() },
             navigateBack = handleBackPressed,
             defaultPaymentMethodId = defaultPaymentMethodId,
-            dispatcher = dispatcher
+            dispatcher = testDispatcher,
         )
 
         TestParams(

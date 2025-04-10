@@ -123,7 +123,7 @@ internal class DefaultManageScreenInteractor(
     }
 
     init {
-        coroutineScope.launch {
+        coroutineScope.launch(Dispatchers.Main) {
             state.collect { state ->
                 if (!state.isEditing && !state.canEdit && state.paymentMethods.size == 1) {
                     handlePaymentMethodSelected(state.paymentMethods.first())
