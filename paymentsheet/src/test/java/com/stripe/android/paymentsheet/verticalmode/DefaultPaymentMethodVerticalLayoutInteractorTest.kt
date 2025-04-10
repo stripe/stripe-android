@@ -918,6 +918,25 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
+    fun verticalModeScreenSelection_isUpdatedToNewPmWithFormFields_withCustomShouldUpdateVerticalModeSelection() {
+        val initialPaymentSelection = PaymentSelection.Link()
+        runScenario(
+            initialSelection = initialPaymentSelection,
+            formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
+            updateSelection = {},
+            shouldUpdateVerticalModeSelection = { true }
+        ) {
+            selectionSource.value = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
+
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(selection).isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.New("card"))
+                }
+            }
+        }
+    }
+
+    @Test
     fun verticalModeSelectionIsNotCleared_whenInitializing() {
         var verticalModeSelection: PaymentSelection? = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
         runScenario(
@@ -1182,6 +1201,11 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         updateSelection: (PaymentSelection?) -> Unit = { notImplemented() },
         reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit = { notImplemented() },
         reportFormShown: (PaymentMethodCode) -> Unit = { notImplemented() },
+        shouldUpdateVerticalModeSelection: (String?) -> Boolean = { paymentMethodCode ->
+            val requiresFormScreen = paymentMethodCode != null &&
+                formTypeForCode(paymentMethodCode) == FormHelper.FormType.UserInteractionRequired
+            !requiresFormScreen
+        },
         testBlock: suspend TestParams.() -> Unit
     ) {
         val processing: MutableStateFlow<Boolean> = MutableStateFlow(initialProcessing)
@@ -1221,6 +1245,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             reportPaymentMethodTypeSelected = reportPaymentMethodTypeSelected,
             reportFormShown = reportFormShown,
             onUpdatePaymentMethod = onUpdatePaymentMethod,
+            shouldUpdateVerticalModeSelection = shouldUpdateVerticalModeSelection,
             dispatcher = UnconfinedTestDispatcher(),
             mainDispatcher = UnconfinedTestDispatcher(),
         )

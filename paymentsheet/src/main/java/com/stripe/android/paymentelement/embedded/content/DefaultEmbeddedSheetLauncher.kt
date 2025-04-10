@@ -69,13 +69,11 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             sheetStateHolder.sheetIsOpen = false
             selectionHolder.setTemporary(null)
             if (result is FormResult.Complete) {
+                selectionHolder.set(result.selection)
                 if (result.hasBeenConfirmed) {
                     embeddedResultCallbackHelper.setResult(
                         EmbeddedPaymentElement.Result.Completed()
                     )
-                } else {
-                    selectionHolder.setTemporary(result.selection?.paymentMethodType)
-                    selectionHolder.set(result.selection)
                 }
             }
         }
@@ -107,6 +105,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         if (sheetStateHolder.sheetIsOpen) return
         sheetStateHolder.sheetIsOpen = true
         selectionHolder.setTemporary(code)
+        val currentSelection = selectionHolder.selection.value as? PaymentSelection.New?
         val args = FormContract.Args(
             selectedPaymentMethodCode = code,
             paymentMethodMetadata = paymentMethodMetadata,
@@ -115,6 +114,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             initializationMode = embeddedConfirmationState.initializationMode,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
+            paymentSelection = currentSelection.takeIf { it?.paymentMethodType == code },
         )
         formActivityLauncher.launch(args)
     }

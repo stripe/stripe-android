@@ -22,6 +22,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
 import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
+import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
@@ -53,6 +54,7 @@ import kotlin.coroutines.CoroutineContext
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal interface FormActivityViewModelComponent {
     val viewModel: FormActivityViewModel
+    val selectionHolder: EmbeddedSelectionHolder
     val subcomponentFactory: FormActivitySubcomponent.Factory
 
     @Component.Factory
