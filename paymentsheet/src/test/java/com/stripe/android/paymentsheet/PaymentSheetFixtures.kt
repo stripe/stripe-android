@@ -7,8 +7,11 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
+import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodFixtures.BILLING_DETAILS
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
@@ -16,8 +19,10 @@ import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
+import com.stripe.android.paymentsheet.ui.BillingDetailsFormState
 import com.stripe.android.paymentsheet.utils.prefilledBuilder
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.uicore.forms.FormFieldEntry
 import org.mockito.kotlin.mock
 
 internal object PaymentSheetFixtures {
@@ -83,7 +88,7 @@ internal object PaymentSheetFixtures {
             name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
             email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
             phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            address = AddressCollectionMode.Full,
             attachDefaultsToPaymentMethod = true,
         )
     )
@@ -151,7 +156,7 @@ internal object PaymentSheetFixtures {
             name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
             email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
             phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            address = AddressCollectionMode.Full,
             attachDefaultsToPaymentMethod = true,
         )
     )
@@ -292,4 +297,32 @@ internal object PaymentSheetFixtures {
             }
         ] 
     """.trimIndent()
+
+    internal val BILLING_DETAILS_FORM_DETAILS = BILLING_DETAILS.copy(
+        email = null,
+        name = null,
+        phone = null
+    )
+
+    internal fun billingDetailsFormState(
+        line1: FormFieldEntry? = FormFieldEntry("1234 Main Street", isComplete = true),
+        line2: FormFieldEntry? = null,
+        city: FormFieldEntry? = FormFieldEntry("San Francisco", isComplete = true),
+        postalCode: FormFieldEntry? = FormFieldEntry("94111", isComplete = true),
+        state: FormFieldEntry? = FormFieldEntry("CA", isComplete = true),
+        country: FormFieldEntry? = FormFieldEntry("US", isComplete = true),
+        addressCollectionMode: AddressCollectionMode = AddressCollectionMode.Automatic,
+        billingDetails: PaymentMethod.BillingDetails? = BILLING_DETAILS_FORM_DETAILS
+    ): BillingDetailsFormState {
+        return BillingDetailsFormState(
+            line1 = line1,
+            line2 = line2,
+            city = city,
+            postalCode = postalCode,
+            state = state,
+            country = country,
+            addressCollectionMode = addressCollectionMode,
+            billingDetails = billingDetails
+        )
+    }
 }

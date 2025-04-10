@@ -16,6 +16,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
@@ -333,6 +334,7 @@ internal class CardDetailsEditUITest {
     fun selectingCardBrandDropdown_sendsOnBrandChoiceChangedAction() {
         runScenario(
             card = PaymentMethodFixtures.CARD_WITH_NETWORKS,
+            addressCollectionMode = AddressCollectionMode.Never
         ) {
             composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).performClick()
 
@@ -390,6 +392,7 @@ internal class CardDetailsEditUITest {
     fun expiryDateInput_invokesCorrectViwAction() {
         runScenario(
             card = PaymentMethodFixtures.CARD_WITH_NETWORKS,
+            addressCollectionMode = AddressCollectionMode.Never
         ) {
             performExpiryDateInput("1229")
 
@@ -429,6 +432,7 @@ internal class CardDetailsEditUITest {
         card: PaymentMethod.Card = PaymentMethodFixtures.CARD_WITH_NETWORKS,
         showCardBrandDropdown: Boolean = true,
         expiryDateEditEnabled: Boolean = true,
+        addressCollectionMode: AddressCollectionMode = AddressCollectionMode.Automatic,
         block: TestScenario.() -> Unit
     ) {
         val viewActionRecorder = ViewActionRecorder<EditCardDetailsInteractor.ViewAction>()
@@ -440,7 +444,9 @@ internal class CardDetailsEditUITest {
                 cardBrandFilter = DefaultCardBrandFilter,
                 card = card,
                 onBrandChoiceChanged = {},
-                onCardUpdateParamsChanged = {}
+                onCardUpdateParamsChanged = {},
+                billingDetails = PaymentMethodFixtures.BILLING_DETAILS,
+                addressCollectionMode = addressCollectionMode
             )
         composeRule.setContent {
             CardDetailsEditUI(
