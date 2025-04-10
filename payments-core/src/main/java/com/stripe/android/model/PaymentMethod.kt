@@ -54,7 +54,7 @@ constructor(
      *
      * [livemode](https://stripe.com/docs/api/payment_methods/object#payment_method_object-type)
      */
-    @JvmField val code: PaymentMethodCode?,
+    @JvmField internal val code: PaymentMethodCode?,
 
     /**
      * The type of the PaymentMethod. An additional hash is included on the PaymentMethod with a

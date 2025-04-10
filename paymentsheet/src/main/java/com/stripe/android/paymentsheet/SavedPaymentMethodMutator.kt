@@ -158,7 +158,7 @@ internal class SavedPaymentMethodMutator(
             withContext(uiContext) {
                 setSelection(null)
             }
-            currentSelection?.code?.let {
+            currentSelection?.type?.code?.let {
                 eventReporter.onRemoveSavedPaymentMethod(it)
             }
         }
