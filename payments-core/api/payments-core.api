@@ -3051,6 +3051,7 @@ public final class com/stripe/android/model/PaymentMethod : com/stripe/android/c
 	public final field billingDetails Lcom/stripe/android/model/PaymentMethod$BillingDetails;
 	public final field card Lcom/stripe/android/model/PaymentMethod$Card;
 	public final field cardPresent Lcom/stripe/android/model/PaymentMethod$CardPresent;
+	public final field code Ljava/lang/String;
 	public final field created Ljava/lang/Long;
 	public final field customerId Ljava/lang/String;
 	public final field fpx Lcom/stripe/android/model/PaymentMethod$Fpx;
@@ -3076,6 +3077,7 @@ public final class com/stripe/android/model/PaymentMethod : com/stripe/android/c
 	public final fun component19 ()Lcom/stripe/android/model/PaymentMethod$AllowRedisplay;
 	public final fun component2 ()Ljava/lang/Long;
 	public final fun component3 ()Z
+	public final fun component4 ()Ljava/lang/String;
 	public final fun component5 ()Lcom/stripe/android/model/PaymentMethod$Type;
 	public final fun component6 ()Lcom/stripe/android/model/PaymentMethod$BillingDetails;
 	public final fun component7 ()Ljava/lang/String;
