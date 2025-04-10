@@ -63,6 +63,7 @@ internal object FormContract : ActivityResultContract<FormContract.Args, FormRes
         val initializationMode: PaymentElementLoader.InitializationMode,
         val paymentElementCallbackIdentifier: String,
         val statusBarColor: Int?,
+        val paymentSelection: PaymentSelection?,
     ) : Parcelable {
         companion object {
             fun fromIntent(intent: Intent): Args? {

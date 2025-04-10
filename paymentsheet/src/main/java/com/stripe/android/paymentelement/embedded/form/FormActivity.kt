@@ -1,6 +1,7 @@
+@file:OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+
 package com.stripe.android.paymentelement.embedded.form
 
-import android.app.Activity
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -8,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.getValue
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
@@ -102,7 +104,7 @@ internal class FormActivity : AppCompatActivity() {
 
     private fun setFormResult(result: FormResult) {
         setResult(
-            Activity.RESULT_OK,
+            RESULT_OK,
             FormResult.toIntent(intent, result)
         )
     }
