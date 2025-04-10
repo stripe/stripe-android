@@ -151,12 +151,14 @@ internal fun VerificationBody(
             onClick = onResendCodeClick,
         )
 
-        Text(
-            modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
-            text = state.email,
-            style = MaterialTheme.typography.body2,
-            color = MaterialTheme.colors.onSecondary,
-        )
+        if (state.isDialog) {
+            Text(
+                modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
+                text = state.email,
+                style = MaterialTheme.typography.body2,
+                color = MaterialTheme.colors.onSecondary,
+            )
+        }
     }
 }
 
