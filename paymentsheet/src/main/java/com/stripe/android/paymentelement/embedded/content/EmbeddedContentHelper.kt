@@ -176,9 +176,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             mostRecentlySelectedSavedPaymentMethod = customerStateHolder.mostRecentlySelectedSavedPaymentMethod,
             providePaymentMethodName = savedPaymentMethodMutator.providePaymentMethodName,
             canRemove = customerStateHolder.canRemove,
-            onSelectSavedPaymentMethod = {
-                setSelection(PaymentSelection.Saved(it))
-            },
+            onSelectSavedPaymentMethod = ::setSelection,
             walletsState = walletsState,
             canShowWalletsInline = true,
             canShowWalletButtons = false,

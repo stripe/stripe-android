@@ -169,4 +169,16 @@ internal class DefaultLogLinkGlobalHoldbackExposure @Inject constructor(
         val linkEnabledOrEnableLinkSPMFlagEnabled = !linkEnabled || flags[ELEMENTS_ENABLE_LINK_SPM] == true
         return paymentMethodSaveEnabled && linkEnabledOrEnableLinkSPMFlagEnabled
     }
+
+    private suspend fun PaymentElementLoader.State.getEmail(): String? =
+        paymentMethodMetadata.linkState?.configuration?.customerInfo?.email ?: retrieveCustomerEmail(
+            configuration = config,
+            customer = customer?.let {
+                CustomerRepository.CustomerInfo(
+                    id = it.id,
+                    ephemeralKeySecret = it.ephemeralKeySecret,
+                    customerSessionClientSecret = it.customerSessionClientSecret
+                )
+            }
+        )
 }

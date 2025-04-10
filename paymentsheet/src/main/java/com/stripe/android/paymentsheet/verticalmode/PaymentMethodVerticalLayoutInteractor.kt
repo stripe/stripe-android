@@ -16,6 +16,7 @@ import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
@@ -62,7 +63,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
         data object TransitionToManageSavedPaymentMethods : ViewAction
         data class OnManageOneSavedPaymentMethod(val savedPaymentMethod: DisplayableSavedPaymentMethod) : ViewAction
         data class PaymentMethodSelected(val selectedPaymentMethodCode: String) : ViewAction
-        data class SavedPaymentMethodSelected(val savedPaymentMethod: PaymentMethod) : ViewAction
+        data class SavedPaymentMethodSelected(val paymentSelection: PaymentSelection) : ViewAction
     }
 
     enum class SavedPaymentMethodAction {
@@ -86,13 +87,13 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?>,
     private val providePaymentMethodName: (PaymentMethodCode?) -> ResolvableString,
     private val canRemove: StateFlow<Boolean>,
-    private val onSelectSavedPaymentMethod: (PaymentMethod) -> Unit,
+    private val onSelectSavedPaymentMethod: (PaymentSelection) -> Unit,
     private val walletsState: StateFlow<WalletsState?>,
     private val canShowWalletsInline: Boolean,
     private val canShowWalletButtons: Boolean,
     private val updateSelection: (PaymentSelection?) -> Unit,
     private val isCurrentScreen: StateFlow<Boolean>,
-    private val reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit,
+    private val reportPaymentMethodTypeSelected: (PaymentMethodCode, Boolean) -> Unit,
     private val reportFormShown: (PaymentMethodCode) -> Unit,
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     dispatcher: CoroutineContext = Dispatchers.Default,
@@ -142,9 +143,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 mostRecentlySelectedSavedPaymentMethod = customerStateHolder.mostRecentlySelectedSavedPaymentMethod,
                 providePaymentMethodName = viewModel.savedPaymentMethodMutator.providePaymentMethodName,
                 canRemove = viewModel.customerStateHolder.canRemove,
-                onSelectSavedPaymentMethod = {
-                    viewModel.handlePaymentMethodSelected(PaymentSelection.Saved(it))
-                },
+                onSelectSavedPaymentMethod = viewModel::handlePaymentMethodSelected,
                 onUpdatePaymentMethod = { viewModel.savedPaymentMethodMutator.updatePaymentMethod(it) },
                 walletsState = viewModel.walletsState,
                 canShowWalletsInline = !viewModel.isCompleteFlow,
@@ -389,7 +388,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     override fun handleViewAction(viewAction: ViewAction) {
         when (viewAction) {
             is ViewAction.PaymentMethodSelected -> {
-                reportPaymentMethodTypeSelected(viewAction.selectedPaymentMethodCode)
+                reportPaymentMethodTypeSelected(viewAction.selectedPaymentMethodCode, false)
 
                 val formType = formTypeForCode(viewAction.selectedPaymentMethodCode)
                 if (formType == FormType.UserInteractionRequired) {
@@ -400,8 +399,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 }
             }
             is ViewAction.SavedPaymentMethodSelected -> {
-                reportPaymentMethodTypeSelected("saved")
-                onSelectSavedPaymentMethod(viewAction.savedPaymentMethod)
+                reportPaymentMethodTypeSelected(viewAction.paymentSelection.paymentMethodType, true)
+                onSelectSavedPaymentMethod(viewAction.paymentSelection)
             }
             ViewAction.TransitionToManageSavedPaymentMethods -> {
                 transitionToManageScreen()
