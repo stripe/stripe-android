@@ -596,7 +596,7 @@ class DefaultEventReporterTest {
 
             val experiment = LoggableExperiment.LinkGlobalHoldback(
                 arbId = "random_arb_id",
-                isReturningLinkConsumer = false,
+                isReturningLinkUser = false,
                 group = "holdback",
                 useLinkNative = true,
                 emailRecognitionSource = EmailRecognitionSource.EMAIL,

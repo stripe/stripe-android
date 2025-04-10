@@ -15,7 +15,7 @@ internal sealed class LoggableExperiment(
     data class LinkGlobalHoldback(
         override val arbId: String,
         override val group: String,
-        val isReturningLinkConsumer: Boolean,
+        val isReturningLinkUser: Boolean,
         val useLinkNative: Boolean,
         val emailRecognitionSource: EmailRecognitionSource?,
         val providedDefaultValues: ProvidedDefaultValues,
@@ -28,7 +28,7 @@ internal sealed class LoggableExperiment(
         experiment = ExperimentAssignment.LINK_GLOBAL_HOLD_BACK,
         dimensions = mapOf(
             "integration_type" to "mpe_android",
-            "is_returning_link_consumer" to isReturningLinkConsumer.toString(),
+            "is_returning_link_user" to isReturningLinkUser.toString(),
             "dvs_provided" to providedDefaultValues.toDimension(),
             "use_link_native" to useLinkNative.toString(),
             "recognition_type" to emailRecognitionSource?.dimension,

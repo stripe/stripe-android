@@ -110,7 +110,7 @@ internal class DefaultLogLinkGlobalHoldbackExposure @Inject constructor(
         eventReporter.onExperimentExposure(
             experiment = LinkGlobalHoldback(
                 arbId = experimentsData.arbId,
-                isReturningLinkConsumer = isReturningUser,
+                isReturningLinkUser = isReturningUser,
                 providedDefaultValues = defaultValues,
                 linkDisplayed = linkEnabled,
                 useLinkNative = useLinkNative,

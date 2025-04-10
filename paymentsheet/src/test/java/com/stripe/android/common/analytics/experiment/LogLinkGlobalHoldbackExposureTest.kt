@@ -210,7 +210,7 @@ class LogLinkGlobalHoldbackExposureTest {
         assertTrue(experiment is LoggableExperiment.LinkGlobalHoldback)
         assertThat(experiment).isInstanceOf(LoggableExperiment.LinkGlobalHoldback::class.java)
         assertThat(experiment.group).isEqualTo("holdback")
-        assertThat(experiment.isReturningLinkConsumer).isTrue()
+        assertThat(experiment.isReturningLinkUser).isTrue()
     }
 
     @Test
@@ -283,7 +283,7 @@ class LogLinkGlobalHoldbackExposureTest {
         val exposureCall = eventReporter.experimentExposureCalls.awaitItem()
         assertTrue(exposureCall.experiment is LoggableExperiment.LinkGlobalHoldback)
         assertThat(exposureCall.experiment.group).isEqualTo("holdback")
-        assertThat(exposureCall.experiment.isReturningLinkConsumer).isFalse()
+        assertThat(exposureCall.experiment.isReturningLinkUser).isFalse()
     }
 
     @Test
