@@ -152,6 +152,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
             isModifiable = displayableSavedPaymentMethod.isModifiable(),
             cardBrandFilter = cardBrandFilter,
             onBrandChoiceChanged = onBrandChoiceSelected,
+            areExpiryDateAndAddressModificationSupported = allowCardEdit,
         )
     }
 

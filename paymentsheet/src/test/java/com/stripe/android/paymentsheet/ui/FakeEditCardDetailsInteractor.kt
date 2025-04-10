@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 internal class FakeEditCardDetailsInteractor(
     private val card: PaymentMethod.Card = PaymentMethodFixtures.CARD_WITH_NETWORKS,
     private val shouldShowCardBrandDropdown: Boolean = true,
+    private val expiryDateEditEnabled: Boolean = true,
     override val state: StateFlow<EditCardDetailsInteractor.State> = stateFlowOf(
         EditCardDetailsInteractor.State(
             card = card,
@@ -20,7 +21,11 @@ internal class FakeEditCardDetailsInteractor(
             availableNetworks = listOf(
                 CardBrandChoice(CardBrand.CartesBancaires, enabled = true),
                 CardBrandChoice(CardBrand.Visa, enabled = true),
-            )
+            ),
+            expiryDateState = ExpiryDateState.create(
+                card = card,
+                enabled = expiryDateEditEnabled,
+            ),
         )
     ),
 ) : EditCardDetailsInteractor {

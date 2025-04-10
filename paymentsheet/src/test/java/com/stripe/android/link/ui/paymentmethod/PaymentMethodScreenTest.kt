@@ -125,7 +125,10 @@ internal class PaymentMethodScreenTest {
                 LocalCardNumberCompletedEventReporter provides { },
                 LocalCardBrandDisallowedReporter provides { }
             ) {
-                PaymentMethodScreen(viewModel)
+                PaymentMethodScreen(
+                    viewModel = viewModel,
+                    onCancelClicked = {}
+                )
             }
         }
     }

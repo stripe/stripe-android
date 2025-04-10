@@ -940,10 +940,13 @@ internal class PlaygroundTestDriver(
             .onNodeWithTag("collapsed_wallet_row_tag")
             .performClick()
 
+        composeTestRule.waitForIdle()
+
         // We might have more than one bank account
         composeTestRule
             .onAllNodesWithText("Test Institution")
             .onFirst()
+            .performScrollTo()
             .performClick()
 
         composeTestRule

@@ -356,7 +356,11 @@ internal class PaymentSheetViewModelTest {
             if (currentScreen is PaymentSheetScreen.UpdatePaymentMethod) {
                 val interactor = currentScreen.interactor
 
-                interactor.cardParamsUpdateAction(CardBrand.Visa)
+                interactor.cardParamsUpdateAction(
+                    cardBrand = CardBrand.Visa,
+                    expiryMonth = 12,
+                    expiryYear = 2027
+                )
 
                 interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
             }
@@ -385,7 +389,9 @@ internal class PaymentSheetViewModelTest {
             PaymentMethodUpdateParams.createCard(
                 networks = PaymentMethodUpdateParams.Card.Networks(
                     preferred = CardBrand.Visa.code
-                )
+                ),
+                expiryMonth = 12,
+                expiryYear = 2027
             ).toParamMap()
         )
 

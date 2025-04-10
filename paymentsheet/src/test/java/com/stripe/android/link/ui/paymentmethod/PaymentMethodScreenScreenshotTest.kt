@@ -70,7 +70,8 @@ internal class PaymentMethodScreenScreenshotTest {
                     PaymentMethodBody(
                         state = state,
                         onFormFieldValuesChanged = {},
-                        onPayClicked = {}
+                        onPayClicked = {},
+                        onCancelClicked = {}
                     )
                 }
             }

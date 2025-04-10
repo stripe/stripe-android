@@ -32,17 +32,20 @@ internal interface EditCardDetailsInteractor {
         val selectedCardBrand: CardBrandChoice,
         val paymentMethodIcon: Int,
         val shouldShowCardBrandDropdown: Boolean,
-        val availableNetworks: List<CardBrandChoice>
+        val availableNetworks: List<CardBrandChoice>,
+        val expiryDateState: ExpiryDateState
     )
 
     sealed interface ViewAction {
         data class BrandChoiceChanged(val cardBrandChoice: CardBrandChoice) : ViewAction
+        data class DateChanged(val text: String) : ViewAction
     }
 
     fun interface Factory {
         fun create(
             coroutineScope: CoroutineScope,
             isModifiable: Boolean,
+            areExpiryDateAndAddressModificationSupported: Boolean,
             cardBrandFilter: CardBrandFilter,
             card: PaymentMethod.Card,
             onBrandChoiceChanged: CardBrandCallback,
@@ -55,6 +58,10 @@ internal class DefaultEditCardDetailsInteractor(
     private val card: PaymentMethod.Card,
     private val cardBrandFilter: CardBrandFilter,
     private val isModifiable: Boolean,
+    // Local flag for whether expiry date and address can be edited.
+    // This flag has no effect on Card Brand Choice.
+    // It will be removed before release.
+    private val areExpiryDateAndAddressModificationSupported: Boolean,
     coroutineScope: CoroutineScope,
     private val onBrandChoiceChanged: CardBrandCallback,
     private val onCardUpdateParamsChanged: CardUpdateParamsCallback
@@ -64,7 +71,10 @@ internal class DefaultEditCardDetailsInteractor(
     )
 
     override val state: StateFlow<EditCardDetailsInteractor.State> = cardDetailsEntry.mapLatest { inputState ->
-        uiState(inputState.cardBrandChoice)
+        uiState(
+            cardBrandChoice = inputState.cardBrandChoice,
+            expiryDateState = inputState.expiryDateState
+        )
     }.stateIn(
         scope = coroutineScope,
         started = SharingStarted.Eagerly,
@@ -75,9 +85,12 @@ internal class DefaultEditCardDetailsInteractor(
         coroutineScope.launch(Dispatchers.Main) {
             cardDetailsEntry.collectLatest { state ->
                 val newParams = state.takeIf {
-                    it.hasChanged(
+                    val hasChanged = it.hasChanged(
+                        card = card,
                         originalCardBrandChoice = defaultCardBrandChoice(),
                     )
+                    val isComplete = it.isComplete()
+                    hasChanged && isComplete
                 }?.toUpdateParams()
                 onCardUpdateParamsChanged(newParams)
             }
@@ -95,29 +108,52 @@ internal class DefaultEditCardDetailsInteractor(
         }
     }
 
+    private fun onDateChanged(text: String) {
+        cardDetailsEntry.update { entry ->
+            entry.copy(
+                expiryDateState = entry.expiryDateState.onDateChanged(text),
+            )
+        }
+    }
+
     override fun handleViewAction(viewAction: EditCardDetailsInteractor.ViewAction) {
         when (viewAction) {
             is EditCardDetailsInteractor.ViewAction.BrandChoiceChanged -> {
                 onBrandChoiceChanged(viewAction.cardBrandChoice)
+            }
+            is EditCardDetailsInteractor.ViewAction.DateChanged -> {
+                onDateChanged(viewAction.text)
             }
         }
     }
 
     private fun buildDefaultCardEntry(): CardDetailsEntry {
         return CardDetailsEntry(
-            cardBrandChoice = defaultCardBrandChoice()
+            cardBrandChoice = defaultCardBrandChoice(),
+            expiryDateState = defaultExpiryDateState()
         )
     }
 
     private fun defaultCardBrandChoice() = card.getPreferredChoice(cardBrandFilter)
 
-    private fun uiState(cardBrandChoice: CardBrandChoice = defaultCardBrandChoice()): EditCardDetailsInteractor.State {
+    private fun defaultExpiryDateState(): ExpiryDateState {
+        return ExpiryDateState.create(
+            card = card,
+            enabled = areExpiryDateAndAddressModificationSupported
+        )
+    }
+
+    private fun uiState(
+        cardBrandChoice: CardBrandChoice = defaultCardBrandChoice(),
+        expiryDateState: ExpiryDateState = defaultExpiryDateState()
+    ): EditCardDetailsInteractor.State {
         return EditCardDetailsInteractor.State(
             card = card,
             selectedCardBrand = cardBrandChoice,
             paymentMethodIcon = card.getSavedPaymentMethodIcon(forVerticalMode = true),
             shouldShowCardBrandDropdown = isModifiable && isExpired().not(),
-            availableNetworks = card.getAvailableNetworks(cardBrandFilter)
+            availableNetworks = card.getAvailableNetworks(cardBrandFilter),
+            expiryDateState = expiryDateState
         )
     }
 
@@ -137,6 +173,7 @@ internal class DefaultEditCardDetailsInteractor(
         override fun create(
             coroutineScope: CoroutineScope,
             isModifiable: Boolean,
+            areExpiryDateAndAddressModificationSupported: Boolean,
             cardBrandFilter: CardBrandFilter,
             card: PaymentMethod.Card,
             onBrandChoiceChanged: CardBrandCallback,
@@ -148,7 +185,8 @@ internal class DefaultEditCardDetailsInteractor(
                 isModifiable = isModifiable,
                 coroutineScope = coroutineScope,
                 onBrandChoiceChanged = onBrandChoiceChanged,
-                onCardUpdateParamsChanged = onCardUpdateParamsChanged
+                onCardUpdateParamsChanged = onCardUpdateParamsChanged,
+                areExpiryDateAndAddressModificationSupported = areExpiryDateAndAddressModificationSupported
             )
         }
     }
