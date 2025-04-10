@@ -165,6 +165,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                                 configuration = parentComponent.configuration,
                             ),
                             eventReporter = parentComponent.eventReporter,
+                            savedStateHandle = parentComponent.viewModel.savedStateHandle
                         ),
                         logger = parentComponent.logger,
                         dismissWithResult = dismissWithResult

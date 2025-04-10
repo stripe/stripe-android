@@ -117,7 +117,6 @@ internal class PaymentSheetAnalyticsListener(
     companion object {
         internal const val PREVIOUSLY_SHOWN_PAYMENT_FORM = "previously_shown_payment_form"
         internal const val PREVIOUSLY_INTERACTION_PAYMENT_FORM = "previously_interacted_payment_form"
-        internal const val PREVIOUSLY_COMPLETED_PAYMENT_FORM = "previously_completed_payment_form"
         internal const val PREVIOUSLY_SENT_DEEP_LINK_EVENT = "previously_sent_deep_link_event"
     }
 }

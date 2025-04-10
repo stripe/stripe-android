@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded
 
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -17,6 +18,7 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val embeddedSelectionHolder: EmbeddedSelectionHolder,
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
+    private val savedStateHandle: SavedStateHandle,
 ) {
     fun create(
         coroutineScope: CoroutineScope,
@@ -47,6 +49,7 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
             linkConfigurationCoordinator = linkConfigurationCoordinator,
             setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
             eventReporter = eventReporter,
+            savedStateHandle = savedStateHandle,
         )
     }
 }

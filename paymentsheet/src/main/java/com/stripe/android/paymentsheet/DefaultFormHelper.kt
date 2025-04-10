@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet
 
-import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.link.LinkConfigurationCoordinator
@@ -37,9 +37,11 @@ internal class DefaultFormHelper(
     private val selectionUpdater: (PaymentSelection?) -> Unit,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
     private val setAsDefaultMatchesSaveForFutureUse: Boolean,
-    @get:VisibleForTesting val eventReporter: EventReporter,
+    private val eventReporter: EventReporter,
+    private val savedStateHandle: SavedStateHandle,
 ) : FormHelper {
     companion object {
+        internal const val PREVIOUSLY_COMPLETED_PAYMENT_FORM = "previously_completed_payment_form"
         fun create(
             viewModel: BaseSheetViewModel,
             paymentMethodMetadata: PaymentMethodMetadata,
@@ -59,6 +61,7 @@ internal class DefaultFormHelper(
                 },
                 setAsDefaultMatchesSaveForFutureUse = viewModel.customerStateHolder.paymentMethods.value.isEmpty(),
                 eventReporter = viewModel.eventReporter,
+                savedStateHandle = viewModel.savedStateHandle,
             )
         }
 
@@ -67,6 +70,7 @@ internal class DefaultFormHelper(
             cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
             paymentMethodMetadata: PaymentMethodMetadata,
             eventReporter: EventReporter,
+            savedStateHandle: SavedStateHandle,
         ): FormHelper {
             return DefaultFormHelper(
                 coroutineScope = coroutineScope,
@@ -78,6 +82,7 @@ internal class DefaultFormHelper(
                 selectionUpdater = {},
                 setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
                 eventReporter = eventReporter,
+                savedStateHandle = savedStateHandle,
             )
         }
     }
@@ -117,7 +122,11 @@ internal class DefaultFormHelper(
         }
     }
 
-    private var previouslyCompletedForm: PaymentMethodCode? = null
+    private var previouslyCompletedForm : PaymentMethodCode?
+        get() = savedStateHandle[PREVIOUSLY_COMPLETED_PAYMENT_FORM]
+        set(value) {
+            savedStateHandle[PREVIOUSLY_COMPLETED_PAYMENT_FORM] = value
+        }
     private fun reportFieldCompleted(code: PaymentMethodCode?) {
         if (code == null || formTypeForCode(code) != FormType.UserInteractionRequired) {
             return
