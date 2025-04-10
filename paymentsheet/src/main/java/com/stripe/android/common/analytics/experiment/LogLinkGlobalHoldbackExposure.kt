@@ -131,6 +131,11 @@ internal class DefaultLogLinkGlobalHoldbackExposure @Inject constructor(
         )
     }
 
+    /**
+     * Check if the user is a returning Link user by looking up their email.
+     *
+     * If lookup fails, we populate the error as we don't want to log exposures on these cases.
+     */
     suspend fun isReturningUser(
         email: String,
     ): Boolean {
@@ -141,18 +146,6 @@ internal class DefaultLogLinkGlobalHoldbackExposure @Inject constructor(
                 logger.error("Failed to check if user is returning", it)
             }.getOrThrow()
     }
-
-    private suspend fun PaymentElementLoader.State.getEmail(): String? =
-        paymentMethodMetadata.linkState?.configuration?.customerInfo?.email ?: retrieveCustomerEmail(
-            configuration = config,
-            customer = customer?.let {
-                CustomerRepository.CustomerInfo(
-                    id = it.id,
-                    ephemeralKeySecret = it.ephemeralKeySecret,
-                    customerSessionClientSecret = it.customerSessionClientSecret
-                )
-            }
-        )
 
     /**
      * SPM is enabled when:

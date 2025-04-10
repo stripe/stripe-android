@@ -172,14 +172,6 @@ data class ElementsSession(
         LINK_GLOBAL_HOLD_BACK("link_global_holdback"),
     }
 
-    /**
-     * Experiments declared here will be parsed and include in the [ElementsSession] object.
-     */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    enum class ExperimentAssignment(val experimentValue: String) {
-        LINK_GLOBAL_HOLD_BACK("link_global_holdback"),
-    }
-
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         fun createFromFallback(
