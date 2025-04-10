@@ -61,6 +61,7 @@ internal class DefaultLinkAuth @Inject constructor(
         } else {
             linkAccountManager.lookupConsumer(
                 email = email,
+                emailSource = emailSource,
                 startSession = startSession
             )
         }

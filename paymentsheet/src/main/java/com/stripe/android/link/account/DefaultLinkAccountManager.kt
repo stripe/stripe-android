@@ -52,9 +52,10 @@ internal class DefaultLinkAccountManager @Inject constructor(
 
     override suspend fun lookupConsumer(
         email: String,
+        emailSource: EmailSource,
         startSession: Boolean,
     ): Result<LinkAccount?> =
-        linkRepository.lookupConsumer(email)
+        linkRepository.lookupConsumer(email, emailSource)
             .onFailure { error ->
                 linkEventsReporter.onAccountLookupFailure(error)
             }.map { consumerSessionLookup ->
@@ -88,10 +89,11 @@ internal class DefaultLinkAccountManager @Inject constructor(
     }
 
     override suspend fun signInWithUserInput(
-        userInput: UserInput
+        userInput: UserInput,
+        emailSource: EmailSource,
     ): Result<LinkAccount> =
         when (userInput) {
-            is UserInput.SignIn -> lookupConsumer(userInput.email).mapCatching {
+            is UserInput.SignIn -> lookupConsumer(userInput.email, emailSource).mapCatching {
                 requireNotNull(it) { "Error fetching user account" }
             }
             is UserInput.SignUp -> signUpIfValidSessionState(
@@ -397,7 +399,10 @@ internal class DefaultLinkAccountManager @Inject constructor(
          */
         this?.accountStatus
             ?: config.customerInfo.email?.let { customerEmail ->
-                lookupConsumer(customerEmail).map {
+                lookupConsumer(
+                    email = customerEmail,
+                    emailSource = EmailSource.CUSTOMER_EMAIL
+                ).map {
                     it?.accountStatus
                 }.getOrElse {
                     AccountStatus.Error
