@@ -101,7 +101,6 @@ internal class EmbeddedPaymentElementAnalyticsTest {
 
         embeddedContentPage.clickOnLpm("card")
         formPage.fillOutCardDetails()
-        testRules.compose.waitForIdle()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.CompletedPaymentMethodForm("card"))
 
         networkRule.enqueue(
