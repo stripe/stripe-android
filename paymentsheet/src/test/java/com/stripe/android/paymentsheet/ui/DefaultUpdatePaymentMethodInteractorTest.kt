@@ -11,6 +11,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.setDefaultPaymentMethodErrorMessage
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.updateCardBrandErrorMessage
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.updatesFailedErrorMessage
@@ -642,6 +643,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             isLiveMode = isLiveMode,
             canRemove = canRemove,
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
+            addressCollectionMode = AddressCollectionMode.Automatic,
             removeExecutor = onRemovePaymentMethod,
             updatePaymentMethodExecutor = updatePaymentMethodExecutor,
             setDefaultPaymentMethodExecutor = onSetDefaultPaymentMethod,

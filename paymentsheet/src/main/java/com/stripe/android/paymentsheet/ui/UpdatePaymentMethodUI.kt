@@ -29,6 +29,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.SavedPaymentMethod
 import com.stripe.android.paymentsheet.utils.testMetadata
 import com.stripe.android.uicore.elements.CheckboxElementUI
@@ -306,6 +307,7 @@ private fun PreviewUpdatePaymentMethodUI() {
             isLiveMode = false,
             canRemove = true,
             displayableSavedPaymentMethod = exampleCard,
+            addressCollectionMode = AddressCollectionMode.Automatic,
             removeExecutor = { null },
             updatePaymentMethodExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
             setDefaultPaymentMethodExecutor = { _ -> Result.success(Unit) },

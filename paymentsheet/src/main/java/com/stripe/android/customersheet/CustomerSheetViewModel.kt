@@ -549,6 +549,7 @@ internal class CustomerSheetViewModel(
                     isLiveMode = isLiveModeProvider(),
                     canRemove = customerState.canRemove,
                     displayableSavedPaymentMethod = paymentMethod,
+                    addressCollectionMode = configuration.billingDetailsCollectionConfiguration.address,
                     cardBrandFilter = PaymentSheetCardBrandFilter(customerState.configuration.cardBrandAcceptance),
                     removeExecutor = ::removeExecutor,
                     onBrandChoiceSelected = { brand ->
