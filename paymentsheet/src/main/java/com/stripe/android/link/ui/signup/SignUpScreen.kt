@@ -112,7 +112,7 @@ internal fun SignUpBody(
         )
         StripeThemeForLink {
             EmailCollectionSection(
-                enabled = true,
+                enabled = !signUpScreenState.isSubmitting,
                 emailController = emailController,
                 signUpScreenState = signUpScreenState,
                 focusRequester = emailFocusRequester,
@@ -202,7 +202,7 @@ private fun SecondaryFields(
     Column(modifier = Modifier.fillMaxWidth()) {
         StripeThemeForLink {
             PhoneNumberCollectionSection(
-                enabled = true,
+                enabled = !signUpScreenState.isSubmitting,
                 phoneNumberController = phoneNumberController,
                 requestFocusWhenShown = phoneNumberController.initialPhoneNumber.isEmpty(),
                 imeAction = if (signUpScreenState.requiresNameCollection) {
@@ -220,7 +220,7 @@ private fun SecondaryFields(
                     TextField(
                         textFieldController = nameController,
                         imeAction = ImeAction.Done,
-                        enabled = true,
+                        enabled = !signUpScreenState.isSubmitting,
                     )
                 }
             }
@@ -244,7 +244,7 @@ private fun SecondaryFields(
         PrimaryButton(
             modifier = Modifier.padding(vertical = 16.dp),
             label = stringResource(R.string.stripe_link_sign_up),
-            state = if (signUpScreenState.signUpEnabled) {
+            state = if (signUpScreenState.signUpEnabled && !signUpScreenState.isSubmitting) {
                 PrimaryButtonState.Enabled
             } else {
                 PrimaryButtonState.Disabled
