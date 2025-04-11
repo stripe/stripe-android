@@ -44,7 +44,7 @@ class FieldValuesToParamsMapConverter {
                         requiresMandate = requiresMandate,
                         billingDetails = createBillingDetails(fieldValuePairsForCreateParams),
                         overrideParamMap = this,
-                        productUsage = setOf("PaymentSheet"),
+                        productUsage = emptySet(),
                         allowRedisplay = allowRedisplay,
                     )
                 }
