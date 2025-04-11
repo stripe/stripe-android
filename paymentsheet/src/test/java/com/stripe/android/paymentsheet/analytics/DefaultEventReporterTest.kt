@@ -447,6 +447,24 @@ class DefaultEventReporterTest {
     }
 
     @Test
+    fun `onPaymentMethodFormCompleted() should fire analytics request with expected event value`() =
+        runTest(testDispatcher) {
+            val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
+                simulateSuccessfulSetup()
+            }
+
+            customEventReporter.onPaymentMethodFormCompleted(
+                code = "card",
+            )
+
+            analyticEventCallbackRule.assertMatchesExpectedEvent(
+                AnalyticEvent.CompletedPaymentMethodForm(
+                    paymentMethodType = "card"
+                )
+            )
+        }
+
+    @Test
     fun `onCardNumberCompleted() should fire analytics request with expected event value`() {
         val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
             simulateSuccessfulSetup()

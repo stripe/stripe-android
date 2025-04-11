@@ -132,7 +132,8 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
         val formHelper = embeddedFormHelperFactory.create(
             coroutineScope = coroutineScope,
             paymentMethodMetadata = paymentMethodMetadata,
-            selectionUpdater = ::setSelection
+            eventReporter = eventReporter,
+            selectionUpdater = ::setSelection,
         )
         val savedPaymentMethodMutator = createSavedPaymentMethodMutator(
             coroutineScope = coroutineScope,
