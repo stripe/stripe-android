@@ -5,7 +5,6 @@ import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkGlo
 import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkGlobalHoldback.ProvidedDefaultValues
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.model.ElementsSession
@@ -51,13 +50,11 @@ internal class DefaultLogLinkGlobalHoldbackExposure @Inject constructor(
         elementsSession: ElementsSession,
         state: PaymentElementLoader.State
     ) {
-        if (FeatureFlags.linkGlobalHoldbackExposureEnabled.isEnabled) {
-            CoroutineScope(workContext).launch {
-                runCatching {
-                    logExposure(elementsSession, state)
-                }.onFailure { error ->
-                    logger.error("Failed to log Global holdback exposure", error)
-                }
+        CoroutineScope(workContext).launch {
+            runCatching {
+                logExposure(elementsSession, state)
+            }.onFailure { error ->
+                logger.error("Failed to log Global holdback exposure", error)
             }
         }
     }

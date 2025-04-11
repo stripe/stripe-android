@@ -4,7 +4,6 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkGlobalHoldback.EmailRecognitionSource
 import com.stripe.android.common.model.CommonConfigurationFactory
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.TestFactory.CONSUMER_SESSION
 import com.stripe.android.link.TestFactory.PUBLISHABLE_KEY
@@ -26,7 +25,6 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
 import com.stripe.android.testing.FakeLogger
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -52,12 +50,6 @@ class LogLinkGlobalHoldbackExposureTest {
     var rule: TestRule = InstantTaskExecutorRule()
 
     private val testDispatcher = UnconfinedTestDispatcher()
-
-    @get:Rule
-    val linkGlobalHoldbackExposureEnabledRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.linkGlobalHoldbackExposureEnabled,
-        isEnabled = true,
-    )
 
     @Before
     fun setUp() {
@@ -117,24 +109,6 @@ class LogLinkGlobalHoldbackExposureTest {
 
         assertTrue(exposureCall.experiment is LoggableExperiment.LinkGlobalHoldback)
         assertEquals(exposureCall.experiment.group, "control")
-    }
-
-    @Test
-    fun `invoke should not log exposure when feature flag is disabled`() = runTest {
-        linkGlobalHoldbackExposureEnabledRule.setEnabled(false)
-        val elementsSession = createElementsSession(
-            experimentsData = ElementsSession.ExperimentsData(
-                arbId = "test_arb_id",
-                experimentAssignments = mapOf(
-                    LINK_GLOBAL_HOLD_BACK to "holdback"
-                )
-            )
-        )
-        val state = createElementsState(PaymentMethodMetadataFactory.create())
-
-        logLinkGlobalHoldbackExposure(elementsSession, state)
-
-        eventReporter.experimentExposureCalls.expectNoEvents()
     }
 
     @Test
