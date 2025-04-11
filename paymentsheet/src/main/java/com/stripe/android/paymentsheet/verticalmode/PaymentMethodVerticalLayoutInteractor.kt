@@ -157,7 +157,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             ).also { interactor ->
                 viewModel.viewModelScope.launch {
                     interactor.state.collect { state ->
-                        val newSelection = state.temporarySelection as? PaymentMethodVerticalLayoutInteractor.Selection.New
+                        val newSelection =
+                            state.temporarySelection as? PaymentMethodVerticalLayoutInteractor.Selection.New
                         newSelection?.code?.let { code ->
                             val formType = formHelper.formTypeForCode(code)
                             if (formType is FormType.MandateOnly) {
