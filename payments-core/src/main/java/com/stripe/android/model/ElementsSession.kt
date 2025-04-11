@@ -57,7 +57,6 @@ data class ElementsSession(
         val linkFlags: Map<String, Boolean>,
         val disableLinkSignup: Boolean,
         val linkConsumerIncentive: LinkConsumerIncentive?,
-        val linkGlobalHoldbackOn: Boolean,
         val useAttestationEndpoints: Boolean,
         val suppress2faModal: Boolean
     ) : StripeModel
@@ -66,6 +65,7 @@ data class ElementsSession(
     @Parcelize
     data class ExperimentsData(
         val arbId: String,
+        val experimentAssignments: Map<ExperimentAssignment, String>
     ) : StripeModel
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -159,7 +159,17 @@ data class ElementsSession(
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class Flag(val flagValue: String) {
-        ELEMENTS_DISABLE_FC_LITE("elements_disable_fc_lite")
+        ELEMENTS_DISABLE_FC_LITE("elements_disable_fc_lite"),
+        ELEMENTS_DISABLE_LINK_GLOBAL_HOLDBACK_LOOKUP("elements_disable_link_global_holdback_lookup"),
+        ELEMENTS_ENABLE_LINK_SPM("elements_enable_link_spm"),
+    }
+
+    /**
+     * Experiments declared here will be parsed and include in the [ElementsSession] object.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    enum class ExperimentAssignment(val experimentValue: String) {
+        LINK_GLOBAL_HOLD_BACK("link_global_holdback"),
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

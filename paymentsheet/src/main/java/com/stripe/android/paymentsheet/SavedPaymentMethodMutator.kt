@@ -135,8 +135,8 @@ internal class SavedPaymentMethodMutator(
         val paymentMethodId = paymentMethod.id ?: return
 
         coroutineScope.launch(workContext) {
-            removeDeletedPaymentMethodFromState(paymentMethodId)
             removePaymentMethodInternal(paymentMethodId)
+            removeDeletedPaymentMethodFromState(paymentMethodId)
         }
     }
 
@@ -149,13 +149,18 @@ internal class SavedPaymentMethodMutator(
             )
         )
 
-        val currentSelection = (selection.value as? PaymentSelection.Saved)?.paymentMethod?.id
-        val didRemoveSelectedItem = currentSelection == paymentMethodId
+        val currentSelection = (selection.value as? PaymentSelection.Saved)?.paymentMethod
+        val didRemoveSelectedItem = currentSelection?.id == paymentMethodId
 
         if (didRemoveSelectedItem) {
             // Remove the current selection. The new selection will be set when we're computing
             // the next PaymentOptionsState.
-            setSelection(null)
+            withContext(uiContext) {
+                setSelection(null)
+            }
+            currentSelection?.type?.code?.let {
+                eventReporter.onRemoveSavedPaymentMethod(it)
+            }
         }
 
         return customerRepository.detachPaymentMethod(
@@ -180,11 +185,11 @@ internal class SavedPaymentMethodMutator(
             )
         )
 
-        if ((selection.value as? PaymentSelection.Saved)?.paymentMethod?.id == paymentMethodId) {
-            setSelection(null)
-        }
-
         withContext(uiContext) {
+            if ((selection.value as? PaymentSelection.Saved)?.paymentMethod?.id == paymentMethodId) {
+                setSelection(null)
+            }
+
             postPaymentMethodRemoveActions()
         }
     }
@@ -223,8 +228,10 @@ internal class SavedPaymentMethodMutator(
                 error = error
             )
         }.onSuccess {
-            customerStateHolder.setDefaultPaymentMethod(paymentMethod = paymentMethod)
-            setSelection(PaymentSelection.Saved(paymentMethod = paymentMethod))
+            withContext(uiContext) {
+                customerStateHolder.setDefaultPaymentMethod(paymentMethod = paymentMethod)
+                setSelection(PaymentSelection.Saved(paymentMethod = paymentMethod))
+            }
 
             eventReporter.onSetAsDefaultPaymentMethodSucceeded(
                 paymentMethodType = paymentMethod.type?.code,

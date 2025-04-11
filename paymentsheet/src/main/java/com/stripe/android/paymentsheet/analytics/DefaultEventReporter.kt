@@ -210,6 +210,10 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
+    override fun onRemoveSavedPaymentMethod(code: PaymentMethodCode) {
+        fireAnalyticEvent(AnalyticEvent.RemovedSavedPaymentMethod(code))
+    }
+
     override fun onPaymentMethodFormShown(code: PaymentMethodCode) {
         durationProvider.start(DurationProvider.Key.ConfirmButtonClicked)
 

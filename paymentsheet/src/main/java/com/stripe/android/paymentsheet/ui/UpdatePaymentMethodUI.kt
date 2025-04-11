@@ -50,13 +50,14 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
         interactor.displayableSavedPaymentMethod.isModifiable()
 
     Column(
-        modifier = modifier.padding(horizontal = horizontalPadding).testTag(UPDATE_PM_SCREEN_TEST_TAG),
+        modifier = modifier
+            .padding(horizontal = horizontalPadding)
+            .testTag(UPDATE_PM_SCREEN_TEST_TAG),
     ) {
         when (val savedPaymentMethod = interactor.displayableSavedPaymentMethod.savedPaymentMethod) {
             is SavedPaymentMethod.Card -> {
                 CardDetailsEditUI(
                     editCardDetailsInteractor = interactor.editCardDetailsInteractor,
-                    isExpired = interactor.isExpiredCard
                 )
             }
             is SavedPaymentMethod.SepaDebit -> SepaDebitUI(
@@ -133,7 +134,9 @@ private fun SetAsDefaultPaymentMethodCheckbox(
         onValueChange = onCheckChanged,
         isEnabled = isEnabled,
         label = (com.stripe.android.ui.core.R.string.stripe_set_as_default_payment_method).resolvableString.resolve(),
-        modifier = Modifier.padding(top = 12.dp).testTag(UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG)
+        modifier = Modifier
+            .padding(top = 12.dp)
+            .testTag(UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG)
     )
 }
 

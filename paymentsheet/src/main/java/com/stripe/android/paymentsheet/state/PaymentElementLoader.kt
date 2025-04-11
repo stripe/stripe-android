@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
+import com.stripe.android.common.analytics.experiment.LogLinkGlobalHoldbackExposure
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.Logger
@@ -126,7 +127,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val eventReporter: EventReporter,
     private val errorReporter: ErrorReporter,
     @IOContext private val workContext: CoroutineContext,
+    private val retrieveCustomerEmail: RetrieveCustomerEmail,
     private val accountStatusProvider: LinkAccountStatusProvider,
+    private val logLinkGlobalHoldbackExposure: LogLinkGlobalHoldbackExposure,
     private val linkStore: LinkStore,
     private val externalPaymentMethodsRepository: ExternalPaymentMethodsRepository,
     private val userFacingLogger: UserFacingLogger,
@@ -143,7 +146,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         eventReporter.onLoadStarted(initializedViaCompose)
 
         val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(configuration)
-
         val elementsSession = retrieveElementsSession(
             initializationMode = initializationMode,
             customer = configuration.customer,
@@ -220,6 +222,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             paymentSelection = initialPaymentSelection.await(),
             validationError = stripeIntent.validate(),
             paymentMethodMetadata = paymentMethodMetadata,
+        )
+
+        logLinkGlobalHoldbackExposure(
+            elementsSession = elementsSession,
+            state = state
         )
 
         reportSuccessfulLoad(
@@ -501,15 +508,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             configuration.defaultBillingDetails?.phone
         }
 
-        val customerEmail = configuration.defaultBillingDetails?.email ?: customer?.let {
-            customerRepository.retrieveCustomer(
-                CustomerRepository.CustomerInfo(
-                    id = it.id,
-                    ephemeralKeySecret = it.ephemeralKeySecret,
-                    customerSessionClientSecret = (it as? CustomerInfo.CustomerSession)?.customerSessionClientSecret,
-                )
-            )
-        }?.email
+        val customerEmail = retrieveCustomerEmail(
+            configuration = configuration,
+            customer = customer?.toCustomerInfo()
+        )
 
         val merchantName = configuration.merchantDisplayName
 
@@ -813,6 +815,12 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             override val ephemeralKeySecret: String = accessType.ephemeralKeySecret
         }
     }
+
+    private fun CustomerInfo.toCustomerInfo() = CustomerRepository.CustomerInfo(
+        id = id,
+        ephemeralKeySecret = ephemeralKeySecret,
+        customerSessionClientSecret = (this as? CustomerInfo.CustomerSession)?.customerSessionClientSecret,
+    )
 }
 
 private suspend fun List<PaymentMethod>.withDefaultPaymentMethodOrLastUsedPaymentMethodFirst(

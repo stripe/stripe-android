@@ -45,6 +45,7 @@ interface ConsumersApiService {
     suspend fun lookupConsumerSession(
         email: String,
         requestSurface: String,
+        doNotLogConsumerFunnelEvent: Boolean,
         requestOptions: ApiRequest.Options
     ): ConsumerSessionLookup
 
@@ -166,8 +167,14 @@ class ConsumersApiServiceImpl(
     override suspend fun lookupConsumerSession(
         email: String,
         requestSurface: String,
+        doNotLogConsumerFunnelEvent: Boolean,
         requestOptions: ApiRequest.Options
     ): ConsumerSessionLookup {
+        val avoidConsumerLoggingParams: Map<String, Boolean> = if (doNotLogConsumerFunnelEvent) {
+            mapOf("do_not_log_consumer_funnel_event" to true)
+        } else {
+            emptyMap()
+        }
         return executeRequestWithModelJsonParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
             stripeNetworkClient = stripeNetworkClient,
@@ -177,7 +184,7 @@ class ConsumersApiServiceImpl(
                 mapOf(
                     "request_surface" to requestSurface,
                     "email_address" to email.lowercase()
-                )
+                ) + avoidConsumerLoggingParams
             ),
             responseJsonParser = ConsumerSessionLookupJsonParser()
         )
