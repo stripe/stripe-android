@@ -450,7 +450,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 assertThat(selectedPaymentMethodCode).isEqualTo("cashapp")
                 onFormFieldValuesChangedCalled = true
             },
-            reportPaymentMethodTypeSelected = { _, _ -> },
+            reportPaymentMethodTypeSelected = {},
         ) {
             val paymentMethod = interactor.state.value.displayablePaymentMethods.first { it.code == "cashapp" }
             paymentMethod.onClick()
@@ -658,22 +658,17 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         var calledFormScreenFactory = false
         var reportedSelectedPaymentMethodType: PaymentMethodCode? = null
         var reportFormShownForPm: PaymentMethodCode? = null
-        var isSavedPaymentMethod: Boolean? = null
         runScenario(
             formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
             transitionToFormScreen = {
                 calledFormScreenFactory = true
             },
-            reportPaymentMethodTypeSelected = { paymentMethodCode, isSaved ->
-                reportedSelectedPaymentMethodType = paymentMethodCode
-                isSavedPaymentMethod = isSaved
-            },
+            reportPaymentMethodTypeSelected = { reportedSelectedPaymentMethodType = it },
             reportFormShown = { reportFormShownForPm = it }
         ) {
             interactor.handleViewAction(ViewAction.PaymentMethodSelected("card"))
             assertThat(calledFormScreenFactory).isTrue()
             assertThat(reportedSelectedPaymentMethodType).isEqualTo("card")
-            assertThat(isSavedPaymentMethod).isEqualTo(false)
             assertThat(reportFormShownForPm).isEqualTo("card")
         }
     }
@@ -686,7 +681,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             transitionToFormScreen = {
                 calledFormScreenFactory = true
             },
-            reportPaymentMethodTypeSelected = { _, _ -> },
+            reportPaymentMethodTypeSelected = {},
             reportFormShown = {},
         ) {
             interactor.handleViewAction(ViewAction.PaymentMethodSelected("us_bank_account"))
@@ -702,7 +697,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             transitionToFormScreen = {
                 calledFormScreenFactory = true
             },
-            reportPaymentMethodTypeSelected = { _, _ -> },
+            reportPaymentMethodTypeSelected = {},
             reportFormShown = {},
         ) {
             interactor.handleViewAction(ViewAction.PaymentMethodSelected("link"))
@@ -714,7 +709,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     fun handleViewAction_PaymentMethodSelected_updatesSelectedLPM() {
         var onFormFieldValuesChangedCalled = false
         var reportedSelectedPaymentMethodType: PaymentMethodCode? = null
-        var isSavedPaymentMethod: Boolean? = null
         runScenario(
             formTypeForCode = { FormHelper.FormType.Empty },
             onFormFieldValuesChanged = { fieldValues, selectedPaymentMethodCode ->
@@ -725,15 +719,11 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 assertThat(selectedPaymentMethodCode).isEqualTo("cashapp")
                 onFormFieldValuesChangedCalled = true
             },
-            reportPaymentMethodTypeSelected = { paymentMethodCode, isSaved ->
-                reportedSelectedPaymentMethodType = paymentMethodCode
-                isSavedPaymentMethod = isSaved
-            }
+            reportPaymentMethodTypeSelected = { reportedSelectedPaymentMethodType = it }
         ) {
             interactor.handleViewAction(ViewAction.PaymentMethodSelected("cashapp"))
             assertThat(onFormFieldValuesChangedCalled).isTrue()
             assertThat(reportedSelectedPaymentMethodType).isEqualTo("cashapp")
-            assertThat(isSavedPaymentMethod).isEqualTo(false)
         }
     }
 
@@ -757,7 +747,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 assertThat(selectedPaymentMethodCode).isEqualTo("cashapp")
                 onFormFieldValuesChangedCalled = true
             },
-            reportPaymentMethodTypeSelected = { _, _ -> }
+            reportPaymentMethodTypeSelected = {}
         ) {
             interactor.state.test {
                 assertThat(awaitItem().mandate).isNull()
@@ -785,7 +775,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             },
             initialPaymentMethods = savedPaymentMethods,
             initialMostRecentlySelectedSavedPaymentMethod = displayedPaymentMethod,
-            reportPaymentMethodTypeSelected = { _, _ -> },
+            reportPaymentMethodTypeSelected = {},
         ) {
             interactor.handleViewAction(ViewAction.PaymentMethodSelected("cashapp"))
             interactor.state.test {
@@ -859,22 +849,15 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     @Test
     fun handleViewAction_SelectSavedPaymentMethod_selectsSavedPm() {
         val savedPaymentMethod = PaymentMethodFixtures.displayableCard()
-        var paymentSelection: PaymentSelection? = null
-        var isSavedPaymentMethod: Boolean? = null
+        var selectedSavedPaymentMethod: PaymentMethod? = null
+        var reportedSelectedPaymentMethodType: PaymentMethodCode? = null
         runScenario(
-            onSelectSavedPaymentMethod = { paymentSelection = it },
-            reportPaymentMethodTypeSelected = { paymentMethodCode, isSaved ->
-                isSavedPaymentMethod = isSaved
-            }
+            onSelectSavedPaymentMethod = { selectedSavedPaymentMethod = it },
+            reportPaymentMethodTypeSelected = { reportedSelectedPaymentMethodType = it }
         ) {
-            interactor.handleViewAction(
-                ViewAction.SavedPaymentMethodSelected(
-                    PaymentSelection.Saved(savedPaymentMethod.paymentMethod)
-                )
-            )
-            assertThat((paymentSelection as PaymentSelection.Saved).paymentMethod)
-                .isEqualTo(savedPaymentMethod.paymentMethod)
-            assertThat(isSavedPaymentMethod).isEqualTo(true)
+            interactor.handleViewAction(ViewAction.SavedPaymentMethodSelected(savedPaymentMethod.paymentMethod))
+            assertThat(selectedSavedPaymentMethod).isEqualTo(savedPaymentMethod.paymentMethod)
+            assertThat(reportedSelectedPaymentMethodType).isEqualTo("saved")
         }
     }
 
@@ -1192,12 +1175,12 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         transitionToFormScreen: (selectedPaymentMethodCode: String) -> Unit = { notImplemented() },
         initialPaymentMethods: List<PaymentMethod> = emptyList(),
         initialMostRecentlySelectedSavedPaymentMethod: PaymentMethod? = null,
-        onSelectSavedPaymentMethod: (PaymentSelection) -> Unit = { notImplemented() },
+        onSelectSavedPaymentMethod: (PaymentMethod) -> Unit = { notImplemented() },
         onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit = { notImplemented() },
         canShowWalletsInline: Boolean = false,
         canShowWalletButtons: Boolean = true,
         updateSelection: (PaymentSelection?) -> Unit = { notImplemented() },
-        reportPaymentMethodTypeSelected: (PaymentMethodCode, Boolean) -> Unit = { _, _ -> notImplemented() },
+        reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit = { notImplemented() },
         reportFormShown: (PaymentMethodCode) -> Unit = { notImplemented() },
         testBlock: suspend TestParams.() -> Unit
     ) {

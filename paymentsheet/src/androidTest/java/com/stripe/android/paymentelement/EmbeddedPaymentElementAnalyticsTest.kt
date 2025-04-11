@@ -105,6 +105,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
 
         formPage.fillOutCardDetails()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.StartedInteractionWithPaymentMethodForm("card"))
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.CompletedPaymentMethodForm("card"))
 
         networkRule.enqueue(
             method("POST"),

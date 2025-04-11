@@ -114,6 +114,7 @@ internal class PaymentSheetAnalyticsTest {
 
         page.fillOutCardDetails()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.StartedInteractionWithPaymentMethodForm("card"))
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.CompletedPaymentMethodForm("card"))
 
         networkRule.enqueue(
             host("api.stripe.com"),
@@ -184,6 +185,7 @@ internal class PaymentSheetAnalyticsTest {
 
         page.fillOutCardDetails()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.StartedInteractionWithPaymentMethodForm("card"))
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.CompletedPaymentMethodForm("card"))
 
         networkRule.enqueue(
             host("api.stripe.com"),
@@ -252,6 +254,7 @@ internal class PaymentSheetAnalyticsTest {
 
         page.fillOutCardDetails()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.StartedInteractionWithPaymentMethodForm("card"))
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.CompletedPaymentMethodForm("card"))
 
         networkRule.enqueue(
             host("api.stripe.com"),
@@ -325,6 +328,7 @@ internal class PaymentSheetAnalyticsTest {
 
         page.fillOutCardDetails()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.StartedInteractionWithPaymentMethodForm("card"))
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.CompletedPaymentMethodForm("card"))
 
         networkRule.enqueue(
             host("api.stripe.com"),

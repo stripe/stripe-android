@@ -1,5 +1,7 @@
 package com.stripe.android.link.ui.paymentmethod
 
+import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.Turbine
 import com.stripe.android.link.TestFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -14,8 +16,11 @@ internal class PaymentMethodFormHelper : FormHelper {
     var paymentMethodCreateParams: PaymentMethodCreateParams? = PaymentMethodCreateParamsFixtures.DEFAULT_CARD
     val getPaymentMethodParamsCalls = arrayListOf<GetPaymentMethodParamsCall>()
 
+    private val _formFieldValuesChangedCall = Turbine<String>()
+    val formFieldValuesChangedCall: ReceiveTurbine<String> = _formFieldValuesChangedCall
+
     override fun onFormFieldValuesChanged(formValues: FormFieldValues?, selectedPaymentMethodCode: String) {
-        TODO("Not yet implemented")
+        _formFieldValuesChangedCall.add(selectedPaymentMethodCode)
     }
 
     override fun getPaymentMethodParams(

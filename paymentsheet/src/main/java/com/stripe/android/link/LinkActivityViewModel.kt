@@ -50,7 +50,7 @@ internal class LinkActivityViewModel @Inject constructor(
     val eventReporter: EventReporter,
     private val linkConfiguration: LinkConfiguration,
     private val linkAttestationCheck: LinkAttestationCheck,
-    private val savedStateHandle: SavedStateHandle,
+    val savedStateHandle: SavedStateHandle,
     private val startWithVerificationDialog: Boolean
 ) : ViewModel(), DefaultLifecycleObserver {
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)

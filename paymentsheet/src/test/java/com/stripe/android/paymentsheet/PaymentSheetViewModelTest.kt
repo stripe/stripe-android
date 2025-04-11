@@ -2293,7 +2293,10 @@ internal class PaymentSheetViewModelTest {
         val usBankAccount = PaymentSelection.New.USBankAccount(
             label = "Test",
             iconResource = 0,
-            paymentMethodCreateParams = mock(),
+            paymentMethodCreateParams = PaymentMethodCreateParams(
+                code = PaymentMethod.Type.USBankAccount.code,
+                requiresMandate = false,
+            ),
             customerRequestedSave = mock(),
             input = PaymentSelection.New.USBankAccount.Input(
                 name = "",

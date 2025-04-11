@@ -49,6 +49,7 @@ com.stripe.android.model
 module:paymentsheet
 com.stripe.android
 com.stripe.android.customersheet
+com.stripe.android.paymentelement
 com.stripe.android.paymentsheet
 com.stripe.android.paymentsheet.addresselement
 com.stripe.android.paymentsheet.model

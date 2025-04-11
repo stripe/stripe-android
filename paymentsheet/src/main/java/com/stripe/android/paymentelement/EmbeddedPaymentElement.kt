@@ -39,7 +39,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @ExperimentalEmbeddedPaymentElementApi
 @EmbeddedPaymentElementScope
 class EmbeddedPaymentElement @Inject internal constructor(
@@ -103,7 +102,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
      * Creation can be completed with [rememberEmbeddedPaymentElement].
      */
     @ExperimentalEmbeddedPaymentElementApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Builder(
         /**
          * Called when the customer confirms the payment or setup.
@@ -155,7 +153,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
     @Parcelize
     @Poko
     @ExperimentalEmbeddedPaymentElementApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration internal constructor(
         internal val merchantDisplayName: String,
         internal val customer: PaymentSheet.CustomerConfiguration?,
@@ -178,7 +175,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
     ) : Parcelable {
         @Suppress("TooManyFunctions")
         @ExperimentalEmbeddedPaymentElementApi
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         class Builder(
             /**
              * Your customer-facing business name.
@@ -423,13 +419,11 @@ class EmbeddedPaymentElement @Inject internal constructor(
     /**
      * The result of a [configure] call.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @ExperimentalEmbeddedPaymentElementApi
     sealed interface ConfigureResult {
         /**
          * The configure succeeded.
          */
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @ExperimentalEmbeddedPaymentElementApi
         class Succeeded internal constructor() : ConfigureResult
 
@@ -439,13 +433,11 @@ class EmbeddedPaymentElement @Inject internal constructor(
          * Your integration should retry with exponential backoff.
          */
         @Poko
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @ExperimentalEmbeddedPaymentElementApi
         class Failed internal constructor(val error: Throwable) : ConfigureResult
     }
 
     @Poko
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @ExperimentalEmbeddedPaymentElementApi
     class PaymentOptionDisplayData internal constructor(
         private val imageLoader: suspend () -> Drawable,
@@ -492,7 +484,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
     /**
      * The result of an attempt to confirm a [PaymentIntent] or [SetupIntent].
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @ExperimentalEmbeddedPaymentElementApi
     sealed interface Result {
         /**
@@ -505,14 +496,12 @@ class EmbeddedPaymentElement @Inject internal constructor(
          *
          * See [Stripe's documentation](https://stripe.com/docs/payments/handling-payment-events).
          */
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @ExperimentalEmbeddedPaymentElementApi
         class Completed internal constructor() : Result
 
         /**
          * The customer canceled the payment or setup attempt.
          */
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @ExperimentalEmbeddedPaymentElementApi
         class Canceled internal constructor() : Result
 
@@ -522,7 +511,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
          * @param error The error encountered by the customer.
          */
         @Poko
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @ExperimentalEmbeddedPaymentElementApi
         class Failed internal constructor(val error: Throwable) : Result
     }
@@ -530,7 +518,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
     /**
      * Callback that is invoked when a [Result] is available.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @ExperimentalEmbeddedPaymentElementApi
     fun interface ResultCallback {
         fun onResult(result: Result)

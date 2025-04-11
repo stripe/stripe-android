@@ -132,7 +132,8 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
         val formHelper = embeddedFormHelperFactory.create(
             coroutineScope = coroutineScope,
             paymentMethodMetadata = paymentMethodMetadata,
-            selectionUpdater = ::setSelection
+            eventReporter = eventReporter,
+            selectionUpdater = ::setSelection,
         )
         val savedPaymentMethodMutator = createSavedPaymentMethodMutator(
             coroutineScope = coroutineScope,
@@ -176,7 +177,9 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             mostRecentlySelectedSavedPaymentMethod = customerStateHolder.mostRecentlySelectedSavedPaymentMethod,
             providePaymentMethodName = savedPaymentMethodMutator.providePaymentMethodName,
             canRemove = customerStateHolder.canRemove,
-            onSelectSavedPaymentMethod = ::setSelection,
+            onSelectSavedPaymentMethod = {
+                setSelection(PaymentSelection.Saved(it))
+            },
             walletsState = walletsState,
             canShowWalletsInline = true,
             canShowWalletButtons = false,

@@ -80,7 +80,6 @@ internal interface EventReporter {
      */
     fun onSelectPaymentMethod(
         code: PaymentMethodCode,
-        isSaved: Boolean,
     )
 
     /**
@@ -206,6 +205,13 @@ internal interface EventReporter {
     fun onSetAsDefaultPaymentMethodFailed(
         paymentMethodType: String?,
         error: Throwable,
+    )
+
+    /**
+     * The customer has completed all required payment form fields
+     */
+    fun onPaymentMethodFormCompleted(
+        code: PaymentMethodCode,
     )
 
     /**

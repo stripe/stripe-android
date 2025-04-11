@@ -17,6 +17,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.printToString
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
@@ -31,6 +32,7 @@ import com.stripe.android.testing.FakeLogger
 import com.stripe.android.ui.core.elements.events.LocalCardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,17 +49,7 @@ internal class PaymentMethodScreenTest {
     val coroutineTestRule = CoroutineTestRule(dispatcher)
 
     @Test
-    fun `form fields are displayed correctly`() {
-        val linkAccountManager = FakeLinkAccountManager()
-
-        screen(
-            viewModel = createViewModel(
-                linkAccountManager = linkAccountManager
-            )
-        )
-
-        composeTestRule.waitForIdle()
-
+    fun `form fields are displayed correctly`() = runScenario {
         onCardNumber().assertExists()
         onCvc().assertIsDisplayed()
         onExpiryDate().assertIsDisplayed()
@@ -69,18 +61,9 @@ internal class PaymentMethodScreenTest {
     }
 
     @Test
-    fun `no error message on successful payment`() {
-        val linkAccountManager = FakeLinkAccountManager()
-
-        screen(
-            viewModel = createViewModel(
-                linkAccountManager = linkAccountManager
-            )
-        )
-
-        composeTestRule.waitForIdle()
-
+    fun `no error message on successful payment`() = runScenario {
         fillCardDetails()
+        assertThat(formHelper.formFieldValuesChangedCall.awaitItem()).isNotNull()
 
         onPayButton()
             .scrollToAndAssertDisplayed()
@@ -91,17 +74,7 @@ internal class PaymentMethodScreenTest {
     }
 
     @Test
-    fun `error message should be displayed on card creation failure`() {
-        val linkAccountManager = FakeLinkAccountManager()
-
-        screen(
-            viewModel = createViewModel(
-                linkAccountManager = linkAccountManager
-            )
-        )
-
-        composeTestRule.waitForIdle()
-
+    fun `error message should be displayed on card creation failure`() = runScenario {
         fillCardDetails()
 
         linkAccountManager.createCardPaymentDetailsResult = Result.failure(Throwable("oops"))
@@ -122,17 +95,7 @@ internal class PaymentMethodScreenTest {
     }
 
     @Test
-    fun `error message should be displayed on payment confirmation failure`() {
-        val linkConfirmationHandler = FakeLinkConfirmationHandler()
-
-        screen(
-            viewModel = createViewModel(
-                linkConfirmationHandler = linkConfirmationHandler
-            )
-        )
-
-        composeTestRule.waitForIdle()
-
+    fun `error message should be displayed on payment confirmation failure`() = runScenario {
         fillCardDetails()
 
         linkConfirmationHandler.confirmWithLinkPaymentDetailsResult =
@@ -170,10 +133,37 @@ internal class PaymentMethodScreenTest {
         }
     }
 
-    private fun createViewModel(
+    private fun runScenario(
         linkAccountManager: FakeLinkAccountManager = FakeLinkAccountManager(),
         linkConfirmationHandler: FakeLinkConfirmationHandler = FakeLinkConfirmationHandler(),
-        formHelper: FormHelper = PaymentMethodFormHelper()
+        formHelper: PaymentMethodFormHelper = PaymentMethodFormHelper(),
+        block: suspend Scenario.() -> Unit
+    ) {
+        screen(
+            viewModel = createViewModel(
+                linkAccountManager = linkAccountManager,
+                linkConfirmationHandler = linkConfirmationHandler,
+                formHelper = formHelper,
+            )
+        )
+        composeTestRule.waitForIdle()
+        Scenario(
+            linkAccountManager = linkAccountManager,
+            linkConfirmationHandler = linkConfirmationHandler,
+            formHelper = formHelper,
+        ).apply {
+            runTest {
+                formHelper.formFieldValuesChangedCall.skipItems(1)
+                block()
+            }
+        }
+        formHelper.formFieldValuesChangedCall.ensureAllEventsConsumed()
+    }
+
+    private fun createViewModel(
+        linkAccountManager: FakeLinkAccountManager,
+        linkConfirmationHandler: FakeLinkConfirmationHandler,
+        formHelper: FormHelper,
     ): PaymentMethodViewModel {
         return PaymentMethodViewModel(
             configuration = TestFactory.LINK_CONFIGURATION,
@@ -206,4 +196,10 @@ internal class PaymentMethodScreenTest {
             .performScrollTo()
             .assertIsDisplayed()
     }
+
+    private data class Scenario(
+        val linkAccountManager: FakeLinkAccountManager,
+        val linkConfirmationHandler: FakeLinkConfirmationHandler,
+        val formHelper: PaymentMethodFormHelper,
+    )
 }

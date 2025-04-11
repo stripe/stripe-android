@@ -516,7 +516,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     ) : PaymentSheetEvent() {
         override val eventName: String = "elements.experiment_exposure"
         override val additionalParams: Map<String, Any?> = mapOf(
-            "experiment_retrieved" to experiment.name,
+            "experiment_retrieved" to experiment.experiment.experimentValue,
             "arb_id" to experiment.arbId,
             "assignment_group" to experiment.group
         ) + experiment.dimensions.mapKeys { "dimensions-${it.key}" }
