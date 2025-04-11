@@ -7,6 +7,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.common.di.ApplicationIdModule
+import com.stripe.android.common.di.MobileSessionIdModule
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.RealUserFacingLogger
@@ -55,9 +56,10 @@ import kotlin.coroutines.CoroutineContext
         ExtendedPaymentElementConfirmationModule::class,
         EmbeddedCommonModule::class,
         ApplicationIdModule::class,
+        MobileSessionIdModule::class,
         CardScanModule::class,
         EmbeddedLinkExtrasModule::class,
-        LinkHoldbackExposureModule::class
+        LinkHoldbackExposureModule::class,
     ],
 )
 internal interface EmbeddedPaymentElementViewModelComponent {
