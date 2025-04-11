@@ -210,6 +210,3 @@ private fun ViewMoreButton(
         }
     }
 }
-        )
-    }
-}
