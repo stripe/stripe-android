@@ -61,7 +61,7 @@ internal interface CustomerSheetDataCommonModule {
 
         @Provides
         @Named(PRODUCT_USAGE)
-        fun providesProductUsage(): Set<String> = setOf("WalletMode")
+        fun providesProductUsage(): Set<String> = setOf("CustomerSheet")
 
         @Provides
         @Named(ENABLE_LOGGING)

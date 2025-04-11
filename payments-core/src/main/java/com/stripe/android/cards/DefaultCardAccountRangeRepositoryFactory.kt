@@ -39,9 +39,12 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
         )
     }
 
-    constructor(context: Context) : this(
+    constructor(
+        context: Context,
+        productUsageTokens: Set<String> = emptySet()
+    ) : this(
         context,
-        emptySet(),
+        productUsageTokens,
         DefaultAnalyticsRequestExecutor(),
     )
 
