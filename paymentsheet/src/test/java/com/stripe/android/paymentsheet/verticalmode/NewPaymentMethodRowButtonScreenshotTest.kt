@@ -102,7 +102,8 @@ internal class NewPaymentMethodRowButtonScreenshotTest {
             title = "Klarna",
             subtitle = "Buy now or pay later with Klarna.",
             rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.default
-        )    }
+        )
+    }
 
     @Test
     fun testLongSubtitle() {
