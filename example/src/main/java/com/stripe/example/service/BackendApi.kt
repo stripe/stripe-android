@@ -21,4 +21,8 @@ interface BackendApi {
     @FormUrlEncoded
     @POST("create_setup_intent")
     suspend fun createSetupIntent(@FieldMap params: MutableMap<String, String>): ResponseBody
+
+    @FormUrlEncoded
+    @POST("confirm_payment_intent")
+    suspend fun confirmPaymentIntent(@FieldMap params: MutableMap<String, String>): ResponseBody
 }

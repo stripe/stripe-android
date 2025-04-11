@@ -4,9 +4,14 @@ import android.app.Application
 import androidx.annotation.StringRes
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.liveData
+import androidx.lifecycle.viewModelScope
+import com.stripe.android.createPaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.example.R
+import com.stripe.example.StripeFactory
 import com.stripe.example.activity.BaseViewModel
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
 import org.json.JSONObject
@@ -19,6 +24,13 @@ internal class StripeIntentViewModel(
     val status = MutableLiveData<String>()
 
     val paymentResultLiveData = MutableLiveData<PaymentResult>()
+    val requiresAction = MutableLiveData<Boolean>()
+    var piSecret: String? = null
+    val stripe = StripeFactory(application).create()
+    var intentId: String? = null
+        get() {
+            return piSecret?.let { getIntentId(it) }
+        }
 
     fun createPaymentIntent(
         country: String,
@@ -46,6 +58,72 @@ internal class StripeIntentViewModel(
                 )
                 .toMutableMap()
         )
+    }
+
+    private fun confirmPaymentIntentWithPaymentMethod(paymentMethodId: String) {
+        println("StripeSdk confirming payment method id: $paymentMethodId")
+        status.postValue("Creating a confirming intent server side")
+        viewModelScope.launch {
+            runCatching {
+                backendApi.confirmPaymentIntent(
+                    mapOf("payment_method_id" to paymentMethodId).toMutableMap()
+                )
+            }.onSuccess {
+                status.postValue("Confirmation succeeded")
+                val response = JSONObject(it.string())
+                if (response.optBoolean("requires_action")) {
+                    piSecret = response.getString("secret")
+                    requiresAction.postValue(true)
+                }
+            }.onFailure {
+                status.postValue("Confirmation failed: ${it.message}")
+                println(it)
+            }
+        }
+    }
+
+    fun confirmPaymentIntentWithIntentId(intentId: String) {
+        println("StripeSdk confirming intent id: $intentId")
+        status.postValue("Confirming intent after 3ds2 auth: $intentId")
+        viewModelScope.launch {
+            runCatching {
+                backendApi.confirmPaymentIntent(
+                    mapOf("payment_intent_id" to intentId).toMutableMap()
+                )
+            }.onSuccess {
+                val response = JSONObject(it.string())
+                status.postValue("Confirming intent after 3ds2 auth success: $response")
+                requiresAction.postValue(false)
+                piSecret = null
+            }.onFailure {
+                status.postValue("Confirming intent after 3ds2 auth failure: ${it.message}")
+                println(it)
+            }
+        }
+    }
+
+    private fun getIntentId(s: String): String {
+        var underscoreCount = 0
+        var i = 0
+        while (underscoreCount < 2) {
+            if (s[i] == '_') underscoreCount++
+            i++
+        }
+        return s.slice(0..i - 2)
+    }
+
+    internal fun createPaymentMethod(
+        params: PaymentMethodCreateParams
+    ) {
+        viewModelScope.launch {
+            runCatching {
+                stripe.createPaymentMethod(params)
+            }.onSuccess { paymentMethod ->
+                confirmPaymentIntentWithPaymentMethod(paymentMethod.id!!)
+            }.onFailure {
+                println(it)
+            }
+        }
     }
 
     fun createSetupIntent(
