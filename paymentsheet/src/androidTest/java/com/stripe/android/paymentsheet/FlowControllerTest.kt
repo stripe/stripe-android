@@ -493,7 +493,7 @@ internal class FlowControllerTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3Bdeferred-intent%3Bautopm")
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
@@ -512,7 +512,7 @@ internal class FlowControllerTest {
             not(
                 bodyPart(
                     urlEncode("payment_method_data[payment_user_agent]"),
-                    Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                    Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3Bdeferred-intent%3Bautopm")
                 )
             ),
         ) { response ->
@@ -631,7 +631,7 @@ internal class FlowControllerTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3Bdeferred-intent%3Bautopm")
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
@@ -683,7 +683,7 @@ internal class FlowControllerTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3Bdeferred-intent%3Bautopm")
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
@@ -740,7 +740,7 @@ internal class FlowControllerTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3Bdeferred-intent%3Bautopm")
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")

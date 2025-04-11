@@ -12,11 +12,8 @@ import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
-import com.stripe.android.core.networking.NetworkTypeDetector
-import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.RealUserFacingLogger
@@ -38,6 +35,7 @@ import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.LinkApiRepository
 import com.stripe.android.link.repositories.LinkRepository
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
@@ -117,6 +115,9 @@ internal interface NativeLinkModule {
     @Binds
     fun bindsUserFacingLogger(impl: RealUserFacingLogger): UserFacingLogger
 
+    @Binds
+    fun bindsAnalyticsRequestFactory(impl: PaymentAnalyticsRequestFactory): AnalyticsRequestFactory
+
     @SuppressWarnings("TooManyFunctions")
     companion object {
         @Provides
@@ -143,19 +144,6 @@ internal interface NativeLinkModule {
                 logger = logger,
                 workContext = workContext
             )
-        )
-
-        @Provides
-        @NativeLinkScope
-        fun provideAnalyticsRequestFactory(
-            context: Context,
-            @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String
-        ): AnalyticsRequestFactory = AnalyticsRequestFactory(
-            packageManager = context.packageManager,
-            packageName = context.packageName.orEmpty(),
-            packageInfo = context.packageInfo,
-            publishableKeyProvider = publishableKeyProvider,
-            networkTypeProvider = NetworkTypeDetector(context)::invoke,
         )
 
         @Provides

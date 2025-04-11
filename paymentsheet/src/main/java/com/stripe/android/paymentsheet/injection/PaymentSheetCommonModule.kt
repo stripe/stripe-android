@@ -10,8 +10,6 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.AnalyticsRequestFactory
-import com.stripe.android.core.networking.NetworkTypeDetector
-import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.RealUserFacingLogger
@@ -23,6 +21,7 @@ import com.stripe.android.link.gate.DefaultLinkGate
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.injection.LinkComponent
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
@@ -107,6 +106,11 @@ internal abstract class PaymentSheetCommonModule {
     abstract fun bindsLinkConfigurationCoordinator(impl: RealLinkConfigurationCoordinator): LinkConfigurationCoordinator
 
     @Binds
+    abstract fun bindsAnalyticsRequestFactory(
+        paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
+    ): AnalyticsRequestFactory
+
+    @Binds
     abstract fun bindLinkGateFactory(linkGateFactory: DefaultLinkGate.Factory): LinkGate.Factory
 
     @Binds
@@ -170,18 +174,6 @@ internal abstract class PaymentSheetCommonModule {
         fun provideDurationProvider(): DurationProvider {
             return DefaultDurationProvider.instance
         }
-
-        @Provides
-        fun provideAnalyticsRequestFactory(
-            context: Context,
-            paymentConfiguration: Provider<PaymentConfiguration>
-        ): AnalyticsRequestFactory = AnalyticsRequestFactory(
-            packageManager = context.packageManager,
-            packageName = context.packageName.orEmpty(),
-            packageInfo = context.packageInfo,
-            publishableKeyProvider = { paymentConfiguration.get().publishableKey },
-            networkTypeProvider = NetworkTypeDetector(context)::invoke,
-        )
 
         @Provides
         fun providesCvcRecollectionInteractorFactory(): CvcRecollectionInteractor.Factory {

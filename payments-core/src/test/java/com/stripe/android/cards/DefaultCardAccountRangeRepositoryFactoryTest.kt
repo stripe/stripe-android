@@ -16,7 +16,8 @@ class DefaultCardAccountRangeRepositoryFactoryTest {
     private val analyticsRequests = mutableListOf<AnalyticsRequest>()
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val factory = DefaultCardAccountRangeRepositoryFactory(
-        context
+        context = context,
+        productUsageTokens = setOf("SomeProduct"),
     ) {
         analyticsRequests.add(it)
     }
@@ -32,8 +33,11 @@ class DefaultCardAccountRangeRepositoryFactoryTest {
             .isNotNull()
         assertThat(analyticsRequests)
             .hasSize(1)
-        assertThat(analyticsRequests.first().params["event"])
-            .isEqualTo("stripe_android.card_metadata_pk_unavailable")
+
+        val event = analyticsRequests.first()
+
+        assertThat(event.params["event"]).isEqualTo("stripe_android.card_metadata_pk_unavailable")
+        assertThat(event.params["product_usage"]).isEqualTo("SomeProduct")
     }
 
     @Test
@@ -43,7 +47,10 @@ class DefaultCardAccountRangeRepositoryFactoryTest {
             .isNotNull()
         assertThat(analyticsRequests)
             .hasSize(1)
-        assertThat(analyticsRequests.first().params["event"])
-            .isEqualTo("stripe_android.card_metadata_pk_available")
+
+        val event = analyticsRequests.first()
+
+        assertThat(event.params["event"]).isEqualTo("stripe_android.card_metadata_pk_available")
+        assertThat(event.params["product_usage"]).isEqualTo("SomeProduct")
     }
 }
