@@ -4,6 +4,7 @@ import androidx.compose.runtime.Stable
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.toInternal
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
+import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
@@ -27,7 +28,10 @@ internal class BillingDetailsForm(
         rawValuesMap = rawAddressValues(billingDetails)
     )
 
-    val addressSectionElement = SectionElement.wrap(cardBillingAddressElement)
+    val addressSectionElement = SectionElement.wrap(
+        sectionFieldElement = cardBillingAddressElement,
+        label = R.string.stripe_billing_details,
+    )
     val hiddenElements = cardBillingAddressElement.hiddenIdentifiers
     val formFieldsState = formFieldsState()
 
