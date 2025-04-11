@@ -301,7 +301,7 @@ internal class PaymentMethodLayoutUITest(
         ): PaymentMethodVerticalLayoutInteractor.State = PaymentMethodVerticalLayoutInteractor.State(
             displayablePaymentMethods = displayablePaymentMethods,
             isProcessing = isProcessing,
-            selection = selection,
+            temporarySelection = selection,
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
             availableSavedPaymentMethodAction = availableSavedPaymentMethodAction,
             mandate = mandate,
