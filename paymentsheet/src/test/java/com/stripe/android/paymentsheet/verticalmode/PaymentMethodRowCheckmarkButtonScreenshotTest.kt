@@ -1,24 +1,22 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark
-import com.stripe.android.paymentsheet.ui.PaymentMethodIconFromResource
-import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
-import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.StripeThemeDefaults
+import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
 import org.junit.Test
 
@@ -27,6 +25,8 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
 
     @get:Rule
     val paparazziRule = PaparazziRule(
+        SystemAppearance.entries,
+        PaymentSheetAppearance.entries,
         FontSize.entries,
         boxModifier = Modifier
             .padding(16.dp)
@@ -35,120 +35,45 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
 
     @Test
     fun testInitialState() {
-        paparazziRule.snapshot {
-            PaymentMethodRowButton(
-                isEnabled = true,
-                isSelected = false,
-                iconContent = {
-                    Icon()
-                },
-                title = "**** 4242",
-                subtitle = null,
-                promoText = null,
-                onClick = {},
-                style = FlatWithCheckmark.default,
-                shouldShowDefaultBadge = false,
-            )
-        }
+        testPaymentMethodRowButton_Checkmark()
     }
 
     @Test
     fun testDisabledState() {
-        paparazziRule.snapshot {
-            PaymentMethodRowButton(
-                isEnabled = false,
-                isSelected = false,
-                iconContent = {
-                    Icon()
-                },
-                title = "**** 4242",
-                subtitle = null,
-                promoText = null,
-                onClick = {},
-                style = FlatWithCheckmark.default,
-                shouldShowDefaultBadge = false,
-            )
-        }
+        testPaymentMethodRowButton_Checkmark(
+            isEnabled = false,
+        )
     }
 
     @Test
     fun testSelectedState() {
-        paparazziRule.snapshot {
-            PaymentMethodRowButton(
-                isEnabled = true,
-                isSelected = true,
-                iconContent = {
-                    Icon()
-                },
-                title = "**** 4242",
-                subtitle = null,
-                promoText = null,
-                onClick = {},
-                style = FlatWithCheckmark.default,
-                shouldShowDefaultBadge = false,
-            )
-        }
+        testPaymentMethodRowButton_Checkmark(
+            isSelected = true,
+        )
     }
 
     @Test
     fun testMultilineText() {
-        paparazziRule.snapshot {
-            PaymentMethodRowButton(
-                isEnabled = true,
-                isSelected = false,
-                iconContent = {
-                    Icon()
-                },
-                title = "**** 4242",
-                subtitle = "Please click me, I'm fancy",
-                promoText = null,
-                onClick = {},
-                style = FlatWithCheckmark.default,
-                shouldShowDefaultBadge = false,
-            )
-        }
+        testPaymentMethodRowButton_Checkmark(
+            subtitle = "Please click me, I'm fancy",
+        )
     }
 
     @Test
     fun testMultilineTextTruncation() {
-        paparazziRule.snapshot {
-            PaymentMethodRowButton(
-                isEnabled = true,
-                isSelected = false,
-                iconContent = {
-                    Icon()
-                },
-                title = "**** 4242",
-                subtitle = "Please click me, I'm fancy, but I shouldn't extend a a a a a a a a a a a a a a a a " +
-                    "forever.",
-                promoText = null,
-                onClick = {},
-                style = FlatWithCheckmark.default,
-                shouldShowDefaultBadge = false,
-            )
-        }
+        testPaymentMethodRowButton_Checkmark(
+            subtitle = "Please click me, I'm fancy, but I shouldn't extend a a a a a a a a a a a a a a a a " +
+                "forever.",
+        )
     }
 
     @Test
     fun testTailingContent() {
-        paparazziRule.snapshot {
-            PaymentMethodRowButton(
-                isEnabled = true,
-                isSelected = false,
-                iconContent = {
-                    Icon()
-                },
-                title = "**** 4242",
-                subtitle = null,
-                promoText = null,
-                onClick = {},
-                style = FlatWithCheckmark.default,
-                trailingContent = {
-                    Text("View more")
-                },
-                shouldShowDefaultBadge = false,
-            )
-        }
+        testPaymentMethodRowButton_Checkmark(
+            trailingContent = {
+                Text("View more")
+            },
+        )
     }
 
     @Test
@@ -171,35 +96,63 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
                 checkmarkColor = StripeThemeDefaults.colorsDark.materialColors.error.toArgb()
             )
         )
-        paparazziRule.snapshot {
-            PaymentMethodRowButton(
-                isEnabled = true,
-                isSelected = false,
-                iconContent = {
-                    Icon()
-                },
-                title = "**** 4242",
-                subtitle = null,
-                promoText = null,
-                onClick = {},
-                style = style,
-                trailingContent = {
-                    Text("View more")
-                },
-                shouldShowDefaultBadge = false,
-            )
-        }
+
+        testPaymentMethodRowButton_Checkmark(
+            rowStyle = style,
+            trailingContent = {
+                Text("View more")
+            },
+        )
     }
 
-    @Composable
-    private fun Icon() {
-        PaymentMethodIconFromResource(
-            iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
-            colorFilter = null,
-            alignment = Alignment.Center,
-            modifier = Modifier
-                .height(iconHeight)
-                .width(iconWidth)
+    @Test
+    fun testNonTintedIcon() {
+        testPaymentMethodRowButton_Checkmark(
+            iconContent = {
+                DefaultPaymentMethodRowIcon(
+                    iconRes = R.drawable.stripe_ic_paymentsheet_pm_klarna
+                )
+            },
+            title = "Klarna"
+        )
+    }
+
+    @Test
+    fun testLongTitle() {
+        testPaymentMethodRowButton_Checkmark(
+            iconContent = {
+                DefaultPaymentMethodRowIcon(
+                    iconRes = R.drawable.stripe_ic_paymentsheet_pm_klarna
+                )
+            },
+            title = "Buy now or pay later with Klarna"
+        )
+    }
+
+    private fun testPaymentMethodRowButton_Checkmark(
+        isEnabled: Boolean = true,
+        isSelected: Boolean = false,
+        iconContent: @Composable RowScope.() -> Unit = {
+            DefaultPaymentMethodRowIcon()
+        },
+        rowStyle: PaymentSheet.Appearance.Embedded.RowStyle = FlatWithCheckmark.default,
+        trailingContent: @Composable RowScope.() -> Unit = {},
+        title: String = "**** 4242",
+        subtitle: String? = null,
+        promoText: String? = null,
+        shouldShowDefaultBadge: Boolean = false,
+    ) {
+        testPaymentMethodRowButton(
+            isEnabled = isEnabled,
+            isSelected = isSelected,
+            iconContent = iconContent,
+            title = title,
+            subtitle = subtitle,
+            promoText = promoText,
+            trailingContent = trailingContent,
+            shouldShowDefaultBadge = shouldShowDefaultBadge,
+            rowStyle = rowStyle,
+            paparazziRule = paparazziRule,
         )
     }
 }
