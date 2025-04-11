@@ -183,6 +183,7 @@ private fun EditButton(onClick: () -> Unit) {
 
 @Composable
 private fun ViewMoreButton(
+    showChevron: Boolean = true,
     onViewMorePaymentMethods: () -> Unit,
 ) {
     Row(
@@ -199,11 +200,16 @@ private fun ViewMoreButton(
             style = MaterialTheme.typography.subtitle1,
             fontWeight = FontWeight.Medium,
         )
-        Icon(
-            painter = painterResource(R.drawable.stripe_ic_chevron_right),
-            contentDescription = null,
-            tint = MaterialTheme.colors.primary,
-            modifier = Modifier.padding(start = 4.dp, top = 2.dp)
+        if (showChevron) {
+            Icon(
+                painter = painterResource(R.drawable.stripe_ic_chevron_right),
+                contentDescription = null,
+                tint = MaterialTheme.colors.primary,
+                modifier = Modifier.padding(start = 4.dp, top = 2.dp)
+            )
+        }
+    }
+}
         )
     }
 }
