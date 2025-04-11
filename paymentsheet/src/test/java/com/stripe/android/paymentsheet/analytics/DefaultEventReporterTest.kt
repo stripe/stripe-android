@@ -191,7 +191,7 @@ class DefaultEventReporterTest {
 
     @Test
     fun `onShowExistingPaymentOptions() should fire analytics request with expected event value`() =
-        runTest(testDispatcher){
+        runTest(testDispatcher) {
             val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
                 simulateSuccessfulSetup()
             }
@@ -374,7 +374,7 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `onSelectPaymentOption() should fire analytics request with expected event value`() {
+    fun `onSelectPaymentOption() should fire analytics request with expected event value`() = runTest(testDispatcher) {
         val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
             simulateSuccessfulSetup()
         }
@@ -383,6 +383,7 @@ class DefaultEventReporterTest {
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         )
 
+        analyticEventCallbackRule.assertMatchesExpectedEvent(AnalyticEvent.SelectedSavedPaymentMethod("card"))
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "mc_custom_paymentoption_savedpm_select" &&
@@ -955,7 +956,7 @@ class DefaultEventReporterTest {
             completeEventReporter.onSelectPaymentMethod("card", true)
 
             analyticEventCallbackRule.assertMatchesExpectedEvent(
-                AnalyticEvent.SelectedSavedPaymentMethod("card")
+                AnalyticEvent.SelectedPaymentMethodType("card")
             )
 
             verify(analyticsRequestExecutor).executeAsync(

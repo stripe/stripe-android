@@ -200,11 +200,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         code: PaymentMethodCode,
         isSaved: Boolean,
     ) {
-        if (isSaved) {
-            fireAnalyticEvent(AnalyticEvent.SelectedSavedPaymentMethod(code))
-        } else {
-            fireAnalyticEvent(AnalyticEvent.SelectedPaymentMethodType(code))
-        }
+        fireAnalyticEvent(AnalyticEvent.SelectedPaymentMethodType(code))
         fireEvent(
             PaymentSheetEvent.SelectPaymentMethod(
                 code = if (isSaved) "saved" else code,
@@ -260,6 +256,9 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onSelectPaymentOption(
         paymentSelection: PaymentSelection,
     ) {
+        paymentSelection.code()?.let {
+            fireAnalyticEvent(AnalyticEvent.SelectedSavedPaymentMethod(it))
+        }
         fireEvent(
             PaymentSheetEvent.SelectPaymentOption(
                 mode = mode,
