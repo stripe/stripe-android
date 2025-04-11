@@ -46,6 +46,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
         val displayablePaymentMethods: List<DisplayablePaymentMethod>,
         val isProcessing: Boolean,
         val temporarySelection: Selection?,
+        val paymentSelection: PaymentSelection?,
         val displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
         val availableSavedPaymentMethodAction: SavedPaymentMethodAction,
         val mandate: ResolvableString?,
@@ -96,6 +97,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val reportPaymentMethodTypeSelected: (PaymentMethodCode, Boolean) -> Unit,
     private val reportFormShown: (PaymentMethodCode) -> Unit,
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    private val isEmbedded: Boolean = false,
     dispatcher: CoroutineContext = Dispatchers.Default,
     mainDispatcher: CoroutineContext = Dispatchers.Main.immediate,
 ) : PaymentMethodVerticalLayoutInteractor {
@@ -208,8 +210,14 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         paymentMethods,
         walletsState,
         paymentMethodIncentiveInteractor.displayedIncentive,
-    ) { paymentMethods, walletsState, incentive ->
-        getDisplayablePaymentMethods(paymentMethods, walletsState, incentive)
+        selection,
+    ) { paymentMethods, walletsState, incentive, selection ->
+        getDisplayablePaymentMethods(
+            paymentMethods = paymentMethods,
+            walletsState = walletsState,
+            incentive = incentive,
+            selection = selection,
+        )
     }
 
     override val isLiveMode: Boolean = paymentMethodMetadata.stripeIntent.isLiveMode
@@ -232,6 +240,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             displayablePaymentMethods = displayablePaymentMethods,
             isProcessing = isProcessing,
             temporarySelection = temporarySelection ?: mostRecentSelection?.asVerticalSelection(),
+            paymentSelection = mostRecentSelection,
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
             availableSavedPaymentMethodAction = action,
             mandate = getMandate(temporarySelectionCode, mostRecentSelection),
@@ -292,10 +301,17 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         paymentMethods: List<PaymentMethod>,
         walletsState: WalletsState?,
         incentive: PaymentMethodIncentive?,
+        selection: PaymentSelection?,
     ): List<DisplayablePaymentMethod> {
         val lpms = supportedPaymentMethods.map { supportedPaymentMethod ->
             val paymentMethodIncentive = incentive?.takeIfMatches(supportedPaymentMethod.code)
-            supportedPaymentMethod.asDisplayablePaymentMethod(paymentMethods, paymentMethodIncentive) {
+
+            supportedPaymentMethod.asDisplayablePaymentMethod(
+                customerSavedPaymentMethods = paymentMethods,
+                paymentSelection = selection,
+                isEmbedded = isEmbedded,
+                incentive = paymentMethodIncentive
+            ) {
                 handleViewAction(ViewAction.PaymentMethodSelected(supportedPaymentMethod.code))
             }
         }

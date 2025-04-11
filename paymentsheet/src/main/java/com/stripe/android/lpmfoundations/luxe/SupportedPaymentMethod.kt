@@ -10,6 +10,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.verticalmode.DisplayablePaymentMethod
 import com.stripe.android.ui.core.elements.SharedDataSpec
 
@@ -89,7 +90,9 @@ internal data class SupportedPaymentMethod(
 
     fun asDisplayablePaymentMethod(
         customerSavedPaymentMethods: List<PaymentMethod>,
+        paymentSelection: PaymentSelection? = null,
         incentive: PaymentMethodIncentive?,
+        isEmbedded: Boolean = false,
         onClick: () -> Unit,
     ): DisplayablePaymentMethod {
         fun isTypeAndHasCustomerSavedPaymentMethodsOfType(type: PaymentMethod.Type): Boolean {
@@ -100,6 +103,22 @@ internal data class SupportedPaymentMethod(
             R.string.stripe_paymentsheet_new_card.resolvableString
         } else {
             displayName
+        }
+
+        val subtitle = if (
+            paymentSelection is PaymentSelection.New.Card &&
+            code == PaymentMethod.Type.Card.code &&
+            isEmbedded
+        ) {
+            "${paymentSelection.brand} ${paymentSelection.last4}".resolvableString
+        } else if (
+            paymentSelection is PaymentSelection.New.USBankAccount &&
+            code == PaymentMethod.Type.USBankAccount.code &&
+            isEmbedded
+        ) {
+            paymentSelection.label.resolvableString
+        } else {
+            subtitle
         }
 
         return DisplayablePaymentMethod(

@@ -13,6 +13,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FormHelper
+import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
@@ -914,6 +915,8 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 awaitItem().run {
                     assertThat(temporarySelection).isNull()
                 }
+
+                assertThat(awaitItem().paymentSelection).isNull()
             }
         }
     }
@@ -1121,6 +1124,10 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 assertThat(awaitItem().mandate).isNull()
                 selectionSource.value = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION
                 assertThat(awaitItem().mandate).isEqualTo("Foobar".resolvableString)
+                val selection = awaitItem().paymentSelection
+                assertThat(selection is PaymentSelection.New.GenericPaymentMethod).isTrue()
+                assertThat((selection as PaymentSelection.New.GenericPaymentMethod).code())
+                    .isEqualTo(PaymentMethod.Type.CashAppPay.code)
             }
         }
     }
@@ -1145,10 +1152,17 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         ) {
             interactor.state.test {
                 assertThat(awaitItem().mandate).isNull()
+
                 selectionSource.value = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION
                 assertThat(awaitItem().mandate).isEqualTo("Foobar".resolvableString)
+                val selection = awaitItem().paymentSelection
+                assertThat(selection is PaymentSelection.New.GenericPaymentMethod).isTrue()
+                assertThat((selection as PaymentSelection.New.GenericPaymentMethod).code())
+                    .isEqualTo(PaymentMethod.Type.CashAppPay.code)
+
                 temporarySelectionSource.value = "card"
                 assertThat(awaitItem().mandate).isNull()
+
                 temporarySelectionSource.value = null
                 assertThat(awaitItem().mandate).isEqualTo("Foobar".resolvableString)
             }
@@ -1176,8 +1190,15 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                             paymentMethodMetadata.merchantName
                         )
                     )
+                var selection = awaitItem().paymentSelection
+                assertThat(selection is PaymentSelection.Saved).isTrue()
+                assertThat((selection as PaymentSelection.Saved).code()).isEqualTo(PaymentMethod.Type.SepaDebit.code)
+
                 selectionSource.value = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
                 assertThat(awaitItem().mandate).isNull()
+                selection = awaitItem().paymentSelection
+                assertThat(selection is PaymentSelection.Saved).isTrue()
+                assertThat((selection as PaymentSelection.Saved).code()).isEqualTo(PaymentMethod.Type.Card.code)
             }
         }
     }

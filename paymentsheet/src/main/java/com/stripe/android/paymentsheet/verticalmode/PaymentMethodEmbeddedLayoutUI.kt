@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
@@ -52,7 +53,8 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
         paymentMethods = state.displayablePaymentMethods,
         displayedSavedPaymentMethod = state.displayedSavedPaymentMethod,
         savedPaymentMethodAction = state.availableSavedPaymentMethodAction,
-        selection = state.temporarySelection,
+        temporarySelection = state.temporarySelection,
+        paymentSelection = state.paymentSelection,
         isEnabled = !state.isProcessing,
         onViewMorePaymentMethods = {
             interactor.handleViewAction(
@@ -87,17 +89,19 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
 @VisibleForTesting
 @Composable
 internal fun PaymentMethodEmbeddedLayoutUI(
+    modifier: Modifier = Modifier,
     paymentMethods: List<DisplayablePaymentMethod>,
     displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
     savedPaymentMethodAction: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
-    selection: PaymentMethodVerticalLayoutInteractor.Selection?,
+    temporarySelection: PaymentMethodVerticalLayoutInteractor.Selection?,
+    paymentSelection: PaymentSelection? = null,
     isEnabled: Boolean,
     onViewMorePaymentMethods: () -> Unit,
     onManageOneSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    onEditNewPaymentMethod: (PaymentSelection) -> Unit = {},
     imageLoader: StripeImageLoader,
     rowStyle: Embedded.RowStyle,
-    modifier: Modifier = Modifier,
 ) {
     val arrangement = if (rowStyle is Embedded.RowStyle.FloatingButton) {
         Arrangement.spacedBy(rowStyle.spacingDp.dp)
@@ -106,47 +110,114 @@ internal fun PaymentMethodEmbeddedLayoutUI(
     }
     Column(modifier = modifier, verticalArrangement = arrangement) {
         if (rowStyle.topSeparatorEnabled()) OptionalEmbeddedDivider(rowStyle)
-        if (displayedSavedPaymentMethod != null) {
-            SavedPaymentMethodRowButton(
-                displayableSavedPaymentMethod = displayedSavedPaymentMethod,
-                isEnabled = isEnabled,
-                isSelected = selection?.isSaved == true,
-                trailingContent = {
-                    SavedPaymentMethodTrailingContent(
-                        savedPaymentMethodAction = savedPaymentMethodAction,
-                        onViewMorePaymentMethods = onViewMorePaymentMethods,
-                        onManageOneSavedPaymentMethod = { onManageOneSavedPaymentMethod(displayedSavedPaymentMethod) },
-                    )
-                },
-                onClick = { onSelectSavedPaymentMethod(displayedSavedPaymentMethod) },
-                rowStyle = rowStyle
-            )
+        EmbeddedSavedPaymentMethodRowButton(
+            paymentMethods = paymentMethods,
+            displayedSavedPaymentMethod = displayedSavedPaymentMethod,
+            savedPaymentMethodAction = savedPaymentMethodAction,
+            temporarySelection = temporarySelection,
+            isEnabled = isEnabled,
+            onViewMorePaymentMethods = onViewMorePaymentMethods,
+            onManageOneSavedPaymentMethod = onManageOneSavedPaymentMethod,
+            onSelectSavedPaymentMethod = onSelectSavedPaymentMethod,
+            rowStyle = rowStyle,
+        )
 
-            if (paymentMethods.isNotEmpty()) OptionalEmbeddedDivider(rowStyle)
-        }
-
-        val selectedIndex = remember(selection, paymentMethods) {
-            if (selection is PaymentMethodVerticalLayoutInteractor.Selection.New) {
-                val code = selection.code
-                paymentMethods.indexOfFirst { it.code == code }
-            } else {
-                -1
-            }
-        }
-
-        paymentMethods.forEachIndexed { index, item ->
-            NewPaymentMethodRowButton(
-                isEnabled = isEnabled,
-                isSelected = index == selectedIndex,
-                displayablePaymentMethod = item,
-                imageLoader = imageLoader,
-                rowStyle = rowStyle
-            )
-
-            if (index != paymentMethods.lastIndex) OptionalEmbeddedDivider(rowStyle)
-        }
+        EmbeddedNewPaymentMethodRowButton(
+            paymentMethods = paymentMethods,
+            temporarySelection = temporarySelection,
+            paymentSelection = paymentSelection,
+            isEnabled = isEnabled,
+            onEditNewPaymentMethod = onEditNewPaymentMethod,
+            imageLoader = imageLoader,
+            rowStyle = rowStyle,
+        )
 
         if (rowStyle.bottomSeparatorEnabled()) OptionalEmbeddedDivider(rowStyle)
+    }
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+@VisibleForTesting
+@Composable
+internal fun EmbeddedNewPaymentMethodRowButton(
+    paymentMethods: List<DisplayablePaymentMethod>,
+    temporarySelection: PaymentMethodVerticalLayoutInteractor.Selection?,
+    paymentSelection: PaymentSelection? = null,
+    isEnabled: Boolean,
+    onEditNewPaymentMethod: (PaymentSelection) -> Unit = {},
+    imageLoader: StripeImageLoader,
+    rowStyle: Embedded.RowStyle,
+) {
+    val selectedIndex = remember(temporarySelection, paymentMethods) {
+        if (temporarySelection is PaymentMethodVerticalLayoutInteractor.Selection.New) {
+            val code = temporarySelection.code
+            paymentMethods.indexOfFirst { it.code == code }
+        } else {
+            -1
+        }
+    }
+
+    val isNewPaymentSelectedCard = paymentSelection is PaymentSelection.New.Card &&
+        paymentMethods.getOrNull(selectedIndex)?.code == PaymentMethod.Type.Card.code
+    val isNewPaymentSelectedUSBankAccount = paymentSelection is PaymentSelection.New.USBankAccount &&
+        paymentMethods.getOrNull(selectedIndex)?.code == PaymentMethod.Type.USBankAccount.code
+
+    paymentMethods.forEachIndexed { index, item ->
+        NewPaymentMethodRowButton(
+            isEnabled = isEnabled,
+            isSelected = index == selectedIndex,
+            displayablePaymentMethod = item,
+            imageLoader = imageLoader,
+            trailingContent = {
+                if ((isNewPaymentSelectedCard || isNewPaymentSelectedUSBankAccount) &&
+                    index == selectedIndex
+                ) {
+                    EmbeddedNewPaymentMethodTrailingContent(
+                        showChevron = rowStyle !is Embedded.RowStyle.FlatWithCheckmark
+                    ) {
+                        onEditNewPaymentMethod(paymentSelection!!)
+                    }
+                }
+            },
+            rowStyle = rowStyle
+        )
+
+        if (index != paymentMethods.lastIndex) OptionalEmbeddedDivider(rowStyle)
+    }
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+@VisibleForTesting
+@Composable
+internal fun EmbeddedSavedPaymentMethodRowButton(
+    paymentMethods: List<DisplayablePaymentMethod>,
+    displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
+    savedPaymentMethodAction: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
+    temporarySelection: PaymentMethodVerticalLayoutInteractor.Selection?,
+    isEnabled: Boolean,
+    onViewMorePaymentMethods: () -> Unit,
+    onManageOneSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    rowStyle: Embedded.RowStyle,
+) {
+    if (displayedSavedPaymentMethod != null) {
+        SavedPaymentMethodRowButton(
+            displayableSavedPaymentMethod = displayedSavedPaymentMethod,
+            isEnabled = isEnabled,
+            isSelected = temporarySelection?.isSaved == true,
+            trailingContent = {
+                EmbeddedSavedPaymentMethodTrailingContent(
+                    savedPaymentMethodAction = savedPaymentMethodAction,
+                    rowStyle = rowStyle,
+                    onViewMorePaymentMethods = onViewMorePaymentMethods,
+                    onManageOneSavedPaymentMethod = { onManageOneSavedPaymentMethod(displayedSavedPaymentMethod) },
+                )
+            },
+            onClick = { onSelectSavedPaymentMethod(displayedSavedPaymentMethod) },
+            rowStyle = rowStyle
+        )
+
+        if (paymentMethods.isNotEmpty()) OptionalEmbeddedDivider(rowStyle)
     }
 }
 
