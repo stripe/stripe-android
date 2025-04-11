@@ -159,6 +159,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onShowExistingPaymentOptions() {
+        fireAnalyticEvent(AnalyticEvent.PresentedSheet())
         fireEvent(
             PaymentSheetEvent.ShowExistingPaymentOptions(
                 mode = mode,
