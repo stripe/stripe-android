@@ -98,9 +98,9 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
         paymentMethodMetadata: PaymentMethodMetadata,
     ): Boolean {
         val newFormType = formHelperFactory.create(
-            coroutineScope,
-            paymentMethodMetadata,
-            eventReporter,
+            coroutineScope = coroutineScope,
+            paymentMethodMetadata = paymentMethodMetadata,
+            eventReporter = eventReporter,
         ) {}
             .formTypeForCode(previousSelection.paymentMethodType)
         return newFormType != FormHelper.FormType.UserInteractionRequired
