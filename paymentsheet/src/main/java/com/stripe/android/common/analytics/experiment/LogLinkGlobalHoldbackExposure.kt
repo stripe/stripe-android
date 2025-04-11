@@ -159,8 +159,8 @@ internal class DefaultLogLinkGlobalHoldbackExposure @Inject constructor(
             ?.mobilePaymentElement
         val paymentMethodSaveEnabled =
             elementsConfiguration is Enabled && elementsConfiguration.isPaymentMethodSaveEnabled == true
-        val linkEnabledOrEnableLinkSPMFlagEnabled = !linkEnabled || flags[ELEMENTS_ENABLE_LINK_SPM] == true
-        return paymentMethodSaveEnabled && linkEnabledOrEnableLinkSPMFlagEnabled
+        val linkDisabledOrEnableLinkSPMFlagEnabled = !linkEnabled || flags[ELEMENTS_ENABLE_LINK_SPM] == true
+        return paymentMethodSaveEnabled && linkDisabledOrEnableLinkSPMFlagEnabled
     }
 
     private suspend fun PaymentElementLoader.State.getEmail(): String? =
