@@ -207,6 +207,78 @@ internal class FormHelperTest {
     }
 
     @Test
+    fun `onPaymentMethodFormCompleted event should not be emitted when form is filled twice`() = runScenario {
+        val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+        val formHelper = createFormHelper(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "klarna"),
+                )
+            ),
+            eventReporter = eventReporter,
+            newPaymentSelectionProvider = { null },
+            selectionUpdater = {},
+        )
+
+        val firstFormFieldValues = FormFieldValues(
+            fieldValuePairs = mapOf(
+                IdentifierSpec.Country to FormFieldEntry("US", true),
+                IdentifierSpec.Email to FormFieldEntry("Joe@stripe.com", true),
+            ),
+            userRequestedReuse = customerRequestedSave,
+        )
+        formHelper.onFormFieldValuesChanged(firstFormFieldValues, "klarna")
+        val event = eventReporter.formCompletedCalls.awaitItem()
+        assertThat(event.code).isEqualTo("klarna")
+
+        val secondFormFieldValues = FormFieldValues(
+            fieldValuePairs = mapOf(
+                IdentifierSpec.Country to FormFieldEntry("UK", true),
+                IdentifierSpec.Email to FormFieldEntry("Joey@stripe.com", true),
+            ),
+            userRequestedReuse = customerRequestedSave,
+        )
+        formHelper.onFormFieldValuesChanged(secondFormFieldValues, "klarna")
+    }
+
+    @Test
+    fun `onPaymentMethodFormCompleted event emitted when different forms are filled`() = runScenario {
+        val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+        val formHelper = createFormHelper(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "klarna"),
+                )
+            ),
+            eventReporter = eventReporter,
+            newPaymentSelectionProvider = { null },
+            selectionUpdater = {},
+        )
+
+        val klarnaFormFieldValues = FormFieldValues(
+            fieldValuePairs = mapOf(
+                IdentifierSpec.Country to FormFieldEntry("US", true),
+                IdentifierSpec.Email to FormFieldEntry("Joe@stripe.com", true),
+            ),
+            userRequestedReuse = customerRequestedSave,
+        )
+        formHelper.onFormFieldValuesChanged(klarnaFormFieldValues, "klarna")
+        val klarnaEvent = eventReporter.formCompletedCalls.awaitItem()
+        assertThat(klarnaEvent.code).isEqualTo("klarna")
+
+        val cardFormFieldValues = FormFieldValues(
+            fieldValuePairs = mapOf(
+                IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
+                IdentifierSpec.Name to FormFieldEntry("joe", true),
+            ),
+            userRequestedReuse = customerRequestedSave,
+        )
+        formHelper.onFormFieldValuesChanged(cardFormFieldValues, "card")
+        val cardEvent = eventReporter.formCompletedCalls.awaitItem()
+        assertThat(cardEvent.code).isEqualTo("card")
+    }
+
+    @Test
     fun `onFormFieldValuesChanged & onLinkStateChanged calls create Link Inline selection when card`() = runTest {
         val formFieldValues = FormFieldValues(
             fieldValuePairs = mapOf(
