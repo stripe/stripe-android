@@ -158,7 +158,10 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onShowExistingPaymentOptions() {
+    override fun onShowExistingPaymentOptions(hasPresentedSheet: Boolean) {
+        if (!hasPresentedSheet) {
+            fireAnalyticEvent(AnalyticEvent.PresentedSheet())
+        }
         fireEvent(
             PaymentSheetEvent.ShowExistingPaymentOptions(
                 mode = mode,
@@ -182,8 +185,10 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onShowNewPaymentOptions() {
-        fireAnalyticEvent(AnalyticEvent.PresentedSheet())
+    override fun onShowNewPaymentOptions(hasPresentedSheet: Boolean) {
+        if (!hasPresentedSheet) {
+            fireAnalyticEvent(AnalyticEvent.PresentedSheet())
+        }
         fireEvent(
             PaymentSheetEvent.ShowNewPaymentOptions(
                 mode = mode,

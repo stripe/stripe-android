@@ -113,14 +113,14 @@ internal class FakeEventReporter : EventReporter {
     override fun onDismiss() {
     }
 
-    override fun onShowExistingPaymentOptions() {
+    override fun onShowExistingPaymentOptions(hasPresentedSheet: Boolean) {
     }
 
     override fun onShowManageSavedPaymentMethods() {
         _showManageSavedPaymentMethods.add(Unit)
     }
 
-    override fun onShowNewPaymentOptions() {
+    override fun onShowNewPaymentOptions(hasPresentedSheet: Boolean) {
         _showNewPaymentOptionsCalls.add(Unit)
     }
 
