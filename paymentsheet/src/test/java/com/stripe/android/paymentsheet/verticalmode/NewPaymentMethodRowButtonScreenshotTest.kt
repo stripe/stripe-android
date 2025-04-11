@@ -47,7 +47,7 @@ internal class NewPaymentMethodRowButtonScreenshotTest {
     }
 
     @Test
-    fun testUnselectedState() {
+    fun testUnselectedState_FloatingButton() {
         testNewPaymentMethodRowButton(
             isSelected = false,
             rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.default
@@ -55,11 +55,45 @@ internal class NewPaymentMethodRowButtonScreenshotTest {
     }
 
     @Test
-    fun testDisabled() {
+    fun testUnselectedState_FlatWithRadio() {
+        testNewPaymentMethodRowButton(
+            isSelected = false,
+            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio.default
+        )
+    }
+
+    @Test
+    fun testUnselectedState_FlatWithCheckmark() {
+        testNewPaymentMethodRowButton(
+            isSelected = false,
+            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.default
+        )
+    }
+
+    @Test
+    fun testDisabled_FloatingButton() {
         testNewPaymentMethodRowButton(
             isEnabled = false,
             isSelected = false,
             rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.default
+        )
+    }
+
+    @Test
+    fun testDisabled_FlatWithRadio() {
+        testNewPaymentMethodRowButton(
+            isEnabled = false,
+            isSelected = false,
+            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio.default
+        )
+    }
+
+    @Test
+    fun testDisabled_FlatWithCheckmark() {
+        testNewPaymentMethodRowButton(
+            isEnabled = false,
+            isSelected = false,
+            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.default
         )
     }
 
@@ -94,7 +128,7 @@ internal class NewPaymentMethodRowButtonScreenshotTest {
     }
 
     @Test
-    fun testSubtitle() {
+    fun testSubtitle_FloatingButton() {
         testNewPaymentMethodRowButton(
             iconRes = R.drawable.stripe_ic_paymentsheet_pm_klarna,
             iconRequiresTinting = false,
@@ -106,7 +140,31 @@ internal class NewPaymentMethodRowButtonScreenshotTest {
     }
 
     @Test
-    fun testLongSubtitle() {
+    fun testSubtitle_FlatWithRadio() {
+        testNewPaymentMethodRowButton(
+            iconRes = R.drawable.stripe_ic_paymentsheet_pm_klarna,
+            iconRequiresTinting = false,
+            isSelected = false,
+            title = "Klarna",
+            subtitle = "Buy now or pay later with Klarna.",
+            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio.default
+        )
+    }
+
+    @Test
+    fun testSubtitle_FlatWithCheckmark() {
+        testNewPaymentMethodRowButton(
+            iconRes = R.drawable.stripe_ic_paymentsheet_pm_klarna,
+            iconRequiresTinting = false,
+            isSelected = false,
+            title = "Klarna",
+            subtitle = "Buy now or pay later with Klarna.",
+            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.default
+        )
+    }
+
+    @Test
+    fun testLongSubtitle_FloatingButton() {
         testNewPaymentMethodRowButton(
             iconRes = R.drawable.stripe_ic_paymentsheet_pm_klarna,
             iconRequiresTinting = false,
@@ -115,6 +173,32 @@ internal class NewPaymentMethodRowButtonScreenshotTest {
             subtitle = "A very long subtitle, that you should read all of and you should Buy now or pay later" +
                 " with Klarna.",
             rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.default
+        )
+    }
+
+    @Test
+    fun testLongSubtitle_FlatWithRadio() {
+        testNewPaymentMethodRowButton(
+            iconRes = R.drawable.stripe_ic_paymentsheet_pm_klarna,
+            iconRequiresTinting = false,
+            isSelected = false,
+            title = "Klarna",
+            subtitle = "A very long subtitle, that you should read all of and you should Buy now or pay later" +
+                " with Klarna.",
+            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio.default
+        )
+    }
+
+    @Test
+    fun testLongSubtitle_FlatWithCheckmark() {
+        testNewPaymentMethodRowButton(
+            iconRes = R.drawable.stripe_ic_paymentsheet_pm_klarna,
+            iconRequiresTinting = false,
+            isSelected = false,
+            title = "Klarna",
+            subtitle = "A very long subtitle, that you should read all of and you should Buy now or pay later" +
+                " with Klarna.",
+            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.default
         )
     }
 
