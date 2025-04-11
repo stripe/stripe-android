@@ -12,6 +12,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.utils.MockPaymentMethodsFactory
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
@@ -35,6 +36,18 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
         }
     }
 
+    private val paymentMethodsWithNewPaymentMethod: List<DisplayablePaymentMethod> by lazy {
+        MockPaymentMethodsFactory.createDisplayablePaymentMethods()
+    }
+
+    private val paymentMethodsWithNewPaymentMethodWithSelectedCard: List<DisplayablePaymentMethod> by lazy {
+        MockPaymentMethodsFactory.createDisplayablePaymentMethodsWithSelectedCard()
+    }
+
+    private val paymentMethodsWithNewPaymentMethodWithSelectedUSBankAccount: List<DisplayablePaymentMethod> by lazy {
+        MockPaymentMethodsFactory.createDisplayablePaymentMethodsWithSelectedUSBankAccount()
+    }
+
     private val savedPaymentMethod: DisplayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard()
 
     @Test
@@ -47,7 +60,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     }
 
     @Test
-    fun testFlatWitRadio() {
+    fun testFlatWithRadio() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
                 rowStyle = getRowStyle(FlatWithRadio::class)
@@ -135,6 +148,123 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
         }
     }
 
+    @Test
+    fun testFloatingButtonWithKlarnaSelected() {
+        paparazziRule.snapshot {
+            TestPaymentMethodLayoutUiWithNewPaymentSelection(
+                rowStyle = getRowStyle(FloatingButton::class),
+                displayableSavedPaymentMethod = savedPaymentMethod,
+                newPaymentMethods = paymentMethodsWithNewPaymentMethod,
+                paymentSelection = null,
+                selectionCode = PaymentMethodVerticalLayoutInteractor.Selection.New("klarna")
+            )
+        }
+    }
+
+    @Test
+    fun testFlatWithRadioWithKlarnaSelected() {
+        paparazziRule.snapshot {
+            TestPaymentMethodLayoutUiWithNewPaymentSelection(
+                rowStyle = getRowStyle(FlatWithRadio::class),
+                displayableSavedPaymentMethod = savedPaymentMethod,
+                newPaymentMethods = paymentMethodsWithNewPaymentMethod,
+                paymentSelection = null,
+                selectionCode = PaymentMethodVerticalLayoutInteractor.Selection.New("klarna")
+            )
+        }
+    }
+
+    @Test
+    fun testFlatWithCheckmarkWithKlarnaSelected() {
+        paparazziRule.snapshot {
+            TestPaymentMethodLayoutUiWithNewPaymentSelection(
+                rowStyle = getRowStyle(FlatWithCheckmark::class),
+                displayableSavedPaymentMethod = savedPaymentMethod,
+                newPaymentMethods = paymentMethodsWithNewPaymentMethod,
+                paymentSelection = null,
+                selectionCode = PaymentMethodVerticalLayoutInteractor.Selection.New("klarna")
+            )
+        }
+    }
+
+    @Test
+    fun testFloatingButtonWithCardSelected() {
+        paparazziRule.snapshot {
+            TestPaymentMethodLayoutUiWithNewPaymentSelection(
+                rowStyle = getRowStyle(FloatingButton::class),
+                displayableSavedPaymentMethod = savedPaymentMethod,
+                newPaymentMethods = paymentMethodsWithNewPaymentMethodWithSelectedCard,
+                paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+                selectionCode = PaymentMethodVerticalLayoutInteractor.Selection.New("card"),
+            )
+        }
+    }
+
+    @Test
+    fun testFlatWithRadioWithCardSelected() {
+        paparazziRule.snapshot {
+            TestPaymentMethodLayoutUiWithNewPaymentSelection(
+                rowStyle = getRowStyle(FlatWithRadio::class),
+                displayableSavedPaymentMethod = savedPaymentMethod,
+                newPaymentMethods = paymentMethodsWithNewPaymentMethodWithSelectedCard,
+                paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+                selectionCode = PaymentMethodVerticalLayoutInteractor.Selection.New("card"),
+            )
+        }
+    }
+
+    @Test
+    fun testFlatWithCheckmarkWithCardSelected() {
+        paparazziRule.snapshot {
+            TestPaymentMethodLayoutUiWithNewPaymentSelection(
+                rowStyle = getRowStyle(FlatWithCheckmark::class),
+                displayableSavedPaymentMethod = savedPaymentMethod,
+                newPaymentMethods = paymentMethodsWithNewPaymentMethodWithSelectedCard,
+                paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+                selectionCode = PaymentMethodVerticalLayoutInteractor.Selection.New("card"),
+            )
+        }
+    }
+
+    @Test
+    fun testFloatingButtonWithUSBankAccountSelected() {
+        paparazziRule.snapshot {
+            TestPaymentMethodLayoutUiWithNewPaymentSelection(
+                rowStyle = getRowStyle(FloatingButton::class),
+                displayableSavedPaymentMethod = savedPaymentMethod,
+                newPaymentMethods = paymentMethodsWithNewPaymentMethodWithSelectedUSBankAccount,
+                paymentSelection = PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION,
+                selectionCode = PaymentMethodVerticalLayoutInteractor.Selection.New("us_bank_account"),
+            )
+        }
+    }
+
+    @Test
+    fun testFlatWithRadioWithUSBankAccountSelected() {
+        paparazziRule.snapshot {
+            TestPaymentMethodLayoutUiWithNewPaymentSelection(
+                rowStyle = getRowStyle(FlatWithRadio::class),
+                displayableSavedPaymentMethod = savedPaymentMethod,
+                newPaymentMethods = paymentMethodsWithNewPaymentMethodWithSelectedUSBankAccount,
+                paymentSelection = PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION,
+                selectionCode = PaymentMethodVerticalLayoutInteractor.Selection.New("us_bank_account"),
+            )
+        }
+    }
+
+    @Test
+    fun testFlatWithCheckmarkWithUSBankAccountSelected() {
+        paparazziRule.snapshot {
+            TestPaymentMethodLayoutUiWithNewPaymentSelection(
+                rowStyle = getRowStyle(FlatWithCheckmark::class),
+                displayableSavedPaymentMethod = savedPaymentMethod,
+                newPaymentMethods = paymentMethodsWithNewPaymentMethodWithSelectedUSBankAccount,
+                paymentSelection = PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION,
+                selectionCode = PaymentMethodVerticalLayoutInteractor.Selection.New("us_bank_account"),
+            )
+        }
+    }
+
     @Composable
     private fun TestPaymentMethodLayoutUi(
         rowStyle: Embedded.RowStyle,
@@ -147,7 +277,33 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
             displayedSavedPaymentMethod = displayableSavedPaymentMethod,
             savedPaymentMethodAction =
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
-            selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
+            temporarySelection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
+            isEnabled = true,
+            onViewMorePaymentMethods = {},
+            onSelectSavedPaymentMethod = {},
+            onManageOneSavedPaymentMethod = {},
+            imageLoader = mock(),
+            rowStyle = rowStyle,
+            modifier = Modifier.verticalScroll(scrollState),
+        )
+    }
+
+    @Composable
+    private fun TestPaymentMethodLayoutUiWithNewPaymentSelection(
+        rowStyle: Embedded.RowStyle,
+        paymentSelection: PaymentSelection?,
+        selectionCode: PaymentMethodVerticalLayoutInteractor.Selection,
+        displayableSavedPaymentMethod: DisplayableSavedPaymentMethod?,
+        newPaymentMethods: List<DisplayablePaymentMethod>
+    ) {
+        val scrollState = rememberScrollState()
+        PaymentMethodEmbeddedLayoutUI(
+            paymentMethods = newPaymentMethods,
+            displayedSavedPaymentMethod = displayableSavedPaymentMethod,
+            savedPaymentMethodAction =
+            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+            temporarySelection = selectionCode,
+            paymentSelection = paymentSelection,
             isEnabled = true,
             onViewMorePaymentMethods = {},
             onSelectSavedPaymentMethod = {},

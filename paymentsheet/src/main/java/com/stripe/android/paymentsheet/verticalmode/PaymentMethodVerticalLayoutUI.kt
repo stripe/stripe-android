@@ -5,9 +5,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -36,6 +37,9 @@ const val TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT = "TEST_TAG_PAYMENT_METHOD_VER
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val TEST_TAG_VIEW_MORE = "TEST_TAG_VIEW_MORE"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val TEST_TAG_EDIT_NEW_CARD = "TEST_TAG_NEW_PM_EDIT"
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val TEST_TAG_EDIT_SAVED_CARD = "TEST_TAG_VERTICAL_MODE_SAVED_PM_EDIT"
@@ -166,6 +170,28 @@ internal fun SavedPaymentMethodTrailingContent(
     }
 }
 
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+@Composable
+internal fun EmbeddedSavedPaymentMethodTrailingContent(
+    savedPaymentMethodAction: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
+    rowStyle: PaymentSheet.Appearance.Embedded.RowStyle,
+    onViewMorePaymentMethods: () -> Unit,
+    onManageOneSavedPaymentMethod: () -> Unit,
+) {
+    when (savedPaymentMethodAction) {
+        PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE -> Unit
+        PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE -> {
+            EditButton(onClick = onManageOneSavedPaymentMethod)
+        }
+        PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL -> {
+            ViewMoreButton(
+                showChevron = rowStyle !is PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark,
+                onViewMorePaymentMethods = onViewMorePaymentMethods
+            )
+        }
+    }
+}
+
 @Composable
 private fun EditButton(onClick: () -> Unit) {
     Text(
@@ -177,7 +203,7 @@ private fun EditButton(onClick: () -> Unit) {
             .testTag(TEST_TAG_EDIT_SAVED_CARD)
             .clickable(onClick = onClick)
             .padding(vertical = 4.dp)
-            .fillMaxHeight()
+            .wrapContentSize()
     )
 }
 
@@ -192,7 +218,7 @@ private fun ViewMoreButton(
             .testTag(TEST_TAG_VIEW_MORE)
             .clickable(onClick = onViewMorePaymentMethods)
             .padding(vertical = 4.dp)
-            .fillMaxHeight()
+            .wrapContentSize()
     ) {
         Text(
             stringResource(id = R.string.stripe_view_more),
@@ -210,6 +236,33 @@ private fun ViewMoreButton(
         }
     }
 }
+
+@Composable
+internal fun EmbeddedNewPaymentMethodTrailingContent(
+    showChevron: Boolean,
+    onClick: () -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .testTag(TEST_TAG_EDIT_NEW_CARD)
+            .clickable(onClick = onClick)
+            .padding(vertical = 4.dp)
+            .wrapContentSize()
+    ) {
+        Text(
+            stringResource(id = com.stripe.android.R.string.stripe_change),
+            color = MaterialTheme.colors.primary,
+            style = MaterialTheme.typography.subtitle1,
+            fontWeight = FontWeight.Medium,
         )
+        if (showChevron) {
+            Icon(
+                painter = painterResource(R.drawable.stripe_ic_chevron_right),
+                contentDescription = null,
+                tint = MaterialTheme.colors.primary,
+                modifier = Modifier.padding(start = 4.dp, top = 2.dp)
+            )
+        }
     }
 }
