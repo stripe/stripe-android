@@ -1,7 +1,9 @@
 package com.stripe.android.paymentsheet.ui
 
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CardUpdateParams
+import com.stripe.android.paymentsheet.PaymentSheetFixtures
 
 internal fun UpdatePaymentMethodInteractor.editCardDetailsInteractorHelper(
     block: EditCardDetailsInteractor.() -> Unit = {}
@@ -24,6 +26,7 @@ internal fun UpdatePaymentMethodInteractor.cardParamsUpdateAction(
     cardBrand: CardBrand,
     expiryMonth: Int? = null,
     expiryYear: Int? = null,
+    billingDetails: PaymentMethod.BillingDetails? = null
 ) {
     handleViewAction(
         viewAction = UpdatePaymentMethodInteractor.ViewAction.CardUpdateParamsChanged(
@@ -31,6 +34,7 @@ internal fun UpdatePaymentMethodInteractor.cardParamsUpdateAction(
                 cardBrand = cardBrand,
                 expiryMonth = expiryMonth,
                 expiryYear = expiryYear,
+                billingDetails = billingDetails
             )
         )
     )
@@ -43,5 +47,15 @@ internal fun UpdatePaymentMethodInteractor.nullCardParamsUpdateAction() {
 internal fun EditCardDetailsInteractor.updateExpiryDate(text: String) {
     handleViewAction(
         viewAction = EditCardDetailsInteractor.ViewAction.DateChanged(text)
+    )
+}
+
+internal fun EditCardDetailsInteractor.updateBillingDetails(
+    billingDetailsFormState: BillingDetailsFormState = PaymentSheetFixtures.billingDetailsFormState()
+) {
+    handleViewAction(
+        viewAction = EditCardDetailsInteractor.ViewAction.BillingDetailsChanged(
+            billingDetailsFormState = billingDetailsFormState
+        )
     )
 }

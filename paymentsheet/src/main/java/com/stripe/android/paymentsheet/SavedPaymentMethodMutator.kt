@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.mainthread.MainThreadOnlyMutableStateFlow
 import com.stripe.android.core.mainthread.update
 import com.stripe.android.core.strings.ResolvableString
@@ -373,6 +374,8 @@ internal class SavedPaymentMethodMutator(
                             canRemove = canRemove,
                             displayableSavedPaymentMethod,
                             cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
+                            addressCollectionMode = viewModel.config.asCommonConfiguration()
+                                .billingDetailsCollectionConfiguration.address,
                             removeExecutor = { method ->
                                 performRemove()
                             },
