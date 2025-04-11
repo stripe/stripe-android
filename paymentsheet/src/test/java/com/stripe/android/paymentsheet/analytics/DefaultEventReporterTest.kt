@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
+import com.stripe.android.common.analytics.experiment.LoggableExperiment.LinkGlobalHoldback.EmailRecognitionSource
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequest
@@ -595,8 +596,18 @@ class DefaultEventReporterTest {
 
             val experiment = LoggableExperiment.LinkGlobalHoldback(
                 arbId = "random_arb_id",
-                isReturningLinkConsumer = false,
+                isReturningLinkUser = false,
                 group = "holdback",
+                useLinkNative = true,
+                emailRecognitionSource = EmailRecognitionSource.EMAIL,
+                providedDefaultValues = LoggableExperiment.LinkGlobalHoldback.ProvidedDefaultValues(
+                    email = true,
+                    name = false,
+                    phone = true,
+                ),
+                spmEnabled = true,
+                integrationShape = "embedded",
+                linkDisplayed = true
             )
             completeEventReporter.onExperimentExposure(experiment)
 
@@ -608,6 +619,10 @@ class DefaultEventReporterTest {
             assertEquals(params["arb_id"], "random_arb_id")
             assertEquals(params["assignment_group"], "holdback")
             assertEquals(params["dimensions-integration_type"], "mpe_android")
+            assertEquals(params["dimensions-is_returning_link_user"], "false")
+            assertEquals(params["dimensions-recognition_type"], "email")
+            assertEquals(params["dimensions-link_displayed"], "true")
+            assertEquals(params["dimensions-integration_shape"], "embedded")
             assertEquals(params["sdk_platform"], "android")
             assertEquals(params["plugin_type"], "native")
 
