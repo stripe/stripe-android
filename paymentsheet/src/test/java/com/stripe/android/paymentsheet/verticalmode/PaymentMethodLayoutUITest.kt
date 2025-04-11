@@ -175,7 +175,7 @@ internal class PaymentMethodLayoutUITest(
                     onClick = {},
                 )
             },
-            selection = Selection.Saved,
+            temporarySelection = Selection.Saved,
         )
     ) {
         composeRule.onNodeWithTag(
@@ -212,7 +212,7 @@ internal class PaymentMethodLayoutUITest(
                         onClick = {},
                     )
                 },
-                selection = selection,
+                temporarySelection = selection,
                 displayedSavedPaymentMethod = null,
             )
         ) {
@@ -293,14 +293,15 @@ internal class PaymentMethodLayoutUITest(
         private fun createState(
             displayablePaymentMethods: List<DisplayablePaymentMethod> = emptyList(),
             isProcessing: Boolean = false,
-            selection: Selection? = null,
+            temporarySelection: Selection? = null,
             displayedSavedPaymentMethod: DisplayableSavedPaymentMethod? = PaymentMethodFixtures.displayableCard(),
             availableSavedPaymentMethodAction: SavedPaymentMethodAction = SavedPaymentMethodAction.MANAGE_ALL,
             mandate: ResolvableString? = null,
         ): PaymentMethodVerticalLayoutInteractor.State = PaymentMethodVerticalLayoutInteractor.State(
             displayablePaymentMethods = displayablePaymentMethods,
             isProcessing = isProcessing,
-            selection = selection,
+            temporarySelection = temporarySelection,
+            paymentSelection = null,
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
             availableSavedPaymentMethodAction = availableSavedPaymentMethodAction,
             mandate = mandate,

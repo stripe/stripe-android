@@ -1,9 +1,12 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -25,116 +28,175 @@ internal class NewPaymentMethodRowButtonScreenshotTest {
     )
 
     @Test
-    fun testSelectedState() {
-        paparazziRule.snapshot {
-            NewPaymentMethodRowButton(
-                isEnabled = true,
-                isSelected = true,
-                iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
-                iconUrl = null,
-                imageLoader = Mockito.mock(),
-                title = "Card",
-                subtitle = null,
-                promoText = null,
-                iconRequiresTinting = true,
-                onClick = {},
-                modifier = Modifier,
-            )
-        }
+    fun testSelectedState_FloatingButton() {
+        testNewPaymentMethodRowButton(
+            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.default
+        )
+    }
+
+    @Test
+    fun testSelectedState_FlatWithRadio() {
+        testNewPaymentMethodRowButton(
+            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio.default
+        )
+    }
+
+    @Test
+    fun testSelectedState_FlatWithCheckmark() {
+        testNewPaymentMethodRowButton(
+            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.default
+        )
     }
 
     @Test
     fun testUnselectedState() {
-        paparazziRule.snapshot {
-            NewPaymentMethodRowButton(
-                isEnabled = true,
-                isSelected = false,
-                iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
-                iconUrl = null,
-                imageLoader = Mockito.mock(),
-                title = "Card",
-                subtitle = null,
-                promoText = null,
-                iconRequiresTinting = true,
-                onClick = {},
-                modifier = Modifier,
-            )
-        }
+        testNewPaymentMethodRowButton(
+            isSelected = false,
+            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.default
+        )
     }
 
     @Test
     fun testDisabled() {
-        paparazziRule.snapshot {
-            NewPaymentMethodRowButton(
-                isEnabled = false,
-                isSelected = false,
-                iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
-                iconUrl = null,
-                imageLoader = Mockito.mock(),
-                title = "Card",
-                subtitle = null,
-                promoText = null,
-                iconRequiresTinting = true,
-                onClick = {},
-                modifier = Modifier,
-            )
-        }
+        testNewPaymentMethodRowButton(
+            isEnabled = false,
+            isSelected = false,
+            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.default
+        )
     }
 
     @Test
     fun testLongTitle() {
-        paparazziRule.snapshot {
-            NewPaymentMethodRowButton(
-                isEnabled = true,
-                isSelected = false,
-                iconRes = R.drawable.stripe_ic_paymentsheet_pm_bank,
-                iconUrl = null,
-                imageLoader = Mockito.mock(),
-                title = "The Greatest US Bank Account",
-                subtitle = null,
-                promoText = null,
-                iconRequiresTinting = true,
-                onClick = {},
-                modifier = Modifier,
-            )
-        }
+        testNewPaymentMethodRowButton(
+            iconRes = R.drawable.stripe_ic_paymentsheet_pm_bank,
+            isSelected = false,
+            title = "The Greatest US Bank Account",
+            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.default
+        )
     }
 
     @Test
     fun testSubtitle() {
-        paparazziRule.snapshot {
-            NewPaymentMethodRowButton(
-                isEnabled = true,
-                isSelected = false,
-                iconRes = R.drawable.stripe_ic_paymentsheet_pm_klarna,
-                iconUrl = null,
-                imageLoader = Mockito.mock(),
-                title = "Klarna",
-                subtitle = "Buy now or pay later with Klarna.",
-                promoText = null,
-                iconRequiresTinting = false,
-                onClick = {},
-                modifier = Modifier,
-            )
-        }
+        testNewPaymentMethodRowButton(
+            iconRes = R.drawable.stripe_ic_paymentsheet_pm_klarna,
+            isSelected = false,
+            title = "Klarna",
+            subtitle = "Buy now or pay later with Klarna.",
+            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.default
+        )
     }
 
     @Test
     fun testLongSubtitle() {
+        testNewPaymentMethodRowButton(
+            iconRes = R.drawable.stripe_ic_paymentsheet_pm_klarna,
+            isSelected = false,
+            title = "Klarna",
+            subtitle = "A very long subtitle, that you should read all of and you should Buy now or pay later" +
+                " with Klarna.",
+            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.default
+        )
+    }
+
+    @Test
+    fun testHasCardPaymentSelection_FloatingButton() {
+        testNewPaymentMethodRowButton(
+            title = "Card",
+            subtitle = "Visa **** 4242",
+            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton.default,
+            trailingContent = {
+                EmbeddedNewPaymentMethodTrailingContent(showChevron = true) {}
+            },
+        )
+    }
+
+    @Test
+    fun testHasCardPaymentSelection_FlatWithRadio() {
+        testNewPaymentMethodRowButton(
+            title = "Card",
+            subtitle = "Visa **** 4242",
+            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio.default,
+            trailingContent = {
+                EmbeddedNewPaymentMethodTrailingContent(showChevron = true) {}
+            },
+        )
+    }
+
+    @Test
+    fun testHasCardPaymentSelection_FlatWithCheckmark() {
+        testNewPaymentMethodRowButton(
+            title = "Card",
+            subtitle = "Visa **** 4242",
+            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.default,
+            trailingContent = {
+                EmbeddedNewPaymentMethodTrailingContent(showChevron = false) {}
+            },
+        )
+    }
+
+    @Test
+    fun testHasUSBankAccountPaymentSelection_FlatWithRadio() {
+        testNewPaymentMethodRowButton(
+            title = "US bank account",
+            subtitle = "**** 6789",
+            iconRes = R.drawable.stripe_ic_paymentsheet_pm_bank,
+            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio.default,
+            trailingContent = {
+                EmbeddedNewPaymentMethodTrailingContent(showChevron = false) {}
+            },
+        )
+    }
+
+    @Test
+    fun testHasUSBankAccountPaymentSelection_Flat_WithCheckmark() {
+        testNewPaymentMethodRowButton(
+            title = "US bank account",
+            subtitle = "**** 6789",
+            iconRes = R.drawable.stripe_ic_paymentsheet_pm_bank,
+            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.default,
+            trailingContent = {
+                EmbeddedNewPaymentMethodTrailingContent(showChevron = false) {}
+            },
+        )
+    }
+
+    @Test
+    fun testHasUSBankAccountPaymentSelection_Flat_WithRadio() {
+        testNewPaymentMethodRowButton(
+            title = "US bank account",
+            subtitle = "**** 6789",
+            iconRes = R.drawable.stripe_ic_paymentsheet_pm_bank,
+            rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio.default,
+            trailingContent = {
+                EmbeddedNewPaymentMethodTrailingContent(showChevron = false) {}
+            },
+        )
+    }
+
+    private fun testNewPaymentMethodRowButton(
+        isEnabled: Boolean = true,
+        isSelected: Boolean = true,
+        iconRes: Int = R.drawable.stripe_ic_paymentsheet_pm_card,
+        title: String = "Card",
+        subtitle: String? = null,
+        rowStyle: PaymentSheet.Appearance.Embedded.RowStyle,
+        trailingContent: (@Composable RowScope.() -> Unit)? = null,
+    ) {
         paparazziRule.snapshot {
             NewPaymentMethodRowButton(
-                isEnabled = true,
-                isSelected = false,
-                iconRes = R.drawable.stripe_ic_paymentsheet_pm_klarna,
+                isEnabled = isEnabled,
+                isSelected = isSelected,
+                iconRes = iconRes,
                 iconUrl = null,
                 imageLoader = Mockito.mock(),
-                title = "Klarna",
-                subtitle = "A very long subtitle, that you should read all of and you should Buy now or pay later" +
-                    " with Klarna.",
-                iconRequiresTinting = false,
+                title = title,
+                subtitle = subtitle,
                 promoText = null,
+                iconRequiresTinting = true,
                 onClick = {},
                 modifier = Modifier,
+                rowStyle = rowStyle,
+                trailingContent = trailingContent,
             )
         }
     }

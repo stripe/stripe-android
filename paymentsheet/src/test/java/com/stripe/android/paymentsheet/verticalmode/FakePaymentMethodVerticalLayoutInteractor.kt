@@ -32,7 +32,8 @@ internal class FakePaymentMethodVerticalLayoutInteractor(
             val initialState = PaymentMethodVerticalLayoutInteractor.State(
                 displayablePaymentMethods = displayablePaymentMethods,
                 isProcessing = false,
-                selection = selection,
+                temporarySelection = selection,
+                paymentSelection = null,
                 displayedSavedPaymentMethod = null,
                 availableSavedPaymentMethodAction =
                 PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
