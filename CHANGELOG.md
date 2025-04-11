@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 21.10.0 - 2025-04-11
+
 ### Payments
 * [FIXED][10590](https://github.com/stripe/stripe-android/pull/10590) Fix 3DS2 Challenge Response parsing error.
 * [FIXED][10612](https://github.com/stripe/stripe-android/pull/10612) Fix JWS validation error in 3DS2 flow.
