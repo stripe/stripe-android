@@ -580,6 +580,53 @@ public final class com/stripe/android/paymentelement/CustomPaymentMethodResult$F
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/paymentelement/EmbeddedPaymentElement {
+	public static final field $stable I
+	public final fun Content (Landroidx/compose/runtime/Composer;I)V
+	public final fun clearPaymentOption ()V
+	public final fun configure (Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration;Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun confirm ()V
+	public final fun getPaymentOption ()Lkotlinx/coroutines/flow/StateFlow;
+}
+
+public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$Builder {
+	public static final field $stable I
+	public fun <init> (Lcom/stripe/android/paymentsheet/CreateIntentCallback;Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$ResultCallback;)V
+	public final fun externalPaymentMethodConfirmHandler (Lcom/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Builder;
+}
+
+public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration : android/os/Parcelable {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public final fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;)V
+	public final fun allowsDelayedPaymentMethods (Z)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
+	public final fun allowsPaymentMethodsRequiringShippingAddress (Z)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
+	public final fun allowsRemovalOfLastSavedPaymentMethod (Z)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
+	public final fun appearance (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
+	public final fun billingDetailsCollectionConfiguration (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
+	public final fun build ()Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration;
+	public final fun cardBrandAcceptance (Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
+	public final fun customer (Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
+	public final fun defaultBillingDetails (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
+	public final fun embeddedViewDisplaysMandateText (Z)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
+	public final fun externalPaymentMethods (Ljava/util/List;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
+	public final fun googlePay (Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
+	public final fun link (Lcom/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
+	public final fun paymentMethodOrder (Ljava/util/List;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
+	public final fun preferredNetworks (Ljava/util/List;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
+	public final fun primaryButtonLabel (Ljava/lang/String;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
+	public final fun shippingDetails (Lcom/stripe/android/paymentsheet/addresselement/AddressDetails;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
+}
+
 public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration;
@@ -588,12 +635,69 @@ public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$Conf
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public abstract interface class com/stripe/android/paymentelement/EmbeddedPaymentElement$ConfigureResult {
+}
+
+public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$ConfigureResult$Failed : com/stripe/android/paymentelement/EmbeddedPaymentElement$ConfigureResult {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/Throwable;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$ConfigureResult$Succeeded : com/stripe/android/paymentelement/EmbeddedPaymentElement$ConfigureResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$PaymentOptionDisplayData {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBillingDetails ()Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;
+	public final fun getIconPainter (Landroidx/compose/runtime/Composer;I)Landroidx/compose/ui/graphics/painter/Painter;
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getMandateText ()Landroidx/compose/ui/text/AnnotatedString;
+	public final fun getPaymentMethodType ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class com/stripe/android/paymentelement/EmbeddedPaymentElement$Result {
+}
+
+public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$Result$Canceled : com/stripe/android/paymentelement/EmbeddedPaymentElement$Result {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$Result$Completed : com/stripe/android/paymentelement/EmbeddedPaymentElement$Result {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$Result$Failed : com/stripe/android/paymentelement/EmbeddedPaymentElement$Result {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/Throwable;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class com/stripe/android/paymentelement/EmbeddedPaymentElement$ResultCallback {
+	public abstract fun onResult (Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Result;)V
+}
+
 public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$State$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$State;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$State;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentelement/EmbeddedPaymentElementKtxKt {
+	public static final fun rememberEmbeddedPaymentElement (Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Builder;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement;
+}
+
+public abstract interface annotation class com/stripe/android/paymentelement/ExperimentalEmbeddedPaymentElementApi : java/lang/annotation/Annotation {
 }
 
 public final class com/stripe/android/paymentelement/confirmation/ConfirmationDefinition$Parameters$Creator : android/os/Parcelable$Creator {
