@@ -40,7 +40,6 @@ internal class BillingDetailsForm(
             flow = cardBillingAddressElement.getFormFieldValueFlow(),
             flow2 = hiddenElements
         ) { fieldList, hiddenIdentifiers ->
-            // What is the IdentifierSpec.OneLineAddress?
             val line1 = fieldList.valueOrNull(IdentifierSpec.Line1, hiddenIdentifiers)
             val line2 = fieldList.valueOrNull(IdentifierSpec.Line2, hiddenIdentifiers)
             val city = fieldList.valueOrNull(IdentifierSpec.City, hiddenIdentifiers)
