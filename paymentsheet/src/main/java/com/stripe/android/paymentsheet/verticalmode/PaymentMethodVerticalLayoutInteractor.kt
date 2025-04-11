@@ -44,7 +44,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
     data class State(
         val displayablePaymentMethods: List<DisplayablePaymentMethod>,
         val isProcessing: Boolean,
-        val selection: Selection?,
+        val temporarySelection: Selection?,
         val displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
         val availableSavedPaymentMethodAction: SavedPaymentMethodAction,
         val mandate: ResolvableString?,
@@ -158,7 +158,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             ).also { interactor ->
                 viewModel.viewModelScope.launch {
                     interactor.state.collect { state ->
-                        val newSelection = state.selection as? PaymentMethodVerticalLayoutInteractor.Selection.New
+                        val newSelection =
+                            state.temporarySelection as? PaymentMethodVerticalLayoutInteractor.Selection.New
                         newSelection?.code?.let { code ->
                             val formType = formHelper.formTypeForCode(code)
                             if (formType is FormType.MandateOnly) {
@@ -231,7 +232,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         PaymentMethodVerticalLayoutInteractor.State(
             displayablePaymentMethods = displayablePaymentMethods,
             isProcessing = isProcessing,
-            selection = temporarySelection ?: mostRecentSelection?.asVerticalSelection(),
+            temporarySelection = temporarySelection ?: mostRecentSelection?.asVerticalSelection(),
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
             availableSavedPaymentMethodAction = action,
             mandate = getMandate(temporarySelectionCode, mostRecentSelection),

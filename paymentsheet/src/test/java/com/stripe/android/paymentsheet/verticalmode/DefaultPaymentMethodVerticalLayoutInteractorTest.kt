@@ -60,7 +60,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             interactor.state.test {
                 awaitItem().run {
                     assertThat(displayablePaymentMethods).isNotEmpty()
-                    assertThat(selection).isNull()
+                    assertThat(temporarySelection).isNull()
                 }
             }
             selectionSource.value = PaymentSelection.New.GenericPaymentMethod(
@@ -75,7 +75,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             interactor.state.test {
                 awaitItem().run {
                     assertThat(displayablePaymentMethods).isNotEmpty()
-                    assertThat((selection as PaymentMethodVerticalLayoutInteractor.Selection.New).code)
+                    assertThat((temporarySelection as PaymentMethodVerticalLayoutInteractor.Selection.New).code)
                         .isEqualTo("cashapp")
                 }
             }
@@ -96,7 +96,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         interactor.state.test {
             awaitItem().run {
                 assertThat(displayablePaymentMethods).isNotEmpty()
-                assertThat(selection).isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.Saved)
+                assertThat(temporarySelection).isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.Saved)
             }
         }
     }
@@ -873,7 +873,8 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
             interactor.state.test {
                 awaitItem().run {
-                    assertThat(selection).isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.New("link"))
+                    assertThat(temporarySelection)
+                        .isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.New("link"))
                 }
             }
         }
@@ -888,12 +889,13 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         ) {
             interactor.state.test {
                 awaitItem().run {
-                    assertThat(selection).isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.New("link"))
+                    assertThat(temporarySelection)
+                        .isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.New("link"))
                 }
                 isCurrentScreenSource.value = true
                 selectionSource.value = null
                 awaitItem().run {
-                    assertThat(selection).isNull()
+                    assertThat(temporarySelection).isNull()
                 }
             }
         }
@@ -911,7 +913,8 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
             interactor.state.test {
                 awaitItem().run {
-                    assertThat(selection).isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.New("link"))
+                    assertThat(temporarySelection)
+                        .isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.New("link"))
                 }
             }
         }
@@ -927,7 +930,8 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         ) {
             interactor.state.test {
                 assertThat(verticalModeSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
-                assertThat(awaitItem().selection).isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.New("card"))
+                assertThat(awaitItem().temporarySelection)
+                    .isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.New("card"))
             }
         }
     }
@@ -945,7 +949,8 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
             interactor.state.test {
                 awaitItem().run {
-                    assertThat(selection).isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.New("card"))
+                    assertThat(temporarySelection)
+                        .isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.New("card"))
                 }
             }
         }
@@ -966,7 +971,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
             interactor.state.test {
                 awaitItem().run {
-                    assertThat(selection)
+                    assertThat(temporarySelection)
                         .isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.New("external_paypal"))
                 }
             }
@@ -988,7 +993,8 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
             interactor.state.test {
                 awaitItem().run {
-                    assertThat(selection).isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.Saved)
+                    assertThat(temporarySelection)
+                        .isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.Saved)
                 }
             }
         }
@@ -1007,7 +1013,8 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
             interactor.state.test {
                 awaitItem().run {
-                    assertThat(selection).isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.New("link"))
+                    assertThat(temporarySelection)
+                        .isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.New("link"))
                 }
             }
         }
@@ -1026,7 +1033,8 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
             interactor.state.test {
                 awaitItem().run {
-                    assertThat(selection).isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.New("google_pay"))
+                    assertThat(temporarySelection)
+                        .isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.New("google_pay"))
                 }
             }
         }
@@ -1042,15 +1050,18 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         ) {
             interactor.state.test {
                 awaitItem().run {
-                    assertThat(selection).isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.New("link"))
+                    assertThat(temporarySelection)
+                        .isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.New("link"))
                 }
                 temporarySelectionSource.value = "card"
                 awaitItem().run {
-                    assertThat(selection).isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.New("card"))
+                    assertThat(temporarySelection)
+                        .isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.New("card"))
                 }
                 temporarySelectionSource.value = null
                 awaitItem().run {
-                    assertThat(selection).isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.New("link"))
+                    assertThat(temporarySelection)
+                        .isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.New("link"))
                 }
             }
         }

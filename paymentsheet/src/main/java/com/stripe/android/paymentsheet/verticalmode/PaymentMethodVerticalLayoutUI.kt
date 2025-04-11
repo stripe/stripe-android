@@ -58,7 +58,7 @@ internal fun PaymentMethodVerticalLayoutUI(
         paymentMethods = state.displayablePaymentMethods,
         displayedSavedPaymentMethod = state.displayedSavedPaymentMethod,
         savedPaymentMethodAction = state.availableSavedPaymentMethodAction,
-        selection = state.selection,
+        selection = state.temporarySelection,
         isEnabled = !state.isProcessing,
         onViewMorePaymentMethods = {
             interactor.handleViewAction(
