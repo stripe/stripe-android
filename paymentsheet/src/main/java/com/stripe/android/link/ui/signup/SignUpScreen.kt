@@ -112,7 +112,7 @@ internal fun SignUpBody(
         )
         StripeThemeForLink {
             EmailCollectionSection(
-                enabled = !signUpScreenState.isSubmitting,
+                enabled = signUpScreenState.canEditForm,
                 emailController = emailController,
                 signUpScreenState = signUpScreenState,
                 focusRequester = emailFocusRequester,
@@ -202,7 +202,7 @@ private fun SecondaryFields(
     Column(modifier = Modifier.fillMaxWidth()) {
         StripeThemeForLink {
             PhoneNumberCollectionSection(
-                enabled = !signUpScreenState.isSubmitting,
+                enabled = signUpScreenState.canEditForm,
                 phoneNumberController = phoneNumberController,
                 requestFocusWhenShown = phoneNumberController.initialPhoneNumber.isEmpty(),
                 imeAction = if (signUpScreenState.requiresNameCollection) {
@@ -220,7 +220,7 @@ private fun SecondaryFields(
                     TextField(
                         textFieldController = nameController,
                         imeAction = ImeAction.Done,
-                        enabled = !signUpScreenState.isSubmitting,
+                        enabled = signUpScreenState.canEditForm,
                     )
                 }
             }
@@ -244,10 +244,15 @@ private fun SecondaryFields(
         PrimaryButton(
             modifier = Modifier.padding(vertical = 16.dp),
             label = stringResource(R.string.stripe_link_sign_up),
-            state = if (signUpScreenState.signUpEnabled && !signUpScreenState.isSubmitting) {
-                PrimaryButtonState.Enabled
-            } else {
-                PrimaryButtonState.Disabled
+            state = when {
+                signUpScreenState.submitState == SignUpScreenState.SubmitState.Submitting ->
+                    PrimaryButtonState.Processing
+                signUpScreenState.submitState == SignUpScreenState.SubmitState.Success ->
+                    PrimaryButtonState.Completed
+                signUpScreenState.signUpEnabled ->
+                    PrimaryButtonState.Enabled
+                else ->
+                    PrimaryButtonState.Disabled
             },
             onButtonClick = {
                 onSignUpClick()

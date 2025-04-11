@@ -533,15 +533,25 @@ internal class SignUpViewModelTest {
     }
 
     @Test
-    fun `isSubmitting state is set while submitting`() = runTest(dispatcher) {
-        val viewModel = createViewModel()
-        val isSubmittingEvents = viewModel.state.map { it.isSubmitting }.distinctUntilChanged()
+    fun `submitState is set while submitting`() = runTest(dispatcher) {
+        val linkAuth = FakeLinkAuth().apply {
+            lookupResult = LinkAuthResult.NoLinkAccountFound
+        }
+        val viewModel = createViewModel(linkAuth = linkAuth)
+        val submitStates = viewModel.state.map { it.submitState }.distinctUntilChanged()
         turbineScope {
-            isSubmittingEvents.test {
-                assertThat(awaitItem()).isFalse()
+            submitStates.test {
+                linkAuth.signupResult = LinkAuthResult.AttestationFailed(Throwable())
+                assertThat(awaitItem()).isEqualTo(SignUpScreenState.SubmitState.Idle)
                 viewModel.performValidSignup()
-                assertThat(awaitItem()).isTrue()
-                assertThat(awaitItem()).isFalse()
+                assertThat(awaitItem()).isEqualTo(SignUpScreenState.SubmitState.Submitting)
+                assertThat(awaitItem()).isEqualTo(SignUpScreenState.SubmitState.Idle)
+
+                linkAuth.signupResult = LinkAuthResult.Success(TestFactory.LINK_ACCOUNT)
+                viewModel.performValidSignup()
+                assertThat(awaitItem()).isEqualTo(SignUpScreenState.SubmitState.Submitting)
+                assertThat(awaitItem()).isEqualTo(SignUpScreenState.SubmitState.Success)
+
             }
         }
     }

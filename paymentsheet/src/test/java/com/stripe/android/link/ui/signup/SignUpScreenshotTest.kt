@@ -32,8 +32,8 @@ internal class SignUpScreenshotTest(
                     phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),
                     nameController = NameConfig.createController("Jane Doe"),
                     signUpScreenState = testCase.state,
-                ) {
-                }
+                    onSignUpClick = {}
+                )
             }
         }
     }
@@ -50,20 +50,39 @@ internal class SignUpScreenshotTest(
             return signUpEnabledStates.flatMap { (signUpEnabled, signUpEnabledName) ->
                 signUpStates.flatMap { signUpState ->
                     requiresNameCollectionStates.flatMap { (requiresNameCollection, requiresNameCollectionName) ->
-                        errorMessages.map { (errorMessage, errorMessageName) ->
-                            val name = "SignUpScreen$signUpEnabledName${signUpState.name}$requiresNameCollectionName" +
-                                errorMessageName
-                            TestCase(
-                                name = name,
-                                state = SignUpScreenState(
-                                    merchantName = "Example Inc.",
-                                    signUpEnabled = signUpEnabled,
-                                    requiresNameCollection = requiresNameCollection,
-                                    signUpState = signUpState,
-                                    errorMessage = errorMessage,
-                                    showKeyboardOnOpen = false,
+                        errorMessages.flatMap { (errorMessage, errorMessageName) ->
+                            val submitStates =
+                                // Submitting is only applicable for InputtingRemainingFields.
+                                if (signUpState == SignUpState.InputtingRemainingFields)
+                                    SignUpScreenState.SubmitState.entries
+                                        .filterNot {
+                                            // Success not applicable when there is an error message.
+                                            it == SignUpScreenState.SubmitState.Success && errorMessage != null
+                                        }
+                                else
+                                    listOf(SignUpScreenState.SubmitState.Idle)
+                            submitStates.map { submitState ->
+                                val name = buildString {
+                                    append("SignUpScreen")
+                                    append(signUpEnabledName)
+                                    append(signUpState.name)
+                                    append(requiresNameCollectionName)
+                                    append(submitState.name)
+                                    append(errorMessageName)
+                                }
+                                TestCase(
+                                    name = name,
+                                    state = SignUpScreenState(
+                                        merchantName = "Example Inc.",
+                                        signUpEnabled = signUpEnabled,
+                                        requiresNameCollection = requiresNameCollection,
+                                        signUpState = signUpState,
+                                        errorMessage = errorMessage,
+                                        showKeyboardOnOpen = false,
+                                        submitState = submitState,
+                                    )
                                 )
-                            )
+                            }
                         }
                     }
                 }
