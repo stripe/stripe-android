@@ -159,6 +159,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onShowExistingPaymentOptions() {
+        fireAnalyticEvent(AnalyticEvent.PresentedSheet())
         fireEvent(
             PaymentSheetEvent.ShowExistingPaymentOptions(
                 mode = mode,
@@ -199,9 +200,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         code: PaymentMethodCode,
         isSaved: Boolean,
     ) {
-        if (isSaved) {
-            fireAnalyticEvent(AnalyticEvent.SelectedSavedPaymentMethod(code))
-        }
+        fireAnalyticEvent(AnalyticEvent.SelectedPaymentMethodType(code))
         fireEvent(
             PaymentSheetEvent.SelectPaymentMethod(
                 code = if (isSaved) "saved" else code,
@@ -221,6 +220,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onPaymentMethodFormShown(code: PaymentMethodCode) {
         durationProvider.start(DurationProvider.Key.ConfirmButtonClicked)
 
+        fireAnalyticEvent(AnalyticEvent.DisplayedPaymentMethodForm(code))
         fireEvent(
             PaymentSheetEvent.ShowPaymentOptionForm(
                 code = code,
@@ -232,6 +232,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onPaymentMethodFormInteraction(code: PaymentMethodCode) {
+        fireAnalyticEvent(AnalyticEvent.StartedInteractionWithPaymentMethodForm(code))
         fireEvent(
             PaymentSheetEvent.PaymentOptionFormInteraction(
                 code = code,
@@ -255,6 +256,9 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onSelectPaymentOption(
         paymentSelection: PaymentSelection,
     ) {
+        paymentSelection.code()?.let {
+            fireAnalyticEvent(AnalyticEvent.SelectedSavedPaymentMethod(it))
+        }
         fireEvent(
             PaymentSheetEvent.SelectPaymentOption(
                 mode = mode,
@@ -281,6 +285,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onPressConfirmButton(paymentSelection: PaymentSelection?) {
         val duration = durationProvider.end(DurationProvider.Key.ConfirmButtonClicked)
 
+        fireAnalyticEvent(AnalyticEvent.TappedConfirmButton(paymentSelection.code()))
         fireEvent(
             PaymentSheetEvent.PressConfirmButton(
                 currency = currency,
