@@ -376,19 +376,6 @@ internal class CardDetailsEditUITest {
     }
 
     @Test
-    fun invalidExpiryDateInput_textIsCorrectlyFormatted_errorMessageIsDisplayed() {
-        runScenario(
-            card = PaymentMethodFixtures.CARD_WITH_NETWORKS,
-        ) {
-            performExpiryDateInput("1221")
-
-            assertExpiryDateEquals("12 / 21")
-            composeRule.onNodeWithTag(CARD_EDIT_UI_ERROR_MESSAGE)
-                .assert(hasText("Your card's expiration year is invalid."))
-        }
-    }
-
-    @Test
     fun expiryDateInput_invokesCorrectViwAction() {
         runScenario(
             card = PaymentMethodFixtures.CARD_WITH_NETWORKS,

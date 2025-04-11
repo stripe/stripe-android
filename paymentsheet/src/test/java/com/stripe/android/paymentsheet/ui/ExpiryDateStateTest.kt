@@ -66,6 +66,13 @@ internal class ExpiryDateStateTest {
     }
 
     @Test
+    fun `section should return non-null message for expired date`() {
+        val state = ExpiryDateState(text = EXPIRED_EXPIRY_TEXT, enabled = true)
+
+        assertThat(state.sectionError()).isNotNull()
+    }
+
+    @Test
     fun `sectionError should return null for valid date`() {
         val state = ExpiryDateState(text = VALID_EXPIRY_TEXT, enabled = true)
 
