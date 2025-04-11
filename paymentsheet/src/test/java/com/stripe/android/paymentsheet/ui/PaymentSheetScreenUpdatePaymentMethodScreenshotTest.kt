@@ -6,6 +6,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.PaymentMethodFactory
@@ -117,6 +118,53 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
         }
     }
 
+    @Test
+    fun updatePaymentMethodScreen_forCard_withEditEnabled_automaticAddressCollection() {
+        paparazziRule.snapshot {
+            PaymentSheetScreenOnUpdatePaymentMethod(
+                paymentMethod = PaymentMethodFixtures
+                    .CARD_WITH_NETWORKS_PAYMENT_METHOD
+                    .toDisplayableSavedPaymentMethod(),
+                canRemove = true,
+                shouldShowSetAsDefaultCheckbox = true,
+                allowCardEdit = true,
+                addressCollectionMode = AddressCollectionMode.Automatic
+            )
+        }
+    }
+
+    @Test
+    fun updatePaymentMethodScreen_forCard_withEditEnabled_fullAddressCollection() {
+        paparazziRule.snapshot {
+            PaymentSheetScreenOnUpdatePaymentMethod(
+                paymentMethod = PaymentMethodFixtures
+                    .CARD_WITH_NETWORKS_PAYMENT_METHOD
+                    .toDisplayableSavedPaymentMethod(),
+                isModifiablePaymentMethod = true,
+                canRemove = true,
+                shouldShowSetAsDefaultCheckbox = true,
+                allowCardEdit = true,
+                addressCollectionMode = AddressCollectionMode.Full,
+            )
+        }
+    }
+
+    @Test
+    fun updatePaymentMethodScreen_forCard_withEditEnabled_noAddressCollection() {
+        paparazziRule.snapshot {
+            PaymentSheetScreenOnUpdatePaymentMethod(
+                paymentMethod = PaymentMethodFixtures
+                    .CARD_WITH_NETWORKS_PAYMENT_METHOD
+                    .toDisplayableSavedPaymentMethod(),
+                isModifiablePaymentMethod = true,
+                canRemove = true,
+                shouldShowSetAsDefaultCheckbox = true,
+                allowCardEdit = true,
+                addressCollectionMode = AddressCollectionMode.Never,
+            )
+        }
+    }
+
     @Composable
     fun PaymentSheetScreenOnUpdatePaymentMethod(
         paymentMethod: DisplayableSavedPaymentMethod,
@@ -125,6 +173,8 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
         isExpiredCard: Boolean = false,
         error: String? = null,
         shouldShowSetAsDefaultCheckbox: Boolean = false,
+        allowCardEdit: Boolean = false,
+        addressCollectionMode: AddressCollectionMode = AddressCollectionMode.Never
     ) {
         val interactor = FakeUpdatePaymentMethodInteractor(
             displayableSavedPaymentMethod = paymentMethod,
@@ -141,6 +191,8 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
                 isSaveButtonEnabled = false,
             ),
             shouldShowSaveButton = isModifiablePaymentMethod || shouldShowSetAsDefaultCheckbox,
+            addressCollectionMode = addressCollectionMode,
+            allowCardEdit = allowCardEdit
         )
         val screen = com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.UpdatePaymentMethod(interactor)
         val metadata = PaymentMethodMetadataFactory.create()
