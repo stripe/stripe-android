@@ -7,6 +7,7 @@ import android.widget.Button
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -31,7 +32,9 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_ERROR_TEXT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
+import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
 import com.stripe.android.ui.core.elements.SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
@@ -69,10 +72,30 @@ internal class PaymentSheetPage(
         clickViewWithText("Save your info for secure 1-click checkout with Link")
     }
 
+    fun clickSavedCard(last4: String) {
+        val tag = "${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_···· $last4"
+        waitForTag(tag)
+        clickViewWithTag(tag)
+    }
+
+    fun clickSavedCardEditBadge(last4: String) {
+        val badgeTagMatcher = hasTestTag(TEST_TAG_MODIFY_BADGE)
+            .and(hasAnyAncestor(hasText(last4, substring = true)))
+        composeTestRule.waitUntilExactlyOneExists(badgeTagMatcher)
+        composeTestRule.onNode(badgeTagMatcher).performClick()
+    }
+
     fun clickEditButton() {
         waitForText("EDIT")
         composeTestRule
             .onNodeWithText("EDIT")
+            .performClick()
+    }
+
+    fun clickDoneButton() {
+        waitForText("DONE")
+        composeTestRule
+            .onNodeWithText("DONE")
             .performClick()
     }
 

@@ -25,7 +25,9 @@ import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runFlowControllerTest
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
 import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
+import com.stripe.paymentelementnetwork.setupPaymentMethodDetachResponse
 import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse
+import com.stripe.paymentelementtestpages.EditPage
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -50,6 +52,7 @@ internal class PaymentSheetAnalyticsTest {
     private val composeTestRule = testRules.compose
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
+    private val editPage = EditPage(testRules.compose)
 
     private val card1 = CardPaymentMethodDetails("pm_12345", "4242")
     private val card2 = CardPaymentMethodDetails("pm_67890", "5544")
@@ -361,30 +364,106 @@ internal class PaymentSheetAnalyticsTest {
             method("GET"),
             path("/v1/elements/sessions"),
         ) { response ->
-//            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
             response.testBodyFromFile("elements-sessions-requires_cvc_recollection.json")
         }
-
         networkRule.setupV1PaymentMethodsResponse(card1, card2)
-
+        validateAnalyticsRequest(eventName = "mc_complete_init_customer")
+        validateAnalyticsRequest(eventName = "mc_load_started")
+        validateAnalyticsRequest(eventName = "stripe_android.retrieve_payment_methods")
+        validateAnalyticsRequest(eventName = "elements.customer_repository.get_saved_payment_methods_success")
+        validateAnalyticsRequest(eventName = "mc_load_succeeded")
+        validateAnalyticsRequest(eventName = "mc_complete_sheet_savedpm_show")
 
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Merchant, Inc.",
+                configuration = horizontalModeConfiguration.copy(
                     customer = PaymentSheet.CustomerConfiguration(
                         id = "cus_1",
                         ephemeralKeySecret = "ek_123",
                     ),
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                )
+            )
+        }
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
+
+        validateAnalyticsRequest(eventName = "mc_open_edit_screen")
+        page.clickEditButton()
+        page.clickSavedCardEditBadge(card1.last4)
+        editPage.waitUntilVisible()
+
+        networkRule.setupPaymentMethodDetachResponse(card1.id)
+        validateAnalyticsRequest(eventName = "stripe_android.detach_payment_method")
+        validateAnalyticsRequest(eventName = "mc_complete_sheet_savedpm_show")
+        validateAnalyticsRequest(eventName = "mc_cancel_edit_screen")
+
+        editPage.clickRemove()
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.RemovedSavedPaymentMethod("card"))
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
+        testContext.markTestSucceeded()
+    }
+
+    @Test
+    fun testSavedPaymentMethodInFowController() = runFlowControllerTest(
+        networkRule = networkRule,
+        analyticEventCallback = analyticEventRule,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_cvc_recollection.json")
+        }
+
+        networkRule.setupV1PaymentMethodsResponse(card1, card2)
+        validateAnalyticsRequest(eventName = "mc_custom_init_customer")
+        validateAnalyticsRequest(eventName = "mc_load_started")
+        validateAnalyticsRequest(eventName = "stripe_android.retrieve_payment_methods")
+        validateAnalyticsRequest(eventName = "elements.customer_repository.get_saved_payment_methods_success")
+        validateAnalyticsRequest(eventName = "mc_load_succeeded")
+        validateAnalyticsRequest(eventName = "mc_custom_sheet_savedpm_show")
+
+        testContext.configureFlowController {
+            configureWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = horizontalModeConfiguration.copy(
+                    customer = PaymentSheet.CustomerConfiguration(
+                        id = "cus_1",
+                        ephemeralKeySecret = "ek_123",
+                    ),
                 ),
+                callback = { success, error ->
+                    assertThat(success).isTrue()
+                    assertThat(error).isNull()
+                    presentPaymentOptions()
+                }
             )
         }
 
-        page.clickEditButton()
-    }
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
 
+        validateAnalyticsRequest(eventName = "mc_open_edit_screen")
+        page.clickEditButton()
+        page.clickSavedCardEditBadge(card1.last4)
+        editPage.waitUntilVisible()
+
+        networkRule.setupPaymentMethodDetachResponse(card1.id)
+        validateAnalyticsRequest(eventName = "stripe_android.detach_payment_method")
+        validateAnalyticsRequest(eventName = "mc_custom_sheet_savedpm_show")
+        validateAnalyticsRequest(eventName = "mc_cancel_edit_screen")
+
+        editPage.clickRemove()
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.RemovedSavedPaymentMethod("card"))
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
+
+        validateAnalyticsRequest(eventName = "mc_custom_paymentoption_savedpm_select")
+        page.clickDoneButton()
+        page.clickSavedCard(card2.last4)
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.SelectedSavedPaymentMethod("card"))
+        testContext.markTestSucceeded()
+    }
 
     private fun validateAnalyticsRequest(
         eventName: String,
