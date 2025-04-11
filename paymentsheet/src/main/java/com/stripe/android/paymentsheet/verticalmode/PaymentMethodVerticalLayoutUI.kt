@@ -25,7 +25,6 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
@@ -68,9 +67,7 @@ internal fun PaymentMethodVerticalLayoutUI(
         },
         onSelectSavedPaymentMethod = {
             interactor.handleViewAction(
-                PaymentMethodVerticalLayoutInteractor.ViewAction.SavedPaymentMethodSelected(
-                    PaymentSelection.Saved(it.paymentMethod)
-                )
+                PaymentMethodVerticalLayoutInteractor.ViewAction.SavedPaymentMethodSelected(it.paymentMethod)
             )
         },
         onManageOneSavedPaymentMethod = {

@@ -24,7 +24,6 @@ import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.ViewActionRecorder
-import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.Selection
 import org.junit.Rule
@@ -125,7 +124,7 @@ internal class PaymentMethodLayoutUITest(
             ).performClick()
             viewActionRecorder.consume(
                 PaymentMethodVerticalLayoutInteractor.ViewAction.SavedPaymentMethodSelected(
-                    PaymentSelection.Saved(savedPaymentMethod.paymentMethod)
+                    savedPaymentMethod.paymentMethod
                 )
             )
             assertThat(viewActionRecorder.viewActions).isEmpty()

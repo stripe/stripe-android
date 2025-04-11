@@ -63,7 +63,7 @@ internal class DefaultAddPaymentMethodInteractor(
     private val clearErrorMessages: () -> Unit,
     private val reportFieldInteraction: (PaymentMethodCode) -> Unit,
     private val onFormFieldValuesChanged: (FormFieldValues?, String) -> Unit,
-    private val reportPaymentMethodTypeSelected: (PaymentMethodCode, Boolean) -> Unit,
+    private val reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit,
     private val createUSBankAccountFormArguments: (PaymentMethodCode) -> USBankAccountFormArguments,
     private val coroutineScope: CoroutineScope,
     override val isLiveMode: Boolean,
@@ -183,7 +183,7 @@ internal class DefaultAddPaymentMethodInteractor(
             is AddPaymentMethodInteractor.ViewAction.OnPaymentMethodSelected -> {
                 if (selectedPaymentMethodCode.value != viewAction.code) {
                     _selectedPaymentMethodCode.value = viewAction.code
-                    reportPaymentMethodTypeSelected(viewAction.code, false)
+                    reportPaymentMethodTypeSelected(viewAction.code)
                 }
             }
         }

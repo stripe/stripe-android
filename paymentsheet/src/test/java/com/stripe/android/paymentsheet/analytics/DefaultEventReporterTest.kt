@@ -787,7 +787,7 @@ class DefaultEventReporterTest {
             simulateSuccessfulSetup(linkMode = LinkMode.LinkPaymentMethod)
         }
 
-        completeEventReporter.onSelectPaymentMethod("link", false)
+        completeEventReporter.onSelectPaymentMethod("link")
 
         val argumentCaptor = argumentCaptor<AnalyticsRequest>()
         verify(analyticsRequestExecutor).executeAsync(argumentCaptor.capture())
@@ -803,7 +803,7 @@ class DefaultEventReporterTest {
             simulateSuccessfulSetup(linkMode = LinkMode.LinkCardBrand)
         }
 
-        completeEventReporter.onSelectPaymentMethod("link", false)
+        completeEventReporter.onSelectPaymentMethod("link")
 
         val argumentCaptor = argumentCaptor<AnalyticsRequest>()
         verify(analyticsRequestExecutor).executeAsync(argumentCaptor.capture())
@@ -905,27 +905,6 @@ class DefaultEventReporterTest {
 
         assertThat(argumentCaptor.firstValue.params).doesNotContainKey("link_context")
     }
-
-    @Test
-    fun `Send correct arguments when selecting a saved payment method`() =
-        runTest(testDispatcher) {
-            val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
-                simulateInit()
-            }
-
-            completeEventReporter.onSelectPaymentMethod("card", true)
-
-            analyticEventCallbackRule.assertMatchesExpectedEvent(
-                AnalyticEvent.SelectedSavedPaymentMethod("card")
-            )
-
-            verify(analyticsRequestExecutor).executeAsync(
-                argWhere { req ->
-                    req.params["event"] == "mc_carousel_payment_method_tapped" &&
-                        req.params["selected_lpm"] == "saved"
-                }
-            )
-        }
 
     @Test
     fun `Send correct arguments when removing a saved payment method`() =
