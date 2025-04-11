@@ -24,6 +24,8 @@ import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runFlowControllerTest
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
+import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
+import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -48,6 +50,9 @@ internal class PaymentSheetAnalyticsTest {
     private val composeTestRule = testRules.compose
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
+
+    private val card1 = CardPaymentMethodDetails("pm_12345", "4242")
+    private val card2 = CardPaymentMethodDetails("pm_67890", "5544")
 
     private val verticalModeConfiguration = PaymentSheet.Configuration.Builder("Example, Inc.")
         .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
@@ -344,6 +349,42 @@ internal class PaymentSheetAnalyticsTest {
         page.clickPrimaryButton()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.TappedConfirmButton("card"))
     }
+
+    @Test
+    fun testSavedPaymentMethod() = runPaymentSheetTest(
+        networkRule = networkRule,
+        analyticEventCallback = analyticEventRule,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+//            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+            response.testBodyFromFile("elements-sessions-requires_cvc_recollection.json")
+        }
+
+        networkRule.setupV1PaymentMethodsResponse(card1, card2)
+
+
+        testContext.presentPaymentSheet {
+            presentWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = PaymentSheet.Configuration(
+                    merchantDisplayName = "Merchant, Inc.",
+                    customer = PaymentSheet.CustomerConfiguration(
+                        id = "cus_1",
+                        ephemeralKeySecret = "ek_123",
+                    ),
+                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                ),
+            )
+        }
+
+        page.clickEditButton()
+    }
+
 
     private fun validateAnalyticsRequest(
         eventName: String,
