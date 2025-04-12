@@ -39,6 +39,7 @@ class DefaultCardAccountRangeRepositoryFactory @Inject constructor(
         )
     }
 
+    @JvmOverloads
     constructor(
         context: Context,
         productUsageTokens: Set<String> = emptySet()
