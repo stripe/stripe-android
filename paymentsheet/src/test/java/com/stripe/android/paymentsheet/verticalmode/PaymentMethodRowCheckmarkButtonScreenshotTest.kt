@@ -68,7 +68,7 @@ internal class PaymentMethodRowCheckmarkButtonScreenshotTest {
     }
 
     @Test
-    fun testTailingContent() {
+    fun testTrailingContent() {
         testPaymentMethodRowButton_Checkmark(
             trailingContent = {
                 Text("View more")
