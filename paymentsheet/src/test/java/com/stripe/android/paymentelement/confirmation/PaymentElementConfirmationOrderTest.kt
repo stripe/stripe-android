@@ -9,6 +9,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkActivityContract
+import com.stripe.android.paymentelement.confirmation.cpms.CustomPaymentMethodContract
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
@@ -38,6 +39,9 @@ class PaymentElementConfirmationOrderTest {
             )
 
             assertThat(awaitRegisterCall().contract).isInstanceOf<BacsMandateConfirmationContract>()
+            assertThat(awaitNextRegisteredLauncher()).isInstanceOf<ActivityResultLauncher<*>>()
+
+            assertThat(awaitRegisterCall().contract).isInstanceOf<CustomPaymentMethodContract>()
             assertThat(awaitNextRegisteredLauncher()).isInstanceOf<ActivityResultLauncher<*>>()
 
             assertThat(awaitRegisterCall().contract).isInstanceOf<ExternalPaymentMethodContract>()
