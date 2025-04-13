@@ -45,6 +45,10 @@ internal class CustomerSheetTest {
             assertThat(result).isInstanceOf(CustomerSheetResult.Selected::class.java)
         }
     ) { context ->
+        if (true) {
+            throw AssertionError("Lol")
+        }
+
         networkRule.enqueue(
             CustomerSheetUtils.retrieveElementsSessionRequest(),
         ) { response ->
