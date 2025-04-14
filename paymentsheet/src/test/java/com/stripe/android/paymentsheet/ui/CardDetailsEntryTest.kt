@@ -59,8 +59,8 @@ internal class CardDetailsEntryTest {
             expYear = 2030,
             billingDetailsFormState = billingDetailsFormState(
                 line1 = FormFieldEntry("", isComplete = false),
-                addressCollectionMode = AddressCollectionMode.Full
-            )
+            ),
+            addressCollectionMode = AddressCollectionMode.Full
         )
         assertThat(entry.isComplete()).isFalse()
     }
@@ -227,14 +227,18 @@ internal class CardDetailsEntryTest {
         expMonth: Int? = 12,
         expYear: Int? = 2030,
         expiryDateEditable: Boolean = true,
-        billingDetailsFormState: BillingDetailsFormState? = billingDetailsFormState()
+        billingDetailsFormState: BillingDetailsFormState? = billingDetailsFormState(),
+        billingDetails: PaymentMethod.BillingDetails = BILLING_DETAILS_FORM_DETAILS,
+        addressCollectionMode: AddressCollectionMode = AddressCollectionMode.Automatic
     ) = CardDetailsEntry(
         cardBrandChoice = cardBrandChoice,
         expiryDateState = ExpiryDateState.create(
             card = createCard(expiryMonth = expMonth, expiryYear = expYear),
             enabled = expiryDateEditable
         ),
-        billingAddressState = billingDetailsFormState
+        billingDetailsEntry = billingDetailsFormState?.let { BillingDetailsEntry(it) },
+        billingDetails = billingDetails,
+        addressCollectionMode = addressCollectionMode
     )
 
     private fun createCard(

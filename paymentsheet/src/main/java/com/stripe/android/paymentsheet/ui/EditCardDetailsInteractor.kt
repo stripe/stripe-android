@@ -132,7 +132,9 @@ internal class DefaultEditCardDetailsInteractor(
     private fun onBillingAddressFormChanged(state: BillingDetailsFormState) {
         cardDetailsEntry.update { entry ->
             entry.copy(
-                billingAddressState = state
+                billingDetailsEntry = BillingDetailsEntry(
+                    billingDetailsFormState = state,
+                )
             )
         }
     }
@@ -154,7 +156,9 @@ internal class DefaultEditCardDetailsInteractor(
     private fun buildDefaultCardEntry(): CardDetailsEntry {
         return CardDetailsEntry(
             cardBrandChoice = defaultCardBrandChoice(),
-            expiryDateState = defaultExpiryDateState()
+            expiryDateState = defaultExpiryDateState(),
+            billingDetails = billingDetails,
+            addressCollectionMode = addressCollectionMode
         )
     }
 

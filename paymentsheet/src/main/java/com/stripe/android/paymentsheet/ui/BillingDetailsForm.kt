@@ -16,8 +16,8 @@ import kotlinx.coroutines.flow.flowOn
 
 @Stable
 internal class BillingDetailsForm(
-    private val billingDetails: PaymentMethod.BillingDetails?,
-    private val addressCollectionMode: AddressCollectionMode,
+    billingDetails: PaymentMethod.BillingDetails?,
+    addressCollectionMode: AddressCollectionMode,
 ) {
 
     private val cardBillingAddressElement: CardBillingAddressElement = CardBillingAddressElement(
@@ -53,8 +53,6 @@ internal class BillingDetailsForm(
                 postalCode = postalCode,
                 country = country,
                 state = state,
-                billingDetails = billingDetails,
-                addressCollectionMode = addressCollectionMode
             )
         }.flowOn(Dispatchers.Main)
     }

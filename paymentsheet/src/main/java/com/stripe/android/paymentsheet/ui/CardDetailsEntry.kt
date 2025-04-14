@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.ui
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CardUpdateParams
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 
 /**
  * Represents the editable details of a card payment method.
@@ -12,7 +13,9 @@ import com.stripe.android.paymentsheet.CardUpdateParams
 internal data class CardDetailsEntry(
     val cardBrandChoice: CardBrandChoice,
     val expiryDateState: ExpiryDateState,
-    val billingAddressState: BillingDetailsFormState? = null,
+    val billingDetailsEntry: BillingDetailsEntry? = null,
+    private val billingDetails: PaymentMethod.BillingDetails?,
+    private val addressCollectionMode: AddressCollectionMode,
 ) {
     /**
      * Determines if the card details have changed compared to the provided values.
@@ -32,14 +35,15 @@ internal data class CardDetailsEntry(
         return expiryDateComplete() && billingAddressComplete()
     }
 
-    private fun expiryDateHasChanged(
-        card: PaymentMethod.Card,
-    ): Boolean {
+    private fun expiryDateHasChanged(card: PaymentMethod.Card): Boolean {
         return card.expiryMonth != expiryDateState.expiryMonth || card.expiryYear != expiryDateState.expiryYear
     }
 
     private fun billingAddressHasChanged(): Boolean {
-        return billingAddressState?.hasChanged() ?: false
+        return billingDetailsEntry?.hasChanged(
+            billingDetails = billingDetails,
+            addressCollectionMode = addressCollectionMode
+        ) ?: false
     }
 
     private fun expiryDateComplete(): Boolean {
@@ -48,7 +52,7 @@ internal data class CardDetailsEntry(
     }
 
     private fun billingAddressComplete(): Boolean {
-        return billingAddressState?.isComplete() ?: true
+        return billingDetailsEntry?.isComplete(addressCollectionMode) ?: true
     }
 }
 
@@ -62,7 +66,7 @@ internal fun CardDetailsEntry.toUpdateParams(): CardUpdateParams {
         cardBrand = cardBrandChoice.brand,
         expiryMonth = expiryDateState.expiryMonth,
         expiryYear = expiryDateState.expiryYear,
-        billingDetails = billingAddressState?.let {
+        billingDetails = billingDetailsEntry?.billingDetailsFormState?.let {
             val address = Address(
                 city = it.city?.value,
                 country = it.country?.value,

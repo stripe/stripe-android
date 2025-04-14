@@ -7,7 +7,6 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
-import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.BILLING_DETAILS
 import com.stripe.android.model.StripeIntent
@@ -311,8 +310,6 @@ internal object PaymentSheetFixtures {
         postalCode: FormFieldEntry? = FormFieldEntry("94111", isComplete = true),
         state: FormFieldEntry? = FormFieldEntry("CA", isComplete = true),
         country: FormFieldEntry? = FormFieldEntry("US", isComplete = true),
-        addressCollectionMode: AddressCollectionMode = AddressCollectionMode.Automatic,
-        billingDetails: PaymentMethod.BillingDetails? = BILLING_DETAILS_FORM_DETAILS
     ): BillingDetailsFormState {
         return BillingDetailsFormState(
             line1 = line1,
@@ -321,8 +318,6 @@ internal object PaymentSheetFixtures {
             postalCode = postalCode,
             state = state,
             country = country,
-            addressCollectionMode = addressCollectionMode,
-            billingDetails = billingDetails
         )
     }
 }
