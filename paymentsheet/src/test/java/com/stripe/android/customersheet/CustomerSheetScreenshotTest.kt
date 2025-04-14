@@ -30,6 +30,7 @@ import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.SetupIntentFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
@@ -330,20 +331,24 @@ internal class CustomerSheetScreenshotTest {
     @Test
     fun testUpdatePaymentMethodScreen() {
         paparazzi.snapshot {
-            CustomerSheetScreen(
-                viewState = createUpdatePaymentMethodViewState(canRemove = true),
-                paymentMethodNameProvider = { it!!.resolvableString },
-            )
+            StripeTheme {
+                CustomerSheetScreen(
+                    viewState = createUpdatePaymentMethodViewState(canRemove = true),
+                    paymentMethodNameProvider = { it!!.resolvableString },
+                )
+            }
         }
     }
 
     @Test
     fun testUpdatePaymentMethodScreen_withoutRemove() {
         paparazzi.snapshot {
-            CustomerSheetScreen(
-                viewState = createUpdatePaymentMethodViewState(canRemove = false),
-                paymentMethodNameProvider = { it!!.resolvableString },
-            )
+            StripeTheme {
+                CustomerSheetScreen(
+                    viewState = createUpdatePaymentMethodViewState(canRemove = false),
+                    paymentMethodNameProvider = { it!!.resolvableString },
+                )
+            }
         }
     }
 
