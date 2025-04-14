@@ -51,23 +51,20 @@ internal class SignUpScreenshotTest(
                 signUpStates.flatMap { signUpState ->
                     requiresNameCollectionStates.flatMap { (requiresNameCollection, requiresNameCollectionName) ->
                         errorMessages.flatMap { (errorMessage, errorMessageName) ->
-                            val submitStates =
-                                // Submitting is only applicable for InputtingRemainingFields.
-                                if (signUpState == SignUpState.InputtingRemainingFields)
-                                    SignUpScreenState.SubmitState.entries
-                                        .filterNot {
-                                            // Success not applicable when there is an error message.
-                                            it == SignUpScreenState.SubmitState.Success && errorMessage != null
-                                        }
-                                else
-                                    listOf(SignUpScreenState.SubmitState.Idle)
-                            submitStates.map { submitState ->
+                            // Submitting is only applicable for InputtingRemainingFields.
+                            val submittingStates = if (signUpState == SignUpState.InputtingRemainingFields) {
+                                listOf(true to "Submitting", false to "Idle")
+                            } else {
+                                listOf(false to "Idle")
+                            }
+
+                            submittingStates.map { (isSubmitting, submittingStateName) ->
                                 val name = buildString {
                                     append("SignUpScreen")
                                     append(signUpEnabledName)
                                     append(signUpState.name)
                                     append(requiresNameCollectionName)
-                                    append(submitState.name)
+                                    append(submittingStateName)
                                     append(errorMessageName)
                                 }
                                 TestCase(
@@ -79,7 +76,7 @@ internal class SignUpScreenshotTest(
                                         signUpState = signUpState,
                                         errorMessage = errorMessage,
                                         showKeyboardOnOpen = false,
-                                        submitState = submitState,
+                                        isSubmitting = isSubmitting,
                                     )
                                 )
                             }

@@ -538,20 +538,19 @@ internal class SignUpViewModelTest {
             lookupResult = LinkAuthResult.NoLinkAccountFound
         }
         val viewModel = createViewModel(linkAuth = linkAuth)
-        val submitStates = viewModel.state.map { it.submitState }.distinctUntilChanged()
+        val submitStates = viewModel.state.map { it.isSubmitting }.distinctUntilChanged()
         turbineScope {
             submitStates.test {
                 linkAuth.signupResult = LinkAuthResult.AttestationFailed(Throwable())
-                assertThat(awaitItem()).isEqualTo(SignUpScreenState.SubmitState.Idle)
+                assertThat(awaitItem()).isFalse()
                 viewModel.performValidSignup()
-                assertThat(awaitItem()).isEqualTo(SignUpScreenState.SubmitState.Submitting)
-                assertThat(awaitItem()).isEqualTo(SignUpScreenState.SubmitState.Idle)
+                assertThat(awaitItem()).isTrue()
+                assertThat(awaitItem()).isFalse()
 
                 linkAuth.signupResult = LinkAuthResult.Success(TestFactory.LINK_ACCOUNT)
                 viewModel.performValidSignup()
-                assertThat(awaitItem()).isEqualTo(SignUpScreenState.SubmitState.Submitting)
-                assertThat(awaitItem()).isEqualTo(SignUpScreenState.SubmitState.Success)
-
+                assertThat(awaitItem()).isTrue()
+                assertThat(awaitItem()).isFalse()
             }
         }
     }
