@@ -78,6 +78,7 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.ARGS_DEFERRED_INTENT
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.BILLING_DETAILS_FORM_DETAILS
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
@@ -359,7 +360,8 @@ internal class PaymentSheetViewModelTest {
                 interactor.cardParamsUpdateAction(
                     cardBrand = CardBrand.Visa,
                     expiryMonth = 12,
-                    expiryYear = 2027
+                    expiryYear = 2027,
+                    billingDetails = BILLING_DETAILS_FORM_DETAILS
                 )
 
                 interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
@@ -391,7 +393,8 @@ internal class PaymentSheetViewModelTest {
                     preferred = CardBrand.Visa.code
                 ),
                 expiryMonth = 12,
-                expiryYear = 2027
+                expiryYear = 2027,
+                billingDetails = BILLING_DETAILS_FORM_DETAILS
             ).toParamMap()
         )
 

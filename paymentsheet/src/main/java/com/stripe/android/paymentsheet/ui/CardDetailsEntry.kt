@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CardUpdateParams
 
@@ -22,14 +23,17 @@ internal data class CardDetailsEntry(
         card: PaymentMethod.Card,
         originalCardBrandChoice: CardBrandChoice,
     ): Boolean {
-        val expChanged =
-            card.expiryMonth != expiryDateState.expiryMonth || card.expiryYear != expiryDateState.expiryYear
-        return originalCardBrandChoice != this.cardBrandChoice || expChanged
+        return originalCardBrandChoice != this.cardBrandChoice ||
+            expiryDateHasChanged(card)
     }
 
     fun isComplete(): Boolean {
         if (expiryDateState.enabled.not()) return true
         return expiryDateState.expiryMonth != null && expiryDateState.expiryYear != null
+    }
+
+    private fun expiryDateHasChanged(card: PaymentMethod.Card): Boolean {
+        return card.expiryMonth != expiryDateState.expiryMonth || card.expiryYear != expiryDateState.expiryYear
     }
 }
 
@@ -38,10 +42,23 @@ internal data class CardDetailsEntry(
  *
  * @return CardUpdateParams containing the updated card brand.
  */
-internal fun CardDetailsEntry.toUpdateParams(): CardUpdateParams {
+internal fun CardDetailsEntry.toUpdateParams(
+    billingDetailsEntry: BillingDetailsEntry?
+): CardUpdateParams {
     return CardUpdateParams(
         cardBrand = cardBrandChoice.brand,
         expiryMonth = expiryDateState.expiryMonth,
-        expiryYear = expiryDateState.expiryYear
+        expiryYear = expiryDateState.expiryYear,
+        billingDetails = billingDetailsEntry?.billingDetailsFormState?.let {
+            val address = Address(
+                city = it.city?.value,
+                country = it.country?.value,
+                line1 = it.line1?.value,
+                line2 = it.line2?.value,
+                postalCode = it.postalCode?.value,
+                state = it.state?.value
+            )
+            PaymentMethod.BillingDetails(address)
+        }
     )
 }
