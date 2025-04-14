@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalTextInputService
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -64,7 +64,7 @@ internal fun PaymentSheetTopBar(
     elevation: Dp,
     onNavigationIconPressed: () -> Unit,
 ) {
-    val keyboardController = LocalTextInputService.current
+    val keyboardController = LocalSoftwareKeyboardController.current
     val tintColor = MaterialTheme.stripeColors.appBarIcon
 
     TopAppBar(
@@ -77,8 +77,7 @@ internal fun PaymentSheetTopBar(
             IconButton(
                 enabled = isEnabled,
                 onClick = {
-                    @Suppress("DEPRECATION")
-                    keyboardController?.hideSoftwareKeyboard()
+                    keyboardController?.hide()
                     onNavigationIconPressed()
                 },
                 modifier = Modifier.testTag(SHEET_NAVIGATION_BUTTON_TAG)

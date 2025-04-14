@@ -8,13 +8,13 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.Colors
+import androidx.compose.material.LocalRippleConfiguration
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ripple.LocalRippleTheme
-import androidx.compose.material.ripple.RippleTheme
+import androidx.compose.material.RippleConfiguration
+import androidx.compose.material.RippleDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
@@ -236,20 +236,18 @@ internal val TextSelectionColors: TextSelectionColors
         backgroundColor = FinancialConnectionsTheme.colors.textDefault.copy(alpha = 0.4f)
     )
 
-@Immutable
-private object FinancialConnectionsRippleTheme : RippleTheme {
+private val FinancialConnectionsRippleConfiguration: RippleConfiguration
     @Composable
-    override fun defaultColor() = RippleTheme.defaultRippleColor(
-        contentColor = FinancialConnectionsTheme.colors.textAction,
-        lightTheme = MaterialTheme.colors.isLight,
+    get() = RippleConfiguration(
+        color = RippleDefaults.rippleColor(
+            contentColor = FinancialConnectionsTheme.colors.textAction,
+            lightTheme = MaterialTheme.colors.isLight,
+        ),
+        rippleAlpha = RippleDefaults.rippleAlpha(
+            contentColor = FinancialConnectionsTheme.colors.textAction,
+            lightTheme = MaterialTheme.colors.isLight,
+        )
     )
-
-    @Composable
-    override fun rippleAlpha() = RippleTheme.defaultRippleAlpha(
-        contentColor = FinancialConnectionsTheme.colors.textAction,
-        lightTheme = MaterialTheme.colors.isLight,
-    )
-}
 
 @Composable
 internal fun FinancialConnectionsTheme(
@@ -274,13 +272,14 @@ internal fun FinancialConnectionsTheme(
                 }
             }
         }
+
         MaterialTheme(
             colors = debugColors(),
             content = {
                 CompositionLocalProvider(
                     LocalTextSelectionColors provides TextSelectionColors,
                     LocalTextStyle provides LocalTextStyle.current.toCompat(useDefaultLineHeight = true),
-                    LocalRippleTheme provides FinancialConnectionsRippleTheme
+                    LocalRippleConfiguration provides FinancialConnectionsRippleConfiguration
                 ) {
                     content()
                 }

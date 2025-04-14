@@ -58,8 +58,11 @@ internal class FakeEventReporter : EventReporter {
     private val _removePaymentMethodCalls = Turbine<RemovePaymentMethodCall>()
     val removePaymentMethodCalls: ReceiveTurbine<RemovePaymentMethodCall> = _removePaymentMethodCalls
 
-    private val _formCompletedCals = Turbine<FormCompletedCall>()
-    val formCompletedCalls: ReceiveTurbine<FormCompletedCall> = _formCompletedCals
+    private val _formCompletedCalls = Turbine<FormCompletedCall>()
+    val formCompletedCalls: ReceiveTurbine<FormCompletedCall> = _formCompletedCalls
+
+    private val _pressConfirmButtonCalls = Turbine<PaymentSelection?>()
+    val pressConfirmButtonCalls: ReceiveTurbine<PaymentSelection?> = _pressConfirmButtonCalls
 
     fun validate() {
         _paymentFailureCalls.ensureAllEventsConsumed()
@@ -75,7 +78,8 @@ internal class FakeEventReporter : EventReporter {
         _showManageSavedPaymentMethods.ensureAllEventsConsumed()
         _experimentExposureCalls.ensureAllEventsConsumed()
         _removePaymentMethodCalls.ensureAllEventsConsumed()
-        _formCompletedCals.ensureAllEventsConsumed()
+        _formCompletedCalls.ensureAllEventsConsumed()
+        _pressConfirmButtonCalls.ensureAllEventsConsumed()
     }
 
     override fun onInit(
@@ -138,7 +142,7 @@ internal class FakeEventReporter : EventReporter {
     }
 
     override fun onPaymentMethodFormCompleted(code: String) {
-        _formCompletedCals.add(
+        _formCompletedCalls.add(
             FormCompletedCall(
                 code = code
             )
@@ -152,6 +156,7 @@ internal class FakeEventReporter : EventReporter {
     }
 
     override fun onPressConfirmButton(paymentSelection: PaymentSelection?) {
+        _pressConfirmButtonCalls.add(paymentSelection)
     }
 
     override fun onPaymentSuccess(

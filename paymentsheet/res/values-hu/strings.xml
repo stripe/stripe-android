@@ -187,6 +187,8 @@
   <string name="stripe_signup_deactivated_account_message">A számláját deaktiváltuk.</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">Hiba történt</string>
+  <!-- Accessibility description when payment button shows a successful transaction animation. -->
+  <string name="stripe_successful_transaction_description">A tranzakció befejeződött</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Szakítsa meg, és fizessen más módon</string>
   <!-- Text on a screen asking the user to approve a payment -->

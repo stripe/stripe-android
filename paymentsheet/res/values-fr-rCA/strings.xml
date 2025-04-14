@@ -187,6 +187,8 @@
   <string name="stripe_signup_deactivated_account_message">Votre compte a été désactivé</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">Un problème est survenu</string>
+  <!-- Accessibility description when payment button shows a successful transaction animation. -->
+  <string name="stripe_successful_transaction_description">Transaction terminée</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Annuler et utiliser un autre moyen de paiement</string>
   <!-- Text on a screen asking the user to approve a payment -->
