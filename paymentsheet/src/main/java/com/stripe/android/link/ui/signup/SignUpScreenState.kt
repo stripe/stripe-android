@@ -21,7 +21,7 @@ internal data class SignUpScreenState(
     val canEditForm: Boolean
         get() = !isSubmitting
 
-    companion object {
+    internal companion object {
 
         fun create(
             configuration: LinkConfiguration,
