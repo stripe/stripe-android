@@ -19,6 +19,7 @@ import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.isSaved
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.ui.core.IsStripeCardScanAvailable
 import kotlinx.coroutines.CoroutineScope
@@ -263,8 +264,10 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onSelectPaymentOption(
         paymentSelection: PaymentSelection,
     ) {
-        paymentSelection.code()?.let {
-            fireAnalyticEvent(AnalyticEvent.SelectedSavedPaymentMethod(it))
+        if (paymentSelection.isSaved) {
+            paymentSelection.code()?.let {
+                fireAnalyticEvent(AnalyticEvent.SelectedSavedPaymentMethod(it))
+            }
         }
         fireEvent(
             PaymentSheetEvent.SelectPaymentOption(
