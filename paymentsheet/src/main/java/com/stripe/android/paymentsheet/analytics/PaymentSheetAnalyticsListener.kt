@@ -83,29 +83,29 @@ internal class PaymentSheetAnalyticsListener(
                 eventReporter.onShowEditablePaymentOption()
             }
             is PaymentSheetScreen.SelectSavedPaymentMethods -> {
-                eventReporter.onShowExistingPaymentOptions(previouslyPresentedSheet)
+                reportPaymentOptions(true)
                 previouslyShownForm = null
                 previouslyInteractedForm = null
             }
             is PaymentSheetScreen.VerticalMode -> {
-                eventReporter.onShowNewPaymentOptions(previouslyPresentedSheet)
+                reportPaymentOptions(false)
             }
             is AddFirstPaymentMethod, is AddAnotherPaymentMethod -> {
                 reportFormShown(currentPaymentMethodTypeProvider())
-                eventReporter.onShowNewPaymentOptions(previouslyPresentedSheet)
+                reportPaymentOptions(false)
             }
         }
-        // PresentedSheet events should only show once per session
-        when (currentScreen) {
-            is PaymentSheetScreen.SelectSavedPaymentMethods,
-            is PaymentSheetScreen.VerticalMode,
-            is AddFirstPaymentMethod, is AddAnotherPaymentMethod -> {
-                previouslyPresentedSheet = true
-            }
-            else -> {
-                // Nothing to do here
+    }
+
+    private fun reportPaymentOptions(isSaved: Boolean) {
+        if (!previouslyPresentedSheet) {
+            if (isSaved) {
+                eventReporter.onShowExistingPaymentOptions()
+            } else {
+                eventReporter.onShowNewPaymentOptions()
             }
         }
+        previouslyPresentedSheet = true
     }
 
     fun reportPaymentSheetHidden(hiddenScreen: PaymentSheetScreen) {
