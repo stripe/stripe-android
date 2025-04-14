@@ -78,13 +78,13 @@ internal class DefaultEditCardDetailsInteractor(
         value = buildDefaultCardEntry()
     )
     private val billingDetailsEntry = MutableStateFlow<BillingDetailsEntry?>(null)
-    private val billingAddressForm = defaultBillingAddressForm()
+    private val billingDetailsForm = defaultBillingDetailsForm()
 
     override val state: StateFlow<EditCardDetailsInteractor.State> = cardDetailsEntry.mapLatest { inputState ->
         uiState(
             cardBrandChoice = inputState.cardBrandChoice,
             expiryDateState = inputState.expiryDateState,
-            billingDetailsForm = billingAddressForm
+            billingDetailsForm = billingDetailsForm
         )
     }.stateIn(
         scope = coroutineScope,
@@ -92,7 +92,7 @@ internal class DefaultEditCardDetailsInteractor(
         initialValue = uiState(
             cardBrandChoice = cardDetailsEntry.value.cardBrandChoice,
             expiryDateState = cardDetailsEntry.value.expiryDateState,
-            billingDetailsForm = billingAddressForm
+            billingDetailsForm = billingDetailsForm
         )
     )
 
@@ -195,7 +195,7 @@ internal class DefaultEditCardDetailsInteractor(
         )
     }
 
-    private fun defaultBillingAddressForm(): BillingDetailsForm? {
+    private fun defaultBillingDetailsForm(): BillingDetailsForm? {
         val showAddressForm = areExpiryDateAndAddressModificationSupported &&
             addressCollectionMode != AddressCollectionMode.Never
         if (showAddressForm.not()) {
