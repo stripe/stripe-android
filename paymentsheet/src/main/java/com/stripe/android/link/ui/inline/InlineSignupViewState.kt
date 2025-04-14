@@ -1,9 +1,9 @@
 package com.stripe.android.link.ui.inline
 
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.ui.signup.SignUpState
+import com.stripe.android.link.ui.signup.requiresNameCollection
 
 /**
  * The LinkInlineSignup view state.
@@ -67,8 +67,7 @@ constructor(
                     add(LinkSignupField.Phone)
                 }
 
-                val requiresNameCollection = config.stripeIntent.countryCode != CountryCode.US.value
-                if (requiresNameCollection) {
+                if (config.requiresNameCollection) {
                     add(LinkSignupField.Name)
                 }
             }
