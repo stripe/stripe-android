@@ -1,89 +1,123 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="stripe_account_picker_error_no_account_available_title">There was a problem accessing your %1$s account</string>
-  <string name="stripe_account_picker_error_no_payment_method_title">No payment accounts available</string>
-  <string name="stripe_account_picker_multiselect_account">Select accounts</string>
-  <!-- Account picker -->
-  <string name="stripe_account_picker_singleselect_account">Select an account</string>
-  <string name="stripe_accounts_error_desc_manualentry">Please enter your bank details manually or select another bank.</string>
-  <string name="stripe_accounts_error_desc_no_retry">Please select another bank.</string>
-  <string name="stripe_accounts_error_desc_retry">Please select another bank or try again.</string>
-  <string name="stripe_attachlinkedpaymentaccount_error_desc">Please enter your bank details manually</string>
-  <string name="stripe_attachlinkedpaymentaccount_error_desc_manual_entry">Please enter your bank details manually or select another bank.</string>
-  <string name="stripe_attachlinkedpaymentaccount_error_title">Your account number couldn’t be accessed at this time</string>
-  <string name="stripe_close_dialog_networking_desc">If you cancel now, your account will be linked to %1$s but it will not be saved to Link.</string>
-  <string name="stripe_close_dialog_networking_desc_no_business">If you cancel now, your account will be linked to this business but it will not be saved to Link.</string>
-  <string name="stripe_error_cta_close">Close</string>
-  <string name="stripe_error_cta_manual_entry">Enter bank details manually</string>
-  <string name="stripe_error_cta_retry">Try again</string>
-  <string name="stripe_error_cta_select_another_bank">Select another bank</string>
-  <string name="stripe_error_generic_desc">Your account can’t be linked at this time. Please try again later.</string>
-  <!-- Error pane -->
-  <string name="stripe_error_generic_title">Something went wrong</string>
-  <string name="stripe_error_planned_downtime_desc">Maintenance is scheduled to end at %1$s. Please select another bank or try again later.</string>
-  <string name="stripe_error_planned_downtime_title">%1$s is undergoing maintenance</string>
-  <string name="stripe_error_unplanned_downtime_desc">Please select another bank or try again later.</string>
-  <string name="stripe_error_unplanned_downtime_title">%1$s is currently unavailable</string>
-  <string name="stripe_exit_modal_cta_accept">Yes, exit</string>
-  <string name="stripe_exit_modal_cta_cancel">Cancel</string>
-  <string name="stripe_exit_modal_desc">Your bank account won’t be connected to %1$s and all progress will be lost.</string>
-  <string name="stripe_exit_modal_desc_no_business">Your bank account won’t be connected to this business and all progress will be lost.</string>
-  <!-- Exit modal -->
-  <string name="stripe_exit_modal_title">Exit without connecting?</string>
-  <string name="stripe_institutionpicker_manual_entry_desc">Enter your account and routing numbers</string>
-  <string name="stripe_institutionpicker_manual_entry_title">Don’t see your bank?</string>
-  <string name="stripe_institutionpicker_pane_error_desc">Try searching another bank</string>
-  <string name="stripe_institutionpicker_pane_error_desc_manual_entry">Try searching another bank or </string>
-  <string name="stripe_institutionpicker_pane_error_title">No results</string>
-  <!-- Institution picker -->
-  <string name="stripe_institutionpicker_pane_select_bank">Select bank</string>
-  <string name="stripe_institutionpicker_search_more_title">Search for more banks</string>
-  <string name="stripe_link_stepup_verification_desc">Enter the code sent to %1$s. We periodically request this extra step to keep your account safe.</string>
-  <!-- Networking step-up verification -->
-  <string name="stripe_link_stepup_verification_title">Verify your email</string>
-  <!-- Loading -->
-  <string name="stripe_loading_pill_label">Hang on, nearly there</string>
-  <string name="stripe_manualentry_account">Account number</string>
-  <string name="stripe_manualentry_accountconfirm">Confirm account number</string>
-  <string name="stripe_manualentry_cta">Submit</string>
-  <string name="stripe_manualentry_microdeposits_desc">Your bank information will be verified via micro-deposits to your account, typically within 1–2 business days. Only checking accounts are supported.</string>
-  <string name="stripe_manualentry_routing">Routing number</string>
-  <string name="stripe_manualentry_test_banner">Use test account</string>
-  <!-- Manual entry -->
-  <string name="stripe_manualentry_title">Enter bank details</string>
-  <string name="stripe_networking_link_login_warmup_cta_cancel">Cancel</string>
-  <string name="stripe_networking_link_login_warmup_cta_continue">Continue with Link</string>
-  <string name="stripe_networking_link_login_warmup_cta_skip">Not now</string>
-  <!-- Networking warmup -->
-  <string name="stripe_networking_link_login_warmup_description">Use information you previously saved with your Link account.</string>
-  <string name="stripe_networking_link_login_warmup_title">Continue with Link</string>
-  <string name="stripe_networking_save_to_link_verification_cta_negative">Not now</string>
-  <string name="stripe_networking_save_to_link_verification_title">Confirm it\'s you</string>
-  <!-- Networking signup -->
-  <string name="stripe_networking_signup_email_label">Email address</string>
-  <string name="stripe_networking_verification_desc">Enter the code sent to %1$s</string>
-  <!-- Networking verification -->
-  <string name="stripe_networking_verification_title">Confirm it\'s you</string>
-  <!-- Partner auth -->
-  <string name="stripe_prepane_cancel_cta">Cancel</string>
-  <string name="stripe_prepane_choose_different_bank_cta">Choose a different bank</string>
-  <string name="stripe_search">Search</string>
-  <string name="stripe_success_pane_desc_microdeposits">You can expect micro-deposits to account ••••%1$s in 1–2 days and an email with further instructions.</string>
-  <string name="stripe_success_pane_done">Done</string>
-  <string name="stripe_success_pane_done_with_merchant">Back to %1$s</string>
-  <!-- Success panes -->
-  <string name="stripe_success_pane_title">Success</string>
-  <string name="stripe_success_pane_title_microdeposits">Almost there</string>
-  <string name="stripe_validation_account_confirm_mismatch">Your account numbers don\'t match.</string>
-  <string name="stripe_validation_account_required">Account number required.</string>
-  <string name="stripe_validation_account_too_long">Invalid bank account number: must be at most 17 digits long.</string>
-  <string name="stripe_validation_no_us_routing">Invalid routing number.</string>
-  <string name="stripe_validation_routing_required">Routing number required.</string>
-  <string name="stripe_validation_routing_too_short">Please enter 9 digits for your routing number.</string>
-  <string name="stripe_verification.codeExpiredEmail">It looks like the verification code you provided is not valid anymore. Click “Resend code” and try again, or </string>
-  <string name="stripe_verification.codeExpiredSms">It looks like the verification code you provided is not valid anymore. Try again, or </string>
-  <!-- Verification (shared) -->
-  <string name="stripe_verification.codeInvalid">Hmm, that code didn’t work. Double check it and try again.</string>
-  <string name="stripe_verification.inTestMode">You\'re in test mode.</string>
-  <string name="stripe_verification.useTestCode">Use test code</string>
+    <!-- Institution picker -->
+    <string name="stripe_institutionpicker_pane_select_bank">Select bank</string>
+    <string name="stripe_institutionpicker_manual_entry_title">Don’t see your bank?</string>
+    <string name="stripe_institutionpicker_search_more_title">Search for more banks</string>
+    <string name="stripe_institutionpicker_manual_entry_desc">Enter your account and routing numbers</string>
+    <string name="stripe_institutionpicker_pane_error_title">No results</string>
+    <string name="stripe_institutionpicker_pane_error_desc">Try searching another bank</string>
+    <string name="stripe_institutionpicker_pane_error_desc_manual_entry">Try searching another bank or <annotation clickable="manual_entry">manually\u00a0enter\u00a0details</annotation>.</string>
+    <string name="stripe_search">Search</string>
+
+    <!-- Error pane -->
+    <string name="stripe_error_generic_title">Something went wrong</string>
+    <string name="stripe_error_generic_desc">Your account can’t be linked at this time. Please try again later.</string>
+    <string name="stripe_error_unplanned_downtime_title">%1$s is currently unavailable</string>
+    <string name="stripe_error_unplanned_downtime_desc">Please select another bank or try again later.</string>
+    <string name="stripe_error_planned_downtime_title">%1$s is undergoing maintenance</string>
+    <string name="stripe_error_planned_downtime_desc">Maintenance is scheduled to end at %1$s. Please select another bank or try again later.</string>
+    <string name="stripe_error_cta_select_another_bank">Select another bank</string>
+    <string name="stripe_error_cta_retry">Try again</string>
+    <string name="stripe_error_cta_manual_entry">Enter bank details manually</string>
+    <string name="stripe_accounts_error_desc_retry">Please select another bank or try again.</string>
+    <string name="stripe_attachlinkedpaymentaccount_error_title">Your account number couldn’t be accessed at this time</string>
+    <string name="stripe_attachlinkedpaymentaccount_error_desc">Please enter your bank details manually</string>
+    <string name="stripe_attachlinkedpaymentaccount_error_desc_manual_entry">Please enter your bank details manually or select another bank.</string>
+    <string name="stripe_error_cta_close">Close</string>
+    <string name="stripe_accounts_error_desc_manualentry">Please enter your bank details manually or select another bank.</string>
+    <string name="stripe_accounts_error_desc_no_retry">Please select another bank.</string>
+
+    <!-- Account picker -->
+    <string name="stripe_account_picker_singleselect_account">Select an account</string>
+    <string name="stripe_account_picker_multiselect_account">Select accounts</string>
+    <plurals name="stripe_account_picker_cta_link">
+        <item quantity="one">Connect account</item>
+        <item quantity="other">Connect accounts</item>
+    </plurals>
+
+    <!-- Success panes -->
+    <string name="stripe_success_pane_title">Success</string>
+    <string name="stripe_success_pane_title_microdeposits">Almost there</string>
+    <string name="stripe_success_pane_desc_microdeposits">You can expect micro-deposits to account ••••%1$s in 1–2 days and an email with further instructions.</string>
+    <plurals name="stripe_success_pane_desc">
+        <item quantity="one">Your account was connected.</item>
+        <item quantity="other">Your accounts were connected.</item>
+    </plurals>
+    <plurals name="stripe_success_pane_desc_link_success">
+        <item quantity="one">Your account was connected and saved with Link.</item>
+        <item quantity="other">Your accounts were connected and saved with Link.</item>
+    </plurals>
+    <plurals name="stripe_success_pane_desc_link_error">
+        <item quantity="one">Your account was connected <annotation bold="bold">but couldn\'t be saved with Link</annotation>.</item>
+        <item quantity="other">Your accounts were connected <annotation bold="bold">but couldn\'t be saved with Link</annotation>.</item>
+    </plurals>
+    <string name="stripe_success_pane_done">Done</string>
+    <string name="stripe_success_pane_done_with_merchant">Back to %1$s</string>
+    <string name="stripe_account_picker_error_no_payment_method_title">No payment accounts available</string>
+    <plurals name="stripe_account_picker_error_no_payment_method_desc">
+        <item quantity="one">We found %1$s %2$s account but you can only link checking or savings accounts to %3$s. Please try selecting another bank.</item>
+        <item quantity="other">We found %1$s %2$s accounts but you can only link checking or savings accounts to %3$s. Please try selecting another bank.</item>
+    </plurals>
+    <string name="stripe_account_picker_error_no_account_available_title">There was a problem accessing your %1$s account</string>
+
+    <!-- Manual entry -->
+    <string name="stripe_manualentry_title">Enter bank details</string>
+    <string name="stripe_manualentry_routing">Routing number</string>
+    <string name="stripe_manualentry_account">Account number</string>
+    <string name="stripe_manualentry_accountconfirm">Confirm account number</string>
+    <string name="stripe_manualentry_cta">Submit</string>
+    <string name="stripe_validation_routing_too_short">Please enter 9 digits for your routing number.</string>
+    <string name="stripe_validation_no_us_routing">Invalid routing number.</string>
+    <string name="stripe_validation_routing_required">Routing number required.</string>
+    <string name="stripe_validation_account_required">Account number required.</string>
+    <string name="stripe_validation_account_too_long">Invalid bank account number: must be at most 17 digits long.</string>
+    <string name="stripe_validation_account_confirm_mismatch">Your account numbers don\'t match.</string>
+    <string name="stripe_manualentry_microdeposits_desc">Your bank information will be verified via micro-deposits to your account, typically within 1–2 business days. Only checking accounts are supported.</string>
+    <string name="stripe_manualentry_test_banner">Use test account</string>
+
+    <!-- Networking signup -->
+    <string name="stripe_networking_signup_email_label">Email address</string>
+
+    <!-- Networking warmup -->
+    <string name="stripe_networking_link_login_warmup_description">Use information you previously saved with your Link account.</string>
+    <string name="stripe_networking_link_login_warmup_title">Continue with Link</string>
+    <string name="stripe_networking_link_login_warmup_cta_continue">Continue with Link</string>
+    <string name="stripe_networking_link_login_warmup_cta_skip">Not now</string>
+    <string name="stripe_networking_link_login_warmup_cta_cancel">Cancel</string>
+
+    <!-- Networking verification -->
+    <string name="stripe_networking_verification_title">Confirm it\'s you</string>
+    <string name="stripe_networking_verification_desc">Enter the code sent to %1$s</string>
+
+    <string name="stripe_networking_save_to_link_verification_title">Confirm it\'s you</string>
+    <string name="stripe_networking_save_to_link_verification_cta_negative">Not now</string>
+
+    <!-- Networking step-up verification -->
+    <string name="stripe_link_stepup_verification_title">Verify your email</string>
+    <string name="stripe_link_stepup_verification_desc">Enter the code sent to %1$s. We periodically request this extra step to keep your account safe.</string>
+    <string name="stripe_link_stepup_verification_resend_code"><annotation clickable="resend_code">Resend code</annotation></string>
+
+    <!-- Verification (shared) -->
+    <string name="stripe_verification.codeInvalid">Hmm, that code didn’t work. Double check it and try again.</string>
+    <string name="stripe_verification.codeExpiredEmail">It looks like the verification code you provided is not valid anymore. Click “Resend code” and try again, or <annotation clickable="contact_us">Contact us</annotation>.</string>
+    <string name="stripe_verification.codeExpiredSms">It looks like the verification code you provided is not valid anymore. Try again, or <annotation clickable="contact_us">Contact us</annotation>.</string>
+    <string name="stripe_verification.inTestMode">You\'re in test mode.</string>
+    <string name="stripe_verification.useTestCode">Use test code</string>
+
+    <!-- Exit modal -->
+    <string name="stripe_exit_modal_title">Exit without connecting?</string>
+    <string name="stripe_exit_modal_desc">Your bank account won’t be connected to %1$s and all progress will be lost.</string>
+    <string name="stripe_exit_modal_desc_no_business">Your bank account won’t be connected to this business and all progress will be lost.</string>
+    <string name="stripe_close_dialog_networking_desc">If you cancel now, your account will be linked to %1$s but it will not be saved to Link.</string>
+    <string name="stripe_close_dialog_networking_desc_no_business">If you cancel now, your account will be linked to this business but it will not be saved to Link.</string>
+    <string name="stripe_exit_modal_cta_accept">Yes, exit</string>
+    <string name="stripe_exit_modal_cta_cancel">Cancel</string>
+
+    <!-- Partner auth -->
+    <string name="stripe_prepane_cancel_cta">Cancel</string>
+    <string name="stripe_prepane_choose_different_bank_cta">Choose a different bank</string>
+
+    <!-- Loading -->
+    <string name="stripe_loading_pill_label">Hang on, nearly there</string>
 </resources>
