@@ -10,7 +10,6 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.PaymentMethodFactory
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.strings.resolve
 import org.junit.Rule
 import org.junit.Test
@@ -199,8 +198,6 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
         val metadata = PaymentMethodMetadataFactory.create()
         val viewModel = FakeBaseSheetViewModel.create(metadata, screen, canGoBack = true)
 
-        StripeTheme {
-            PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
-        }
+        PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
     }
 }
