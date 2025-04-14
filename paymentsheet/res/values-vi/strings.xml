@@ -187,6 +187,8 @@
   <string name="stripe_signup_deactivated_account_message">Tài khoản của bạn không còn hoạt động.</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">Đã xảy ra sự cố</string>
+  <!-- Accessibility description when payment button shows a successful transaction animation. -->
+  <string name="stripe_successful_transaction_description">Hoàn tất giao dịch</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Hủy và thanh toán theo cách khác</string>
   <!-- Text on a screen asking the user to approve a payment -->
