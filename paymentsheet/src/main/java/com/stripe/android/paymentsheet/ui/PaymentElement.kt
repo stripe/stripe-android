@@ -134,7 +134,10 @@ internal fun FormElement(
                 formArgs = formArguments,
                 usBankAccountFormArgs = usBankAccountFormArguments,
                 previouslyCompleted = previouslyCompletedUSBankAccountForm,
-                onCompleted = { previouslyCompletedUSBankAccountForm = true },
+                onCompleted = {
+                    usBankAccountFormArguments.onFormCompleted()
+                    previouslyCompletedUSBankAccountForm = true
+                },
                 modifier = Modifier.padding(horizontal = horizontalPadding),
                 enabled = enabled
             )

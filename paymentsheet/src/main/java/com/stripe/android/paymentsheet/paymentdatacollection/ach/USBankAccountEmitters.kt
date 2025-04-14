@@ -34,7 +34,6 @@ internal fun USBankAccountEmitters(
 
     LaunchedEffect(hasRequiredFields) {
         if (hasRequiredFields && !previouslyFormCompleted) {
-            usBankAccountFormArgs.onFormCompleted()
             onFormCompleted()
         }
     }
