@@ -19,6 +19,7 @@ import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.isSaved
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.ui.core.IsStripeCardScanAvailable
 import kotlinx.coroutines.CoroutineScope
@@ -159,6 +160,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onShowExistingPaymentOptions() {
+        fireAnalyticEvent(AnalyticEvent.PresentedSheet())
         fireEvent(
             PaymentSheetEvent.ShowExistingPaymentOptions(
                 mode = mode,
@@ -198,6 +200,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onSelectPaymentMethod(
         code: PaymentMethodCode,
     ) {
+        fireAnalyticEvent(AnalyticEvent.SelectedPaymentMethodType(code))
         fireEvent(
             PaymentSheetEvent.SelectPaymentMethod(
                 code = code,
@@ -217,6 +220,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onPaymentMethodFormShown(code: PaymentMethodCode) {
         durationProvider.start(DurationProvider.Key.ConfirmButtonClicked)
 
+        fireAnalyticEvent(AnalyticEvent.DisplayedPaymentMethodForm(code))
         fireEvent(
             PaymentSheetEvent.ShowPaymentOptionForm(
                 code = code,
@@ -228,6 +232,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onPaymentMethodFormInteraction(code: PaymentMethodCode) {
+        fireAnalyticEvent(AnalyticEvent.StartedInteractionWithPaymentMethodForm(code))
         fireEvent(
             PaymentSheetEvent.PaymentOptionFormInteraction(
                 code = code,
@@ -259,6 +264,11 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onSelectPaymentOption(
         paymentSelection: PaymentSelection,
     ) {
+        if (paymentSelection.isSaved) {
+            paymentSelection.code()?.let {
+                fireAnalyticEvent(AnalyticEvent.SelectedSavedPaymentMethod(it))
+            }
+        }
         fireEvent(
             PaymentSheetEvent.SelectPaymentOption(
                 mode = mode,
@@ -285,6 +295,9 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onPressConfirmButton(paymentSelection: PaymentSelection?) {
         val duration = durationProvider.end(DurationProvider.Key.ConfirmButtonClicked)
 
+        paymentSelection.code()?.let {
+            fireAnalyticEvent(AnalyticEvent.TappedConfirmButton(it))
+        }
         fireEvent(
             PaymentSheetEvent.PressConfirmButton(
                 currency = currency,

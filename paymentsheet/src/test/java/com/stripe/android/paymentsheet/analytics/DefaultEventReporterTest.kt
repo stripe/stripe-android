@@ -191,23 +191,25 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `onShowExistingPaymentOptions() should fire analytics request with expected event value`() {
-        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
-            simulateSuccessfulSetup()
-        }
-
-        completeEventReporter.onShowExistingPaymentOptions()
-
-        verify(analyticsRequestExecutor).executeAsync(
-            argWhere { req ->
-                req.params["event"] == "mc_complete_sheet_savedpm_show" &&
-                    req.params["link_enabled"] == true &&
-                    req.params["google_pay_enabled"] == true &&
-                    req.params["currency"] == "usd" &&
-                    req.params["locale"] == "en_US"
+    fun `onShowExistingPaymentOptions() should fire analytics request with expected event value`() =
+        runTest(testDispatcher) {
+            val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+                simulateSuccessfulSetup()
             }
-        )
-    }
+
+            completeEventReporter.onShowExistingPaymentOptions()
+
+            analyticEventCallbackRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
+            verify(analyticsRequestExecutor).executeAsync(
+                argWhere { req ->
+                    req.params["event"] == "mc_complete_sheet_savedpm_show" &&
+                        req.params["link_enabled"] == true &&
+                        req.params["google_pay_enabled"] == true &&
+                        req.params["currency"] == "usd" &&
+                        req.params["locale"] == "en_US"
+                }
+            )
+        }
 
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
     @Test
@@ -232,12 +234,13 @@ class DefaultEventReporterTest {
         }
 
     @Test
-    fun `onPaymentSuccess() should fire analytics request with expected event value`() {
+    fun `onPaymentSuccess() should fire analytics request with expected event value`() = runTest(testDispatcher) {
         // Log initial event so that duration is tracked
         val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
             simulateSuccessfulSetup()
             onShowExistingPaymentOptions()
         }
+        analyticEventCallbackRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
 
         completeEventReporter.onPaymentSuccess(
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
@@ -255,61 +258,65 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `onPaymentSuccess() for Google Pay payment should fire analytics request with expected event value`() {
-        // Log initial event so that duration is tracked
-        val completeEventReporter = createEventReporter(
-            mode = EventReporter.Mode.Complete,
-            duration = 2.seconds,
-        ) {
-            simulateSuccessfulSetup()
-            onShowExistingPaymentOptions()
+    fun `onPaymentSuccess() for Google Pay payment should fire analytics request with expected event value`() =
+        runTest(testDispatcher) {
+            // Log initial event so that duration is tracked
+            val completeEventReporter = createEventReporter(
+                mode = EventReporter.Mode.Complete,
+                duration = 2.seconds,
+            ) {
+                simulateSuccessfulSetup()
+                onShowExistingPaymentOptions()
+            }
+
+            completeEventReporter.onPaymentSuccess(
+                paymentSelection = PaymentSelection.Saved(
+                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                    walletType = PaymentSelection.Saved.WalletType.GooglePay,
+                ),
+                deferredIntentConfirmationType = null,
+            )
+
+            analyticEventCallbackRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
+            verify(analyticsRequestExecutor).executeAsync(
+                argWhere { req ->
+                    req.params["event"] == "mc_complete_payment_googlepay_success" &&
+                        req.params["duration"] == 2f
+                }
+            )
         }
 
-        completeEventReporter.onPaymentSuccess(
-            paymentSelection = PaymentSelection.Saved(
-                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                walletType = PaymentSelection.Saved.WalletType.GooglePay,
-            ),
-            deferredIntentConfirmationType = null,
-        )
-
-        verify(analyticsRequestExecutor).executeAsync(
-            argWhere { req ->
-                req.params["event"] == "mc_complete_payment_googlepay_success" &&
-                    req.params["duration"] == 2f
-            }
-        )
-    }
-
     @Test
-    fun `onPaymentSuccess() for Link payment should fire analytics request with expected event value`() {
-        // Log initial event so that duration is tracked
-        val completeEventReporter = createEventReporter(
-            mode = EventReporter.Mode.Complete,
-            duration = 123.milliseconds,
-        ) {
-            simulateSuccessfulSetup()
-            onShowExistingPaymentOptions()
+    fun `onPaymentSuccess() for Link payment should fire analytics request with expected event value`() =
+        runTest(testDispatcher) {
+            // Log initial event so that duration is tracked
+            val completeEventReporter = createEventReporter(
+                mode = EventReporter.Mode.Complete,
+                duration = 123.milliseconds,
+            ) {
+                simulateSuccessfulSetup()
+                onShowExistingPaymentOptions()
+            }
+            analyticEventCallbackRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
+
+            completeEventReporter.onPaymentSuccess(
+                paymentSelection = PaymentSelection.Saved(
+                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                    walletType = PaymentSelection.Saved.WalletType.Link,
+                ),
+                deferredIntentConfirmationType = null,
+            )
+
+            verify(analyticsRequestExecutor).executeAsync(
+                argWhere { req ->
+                    req.params["event"] == "mc_complete_payment_link_success" &&
+                        req.params["duration"] == 0.123f
+                }
+            )
         }
 
-        completeEventReporter.onPaymentSuccess(
-            paymentSelection = PaymentSelection.Saved(
-                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                walletType = PaymentSelection.Saved.WalletType.Link,
-            ),
-            deferredIntentConfirmationType = null,
-        )
-
-        verify(analyticsRequestExecutor).executeAsync(
-            argWhere { req ->
-                req.params["event"] == "mc_complete_payment_link_success" &&
-                    req.params["duration"] == 0.123f
-            }
-        )
-    }
-
     @Test
-    fun `onPaymentFailure() should fire analytics request with expected event value`() {
+    fun `onPaymentFailure() should fire analytics request with expected event value`() = runTest(testDispatcher) {
         // Log initial event so that duration is tracked
         val completeEventReporter = createEventReporter(
             mode = EventReporter.Mode.Complete,
@@ -318,6 +325,7 @@ class DefaultEventReporterTest {
             simulateSuccessfulSetup()
             onShowExistingPaymentOptions()
         }
+        analyticEventCallbackRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
 
         completeEventReporter.onPaymentFailure(
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
@@ -367,7 +375,7 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `onSelectPaymentOption() should fire analytics request with expected event value`() {
+    fun `onSelectPaymentOption() should fire analytics request with expected event value`() = runTest(testDispatcher) {
         val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
             simulateSuccessfulSetup()
         }
@@ -376,6 +384,7 @@ class DefaultEventReporterTest {
             paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         )
 
+        analyticEventCallbackRule.assertMatchesExpectedEvent(AnalyticEvent.SelectedSavedPaymentMethod("card"))
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "mc_custom_paymentoption_savedpm_select" &&
@@ -386,25 +395,29 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `onPaymentMethodFormShown() should fire analytics request with expected event value`() {
-        val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
-            simulateSuccessfulSetup()
+    fun `onPaymentMethodFormShown() should fire analytics request with expected event value`() =
+        runTest(testDispatcher) {
+            val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
+                simulateSuccessfulSetup()
+            }
+
+            customEventReporter.onPaymentMethodFormShown(
+                code = "card",
+            )
+            analyticEventCallbackRule.assertMatchesExpectedEvent(
+                AnalyticEvent.DisplayedPaymentMethodForm("card")
+            )
+
+            verify(analyticsRequestExecutor).executeAsync(
+                argWhere { req ->
+                    req.params["event"] == "mc_form_shown" &&
+                        req.params["selected_lpm"] == "card"
+                }
+            )
         }
 
-        customEventReporter.onPaymentMethodFormShown(
-            code = "card",
-        )
-
-        verify(analyticsRequestExecutor).executeAsync(
-            argWhere { req ->
-                req.params["event"] == "mc_form_shown" &&
-                    req.params["selected_lpm"] == "card"
-            }
-        )
-    }
-
     @Test
-    fun `onPaymentMethodFormShown() should restart duration on call`() {
+    fun `onPaymentMethodFormShown() should restart duration on call`() = runTest(testDispatcher) {
         val durationProvider = FakeDurationProvider()
 
         val customEventReporter = createEventReporter(
@@ -416,6 +429,9 @@ class DefaultEventReporterTest {
 
         customEventReporter.onPaymentMethodFormShown(
             code = "card",
+        )
+        analyticEventCallbackRule.assertMatchesExpectedEvent(
+            AnalyticEvent.DisplayedPaymentMethodForm("card")
         )
 
         assertThat(
@@ -429,22 +445,26 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `onPaymentMethodFormInteraction() should fire analytics request with expected event value`() {
-        val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
-            simulateSuccessfulSetup()
-        }
-
-        customEventReporter.onPaymentMethodFormInteraction(
-            code = "card",
-        )
-
-        verify(analyticsRequestExecutor).executeAsync(
-            argWhere { req ->
-                req.params["event"] == "mc_form_interacted" &&
-                    req.params["selected_lpm"] == "card"
+    fun `onPaymentMethodFormInteraction() should fire analytics request with expected event value`() =
+        runTest(testDispatcher) {
+            val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
+                simulateSuccessfulSetup()
             }
-        )
-    }
+
+            customEventReporter.onPaymentMethodFormInteraction(
+                code = "card",
+            )
+            analyticEventCallbackRule.assertMatchesExpectedEvent(
+                AnalyticEvent.StartedInteractionWithPaymentMethodForm("card")
+            )
+
+            verify(analyticsRequestExecutor).executeAsync(
+                argWhere { req ->
+                    req.params["event"] == "mc_form_interacted" &&
+                        req.params["selected_lpm"] == "card"
+                }
+            )
+        }
 
     @Test
     fun `onPaymentMethodFormCompleted() should fire analytics request with expected event value`() =
@@ -668,7 +688,7 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `onPressConfirmButton() should fire analytics request with expected event value`() {
+    fun `onPressConfirmButton() should fire analytics request with expected event value`() = runTest(testDispatcher) {
         val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
             simulateSuccessfulSetup()
         }
@@ -684,6 +704,9 @@ class DefaultEventReporterTest {
             )
         )
 
+        analyticEventCallbackRule.assertMatchesExpectedEvent(
+            AnalyticEvent.TappedConfirmButton("cashapp")
+        )
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "mc_confirm_button_tapped" &&
@@ -814,39 +837,45 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `Send correct link_mode when selecting Bank payment method type for Instant Debits`() {
-        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
-            simulateInit()
-            simulateSuccessfulSetup(linkMode = LinkMode.LinkPaymentMethod)
+    fun `Send correct link_mode when selecting Bank payment method type for Instant Debits`() =
+        runTest(testDispatcher) {
+            val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+                simulateInit()
+                simulateSuccessfulSetup(linkMode = LinkMode.LinkPaymentMethod)
+            }
+
+            completeEventReporter.onSelectPaymentMethod("link")
+
+            analyticEventCallbackRule.assertMatchesExpectedEvent(AnalyticEvent.SelectedPaymentMethodType("link"))
+
+            val argumentCaptor = argumentCaptor<AnalyticsRequest>()
+            verify(analyticsRequestExecutor).executeAsync(argumentCaptor.capture())
+
+            val errorType = argumentCaptor.firstValue.params["link_context"] as String
+            assertThat(errorType).isEqualTo("instant_debits")
         }
 
-        completeEventReporter.onSelectPaymentMethod("link")
-
-        val argumentCaptor = argumentCaptor<AnalyticsRequest>()
-        verify(analyticsRequestExecutor).executeAsync(argumentCaptor.capture())
-
-        val errorType = argumentCaptor.firstValue.params["link_context"] as String
-        assertThat(errorType).isEqualTo("instant_debits")
-    }
-
     @Test
-    fun `Send correct link_mode when selecting Bank payment method type for Link Card Brand`() {
-        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
-            simulateInit()
-            simulateSuccessfulSetup(linkMode = LinkMode.LinkCardBrand)
+    fun `Send correct link_mode when selecting Bank payment method type for Link Card Brand`() =
+        runTest(testDispatcher) {
+            val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+                simulateInit()
+                simulateSuccessfulSetup(linkMode = LinkMode.LinkCardBrand)
+            }
+
+            completeEventReporter.onSelectPaymentMethod("link")
+
+            analyticEventCallbackRule.assertMatchesExpectedEvent(AnalyticEvent.SelectedPaymentMethodType("link"))
+
+            val argumentCaptor = argumentCaptor<AnalyticsRequest>()
+            verify(analyticsRequestExecutor).executeAsync(argumentCaptor.capture())
+
+            val errorType = argumentCaptor.firstValue.params["link_context"] as String
+            assertThat(errorType).isEqualTo("link_card_brand")
         }
 
-        completeEventReporter.onSelectPaymentMethod("link")
-
-        val argumentCaptor = argumentCaptor<AnalyticsRequest>()
-        verify(analyticsRequestExecutor).executeAsync(argumentCaptor.capture())
-
-        val errorType = argumentCaptor.firstValue.params["link_context"] as String
-        assertThat(errorType).isEqualTo("link_card_brand")
-    }
-
     @Test
-    fun `Send correct link_context when pressing confirm button for Instant Debits`() {
+    fun `Send correct link_context when pressing confirm button for Instant Debits`() = runTest(testDispatcher) {
         val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
             simulateInit()
         }
@@ -854,6 +883,10 @@ class DefaultEventReporterTest {
         val selection = mockUSBankAccountPaymentSelection(linkMode = LinkMode.LinkPaymentMethod)
         completeEventReporter.onPressConfirmButton(selection)
 
+        analyticEventCallbackRule.assertMatchesExpectedEvent(
+            AnalyticEvent.TappedConfirmButton("us_bank_account")
+        )
+
         val argumentCaptor = argumentCaptor<AnalyticsRequest>()
         verify(analyticsRequestExecutor).executeAsync(argumentCaptor.capture())
 
@@ -862,13 +895,17 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `Send correct link_context when pressing confirm button for Link Card Brand`() {
+    fun `Send correct link_context when pressing confirm button for Link Card Brand`() = runTest(testDispatcher) {
         val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
             simulateInit()
         }
 
         val selection = mockUSBankAccountPaymentSelection(linkMode = LinkMode.LinkCardBrand)
         completeEventReporter.onPressConfirmButton(selection)
+
+        analyticEventCallbackRule.assertMatchesExpectedEvent(
+            AnalyticEvent.TappedConfirmButton("us_bank_account")
+        )
 
         val argumentCaptor = argumentCaptor<AnalyticsRequest>()
         verify(analyticsRequestExecutor).executeAsync(argumentCaptor.capture())
@@ -878,13 +915,17 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `Send correct link_context when pressing confirm button for Link card payments`() {
+    fun `Send correct link_context when pressing confirm button for Link card payments`() = runTest(testDispatcher) {
         val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
             simulateInit()
         }
 
         val selection = mockUSBankAccountPaymentSelection(linkMode = null)
         completeEventReporter.onPressConfirmButton(selection)
+
+        analyticEventCallbackRule.assertMatchesExpectedEvent(
+            AnalyticEvent.TappedConfirmButton("us_bank_account")
+        )
 
         val argumentCaptor = argumentCaptor<AnalyticsRequest>()
         verify(analyticsRequestExecutor).executeAsync(argumentCaptor.capture())
@@ -1083,7 +1124,10 @@ class DefaultEventReporterTest {
         return PaymentSelection.New.USBankAccount(
             label = "Test",
             iconResource = 0,
-            paymentMethodCreateParams = mock(),
+            paymentMethodCreateParams = PaymentMethodCreateParams(
+                code = PaymentMethod.Type.USBankAccount.code,
+                requiresMandate = false,
+            ),
             customerRequestedSave = mock(),
             input = PaymentSelection.New.USBankAccount.Input(
                 name = "",
