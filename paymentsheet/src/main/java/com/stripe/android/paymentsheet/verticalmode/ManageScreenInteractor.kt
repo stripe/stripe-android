@@ -8,6 +8,7 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.SavedPaymentMethod
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
@@ -38,15 +39,41 @@ internal interface ManageScreenInteractor {
         val isEditing: Boolean,
         val canEdit: Boolean,
     ) {
-        val title: ResolvableString
+        private val containsOnlyCards: Boolean by lazy {
+            paymentMethods.isNotEmpty() && paymentMethods.all { displayable ->
+                displayable.savedPaymentMethod is SavedPaymentMethod.Card
+            }
+        }
+
+        private val manageTitle: ResolvableString
             get() {
-                val title = if (isEditing) {
+                val title = if (containsOnlyCards) {
+                    R.string.stripe_paymentsheet_manage_cards
+                } else {
                     R.string.stripe_paymentsheet_manage_payment_methods
+                }
+
+                return title.resolvableString
+            }
+
+        private val selectTitle: ResolvableString
+            get() {
+                val title = if (containsOnlyCards) {
+                    R.string.stripe_paymentsheet_select_card
                 } else {
                     R.string.stripe_paymentsheet_select_payment_method
                 }
 
                 return title.resolvableString
+            }
+
+        val title: ResolvableString
+            get() {
+                return if (isEditing) {
+                    manageTitle
+                } else {
+                    selectTitle
+                }
             }
 
         fun topBarState(interactor: ManageScreenInteractor): PaymentSheetTopBarState {

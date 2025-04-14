@@ -107,7 +107,8 @@ internal class DefaultEmbeddedContentHelperTest {
         val embeddedFormHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
-            embeddedSelectionHolder = selectionHolder
+            embeddedSelectionHolder = selectionHolder,
+            savedStateHandle = savedStateHandle,
         )
         val confirmationHandler = FakeConfirmationHandler()
         val eventReporter = FakeEventReporter()

@@ -238,6 +238,14 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
+    override fun onPaymentMethodFormCompleted(code: String) {
+        fireAnalyticEvent(
+            AnalyticEvent.CompletedPaymentMethodForm(
+                paymentMethodType = code,
+            )
+        )
+    }
+
     override fun onCardNumberCompleted() {
         fireEvent(
             PaymentSheetEvent.CardNumberCompleted(

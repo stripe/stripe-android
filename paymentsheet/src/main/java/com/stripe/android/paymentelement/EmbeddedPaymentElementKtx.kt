@@ -1,7 +1,6 @@
 package com.stripe.android.paymentelement
 
 import androidx.activity.compose.LocalActivityResultRegistryOwner
-import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -21,7 +20,6 @@ import java.util.UUID
  * This *must* be called unconditionally as part of the initialization path.
  */
 @ExperimentalEmbeddedPaymentElementApi
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
 fun rememberEmbeddedPaymentElement(
     builder: EmbeddedPaymentElement.Builder

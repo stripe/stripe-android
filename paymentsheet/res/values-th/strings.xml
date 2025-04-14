@@ -187,6 +187,8 @@
   <string name="stripe_signup_deactivated_account_message">บัญชีของคุณถูกปิดใช้งานแล้ว</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">มีข้อผิดพลาดเกิดขึ้น</string>
+  <!-- Accessibility description when payment button shows a successful transaction animation. -->
+  <string name="stripe_successful_transaction_description">ธุรกรรมเสร็จสมบูรณ์</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">ยกเลิกและชำระเงินด้วยวิธีอื่น</string>
   <!-- Text on a screen asking the user to approve a payment -->

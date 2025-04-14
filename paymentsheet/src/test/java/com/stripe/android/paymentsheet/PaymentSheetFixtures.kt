@@ -4,6 +4,7 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import androidx.core.graphics.toColorInt
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentMethod
@@ -126,6 +127,22 @@ internal object PaymentSheetFixtures {
     internal val CONFIG_CUSTOMER_WITH_EXTERNAL_PAYMENT_METHODS
         get() = CONFIG_CUSTOMER.copy(
             externalPaymentMethods = listOf("external_paypal", "external_fawry")
+        )
+
+    internal val CONFIG_CUSTOMER_WITH_CUSTOM_PAYMENT_METHODS
+        get() = CONFIG_CUSTOMER.copy(
+            customPaymentMethods = listOf(
+                PaymentSheet.CustomPaymentMethod(
+                    id = "cpmt_123",
+                    subtitle = "Pay now with BuFoPay".resolvableString,
+                    disableBillingDetailCollection = false,
+                ),
+                PaymentSheet.CustomPaymentMethod(
+                    id = "cpmt_456",
+                    subtitle = "Pay now with PayPal".resolvableString,
+                    disableBillingDetailCollection = true,
+                ),
+            )
         )
 
     internal val CONFIG_BILLING_DETAILS_COLLECTION = PaymentSheet.Configuration(

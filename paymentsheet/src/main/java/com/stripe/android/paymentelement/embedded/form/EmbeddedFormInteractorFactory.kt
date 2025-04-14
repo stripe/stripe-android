@@ -28,6 +28,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
         val formHelper = embeddedFormHelperFactory.create(
             coroutineScope = viewModelScope,
             paymentMethodMetadata = paymentMethodMetadata,
+            eventReporter = eventReporter,
             selectionUpdater = {
                 embeddedSelectionHolder.set(it)
             }
