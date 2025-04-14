@@ -245,14 +245,9 @@ private fun SecondaryFields(
             modifier = Modifier.padding(vertical = 16.dp),
             label = stringResource(R.string.stripe_link_sign_up),
             state = when {
-                signUpScreenState.submitState == SignUpScreenState.SubmitState.Submitting ->
-                    PrimaryButtonState.Processing
-                signUpScreenState.submitState == SignUpScreenState.SubmitState.Success ->
-                    PrimaryButtonState.Completed
-                signUpScreenState.signUpEnabled ->
-                    PrimaryButtonState.Enabled
-                else ->
-                    PrimaryButtonState.Disabled
+                signUpScreenState.isSubmitting -> PrimaryButtonState.Processing
+                signUpScreenState.signUpEnabled -> PrimaryButtonState.Enabled
+                else -> PrimaryButtonState.Disabled
             },
             onButtonClick = {
                 onSignUpClick()

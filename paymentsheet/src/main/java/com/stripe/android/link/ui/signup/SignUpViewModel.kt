@@ -166,7 +166,10 @@ internal class SignUpViewModel @Inject constructor(
     fun onSignUpClick() {
         clearError()
         viewModelScope.launch {
-            updateState { it.copy(submitState = SignUpScreenState.SubmitState.Submitting) }
+            updateState {
+                it.copy(isSubmitting = true)
+            }
+
             val signupResult = linkAuth.signUp(
                 email = emailController.fieldValue.value,
                 phoneNumber = phoneNumberController.getE164PhoneNumber(phoneNumberController.fieldValue.value),
@@ -195,12 +198,9 @@ internal class SignUpViewModel @Inject constructor(
                     signupResult.handle()
                 }
             }
+
             updateState {
-                val submitState = when (signupResult) {
-                    is LinkAuthResult.Success -> SignUpScreenState.SubmitState.Success
-                    else -> SignUpScreenState.SubmitState.Idle
-                }
-                it.copy(submitState = submitState)
+                it.copy(isSubmitting = false)
             }
         }
     }

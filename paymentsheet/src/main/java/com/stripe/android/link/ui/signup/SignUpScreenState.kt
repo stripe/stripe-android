@@ -2,7 +2,6 @@ package com.stripe.android.link.ui.signup
 
 import androidx.compose.runtime.Immutable
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.link.account.LinkAuthResult
 
 @Immutable
 internal data class SignUpScreenState(
@@ -11,15 +10,9 @@ internal data class SignUpScreenState(
     val requiresNameCollection: Boolean,
     val showKeyboardOnOpen: Boolean,
     val signUpState: SignUpState = SignUpState.InputtingPrimaryField,
-    val submitState: SubmitState = SubmitState.Idle,
+    val isSubmitting: Boolean = false,
     val errorMessage: ResolvableString? = null
 ) {
     val canEditForm: Boolean
-        get() = submitState == SubmitState.Idle
-
-    enum class SubmitState {
-        Idle,
-        Submitting,
-        Success
-    }
+        get() = !isSubmitting
 }
