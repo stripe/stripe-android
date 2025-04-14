@@ -72,6 +72,8 @@ const val TEST_TAG_ACCOUNT_DETAILS = "TEST_TAG_ACCOUNT_DETAILS"
 internal fun USBankAccountForm(
     formArgs: FormArguments,
     usBankAccountFormArgs: USBankAccountFormArguments,
+    previouslyCompleted: Boolean,
+    onCompleted: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean
 ) {
@@ -105,6 +107,8 @@ internal fun USBankAccountForm(
     USBankAccountEmitters(
         viewModel = viewModel,
         usBankAccountFormArgs = usBankAccountFormArgs,
+        previouslyFormCompleted = previouslyCompleted,
+        onFormCompleted = onCompleted,
     )
 
     BankAccountForm(

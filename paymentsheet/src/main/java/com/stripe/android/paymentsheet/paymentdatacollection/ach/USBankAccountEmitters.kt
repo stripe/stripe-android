@@ -11,6 +11,8 @@ import com.stripe.android.uicore.utils.collectAsState
 internal fun USBankAccountEmitters(
     viewModel: USBankAccountFormViewModel,
     usBankAccountFormArgs: USBankAccountFormArguments,
+    previouslyFormCompleted: Boolean,
+    onFormCompleted: () -> Unit,
 ) {
     val screenState by viewModel.currentScreenState.collectAsState()
     val hasRequiredFields by viewModel.requiredFields.collectAsState()
@@ -27,6 +29,13 @@ internal fun USBankAccountEmitters(
             usBankAccountFormArgs.onUpdatePrimaryButtonUIState {
                 it?.copy(enabled = hasRequiredFields)
             }
+        }
+    }
+
+    LaunchedEffect(hasRequiredFields) {
+        if (hasRequiredFields && !previouslyFormCompleted) {
+            usBankAccountFormArgs.onFormCompleted()
+            onFormCompleted()
         }
     }
 
