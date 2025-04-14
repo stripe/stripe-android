@@ -39,6 +39,22 @@ class DefaultFormActivityStateHelperTest {
                     formatArgs = arrayOf("$10.99")
                 )
             )
+            assertThat(state.shouldDisplayLockIcon).isTrue()
+        }
+    }
+
+    @Test
+    fun `state is initialized correctly when formSheetAction=continue`() = testScenario(
+        config = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
+            .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
+            .build()
+    ) {
+        stateHolder.state.test {
+            val state = awaitItem()
+            assertThat(state.primaryButtonLabel).isEqualTo(
+                resolvableString(R.string.stripe_continue_button_label)
+            )
+            assertThat(state.shouldDisplayLockIcon).isFalse()
         }
     }
 
@@ -46,6 +62,20 @@ class DefaultFormActivityStateHelperTest {
     fun `state returns label from config if provided`() {
         testScenario(
             config = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
+                .primaryButtonLabel("Test Label")
+                .build()
+        ) {
+            stateHolder.state.test {
+                assertThat(awaitItem().primaryButtonLabel).isEqualTo("Test Label".resolvableString)
+            }
+        }
+    }
+
+    @Test
+    fun `state returns label from config if provided when formSheetAction=continue`() {
+        testScenario(
+            config = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
+                .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
                 .primaryButtonLabel("Test Label")
                 .build()
         ) {
