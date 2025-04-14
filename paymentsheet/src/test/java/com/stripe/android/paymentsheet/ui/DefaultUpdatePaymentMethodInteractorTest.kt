@@ -4,7 +4,6 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.exception.stripeErrorMessage
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -16,7 +15,6 @@ import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.C
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.updateCardBrandErrorMessage
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.updatesFailedErrorMessage
 import com.stripe.android.testing.CoroutineTestRule
-import com.stripe.android.testing.FeatureFlagTestRule
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
@@ -25,12 +23,6 @@ import org.junit.Test
 
 @Suppress("LargeClass")
 class DefaultUpdatePaymentMethodInteractorTest {
-
-    @get:Rule
-    val editSavedCardPaymentMethodEnabledFeatureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.editSavedCardPaymentMethodEnabled,
-        isEnabled = false
-    )
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
@@ -638,7 +630,6 @@ class DefaultUpdatePaymentMethodInteractorTest {
         onBrandChoiceSelected: (CardBrand) -> Unit = {},
         testBlock: suspend TestParams.() -> Unit
     ) {
-        editSavedCardPaymentMethodEnabledFeatureFlagTestRule.setEnabled(editSavedCardPaymentMethodEnabled)
         val interactor = DefaultUpdatePaymentMethodInteractor(
             isLiveMode = isLiveMode,
             canRemove = canRemove,
@@ -653,7 +644,8 @@ class DefaultUpdatePaymentMethodInteractorTest {
             shouldShowSetAsDefaultCheckbox = shouldShowSetAsDefaultCheckbox,
             isDefaultPaymentMethod = isDefaultPaymentMethod,
             onUpdateSuccess = onUpdateSuccess,
-            editCardDetailsInteractorFactory = editCardDetailsInteractorFactory
+            editCardDetailsInteractorFactory = editCardDetailsInteractorFactory,
+            allowCardEdit = editSavedCardPaymentMethodEnabled
         )
 
         TestParams(interactor).apply { runTest { testBlock() } }

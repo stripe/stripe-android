@@ -17,6 +17,7 @@ internal object CommonConfigurationFactory {
             PaymentSheet.BillingDetailsCollectionConfiguration(),
         preferredNetworks: List<CardBrand> = emptyList(),
         allowsRemovalOfLastSavedPaymentMethod: Boolean = true,
+        updatePaymentMethodEnabled: Boolean = false,
         paymentMethodOrder: List<String> = emptyList(),
         externalPaymentMethods: List<String> = emptyList(),
         customPaymentMethods: List<PaymentSheet.CustomPaymentMethod> = emptyList(),
@@ -38,5 +39,6 @@ internal object CommonConfigurationFactory {
         customPaymentMethods = customPaymentMethods,
         cardBrandAcceptance = cardBrandAcceptance,
         link = link,
+        updatePaymentMethodEnabled = updatePaymentMethodEnabled,
     )
 }

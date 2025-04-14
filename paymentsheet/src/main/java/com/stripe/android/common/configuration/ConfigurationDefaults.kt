@@ -10,6 +10,7 @@ internal object ConfigurationDefaults {
     const val allowsDelayedPaymentMethods: Boolean = false
     const val allowsPaymentMethodsRequiringShippingAddress: Boolean = false
     const val allowsRemovalOfLastSavedPaymentMethod: Boolean = true
+    const val updatePaymentMethodEnabled: Boolean = false
     val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance()
     val billingDetails: PaymentSheet.BillingDetails = PaymentSheet.BillingDetails()
     val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =

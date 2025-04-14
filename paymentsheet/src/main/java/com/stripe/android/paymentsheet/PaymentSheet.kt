@@ -612,6 +612,8 @@ class PaymentSheet internal constructor(
         internal val allowsRemovalOfLastSavedPaymentMethod: Boolean =
             ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
 
+        internal val updatePaymentMethodEnabled: Boolean = ConfigurationDefaults.updatePaymentMethodEnabled,
+
         internal val paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder,
 
         internal val externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods,
@@ -771,6 +773,7 @@ class PaymentSheet internal constructor(
             private var preferredNetworks: List<CardBrand> = ConfigurationDefaults.preferredNetworks
             private var allowsRemovalOfLastSavedPaymentMethod: Boolean =
                 ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod
+            private var updatePaymentMethodEnabled: Boolean = ConfigurationDefaults.updatePaymentMethodEnabled
             private var paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder
             private var externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods
             private var paymentMethodLayout: PaymentMethodLayout = ConfigurationDefaults.paymentMethodLayout
@@ -909,6 +912,14 @@ class PaymentSheet internal constructor(
                 this.link = link
             }
 
+            /**
+             * (Private Preview) This parameter is expected to be removed once we GA this feature
+             * When using customerSessions, allow users to update their saved cards
+             */
+            fun updatePaymentMethodEnabled(enabled: Boolean): Builder = apply {
+                this.updatePaymentMethodEnabled = enabled
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -923,6 +934,7 @@ class PaymentSheet internal constructor(
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
                 preferredNetworks = preferredNetworks,
                 allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
+                updatePaymentMethodEnabled = updatePaymentMethodEnabled,
                 paymentMethodOrder = paymentMethodOrder,
                 externalPaymentMethods = externalPaymentMethods,
                 paymentMethodLayout = paymentMethodLayout,

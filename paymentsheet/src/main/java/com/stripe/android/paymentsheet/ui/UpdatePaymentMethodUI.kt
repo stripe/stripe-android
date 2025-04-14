@@ -316,6 +316,7 @@ private fun PreviewUpdatePaymentMethodUI() {
             shouldShowSetAsDefaultCheckbox = true,
             isDefaultPaymentMethod = false,
             onUpdateSuccess = {},
+            allowCardEdit = true,
         ),
         modifier = Modifier
     )

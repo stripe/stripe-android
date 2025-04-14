@@ -365,6 +365,7 @@ internal class CustomerSheetScreenshotTest {
                 shouldShowSetAsDefaultCheckbox = false,
                 isDefaultPaymentMethod = false,
                 onUpdateSuccess = {},
+                allowCardEdit = false,
             ),
             isLiveMode = true,
         )

@@ -166,6 +166,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
         internal val preferredNetworks: List<CardBrand>,
         internal val allowsRemovalOfLastSavedPaymentMethod: Boolean,
+        internal val updatePaymentMethodEnabled: Boolean,
         internal val paymentMethodOrder: List<String>,
         internal val externalPaymentMethods: List<String>,
         internal val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
@@ -196,6 +197,8 @@ class EmbeddedPaymentElement @Inject internal constructor(
             private var preferredNetworks: List<CardBrand> = ConfigurationDefaults.preferredNetworks
             private var allowsRemovalOfLastSavedPaymentMethod: Boolean =
                 ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod
+            private var updatePaymentMethodEnabled: Boolean =
+                ConfigurationDefaults.updatePaymentMethodEnabled
             private var paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder
             private var externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods
             private var cardBrandAcceptance: PaymentSheet.CardBrandAcceptance =
@@ -319,6 +322,14 @@ class EmbeddedPaymentElement @Inject internal constructor(
             }
 
             /**
+             * (Private Preview) This parameter is expected to be removed once we GA this feature
+             * When using customerSessions, allow users to update their saved cards
+             */
+            fun updatePaymentMethodEnabled(updatePaymentMethodEnabled: Boolean) {
+                this.updatePaymentMethodEnabled = updatePaymentMethodEnabled
+            }
+
+            /**
              * By default, Stripe will use a dynamic ordering that optimizes payment method display for the
              * customer. You can override the default order in which payment methods are displayed with
              * a list of payment method types.
@@ -418,6 +429,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
                 preferredNetworks = preferredNetworks,
                 allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
+                updatePaymentMethodEnabled = updatePaymentMethodEnabled,
                 paymentMethodOrder = paymentMethodOrder,
                 externalPaymentMethods = externalPaymentMethods,
                 cardBrandAcceptance = cardBrandAcceptance,

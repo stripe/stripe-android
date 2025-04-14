@@ -423,7 +423,7 @@ internal class PlaygroundSettings private constructor(
             CustomerSessionRedisplaySettingsDefinition,
             CustomerSessionRedisplayFiltersSettingsDefinition,
             CustomerSessionOverrideRedisplaySettingsDefinition,
-            FeatureFlagSettingsDefinition(FeatureFlags.editSavedCardPaymentMethodEnabled),
+            UpdatePaymentMethodEnabledSettingsDefinition,
             CustomerSettingsDefinition,
             CheckoutModeSettingsDefinition,
             LinkSettingsDefinition,

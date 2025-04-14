@@ -24,6 +24,7 @@ internal object PaymentMethodMetadataFactory {
             PaymentSheet.BillingDetailsCollectionConfiguration(),
         allowsDelayedPaymentMethods: Boolean = true,
         allowsPaymentMethodsRequiringShippingAddress: Boolean = false,
+        updatePaymentMethodEnabled: Boolean = false,
         paymentMethodOrder: List<String> = emptyList(),
         shippingDetails: AddressDetails? = null,
         cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
@@ -70,7 +71,8 @@ internal object PaymentMethodMetadataFactory {
             cardBrandFilter = cardBrandFilter,
             paymentMethodIncentive = paymentMethodIncentive,
             elementsSessionId = elementsSessionId,
-            financialConnectionsAvailability = financialConnectionsAvailability
+            financialConnectionsAvailability = financialConnectionsAvailability,
+            updatePaymentMethodEnabled = updatePaymentMethodEnabled
         )
     }
 

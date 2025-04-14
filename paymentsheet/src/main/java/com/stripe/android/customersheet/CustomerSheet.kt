@@ -226,6 +226,9 @@ class CustomerSheet internal constructor(
         internal val allowsRemovalOfLastSavedPaymentMethod: Boolean =
             ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
 
+        internal val updatePaymentMethodEnabled: Boolean =
+            ConfigurationDefaults.updatePaymentMethodEnabled,
+
         internal val paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder,
 
         internal val cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
@@ -254,6 +257,7 @@ class CustomerSheet internal constructor(
                 .paymentMethodOrder(paymentMethodOrder)
         }
 
+        @SuppressWarnings("TooManyFunctions")
         class Builder internal constructor(private val merchantDisplayName: String) {
             private var appearance: PaymentSheet.Appearance = ConfigurationDefaults.appearance
             private var googlePayEnabled: Boolean = ConfigurationDefaults.googlePayEnabled
@@ -264,6 +268,7 @@ class CustomerSheet internal constructor(
             private var preferredNetworks: List<CardBrand> = ConfigurationDefaults.preferredNetworks
             private var allowsRemovalOfLastSavedPaymentMethod: Boolean =
                 ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod
+            private var updatePaymentMethodEnabled: Boolean = ConfigurationDefaults.updatePaymentMethodEnabled
             private var paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder
             private var cardBrandAcceptance: CardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance
 
@@ -328,6 +333,14 @@ class CustomerSheet internal constructor(
                 this.cardBrandAcceptance = cardBrandAcceptance
             }
 
+            /**
+             * (Private Preview) This parameter is expected to be removed once we GA this feature
+             * When using customerSessions, allow users to update their saved cards
+             */
+            fun updatePaymentMethodEnabled(updatePaymentMethodEnabled: Boolean) = apply {
+                this.updatePaymentMethodEnabled = updatePaymentMethodEnabled
+            }
+
             fun build() = Configuration(
                 appearance = appearance,
                 googlePayEnabled = googlePayEnabled,
@@ -337,6 +350,7 @@ class CustomerSheet internal constructor(
                 merchantDisplayName = merchantDisplayName,
                 preferredNetworks = preferredNetworks,
                 allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
+                updatePaymentMethodEnabled = updatePaymentMethodEnabled,
                 paymentMethodOrder = paymentMethodOrder,
                 cardBrandAcceptance = cardBrandAcceptance
             )

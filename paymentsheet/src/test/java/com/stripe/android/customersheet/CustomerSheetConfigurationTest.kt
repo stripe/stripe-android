@@ -84,6 +84,7 @@ class CustomerSheetConfigurationTest {
             "allowsRemovalOfLastSavedPaymentMethod",
             "paymentMethodOrder",
             "cardBrandAcceptance",
+            "updatePaymentMethodEnabled"
         )
 
         // Programmatically check for any new method on the builder using reflection
