@@ -219,6 +219,87 @@ internal class DefaultEditCardDetailsInteractorTest {
         assertThat(state.shouldShowCardBrandDropdown).isFalse()
     }
 
+    @Test
+    fun cardUpdateParamsIsUpdatedForValidAddressUpdate() {
+        var capturedCardUpdateParams: CardUpdateParams? = null
+        val handler = handler(
+            onCardUpdateParamsChanged = {
+                capturedCardUpdateParams = it
+            }
+        )
+
+        handler.handleViewAction(
+            EditCardDetailsInteractor.ViewAction.BillingDetailsChanged(
+                PaymentSheetFixtures.billingDetailsFormState(
+                    postalCode = FormFieldEntry("11111", isComplete = true),
+                )
+            )
+        )
+
+        assertThat(capturedCardUpdateParams?.billingDetails?.address?.postalCode).isEqualTo("11111")
+    }
+
+    @Test
+    fun cardUpdateParamsIsUpdatedForValidExpDateUpdate() {
+        var capturedCardUpdateParams: CardUpdateParams? = null
+        val handler = handler(
+            onCardUpdateParamsChanged = {
+                capturedCardUpdateParams = it
+            }
+        )
+
+        handler.handleViewAction(
+            EditCardDetailsInteractor.ViewAction.DateChanged("1230") // Dec 2030
+        )
+
+        assertThat(capturedCardUpdateParams).isNotNull()
+        assertThat(capturedCardUpdateParams?.expiryMonth).isEqualTo(12)
+        assertThat(capturedCardUpdateParams?.expiryYear).isEqualTo(2030)
+    }
+
+    @Test
+    fun cardUpdateParamsIsUpdatedWithNullForInvalidExpDateUpdate() {
+        var capturedCardUpdateParams: CardUpdateParams? = null
+        val handler = handler(
+            onCardUpdateParamsChanged = {
+                capturedCardUpdateParams = it
+            }
+        )
+
+        handler.handleViewAction(
+            EditCardDetailsInteractor.ViewAction.DateChanged("00/00")
+        )
+
+        assertThat(capturedCardUpdateParams).isNull()
+
+        handler.handleViewAction(
+            EditCardDetailsInteractor.ViewAction.DateChanged("1220")
+        )
+
+        assertThat(capturedCardUpdateParams).isNull()
+    }
+
+    @Test
+    fun cardUpdateParamsIsUpdatedWithNullForInvalidAddressUpdate() {
+        var capturedCardUpdateParams: CardUpdateParams? = null
+        val handler = handler(
+            onCardUpdateParamsChanged = {
+                capturedCardUpdateParams = it
+            }
+        )
+
+        handler.handleViewAction(
+            EditCardDetailsInteractor.ViewAction.BillingDetailsChanged(
+                PaymentSheetFixtures.billingDetailsFormState(
+                    postalCode = FormFieldEntry("", isComplete = false),
+                    country = FormFieldEntry("US", isComplete = true),
+                )
+            )
+        )
+
+        assertThat(capturedCardUpdateParams).isNull()
+    }
+
     private val EditCardDetailsInteractor.uiState
         get() = this.state.value
 

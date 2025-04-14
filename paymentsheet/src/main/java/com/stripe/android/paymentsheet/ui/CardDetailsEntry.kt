@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.ui
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CardUpdateParams
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 
 /**
  * Represents the editable details of a card payment method.
@@ -13,9 +12,6 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 internal data class CardDetailsEntry(
     val cardBrandChoice: CardBrandChoice,
     val expiryDateState: ExpiryDateState,
-    val billingDetailsEntry: BillingDetailsEntry? = null,
-    private val billingDetails: PaymentMethod.BillingDetails?,
-    private val addressCollectionMode: AddressCollectionMode,
 ) {
     /**
      * Determines if the card details have changed compared to the provided values.
@@ -28,31 +24,16 @@ internal data class CardDetailsEntry(
         originalCardBrandChoice: CardBrandChoice,
     ): Boolean {
         return originalCardBrandChoice != this.cardBrandChoice ||
-            expiryDateHasChanged(card) || billingAddressHasChanged()
+            expiryDateHasChanged(card)
     }
 
     fun isComplete(): Boolean {
-        return expiryDateComplete() && billingAddressComplete()
-    }
-
-    private fun expiryDateHasChanged(card: PaymentMethod.Card): Boolean {
-        return card.expiryMonth != expiryDateState.expiryMonth || card.expiryYear != expiryDateState.expiryYear
-    }
-
-    private fun billingAddressHasChanged(): Boolean {
-        return billingDetailsEntry?.hasChanged(
-            billingDetails = billingDetails,
-            addressCollectionMode = addressCollectionMode
-        ) ?: false
-    }
-
-    private fun expiryDateComplete(): Boolean {
         if (expiryDateState.enabled.not()) return true
         return expiryDateState.expiryMonth != null && expiryDateState.expiryYear != null
     }
 
-    private fun billingAddressComplete(): Boolean {
-        return billingDetailsEntry?.isComplete(addressCollectionMode) ?: true
+    private fun expiryDateHasChanged(card: PaymentMethod.Card): Boolean {
+        return card.expiryMonth != expiryDateState.expiryMonth || card.expiryYear != expiryDateState.expiryYear
     }
 }
 
@@ -61,7 +42,9 @@ internal data class CardDetailsEntry(
  *
  * @return CardUpdateParams containing the updated card brand.
  */
-internal fun CardDetailsEntry.toUpdateParams(): CardUpdateParams {
+internal fun CardDetailsEntry.toUpdateParams(
+    billingDetailsEntry: BillingDetailsEntry?
+): CardUpdateParams {
     return CardUpdateParams(
         cardBrand = cardBrandChoice.brand,
         expiryMonth = expiryDateState.expiryMonth,

@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -76,6 +77,7 @@ internal class DefaultEditCardDetailsInteractor(
     private val cardDetailsEntry = MutableStateFlow(
         value = buildDefaultCardEntry()
     )
+    private val billingDetailsEntry = MutableStateFlow<BillingDetailsEntry?>(null)
     private val billingAddressForm = defaultBillingAddressForm()
 
     override val state: StateFlow<EditCardDetailsInteractor.State> = cardDetailsEntry.mapLatest { inputState ->
@@ -96,18 +98,46 @@ internal class DefaultEditCardDetailsInteractor(
 
     init {
         coroutineScope.launch(Dispatchers.Main) {
-            cardDetailsEntry.collectLatest { state ->
-                val newParams = state.takeIf {
-                    val hasChanged = it.hasChanged(
-                        card = card,
-                        originalCardBrandChoice = defaultCardBrandChoice(),
-                    )
-                    val isComplete = it.isComplete()
-                    hasChanged && isComplete
-                }?.toUpdateParams()
+            combine(
+                flow = cardDetailsEntry,
+                flow2 = billingDetailsEntry
+            ) { cardDetailsEntry, billingDetailsEntry ->
+                newCardUpdateParams(cardDetailsEntry, billingDetailsEntry)
+            }.collectLatest { newParams ->
                 onCardUpdateParamsChanged(newParams)
             }
         }
+    }
+
+    private fun newCardUpdateParams(
+        cardDetailsEntry: CardDetailsEntry,
+        billingDetailsEntry: BillingDetailsEntry?
+    ): CardUpdateParams? {
+        val shouldEmitCardDetailsUpdate = shouldEmitCardDetailsUpdate(cardDetailsEntry)
+        val shouldEmitBillingDetailsUpdate = shouldEmitBillingDetailsUpdate(billingDetailsEntry)
+        val shouldTakeUpdate = shouldEmitCardDetailsUpdate || shouldEmitBillingDetailsUpdate
+        return if (shouldTakeUpdate) {
+            cardDetailsEntry.toUpdateParams(billingDetailsEntry)
+        } else {
+            null
+        }
+    }
+
+    private fun shouldEmitCardDetailsUpdate(cardDetailsEntry: CardDetailsEntry): Boolean {
+        val hasChanged = cardDetailsEntry.hasChanged(
+            card = card,
+            originalCardBrandChoice = defaultCardBrandChoice(),
+        )
+        return hasChanged && cardDetailsEntry.isComplete()
+    }
+
+    private fun shouldEmitBillingDetailsUpdate(billingDetailsEntry: BillingDetailsEntry?): Boolean {
+        val hasChanged = billingDetailsEntry?.hasChanged(
+            billingDetails = billingDetails,
+            addressCollectionMode = addressCollectionMode
+        ) ?: false
+        val isComplete = billingDetailsEntry?.isComplete(addressCollectionMode) ?: false
+        return hasChanged && isComplete
     }
 
     private fun onBrandChoiceChanged(cardBrandChoice: CardBrandChoice) {
@@ -130,13 +160,9 @@ internal class DefaultEditCardDetailsInteractor(
     }
 
     private fun onBillingAddressFormChanged(state: BillingDetailsFormState) {
-        cardDetailsEntry.update { entry ->
-            entry.copy(
-                billingDetailsEntry = BillingDetailsEntry(
-                    billingDetailsFormState = state,
-                )
-            )
-        }
+        billingDetailsEntry.value = BillingDetailsEntry(
+            billingDetailsFormState = state,
+        )
     }
 
     override fun handleViewAction(viewAction: EditCardDetailsInteractor.ViewAction) {
@@ -157,8 +183,6 @@ internal class DefaultEditCardDetailsInteractor(
         return CardDetailsEntry(
             cardBrandChoice = defaultCardBrandChoice(),
             expiryDateState = defaultExpiryDateState(),
-            billingDetails = billingDetails,
-            addressCollectionMode = addressCollectionMode
         )
     }
 
