@@ -408,7 +408,7 @@ internal class PaymentSheetAnalyticsTest {
     }
 
     @Test
-    fun testSavedPaymentMethodInFowController() = runFlowControllerTest(
+    fun testSavedPaymentMethodInFlowController() = runFlowControllerTest(
         networkRule = networkRule,
         analyticEventCallback = analyticEventRule,
         resultCallback = ::assertCompleted,

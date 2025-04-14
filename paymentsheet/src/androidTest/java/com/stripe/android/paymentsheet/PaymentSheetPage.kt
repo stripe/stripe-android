@@ -32,7 +32,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_ERROR_TEXT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
-import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
@@ -73,9 +73,10 @@ internal class PaymentSheetPage(
     }
 
     fun clickSavedCard(last4: String) {
-        val tag = "${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_···· $last4"
-        waitForTag(tag)
-        clickViewWithTag(tag)
+        val savedCardTagMatcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
+                .and(hasText(last4, substring = true))
+        composeTestRule.waitUntilExactlyOneExists(savedCardTagMatcher)
+        composeTestRule.onNode(savedCardTagMatcher).performClick()
     }
 
     fun clickSavedCardEditBadge(last4: String) {
