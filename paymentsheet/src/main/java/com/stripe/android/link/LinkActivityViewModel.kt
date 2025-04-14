@@ -35,6 +35,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
@@ -62,7 +63,7 @@ internal class LinkActivityViewModel @Inject constructor(
             email = null,
         )
     )
-    val linkAppBarState: StateFlow<LinkAppBarState> = _linkAppBarState
+    val linkAppBarState: StateFlow<LinkAppBarState> = _linkAppBarState.asStateFlow()
 
     private val _linkScreenState = MutableStateFlow<ScreenState>(ScreenState.Loading)
     val linkScreenState: StateFlow<ScreenState> = _linkScreenState
@@ -117,12 +118,13 @@ internal class LinkActivityViewModel @Inject constructor(
         navController ?: return
         navListenerJob = viewModelScope.launch {
             navController.currentBackStackEntryFlow.collectLatest { entry ->
+                val previousEntry = navController.previousBackStackEntry
                 val route = entry.destination.route
                 _linkAppBarState.update {
                     it.copy(
                         showHeader = showHeaderRoutes.contains(route),
                         showOverflowMenu = route == LinkScreen.Wallet.route,
-                        navigationIcon = if (route == LinkScreen.PaymentMethod.route) {
+                        navigationIcon = if (previousEntry != null) {
                             R.drawable.stripe_link_back
                         } else {
                             R.drawable.stripe_link_close

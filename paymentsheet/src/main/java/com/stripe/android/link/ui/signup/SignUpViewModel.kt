@@ -192,7 +192,9 @@ internal class SignUpViewModel @Inject constructor(
     }
 
     private fun onAccountFetched(linkAccount: LinkAccount?) {
-        if (linkAccount?.isVerified == true) {
+        if (linkAccount?.completedSignup == true) {
+            navigateAndClearStack(LinkScreen.PaymentMethod)
+        } else if (linkAccount?.isVerified == true) {
             navigateAndClearStack(LinkScreen.Wallet)
         } else {
             navigateAndClearStack(LinkScreen.Verification)
