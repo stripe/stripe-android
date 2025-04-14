@@ -97,11 +97,14 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_card_number_completed")
 
         testContext.configure()
-
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
 
         embeddedContentPage.clickOnLpm("card")
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.SelectedPaymentMethodType("card"))
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.DisplayedPaymentMethodForm("card"))
+
         formPage.fillOutCardDetails()
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.StartedInteractionWithPaymentMethodForm("card"))
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.CompletedPaymentMethodForm("card"))
 
         networkRule.enqueue(
@@ -126,7 +129,10 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             response.testBodyFromFile("payment-intent-confirm.json")
         }
 
-        validateAnalyticsRequest(eventName = "stripe_android.payment_method_creation")
+        validateAnalyticsRequest(
+            eventName = "stripe_android.payment_method_creation",
+            additionalProductUsage = setOf("deferred-intent", "autopm"),
+        )
         validateAnalyticsRequest(eventName = "stripe_android.payment_intent_retrieval")
         validateAnalyticsRequest(
             eventName = "stripe_android.paymenthandler.confirm.started",
@@ -142,6 +148,8 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_embedded_payment_success")
 
         formPage.clickPrimaryButton()
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.TappedConfirmButton("card"))
+
         formPage.waitUntilMissing()
     }
 
@@ -316,8 +324,13 @@ internal class EmbeddedPaymentElementAnalyticsTest {
     private fun validateAnalyticsRequest(
         eventName: String,
         vararg requestMatchers: RequestMatcher,
+        additionalProductUsage: Set<String> = emptySet(),
     ) {
-        networkRule.validateAnalyticsRequest(eventName, *requestMatchers)
+        networkRule.validateAnalyticsRequest(
+            eventName = eventName,
+            productUsage = setOf("EmbeddedPaymentElement").plus(additionalProductUsage),
+            *requestMatchers
+        )
     }
 
     private fun createFakeGooglePayAvailabilityClient(): GooglePayAvailabilityClient.Factory {

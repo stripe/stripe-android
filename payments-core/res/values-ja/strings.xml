@@ -118,6 +118,8 @@
   <string name="stripe_card_with_last_4">%1$s ····%2$s</string>
   <!-- Text for close button -->
   <string name="stripe_close">閉じる</string>
+  <!-- Accessibility title used during Talkback to indicate to users that a transaction is being confirmed -->
+  <string name="stripe_confirming_transaction_status">取引を確定する</string>
   <!-- Accessibility action for deleting a payment method -->
   <string name="stripe_delete_payment_method">支払い方法を削除する</string>
   <string name="stripe_delete_payment_method_prompt_title">支払い方法を削除しますか？</string>

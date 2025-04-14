@@ -5,6 +5,7 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.testing.createComposeCleanupRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -18,6 +19,9 @@ import java.util.concurrent.TimeUnit
 internal class SepaMandateScreenTest {
     @get:Rule
     val composeRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     @Test
     fun testContinueClick() {

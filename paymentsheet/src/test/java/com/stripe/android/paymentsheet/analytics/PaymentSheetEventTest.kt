@@ -100,6 +100,41 @@ class PaymentSheetEventTest {
     }
 
     @Test
+    fun `Init event with custom payment methods should return expected params`() {
+        val config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_CUSTOM_PAYMENT_METHODS
+        val event = PaymentSheetEvent.Init(
+            mode = EventReporter.Mode.Complete,
+            configuration = config.asCommonConfiguration(),
+            appearance = config.appearance,
+            primaryButtonColor = config.primaryButtonColorUsage(),
+            paymentMethodLayout = config.paymentMethodLayout,
+            isDeferred = false,
+            linkEnabled = false,
+            googlePaySupported = false,
+            isStripeCardScanAvailable = true,
+        )
+
+        assertThat(
+            event.eventName
+        ).isEqualTo(
+            "mc_complete_init_customer"
+        )
+
+        val expectedConfig = buildInitMpeConfig(
+            customer = true,
+            customerAccessProvider = "legacy",
+            customPaymentMethods = listOf("cpmt_123", "cpmt_456"),
+        )
+
+        assertThat(event.params).run {
+            containsEntry("link_enabled", false)
+            containsEntry("google_pay_enabled", false)
+            containsEntry("is_decoupled", false)
+            containsEntry("mpe_config", expectedConfig)
+        }
+    }
+
+    @Test
     fun `Init event with vertical mode should return expected params`() {
         val config = PaymentSheetFixtures.CONFIG_CUSTOMER.copy(
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical
@@ -1536,6 +1571,7 @@ class PaymentSheetEventTest {
         billingDetailsCollectionConfiguration: Map<String, Any?> = billingDetailsCollectionConfigurationDefault,
         preferredNetworks: String? = null,
         externalPaymentMethods: List<String>? = null,
+        customPaymentMethods: List<String>? = null,
         paymentMethodLayout: String? = "horizontal",
         cardBrandAcceptance: Boolean = false,
         cardScanAvailable: Boolean = true
@@ -1554,6 +1590,7 @@ class PaymentSheetEventTest {
             "billing_details_collection_configuration" to billingDetailsCollectionConfiguration,
             "preferred_networks" to preferredNetworks,
             "external_payment_methods" to externalPaymentMethods,
+            "custom_payment_methods" to customPaymentMethods,
             "payment_method_layout" to paymentMethodLayout,
             "card_brand_acceptance" to cardBrandAcceptance,
             "card_scan_available" to cardScanAvailable

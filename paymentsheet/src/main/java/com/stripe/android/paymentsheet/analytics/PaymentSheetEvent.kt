@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.analytics
 
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
+import com.stripe.android.common.analytics.getCustomPaymentMethodsAnalyticsValue
 import com.stripe.android.common.analytics.getExternalPaymentMethodsAnalyticsValue
 import com.stripe.android.common.analytics.toAnalyticsMap
 import com.stripe.android.common.analytics.toAnalyticsValue
@@ -164,6 +165,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                     FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION to
                         configuration.billingDetailsCollectionConfiguration.toAnalyticsMap(),
                     FIELD_PREFERRED_NETWORKS to configuration.preferredNetworks.toAnalyticsValue(),
+                    FIELD_CUSTOM_PAYMENT_METHODS to configuration.getCustomPaymentMethodsAnalyticsValue(),
                     FIELD_EXTERNAL_PAYMENT_METHODS to configuration.getExternalPaymentMethodsAnalyticsValue(),
                     FIELD_PAYMENT_METHOD_LAYOUT to paymentMethodLayout?.toAnalyticsValue(),
                     FIELD_CARD_BRAND_ACCEPTANCE to configuration.cardBrandAcceptance.toAnalyticsValue(),
@@ -566,6 +568,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             "allows_removal_of_last_saved_payment_method"
         const val FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION =
             "billing_details_collection_configuration"
+        const val FIELD_CUSTOM_PAYMENT_METHODS = "custom_payment_methods"
         const val FIELD_PAYMENT_METHOD_ORDER = "payment_method_order"
         const val FIELD_IS_DECOUPLED = "is_decoupled"
         const val FIELD_DEFERRED_INTENT_CONFIRMATION_TYPE = "deferred_intent_confirmation_type"

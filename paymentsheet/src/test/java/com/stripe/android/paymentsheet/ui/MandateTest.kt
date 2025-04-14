@@ -7,6 +7,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.elements.Mandate
 import org.junit.Rule
 import org.junit.Test
@@ -19,6 +20,9 @@ import org.robolectric.annotation.Config
 internal class MandateTest {
     @get:Rule
     val composeRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     @Test
     fun testMandateText() {
