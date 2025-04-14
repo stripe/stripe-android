@@ -883,7 +883,9 @@ class DefaultEventReporterTest {
         val selection = mockUSBankAccountPaymentSelection(linkMode = LinkMode.LinkPaymentMethod)
         completeEventReporter.onPressConfirmButton(selection)
 
-        analyticEventCallbackRule.assertMatchesExpectedEvent(AnalyticEvent.TappedConfirmButton(null))
+        analyticEventCallbackRule.assertMatchesExpectedEvent(
+            AnalyticEvent.TappedConfirmButton("us_bank_account")
+        )
 
         val argumentCaptor = argumentCaptor<AnalyticsRequest>()
         verify(analyticsRequestExecutor).executeAsync(argumentCaptor.capture())
@@ -901,7 +903,9 @@ class DefaultEventReporterTest {
         val selection = mockUSBankAccountPaymentSelection(linkMode = LinkMode.LinkCardBrand)
         completeEventReporter.onPressConfirmButton(selection)
 
-        analyticEventCallbackRule.assertMatchesExpectedEvent(AnalyticEvent.TappedConfirmButton(null))
+        analyticEventCallbackRule.assertMatchesExpectedEvent(
+            AnalyticEvent.TappedConfirmButton("us_bank_account")
+        )
 
         val argumentCaptor = argumentCaptor<AnalyticsRequest>()
         verify(analyticsRequestExecutor).executeAsync(argumentCaptor.capture())
@@ -919,7 +923,9 @@ class DefaultEventReporterTest {
         val selection = mockUSBankAccountPaymentSelection(linkMode = null)
         completeEventReporter.onPressConfirmButton(selection)
 
-        analyticEventCallbackRule.assertMatchesExpectedEvent(AnalyticEvent.TappedConfirmButton(null))
+        analyticEventCallbackRule.assertMatchesExpectedEvent(
+            AnalyticEvent.TappedConfirmButton("us_bank_account")
+        )
 
         val argumentCaptor = argumentCaptor<AnalyticsRequest>()
         verify(analyticsRequestExecutor).executeAsync(argumentCaptor.capture())
@@ -1118,7 +1124,10 @@ class DefaultEventReporterTest {
         return PaymentSelection.New.USBankAccount(
             label = "Test",
             iconResource = 0,
-            paymentMethodCreateParams = mock(),
+            paymentMethodCreateParams = PaymentMethodCreateParams(
+                code = PaymentMethod.Type.USBankAccount.code,
+                requiresMandate = false,
+            ),
             customerRequestedSave = mock(),
             input = PaymentSelection.New.USBankAccount.Input(
                 name = "",

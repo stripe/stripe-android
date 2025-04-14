@@ -68,7 +68,7 @@ abstract class AnalyticEvent internal constructor() {
      */
     @Poko
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    class TappedConfirmButton internal constructor(val paymentMethodType: String?) : AnalyticEvent()
+    class TappedConfirmButton internal constructor(val paymentMethodType: String) : AnalyticEvent()
 
     /**
      * User selected a saved payment method
