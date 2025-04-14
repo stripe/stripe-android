@@ -63,6 +63,9 @@ import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val TEST_TAG_BILLING_DETAILS = "TEST_TAG_BILLING_DETAILS"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val TEST_TAG_ACCOUNT_DETAILS = "TEST_TAG_ACCOUNT_DETAILS"
 
 @Composable
@@ -205,7 +208,11 @@ private fun BillingDetailsForm(
     lastTextFieldIdentifier: IdentifierSpec?,
     sameAsShippingElement: SameAsShippingElement?,
 ) {
-    Column(Modifier.fillMaxWidth()) {
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .testTag(TEST_TAG_BILLING_DETAILS)
+    ) {
         H6Text(
             text = if (isPaymentFlow) {
                 stringResource(R.string.stripe_paymentsheet_pay_with_bank_title)

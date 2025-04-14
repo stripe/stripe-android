@@ -45,7 +45,6 @@ internal class SignUpViewModel @Inject constructor(
     private val logger: Logger,
     private val linkAuth: LinkAuth,
     private val savedStateHandle: SavedStateHandle,
-    private val navigate: (LinkScreen) -> Unit,
     private val navigateAndClearStack: (LinkScreen) -> Unit,
     private val moveToWeb: () -> Unit
 ) : ViewModel() {
@@ -73,7 +72,8 @@ internal class SignUpViewModel @Inject constructor(
                     is SetupIntent -> stripeIntent.countryCode
                 }
                 countryCode != CountryCode.US.value
-            }
+            },
+            showKeyboardOnOpen = customerInfo?.email == null,
         )
     )
 
@@ -131,11 +131,15 @@ internal class SignUpViewModel @Inject constructor(
     }
 
     private suspend fun lookupEmail(email: String) {
+        updateSignUpState(SignUpState.VerifyingEmail)
+
         val lookupResult = linkAuth.lookUp(
             email = email,
             emailSource = EmailSource.USER_ACTION,
             startSession = true
         )
+
+        updateSignUpState(SignUpState.InputtingPrimaryField)
 
         when (lookupResult) {
             is LinkAuthResult.AttestationFailed -> {
@@ -162,6 +166,10 @@ internal class SignUpViewModel @Inject constructor(
     fun onSignUpClick() {
         clearError()
         viewModelScope.launch {
+            updateState {
+                it.copy(isSubmitting = true)
+            }
+
             val signupResult = linkAuth.signUp(
                 email = emailController.fieldValue.value,
                 phoneNumber = phoneNumberController.getE164PhoneNumber(phoneNumberController.fieldValue.value),
@@ -190,6 +198,10 @@ internal class SignUpViewModel @Inject constructor(
                     signupResult.handle()
                 }
             }
+
+            updateState {
+                it.copy(isSubmitting = false)
+            }
         }
     }
 
@@ -197,10 +209,7 @@ internal class SignUpViewModel @Inject constructor(
         if (linkAccount?.isVerified == true) {
             navigateAndClearStack(LinkScreen.Wallet)
         } else {
-            navigate(LinkScreen.Verification)
-            // The sign up screen stays in the back stack.
-            // Clean up the state in case the user comes back.
-            emailController.onValueChange("")
+            navigateAndClearStack(LinkScreen.Verification)
         }
     }
 
@@ -247,7 +256,6 @@ internal class SignUpViewModel @Inject constructor(
 
         fun factory(
             parentComponent: NativeLinkComponent,
-            navigate: (LinkScreen) -> Unit,
             navigateAndClearStack: (LinkScreen) -> Unit,
             moveToWeb: () -> Unit
         ): ViewModelProvider.Factory {
@@ -259,7 +267,6 @@ internal class SignUpViewModel @Inject constructor(
                         logger = parentComponent.logger,
                         linkAuth = parentComponent.linkAuth,
                         savedStateHandle = parentComponent.savedStateHandle,
-                        navigate = navigate,
                         navigateAndClearStack = navigateAndClearStack,
                         moveToWeb = moveToWeb
                     )

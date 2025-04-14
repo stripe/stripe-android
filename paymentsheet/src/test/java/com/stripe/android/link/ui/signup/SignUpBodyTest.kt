@@ -84,7 +84,7 @@ internal class SignUpBodyTest {
         setContent(SignUpState.InputtingPrimaryField)
 
         composeTestRule.onNodeWithTag(SIGN_UP_HEADER_TAG)
-            .assert(hasTextExactly("Secure 1\u2060-\u2060click checkout"))
+            .assert(hasTextExactly("Fast, secure, 1\u2060-\u2060click checkout"))
     }
 
     @Test
@@ -135,7 +135,8 @@ internal class SignUpBodyTest {
                     signUpEnabled = isReadyToSignUp,
                     requiresNameCollection = requiresNameCollection,
                     errorMessage = errorMessage,
-                    signUpState = signUpState
+                    signUpState = signUpState,
+                    showKeyboardOnOpen = false,
                 ),
                 onSignUpClick = {}
             )
@@ -146,5 +147,5 @@ internal class SignUpBodyTest {
     private fun onProgressIndicator() = composeTestRule.onNodeWithTag(ProgressIndicatorTestTag)
     private fun onPhoneField() = composeTestRule.onNodeWithText("Phone number")
     private fun onNameField() = composeTestRule.onNodeWithText("Full name")
-    private fun onSignUpButton() = composeTestRule.onNodeWithText("Join Link")
+    private fun onSignUpButton() = composeTestRule.onNodeWithText("Agree and continue")
 }

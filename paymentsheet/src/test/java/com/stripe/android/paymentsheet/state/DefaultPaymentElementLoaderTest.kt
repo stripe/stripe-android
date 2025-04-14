@@ -39,6 +39,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.MERCHANT_DISPLAY_NAME
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.FakeLogLinkGlobalHoldbackExposure
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
@@ -2842,7 +2843,9 @@ internal class DefaultPaymentElementLoaderTest {
             linkStore = linkStore,
             externalPaymentMethodsRepository = ExternalPaymentMethodsRepository(errorReporter = FakeErrorReporter()),
             userFacingLogger = userFacingLogger,
-            cvcRecollectionHandler = CvcRecollectionHandlerImpl()
+            cvcRecollectionHandler = CvcRecollectionHandlerImpl(),
+            logLinkGlobalHoldbackExposure = FakeLogLinkGlobalHoldbackExposure(),
+            retrieveCustomerEmail = DefaultRetrieveCustomerEmail(customerRepo)
         )
     }
 

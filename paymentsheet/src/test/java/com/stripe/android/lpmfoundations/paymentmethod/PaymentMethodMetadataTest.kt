@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
@@ -718,7 +719,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `isExternalPaymentMethod returns false for non-external payment method`() = runTest {
+    fun `isExternalPaymentMethod returns false for non-custom payment method`() = runTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "klarna")
@@ -727,6 +728,196 @@ internal class PaymentMethodMetadataTest {
         )
 
         assertThat(metadata.isExternalPaymentMethod("card")).isFalse()
+    }
+
+    @Test
+    fun `formHeaderInformationForCode is constructed correctly for custom payment method`() = runTest {
+        val paypalCpm = PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD
+        val metadata = PaymentMethodMetadataFactory.create(
+            displayableCustomPaymentMethods = listOf(paypalCpm),
+        )
+        val headerInformation = metadata.formHeaderInformationForCode(
+            code = paypalCpm.id,
+            customerHasSavedPaymentMethods = false,
+        )!!
+        assertThat(headerInformation.displayName).isEqualTo(paypalCpm.displayName.resolvableString)
+        assertThat(headerInformation.shouldShowIcon).isTrue()
+        assertThat(headerInformation.iconResource).isEqualTo(0)
+        assertThat(headerInformation.lightThemeIconUrl).isEqualTo(paypalCpm.logoUrl)
+        assertThat(headerInformation.darkThemeIconUrl).isEqualTo(paypalCpm.logoUrl)
+        assertThat(headerInformation.iconRequiresTinting).isFalse()
+    }
+
+    @Test
+    fun `When custom payment methods are present and no payment method order, CPMs are shown last`() =
+        runTest {
+            val metadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "affirm", "klarna"),
+                ),
+                allowsPaymentMethodsRequiringShippingAddress = true,
+                sharedDataSpecs = listOf(
+                    SharedDataSpec("affirm"),
+                    SharedDataSpec("card"),
+                    SharedDataSpec("klarna"),
+                ),
+                externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
+                displayableCustomPaymentMethods = listOf(PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD),
+            )
+            val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
+            assertThat(sortedSupportedPaymentMethods).hasSize(5)
+            assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("card")
+            assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("affirm")
+            assertThat(sortedSupportedPaymentMethods[2].code).isEqualTo("klarna")
+            assertThat(sortedSupportedPaymentMethods[3].code).isEqualTo("external_paypal")
+            assertThat(sortedSupportedPaymentMethods[4].code).isEqualTo("cpmt_paypal")
+        }
+
+    @Test
+    fun `When custom payment methods are present and in payment method order, payment method order works`() =
+        runTest {
+            val metadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "affirm", "klarna"),
+                ),
+                allowsPaymentMethodsRequiringShippingAddress = true,
+                sharedDataSpecs = listOf(
+                    SharedDataSpec("affirm"),
+                    SharedDataSpec("card"),
+                    SharedDataSpec("klarna"),
+                ),
+                externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
+                displayableCustomPaymentMethods = listOf(PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD),
+                paymentMethodOrder = listOf("affirm", "cpmt_paypal", "external_paypal")
+            )
+            val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
+            assertThat(sortedSupportedPaymentMethods).hasSize(5)
+            assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("affirm")
+            assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("cpmt_paypal")
+            assertThat(sortedSupportedPaymentMethods[2].code).isEqualTo("external_paypal")
+            assertThat(sortedSupportedPaymentMethods[3].code).isEqualTo("card")
+            assertThat(sortedSupportedPaymentMethods[4].code).isEqualTo("klarna")
+        }
+
+    @Test
+    fun `When custom payment methods are present and not in payment method order, payment method order works`() =
+        runTest {
+            val metadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "affirm", "klarna"),
+                ),
+                allowsPaymentMethodsRequiringShippingAddress = true,
+                sharedDataSpecs = listOf(
+                    SharedDataSpec("affirm"),
+                    SharedDataSpec("card"),
+                    SharedDataSpec("klarna"),
+                ),
+                externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
+                displayableCustomPaymentMethods = listOf(PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD),
+                paymentMethodOrder = listOf("affirm", "external_paypal")
+            )
+            val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
+            assertThat(sortedSupportedPaymentMethods).hasSize(5)
+            assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("affirm")
+            assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("external_paypal")
+            assertThat(sortedSupportedPaymentMethods[2].code).isEqualTo("card")
+            assertThat(sortedSupportedPaymentMethods[3].code).isEqualTo("klarna")
+            assertThat(sortedSupportedPaymentMethods[4].code).isEqualTo("cpmt_paypal")
+        }
+
+    @Test
+    fun `Custom payment method does not require mandate`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna")
+            ),
+            displayableCustomPaymentMethods = listOf(PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD),
+        )
+
+        assertThat(metadata.requiresMandate("cpmt_paypal")).isFalse()
+    }
+
+    @Test
+    fun `Custom payment methods are included in supported payment method types`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna")
+            ),
+            displayableCustomPaymentMethods = listOf(PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD),
+        )
+
+        assertThat(metadata.supportedPaymentMethodTypes().contains("cpmt_paypal")).isTrue()
+    }
+
+    @Test
+    fun `Custom payment methods are not included in supported saved payment method types`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna")
+            ),
+            displayableCustomPaymentMethods = listOf(PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD),
+        )
+
+        assertThat(metadata.supportedSavedPaymentMethodTypes().map { it.code }.contains("cpmt_paypal")).isFalse()
+    }
+
+    @Test
+    fun `Custom payment methods return correct supported payment method`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna")
+            ),
+            displayableCustomPaymentMethods = listOf(PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD),
+        )
+        val expectedSupportedPaymentMethod = SupportedPaymentMethod(
+            code = "cpmt_paypal",
+            subtitle = "Pay now with PayPal".resolvableString,
+            displayName = "PayPal".resolvableString,
+            lightThemeIconUrl = "example_url",
+            darkThemeIconUrl = "example_url",
+            iconResource = 0,
+            iconRequiresTinting = false,
+        )
+
+        val actualSupportedPaymentMethod = metadata.supportedPaymentMethodForCode("cpmt_paypal")
+
+        assertThat(actualSupportedPaymentMethod).isEqualTo(expectedSupportedPaymentMethod)
+    }
+
+    @Test
+    fun `isCustomPaymentMethod returns true for supported CPM`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna")
+            ),
+            displayableCustomPaymentMethods = listOf(PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD),
+        )
+
+        assertThat(metadata.isCustomPaymentMethod("cpmt_paypal")).isTrue()
+    }
+
+    @Test
+    fun `isCustomPaymentMethod returns false for unsupported CPM`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna")
+            ),
+            displayableCustomPaymentMethods = listOf(PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD),
+        )
+
+        assertThat(metadata.isCustomPaymentMethod("cpmt_venmo")).isFalse()
+    }
+
+    @Test
+    fun `isCustomPaymentMethod returns false for non-custom payment method`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna")
+            ),
+            displayableCustomPaymentMethods = listOf(PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD),
+        )
+
+        assertThat(metadata.isCustomPaymentMethod("card")).isFalse()
     }
 
     @Suppress("LongMethod")
@@ -1030,7 +1221,8 @@ internal class PaymentMethodMetadataTest {
             externalPaymentMethodData = null,
             paymentMethodSpecs = null,
             elementsSessionId = "session_1234",
-            flags = emptyMap()
+            flags = emptyMap(),
+            experimentsData = null
         )
     }
 
@@ -1359,6 +1551,38 @@ internal class PaymentMethodMetadataTest {
 
         val displayedPaymentMethodTypes = metadata.supportedPaymentMethodTypes()
         assertThat(displayedPaymentMethodTypes).containsExactly("card")
+    }
+
+    @Test
+    fun `Passes eligible CBC along to Link`() {
+        val linkConfiguration = LinkTestUtils.createLinkConfiguration(
+            cardBrandChoice = LinkConfiguration.CardBrandChoice(
+                eligible = true,
+                preferredNetworks = listOf("cartes_bancaires"),
+            )
+        )
+
+        val metadata = PaymentMethodMetadata.createForNativeLink(linkConfiguration)
+
+        assertThat(metadata.cbcEligibility).isEqualTo(
+            CardBrandChoiceEligibility.Eligible(
+                preferredNetworks = listOf(CardBrand.CartesBancaires)
+            )
+        )
+    }
+
+    @Test
+    fun `Passes ineligible CBC along to Link`() {
+        val linkConfiguration = LinkTestUtils.createLinkConfiguration(
+            cardBrandChoice = LinkConfiguration.CardBrandChoice(
+                eligible = false,
+                preferredNetworks = emptyList(),
+            )
+        )
+
+        val metadata = PaymentMethodMetadata.createForNativeLink(linkConfiguration)
+
+        assertThat(metadata.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
     }
 
     private fun createLinkInlineConfiguration(): LinkInlineConfiguration {

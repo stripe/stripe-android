@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.link.LinkConfigurationCoordinator
@@ -10,9 +11,11 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.FormHelper.FormType
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
@@ -30,12 +33,15 @@ internal class DefaultFormHelper(
     private val linkInlineHandler: LinkInlineHandler,
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     private val paymentMethodMetadata: PaymentMethodMetadata,
-    private val newPaymentSelectionProvider: () -> NewOrExternalPaymentSelection?,
+    private val newPaymentSelectionProvider: () -> NewPaymentOptionSelection?,
     private val selectionUpdater: (PaymentSelection?) -> Unit,
     private val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
     private val setAsDefaultMatchesSaveForFutureUse: Boolean,
+    private val eventReporter: EventReporter,
+    private val savedStateHandle: SavedStateHandle,
 ) : FormHelper {
     companion object {
+        internal const val PREVIOUSLY_COMPLETED_PAYMENT_FORM = "previously_completed_payment_form"
         fun create(
             viewModel: BaseSheetViewModel,
             paymentMethodMetadata: PaymentMethodMetadata,
@@ -54,6 +60,8 @@ internal class DefaultFormHelper(
                     viewModel.updateSelection(it)
                 },
                 setAsDefaultMatchesSaveForFutureUse = viewModel.customerStateHolder.paymentMethods.value.isEmpty(),
+                eventReporter = viewModel.eventReporter,
+                savedStateHandle = viewModel.savedStateHandle,
             )
         }
 
@@ -61,6 +69,8 @@ internal class DefaultFormHelper(
             coroutineScope: CoroutineScope,
             cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
             paymentMethodMetadata: PaymentMethodMetadata,
+            eventReporter: EventReporter,
+            savedStateHandle: SavedStateHandle,
         ): FormHelper {
             return DefaultFormHelper(
                 coroutineScope = coroutineScope,
@@ -71,6 +81,8 @@ internal class DefaultFormHelper(
                 linkConfigurationCoordinator = null,
                 selectionUpdater = {},
                 setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
+                eventReporter = eventReporter,
+                savedStateHandle = savedStateHandle,
             )
         }
     }
@@ -110,10 +122,17 @@ internal class DefaultFormHelper(
         }
     }
 
+    private var previouslyCompletedForm: PaymentMethodCode?
+        get() = savedStateHandle[PREVIOUSLY_COMPLETED_PAYMENT_FORM]
+        set(value) {
+            savedStateHandle[PREVIOUSLY_COMPLETED_PAYMENT_FORM] = value
+        }
+
     init {
         coroutineScope.launch {
             paymentSelection.collect { selection ->
                 selectionUpdater(selection)
+                reportFieldCompleted(selection?.paymentMethodType)
             }
         }
     }
@@ -128,6 +147,7 @@ internal class DefaultFormHelper(
                 linkConfigurationCoordinator = linkConfigurationCoordinator,
                 onLinkInlineSignupStateChanged = linkInlineHandler::onStateUpdated,
                 paymentMethodCreateParams = currentSelection?.getPaymentMethodCreateParams(),
+                paymentMethodOptionsParams = currentSelection?.getPaymentMethodOptionParams(),
                 paymentMethodExtraParams = currentSelection?.getPaymentMethodExtraParams(),
                 initialLinkUserInput = when (val selection = currentSelection?.paymentSelection) {
                     is PaymentSelection.New.LinkInline -> selection.input
@@ -186,5 +206,20 @@ internal class DefaultFormHelper(
 
     private fun supportedPaymentMethodForCode(code: String): SupportedPaymentMethod {
         return requireNotNull(paymentMethodMetadata.supportedPaymentMethodForCode(code = code))
+    }
+
+    private fun reportFieldCompleted(code: PaymentMethodCode?) {
+        if (code == null || formTypeForCode(code) != FormType.UserInteractionRequired) {
+            return
+        }
+        /*
+         * Prevents this event from being reported multiple times on field interactions
+         * on the same payment form. We should have one field interaction event for
+         * every form shown event triggered.
+         */
+        if (previouslyCompletedForm != code) {
+            eventReporter.onPaymentMethodFormCompleted(code)
+            previouslyCompletedForm = code
+        }
     }
 }

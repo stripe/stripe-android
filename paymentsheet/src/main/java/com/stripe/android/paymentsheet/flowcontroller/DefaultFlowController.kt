@@ -276,6 +276,7 @@ internal class DefaultFlowController @Inject internal constructor(
             is PaymentSelection.New.LinkInline,
             is PaymentSelection.GooglePay,
             is PaymentSelection.ExternalPaymentMethod,
+            is PaymentSelection.CustomPaymentMethod,
             is PaymentSelection.New,
             null -> confirmPaymentSelection(
                 paymentSelection = paymentSelection,
@@ -497,6 +498,11 @@ internal class DefaultFlowController @Inject internal constructor(
 
         if (paymentResult is PaymentResult.Completed && selection != null && selection.isLink) {
             linkHandler.logOut()
+        }
+
+        if (paymentResult is PaymentResult.Completed) {
+            viewModel.paymentSelection = null
+            viewModel.state = null
         }
 
         viewModelScope.launch {

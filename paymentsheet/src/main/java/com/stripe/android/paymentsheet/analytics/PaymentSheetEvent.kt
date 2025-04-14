@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.analytics
 
+import com.stripe.android.common.analytics.experiment.LoggableExperiment
+import com.stripe.android.common.analytics.getCustomPaymentMethodsAnalyticsValue
 import com.stripe.android.common.analytics.getExternalPaymentMethodsAnalyticsValue
 import com.stripe.android.common.analytics.toAnalyticsMap
 import com.stripe.android.common.analytics.toAnalyticsValue
@@ -7,7 +9,6 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
-import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.analyticsValue
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -15,6 +16,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.asPaymentSheetLoadingException
+import com.stripe.android.paymentsheet.utils.getSetAsDefaultPaymentMethodFromPaymentSelection
 import com.stripe.android.utils.filterNotNullValues
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -163,6 +165,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                     FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION to
                         configuration.billingDetailsCollectionConfiguration.toAnalyticsMap(),
                     FIELD_PREFERRED_NETWORKS to configuration.preferredNetworks.toAnalyticsValue(),
+                    FIELD_CUSTOM_PAYMENT_METHODS to configuration.getCustomPaymentMethodsAnalyticsValue(),
                     FIELD_EXTERNAL_PAYMENT_METHODS to configuration.getExternalPaymentMethodsAnalyticsValue(),
                     FIELD_PAYMENT_METHOD_LAYOUT to paymentMethodLayout?.toAnalyticsValue(),
                     FIELD_CARD_BRAND_ACCEPTANCE to configuration.cardBrandAcceptance.toAnalyticsValue(),
@@ -507,6 +510,20 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val additionalParams: Map<String, Any?> = mapOf()
     }
 
+    class ExperimentExposure(
+        override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+        experiment: LoggableExperiment
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "elements.experiment_exposure"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            "experiment_retrieved" to experiment.experiment.experimentValue,
+            "arb_id" to experiment.arbId,
+            "assignment_group" to experiment.group
+        ) + experiment.dimensions.mapKeys { "dimensions-${it.key}" }
+    }
+
     private fun standardParams(
         isDecoupled: Boolean,
         linkEnabled: Boolean,
@@ -526,6 +543,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             is PaymentSelection.Link,
             is PaymentSelection.New.LinkInline -> "link"
             is PaymentSelection.ExternalPaymentMethod,
+            is PaymentSelection.CustomPaymentMethod,
             is PaymentSelection.New -> "newpm"
             null -> "unknown"
         }
@@ -550,6 +568,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             "allows_removal_of_last_saved_payment_method"
         const val FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION =
             "billing_details_collection_configuration"
+        const val FIELD_CUSTOM_PAYMENT_METHODS = "custom_payment_methods"
         const val FIELD_PAYMENT_METHOD_ORDER = "payment_method_order"
         const val FIELD_IS_DECOUPLED = "is_decoupled"
         const val FIELD_DEFERRED_INTENT_CONFIRMATION_TYPE = "deferred_intent_confirmation_type"
@@ -585,20 +604,6 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     }
 }
 
-private fun PaymentSelection.getSetAsDefaultPaymentMethodFromPaymentSelection(): Boolean? {
-    return when (this) {
-        is PaymentSelection.New.Card -> {
-            (this.paymentMethodExtraParams as? PaymentMethodExtraParams.Card)?.setAsDefault
-        }
-        is PaymentSelection.New.USBankAccount -> {
-            (this.paymentMethodExtraParams as? PaymentMethodExtraParams.USBankAccount)?.setAsDefault
-        }
-        else -> {
-            null
-        }
-    }
-}
-
 private val Duration.asSeconds: Float
     get() = toDouble(DurationUnit.SECONDS).toFloat()
 
@@ -609,6 +614,7 @@ internal fun PaymentSelection?.code(): String? {
         is PaymentSelection.New -> paymentMethodCreateParams.typeCode
         is PaymentSelection.Saved -> paymentMethod.type?.code
         is PaymentSelection.ExternalPaymentMethod -> type
+        is PaymentSelection.CustomPaymentMethod -> id
         null -> null
     }
 }
@@ -628,6 +634,7 @@ internal fun PaymentSelection?.linkContext(): String? {
         is PaymentSelection.GooglePay,
         is PaymentSelection.New,
         is PaymentSelection.Saved,
+        is PaymentSelection.CustomPaymentMethod,
         is PaymentSelection.ExternalPaymentMethod,
         null -> null
     }

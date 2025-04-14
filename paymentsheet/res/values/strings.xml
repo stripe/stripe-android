@@ -26,6 +26,16 @@
   <string name="stripe_confirm_close_form_title">Do you want to close this form?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Save your info for secure 1-click checkout with Link</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_link_sign_up">Agree and continue</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header">Fast, secure, 1⁠-⁠click checkout</string>
+  <!-- Label describing the benefit of signing up for Link. -->
+  <string name="stripe_link_sign_up_message">Save your payment information with Link, and securely check out in 1-click on Link-supported sites.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_link_sign_up_terms"><![CDATA[By continuing you agree to the <terms>Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message">Enter the code sent to %s to use your saved information.</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Log out of Link</string>
   <!-- Text that is displayed when a network error occurs -->
@@ -83,6 +93,8 @@
   <string name="stripe_paymentsheet_manage_bank_account">Manage US bank account</string>
   <!-- Title shown above a view containing a customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_card">Manage card</string>
+  <!-- Title shown above a view containing the customer's cards that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_cards">Manage cards</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Manage payment methods</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
@@ -139,6 +151,8 @@
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Save this card for future %s payments</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">Saved</string>
+  <!-- Title shown above a view containing the customer's cards -->
+  <string name="stripe_paymentsheet_select_card">Select card</string>
   <!-- Title shown above a view containing the customer's payment methods -->
   <string name="stripe_paymentsheet_select_payment_method">Select payment method</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
@@ -173,6 +187,8 @@
   <string name="stripe_signup_deactivated_account_message">Your account has been deactivated</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">Something went wrong</string>
+  <!-- Accessibility description when payment button shows a successful transaction animation. -->
+  <string name="stripe_successful_transaction_description">Transaction complete</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Cancel and pay another way</string>
   <!-- Text on a screen asking the user to approve a payment -->

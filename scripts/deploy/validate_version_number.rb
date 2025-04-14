@@ -19,10 +19,10 @@ def validate_version_number_format(version_number)
 end
 
 def target_version_is_newer(target_version, current_version)
-  target_major, target_minor, target_patch = target_version.split('.')
+  target_major, target_minor, target_patch = target_version.split('.').map(&:to_i)
   # We tag version numbers to start with "v", so we need to remove that before comparing to the
   # target version.
-  current_major, current_minor, current_patch = current_version[1..].split('.')
+  current_major, current_minor, current_patch = current_version[1..].split('.').map(&:to_i)
 
   if target_major < current_major
     false

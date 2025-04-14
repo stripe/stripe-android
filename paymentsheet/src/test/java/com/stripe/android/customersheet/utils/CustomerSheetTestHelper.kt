@@ -111,6 +111,7 @@ internal object CustomerSheetTestHelper {
             integrationType = integrationType,
             isLiveModeProvider = { isLiveMode },
             logger = Logger.noop(),
+            productUsage = emptySet(),
             confirmationHandlerFactory = createTestConfirmationHandlerFactory(
                 paymentElementCallbackIdentifier = "CustomerSheetTestIdentifier",
                 intentConfirmationInterceptor = intentConfirmationInterceptor,

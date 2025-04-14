@@ -5,7 +5,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,18 +44,22 @@ internal fun FullScreenContent(
     getLinkAccount: () -> LinkAccount?,
     changeEmail: () -> Unit
 ) {
-    var bottomSheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
-    val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val coroutineScope = rememberCoroutineScope()
+    var bottomSheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
+
+    val sheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
     val navController = rememberNavController()
     val keyboardController = rememberKeyboardController()
 
-    if (bottomSheetContent != null) {
-        DisposableEffect(bottomSheetContent) {
-            coroutineScope.launch { sheetState.show() }
-            onDispose {
-                coroutineScope.launch { sheetState.hide() }
-            }
+    LaunchedEffect(bottomSheetContent) {
+        if (bottomSheetContent != null) {
+            sheetState.show()
+        }
+    }
+
+    LaunchedEffect(sheetState.isVisible) {
+        if (!sheetState.isVisible) {
+            bottomSheetContent = null
         }
     }
 
@@ -78,8 +82,14 @@ internal fun FullScreenContent(
                 appBarState = appBarState,
                 sheetState = sheetState,
                 bottomSheetContent = bottomSheetContent,
-                onUpdateSheetContent = {
-                    bottomSheetContent = it
+                onUpdateSheetContent = { content ->
+                    if (content != null) {
+                        bottomSheetContent = content
+                    } else {
+                        coroutineScope.launch {
+                            sheetState.hide()
+                        }
+                    }
                 },
                 onBackPressed = onBackPressed,
                 moveToWeb = moveToWeb,

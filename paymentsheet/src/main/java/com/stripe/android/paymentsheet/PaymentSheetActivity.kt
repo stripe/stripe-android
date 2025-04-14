@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.collectAsState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
 
 internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
@@ -55,7 +56,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
         setContent {
             StripeTheme {
-                val isProcessing by viewModel.processing.collectAsState()
+                val isProcessing by viewModel.processing.collectAsState(Dispatchers.Main)
 
                 val bottomSheetState = rememberStripeBottomSheetState(
                     confirmValueChange = { !isProcessing },

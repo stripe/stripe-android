@@ -25,6 +25,7 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.link.ui.signup.SignUpViewModel
+import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -32,6 +33,8 @@ import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.uicore.navigation.PopUpToBehavior
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -48,7 +51,7 @@ internal class LinkActivityViewModel @Inject constructor(
     val eventReporter: EventReporter,
     private val linkConfiguration: LinkConfiguration,
     private val linkAttestationCheck: LinkAttestationCheck,
-    private val savedStateHandle: SavedStateHandle,
+    val savedStateHandle: SavedStateHandle,
     private val startWithVerificationDialog: Boolean,
     private val navigationManager: NavigationManager,
 ) : ViewModel(), DefaultLifecycleObserver {
@@ -217,6 +220,11 @@ internal class LinkActivityViewModel @Inject constructor(
 
     private suspend fun buildFullScreenState(): ScreenState.FullScreen {
         val accountStatus = linkAccountManager.accountStatus.first()
+
+        // We add a tiny delay, which gives the loading screen a chance to fully inflate.
+        // Otherwise, we get a weird scaling animation when we display the first non-loading screen.
+        delay(LINK_DEFAULT_ANIMATION_DELAY_MILLIS)
+
         return ScreenState.FullScreen(
             initialDestination = when (accountStatus) {
                 AccountStatus.Verified -> {
@@ -240,8 +248,9 @@ internal class LinkActivityViewModel @Inject constructor(
 
     companion object {
         private val showHeaderRoutes = setOf(
-            LinkScreen.Wallet.route,
+            LinkScreen.Loading.route,
             LinkScreen.SignUp.route,
+            LinkScreen.Wallet.route,
             LinkScreen.Verification.route
         )
 

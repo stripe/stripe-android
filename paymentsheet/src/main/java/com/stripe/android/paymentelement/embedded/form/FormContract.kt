@@ -16,7 +16,10 @@ import kotlinx.parcelize.Parcelize
 internal sealed interface FormResult : Parcelable {
 
     @Parcelize
-    data class Complete(val selection: PaymentSelection?) : FormResult
+    data class Complete(
+        val selection: PaymentSelection?,
+        val hasBeenConfirmed: Boolean,
+    ) : FormResult
 
     @Parcelize
     object Cancelled : FormResult
@@ -59,7 +62,7 @@ internal object FormContract : ActivityResultContract<FormContract.Args, FormRes
         val configuration: EmbeddedPaymentElement.Configuration,
         val initializationMode: PaymentElementLoader.InitializationMode,
         val paymentElementCallbackIdentifier: String,
-        val statusBarColor: Int?
+        val statusBarColor: Int?,
     ) : Parcelable {
         companion object {
             fun fromIntent(intent: Intent): Args? {

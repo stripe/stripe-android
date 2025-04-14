@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.analytics
 
 import androidx.annotation.Keep
+import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
@@ -78,6 +79,13 @@ internal interface EventReporter {
      * The customer has selected one of the available payment methods in the payment method form.
      */
     fun onSelectPaymentMethod(
+        code: PaymentMethodCode,
+    )
+
+    /**
+     * The customer has removed a saved payment method.
+     */
+    fun onRemoveSavedPaymentMethod(
         code: PaymentMethodCode,
     )
 
@@ -185,11 +193,25 @@ internal interface EventReporter {
     )
 
     /**
+     * The customer has been exposed to an experiment.
+     */
+    fun onExperimentExposure(
+        experiment: LoggableExperiment
+    )
+
+    /**
      * The customer has failed to set a payment method as the default.
      */
     fun onSetAsDefaultPaymentMethodFailed(
         paymentMethodType: String?,
         error: Throwable,
+    )
+
+    /**
+     * The customer has completed all required payment form fields
+     */
+    fun onPaymentMethodFormCompleted(
+        code: PaymentMethodCode,
     )
 
     /**

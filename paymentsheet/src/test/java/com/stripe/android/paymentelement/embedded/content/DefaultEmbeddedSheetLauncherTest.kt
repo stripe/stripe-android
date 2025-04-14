@@ -5,6 +5,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.mainthread.MainThreadSavedStateHandle
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
@@ -85,7 +86,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
         selectionHolder.set(selection)
 
-        val result = FormResult.Complete(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+        val result = FormResult.Complete(null, true)
         val callback = formRegisterCall.callback.asCallbackFor<FormResult>()
 
         callback.onActivityResult(result)
@@ -93,6 +94,22 @@ internal class DefaultEmbeddedSheetLauncherTest {
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
         assertThat(selectionHolder.temporarySelection.value).isNull()
         assertThat(callbackHelper.callbackTurbine.awaitItem()).isInstanceOf<EmbeddedPaymentElement.Result.Completed>()
+    }
+
+    @Test
+    fun `formActivityLauncher sets selection holder on complete result`() = testScenario {
+        sheetStateHolder.sheetIsOpen = true
+        selectionHolder.setTemporary("cashapp")
+        val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
+        selectionHolder.set(selection)
+
+        val result = FormResult.Complete(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION, false)
+        val callback = formRegisterCall.callback.asCallbackFor<FormResult>()
+
+        callback.onActivityResult(result)
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+        assertThat(selectionHolder.temporarySelection.value).isEqualTo("cashapp")
+        assertThat(selectionHolder.selection.value).isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
     }
 
     @Test
@@ -184,7 +201,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
     ) = runTest {
         val lifecycleOwner = TestLifecycleOwner()
         val savedStateHandle = SavedStateHandle()
-        val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
+        val selectionHolder = EmbeddedSelectionHolder(MainThreadSavedStateHandle(savedStateHandle))
         val customerStateHolder = CustomerStateHolder(savedStateHandle, selectionHolder.selection)
         val sheetStateHolder = SheetStateHolder(savedStateHandle)
         val errorReporter = FakeErrorReporter()

@@ -15,6 +15,7 @@ required_passwords = [
     "bindings/gnupg/privkey",
     "bindings/gnupg/passphrase",
     "bindings/java-maven-api-token",
+    "nexus-sonatype-login",
 ]
 
 required_passwords.each do |password|

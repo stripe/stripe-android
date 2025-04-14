@@ -103,7 +103,8 @@ class ConsumersApiServiceImplTest {
         val lookup = consumersApiService.lookupConsumerSession(
             email = email,
             requestSurface = requestSurface,
-            requestOptions = DEFAULT_OPTIONS
+            requestOptions = DEFAULT_OPTIONS,
+            doNotLogConsumerFunnelEvent = false,
         )
 
         assertThat(lookup.exists).isTrue()
@@ -131,6 +132,7 @@ class ConsumersApiServiceImplTest {
             consumersApiService.lookupConsumerSession(
                 email = email,
                 requestSurface = requestSurface,
+                doNotLogConsumerFunnelEvent = false,
                 requestOptions = DEFAULT_OPTIONS
             )
         }

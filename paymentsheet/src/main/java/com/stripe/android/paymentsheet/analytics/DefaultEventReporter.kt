@@ -1,8 +1,12 @@
 package com.stripe.android.paymentsheet.analytics
 
+import android.content.Context
+import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.AnalyticsRequestV2Executor
+import com.stripe.android.core.networking.AnalyticsRequestV2Factory
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.model.CardBrand
@@ -15,6 +19,7 @@ import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.isSaved
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.ui.core.IsStripeCardScanAvailable
 import kotlinx.coroutines.CoroutineScope
@@ -25,8 +30,10 @@ import kotlin.coroutines.CoroutineContext
 
 @OptIn(ExperimentalAnalyticEventCallbackApi::class)
 internal class DefaultEventReporter @Inject internal constructor(
+    context: Context,
     private val mode: EventReporter.Mode,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
+    private val analyticsRequestV2Executor: AnalyticsRequestV2Executor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     private val durationProvider: DurationProvider,
     private val analyticEventCallbackProvider: Provider<AnalyticEventCallback?>,
@@ -40,6 +47,12 @@ internal class DefaultEventReporter @Inject internal constructor(
     private var linkMode: LinkMode? = null
     private var googlePaySupported: Boolean = false
     private var currency: String? = null
+
+    private val analyticsRequestV2Factory = AnalyticsRequestV2Factory(
+        context,
+        clientId = CLIENT_ID,
+        origin = ORIGIN,
+    )
 
     override fun onInit(
         commonConfiguration: CommonConfiguration,
@@ -147,6 +160,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onShowExistingPaymentOptions() {
+        fireAnalyticEvent(AnalyticEvent.PresentedSheet())
         fireEvent(
             PaymentSheetEvent.ShowExistingPaymentOptions(
                 mode = mode,
@@ -186,6 +200,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onSelectPaymentMethod(
         code: PaymentMethodCode,
     ) {
+        fireAnalyticEvent(AnalyticEvent.SelectedPaymentMethodType(code))
         fireEvent(
             PaymentSheetEvent.SelectPaymentMethod(
                 code = code,
@@ -198,9 +213,14 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
+    override fun onRemoveSavedPaymentMethod(code: PaymentMethodCode) {
+        fireAnalyticEvent(AnalyticEvent.RemovedSavedPaymentMethod(code))
+    }
+
     override fun onPaymentMethodFormShown(code: PaymentMethodCode) {
         durationProvider.start(DurationProvider.Key.ConfirmButtonClicked)
 
+        fireAnalyticEvent(AnalyticEvent.DisplayedPaymentMethodForm(code))
         fireEvent(
             PaymentSheetEvent.ShowPaymentOptionForm(
                 code = code,
@@ -212,12 +232,21 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onPaymentMethodFormInteraction(code: PaymentMethodCode) {
+        fireAnalyticEvent(AnalyticEvent.StartedInteractionWithPaymentMethodForm(code))
         fireEvent(
             PaymentSheetEvent.PaymentOptionFormInteraction(
                 code = code,
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
+            )
+        )
+    }
+
+    override fun onPaymentMethodFormCompleted(code: String) {
+        fireAnalyticEvent(
+            AnalyticEvent.CompletedPaymentMethodForm(
+                paymentMethodType = code,
             )
         )
     }
@@ -235,6 +264,11 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onSelectPaymentOption(
         paymentSelection: PaymentSelection,
     ) {
+        if (paymentSelection.isSaved) {
+            paymentSelection.code()?.let {
+                fireAnalyticEvent(AnalyticEvent.SelectedSavedPaymentMethod(it))
+            }
+        }
         fireEvent(
             PaymentSheetEvent.SelectPaymentOption(
                 mode = mode,
@@ -261,6 +295,9 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onPressConfirmButton(paymentSelection: PaymentSelection?) {
         val duration = durationProvider.end(DurationProvider.Key.ConfirmButtonClicked)
 
+        paymentSelection.code()?.let {
+            fireAnalyticEvent(AnalyticEvent.TappedConfirmButton(it))
+        }
         fireEvent(
             PaymentSheetEvent.PressConfirmButton(
                 currency = currency,
@@ -425,6 +462,19 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
+    override fun onExperimentExposure(
+        experiment: LoggableExperiment
+    ) {
+        fireV2Event(
+            PaymentSheetEvent.ExperimentExposure(
+                experiment = experiment,
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
+    }
+
     override fun onSetAsDefaultPaymentMethodFailed(
         paymentMethodType: String?,
         error: Throwable,
@@ -455,6 +505,17 @@ internal class DefaultEventReporter @Inject internal constructor(
         }
     }
 
+    private fun fireV2Event(event: PaymentSheetEvent) {
+        CoroutineScope(workContext).launch {
+            analyticsRequestV2Executor.enqueue(
+                analyticsRequestV2Factory.createRequest(
+                    eventName = event.eventName,
+                    additionalParams = event.params,
+                )
+            )
+        }
+    }
+
     private fun fireAnalyticEvent(event: AnalyticEvent) {
         CoroutineScope(workContext).launch {
             analyticEventCallbackProvider.get()?.run {
@@ -479,5 +540,10 @@ internal class DefaultEventReporter @Inject internal constructor(
         } else {
             null
         }
+    }
+
+    private companion object {
+        const val CLIENT_ID = "stripe-mobile-sdk"
+        const val ORIGIN = "stripe-mobile-sdk-android"
     }
 }

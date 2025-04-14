@@ -36,9 +36,11 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.paymentsheet.ui.CardBrandChoice
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
+import com.stripe.android.paymentsheet.ui.cardParamsUpdateAction
+import com.stripe.android.paymentsheet.ui.editCardDetailsInteractorHelper
+import com.stripe.android.paymentsheet.ui.updateCardBrand
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
@@ -2693,14 +2695,8 @@ class CustomerSheetViewModelTest {
                 )
 
                 val editViewState = awaitViewState<CustomerSheetViewState.UpdatePaymentMethod>()
-                editViewState.updatePaymentMethodInteractor.handleViewAction(
-                    UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                        CardBrandChoice(
-                            brand = CardBrand.Visa,
-                            enabled = true
-                        )
-                    )
-                )
+
+                editViewState.updatePaymentMethodInteractor.cardParamsUpdateAction(CardBrand.Visa)
 
                 editViewState.updatePaymentMethodInteractor.handleViewAction(
                     UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed
@@ -2882,15 +2878,7 @@ class CustomerSheetViewModelTest {
             )
 
             val editViewState = awaitViewState<CustomerSheetViewState.UpdatePaymentMethod>()
-            editViewState.updatePaymentMethodInteractor.handleViewAction(
-                UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                    CardBrandChoice(
-                        brand = CardBrand.Visa,
-                        enabled = true
-
-                    )
-                )
-            )
+            editViewState.updatePaymentMethodInteractor.cardParamsUpdateAction(CardBrand.Visa)
             editViewState.updatePaymentMethodInteractor.handleViewAction(
                 UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed
             )
@@ -2922,14 +2910,9 @@ class CustomerSheetViewModelTest {
             )
 
             val editViewState = awaitViewState<CustomerSheetViewState.UpdatePaymentMethod>()
-            editViewState.updatePaymentMethodInteractor.handleViewAction(
-                UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                    CardBrandChoice(
-                        brand = CardBrand.Visa,
-                        enabled = true
-                    )
-                )
-            )
+            editViewState.updatePaymentMethodInteractor.editCardDetailsInteractorHelper {
+                updateCardBrand(CardBrand.Visa)
+            }
 
             verify(eventReporter).onBrandChoiceSelected(
                 source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
@@ -3552,14 +3535,7 @@ class CustomerSheetViewModelTest {
             )
 
             val editViewState = awaitViewState<CustomerSheetViewState.UpdatePaymentMethod>()
-            editViewState.updatePaymentMethodInteractor.handleViewAction(
-                UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                    CardBrandChoice(
-                        brand = CardBrand.Visa,
-                        enabled = true
-                    )
-                )
-            )
+            editViewState.updatePaymentMethodInteractor.cardParamsUpdateAction(CardBrand.Visa)
             editViewState.updatePaymentMethodInteractor.handleViewAction(
                 UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed
             )

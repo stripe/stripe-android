@@ -1,6 +1,8 @@
 package com.stripe.android.link.ui.signup
 
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.test
+import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
@@ -24,6 +26,8 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
@@ -307,9 +311,9 @@ internal class SignUpViewModelTest {
             linkEventsReporter = object : SignUpLinkEventsReporter() {
                 override fun onSignupCompleted(isInline: Boolean) = Unit
             },
-            navigate = { screen ->
+            navigateAndClearStack = { screen ->
                 screens.add(screen)
-            }
+            },
         )
 
         val linkAccount = LinkAccount(
@@ -528,6 +532,29 @@ internal class SignUpViewModelTest {
         assertThat(movedToWeb).isFalse()
     }
 
+    @Test
+    fun `submitState is set while submitting`() = runTest(dispatcher) {
+        val linkAuth = FakeLinkAuth().apply {
+            lookupResult = LinkAuthResult.NoLinkAccountFound
+        }
+        val viewModel = createViewModel(linkAuth = linkAuth)
+        val submitStates = viewModel.state.map { it.isSubmitting }.distinctUntilChanged()
+        turbineScope {
+            submitStates.test {
+                linkAuth.signupResult = LinkAuthResult.AttestationFailed(Throwable())
+                assertThat(awaitItem()).isFalse()
+                viewModel.performValidSignup()
+                assertThat(awaitItem()).isTrue()
+                assertThat(awaitItem()).isFalse()
+
+                linkAuth.signupResult = LinkAuthResult.Success(TestFactory.LINK_ACCOUNT)
+                viewModel.performValidSignup()
+                assertThat(awaitItem()).isTrue()
+                assertThat(awaitItem()).isFalse()
+            }
+        }
+    }
+
     private fun SignUpViewModel.performValidSignup() {
         emailController.onRawValueChange("email@valid.co")
         phoneNumberController.onRawValueChange("1234567890")
@@ -570,7 +597,6 @@ internal class SignUpViewModelTest {
         },
         logger: Logger = FakeLogger(),
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
-        navigate: (LinkScreen) -> Unit = {},
         navigateAndClearStack: (LinkScreen) -> Unit = {},
         moveToWeb: () -> Unit = {}
     ): SignUpViewModel {
@@ -588,7 +614,6 @@ internal class SignUpViewModelTest {
             linkEventsReporter = linkEventsReporter,
             logger = logger,
             savedStateHandle = savedStateHandle,
-            navigate = navigate,
             navigateAndClearStack = navigateAndClearStack,
             moveToWeb = moveToWeb,
         )

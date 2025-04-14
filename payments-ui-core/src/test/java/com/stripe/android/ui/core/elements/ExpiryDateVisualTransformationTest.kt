@@ -45,6 +45,13 @@ internal class ExpiryDateVisualTransformationTest {
         assertCorrectMapping(original = "53", result)
     }
 
+    @Test
+    fun `transformation is ignored for fallbackExpiryDate`() {
+        val transform = ExpiryDateVisualTransformation(fallbackExpiryDate = "•• / ••")
+        val result = transform.filter(AnnotatedString("•• / ••"))
+        assertThat(result.text.text).isEqualTo("•• / ••")
+    }
+
     private fun assertCorrectMapping(
         original: String,
         result: TransformedText,

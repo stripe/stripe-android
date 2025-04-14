@@ -11,8 +11,12 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -32,9 +36,11 @@ import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkTerms
+import com.stripe.android.link.ui.LinkTermsType
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.ProgressIndicatorTestTag
+import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
@@ -44,6 +50,7 @@ import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.utils.collectAsState
+import kotlinx.coroutines.delay
 
 @Composable
 internal fun SignUpScreen(
@@ -68,6 +75,17 @@ internal fun SignUpBody(
     signUpScreenState: SignUpScreenState,
     onSignUpClick: () -> Unit
 ) {
+    var didFocusField by rememberSaveable { mutableStateOf(false) }
+    val emailFocusRequester = remember { FocusRequester() }
+
+    if (!didFocusField && signUpScreenState.showKeyboardOnOpen) {
+        LaunchedEffect(Unit) {
+            delay(LINK_DEFAULT_ANIMATION_DELAY_MILLIS)
+            emailFocusRequester.requestFocus()
+            didFocusField = true
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -75,7 +93,7 @@ internal fun SignUpBody(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = stringResource(R.string.stripe_sign_up_header),
+            text = stringResource(R.string.stripe_link_sign_up_header),
             modifier = Modifier
                 .testTag(SIGN_UP_HEADER_TAG)
                 .padding(vertical = 4.dp),
@@ -84,7 +102,7 @@ internal fun SignUpBody(
             color = MaterialTheme.colors.onSurface
         )
         Text(
-            text = stringResource(R.string.stripe_sign_up_message, signUpScreenState.merchantName),
+            text = stringResource(R.string.stripe_link_sign_up_message),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 4.dp, bottom = 30.dp),
@@ -94,9 +112,10 @@ internal fun SignUpBody(
         )
         StripeThemeForLink {
             EmailCollectionSection(
-                enabled = true,
+                enabled = signUpScreenState.canEditForm,
                 emailController = emailController,
-                signUpScreenState = signUpScreenState
+                signUpScreenState = signUpScreenState,
+                focusRequester = emailFocusRequester,
             )
         }
         AnimatedVisibility(
@@ -183,7 +202,7 @@ private fun SecondaryFields(
     Column(modifier = Modifier.fillMaxWidth()) {
         StripeThemeForLink {
             PhoneNumberCollectionSection(
-                enabled = true,
+                enabled = signUpScreenState.canEditForm,
                 phoneNumberController = phoneNumberController,
                 requestFocusWhenShown = phoneNumberController.initialPhoneNumber.isEmpty(),
                 imeAction = if (signUpScreenState.requiresNameCollection) {
@@ -201,7 +220,7 @@ private fun SecondaryFields(
                     TextField(
                         textFieldController = nameController,
                         imeAction = ImeAction.Done,
-                        enabled = true,
+                        enabled = signUpScreenState.canEditForm,
                     )
                 }
             }
@@ -211,8 +230,7 @@ private fun SecondaryFields(
                     .fillMaxWidth()
                     .padding(top = 8.dp, bottom = 16.dp),
                 textAlign = TextAlign.Center,
-                isShowingPhoneFirst = true,
-                isOptional = true
+                type = LinkTermsType.Full,
             )
         }
         AnimatedVisibility(visible = signUpScreenState.errorMessage != null) {
@@ -224,11 +242,12 @@ private fun SecondaryFields(
             )
         }
         PrimaryButton(
-            label = stringResource(R.string.stripe_sign_up),
-            state = if (signUpScreenState.signUpEnabled) {
-                PrimaryButtonState.Enabled
-            } else {
-                PrimaryButtonState.Disabled
+            modifier = Modifier.padding(vertical = 16.dp),
+            label = stringResource(R.string.stripe_link_sign_up),
+            state = when {
+                signUpScreenState.isSubmitting -> PrimaryButtonState.Processing
+                signUpScreenState.signUpEnabled -> PrimaryButtonState.Enabled
+                else -> PrimaryButtonState.Disabled
             },
             onButtonClick = {
                 onSignUpClick()
@@ -255,6 +274,7 @@ private fun SignUpScreenPreview() {
                     signUpEnabled = false,
                     signUpState = SignUpState.InputtingRemainingFields,
                     requiresNameCollection = true,
+                    showKeyboardOnOpen = false,
                 ),
                 onSignUpClick = {}
             )

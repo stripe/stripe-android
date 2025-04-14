@@ -5,7 +5,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentsheet.LinkHandler
-import com.stripe.android.paymentsheet.NewOrExternalPaymentSelection
+import com.stripe.android.paymentsheet.NewPaymentOptionSelection
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -90,7 +90,7 @@ internal class FakeBaseSheetViewModel private constructor(
     private val errorSource = MutableStateFlow<ResolvableString?>(null)
     override val error: StateFlow<ResolvableString?> = errorSource.asStateFlow()
 
-    override var newPaymentSelection: NewOrExternalPaymentSelection? = null
+    override var newPaymentSelection: NewPaymentOptionSelection? = null
 
     override fun onError(error: ResolvableString?) {
         errorSource.value = error

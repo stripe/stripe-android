@@ -16,6 +16,8 @@
   <string name="stripe_bank_account_with_last_4">Banka hesabı ···· %s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">%s içinde banka uygulamanızda ödemeyi onaylayarak satın almayı tamamlayın.</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_cashapp_afterpay_subtitle">Şimdi satın alın veya daha sonra Cash App Afterpay ile ödeyin</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
   <string name="stripe_clearpay_subtitle">Şimdi satın alın veya daha sonra Clearpay ile ödeyin</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
@@ -24,6 +26,16 @@
   <string name="stripe_confirm_close_form_title">Bu formu kapatmak istiyor musunuz?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Link ile tek tıklamayla güvenli ödeme yapmak için bilgilerinizi kaydedin</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_link_sign_up">Kabul et ve devam et</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header">Hızlı, güvenli, tek tıklamayla ödeme</string>
+  <!-- Label describing the benefit of signing up for Link. -->
+  <string name="stripe_link_sign_up_message">Bilgilerinizi Link\'e kaydedin ve Link tarafından desteklenen sitelerde 1 tıklamayla güvenle ödeme yapın.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_link_sign_up_terms"><![CDATA[Devam ettiğinizde <terms>Koşulları</terms> ve <privacy>Gizlilik Politikasını</privacy> kabul etmiş olursunuz.]]></string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message">Kaydedilmiş bilgilerinizi kullanmak için %s numaralı telefona gönderilen kodu girin.</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Link\'ten çıkış yap</string>
   <!-- Text that is displayed when a network error occurs -->
@@ -81,6 +93,8 @@
   <string name="stripe_paymentsheet_manage_bank_account">ABD banka hesabını yönet</string>
   <!-- Title shown above a view containing a customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_card">Kartı yönetin</string>
+  <!-- Title shown above a view containing the customer's cards that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_cards">Kartları yönet</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Ödeme yöntemlerini yönetin</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
@@ -137,6 +151,8 @@
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Bu kartı gelecekteki %s ödemeleri için kaydedin</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">Kaydedildi</string>
+  <!-- Title shown above a view containing the customer's cards -->
+  <string name="stripe_paymentsheet_select_card">Kart seçin</string>
   <!-- Title shown above a view containing the customer's payment methods -->
   <string name="stripe_paymentsheet_select_payment_method">Ödeme yöntemini seçin</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
@@ -171,6 +187,8 @@
   <string name="stripe_signup_deactivated_account_message">Hesabınız devre dışı bırakıldı</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">Bir sorun oluştu</string>
+  <!-- Accessibility description when payment button shows a successful transaction animation. -->
+  <string name="stripe_successful_transaction_description">İşlem tamamlandı</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">İptal edip başka bir yöntemle ödeyin</string>
   <!-- Text on a screen asking the user to approve a payment -->

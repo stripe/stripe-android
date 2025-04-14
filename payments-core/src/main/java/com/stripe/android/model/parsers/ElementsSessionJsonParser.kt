@@ -6,6 +6,7 @@ import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArray
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
@@ -57,6 +58,16 @@ internal class ElementsSessionJsonParser(
             countryCode = countryCode
         )
 
+        val experimentsData: ElementsSession.ExperimentsData? =
+            json.optJSONObject(FIELD_EXPERIMENTS_DATA)?.let { experimentsDataJson ->
+                ElementsSession.ExperimentsData(
+                    arbId = experimentsDataJson.optString(ARB_ID),
+                    experimentAssignments = experimentsDataJson.optJSONObject(FIELD_EXPERIMENTS_ASSIGNMENTS)?.let {
+                        parseExperimentAssignments(it)
+                    } ?: emptyMap()
+                )
+            }
+
         val customPaymentMethods = parseCustomPaymentMethods(json.optJSONArray(FIELD_CUSTOM_PAYMENT_METHODS_DATA))
 
         val cardBrandChoice = parseCardBrandChoice(json)
@@ -76,6 +87,7 @@ internal class ElementsSessionJsonParser(
                 externalPaymentMethodData = externalPaymentMethodData,
                 customPaymentMethods = customPaymentMethods,
                 flags = flags,
+                experimentsData = experimentsData,
                 elementsSessionId = elementsSessionId.takeIf { it.isNotBlank() } ?: UUID.randomUUID().toString()
             )
         } else {
@@ -146,10 +158,10 @@ internal class ElementsSessionJsonParser(
         json: JSONObject?,
         linkFundingSources: JSONArray?,
     ): ElementsSession.LinkSettings {
-        val disableLinkSignup = json?.optBoolean(FIELD_DISABLE_LINK_SIGNUP) ?: false
-        val linkPassthroughModeEnabled = json?.optBoolean(FIELD_LINK_PASSTHROUGH_MODE_ENABLED) ?: false
-        val useLinkAttestationEndpoints = json?.optBoolean(FIELD_USE_LINK_ATTESTATION_ENDPOINTS) ?: false
-        val suppressLink2faModal = json?.optBoolean(FIELD_LINK_SUPPRESS_2FA_MODAL) ?: false
+        val disableLinkSignup = json?.optBoolean(FIELD_DISABLE_LINK_SIGNUP) == true
+        val linkPassthroughModeEnabled = json?.optBoolean(FIELD_LINK_PASSTHROUGH_MODE_ENABLED) == true
+        val useLinkAttestationEndpoints = json?.optBoolean(FIELD_USE_LINK_ATTESTATION_ENDPOINTS) == true
+        val suppressLink2faModal = json?.optBoolean(FIELD_LINK_SUPPRESS_2FA_MODAL) == true
 
         val linkMode = json?.optString(FIELD_LINK_MODE)?.let { mode ->
             LinkMode.entries.firstOrNull { it.value == mode }
@@ -348,7 +360,6 @@ internal class ElementsSessionJsonParser(
     /**
      * Parse the flags from the [json] object.
      * @param json the json object to parse
-     * @param relevantFlags the flags to parse. If null, all flags will be parsed.
      */
     private fun parseSessionFlags(json: JSONObject): Map<ElementsSession.Flag, Boolean> {
         val flags = mutableMapOf<ElementsSession.Flag, Boolean>()
@@ -365,6 +376,26 @@ internal class ElementsSessionJsonParser(
         }
 
         return flags.toMap()
+    }
+
+    /**
+     * Parse the experiment assignments from the [json] object.
+     * @param json the json object to parse
+     */
+    private fun parseExperimentAssignments(json: JSONObject): Map<ExperimentAssignment, String> {
+        val specs = mutableMapOf<ExperimentAssignment, String>()
+        json.keys().forEach { key ->
+            val value = json.get(key)
+            ExperimentAssignment.entries
+                .firstOrNull { it.experimentValue == key }
+                ?.let { flag ->
+                    if (value is String) {
+                        specs[flag] = value
+                    }
+                }
+        }
+
+        return specs.toMap()
     }
 
     internal companion object {
@@ -413,6 +444,9 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_PAYMENT_METHOD_SYNC_DEFAULT = "payment_method_sync_default"
         private const val VALUE_ENABLED = FIELD_ENABLED
         const val FIELD_GOOGLE_PAY_PREFERENCE = "google_pay_preference"
+        private const val FIELD_EXPERIMENTS_DATA = "experiments_data"
+        private const val FIELD_EXPERIMENTS_ASSIGNMENTS = "experiment_assignments"
+        private const val ARB_ID = "arb_id"
 
         private val PAYMENT_METHOD_JSON_PARSER = PaymentMethodJsonParser()
         private val CUSTOM_PAYMENT_METHOD_JSON_PARSER = CustomPaymentMethodJsonParser()

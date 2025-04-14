@@ -1,6 +1,8 @@
 package com.stripe.android.paymentelement.embedded.form
 
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.core.mainthread.MainThreadOnlyMutableStateFlow
+import com.stripe.android.core.mainthread.update
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentIntent
@@ -15,13 +17,12 @@ import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.paymentsheet.utils.buyButtonLabel
+import com.stripe.android.paymentsheet.utils.continueButtonLabel
 import com.stripe.android.paymentsheet.utils.reportPaymentResult
 import com.stripe.android.ui.core.Amount
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -38,8 +39,9 @@ internal interface FormActivityStateHelper {
         val isEnabled: Boolean,
         val processingState: PrimaryButtonProcessingState,
         val isProcessing: Boolean,
+        val shouldDisplayLockIcon: Boolean,
         val error: ResolvableString? = null,
-        val mandateText: ResolvableString? = null
+        val mandateText: ResolvableString? = null,
     )
 }
 
@@ -53,12 +55,13 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
     private val eventReporter: EventReporter,
     @ViewModelScope coroutineScope: CoroutineScope,
 ) : FormActivityStateHelper {
-    private val _state = MutableStateFlow(
+    private val _state = MainThreadOnlyMutableStateFlow(
         FormActivityStateHelper.State(
             primaryButtonLabel = primaryButtonLabel(paymentMethodMetadata.stripeIntent, configuration),
             isEnabled = false,
             processingState = PrimaryButtonProcessingState.Idle(null),
-            isProcessing = false
+            isProcessing = false,
+            shouldDisplayLockIcon = configuration.formSheetAction == EmbeddedPaymentElement.FormSheetAction.Confirm,
         )
     )
     override val state: StateFlow<FormActivityStateHelper.State> = _state
@@ -168,7 +171,10 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
         val amount = amount(stripeIntent.amount, stripeIntent.currency)
         val label = configuration.primaryButtonLabel
         val isForPaymentIntent = stripeIntent is PaymentIntent
-        return buyButtonLabel(amount, label, isForPaymentIntent)
+        return when (configuration.formSheetAction) {
+            EmbeddedPaymentElement.FormSheetAction.Continue -> continueButtonLabel(label)
+            EmbeddedPaymentElement.FormSheetAction.Confirm -> buyButtonLabel(amount, label, isForPaymentIntent)
+        }
     }
 
     private fun amount(amount: Long?, currency: String?): Amount? {

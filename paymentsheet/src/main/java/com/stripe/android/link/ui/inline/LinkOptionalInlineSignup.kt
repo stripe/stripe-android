@@ -27,7 +27,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalTextInputService
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -38,6 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.LinkTerms
+import com.stripe.android.link.ui.LinkTermsType
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.CircularProgressIndicator
@@ -68,13 +69,12 @@ internal fun LinkOptionalInlineSignup(
     }
 
     val focusManager = LocalFocusManager.current
-    val textInputService = LocalTextInputService.current
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     LaunchedEffect(viewState.signUpState) {
         if (viewState.signUpState == SignUpState.InputtingPrimaryField && viewState.userInput != null) {
             focusManager.clearFocus(true)
-            @Suppress("DEPRECATION")
-            textInputService?.hideSoftwareKeyboard()
+            keyboardController?.hide()
         }
     }
 
@@ -152,8 +152,11 @@ internal fun LinkOptionalInlineSignup(
         )
 
         LinkTerms(
-            isOptional = true,
-            isShowingPhoneFirst = isShowingPhoneFirst,
+            type = if (isShowingPhoneFirst) {
+                LinkTermsType.InlineOptionalWithPhoneFirst
+            } else {
+                LinkTermsType.InlineOptional
+            },
             textAlign = TextAlign.Start,
             modifier = Modifier
                 .padding(top = 8.dp)

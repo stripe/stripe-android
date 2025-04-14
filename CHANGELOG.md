@@ -2,10 +2,32 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+Dependencies updated in [10579](https://github.com/stripe/stripe-android/pull/10579):
+* Bumped Accompanist from 0.34.0 to 0.36.0.
+* Bumped Compose from 1.6.8 to 1.7.8.
+* Bumped Androidx Navigation from 2.7.7 to 2.8.5.
+
+## 21.10.0 - 2025-04-11
+
+### Payments
+* [FIXED][10590](https://github.com/stripe/stripe-android/pull/10590) Fix 3DS2 Challenge Response parsing error.
+* [FIXED][10612](https://github.com/stripe/stripe-android/pull/10612) Fix JWS validation error in 3DS2 flow.
+
+### PaymentSheet
+* [ADDED][10587](https://github.com/stripe/stripe-android/pull/10587) Embedded Payment Element is now in private beta.
+
+## 21.9.0 - 2025-04-07
+
+### Connect (Private Preview)
+* [CHANGED][10548](https://github.com/stripe/stripe-android/pull/10548) Replaced `ClientSecretProvider` with `FetchClientSecret`
+
+## 21.8.0 - 2025-04-01
+
 ### PaymentSheet
 * [CHANGED][10480](https://github.com/stripe/stripe-android/pull/10480) Updated Afterpay branding in the US to be Cash App Afterpay.
 * [FIXED][10492](https://github.com/stripe/stripe-android/pull/10492) Update Add Payment Method screen to use `PaymentSheet.Appearance.Colors.onSurface` as the header text color when `PaymentMethodLayout` is `Vertical`.
-* [Added][10496](https://github.com/stripe/stripe-android/pull/10496) Improve Google Pay troubleshooting with detailed user facing logs.
+* [ADDED][10496](https://github.com/stripe/stripe-android/pull/10496) Improve Google Pay troubleshooting with detailed user facing logs.
+* [ADDED][10437](https://github.com/stripe/stripe-android/pull/10437) Added `LinkConfiguration` to allow control over Link in PaymentSheet.
 
 ### Connect (Private Preview)
 * [Added] Connect SDK to add connected account dashboard functionality to your app using [Connect embedded components](https://docs.stripe.com/connect/get-started-connect-embedded-components?platform=android).

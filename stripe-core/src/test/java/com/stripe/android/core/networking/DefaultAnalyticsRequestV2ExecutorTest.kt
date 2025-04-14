@@ -33,7 +33,7 @@ internal class DefaultAnalyticsRequestV2ExecutorTest {
         val storage = FakeAnalyticsRequestV2Storage()
 
         val executor = DefaultAnalyticsRequestV2Executor(
-            application = application,
+            context = application,
             networkClient = networkClient,
             logger = Logger.noop(),
             storage = storage,
@@ -55,7 +55,7 @@ internal class DefaultAnalyticsRequestV2ExecutorTest {
         val storage = FakeAnalyticsRequestV2Storage()
 
         val executor = DefaultAnalyticsRequestV2Executor(
-            application = application,
+            context = application,
             networkClient = networkClient,
             logger = Logger.noop(),
             storage = storage,

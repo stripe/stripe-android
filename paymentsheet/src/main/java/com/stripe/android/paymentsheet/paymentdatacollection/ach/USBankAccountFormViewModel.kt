@@ -41,6 +41,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.BankFormScreenState.ResultIdentifier
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.DaggerUSBankAccountFormComponent
+import com.stripe.android.paymentsheet.utils.getSetAsDefaultPaymentMethodFromPaymentSelection
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SetAsDefaultPaymentMethodElement
 import com.stripe.android.uicore.elements.AddressElement
@@ -191,20 +192,23 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         stateFlowOf(null)
     }
 
-    private val defaultSaveForFutureUse: Boolean =
+    private val saveForFutureUseInitialValue: Boolean =
         args.savedPaymentMethod?.input?.saveForFutureUse ?: false
 
     val saveForFutureUseElement: SaveForFutureUseElement = SaveForFutureUseElement(
-        initialValue = defaultSaveForFutureUse,
+        initialValue = saveForFutureUseInitialValue,
         merchantName = args.formArgs.merchantName
     )
 
     val saveForFutureUseCheckedFlow: StateFlow<Boolean> = saveForFutureUseElement.controller.saveForFutureUse
 
+    private val setAsDefaultInitialValue: Boolean =
+        args.savedPaymentMethod?.getSetAsDefaultPaymentMethodFromPaymentSelection() ?: false
+
     val setAsDefaultPaymentMethodElement: SetAsDefaultPaymentMethodElement? =
         if (args.setAsDefaultPaymentMethodEnabled) {
             SetAsDefaultPaymentMethodElement(
-                initialValue = false,
+                initialValue = setAsDefaultInitialValue,
                 saveForFutureUseCheckedFlow = saveForFutureUseCheckedFlow,
                 setAsDefaultMatchesSaveForFutureUse = args.setAsDefaultMatchesSaveForFutureUse,
             )

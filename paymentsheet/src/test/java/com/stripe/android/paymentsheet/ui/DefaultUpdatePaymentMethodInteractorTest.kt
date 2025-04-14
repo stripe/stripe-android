@@ -11,12 +11,15 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.setDefaultPaymentMethodErrorMessage
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.updateCardBrandErrorMessage
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.updatesFailedErrorMessage
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FeatureFlagTestRule
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertThrows
 import org.junit.Rule
 import org.junit.Test
 
@@ -28,6 +31,11 @@ class DefaultUpdatePaymentMethodInteractorTest {
         featureFlag = FeatureFlags.editSavedCardPaymentMethodEnabled,
         isEnabled = false
     )
+
+    private val testDispatcher = UnconfinedTestDispatcher()
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
     @Test
     fun removeViewAction_removesPmAndNavigatesBack() {
@@ -124,80 +132,6 @@ class DefaultUpdatePaymentMethodInteractorTest {
     }
 
     @Test
-    fun initialCardBrand_forCardWithNetworks_isCorrect() {
-        runScenario(
-            displayableSavedPaymentMethod = PaymentMethodFixtures
-                .CARD_WITH_NETWORKS_PAYMENT_METHOD
-                .toDisplayableSavedPaymentMethod()
-        ) {
-            interactor.state.test {
-                assertThat(awaitItem().cardBrandChoice.brand).isEqualTo(CardBrand.CartesBancaires)
-            }
-        }
-    }
-
-    @Test
-    fun onCardBrandChoiceChanged_updatesCardBrandInState() {
-        var callbackBrand: CardBrand? = null
-        runScenario(
-            displayableSavedPaymentMethod = PaymentMethodFixtures
-                .CARD_WITH_NETWORKS_PAYMENT_METHOD
-                .toDisplayableSavedPaymentMethod(),
-            onBrandChoiceSelected = {
-                callbackBrand = it
-            }
-        ) {
-            val initialCardBrand = CardBrand.CartesBancaires
-            val updatedCardBrand = CardBrand.Visa
-
-            interactor.state.test {
-                assertThat(awaitItem().cardBrandChoice.brand).isEqualTo(initialCardBrand)
-            }
-
-            interactor.handleViewAction(
-                UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                    cardBrandChoice = CardBrandChoice(brand = updatedCardBrand, enabled = true)
-                )
-            )
-
-            interactor.state.test {
-                assertThat(awaitItem().cardBrandChoice.brand).isEqualTo(updatedCardBrand)
-            }
-            assertThat(callbackBrand).isEqualTo(updatedCardBrand)
-        }
-    }
-
-    @Test
-    fun onCardBrandChoiceChanged_doesNotInvokeCallback_whenNewCardBrandIsSameAsOld() {
-        var callbackBrand: CardBrand? = null
-        runScenario(
-            displayableSavedPaymentMethod = PaymentMethodFixtures
-                .CARD_WITH_NETWORKS_PAYMENT_METHOD
-                .toDisplayableSavedPaymentMethod(),
-            onBrandChoiceSelected = {
-                callbackBrand = it
-            }
-        ) {
-            val initialCardBrand = CardBrand.CartesBancaires
-
-            interactor.state.test {
-                assertThat(awaitItem().cardBrandChoice.brand).isEqualTo(initialCardBrand)
-            }
-
-            interactor.handleViewAction(
-                UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                    cardBrandChoice = CardBrandChoice(brand = initialCardBrand, enabled = true)
-                )
-            )
-
-            interactor.state.test {
-                assertThat(awaitItem().cardBrandChoice.brand).isEqualTo(initialCardBrand)
-            }
-            assertThat(callbackBrand).isNull()
-        }
-    }
-
-    @Test
     fun cbcEligibleCard_isModifiablePaymentMethod() {
         runScenario(
             displayableSavedPaymentMethod = PaymentMethodFixtures
@@ -209,7 +143,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
     }
 
     @Test
-    fun updatingCardBrand_callsOnUpdateSuccess() {
+    fun updatingCard_callsOnUpdateSuccess() {
         var updateSuccessCalled = false
         fun onUpdateSuccess() {
             updateSuccessCalled = true
@@ -221,16 +155,8 @@ class DefaultUpdatePaymentMethodInteractorTest {
             updatePaymentMethodExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
             onUpdateSuccess = ::onUpdateSuccess,
         ) {
-            interactor.state.test {
-                assertThat(awaitItem().cardBrandChoice.brand).isEqualTo(CardBrand.CartesBancaires)
-            }
+            interactor.cardParamsUpdateAction(CardBrand.Visa)
 
-            val expectedNewCardBrand = CardBrand.Visa
-            interactor.handleViewAction(
-                UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                    cardBrandChoice = CardBrandChoice(brand = expectedNewCardBrand, enabled = true)
-                )
-            )
             interactor.state.test {
                 assertThat(awaitItem().isSaveButtonEnabled).isTrue()
             }
@@ -241,36 +167,20 @@ class DefaultUpdatePaymentMethodInteractorTest {
     }
 
     @Test
-    fun updatingCardBrand_updatesStateAsExpected() {
+    fun updatingCard_updatesStateAsExpected() {
         var updatedPaymentMethod: PaymentMethod? = null
-        var newCardBrand: CardBrand? = null
         val initialPaymentMethod = PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
-
-        fun updatePaymentMethodExecutor(
-            paymentMethod: PaymentMethod,
-            cardUpdateParams: CardUpdateParams
-        ): Result<PaymentMethod> {
-            updatedPaymentMethod = paymentMethod
-            newCardBrand = cardUpdateParams.cardBrand
-
-            return Result.success(paymentMethod)
-        }
 
         runScenario(
             displayableSavedPaymentMethod = initialPaymentMethod.toDisplayableSavedPaymentMethod(),
-            updatePaymentMethodExecutor = ::updatePaymentMethodExecutor,
+            updatePaymentMethodExecutor = { paymentMethod, _ ->
+                updatedPaymentMethod = paymentMethod
+                Result.success(paymentMethod)
+            },
             onUpdateSuccess = {},
         ) {
-            interactor.state.test {
-                assertThat(awaitItem().cardBrandChoice.brand).isEqualTo(CardBrand.CartesBancaires)
-            }
+            interactor.cardParamsUpdateAction(CardBrand.CartesBancaires)
 
-            val expectedNewCardBrand = CardBrand.Visa
-            interactor.handleViewAction(
-                UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                    cardBrandChoice = CardBrandChoice(brand = expectedNewCardBrand, enabled = true)
-                )
-            )
             interactor.state.test {
                 assertThat(awaitItem().isSaveButtonEnabled).isTrue()
             }
@@ -278,7 +188,6 @@ class DefaultUpdatePaymentMethodInteractorTest {
             interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
 
             assertThat(updatedPaymentMethod).isEqualTo(initialPaymentMethod)
-            assertThat(newCardBrand).isEqualTo(expectedNewCardBrand)
             // The user should be able to change their card brand back to the original value if they wanted to at this
             // point.
             interactor.state.test {
@@ -286,11 +195,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             }
 
             // Re-clicking on the already saved card brand doesn't update cardBrandHasBeenChanged incorectly.
-            interactor.handleViewAction(
-                UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                    cardBrandChoice = CardBrandChoice(brand = expectedNewCardBrand, enabled = true)
-                )
-            )
+            interactor.nullCardParamsUpdateAction()
             interactor.state.test {
                 assertThat(awaitItem().isSaveButtonEnabled).isFalse()
             }
@@ -298,7 +203,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
     }
 
     @Test
-    fun updatingCardBrand_cardBrandHasNotChanged_doesNotAttemptUpdate() {
+    fun updatingCard_noCardChanges_doesNotAttemptUpdate() {
         val initialPaymentMethod = PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
         var cardBrandUpdateCalled = false
 
@@ -338,16 +243,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
                 .toDisplayableSavedPaymentMethod(),
             updatePaymentMethodExecutor = ::updatePaymentMethodExecutor,
         ) {
-            val originalCardBrand = CardBrand.CartesBancaires
-            interactor.state.test {
-                assertThat(awaitItem().cardBrandChoice.brand).isEqualTo(originalCardBrand)
-            }
-
-            interactor.handleViewAction(
-                UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                    cardBrandChoice = CardBrandChoice(brand = CardBrand.Visa, enabled = true)
-                )
-            )
+            interactor.cardParamsUpdateAction(CardBrand.CartesBancaires)
             interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
 
             interactor.state.test {
@@ -405,7 +301,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
     }
 
     @Test
-    fun isDefaultPaymentMethod_cbcEligibleCard_saveButtonEnabledCorrectly() = runScenario(
+    fun isDefaultPaymentMethod_cardUpdated_saveButtonEnabledCorrectly() = runScenario(
         displayableSavedPaymentMethod = PaymentMethodFixtures
             .CARD_WITH_NETWORKS_PAYMENT_METHOD
             .toDisplayableSavedPaymentMethod(),
@@ -416,11 +312,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             assertThat(awaitItem().isSaveButtonEnabled).isFalse()
         }
 
-        interactor.handleViewAction(
-            UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                cardBrandChoice = CardBrandChoice(brand = CardBrand.Visa, enabled = true)
-            )
-        )
+        interactor.cardParamsUpdateAction(CardBrand.Visa)
 
         interactor.state.test {
             assertThat(awaitItem().isSaveButtonEnabled).isTrue()
@@ -541,7 +433,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
     }
 
     @Test
-    fun updateCardBrandAndDefault_cardBrandUpdateFails_displaysError() {
+    fun updateCardAndDefault_cardUpdateFails_displaysError() {
         var updateSuccessCalled = false
         fun onUpdateSuccess() {
             updateSuccessCalled = true
@@ -558,7 +450,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             updatePaymentMethodExecutor = { _, _ -> Result.failure(expectedError) },
             onUpdateSuccess = ::onUpdateSuccess,
         ) {
-            updateCardBrandAndDefaultPaymentMethod(interactor)
+            updateCardAndDefaultPaymentMethod(interactor)
 
             assertThat(updateSuccessCalled).isFalse()
             interactor.state.test {
@@ -568,7 +460,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
     }
 
     @Test
-    fun updateCardBrandAndDefault_setDefaultFails_displaysError() {
+    fun updateCardAndDefault_setDefaultFails_displaysError() {
         var updateSuccessCalled = false
         fun onUpdateSuccess() {
             updateSuccessCalled = true
@@ -583,7 +475,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             updatePaymentMethodExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
             onUpdateSuccess = ::onUpdateSuccess,
         ) {
-            updateCardBrandAndDefaultPaymentMethod(interactor)
+            updateCardAndDefaultPaymentMethod(interactor)
 
             assertThat(updateSuccessCalled).isFalse()
             interactor.state.test {
@@ -593,7 +485,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
     }
 
     @Test
-    fun updateCardBrandAndDefault_bothFail_displaysError() {
+    fun updateCardAndDefault_bothFail_displaysError() {
         var updateSuccessCalled = false
         fun onUpdateSuccess() {
             updateSuccessCalled = true
@@ -608,7 +500,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             updatePaymentMethodExecutor = { _, _ -> Result.failure(IllegalStateException("Fake error")) },
             onUpdateSuccess = ::onUpdateSuccess,
         ) {
-            updateCardBrandAndDefaultPaymentMethod(interactor)
+            updateCardAndDefaultPaymentMethod(interactor)
 
             assertThat(updateSuccessCalled).isFalse()
             interactor.state.test {
@@ -653,20 +545,6 @@ class DefaultUpdatePaymentMethodInteractorTest {
     }
 
     @Test
-    fun shouldNotAllowCardEdit_whenCardEditFeatureFlagIsDisabled() = runScenario(
-        editSavedCardPaymentMethodEnabled = false
-    ) {
-        assertThat(interactor.allowCardEdit).isFalse()
-    }
-
-    @Test
-    fun shouldAllowCardEdit_whenCardEditFeatureFlagIsEnabled() = runScenario(
-        editSavedCardPaymentMethodEnabled = true
-    ) {
-        assertThat(interactor.allowCardEdit).isTrue()
-    }
-
-    @Test
     fun shouldNotCallSetDefaultPaymentMethod_ifPaymentMethodIsAlreadyDefault() = runScenario(
         isDefaultPaymentMethod = true,
         onSetDefaultPaymentMethod = { _ -> notImplemented() },
@@ -677,18 +555,64 @@ class DefaultUpdatePaymentMethodInteractorTest {
         // No exceptions thrown here indicates that the executors were not called.
     }
 
-    private fun updateCardBrandAndDefaultPaymentMethod(interactor: UpdatePaymentMethodInteractor) {
+    @Test
+    fun shouldCreateEditCardInteractor_whenPaymentMethodIsCard() = runScenario {
+        assertThat(interactor.editCardDetailsInteractor).isNotNull()
+    }
+
+    @Test
+    fun shouldNotCreateEditCardInteractor_whenPaymentMethodIsNotCard() = runScenario(
+        displayableSavedPaymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT.toDisplayableSavedPaymentMethod()
+    ) {
+        val exception = assertThrows(IllegalArgumentException::class.java) {
+            interactor.editCardDetailsInteractor
+        }
+        assertThat(exception)
+            .hasMessageThat()
+            .isEqualTo("Card payment method required for creating EditCardDetailsInteractor")
+    }
+
+    @Test
+    fun editCardDetailsInteractorCallback_updatesSaveButtonStateCorrectly() {
+        val editCardDetailsInteractorFactory = FakeEditCardDetailsInteractorFactory()
+        runScenario(
+            editCardDetailsInteractorFactory = editCardDetailsInteractorFactory
+        ) {
+            interactor.editCardDetailsInteractor
+            editCardDetailsInteractorFactory.onCardUpdateParamsChanged?.invoke(
+                CardUpdateParams(cardBrand = CardBrand.Visa)
+            )
+
+            assertThat(interactor.state.value.isSaveButtonEnabled).isTrue()
+        }
+    }
+
+    @Test
+    fun editCardDetailsInteractorCallback_nullValue_updatesSaveButtonStateCorrectly() {
+        val editCardDetailsInteractorFactory = FakeEditCardDetailsInteractorFactory()
+        runScenario(
+            editCardDetailsInteractorFactory = editCardDetailsInteractorFactory
+        ) {
+            interactor.editCardDetailsInteractor
+            editCardDetailsInteractorFactory.onCardUpdateParamsChanged?.invoke(
+                CardUpdateParams(cardBrand = CardBrand.Visa)
+            )
+            editCardDetailsInteractorFactory.onCardUpdateParamsChanged?.invoke(null)
+
+            assertThat(interactor.state.value.isSaveButtonEnabled).isFalse()
+        }
+    }
+
+    private fun updateCardAndDefaultPaymentMethod(
+        interactor: UpdatePaymentMethodInteractor,
+    ) {
         interactor.handleViewAction(
             UpdatePaymentMethodInteractor.ViewAction.SetAsDefaultCheckboxChanged(
                 isChecked = true
             )
         )
 
-        interactor.handleViewAction(
-            UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                cardBrandChoice = CardBrandChoice(brand = CardBrand.Visa, enabled = true)
-            )
-        )
+        interactor.cardParamsUpdateAction(CardBrand.Visa)
 
         interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
     }
@@ -709,6 +633,8 @@ class DefaultUpdatePaymentMethodInteractorTest {
         shouldShowSetAsDefaultCheckbox: Boolean = false,
         isDefaultPaymentMethod: Boolean = false,
         editSavedCardPaymentMethodEnabled: Boolean = false,
+        editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = DefaultEditCardDetailsInteractor
+            .Factory(),
         onBrandChoiceSelected: (CardBrand) -> Unit = {},
         testBlock: suspend TestParams.() -> Unit
     ) {
@@ -717,15 +643,17 @@ class DefaultUpdatePaymentMethodInteractorTest {
             isLiveMode = isLiveMode,
             canRemove = canRemove,
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
+            addressCollectionMode = AddressCollectionMode.Automatic,
             removeExecutor = onRemovePaymentMethod,
             updatePaymentMethodExecutor = updatePaymentMethodExecutor,
             setDefaultPaymentMethodExecutor = onSetDefaultPaymentMethod,
-            workContext = UnconfinedTestDispatcher(),
+            workContext = testDispatcher,
             cardBrandFilter = DefaultCardBrandFilter,
             onBrandChoiceSelected = onBrandChoiceSelected,
             shouldShowSetAsDefaultCheckbox = shouldShowSetAsDefaultCheckbox,
             isDefaultPaymentMethod = isDefaultPaymentMethod,
             onUpdateSuccess = onUpdateSuccess,
+            editCardDetailsInteractorFactory = editCardDetailsInteractorFactory
         )
 
         TestParams(interactor).apply { runTest { testBlock() } }

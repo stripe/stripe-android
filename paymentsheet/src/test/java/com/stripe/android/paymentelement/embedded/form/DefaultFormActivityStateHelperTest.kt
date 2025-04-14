@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.mainthread.MainThreadSavedStateHandle
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
@@ -38,6 +39,22 @@ class DefaultFormActivityStateHelperTest {
                     formatArgs = arrayOf("$10.99")
                 )
             )
+            assertThat(state.shouldDisplayLockIcon).isTrue()
+        }
+    }
+
+    @Test
+    fun `state is initialized correctly when formSheetAction=continue`() = testScenario(
+        config = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
+            .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
+            .build()
+    ) {
+        stateHolder.state.test {
+            val state = awaitItem()
+            assertThat(state.primaryButtonLabel).isEqualTo(
+                resolvableString(R.string.stripe_continue_button_label)
+            )
+            assertThat(state.shouldDisplayLockIcon).isFalse()
         }
     }
 
@@ -45,6 +62,20 @@ class DefaultFormActivityStateHelperTest {
     fun `state returns label from config if provided`() {
         testScenario(
             config = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
+                .primaryButtonLabel("Test Label")
+                .build()
+        ) {
+            stateHolder.state.test {
+                assertThat(awaitItem().primaryButtonLabel).isEqualTo("Test Label".resolvableString)
+            }
+        }
+    }
+
+    @Test
+    fun `state returns label from config if provided when formSheetAction=continue`() {
+        testScenario(
+            config = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
+                .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
                 .primaryButtonLabel("Test Label")
                 .build()
         ) {
@@ -257,7 +288,7 @@ class DefaultFormActivityStateHelperTest {
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = stripeIntent)
-        val selectionHolder = EmbeddedSelectionHolder(SavedStateHandle())
+        val selectionHolder = EmbeddedSelectionHolder(MainThreadSavedStateHandle(SavedStateHandle()))
         val onClickOverrideDelegate = OnClickDelegateOverrideImpl()
         val stateHolder = DefaultFormActivityStateHelper(
             paymentMethodMetadata = paymentMethodMetadata,

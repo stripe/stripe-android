@@ -12,13 +12,8 @@ import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
-import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
-import com.stripe.android.core.networking.NetworkTypeDetector
-import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.RealUserFacingLogger
@@ -40,8 +35,7 @@ import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.LinkApiRepository
 import com.stripe.android.link.repositories.LinkRepository
-import com.stripe.android.networking.StripeApiRepository
-import com.stripe.android.networking.StripeRepository
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
@@ -52,6 +46,7 @@ import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfir
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.repository.ConsumersApiService
@@ -67,7 +62,11 @@ import kotlinx.coroutines.Dispatchers
 import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
-@Module
+@Module(
+    includes = [
+        StripeRepositoryModule::class
+    ]
+)
 internal interface NativeLinkModule {
     @Binds
     @NativeLinkScope
@@ -93,10 +92,6 @@ internal interface NativeLinkModule {
 
     @Binds
     @NativeLinkScope
-    fun stripeRepository(stripeRepository: StripeApiRepository): StripeRepository
-
-    @Binds
-    @NativeLinkScope
     fun bindsCardAccountRangeRepositoryFactory(
         defaultCardAccountRangeRepositoryFactory: DefaultCardAccountRangeRepositoryFactory
     ): CardAccountRangeRepository.Factory
@@ -119,6 +114,9 @@ internal interface NativeLinkModule {
 
     @Binds
     fun bindsUserFacingLogger(impl: RealUserFacingLogger): UserFacingLogger
+
+    @Binds
+    fun bindsAnalyticsRequestFactory(impl: PaymentAnalyticsRequestFactory): AnalyticsRequestFactory
 
     @SuppressWarnings("TooManyFunctions")
     companion object {
@@ -150,19 +148,6 @@ internal interface NativeLinkModule {
 
         @Provides
         @NativeLinkScope
-        fun provideAnalyticsRequestFactory(
-            context: Context,
-            @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String
-        ): AnalyticsRequestFactory = AnalyticsRequestFactory(
-            packageManager = context.packageManager,
-            packageName = context.packageName.orEmpty(),
-            packageInfo = context.packageInfo,
-            publishableKeyProvider = publishableKeyProvider,
-            networkTypeProvider = NetworkTypeDetector(context)::invoke,
-        )
-
-        @Provides
-        @NativeLinkScope
         fun provideDurationProvider(): DurationProvider {
             return DefaultDurationProvider.instance
         }
@@ -186,12 +171,6 @@ internal interface NativeLinkModule {
         @NativeLinkScope
         @Named(PRODUCT_USAGE)
         fun provideProductUsageTokens() = setOf("PaymentSheet")
-
-        @Provides
-        @NativeLinkScope
-        fun providesAnalyticsRequestExecutor(
-            executor: DefaultAnalyticsRequestExecutor
-        ): AnalyticsRequestExecutor = executor
 
         @Provides
         @Named(ENABLE_LOGGING)

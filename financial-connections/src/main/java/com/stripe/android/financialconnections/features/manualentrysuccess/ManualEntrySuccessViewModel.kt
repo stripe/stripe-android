@@ -61,6 +61,7 @@ internal class ManualEntrySuccessViewModel @AssistedInject constructor(
             pane = Pane.MANUAL_ENTRY_SUCCESS,
             allowBackNavigation = false,
             error = state.payload.error,
+            canCloseWithoutConfirmation = true,
         )
     }
 

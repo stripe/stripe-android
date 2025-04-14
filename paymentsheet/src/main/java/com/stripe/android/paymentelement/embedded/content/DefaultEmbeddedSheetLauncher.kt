@@ -18,6 +18,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.state.CustomerState
 import javax.inject.Inject
 import javax.inject.Named
@@ -48,7 +49,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     private val errorReporter: ErrorReporter,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
-    embeddedResultCallbackHelper: EmbeddedResultCallbackHelper
+    embeddedResultCallbackHelper: EmbeddedResultCallbackHelper,
 ) : EmbeddedSheetLauncher {
 
     init {
@@ -68,9 +69,14 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             sheetStateHolder.sheetIsOpen = false
             selectionHolder.setTemporary(null)
             if (result is FormResult.Complete) {
-                embeddedResultCallbackHelper.setResult(
-                    EmbeddedPaymentElement.Result.Completed()
-                )
+                if (result.hasBeenConfirmed) {
+                    embeddedResultCallbackHelper.setResult(
+                        EmbeddedPaymentElement.Result.Completed()
+                    )
+                } else {
+                    selectionHolder.setTemporary(result.selection?.paymentMethodType)
+                    selectionHolder.set(result.selection)
+                }
             }
         }
 
@@ -108,7 +114,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             configuration = embeddedConfirmationState.configuration,
             initializationMode = embeddedConfirmationState.initializationMode,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
-            statusBarColor = statusBarColor
+            statusBarColor = statusBarColor,
         )
         formActivityLauncher.launch(args)
     }

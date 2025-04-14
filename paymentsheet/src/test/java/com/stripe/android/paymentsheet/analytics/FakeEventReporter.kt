@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.analytics
 
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
+import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
@@ -51,6 +52,18 @@ internal class FakeEventReporter : EventReporter {
     private val _showManageSavedPaymentMethods = Turbine<Unit>()
     val showManageSavedPaymentMethods: ReceiveTurbine<Unit> = _showManageSavedPaymentMethods
 
+    private val _experimentExposureCalls = Turbine<ExperimentExposureCall>()
+    val experimentExposureCalls: ReceiveTurbine<ExperimentExposureCall> = _experimentExposureCalls
+
+    private val _removePaymentMethodCalls = Turbine<RemovePaymentMethodCall>()
+    val removePaymentMethodCalls: ReceiveTurbine<RemovePaymentMethodCall> = _removePaymentMethodCalls
+
+    private val _formCompletedCalls = Turbine<FormCompletedCall>()
+    val formCompletedCalls: ReceiveTurbine<FormCompletedCall> = _formCompletedCalls
+
+    private val _pressConfirmButtonCalls = Turbine<PaymentSelection?>()
+    val pressConfirmButtonCalls: ReceiveTurbine<PaymentSelection?> = _pressConfirmButtonCalls
+
     fun validate() {
         _paymentFailureCalls.ensureAllEventsConsumed()
         _paymentSuccessCalls.ensureAllEventsConsumed()
@@ -63,6 +76,10 @@ internal class FakeEventReporter : EventReporter {
         _cannotProperlyReturnFromLinkAndOtherLPMsCalls.ensureAllEventsConsumed()
         _showNewPaymentOptionsCalls.ensureAllEventsConsumed()
         _showManageSavedPaymentMethods.ensureAllEventsConsumed()
+        _experimentExposureCalls.ensureAllEventsConsumed()
+        _removePaymentMethodCalls.ensureAllEventsConsumed()
+        _formCompletedCalls.ensureAllEventsConsumed()
+        _pressConfirmButtonCalls.ensureAllEventsConsumed()
     }
 
     override fun onInit(
@@ -114,10 +131,22 @@ internal class FakeEventReporter : EventReporter {
     override fun onSelectPaymentMethod(code: PaymentMethodCode) {
     }
 
+    override fun onRemoveSavedPaymentMethod(code: PaymentMethodCode) {
+        _removePaymentMethodCalls.add(RemovePaymentMethodCall(code))
+    }
+
     override fun onPaymentMethodFormShown(code: PaymentMethodCode) {
     }
 
     override fun onPaymentMethodFormInteraction(code: PaymentMethodCode) {
+    }
+
+    override fun onPaymentMethodFormCompleted(code: String) {
+        _formCompletedCalls.add(
+            FormCompletedCall(
+                code = code
+            )
+        )
     }
 
     override fun onCardNumberCompleted() {
@@ -127,6 +156,7 @@ internal class FakeEventReporter : EventReporter {
     }
 
     override fun onPressConfirmButton(paymentSelection: PaymentSelection?) {
+        _pressConfirmButtonCalls.add(paymentSelection)
     }
 
     override fun onPaymentSuccess(
@@ -191,6 +221,12 @@ internal class FakeEventReporter : EventReporter {
         )
     }
 
+    override fun onExperimentExposure(experiment: LoggableExperiment) {
+        _experimentExposureCalls.add(
+            ExperimentExposureCall(experiment)
+        )
+    }
+
     override fun onSetAsDefaultPaymentMethodFailed(
         paymentMethodType: String?,
         error: Throwable,
@@ -236,5 +272,17 @@ internal class FakeEventReporter : EventReporter {
     data class SetAsDefaultPaymentMethodFailedCall(
         val paymentMethodType: String?,
         val error: Throwable,
+    )
+
+    data class ExperimentExposureCall(
+        val experiment: LoggableExperiment
+    )
+
+    data class RemovePaymentMethodCall(
+        val code: PaymentMethodCode
+    )
+
+    data class FormCompletedCall(
+        val code: PaymentMethodCode
     )
 }
