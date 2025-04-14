@@ -8,6 +8,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.BILLING_DETAILS_FORM_DETAILS
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.paymentelementtestpages.BillingDetailsPage
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
@@ -19,6 +20,9 @@ import org.robolectric.RobolectricTestRunner
 internal class BillingDetailsFormUITest {
     @get:Rule
     val composeRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
