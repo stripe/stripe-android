@@ -187,6 +187,8 @@
   <string name="stripe_signup_deactivated_account_message">계정이 비활성화되었습니다</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">문제가 발생했습니다.</string>
+  <!-- Accessibility description when payment button shows a successful transaction animation. -->
+  <string name="stripe_successful_transaction_description">거래 완료</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">취소 및 다른 방법으로 결제</string>
   <!-- Text on a screen asking the user to approve a payment -->

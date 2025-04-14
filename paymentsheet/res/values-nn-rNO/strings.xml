@@ -187,6 +187,8 @@
   <string name="stripe_signup_deactivated_account_message">Kontoen din er deaktivert</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">Noko gjekk gale</string>
+  <!-- Accessibility description when payment button shows a successful transaction animation. -->
+  <string name="stripe_successful_transaction_description">Transaksjon fullført</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Avbryt og betal på ei anna måte</string>
   <!-- Text on a screen asking the user to approve a payment -->

@@ -187,6 +187,8 @@
   <string name="stripe_signup_deactivated_account_message">Na-deactivate ang iyong account</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">May nangyaring mali</string>
+  <!-- Accessibility description when payment button shows a successful transaction animation. -->
+  <string name="stripe_successful_transaction_description">Kumpleto na ang transaksyon</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Kanselahin at magbayad sa ibang paraan</string>
   <!-- Text on a screen asking the user to approve a payment -->
