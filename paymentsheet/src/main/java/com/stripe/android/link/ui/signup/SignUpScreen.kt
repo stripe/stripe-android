@@ -78,7 +78,7 @@ internal fun SignUpBody(
     var didFocusField by rememberSaveable { mutableStateOf(false) }
     val emailFocusRequester = remember { FocusRequester() }
 
-    if (!didFocusField && signUpScreenState.showKeyboardOnOpen) {
+    if (!didFocusField && signUpScreenState.signUpState == SignUpState.InputtingPrimaryField) {
         LaunchedEffect(Unit) {
             delay(LINK_DEFAULT_ANIMATION_DELAY_MILLIS)
             emailFocusRequester.requestFocus()
@@ -274,7 +274,6 @@ private fun SignUpScreenPreview() {
                     signUpEnabled = false,
                     signUpState = SignUpState.InputtingRemainingFields,
                     requiresNameCollection = true,
-                    showKeyboardOnOpen = false,
                 ),
                 onSignUpClick = {}
             )
