@@ -82,7 +82,7 @@ class PaymentSheetAnalyticsListenerTest {
     }
 
     @Test
-    fun `form events are emitted when screen changes to one with a form`() = runScenario {
+    fun `form events are emitted only once when screen changes to one with a form`() = runScenario {
         val screenTypes = listOf(
             PaymentSheetScreen.AddFirstPaymentMethod::class,
             PaymentSheetScreen.AddAnotherPaymentMethod::class,
@@ -93,7 +93,8 @@ class PaymentSheetAnalyticsListenerTest {
             testScheduler.advanceUntilIdle()
         }
 
-        verify(eventReporter, times(screenTypes.size)).onShowNewPaymentOptions()
+        // Only emit the first time the screen is shown.
+        verify(eventReporter).onShowNewPaymentOptions()
         // Only once since it didn't change.
         verify(eventReporter).onPaymentMethodFormShown(eq("card"))
     }
@@ -111,13 +112,11 @@ class PaymentSheetAnalyticsListenerTest {
 
         currentScreen.value = mock<PaymentSheetScreen.SelectSavedPaymentMethods>()
         testScheduler.advanceUntilIdle()
-        verify(eventReporter).onShowExistingPaymentOptions()
         verifyNoMoreInteractions(eventReporter)
         clearInvocations(eventReporter)
 
         currentScreen.value = mock<PaymentSheetScreen.AddAnotherPaymentMethod>()
         testScheduler.advanceUntilIdle()
-        verify(eventReporter).onShowNewPaymentOptions()
         verify(eventReporter).onPaymentMethodFormShown(eq("card"))
         analyticsListener.reportFieldInteraction("card")
         verify(eventReporter).onPaymentMethodFormInteraction(eq("card"))
