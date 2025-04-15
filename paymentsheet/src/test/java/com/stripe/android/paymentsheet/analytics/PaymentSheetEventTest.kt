@@ -403,6 +403,7 @@ class PaymentSheetEventTest {
                 "ordered_lpms" to "card,klarna",
                 "require_cvc_recollection" to false,
                 "link_display" to "automatic",
+                "fc_sdk_availability" to "FULL"
             )
         )
     }
@@ -1482,7 +1483,7 @@ class PaymentSheetEventTest {
             linkEnabled = false,
             googlePaySupported = false,
             linkContext = null,
-            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Lite
         )
         assertThat(
             event.eventName
@@ -1496,7 +1497,7 @@ class PaymentSheetEventTest {
                 "is_decoupled" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
-                "fc_sdk_availability" to "FULL"
+                "fc_sdk_availability" to "LITE"
             )
         )
     }

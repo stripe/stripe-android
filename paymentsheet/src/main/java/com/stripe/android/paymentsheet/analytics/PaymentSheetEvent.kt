@@ -630,7 +630,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_LINK_MODE = "link_mode"
         const val FIELD_ORDERED_LPMS = "ordered_lpms"
         const val FIELD_REQUIRE_CVC_RECOLLECTION = "require_cvc_recollection"
-        const val FC_SDK_AVAILABILITY = "financial_connections_availability"
+        const val FC_SDK_AVAILABILITY = "fc_sdk_availability"
         const val FIELD_CARD_BRAND_ACCEPTANCE = "card_brand_acceptance"
         const val FIELD_CARD_SCAN_AVAILABLE = "card_scan_available"
         const val FIELD_LINK_DISPLAY = "link_display"
