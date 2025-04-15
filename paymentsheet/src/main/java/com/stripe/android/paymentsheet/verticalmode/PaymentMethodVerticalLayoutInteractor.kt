@@ -95,6 +95,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit,
     private val reportFormShown: (PaymentMethodCode) -> Unit,
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    private val shouldUpdateVerticalModeSelection: (String?) -> Boolean,
     dispatcher: CoroutineContext = Dispatchers.Default,
     mainDispatcher: CoroutineContext = Dispatchers.Main.immediate,
 ) : PaymentMethodVerticalLayoutInteractor {
@@ -155,6 +156,11 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 },
                 reportPaymentMethodTypeSelected = viewModel.eventReporter::onSelectPaymentMethod,
                 reportFormShown = viewModel.eventReporter::onPaymentMethodFormShown,
+                shouldUpdateVerticalModeSelection = { paymentMethodCode ->
+                    val requiresFormScreen = paymentMethodCode != null &&
+                        formHelper.formTypeForCode(paymentMethodCode) == FormType.UserInteractionRequired
+                    !requiresFormScreen
+                }
             ).also { interactor ->
                 viewModel.viewModelScope.launch {
                     interactor.state.collect { state ->
@@ -256,10 +262,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     else -> null
                 }
 
-                val requiresFormScreen = paymentMethodCode != null &&
-                    formTypeForCode(paymentMethodCode) == FormType.UserInteractionRequired
-
-                if (!requiresFormScreen) {
+                if (shouldUpdateVerticalModeSelection(paymentMethodCode)) {
                     _verticalModeScreenSelection.value = currentSelection
                 }
             }
