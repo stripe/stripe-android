@@ -11,6 +11,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -53,7 +54,7 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
             appearance = configuration.appearance,
             isDeferred = true,
             primaryButtonColor = null,
-            paymentMethodLayout = null
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.Embedded(configuration),
         )
 
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration)
