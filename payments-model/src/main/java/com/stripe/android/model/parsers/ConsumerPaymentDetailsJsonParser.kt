@@ -25,6 +25,7 @@ private const val FIELD_ADDRESS_POSTAL_CODE = "postal_code"
 private const val FIELD_CARD_EXPIRY_YEAR = "exp_year"
 private const val FIELD_CARD_EXPIRY_MONTH = "exp_month"
 private const val FIELD_CARD_BRAND = "brand"
+private const val FIELD_CARD_NETWORKS = "networks"
 private const val FIELD_CARD_CHECKS = "checks"
 private const val FIELD_CARD_CVC_CHECK = "cvc_check"
 
@@ -53,12 +54,14 @@ object ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails
                 "card" -> {
                     val cardDetails = json.getJSONObject(FIELD_CARD_DETAILS)
                     val checks = cardDetails.optJSONObject(FIELD_CARD_CHECKS)
+                    val networks = ModelJsonParser.jsonArrayToList(cardDetails.optJSONArray(FIELD_CARD_NETWORKS))
 
                     ConsumerPaymentDetails.Card(
                         id = json.getString(FIELD_ID),
                         expiryYear = cardDetails.getInt(FIELD_CARD_EXPIRY_YEAR),
                         expiryMonth = cardDetails.getInt(FIELD_CARD_EXPIRY_MONTH),
                         brand = CardBrand.fromCode(cardBrandFix(cardDetails.getString(FIELD_CARD_BRAND))),
+                        networks = networks,
                         last4 = cardDetails.getString(FIELD_CARD_LAST_4),
                         cvcCheck = CvcCheck.fromCode(checks?.getString(FIELD_CARD_CVC_CHECK)),
                         billingAddress = parseBillingAddress(json),

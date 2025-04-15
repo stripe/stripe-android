@@ -142,8 +142,9 @@ internal class DefaultUpdatePaymentMethodInteractor(
             "Card payment method required for creating EditCardDetailsInteractor"
         }
         val isModifiable = displayableSavedPaymentMethod.isModifiable(canUpdateFullPaymentMethodDetails)
+        val payload = EditCardPayload.create(savedPaymentMethodCard.card)
         editCardDetailsInteractorFactory.create(
-            card = savedPaymentMethodCard.card,
+            payload = payload,
             onCardUpdateParamsChanged = { cardUpdateParams ->
                 onCardUpdateParamsChanged(cardUpdateParams)
             },

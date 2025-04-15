@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.ZeroCornerSize
-import androidx.compose.material.Card
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -26,7 +25,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.R
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.uicore.elements.Section
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
@@ -43,7 +41,7 @@ internal fun CardDetailsEditUI(
     CardDetailsEditUI(
         shouldShowCardBrandDropdown = state.shouldShowCardBrandDropdown,
         selectedBrand = state.selectedCardBrand,
-        card = state.card,
+        payload = state.payload,
         availableNetworks = state.availableNetworks,
         paymentMethodIcon = state.paymentMethodIcon,
         expiryDateState = state.expiryDateState,
@@ -64,7 +62,7 @@ internal fun CardDetailsEditUI(
 private fun CardDetailsEditUI(
     shouldShowCardBrandDropdown: Boolean,
     selectedBrand: CardBrandChoice,
-    card: PaymentMethod.Card,
+    payload: EditCardPayload,
     expiryDateState: ExpiryDateState,
     billingDetailsForm: BillingDetailsForm?,
     availableNetworks: List<CardBrandChoice>,
@@ -85,7 +83,7 @@ private fun CardDetailsEditUI(
         ) {
             Column {
                 CardNumberField(
-                    card = card,
+                    last4 = payload.last4,
                     selectedBrand = selectedBrand,
                     shouldShowCardBrandDropdown = shouldShowCardBrandDropdown,
                     availableNetworks = availableNetworks,
@@ -113,7 +111,7 @@ private fun CardDetailsEditUI(
                             .width(MaterialTheme.stripeShapes.borderStrokeWidth.dp),
                         color = MaterialTheme.stripeColors.componentDivider,
                     )
-                    CvcField(cardBrand = card.brand, modifier = Modifier.weight(1F))
+                    CvcField(cardBrand = payload.brand, modifier = Modifier.weight(1F))
                 }
             }
         }
@@ -131,7 +129,7 @@ private fun CardDetailsEditUI(
 
 @Composable
 private fun CardNumberField(
-    card: PaymentMethod.Card,
+    last4: String?,
     selectedBrand: CardBrandChoice,
     availableNetworks: List<CardBrandChoice>,
     shouldShowCardBrandDropdown: Boolean,
@@ -139,7 +137,7 @@ private fun CardNumberField(
     onBrandChoiceChanged: (CardBrandChoice) -> Unit,
 ) {
     CommonTextField(
-        value = "•••• •••• •••• ${card.last4}",
+        value = "•••• •••• •••• $last4",
         label = stringResource(id = R.string.stripe_acc_label_card_number),
         trailingIcon = {
             if (shouldShowCardBrandDropdown) {
