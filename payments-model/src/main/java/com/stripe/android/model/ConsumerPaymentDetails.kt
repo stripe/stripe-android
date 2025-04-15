@@ -32,6 +32,7 @@ data class ConsumerPaymentDetails(
         val expiryYear: Int,
         val expiryMonth: Int,
         val brand: CardBrand,
+        val networks: List<String>,
         val cvcCheck: CvcCheck,
         val billingAddress: BillingAddress? = null
     ) : PaymentDetails(

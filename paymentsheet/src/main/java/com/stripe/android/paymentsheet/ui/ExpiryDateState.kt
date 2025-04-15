@@ -100,6 +100,21 @@ internal data class ExpiryDateState(
                 enabled = enabled
             )
         }
+
+        fun create(
+            editPayload: EditCardPayload,
+            enabled: Boolean
+        ): ExpiryDateState {
+            val text = formattedExpiryDate(
+                expiryMonth = editPayload.expiryMonth,
+                expiryYear = editPayload.expiryYear,
+                enabled = enabled
+            )
+            return ExpiryDateState(
+                text = text,
+                enabled = enabled
+            )
+        }
     }
 }
 

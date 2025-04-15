@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.core.utils.DateUtils
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
@@ -23,6 +24,42 @@ internal typealias CardUpdateParamsCallback = (CardUpdateParams?) -> Unit
 
 internal typealias CardBrandCallback = (CardBrand) -> Unit
 
+internal data class EditCardPayload(
+    val last4: String?,
+    val expiryMonth: Int?,
+    val expiryYear: Int?,
+    val displayBrand: String?,
+    val networks: Set<String>?,
+) {
+
+    val brand: CardBrand
+        get() = CardBrand.fromCode(displayBrand)
+
+    internal companion object {
+
+        fun create(card: PaymentMethod.Card): EditCardPayload {
+            return EditCardPayload(
+                last4 = card.last4,
+                expiryMonth = card.expiryMonth,
+                expiryYear = card.expiryYear,
+                displayBrand = card.displayBrand,
+                networks = card.networks?.available,
+            )
+        }
+
+        fun create(card: ConsumerPaymentDetails.Card): EditCardPayload {
+            return EditCardPayload(
+                last4 = card.last4,
+                expiryMonth = card.expiryMonth,
+                expiryYear = card.expiryYear,
+                displayBrand = card.brand.code,
+                // TODO: This still shows the dropdown somehow…
+                networks = card.networks.toSet().takeIf { it.size > 1 },
+            )
+        }
+    }
+}
+
 internal interface EditCardDetailsInteractor {
     val state: StateFlow<State>
 
@@ -30,7 +67,7 @@ internal interface EditCardDetailsInteractor {
 
     @Immutable
     data class State(
-        val card: PaymentMethod.Card,
+        val payload: EditCardPayload,
         val selectedCardBrand: CardBrandChoice,
         val paymentMethodIcon: Int,
         val shouldShowCardBrandDropdown: Boolean,
@@ -51,7 +88,7 @@ internal interface EditCardDetailsInteractor {
             isModifiable: Boolean,
             areExpiryDateAndAddressModificationSupported: Boolean,
             cardBrandFilter: CardBrandFilter,
-            card: PaymentMethod.Card,
+            payload: EditCardPayload,
             billingDetails: PaymentMethod.BillingDetails?,
             addressCollectionMode: AddressCollectionMode,
             onBrandChoiceChanged: CardBrandCallback,
@@ -61,7 +98,7 @@ internal interface EditCardDetailsInteractor {
 }
 
 internal class DefaultEditCardDetailsInteractor(
-    private val card: PaymentMethod.Card,
+    private val payload: EditCardPayload,
     private val billingDetails: PaymentMethod.BillingDetails?,
     private val addressCollectionMode: AddressCollectionMode,
     private val cardBrandFilter: CardBrandFilter,
@@ -125,7 +162,7 @@ internal class DefaultEditCardDetailsInteractor(
 
     private fun hasCardDetailsChanged(cardDetailsEntry: CardDetailsEntry): Boolean {
         return cardDetailsEntry.hasChanged(
-            card = card,
+            editCardPayload = payload,
             originalCardBrandChoice = defaultCardBrandChoice(),
         )
     }
@@ -196,11 +233,11 @@ internal class DefaultEditCardDetailsInteractor(
         )
     }
 
-    private fun defaultCardBrandChoice() = card.getPreferredChoice(cardBrandFilter)
+    private fun defaultCardBrandChoice() = payload.getPreferredChoice(cardBrandFilter)
 
     private fun defaultExpiryDateState(): ExpiryDateState {
         return ExpiryDateState.create(
-            card = card,
+            editPayload = payload,
             enabled = areExpiryDateAndAddressModificationSupported
         )
     }
@@ -223,25 +260,23 @@ internal class DefaultEditCardDetailsInteractor(
         billingDetailsForm: BillingDetailsForm?
     ): EditCardDetailsInteractor.State {
         return EditCardDetailsInteractor.State(
-            card = card,
+            payload = payload,
             selectedCardBrand = cardBrandChoice,
-            paymentMethodIcon = card.getSavedPaymentMethodIcon(forVerticalMode = true),
+            paymentMethodIcon = payload.getSavedPaymentMethodIcon(forVerticalMode = true),
             shouldShowCardBrandDropdown = isModifiable && isExpired().not(),
-            availableNetworks = card.getAvailableNetworks(cardBrandFilter),
+            availableNetworks = payload.getAvailableNetworks(cardBrandFilter),
             expiryDateState = expiryDateState,
             billingDetailsForm = billingDetailsForm
         )
     }
 
     private fun isExpired(): Boolean {
-        val cardExpiryMonth = card.expiryMonth
-        val cardExpiryYear = card.expiryYear
         // If the card's expiration dates are missing, we can't conclude that it is expired, so we don't want to
         // show the user an expired card error.
-        return cardExpiryMonth != null && cardExpiryYear != null &&
+        return payload.expiryMonth != null && payload.expiryYear != null &&
             !DateUtils.isExpiryDataValid(
-                expiryMonth = cardExpiryMonth,
-                expiryYear = cardExpiryYear,
+                expiryMonth = payload.expiryMonth,
+                expiryYear = payload.expiryYear,
             )
     }
 
@@ -251,14 +286,14 @@ internal class DefaultEditCardDetailsInteractor(
             isModifiable: Boolean,
             areExpiryDateAndAddressModificationSupported: Boolean,
             cardBrandFilter: CardBrandFilter,
-            card: PaymentMethod.Card,
+            payload: EditCardPayload,
             billingDetails: PaymentMethod.BillingDetails?,
             addressCollectionMode: AddressCollectionMode,
             onBrandChoiceChanged: CardBrandCallback,
             onCardUpdateParamsChanged: CardUpdateParamsCallback
         ): EditCardDetailsInteractor {
             return DefaultEditCardDetailsInteractor(
-                card = card,
+                payload = payload,
                 cardBrandFilter = cardBrandFilter,
                 isModifiable = isModifiable,
                 coroutineScope = coroutineScope,

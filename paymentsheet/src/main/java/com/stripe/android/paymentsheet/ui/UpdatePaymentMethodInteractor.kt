@@ -143,8 +143,9 @@ internal class DefaultUpdatePaymentMethodInteractor(
         requireNotNull(savedPaymentMethodCard) {
             "Card payment method required for creating EditCardDetailsInteractor"
         }
+        val payload = EditCardPayload.create(savedPaymentMethodCard.card)
         editCardDetailsInteractorFactory.create(
-            card = savedPaymentMethodCard.card,
+            payload = payload,
             onCardUpdateParamsChanged = { cardUpdateParams ->
                 handleViewAction(
                     viewAction = UpdatePaymentMethodInteractor.ViewAction.CardUpdateParamsChanged(cardUpdateParams)
