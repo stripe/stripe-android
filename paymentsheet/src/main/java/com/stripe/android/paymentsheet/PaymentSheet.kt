@@ -916,8 +916,10 @@ class PaymentSheet internal constructor(
              * (Private Preview) This parameter is expected to be removed once we GA this feature
              * When using customerSessions, allow users to update their saved cards
              */
-            fun updatePaymentMethodEnabled(enabled: Boolean): Builder = apply {
-                this.updatePaymentMethodEnabled = enabled
+            @ExperimentalPaymentSheetUpdatePaymentMethodApi
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun updatePaymentMethodEnabled(updatePaymentMethodEnabled: Boolean): Builder = apply {
+                this.updatePaymentMethodEnabled = updatePaymentMethodEnabled
             }
 
             fun build() = Configuration(

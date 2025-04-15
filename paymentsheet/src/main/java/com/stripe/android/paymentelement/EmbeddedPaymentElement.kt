@@ -27,6 +27,7 @@ import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentElementViewModel
 import com.stripe.android.paymentelement.embedded.content.PaymentOptionDisplayDataHolder
 import com.stripe.android.paymentsheet.CreateIntentCallback
+import com.stripe.android.paymentsheet.ExperimentalPaymentSheetUpdatePaymentMethodApi
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -325,6 +326,8 @@ class EmbeddedPaymentElement @Inject internal constructor(
              * (Private Preview) This parameter is expected to be removed once we GA this feature
              * When using customerSessions, allow users to update their saved cards
              */
+            @ExperimentalPaymentSheetUpdatePaymentMethodApi
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun updatePaymentMethodEnabled(updatePaymentMethodEnabled: Boolean) {
                 this.updatePaymentMethodEnabled = updatePaymentMethodEnabled
             }

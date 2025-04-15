@@ -4,6 +4,7 @@ import android.app.Application
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistryOwner
+import androidx.annotation.RestrictTo
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -16,6 +17,7 @@ import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
+import com.stripe.android.paymentsheet.ExperimentalPaymentSheetUpdatePaymentMethodApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.CardBrandAcceptance
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
@@ -337,6 +339,8 @@ class CustomerSheet internal constructor(
              * (Private Preview) This parameter is expected to be removed once we GA this feature
              * When using customerSessions, allow users to update their saved cards
              */
+            @ExperimentalPaymentSheetUpdatePaymentMethodApi
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun updatePaymentMethodEnabled(updatePaymentMethodEnabled: Boolean) = apply {
                 this.updatePaymentMethodEnabled = updatePaymentMethodEnabled
             }

@@ -3,9 +3,11 @@ package com.stripe.android.paymentsheet.example.playground.settings
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentsheet.ExperimentalPaymentSheetUpdatePaymentMethodApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 
+@OptIn(ExperimentalPaymentSheetUpdatePaymentMethodApi::class, ExperimentalEmbeddedPaymentElementApi::class)
 internal object UpdatePaymentMethodEnabledSettingsDefinition : BooleanSettingsDefinition(
     key = "updatePaymentMethodEnabled",
     displayName = "Enable Payment Method Details Update",
@@ -20,7 +22,6 @@ internal object UpdatePaymentMethodEnabledSettingsDefinition : BooleanSettingsDe
         configurationBuilder.updatePaymentMethodEnabled(value)
     }
 
-    @ExperimentalEmbeddedPaymentElementApi
     override fun configure(
         value: Boolean,
         configurationBuilder: EmbeddedPaymentElement.Configuration.Builder,
