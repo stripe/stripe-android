@@ -80,6 +80,7 @@ internal class CustomerSheetScreenshotTest {
         onFormCompleted = { },
         setAsDefaultPaymentMethodEnabled = false,
         financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
+        onAnalyticsEvent = { },
         setAsDefaultMatchesSaveForFutureUse = false,
     )
 

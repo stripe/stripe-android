@@ -40,7 +40,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             selectedPaymentMethodCode = paymentMethodCode,
             hostedSurface = HOSTED_SURFACE_PAYMENT_ELEMENT,
             setSelection = embeddedSelectionHolder::set,
-            onAnalyticsEvent = { eventReporter.onUsBankAccountFormEvent(it) },
+            onAnalyticsEvent = eventReporter::onUsBankAccountFormEvent,
             onMandateTextChanged = { mandateText, _ ->
                 formActivityStateHelper.updateMandate(mandateText)
             },
