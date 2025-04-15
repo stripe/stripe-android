@@ -64,10 +64,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             put(FIELD_INTENT_TYPE, initializationMode.defaultAnalyticsValue)
             put(FIELD_ORDERED_LPMS, orderedLpms.joinToString(","))
             put(FIELD_REQUIRE_CVC_RECOLLECTION, requireCvcRecollection)
-            put(
-                FIELD_FINANCIAL_CONNECTIONS_AVAILABILITY,
-                financialConnectionsAvailability.toAnalyticsParam()
-            )
+            put(FC_SDK_AVAILABILITY, financialConnectionsAvailability.toAnalyticsParam())
             linkMode?.let { mode ->
                 put(FIELD_LINK_MODE, mode.analyticsValue)
             }
@@ -245,7 +242,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             FIELD_CURRENCY to currency,
             FIELD_SELECTED_LPM to code,
             FIELD_LINK_CONTEXT to linkContext,
-            FIELD_FINANCIAL_CONNECTIONS_AVAILABILITY to financialConnectionsAvailability.toAnalyticsParam()
+            FC_SDK_AVAILABILITY to financialConnectionsAvailability.toAnalyticsParam()
         )
     }
 
@@ -326,7 +323,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             FIELD_CURRENCY to currency,
             FIELD_SELECTED_LPM to selectedLpm,
             FIELD_LINK_CONTEXT to linkContext,
-            FIELD_FINANCIAL_CONNECTIONS_AVAILABILITY to financialConnectionsAvailability.toAnalyticsParam()
+            FC_SDK_AVAILABILITY to financialConnectionsAvailability.toAnalyticsParam()
         ).filterNotNullValues()
     }
 
@@ -602,7 +599,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_LINK_MODE = "link_mode"
         const val FIELD_ORDERED_LPMS = "ordered_lpms"
         const val FIELD_REQUIRE_CVC_RECOLLECTION = "require_cvc_recollection"
-        const val FIELD_FINANCIAL_CONNECTIONS_AVAILABILITY = "financial_connections_availability"
+        const val FC_SDK_AVAILABILITY = "financial_connections_availability"
         const val FIELD_CARD_BRAND_ACCEPTANCE = "card_brand_acceptance"
         const val FIELD_CARD_SCAN_AVAILABLE = "card_scan_available"
         const val FIELD_LINK_DISPLAY = "link_display"
@@ -616,9 +613,9 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 }
 
 private fun FinancialConnectionsAvailability?.toAnalyticsParam(): String = when (this) {
-    FinancialConnectionsAvailability.Full -> "full"
-    FinancialConnectionsAvailability.Lite -> "lite"
-    null -> "none"
+    FinancialConnectionsAvailability.Full -> "FULL"
+    FinancialConnectionsAvailability.Lite -> "LITE"
+    null -> "NONE"
 }
 
 private val Duration.asSeconds: Float
