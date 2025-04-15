@@ -2547,11 +2547,11 @@ internal class DefaultPaymentElementLoaderTest {
             linkDisplay = eq(PaymentSheet.LinkConfiguration.Display.Automatic),
             currency = anyOrNull(),
             initializationMode = any(),
+            financialConnectionsAvailability = anyOrNull(),
             orderedLpms = any(),
             requireCvcRecollection = any(),
             hasDefaultPaymentMethod = anyOrNull(),
-            setAsDefaultEnabled = anyOrNull(),
-            financialConnectionsAvailability = anyOrNull(),
+            setAsDefaultEnabled = anyOrNull()
         )
     }
 
@@ -2609,11 +2609,11 @@ internal class DefaultPaymentElementLoaderTest {
             linkDisplay = eq(PaymentSheet.LinkConfiguration.Display.Never),
             currency = anyOrNull(),
             initializationMode = any(),
+            financialConnectionsAvailability = anyOrNull(),
             orderedLpms = any(),
             requireCvcRecollection = any(),
             hasDefaultPaymentMethod = anyOrNull(),
-            setAsDefaultEnabled = anyOrNull(),
-            financialConnectionsAvailability = anyOrNull(),
+            setAsDefaultEnabled = anyOrNull()
         )
     }
 
