@@ -11,7 +11,6 @@ import com.stripe.android.uicore.utils.collectAsState
 internal fun USBankAccountEmitters(
     viewModel: USBankAccountFormViewModel,
     usBankAccountFormArgs: USBankAccountFormArguments,
-    previouslyFormCompleted: Boolean,
     onFormCompleted: () -> Unit,
 ) {
     val screenState by viewModel.currentScreenState.collectAsState()
@@ -33,7 +32,7 @@ internal fun USBankAccountEmitters(
     }
 
     LaunchedEffect(hasRequiredFields) {
-        if (hasRequiredFields && !previouslyFormCompleted) {
+        if (hasRequiredFields) {
             onFormCompleted()
         }
     }
