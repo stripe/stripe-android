@@ -38,6 +38,8 @@ internal class FormActivityViewModel @Inject constructor(
                 savedStateHandle = extras.createSavedStateHandle(),
             )
 
+            component.selectionHolder.set(args.paymentSelection)
+
             return component.viewModel as T
         }
     }

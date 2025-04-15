@@ -88,7 +88,7 @@ class DefaultEventReporterTest {
             commonConfiguration = configuration.asCommonConfiguration(),
             appearance = configuration.appearance,
             primaryButtonColor = configuration.primaryButtonColorUsage(),
-            paymentMethodLayout = configuration.paymentMethodLayout,
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(configuration),
             isDeferred = false,
         )
 
@@ -1084,7 +1084,7 @@ class DefaultEventReporterTest {
             commonConfiguration = configuration.asCommonConfiguration(),
             appearance = configuration.appearance,
             primaryButtonColor = configuration.primaryButtonColorUsage(),
-            paymentMethodLayout = configuration.paymentMethodLayout,
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(configuration),
             isDeferred = false
         )
     }

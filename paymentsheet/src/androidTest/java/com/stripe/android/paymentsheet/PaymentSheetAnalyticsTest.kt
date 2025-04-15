@@ -412,12 +412,15 @@ internal class PaymentSheetAnalyticsTest {
 
         networkRule.setupPaymentMethodDetachResponse(card1.id)
         testContext.validateAnalyticsRequest(eventName = "stripe_android.detach_payment_method")
-        testContext.validateAnalyticsRequest(eventName = "mc_complete_sheet_savedpm_show")
         testContext.validateAnalyticsRequest(eventName = "mc_cancel_edit_screen")
 
         editPage.clickRemove()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.RemovedSavedPaymentMethod("card"))
-        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
+
+        testContext.validateAnalyticsRequest(eventName = "mc_complete_paymentoption_savedpm_select")
+        page.clickDoneButton()
+        page.clickSavedCard(card2.last4)
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.SelectedSavedPaymentMethod("card"))
         testContext.markTestSucceeded()
     }
 
@@ -469,12 +472,10 @@ internal class PaymentSheetAnalyticsTest {
 
         networkRule.setupPaymentMethodDetachResponse(card1.id)
         testContext.validateAnalyticsRequest(eventName = "stripe_android.detach_payment_method")
-        testContext.validateAnalyticsRequest(eventName = "mc_custom_sheet_savedpm_show")
         testContext.validateAnalyticsRequest(eventName = "mc_cancel_edit_screen")
 
         editPage.clickRemove()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.RemovedSavedPaymentMethod("card"))
-        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
 
         testContext.validateAnalyticsRequest(eventName = "mc_custom_paymentoption_savedpm_select")
         page.clickDoneButton()

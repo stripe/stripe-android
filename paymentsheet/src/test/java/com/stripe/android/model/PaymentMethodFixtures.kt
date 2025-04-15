@@ -11,7 +11,6 @@ import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.utils.BankFormScreenStateFactory
 import org.json.JSONObject
-import org.mockito.kotlin.mock
 import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
 
@@ -482,10 +481,10 @@ internal object PaymentMethodFixtures {
     )
 
     val US_BANK_PAYMENT_SELECTION = PaymentSelection.New.USBankAccount(
-        label = "Test",
+        label = "···· 6789",
         iconResource = 0,
-        paymentMethodCreateParams = mock(),
-        customerRequestedSave = mock(),
+        paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT,
+        customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
         input = PaymentSelection.New.USBankAccount.Input(
             name = "",
             email = null,

@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.embedded.form
 
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -44,6 +45,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             },
             onUpdatePrimaryButtonUIState = formActivityStateHelper::updatePrimaryButton,
             onError = formActivityStateHelper::updateError,
+            onFormCompleted = { eventReporter.onPaymentMethodFormCompleted(PaymentMethod.Type.USBankAccount.code) }
         )
 
         return DefaultVerticalModeFormInteractor(

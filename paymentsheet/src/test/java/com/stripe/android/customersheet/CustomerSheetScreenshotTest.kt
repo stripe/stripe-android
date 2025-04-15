@@ -77,6 +77,7 @@ internal class CustomerSheetScreenshotTest {
         onUpdatePrimaryButtonState = { },
         onUpdatePrimaryButtonUIState = { },
         onError = { },
+        onFormCompleted = { },
         setAsDefaultPaymentMethodEnabled = false,
         financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
         setAsDefaultMatchesSaveForFutureUse = false,

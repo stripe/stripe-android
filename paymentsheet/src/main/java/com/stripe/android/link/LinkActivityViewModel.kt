@@ -27,7 +27,6 @@ import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -35,6 +34,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
@@ -54,15 +54,9 @@ internal class LinkActivityViewModel @Inject constructor(
     private val startWithVerificationDialog: Boolean
 ) : ViewModel(), DefaultLifecycleObserver {
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
-    private val _linkAppBarState = MutableStateFlow(
-        value = LinkAppBarState(
-            navigationIcon = R.drawable.stripe_link_close,
-            showHeader = true,
-            showOverflowMenu = false,
-            email = null,
-        )
-    )
-    val linkAppBarState: StateFlow<LinkAppBarState> = _linkAppBarState
+
+    private val _linkAppBarState = MutableStateFlow(LinkAppBarState.initial())
+    val linkAppBarState: StateFlow<LinkAppBarState> = _linkAppBarState.asStateFlow()
 
     private val _linkScreenState = MutableStateFlow<ScreenState>(ScreenState.Loading)
     val linkScreenState: StateFlow<ScreenState> = _linkScreenState
@@ -117,19 +111,15 @@ internal class LinkActivityViewModel @Inject constructor(
         navController ?: return
         navListenerJob = viewModelScope.launch {
             navController.currentBackStackEntryFlow.collectLatest { entry ->
+                val previousEntry = navController.previousBackStackEntry?.destination?.route
                 val route = entry.destination.route
+
                 _linkAppBarState.update {
-                    it.copy(
-                        showHeader = showHeaderRoutes.contains(route),
-                        showOverflowMenu = route == LinkScreen.Wallet.route,
-                        navigationIcon = if (route == LinkScreen.PaymentMethod.route) {
-                            R.drawable.stripe_link_back
-                        } else {
-                            R.drawable.stripe_link_close
-                        },
-                        email = linkAccountManager.linkAccount.value?.email?.takeIf {
-                            route == LinkScreen.Wallet.route
-                        }
+                    LinkAppBarState.create(
+                        route = route,
+                        previousEntryRoute = previousEntry,
+                        email = linkAccountManager.linkAccount.value?.email,
+                        consumerIsSigningUp = linkAccount?.completedSignup == true,
                     )
                 }
             }
@@ -263,7 +253,12 @@ internal class LinkActivityViewModel @Inject constructor(
 
         val screen = when (accountStatus) {
             AccountStatus.Verified -> {
-                LinkScreen.Wallet
+                if (linkAccount?.completedSignup == true) {
+                    // We just completed signup, but haven't added a payment method yet.
+                    LinkScreen.PaymentMethod
+                } else {
+                    LinkScreen.Wallet
+                }
             }
             AccountStatus.NeedsVerification, AccountStatus.VerificationStarted -> {
                 LinkScreen.Verification
@@ -282,13 +277,6 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     companion object {
-        private val showHeaderRoutes = setOf(
-            LinkScreen.Loading.route,
-            LinkScreen.SignUp.route,
-            LinkScreen.Wallet.route,
-            LinkScreen.Verification.route
-        )
-
         fun factory(savedStateHandle: SavedStateHandle? = null): ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val handle: SavedStateHandle = savedStateHandle ?: createSavedStateHandle()

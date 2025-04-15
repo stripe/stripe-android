@@ -21,7 +21,7 @@ internal interface EventReporter {
         commonConfiguration: CommonConfiguration,
         appearance: PaymentSheet.Appearance,
         primaryButtonColor: Boolean?,
-        paymentMethodLayout: PaymentSheet.PaymentMethodLayout?,
+        configurationSpecificPayload: PaymentSheetEvent.ConfigurationSpecificPayload,
         isDeferred: Boolean,
     )
 
