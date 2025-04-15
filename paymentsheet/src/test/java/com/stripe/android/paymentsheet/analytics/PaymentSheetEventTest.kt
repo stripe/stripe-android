@@ -13,6 +13,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_SELECTION
 import com.stripe.android.model.PaymentMethodFixtures.LINK_INLINE_PAYMENT_SELECTION
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -1386,6 +1387,7 @@ class PaymentSheetEventTest {
             linkEnabled = false,
             googlePaySupported = false,
             linkContext = null,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
         assertThat(
             event.eventName
@@ -1402,6 +1404,7 @@ class PaymentSheetEventTest {
                 "google_pay_enabled" to false,
                 "duration" to 60f,
                 "currency" to "USD",
+                "fc_sdk_availability" to "FULL"
             )
         )
     }
@@ -1416,6 +1419,7 @@ class PaymentSheetEventTest {
             linkEnabled = false,
             googlePaySupported = false,
             linkContext = null,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
         assertThat(
             event.eventName
@@ -1429,6 +1433,7 @@ class PaymentSheetEventTest {
                 "is_decoupled" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
+                "fc_sdk_availability" to "FULL"
             )
         )
     }
@@ -1540,6 +1545,7 @@ class PaymentSheetEventTest {
         orderedLpms: List<String> = listOf("card"),
         hasDefaultPaymentMethod: Boolean? = null,
         setAsDefaultEnabled: Boolean? = null,
+        financialConnectionsAvailability: FinancialConnectionsAvailability = FinancialConnectionsAvailability.Full,
         linkDisplay: PaymentSheet.LinkConfiguration.Display = PaymentSheet.LinkConfiguration.Display.Automatic,
     ): PaymentSheetEvent.LoadSucceeded {
         return PaymentSheetEvent.LoadSucceeded(
@@ -1554,6 +1560,7 @@ class PaymentSheetEventTest {
             hasDefaultPaymentMethod = hasDefaultPaymentMethod,
             setAsDefaultEnabled = setAsDefaultEnabled,
             linkDisplay = linkDisplay,
+            financialConnectionsAvailability = financialConnectionsAvailability,
         )
     }
 

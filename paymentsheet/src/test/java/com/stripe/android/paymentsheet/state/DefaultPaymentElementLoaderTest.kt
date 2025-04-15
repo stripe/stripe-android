@@ -1099,6 +1099,7 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
 
@@ -1158,6 +1159,7 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
 
@@ -2247,6 +2249,7 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
 
@@ -2277,6 +2280,7 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
 
@@ -2307,6 +2311,7 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
 
@@ -2335,6 +2340,7 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
 
@@ -2373,6 +2379,7 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
 
@@ -2411,6 +2418,7 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
 
@@ -2543,6 +2551,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = any(),
             hasDefaultPaymentMethod = anyOrNull(),
             setAsDefaultEnabled = anyOrNull(),
+            financialConnectionsAvailability = anyOrNull(),
         )
     }
 
@@ -2604,6 +2613,7 @@ internal class DefaultPaymentElementLoaderTest {
             requireCvcRecollection = any(),
             hasDefaultPaymentMethod = anyOrNull(),
             setAsDefaultEnabled = anyOrNull(),
+            financialConnectionsAvailability = anyOrNull(),
         )
     }
 
@@ -2736,6 +2746,7 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
 
