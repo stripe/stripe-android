@@ -1,15 +1,16 @@
 package com.stripe.android.paymentelement.embedded.form
 
 import android.app.Activity
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.getValue
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
@@ -42,6 +43,7 @@ internal class FormActivity : AppCompatActivity() {
 
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         if (args == null) {
@@ -49,14 +51,16 @@ internal class FormActivity : AppCompatActivity() {
             return
         }
 
-        renderEdgeToEdge()
-
         viewModel.component.subcomponentFactory.build(
             activityResultCaller = this,
             lifecycleOwner = this,
         ).inject(this)
 
         setContent {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                window.isNavigationBarContrastEnforced = false
+            }
+
             StripeTheme {
                 val state by formActivityStateHelper.state.collectAsState()
                 val bottomSheetState = rememberStripeBottomSheetState(

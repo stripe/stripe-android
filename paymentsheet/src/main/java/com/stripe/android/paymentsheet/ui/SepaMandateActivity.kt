@@ -1,8 +1,10 @@
 package com.stripe.android.paymentsheet.ui
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -21,7 +23,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.view.WindowCompat
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.H4Text
@@ -33,6 +34,7 @@ import com.stripe.android.ui.core.R as StripeUiCoreR
 @OptIn(ExperimentalMaterialApi::class)
 internal class SepaMandateActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         val merchantName = runCatching {
@@ -46,9 +48,10 @@ internal class SepaMandateActivity : AppCompatActivity() {
             return
         }
 
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-
         setContent {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                window.isNavigationBarContrastEnforced = false
+            }
             StripeTheme {
                 val bottomSheetState = rememberStripeBottomSheetState()
 
