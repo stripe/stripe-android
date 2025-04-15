@@ -65,11 +65,8 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             put(FIELD_ORDERED_LPMS, orderedLpms.joinToString(","))
             put(FIELD_REQUIRE_CVC_RECOLLECTION, requireCvcRecollection)
             put(
-                FIELD_FINANCIAL_CONNECTIONS_AVAILABILITY, when (financialConnectionsAvailability) {
-                    FinancialConnectionsAvailability.Full -> "full"
-                    FinancialConnectionsAvailability.Lite -> "lite"
-                    null -> "none"
-                }
+                FIELD_FINANCIAL_CONNECTIONS_AVAILABILITY,
+                financialConnectionsAvailability.toAnalyticsParam()
             )
             linkMode?.let { mode ->
                 put(FIELD_LINK_MODE, mode.analyticsValue)
@@ -238,6 +235,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         code: String,
         currency: String?,
         linkContext: String?,
+        financialConnectionsAvailability: FinancialConnectionsAvailability?,
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
@@ -247,6 +245,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             FIELD_CURRENCY to currency,
             FIELD_SELECTED_LPM to code,
             FIELD_LINK_CONTEXT to linkContext,
+            FIELD_FINANCIAL_CONNECTIONS_AVAILABILITY to financialConnectionsAvailability.toAnalyticsParam()
         )
     }
 
@@ -612,6 +611,12 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
         const val MAX_EXTERNAL_PAYMENT_METHODS = 10
     }
+}
+
+private fun FinancialConnectionsAvailability?.toAnalyticsParam(): String = when (this) {
+    FinancialConnectionsAvailability.Full -> "full"
+    FinancialConnectionsAvailability.Lite -> "lite"
+    null -> "none"
 }
 
 private val Duration.asSeconds: Float

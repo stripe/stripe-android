@@ -48,6 +48,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     private var linkMode: LinkMode? = null
     private var googlePaySupported: Boolean = false
     private var currency: String? = null
+    private var financialConnectionsAvailability: FinancialConnectionsAvailability? = null
 
     private val analyticsRequestV2Factory = AnalyticsRequestV2Factory(
         context,
@@ -102,6 +103,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         this.linkEnabled = linkEnabled
         this.linkMode = linkMode
         this.googlePaySupported = googlePaySupported
+        this.financialConnectionsAvailability = financialConectionsAvailability
 
         durationProvider.start(DurationProvider.Key.Checkout)
 
@@ -120,7 +122,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 orderedLpms = orderedLpms,
                 requireCvcRecollection = requireCvcRecollection,
                 hasDefaultPaymentMethod = hasDefaultPaymentMethod,
-                financialConnectionsAvailability = financialConectionsAvailability,
+                financialConnectionsAvailability = financialConnectionsAvailability,
                 setAsDefaultEnabled = setAsDefaultEnabled,
             )
         )
@@ -211,6 +213,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 currency = currency,
                 linkEnabled = linkEnabled,
                 linkContext = determineLinkContextForPaymentMethodType(code),
+                financialConnectionsAvailability = financialConnectionsAvailability,
                 googlePaySupported = googlePaySupported,
             )
         )
