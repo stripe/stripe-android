@@ -416,6 +416,11 @@ internal class PaymentSheetAnalyticsTest {
 
         editPage.clickRemove()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.RemovedSavedPaymentMethod("card"))
+
+        testContext.validateAnalyticsRequest(eventName = "mc_complete_paymentoption_savedpm_select")
+        page.clickDoneButton()
+        page.clickSavedCard(card2.last4)
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.SelectedSavedPaymentMethod("card"))
         testContext.markTestSucceeded()
     }
 
