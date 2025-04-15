@@ -8,7 +8,6 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
-import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkConfiguration
@@ -21,8 +20,6 @@ import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.model.EmailSource
-import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
@@ -30,6 +27,7 @@ import com.stripe.android.uicore.elements.PhoneNumberController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -62,22 +60,10 @@ internal class SignUpViewModel @Inject constructor(
     val nameController = NameConfig.createController(
         initialValue = customerInfo?.name
     )
-    private val _state = MutableStateFlow(
-        value = SignUpScreenState(
-            signUpEnabled = false,
-            merchantName = configuration.merchantName,
-            requiresNameCollection = kotlin.run {
-                val countryCode = when (val stripeIntent = configuration.stripeIntent) {
-                    is PaymentIntent -> stripeIntent.countryCode
-                    is SetupIntent -> stripeIntent.countryCode
-                }
-                countryCode != CountryCode.US.value
-            },
-            showKeyboardOnOpen = customerInfo?.email == null,
-        )
-    )
 
-    val state: StateFlow<SignUpScreenState> = _state
+    private val _state = MutableStateFlow(SignUpScreenState.create(configuration, customerInfo))
+    val state: StateFlow<SignUpScreenState> = _state.asStateFlow()
+
     private var emailHasChanged = false
 
     init {
@@ -206,7 +192,9 @@ internal class SignUpViewModel @Inject constructor(
     }
 
     private fun onAccountFetched(linkAccount: LinkAccount?) {
-        if (linkAccount?.isVerified == true) {
+        if (linkAccount?.completedSignup == true) {
+            navigateAndClearStack(LinkScreen.PaymentMethod)
+        } else if (linkAccount?.isVerified == true) {
             navigateAndClearStack(LinkScreen.Wallet)
         } else {
             navigateAndClearStack(LinkScreen.Verification)

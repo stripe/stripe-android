@@ -42,6 +42,7 @@ import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.ProgressIndicatorTestTag
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.addresselement.ScrollableColumn
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
@@ -78,7 +79,7 @@ internal fun SignUpBody(
     var didFocusField by rememberSaveable { mutableStateOf(false) }
     val emailFocusRequester = remember { FocusRequester() }
 
-    if (!didFocusField && signUpScreenState.showKeyboardOnOpen) {
+    if (!didFocusField && signUpScreenState.signUpState == SignUpState.InputtingPrimaryField) {
         LaunchedEffect(Unit) {
             delay(LINK_DEFAULT_ANIMATION_DELAY_MILLIS)
             emailFocusRequester.requestFocus()
@@ -86,11 +87,11 @@ internal fun SignUpBody(
         }
     }
 
-    Column(
+    ScrollableColumn(
         modifier = Modifier
             .fillMaxWidth()
             .padding(20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
             text = stringResource(R.string.stripe_link_sign_up_header),
@@ -274,7 +275,6 @@ private fun SignUpScreenPreview() {
                     signUpEnabled = false,
                     signUpState = SignUpState.InputtingRemainingFields,
                     requiresNameCollection = true,
-                    showKeyboardOnOpen = false,
                 ),
                 onSignUpClick = {}
             )

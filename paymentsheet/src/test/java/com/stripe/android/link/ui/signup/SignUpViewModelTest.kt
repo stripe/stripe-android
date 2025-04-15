@@ -229,7 +229,7 @@ internal class SignUpViewModelTest {
         val linkAuth = FakeLinkAuth()
         val viewModel = createViewModel(prefilledEmail = CUSTOMER_EMAIL, linkAuth = linkAuth)
 
-        assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
+        assertThat(viewModel.contentState.signUpState).isEqualTo(SignUpState.InputtingRemainingFields)
         linkAuth.ensureAllItemsConsumed()
     }
 

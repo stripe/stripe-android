@@ -25,6 +25,9 @@ internal class LinkAccount(private val consumerSession: ConsumerSession) : Parce
         consumerSession.isVerifiedForSignup()
 
     @IgnoredOnParcel
+    val completedSignup: Boolean = consumerSession.isVerifiedForSignup()
+
+    @IgnoredOnParcel
     val accountStatus = when {
         isVerified -> {
             AccountStatus.Verified
