@@ -55,7 +55,11 @@ internal interface PaymentMethodVerticalLayoutInteractor {
             get() = this == Saved
 
         object Saved : Selection
-        data class New(val code: PaymentMethodCode) : Selection
+        data class New(
+            val code: PaymentMethodCode,
+            val changeDetails: String? = null,
+            val canBeChanged: Boolean = false,
+        ) : Selection
     }
 
     sealed interface ViewAction {
@@ -230,7 +234,16 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     ) { displayablePaymentMethods, isProcessing, mostRecentSelection, displayedSavedPaymentMethod, action,
         temporarySelectionCode ->
         val temporarySelection = if (temporarySelectionCode != null) {
-            PaymentMethodVerticalLayoutInteractor.Selection.New(temporarySelectionCode)
+            val changeDetails = if (temporarySelectionCode == mostRecentSelection.code()) {
+                (mostRecentSelection as? PaymentSelection.New?)?.changeDetails()
+            } else {
+                null
+            }
+            PaymentMethodVerticalLayoutInteractor.Selection.New(
+                code = temporarySelectionCode,
+                changeDetails = changeDetails,
+                canBeChanged = temporarySelectionCode == mostRecentSelection.code(),
+            )
         } else {
             null
         }
@@ -441,7 +454,19 @@ private fun PaymentSelection.asVerticalSelection(): PaymentMethodVerticalLayoutI
     is PaymentSelection.Saved -> PaymentMethodVerticalLayoutInteractor.Selection.Saved
     is PaymentSelection.GooglePay -> PaymentMethodVerticalLayoutInteractor.Selection.New("google_pay")
     is PaymentSelection.Link -> PaymentMethodVerticalLayoutInteractor.Selection.New("link")
-    is PaymentSelection.New -> PaymentMethodVerticalLayoutInteractor.Selection.New(paymentMethodCreateParams.typeCode)
+    is PaymentSelection.New -> PaymentMethodVerticalLayoutInteractor.Selection.New(
+        code = paymentMethodCreateParams.typeCode,
+        changeDetails = changeDetails(),
+        canBeChanged = true,
+    )
     is PaymentSelection.ExternalPaymentMethod -> PaymentMethodVerticalLayoutInteractor.Selection.New(type)
     is PaymentSelection.CustomPaymentMethod -> PaymentMethodVerticalLayoutInteractor.Selection.New(id)
+}
+
+private fun PaymentSelection.New.changeDetails(): String? = when (this) {
+    is PaymentSelection.New.Card -> {
+        "···· $last4"
+    }
+    is PaymentSelection.New.USBankAccount -> label
+    else -> null
 }

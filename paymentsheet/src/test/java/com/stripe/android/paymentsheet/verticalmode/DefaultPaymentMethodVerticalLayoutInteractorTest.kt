@@ -930,8 +930,95 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
             interactor.state.test {
                 awaitItem().run {
-                    assertThat(selection).isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.New("card"))
+                    assertThat(selection).isEqualTo(
+                        PaymentMethodVerticalLayoutInteractor.Selection.New(
+                            code = "card",
+                            changeDetails = "···· 4242",
+                            canBeChanged = true,
+                        )
+                    )
                 }
+            }
+        }
+    }
+
+    @Test
+    fun verticalModeScreenSelection_retainsLast4_whenUpdatingTemporarySelection() {
+        val initialPaymentSelection = PaymentSelection.Link()
+        runScenario(
+            initialSelection = initialPaymentSelection,
+            formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
+            updateSelection = {},
+            shouldUpdateVerticalModeSelection = { true }
+        ) {
+            selectionSource.value = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
+
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(selection).isEqualTo(
+                        PaymentMethodVerticalLayoutInteractor.Selection.New(
+                            code = "card",
+                            changeDetails = "···· 4242",
+                            canBeChanged = true,
+                        )
+                    )
+                }
+                temporarySelectionSource.value = "card"
+                ensureAllEventsConsumed()
+                temporarySelectionSource.value = null
+                ensureAllEventsConsumed()
+            }
+        }
+    }
+
+    @Test
+    fun verticalModeScreenSelection_retainsCanBeChanged_whenUpdatingTemporarySelection() {
+        runScenario(
+            formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
+            updateSelection = {},
+            shouldUpdateVerticalModeSelection = { true }
+        ) {
+            selectionSource.value = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION
+
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(selection).isEqualTo(
+                        PaymentMethodVerticalLayoutInteractor.Selection.New(
+                            code = "cashapp",
+                            changeDetails = null,
+                            canBeChanged = true,
+                        )
+                    )
+                }
+                temporarySelectionSource.value = "cashapp"
+                ensureAllEventsConsumed()
+                temporarySelectionSource.value = null
+                ensureAllEventsConsumed()
+            }
+        }
+    }
+
+    @Test
+    fun verticalModeSelectionIsInitialedAsUsBankAccount() {
+        var verticalModeSelection: PaymentSelection? = PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION
+        runScenario(
+            initialSelection = verticalModeSelection,
+            formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
+            updateSelection = { true },
+        ) {
+            interactor.state.test {
+                assertThat(verticalModeSelection).isEqualTo(PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION)
+                assertThat(awaitItem().selection).isEqualTo(
+                    PaymentMethodVerticalLayoutInteractor.Selection.New(
+                        code = "us_bank_account",
+                        changeDetails = "···· 6789",
+                        canBeChanged = true,
+                    )
+                )
+                temporarySelectionSource.value = "us_bank_account"
+                ensureAllEventsConsumed()
+                temporarySelectionSource.value = null
+                ensureAllEventsConsumed()
             }
         }
     }
@@ -946,7 +1033,13 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         ) {
             interactor.state.test {
                 assertThat(verticalModeSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
-                assertThat(awaitItem().selection).isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.New("card"))
+                assertThat(awaitItem().selection).isEqualTo(
+                    PaymentMethodVerticalLayoutInteractor.Selection.New(
+                        code = "card",
+                        changeDetails = "···· 4242",
+                        canBeChanged = true,
+                    )
+                )
             }
         }
     }
@@ -964,7 +1057,13 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
             interactor.state.test {
                 awaitItem().run {
-                    assertThat(selection).isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.New("card"))
+                    assertThat(selection).isEqualTo(
+                        PaymentMethodVerticalLayoutInteractor.Selection.New(
+                            code = "card",
+                            changeDetails = "···· 4242",
+                            canBeChanged = true,
+                        )
+                    )
                 }
             }
         }
