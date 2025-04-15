@@ -44,7 +44,8 @@ internal interface PaymentMethodVerticalLayoutInteractor {
     data class State(
         val displayablePaymentMethods: List<DisplayablePaymentMethod>,
         val isProcessing: Boolean,
-        val selection: Selection?,
+        val temporarySelection: Selection?,
+        val paymentSelection: PaymentSelection?,
         val displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
         val availableSavedPaymentMethodAction: SavedPaymentMethodAction,
         val mandate: ResolvableString?,
@@ -95,6 +96,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit,
     private val reportFormShown: (PaymentMethodCode) -> Unit,
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    private val isEmbedded: Boolean = false,
     dispatcher: CoroutineContext = Dispatchers.Default,
     mainDispatcher: CoroutineContext = Dispatchers.Main.immediate,
 ) : PaymentMethodVerticalLayoutInteractor {
@@ -158,7 +160,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             ).also { interactor ->
                 viewModel.viewModelScope.launch {
                     interactor.state.collect { state ->
-                        val newSelection = state.selection as? PaymentMethodVerticalLayoutInteractor.Selection.New
+                        val newSelection =
+                            state.temporarySelection as? PaymentMethodVerticalLayoutInteractor.Selection.New
                         newSelection?.code?.let { code ->
                             val formType = formHelper.formTypeForCode(code)
                             if (formType is FormType.MandateOnly) {
@@ -208,8 +211,14 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         paymentMethods,
         walletsState,
         paymentMethodIncentiveInteractor.displayedIncentive,
-    ) { paymentMethods, walletsState, incentive ->
-        getDisplayablePaymentMethods(paymentMethods, walletsState, incentive)
+        selection,
+    ) { paymentMethods, walletsState, incentive, selection ->
+        getDisplayablePaymentMethods(
+            paymentMethods = paymentMethods,
+            walletsState = walletsState,
+            incentive = incentive,
+            selection = selection,
+        )
     }
 
     override val isLiveMode: Boolean = paymentMethodMetadata.stripeIntent.isLiveMode
@@ -231,7 +240,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         PaymentMethodVerticalLayoutInteractor.State(
             displayablePaymentMethods = displayablePaymentMethods,
             isProcessing = isProcessing,
-            selection = temporarySelection ?: mostRecentSelection?.asVerticalSelection(),
+            temporarySelection = temporarySelection ?: mostRecentSelection?.asVerticalSelection(),
+            paymentSelection = mostRecentSelection,
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
             availableSavedPaymentMethodAction = action,
             mandate = getMandate(temporarySelectionCode, mostRecentSelection),
@@ -292,10 +302,17 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         paymentMethods: List<PaymentMethod>,
         walletsState: WalletsState?,
         incentive: PaymentMethodIncentive?,
+        selection: PaymentSelection?,
     ): List<DisplayablePaymentMethod> {
         val lpms = supportedPaymentMethods.map { supportedPaymentMethod ->
             val paymentMethodIncentive = incentive?.takeIfMatches(supportedPaymentMethod.code)
-            supportedPaymentMethod.asDisplayablePaymentMethod(paymentMethods, paymentMethodIncentive) {
+
+            supportedPaymentMethod.asDisplayablePaymentMethod(
+                customerSavedPaymentMethods = paymentMethods,
+                paymentSelection = selection,
+                isEmbedded = isEmbedded,
+                incentive = paymentMethodIncentive
+            ) {
                 handleViewAction(ViewAction.PaymentMethodSelected(supportedPaymentMethod.code))
             }
         }

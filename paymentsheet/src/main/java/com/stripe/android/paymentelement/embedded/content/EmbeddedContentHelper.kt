@@ -190,6 +190,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             reportPaymentMethodTypeSelected = eventReporter::onSelectPaymentMethod,
             reportFormShown = eventReporter::onPaymentMethodFormShown,
             onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,
+            isEmbedded = true,
         )
     }
 
