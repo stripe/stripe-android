@@ -114,8 +114,8 @@ internal class USBankAccountFormArguments(
                 },
                 incentive = paymentMethodMetadata.paymentMethodIncentive,
                 setAsDefaultPaymentMethodEnabled =
-                    paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
-                        ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
+                paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
+                    ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
                 financialConnectionsAvailability = paymentMethodMetadata.financialConnectionsAvailability,
                 setAsDefaultMatchesSaveForFutureUse = viewModel.customerStateHolder.paymentMethods.value.isEmpty(),
             )
@@ -167,8 +167,8 @@ internal class USBankAccountFormArguments(
                 onFormCompleted = onFormCompleted,
                 incentive = paymentMethodMetadata.paymentMethodIncentive,
                 setAsDefaultPaymentMethodEnabled =
-                    paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
-                        ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
+                paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
+                    ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
                 financialConnectionsAvailability = paymentMethodMetadata.financialConnectionsAvailability,
                 setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
             )
