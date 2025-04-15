@@ -31,6 +31,7 @@ import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
+import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.analytics.primaryButtonColorUsage
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
@@ -222,7 +223,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         eventReporter.onInit(
             commonConfiguration = config.asCommonConfiguration(),
             primaryButtonColor = config.primaryButtonColorUsage(),
-            paymentMethodLayout = config.paymentMethodLayout,
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
             isDeferred = isDeferred,
             appearance = config.appearance
         )

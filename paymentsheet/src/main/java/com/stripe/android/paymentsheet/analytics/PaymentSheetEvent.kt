@@ -10,6 +10,8 @@ import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.analyticsValue
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -22,6 +24,36 @@ import kotlin.time.Duration
 import kotlin.time.DurationUnit
 
 internal sealed class PaymentSheetEvent : AnalyticsEvent {
+
+    sealed interface ConfigurationSpecificPayload {
+        val payload: Map<String, Any?>
+
+        data class PaymentSheet(
+            private val configuration: PaymentSheet.Configuration,
+        ) : ConfigurationSpecificPayload {
+            override val payload: Map<String, Any?>
+                get() = buildMap {
+                    put(FIELD_PAYMENT_METHOD_LAYOUT, configuration.paymentMethodLayout.toAnalyticsValue())
+                }
+        }
+
+        @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+        data class Embedded(
+            private val configuration: EmbeddedPaymentElement.Configuration,
+        ) : ConfigurationSpecificPayload {
+            override val payload: Map<String, Any?>
+                get() = buildMap {
+                    put(
+                        "form_sheet_action",
+                        when (configuration.formSheetAction) {
+                            EmbeddedPaymentElement.FormSheetAction.Continue -> "continue"
+                            EmbeddedPaymentElement.FormSheetAction.Confirm -> "confirm"
+                        }
+                    )
+                    put("embedded_view_displays_mandate_text", configuration.embeddedViewDisplaysMandateText)
+                }
+        }
+    }
 
     val params: Map<String, Any?>
         get() = standardParams(isDeferred, linkEnabled, googlePaySupported) + additionalParams
@@ -126,7 +158,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         private val configuration: CommonConfiguration,
         private val appearance: PaymentSheet.Appearance,
         private val primaryButtonColor: Boolean?,
-        private val paymentMethodLayout: PaymentSheet.PaymentMethodLayout?,
+        private val configurationSpecificPayload: ConfigurationSpecificPayload,
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
         override val isDeferred: Boolean,
@@ -167,10 +199,9 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                     FIELD_PREFERRED_NETWORKS to configuration.preferredNetworks.toAnalyticsValue(),
                     FIELD_CUSTOM_PAYMENT_METHODS to configuration.getCustomPaymentMethodsAnalyticsValue(),
                     FIELD_EXTERNAL_PAYMENT_METHODS to configuration.getExternalPaymentMethodsAnalyticsValue(),
-                    FIELD_PAYMENT_METHOD_LAYOUT to paymentMethodLayout?.toAnalyticsValue(),
                     FIELD_CARD_BRAND_ACCEPTANCE to configuration.cardBrandAcceptance.toAnalyticsValue(),
                     FIELD_CARD_SCAN_AVAILABLE to isStripeCardScanAvailable
-                )
+                ).plus(configurationSpecificPayload.payload)
                 return mapOf(
                     FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION to configurationMap,
                 )

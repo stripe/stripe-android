@@ -12,6 +12,7 @@ import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_SELECTION
 import com.stripe.android.model.PaymentMethodFixtures.LINK_INLINE_PAYMENT_SELECTION
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -37,7 +38,7 @@ class PaymentSheetEventTest {
             configuration = config.asCommonConfiguration(),
             appearance = config.appearance,
             primaryButtonColor = config.primaryButtonColorUsage(),
-            paymentMethodLayout = config.paymentMethodLayout,
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
@@ -72,7 +73,7 @@ class PaymentSheetEventTest {
             configuration = config.asCommonConfiguration(),
             appearance = config.appearance,
             primaryButtonColor = config.primaryButtonColorUsage(),
-            paymentMethodLayout = config.paymentMethodLayout,
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
@@ -107,7 +108,7 @@ class PaymentSheetEventTest {
             configuration = config.asCommonConfiguration(),
             appearance = config.appearance,
             primaryButtonColor = config.primaryButtonColorUsage(),
-            paymentMethodLayout = config.paymentMethodLayout,
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
@@ -144,7 +145,7 @@ class PaymentSheetEventTest {
             configuration = config.asCommonConfiguration(),
             appearance = config.appearance,
             primaryButtonColor = config.primaryButtonColorUsage(),
-            paymentMethodLayout = config.paymentMethodLayout,
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
@@ -179,7 +180,7 @@ class PaymentSheetEventTest {
             configuration = config.asCommonConfiguration(),
             appearance = config.appearance,
             primaryButtonColor = config.primaryButtonColorUsage(),
-            paymentMethodLayout = config.paymentMethodLayout,
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
@@ -212,7 +213,7 @@ class PaymentSheetEventTest {
             configuration = config.asCommonConfiguration(),
             appearance = config.appearance,
             primaryButtonColor = config.primaryButtonColorUsage(),
-            paymentMethodLayout = config.paymentMethodLayout,
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
@@ -275,19 +276,23 @@ class PaymentSheetEventTest {
     @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
     @Test
     fun `Init event with embedded appearance should return expected params`() {
-        val config = PaymentSheetFixtures.CONFIG_MINIMUM.copy(
-            appearance = PaymentSheet.Appearance(
-                embeddedAppearance = PaymentSheet.Appearance.Embedded(
-                    style = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.default
+        val config = EmbeddedPaymentElement.Configuration.Builder("Example, Inc")
+            .appearance(
+                PaymentSheet.Appearance(
+                    embeddedAppearance = PaymentSheet.Appearance.Embedded(
+                        style = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.default
+                    )
                 )
             )
-        )
+            .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
+            .embeddedViewDisplaysMandateText(true)
+            .build()
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Embedded,
             configuration = config.asCommonConfiguration(),
             appearance = config.appearance,
             primaryButtonColor = null,
-            paymentMethodLayout = null,
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.Embedded(config),
             isDeferred = true,
             linkEnabled = false,
             googlePaySupported = false,
@@ -310,7 +315,65 @@ class PaymentSheetEventTest {
             ),
             paymentMethodLayout = null,
             primaryButtonColor = null,
+        ) {
+            put("form_sheet_action", "confirm")
+            put("embedded_view_displays_mandate_text", true)
+        }
+
+        assertThat(event.params).run {
+            containsEntry("link_enabled", false)
+            containsEntry("google_pay_enabled", false)
+            containsEntry("is_decoupled", true)
+            containsEntry("mpe_config", expectedConfig)
+        }
+    }
+
+    @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+    @Test
+    fun `Init event with embedded should return expected params`() {
+        val config = EmbeddedPaymentElement.Configuration.Builder("Example, Inc")
+            .appearance(
+                PaymentSheet.Appearance(
+                    embeddedAppearance = PaymentSheet.Appearance.Embedded(
+                        style = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.default
+                    )
+                )
+            )
+            .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
+            .embeddedViewDisplaysMandateText(false)
+            .build()
+        val event = PaymentSheetEvent.Init(
+            mode = EventReporter.Mode.Embedded,
+            configuration = config.asCommonConfiguration(),
+            appearance = config.appearance,
+            primaryButtonColor = null,
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.Embedded(config),
+            isDeferred = true,
+            linkEnabled = false,
+            googlePaySupported = false,
+            isStripeCardScanAvailable = true
         )
+
+        assertThat(
+            event.eventName
+        ).isEqualTo(
+            "mc_embedded_init"
+        )
+
+        val expectedConfig = buildInitMpeConfig(
+            appearanceMap = buildAppearanceMap(
+                usedParams = false,
+                embeddedConfig = mapOf(
+                    "style" to true,
+                    "row_style" to "flat_with_checkmark"
+                )
+            ),
+            paymentMethodLayout = null,
+            primaryButtonColor = null,
+        ) {
+            put("form_sheet_action", "continue")
+            put("embedded_view_displays_mandate_text", false)
+        }
 
         assertThat(event.params).run {
             containsEntry("link_enabled", false)
@@ -1279,7 +1342,7 @@ class PaymentSheetEventTest {
                 configuration = config.asCommonConfiguration(),
                 appearance = config.appearance,
                 primaryButtonColor = config.primaryButtonColorUsage(),
-                paymentMethodLayout = config.paymentMethodLayout,
+                configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
                 isDeferred = false,
                 linkEnabled = false,
                 googlePaySupported = false,
@@ -1324,7 +1387,7 @@ class PaymentSheetEventTest {
                 configuration = config.asCommonConfiguration(),
                 appearance = config.appearance,
                 primaryButtonColor = config.primaryButtonColorUsage(),
-                paymentMethodLayout = config.paymentMethodLayout,
+                configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
                 isDeferred = false,
                 linkEnabled = false,
                 googlePaySupported = false,
@@ -1348,7 +1411,7 @@ class PaymentSheetEventTest {
                 mode = EventReporter.Mode.Complete,
                 configuration = config.asCommonConfiguration(),
                 appearance = config.appearance,
-                paymentMethodLayout = config.paymentMethodLayout,
+                configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
                 primaryButtonColor = config.primaryButtonColorUsage(),
                 isDeferred = false,
                 linkEnabled = false,
@@ -1366,7 +1429,7 @@ class PaymentSheetEventTest {
                 mode = EventReporter.Mode.Complete,
                 configuration = config.asCommonConfiguration(),
                 appearance = config.appearance,
-                paymentMethodLayout = config.paymentMethodLayout,
+                configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
                 primaryButtonColor = config.primaryButtonColorUsage(),
                 isDeferred = false,
                 linkEnabled = false,
@@ -1517,7 +1580,7 @@ class PaymentSheetEventTest {
             configuration = configuration.asCommonConfiguration(),
             appearance = configuration.appearance,
             primaryButtonColor = configuration.primaryButtonColorUsage(),
-            paymentMethodLayout = configuration.paymentMethodLayout,
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(configuration),
             googlePaySupported = true,
             isDeferred = false,
             linkEnabled = false,
@@ -1574,9 +1637,10 @@ class PaymentSheetEventTest {
         customPaymentMethods: List<String>? = null,
         paymentMethodLayout: String? = "horizontal",
         cardBrandAcceptance: Boolean = false,
-        cardScanAvailable: Boolean = true
+        cardScanAvailable: Boolean = true,
+        extraParams: MutableMap<String, Any?>.() -> Unit = {},
     ): Map<String, Any?> {
-        return mapOf(
+        return mutableMapOf(
             "customer" to customer,
             "customer_access_provider" to customerAccessProvider,
             "googlepay" to googlePay,
@@ -1591,10 +1655,14 @@ class PaymentSheetEventTest {
             "preferred_networks" to preferredNetworks,
             "external_payment_methods" to externalPaymentMethods,
             "custom_payment_methods" to customPaymentMethods,
-            "payment_method_layout" to paymentMethodLayout,
             "card_brand_acceptance" to cardBrandAcceptance,
-            "card_scan_available" to cardScanAvailable
-        )
+            "card_scan_available" to cardScanAvailable,
+        ).apply {
+            if (paymentMethodLayout != null) {
+                put("payment_method_layout", paymentMethodLayout)
+            }
+            extraParams()
+        }
     }
 
     private fun buildAppearanceMap(usedParams: Boolean, embeddedConfig: Map<String, Any>? = null): Map<String, Any?> {

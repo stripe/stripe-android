@@ -58,7 +58,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         commonConfiguration: CommonConfiguration,
         appearance: PaymentSheet.Appearance,
         primaryButtonColor: Boolean?,
-        paymentMethodLayout: PaymentSheet.PaymentMethodLayout?,
+        configurationSpecificPayload: PaymentSheetEvent.ConfigurationSpecificPayload,
         isDeferred: Boolean,
     ) {
         this.isDeferred = isDeferred
@@ -69,7 +69,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 configuration = commonConfiguration,
                 appearance = appearance,
                 primaryButtonColor = primaryButtonColor,
-                paymentMethodLayout = paymentMethodLayout,
+                configurationSpecificPayload = configurationSpecificPayload,
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
