@@ -465,7 +465,7 @@ private fun PaymentSelection.asVerticalSelection(): PaymentMethodVerticalLayoutI
 
 private fun PaymentSelection.New.changeDetails(): String? = when (this) {
     is PaymentSelection.New.Card -> {
-        "···· $last4"
+        "${this.brand} ···· $last4"
     }
     is PaymentSelection.New.USBankAccount -> label
     else -> null
