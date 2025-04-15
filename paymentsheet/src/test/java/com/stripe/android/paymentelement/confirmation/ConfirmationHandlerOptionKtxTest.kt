@@ -381,7 +381,7 @@ class ConfirmationHandlerOptionKtxTest {
 
     @OptIn(ExperimentalCustomPaymentMethodsApi::class)
     @Test
-    fun `On Custom Payment Method selection with no custom payment method of expected ID, should return nul`() {
+    fun `On Custom Payment Method selection with no custom payment method of expected ID, should return null`() {
         val customPaymentMethodSelection = PaymentSelection.CustomPaymentMethod(
             id = "cpmt_123",
             billingDetails = null,

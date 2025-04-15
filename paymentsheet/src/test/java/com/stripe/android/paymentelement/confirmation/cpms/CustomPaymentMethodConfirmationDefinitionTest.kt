@@ -4,8 +4,7 @@ import androidx.activity.result.ActivityResultCallback
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
-import com.stripe.android.model.Address
-import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -256,14 +255,6 @@ class CustomPaymentMethodConfirmationDefinitionTest {
             disableBillingDetailCollection = false,
         )
 
-        private val BILLING_DETAILS = PaymentMethod.BillingDetails(
-            name = "John Doe",
-            address = Address(
-                line1 = "123 Apple Street",
-                city = "South San Francisco",
-                state = "CA",
-                country = "US",
-            ),
-        )
+        private val BILLING_DETAILS = PaymentMethodFixtures.BILLING_DETAILS
     }
 }

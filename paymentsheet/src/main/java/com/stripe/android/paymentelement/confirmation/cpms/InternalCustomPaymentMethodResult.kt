@@ -4,10 +4,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.paymentelement.CustomPaymentMethodResult
-import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import kotlinx.parcelize.Parcelize
 
 internal sealed class InternalCustomPaymentMethodResult : Parcelable {
@@ -28,12 +28,15 @@ internal sealed class InternalCustomPaymentMethodResult : Parcelable {
         private const val EXTRA_ARGS = "CUSTOM_PAYMENT_METHOD_RESULT"
 
         internal fun fromIntent(intent: Intent?): InternalCustomPaymentMethodResult {
-            @Suppress("DEPRECATION")
-            return intent?.extras?.getParcelable(EXTRA_ARGS)
-                ?: Failed(IllegalStateException("Failed to find custom payment method result!"))
+            return intent?.extras?.let {
+                BundleCompat.getParcelable(
+                    it,
+                    EXTRA_ARGS,
+                    InternalCustomPaymentMethodResult::class.java
+                )
+            } ?: Failed(IllegalStateException("Failed to find custom payment method result!"))
         }
 
-        @OptIn(ExperimentalCustomPaymentMethodsApi::class)
         fun fromCustomPaymentMethodResult(result: CustomPaymentMethodResult): InternalCustomPaymentMethodResult {
             return when (result) {
                 is CustomPaymentMethodResult.Completed -> Completed

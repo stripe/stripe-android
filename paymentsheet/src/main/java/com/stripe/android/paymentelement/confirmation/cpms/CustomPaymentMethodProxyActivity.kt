@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.BundleCompat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.CustomPaymentMethodResult
@@ -30,14 +31,24 @@ internal class CustomPaymentMethodProxyActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         savedInstanceState?.getBoolean(HAS_CONFIRM_STARTED_KEY)?.let { hasConfirmStarted = it }
 
-        @Suppress("DEPRECATION")
-        val type = intent.getParcelableExtra<PaymentSheet.CustomPaymentMethod>(
-            EXTRA_CUSTOM_PAYMENT_METHOD_TYPE
-        )
+        val extras = intent.extras
+
+        val type = extras?.let {
+            BundleCompat.getParcelable(
+                it,
+                EXTRA_CUSTOM_PAYMENT_METHOD_TYPE,
+                PaymentSheet.CustomPaymentMethod::class.java,
+            )
+        }
         val paymentElementCallbackIdentifier = intent.getStringExtra(EXTRA_PAYMENT_ELEMENT_IDENTIFIER)
 
-        @Suppress("DEPRECATION")
-        val billingDetails = intent.getParcelableExtra<PaymentMethod.BillingDetails>(EXTRA_BILLING_DETAILS)
+        val billingDetails = extras?.let {
+            BundleCompat.getParcelable(
+                it,
+                EXTRA_BILLING_DETAILS,
+                PaymentMethod.BillingDetails::class.java,
+            )
+        }
 
         if (type != null && !hasConfirmStarted && paymentElementCallbackIdentifier != null) {
             hasConfirmStarted = true
@@ -56,14 +67,24 @@ internal class CustomPaymentMethodProxyActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
-        @Suppress("DEPRECATION")
-        val type = intent.getParcelableExtra<PaymentSheet.CustomPaymentMethod>(
-            EXTRA_CUSTOM_PAYMENT_METHOD_TYPE
+        val extras = intent.extras ?: run {
+            // We expect to start this activity with extras. If that's not true, it is in an  unexpected state and
+            // should finish.
+            finish()
+            return
+        }
+
+        val type = BundleCompat.getParcelable(
+            extras,
+            EXTRA_CUSTOM_PAYMENT_METHOD_TYPE,
+            PaymentSheet.CustomPaymentMethod::class.java,
         )
 
-        @Suppress("DEPRECATION")
-        val customPaymentMethodResult: CustomPaymentMethodResult? =
-            intent.getParcelableExtra(CustomPaymentMethodResultHandler.EXTRA_CUSTOM_PAYMENT_METHOD_RESULT)
+        val customPaymentMethodResult = BundleCompat.getParcelable(
+            extras,
+            CustomPaymentMethodResultHandler.EXTRA_CUSTOM_PAYMENT_METHOD_RESULT,
+            CustomPaymentMethodResult::class.java,
+        )
 
         if (type == null && customPaymentMethodResult == null) {
             // We expect to start this activity with either a type or a result. If that's not true, it is in an
@@ -73,11 +94,11 @@ internal class CustomPaymentMethodProxyActivity : AppCompatActivity() {
         }
 
         customPaymentMethodResult?.let {
-            val extras = InternalCustomPaymentMethodResult.fromCustomPaymentMethodResult(it).toBundle()
+            val resultExtras = InternalCustomPaymentMethodResult.fromCustomPaymentMethodResult(it).toBundle()
 
             setResult(
                 Activity.RESULT_OK,
-                Intent().putExtras(extras)
+                Intent().putExtras(resultExtras)
             )
 
             finish()

@@ -170,14 +170,7 @@ internal class CustomPaymentMethodConfirmationActivityTest {
     }
 
     private companion object {
-        val PAYMENT_INTENT = PaymentIntentFactory.create().copy(
-            id = "pm_1",
-            amount = 5000,
-            currency = "CAD",
-            paymentMethodOptionsJsonString = """
-                {"card": {"require_cvc_recollection": true}}
-            """.trimIndent()
-        )
+        val PAYMENT_INTENT = PaymentIntentFactory.create()
 
         val CONFIRMATION_OPTION = CustomPaymentMethodConfirmationOption(
             customPaymentMethodType = PaymentSheet.CustomPaymentMethod(

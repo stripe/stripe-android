@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation.cpms
 
 import android.app.Activity
 import android.content.Intent
+import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -18,7 +19,6 @@ import org.robolectric.RobolectricTestRunner
 internal class CustomPaymentMethodContractTest {
     private val customPaymentMethodContract: CustomPaymentMethodContract = CustomPaymentMethodContract()
 
-    @Suppress("DEPRECATION")
     @Test
     fun `on create intent, should have expected extras`() {
         val paymentElementCallbackIdentifier = "CustomPaymentMethodTestIdentifier"
@@ -46,14 +46,22 @@ internal class CustomPaymentMethodContractTest {
             extras?.getString(CustomPaymentMethodProxyActivity.EXTRA_PAYMENT_ELEMENT_IDENTIFIER)
         ).isEqualTo(paymentElementCallbackIdentifier)
         assertThat(
-            extras?.getParcelable<PaymentSheet.CustomPaymentMethod>(
-                CustomPaymentMethodProxyActivity.EXTRA_CUSTOM_PAYMENT_METHOD_TYPE
-            )
+            extras?.let {
+                BundleCompat.getParcelable(
+                    it,
+                    CustomPaymentMethodProxyActivity.EXTRA_CUSTOM_PAYMENT_METHOD_TYPE,
+                    PaymentSheet.CustomPaymentMethod::class.java,
+                )
+            }
         ).isEqualTo(customPaymentMethodType)
         assertThat(
-            extras?.getParcelable<PaymentMethod.BillingDetails>(
-                CustomPaymentMethodProxyActivity.EXTRA_BILLING_DETAILS
-            )
+            extras?.let {
+                BundleCompat.getParcelable(
+                    it,
+                    CustomPaymentMethodProxyActivity.EXTRA_BILLING_DETAILS,
+                    PaymentMethod.BillingDetails::class.java,
+                )
+            }
         ).isEqualTo(billingDetails)
     }
 
