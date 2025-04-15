@@ -12,6 +12,7 @@ import com.stripe.android.model.LinkMode
 import com.stripe.android.model.analyticsValue
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -51,6 +52,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val isDeferred: Boolean,
         override val googlePaySupported: Boolean,
         linkDisplay: PaymentSheet.LinkConfiguration.Display,
+        financialConnectionsAvailability: FinancialConnectionsAvailability?,
         requireCvcRecollection: Boolean = false,
         hasDefaultPaymentMethod: Boolean? = null,
         setAsDefaultEnabled: Boolean? = null,
@@ -62,6 +64,13 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             put(FIELD_INTENT_TYPE, initializationMode.defaultAnalyticsValue)
             put(FIELD_ORDERED_LPMS, orderedLpms.joinToString(","))
             put(FIELD_REQUIRE_CVC_RECOLLECTION, requireCvcRecollection)
+            put(
+                FIELD_FINANCIAL_CONNECTIONS_AVAILABILITY, when (financialConnectionsAvailability) {
+                    FinancialConnectionsAvailability.Full -> "full"
+                    FinancialConnectionsAvailability.Lite -> "lite"
+                    null -> "none"
+                }
+            )
             linkMode?.let { mode ->
                 put(FIELD_LINK_MODE, mode.analyticsValue)
             }
@@ -169,7 +178,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                     FIELD_EXTERNAL_PAYMENT_METHODS to configuration.getExternalPaymentMethodsAnalyticsValue(),
                     FIELD_PAYMENT_METHOD_LAYOUT to paymentMethodLayout?.toAnalyticsValue(),
                     FIELD_CARD_BRAND_ACCEPTANCE to configuration.cardBrandAcceptance.toAnalyticsValue(),
-                    FIELD_CARD_SCAN_AVAILABLE to isStripeCardScanAvailable
+                    FIELD_CARD_SCAN_AVAILABLE to isStripeCardScanAvailable,
                 )
                 return mapOf(
                     FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION to configurationMap,
@@ -592,6 +601,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_LINK_MODE = "link_mode"
         const val FIELD_ORDERED_LPMS = "ordered_lpms"
         const val FIELD_REQUIRE_CVC_RECOLLECTION = "require_cvc_recollection"
+        const val FIELD_FINANCIAL_CONNECTIONS_AVAILABILITY = "financial_connections_availability"
         const val FIELD_CARD_BRAND_ACCEPTANCE = "card_brand_acceptance"
         const val FIELD_CARD_SCAN_AVAILABLE = "card_scan_available"
         const val FIELD_LINK_DISPLAY = "link_display"

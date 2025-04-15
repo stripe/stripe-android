@@ -17,6 +17,7 @@ import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.isSaved
@@ -91,6 +92,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         linkDisplay: PaymentSheet.LinkConfiguration.Display,
         currency: String?,
         initializationMode: PaymentElementLoader.InitializationMode,
+        financialConectionsAvailability: FinancialConnectionsAvailability?,
         orderedLpms: List<String>,
         requireCvcRecollection: Boolean,
         hasDefaultPaymentMethod: Boolean?,
@@ -118,6 +120,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 orderedLpms = orderedLpms,
                 requireCvcRecollection = requireCvcRecollection,
                 hasDefaultPaymentMethod = hasDefaultPaymentMethod,
+                financialConnectionsAvailability = financialConectionsAvailability,
                 setAsDefaultEnabled = setAsDefaultEnabled,
             )
         )
