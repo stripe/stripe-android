@@ -15,6 +15,7 @@ import com.stripe.android.link.ui.inline.LinkSignupField.Name
 import com.stripe.android.link.ui.inline.LinkSignupField.Phone
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.link.utils.errorMessage
+import com.stripe.android.model.EmailSource
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
@@ -235,7 +236,13 @@ internal class InlineSignupViewModel(
 
     private suspend fun lookupConsumerEmail(email: String) {
         clearError()
-        linkAccountManager.lookupConsumer(email, startSession = false).fold(
+        linkAccountManager.lookupConsumer(
+            email,
+            when {
+                prefilledEmail?.isNotBlank() == true && prefilledEmail == email -> EmailSource.DEFAULT_VALUE
+                else -> EmailSource.USER_ACTION
+            }
+        ).fold(
             onSuccess = {
                 if (it != null) {
                     _viewState.update { oldState ->

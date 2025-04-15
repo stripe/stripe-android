@@ -58,7 +58,8 @@ internal class LinkApiRepository @Inject constructor(
 
     override suspend fun lookupConsumer(
         email: String,
-    ): Result<ConsumerSessionLookup> = withContext(workContext) {
+        emailSource: EmailSource
+        ): Result<ConsumerSessionLookup> = withContext(workContext) {
         runCatching {
             requireNotNull(
                 consumersApiService.lookupConsumerSession(

@@ -6,6 +6,7 @@ import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -85,7 +86,7 @@ internal class RealLinkConfigurationCoordinator @Inject internal constructor(
         userInput: UserInput
     ): Result<Boolean> = getLinkPaymentLauncherComponent(configuration)
         .linkAccountManager
-        .signInWithUserInput(userInput)
+        .signInWithUserInput(userInput, EmailSource.USER_ACTION)
         .map { true }
 
     /**
