@@ -371,6 +371,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     override fun handlePaymentMethodSelected(selection: PaymentSelection?) {
         if (selection != this.selection.value) {
             updateSelection(selection)
+            selection?.let {
+                eventReporter.onSelectPaymentOption(selection)
+            }
         }
     }
 
