@@ -61,6 +61,7 @@ internal class USBankAccountFormArguments(
     val onUpdatePrimaryButtonUIState: ((PrimaryButton.UIState?) -> (PrimaryButton.UIState?)) -> Unit,
     val onUpdatePrimaryButtonState: (PrimaryButton.State) -> Unit,
     val onError: (ResolvableString?) -> Unit,
+    val onFormCompleted: () -> Unit,
     val setAsDefaultPaymentMethodEnabled: Boolean,
     val financialConnectionsAvailability: FinancialConnectionsAvailability?,
     val setAsDefaultMatchesSaveForFutureUse: Boolean,
@@ -106,6 +107,9 @@ internal class USBankAccountFormArguments(
                 onUpdatePrimaryButtonUIState = { viewModel.customPrimaryButtonUiState.update(it) },
                 onUpdatePrimaryButtonState = viewModel::updatePrimaryButtonState,
                 onError = viewModel::onError,
+                onFormCompleted = {
+                    viewModel.eventReporter.onPaymentMethodFormCompleted(PaymentMethod.Type.USBankAccount.code)
+                },
                 incentive = paymentMethodMetadata.paymentMethodIncentive,
                 setAsDefaultPaymentMethodEnabled =
                 paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
@@ -123,6 +127,7 @@ internal class USBankAccountFormArguments(
             onMandateTextChanged: (mandate: ResolvableString?, showAbove: Boolean) -> Unit,
             onUpdatePrimaryButtonUIState: ((PrimaryButton.UIState?) -> (PrimaryButton.UIState?)) -> Unit,
             onError: (ResolvableString?) -> Unit,
+            onFormCompleted: () -> Unit,
         ): USBankAccountFormArguments {
             val isSaveForFutureUseValueChangeable = isSaveForFutureUseValueChangeable(
                 code = selectedPaymentMethodCode,
@@ -155,6 +160,7 @@ internal class USBankAccountFormArguments(
                 onUpdatePrimaryButtonState = {
                 },
                 onError = onError,
+                onFormCompleted = onFormCompleted,
                 incentive = paymentMethodMetadata.paymentMethodIncentive,
                 setAsDefaultPaymentMethodEnabled =
                 paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
