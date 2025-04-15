@@ -313,6 +313,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
+                financialConnectionsAvailability = financialConnectionsAvailability,
             )
         )
     }

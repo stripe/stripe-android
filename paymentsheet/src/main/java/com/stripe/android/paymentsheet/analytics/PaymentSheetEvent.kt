@@ -315,6 +315,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         duration: Duration?,
         selectedLpm: String?,
         linkContext: String?,
+        financialConnectionsAvailability: FinancialConnectionsAvailability?,
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
@@ -325,6 +326,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             FIELD_CURRENCY to currency,
             FIELD_SELECTED_LPM to selectedLpm,
             FIELD_LINK_CONTEXT to linkContext,
+            FIELD_FINANCIAL_CONNECTIONS_AVAILABILITY to financialConnectionsAvailability.toAnalyticsParam()
         ).filterNotNullValues()
     }
 
