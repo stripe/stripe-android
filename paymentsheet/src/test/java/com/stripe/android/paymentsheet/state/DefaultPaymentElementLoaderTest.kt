@@ -6,6 +6,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
@@ -47,6 +48,7 @@ import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.PaymentIntentInTerminalState
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -56,6 +58,7 @@ import com.stripe.android.utils.FakeElementsSessionRepository
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.MockitoAnnotations
@@ -73,6 +76,12 @@ import kotlin.test.Test
 
 @OptIn(ExperimentalCustomPaymentMethodsApi::class)
 internal class DefaultPaymentElementLoaderTest {
+
+    @get:Rule
+    val editSavedCardPaymentMethodEnabledFeatureFlagTestRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.editSavedCardPaymentMethodEnabled,
+        isEnabled = false
+    )
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val eventReporter = mock<EventReporter>()
@@ -137,6 +146,7 @@ internal class DefaultPaymentElementLoaderTest {
                         canRemovePaymentMethods = true,
                         canRemoveLastPaymentMethod = true,
                         canRemoveDuplicates = false,
+                        canUpdatePaymentMethod = false
                     ),
                     defaultPaymentMethodId = null,
                 ),
@@ -1599,6 +1609,7 @@ internal class DefaultPaymentElementLoaderTest {
                     canRemovePaymentMethods = true,
                     canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = true,
+                    canUpdatePaymentMethod = false
                 )
             )
         }
@@ -1641,6 +1652,7 @@ internal class DefaultPaymentElementLoaderTest {
                     canRemovePaymentMethods = false,
                     canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = true,
+                    canUpdatePaymentMethod = false
                 )
             )
         }
@@ -1683,12 +1695,57 @@ internal class DefaultPaymentElementLoaderTest {
                     canRemovePaymentMethods = false,
                     canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = true,
+                    canUpdatePaymentMethod = false
+                )
+            )
+        }
+
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    @Test
+    fun `customer session with edit saved payment method enabled, should enable canUpdatePaymentMethod permission`() =
+        runTest {
+            editSavedCardPaymentMethodEnabledFeatureFlagTestRule.setEnabled(true)
+            val loader = createPaymentElementLoader(
+                customer = ElementsSession.Customer(
+                    paymentMethods = PaymentMethodFactory.cards(4),
+                    session = createElementsSessionCustomerSession(
+                        createEnabledMobilePaymentElement(
+                            isPaymentMethodRemoveEnabled = false,
+                            isPaymentMethodSaveEnabled = false,
+                            canRemoveLastPaymentMethod = true,
+                            allowRedisplayOverride = null,
+                        )
+                    ),
+                    defaultPaymentMethod = null,
+                )
+            )
+
+            val state = loader.load(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                    clientSecret = "client_secret"
+                ),
+                paymentSheetConfiguration = PaymentSheet.Configuration(
+                    merchantDisplayName = "Merchant, Inc.",
+                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                        id = "cus_1",
+                        clientSecret = "customer_client_secret",
+                    ),
+                ),
+                initializedViaCompose = false,
+            ).getOrThrow()
+
+            assertThat(state.customer?.permissions).isEqualTo(
+                CustomerState.Permissions(
+                    canRemovePaymentMethods = false,
+                    canRemoveLastPaymentMethod = true,
+                    canRemoveDuplicates = true,
+                    canUpdatePaymentMethod = true
                 )
             )
         }
 
     @Test
-    fun `When 'LegacyEphemeralKey' config is provided, permissions should always be enabled and remove duplicates should be disabled`() =
+    fun `When 'LegacyEphemeralKey' config is provided, permissions should always be enabled and remove duplicates, payment method update should be disabled`() =
         runTest {
             val loader = createPaymentElementLoader()
 
@@ -1711,6 +1768,7 @@ internal class DefaultPaymentElementLoaderTest {
                     canRemovePaymentMethods = true,
                     canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = false,
+                    canUpdatePaymentMethod = false
                 )
             )
         }

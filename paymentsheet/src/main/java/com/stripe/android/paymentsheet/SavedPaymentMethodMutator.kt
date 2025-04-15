@@ -372,7 +372,8 @@ internal class SavedPaymentMethodMutator(
                         DefaultUpdatePaymentMethodInteractor(
                             isLiveMode = isLiveMode,
                             canRemove = canRemove,
-                            displayableSavedPaymentMethod,
+                            allowCardEdit = viewModel.customerStateHolder.updatePaymentMethodEnabled,
+                            displayableSavedPaymentMethod = displayableSavedPaymentMethod,
                             cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
                             addressCollectionMode = viewModel.config.asCommonConfiguration()
                                 .billingDetailsCollectionConfiguration.address,

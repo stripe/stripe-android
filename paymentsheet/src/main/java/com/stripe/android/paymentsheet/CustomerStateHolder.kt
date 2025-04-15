@@ -42,6 +42,11 @@ internal class CustomerStateHolder(
         } ?: false
     }
 
+    val updatePaymentMethodEnabled: Boolean
+        get() {
+            return customer.value?.permissions?.canUpdatePaymentMethod ?: false
+        }
+
     fun setCustomerState(customerState: CustomerState?) {
         savedStateHandle[SAVED_CUSTOMER] = customerState
 

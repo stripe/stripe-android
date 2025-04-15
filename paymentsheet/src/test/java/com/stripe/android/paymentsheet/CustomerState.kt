@@ -7,6 +7,7 @@ internal fun createCustomerState(
     paymentMethods: List<PaymentMethod>,
     isRemoveEnabled: Boolean = true,
     canRemoveLastPaymentMethod: Boolean = true,
+    canUpdatePaymentMethod: Boolean = true,
     defaultPaymentMethodId: String? = null,
 ): CustomerState {
     return CustomerState(
@@ -18,6 +19,7 @@ internal fun createCustomerState(
             canRemovePaymentMethods = isRemoveEnabled,
             canRemoveDuplicates = true,
             canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
+            canUpdatePaymentMethod = canUpdatePaymentMethod,
         ),
         defaultPaymentMethodId = defaultPaymentMethodId,
     )

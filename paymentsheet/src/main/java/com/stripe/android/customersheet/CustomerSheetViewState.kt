@@ -140,23 +140,12 @@ internal sealed class CustomerSheetViewState(
     }
 }
 
-internal fun canEdit(
-    allowsRemovalOfLastSavedPaymentMethod: Boolean,
-    savedPaymentMethods: List<PaymentMethod>,
+internal fun isModifiable(
+    paymentMethod: PaymentMethod,
     cbcEligibility: CardBrandChoiceEligibility,
+    canUpdatePaymentMethod: Boolean
 ): Boolean {
-    return if (allowsRemovalOfLastSavedPaymentMethod) {
-        savedPaymentMethods.isNotEmpty()
-    } else {
-        if (savedPaymentMethods.size == 1) {
-            isModifiable(savedPaymentMethods.first(), cbcEligibility)
-        } else {
-            savedPaymentMethods.size > 1
-        }
-    }
-}
-
-internal fun isModifiable(paymentMethod: PaymentMethod, cbcEligibility: CardBrandChoiceEligibility): Boolean {
+    if (canUpdatePaymentMethod && paymentMethod.card != null) return true
     val hasMultipleNetworks = paymentMethod.card?.networks?.available?.let { available ->
         available.size > 1
     } ?: false

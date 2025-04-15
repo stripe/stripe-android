@@ -23,7 +23,9 @@ import kotlinx.coroutines.test.runTest
 import kotlin.coroutines.coroutineContext
 import kotlin.test.Test
 
+@SuppressWarnings("LargeClass")
 class CustomerAdapterDataSourceTest {
+
     @Test
     fun `on retrieve payment methods, should complete successfully from adapter`() = runTest {
         val paymentMethods = PaymentMethodFactory.cards(size = 6)
@@ -530,6 +532,7 @@ class CustomerAdapterDataSourceTest {
         assertThat(customerSheetSession.paymentMethods).containsExactlyElementsIn(paymentMethods)
         assertThat(customerSheetSession.savedSelection).isEqualTo(SavedSelection.PaymentMethod(id = "pm_1"))
         assertThat(customerSheetSession.permissions.canRemovePaymentMethods).isTrue()
+        assertThat(customerSheetSession.permissions.canUpdatePaymentMethod).isFalse()
         assertThat(customerSheetSession.paymentMethodSaveConsentBehavior).isEqualTo(
             PaymentMethodSaveConsentBehavior.Legacy
         )
