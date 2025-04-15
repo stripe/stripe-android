@@ -21,6 +21,7 @@ import com.stripe.android.payments.financialconnections.FinancialConnectionsAvai
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.isSaved
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.ui.core.IsStripeCardScanAvailable
 import kotlinx.coroutines.CoroutineScope
@@ -499,6 +500,14 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     override fun onCannotProperlyReturnFromLinkAndOtherLPMs() {
         fireEvent(PaymentSheetEvent.CannotProperlyReturnFromLinkAndLPMs(mode = mode))
+    }
+
+    override fun onUsBankAccountFormEvent(event: USBankAccountFormViewModel.AnalyticsEvent) {
+        fireEvent(
+            PaymentSheetEvent.BankAccountCollectorStarted(
+                financialConnectionsAvailability = financialConnectionsAvailability
+            )
+        )
     }
 
     private fun fireEvent(event: PaymentSheetEvent) {

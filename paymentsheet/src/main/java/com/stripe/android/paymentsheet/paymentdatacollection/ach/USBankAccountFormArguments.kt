@@ -56,6 +56,7 @@ internal class USBankAccountFormArguments(
     val hostedSurface: String,
     val shippingDetails: AddressDetails?,
     val draftPaymentSelection: PaymentSelection?,
+    val onAnalyticsEvent: (USBankAccountFormViewModel.AnalyticsEvent) -> Unit,
     val onMandateTextChanged: (mandate: ResolvableString?, showAbove: Boolean) -> Unit,
     val onLinkedBankAccountChanged: (PaymentSelection.New.USBankAccount?) -> Unit,
     val onUpdatePrimaryButtonUIState: ((PrimaryButton.UIState?) -> (PrimaryButton.UIState?)) -> Unit,
@@ -101,6 +102,7 @@ internal class USBankAccountFormArguments(
                 stripeIntentId = stripeIntent.id,
                 clientSecret = stripeIntent.clientSecret,
                 shippingDetails = viewModel.config.shippingDetails,
+                onAnalyticsEvent = { viewModel.eventReporter.onUsBankAccountFormEvent(it) },
                 draftPaymentSelection = viewModel.newPaymentSelection?.paymentSelection,
                 onMandateTextChanged = viewModel.mandateHandler::updateMandateText,
                 onLinkedBankAccountChanged = bankFormInteractor::handleLinkedBankAccountChanged,
@@ -112,8 +114,8 @@ internal class USBankAccountFormArguments(
                 },
                 incentive = paymentMethodMetadata.paymentMethodIncentive,
                 setAsDefaultPaymentMethodEnabled =
-                paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
-                    ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
+                    paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
+                        ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
                 financialConnectionsAvailability = paymentMethodMetadata.financialConnectionsAvailability,
                 setAsDefaultMatchesSaveForFutureUse = viewModel.customerStateHolder.paymentMethods.value.isEmpty(),
             )
@@ -125,6 +127,7 @@ internal class USBankAccountFormArguments(
             hostedSurface: String,
             setSelection: (PaymentSelection?) -> Unit,
             onMandateTextChanged: (mandate: ResolvableString?, showAbove: Boolean) -> Unit,
+            onAnalyticsEvent: (USBankAccountFormViewModel.AnalyticsEvent) -> Unit,
             onUpdatePrimaryButtonUIState: ((PrimaryButton.UIState?) -> (PrimaryButton.UIState?)) -> Unit,
             onError: (ResolvableString?) -> Unit,
             onFormCompleted: () -> Unit,
@@ -155,6 +158,7 @@ internal class USBankAccountFormArguments(
                 shippingDetails = paymentMethodMetadata.shippingDetails,
                 draftPaymentSelection = null,
                 onMandateTextChanged = onMandateTextChanged,
+                onAnalyticsEvent = onAnalyticsEvent,
                 onLinkedBankAccountChanged = bankFormInteractor::handleLinkedBankAccountChanged,
                 onUpdatePrimaryButtonUIState = onUpdatePrimaryButtonUIState,
                 onUpdatePrimaryButtonState = {
@@ -163,8 +167,8 @@ internal class USBankAccountFormArguments(
                 onFormCompleted = onFormCompleted,
                 incentive = paymentMethodMetadata.paymentMethodIncentive,
                 setAsDefaultPaymentMethodEnabled =
-                paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
-                    ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
+                    paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
+                        ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
                 financialConnectionsAvailability = paymentMethodMetadata.financialConnectionsAvailability,
                 setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
             )

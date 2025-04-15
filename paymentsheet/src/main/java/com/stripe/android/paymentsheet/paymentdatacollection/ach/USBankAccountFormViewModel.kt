@@ -40,6 +40,7 @@ import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.BankFormScreenState.ResultIdentifier
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel.AnalyticsEvent.Finished
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.DaggerUSBankAccountFormComponent
 import com.stripe.android.paymentsheet.utils.getSetAsDefaultPaymentMethodFromPaymentSelection
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
@@ -55,8 +56,11 @@ import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -236,6 +240,9 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         state.updateWithMandate(mandateText)
     }
 
+    private val _analyticsEvent = MutableSharedFlow<AnalyticsEvent>(replay = 1)
+    val analyticsEvent: SharedFlow<AnalyticsEvent> = _analyticsEvent.asSharedFlow()
+
     val linkedAccount: StateFlow<PaymentSelection.New.USBankAccount?> = combineAsStateFlow(
         currentScreenState,
         billingDetails,
@@ -324,10 +331,12 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             }
 
             is CollectBankAccountResultInternal.Failed -> {
+                _analyticsEvent.tryEmit(Finished(isInstantDebits = false, result = "failed"))
                 reset(R.string.stripe_paymentsheet_ach_something_went_wrong.resolvableString)
             }
 
             is CollectBankAccountResultInternal.Cancelled -> {
+                _analyticsEvent.tryEmit(Finished(isInstantDebits = false, result = "cancelled"))
                 reset()
             }
         }
@@ -341,9 +350,11 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 handleCompletedInstantDebitsResult(result)
             }
             is CollectBankAccountForInstantDebitsResult.Failed -> {
+                _analyticsEvent.tryEmit(Finished(isInstantDebits = true, result = "failed"))
                 reset(R.string.stripe_paymentsheet_ach_something_went_wrong.resolvableString)
             }
             is CollectBankAccountForInstantDebitsResult.Cancelled -> {
+                _analyticsEvent.tryEmit(Finished(isInstantDebits = true, result = "cancelled"))
                 reset()
             }
         }
@@ -356,8 +367,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val usBankAccountData = result.response.usBankAccountData
 
         if (usBankAccountData != null) {
+            _analyticsEvent.tryEmit(Finished(isInstantDebits = false, result = "failed"))
             handleResultForACH(usBankAccountData, intentId)
         } else {
+            _analyticsEvent.tryEmit(Finished(isInstantDebits = false, result = "completed"))
             reset(R.string.stripe_paymentsheet_ach_something_went_wrong.resolvableString)
         }
     }
@@ -365,6 +378,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     private fun handleCompletedInstantDebitsResult(
         result: CollectBankAccountForInstantDebitsResult.Completed,
     ) {
+        _analyticsEvent.tryEmit(Finished(isInstantDebits = true, result = "completed"))
         screenStateWithoutSaveForFutureUse.update {
             it.updateWithLinkedBankAccount(
                 account = BankFormScreenState.LinkedBankAccount(
@@ -483,7 +497,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         } else {
             createUSBankAccountConfiguration()
         }
-
+        _analyticsEvent.tryEmit(AnalyticsEvent.Started(instantDebits = args.instantDebits))
         if (args.isPaymentFlow) {
             collectBankAccountLauncher?.presentWithPaymentIntent(
                 publishableKey = lazyPaymentConfig.get().publishableKey,
@@ -716,6 +730,11 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             last4 = linkedAccount.last4,
             billingDetails = billingDetails,
         )
+    }
+
+    sealed interface AnalyticsEvent {
+        class Started(instantDebits: Boolean) : AnalyticsEvent
+        class Finished(val result: String, isInstantDebits: Boolean) : AnalyticsEvent
     }
 
     internal class Factory(
