@@ -37,8 +37,6 @@ import com.stripe.android.cards.Cvc
 import com.stripe.android.databinding.StripeCardInputWidgetBinding
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.CardParams
-import com.stripe.android.model.DelicateCardDetailsApi
 import com.stripe.android.model.ExpirationDate
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -185,47 +183,6 @@ class CardInputWidget @JvmOverloads constructor(
      * otherwise `null`. If a field is invalid focus will shift to the invalid field.
      */
     override val paymentMethodCard: PaymentMethodCreateParams.Card?
-        @OptIn(DelicateCardDetailsApi::class)
-        get() {
-            return cardParams?.let { params ->
-                PaymentMethodCreateParams.Card(
-                    number = params.number,
-                    cvc = params.cvc,
-                    expiryMonth = params.expMonth,
-                    expiryYear = params.expYear,
-                    attribution = params.attribution,
-                    networks = cardBrandView.paymentMethodCreateParamsNetworks(),
-                )
-            }
-        }
-
-    private val billingDetails: PaymentMethod.BillingDetails?
-        get() {
-            return postalCodeValue?.let {
-                PaymentMethod.BillingDetails(
-                    address = Address(
-                        postalCode = it
-                    )
-                )
-            }
-        }
-
-    /**
-     * A [PaymentMethodCreateParams] representing the card details and postal code if all fields
-     * are valid; otherwise `null`. If a field is invalid focus will shift to the invalid field
-     */
-    override val paymentMethodCreateParams: PaymentMethodCreateParams?
-        get() {
-            return paymentMethodCard?.let { card ->
-                PaymentMethodCreateParams.create(card, billingDetails)
-            }
-        }
-
-    /**
-     * A [CardParams] representing the card details and postal code if all fields are valid;
-     * otherwise `null`. If a field is invalid focus will shift to the invalid field.
-     */
-    override val cardParams: CardParams?
         get() {
             val cardNumber = cardNumberEditText.validatedCardNumber
             val expirationDate = expiryDateEditText.validatedDate
@@ -262,17 +219,13 @@ class CardInputWidget @JvmOverloads constructor(
                 }
                 else -> {
                     shouldShowErrorIcon = false
-                    return CardParams(
-                        brand = brand,
-                        loggingTokens = setOf(LOGGING_TOKEN),
+                    return PaymentMethodCreateParams.Card(
+                        attribution = setOf(LOGGING_TOKEN),
                         number = cardNumber.value,
-                        expMonth = expirationDate.month,
-                        expYear = expirationDate.year,
+                        expiryMonth = expirationDate.month,
+                        expiryYear = expirationDate.year,
                         cvc = cvc.value,
-                        address = Address.Builder()
-                            .setPostalCode(postalCodeValue.takeUnless { it.isNullOrBlank() })
-                            .build(),
-                        networks = cardBrandView.cardParamsNetworks()
+                        networks = cardBrandView.paymentMethodCreateParamsNetworks()
                     )
                 }
             }
@@ -280,6 +233,28 @@ class CardInputWidget @JvmOverloads constructor(
             shouldShowErrorIcon = true
 
             return null
+        }
+
+    private val billingDetails: PaymentMethod.BillingDetails?
+        get() {
+            return postalCodeValue?.let {
+                PaymentMethod.BillingDetails(
+                    address = Address(
+                        postalCode = it
+                    )
+                )
+            }
+        }
+
+    /**
+     * A [PaymentMethodCreateParams] representing the card details and postal code if all fields
+     * are valid; otherwise `null`. If a field is invalid focus will shift to the invalid field
+     */
+    override val paymentMethodCreateParams: PaymentMethodCreateParams?
+        get() {
+            return paymentMethodCard?.let { card ->
+                PaymentMethodCreateParams.create(card, billingDetails)
+            }
         }
 
     private val frameWidth: Int
