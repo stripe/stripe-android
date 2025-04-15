@@ -841,9 +841,7 @@ internal class CustomerSheetViewModel(
             onMandateTextChanged = { mandate, showAbove ->
                 handleViewAction(CustomerSheetViewAction.OnUpdateMandateText(mandate, showAbove))
             },
-            onAnalyticsEvent = {
-                // TODO
-            },
+            onAnalyticsEvent = { /* no-op, CustomerSheetScreen does not send AnalyticEvent */ },
             onLinkedBankAccountChanged = {
                 handleViewAction(CustomerSheetViewAction.OnBankAccountSelectionChanged(it))
             },

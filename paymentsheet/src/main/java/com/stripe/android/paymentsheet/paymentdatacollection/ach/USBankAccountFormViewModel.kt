@@ -23,6 +23,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountForInstantDebitsLauncher
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
@@ -324,19 +325,17 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     @VisibleForTesting
     fun handleCollectBankAccountResult(result: CollectBankAccountResultInternal) {
         hasLaunched = false
-
+        emitFinishedEvent(result)
         when (result) {
             is CollectBankAccountResultInternal.Completed -> {
                 handleCompletedBankAccountResult(result)
             }
 
             is CollectBankAccountResultInternal.Failed -> {
-                _analyticsEvent.tryEmit(Finished(isInstantDebits = false, result = "failed"))
                 reset(R.string.stripe_paymentsheet_ach_something_went_wrong.resolvableString)
             }
 
             is CollectBankAccountResultInternal.Cancelled -> {
-                _analyticsEvent.tryEmit(Finished(isInstantDebits = false, result = "cancelled"))
                 reset()
             }
         }
@@ -344,20 +343,50 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     private fun handleInstantDebitsResult(result: CollectBankAccountForInstantDebitsResult) {
         hasLaunched = false
-
+        emitFinishedEvent(result)
         when (result) {
             is CollectBankAccountForInstantDebitsResult.Completed -> {
                 handleCompletedInstantDebitsResult(result)
             }
             is CollectBankAccountForInstantDebitsResult.Failed -> {
-                _analyticsEvent.tryEmit(Finished(isInstantDebits = true, result = "failed"))
                 reset(R.string.stripe_paymentsheet_ach_something_went_wrong.resolvableString)
             }
             is CollectBankAccountForInstantDebitsResult.Cancelled -> {
-                _analyticsEvent.tryEmit(Finished(isInstantDebits = true, result = "cancelled"))
                 reset()
             }
         }
+    }
+
+    private fun emitFinishedEvent(result: CollectBankAccountForInstantDebitsResult) {
+        val completed = result as? CollectBankAccountForInstantDebitsResult.Completed
+        _analyticsEvent.tryEmit(
+            Finished(
+                result = when (result) {
+                    is CollectBankAccountForInstantDebitsResult.Completed -> "completed"
+                    is CollectBankAccountForInstantDebitsResult.Failed -> "failed"
+                    is CollectBankAccountForInstantDebitsResult.Cancelled -> "cancelled"
+                },
+                isInstantDebits = true,
+                linkAccountSessionId = null,
+                intent = completed?.intent,
+            )
+        )
+    }
+
+    private fun emitFinishedEvent(result: CollectBankAccountResultInternal) {
+        val completed = result as? CollectBankAccountResultInternal.Completed
+        _analyticsEvent.tryEmit(
+            Finished(
+                result = when (result) {
+                    is CollectBankAccountResultInternal.Completed -> "completed"
+                    is CollectBankAccountResultInternal.Failed -> "failed"
+                    is CollectBankAccountResultInternal.Cancelled -> "cancelled"
+                },
+                isInstantDebits = false,
+                linkAccountSessionId = completed?.response?.usBankAccountData?.financialConnectionsSession?.id,
+                intent = completed?.response?.intent,
+            )
+        )
     }
 
     private fun handleCompletedBankAccountResult(
@@ -367,10 +396,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val usBankAccountData = result.response.usBankAccountData
 
         if (usBankAccountData != null) {
-            _analyticsEvent.tryEmit(Finished(isInstantDebits = false, result = "failed"))
             handleResultForACH(usBankAccountData, intentId)
         } else {
-            _analyticsEvent.tryEmit(Finished(isInstantDebits = false, result = "completed"))
             reset(R.string.stripe_paymentsheet_ach_something_went_wrong.resolvableString)
         }
     }
@@ -378,7 +405,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     private fun handleCompletedInstantDebitsResult(
         result: CollectBankAccountForInstantDebitsResult.Completed,
     ) {
-        _analyticsEvent.tryEmit(Finished(isInstantDebits = true, result = "completed"))
         screenStateWithoutSaveForFutureUse.update {
             it.updateWithLinkedBankAccount(
                 account = BankFormScreenState.LinkedBankAccount(
@@ -734,7 +760,12 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     sealed interface AnalyticsEvent {
         class Started(instantDebits: Boolean) : AnalyticsEvent
-        class Finished(val result: String, isInstantDebits: Boolean) : AnalyticsEvent
+        class Finished(
+            val result: String,
+            val isInstantDebits: Boolean,
+            val linkAccountSessionId: String?,
+            val intent: StripeIntent?
+        ) : AnalyticsEvent
     }
 
     internal class Factory(

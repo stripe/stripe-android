@@ -503,11 +503,23 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onUsBankAccountFormEvent(event: USBankAccountFormViewModel.AnalyticsEvent) {
-        fireEvent(
-            PaymentSheetEvent.BankAccountCollectorStarted(
-                financialConnectionsAvailability = financialConnectionsAvailability
-            )
-        )
+        val analyticsEvent = when (event) {
+            is USBankAccountFormViewModel.AnalyticsEvent.Started -> {
+                PaymentSheetEvent.BankAccountCollectorStarted(
+                    financialConnectionsAvailability = financialConnectionsAvailability
+                )
+            }
+            is USBankAccountFormViewModel.AnalyticsEvent.Finished -> {
+                PaymentSheetEvent.BankAccountCollectorFinished(
+                    isDeferred = isDeferred,
+                    linkEnabled = linkEnabled,
+                    googlePaySupported = googlePaySupported,
+                    event = event,
+                    financialConnectionsAvailability = financialConnectionsAvailability,
+                )
+            }
+        }
+        fireEvent(analyticsEvent)
     }
 
     private fun fireEvent(event: PaymentSheetEvent) {
