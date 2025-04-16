@@ -13,6 +13,23 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
--keep class org.bouncycastle.jcajce.provider.** { *; }
+# current master
+#-keep class org.bouncycastle.jcajce.provider.** { *; }
+#-keep class !org.bouncycastle.jce.provider.X509LDAPCertStoreSpi,org.bouncycastle.jce.provider.** { *; }
+#-dontwarn com.google.crypto.tink.subtle.XChaCha20Poly1305
+
+## original
+#-dontwarn com.google.crypto.tink.subtle.XChaCha20Poly1305
+#-dontwarn org.bouncycastle.**
+
+## can do better?
+-keep class org.bouncycastle.jcajce.provider.asymmetric.**
+-keep class org.bouncycastle.jcajce.provider.symmetric.**
 -keep class !org.bouncycastle.jce.provider.X509LDAPCertStoreSpi,org.bouncycastle.jce.provider.** { *; }
 -dontwarn com.google.crypto.tink.subtle.XChaCha20Poly1305
+
+
+#-keep class org.bouncycastle.jcajce.provider.** { *; }
+#-keep class org.bouncycastle.jce.provider.** { *; }
+#-keep class !org.bouncycastle.jce.provider.X509LDAPCertStoreSpi { *; }
+#-keep class !org.bouncycastle.jce.provider.X509LDAPCertStoreSpi,org.bouncycastle.jce.provider.** { *; }
