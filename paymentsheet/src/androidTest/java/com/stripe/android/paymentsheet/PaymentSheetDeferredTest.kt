@@ -43,9 +43,11 @@ internal class PaymentSheetDeferredTest {
     fun testDeferredIntentCardPayment() = runPaymentSheetTest(
         networkRule = networkRule,
         integrationType = integrationType,
-        createIntentCallback = { _, shouldSavePaymentMethod ->
-            assertThat(shouldSavePaymentMethod).isFalse()
-            CreateIntentResult.Success("pi_example_secret_example")
+        builder = {
+            createIntentCallback { _, shouldSavePaymentMethod ->
+                assertThat(shouldSavePaymentMethod).isFalse()
+                CreateIntentResult.Success("pi_example_secret_example")
+            }
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -114,9 +116,11 @@ internal class PaymentSheetDeferredTest {
     fun testDeferredIntentCardPayment_forSetup() = runPaymentSheetTest(
         networkRule = networkRule,
         integrationType = integrationType,
-        createIntentCallback = { _, shouldSavePaymentMethod ->
-            assertThat(shouldSavePaymentMethod).isFalse()
-            CreateIntentResult.Success("seti_example_secret_example")
+        builder = {
+            createIntentCallback { _, shouldSavePaymentMethod ->
+                assertThat(shouldSavePaymentMethod).isFalse()
+                CreateIntentResult.Success("seti_example_secret_example")
+            }
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -166,9 +170,11 @@ internal class PaymentSheetDeferredTest {
     fun testDeferredIntentCardPaymentWithCustomer() = runPaymentSheetTest(
         networkRule = networkRule,
         integrationType = integrationType,
-        createIntentCallback = { _, shouldSavePaymentMethod ->
-            assertThat(shouldSavePaymentMethod).isFalse()
-            CreateIntentResult.Success("pi_example_secret_example")
+        builder = {
+            createIntentCallback { _, shouldSavePaymentMethod ->
+                assertThat(shouldSavePaymentMethod).isFalse()
+                CreateIntentResult.Success("pi_example_secret_example")
+            }
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -249,9 +255,11 @@ internal class PaymentSheetDeferredTest {
     fun testDeferredIntentCardPaymentWithSaveFor() = runPaymentSheetTest(
         networkRule = networkRule,
         integrationType = integrationType,
-        createIntentCallback = { _, shouldSavePaymentMethod ->
-            assertThat(shouldSavePaymentMethod).isTrue()
-            CreateIntentResult.Success("pi_example_secret_example")
+        builder = {
+            createIntentCallback { _, shouldSavePaymentMethod ->
+                assertThat(shouldSavePaymentMethod).isTrue()
+                CreateIntentResult.Success("pi_example_secret_example")
+            }
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -331,11 +339,13 @@ internal class PaymentSheetDeferredTest {
     fun testDeferredIntentFailedCardPayment() = runPaymentSheetTest(
         networkRule = networkRule,
         integrationType = integrationType,
-        createIntentCallback = { _, _ ->
-            CreateIntentResult.Failure(
-                cause = Exception("We don't accept visa"),
-                displayMessage = "We don't accept visa"
-            )
+        builder = {
+            createIntentCallback { _, _ ->
+                CreateIntentResult.Failure(
+                    cause = Exception("We don't accept visa"),
+                    displayMessage = "We don't accept visa"
+                )
+            }
         },
         resultCallback = ::expectNoResult,
     ) { testContext ->
@@ -382,8 +392,10 @@ internal class PaymentSheetDeferredTest {
     fun testDeferredIntentCardPaymentWithForcedSuccess() = runPaymentSheetTest(
         networkRule = networkRule,
         integrationType = integrationType,
-        createIntentCallback = { _, _ ->
-            CreateIntentResult.Success(PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
+        builder = {
+            createIntentCallback { _, _ ->
+                CreateIntentResult.Success(PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
+            }
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -426,9 +438,11 @@ internal class PaymentSheetDeferredTest {
     fun testDeferredIntentKonbiniPayment() = runPaymentSheetTest(
         networkRule = networkRule,
         integrationType = integrationType,
-        createIntentCallback = { _, shouldSavePaymentMethod ->
-            assertThat(shouldSavePaymentMethod).isFalse()
-            CreateIntentResult.Success("pi_example_secret_example")
+        builder = {
+            createIntentCallback { _, shouldSavePaymentMethod ->
+                assertThat(shouldSavePaymentMethod).isFalse()
+                CreateIntentResult.Success("pi_example_secret_example")
+            }
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -504,9 +518,11 @@ internal class PaymentSheetDeferredTest {
     fun testDeferredPaymentIntent_withElementsSessionFailure() = runPaymentSheetTest(
         networkRule = networkRule,
         integrationType = integrationType,
-        createIntentCallback = { _, shouldSavePaymentMethod ->
-            assertThat(shouldSavePaymentMethod).isFalse()
-            CreateIntentResult.Success("pi_example_secret_example")
+        builder = {
+            createIntentCallback { _, shouldSavePaymentMethod ->
+                assertThat(shouldSavePaymentMethod).isFalse()
+                CreateIntentResult.Success("pi_example_secret_example")
+            }
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -575,9 +591,11 @@ internal class PaymentSheetDeferredTest {
     fun testDeferredSetupIntent_withElementsSessionFailure() = runPaymentSheetTest(
         networkRule = networkRule,
         integrationType = integrationType,
-        createIntentCallback = { _, shouldSavePaymentMethod ->
-            assertThat(shouldSavePaymentMethod).isFalse()
-            CreateIntentResult.Success("seti_example_secret_example")
+        builder = {
+            createIntentCallback { _, shouldSavePaymentMethod ->
+                assertThat(shouldSavePaymentMethod).isFalse()
+                CreateIntentResult.Success("seti_example_secret_example")
+            }
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
