@@ -366,7 +366,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     is CollectBankAccountForInstantDebitsResult.Failed -> "failed"
                     is CollectBankAccountForInstantDebitsResult.Cancelled -> "cancelled"
                 },
-                isInstantDebits = true,
                 linkAccountSessionId = null,
                 intent = completed?.intent,
             )
@@ -382,7 +381,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     is CollectBankAccountResultInternal.Failed -> "failed"
                     is CollectBankAccountResultInternal.Cancelled -> "cancelled"
                 },
-                isInstantDebits = false,
                 linkAccountSessionId = completed?.response?.usBankAccountData?.financialConnectionsSession?.id,
                 intent = completed?.response?.intent,
             )
@@ -523,7 +521,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         } else {
             createUSBankAccountConfiguration()
         }
-        _analyticsEvent.tryEmit(AnalyticsEvent.Started(instantDebits = args.instantDebits))
+        _analyticsEvent.tryEmit(AnalyticsEvent.Started)
         if (args.isPaymentFlow) {
             collectBankAccountLauncher?.presentWithPaymentIntent(
                 publishableKey = lazyPaymentConfig.get().publishableKey,
@@ -759,10 +757,9 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 
     sealed interface AnalyticsEvent {
-        class Started(instantDebits: Boolean) : AnalyticsEvent
+        object Started : AnalyticsEvent
         class Finished(
             val result: String,
-            val isInstantDebits: Boolean,
             val linkAccountSessionId: String?,
             val intent: StripeIntent?
         ) : AnalyticsEvent
