@@ -31,11 +31,7 @@ internal data class DisplayableSavedPaymentMethod private constructor(
     fun isModifiable(canUpdateFullPaymentMethodDetails: Boolean): Boolean {
         return when (savedPaymentMethod) {
             is SavedPaymentMethod.Card -> {
-                if (canUpdateFullPaymentMethodDetails) {
-                    true
-                } else {
-                    savedPaymentMethod.isExpired().not() && canChangeCbc()
-                }
+                canUpdateFullPaymentMethodDetails || (savedPaymentMethod.isExpired().not() && canChangeCbc())
             }
             is SavedPaymentMethod.SepaDebit,
             is SavedPaymentMethod.USBankAccount,
