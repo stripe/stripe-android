@@ -164,6 +164,7 @@ class SavedPaymentMethodMutatorTest {
             }
 
             assertThat(postPaymentMethodRemovedTurbine.awaitItem()).isEqualTo(Unit)
+            assertThat(eventReporter.removePaymentMethodCalls.awaitItem().code).isEqualTo("card")
 
             assertThat(calledDetach).isTrue()
         }
@@ -202,6 +203,7 @@ class SavedPaymentMethodMutatorTest {
         }
 
         assertThat(postPaymentMethodRemovedTurbine.awaitItem()).isEqualTo(Unit)
+        assertThat(eventReporter.removePaymentMethodCalls.awaitItem().code).isEqualTo("card")
     }
 
     @Test
@@ -264,6 +266,18 @@ class SavedPaymentMethodMutatorTest {
     }
 
     @Test
+    fun `Removing payment methods without any PM selected should correctly send analytic events`() = runScenario {
+        val cards = PaymentMethodFixtures.createCards(3)
+        customerStateHolder.setCustomerState(EMPTY_CUSTOMER_STATE.copy(paymentMethods = cards))
+
+        for (card in cards) {
+            savedPaymentMethodMutator.removePaymentMethod(card)
+            assertThat(postPaymentMethodRemovedTurbine.awaitItem()).isEqualTo(Unit)
+            assertThat(eventReporter.removePaymentMethodCalls.awaitItem().code).isEqualTo("card")
+        }
+    }
+
+    @Test
     fun `On detach without remove duplicate permissions, should not attempt to remove duplicates in repository`() {
         removeDuplicatesTest(shouldRemoveDuplicates = false)
     }
@@ -313,6 +327,7 @@ class SavedPaymentMethodMutatorTest {
 
             assertThat(calledDetach.awaitItem()).isTrue()
             assertThat(prePaymentMethodRemovedTurbine.awaitItem()).isNotNull()
+            assertThat(eventReporter.removePaymentMethodCalls.awaitItem().code).isEqualTo("card")
             assertThat(postPaymentMethodRemovedTurbine.awaitItem()).isNotNull()
 
             assertThat(customerStateHolder.paymentMethods.value).isEmpty()
@@ -346,6 +361,7 @@ class SavedPaymentMethodMutatorTest {
 
             assertThat(calledDetach.awaitItem()).isTrue()
             assertThat(prePaymentMethodRemovedTurbine.awaitItem()).isNotNull()
+            assertThat(eventReporter.removePaymentMethodCalls.awaitItem().code).isEqualTo("card")
             assertThat(postPaymentMethodRemovedTurbine.awaitItem()).isNotNull()
 
             assertThat(customerStateHolder.paymentMethods.value).isEmpty()

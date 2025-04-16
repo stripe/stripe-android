@@ -10,6 +10,7 @@ import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfi
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 
 internal interface EventReporter {
@@ -224,6 +225,10 @@ internal interface EventReporter {
      *     Deep Linking issue for Mobile Android SDK</a>
      */
     fun onCannotProperlyReturnFromLinkAndOtherLPMs()
+
+    fun onUsBankAccountFormEvent(
+        event: USBankAccountFormViewModel.AnalyticsEvent
+    )
 
     enum class Mode(val code: String) {
         Complete("complete"),

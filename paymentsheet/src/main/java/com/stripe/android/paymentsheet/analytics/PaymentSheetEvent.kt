@@ -9,6 +9,8 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.analyticsValue
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
@@ -17,6 +19,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel.AnalyticsEvent.Finished
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.asPaymentSheetLoadingException
 import com.stripe.android.paymentsheet.utils.getSetAsDefaultPaymentMethodFromPaymentSelection
@@ -550,6 +553,45 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val additionalParams: Map<String, Any?> = mapOf()
     }
 
+    class BankAccountCollectorStarted(
+        override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+        financialConnectionsAvailability: FinancialConnectionsAvailability?
+    ) :
+        PaymentSheetEvent() {
+        override val eventName: String = "stripe_android.bankaccountcollector.started"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FC_SDK_AVAILABILITY to financialConnectionsAvailability.toAnalyticsParam()
+        )
+    }
+
+    class BankAccountCollectorFinished(
+        event: Finished,
+        override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+        financialConnectionsAvailability: FinancialConnectionsAvailability?
+    ) :
+        PaymentSheetEvent() {
+        override val eventName: String = "stripe_android.bankaccountcollector.finished"
+
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FC_SDK_AVAILABILITY to financialConnectionsAvailability.toAnalyticsParam(),
+            INTENT_ID to event.intent?.id,
+            INTENT_TYPE to event.paymentIntentType(),
+            LINK_ACCOUNT_SESSION_ID to event.linkAccountSessionId,
+            FC_SDK_RESULT to event.result
+        )
+
+        private fun Finished.paymentIntentType(): String? = when {
+            isDeferred -> "deferred"
+            intent is PaymentIntent -> "payment"
+            intent is SetupIntent -> "setup"
+            else -> null
+        }
+    }
+
     class ExperimentExposure(
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,
@@ -633,6 +675,10 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_ORDERED_LPMS = "ordered_lpms"
         const val FIELD_REQUIRE_CVC_RECOLLECTION = "require_cvc_recollection"
         const val FC_SDK_AVAILABILITY = "fc_sdk_availability"
+        const val INTENT_ID = "intent_id"
+        const val INTENT_TYPE = "intent_type"
+        const val LINK_ACCOUNT_SESSION_ID = "link_account_session_id"
+        const val FC_SDK_RESULT = "fc_sdk_result"
         const val FIELD_CARD_BRAND_ACCEPTANCE = "card_brand_acceptance"
         const val FIELD_CARD_SCAN_AVAILABLE = "card_scan_available"
         const val FIELD_ANALYTIC_CALLBACK_SET = "analytic_callback_set"

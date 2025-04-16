@@ -37,6 +37,10 @@ internal fun USBankAccountEmitters(
         }
     }
 
+    LaunchedEffect(Unit) {
+        viewModel.analyticsEvent.collect { usBankAccountFormArgs.onAnalyticsEvent(it) }
+    }
+
     LaunchedEffect(screenState, hasRequiredFields) {
         usBankAccountFormArgs.handleScreenStateChanged(
             screenState = screenState,

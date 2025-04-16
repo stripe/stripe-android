@@ -56,6 +56,39 @@ internal class PaymentSheetPage(
         }
     }
 
+    fun fillOutBillingCollectionDetails(
+        name: String = "John Doe",
+        email: String = "email@email.com",
+        phone: String = "1234567890",
+        addressLineOne: String = "123 Apple Street",
+        city: String = "South San Francisco",
+        zipCode: String = "12345"
+    ) {
+        waitForText("Full name")
+        replaceText("Full name", name)
+
+        waitForText("Email")
+        replaceText("Email", email)
+
+        waitForText("Phone number")
+        replaceText("Phone number", phone)
+
+        waitForText("Address line 1")
+        replaceText("Address line 1", addressLineOne)
+
+        waitForText("City")
+        replaceText("City", city)
+
+        waitForText("State")
+        clickViewWithText("State")
+
+        waitForText("California")
+        clickViewWithText("California")
+
+        waitForText("ZIP Code")
+        replaceText("ZIP Code", zipCode)
+    }
+
     fun clearCard() {
         waitForText("4242 4242 4242 4242")
 

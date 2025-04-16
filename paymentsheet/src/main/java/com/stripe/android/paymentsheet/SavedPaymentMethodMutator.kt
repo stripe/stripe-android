@@ -159,9 +159,6 @@ internal class SavedPaymentMethodMutator(
             withContext(uiContext) {
                 setSelection(null)
             }
-            currentSelection?.type?.code?.let {
-                eventReporter.onRemoveSavedPaymentMethod(it)
-            }
         }
 
         return customerRepository.detachPaymentMethod(
@@ -178,6 +175,9 @@ internal class SavedPaymentMethodMutator(
     private suspend fun removeDeletedPaymentMethodFromState(paymentMethodId: String) {
         val currentCustomer = customerStateHolder.customer.value ?: return
 
+        currentCustomer.paymentMethods.find { it.id == paymentMethodId }?.type?.code?.let {
+            eventReporter.onRemoveSavedPaymentMethod(it)
+        }
         customerStateHolder.setCustomerState(
             currentCustomer.copy(
                 paymentMethods = currentCustomer.paymentMethods.filter {
