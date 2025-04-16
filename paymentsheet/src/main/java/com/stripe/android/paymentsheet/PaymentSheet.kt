@@ -1021,7 +1021,6 @@ class PaymentSheet internal constructor(
             return if (isDark) colorsDark else colorsLight
         }
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
         @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
         @Poko
@@ -1036,7 +1035,6 @@ class PaymentSheet internal constructor(
                 )
             }
 
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @ExperimentalEmbeddedPaymentElementApi
             @Parcelize
             sealed class RowStyle : Parcelable {
@@ -1044,7 +1042,6 @@ class PaymentSheet internal constructor(
                 internal abstract fun hasSeparators(): Boolean
                 internal abstract fun startSeparatorHasDefaultInset(): Boolean
 
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 @ExperimentalEmbeddedPaymentElementApi
                 @Parcelize
                 @Poko
@@ -1123,7 +1120,6 @@ class PaymentSheet internal constructor(
                     override fun startSeparatorHasDefaultInset() = true
                     internal fun getColors(isDark: Boolean): Colors = if (isDark) colorsDark else colorsLight
 
-                    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                     @ExperimentalEmbeddedPaymentElementApi
                     @Parcelize
                     @Poko
@@ -1170,7 +1166,6 @@ class PaymentSheet internal constructor(
                     }
                 }
 
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 @ExperimentalEmbeddedPaymentElementApi
                 @Parcelize
                 @Poko
@@ -1252,7 +1247,6 @@ class PaymentSheet internal constructor(
                         colorsDark = colorsDark
                     )
 
-                    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                     @ExperimentalEmbeddedPaymentElementApi
                     @Parcelize
                     @Poko
@@ -1296,7 +1290,6 @@ class PaymentSheet internal constructor(
                     }
                 }
 
-                @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
                 @ExperimentalEmbeddedPaymentElementApi
                 @Parcelize
                 @Poko
@@ -1364,7 +1357,6 @@ class PaymentSheet internal constructor(
                 this.primaryButton = primaryButton
             }
 
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @ExperimentalEmbeddedPaymentElementApi
             fun embeddedAppearance(embeddedAppearance: Embedded) = apply {
                 this.embeddedAppearance = embeddedAppearance
