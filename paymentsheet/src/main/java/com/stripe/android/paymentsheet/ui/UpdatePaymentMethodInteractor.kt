@@ -35,7 +35,7 @@ internal interface UpdatePaymentMethodInteractor {
     val shouldShowSetAsDefaultCheckbox: Boolean
     val setAsDefaultCheckboxEnabled: Boolean
     val shouldShowSaveButton: Boolean
-    val allowFullCardDetailsEdit: Boolean
+    val canUpdateFullPaymentMethodDetails: Boolean
     val addressCollectionMode: AddressCollectionMode
     val editCardDetailsInteractor: EditCardDetailsInteractor
 
@@ -93,7 +93,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     override val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     override val cardBrandFilter: CardBrandFilter,
     override val addressCollectionMode: AddressCollectionMode,
-    override val allowFullCardDetailsEdit: Boolean,
+    override val canUpdateFullPaymentMethodDetails: Boolean,
     val isDefaultPaymentMethod: Boolean,
     shouldShowSetAsDefaultCheckbox: Boolean,
     private val removeExecutor: PaymentMethodRemoveOperation,
@@ -124,7 +124,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
         displayableSavedPaymentMethod
     )
     override val isModifiablePaymentMethod: Boolean
-        get() = displayableSavedPaymentMethod.isModifiable(allowFullCardDetailsEdit)
+        get() = displayableSavedPaymentMethod.isModifiable(canUpdateFullPaymentMethodDetails)
 
     override val topBarState: PaymentSheetTopBarState = PaymentSheetTopBarStateFactory.create(
         isLiveMode = isLiveMode,
@@ -151,10 +151,10 @@ internal class DefaultUpdatePaymentMethodInteractor(
                 )
             },
             coroutineScope = coroutineScope,
-            isModifiable = displayableSavedPaymentMethod.isModifiable(allowFullCardDetailsEdit),
+            isModifiable = displayableSavedPaymentMethod.isModifiable(canUpdateFullPaymentMethodDetails),
             cardBrandFilter = cardBrandFilter,
             onBrandChoiceChanged = onBrandChoiceSelected,
-            areExpiryDateAndAddressModificationSupported = allowFullCardDetailsEdit,
+            areExpiryDateAndAddressModificationSupported = canUpdateFullPaymentMethodDetails,
             billingDetails = savedPaymentMethodCard.billingDetails,
             addressCollectionMode = addressCollectionMode,
         )

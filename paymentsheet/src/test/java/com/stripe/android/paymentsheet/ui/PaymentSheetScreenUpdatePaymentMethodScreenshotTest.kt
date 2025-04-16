@@ -127,7 +127,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
                     .toDisplayableSavedPaymentMethod(),
                 canRemove = true,
                 shouldShowSetAsDefaultCheckbox = true,
-                allowFullCardDetailsEdit = true,
+                canUpdateFullPaymentMethodDetails = true,
                 addressCollectionMode = AddressCollectionMode.Automatic
             )
         }
@@ -143,7 +143,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
                 isModifiablePaymentMethod = true,
                 canRemove = true,
                 shouldShowSetAsDefaultCheckbox = true,
-                allowFullCardDetailsEdit = true,
+                canUpdateFullPaymentMethodDetails = true,
                 addressCollectionMode = AddressCollectionMode.Full,
             )
         }
@@ -159,7 +159,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
                 isModifiablePaymentMethod = true,
                 canRemove = true,
                 shouldShowSetAsDefaultCheckbox = true,
-                allowFullCardDetailsEdit = true,
+                canUpdateFullPaymentMethodDetails = true,
                 addressCollectionMode = AddressCollectionMode.Never,
             )
         }
@@ -173,7 +173,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
         isExpiredCard: Boolean = false,
         error: String? = null,
         shouldShowSetAsDefaultCheckbox: Boolean = false,
-        allowFullCardDetailsEdit: Boolean = false,
+        canUpdateFullPaymentMethodDetails: Boolean = false,
         addressCollectionMode: AddressCollectionMode = AddressCollectionMode.Never
     ) {
         val interactor = FakeUpdatePaymentMethodInteractor(
@@ -192,7 +192,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
             ),
             shouldShowSaveButton = isModifiablePaymentMethod || shouldShowSetAsDefaultCheckbox,
             addressCollectionMode = addressCollectionMode,
-            allowFullCardDetailsEdit = allowFullCardDetailsEdit
+            canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails
         )
         val screen = com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.UpdatePaymentMethod(interactor)
         val metadata = PaymentMethodMetadataFactory.create()
