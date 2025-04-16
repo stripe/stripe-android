@@ -75,7 +75,6 @@ internal class SignUpScreenshotTest(
                                         requiresNameCollection = requiresNameCollection,
                                         signUpState = signUpState,
                                         errorMessage = errorMessage,
-                                        showKeyboardOnOpen = false,
                                         isSubmitting = isSubmitting,
                                     )
                                 )

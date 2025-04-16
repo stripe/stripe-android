@@ -540,6 +540,7 @@ class DefaultCustomerSheetLoaderTest {
                         permissions = CustomerPermissions(
                             canRemovePaymentMethods = true,
                             canRemoveLastPaymentMethod = true,
+                            canUpdateFullPaymentMethodDetails = true,
                         ),
                         defaultPaymentMethodId = defaultPaymentMethodId,
                     )

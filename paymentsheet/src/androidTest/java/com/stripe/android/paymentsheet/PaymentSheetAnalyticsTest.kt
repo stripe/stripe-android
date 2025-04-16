@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.net.Uri
 import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
@@ -83,7 +84,9 @@ internal class PaymentSheetAnalyticsTest {
     @Test
     fun testSuccessfulCardPayment() = runPaymentSheetTest(
         networkRule = networkRule,
-        analyticEventCallback = analyticEventRule,
+        builder = {
+            analyticEventCallback(analyticEventRule)
+        },
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
@@ -94,7 +97,10 @@ internal class PaymentSheetAnalyticsTest {
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
-        testContext.validateAnalyticsRequest(eventName = "mc_complete_init_default")
+        testContext.validateAnalyticsRequest(
+            eventName = "mc_complete_init_default",
+            query(Uri.encode("mpe_config[analytic_callback_set]"), "true"),
+        )
         testContext.validateAnalyticsRequest(eventName = "mc_load_started")
         testContext.validateAnalyticsRequest(eventName = "mc_load_succeeded")
         testContext.validateAnalyticsRequest(eventName = "mc_complete_sheet_newpm_show")
@@ -151,7 +157,9 @@ internal class PaymentSheetAnalyticsTest {
     @Test
     fun testSuccessfulCardPaymentInFlowController() = runFlowControllerTest(
         networkRule = networkRule,
-        analyticEventCallback = analyticEventRule,
+        builder = {
+            analyticEventCallback(analyticEventRule)
+        },
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
@@ -162,7 +170,10 @@ internal class PaymentSheetAnalyticsTest {
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
-        testContext.validateAnalyticsRequest(eventName = "mc_custom_init_default")
+        testContext.validateAnalyticsRequest(
+            eventName = "mc_custom_init_default",
+            query(Uri.encode("mpe_config[analytic_callback_set]"), "true"),
+        )
         testContext.validateAnalyticsRequest(eventName = "mc_load_started")
         testContext.validateAnalyticsRequest(eventName = "mc_load_succeeded")
         testContext.validateAnalyticsRequest(eventName = "mc_custom_sheet_newpm_show")
@@ -225,7 +236,9 @@ internal class PaymentSheetAnalyticsTest {
     @Test
     fun testSuccessfulCardPaymentInVerticalMode() = runPaymentSheetTest(
         networkRule = networkRule,
-        analyticEventCallback = analyticEventRule,
+        builder = {
+            analyticEventCallback(analyticEventRule)
+        },
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
@@ -297,7 +310,9 @@ internal class PaymentSheetAnalyticsTest {
     @Test
     fun testSuccessfulCardPaymentInFlowControllerInVerticalMode() = runFlowControllerTest(
         networkRule = networkRule,
-        analyticEventCallback = analyticEventRule,
+        builder = {
+            analyticEventCallback(analyticEventRule)
+        },
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
@@ -374,7 +389,9 @@ internal class PaymentSheetAnalyticsTest {
     @Test
     fun testSavedPaymentMethod() = runPaymentSheetTest(
         networkRule = networkRule,
-        analyticEventCallback = analyticEventRule,
+        builder = {
+            analyticEventCallback(analyticEventRule)
+        },
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
@@ -412,19 +429,24 @@ internal class PaymentSheetAnalyticsTest {
 
         networkRule.setupPaymentMethodDetachResponse(card1.id)
         testContext.validateAnalyticsRequest(eventName = "stripe_android.detach_payment_method")
-        testContext.validateAnalyticsRequest(eventName = "mc_complete_sheet_savedpm_show")
         testContext.validateAnalyticsRequest(eventName = "mc_cancel_edit_screen")
 
         editPage.clickRemove()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.RemovedSavedPaymentMethod("card"))
-        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
+
+        testContext.validateAnalyticsRequest(eventName = "mc_complete_paymentoption_savedpm_select")
+        page.clickDoneButton()
+        page.clickSavedCard(card2.last4)
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.SelectedSavedPaymentMethod("card"))
         testContext.markTestSucceeded()
     }
 
     @Test
     fun testSavedPaymentMethodInFlowController() = runFlowControllerTest(
         networkRule = networkRule,
-        analyticEventCallback = analyticEventRule,
+        builder = {
+            analyticEventCallback(analyticEventRule)
+        },
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
@@ -469,12 +491,10 @@ internal class PaymentSheetAnalyticsTest {
 
         networkRule.setupPaymentMethodDetachResponse(card1.id)
         testContext.validateAnalyticsRequest(eventName = "stripe_android.detach_payment_method")
-        testContext.validateAnalyticsRequest(eventName = "mc_custom_sheet_savedpm_show")
         testContext.validateAnalyticsRequest(eventName = "mc_cancel_edit_screen")
 
         editPage.clickRemove()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.RemovedSavedPaymentMethod("card"))
-        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
 
         testContext.validateAnalyticsRequest(eventName = "mc_custom_paymentoption_savedpm_select")
         page.clickDoneButton()

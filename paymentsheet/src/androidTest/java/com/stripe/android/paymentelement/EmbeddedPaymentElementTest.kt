@@ -2,7 +2,9 @@
 
 package com.stripe.android.paymentelement
 
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -16,6 +18,8 @@ import com.stripe.paymentelementnetwork.setupPaymentMethodDetachResponse
 import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse
 import com.stripe.paymentelementtestpages.EditPage
 import com.stripe.paymentelementtestpages.ManagePage
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.junit.Rule
 import org.junit.Test
 
@@ -70,4 +74,65 @@ internal class EmbeddedPaymentElementTest {
 
         testContext.markTestSucceeded()
     }
+
+    @Test
+    fun testStateCanBeTakenFromOneInstanceToAnother() {
+        var state: EmbeddedPaymentElement.State? = null
+
+        // Instance 1
+        runEmbeddedPaymentElementTest(
+            networkRule = networkRule,
+            createIntentCallback = { _, shouldSavePaymentMethod ->
+                assertThat(shouldSavePaymentMethod).isFalse()
+                CreateIntentResult.Success("pi_example_secret_12345")
+            },
+            resultCallback = ::assertCompleted,
+        ) { testContext ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("GET"),
+                path("/v1/elements/sessions"),
+            ) { response ->
+                response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
+            }
+            networkRule.setupV1PaymentMethodsResponse(card1, card2)
+
+            testContext.configure {
+                customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+                formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
+            }
+
+            state = testContext.embeddedPaymentElement.state
+            assertThat(state.paymentMethods()).hasSize(2)
+
+            testContext.markTestSucceeded()
+        }
+
+        // Instance 2 - no network requests, no configure call -- just a state set.
+        runEmbeddedPaymentElementTest(
+            networkRule = networkRule,
+            createIntentCallback = { _, shouldSavePaymentMethod ->
+                assertThat(shouldSavePaymentMethod).isFalse()
+                CreateIntentResult.Success("pi_example_secret_12345")
+            },
+            resultCallback = ::assertCompleted,
+        ) { testContext ->
+            testContext.embeddedPaymentElement.paymentOption.test {
+                assertThat(awaitItem()).isNull()
+                ensureAllEventsConsumed()
+                withContext(Dispatchers.Main) {
+                    testContext.embeddedPaymentElement.state = state
+                }
+                assertThat(awaitItem()?.paymentMethodType).isEqualTo("Card")
+            }
+
+            embeddedContentPage.clickViewMore()
+
+            testContext.markTestSucceeded()
+        }
+    }
+}
+
+private fun EmbeddedPaymentElement.State?.paymentMethods(): List<PaymentMethod>? {
+    return this?.customer?.paymentMethods
 }

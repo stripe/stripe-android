@@ -17,6 +17,7 @@ import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.isSaved
@@ -47,6 +48,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     private var linkMode: LinkMode? = null
     private var googlePaySupported: Boolean = false
     private var currency: String? = null
+    private var financialConnectionsAvailability: FinancialConnectionsAvailability? = null
 
     private val analyticsRequestV2Factory = AnalyticsRequestV2Factory(
         context,
@@ -58,7 +60,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         commonConfiguration: CommonConfiguration,
         appearance: PaymentSheet.Appearance,
         primaryButtonColor: Boolean?,
-        paymentMethodLayout: PaymentSheet.PaymentMethodLayout?,
+        configurationSpecificPayload: PaymentSheetEvent.ConfigurationSpecificPayload,
         isDeferred: Boolean,
     ) {
         this.isDeferred = isDeferred
@@ -69,11 +71,12 @@ internal class DefaultEventReporter @Inject internal constructor(
                 configuration = commonConfiguration,
                 appearance = appearance,
                 primaryButtonColor = primaryButtonColor,
-                paymentMethodLayout = paymentMethodLayout,
+                configurationSpecificPayload = configurationSpecificPayload,
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
                 isStripeCardScanAvailable = isStripeCardScanAvailable(),
+                isAnalyticEventCallbackSet = analyticEventCallbackProvider.get() != null,
             )
         )
     }
@@ -91,6 +94,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         linkDisplay: PaymentSheet.LinkConfiguration.Display,
         currency: String?,
         initializationMode: PaymentElementLoader.InitializationMode,
+        financialConnectionsAvailability: FinancialConnectionsAvailability?,
         orderedLpms: List<String>,
         requireCvcRecollection: Boolean,
         hasDefaultPaymentMethod: Boolean?,
@@ -100,6 +104,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         this.linkEnabled = linkEnabled
         this.linkMode = linkMode
         this.googlePaySupported = googlePaySupported
+        this.financialConnectionsAvailability = financialConnectionsAvailability
 
         durationProvider.start(DurationProvider.Key.Checkout)
 
@@ -118,6 +123,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 orderedLpms = orderedLpms,
                 requireCvcRecollection = requireCvcRecollection,
                 hasDefaultPaymentMethod = hasDefaultPaymentMethod,
+                financialConnectionsAvailability = this@DefaultEventReporter.financialConnectionsAvailability,
                 setAsDefaultEnabled = setAsDefaultEnabled,
             )
         )
@@ -208,6 +214,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 currency = currency,
                 linkEnabled = linkEnabled,
                 linkContext = determineLinkContextForPaymentMethodType(code),
+                financialConnectionsAvailability = financialConnectionsAvailability,
                 googlePaySupported = googlePaySupported,
             )
         )
@@ -307,6 +314,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
+                financialConnectionsAvailability = financialConnectionsAvailability,
             )
         )
     }

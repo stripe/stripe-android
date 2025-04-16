@@ -7,8 +7,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.paymentelement.AnalyticEventCallback
-import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -48,29 +46,7 @@ internal class PaymentSheetTestRunnerContext(
 internal fun runPaymentSheetTest(
     networkRule: NetworkRule,
     integrationType: IntegrationType = IntegrationType.Compose,
-    createIntentCallback: CreateIntentCallback? = null,
-    successTimeoutSeconds: Long = 5L,
-    resultCallback: PaymentSheetResultCallback,
-    block: suspend (PaymentSheetTestRunnerContext) -> Unit,
-) {
-    @OptIn(ExperimentalAnalyticEventCallbackApi::class)
-    runPaymentSheetTest(
-        networkRule = networkRule,
-        integrationType = integrationType,
-        createIntentCallback = createIntentCallback,
-        analyticEventCallback = null,
-        successTimeoutSeconds = successTimeoutSeconds,
-        resultCallback = resultCallback,
-        block = block
-    )
-}
-
-@OptIn(ExperimentalAnalyticEventCallbackApi::class)
-internal fun runPaymentSheetTest(
-    networkRule: NetworkRule,
-    integrationType: IntegrationType = IntegrationType.Compose,
-    createIntentCallback: CreateIntentCallback? = null,
-    analyticEventCallback: AnalyticEventCallback? = null,
+    builder: PaymentSheet.Builder.() -> Unit = {},
     successTimeoutSeconds: Long = 5L,
     resultCallback: PaymentSheetResultCallback,
     block: suspend (PaymentSheetTestRunnerContext) -> Unit,
@@ -81,8 +57,7 @@ internal fun runPaymentSheetTest(
         resultCallback.onPaymentSheetResult(result)
         countDownLatch.countDown()
     }.apply {
-        createIntentCallback?.let { createIntentCallback(it) }
-        analyticEventCallback?.let { analyticEventCallback(it) }
+        builder()
     }
 
     ActivityScenario.launch(MainActivity::class.java).use { scenario ->

@@ -77,6 +77,7 @@ internal class CustomerSheetScreenshotTest {
         onUpdatePrimaryButtonState = { },
         onUpdatePrimaryButtonUIState = { },
         onError = { },
+        onFormCompleted = { },
         setAsDefaultPaymentMethodEnabled = false,
         financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
         setAsDefaultMatchesSaveForFutureUse = false,
@@ -352,6 +353,7 @@ internal class CustomerSheetScreenshotTest {
     ): CustomerSheetViewState {
         return CustomerSheetViewState.UpdatePaymentMethod(
             updatePaymentMethodInteractor = DefaultUpdatePaymentMethodInteractor(
+                allowFullCardDetailsEdit = false,
                 displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
                 removeExecutor = { null },
                 updatePaymentMethodExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },

@@ -5,7 +5,6 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CardUpdateParams
@@ -36,7 +35,7 @@ internal interface UpdatePaymentMethodInteractor {
     val shouldShowSetAsDefaultCheckbox: Boolean
     val setAsDefaultCheckboxEnabled: Boolean
     val shouldShowSaveButton: Boolean
-    val allowCardEdit: Boolean
+    val allowFullCardDetailsEdit: Boolean
     val addressCollectionMode: AddressCollectionMode
     val editCardDetailsInteractor: EditCardDetailsInteractor
 
@@ -94,6 +93,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     override val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     override val cardBrandFilter: CardBrandFilter,
     override val addressCollectionMode: AddressCollectionMode,
+    override val allowFullCardDetailsEdit: Boolean,
     val isDefaultPaymentMethod: Boolean,
     shouldShowSetAsDefaultCheckbox: Boolean,
     private val removeExecutor: PaymentMethodRemoveOperation,
@@ -134,7 +134,6 @@ internal class DefaultUpdatePaymentMethodInteractor(
 
     override val shouldShowSaveButton: Boolean = isModifiablePaymentMethod ||
         (shouldShowSetAsDefaultCheckbox && !isDefaultPaymentMethod)
-    override val allowCardEdit = FeatureFlags.editSavedCardPaymentMethodEnabled.isEnabled
 
     private val _setAsDefaultValueChanged = setAsDefaultCheckboxChecked.mapAsStateFlow { setAsDefaultCheckboxChecked ->
         setAsDefaultCheckboxChecked != initialSetAsDefaultCheckedValue
@@ -155,7 +154,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
             isModifiable = displayableSavedPaymentMethod.isModifiable(),
             cardBrandFilter = cardBrandFilter,
             onBrandChoiceChanged = onBrandChoiceSelected,
-            areExpiryDateAndAddressModificationSupported = allowCardEdit,
+            areExpiryDateAndAddressModificationSupported = allowFullCardDetailsEdit,
             billingDetails = savedPaymentMethodCard.billingDetails,
             addressCollectionMode = addressCollectionMode,
         )

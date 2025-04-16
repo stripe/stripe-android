@@ -8,8 +8,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.paymentelement.AnalyticEventCallback
-import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
@@ -52,29 +50,7 @@ internal fun runFlowControllerTest(
     networkRule: NetworkRule,
     integrationType: IntegrationType = IntegrationType.Compose,
     callConfirmOnPaymentOptionCallback: Boolean = true,
-    createIntentCallback: CreateIntentCallback? = null,
-    resultCallback: PaymentSheetResultCallback,
-    block: suspend (FlowControllerTestRunnerContext) -> Unit,
-) {
-    @OptIn(ExperimentalAnalyticEventCallbackApi::class)
-    runFlowControllerTest(
-        networkRule = networkRule,
-        integrationType = integrationType,
-        callConfirmOnPaymentOptionCallback = callConfirmOnPaymentOptionCallback,
-        createIntentCallback = createIntentCallback,
-        analyticEventCallback = null,
-        resultCallback = resultCallback,
-        block = block
-    )
-}
-
-@OptIn(ExperimentalAnalyticEventCallbackApi::class)
-internal fun runFlowControllerTest(
-    networkRule: NetworkRule,
-    integrationType: IntegrationType = IntegrationType.Compose,
-    callConfirmOnPaymentOptionCallback: Boolean = true,
-    createIntentCallback: CreateIntentCallback? = null,
-    analyticEventCallback: AnalyticEventCallback? = null,
+    builder: PaymentSheet.FlowController.Builder.() -> Unit = {},
     resultCallback: PaymentSheetResultCallback,
     block: suspend (FlowControllerTestRunnerContext) -> Unit,
 ) {
@@ -83,8 +59,7 @@ internal fun runFlowControllerTest(
 
     val factory = FlowControllerTestFactory(
         callConfirmOnPaymentOptionCallback = callConfirmOnPaymentOptionCallback,
-        createIntentCallback = createIntentCallback,
-        analyticEventCallback = analyticEventCallback,
+        builder = builder,
         configureCallbackTurbine = configureCallbackTurbine,
         resultCallback = { result ->
             resultCallback.onPaymentSheetResult(result)
@@ -151,13 +126,15 @@ internal fun runMultipleFlowControllerInstancesTest(
 
     val firstFlowControllerFactory = FlowControllerTestFactory(
         callConfirmOnPaymentOptionCallback = callConfirmOnPaymentOptionCallback,
-        createIntentCallback = { paymentMethod, shouldSavePaymentMethod ->
-            if (testType == MultipleInstancesTestType.RunWithFirst) {
-                firstCreateIntentCallbackCalled = true
+        builder = {
+            createIntentCallback { paymentMethod, shouldSavePaymentMethod ->
+                if (testType == MultipleInstancesTestType.RunWithFirst) {
+                    firstCreateIntentCallbackCalled = true
 
-                createIntentCallback.onCreateIntent(paymentMethod, shouldSavePaymentMethod)
-            } else {
-                error("Should not have been called!")
+                    createIntentCallback.onCreateIntent(paymentMethod, shouldSavePaymentMethod)
+                } else {
+                    error("Should not have been called!")
+                }
             }
         },
         configureCallbackTurbine = configureCallbackTurbine,
@@ -173,13 +150,15 @@ internal fun runMultipleFlowControllerInstancesTest(
 
     val secondFlowControllerFactory = FlowControllerTestFactory(
         callConfirmOnPaymentOptionCallback = callConfirmOnPaymentOptionCallback,
-        createIntentCallback = { paymentMethod, shouldSavePaymentMethod ->
-            if (testType == MultipleInstancesTestType.RunWithSecond) {
-                secondCreateIntentCallbackCalled = true
+        builder = {
+            createIntentCallback { paymentMethod, shouldSavePaymentMethod ->
+                if (testType == MultipleInstancesTestType.RunWithSecond) {
+                    secondCreateIntentCallbackCalled = true
 
-                createIntentCallback.onCreateIntent(paymentMethod, shouldSavePaymentMethod)
-            } else {
-                error("Should not have been called!")
+                    createIntentCallback.onCreateIntent(paymentMethod, shouldSavePaymentMethod)
+                } else {
+                    error("Should not have been called!")
+                }
             }
         },
         configureCallbackTurbine = configureCallbackTurbine,

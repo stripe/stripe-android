@@ -25,6 +25,7 @@ import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationSt
 import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelper
 import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentElementScope
 import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentElementViewModel
+import com.stripe.android.paymentelement.embedded.content.EmbeddedStateHelper
 import com.stripe.android.paymentelement.embedded.content.PaymentOptionDisplayDataHolder
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
@@ -47,6 +48,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
     private val selectionHolder: EmbeddedSelectionHolder,
     paymentOptionDisplayDataHolder: PaymentOptionDisplayDataHolder,
     private val configurationCoordinator: EmbeddedConfigurationCoordinator,
+    stateHelper: EmbeddedStateHelper,
 ) {
 
     /**
@@ -54,6 +56,15 @@ class EmbeddedPaymentElement @Inject internal constructor(
      * Use this to display the payment option in your own UI.
      */
     val paymentOption: StateFlow<PaymentOptionDisplayData?> = paymentOptionDisplayDataHolder.paymentOption
+
+    /**
+     * The state of an already configured [EmbeddedPaymentElement].
+     *
+     * Use this to instantly configure an [EmbeddedPaymentElement], likely from the state of another Activity.
+     */
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @set:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    var state: State? by stateHelper::state
 
     /**
      * Call this method to configure [EmbeddedPaymentElement] or when the IntentConfiguration values you used to
@@ -560,10 +571,11 @@ class EmbeddedPaymentElement @Inject internal constructor(
     /**
      * A [Parcelable] state used to reconfigure [EmbeddedPaymentElement] across activity boundaries.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @ExperimentalEmbeddedPaymentElementApi
     @Poko
     @Parcelize
-    internal class State internal constructor(
+    class State internal constructor(
         internal val confirmationState: EmbeddedConfirmationStateHolder.State,
         internal val customer: CustomerState?,
     ) : Parcelable

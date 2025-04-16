@@ -12,7 +12,9 @@ import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_SELECTION
 import com.stripe.android.model.PaymentMethodFixtures.LINK_INLINE_PAYMENT_SELECTION
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -37,11 +39,12 @@ class PaymentSheetEventTest {
             configuration = config.asCommonConfiguration(),
             appearance = config.appearance,
             primaryButtonColor = config.primaryButtonColorUsage(),
-            paymentMethodLayout = config.paymentMethodLayout,
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
             isStripeCardScanAvailable = true,
+            isAnalyticEventCallbackSet = false,
         )
 
         assertThat(
@@ -72,11 +75,12 @@ class PaymentSheetEventTest {
             configuration = config.asCommonConfiguration(),
             appearance = config.appearance,
             primaryButtonColor = config.primaryButtonColorUsage(),
-            paymentMethodLayout = config.paymentMethodLayout,
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
             isStripeCardScanAvailable = true,
+            isAnalyticEventCallbackSet = false,
         )
 
         assertThat(
@@ -107,11 +111,12 @@ class PaymentSheetEventTest {
             configuration = config.asCommonConfiguration(),
             appearance = config.appearance,
             primaryButtonColor = config.primaryButtonColorUsage(),
-            paymentMethodLayout = config.paymentMethodLayout,
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
             isStripeCardScanAvailable = true,
+            isAnalyticEventCallbackSet = false,
         )
 
         assertThat(
@@ -144,11 +149,12 @@ class PaymentSheetEventTest {
             configuration = config.asCommonConfiguration(),
             appearance = config.appearance,
             primaryButtonColor = config.primaryButtonColorUsage(),
-            paymentMethodLayout = config.paymentMethodLayout,
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
             isStripeCardScanAvailable = true,
+            isAnalyticEventCallbackSet = false,
         )
 
         assertThat(
@@ -179,11 +185,12 @@ class PaymentSheetEventTest {
             configuration = config.asCommonConfiguration(),
             appearance = config.appearance,
             primaryButtonColor = config.primaryButtonColorUsage(),
-            paymentMethodLayout = config.paymentMethodLayout,
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
             isStripeCardScanAvailable = true,
+            isAnalyticEventCallbackSet = false,
         )
 
         assertThat(
@@ -212,11 +219,12 @@ class PaymentSheetEventTest {
             configuration = config.asCommonConfiguration(),
             appearance = config.appearance,
             primaryButtonColor = config.primaryButtonColorUsage(),
-            paymentMethodLayout = config.paymentMethodLayout,
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
             isStripeCardScanAvailable = true,
+            isAnalyticEventCallbackSet = false,
         )
 
         assertThat(
@@ -275,23 +283,28 @@ class PaymentSheetEventTest {
     @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
     @Test
     fun `Init event with embedded appearance should return expected params`() {
-        val config = PaymentSheetFixtures.CONFIG_MINIMUM.copy(
-            appearance = PaymentSheet.Appearance(
-                embeddedAppearance = PaymentSheet.Appearance.Embedded(
-                    style = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.default
+        val config = EmbeddedPaymentElement.Configuration.Builder("Example, Inc")
+            .appearance(
+                PaymentSheet.Appearance(
+                    embeddedAppearance = PaymentSheet.Appearance.Embedded(
+                        style = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.default
+                    )
                 )
             )
-        )
+            .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
+            .embeddedViewDisplaysMandateText(true)
+            .build()
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Embedded,
             configuration = config.asCommonConfiguration(),
             appearance = config.appearance,
             primaryButtonColor = null,
-            paymentMethodLayout = null,
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.Embedded(config),
             isDeferred = true,
             linkEnabled = false,
             googlePaySupported = false,
-            isStripeCardScanAvailable = true
+            isStripeCardScanAvailable = true,
+            isAnalyticEventCallbackSet = false,
         )
 
         assertThat(
@@ -310,7 +323,66 @@ class PaymentSheetEventTest {
             ),
             paymentMethodLayout = null,
             primaryButtonColor = null,
+        ) {
+            put("form_sheet_action", "confirm")
+            put("embedded_view_displays_mandate_text", true)
+        }
+
+        assertThat(event.params).run {
+            containsEntry("link_enabled", false)
+            containsEntry("google_pay_enabled", false)
+            containsEntry("is_decoupled", true)
+            containsEntry("mpe_config", expectedConfig)
+        }
+    }
+
+    @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+    @Test
+    fun `Init event with embedded should return expected params`() {
+        val config = EmbeddedPaymentElement.Configuration.Builder("Example, Inc")
+            .appearance(
+                PaymentSheet.Appearance(
+                    embeddedAppearance = PaymentSheet.Appearance.Embedded(
+                        style = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithCheckmark.default
+                    )
+                )
+            )
+            .formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue)
+            .embeddedViewDisplaysMandateText(false)
+            .build()
+        val event = PaymentSheetEvent.Init(
+            mode = EventReporter.Mode.Embedded,
+            configuration = config.asCommonConfiguration(),
+            appearance = config.appearance,
+            primaryButtonColor = null,
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.Embedded(config),
+            isDeferred = true,
+            linkEnabled = false,
+            googlePaySupported = false,
+            isStripeCardScanAvailable = true,
+            isAnalyticEventCallbackSet = false,
         )
+
+        assertThat(
+            event.eventName
+        ).isEqualTo(
+            "mc_embedded_init"
+        )
+
+        val expectedConfig = buildInitMpeConfig(
+            appearanceMap = buildAppearanceMap(
+                usedParams = false,
+                embeddedConfig = mapOf(
+                    "style" to true,
+                    "row_style" to "flat_with_checkmark"
+                )
+            ),
+            paymentMethodLayout = null,
+            primaryButtonColor = null,
+        ) {
+            put("form_sheet_action", "continue")
+            put("embedded_view_displays_mandate_text", false)
+        }
 
         assertThat(event.params).run {
             containsEntry("link_enabled", false)
@@ -339,6 +411,7 @@ class PaymentSheetEventTest {
                 "ordered_lpms" to "card,klarna",
                 "require_cvc_recollection" to false,
                 "link_display" to "automatic",
+                "fc_sdk_availability" to "FULL"
             )
         )
     }
@@ -1279,11 +1352,12 @@ class PaymentSheetEventTest {
                 configuration = config.asCommonConfiguration(),
                 appearance = config.appearance,
                 primaryButtonColor = config.primaryButtonColorUsage(),
-                paymentMethodLayout = config.paymentMethodLayout,
+                configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
                 isDeferred = false,
                 linkEnabled = false,
                 googlePaySupported = false,
                 isStripeCardScanAvailable = true,
+                isAnalyticEventCallbackSet = false,
             ).params
         ).isEqualTo(
             mapOf(
@@ -1324,11 +1398,12 @@ class PaymentSheetEventTest {
                 configuration = config.asCommonConfiguration(),
                 appearance = config.appearance,
                 primaryButtonColor = config.primaryButtonColorUsage(),
-                paymentMethodLayout = config.paymentMethodLayout,
+                configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
                 isDeferred = false,
                 linkEnabled = false,
                 googlePaySupported = false,
                 isStripeCardScanAvailable = true,
+                isAnalyticEventCallbackSet = false,
             ).params
         ).isEqualTo(
             mapOf(
@@ -1348,12 +1423,13 @@ class PaymentSheetEventTest {
                 mode = EventReporter.Mode.Complete,
                 configuration = config.asCommonConfiguration(),
                 appearance = config.appearance,
-                paymentMethodLayout = config.paymentMethodLayout,
+                configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
                 primaryButtonColor = config.primaryButtonColorUsage(),
                 isDeferred = false,
                 linkEnabled = false,
                 googlePaySupported = false,
                 isStripeCardScanAvailable = true,
+                isAnalyticEventCallbackSet = false,
             ).params["mpe_config"]?.asMap()?.get("card_scan_available")
         ).isEqualTo(true)
     }
@@ -1366,13 +1442,52 @@ class PaymentSheetEventTest {
                 mode = EventReporter.Mode.Complete,
                 configuration = config.asCommonConfiguration(),
                 appearance = config.appearance,
-                paymentMethodLayout = config.paymentMethodLayout,
+                configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
                 primaryButtonColor = config.primaryButtonColorUsage(),
                 isDeferred = false,
                 linkEnabled = false,
                 googlePaySupported = false,
                 isStripeCardScanAvailable = false,
+                isAnalyticEventCallbackSet = false,
             ).params["mpe_config"]?.asMap()?.get("card_scan_available")
+        ).isEqualTo(false)
+    }
+
+    @Test
+    fun `Init event should report analytic_callback_set as true if available`() {
+        val config = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING
+        assertThat(
+            PaymentSheetEvent.Init(
+                mode = EventReporter.Mode.Complete,
+                configuration = config.asCommonConfiguration(),
+                appearance = config.appearance,
+                configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
+                primaryButtonColor = config.primaryButtonColorUsage(),
+                isDeferred = false,
+                linkEnabled = false,
+                googlePaySupported = false,
+                isStripeCardScanAvailable = true,
+                isAnalyticEventCallbackSet = true,
+            ).params["mpe_config"]?.asMap()?.get("analytic_callback_set")
+        ).isEqualTo(true)
+    }
+
+    @Test
+    fun `Init event should report analytic_callback_set as false if unavailable`() {
+        val config = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING
+        assertThat(
+            PaymentSheetEvent.Init(
+                mode = EventReporter.Mode.Complete,
+                configuration = config.asCommonConfiguration(),
+                appearance = config.appearance,
+                configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
+                primaryButtonColor = config.primaryButtonColorUsage(),
+                isDeferred = false,
+                linkEnabled = false,
+                googlePaySupported = false,
+                isStripeCardScanAvailable = false,
+                isAnalyticEventCallbackSet = false,
+            ).params["mpe_config"]?.asMap()?.get("analytic_callback_set")
         ).isEqualTo(false)
     }
 
@@ -1386,6 +1501,7 @@ class PaymentSheetEventTest {
             linkEnabled = false,
             googlePaySupported = false,
             linkContext = null,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
         assertThat(
             event.eventName
@@ -1402,6 +1518,7 @@ class PaymentSheetEventTest {
                 "google_pay_enabled" to false,
                 "duration" to 60f,
                 "currency" to "USD",
+                "fc_sdk_availability" to "FULL"
             )
         )
     }
@@ -1416,6 +1533,7 @@ class PaymentSheetEventTest {
             linkEnabled = false,
             googlePaySupported = false,
             linkContext = null,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Lite
         )
         assertThat(
             event.eventName
@@ -1429,6 +1547,7 @@ class PaymentSheetEventTest {
                 "is_decoupled" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
+                "fc_sdk_availability" to "LITE"
             )
         )
     }
@@ -1517,11 +1636,12 @@ class PaymentSheetEventTest {
             configuration = configuration.asCommonConfiguration(),
             appearance = configuration.appearance,
             primaryButtonColor = configuration.primaryButtonColorUsage(),
-            paymentMethodLayout = configuration.paymentMethodLayout,
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(configuration),
             googlePaySupported = true,
             isDeferred = false,
             linkEnabled = false,
             isStripeCardScanAvailable = true,
+            isAnalyticEventCallbackSet = false,
         )
     }
 
@@ -1540,6 +1660,7 @@ class PaymentSheetEventTest {
         orderedLpms: List<String> = listOf("card"),
         hasDefaultPaymentMethod: Boolean? = null,
         setAsDefaultEnabled: Boolean? = null,
+        financialConnectionsAvailability: FinancialConnectionsAvailability = FinancialConnectionsAvailability.Full,
         linkDisplay: PaymentSheet.LinkConfiguration.Display = PaymentSheet.LinkConfiguration.Display.Automatic,
     ): PaymentSheetEvent.LoadSucceeded {
         return PaymentSheetEvent.LoadSucceeded(
@@ -1554,6 +1675,7 @@ class PaymentSheetEventTest {
             hasDefaultPaymentMethod = hasDefaultPaymentMethod,
             setAsDefaultEnabled = setAsDefaultEnabled,
             linkDisplay = linkDisplay,
+            financialConnectionsAvailability = financialConnectionsAvailability,
         )
     }
 
@@ -1574,9 +1696,11 @@ class PaymentSheetEventTest {
         customPaymentMethods: List<String>? = null,
         paymentMethodLayout: String? = "horizontal",
         cardBrandAcceptance: Boolean = false,
-        cardScanAvailable: Boolean = true
+        cardScanAvailable: Boolean = true,
+        analyticCallbackSet: Boolean = false,
+        extraParams: MutableMap<String, Any?>.() -> Unit = {},
     ): Map<String, Any?> {
-        return mapOf(
+        return mutableMapOf(
             "customer" to customer,
             "customer_access_provider" to customerAccessProvider,
             "googlepay" to googlePay,
@@ -1591,10 +1715,15 @@ class PaymentSheetEventTest {
             "preferred_networks" to preferredNetworks,
             "external_payment_methods" to externalPaymentMethods,
             "custom_payment_methods" to customPaymentMethods,
-            "payment_method_layout" to paymentMethodLayout,
             "card_brand_acceptance" to cardBrandAcceptance,
-            "card_scan_available" to cardScanAvailable
-        )
+            "card_scan_available" to cardScanAvailable,
+            "analytic_callback_set" to analyticCallbackSet,
+        ).apply {
+            if (paymentMethodLayout != null) {
+                put("payment_method_layout", paymentMethodLayout)
+            }
+            extraParams()
+        }
     }
 
     private fun buildAppearanceMap(usedParams: Boolean, embeddedConfig: Map<String, Any>? = null): Map<String, Any?> {

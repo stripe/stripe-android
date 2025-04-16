@@ -86,6 +86,7 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
+import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.analytics.primaryButtonColorUsage
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
@@ -227,7 +228,7 @@ internal class PaymentSheetViewModelTest {
             commonConfiguration = eq(config.asCommonConfiguration()),
             appearance = eq(config.appearance),
             primaryButtonColor = eq(config.primaryButtonColorUsage()),
-            paymentMethodLayout = eq(config.paymentMethodLayout),
+            configurationSpecificPayload = eq(PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config)),
             isDeferred = eq(false),
         )
 
@@ -268,6 +269,7 @@ internal class PaymentSheetViewModelTest {
                     canRemovePaymentMethods = true,
                     canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = false,
+                    canUpdateFullPaymentMethodDetails = true
                 ),
                 defaultPaymentMethodId = null,
             ),
@@ -2109,7 +2111,7 @@ internal class PaymentSheetViewModelTest {
             commonConfiguration = anyOrNull(),
             appearance = anyOrNull(),
             primaryButtonColor = anyOrNull(),
-            paymentMethodLayout = anyOrNull(),
+            configurationSpecificPayload = any(),
             isDeferred = eq(false),
         )
     }
@@ -2134,7 +2136,7 @@ internal class PaymentSheetViewModelTest {
             commonConfiguration = anyOrNull(),
             appearance = anyOrNull(),
             primaryButtonColor = anyOrNull(),
-            paymentMethodLayout = anyOrNull(),
+            configurationSpecificPayload = any(),
             isDeferred = eq(true),
         )
     }
@@ -2159,7 +2161,7 @@ internal class PaymentSheetViewModelTest {
             commonConfiguration = anyOrNull(),
             appearance = anyOrNull(),
             primaryButtonColor = anyOrNull(),
-            paymentMethodLayout = anyOrNull(),
+            configurationSpecificPayload = any(),
             isDeferred = eq(true),
         )
     }

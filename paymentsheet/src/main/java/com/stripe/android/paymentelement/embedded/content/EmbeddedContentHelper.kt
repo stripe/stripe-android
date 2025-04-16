@@ -7,11 +7,13 @@ import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.mainthread.MainThreadOnlyMutableStateFlow
 import com.stripe.android.core.mainthread.MainThreadSavedStateHandle
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.FormHelper.FormType
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -190,6 +192,17 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             reportPaymentMethodTypeSelected = eventReporter::onSelectPaymentMethod,
             reportFormShown = eventReporter::onPaymentMethodFormShown,
             onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,
+            shouldUpdateVerticalModeSelection = { paymentMethodCode ->
+                val isConfirmFlow = confirmationStateHolder.state?.configuration?.formSheetAction ==
+                    EmbeddedPaymentElement.FormSheetAction.Confirm
+                if (isConfirmFlow) {
+                    val requiresFormScreen = paymentMethodCode != null &&
+                        formHelper.formTypeForCode(paymentMethodCode) == FormType.UserInteractionRequired
+                    !requiresFormScreen
+                } else {
+                    true
+                }
+            }
         )
     }
 
