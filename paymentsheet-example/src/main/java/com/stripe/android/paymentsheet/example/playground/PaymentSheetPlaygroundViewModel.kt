@@ -421,7 +421,6 @@ internal class PaymentSheetPlaygroundViewModel(
         return PlaygroundRequester(playgroundSettingsSnapshot, getApplication()).fetch().fold(
             onSuccess = { state ->
                 playgroundSettingsFlow.value = state.snapshot.playgroundSettings()
-                setPlaygroundState(state)
                 val clientSecret = requireNotNull(state.asPaymentState()).clientSecret
                 CreateIntentResult.Success(clientSecret)
             },
