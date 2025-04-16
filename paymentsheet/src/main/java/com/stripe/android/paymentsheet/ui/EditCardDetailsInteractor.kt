@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.runtime.Immutable
 import com.stripe.android.CardBrandFilter
+import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethod
@@ -29,6 +30,7 @@ internal data class EditCardPayload(
     val expiryYear: Int?,
     val displayBrand: String?,
     val networks: Set<String>?,
+    val billingDetails: PaymentMethod.BillingDetails?,
 ) {
 
     val brand: CardBrand
@@ -36,17 +38,24 @@ internal data class EditCardPayload(
 
     internal companion object {
 
-        fun create(card: PaymentMethod.Card): EditCardPayload {
+        fun create(
+            card: PaymentMethod.Card,
+            billingDetails: PaymentMethod.BillingDetails?,
+        ): EditCardPayload {
             return EditCardPayload(
                 last4 = card.last4,
                 expiryMonth = card.expiryMonth,
                 expiryYear = card.expiryYear,
                 displayBrand = card.displayBrand,
                 networks = card.networks?.available,
+                billingDetails = billingDetails,
             )
         }
 
-        fun create(card: ConsumerPaymentDetails.Card): EditCardPayload {
+        fun create(
+            card: ConsumerPaymentDetails.Card,
+            billingPhoneNumber: String?,
+        ): EditCardPayload {
             return EditCardPayload(
                 last4 = card.last4,
                 expiryMonth = card.expiryMonth,
@@ -54,6 +63,21 @@ internal data class EditCardPayload(
                 displayBrand = card.brand.code,
                 // TODO: This still shows the dropdown somehow…
                 networks = card.networks.toSet().takeIf { it.size > 1 },
+                billingDetails = PaymentMethod.BillingDetails(
+                    address = card.billingAddress?.let {
+                        Address(
+                            line1 = it.line1,
+                            line2 = it.line2,
+                            city = it.locality,
+                            state = it.administrativeArea,
+                            postalCode = it.postalCode,
+                            country = it.countryCode?.value,
+                        )
+                    },
+                    email = card.billingEmailAddress,
+                    name = card.billingAddress?.name,
+                    phone = billingPhoneNumber,
+                )
             )
         }
     }
@@ -88,7 +112,6 @@ internal interface EditCardDetailsInteractor {
             areExpiryDateAndAddressModificationSupported: Boolean,
             cardBrandFilter: CardBrandFilter,
             payload: EditCardPayload,
-            billingDetails: PaymentMethod.BillingDetails?,
             addressCollectionMode: AddressCollectionMode,
             onBrandChoiceChanged: CardBrandCallback,
             onCardUpdateParamsChanged: CardUpdateParamsCallback
@@ -98,7 +121,6 @@ internal interface EditCardDetailsInteractor {
 
 internal class DefaultEditCardDetailsInteractor(
     private val payload: EditCardPayload,
-    private val billingDetails: PaymentMethod.BillingDetails?,
     private val addressCollectionMode: AddressCollectionMode,
     private val cardBrandFilter: CardBrandFilter,
     private val isCbcModifiable: Boolean,
@@ -168,7 +190,7 @@ internal class DefaultEditCardDetailsInteractor(
 
     private fun hasBillingDetailsChanged(billingDetailsEntry: BillingDetailsEntry?): Boolean {
         return billingDetailsEntry?.hasChanged(
-            billingDetails = billingDetails,
+            billingDetails = payload.billingDetails,
             addressCollectionMode = addressCollectionMode
         ) ?: false
     }
@@ -249,7 +271,7 @@ internal class DefaultEditCardDetailsInteractor(
         }
         return BillingDetailsForm(
             addressCollectionMode = addressCollectionMode,
-            billingDetails = billingDetails
+            billingDetails = payload.billingDetails,
         )
     }
 
@@ -276,7 +298,6 @@ internal class DefaultEditCardDetailsInteractor(
             areExpiryDateAndAddressModificationSupported: Boolean,
             cardBrandFilter: CardBrandFilter,
             payload: EditCardPayload,
-            billingDetails: PaymentMethod.BillingDetails?,
             addressCollectionMode: AddressCollectionMode,
             onBrandChoiceChanged: CardBrandCallback,
             onCardUpdateParamsChanged: CardUpdateParamsCallback
@@ -289,7 +310,6 @@ internal class DefaultEditCardDetailsInteractor(
                 onBrandChoiceChanged = onBrandChoiceChanged,
                 onCardUpdateParamsChanged = onCardUpdateParamsChanged,
                 areExpiryDateAndAddressModificationSupported = areExpiryDateAndAddressModificationSupported,
-                billingDetails = billingDetails,
                 addressCollectionMode = addressCollectionMode
             )
         }

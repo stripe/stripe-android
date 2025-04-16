@@ -1,5 +1,6 @@
 package com.stripe.android.uicore.elements
 
+import androidx.annotation.RestrictTo
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
@@ -14,7 +15,8 @@ import kotlin.math.min
  * characters. The resulting value should be shown in a TextField that uses [visualTransformation],
  * which will display it in the domestic format (e.g. "(555) 555-5555" for "US" locale).
  */
-internal sealed class PhoneNumberFormatter {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed class PhoneNumberFormatter {
     /**
      * Region prefix, like "+1" for US.
      */

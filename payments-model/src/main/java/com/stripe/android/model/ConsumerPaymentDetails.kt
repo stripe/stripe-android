@@ -34,7 +34,8 @@ data class ConsumerPaymentDetails(
         val brand: CardBrand,
         val networks: List<String>,
         val cvcCheck: CvcCheck,
-        val billingAddress: BillingAddress? = null
+        val billingAddress: BillingAddress? = null,
+        val billingEmailAddress: String? = null,
     ) : PaymentDetails(
         id = id,
         isDefault = isDefault,
@@ -108,7 +109,12 @@ data class ConsumerPaymentDetails(
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class BillingAddress(
+        val name: String?,
+        val line1: String?,
+        val line2: String?,
+        val administrativeArea: String?,
+        val locality: String?,
+        val postalCode: String?,
         val countryCode: CountryCode?,
-        val postalCode: String?
     ) : Parcelable
 }
