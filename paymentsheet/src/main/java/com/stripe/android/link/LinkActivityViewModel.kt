@@ -110,7 +110,7 @@ internal class LinkActivityViewModel @Inject constructor(
         _linkAppBarState.update {
             LinkAppBarState.create(
                 route = route,
-                previousEntryRoute = previousEntry,
+                previousEntryRoute = null, // TODO update.
                 email = linkAccountManager.linkAccount.value?.email,
                 consumerIsSigningUp = linkAccount?.completedSignup == true,
             )
@@ -266,9 +266,7 @@ internal class LinkActivityViewModel @Inject constructor(
 
 internal sealed interface ScreenState {
     data class VerificationDialog(val linkAccount: LinkAccount) : ScreenState
-    data class FullScreen(
-        val initialDestination: LinkScreen
-    ) : ScreenState
+    data class FullScreen(val initialDestination: LinkScreen) : ScreenState
     data object Loading : ScreenState
 }
 
