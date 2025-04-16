@@ -40,14 +40,14 @@
     <string name="stripe_success_pane_title_microdeposits">Almost there</string>
     <string name="stripe_success_pane_desc_microdeposits">You can expect micro-deposits to account ••••%1$s in 1–2 days and an email with further instructions.</string>
 
-    <string name="stripe_success_pane_desc_singular">Your account was connected</string>
-    <string name="stripe_success_pane_desc_plural">Your accounts were connected</string>
+    <string name="stripe_success_pane_desc_singular">Your account was connected.</string>
+    <string name="stripe_success_pane_desc_plural">Your accounts were connected.</string>
 
     <string name="stripe_success_pane_desc_link_success_singular">Your account was connected and saved with Link.</string>
     <string name="stripe_success_pane_desc_link_success_plural">Your accounts were connected and saved with Link.</string>
 
-    <string name="stripe_success_pane_desc_link_error_singular">Your account was connected but couldn’t be saved with Link.</string>
-    <string name="stripe_success_pane_desc_link_error_plural">Your accounts were connected but couldn’t be saved with Link.</string>
+    <string name="stripe_success_pane_desc_link_error_singular">Your account was connected <annotation bold="bold">but couldn\'t be saved with Link</annotation>.</string>
+    <string name="stripe_success_pane_desc_link_error_plural">Your accounts were connected <annotation bold="bold">but couldn\'t be saved with Link</annotation>.</string>
 
     <string name="stripe_success_pane_done">Done</string>
     <string name="stripe_success_pane_done_with_merchant">Back to %1$s</string>
