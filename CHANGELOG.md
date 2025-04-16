@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [ADDED][10651](https://github.com/stripe/stripe-android/pull/10651) Analytic Event launches for alpha.
+
 Dependencies updated in [10579](https://github.com/stripe/stripe-android/pull/10579):
 * Bumped Accompanist from 0.34.0 to 0.36.0.
 * Bumped Compose from 1.6.8 to 1.7.8.
