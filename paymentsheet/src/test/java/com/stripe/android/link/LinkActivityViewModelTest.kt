@@ -30,11 +30,13 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.uicore.navigation.NavBackStackEntryUpdate
 import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.uicore.navigation.PopUpToBehavior
 import com.stripe.android.utils.DummyActivityResultCaller
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -200,6 +202,8 @@ internal class LinkActivityViewModelTest {
 
         vm.onCreate(mock())
 
+        advanceUntilIdle()
+
         val state = vm.linkScreenState.value as ScreenState.FullScreen
         assertEquals(state.initialDestination, LinkScreen.Wallet)
     }
@@ -212,6 +216,8 @@ internal class LinkActivityViewModelTest {
         linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification)
 
         vm.onCreate(mock())
+
+        advanceUntilIdle()
 
         val state = vm.linkScreenState.value as ScreenState.FullScreen
         assertEquals(state.initialDestination, LinkScreen.Verification)
@@ -226,6 +232,8 @@ internal class LinkActivityViewModelTest {
 
         vm.onCreate(mock())
 
+        advanceUntilIdle()
+
         val state = vm.linkScreenState.value as ScreenState.FullScreen
         assertEquals(state.initialDestination, LinkScreen.Verification)
     }
@@ -239,6 +247,8 @@ internal class LinkActivityViewModelTest {
 
         vm.onCreate(mock())
 
+        advanceUntilIdle()
+
         val state = vm.linkScreenState.value as ScreenState.FullScreen
         assertEquals(state.initialDestination, LinkScreen.SignUp)
     }
@@ -251,6 +261,8 @@ internal class LinkActivityViewModelTest {
         linkAccountManager.setAccountStatus(AccountStatus.Error)
 
         vm.onCreate(mock())
+
+        advanceUntilIdle()
 
         val state = vm.linkScreenState.value as ScreenState.FullScreen
         assertEquals(state.initialDestination, LinkScreen.SignUp)
@@ -291,6 +303,8 @@ internal class LinkActivityViewModelTest {
             )
 
             vm.onCreate(mock())
+
+            advanceUntilIdle()
 
             val state = vm.linkScreenState.value as ScreenState.FullScreen
             assertEquals(state.initialDestination, LinkScreen.SignUp)
@@ -345,9 +359,13 @@ internal class LinkActivityViewModelTest {
 
         vm.onCreate(mock())
 
+        advanceUntilIdle()
+
         assertThat(vm.linkScreenState.value).isEqualTo(ScreenState.VerificationDialog(TestFactory.LINK_ACCOUNT))
 
         vm.onVerificationSucceeded()
+
+        advanceUntilIdle()
 
         assertThat(vm.linkScreenState.value).isInstanceOf(ScreenState.FullScreen::class.java)
     }
@@ -384,7 +402,10 @@ internal class LinkActivityViewModelTest {
         val viewModel = createViewModel()
 
         viewModel.onNavEntryChanged(
-            navBackStackEntry(LinkScreen.SignUp)
+            NavBackStackEntryUpdate(
+                previousBackStackEntry = null,
+                currentBackStackEntry = navBackStackEntry(LinkScreen.SignUp)
+            )
         )
 
         val appBarState = viewModel.linkAppBarState.value
@@ -409,7 +430,10 @@ internal class LinkActivityViewModelTest {
         val viewModel = createViewModel()
 
         viewModel.onNavEntryChanged(
-            navBackStackEntry(LinkScreen.Verification)
+            NavBackStackEntryUpdate(
+                previousBackStackEntry = null,
+                currentBackStackEntry = navBackStackEntry(LinkScreen.Verification)
+            )
         )
 
         val appBarState = viewModel.linkAppBarState.value
@@ -424,7 +448,10 @@ internal class LinkActivityViewModelTest {
         val viewModel = createViewModel()
 
         viewModel.onNavEntryChanged(
-            navBackStackEntry(LinkScreen.Wallet)
+            NavBackStackEntryUpdate(
+                previousBackStackEntry = null,
+                currentBackStackEntry = navBackStackEntry(LinkScreen.Wallet)
+            )
         )
 
         val appBarState = viewModel.linkAppBarState.value
@@ -439,7 +466,10 @@ internal class LinkActivityViewModelTest {
         val viewModel = createViewModel()
 
         viewModel.onNavEntryChanged(
-            navBackStackEntry(LinkScreen.PaymentMethod)
+            NavBackStackEntryUpdate(
+                previousBackStackEntry = null,
+                currentBackStackEntry = navBackStackEntry(LinkScreen.PaymentMethod)
+            )
         )
 
         val appBarState = viewModel.linkAppBarState.value
@@ -454,7 +484,10 @@ internal class LinkActivityViewModelTest {
         val viewModel = createViewModel()
 
         viewModel.onNavEntryChanged(
-            navBackStackEntry(LinkScreen.Loading)
+            NavBackStackEntryUpdate(
+                previousBackStackEntry = null,
+                currentBackStackEntry = navBackStackEntry(LinkScreen.Loading)
+            )
         )
 
         val appBarState = viewModel.linkAppBarState.value
@@ -537,6 +570,8 @@ internal class LinkActivityViewModelTest {
             }
         )
         vm.onCreate(mock())
+
+        advanceUntilIdle()
 
         linkAccountManager.awaitLogoutCall()
         assertThat(linkAccountHolder.linkAccount.value).isNull()
