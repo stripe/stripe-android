@@ -76,6 +76,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
                 isStripeCardScanAvailable = isStripeCardScanAvailable(),
+                isAnalyticEventCallbackSet = analyticEventCallbackProvider.get() != null,
             )
         )
     }

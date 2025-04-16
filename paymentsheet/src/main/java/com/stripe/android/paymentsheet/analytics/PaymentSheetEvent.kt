@@ -165,7 +165,8 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
         override val isDeferred: Boolean,
-        private val isStripeCardScanAvailable: Boolean
+        private val isStripeCardScanAvailable: Boolean,
+        private val isAnalyticEventCallbackSet: Boolean,
     ) : PaymentSheetEvent() {
 
         override val eventName: String
@@ -204,6 +205,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                     FIELD_EXTERNAL_PAYMENT_METHODS to configuration.getExternalPaymentMethodsAnalyticsValue(),
                     FIELD_CARD_BRAND_ACCEPTANCE to configuration.cardBrandAcceptance.toAnalyticsValue(),
                     FIELD_CARD_SCAN_AVAILABLE to isStripeCardScanAvailable,
+                    FIELD_ANALYTIC_CALLBACK_SET to isAnalyticEventCallbackSet,
                 ).plus(configurationSpecificPayload.payload)
                 return mapOf(
                     FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION to configurationMap,
@@ -633,6 +635,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FC_SDK_AVAILABILITY = "fc_sdk_availability"
         const val FIELD_CARD_BRAND_ACCEPTANCE = "card_brand_acceptance"
         const val FIELD_CARD_SCAN_AVAILABLE = "card_scan_available"
+        const val FIELD_ANALYTIC_CALLBACK_SET = "analytic_callback_set"
         const val FIELD_LINK_DISPLAY = "link_display"
 
         const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
