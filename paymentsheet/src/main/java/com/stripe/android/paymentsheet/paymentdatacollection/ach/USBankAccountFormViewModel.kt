@@ -241,7 +241,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         state.updateWithMandate(mandateText)
     }
 
-    private val _analyticsEvent = MutableSharedFlow<AnalyticsEvent>(replay = 1)
+    private val _analyticsEvent = MutableSharedFlow<AnalyticsEvent>()
     val analyticsEvent: SharedFlow<AnalyticsEvent> = _analyticsEvent.asSharedFlow()
 
     val linkedAccount: StateFlow<PaymentSelection.New.USBankAccount?> = combineAsStateFlow(
