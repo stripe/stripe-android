@@ -84,7 +84,7 @@ private fun NavOptionsBuilder.applyPop(
             inclusive = popUpTo.inclusive
         }
         PopUpToBehavior.Start -> popUpTo(
-            navHostController.graph.startDestinationId
+            navHostController.graph.id
         ) {
             inclusive = popUpTo.inclusive
         }
