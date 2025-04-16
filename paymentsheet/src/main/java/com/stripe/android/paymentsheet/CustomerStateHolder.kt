@@ -42,7 +42,7 @@ internal class CustomerStateHolder(
         } ?: false
     }
 
-    val updatePaymentMethodEnabled: Boolean
+    val canUpdateFullPaymentMethodDetails: Boolean
         get() {
             return customer.value?.permissions?.canUpdateFullPaymentMethodDetails ?: false
         }
