@@ -552,13 +552,13 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     }
 
     class BankAccountCollectorStarted(
+        override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
         financialConnectionsAvailability: FinancialConnectionsAvailability?
     ) :
         PaymentSheetEvent() {
         override val eventName: String = "stripe_android.bankaccountcollector.started"
-        override val isDeferred: Boolean = false
-        override val linkEnabled: Boolean = false
-        override val googlePaySupported: Boolean = false
         override val additionalParams: Map<String, Any?> = mapOf(
             FC_SDK_AVAILABILITY to financialConnectionsAvailability.toAnalyticsParam()
         )
