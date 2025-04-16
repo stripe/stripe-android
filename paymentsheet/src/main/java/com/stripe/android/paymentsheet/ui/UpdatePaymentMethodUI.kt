@@ -48,7 +48,7 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
     )
     val state by interactor.state.collectAsState()
     val shouldShowCardBrandDropdown = interactor.isModifiablePaymentMethod &&
-        interactor.displayableSavedPaymentMethod.isModifiable()
+        interactor.displayableSavedPaymentMethod.canChangeCbc()
 
     Column(
         modifier = modifier
@@ -74,7 +74,9 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
             SavedPaymentMethod.Unexpected -> {}
         }
 
-        if (!interactor.isExpiredCard) {
+        val showCardDetailsCannotBeChanged = interactor.isExpiredCard.not() &&
+            (interactor.isModifiablePaymentMethod.not() || interactor.allowFullCardDetailsEdit.not())
+        if (showCardDetailsCannotBeChanged) {
             DetailsCannotBeChangedText(interactor, shouldShowCardBrandDropdown, context)
         }
 

@@ -112,4 +112,12 @@ class DisplayableSavedPaymentMethodTest {
 
         assertThat(displayableSavedPaymentMethod.savedPaymentMethod).isInstanceOf<SavedPaymentMethod.Unexpected>()
     }
+
+    data class IsModifiableParams(
+        val canUpdatePaymentMethod: Boolean = false,
+        val isCbcEligible: Boolean = false,
+        val availableNetworks: Set<String> = setOf("visa"),
+        val cardExpired: Boolean = false,
+        val expectedResult: Boolean,
+    )
 }

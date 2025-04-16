@@ -6,6 +6,7 @@ import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.mainthread.MainThreadOnlyMutableStateFlow
 import com.stripe.android.core.mainthread.MainThreadSavedStateHandle
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
@@ -179,6 +180,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             mostRecentlySelectedSavedPaymentMethod = customerStateHolder.mostRecentlySelectedSavedPaymentMethod,
             providePaymentMethodName = savedPaymentMethodMutator.providePaymentMethodName,
             canRemove = customerStateHolder.canRemove,
+            canUpdatePaymentMethod = FeatureFlags.editSavedCardPaymentMethodEnabled.isEnabled,
             onSelectSavedPaymentMethod = {
                 setSelection(PaymentSelection.Saved(it))
             },

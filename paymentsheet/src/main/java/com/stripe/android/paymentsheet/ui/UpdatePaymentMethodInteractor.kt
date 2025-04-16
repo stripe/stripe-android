@@ -124,7 +124,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
         displayableSavedPaymentMethod
     )
     override val isModifiablePaymentMethod: Boolean
-        get() = !isExpiredCard && displayableSavedPaymentMethod.isModifiable()
+        get() = displayableSavedPaymentMethod.isModifiable(allowFullCardDetailsEdit)
 
     override val topBarState: PaymentSheetTopBarState = PaymentSheetTopBarStateFactory.create(
         isLiveMode = isLiveMode,
@@ -151,7 +151,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
                 )
             },
             coroutineScope = coroutineScope,
-            isModifiable = displayableSavedPaymentMethod.isModifiable(),
+            isModifiable = displayableSavedPaymentMethod.isModifiable(allowFullCardDetailsEdit),
             cardBrandFilter = cardBrandFilter,
             onBrandChoiceChanged = onBrandChoiceSelected,
             areExpiryDateAndAddressModificationSupported = allowFullCardDetailsEdit,
@@ -285,7 +285,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     }
 
     private fun getInitialError(): ResolvableString? {
-        return if (paymentMethodIsExpiredCard()) {
+        return if (paymentMethodIsExpiredCard() && !isModifiablePaymentMethod) {
             UpdatePaymentMethodInteractor.expiredErrorMessage
         } else {
             null

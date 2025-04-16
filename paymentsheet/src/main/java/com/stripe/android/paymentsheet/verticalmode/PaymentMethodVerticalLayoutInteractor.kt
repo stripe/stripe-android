@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.mainthread.MainThreadOnlyMutableStateFlow
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -94,6 +95,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val walletsState: StateFlow<WalletsState?>,
     private val canShowWalletsInline: Boolean,
     private val canShowWalletButtons: Boolean,
+    private val canUpdatePaymentMethod: Boolean,
     private val updateSelection: (PaymentSelection?) -> Unit,
     private val isCurrentScreen: StateFlow<Boolean>,
     private val reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit,
@@ -154,6 +156,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 walletsState = viewModel.walletsState,
                 canShowWalletsInline = !viewModel.isCompleteFlow,
                 canShowWalletButtons = true,
+                canUpdatePaymentMethod = FeatureFlags.editSavedCardPaymentMethodEnabled.isEnabled,
                 updateSelection = viewModel::updateSelection,
                 isCurrentScreen = viewModel.navigationHandler.currentScreen.mapAsStateFlow {
                     it is PaymentSheetScreen.VerticalMode
@@ -395,7 +398,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         canRemove: Boolean,
         savedPaymentMethod: DisplayableSavedPaymentMethod?,
     ): PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction {
-        return if (savedPaymentMethod?.isModifiable() == true || canRemove) {
+        return if (savedPaymentMethod?.isModifiable(canUpdatePaymentMethod) == true || canRemove) {
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE
         } else {
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE

@@ -46,14 +46,48 @@ class PaymentOptionsStateFactoryTest {
     }
 
     @Test
-    fun `'isModifiable' is true when multiple networks are available & is CBC eligible`() {
+    fun `'isModifiable' is true when canUpdatePaymentMethod is false and cbc can change`() {
+        helperIsModifiable(
+            canUpdatePaymentMethod = false,
+            isCbcEligible = true,
+            availableNetworks = setOf("visa", "cartes_bancaires"),
+            expectedResult = true
+        )
+    }
+
+    @Test
+    fun `'isModifiable' is true when canUpdatePaymentMethod is true and cbc cannot change`() {
+        helperIsModifiable(
+            canUpdatePaymentMethod = true,
+            isCbcEligible = false,
+            availableNetworks = setOf("visa"),
+            expectedResult = true
+        )
+    }
+
+    @Test
+    fun `'isModifiable' is false when canUpdatePaymentMethod is false and cbc cannot change`() {
+        helperIsModifiable(
+            canUpdatePaymentMethod = false,
+            isCbcEligible = false,
+            availableNetworks = setOf("visa"),
+            expectedResult = false
+        )
+    }
+
+    private fun helperIsModifiable(
+        canUpdatePaymentMethod: Boolean = false,
+        isCbcEligible: Boolean = false,
+        availableNetworks: Set<String> = emptySet(),
+        expectedResult: Boolean
+    ) {
         val paymentMethods = PaymentMethodFixtures.createCards(3).toMutableList()
 
         val lastPaymentMethodWithNetworks = paymentMethods.removeAt(paymentMethods.lastIndex).let { paymentMethod ->
             paymentMethod.copy(
                 card = paymentMethod.card?.copy(
                     networks = PaymentMethod.Card.Networks(
-                        available = setOf("visa", "cartes_bancaires")
+                        available = availableNetworks
                     )
                 )
             )
@@ -67,13 +101,13 @@ class PaymentOptionsStateFactoryTest {
             showLink = false,
             currentSelection = PaymentSelection.Link(),
             nameProvider = { it!!.resolvableString },
-            isCbcEligible = true,
+            isCbcEligible = isCbcEligible,
             defaultPaymentMethodId = null,
         )
 
         assertThat(
-            (state.items.last() as PaymentOptionsItem.SavedPaymentMethod).isModifiable
-        ).isTrue()
+            (state.items.last() as PaymentOptionsItem.SavedPaymentMethod).isModifiable(canUpdatePaymentMethod)
+        ).isEqualTo(expectedResult)
     }
 
     @Test
