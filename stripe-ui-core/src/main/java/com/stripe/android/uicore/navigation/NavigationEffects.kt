@@ -20,13 +20,17 @@ fun NavigationEffects(
     navigationChannel: SharedFlow<NavigationIntent>,
     navHostController: NavHostController,
     keyboardController: KeyboardController,
-    onBackStackEntryUpdated: (NavBackStackEntry?) -> Unit
+    onBackStackEntryUpdated: (NavBackStackEntryUpdate) -> Unit
 ) {
     val activity = (LocalContext.current as? Activity)
     val backStackEntry by navHostController.currentBackStackEntryAsState()
 
     LaunchedEffect(backStackEntry) {
-        onBackStackEntryUpdated(backStackEntry)
+        val update = NavBackStackEntryUpdate(
+            previousBackStackEntry = navHostController.previousBackStackEntry,
+            currentBackStackEntry = backStackEntry,
+        )
+        onBackStackEntryUpdated(update)
     }
 
     LaunchedEffect(activity, navHostController, navigationChannel) {
@@ -63,10 +67,6 @@ fun NavigationEffects(
             }
         }.launchIn(this)
     }
-
-    LaunchedEffect(backStackEntry) {
-        onBackStackEntryUpdated(backStackEntry)
-    }
 }
 
 private fun NavOptionsBuilder.applyPop(
@@ -90,3 +90,9 @@ private fun NavOptionsBuilder.applyPop(
         }
     }
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class NavBackStackEntryUpdate(
+    val previousBackStackEntry: NavBackStackEntry?,
+    val currentBackStackEntry: NavBackStackEntry?
+)

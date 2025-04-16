@@ -12,7 +12,6 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.NavHost
 import com.stripe.android.link.LinkActivity.Companion.getArgs
 import com.stripe.android.link.account.LinkAccountHolder
@@ -28,7 +27,7 @@ import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.uicore.navigation.NavBackStackEntryUpdate
 import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.uicore.navigation.PopUpToBehavior
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -37,7 +36,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -106,13 +104,13 @@ internal class LinkActivityViewModel @Inject constructor(
         )
     }
 
-    fun onNavEntryChanged(entry: NavBackStackEntry?) {
-        val route: String = entry?.destination?.route ?: return
-        val initialDestination = (linkScreenState.value as? ScreenState.FullScreen)?.initialDestination
+    fun onNavEntryChanged(entry: NavBackStackEntryUpdate) {
+        val route: String = entry.currentBackStackEntry?.destination?.route ?: return
+        val previousEntry = entry.previousBackStackEntry?.destination?.route
         _linkAppBarState.update {
             LinkAppBarState.create(
                 route = route,
-                isLastEntry = route == initialDestination?.route,
+                previousEntryRoute = previousEntry,
                 email = linkAccountManager.linkAccount.value?.email,
                 consumerIsSigningUp = linkAccount?.completedSignup == true,
             )

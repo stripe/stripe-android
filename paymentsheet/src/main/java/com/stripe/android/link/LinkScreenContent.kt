@@ -4,12 +4,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.navigation.NavBackStackEntry
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.FullScreenContent
 import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.link.ui.verification.VerificationDialog
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.uicore.navigation.NavBackStackEntryUpdate
 import com.stripe.android.uicore.navigation.NavigationIntent
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.flow.SharedFlow
@@ -51,7 +51,7 @@ internal fun LinkScreenContentBody(
     appBarState: LinkAppBarState,
     eventReporter: EventReporter,
     navigationChannel: SharedFlow<NavigationIntent>,
-    onNavBackStackEntryChanged: (NavBackStackEntry?) -> Unit,
+    onNavBackStackEntryChanged: (NavBackStackEntryUpdate) -> Unit,
     onVerificationSucceeded: () -> Unit,
     onDismissClicked: () -> Unit,
     onBackPressed: () -> Unit,

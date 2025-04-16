@@ -12,7 +12,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.link.LinkAction
 import com.stripe.android.link.LinkActivityResult
@@ -20,6 +19,7 @@ import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
+import com.stripe.android.uicore.navigation.NavBackStackEntryUpdate
 import com.stripe.android.uicore.navigation.NavigationEffects
 import com.stripe.android.uicore.navigation.NavigationIntent
 import com.stripe.android.uicore.navigation.rememberKeyboardController
@@ -36,7 +36,7 @@ internal fun FullScreenContent(
     onBackPressed: () -> Unit,
     moveToWeb: () -> Unit,
     goBack: () -> Unit,
-    onNavBackStackEntryChanged: (NavBackStackEntry?) -> Unit,
+    onNavBackStackEntryChanged: (NavBackStackEntryUpdate) -> Unit,
     navigationChannel: SharedFlow<NavigationIntent>,
     handleViewAction: (LinkAction) -> Unit,
     navigate: (route: LinkScreen, clearStack: Boolean) -> Unit,
