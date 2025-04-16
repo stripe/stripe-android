@@ -757,8 +757,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 
     sealed interface AnalyticsEvent {
-        object Started : AnalyticsEvent
-        class Finished(
+        data object Started : AnalyticsEvent
+        data class Finished(
             val result: String,
             val linkAccountSessionId: String?,
             val intent: StripeIntent?
