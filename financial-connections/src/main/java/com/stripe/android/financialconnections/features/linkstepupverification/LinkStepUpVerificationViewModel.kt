@@ -196,7 +196,6 @@ internal class LinkStepUpVerificationViewModel @AssistedInject constructor(
                 }
             }
 
-        private const val CLICKABLE_TEXT_RESEND_CODE = "resend_code"
         internal val PANE = Pane.LINK_STEP_UP_VERIFICATION
     }
 }

@@ -45,9 +45,6 @@ import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.paneViewModel
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
-import com.stripe.android.financialconnections.ui.TextResource
-import com.stripe.android.financialconnections.ui.components.AnnotatedText
-import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
