@@ -32,7 +32,7 @@ internal class FakeUpdatePaymentMethodInteractor(
         isSaveButtonEnabled = false,
     ),
     override val setAsDefaultCheckboxEnabled: Boolean = true,
-    override val allowCardEdit: Boolean = false,
+    override val allowFullCardDetailsEdit: Boolean = false,
     private val editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = DefaultEditCardDetailsInteractor
         .Factory(),
 ) : UpdatePaymentMethodInteractor {
@@ -48,7 +48,7 @@ internal class FakeUpdatePaymentMethodInteractor(
             card = displayableSavedPaymentMethod.paymentMethod.card!!,
             onBrandChoiceChanged = {},
             onCardUpdateParamsChanged = {},
-            areExpiryDateAndAddressModificationSupported = allowCardEdit,
+            areExpiryDateAndAddressModificationSupported = allowFullCardDetailsEdit,
             billingDetails = PaymentMethodFixtures.BILLING_DETAILS,
             addressCollectionMode = addressCollectionMode,
         )
