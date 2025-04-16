@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.net.Uri
 import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
@@ -94,7 +95,10 @@ internal class PaymentSheetAnalyticsTest {
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
-        testContext.validateAnalyticsRequest(eventName = "mc_complete_init_default")
+        testContext.validateAnalyticsRequest(
+            eventName = "mc_complete_init_default",
+            query(Uri.encode("mpe_config[analytic_callback_set]"), "true"),
+        )
         testContext.validateAnalyticsRequest(eventName = "mc_load_started")
         testContext.validateAnalyticsRequest(eventName = "mc_load_succeeded")
         testContext.validateAnalyticsRequest(eventName = "mc_complete_sheet_newpm_show")
@@ -162,7 +166,10 @@ internal class PaymentSheetAnalyticsTest {
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
-        testContext.validateAnalyticsRequest(eventName = "mc_custom_init_default")
+        testContext.validateAnalyticsRequest(
+            eventName = "mc_custom_init_default",
+            query(Uri.encode("mpe_config[analytic_callback_set]"), "true"),
+        )
         testContext.validateAnalyticsRequest(eventName = "mc_load_started")
         testContext.validateAnalyticsRequest(eventName = "mc_load_succeeded")
         testContext.validateAnalyticsRequest(eventName = "mc_custom_sheet_newpm_show")
