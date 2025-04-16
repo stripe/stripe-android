@@ -40,6 +40,7 @@ import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
+import com.stripe.android.paymentsheet.example.playground.activity.CustomPaymentMethodActivity
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
 import com.stripe.android.paymentsheet.example.playground.activity.getEmbeddedAppearance
@@ -554,7 +555,14 @@ internal class PaymentSheetPlaygroundActivity :
         customPaymentMethod: PaymentSheet.CustomPaymentMethod,
         billingDetails: PaymentMethod.BillingDetails
     ) {
-        error("Currently cannot handle custom payment methods!")
+        startActivity(
+            Intent().setClass(
+                this,
+                CustomPaymentMethodActivity::class.java
+            )
+                .putExtra(CustomPaymentMethodActivity.EXTRA_CUSTOM_PAYMENT_METHOD_TYPE, customPaymentMethod)
+                .putExtra(CustomPaymentMethodActivity.EXTRA_BILLING_DETAILS, billingDetails)
+        )
     }
 }
 

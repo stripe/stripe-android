@@ -94,7 +94,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         linkDisplay: PaymentSheet.LinkConfiguration.Display,
         currency: String?,
         initializationMode: PaymentElementLoader.InitializationMode,
-        financialConectionsAvailability: FinancialConnectionsAvailability?,
+        financialConnectionsAvailability: FinancialConnectionsAvailability?,
         orderedLpms: List<String>,
         requireCvcRecollection: Boolean,
         hasDefaultPaymentMethod: Boolean?,
@@ -104,7 +104,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         this.linkEnabled = linkEnabled
         this.linkMode = linkMode
         this.googlePaySupported = googlePaySupported
-        this.financialConnectionsAvailability = financialConectionsAvailability
+        this.financialConnectionsAvailability = financialConnectionsAvailability
 
         durationProvider.start(DurationProvider.Key.Checkout)
 
