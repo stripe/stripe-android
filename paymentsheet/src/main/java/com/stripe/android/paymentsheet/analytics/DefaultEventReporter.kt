@@ -19,8 +19,11 @@ import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent.BankAccountCollectorFinished
+import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent.BankAccountCollectorStarted
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.isSaved
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.ui.core.IsStripeCardScanAvailable
 import kotlinx.coroutines.CoroutineScope
@@ -123,7 +126,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 orderedLpms = orderedLpms,
                 requireCvcRecollection = requireCvcRecollection,
                 hasDefaultPaymentMethod = hasDefaultPaymentMethod,
-                financialConnectionsAvailability = this@DefaultEventReporter.financialConnectionsAvailability,
+                financialConnectionsAvailability = financialConnectionsAvailability,
                 setAsDefaultEnabled = setAsDefaultEnabled,
             )
         )
@@ -500,6 +503,26 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     override fun onCannotProperlyReturnFromLinkAndOtherLPMs() {
         fireEvent(PaymentSheetEvent.CannotProperlyReturnFromLinkAndLPMs(mode = mode))
+    }
+
+    override fun onUsBankAccountFormEvent(event: USBankAccountFormViewModel.AnalyticsEvent) {
+        val analyticsEvent = when (event) {
+            is USBankAccountFormViewModel.AnalyticsEvent.Started -> BankAccountCollectorStarted(
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+                financialConnectionsAvailability = financialConnectionsAvailability
+            )
+
+            is USBankAccountFormViewModel.AnalyticsEvent.Finished -> BankAccountCollectorFinished(
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+                event = event,
+                financialConnectionsAvailability = financialConnectionsAvailability,
+            )
+        }
+        fireEvent(analyticsEvent)
     }
 
     private fun fireEvent(event: PaymentSheetEvent) {

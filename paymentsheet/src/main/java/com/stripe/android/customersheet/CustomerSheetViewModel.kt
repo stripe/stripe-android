@@ -855,6 +855,7 @@ internal class CustomerSheetViewModel(
                 handleViewAction(CustomerSheetViewAction.OnFormError(error))
             },
             onFormCompleted = { /* no-op, CustomerSheetScreen does not send AnalyticEvent */ },
+            onAnalyticsEvent = { /* no-op, CustomerSheetScreen does not send AnalyticEvent */ },
             setAsDefaultPaymentMethodEnabled = false,
             financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null),
             setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
