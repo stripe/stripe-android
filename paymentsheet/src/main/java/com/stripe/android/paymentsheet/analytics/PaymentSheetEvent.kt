@@ -582,14 +582,11 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             FC_SDK_RESULT to event.result
         )
 
-        private fun Finished.paymentIntentType(): String? {
-            return if (this@BankAccountCollectorFinished.isDeferred) {
-                "deferred"
-            } else when (intent) {
-                is PaymentIntent -> "payment"
-                is SetupIntent -> "setup"
-                else -> null
-            }
+        private fun Finished.paymentIntentType(): String? = when {
+            isDeferred -> "deferred"
+            intent is PaymentIntent -> "payment"
+            intent is SetupIntent -> "setup"
+            else -> null
         }
     }
 
