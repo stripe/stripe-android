@@ -151,7 +151,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
          * Called when an analytic event is emitted.
          */
         @ExperimentalAnalyticEventCallbackApi
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun analyticEventCallback(callback: AnalyticEventCallback) = apply {
             this.analyticEventCallback = callback
         }

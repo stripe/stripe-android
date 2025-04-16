@@ -10,13 +10,11 @@ import dev.drewhamilton.poko.Poko
  *
  * @param event the [AnalyticEvent] that was emitted
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @ExperimentalAnalyticEventCallbackApi
 fun interface AnalyticEventCallback {
     fun onEvent(event: AnalyticEvent)
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @ExperimentalAnalyticEventCallbackApi
 abstract class AnalyticEvent internal constructor() {
 
