@@ -23,6 +23,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -1101,6 +1102,7 @@ class DefaultEventReporterTest {
         requireCvcRecollection: Boolean = false,
         hasDefaultPaymentMethod: Boolean? = null,
         setAsDefaultEnabled: Boolean? = null,
+        financialConnectionsAvailability: FinancialConnectionsAvailability = FinancialConnectionsAvailability.Full,
         linkDisplay: PaymentSheet.LinkConfiguration.Display = PaymentSheet.LinkConfiguration.Display.Automatic,
     ) {
         simulateInit()
@@ -1116,6 +1118,7 @@ class DefaultEventReporterTest {
             requireCvcRecollection = requireCvcRecollection,
             hasDefaultPaymentMethod = hasDefaultPaymentMethod,
             setAsDefaultEnabled = setAsDefaultEnabled,
+            financialConnectionsAvailability = financialConnectionsAvailability,
             linkDisplay = linkDisplay,
         )
     }

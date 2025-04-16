@@ -1099,6 +1099,7 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
 
@@ -1158,6 +1159,7 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
 
@@ -2247,6 +2249,7 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
 
@@ -2277,6 +2280,7 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
 
@@ -2307,6 +2311,7 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
 
@@ -2335,6 +2340,7 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
 
@@ -2373,6 +2379,7 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
 
@@ -2411,6 +2418,7 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
 
@@ -2539,10 +2547,11 @@ internal class DefaultPaymentElementLoaderTest {
             linkDisplay = eq(PaymentSheet.LinkConfiguration.Display.Automatic),
             currency = anyOrNull(),
             initializationMode = any(),
+            financialConnectionsAvailability = anyOrNull(),
             orderedLpms = any(),
             requireCvcRecollection = any(),
             hasDefaultPaymentMethod = anyOrNull(),
-            setAsDefaultEnabled = anyOrNull(),
+            setAsDefaultEnabled = anyOrNull()
         )
     }
 
@@ -2600,10 +2609,11 @@ internal class DefaultPaymentElementLoaderTest {
             linkDisplay = eq(PaymentSheet.LinkConfiguration.Display.Never),
             currency = anyOrNull(),
             initializationMode = any(),
+            financialConnectionsAvailability = anyOrNull(),
             orderedLpms = any(),
             requireCvcRecollection = any(),
             hasDefaultPaymentMethod = anyOrNull(),
-            setAsDefaultEnabled = anyOrNull(),
+            setAsDefaultEnabled = anyOrNull()
         )
     }
 
@@ -2736,6 +2746,7 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
 
