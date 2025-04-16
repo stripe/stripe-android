@@ -306,7 +306,7 @@ private fun PreviewUpdatePaymentMethodUI() {
         interactor = DefaultUpdatePaymentMethodInteractor(
             isLiveMode = false,
             canRemove = true,
-            allowCardEdit = true,
+            allowFullCardDetailsEdit = true,
             displayableSavedPaymentMethod = exampleCard,
             addressCollectionMode = AddressCollectionMode.Automatic,
             removeExecutor = { null },

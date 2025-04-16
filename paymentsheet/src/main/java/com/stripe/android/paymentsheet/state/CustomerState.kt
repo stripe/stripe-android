@@ -22,7 +22,7 @@ internal data class CustomerState(
         val canRemovePaymentMethods: Boolean,
         val canRemoveLastPaymentMethod: Boolean,
         val canRemoveDuplicates: Boolean,
-        val canUpdatePaymentMethod: Boolean,
+        val canUpdateFullPaymentMethodDetails: Boolean,
     ) : Parcelable
 
     @Parcelize
@@ -76,7 +76,7 @@ internal data class CustomerState(
                     canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
                     // Should always remove duplicates when using `customer_session`
                     canRemoveDuplicates = true,
-                    canUpdatePaymentMethod = FeatureFlags.editSavedCardPaymentMethodEnabled.isEnabled,
+                    canUpdateFullPaymentMethodDetails = FeatureFlags.editSavedCardPaymentMethodEnabled.isEnabled,
                 ),
                 defaultPaymentMethodId = customer.defaultPaymentMethod
             )
@@ -124,7 +124,7 @@ internal data class CustomerState(
                      * Un-scoped legacy ephemeral keys do not have permissions to update payment method. This should
                      * always be set to false.
                      */
-                    canUpdatePaymentMethod = false,
+                    canUpdateFullPaymentMethodDetails = false,
                 ),
                 // This is a customer sessions only feature, so will always be null when using a legacy ephemeral key.
                 defaultPaymentMethodId = null

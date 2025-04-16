@@ -112,7 +112,7 @@ internal object PaymentSheetFixtures {
             canRemovePaymentMethods = true,
             canRemoveLastPaymentMethod = true,
             canRemoveDuplicates = false,
-            canUpdatePaymentMethod = false,
+            canUpdateFullPaymentMethodDetails = false,
         ),
         defaultPaymentMethodId = null,
     )
@@ -194,7 +194,7 @@ internal object PaymentSheetFixtures {
                         canRemovePaymentMethods = true,
                         canRemoveLastPaymentMethod = true,
                         canRemoveDuplicates = false,
-                        canUpdatePaymentMethod = true
+                        canUpdateFullPaymentMethodDetails = true
                     ),
                     defaultPaymentMethodId = null,
                 ),

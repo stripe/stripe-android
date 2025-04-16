@@ -35,7 +35,7 @@ internal interface UpdatePaymentMethodInteractor {
     val shouldShowSetAsDefaultCheckbox: Boolean
     val setAsDefaultCheckboxEnabled: Boolean
     val shouldShowSaveButton: Boolean
-    val allowCardEdit: Boolean
+    val allowFullCardDetailsEdit: Boolean
     val addressCollectionMode: AddressCollectionMode
     val editCardDetailsInteractor: EditCardDetailsInteractor
 
@@ -93,7 +93,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     override val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     override val cardBrandFilter: CardBrandFilter,
     override val addressCollectionMode: AddressCollectionMode,
-    override val allowCardEdit: Boolean,
+    override val allowFullCardDetailsEdit: Boolean,
     val isDefaultPaymentMethod: Boolean,
     shouldShowSetAsDefaultCheckbox: Boolean,
     private val removeExecutor: PaymentMethodRemoveOperation,
@@ -154,7 +154,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
             isModifiable = displayableSavedPaymentMethod.isModifiable(),
             cardBrandFilter = cardBrandFilter,
             onBrandChoiceChanged = onBrandChoiceSelected,
-            areExpiryDateAndAddressModificationSupported = allowCardEdit,
+            areExpiryDateAndAddressModificationSupported = allowFullCardDetailsEdit,
             billingDetails = savedPaymentMethodCard.billingDetails,
             addressCollectionMode = addressCollectionMode,
         )

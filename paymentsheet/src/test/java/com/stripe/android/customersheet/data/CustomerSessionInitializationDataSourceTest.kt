@@ -105,7 +105,7 @@ class CustomerSessionInitializationDataSourceTest {
     }
 
     @Test
-    fun `on load, canUpdatePaymentMethod should enabled when feature flag is enabled`() = runTest {
+    fun `on load, canUpdateFullPaymentMethodDetails should enabled when feature flag is enabled`() = runTest {
         editSavedCardPaymentMethodEnabledFeatureFlagTestRule.setEnabled(true)
         val dataSource = createInitializationDataSource(
             elementsSessionManager = FakeCustomerSessionElementsSessionManager(
@@ -116,11 +116,11 @@ class CustomerSessionInitializationDataSourceTest {
         val result = dataSource.loadCustomerSheetSession(createConfiguration())
         val customerSheetSession = result.asSuccess().value
 
-        assertThat(customerSheetSession.permissions.canUpdatePaymentMethod).isTrue()
+        assertThat(customerSheetSession.permissions.canUpdateFullPaymentMethodDetails).isTrue()
     }
 
     @Test
-    fun `on load, canUpdatePaymentMethod should enabled when feature flag is disabled`() = runTest {
+    fun `on load, canUpdateFullPaymentMethodDetails should enabled when feature flag is disabled`() = runTest {
         editSavedCardPaymentMethodEnabledFeatureFlagTestRule.setEnabled(false)
         val dataSource = createInitializationDataSource(
             elementsSessionManager = FakeCustomerSessionElementsSessionManager(
@@ -131,7 +131,7 @@ class CustomerSessionInitializationDataSourceTest {
         val result = dataSource.loadCustomerSheetSession(createConfiguration())
         val customerSheetSession = result.asSuccess().value
 
-        assertThat(customerSheetSession.permissions.canUpdatePaymentMethod).isFalse()
+        assertThat(customerSheetSession.permissions.canUpdateFullPaymentMethodDetails).isFalse()
     }
 
     @Test

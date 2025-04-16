@@ -58,7 +58,7 @@ internal class CustomerSessionInitializationDataSource @Inject constructor(
                                 component.isPaymentMethodRemoveEnabled
                             is ElementsSession.Customer.Components.CustomerSheet.Disabled -> false
                         },
-                        canUpdatePaymentMethod = FeatureFlags.editSavedCardPaymentMethodEnabled.isEnabled
+                        canUpdateFullPaymentMethodDetails = FeatureFlags.editSavedCardPaymentMethodEnabled.isEnabled
                     ),
                     defaultPaymentMethodId = customer.defaultPaymentMethod,
                 )

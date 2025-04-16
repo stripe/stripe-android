@@ -78,7 +78,7 @@ class VerticalModeInitialScreenFactoryTest {
                         canRemovePaymentMethods = true,
                         canRemoveLastPaymentMethod = true,
                         canRemoveDuplicates = true,
-                        canUpdatePaymentMethod = false
+                        canUpdateFullPaymentMethodDetails = false
                     ),
                     defaultPaymentMethodId = null,
                 )

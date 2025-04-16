@@ -33,7 +33,7 @@ internal class FakeCustomerSheetLoader(
     private val permissions: CustomerPermissions = CustomerPermissions(
         canRemovePaymentMethods = true,
         canRemoveLastPaymentMethod = true,
-        canUpdatePaymentMethod = true,
+        canUpdateFullPaymentMethodDetails = true,
     ),
     private val isPaymentMethodSyncDefaultEnabled: Boolean = false,
 ) : CustomerSheetLoader {

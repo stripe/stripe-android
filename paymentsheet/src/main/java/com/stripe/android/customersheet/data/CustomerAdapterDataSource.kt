@@ -66,7 +66,7 @@ internal class CustomerAdapterDataSource @Inject constructor(
                     // Always `true` for `Adapter` use case
                     canRemovePaymentMethods = true,
                     // Payment Method Update is customer sessions-only feature, so this value is unused.
-                    canUpdatePaymentMethod = false,
+                    canUpdateFullPaymentMethodDetails = false,
                 ),
                 // Default payment methods are a customer sessions-only feature, so this value is unused.
                 defaultPaymentMethodId = null,

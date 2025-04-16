@@ -63,7 +63,7 @@ internal object CustomerSheetTestHelper {
         customerPermissions: CustomerPermissions = CustomerPermissions(
             canRemovePaymentMethods = true,
             canRemoveLastPaymentMethod = true,
-            canUpdatePaymentMethod = true,
+            canUpdateFullPaymentMethodDetails = true,
         ),
         cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
         supportedPaymentMethods: List<SupportedPaymentMethod> = listOf(

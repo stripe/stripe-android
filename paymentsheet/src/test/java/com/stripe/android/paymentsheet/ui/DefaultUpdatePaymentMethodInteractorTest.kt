@@ -633,7 +633,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         val interactor = DefaultUpdatePaymentMethodInteractor(
             isLiveMode = isLiveMode,
             canRemove = canRemove,
-            allowCardEdit = editSavedCardPaymentMethodEnabled,
+            allowFullCardDetailsEdit = editSavedCardPaymentMethodEnabled,
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
             addressCollectionMode = AddressCollectionMode.Automatic,
             removeExecutor = onRemovePaymentMethod,

@@ -769,7 +769,7 @@ class SavedPaymentMethodMutatorTest {
                         canRemovePaymentMethods = true,
                         canRemoveLastPaymentMethod = true,
                         canRemoveDuplicates = shouldRemoveDuplicates,
-                        canUpdatePaymentMethod = true
+                        canUpdateFullPaymentMethodDetails = true
                     ),
                     defaultPaymentMethodId = null,
                 )

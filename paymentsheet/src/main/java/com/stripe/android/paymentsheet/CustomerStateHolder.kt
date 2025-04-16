@@ -44,7 +44,7 @@ internal class CustomerStateHolder(
 
     val updatePaymentMethodEnabled: Boolean
         get() {
-            return customer.value?.permissions?.canUpdatePaymentMethod ?: false
+            return customer.value?.permissions?.canUpdateFullPaymentMethodDetails ?: false
         }
 
     fun setCustomerState(customerState: CustomerState?) {

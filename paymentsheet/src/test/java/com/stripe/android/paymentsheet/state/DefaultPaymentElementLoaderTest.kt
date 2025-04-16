@@ -146,7 +146,7 @@ internal class DefaultPaymentElementLoaderTest {
                         canRemovePaymentMethods = true,
                         canRemoveLastPaymentMethod = true,
                         canRemoveDuplicates = false,
-                        canUpdatePaymentMethod = false
+                        canUpdateFullPaymentMethodDetails = false
                     ),
                     defaultPaymentMethodId = null,
                 ),
@@ -1609,7 +1609,7 @@ internal class DefaultPaymentElementLoaderTest {
                     canRemovePaymentMethods = true,
                     canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = true,
-                    canUpdatePaymentMethod = false
+                    canUpdateFullPaymentMethodDetails = false
                 )
             )
         }
@@ -1652,7 +1652,7 @@ internal class DefaultPaymentElementLoaderTest {
                     canRemovePaymentMethods = false,
                     canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = true,
-                    canUpdatePaymentMethod = false
+                    canUpdateFullPaymentMethodDetails = false
                 )
             )
         }
@@ -1695,14 +1695,14 @@ internal class DefaultPaymentElementLoaderTest {
                     canRemovePaymentMethods = false,
                     canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = true,
-                    canUpdatePaymentMethod = false
+                    canUpdateFullPaymentMethodDetails = false
                 )
             )
         }
 
     @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
-    fun `customer session with edit saved payment method enabled, should enable canUpdatePaymentMethod permission`() =
+    fun `customer session with edit saved payment method enabled, should enable canUpdateFullPaymentMethodDetails permission`() =
         runTest {
             editSavedCardPaymentMethodEnabledFeatureFlagTestRule.setEnabled(true)
             val loader = createPaymentElementLoader(
@@ -1739,7 +1739,7 @@ internal class DefaultPaymentElementLoaderTest {
                     canRemovePaymentMethods = false,
                     canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = true,
-                    canUpdatePaymentMethod = true
+                    canUpdateFullPaymentMethodDetails = true
                 )
             )
         }
@@ -1768,7 +1768,7 @@ internal class DefaultPaymentElementLoaderTest {
                     canRemovePaymentMethods = true,
                     canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = false,
-                    canUpdatePaymentMethod = false
+                    canUpdateFullPaymentMethodDetails = false
                 )
             )
         }

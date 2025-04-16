@@ -143,9 +143,9 @@ internal sealed class CustomerSheetViewState(
 internal fun isModifiable(
     paymentMethod: PaymentMethod,
     cbcEligibility: CardBrandChoiceEligibility,
-    canUpdatePaymentMethod: Boolean
+    canUpdateFullPaymentMethodDetails: Boolean
 ): Boolean {
-    if (canUpdatePaymentMethod && paymentMethod.card != null) return true
+    if (canUpdateFullPaymentMethodDetails && paymentMethod.card != null) return true
     val hasMultipleNetworks = paymentMethod.card?.networks?.available?.let { available ->
         available.size > 1
     } ?: false
