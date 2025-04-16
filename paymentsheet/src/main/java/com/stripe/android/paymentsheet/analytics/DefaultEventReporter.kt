@@ -507,11 +507,11 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onUsBankAccountFormEvent(event: USBankAccountFormViewModel.AnalyticsEvent) {
         val analyticsEvent = when (event) {
             is USBankAccountFormViewModel.AnalyticsEvent.Started -> BankAccountCollectorStarted(
-                    isDeferred = isDeferred,
-                    linkEnabled = linkEnabled,
-                    googlePaySupported = googlePaySupported,
-                    financialConnectionsAvailability = financialConnectionsAvailability
-                )
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+                financialConnectionsAvailability = financialConnectionsAvailability
+            )
 
             is USBankAccountFormViewModel.AnalyticsEvent.Finished -> BankAccountCollectorFinished(
                 isDeferred = isDeferred,
