@@ -161,14 +161,7 @@ internal class LinkStepUpVerificationViewModel @AssistedInject constructor(
         )
     }.execute { copy(confirmVerification = it) }
 
-    fun onClickableTextClick(text: String) {
-        when (text) {
-            CLICKABLE_TEXT_RESEND_CODE -> viewModelScope.launch { onResendOtp() }
-            else -> logger.error("Unknown clicked text $text")
-        }
-    }
-
-    private fun onResendOtp() {
+    fun onResendCodeClick() {
         suspend {
             startVerification()
             Unit

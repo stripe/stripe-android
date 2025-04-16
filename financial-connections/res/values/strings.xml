@@ -31,34 +31,31 @@
     <!-- Account picker -->
     <string name="stripe_account_picker_singleselect_account">Select an account</string>
     <string name="stripe_account_picker_multiselect_account">Select accounts</string>
-    <plurals name="stripe_account_picker_cta_link">
-        <item quantity="one">Connect account</item>
-        <item quantity="other">Connect accounts</item>
-    </plurals>
+
+    <string name="stripe_account_picker_cta_link_singular">Connect account</string>
+    <string name="stripe_account_picker_cta_link_plural">Connect accounts</string>
 
     <!-- Success panes -->
     <string name="stripe_success_pane_title">Success</string>
     <string name="stripe_success_pane_title_microdeposits">Almost there</string>
     <string name="stripe_success_pane_desc_microdeposits">You can expect micro-deposits to account ••••%1$s in 1–2 days and an email with further instructions.</string>
-    <plurals name="stripe_success_pane_desc">
-        <item quantity="one">Your account was connected.</item>
-        <item quantity="other">Your accounts were connected.</item>
-    </plurals>
-    <plurals name="stripe_success_pane_desc_link_success">
-        <item quantity="one">Your account was connected and saved with Link.</item>
-        <item quantity="other">Your accounts were connected and saved with Link.</item>
-    </plurals>
-    <plurals name="stripe_success_pane_desc_link_error">
-        <item quantity="one">Your account was connected <annotation bold="bold">but couldn\'t be saved with Link</annotation>.</item>
-        <item quantity="other">Your accounts were connected <annotation bold="bold">but couldn\'t be saved with Link</annotation>.</item>
-    </plurals>
+
+    <string name="stripe_success_pane_desc_singular">Your account was connected</string>
+    <string name="stripe_success_pane_desc_plural">Your accounts were connected</string>
+
+    <string name="stripe_success_pane_desc_link_success_singular">Your account was connected and saved with Link.</string>
+    <string name="stripe_success_pane_desc_link_success_plural">Your accounts were connected and saved with Link.</string>
+
+    <string name="stripe_success_pane_desc_link_error_singular">Your account was connected but couldn’t be saved with Link.</string>
+    <string name="stripe_success_pane_desc_link_error_plural">Your accounts were connected but couldn’t be saved with Link.</string>
+
     <string name="stripe_success_pane_done">Done</string>
     <string name="stripe_success_pane_done_with_merchant">Back to %1$s</string>
     <string name="stripe_account_picker_error_no_payment_method_title">No payment accounts available</string>
-    <plurals name="stripe_account_picker_error_no_payment_method_desc">
-        <item quantity="one">We found %1$s %2$s account but you can only link checking or savings accounts to %3$s. Please try selecting another bank.</item>
-        <item quantity="other">We found %1$s %2$s accounts but you can only link checking or savings accounts to %3$s. Please try selecting another bank.</item>
-    </plurals>
+
+    <string name="stripe_account_picker_error_no_payment_method_desc_singular">We found %1$s %2$s account but you can only link checking or savings accounts to %3$s. Please try selecting another bank.</string>
+    <string name="stripe_account_picker_error_no_payment_method_desc_plural">We found %1$s %2$s accounts but you can only link checking or savings accounts to %3$s. Please try selecting another bank.</string>
+
     <string name="stripe_account_picker_error_no_account_available_title">There was a problem accessing your %1$s account</string>
 
     <!-- Manual entry -->
@@ -96,7 +93,7 @@
     <!-- Networking step-up verification -->
     <string name="stripe_link_stepup_verification_title">Verify your email</string>
     <string name="stripe_link_stepup_verification_desc">Enter the code sent to %1$s. We periodically request this extra step to keep your account safe.</string>
-    <string name="stripe_link_stepup_verification_resend_code"><annotation clickable="resend_code">Resend code</annotation></string>
+    <string name="stripe_link_stepup_verification_resend_code">Resend code</string>
 
     <!-- Verification (shared) -->
     <string name="stripe_verification.codeInvalid">Hmm, that code didn’t work. Double check it and try again.</string>

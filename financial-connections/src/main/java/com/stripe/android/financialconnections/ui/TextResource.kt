@@ -3,7 +3,6 @@ package com.stripe.android.financialconnections.ui
 import android.os.Parcelable
 import android.text.TextUtils
 import androidx.annotation.DrawableRes
-import androidx.annotation.PluralsRes
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
@@ -25,7 +24,8 @@ internal sealed interface TextResource : Parcelable {
 
     @Parcelize
     data class PluralId(
-        @PluralsRes val value: Int,
+        @StringRes val singular: Int,
+        @StringRes val plural: Int,
         val count: Int,
         val args: List<String> = emptyList()
     ) : TextResource
@@ -39,28 +39,26 @@ internal sealed interface TextResource : Parcelable {
     fun toText(): CharSequence {
         return when (this) {
             is Text -> value
-            /**
-             * [android.content.res.Resources.getText] does not support format args, and
-             * [android.content.res.Resources.getString] does not keep annotations.
-             * This function uses getText and manually handles formats.
-             */
-            is StringId -> args.foldIndexed(
-                LocalContext.current.resources.getText(value)
-            ) { index, current, arg ->
-                TextUtils.replace(current, arrayOf("%${index + 1}\$s"), arrayOf(arg))
-            }
 
-            /**
-             * [android.content.res.Resources.getQuantityText] does not support format args, and
-             * [android.content.res.Resources.getQuantityString] does not keep annotations.
-             * This function uses getText and manually handles formats.
-             */
-            is PluralId -> args.foldIndexed(
-                LocalContext.current.resources.getQuantityText(value, count),
-            ) { index, current, arg ->
-                TextUtils.replace(current, arrayOf("%${index + 1}\$s"), arrayOf(arg))
+            is StringId -> value.buildText(args)
+
+            is PluralId -> when (count) {
+                1 -> singular.buildText(args)
+                else -> plural.buildText(args)
             }
         }
+    }
+
+    /**
+     * [android.content.res.Resources.getText] does not support format args, and
+     * [android.content.res.Resources.getString] does not keep annotations.
+     * This function uses getText and manually handles formats.
+     */
+    @Composable
+    fun Int.buildText(args: List<String>): CharSequence = args.foldIndexed(
+        LocalContext.current.resources.getText(this)
+    ) { index, current, arg ->
+        TextUtils.replace(current, arrayOf("%${index + 1}\$s"), arrayOf(arg))
     }
 }
 

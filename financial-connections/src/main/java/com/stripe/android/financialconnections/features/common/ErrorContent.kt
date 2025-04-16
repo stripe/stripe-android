@@ -159,8 +159,9 @@ internal fun NoSupportedPaymentMethodTypeAccountsErrorContent(
         title = stringResource(
             R.string.stripe_account_picker_error_no_payment_method_title
         ),
-        content = pluralStringResource(
-            id = R.plurals.stripe_account_picker_error_no_payment_method_desc,
+        content = com.stripe.android.financialconnections.ui.components.pluralStringResource(
+            singular = R.string.stripe_account_picker_error_no_payment_method_desc_singular,
+            plural = R.string.stripe_account_picker_error_no_payment_method_desc_plural,
             count = exception.accountsCount,
             exception.accountsCount.toString(),
             exception.institution.name,
