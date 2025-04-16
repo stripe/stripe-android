@@ -25,7 +25,7 @@ internal data class LinkAppBarState(
         fun create(
             route: String?,
             email: String?,
-            previousEntryRoute: String?,
+            isLastEntry: Boolean,
             consumerIsSigningUp: Boolean,
         ): LinkAppBarState {
             val showHeaderRoutes = mutableSetOf(
@@ -49,7 +49,7 @@ internal data class LinkAppBarState(
             return LinkAppBarState(
                 showHeader = route in showHeaderRoutes,
                 showOverflowMenu = route == LinkScreen.Wallet.route,
-                navigationIcon = if (previousEntryRoute != null) {
+                navigationIcon = if (isLastEntry.not()) {
                     R.drawable.stripe_link_back
                 } else {
                     R.drawable.stripe_link_close

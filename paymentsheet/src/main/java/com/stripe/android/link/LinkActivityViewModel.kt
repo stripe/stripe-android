@@ -28,6 +28,7 @@ import com.stripe.android.link.ui.signup.SignUpViewModel
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.uicore.navigation.PopUpToBehavior
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -106,11 +107,12 @@ internal class LinkActivityViewModel @Inject constructor(
     }
 
     fun onNavEntryChanged(entry: NavBackStackEntry?) {
-        val route = entry?.destination?.route ?: return
+        val route: String = entry?.destination?.route ?: return
+        val initialDestination = (linkScreenState.value as? ScreenState.FullScreen)?.initialDestination
         _linkAppBarState.update {
             LinkAppBarState.create(
                 route = route,
-                previousEntryRoute = null, // TODO update.
+                isLastEntry = route == initialDestination?.route,
                 email = linkAccountManager.linkAccount.value?.email,
                 consumerIsSigningUp = linkAccount?.completedSignup == true,
             )
