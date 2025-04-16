@@ -55,7 +55,7 @@ internal sealed interface TextResource : Parcelable {
      * This function uses getText and manually handles formats.
      */
     @Composable
-    fun Int.buildText(args: List<String>): CharSequence = args.foldIndexed(
+    private fun Int.buildText(args: List<String>): CharSequence = args.foldIndexed(
         LocalContext.current.resources.getText(this)
     ) { index, current, arg ->
         TextUtils.replace(current, arrayOf("%${index + 1}\$s"), arrayOf(arg))
