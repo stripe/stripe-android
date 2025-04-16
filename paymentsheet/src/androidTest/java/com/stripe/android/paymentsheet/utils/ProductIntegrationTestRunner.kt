@@ -2,6 +2,8 @@ package com.stripe.android.paymentsheet.utils
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
@@ -47,8 +49,17 @@ internal fun runProductIntegrationTest(
     }
 }
 
+@OptIn(ExperimentalCustomPaymentMethodsApi::class)
 internal class ProductIntegrationBuilder {
     private var createIntentCallback: CreateIntentCallback? = null
+
+    private var confirmCustomPaymentMethodCallback: ConfirmCustomPaymentMethodCallback? = null
+
+    fun confirmCustomPaymentMethodCallback(
+        confirmCustomPaymentMethodCallback: ConfirmCustomPaymentMethodCallback?
+    ) = apply {
+        this.confirmCustomPaymentMethodCallback = confirmCustomPaymentMethodCallback
+    }
 
     fun createIntentCallback(createIntentCallback: CreateIntentCallback?) = apply {
         this.createIntentCallback = createIntentCallback
@@ -58,11 +69,19 @@ internal class ProductIntegrationBuilder {
         createIntentCallback?.let {
             builder.createIntentCallback(it)
         }
+
+        confirmCustomPaymentMethodCallback?.let {
+            builder.confirmCustomPaymentMethodCallback(it)
+        }
     }
 
     fun applyToFlowControllerBuilder(builder: PaymentSheet.FlowController.Builder) {
         createIntentCallback?.let {
             builder.createIntentCallback(it)
+        }
+
+        confirmCustomPaymentMethodCallback?.let {
+            builder.confirmCustomPaymentMethodCallback(it)
         }
     }
 }
