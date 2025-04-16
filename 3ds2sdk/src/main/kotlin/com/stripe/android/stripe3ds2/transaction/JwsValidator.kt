@@ -64,6 +64,7 @@ internal class DefaultJwsValidator(
     override fun getPayload(
         jws: String
     ): JSONObject {
+        println("YEET JwsValidator getPayload called")
         val jwsObject = JWSObject.parse(jws)
 
         if (!isLiveMode) {
