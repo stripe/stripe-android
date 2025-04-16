@@ -933,7 +933,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                     assertThat(selection).isEqualTo(
                         PaymentMethodVerticalLayoutInteractor.Selection.New(
                             code = "card",
-                            changeDetails = "···· 4242",
+                            changeDetails = "Visa ···· 4242",
                             canBeChanged = true,
                         )
                     )
@@ -958,7 +958,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                     assertThat(selection).isEqualTo(
                         PaymentMethodVerticalLayoutInteractor.Selection.New(
                             code = "card",
-                            changeDetails = "···· 4242",
+                            changeDetails = "Visa ···· 4242",
                             canBeChanged = true,
                         )
                     )
@@ -1036,7 +1036,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 assertThat(awaitItem().selection).isEqualTo(
                     PaymentMethodVerticalLayoutInteractor.Selection.New(
                         code = "card",
-                        changeDetails = "···· 4242",
+                        changeDetails = "Visa ···· 4242",
                         canBeChanged = true,
                     )
                 )
@@ -1060,7 +1060,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                     assertThat(selection).isEqualTo(
                         PaymentMethodVerticalLayoutInteractor.Selection.New(
                             code = "card",
-                            changeDetails = "···· 4242",
+                            changeDetails = "Visa ···· 4242",
                             canBeChanged = true,
                         )
                     )

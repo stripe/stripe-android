@@ -9,16 +9,22 @@ import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 internal fun runProductIntegrationTest(
     networkRule: NetworkRule,
     integrationType: ProductIntegrationType,
-    createIntentCallback: CreateIntentCallback? = null,
+    builder: ProductIntegrationBuilder.() -> Unit = {},
     resultCallback: PaymentSheetResultCallback,
     block: (ProductIntegrationTestRunnerContext) -> Unit,
 ) {
+    val integrationBuilder = ProductIntegrationBuilder().apply {
+        builder()
+    }
+
     when (integrationType) {
         ProductIntegrationType.PaymentSheet -> {
             runPaymentSheetTest(
                 networkRule = networkRule,
                 integrationType = IntegrationType.Compose,
-                createIntentCallback = createIntentCallback,
+                builder = {
+                    integrationBuilder.applyToPaymentSheetBuilder(this)
+                },
                 resultCallback = resultCallback,
                 block = { context ->
                     block(ProductIntegrationTestRunnerContext.WithPaymentSheet(context))
@@ -29,12 +35,34 @@ internal fun runProductIntegrationTest(
             runFlowControllerTest(
                 networkRule = networkRule,
                 integrationType = IntegrationType.Compose,
-                createIntentCallback = createIntentCallback,
+                builder = {
+                    integrationBuilder.applyToFlowControllerBuilder(this)
+                },
                 resultCallback = resultCallback,
                 block = { context ->
                     block(ProductIntegrationTestRunnerContext.WithFlowController(context))
                 }
             )
+        }
+    }
+}
+
+internal class ProductIntegrationBuilder {
+    private var createIntentCallback: CreateIntentCallback? = null
+
+    fun createIntentCallback(createIntentCallback: CreateIntentCallback?) = apply {
+        this.createIntentCallback = createIntentCallback
+    }
+
+    fun applyToPaymentSheetBuilder(builder: PaymentSheet.Builder) {
+        createIntentCallback?.let {
+            builder.createIntentCallback(it)
+        }
+    }
+
+    fun applyToFlowControllerBuilder(builder: PaymentSheet.FlowController.Builder) {
+        createIntentCallback?.let {
+            builder.createIntentCallback(it)
         }
     }
 }

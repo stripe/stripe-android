@@ -269,6 +269,7 @@ internal class PaymentSheetViewModelTest {
                     canRemovePaymentMethods = true,
                     canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = false,
+                    canUpdateFullPaymentMethodDetails = true
                 ),
                 defaultPaymentMethodId = null,
             ),

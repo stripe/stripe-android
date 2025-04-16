@@ -88,7 +88,11 @@ internal class DefaultPaymentMethodsFlowControllerConfirmationTest {
     ) {
         runFlowControllerTest(
             networkRule = networkRule,
-            createIntentCallback = confirmationType.createIntentCallback,
+            builder = {
+                confirmationType.createIntentCallback?.let {
+                    createIntentCallback(it)
+                }
+            },
             callConfirmOnPaymentOptionCallback = false,
             integrationType = IntegrationType.Compose,
             resultCallback = ::assertCompleted,

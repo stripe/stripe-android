@@ -65,6 +65,8 @@ internal class CustomerAdapterDataSource @Inject constructor(
                     canRemoveLastPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
                     // Always `true` for `Adapter` use case
                     canRemovePaymentMethods = true,
+                    // Payment Method Update is customer sessions-only feature, so this value is unused.
+                    canUpdateFullPaymentMethodDetails = false,
                 ),
                 // Default payment methods are a customer sessions-only feature, so this value is unused.
                 defaultPaymentMethodId = null,
