@@ -83,7 +83,9 @@ internal class PaymentSheetAnalyticsTest {
     @Test
     fun testSuccessfulCardPayment() = runPaymentSheetTest(
         networkRule = networkRule,
-        analyticEventCallback = analyticEventRule,
+        builder = {
+            analyticEventCallback(analyticEventRule)
+        },
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
@@ -151,7 +153,9 @@ internal class PaymentSheetAnalyticsTest {
     @Test
     fun testSuccessfulCardPaymentInFlowController() = runFlowControllerTest(
         networkRule = networkRule,
-        analyticEventCallback = analyticEventRule,
+        builder = {
+            analyticEventCallback(analyticEventRule)
+        },
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
@@ -225,7 +229,9 @@ internal class PaymentSheetAnalyticsTest {
     @Test
     fun testSuccessfulCardPaymentInVerticalMode() = runPaymentSheetTest(
         networkRule = networkRule,
-        analyticEventCallback = analyticEventRule,
+        builder = {
+            analyticEventCallback(analyticEventRule)
+        },
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
@@ -297,7 +303,9 @@ internal class PaymentSheetAnalyticsTest {
     @Test
     fun testSuccessfulCardPaymentInFlowControllerInVerticalMode() = runFlowControllerTest(
         networkRule = networkRule,
-        analyticEventCallback = analyticEventRule,
+        builder = {
+            analyticEventCallback(analyticEventRule)
+        },
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
@@ -374,7 +382,9 @@ internal class PaymentSheetAnalyticsTest {
     @Test
     fun testSavedPaymentMethod() = runPaymentSheetTest(
         networkRule = networkRule,
-        analyticEventCallback = analyticEventRule,
+        builder = {
+            analyticEventCallback(analyticEventRule)
+        },
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
@@ -427,7 +437,9 @@ internal class PaymentSheetAnalyticsTest {
     @Test
     fun testSavedPaymentMethodInFlowController() = runFlowControllerTest(
         networkRule = networkRule,
-        analyticEventCallback = analyticEventRule,
+        builder = {
+            analyticEventCallback(analyticEventRule)
+        },
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
