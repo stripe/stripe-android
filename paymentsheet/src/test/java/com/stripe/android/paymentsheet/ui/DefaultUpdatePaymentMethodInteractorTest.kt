@@ -585,7 +585,6 @@ class DefaultUpdatePaymentMethodInteractorTest {
         runScenario(
             editCardDetailsInteractorFactory = editCardDetailsInteractorFactory
         ) {
-            interactor.editCardDetailsInteractor
             editCardDetailsInteractorFactory.onCardUpdateParamsChanged?.invoke(
                 CardUpdateParams(cardBrand = CardBrand.Visa)
             )

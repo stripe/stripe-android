@@ -113,31 +113,41 @@ internal class DefaultEditCardDetailsInteractor(
         cardDetailsEntry: CardDetailsEntry,
         billingDetailsEntry: BillingDetailsEntry?
     ): CardUpdateParams? {
-        val shouldEmitCardDetailsUpdate = shouldEmitCardDetailsUpdate(cardDetailsEntry)
-        val shouldEmitBillingDetailsUpdate = shouldEmitBillingDetailsUpdate(billingDetailsEntry)
-        val shouldTakeUpdate = shouldEmitCardDetailsUpdate || shouldEmitBillingDetailsUpdate
-        return if (shouldTakeUpdate) {
+        val hasChanges = hasCardDetailsChanged(cardDetailsEntry) || hasBillingDetailsChanged(billingDetailsEntry)
+        val isComplete = cardDetailsEntry.isComplete() && isComplete(billingDetailsEntry)
+
+        return if (hasChanges && isComplete) {
             cardDetailsEntry.toUpdateParams(billingDetailsEntry)
         } else {
             null
         }
     }
 
-    private fun shouldEmitCardDetailsUpdate(cardDetailsEntry: CardDetailsEntry): Boolean {
-        val hasChanged = cardDetailsEntry.hasChanged(
+    private fun hasCardDetailsChanged(cardDetailsEntry: CardDetailsEntry): Boolean {
+        return cardDetailsEntry.hasChanged(
             card = card,
             originalCardBrandChoice = defaultCardBrandChoice(),
         )
-        return hasChanged && cardDetailsEntry.isComplete()
     }
 
-    private fun shouldEmitBillingDetailsUpdate(billingDetailsEntry: BillingDetailsEntry?): Boolean {
-        val hasChanged = billingDetailsEntry?.hasChanged(
+    private fun hasBillingDetailsChanged(billingDetailsEntry: BillingDetailsEntry?): Boolean {
+        return billingDetailsEntry?.hasChanged(
             billingDetails = billingDetails,
             addressCollectionMode = addressCollectionMode
         ) ?: false
-        val isComplete = billingDetailsEntry?.isComplete(addressCollectionMode) ?: false
-        return hasChanged && isComplete
+    }
+
+    private fun isComplete(billingDetailsEntry: BillingDetailsEntry?): Boolean {
+        return when (addressCollectionMode) {
+            AddressCollectionMode.Never -> {
+                billingDetailsEntry == null
+            }
+            else -> {
+                billingDetailsEntry?.isComplete(
+                    addressCollectionMode = addressCollectionMode
+                ) ?: true
+            }
+        }
     }
 
     private fun onBrandChoiceChanged(cardBrandChoice: CardBrandChoice) {
