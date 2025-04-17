@@ -31,6 +31,8 @@ class ConsumerSessionLookupJsonParserTest {
                     emailAddress = "email@example.com",
                     redactedPhoneNumber = "+1********68",
                     redactedFormattedPhoneNumber = "(***) *** **68",
+                    unredactedPhoneNumber = null,
+                    phoneNumberCountry = null,
                     verificationSessions = emptyList(),
                 ),
                 errorMessage = null,

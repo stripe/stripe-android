@@ -15,8 +15,7 @@ import kotlin.math.min
  * characters. The resulting value should be shown in a TextField that uses [visualTransformation],
  * which will display it in the domestic format (e.g. "(555) 555-5555" for "US" locale).
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed class PhoneNumberFormatter {
+internal sealed class PhoneNumberFormatter {
     /**
      * Region prefix, like "+1" for US.
      */
@@ -496,4 +495,13 @@ sealed class PhoneNumberFormatter {
             "UZ" to Metadata(prefix = "+998", regionCode = "UZ", pattern = "## ### ## ##")
         )
     }
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun convertPhoneNumberToE164(
+    nationalPhoneNumber: String,
+    countryCode: String,
+): String? {
+    val formatter = PhoneNumberFormatter.forCountry(countryCode)
+    return formatter.toE164Format(nationalPhoneNumber)
 }

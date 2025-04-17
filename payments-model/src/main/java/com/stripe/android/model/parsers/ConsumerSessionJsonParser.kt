@@ -1,6 +1,7 @@
 package com.stripe.android.model.parsers
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.ConsumerSession
 import org.json.JSONObject
@@ -23,8 +24,8 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
             emailAddress = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_EMAIL),
             redactedFormattedPhoneNumber = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_FORMATTED_PHONE),
             redactedPhoneNumber = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_PHONE),
-            unredactedPhoneNumber = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_UNREDACTED_PHONE),
-            phoneNumberCountry = consumerSessionJson.optString(FIELD_CONSUMER_SESSION_PHONE_COUNTRY),
+            unredactedPhoneNumber = optString(consumerSessionJson, FIELD_CONSUMER_SESSION_UNREDACTED_PHONE),
+            phoneNumberCountry = optString(consumerSessionJson, FIELD_CONSUMER_SESSION_PHONE_COUNTRY),
             verificationSessions = verificationSession,
         )
     }

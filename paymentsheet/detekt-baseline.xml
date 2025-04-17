@@ -84,6 +84,7 @@
     <ID>TooManyFunctions:NativeLinkComponent.kt$NativeLinkComponent$Builder</ID>
     <ID>TooManyFunctions:NativeLinkModule.kt$NativeLinkModule</ID>
     <ID>TooManyFunctions:PaymentMethodMetadata.kt$PaymentMethodMetadata : Parcelable</ID>
+    <ID>TooManyFunctions:PaymentMethodsUiExtension.kt$com.stripe.android.paymentsheet.ui.PaymentMethodsUiExtension.kt</ID>
     <ID>UnusedPrivateClass:PaymentOptionsViewModelTest.kt$PaymentOptionsViewModelTest$MyHostActivity : AppCompatActivity</ID>
   </CurrentIssues>
 </SmellBaseline>

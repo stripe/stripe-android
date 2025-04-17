@@ -140,6 +140,8 @@ internal object ApiKeyFixtures {
         emailAddress = "test@test.com",
         redactedPhoneNumber = "+1********12",
         redactedFormattedPhoneNumber = "(***) *** **12",
+        unredactedPhoneNumber = null,
+        phoneNumberCountry = null,
         verificationSessions = emptyList(),
     )
 
@@ -154,6 +156,8 @@ internal object ApiKeyFixtures {
         emailAddress = "test@test.com",
         redactedPhoneNumber = "+1********12",
         redactedFormattedPhoneNumber = "(***) *** **12",
+        unredactedPhoneNumber = null,
+        phoneNumberCountry = null,
         verificationSessions = listOf(
             ConsumerSession.VerificationSession(
                 type = ConsumerSession.VerificationSession.SessionType.Sms,

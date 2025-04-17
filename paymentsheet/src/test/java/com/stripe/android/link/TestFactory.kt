@@ -93,7 +93,13 @@ internal object TestFactory {
         brand = CardBrand.Visa,
         cvcCheck = CvcCheck.Pass,
         isDefault = true,
+        networks = emptyList(),
         billingAddress = ConsumerPaymentDetails.BillingAddress(
+            name = null,
+            line1 = null,
+            line2 = null,
+            locality = null,
+            administrativeArea = null,
             countryCode = CountryCode.US,
             postalCode = "12312"
         )

@@ -17,6 +17,8 @@ class ConsumerSessionJsonParserTest {
                 emailAddress = "test@stripe.com",
                 redactedPhoneNumber = "+1********56",
                 redactedFormattedPhoneNumber = "(***) *** **56",
+                unredactedPhoneNumber = null,
+                phoneNumberCountry = null,
                 verificationSessions = listOf(
                     ConsumerSession.VerificationSession(
                         type = ConsumerSession.VerificationSession.SessionType.Sms,
@@ -37,6 +39,8 @@ class ConsumerSessionJsonParserTest {
                 emailAddress = "test@stripe.com",
                 redactedPhoneNumber = "+1********56",
                 redactedFormattedPhoneNumber = "(***) *** **56",
+                unredactedPhoneNumber = null,
+                phoneNumberCountry = null,
                 verificationSessions = listOf(
                     ConsumerSession.VerificationSession(
                         type = ConsumerSession.VerificationSession.SessionType.Sms,
@@ -57,6 +61,8 @@ class ConsumerSessionJsonParserTest {
                 emailAddress = "test@stripe.com",
                 redactedPhoneNumber = "+1********23",
                 redactedFormattedPhoneNumber = "(***) *** **23",
+                unredactedPhoneNumber = null,
+                phoneNumberCountry = null,
                 verificationSessions = listOf(
                     ConsumerSession.VerificationSession(
                         type = ConsumerSession.VerificationSession.SessionType.SignUp,

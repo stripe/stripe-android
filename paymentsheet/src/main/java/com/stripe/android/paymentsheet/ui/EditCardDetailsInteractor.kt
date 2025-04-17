@@ -62,7 +62,6 @@ internal data class EditCardPayload(
                 expiryMonth = card.expiryMonth,
                 expiryYear = card.expiryYear,
                 displayBrand = card.brand.code,
-                // TODO: This still shows the dropdown somehow…
                 networks = card.networks.toSet().takeIf { it.size > 1 },
                 billingDetails = PaymentMethod.BillingDetails(
                     address = card.billingAddress?.let {
