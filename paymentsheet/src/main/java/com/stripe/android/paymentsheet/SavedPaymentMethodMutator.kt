@@ -178,15 +178,16 @@ internal class SavedPaymentMethodMutator(
         currentCustomer.paymentMethods.find { it.id == paymentMethodId }?.type?.code?.let {
             eventReporter.onRemoveSavedPaymentMethod(it)
         }
-        customerStateHolder.setCustomerState(
-            currentCustomer.copy(
-                paymentMethods = currentCustomer.paymentMethods.filter {
-                    it.id != paymentMethodId
-                }
-            )
-        )
 
         withContext(uiContext) {
+            customerStateHolder.setCustomerState(
+                currentCustomer.copy(
+                    paymentMethods = currentCustomer.paymentMethods.filter {
+                        it.id != paymentMethodId
+                    }
+                )
+            )
+
             if ((selection.value as? PaymentSelection.Saved)?.paymentMethod?.id == paymentMethodId) {
                 setSelection(null)
             }
