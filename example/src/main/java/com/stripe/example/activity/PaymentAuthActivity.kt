@@ -125,27 +125,27 @@ class PaymentAuthActivity : StripeIntentActivity() {
 
    // override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
-        if (viewModel.stripe.isPaymentResult(requestCode, data)) {
-            lifecycleScope.launch {
-                runCatching {
-                    viewModel.stripe.getPaymentIntentResult(requestCode, data!!)
-                }.fold(
-                    onSuccess = { result ->
-                        val paymentIntent = result.intent
-                        val status = paymentIntent.status
-
-                        viewBinding.status.text = "Status: ${status?.toString()}"
-                        if (status == StripeIntent.Status.RequiresConfirmation) {
-                            viewBinding.status.text = "Confirming intent ${paymentIntent.id}"
-                            viewModel.confirmPaymentIntentWithIntentId(paymentIntent.id!!)
-                        }
-                    },
-                    onFailure = {
-                        viewBinding.status.text = "Failed: ${it.message}"
-                    }
-                )
-            }
-        }
+//        if (viewModel.stripe.isPaymentResult(requestCode, data)) {
+//            lifecycleScope.launch {
+//                runCatching {
+//                    viewModel.stripe.getPaymentIntentResult(requestCode, data!!)
+//                }.fold(
+//                    onSuccess = { result ->
+//                        val paymentIntent = result.intent
+//                        val status = paymentIntent.status
+//
+//                        viewBinding.status.text = "Status: ${status?.toString()}"
+//                        if (status == StripeIntent.Status.RequiresConfirmation) {
+//                            viewBinding.status.text = "Confirming intent ${paymentIntent.id}"
+//                            viewModel.confirmPaymentIntentWithIntentId(paymentIntent.id!!)
+//                        }
+//                    },
+//                    onFailure = {
+//                        viewBinding.status.text = "Failed: ${it.message}"
+//                    }
+//                )
+//            }
+//        }
     }
 
     private fun enableUi(enable: Boolean) {

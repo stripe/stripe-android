@@ -2,6 +2,7 @@ package com.stripe.android.stripe3ds2.transaction
 
 import androidx.annotation.VisibleForTesting
 import com.nimbusds.jose.JOSEException
+import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.JWSObject
 import com.nimbusds.jose.JWSVerifier
@@ -19,8 +20,11 @@ import java.io.IOException
 import java.security.GeneralSecurityException
 import java.security.KeyStore
 import java.security.KeyStoreException
+import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.security.PublicKey
+import java.security.Security
+import java.security.Signature
 import java.security.cert.CertPathBuilder
 import java.security.cert.CertStore
 import java.security.cert.CertificateException
@@ -79,6 +83,7 @@ internal class DefaultJwsValidator(
                 return JSONObject(jwsObject.payload.toString())
             }
         } else if (isValid(jwsObject, rootCerts)) {
+            println("StripeSdk JwsValidator.isValid = true")
             return JSONObject(jwsObject.payload.toString())
         }
 
@@ -112,10 +117,29 @@ internal class DefaultJwsValidator(
         return jwsObject.verify(verifier)
     }
 
+//    @Throws(JOSEException::class, CertificateException::class)
+//    private fun getVerifier(jwsHeader: JWSHeader): JWSVerifier {
+//        println("StripeSdk algorithm: ${jwsHeader.algorithm}")
+//        val verifierFactory = DefaultJWSVerifierFactory()
+//        verifierFactory.jcaContext.provider = BouncyCastleProviderSingleton.getInstance()
+//        return verifierFactory.createJWSVerifier(jwsHeader, getPublicKeyFromHeader(jwsHeader))
+//    }
+
     @Throws(JOSEException::class, CertificateException::class)
     private fun getVerifier(jwsHeader: JWSHeader): JWSVerifier {
         val verifierFactory = DefaultJWSVerifierFactory()
-        verifierFactory.jcaContext.provider = BouncyCastleProviderSingleton.getInstance()
+        //MessageDigest.getInstance("SHA-256").provider
+        //KeyPairGenerator.getInstance(jwsHeader.algorithm.toString()).provider
+        println("StripeSdk JWT Algorithm: ${jwsHeader.algorithm}")
+
+        val provider = if (jwsHeader.algorithm == JWSAlgorithm.ES256) {
+            Signature.getInstance("SHA256withECDSA").provider
+        } else {
+            Signature.getInstance("SHA256withRSA").provider
+        }
+        //Security.addProvider(provider)
+        //verifierFactory.jcaContext.provider = s.provider//KeyPairGenerator.getInstance(jwsHeader.algorithm.toString()).provider//BouncyCastleProviderSingleton.getInstance()
+        verifierFactory.jcaContext.provider = provider//BouncyCastleProviderSingleton.getInstance()
         return verifierFactory.createJWSVerifier(jwsHeader, getPublicKeyFromHeader(jwsHeader))
     }
 
