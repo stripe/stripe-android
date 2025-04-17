@@ -70,6 +70,7 @@ internal data class TestParameters(
             settings[DelayedPaymentMethodsSettingsDefinition] = false
             settings[AutomaticPaymentMethodsSettingsDefinition] = false
             settings[LayoutSettingsDefinition] = Layout.HORIZONTAL
+            settings[LinkSettingsDefinition] = false
             block(settings)
             return settings
         }
