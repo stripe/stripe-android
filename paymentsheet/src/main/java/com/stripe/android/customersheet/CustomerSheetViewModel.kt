@@ -15,6 +15,8 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IS_LIVE_MODE
+import com.stripe.android.core.mainthread.MainThreadOnlyMutableStateFlow
+import com.stripe.android.core.mainthread.update
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
@@ -74,10 +76,8 @@ import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
@@ -108,7 +108,8 @@ internal class CustomerSheetViewModel(
     private val errorReporter: ErrorReporter,
 ) : ViewModel() {
 
-    @Inject constructor(
+    @Inject
+    constructor(
         application: Application,
         originalPaymentSelection: PaymentSelection?,
         paymentConfigurationProvider: Provider<PaymentConfiguration>,
@@ -148,7 +149,7 @@ internal class CustomerSheetViewModel(
         productUsageTokens = productUsage,
     )
 
-    private val backStack = MutableStateFlow<List<CustomerSheetViewState>>(
+    private val backStack = MainThreadOnlyMutableStateFlow<List<CustomerSheetViewState>>(
         listOf(
             CustomerSheetViewState.Loading(
                 isLiveMode = isLiveModeProvider()
@@ -157,21 +158,21 @@ internal class CustomerSheetViewModel(
     )
     val viewState: StateFlow<CustomerSheetViewState> = backStack.mapAsStateFlow { it.last() }
 
-    private val _result = MutableStateFlow<InternalCustomerSheetResult?>(null)
+    private val _result = MainThreadOnlyMutableStateFlow<InternalCustomerSheetResult?>(null)
     val result: StateFlow<InternalCustomerSheetResult?> = _result
 
     private val confirmationHandler = confirmationHandlerFactory.create(
         scope = viewModelScope.plus(workContext)
     )
 
-    private val isEditing = MutableStateFlow(false)
-    private val selectionConfirmationState = MutableStateFlow(
+    private val isEditing = MainThreadOnlyMutableStateFlow(false)
+    private val selectionConfirmationState = MainThreadOnlyMutableStateFlow(
         SelectionConfirmationState(
             isConfirming = false,
             error = null,
         )
     )
-    private val customerState = MutableStateFlow(
+    private val customerState = MainThreadOnlyMutableStateFlow(
         CustomerState(
             paymentMethods = listOf(),
             configuration = configuration,
@@ -340,35 +341,37 @@ internal class CustomerSheetViewModel(
             )
         }
 
-        result.fold(
-            onSuccess = { state ->
-                if (state.validationError != null) {
-                    _result.update {
-                        InternalCustomerSheetResult.Error(state.validationError)
+        withContext(viewModelScope.coroutineContext) {
+            result.fold(
+                onSuccess = { state ->
+                    if (state.validationError != null) {
+                        _result.update {
+                            InternalCustomerSheetResult.Error(state.validationError)
+                        }
+                    } else {
+                        supportedPaymentMethods.clear()
+                        supportedPaymentMethods.addAll(state.supportedPaymentMethods)
+
+                        originalPaymentSelection = state.paymentSelection
+
+                        customerState.value = CustomerState(
+                            paymentMethods = state.customerPaymentMethods,
+                            configuration = configuration,
+                            currentSelection = state.paymentSelection,
+                            metadata = state.paymentMethodMetadata,
+                            permissions = state.customerPermissions,
+                        )
+
+                        transitionToInitialScreen()
                     }
-                } else {
-                    supportedPaymentMethods.clear()
-                    supportedPaymentMethods.addAll(state.supportedPaymentMethods)
-
-                    originalPaymentSelection = state.paymentSelection
-
-                    customerState.value = CustomerState(
-                        paymentMethods = state.customerPaymentMethods,
-                        configuration = configuration,
-                        currentSelection = state.paymentSelection,
-                        metadata = state.paymentMethodMetadata,
-                        permissions = state.customerPermissions,
-                    )
-
-                    transitionToInitialScreen()
+                },
+                onFailure = { cause ->
+                    _result.update {
+                        InternalCustomerSheetResult.Error(exception = cause)
+                    }
                 }
-            },
-            onFailure = { cause ->
-                _result.update {
-                    InternalCustomerSheetResult.Error(exception = cause)
-                }
-            }
-        )
+            )
+        }
     }
 
     private fun transitionToInitialScreen() {
@@ -567,7 +570,11 @@ internal class CustomerSheetViewModel(
                             selectedBrand = brand
                         )
                     },
-                    onUpdateSuccess = ::onBackPressed,
+                    onUpdateSuccess = {
+                        viewModelScope.launch {
+                            onBackPressed()
+                        }
+                    },
                     updatePaymentMethodExecutor = ::updatePaymentMethodExecutor,
                     workContext = workContext,
                     // This checkbox is never displayed in CustomerSheet.
@@ -587,8 +594,10 @@ internal class CustomerSheetViewModel(
 
     private suspend fun removeExecutor(paymentMethod: PaymentMethod): Throwable? {
         return removePaymentMethod(paymentMethod = paymentMethod).onSuccess {
-            onBackPressed()
-            handlePaymentMethodRemovedFromEditScreen(paymentMethod)
+            viewModelScope.launch {
+                onBackPressed()
+                handlePaymentMethodRemovedFromEditScreen(paymentMethod)
+            }
         }.failureOrNull()?.cause
     }
 
@@ -602,7 +611,7 @@ internal class CustomerSheetViewModel(
         }
     }
 
-    private fun removePaymentMethodFromState(paymentMethod: PaymentMethod) {
+    private suspend fun removePaymentMethodFromState(paymentMethod: PaymentMethod) {
         val currentCustomerState = customerState.value
         val newSavedPaymentMethods = currentCustomerState.paymentMethods.filter { it.id != paymentMethod.id!! }
 
@@ -619,12 +628,14 @@ internal class CustomerSheetViewModel(
             originalPaymentSelection = null
         }
 
-        customerState.value = currentCustomerState.copy(
-            paymentMethods = newSavedPaymentMethods,
-            currentSelection = currentSelection.takeUnless {
-                didRemoveCurrentSelection
-            } ?: originalPaymentSelection,
-        )
+        withContext(viewModelScope.coroutineContext) {
+            customerState.value = currentCustomerState.copy(
+                paymentMethods = newSavedPaymentMethods,
+                currentSelection = currentSelection.takeUnless {
+                    didRemoveCurrentSelection
+                } ?: originalPaymentSelection,
+            )
+        }
     }
 
     private fun updatePaymentMethodInState(updatedMethod: PaymentMethod) {
@@ -981,13 +992,15 @@ internal class CustomerSheetViewModel(
                     t = cause,
                 )
 
-                updateViewState<CustomerSheetViewState.AddPaymentMethod> {
-                    it.copy(
-                        errorMessage = displayMessage?.resolvableString ?: cause.stripeErrorMessage(),
-                        enabled = true,
-                        primaryButtonEnabled = it.formFieldValues != null && !it.isProcessing,
-                        isProcessing = false,
-                    )
+                withContext(viewModelScope.coroutineContext) {
+                    updateViewState<CustomerSheetViewState.AddPaymentMethod> {
+                        it.copy(
+                            errorMessage = displayMessage?.resolvableString ?: cause.stripeErrorMessage(),
+                            enabled = true,
+                            primaryButtonEnabled = it.formFieldValues != null && !it.isProcessing,
+                            isProcessing = false,
+                        )
+                    }
                 }
             }
     }
@@ -1030,12 +1043,14 @@ internal class CustomerSheetViewModel(
                     t = result.cause,
                 )
 
-                updateViewState<CustomerSheetViewState.AddPaymentMethod> {
-                    it.copy(
-                        isProcessing = false,
-                        primaryButtonEnabled = it.formFieldValues != null,
-                        errorMessage = result.message,
-                    )
+                withContext(viewModelScope.coroutineContext) {
+                    updateViewState<CustomerSheetViewState.AddPaymentMethod> {
+                        it.copy(
+                            isProcessing = false,
+                            primaryButtonEnabled = it.formFieldValues != null,
+                            errorMessage = result.message,
+                        )
+                    }
                 }
             }
             is ConfirmationHandler.Result.Canceled,
@@ -1079,39 +1094,44 @@ internal class CustomerSheetViewModel(
     private suspend fun refreshAndUpdatePaymentMethods(
         newPaymentMethod: PaymentMethod
     ) {
-        awaitPaymentMethodDataSource().retrievePaymentMethods().onSuccess { paymentMethods ->
-            errorReporter.report(
-                ErrorReporter.SuccessEvent.CUSTOMER_SHEET_PAYMENT_METHODS_REFRESH_SUCCESS,
-            )
-
-            setCustomerState { state ->
-                val selection = paymentMethods.find { paymentMethod ->
-                    newPaymentMethod.id == paymentMethod.id
-                }?.let {
-                    PaymentSelection.Saved(it)
-                } ?: state.currentSelection
-                val filteredPaymentMethods = paymentMethods.filter { paymentMethod ->
-                    paymentMethod.card?.let { card ->
-                        PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance).isAccepted(card.brand)
-                    } ?: true
-                }
-                state.copy(
-                    paymentMethods = sortPaymentMethods(filteredPaymentMethods, selection as? PaymentSelection.Saved),
-                    currentSelection = selection,
+        withContext(viewModelScope.coroutineContext) {
+            awaitPaymentMethodDataSource().retrievePaymentMethods().onSuccess { paymentMethods ->
+                errorReporter.report(
+                    ErrorReporter.SuccessEvent.CUSTOMER_SHEET_PAYMENT_METHODS_REFRESH_SUCCESS,
                 )
+
+                setCustomerState { state ->
+                    val selection = paymentMethods.find { paymentMethod ->
+                        newPaymentMethod.id == paymentMethod.id
+                    }?.let {
+                        PaymentSelection.Saved(it)
+                    } ?: state.currentSelection
+                    val filteredPaymentMethods = paymentMethods.filter { paymentMethod ->
+                        paymentMethod.card?.let { card ->
+                            PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance).isAccepted(card.brand)
+                        } ?: true
+                    }
+                    state.copy(
+                        paymentMethods = sortPaymentMethods(
+                            filteredPaymentMethods,
+                            selection as? PaymentSelection.Saved
+                        ),
+                        currentSelection = selection,
+                    )
+                }
+
+                transition(
+                    to = selectPaymentMethodState.value,
+                    reset = true,
+                )
+            }.onFailure { exception, _ ->
+                errorReporter.report(
+                    ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_PAYMENT_METHODS_REFRESH_FAILURE,
+                    StripeException.create(exception),
+                )
+
+                onDismissed()
             }
-
-            transition(
-                to = selectPaymentMethodState.value,
-                reset = true,
-            )
-        }.onFailure { exception, _ ->
-            errorReporter.report(
-                ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_PAYMENT_METHODS_REFRESH_FAILURE,
-                StripeException.create(exception),
-            )
-
-            onDismissed()
         }
     }
 
@@ -1214,7 +1234,7 @@ internal class CustomerSheetViewModel(
                 eventReporter.onScreenPresented(CustomerSheetEventReporter.Screen.SelectPaymentMethod)
             is CustomerSheetViewState.UpdatePaymentMethod ->
                 eventReporter.onScreenPresented(CustomerSheetEventReporter.Screen.EditPaymentMethod)
-            else -> { }
+            else -> {}
         }
 
         backStack.update {
