@@ -19,7 +19,6 @@ import java.io.IOException
 import java.security.GeneralSecurityException
 import java.security.KeyStore
 import java.security.KeyStoreException
-import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.security.PublicKey
 import java.security.Signature
@@ -117,12 +116,12 @@ internal class DefaultJwsValidator(
     @Throws(JOSEException::class, CertificateException::class)
     private fun getVerifier(jwsHeader: JWSHeader): JWSVerifier {
         val verifierFactory = DefaultJWSVerifierFactory()
-        val provider = if (jwsHeader.algorithm == JWSAlgorithm.ES256) {
-            Signature.getInstance("SHA256withECDSA").provider
+        val supportAlgorithm = if (jwsHeader.algorithm == JWSAlgorithm.ES256) {
+            "SHA256withECDSA"
         } else {
-            MessageDigest.getInstance("SHA-256").provider
+            "SHA256withRSA"
         }
-        verifierFactory.jcaContext.provider = provider
+        verifierFactory.jcaContext.provider = Signature.getInstance(supportAlgorithm).provider
         return verifierFactory.createJWSVerifier(jwsHeader, getPublicKeyFromHeader(jwsHeader))
     }
 
