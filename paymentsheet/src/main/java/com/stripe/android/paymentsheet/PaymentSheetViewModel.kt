@@ -495,13 +495,15 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
                 errorReporter.report(event, StripeException.create(exception))
 
-                processConfirmationResult(
-                    ConfirmationHandler.Result.Failed(
-                        cause = exception,
-                        message = exception.stripeErrorMessage(),
-                        type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+                withContext(viewModelScope.coroutineContext) {
+                    processConfirmationResult(
+                        ConfirmationHandler.Result.Failed(
+                            cause = exception,
+                            message = exception.stripeErrorMessage(),
+                            type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+                        )
                     )
-                )
+                }
             }
         }
     }
