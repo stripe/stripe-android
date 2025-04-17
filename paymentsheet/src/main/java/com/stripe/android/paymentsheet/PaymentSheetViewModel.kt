@@ -1,7 +1,12 @@
 package com.stripe.android.paymentsheet
 
+import android.Manifest
+import android.app.Application
+import android.content.pm.PackageManager
+import android.widget.Toast
 import androidx.activity.result.ActivityResultCaller
 import androidx.annotation.VisibleForTesting
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -17,6 +22,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -84,6 +90,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
+    private val tapToPayClient: TapToPayClient,
+    private val application: Application,
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     private val errorReporter: ErrorReporter,
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
@@ -458,51 +466,74 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
         viewModelScope.launch(workContext) {
-            val confirmationOption = withContext(viewModelScope.coroutineContext) {
-                inProgressSelection = paymentSelection
+            viewState.value = PaymentSheetViewState.StartProcessing
 
-                paymentSelectionWithCvcIfEnabled(paymentSelection)
-                    ?.toConfirmationOption(
-                        configuration = config.asCommonConfiguration(),
-                        linkConfiguration = linkHandler.linkConfiguration.value,
-                    )
-            }
+            if (ActivityCompat.checkSelfPermission(
+                    application,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                    application,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                tapToPayClient.activate()
+                val result = tapToPayClient.collect(amount = 5000, currencyCode = "CAD").fold(
+                    onSuccess = { it.toString() },
+                    onFailure = { it.toString()  }
+                ).resolvableString
 
-            confirmationOption?.let { option ->
-                val stripeIntent = awaitStripeIntent()
-
-                confirmationHandler.start(
-                    arguments = ConfirmationHandler.Args(
-                        intent = stripeIntent,
-                        confirmationOption = option,
-                        initializationMode = args.initializationMode,
-                        appearance = config.appearance,
-                        shippingDetails = config.shippingDetails,
-                    ),
-                )
-            } ?: run {
-                inProgressSelection = null
-
-                val message = paymentSelection?.let {
-                    "Cannot confirm using a ${it::class.qualifiedName} payment selection!"
-                } ?: "Cannot confirm without a payment selection!"
-
-                val exception = IllegalStateException(message)
-
-                val event = paymentSelection?.let {
-                    ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_INVALID_PAYMENT_SELECTION_ON_CHECKOUT
-                } ?: ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_NO_PAYMENT_SELECTION_ON_CHECKOUT
-
-                errorReporter.report(event, StripeException.create(exception))
-
-                processConfirmationResult(
-                    ConfirmationHandler.Result.Failed(
-                        cause = exception,
-                        message = exception.stripeErrorMessage(),
-                        type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+                viewState.value = PaymentSheetViewState.Reset(
+                    message = PaymentSheetViewState.UserErrorMessage(
+                        message = result
                     )
                 )
             }
+
+//            val confirmationOption = withContext(viewModelScope.coroutineContext) {
+//                inProgressSelection = paymentSelection
+//
+//                paymentSelectionWithCvcIfEnabled(paymentSelection)
+//                    ?.toConfirmationOption(
+//                        configuration = config.asCommonConfiguration(),
+//                        linkConfiguration = linkHandler.linkConfiguration.value,
+//                    )
+//            }
+//
+//            confirmationOption?.let { option ->
+//                val stripeIntent = awaitStripeIntent()
+//
+//                confirmationHandler.start(
+//                    arguments = ConfirmationHandler.Args(
+//                        intent = stripeIntent,
+//                        confirmationOption = option,
+//                        initializationMode = args.initializationMode,
+//                        appearance = config.appearance,
+//                        shippingDetails = config.shippingDetails,
+//                    ),
+//                )
+//            } ?: run {
+//                inProgressSelection = null
+//
+//                val message = paymentSelection?.let {
+//                    "Cannot confirm using a ${it::class.qualifiedName} payment selection!"
+//                } ?: "Cannot confirm without a payment selection!"
+//
+//                val exception = IllegalStateException(message)
+//
+//                val event = paymentSelection?.let {
+//                    ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_INVALID_PAYMENT_SELECTION_ON_CHECKOUT
+//                } ?: ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_NO_PAYMENT_SELECTION_ON_CHECKOUT
+//
+//                errorReporter.report(event, StripeException.create(exception))
+//
+//                processConfirmationResult(
+//                    ConfirmationHandler.Result.Failed(
+//                        cause = exception,
+//                        message = exception.stripeErrorMessage(),
+//                        type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+//                    )
+//                )
+//            }
         }
     }
 
