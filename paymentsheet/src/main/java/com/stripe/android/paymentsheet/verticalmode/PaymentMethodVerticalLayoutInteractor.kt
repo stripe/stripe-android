@@ -94,6 +94,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val walletsState: StateFlow<WalletsState?>,
     private val canShowWalletsInline: Boolean,
     private val canShowWalletButtons: Boolean,
+    private val canUpdateFullPaymentMethodDetails: Boolean,
     private val updateSelection: (PaymentSelection?) -> Unit,
     private val isCurrentScreen: StateFlow<Boolean>,
     private val reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit,
@@ -154,6 +155,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 walletsState = viewModel.walletsState,
                 canShowWalletsInline = !viewModel.isCompleteFlow,
                 canShowWalletButtons = true,
+                canUpdateFullPaymentMethodDetails = viewModel.customerStateHolder.canUpdateFullPaymentMethodDetails,
                 updateSelection = viewModel::updateSelection,
                 isCurrentScreen = viewModel.navigationHandler.currentScreen.mapAsStateFlow {
                     it is PaymentSheetScreen.VerticalMode
@@ -395,7 +397,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         canRemove: Boolean,
         savedPaymentMethod: DisplayableSavedPaymentMethod?,
     ): PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction {
-        return if (savedPaymentMethod?.isModifiable() == true || canRemove) {
+        return if (savedPaymentMethod?.isModifiable(canUpdateFullPaymentMethodDetails) == true || canRemove) {
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE
         } else {
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE

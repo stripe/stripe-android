@@ -179,6 +179,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             mostRecentlySelectedSavedPaymentMethod = customerStateHolder.mostRecentlySelectedSavedPaymentMethod,
             providePaymentMethodName = savedPaymentMethodMutator.providePaymentMethodName,
             canRemove = customerStateHolder.canRemove,
+            canUpdateFullPaymentMethodDetails = customerStateHolder.canUpdateFullPaymentMethodDetails,
             onSelectSavedPaymentMethod = {
                 setSelection(PaymentSelection.Saved(it))
             },
