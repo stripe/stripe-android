@@ -281,7 +281,7 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./gradlew :example:connectedAndroidTest
+            - content: ./scripts/retry.sh 3 ./gradlew :example:connectedAndroidTest
   run-financial-connections-instrumentation-tests:
     before_run:
       - start_emulator
