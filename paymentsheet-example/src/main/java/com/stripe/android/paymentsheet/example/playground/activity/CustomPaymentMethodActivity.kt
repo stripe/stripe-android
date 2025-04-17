@@ -115,6 +115,6 @@ class CustomPaymentMethodActivity : AppCompatActivity() {
         const val COMPLETED_BUTTON_TEST_TAG = "cpm_complete"
         const val CANCELED_BUTTON_TEST_TAG = "cpm_canceled"
         const val FAILED_BUTTON_TEST_TAG = "cpm_failed"
-        const val FAILED_DISPLAY_MESSAGE = "Payment failed!"
+        const val FAILED_DISPLAY_MESSAGE = "Custom payment failed!"
     }
 }
