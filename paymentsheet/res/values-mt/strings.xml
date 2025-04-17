@@ -16,6 +16,8 @@
   <string name="stripe_bank_account_with_last_4">Kont tal-bank ····%s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Ikkonferma l-pagament fl-app tal-bank fi żmien %s biex tlesti x-xirja.</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_cashapp_afterpay_subtitle">Ixtri issa jew ħallas iktar tard b\'Cash App Afterpay</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
   <string name="stripe_clearpay_subtitle">Ixtri issa jew ħallas iktar tard bi Clearpay</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
@@ -24,6 +26,16 @@
   <string name="stripe_confirm_close_form_title">Trid tagħlaq din il-formola?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Erfa\' l-informazzjoni tiegħek biex tkun tista\' tħallas f\'pass wieħed grazzi għal Link</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_link_sign_up">Aqbel u kompli</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header">Ħallas malajr, b\'mod sigur, b\'mossa waħda</string>
+  <!-- Label describing the benefit of signing up for Link. -->
+  <string name="stripe_link_sign_up_message">Erfa\' l-informazzjoni dwar il-pagament tiegħek permezz ta\' Link u ħallas b\'mod sigur b\'mossa waħda fuq siti tal-internet li jaċċettaw Link.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_link_sign_up_terms"><![CDATA[Meta tkompli tkun qed taqbel mar-<terms>Regoli</terms> u l-<privacy>Politika tal-Privatezza</privacy>.]]></string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message">Daħħal il-kodiċi li bgħatna fuq %s biex tuża l-informazzjoni merfugħa tiegħek.</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Oħroġ minn Link</string>
   <!-- Text that is displayed when a network error occurs -->
@@ -81,6 +93,8 @@
   <string name="stripe_paymentsheet_manage_bank_account">Ħu ħsieb il-kont tal-bank tal-Istati Uniti tal-Amerka</string>
   <!-- Title shown above a view containing a customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_card">Ħu ħsieb il-karta</string>
+  <!-- Title shown above a view containing the customer's cards that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_cards">Ħu ħsieb il-karti</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Ħu ħsieb il-metodi tal-pagament</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
@@ -137,6 +151,8 @@
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Erfa\' din il-kard għal pagamenti futuri %s</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">Merfugħ</string>
+  <!-- Title shown above a view containing the customer's cards -->
+  <string name="stripe_paymentsheet_select_card">Agħżel karta</string>
   <!-- Title shown above a view containing the customer's payment methods -->
   <string name="stripe_paymentsheet_select_payment_method">Agħżel metodu tal-pagament</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
@@ -171,6 +187,8 @@
   <string name="stripe_signup_deactivated_account_message">Il-kont tiegħek mitfi</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">Xi ħaġa marret ħażin</string>
+  <!-- Accessibility description when payment button shows a successful transaction animation. -->
+  <string name="stripe_successful_transaction_description">It-tranżazzjoni għaddiet</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Ikkanċella u ħallas mod ieħor</string>
   <!-- Text on a screen asking the user to approve a payment -->

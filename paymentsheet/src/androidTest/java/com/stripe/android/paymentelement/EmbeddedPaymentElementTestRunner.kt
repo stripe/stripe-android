@@ -22,7 +22,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 internal class EmbeddedPaymentElementTestRunnerContext(
-    private val embeddedPaymentElement: EmbeddedPaymentElement,
+    val embeddedPaymentElement: EmbeddedPaymentElement,
     private val countDownLatch: CountDownLatch,
 ) {
     suspend fun configure(
@@ -52,10 +52,12 @@ internal class EmbeddedPaymentElementTestRunnerContext(
     }
 }
 
+@OptIn(ExperimentalAnalyticEventCallbackApi::class)
 internal fun runEmbeddedPaymentElementTest(
     networkRule: NetworkRule,
     createIntentCallback: CreateIntentCallback,
     resultCallback: EmbeddedPaymentElement.ResultCallback,
+    analyticEventCallback: AnalyticEventCallback? = null,
     successTimeoutSeconds: Long = 5L,
     block: suspend (EmbeddedPaymentElementTestRunnerContext) -> Unit,
 ) {
@@ -69,7 +71,9 @@ internal fun runEmbeddedPaymentElementTest(
                 resultCallback.onResult(result)
                 countDownLatch.countDown()
             },
-        )
+        ).analyticEventCallback { event ->
+            analyticEventCallback?.onEvent(event)
+        }
         it.setContent {
             embeddedPaymentElement = rememberEmbeddedPaymentElement(builder)
             val scrollState = rememberScrollState()

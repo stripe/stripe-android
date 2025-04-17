@@ -48,7 +48,9 @@ internal object LinkTestUtils {
         originalParams = mock()
     )
 
-    fun createLinkConfiguration(): LinkConfiguration {
+    fun createLinkConfiguration(
+        cardBrandChoice: LinkConfiguration.CardBrandChoice? = null,
+    ): LinkConfiguration {
         return LinkConfiguration(
             stripeIntent = mock {
                 on { linkFundingSources } doReturn listOf(
@@ -60,7 +62,7 @@ internal object LinkTestUtils {
             merchantName = "Test merchant inc.",
             merchantCountryCode = "US",
             passthroughModeEnabled = false,
-            cardBrandChoice = null,
+            cardBrandChoice = cardBrandChoice,
             shippingDetails = null,
             useAttestationEndpointsForLink = false,
             suppress2faModal = false,

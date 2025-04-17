@@ -13,5 +13,6 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
--dontwarn org.bouncycastle.**
+-keep class org.bouncycastle.jcajce.provider.** { *; }
+-keep class !org.bouncycastle.jce.provider.X509LDAPCertStoreSpi,org.bouncycastle.jce.provider.** { *; }
 -dontwarn com.google.crypto.tink.subtle.XChaCha20Poly1305

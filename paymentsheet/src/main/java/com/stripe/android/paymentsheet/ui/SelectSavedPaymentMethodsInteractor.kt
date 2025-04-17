@@ -8,9 +8,11 @@ import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -54,16 +56,24 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
     private val canRemove: StateFlow<Boolean>,
     private val toggleEdit: () -> Unit,
     private val isProcessing: StateFlow<Boolean>,
+    private val isCurrentScreen: StateFlow<Boolean>,
     private val currentSelection: StateFlow<PaymentSelection?>,
     private val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?>,
     private val onAddCardPressed: () -> Unit,
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
-    private val onPaymentMethodSelected: (PaymentSelection?) -> Unit,
+    private val updateSelection: (selection: PaymentSelection?, isUserInput: Boolean) -> Unit,
     override val isLiveMode: Boolean,
 ) : SelectSavedPaymentMethodsInteractor {
     private val coroutineScope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
 
-    private val _paymentOptionsRelevantSelection: MutableStateFlow<PaymentSelection?> = MutableStateFlow(null)
+    private val _screenSelection: MutableStateFlow<PaymentSelection?> = MutableStateFlow(
+        when (val value = currentSelection.value) {
+            is PaymentSelection.Link,
+            is PaymentSelection.GooglePay,
+            is PaymentSelection.Saved -> value
+            else -> null
+        }
+    )
 
     private val _state: MutableStateFlow<SelectSavedPaymentMethodsInteractor.State> =
         MutableStateFlow(getInitialState())
@@ -75,7 +85,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
         return SelectSavedPaymentMethodsInteractor.State(
             paymentOptionsItems = paymentOptionsItems,
             selectedPaymentOptionsItem = getSelectedPaymentOptionsItem(
-                currentSelection.value,
+                _screenSelection.value,
                 mostRecentlySelectedSavedPaymentMethod.value,
                 paymentOptionsItems,
             ),
@@ -142,14 +152,16 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
                 selection is PaymentSelection.Saved ||
                     selection is PaymentSelection.Link ||
                     selection == PaymentSelection.GooglePay
-            }.collect {
-                _paymentOptionsRelevantSelection.value = it
+            }.collect { selection ->
+                if (selection != _screenSelection.value) {
+                    _screenSelection.value = selection
+                }
             }
         }
 
         coroutineScope.launch {
             combineAsStateFlow(
-                _paymentOptionsRelevantSelection,
+                _screenSelection,
                 mostRecentlySelectedSavedPaymentMethod,
                 paymentOptionsItems,
             ) { selection, savedSelection, paymentOptionsItems ->
@@ -162,6 +174,14 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
                 }
             }
         }
+
+        coroutineScope.launch {
+            isCurrentScreen.collect { isCurrentScreen ->
+                if (isCurrentScreen) {
+                    updateSelection(_screenSelection.value, false)
+                }
+            }
+        }
     }
 
     private fun getSelectedPaymentOptionsItem(
@@ -170,9 +190,13 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
         paymentOptionsItems: List<PaymentOptionsItem>,
     ): PaymentOptionsItem? {
         val paymentSelection = when (selection) {
-            is PaymentSelection.Saved, is PaymentSelection.Link, PaymentSelection.GooglePay -> selection
-
-            is PaymentSelection.New, is PaymentSelection.ExternalPaymentMethod, null -> savedSelection?.let {
+            is PaymentSelection.Saved,
+            is PaymentSelection.Link,
+            is PaymentSelection.GooglePay -> selection
+            is PaymentSelection.New,
+            is PaymentSelection.ExternalPaymentMethod,
+            is PaymentSelection.CustomPaymentMethod,
+            null -> savedSelection?.let {
                 PaymentSelection.Saved(it)
             }
         }
@@ -189,9 +213,16 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
                 onUpdatePaymentMethod(viewAction.paymentMethod)
             }
 
-            is SelectSavedPaymentMethodsInteractor.ViewAction.SelectPaymentMethod -> onPaymentMethodSelected(
-                viewAction.selection
-            )
+            is SelectSavedPaymentMethodsInteractor.ViewAction.SelectPaymentMethod -> {
+                val selection = viewAction.selection
+
+                _screenSelection.value = selection
+
+                updateSelection(
+                    selection,
+                    true,
+                )
+            }
 
             SelectSavedPaymentMethodsInteractor.ViewAction.AddCardPressed -> onAddCardPressed()
             SelectSavedPaymentMethodsInteractor.ViewAction.ToggleEdit -> toggleEdit()
@@ -227,8 +258,17 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
                         AddAnotherPaymentMethod(interactor = interactor)
                     )
                 },
+                isCurrentScreen = viewModel.navigationHandler.currentScreen.mapAsStateFlow {
+                    it is PaymentSheetScreen.SelectSavedPaymentMethods
+                },
+                updateSelection = { selection, isUserInput ->
+                    if (isUserInput) {
+                        viewModel.handlePaymentMethodSelected(selection)
+                    } else {
+                        viewModel.updateSelection(selection)
+                    }
+                },
                 onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,
-                onPaymentMethodSelected = viewModel::handlePaymentMethodSelected,
                 isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             )
         }

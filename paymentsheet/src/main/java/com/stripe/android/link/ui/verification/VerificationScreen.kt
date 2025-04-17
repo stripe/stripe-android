@@ -106,7 +106,7 @@ internal fun VerificationBody(
         )
 
         Text(
-            text = stringResource(R.string.stripe_verification_message, state.redactedPhoneNumber),
+            text = stringResource(R.string.stripe_link_verification_message, state.redactedPhoneNumber),
             modifier = Modifier
                 .testTag(VERIFICATION_SUBTITLE_TAG)
                 .fillMaxWidth()
@@ -150,6 +150,15 @@ internal fun VerificationBody(
             isSendingNewCode = state.isSendingNewCode,
             onClick = onResendCodeClick,
         )
+
+        if (state.isDialog) {
+            Text(
+                modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
+                text = state.email,
+                style = MaterialTheme.typography.body2,
+                color = MaterialTheme.colors.onSecondary,
+            )
+        }
     }
 }
 
@@ -198,7 +207,7 @@ private fun Header(
         )
     } else {
         Text(
-            text = stringResource(R.string.stripe_verification_header),
+            text = stringResource(R.string.stripe_verification_dialog_header),
             modifier = Modifier
                 .testTag(VERIFICATION_TITLE_TAG)
                 .padding(vertical = 4.dp),

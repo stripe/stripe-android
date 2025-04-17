@@ -50,6 +50,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -101,6 +102,7 @@ internal class CustomerSheetViewModel(
     private val eventReporter: CustomerSheetEventReporter,
     private val workContext: CoroutineContext = Dispatchers.IO,
     @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
+    private val productUsage: Set<String>,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
     private val customerSheetLoader: CustomerSheetLoader,
     private val errorReporter: ErrorReporter,
@@ -117,6 +119,7 @@ internal class CustomerSheetViewModel(
         eventReporter: CustomerSheetEventReporter,
         workContext: CoroutineContext = Dispatchers.IO,
         @Named(IS_LIVE_MODE) isLiveModeProvider: () -> Boolean,
+        @Named(PRODUCT_USAGE) productUsage: Set<String>,
         confirmationHandlerFactory: ConfirmationHandler.Factory,
         customerSheetLoader: CustomerSheetLoader,
         errorReporter: ErrorReporter,
@@ -133,13 +136,17 @@ internal class CustomerSheetViewModel(
         stripeRepository = stripeRepository,
         eventReporter = eventReporter,
         workContext = workContext,
+        productUsage = productUsage,
         isLiveModeProvider = isLiveModeProvider,
         confirmationHandlerFactory = confirmationHandlerFactory,
         customerSheetLoader = customerSheetLoader,
         errorReporter = errorReporter,
     )
 
-    private val cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(application)
+    private val cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(
+        context = application,
+        productUsageTokens = productUsage,
+    )
 
     private val backStack = MutableStateFlow<List<CustomerSheetViewState>>(
         listOf(
@@ -172,6 +179,7 @@ internal class CustomerSheetViewModel(
             permissions = CustomerPermissions(
                 canRemovePaymentMethods = false,
                 canRemoveLastPaymentMethod = false,
+                canUpdateFullPaymentMethodDetails = false,
             ),
             metadata = null,
         )
@@ -548,7 +556,9 @@ internal class CustomerSheetViewModel(
                 updatePaymentMethodInteractor = DefaultUpdatePaymentMethodInteractor(
                     isLiveMode = isLiveModeProvider(),
                     canRemove = customerState.canRemove,
+                    allowFullCardDetailsEdit = customerState.canUpdateFullPaymentMethodDetails,
                     displayableSavedPaymentMethod = paymentMethod,
+                    addressCollectionMode = configuration.billingDetailsCollectionConfiguration.address,
                     cardBrandFilter = PaymentSheetCardBrandFilter(customerState.configuration.cardBrandAcceptance),
                     removeExecutor = ::removeExecutor,
                     onBrandChoiceSelected = { brand ->
@@ -844,6 +854,8 @@ internal class CustomerSheetViewModel(
             onError = { error ->
                 handleViewAction(CustomerSheetViewAction.OnFormError(error))
             },
+            onFormCompleted = { /* no-op, CustomerSheetScreen does not send AnalyticEvent */ },
+            onAnalyticsEvent = { /* no-op, CustomerSheetScreen does not send AnalyticEvent */ },
             setAsDefaultPaymentMethodEnabled = false,
             financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null),
             setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
@@ -1255,10 +1267,12 @@ internal class CustomerSheetViewModel(
             else -> permissions.canRemovePaymentMethods
         }
 
+        val canUpdateFullPaymentMethodDetails = permissions.canUpdateFullPaymentMethodDetails
+
         val cbcEligibility = metadata?.cbcEligibility ?: CardBrandChoiceEligibility.Ineligible
 
         val canEdit = canRemove || paymentMethods.any { method ->
-            isModifiable(method, cbcEligibility)
+            isModifiable(method, cbcEligibility, canUpdateFullPaymentMethodDetails)
         }
 
         val canShowSavedPaymentMethods = paymentMethods.isNotEmpty() || shouldShowGooglePay(metadata)

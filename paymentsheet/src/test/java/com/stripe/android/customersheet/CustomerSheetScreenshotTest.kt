@@ -16,6 +16,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
@@ -76,8 +77,10 @@ internal class CustomerSheetScreenshotTest {
         onUpdatePrimaryButtonState = { },
         onUpdatePrimaryButtonUIState = { },
         onError = { },
+        onFormCompleted = { },
         setAsDefaultPaymentMethodEnabled = false,
         financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
+        onAnalyticsEvent = { },
         setAsDefaultMatchesSaveForFutureUse = false,
     )
 
@@ -351,6 +354,7 @@ internal class CustomerSheetScreenshotTest {
     ): CustomerSheetViewState {
         return CustomerSheetViewState.UpdatePaymentMethod(
             updatePaymentMethodInteractor = DefaultUpdatePaymentMethodInteractor(
+                allowFullCardDetailsEdit = false,
                 displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
                 removeExecutor = { null },
                 updatePaymentMethodExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
@@ -358,6 +362,7 @@ internal class CustomerSheetScreenshotTest {
                 canRemove = canRemove,
                 isLiveMode = true,
                 cardBrandFilter = DefaultCardBrandFilter,
+                addressCollectionMode = AddressCollectionMode.Automatic,
                 onBrandChoiceSelected = {},
                 // This checkbox is never displayed in CustomerSheet.
                 shouldShowSetAsDefaultCheckbox = false,

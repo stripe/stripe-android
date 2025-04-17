@@ -5,6 +5,7 @@ import com.stripe.android.connect.PrivateBetaConnectSDK
 import com.stripe.android.connect.appearance.Appearance
 import com.stripe.android.connect.appearance.TextTransform
 import kotlinx.serialization.Serializable
+import kotlin.math.roundToInt
 
 @Serializable
 internal data class AppearanceJs(
@@ -21,21 +22,22 @@ internal data class AppearanceVariablesJs(
     val fontFamily: String?,
 
     /**
-     * The baseline font size set on the embedded component root. This scales the value of other font size variables.
+     * The baseline font size in px set on the embedded component root.
+     * This scales the value of other font size variables.
      */
-    val fontSizeBase: Float?,
+    val fontSizeBase: String?,
 
     /**
-     * The base spacing unit in dp that derives all spacing values. Increase or decrease this value to make your layout
+     * The base spacing unit in px that derives all spacing values. Increase or decrease this value to make your layout
      * more or less spacious.
      */
-    val spacingUnit: Float?,
+    val spacingUnit: String?,
 
     /**
-     * The general border radius in dp used in embedded components. This sets the default border radius for all
+     * The general border radius in px used in embedded components. This sets the default border radius for all
      * components.
      */
-    val borderRadius: Float?,
+    val borderRadius: String?,
 
     /**
      * The primary color used throughout embedded components. Set this to your primary brand color.
@@ -205,24 +207,24 @@ internal data class AppearanceVariablesJs(
     @ColorInt val formAccentColor: IntAsRgbHexString?,
 
     /**
-     * The border radius in dp used for buttons.
+     * The border radius in px used for buttons.
      */
-    val buttonBorderRadius: Float?,
+    val buttonBorderRadius: String?,
 
     /**
-     * The border radius in dp used for form elements.
+     * The border radius in px used for form elements.
      */
-    val formBorderRadius: Float?,
+    val formBorderRadius: String?,
 
     /**
-     * The border radius in dp used for badges.
+     * The border radius in px used for badges.
      */
-    val badgeBorderRadius: Float?,
+    val badgeBorderRadius: String?,
 
     /**
-     * The border radius in dp used for overlays.
+     * The border radius in px used for overlays.
      */
-    val overlayBorderRadius: Float?,
+    val overlayBorderRadius: String?,
 
     /**
      * The backdrop color when an overlay is opened.
@@ -230,9 +232,9 @@ internal data class AppearanceVariablesJs(
     @ColorInt val overlayBackdropColor: IntAsRgbHexString?,
 
     /**
-     * The font size in sp for the medium body typography.
+     * The font size in px for the medium body typography.
      */
-    val bodyMdFontSize: Float?,
+    val bodyMdFontSize: String?,
 
     /**
      * The font weight (between 0-1000) for the medium body typography.
@@ -240,9 +242,9 @@ internal data class AppearanceVariablesJs(
     val bodyMdFontWeight: Int?,
 
     /**
-     * The font size in sp for the small body typography.
+     * The font size in px for the small body typography.
      */
-    val bodySmFontSize: Float?,
+    val bodySmFontSize: String?,
 
     /**
      * The font weight (between 0-1000) for the small body typography.
@@ -250,9 +252,9 @@ internal data class AppearanceVariablesJs(
     val bodySmFontWeight: Int?,
 
     /**
-     * The font size in sp for the extra large heading typography.
+     * The font size in px for the extra large heading typography.
      */
-    val headingXlFontSize: Float?,
+    val headingXlFontSize: String?,
 
     /**
      * The font weight (between 0-1000) for the extra large heading typography.
@@ -266,9 +268,9 @@ internal data class AppearanceVariablesJs(
     val headingXlTextTransform: TextTransform?,
 
     /**
-     * The font size in sp for the large heading typography.
+     * The font size in px for the large heading typography.
      */
-    val headingLgFontSize: Float?,
+    val headingLgFontSize: String?,
 
     /**
      * The font weight (between 0-1000) for the large heading typography.
@@ -282,9 +284,9 @@ internal data class AppearanceVariablesJs(
     val headingLgTextTransform: TextTransform?,
 
     /**
-     * The font size in sp for the medium heading typography.
+     * The font size in px for the medium heading typography.
      */
-    val headingMdFontSize: Float?,
+    val headingMdFontSize: String?,
 
     /**
      * The font weight (between 0-1000) for the medium heading typography.
@@ -298,9 +300,9 @@ internal data class AppearanceVariablesJs(
     val headingMdTextTransform: TextTransform?,
 
     /**
-     * The font size in sp for the small heading typography.
+     * The font size in px for the small heading typography.
      */
-    val headingSmFontSize: Float?,
+    val headingSmFontSize: String?,
 
     /**
      * The font weight (between 0-1000) for the small heading typography.
@@ -314,9 +316,9 @@ internal data class AppearanceVariablesJs(
     val headingSmTextTransform: TextTransform?,
 
     /**
-     * The font size in sp for the extra small heading typography.
+     * The font size in px for the extra small heading typography.
      */
-    val headingXsFontSize: Float?,
+    val headingXsFontSize: String?,
 
     /**
      * The font weight (between 0-1000) for the extra small heading typography.
@@ -330,9 +332,9 @@ internal data class AppearanceVariablesJs(
     val headingXsTextTransform: TextTransform?,
 
     /**
-     * The font size in sp for the medium label typography.
+     * The font size in px for the medium label typography.
      */
-    val labelMdFontSize: Float?,
+    val labelMdFontSize: String?,
 
     /**
      * The font weight (between 0-1000) for the medium label typography.
@@ -346,9 +348,9 @@ internal data class AppearanceVariablesJs(
     val labelMdTextTransform: TextTransform?,
 
     /**
-     * The font size in sp for the small label typography.
+     * The font size in px for the small label typography.
      */
-    val labelSmFontSize: Float?,
+    val labelSmFontSize: String?,
 
     /**
      * The font weight (between 0-1000) for the small label typography.
@@ -362,15 +364,24 @@ internal data class AppearanceVariablesJs(
     val labelSmTextTransform: TextTransform?,
 )
 
+private fun Float?.toPx(): String? {
+    return this?.let { "${roundToInt()}px" }
+}
+
+/**
+ * We need to send the user's customization options to ConnectJS which is only aware of web.
+ * Unscaled floats are sent without conversion since browsers will appropriately
+ * scale `px` values.
+ */
 @OptIn(PrivateBetaConnectSDK::class)
 @Suppress("LongMethod")
 internal fun Appearance.toJs(): AppearanceJs {
     return AppearanceJs(
         variables = AppearanceVariablesJs(
             fontFamily = typography.fontFamily,
-            fontSizeBase = typography.fontSizeBase,
-            spacingUnit = null,
-            borderRadius = cornerRadius.base,
+            fontSizeBase = typography.fontSizeBase.toPx(),
+            spacingUnit = spacingUnit.toPx(),
+            borderRadius = cornerRadius.base.toPx(),
             colorPrimary = colors.primary,
             colorBackground = colors.background,
             colorText = colors.text,
@@ -403,34 +414,34 @@ internal fun Appearance.toJs(): AppearanceJs {
             colorBorder = colors.border,
             formHighlightColorBorder = colors.formHighlightBorder,
             formAccentColor = colors.formAccent,
-            buttonBorderRadius = cornerRadius.button,
-            formBorderRadius = cornerRadius.form,
-            badgeBorderRadius = cornerRadius.badge,
-            overlayBorderRadius = cornerRadius.overlay,
+            buttonBorderRadius = cornerRadius.button.toPx(),
+            formBorderRadius = cornerRadius.form.toPx(),
+            badgeBorderRadius = cornerRadius.badge.toPx(),
+            overlayBorderRadius = cornerRadius.overlay.toPx(),
             overlayBackdropColor = null,
-            bodyMdFontSize = typography.bodyMd?.fontSize,
+            bodyMdFontSize = typography.bodyMd?.fontSize.toPx(),
             bodyMdFontWeight = typography.bodyMd?.fontWeight,
-            bodySmFontSize = typography.bodySm?.fontSize,
+            bodySmFontSize = typography.bodySm?.fontSize.toPx(),
             bodySmFontWeight = typography.bodySm?.fontWeight,
-            headingXlFontSize = typography.headingXl?.fontSize,
+            headingXlFontSize = typography.headingXl?.fontSize.toPx(),
             headingXlFontWeight = typography.headingXl?.fontWeight,
             headingXlTextTransform = typography.headingXl?.textTransform,
-            headingLgFontSize = typography.headingLg?.fontSize,
+            headingLgFontSize = typography.headingLg?.fontSize.toPx(),
             headingLgFontWeight = typography.headingLg?.fontWeight,
             headingLgTextTransform = typography.headingLg?.textTransform,
-            headingMdFontSize = typography.headingMd?.fontSize,
+            headingMdFontSize = typography.headingMd?.fontSize.toPx(),
             headingMdFontWeight = typography.headingMd?.fontWeight,
             headingMdTextTransform = typography.headingMd?.textTransform,
-            headingSmFontSize = typography.headingSm?.fontSize,
+            headingSmFontSize = typography.headingSm?.fontSize.toPx(),
             headingSmFontWeight = typography.headingSm?.fontWeight,
             headingSmTextTransform = typography.headingSm?.textTransform,
-            headingXsFontSize = typography.headingXs?.fontSize,
+            headingXsFontSize = typography.headingXs?.fontSize.toPx(),
             headingXsFontWeight = typography.headingXs?.fontWeight,
             headingXsTextTransform = typography.headingXs?.textTransform,
-            labelMdFontSize = typography.labelMd?.fontSize,
+            labelMdFontSize = typography.labelMd?.fontSize.toPx(),
             labelMdFontWeight = typography.labelMd?.fontWeight,
             labelMdTextTransform = typography.labelMd?.textTransform,
-            labelSmFontSize = typography.labelSm?.fontSize,
+            labelSmFontSize = typography.labelSm?.fontSize.toPx(),
             labelSmFontWeight = typography.labelSm?.fontWeight,
             labelSmTextTransform = typography.labelSm?.textTransform,
         )

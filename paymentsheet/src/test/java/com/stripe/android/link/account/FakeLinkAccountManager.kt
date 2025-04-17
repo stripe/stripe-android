@@ -18,7 +18,6 @@ import com.stripe.android.model.SharePaymentDetails
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
 
 internal open class FakeLinkAccountManager(
     val linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
@@ -62,12 +61,6 @@ internal open class FakeLinkAccountManager(
 
     fun setAccountStatus(status: AccountStatus) {
         _accountStatus.value = status
-    }
-
-    suspend fun setAccountStatus(status: Flow<AccountStatus>) {
-        status.collectLatest {
-            _accountStatus.value = it
-        }
     }
 
     override suspend fun lookupConsumer(email: String, startSession: Boolean): Result<LinkAccount?> {
@@ -163,7 +156,10 @@ internal open class FakeLinkAccountManager(
         return sharePaymentDetails
     }
 
-    override fun setLinkAccountFromLookupResult(lookup: ConsumerSessionLookup, startSession: Boolean): LinkAccount? {
+    override suspend fun setLinkAccountFromLookupResult(
+        lookup: ConsumerSessionLookup,
+        startSession: Boolean,
+    ): LinkAccount? {
         return linkAccountFromLookupResult
     }
 

@@ -50,7 +50,7 @@ internal fun runFlowControllerTest(
     networkRule: NetworkRule,
     integrationType: IntegrationType = IntegrationType.Compose,
     callConfirmOnPaymentOptionCallback: Boolean = true,
-    createIntentCallback: CreateIntentCallback? = null,
+    builder: PaymentSheet.FlowController.Builder.() -> Unit = {},
     resultCallback: PaymentSheetResultCallback,
     block: suspend (FlowControllerTestRunnerContext) -> Unit,
 ) {
@@ -59,7 +59,7 @@ internal fun runFlowControllerTest(
 
     val factory = FlowControllerTestFactory(
         callConfirmOnPaymentOptionCallback = callConfirmOnPaymentOptionCallback,
-        createIntentCallback = createIntentCallback,
+        builder = builder,
         configureCallbackTurbine = configureCallbackTurbine,
         resultCallback = { result ->
             resultCallback.onPaymentSheetResult(result)
@@ -126,13 +126,15 @@ internal fun runMultipleFlowControllerInstancesTest(
 
     val firstFlowControllerFactory = FlowControllerTestFactory(
         callConfirmOnPaymentOptionCallback = callConfirmOnPaymentOptionCallback,
-        createIntentCallback = { paymentMethod, shouldSavePaymentMethod ->
-            if (testType == MultipleInstancesTestType.RunWithFirst) {
-                firstCreateIntentCallbackCalled = true
+        builder = {
+            createIntentCallback { paymentMethod, shouldSavePaymentMethod ->
+                if (testType == MultipleInstancesTestType.RunWithFirst) {
+                    firstCreateIntentCallbackCalled = true
 
-                createIntentCallback.onCreateIntent(paymentMethod, shouldSavePaymentMethod)
-            } else {
-                error("Should not have been called!")
+                    createIntentCallback.onCreateIntent(paymentMethod, shouldSavePaymentMethod)
+                } else {
+                    error("Should not have been called!")
+                }
             }
         },
         configureCallbackTurbine = configureCallbackTurbine,
@@ -148,13 +150,15 @@ internal fun runMultipleFlowControllerInstancesTest(
 
     val secondFlowControllerFactory = FlowControllerTestFactory(
         callConfirmOnPaymentOptionCallback = callConfirmOnPaymentOptionCallback,
-        createIntentCallback = { paymentMethod, shouldSavePaymentMethod ->
-            if (testType == MultipleInstancesTestType.RunWithSecond) {
-                secondCreateIntentCallbackCalled = true
+        builder = {
+            createIntentCallback { paymentMethod, shouldSavePaymentMethod ->
+                if (testType == MultipleInstancesTestType.RunWithSecond) {
+                    secondCreateIntentCallbackCalled = true
 
-                createIntentCallback.onCreateIntent(paymentMethod, shouldSavePaymentMethod)
-            } else {
-                error("Should not have been called!")
+                    createIntentCallback.onCreateIntent(paymentMethod, shouldSavePaymentMethod)
+                } else {
+                    error("Should not have been called!")
+                }
             }
         },
         configureCallbackTurbine = configureCallbackTurbine,

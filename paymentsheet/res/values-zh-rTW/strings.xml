@@ -16,6 +16,8 @@
   <string name="stripe_bank_account_with_last_4">銀行帳戶 ···· %s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">%s内在您的銀行應用中確認付款，完成購物。</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_cashapp_afterpay_subtitle">用 Cash App Afterpay 先買後付</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
   <string name="stripe_clearpay_subtitle">用 Clearpay 先買後付</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
@@ -24,6 +26,16 @@
   <string name="stripe_confirm_close_form_title">您確定要保存此表單嗎？</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">保存您的資訊，用 Link 安全地一鍵結帳</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_link_sign_up">同意並繼續</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header">快速安全地一鍵結帳</string>
+  <!-- Label describing the benefit of signing up for Link. -->
+  <string name="stripe_link_sign_up_message">用 Link 保存您的支付資訊，並在支援 Link 的網站上一鍵安全結帳。</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_link_sign_up_terms"><![CDATA[繼續即表示您同意<terms>條款</terms>和<privacy>隱私政策</privacy>。]]></string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message">輸入發送到 %s 的驗證碼來使用您保存的資訊。</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">退出 Link</string>
   <!-- Text that is displayed when a network error occurs -->
@@ -81,6 +93,8 @@
   <string name="stripe_paymentsheet_manage_bank_account">管理美國銀行帳戶</string>
   <!-- Title shown above a view containing a customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_card">管理金融卡</string>
+  <!-- Title shown above a view containing the customer's cards that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_cards">管理金融卡</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">管理支付方式</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
@@ -137,6 +151,8 @@
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">保存該卡，用於未來在 %s 付款。</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">已保存</string>
+  <!-- Title shown above a view containing the customer's cards -->
+  <string name="stripe_paymentsheet_select_card">選擇卡</string>
   <!-- Title shown above a view containing the customer's payment methods -->
   <string name="stripe_paymentsheet_select_payment_method">選擇支付方式</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
@@ -171,6 +187,8 @@
   <string name="stripe_signup_deactivated_account_message">您的帳戶已被禁用</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">出錯了</string>
+  <!-- Accessibility description when payment button shows a successful transaction animation. -->
+  <string name="stripe_successful_transaction_description">交易完成</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">取消並用另一方式支付</string>
   <!-- Text on a screen asking the user to approve a payment -->

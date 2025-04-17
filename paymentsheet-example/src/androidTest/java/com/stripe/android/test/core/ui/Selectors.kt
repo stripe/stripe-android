@@ -25,6 +25,7 @@ import com.stripe.android.model.PaymentMethod.Type.Blik
 import com.stripe.android.model.PaymentMethod.Type.CashAppPay
 import com.stripe.android.paymentelement.embedded.form.EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON
 import com.stripe.android.paymentsheet.example.playground.RELOAD_TEST_TAG
+import com.stripe.android.paymentsheet.example.playground.activity.CustomPaymentMethodActivity
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PAYMENT_METHOD_SELECTOR_TEST_TAG
@@ -36,6 +37,7 @@ import com.stripe.android.test.core.HOOKS_PAGE_LOAD_TIMEOUT
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.ui.core.elements.MANDATE_TEST_TAG
 import com.stripe.android.ui.core.elements.SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
+import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
 import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.R as StripeR
 import com.stripe.android.core.R as CoreR
@@ -108,6 +110,21 @@ internal class Selectors(
     val externalPaymentMethodFailButton = ComposeButton(
         composeTestRule,
         hasTestTag(FawryActivity.FAILED_BUTTON_TEST_TAG)
+    )
+
+    val customPaymentMethodSucceedButton = ComposeButton(
+        composeTestRule,
+        hasTestTag(CustomPaymentMethodActivity.COMPLETED_BUTTON_TEST_TAG)
+    )
+
+    val customPaymentMethodCancelButton = ComposeButton(
+        composeTestRule,
+        hasTestTag(CustomPaymentMethodActivity.CANCELED_BUTTON_TEST_TAG)
+    )
+
+    val customPaymentMethodFailButton = ComposeButton(
+        composeTestRule,
+        hasTestTag(CustomPaymentMethodActivity.FAILED_BUTTON_TEST_TAG)
     )
 
     val googlePayButton = ComposeButton(
@@ -342,6 +359,13 @@ internal class Selectors(
     fun getCvcRecollectionScreenConfirm() = composeTestRule.onNode(
         hasTestTag(CVC_RECOLLECTION_SCREEN_CONFIRM)
     )
+
+    fun selectCardBrand(displayName: String) {
+        composeTestRule.onNode(hasTestTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG))
+            .performClick()
+        composeTestRule.onNodeWithTextAfterWaiting(displayName)
+            .performClick()
+    }
 
     private fun ComposeTestRule.onNodeWithTextAfterWaiting(text: String): SemanticsNodeInteraction {
         this.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {

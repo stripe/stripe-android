@@ -45,7 +45,7 @@ internal class VerificationScreenshotTest(
                         otpElement = otpSpecWithContent(content = ""),
                         state = VerificationViewState(
                             requestFocus = false,
-                            redactedPhoneNumber = "+1********91",
+                            redactedPhoneNumber = "(•••) ••• ••91",
                             email = "test@test.com",
                             isProcessing = false,
                             errorMessage = null,
@@ -61,7 +61,7 @@ internal class VerificationScreenshotTest(
                         otpElement = otpSpecWithContent(),
                         state = VerificationViewState(
                             requestFocus = false,
-                            redactedPhoneNumber = "+1********91",
+                            redactedPhoneNumber = "(•••) ••• ••91",
                             email = "test@test.com",
                             isProcessing = false,
                             errorMessage = null,
@@ -78,7 +78,7 @@ internal class VerificationScreenshotTest(
                         state = VerificationViewState(
                             isProcessing = true,
                             requestFocus = false,
-                            redactedPhoneNumber = "+1********91",
+                            redactedPhoneNumber = "(•••) ••• ••91",
                             email = "test@test.com",
                             errorMessage = null,
                             isSendingNewCode = false,
@@ -94,7 +94,7 @@ internal class VerificationScreenshotTest(
                         state = VerificationViewState(
                             isSendingNewCode = true,
                             requestFocus = false,
-                            redactedPhoneNumber = "+1********91",
+                            redactedPhoneNumber = "(•••) ••• ••91",
                             email = "test@test.com",
                             isProcessing = false,
                             errorMessage = null,
@@ -110,7 +110,7 @@ internal class VerificationScreenshotTest(
                         state = VerificationViewState(
                             isSendingNewCode = false,
                             requestFocus = false,
-                            redactedPhoneNumber = "+1********91",
+                            redactedPhoneNumber = "(•••) ••• ••91",
                             email = "test@test.com",
                             isProcessing = false,
                             errorMessage = "Something went wrong".resolvableString,
@@ -125,7 +125,7 @@ internal class VerificationScreenshotTest(
                         otpElement = otpSpecWithContent(content = ""),
                         state = VerificationViewState(
                             requestFocus = false,
-                            redactedPhoneNumber = "+1********91",
+                            redactedPhoneNumber = "(•••) ••• ••91",
                             email = "test@test.com",
                             isProcessing = false,
                             errorMessage = null,
@@ -141,7 +141,7 @@ internal class VerificationScreenshotTest(
                         otpElement = otpSpecWithContent(),
                         state = VerificationViewState(
                             requestFocus = false,
-                            redactedPhoneNumber = "+1********91",
+                            redactedPhoneNumber = "(•••) ••• ••91",
                             email = "test@test.com",
                             isProcessing = false,
                             errorMessage = null,
@@ -158,7 +158,7 @@ internal class VerificationScreenshotTest(
                         state = VerificationViewState(
                             isSendingNewCode = false,
                             requestFocus = false,
-                            redactedPhoneNumber = "+1********91",
+                            redactedPhoneNumber = "(•••) ••• ••91",
                             email = "test@test.com",
                             isProcessing = false,
                             errorMessage = "Something went wrong".resolvableString,

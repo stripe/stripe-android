@@ -118,9 +118,9 @@ private fun PaymentSheetScreen(
     scrollState: ScrollState,
     content: @Composable () -> Unit,
 ) {
-    val processing by viewModel.processing.collectAsState()
+    val processing by viewModel.processing.collectAsState(Dispatchers.Main)
 
-    val walletsProcessingState by viewModel.walletsProcessingState.collectAsState()
+    val walletsProcessingState by viewModel.walletsProcessingState.collectAsState(Dispatchers.Main)
 
     val density = LocalDensity.current
     var contentHeight by remember { mutableStateOf(0.dp) }
@@ -129,7 +129,7 @@ private fun PaymentSheetScreen(
 
     BottomSheetScaffold(
         topBar = {
-            val currentScreen by viewModel.navigationHandler.currentScreen.collectAsState()
+            val currentScreen by viewModel.navigationHandler.currentScreen.collectAsState(Dispatchers.Main)
             val topBarState by remember(currentScreen) {
                 currentScreen.topBarState()
             }.collectAsState()
@@ -331,7 +331,7 @@ private fun PaymentSheetContent(
             }
         }
 
-        if (mandateText?.showAbovePrimaryButton == true && currentScreen.showsMandates) {
+        if (mandateText?.showAbovePrimaryButton == true && currentScreen.showsPaymentConfirmationMandates) {
             Mandate(
                 mandateText = mandateText.text?.resolve(),
                 modifier = Modifier
@@ -355,7 +355,7 @@ private fun PaymentSheetContent(
     PrimaryButton(viewModel)
 
     Box(modifier = modifier) {
-        if (mandateText?.showAbovePrimaryButton == false && currentScreen.showsMandates) {
+        if (mandateText?.showAbovePrimaryButton == false && currentScreen.showsPaymentConfirmationMandates) {
             Mandate(
                 mandateText = mandateText.text?.resolve(),
                 modifier = Modifier
@@ -423,7 +423,7 @@ internal fun Wallet(
 
 @Composable
 private fun PrimaryButton(viewModel: BaseSheetViewModel) {
-    val uiState = viewModel.primaryButtonUiState.collectAsState()
+    val uiState = viewModel.primaryButtonUiState.collectAsState(Dispatchers.Main)
 
     val modifier = Modifier
         .testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)

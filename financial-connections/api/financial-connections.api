@@ -659,6 +659,14 @@ public final class com/stripe/android/financialconnections/model/GetFinancialCon
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/financialconnections/model/IDConsentContentPane$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/model/IDConsentContentPane;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/financialconnections/model/IDConsentContentPane;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/financialconnections/model/Image$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/model/Image;
@@ -821,6 +829,7 @@ public final class com/stripe/android/financialconnections/navigation/Composable
 	public final fun getLambda-20$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-21$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-22$financial_connections_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-23$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-3$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-4$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-5$financial_connections_release ()Lkotlin/jvm/functions/Function3;

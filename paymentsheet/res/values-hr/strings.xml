@@ -16,6 +16,8 @@
   <string name="stripe_bank_account_with_last_4">Bankovni račun ····%s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Potvrdite plaćanje u aplikaciji svoje banke unutar %s da biste dovršili kupnju.</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_cashapp_afterpay_subtitle">Kupite sada ili platite kasnije s Cash App Afterpay</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
   <string name="stripe_clearpay_subtitle">Kupite sada ili platite kasnije s Clearpay</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
@@ -24,6 +26,16 @@
   <string name="stripe_confirm_close_form_title">Želite li zatvoriti ovaj obrazac?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Spremite svoje podatke za sigurno plaćanje jednim klikom putem Linka</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_link_sign_up">Pristani i nastavi</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header">Brzo i sigurno plaćanje jednim klikom</string>
+  <!-- Label describing the benefit of signing up for Link. -->
+  <string name="stripe_link_sign_up_message">Spremite svoje podatke o plaćanju pomoću Linka i sigurno platite jednim klikom na stranicama koje podržavaju Link.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_link_sign_up_terms"><![CDATA[Nastavkom pristajte na <terms>Uvjete</terms> i <privacy>Pravila o privatnosti</privacy>.]]></string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message">Unesite kôd poslan na %s za korištenje vaših spremljenih podataka.</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Odjavite se s Linka</string>
   <!-- Text that is displayed when a network error occurs -->
@@ -81,6 +93,8 @@
   <string name="stripe_paymentsheet_manage_bank_account">Upravljajte bankovnim računom u SAD-u</string>
   <!-- Title shown above a view containing a customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_card">Upravljajte karticom</string>
+  <!-- Title shown above a view containing the customer's cards that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_cards">Upravljajte karticama</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Upravljanje načinima plaćanja</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
@@ -137,6 +151,8 @@
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Spremi ovu karticu za buduća plaćanja %s</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">Spremljeno</string>
+  <!-- Title shown above a view containing the customer's cards -->
+  <string name="stripe_paymentsheet_select_card">Odaberite karticu</string>
   <!-- Title shown above a view containing the customer's payment methods -->
   <string name="stripe_paymentsheet_select_payment_method">Odaberite način plaćanja</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
@@ -171,6 +187,8 @@
   <string name="stripe_signup_deactivated_account_message">Vaš račun je deaktiviran</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">Došlo je do pogreške</string>
+  <!-- Accessibility description when payment button shows a successful transaction animation. -->
+  <string name="stripe_successful_transaction_description">Transakcija je dovršena</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Otkaži i plati na drugi način</string>
   <!-- Text on a screen asking the user to approve a payment -->

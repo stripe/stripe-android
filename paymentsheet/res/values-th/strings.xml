@@ -16,6 +16,8 @@
   <string name="stripe_bank_account_with_last_4">บัญชีธนาคาร ····%s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">ยืนยันการชำระเงินในแอปของธนาคารภายใน %s เพื่อชำระเงินให้เสร็จสิ้น</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_cashapp_afterpay_subtitle">ซื้อตอนนี้หรือจ่ายทีหลังด้วย Cash App Afterpay</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
   <string name="stripe_clearpay_subtitle">ซื้อตอนนี้หรือจ่ายทีหลังด้วย Clearpay</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
@@ -24,6 +26,16 @@
   <string name="stripe_confirm_close_form_title">แน่ใจไหมว่าต้องการปิดแบบฟอร์มนี้</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">บันทึกข้อมูลของคุณไว้เพื่อการชำระเงินที่ปลอดภัยในคลิกเดียวด้วย Link</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_link_sign_up">ยอมรับและดำเนินการต่อ</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header">การชำระเงินที่รวดเร็วและปลอดภัยในคลิกเดียว</string>
+  <!-- Label describing the benefit of signing up for Link. -->
+  <string name="stripe_link_sign_up_message">บันทึกข้อมูลการชำระเงินของคุณด้วย Link แล้วชำระเงินอย่างปลอดภัยในคลิกเดียวบนเว็บไซต์ที่ Link รองรับ</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_link_sign_up_terms"><![CDATA[การดำเนินการต่อหมายความว่าคุณยอมรับ<terms>ข้อกำหนด</terms>และ<privacy>นโยบายความเป็นส่วนตัว</privacy>]]></string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message">ป้อนรหัสยืนยันที่ส่งไปยัง %s เพื่อใช้ข้อมูลที่บันทึกไว้</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">ออกจากระบบ Link</string>
   <!-- Text that is displayed when a network error occurs -->
@@ -81,6 +93,8 @@
   <string name="stripe_paymentsheet_manage_bank_account">จัดการบัญชีธนาคารในสหรัฐอเมริกา</string>
   <!-- Title shown above a view containing a customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_card">จัดการบัตร</string>
+  <!-- Title shown above a view containing the customer's cards that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_cards">จัดการบัตร</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">จัดการวิธีการชำระเงิน</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
@@ -137,6 +151,8 @@
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">บันทึกบัตรนี้เพื่อชำระเงินให้ %s ในอนาคต</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">บันทึกแล้ว</string>
+  <!-- Title shown above a view containing the customer's cards -->
+  <string name="stripe_paymentsheet_select_card">เลือกบัตร</string>
   <!-- Title shown above a view containing the customer's payment methods -->
   <string name="stripe_paymentsheet_select_payment_method">เลือกวิธีการชำระเงิน</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
@@ -171,6 +187,8 @@
   <string name="stripe_signup_deactivated_account_message">บัญชีของคุณถูกปิดใช้งานแล้ว</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">มีข้อผิดพลาดเกิดขึ้น</string>
+  <!-- Accessibility description when payment button shows a successful transaction animation. -->
+  <string name="stripe_successful_transaction_description">ธุรกรรมเสร็จสมบูรณ์</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">ยกเลิกและชำระเงินด้วยวิธีอื่น</string>
   <!-- Text on a screen asking the user to approve a payment -->

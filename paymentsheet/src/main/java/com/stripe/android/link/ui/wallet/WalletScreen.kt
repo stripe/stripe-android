@@ -2,7 +2,6 @@ package com.stripe.android.link.ui.wallet
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -14,8 +13,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
@@ -25,10 +22,7 @@ import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,6 +47,7 @@ import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.addresselement.ScrollableColumn
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.CvcElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -72,16 +67,12 @@ internal fun WalletScreen(
     hideBottomSheetContent: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsState()
-    var isExpanded by rememberSaveable { mutableStateOf(false) }
     WalletBody(
         state = state,
-        isExpanded = isExpanded,
         expiryDateController = viewModel.expiryDateController,
         cvcController = viewModel.cvcController,
         onItemSelected = viewModel::onItemSelected,
-        onExpandedChanged = { expanded ->
-            isExpanded = expanded
-        },
+        onExpandedChanged = viewModel::onExpandedChanged,
         onPrimaryButtonClick = viewModel::onPrimaryButtonClicked,
         onPayAnotherWayClicked = viewModel::onPayAnotherWayClicked,
         onRemoveClicked = viewModel::onRemoveClicked,
@@ -96,7 +87,6 @@ internal fun WalletScreen(
 @Composable
 internal fun WalletBody(
     state: WalletUiState,
-    isExpanded: Boolean,
     expiryDateController: TextFieldController,
     cvcController: CvcController,
     onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
@@ -130,20 +120,16 @@ internal fun WalletBody(
         }
     }
 
-    Column(
+    ScrollableColumn(
         modifier = Modifier
             .testTag(WALLET_SCREEN_BOX)
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(16.dp),
     ) {
         PaymentDetailsSection(
-            modifier = Modifier
-                .weight(
-                    weight = 1f,
-                    fill = false
-                ),
+            modifier = Modifier,
             state = state,
-            isExpanded = isExpanded,
+            isExpanded = state.isExpanded,
             expiryDateController = expiryDateController,
             cvcController = cvcController,
             onItemSelected = onItemSelected,
@@ -242,7 +228,8 @@ private fun ActionSection(
     Column {
         PrimaryButton(
             modifier = Modifier
-                .testTag(WALLET_SCREEN_PAY_BUTTON),
+                .testTag(WALLET_SCREEN_PAY_BUTTON)
+                .padding(top = 16.dp, bottom = 8.dp),
             label = state.primaryButtonLabel.resolve(LocalContext.current),
             state = state.primaryButtonState,
             onButtonClick = onPrimaryButtonClick,
@@ -372,7 +359,6 @@ internal fun CollapsedPaymentDetails(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ExpandedPaymentDetails(
     uiState: WalletUiState,
@@ -402,17 +388,16 @@ private fun ExpandedPaymentDetails(
             onCollapse = onCollapse
         )
 
-        Column(
-            modifier = Modifier
-                .weight(
-                    weight = 1f,
-                    fill = false
-                )
-        ) {
-            PaymentDetailsList(
-                uiState = uiState,
-                onItemSelected = onItemSelected,
-                onMenuButtonClick = onMenuButtonClick
+        uiState.paymentDetailsList.forEach { item ->
+            PaymentDetailsListItem(
+                modifier = Modifier
+                    .testTag(WALLET_SCREEN_PAYMENT_METHODS_LIST),
+                paymentDetails = item,
+                enabled = isEnabled,
+                isSelected = uiState.selectedItem?.id == item.id,
+                isUpdating = uiState.cardBeingUpdated == item.id,
+                onClick = { onItemSelected(item) },
+                onMenuButtonClick = { onMenuButtonClick(item) }
             )
         }
 
@@ -420,44 +405,6 @@ private fun ExpandedPaymentDetails(
             AddPaymentMethodRow(
                 isEnabled = isEnabled,
                 onAddNewPaymentMethodClick = onAddNewPaymentMethodClick
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun PaymentDetailsList(
-    uiState: WalletUiState,
-    onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
-    onMenuButtonClick: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
-) {
-    val isEnabled = !uiState.primaryButtonState.isBlocking
-
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
-        items(
-            items = uiState.paymentDetailsList,
-            key = {
-                "payment_detail_${it.id}"
-            }
-        ) { item ->
-            PaymentDetailsListItem(
-                modifier = Modifier
-                    .animateItemPlacement()
-                    .testTag(WALLET_SCREEN_PAYMENT_METHODS_LIST),
-                paymentDetails = item,
-                enabled = isEnabled,
-                isSelected = uiState.selectedItem?.id == item.id,
-                isUpdating = uiState.cardBeingUpdated == item.id,
-                onClick = {
-                    onItemSelected(item)
-                },
-                onMenuButtonClick = {
-                    onMenuButtonClick(item)
-                }
             )
         }
     }

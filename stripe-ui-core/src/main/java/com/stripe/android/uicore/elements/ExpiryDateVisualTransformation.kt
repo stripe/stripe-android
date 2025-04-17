@@ -7,10 +7,13 @@ import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class ExpiryDateVisualTransformation : VisualTransformation {
+class ExpiryDateVisualTransformation(
+    private val fallbackExpiryDate: String? = null
+) : VisualTransformation {
     private val separator = " / "
 
     override fun filter(text: AnnotatedString): TransformedText {
+        if (text.text == fallbackExpiryDate) return TransformedText(text, OffsetMapping.Identity)
         /**
          * Depending on the first number is where the separator will be placed
          * If the first number is 2-9 then the slash will come after the

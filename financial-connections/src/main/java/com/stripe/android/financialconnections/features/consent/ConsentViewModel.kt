@@ -83,6 +83,7 @@ internal class ConsentViewModel @AssistedInject constructor(
             hideStripeLogo = state.consent()?.shouldShowMerchantLogos ?: true,
             allowBackNavigation = true,
             error = state.consent.error,
+            canCloseWithoutConfirmation = true,
         )
     }
 

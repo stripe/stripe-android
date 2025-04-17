@@ -16,6 +16,8 @@
   <string name="stripe_bank_account_with_last_4">은행 계좌 ····%s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">%s 이내에 은행 앱에서 결제를 확인하여 구매를 완료하십시오.</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_cashapp_afterpay_subtitle">지금 구매하거나 Cash App Afterpay로 나중에 결제</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
   <string name="stripe_clearpay_subtitle">지금 구매하거나 Clearpay로 나중에 결제</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
@@ -24,6 +26,16 @@
   <string name="stripe_confirm_close_form_title">이 양식을 닫으시겠습니까?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Link로 안전한 원클릭 결제를 위해 사용자 정보 저장</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_link_sign_up">동의하고 계속</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header">빠른 보안 원클릭 체크아웃</string>
+  <!-- Label describing the benefit of signing up for Link. -->
+  <string name="stripe_link_sign_up_message">Link에서 결제 정보를 저장하고 Link 지원 사이트에서 원클릭으로 안전하게 체크아웃하십시오.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_link_sign_up_terms"><![CDATA[계속하면 <terms>약관</terms>과 <privacy>개인정보정책</privacy>에 동의하는 것입니다.]]></string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message">저장된 정보를 사용하려면 %s(으)로 보낸 코드를 입력하십시오.</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Link 로그아웃</string>
   <!-- Text that is displayed when a network error occurs -->
@@ -81,6 +93,8 @@
   <string name="stripe_paymentsheet_manage_bank_account">미국 은행 계좌 관리</string>
   <!-- Title shown above a view containing a customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_card">카드 관리</string>
+  <!-- Title shown above a view containing the customer's cards that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_cards">카드 관리</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">결제 방식 관리</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
@@ -137,6 +151,8 @@
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">이 카드를 향후 %s 결제에 사용하도록 저장</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">저장함</string>
+  <!-- Title shown above a view containing the customer's cards -->
+  <string name="stripe_paymentsheet_select_card">카드 선택</string>
   <!-- Title shown above a view containing the customer's payment methods -->
   <string name="stripe_paymentsheet_select_payment_method">결제 방식 선택</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
@@ -171,6 +187,8 @@
   <string name="stripe_signup_deactivated_account_message">계정이 비활성화되었습니다</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">문제가 발생했습니다.</string>
+  <!-- Accessibility description when payment button shows a successful transaction animation. -->
+  <string name="stripe_successful_transaction_description">거래 완료</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">취소 및 다른 방법으로 결제</string>
   <!-- Text on a screen asking the user to approve a payment -->

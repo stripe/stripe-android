@@ -3,14 +3,13 @@ package com.stripe.android.paymentsheet.utils
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import app.cash.turbine.Turbine
-import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import com.stripe.android.paymentsheet.model.PaymentOption
 
 internal class FlowControllerTestFactory(
     callConfirmOnPaymentOptionCallback: Boolean,
-    createIntentCallback: CreateIntentCallback? = null,
+    builder: PaymentSheet.FlowController.Builder.() -> Unit,
     configureCallbackTurbine: Turbine<PaymentOption?>,
     resultCallback: PaymentSheetResultCallback,
 ) {
@@ -25,7 +24,7 @@ internal class FlowControllerTestFactory(
                 }
             },
         ).apply {
-            createIntentCallback?.let { createIntentCallback(it) }
+            builder()
         }
 
     fun make(activity: ComponentActivity): PaymentSheet.FlowController {

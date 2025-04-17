@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
@@ -1220,7 +1221,8 @@ internal class PaymentMethodMetadataTest {
             externalPaymentMethodData = null,
             paymentMethodSpecs = null,
             elementsSessionId = "session_1234",
-            flags = emptyMap()
+            flags = emptyMap(),
+            experimentsData = null
         )
     }
 
@@ -1549,6 +1551,38 @@ internal class PaymentMethodMetadataTest {
 
         val displayedPaymentMethodTypes = metadata.supportedPaymentMethodTypes()
         assertThat(displayedPaymentMethodTypes).containsExactly("card")
+    }
+
+    @Test
+    fun `Passes eligible CBC along to Link`() {
+        val linkConfiguration = LinkTestUtils.createLinkConfiguration(
+            cardBrandChoice = LinkConfiguration.CardBrandChoice(
+                eligible = true,
+                preferredNetworks = listOf("cartes_bancaires"),
+            )
+        )
+
+        val metadata = PaymentMethodMetadata.createForNativeLink(linkConfiguration)
+
+        assertThat(metadata.cbcEligibility).isEqualTo(
+            CardBrandChoiceEligibility.Eligible(
+                preferredNetworks = listOf(CardBrand.CartesBancaires)
+            )
+        )
+    }
+
+    @Test
+    fun `Passes ineligible CBC along to Link`() {
+        val linkConfiguration = LinkTestUtils.createLinkConfiguration(
+            cardBrandChoice = LinkConfiguration.CardBrandChoice(
+                eligible = false,
+                preferredNetworks = emptyList(),
+            )
+        )
+
+        val metadata = PaymentMethodMetadata.createForNativeLink(linkConfiguration)
+
+        assertThat(metadata.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
     }
 
     private fun createLinkInlineConfiguration(): LinkInlineConfiguration {

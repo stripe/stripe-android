@@ -2,20 +2,20 @@
 
 package com.stripe.android.paymentelement.embedded.content
 
-import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.containsVolatileDifferences
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.core.mainthread.MainThreadSavedStateHandle
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentsheet.FormHelper
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
-import kotlin.collections.contains
 
 internal fun interface EmbeddedSelectionChooser {
     fun choose(
@@ -28,8 +28,9 @@ internal fun interface EmbeddedSelectionChooser {
 }
 
 internal class DefaultEmbeddedSelectionChooser @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
+    private val savedStateHandle: MainThreadSavedStateHandle,
     private val formHelperFactory: EmbeddedFormHelperFactory,
+    private val eventReporter: EventReporter,
     @ViewModelScope private val coroutineScope: CoroutineScope,
 ) : EmbeddedSelectionChooser {
     private var previousConfiguration: CommonConfiguration?
@@ -86,6 +87,9 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
             is PaymentSelection.ExternalPaymentMethod -> {
                 paymentMethodMetadata.isExternalPaymentMethod(previousSelection.type)
             }
+            is PaymentSelection.CustomPaymentMethod -> {
+                paymentMethodMetadata.isCustomPaymentMethod(previousSelection.id)
+            }
         }
     }
 
@@ -93,7 +97,11 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
         previousSelection: PaymentSelection.New,
         paymentMethodMetadata: PaymentMethodMetadata,
     ): Boolean {
-        val newFormType = formHelperFactory.create(coroutineScope, paymentMethodMetadata) {}
+        val newFormType = formHelperFactory.create(
+            coroutineScope = coroutineScope,
+            paymentMethodMetadata = paymentMethodMetadata,
+            eventReporter = eventReporter,
+        ) {}
             .formTypeForCode(previousSelection.paymentMethodType)
         return newFormType != FormHelper.FormType.UserInteractionRequired
     }

@@ -9,6 +9,8 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.PrimaryButtonHeight
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
@@ -36,6 +38,18 @@ internal fun SecondaryButton(
             text = label,
             color = MaterialTheme.linkColors.secondaryButtonLabel
                 .copy(alpha = if (enabled) ContentAlpha.high else ContentAlpha.disabled)
+        )
+    }
+}
+
+@Composable
+@Preview
+private fun SecondaryButtonPreview() {
+    DefaultLinkTheme {
+        SecondaryButton(
+            enabled = true,
+            label = "Testing",
+            onClick = {}
         )
     }
 }

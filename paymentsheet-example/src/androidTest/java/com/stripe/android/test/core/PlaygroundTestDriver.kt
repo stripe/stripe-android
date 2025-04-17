@@ -40,6 +40,7 @@ import com.stripe.android.paymentsheet.example.BuildConfig
 import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.SUCCESS_RESULT
+import com.stripe.android.paymentsheet.example.playground.activity.CustomPaymentMethodActivity
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
@@ -825,7 +826,7 @@ internal class PlaygroundTestDriver(
         setup(testParameters)
         launchComplete()
 
-        confirmExternalPaymentMethod(
+        confirmExternalOrCustomPaymentMethod(
             selectors.externalPaymentMethodSucceedButton,
         )
 
@@ -842,7 +843,7 @@ internal class PlaygroundTestDriver(
         setup(testParameters)
         launchComplete()
 
-        confirmExternalPaymentMethod(
+        confirmExternalOrCustomPaymentMethod(
             selectors.externalPaymentMethodCancelButton,
         )
 
@@ -858,7 +859,7 @@ internal class PlaygroundTestDriver(
         setup(testParameters)
         launchComplete()
 
-        confirmExternalPaymentMethod(
+        confirmExternalOrCustomPaymentMethod(
             selectors.externalPaymentMethodFailButton,
         )
 
@@ -869,7 +870,57 @@ internal class PlaygroundTestDriver(
         teardown()
     }
 
-    private fun confirmExternalPaymentMethod(
+    fun confirmCustomPaymentMethodSuccess(
+        testParameters: TestParameters,
+    ) {
+        setup(testParameters)
+        launchComplete()
+
+        confirmExternalOrCustomPaymentMethod(
+            selectors.customPaymentMethodSucceedButton,
+        )
+
+        waitForPlaygroundActivity()
+
+        assertThat(resultValue).isEqualTo(SUCCESS_RESULT)
+
+        teardown()
+    }
+
+    fun confirmCustomPaymentMethodCanceled(
+        testParameters: TestParameters,
+    ) {
+        setup(testParameters)
+        launchComplete()
+
+        confirmExternalOrCustomPaymentMethod(
+            selectors.customPaymentMethodCancelButton,
+        )
+
+        isSelectPaymentMethodScreen()
+        selectors.buyButton.isEnabled()
+
+        teardown()
+    }
+
+    fun confirmCustomPaymentMethodFailed(
+        testParameters: TestParameters,
+    ) {
+        setup(testParameters)
+        launchComplete()
+
+        confirmExternalOrCustomPaymentMethod(
+            selectors.customPaymentMethodFailButton,
+        )
+
+        composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG))
+            .assertIsDisplayed()
+            .assertTextEquals(CustomPaymentMethodActivity.FAILED_DISPLAY_MESSAGE)
+
+        teardown()
+    }
+
+    private fun confirmExternalOrCustomPaymentMethod(
         button: ComposeButton,
     ) {
         clickPaymentSelection()
@@ -940,10 +991,13 @@ internal class PlaygroundTestDriver(
             .onNodeWithTag("collapsed_wallet_row_tag")
             .performClick()
 
+        composeTestRule.waitForIdle()
+
         // We might have more than one bank account
         composeTestRule
             .onAllNodesWithText("Test Institution")
             .onFirst()
+            .performScrollTo()
             .performClick()
 
         composeTestRule
@@ -1098,6 +1152,7 @@ internal class PlaygroundTestDriver(
 
         waitForScreenToLoad(testParameters)
         customOperations()
+        composeTestRule.waitForIdle()
 
         currentActivity?.let {
             compareScreenshot(it)

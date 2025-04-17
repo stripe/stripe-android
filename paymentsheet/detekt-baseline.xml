@@ -19,10 +19,12 @@
     <ID>LargeClass:DefaultEventReporterTest.kt$DefaultEventReporterTest</ID>
     <ID>LargeClass:DefaultFlowControllerTest.kt$DefaultFlowControllerTest</ID>
     <ID>LargeClass:DefaultPaymentElementLoaderTest.kt$DefaultPaymentElementLoaderTest</ID>
+    <ID>LargeClass:PaymentElementLoader.kt$DefaultPaymentElementLoader : PaymentElementLoader</ID>
     <ID>LargeClass:PaymentMethodMetadataTest.kt$PaymentMethodMetadataTest</ID>
     <ID>LargeClass:PaymentOptionsViewModelTest.kt$PaymentOptionsViewModelTest</ID>
     <ID>LargeClass:PaymentSheetActivityTest.kt$PaymentSheetActivityTest</ID>
     <ID>LargeClass:PaymentSheetViewModelTest.kt$PaymentSheetViewModelTest</ID>
+    <ID>LargeClass:USBankAccountFormViewModel.kt$USBankAccountFormViewModel : ViewModel</ID>
     <ID>LargeClass:USBankAccountFormViewModelTest.kt$USBankAccountFormViewModelTest</ID>
     <ID>LongMethod:AutocompleteScreen.kt$@Composable internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel)</ID>
     <ID>LongMethod:CustomerSheetScreen.kt$@Composable internal fun SelectPaymentMethod( viewState: CustomerSheetViewState.SelectPaymentMethod, viewActionHandler: (CustomerSheetViewAction) -> Unit, paymentMethodNameProvider: (PaymentMethodCode?) -> ResolvableString, modifier: Modifier = Modifier, )</ID>
@@ -37,6 +39,7 @@
     <ID>LongMethod:PaymentSheetScreen.kt$@Composable private fun PaymentSheetContent( viewModel: BaseSheetViewModel, headerText: ResolvableString?, walletsState: WalletsState?, walletsProcessingState: WalletsProcessingState?, error: ResolvableString?, currentScreen: PaymentSheetScreen, mandateText: MandateText?, modifier: Modifier )</ID>
     <ID>LongMethod:PaymentSheetViewModelTest.kt$PaymentSheetViewModelTest$@Test fun `Can complete payment after switching to another LPM from card selection with inline Link signup state`()</ID>
     <ID>LongMethod:PlaceholderHelperTest.kt$PlaceholderHelperTest$@Test fun `Test correct placeholder is removed for placeholder spec`()</ID>
+    <ID>LongMethod:SignUpScreen.kt$@Composable internal fun SignUpBody( emailController: TextFieldController, phoneNumberController: PhoneNumberController, nameController: TextFieldController, signUpScreenState: SignUpScreenState, onSignUpClick: () -> Unit )</ID>
     <ID>LongMethod:USBankAccountForm.kt$@Composable private fun BillingDetailsForm( instantDebits: Boolean, formArgs: FormArguments, enabled: Boolean, isPaymentFlow: Boolean, nameController: TextFieldController, emailController: TextFieldController, phoneController: PhoneNumberController, addressController: AddressController, lastTextFieldIdentifier: IdentifierSpec?, sameAsShippingElement: SameAsShippingElement?, )</ID>
     <ID>LongMethod:USBankAccountFormViewModel.kt$USBankAccountFormViewModel$private fun createNewPaymentSelection( resultIdentifier: ResultIdentifier, last4: String?, bankName: String?, billingDetails: PaymentMethod.BillingDetails, ): PaymentSelection.New.USBankAccount</ID>
     <ID>MagicNumber:NewPaymentMethodTabLayoutUI.kt$.3f</ID>
@@ -45,6 +48,7 @@
     <ID>MagicNumber:PrimaryButton.kt$PrimaryButton$0.5f</ID>
     <ID>MagicNumber:USBankAccountForm.kt$0.5f</ID>
     <ID>MatchingDeclarationName:ErrorText.kt$ErrorTextStyle</ID>
+    <ID>MatchingDeclarationName:LinkTerms.kt$LinkTermsType</ID>
     <ID>MaxLineLength:CardDefinition.kt$internal</ID>
     <ID>MaxLineLength:CustomerRepositoryTest.kt$CustomerRepositoryTest$fun</ID>
     <ID>MaxLineLength:CustomerSheetViewModelTest.kt$CustomerSheetViewModelTest$fun</ID>

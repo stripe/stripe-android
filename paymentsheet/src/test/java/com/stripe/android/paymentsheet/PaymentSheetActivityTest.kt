@@ -80,12 +80,14 @@ import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_EDIT_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.utils.prefilledBuilder
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
@@ -1140,6 +1142,58 @@ internal class PaymentSheetActivityTest {
         }
 
         verify(eventReporter).onPressConfirmButton(any())
+    }
+
+    @Test
+    fun `Navigating back from add screen to saved pms screen should enable pay button`() = runTest(testDispatcher) {
+        val paymentMethods = listOf(
+            PaymentMethodFactory.card(
+                last4 = "4242"
+            ),
+            PaymentMethodFactory.card(
+                last4 = "5454"
+            )
+        )
+        val initialSelection = PaymentSelection.Saved(paymentMethods[0])
+        val newSelection = PaymentSelection.Saved(paymentMethods[1])
+        val viewModel = createViewModel(
+            paymentMethods = paymentMethods,
+            initialPaymentSelection = initialSelection,
+        )
+        val scenario = activityScenario(viewModel)
+
+        scenario.launch(intent).use {
+            scenario.onActivity {
+                composeTestRule.waitForIdle()
+                assertThat(viewModel.selection.value).isEqualTo(initialSelection)
+                composeTestRule.onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG).assertIsEnabled()
+                assertThat(viewModel.navigationHandler.currentScreen.value)
+                    .isInstanceOf<SelectSavedPaymentMethods>()
+
+                composeTestRule.onNodeWithTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_···· 5454")
+                    .performClick()
+
+                composeTestRule.waitForIdle()
+                assertThat(viewModel.selection.value).isEqualTo(newSelection)
+                composeTestRule.onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG).assertIsEnabled()
+
+                viewModel.transitionToAddPaymentScreen()
+
+                composeTestRule.waitForIdle()
+                assertThat(viewModel.selection.value).isNull()
+                composeTestRule.onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG).assertIsNotEnabled()
+                assertThat(viewModel.navigationHandler.currentScreen.value)
+                    .isInstanceOf<AddAnotherPaymentMethod>()
+
+                pressBack()
+
+                composeTestRule.waitForIdle()
+                assertThat(viewModel.selection.value).isEqualTo(newSelection)
+                composeTestRule.onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG).assertIsEnabled()
+                assertThat(viewModel.navigationHandler.currentScreen.value)
+                    .isInstanceOf<SelectSavedPaymentMethods>()
+            }
+        }
     }
 
     private fun activityScenario(

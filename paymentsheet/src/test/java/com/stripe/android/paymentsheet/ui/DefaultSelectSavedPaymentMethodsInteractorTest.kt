@@ -149,11 +149,16 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
     @Test
     fun handleViewAction_SelectPaymentMethod_selectsPaymentMethod() {
         var paymentSelection: PaymentSelection? = null
-        fun onSelectPaymentMethod(selection: PaymentSelection?) {
+        var isUserInputResult = false
+
+        fun onSelectPaymentMethod(selection: PaymentSelection?, isUserInput: Boolean) {
             paymentSelection = selection
+            isUserInputResult = isUserInput
         }
 
-        runScenario(onPaymentMethodSelected = ::onSelectPaymentMethod) {
+        runScenario(
+            updateSelection = ::onSelectPaymentMethod,
+        ) {
             val newPaymentSelection = PaymentSelection.Saved(
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD
             )
@@ -164,6 +169,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             )
 
             assertThat(paymentSelection).isEqualTo(newPaymentSelection)
+            assertThat(isUserInputResult).isTrue()
         }
     }
 
@@ -342,6 +348,46 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
     }
 
     @Test
+    fun selectedPaymentOptionItem_canChangeFromSaved_toGooglePay() {
+        val paymentMethods = PaymentMethodFixtures.createCards(2)
+        val selectedSavedPaymentMethod = paymentMethods[1]
+        val currentSelectionFlow: MutableStateFlow<PaymentSelection?> = MutableStateFlow(null)
+        val mostRecentlySelectedSavedPaymentMethod: MutableStateFlow<PaymentMethod?> = MutableStateFlow(
+            selectedSavedPaymentMethod
+        )
+
+        runScenario(
+            paymentOptionsItems = MutableStateFlow(
+                createPaymentOptionsItems(paymentMethods = paymentMethods).plus(
+                    PaymentOptionsItem.GooglePay
+                )
+            ),
+            currentSelection = currentSelectionFlow,
+            mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
+        ) {
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(
+                        (selectedPaymentOptionsItem as? PaymentOptionsItem.SavedPaymentMethod)?.paymentMethod
+                    ).isEqualTo(
+                        selectedSavedPaymentMethod
+                    )
+                }
+            }
+
+            currentSelectionFlow.value = PaymentSelection.GooglePay
+
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(selectedPaymentOptionsItem).isEqualTo(
+                        PaymentOptionsItem.GooglePay
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
     fun selectedPaymentOptionItem_canChangeFromSaved_toLink() {
         val paymentMethods = PaymentMethodFixtures.createCards(2)
         val selectedSavedPaymentMethod = paymentMethods[1]
@@ -414,6 +460,37 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
         }
     }
 
+    @Test
+    fun isCurrentScreenIsUpdatedToTrue_shouldCallUpdateSelection() {
+        val isCurrentScreen = MutableStateFlow(false)
+        val paymentMethods = PaymentMethodFixtures.createCards(2)
+        var paymentSelection: PaymentSelection? = null
+        val currentSelectionFlow: MutableStateFlow<PaymentSelection?> = MutableStateFlow(
+            PaymentSelection.Saved(paymentMethods[0])
+        )
+        var isUserInputResult = false
+
+        fun onSelectPaymentMethod(selection: PaymentSelection?, isUserInput: Boolean) {
+            paymentSelection = selection
+            isUserInputResult = isUserInput
+        }
+
+        runScenario(
+            paymentOptionsItems = MutableStateFlow(createPaymentOptionsItems(paymentMethods = paymentMethods)),
+            isCurrentScreen = isCurrentScreen,
+            updateSelection = ::onSelectPaymentMethod,
+            currentSelection = currentSelectionFlow,
+        ) {
+            assertThat(paymentSelection).isNull()
+            assertThat(isUserInputResult).isFalse()
+
+            isCurrentScreen.value = true
+
+            assertThat(paymentSelection).isEqualTo(PaymentSelection.Saved(paymentMethods[0]))
+            assertThat(isUserInputResult).isFalse()
+        }
+    }
+
     private fun createPaymentOptionsItems(
         paymentMethods: List<PaymentMethod>,
     ): List<PaymentOptionsItem> {
@@ -455,11 +532,12 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
         canRemove: StateFlow<Boolean> = MutableStateFlow(true),
         toggleEdit: () -> Unit = { notImplemented() },
         isProcessing: StateFlow<Boolean> = MutableStateFlow(false),
+        isCurrentScreen: StateFlow<Boolean> = MutableStateFlow(false),
         currentSelection: StateFlow<PaymentSelection?> = MutableStateFlow(null),
         mostRecentlySelectedSavedPaymentMethod: MutableStateFlow<PaymentMethod?> = MutableStateFlow(null),
         onAddCardPressed: () -> Unit = { notImplemented() },
         onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit = { notImplemented() },
-        onPaymentMethodSelected: (PaymentSelection?) -> Unit = { notImplemented() },
+        updateSelection: (PaymentSelection?, Boolean) -> Unit = { _, _ -> notImplemented() },
         testBlock: suspend TestParams.() -> Unit,
     ) {
         val interactor = DefaultSelectSavedPaymentMethodsInteractor(
@@ -469,11 +547,12 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             canRemove = canRemove,
             toggleEdit = toggleEdit,
             isProcessing = isProcessing,
+            isCurrentScreen = isCurrentScreen,
             currentSelection = currentSelection,
             mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
             onAddCardPressed = onAddCardPressed,
             onUpdatePaymentMethod = onUpdatePaymentMethod,
-            onPaymentMethodSelected = onPaymentMethodSelected,
+            updateSelection = updateSelection,
             isLiveMode = true,
         )
 

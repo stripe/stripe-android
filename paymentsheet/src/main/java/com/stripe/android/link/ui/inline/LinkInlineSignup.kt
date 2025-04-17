@@ -33,7 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalTextInputService
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -41,6 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.LinkTerms
+import com.stripe.android.link.ui.LinkTermsType
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.link.ui.signup.SignUpState.InputtingRemainingFields
 import com.stripe.android.paymentsheet.R
@@ -74,13 +75,12 @@ internal fun LinkInlineSignup(
     }
 
     val focusManager = LocalFocusManager.current
-    val textInputService = LocalTextInputService.current
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     LaunchedEffect(viewState.signUpState) {
         if (viewState.signUpState == SignUpState.InputtingPrimaryField && viewState.userInput != null) {
             focusManager.clearFocus(true)
-            @Suppress("DEPRECATION")
-            textInputService?.hideSoftwareKeyboard()
+            keyboardController?.hide()
         }
     }
 
@@ -257,8 +257,7 @@ internal fun LinkFields(
 
             AnimatedVisibility(visible = signUpState == InputtingRemainingFields) {
                 LinkTerms(
-                    isOptional = false,
-                    isShowingPhoneFirst = false,
+                    type = LinkTermsType.Inline,
                     modifier = Modifier.padding(top = 16.dp),
                     textAlign = TextAlign.Start,
                 )

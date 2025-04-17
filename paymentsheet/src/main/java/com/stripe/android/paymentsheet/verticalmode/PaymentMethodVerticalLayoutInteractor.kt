@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.core.mainthread.MainThreadOnlyMutableStateFlow
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -25,7 +26,6 @@ import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
@@ -55,7 +55,11 @@ internal interface PaymentMethodVerticalLayoutInteractor {
             get() = this == Saved
 
         object Saved : Selection
-        data class New(val code: PaymentMethodCode) : Selection
+        data class New(
+            val code: PaymentMethodCode,
+            val changeDetails: String? = null,
+            val canBeChanged: Boolean = false,
+        ) : Selection
     }
 
     sealed interface ViewAction {
@@ -95,7 +99,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit,
     private val reportFormShown: (PaymentMethodCode) -> Unit,
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    private val shouldUpdateVerticalModeSelection: (String?) -> Boolean,
     dispatcher: CoroutineContext = Dispatchers.Default,
+    mainDispatcher: CoroutineContext = Dispatchers.Main.immediate,
 ) : PaymentMethodVerticalLayoutInteractor {
 
     companion object {
@@ -154,6 +160,11 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 },
                 reportPaymentMethodTypeSelected = viewModel.eventReporter::onSelectPaymentMethod,
                 reportFormShown = viewModel.eventReporter::onPaymentMethodFormShown,
+                shouldUpdateVerticalModeSelection = { paymentMethodCode ->
+                    val requiresFormScreen = paymentMethodCode != null &&
+                        formHelper.formTypeForCode(paymentMethodCode) == FormType.UserInteractionRequired
+                    !requiresFormScreen
+                }
             ).also { interactor ->
                 viewModel.viewModelScope.launch {
                     interactor.state.collect { state ->
@@ -175,7 +186,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
 
     private val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
 
-    private val _verticalModeScreenSelection = MutableStateFlow(selection.value)
+    private val _verticalModeScreenSelection = MainThreadOnlyMutableStateFlow(selection.value)
     private val verticalModeScreenSelection = _verticalModeScreenSelection
 
     private val supportedPaymentMethods = paymentMethodMetadata.sortedSupportedPaymentMethods()
@@ -223,7 +234,16 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     ) { displayablePaymentMethods, isProcessing, mostRecentSelection, displayedSavedPaymentMethod, action,
         temporarySelectionCode ->
         val temporarySelection = if (temporarySelectionCode != null) {
-            PaymentMethodVerticalLayoutInteractor.Selection.New(temporarySelectionCode)
+            val changeDetails = if (temporarySelectionCode == mostRecentSelection.code()) {
+                (mostRecentSelection as? PaymentSelection.New?)?.changeDetails()
+            } else {
+                null
+            }
+            PaymentMethodVerticalLayoutInteractor.Selection.New(
+                code = temporarySelectionCode,
+                changeDetails = changeDetails,
+                canBeChanged = temporarySelectionCode == mostRecentSelection.code(),
+            )
         } else {
             null
         }
@@ -242,23 +262,26 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     }
 
     init {
-        coroutineScope.launch {
-            selection.collect {
-                if (it == null && !isCurrentScreen.value) {
+        coroutineScope.launch(mainDispatcher) {
+            selection.collect { currentSelection ->
+                if (currentSelection == null && !isCurrentScreen.value) {
                     return@collect
                 }
 
-                val paymentMethodCode = (it as? PaymentSelection.New).code()
-                    ?: (it as? PaymentSelection.ExternalPaymentMethod).code()
-                val requiresFormScreen = paymentMethodCode != null &&
-                    formTypeForCode(paymentMethodCode) == FormType.UserInteractionRequired
-                if (!requiresFormScreen) {
-                    _verticalModeScreenSelection.value = it
+                val paymentMethodCode = when (currentSelection) {
+                    is PaymentSelection.New,
+                    is PaymentSelection.ExternalPaymentMethod,
+                    is PaymentSelection.CustomPaymentMethod -> currentSelection.code()
+                    else -> null
+                }
+
+                if (shouldUpdateVerticalModeSelection(paymentMethodCode)) {
+                    _verticalModeScreenSelection.value = currentSelection
                 }
             }
         }
 
-        coroutineScope.launch {
+        coroutineScope.launch(mainDispatcher) {
             // When PaymentSheet opens with no existing selection, a saved PM will be selected by default, but
             // mostRecentlySelectedSavedPaymentMethod may not have been set. So we drop its first value, to ensure that
             // we correctly set the initial selection.
@@ -272,7 +295,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             }
         }
 
-        coroutineScope.launch {
+        coroutineScope.launch(mainDispatcher) {
             isCurrentScreen.collect { isCurrentScreen ->
                 if (isCurrentScreen) {
                     updateSelection(verticalModeScreenSelection.value)
@@ -431,6 +454,19 @@ private fun PaymentSelection.asVerticalSelection(): PaymentMethodVerticalLayoutI
     is PaymentSelection.Saved -> PaymentMethodVerticalLayoutInteractor.Selection.Saved
     is PaymentSelection.GooglePay -> PaymentMethodVerticalLayoutInteractor.Selection.New("google_pay")
     is PaymentSelection.Link -> PaymentMethodVerticalLayoutInteractor.Selection.New("link")
-    is PaymentSelection.New -> PaymentMethodVerticalLayoutInteractor.Selection.New(paymentMethodCreateParams.typeCode)
+    is PaymentSelection.New -> PaymentMethodVerticalLayoutInteractor.Selection.New(
+        code = paymentMethodCreateParams.typeCode,
+        changeDetails = changeDetails(),
+        canBeChanged = true,
+    )
     is PaymentSelection.ExternalPaymentMethod -> PaymentMethodVerticalLayoutInteractor.Selection.New(type)
+    is PaymentSelection.CustomPaymentMethod -> PaymentMethodVerticalLayoutInteractor.Selection.New(id)
+}
+
+private fun PaymentSelection.New.changeDetails(): String? = when (this) {
+    is PaymentSelection.New.Card -> {
+        "${this.brand.displayName} ···· $last4"
+    }
+    is PaymentSelection.New.USBankAccount -> label
+    else -> null
 }

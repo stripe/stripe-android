@@ -5,6 +5,7 @@ package com.stripe.android.paymentelement.embedded.content
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.mainthread.MainThreadSavedStateHandle
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateHolder.Companion.CONFIRMATION_STATE_KEY
@@ -73,9 +74,9 @@ internal class EmbeddedConfirmationStateHolderTest {
     ) = runTest {
         val savedStateHandle = SavedStateHandle()
         setup(savedStateHandle)
-        val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
+        val selectionHolder = EmbeddedSelectionHolder(MainThreadSavedStateHandle(savedStateHandle))
         val confirmationStateHolder = EmbeddedConfirmationStateHolder(
-            savedStateHandle = savedStateHandle,
+            savedStateHandle = MainThreadSavedStateHandle(savedStateHandle),
             selectionHolder = selectionHolder,
             coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
         )

@@ -7,6 +7,7 @@ import FinancialConnectionsGenericInfoScreen.Footer
 import FinancialConnectionsGenericInfoScreen.Header
 import Size
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,17 +23,21 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.features.common.IconSize
+import com.stripe.android.financialconnections.features.common.ListItem
 import com.stripe.android.financialconnections.features.common.ShapedIcon
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
+import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
@@ -133,6 +138,23 @@ internal fun GenericBody(
                             modifier = Modifier.padding(horizontal = 24.dp),
                         )
                     }
+                    is Body.Entry.Bullets -> {
+                        val bullets = remember(entry.bullets) {
+                            entry.bullets.map(BulletUI::from)
+                        }
+
+                        Column(
+                            modifier = Modifier.padding(horizontal = 24.dp),
+                        ) {
+                            bullets.forEach { bullet ->
+                                ListItem(
+                                    bullet = bullet,
+                                    onClickableTextClick = onClickableTextClick
+                                )
+                                Spacer(modifier = Modifier.size(24.dp))
+                            }
+                        }
+                    }
                     else -> {
                         Log.e("GenericBody", "Unsupported entry type: $entry")
                     }
@@ -148,16 +170,29 @@ internal fun GenericHeader(
     onClickableTextClick: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val isBrandIcon: Boolean =
-        remember(payload.icon?.default) { payload.icon?.default?.contains("BrandIcon") == true }
+    val isBrandIcon: Boolean = remember(payload.icon?.default) {
+        payload.icon?.default?.contains("BrandIcon") == true
+    }
+
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
+        val iconShape = if (isBrandIcon) RoundedCornerShape(12.dp) else CircleShape
+
+        val iconModifier = if (isBrandIcon) {
+            Modifier
+                .shadow(8.dp, iconShape)
+                .clip(iconShape)
+                .background(color = colors.backgroundSecondary, shape = iconShape)
+        } else {
+            Modifier
+        }
+
         payload.icon?.default?.let { iconUrl ->
             ShapedIcon(
-                modifier = Modifier.align(payload.alignment.toComposeAlignment()),
-                backgroundShape = if (isBrandIcon) RoundedCornerShape(12.dp) else CircleShape,
+                modifier = iconModifier.align(payload.alignment.toComposeAlignment()),
+                backgroundShape = iconShape,
                 flushed = isBrandIcon,
                 url = iconUrl,
                 contentDescription = null,
@@ -210,7 +245,7 @@ internal fun GenericFooter(
                 onClickableTextClick = onClickableTextClick,
                 defaultStyle = typography.labelSmall.copy(
                     color = colors.textDefault,
-                    textAlign = TextAlign.Start,
+                    textAlign = TextAlign.Center,
                 ),
             )
         }
@@ -234,11 +269,11 @@ internal fun GenericFooter(
         payload.belowCta?.let { belowCta ->
             AnnotatedText(
                 modifier = Modifier.fillMaxWidth(),
-                text = TextResource.Text(fromHtml(belowCta.label)),
+                text = TextResource.Text(fromHtml(belowCta)),
                 onClickableTextClick = onClickableTextClick,
                 defaultStyle = typography.labelSmall.copy(
                     color = colors.textDefault,
-                    textAlign = TextAlign.Start,
+                    textAlign = TextAlign.Center,
                 ),
             )
         }

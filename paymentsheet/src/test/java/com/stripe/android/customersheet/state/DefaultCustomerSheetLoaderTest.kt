@@ -540,6 +540,7 @@ class DefaultCustomerSheetLoaderTest {
                         permissions = CustomerPermissions(
                             canRemovePaymentMethods = true,
                             canRemoveLastPaymentMethod = true,
+                            canUpdateFullPaymentMethodDetails = true,
                         ),
                         defaultPaymentMethodId = defaultPaymentMethodId,
                     )
@@ -593,7 +594,8 @@ class DefaultCustomerSheetLoaderTest {
             customPaymentMethods = emptyList(),
             paymentMethodSpecs = null,
             flags = emptyMap(),
-            elementsSessionId = "session_1234"
+            elementsSessionId = "session_1234",
+            experimentsData = null
         )
     }
 

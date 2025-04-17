@@ -31,6 +31,7 @@ import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
+import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.analytics.primaryButtonColorUsage
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
@@ -57,6 +58,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -136,7 +138,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             savedStateHandle[IN_PROGRESS_SELECTION] = value
         }
 
-    override var newPaymentSelection: NewOrExternalPaymentSelection? = null
+    override var newPaymentSelection: NewPaymentOptionSelection? = null
 
     private val googlePayButtonType: GooglePayButtonType =
         when (args.config.googlePay?.buttonType) {
@@ -221,7 +223,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         eventReporter.onInit(
             commonConfiguration = config.asCommonConfiguration(),
             primaryButtonColor = config.primaryButtonColorUsage(),
-            paymentMethodLayout = config.paymentMethodLayout,
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
             isDeferred = isDeferred,
             appearance = config.appearance
         )
@@ -271,28 +273,30 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private suspend fun initializeWithState(state: PaymentSheetState.Full) {
-        customerStateHolder.setCustomerState(state.customer)
+        withContext(Dispatchers.Main.immediate) {
+            customerStateHolder.setCustomerState(state.customer)
 
-        updateSelection(state.paymentSelection)
+            updateSelection(state.paymentSelection)
 
-        setPaymentMethodMetadata(state.paymentMethodMetadata)
+            setPaymentMethodMetadata(state.paymentMethodMetadata)
 
-        val shouldLaunchEagerly = linkHandler.setupLinkWithEagerLaunch(state.paymentMethodMetadata.linkState)
+            val shouldLaunchEagerly = linkHandler.setupLinkWithEagerLaunch(state.paymentMethodMetadata.linkState)
 
-        val pendingFailedPaymentResult = confirmationHandler.awaitResult()
-            as? ConfirmationHandler.Result.Failed
-        val errorMessage = pendingFailedPaymentResult?.cause?.stripeErrorMessage()
+            val pendingFailedPaymentResult = confirmationHandler.awaitResult()
+                as? ConfirmationHandler.Result.Failed
+            val errorMessage = pendingFailedPaymentResult?.cause?.stripeErrorMessage()
 
-        resetViewState(errorMessage)
-        navigationHandler.resetTo(
-            determineInitialBackStack(
-                paymentMethodMetadata = state.paymentMethodMetadata,
-                customerStateHolder = customerStateHolder,
+            resetViewState(errorMessage)
+            navigationHandler.resetTo(
+                determineInitialBackStack(
+                    paymentMethodMetadata = state.paymentMethodMetadata,
+                    customerStateHolder = customerStateHolder,
+                )
             )
-        )
 
-        if (shouldLaunchEagerly) {
-            checkoutWithLinkExpress()
+            if (shouldLaunchEagerly) {
+                checkoutWithLinkExpress()
+            }
         }
 
         viewModelScope.launch {
@@ -367,6 +371,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     override fun handlePaymentMethodSelected(selection: PaymentSelection?) {
         if (selection != this.selection.value) {
             updateSelection(selection)
+            selection?.let {
+                eventReporter.onSelectPaymentOption(selection)
+            }
         }
     }
 
@@ -451,13 +458,15 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
         viewModelScope.launch(workContext) {
-            inProgressSelection = paymentSelection
+            val confirmationOption = withContext(viewModelScope.coroutineContext) {
+                inProgressSelection = paymentSelection
 
-            val confirmationOption = paymentSelectionWithCvcIfEnabled(paymentSelection)
-                ?.toConfirmationOption(
-                    configuration = config.asCommonConfiguration(),
-                    linkConfiguration = linkHandler.linkConfiguration.value,
-                )
+                paymentSelectionWithCvcIfEnabled(paymentSelection)
+                    ?.toConfirmationOption(
+                        configuration = config.asCommonConfiguration(),
+                        linkConfiguration = linkHandler.linkConfiguration.value,
+                    )
+            }
 
             confirmationOption?.let { option ->
                 val stripeIntent = awaitStripeIntent()
@@ -486,13 +495,15 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
                 errorReporter.report(event, StripeException.create(exception))
 
-                processConfirmationResult(
-                    ConfirmationHandler.Result.Failed(
-                        cause = exception,
-                        message = exception.stripeErrorMessage(),
-                        type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+                withContext(viewModelScope.coroutineContext) {
+                    processConfirmationResult(
+                        ConfirmationHandler.Result.Failed(
+                            cause = exception,
+                            message = exception.stripeErrorMessage(),
+                            type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+                        )
                     )
-                )
+                }
             }
         }
     }

@@ -13,6 +13,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsInstitu
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitutionSelected
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.model.IDConsentContentPane
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import com.stripe.android.financialconnections.network.NetworkConstants
@@ -321,6 +322,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
         ).also { newResponse ->
             updateActiveInstitution("selectInstitution", institution)
             updateCachedManifest("selectInstitution", newResponse.manifest)
+            updateIDConsentContentPane("selectInstitution", newResponse.text?.idConsentContentPane)
         }
     }
 
@@ -593,6 +595,19 @@ private class FinancialConnectionsManifestRepositoryImpl(
         logger.debug("SYNC_CACHE: updating local manifest from $source")
         cachedSynchronizeSessionResponse = cachedSynchronizeSessionResponse?.copy(
             manifest = manifest
+        )
+    }
+
+    private fun updateIDConsentContentPane(
+        source: String,
+        pane: IDConsentContentPane?
+    ) {
+        logger.debug("SYNC_CACHE: updating local sync object from $source with ID consent content pane")
+        val cachedResponse = cachedSynchronizeSessionResponse
+        cachedSynchronizeSessionResponse = cachedResponse?.copy(
+            text = cachedResponse.text?.copy(
+                idConsentContentPane = pane,
+            ),
         )
     }
 

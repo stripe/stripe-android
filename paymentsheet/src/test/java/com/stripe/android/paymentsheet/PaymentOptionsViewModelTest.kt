@@ -151,6 +151,29 @@ internal class PaymentOptionsViewModelTest {
         }
 
     @Test
+    fun `onUserSelection() when custom payment method should set the view state to process result`() =
+        runTest {
+            val viewModel = createViewModel()
+            viewModel.paymentOptionResult.test {
+                viewModel.updateSelection(CUSTOM_PAYMENT_METHOD_SELECTION)
+                viewModel.onUserSelection()
+                assertThat(awaitItem())
+                    .isEqualTo(
+                        PaymentOptionResult.Succeeded(
+                            CUSTOM_PAYMENT_METHOD_SELECTION,
+                            listOf()
+                        )
+                    )
+                ensureAllEventsConsumed()
+            }
+
+            verify(eventReporter)
+                .onSelectPaymentOption(
+                    paymentSelection = CUSTOM_PAYMENT_METHOD_SELECTION
+                )
+        }
+
+    @Test
     fun `onUserSelection() new card with save should complete with succeeded view state`() =
         runTest {
             val viewModel = createViewModel()
@@ -203,6 +226,7 @@ internal class PaymentOptionsViewModelTest {
 
     @Test
     fun `when paymentMethods is empty, primary button and text below button are gone`() = runTest {
+        Dispatchers.setMain(testDispatcher)
         val paymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT
         val viewModel = createViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
@@ -462,7 +486,7 @@ internal class PaymentOptionsViewModelTest {
             viewModel.updateSelection(newSelection)
             assertThat(awaitItem()).isEqualTo(newSelection)
             assertThat(viewModel.newPaymentSelection).isEqualTo(
-                NewOrExternalPaymentSelection.New(
+                NewPaymentOptionSelection.New(
                     newSelection
                 )
             )
@@ -540,6 +564,7 @@ internal class PaymentOptionsViewModelTest {
 
     @Test
     fun `Falls back to no payment selection if user cancels after deleting initial payment method`() = runTest {
+        Dispatchers.setMain(testDispatcher)
         val paymentMethods = PaymentMethodFixtures.createCards(3)
         val selection = PaymentSelection.Saved(paymentMethod = paymentMethods.random())
 
@@ -860,6 +885,8 @@ internal class PaymentOptionsViewModelTest {
         )
         private val EXTERNAL_PAYMENT_METHOD_PAYMENT_SELECTION =
             PaymentMethodFixtures.createExternalPaymentMethod(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC)
+        private val CUSTOM_PAYMENT_METHOD_SELECTION =
+            PaymentMethodFixtures.createCustomPaymentMethod(PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD)
         private val NEW_CARD_PAYMENT_SELECTION = PaymentSelection.New.Card(
             DEFAULT_CARD,
             CardBrand.Discover,

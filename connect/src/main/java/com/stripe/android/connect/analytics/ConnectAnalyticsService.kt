@@ -38,7 +38,7 @@ internal class DefaultConnectAnalyticsService @AssistedInject constructor(
     )
 
     private val requestExecutor = DefaultAnalyticsRequestV2Executor(
-        application = application,
+        context = application,
         networkClient = networkClient,
         logger = logger,
         storage = analyticsRequestStorage,

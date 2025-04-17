@@ -16,6 +16,8 @@
   <string name="stripe_bank_account_with_last_4">Bankovní účet ····%s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Dokončete nákup potvrzením platby v bankovní aplikaci do  %s.</string>
+  <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
+  <string name="stripe_cashapp_afterpay_subtitle">Koupit nyní nebo zaplatit později s Cash App Afterpay</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
   <string name="stripe_clearpay_subtitle">Koupit nyní nebo zaplatit pomocí Clearpay</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
@@ -24,6 +26,16 @@
   <string name="stripe_confirm_close_form_title">Chcete tento formulář zavřít?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Uložte své údaje pro pro bezpečné odbavení 1 kliknutím u Link</string>
+  <!-- Title for a button that when tapped creates a Link account for the user. -->
+  <string name="stripe_link_sign_up">Souhlasit a pokračovat</string>
+  <!-- Title for the Link signup screen -->
+  <string name="stripe_link_sign_up_header">Rychlý, bezpečný přechod k pokladně 1 kliknutím</string>
+  <!-- Label describing the benefit of signing up for Link. -->
+  <string name="stripe_link_sign_up_message">Uložte si platební údaje u Link a na stránkách podporovaných službou Link se bezpečně odbavte jedním kliknutím.</string>
+  <!-- Legal text shown when creating a Link account. -->
+  <string name="stripe_link_sign_up_terms"><![CDATA[Pokračováním souhlasíte s <terms>podmínkami</terms> a <privacy>zásadami ochrany osobních údajů</privacy>.]]></string>
+  <!-- Instructs the user to enter the code sent to their phone number in order to login to Link -->
+  <string name="stripe_link_verification_message">Chcete-li použít uložené informace, zadejte kód zaslaný na číslo %s.</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Odhlásit ze služby Link</string>
   <!-- Text that is displayed when a network error occurs -->
@@ -81,6 +93,8 @@
   <string name="stripe_paymentsheet_manage_bank_account">Správa bankovního účtu v USA</string>
   <!-- Title shown above a view containing a customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_card">Spravovat kartu</string>
+  <!-- Title shown above a view containing the customer's cards that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_cards">Spravovat karty</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Spravovat způsoby platby</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
@@ -137,6 +151,8 @@
   <string name="stripe_paymentsheet_save_this_card_with_merchant_name">Uložit tuto kartu pro budoucí platby %s</string>
   <!-- Title shown above a button that represents the customer's saved payment method e.g., a saved credit card or bank account. -->
   <string name="stripe_paymentsheet_saved">Uloženo</string>
+  <!-- Title shown above a view containing the customer's cards -->
+  <string name="stripe_paymentsheet_select_card">Vybrat kartu</string>
   <!-- Title shown above a view containing the customer's payment methods -->
   <string name="stripe_paymentsheet_select_payment_method">Vybrat způsob platby</string>
   <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
@@ -171,6 +187,8 @@
   <string name="stripe_signup_deactivated_account_message">Váš účet byl deaktivován</string>
   <!-- Generic failure message -->
   <string name="stripe_something_went_wrong">Něco se pokazilo</string>
+  <!-- Accessibility description when payment button shows a successful transaction animation. -->
+  <string name="stripe_successful_transaction_description">Transakce dokončena</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Zrušit a zaplatit jiným způsobem</string>
   <!-- Text on a screen asking the user to approve a payment -->

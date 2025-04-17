@@ -7,6 +7,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.common.di.ApplicationIdModule
+import com.stripe.android.common.di.MobileSessionIdModule
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.RealUserFacingLogger
@@ -23,12 +24,15 @@ import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
 import com.stripe.android.paymentsheet.state.DefaultLinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.DefaultPaymentElementLoader
+import com.stripe.android.paymentsheet.state.DefaultRetrieveCustomerEmail
 import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
 import com.stripe.android.ui.core.di.CardScanModule
 import com.stripe.android.uicore.image.StripeImageLoader
 import dagger.Binds
@@ -52,8 +56,10 @@ import kotlin.coroutines.CoroutineContext
         ExtendedPaymentElementConfirmationModule::class,
         EmbeddedCommonModule::class,
         ApplicationIdModule::class,
+        MobileSessionIdModule::class,
         CardScanModule::class,
-        EmbeddedLinkExtrasModule::class
+        EmbeddedLinkExtrasModule::class,
+        LinkHoldbackExposureModule::class,
     ],
 )
 internal interface EmbeddedPaymentElementViewModelComponent {
@@ -113,6 +119,11 @@ internal interface EmbeddedPaymentElementViewModelModule {
 
     @Binds
     fun bindPaymentElementLoader(loader: DefaultPaymentElementLoader): PaymentElementLoader
+
+    @Binds
+    fun bindRetrieveCustomerEmail(
+        retrieveCustomerEmail: DefaultRetrieveCustomerEmail
+    ): RetrieveCustomerEmail
 
     @Binds
     fun bindSelectionChooser(chooser: DefaultEmbeddedSelectionChooser): EmbeddedSelectionChooser

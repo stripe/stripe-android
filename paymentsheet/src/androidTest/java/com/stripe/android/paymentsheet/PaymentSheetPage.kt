@@ -7,10 +7,12 @@ import android.widget.Button
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
+import androidx.compose.ui.test.isOff
 import androidx.compose.ui.test.isOn
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.isToggleable
@@ -30,7 +32,9 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_ERROR_TEXT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
+import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
 import com.stripe.android.ui.core.elements.SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
@@ -52,6 +56,39 @@ internal class PaymentSheetPage(
         }
     }
 
+    fun fillOutBillingCollectionDetails(
+        name: String = "John Doe",
+        email: String = "email@email.com",
+        phone: String = "1234567890",
+        addressLineOne: String = "123 Apple Street",
+        city: String = "South San Francisco",
+        zipCode: String = "12345"
+    ) {
+        waitForText("Full name")
+        replaceText("Full name", name)
+
+        waitForText("Email")
+        replaceText("Email", email)
+
+        waitForText("Phone number")
+        replaceText("Phone number", phone)
+
+        waitForText("Address line 1")
+        replaceText("Address line 1", addressLineOne)
+
+        waitForText("City")
+        replaceText("City", city)
+
+        waitForText("State")
+        clickViewWithText("State")
+
+        waitForText("California")
+        clickViewWithText("California")
+
+        waitForText("ZIP Code")
+        replaceText("ZIP Code", zipCode)
+    }
+
     fun clearCard() {
         waitForText("4242 4242 4242 4242")
 
@@ -68,10 +105,31 @@ internal class PaymentSheetPage(
         clickViewWithText("Save your info for secure 1-click checkout with Link")
     }
 
+    fun clickSavedCard(last4: String) {
+        val savedCardTagMatcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
+                .and(hasText(last4, substring = true))
+        composeTestRule.waitUntilExactlyOneExists(savedCardTagMatcher)
+        composeTestRule.onNode(savedCardTagMatcher).performClick()
+    }
+
+    fun clickSavedCardEditBadge(last4: String) {
+        val badgeTagMatcher = hasTestTag(TEST_TAG_MODIFY_BADGE)
+            .and(hasAnyAncestor(hasText(last4, substring = true)))
+        composeTestRule.waitUntilExactlyOneExists(badgeTagMatcher)
+        composeTestRule.onNode(badgeTagMatcher).performClick()
+    }
+
     fun clickEditButton() {
         waitForText("EDIT")
         composeTestRule
             .onNodeWithText("EDIT")
+            .performClick()
+    }
+
+    fun clickDoneButton() {
+        waitForText("DONE")
+        composeTestRule
+            .onNodeWithText("DONE")
             .performClick()
     }
 
@@ -136,11 +194,11 @@ internal class PaymentSheetPage(
             .performClick()
     }
 
-    fun assertPrimaryButton(expectedContentDescription: String, canPay: Boolean) {
+    fun assertPrimaryButton(expectedStateDescription: String, canPay: Boolean) {
         onView(withId(R.id.primary_button)).check { view, _ ->
             val nodeInfo = AccessibilityNodeInfo()
             view.onInitializeAccessibilityNodeInfo(nodeInfo)
-            assertThat(nodeInfo.contentDescription).isEqualTo(expectedContentDescription)
+            assertThat(nodeInfo.stateDescription).isEqualTo(expectedStateDescription)
             assertThat(nodeInfo.className).isEqualTo(Button::class.java.name)
             if (canPay) {
                 assertThat(nodeInfo.isClickable).isTrue()
@@ -259,6 +317,17 @@ internal class PaymentSheetPage(
         ).fetchSemanticsNodes().isEmpty()
     }
 
+    fun assertSetAsDefaultCheckboxNotChecked() {
+        val testTag = SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG
+        composeTestRule.waitUntil(
+            timeoutMillis = 5000L
+        ) {
+            composeTestRule.onAllNodes(
+                hasTestTag(testTag).and(isToggleable()).and(isOff())
+            ).fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
     fun assertSetAsDefaultCheckboxChecked() {
         val testTag = SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG
         composeTestRule.waitUntil(
@@ -267,6 +336,37 @@ internal class PaymentSheetPage(
             composeTestRule.onAllNodes(
                 hasTestTag(testTag).and(isToggleable()).and(isOn())
             ).fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
+    fun assertSaveForFutureCheckboxNotChecked() {
+        val testTag = SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
+        composeTestRule.waitUntil(
+            timeoutMillis = 5000L
+        ) {
+            composeTestRule.onAllNodes(
+                hasTestTag(testTag).and(isToggleable()).and(isOff())
+            ).fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
+    fun assertSaveForFutureUseCheckboxChecked() {
+        val testTag = SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
+        composeTestRule.waitUntil(
+            timeoutMillis = 5000L
+        ) {
+            composeTestRule.onAllNodes(
+                hasTestTag(testTag).and(isToggleable()).and(isOn())
+            ).fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
+    fun waitUntilVisible() {
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onAllNodes(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
         }
     }
 

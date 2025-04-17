@@ -8,7 +8,6 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
-import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkConfiguration
@@ -21,8 +20,6 @@ import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.model.EmailSource
-import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
@@ -30,6 +27,7 @@ import com.stripe.android.uicore.elements.PhoneNumberController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -45,7 +43,6 @@ internal class SignUpViewModel @Inject constructor(
     private val logger: Logger,
     private val linkAuth: LinkAuth,
     private val savedStateHandle: SavedStateHandle,
-    private val navigate: (LinkScreen) -> Unit,
     private val navigateAndClearStack: (LinkScreen) -> Unit,
     private val moveToWeb: () -> Unit
 ) : ViewModel() {
@@ -63,21 +60,10 @@ internal class SignUpViewModel @Inject constructor(
     val nameController = NameConfig.createController(
         initialValue = customerInfo?.name
     )
-    private val _state = MutableStateFlow(
-        value = SignUpScreenState(
-            signUpEnabled = false,
-            merchantName = configuration.merchantName,
-            requiresNameCollection = kotlin.run {
-                val countryCode = when (val stripeIntent = configuration.stripeIntent) {
-                    is PaymentIntent -> stripeIntent.countryCode
-                    is SetupIntent -> stripeIntent.countryCode
-                }
-                countryCode != CountryCode.US.value
-            }
-        )
-    )
 
-    val state: StateFlow<SignUpScreenState> = _state
+    private val _state = MutableStateFlow(SignUpScreenState.create(configuration, customerInfo))
+    val state: StateFlow<SignUpScreenState> = _state.asStateFlow()
+
     private var emailHasChanged = false
 
     init {
@@ -131,11 +117,15 @@ internal class SignUpViewModel @Inject constructor(
     }
 
     private suspend fun lookupEmail(email: String) {
+        updateSignUpState(SignUpState.VerifyingEmail)
+
         val lookupResult = linkAuth.lookUp(
             email = email,
             emailSource = EmailSource.USER_ACTION,
             startSession = true
         )
+
+        updateSignUpState(SignUpState.InputtingPrimaryField)
 
         when (lookupResult) {
             is LinkAuthResult.AttestationFailed -> {
@@ -162,6 +152,10 @@ internal class SignUpViewModel @Inject constructor(
     fun onSignUpClick() {
         clearError()
         viewModelScope.launch {
+            updateState {
+                it.copy(isSubmitting = true)
+            }
+
             val signupResult = linkAuth.signUp(
                 email = emailController.fieldValue.value,
                 phoneNumber = phoneNumberController.getE164PhoneNumber(phoneNumberController.fieldValue.value),
@@ -190,17 +184,20 @@ internal class SignUpViewModel @Inject constructor(
                     signupResult.handle()
                 }
             }
+
+            updateState {
+                it.copy(isSubmitting = false)
+            }
         }
     }
 
     private fun onAccountFetched(linkAccount: LinkAccount?) {
-        if (linkAccount?.isVerified == true) {
+        if (linkAccount?.completedSignup == true) {
+            navigateAndClearStack(LinkScreen.PaymentMethod)
+        } else if (linkAccount?.isVerified == true) {
             navigateAndClearStack(LinkScreen.Wallet)
         } else {
-            navigate(LinkScreen.Verification)
-            // The sign up screen stays in the back stack.
-            // Clean up the state in case the user comes back.
-            emailController.onValueChange("")
+            navigateAndClearStack(LinkScreen.Verification)
         }
     }
 
@@ -247,7 +244,6 @@ internal class SignUpViewModel @Inject constructor(
 
         fun factory(
             parentComponent: NativeLinkComponent,
-            navigate: (LinkScreen) -> Unit,
             navigateAndClearStack: (LinkScreen) -> Unit,
             moveToWeb: () -> Unit
         ): ViewModelProvider.Factory {
@@ -259,7 +255,6 @@ internal class SignUpViewModel @Inject constructor(
                         logger = parentComponent.logger,
                         linkAuth = parentComponent.linkAuth,
                         savedStateHandle = parentComponent.savedStateHandle,
-                        navigate = navigate,
                         navigateAndClearStack = navigateAndClearStack,
                         moveToWeb = moveToWeb
                     )

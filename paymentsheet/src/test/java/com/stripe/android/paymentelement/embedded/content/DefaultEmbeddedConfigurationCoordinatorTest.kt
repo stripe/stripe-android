@@ -5,6 +5,7 @@ import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.core.mainthread.MainThreadSavedStateHandle
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
@@ -207,9 +208,9 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
         val confirmationHandler = FakeConfirmationHandler()
         val configurationHandler = FakeEmbeddedConfigurationHandler()
         val savedStateHandle = SavedStateHandle()
-        val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
+        val selectionHolder = EmbeddedSelectionHolder(MainThreadSavedStateHandle(savedStateHandle))
         val confirmationStateHolder = EmbeddedConfirmationStateHolder(
-            savedStateHandle = savedStateHandle,
+            savedStateHandle = MainThreadSavedStateHandle(savedStateHandle),
             selectionHolder = selectionHolder,
             coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
         )

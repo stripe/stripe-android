@@ -32,6 +32,7 @@ import com.stripe.android.connect.util.findActivity
 import com.stripe.android.connect.util.isInInstrumentationTest
 import com.stripe.android.connect.webview.serialization.AccountSessionClaimedMessage
 import com.stripe.android.connect.webview.serialization.AlertJs
+import com.stripe.android.connect.webview.serialization.AppInfoJs
 import com.stripe.android.connect.webview.serialization.ConnectInstanceJs
 import com.stripe.android.connect.webview.serialization.ConnectJson
 import com.stripe.android.connect.webview.serialization.OpenAuthenticatedWebViewMessage
@@ -100,6 +101,10 @@ internal class StripeConnectWebView private constructor(
             loadWithOverviewMode = true
             useWideViewPort = true
             userAgentString = "$userAgentString - stripe-android/${StripeSdkVersion.VERSION_NAME}"
+
+            // Fixes front camera "paused" issue on Samsung devices with Gelato selfie verification
+            // by allowing camera activation without requiring explicit user interaction first
+            mediaPlaybackRequiresUserGesture = false
         }
 
         setDownloadListener(StripeDownloadListener(context))
@@ -132,6 +137,15 @@ internal class StripeConnectWebView private constructor(
                 put("input", input.value)
             },
             resultCallback = resultCallback
+        )
+    }
+
+    fun returnedFromAuthenticatedWebView(url: String?) {
+        evaluateSdkJs(
+            function = "returnedFromAuthenticatedWebView",
+            payload = buildJsonObject {
+                put("url", url)
+            },
         )
     }
 
@@ -443,6 +457,12 @@ internal class StripeConnectWebView private constructor(
             val initialParams = delegate.getInitialParams(context)
             logger.debug("($loggerTag) InitParams fetched: ${initialParams.toDebugString()}")
             return ConnectJson.encodeToString(initialParams)
+        }
+
+        @JavascriptInterface
+        fun fetchAppInfo(): String {
+            logger.debug("($loggerTag) fetchAppInfo called")
+            return ConnectJson.encodeToString(AppInfoJs(applicationId = context.packageName))
         }
 
         @JavascriptInterface

@@ -459,7 +459,11 @@ internal class FlowControllerTest {
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
-        createIntentCallback = { _, _ -> CreateIntentResult.Success("pi_example_secret_example") },
+        builder = {
+            createIntentCallback { _, _ ->
+                CreateIntentResult.Success("pi_example_secret_example")
+            }
+        },
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
@@ -493,7 +497,7 @@ internal class FlowControllerTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3Bdeferred-intent%3Bautopm")
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
@@ -512,7 +516,7 @@ internal class FlowControllerTest {
             not(
                 bodyPart(
                     urlEncode("payment_method_data[payment_user_agent]"),
-                    Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                    Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3Bdeferred-intent%3Bautopm")
                 )
             ),
         ) { response ->
@@ -588,11 +592,13 @@ internal class FlowControllerTest {
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
-        createIntentCallback = { _, _ ->
-            CreateIntentResult.Failure(
-                cause = Exception("We don't accept visa"),
-                displayMessage = "We don't accept visa"
-            )
+        builder = {
+            createIntentCallback { _, _ ->
+                CreateIntentResult.Failure(
+                    cause = Exception("We don't accept visa"),
+                    displayMessage = "We don't accept visa"
+                )
+            }
         },
         resultCallback = { result ->
             assertThat(result).isInstanceOf(PaymentSheetResult.Failed::class.java)
@@ -631,7 +637,7 @@ internal class FlowControllerTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3Bdeferred-intent%3Bautopm")
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
@@ -647,8 +653,10 @@ internal class FlowControllerTest {
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
-        createIntentCallback = { _, _ ->
-            CreateIntentResult.Success(PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
+        builder = {
+            createIntentCallback { _, _ ->
+                CreateIntentResult.Success(PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
+            }
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -683,7 +691,7 @@ internal class FlowControllerTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3Bdeferred-intent%3Bautopm")
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
@@ -698,7 +706,11 @@ internal class FlowControllerTest {
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
-        createIntentCallback = { _, _ -> CreateIntentResult.Success("pi_example_secret_example") },
+        builder = {
+            createIntentCallback { _, _ ->
+                CreateIntentResult.Success("pi_example_secret_example")
+            }
+        },
         resultCallback = { result ->
             val failureResult = result as? PaymentSheetResult.Failed
             assertThat(failureResult?.error?.message).isEqualTo(
@@ -740,7 +752,7 @@ internal class FlowControllerTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3Bdeferred-intent%3Bautopm")
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")

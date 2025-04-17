@@ -24,10 +24,10 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.ViewActionRecorder
+import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import com.stripe.android.ui.core.elements.TEST_TAG_SIMPLE_DIALOG
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
-import com.stripe.android.uicore.elements.TEST_TAG_DROP_DOWN_CHOICE
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -40,6 +40,9 @@ class UpdatePaymentMethodUITest {
 
     @get:Rule
     val composeRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     @Test
     fun canRemoveIsFalse_removeButtonHidden() = runScenario(
@@ -249,27 +252,6 @@ class UpdatePaymentMethodUITest {
     }
 
     @Test
-    fun selectingCardBrandDropdown_sendsOnBrandChoiceChangedAction() {
-        runScenario(
-            displayableSavedPaymentMethod = PaymentMethodFixtures
-                .CARD_WITH_NETWORKS_PAYMENT_METHOD
-                .toDisplayableSavedPaymentMethod()
-        ) {
-            assertThat(viewActionRecorder.viewActions).isEmpty()
-            composeRule.onNodeWithTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG).performClick()
-
-            composeRule.onNodeWithTag("${TEST_TAG_DROP_DOWN_CHOICE}_Visa").performClick()
-
-            viewActionRecorder.consume(
-                UpdatePaymentMethodInteractor.ViewAction.BrandChoiceChanged(
-                    cardBrandChoice = CardBrandChoice(brand = CardBrand.Visa, enabled = true)
-                )
-            )
-            assertThat(viewActionRecorder.viewActions).isEmpty()
-        }
-    }
-
-    @Test
     fun `When should show set as default checkbox, checkbox is visible and enabled`() {
         runScenario(
             shouldShowSetAsDefaultCheckbox = true,
@@ -328,7 +310,6 @@ class UpdatePaymentMethodUITest {
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
         isExpiredCard: Boolean = false,
         errorMessage: ResolvableString? = null,
-        initialCardBrand: CardBrand = CardBrand.Unknown,
         canRemove: Boolean = true,
         isModifiablePaymentMethod: Boolean = true,
         hasValidBrandChoices: Boolean = true,
@@ -338,6 +319,7 @@ class UpdatePaymentMethodUITest {
         shouldShowSetAsDefaultCheckbox: Boolean = false,
         shouldShowSaveButton: Boolean = false,
         isSaveButtonEnabled: Boolean = false,
+        editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = FakeEditCardDetailsInteractorFactory(),
         testBlock: Scenario.() -> Unit,
     ) {
         val viewActionRecorder = ViewActionRecorder<UpdatePaymentMethodInteractor.ViewAction>()
@@ -355,10 +337,10 @@ class UpdatePaymentMethodUITest {
             initialState = UpdatePaymentMethodInteractor.State(
                 error = errorMessage,
                 status = UpdatePaymentMethodInteractor.Status.Idle,
-                cardBrandChoice = CardBrandChoice(brand = initialCardBrand, enabled = true),
                 setAsDefaultCheckboxChecked = setAsDefaultCheckboxChecked,
                 isSaveButtonEnabled = isSaveButtonEnabled,
             ),
+            editCardDetailsInteractorFactory = editCardDetailsInteractorFactory
         )
 
         composeRule.setContent {

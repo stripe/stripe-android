@@ -554,7 +554,7 @@ internal class LinkActivityViewModelTest {
         assertThat(appBarState.email).isNull()
         assertThat(appBarState.showHeader).isFalse()
         assertThat(appBarState.showOverflowMenu).isFalse()
-        assertThat(appBarState.navigationIcon).isEqualTo(R.drawable.stripe_link_back)
+        assertThat(appBarState.navigationIcon).isEqualTo(R.drawable.stripe_link_close)
     }
 
     @Test
@@ -566,7 +566,7 @@ internal class LinkActivityViewModelTest {
 
         val appBarState = viewModel.linkAppBarState.value
         assertThat(appBarState.email).isNull()
-        assertThat(appBarState.showHeader).isFalse()
+        assertThat(appBarState.showHeader).isTrue()
         assertThat(appBarState.showOverflowMenu).isFalse()
         assertThat(appBarState.navigationIcon).isEqualTo(R.drawable.stripe_link_close)
     }

@@ -1,16 +1,19 @@
 package com.stripe.android.paymentelement.embedded.content
 
 import android.os.Parcelable
-import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.core.mainthread.MainThreadOnlyMutableStateFlow
+import com.stripe.android.core.mainthread.MainThreadSavedStateHandle
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.FormHelper.FormType
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -24,9 +27,7 @@ import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
@@ -54,7 +55,7 @@ internal interface EmbeddedContentHelper {
 @Singleton
 internal class DefaultEmbeddedContentHelper @Inject constructor(
     @ViewModelScope private val coroutineScope: CoroutineScope,
-    private val savedStateHandle: SavedStateHandle,
+    private val savedStateHandle: MainThreadSavedStateHandle,
     private val eventReporter: EventReporter,
     @IOContext private val workContext: CoroutineContext,
     @UIContext private val uiContext: CoroutineContext,
@@ -72,7 +73,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
         initialValue = null
     )
 
-    private val _embeddedContent = MutableStateFlow<EmbeddedContent?>(null)
+    private val _embeddedContent = MainThreadOnlyMutableStateFlow<EmbeddedContent?>(null)
     override val embeddedContent: StateFlow<EmbeddedContent?> = _embeddedContent.asStateFlow()
 
     private var sheetLauncher: EmbeddedSheetLauncher? = null
@@ -133,7 +134,8 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
         val formHelper = embeddedFormHelperFactory.create(
             coroutineScope = coroutineScope,
             paymentMethodMetadata = paymentMethodMetadata,
-            selectionUpdater = ::setSelection
+            eventReporter = eventReporter,
+            selectionUpdater = ::setSelection,
         )
         val savedPaymentMethodMutator = createSavedPaymentMethodMutator(
             coroutineScope = coroutineScope,
@@ -190,6 +192,17 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             reportPaymentMethodTypeSelected = eventReporter::onSelectPaymentMethod,
             reportFormShown = eventReporter::onPaymentMethodFormShown,
             onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,
+            shouldUpdateVerticalModeSelection = { paymentMethodCode ->
+                val isConfirmFlow = confirmationStateHolder.state?.configuration?.formSheetAction ==
+                    EmbeddedPaymentElement.FormSheetAction.Confirm
+                if (isConfirmFlow) {
+                    val requiresFormScreen = paymentMethodCode != null &&
+                        formHelper.formTypeForCode(paymentMethodCode) == FormType.UserInteractionRequired
+                    !requiresFormScreen
+                } else {
+                    true
+                }
+            }
         )
     }
 

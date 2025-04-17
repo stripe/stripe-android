@@ -126,7 +126,7 @@ internal fun FormActivityPrimaryButton(
         PrimaryButton(
             modifier = Modifier.testTag(EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON),
             label = state.primaryButtonLabel.resolve(),
-            locked = true,
+            locked = state.shouldDisplayLockIcon,
             enabled = state.isEnabled,
             onClick = onClick,
             onProcessingCompleted = onProcessingCompleted,

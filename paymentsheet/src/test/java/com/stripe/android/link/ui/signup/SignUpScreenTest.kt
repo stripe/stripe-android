@@ -46,7 +46,14 @@ internal class SignUpScreenTest {
 
     @Test
     fun `only email field displayed when controllers are empty`() = runTest(dispatcher) {
-        val viewModel = viewModel()
+        val viewModel = viewModel(
+            customerInfo = LinkConfiguration.CustomerInfo(
+                email = null,
+                phone = null,
+                name = null,
+                billingCountryCode = null,
+            )
+        )
 
         composeTestRule.setContent {
             SignUpScreen(viewModel = viewModel)
@@ -228,7 +235,6 @@ internal class SignUpScreenTest {
             linkEventsReporter = linkEventsReporter,
             logger = logger,
             savedStateHandle = SavedStateHandle(),
-            navigate = {},
             navigateAndClearStack = {},
             moveToWeb = moveToWeb
         )
@@ -237,6 +243,6 @@ internal class SignUpScreenTest {
     private fun onEmailField() = composeTestRule.onNodeWithText("Email")
     private fun onPhoneField() = composeTestRule.onNodeWithText("Phone number")
     private fun onNameField() = composeTestRule.onNodeWithText("Full name")
-    private fun onSignUpButton() = composeTestRule.onNodeWithText("Join Link")
+    private fun onSignUpButton() = composeTestRule.onNodeWithText("Agree and continue")
     private fun onErrorSection() = composeTestRule.onNodeWithTag(SIGN_UP_ERROR_TAG)
 }

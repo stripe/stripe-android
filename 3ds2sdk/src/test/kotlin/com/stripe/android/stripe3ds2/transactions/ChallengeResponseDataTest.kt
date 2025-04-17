@@ -164,15 +164,6 @@ class ChallengeResponseDataTest {
     }
 
     @Test
-    fun checkFinalCresFields_withNonFinalFields_shouldThrowException() {
-        val cresJson = JSONObject(FINAL_CRES_JSON.toString())
-            .put("hello", "world")
-        assertFailsWith<ChallengeResponseParseException> {
-            ChallengeResponseData.checkFinalCresFields(cresJson)
-        }
-    }
-
-    @Test
     fun fromJson_withValidFinalCres_shouldReturnObject() {
         val cresData = ChallengeResponseData.fromJson(FINAL_CRES_JSON)
         assertTrue(cresData.isChallengeCompleted)

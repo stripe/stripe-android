@@ -12,6 +12,7 @@ import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
+import kotlinx.coroutines.test.runTest
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -45,10 +46,10 @@ internal class PaymentSheetTestRunnerContext(
 internal fun runPaymentSheetTest(
     networkRule: NetworkRule,
     integrationType: IntegrationType = IntegrationType.Compose,
-    createIntentCallback: CreateIntentCallback? = null,
+    builder: PaymentSheet.Builder.() -> Unit = {},
     successTimeoutSeconds: Long = 5L,
     resultCallback: PaymentSheetResultCallback,
-    block: (PaymentSheetTestRunnerContext) -> Unit,
+    block: suspend (PaymentSheetTestRunnerContext) -> Unit,
 ) {
     val countDownLatch = CountDownLatch(1)
 
@@ -56,7 +57,7 @@ internal fun runPaymentSheetTest(
         resultCallback.onPaymentSheetResult(result)
         countDownLatch.countDown()
     }.apply {
-        createIntentCallback?.let { createIntentCallback(it) }
+        builder()
     }
 
     ActivityScenario.launch(MainActivity::class.java).use { scenario ->
@@ -82,7 +83,9 @@ internal fun runPaymentSheetTest(
         scenario.moveToState(Lifecycle.State.RESUMED)
 
         val testContext = PaymentSheetTestRunnerContext(scenario, paymentSheet, countDownLatch)
-        block(testContext)
+        runTest {
+            block(testContext)
+        }
 
         val didCompleteSuccessfully = countDownLatch.await(successTimeoutSeconds, TimeUnit.SECONDS)
         networkRule.validate()

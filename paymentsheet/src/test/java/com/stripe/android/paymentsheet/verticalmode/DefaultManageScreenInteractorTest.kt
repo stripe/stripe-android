@@ -39,7 +39,10 @@ class DefaultManageScreenInteractorTest {
 
     @Test
     fun hasCorrectTitle() {
-        val initialPaymentMethods = PaymentMethodFixtures.createCards(2)
+        val initialPaymentMethods = listOf(
+            PaymentMethodFactory.card(random = true),
+            PaymentMethodFactory.usBankAccount(),
+        )
         runScenario(initialPaymentMethods, currentSelection = null) {
             interactor.state.test {
                 assertThat(awaitItem().title)
@@ -47,6 +50,20 @@ class DefaultManageScreenInteractorTest {
                 editingSource.value = true
                 assertThat(awaitItem().title)
                     .isEqualTo(R.string.stripe_paymentsheet_manage_payment_methods.resolvableString)
+            }
+        }
+    }
+
+    @Test
+    fun hasCorrectTitleWithCardsOnly() {
+        val initialPaymentMethods = PaymentMethodFactory.cards(size = 2)
+        runScenario(initialPaymentMethods, currentSelection = null) {
+            interactor.state.test {
+                assertThat(awaitItem().title)
+                    .isEqualTo(R.string.stripe_paymentsheet_select_card.resolvableString)
+                editingSource.value = true
+                assertThat(awaitItem().title)
+                    .isEqualTo(R.string.stripe_paymentsheet_manage_cards.resolvableString)
             }
         }
     }

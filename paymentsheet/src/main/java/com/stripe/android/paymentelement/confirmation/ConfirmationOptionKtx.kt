@@ -5,6 +5,7 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
+import com.stripe.android.paymentelement.confirmation.cpms.CustomPaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
@@ -18,6 +19,7 @@ internal fun PaymentSelection.toConfirmationOption(
     return when (this) {
         is PaymentSelection.Saved -> toConfirmationOption()
         is PaymentSelection.ExternalPaymentMethod -> toConfirmationOption()
+        is PaymentSelection.CustomPaymentMethod -> toConfirmationOption(configuration)
         is PaymentSelection.New.USBankAccount -> toConfirmationOption()
         is PaymentSelection.New.LinkInline -> toConfirmationOption(linkConfiguration)
         is PaymentSelection.New -> toConfirmationOption()
@@ -122,6 +124,19 @@ private fun PaymentSelection.Link.toConfirmationOption(
         LinkConfirmationOption(
             configuration = linkConfiguration,
             useLinkExpress = useLinkExpress
+        )
+    }
+}
+
+private fun PaymentSelection.CustomPaymentMethod.toConfirmationOption(
+    configuration: CommonConfiguration
+): CustomPaymentMethodConfirmationOption? {
+    return configuration.customPaymentMethods.firstOrNull { type ->
+        type.id == id
+    }?.let { type ->
+        CustomPaymentMethodConfirmationOption(
+            customPaymentMethodType = type,
+            billingDetails = billingDetails
         )
     }
 }

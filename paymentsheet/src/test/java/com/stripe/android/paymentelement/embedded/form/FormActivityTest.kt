@@ -104,6 +104,7 @@ internal class FormActivityTest {
                     initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration),
                     statusBarColor = null,
                     paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
+                    paymentSelection = null,
                 ),
             )
         ).use { scenario ->
