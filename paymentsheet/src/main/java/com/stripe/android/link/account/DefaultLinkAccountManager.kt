@@ -24,8 +24,10 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.model.amount
 import com.stripe.android.paymentsheet.model.currency
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
@@ -272,17 +274,19 @@ internal class DefaultLinkAccountManager @Inject constructor(
         }
     }
 
-    private fun setAccount(
+    private suspend fun setAccount(
         consumerSession: ConsumerSession,
         publishableKey: String?,
     ): LinkAccount {
         maybeUpdateConsumerPublishableKey(consumerSession.emailAddress, publishableKey)
         val newAccount = LinkAccount(consumerSession)
-        linkAccountHolder.set(newAccount)
+        withContext(Dispatchers.Main.immediate) {
+            linkAccountHolder.set(newAccount)
+        }
         return newAccount
     }
 
-    override fun setLinkAccountFromLookupResult(
+    override suspend fun setLinkAccountFromLookupResult(
         lookup: ConsumerSessionLookup,
         startSession: Boolean,
     ): LinkAccount? {
@@ -356,14 +360,16 @@ internal class DefaultLinkAccountManager @Inject constructor(
     }
 
     @VisibleForTesting
-    internal fun setAccountNullable(
+    internal suspend fun setAccountNullable(
         consumerSession: ConsumerSession?,
         publishableKey: String?,
     ): LinkAccount? {
         return consumerSession?.let {
             setAccount(consumerSession = it, publishableKey = publishableKey)
         } ?: run {
-            linkAccountHolder.set(null)
+            withContext(Dispatchers.Main.immediate) {
+                linkAccountHolder.set(null)
+            }
             consumerPublishableKey = null
             null
         }
