@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.ui
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.BILLING_DETAILS_FORM_DETAILS
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.billingDetailsFormState
@@ -226,7 +225,7 @@ internal class CardDetailsEntryTest {
     ) = CardDetailsEntry(
         cardBrandChoice = cardBrandChoice,
         expiryDateState = ExpiryDateState.create(
-            card = createCard(expiryMonth = expMonth, expiryYear = expYear),
+            editPayload = createCard(expiryMonth = expMonth, expiryYear = expYear),
             enabled = expiryDateEditable
         ),
     )
@@ -240,10 +239,14 @@ internal class CardDetailsEntryTest {
     private fun createCard(
         expiryMonth: Int? = 12,
         expiryYear: Int? = 2030
-    ): PaymentMethod.Card = PaymentMethodFixtures.CARD_WITH_NETWORKS.copy(
-        brand = CardBrand.Visa,
-        expiryMonth = expiryMonth,
-        expiryYear = expiryYear,
-        last4 = "4242"
-    )
+    ): EditCardPayload {
+        val card = PaymentMethodFixtures.CARD_WITH_NETWORKS.copy(
+            brand = CardBrand.Visa,
+            expiryMonth = expiryMonth,
+            expiryYear = expiryYear,
+            last4 = "4242"
+        )
+
+        return EditCardPayload.create(card, null)
+    }
 }

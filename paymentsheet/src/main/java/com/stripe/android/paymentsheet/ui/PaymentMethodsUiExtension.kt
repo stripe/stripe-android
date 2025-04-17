@@ -53,13 +53,11 @@ internal fun EditCardPayload.getSavedPaymentMethodIcon(
     forVerticalMode: Boolean = false,
     showNightIcon: Boolean? = null,
 ): Int {
-    val brand = CardBrand.fromCode(displayBrand)
-
     // Vertical mode icons are the same for light & dark
     return if (forVerticalMode) {
-        brand.getCardBrandIconForVerticalMode()
+        cardBrand.getCardBrandIconForVerticalMode()
     } else {
-        brand.getCardBrandIconForHorizontalMode(
+        cardBrand.getCardBrandIconForHorizontalMode(
             showNightIcon = showNightIcon,
         )
     }

@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
+import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArrayToList
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
@@ -60,7 +61,7 @@ object ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails
                 "card" -> {
                     val cardDetails = json.getJSONObject(FIELD_CARD_DETAILS)
                     val checks = cardDetails.optJSONObject(FIELD_CARD_CHECKS)
-                    val networks = ModelJsonParser.jsonArrayToList(cardDetails.optJSONArray(FIELD_CARD_NETWORKS))
+                    val networks = jsonArrayToList(cardDetails.optJSONArray(FIELD_CARD_NETWORKS))
 
                     ConsumerPaymentDetails.Card(
                         id = json.getString(FIELD_ID),

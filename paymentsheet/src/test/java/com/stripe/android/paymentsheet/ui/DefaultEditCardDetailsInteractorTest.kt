@@ -27,19 +27,41 @@ internal class DefaultEditCardDetailsInteractorTest {
 
     @Test
     fun testInitialStateForCardWithNetworks() {
+        val card = PaymentMethodFixtures.CARD_WITH_NETWORKS
         val handler = handler()
 
         val state = handler.uiState
-        assertThat(state.card).isEqualTo(PaymentMethodFixtures.CARD_WITH_NETWORKS)
+        assertThat(state.payload).isEqualTo(
+            EditCardPayload(
+                last4 = card.last4,
+                expiryMonth = card.expiryMonth,
+                expiryYear = card.expiryYear,
+                brand = card.brand,
+                displayBrand = card.displayBrand,
+                networks = card.networks?.available,
+                billingDetails = PaymentMethodFixtures.BILLING_DETAILS,
+            )
+        )
         assertThat(state.selectedCardBrand.brand).isEqualTo(CardBrand.CartesBancaires)
     }
 
     @Test
     fun testInitialStateForCardWithNoNetworks() {
-        val handler = handler(card = PaymentMethodFixtures.CARD)
+        val card = PaymentMethodFixtures.CARD
+        val handler = handler(card = card)
 
         val state = handler.uiState
-        assertThat(state.card).isEqualTo(PaymentMethodFixtures.CARD)
+        assertThat(state.payload).isEqualTo(
+            EditCardPayload(
+                last4 = card.last4,
+                expiryMonth = card.expiryMonth,
+                expiryYear = card.expiryYear,
+                brand = card.brand,
+                displayBrand = card.displayBrand,
+                networks = card.networks?.available,
+                billingDetails = PaymentMethodFixtures.BILLING_DETAILS,
+            )
+        )
         assertThat(state.selectedCardBrand.brand).isEqualTo(CardBrand.Unknown)
     }
 
@@ -433,10 +455,9 @@ internal class DefaultEditCardDetailsInteractorTest {
             onBrandChoiceChanged = onBrandChoiceChanged,
             coroutineScope = TestScope(testDispatcher),
             isCbcModifiable = isCbcModifiable,
-            card = card,
+            payload = EditCardPayload.create(card, billingDetails),
             onCardUpdateParamsChanged = onCardUpdateParamsChanged,
             areExpiryDateAndAddressModificationSupported = areExpiryDateAndAddressModificationSupported,
-            billingDetails = billingDetails,
             addressCollectionMode = addressCollectionMode,
         )
     }

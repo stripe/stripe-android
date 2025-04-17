@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardBrand.Unknown
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CardUpdateParams
@@ -28,13 +29,14 @@ internal data class EditCardPayload(
     val last4: String?,
     val expiryMonth: Int?,
     val expiryYear: Int?,
+    val brand: CardBrand,
     val displayBrand: String?,
     val networks: Set<String>?,
     val billingDetails: PaymentMethod.BillingDetails?,
 ) {
 
-    val brand: CardBrand
-        get() = CardBrand.fromCode(displayBrand)
+    val cardBrand: CardBrand
+        get() = CardBrand.fromCode(displayBrand).takeIf { it != Unknown } ?: brand
 
     internal companion object {
 
@@ -46,6 +48,7 @@ internal data class EditCardPayload(
                 last4 = card.last4,
                 expiryMonth = card.expiryMonth,
                 expiryYear = card.expiryYear,
+                brand = card.brand,
                 displayBrand = card.displayBrand,
                 networks = card.networks?.available,
                 billingDetails = billingDetails,
@@ -60,8 +63,8 @@ internal data class EditCardPayload(
                 last4 = card.last4,
                 expiryMonth = card.expiryMonth,
                 expiryYear = card.expiryYear,
-                displayBrand = card.brand.code,
-                // TODO: This still shows the dropdown somehow…
+                brand = card.brand,
+                displayBrand = null,
                 networks = card.networks.toSet().takeIf { it.size > 1 },
                 billingDetails = PaymentMethod.BillingDetails(
                     address = card.billingAddress?.let {

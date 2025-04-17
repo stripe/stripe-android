@@ -276,6 +276,7 @@ internal class CardDetailsEditUITest {
         runScenario(
             card = PaymentMethodFixtures.CARD_WITH_NETWORKS.copy(
                 brand = CardBrand.AmericanExpress,
+                displayBrand = null,
             )
         ) {
             assertCvcEquals(
@@ -427,10 +428,9 @@ internal class CardDetailsEditUITest {
                 isCbcModifiable = showCardBrandDropdown,
                 areExpiryDateAndAddressModificationSupported = expiryDateEditEnabled,
                 cardBrandFilter = DefaultCardBrandFilter,
-                card = card,
+                payload = EditCardPayload.create(card, PaymentMethodFixtures.BILLING_DETAILS),
                 onBrandChoiceChanged = {},
                 onCardUpdateParamsChanged = {},
-                billingDetails = PaymentMethodFixtures.BILLING_DETAILS,
                 addressCollectionMode = addressCollectionMode
             )
         composeRule.setContent {
