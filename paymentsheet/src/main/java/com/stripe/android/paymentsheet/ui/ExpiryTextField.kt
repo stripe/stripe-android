@@ -54,7 +54,7 @@ internal fun ExpiryTextField(
         ),
         shouldShowError = isError,
         keyboardOptions = KeyboardOptions.Default.copy(
-            keyboardType = KeyboardType.Number
+            keyboardType = KeyboardType.NumberPassword
         ),
         visualTransformation = ExpiryDateVisualTransformation(CARD_EDIT_UI_FALLBACK_EXPIRY_DATE),
         colors = colors
