@@ -2,10 +2,10 @@ package com.stripe.android.stripe3ds2.transaction
 
 import androidx.annotation.VisibleForTesting
 import com.nimbusds.jose.JOSEException
+import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.JWSObject
 import com.nimbusds.jose.JWSVerifier
-import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton
 import com.nimbusds.jose.crypto.factories.DefaultJWSVerifierFactory
 import com.nimbusds.jose.util.Base64
 import com.nimbusds.jose.util.X509CertChainUtils
@@ -19,8 +19,10 @@ import java.io.IOException
 import java.security.GeneralSecurityException
 import java.security.KeyStore
 import java.security.KeyStoreException
+import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.security.PublicKey
+import java.security.Signature
 import java.security.cert.CertPathBuilder
 import java.security.cert.CertStore
 import java.security.cert.CertificateException
@@ -115,7 +117,12 @@ internal class DefaultJwsValidator(
     @Throws(JOSEException::class, CertificateException::class)
     private fun getVerifier(jwsHeader: JWSHeader): JWSVerifier {
         val verifierFactory = DefaultJWSVerifierFactory()
-        verifierFactory.jcaContext.provider = BouncyCastleProviderSingleton.getInstance()
+        val provider = if (jwsHeader.algorithm == JWSAlgorithm.ES256) {
+            Signature.getInstance("SHA256withECDSA").provider
+        } else {
+            MessageDigest.getInstance("SHA-256").provider
+        }
+        verifierFactory.jcaContext.provider = provider
         return verifierFactory.createJWSVerifier(jwsHeader, getPublicKeyFromHeader(jwsHeader))
     }
 
