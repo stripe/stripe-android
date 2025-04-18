@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.ZeroCornerSize
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -24,6 +25,7 @@ internal fun CommonTextField(
     shouldShowError: Boolean = false,
     enabled: Boolean = false,
     visualTransformation: VisualTransformation = VisualTransformation.None,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     shape: Shape =
         MaterialTheme.shapes.small.copy(bottomEnd = ZeroCornerSize, bottomStart = ZeroCornerSize),
     colors: TextFieldColors = TextFieldColors(
@@ -42,6 +44,7 @@ internal fun CommonTextField(
         trailingIcon = trailingIcon,
         shape = shape,
         colors = colors,
+        keyboardOptions = keyboardOptions,
         visualTransformation = visualTransformation,
         onValueChange = onValueChange,
     )
