@@ -123,6 +123,7 @@ class ConsumersApiServiceImplTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/consumers/sessions/lookup"),
+            checkValidJson = false
         ) { response ->
             response.setResponseCode(400)
             response.setBody("""{"invalid-json"}""")
