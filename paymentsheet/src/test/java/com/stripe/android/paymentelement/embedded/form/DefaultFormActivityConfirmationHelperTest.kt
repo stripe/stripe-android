@@ -123,6 +123,7 @@ class DefaultFormActivityConfirmationHelperTest {
             eventReporter = eventReporter,
             lifecycleOwner = TestLifecycleOwner(coroutineDispatcher = Dispatchers.Unconfined),
             activityResultCaller = mock(),
+            coroutineScope = this,
         )
         assertThat(confirmationHandler.registerTurbine.awaitItem()).isNotNull()
         assertThat(stateHelper.updateTurbine.awaitItem()).isEqualTo(ConfirmationHandler.State.Idle)

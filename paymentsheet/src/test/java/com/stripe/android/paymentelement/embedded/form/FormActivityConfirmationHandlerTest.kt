@@ -93,7 +93,8 @@ internal class FormActivityConfirmationHandlerTest {
             lifecycleOwner = TestLifecycleOwner(),
             activityResultCaller = mock(),
             onClickDelegate = onClickOverrideDelegate,
-            eventReporter = FakeEventReporter()
+            eventReporter = FakeEventReporter(),
+            coroutineScope = this,
         )
 
         assertThat(confirmationHandler.registerTurbine.awaitItem()).isNotNull()
