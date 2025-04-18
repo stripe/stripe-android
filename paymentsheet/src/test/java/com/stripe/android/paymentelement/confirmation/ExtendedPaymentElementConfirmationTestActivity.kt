@@ -56,7 +56,7 @@ internal class ExtendedPaymentElementConfirmationTestActivity : AppCompatActivit
     }
 
     val confirmationHandler by lazy {
-        viewModel.confirmationHandler
+        MainThreadConfirmationHandler(viewModel.confirmationHandler)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
