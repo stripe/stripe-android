@@ -4,6 +4,7 @@ package com.stripe.android.financialconnections.features.linkstepupverification
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RestrictTo
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,9 +45,6 @@ import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.paneViewModel
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
-import com.stripe.android.financialconnections.ui.TextResource
-import com.stripe.android.financialconnections.ui.components.AnnotatedText
-import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
@@ -63,7 +61,7 @@ internal fun LinkStepUpVerificationScreen() {
     LinkStepUpVerificationContent(
         state = state.value,
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
-        onClickableTextClick = viewModel::onClickableTextClick
+        onResendCodeClick = viewModel::onResendCodeClick
     )
 }
 
@@ -71,7 +69,7 @@ internal fun LinkStepUpVerificationScreen() {
 private fun LinkStepUpVerificationContent(
     state: LinkStepUpVerificationState,
     onCloseFromErrorClick: (Throwable) -> Unit,
-    onClickableTextClick: (String) -> Unit
+    onResendCodeClick: () -> Unit
 ) {
     val lazyListState = rememberLazyListState()
     Box {
@@ -84,7 +82,7 @@ private fun LinkStepUpVerificationContent(
                 state.submitLoading,
                 payload = payload(),
                 onCloseFromErrorClick = onCloseFromErrorClick,
-                onClickableTextClick = onClickableTextClick
+                onResendCodeClick = onResendCodeClick
             )
         }
     }
@@ -97,7 +95,7 @@ private fun LinkStepUpVerificationLoaded(
     submitLoading: Boolean,
     onCloseFromErrorClick: (Throwable) -> Unit,
     payload: Payload,
-    onClickableTextClick: (String) -> Unit
+    onResendCodeClick: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -140,7 +138,7 @@ private fun LinkStepUpVerificationLoaded(
                 item {
                     ResendCodeSection(
                         isLoading = submitLoading,
-                        onClickableTextClick = onClickableTextClick
+                        onResendCodeClick = onResendCodeClick
                     )
                 }
             }
@@ -171,7 +169,7 @@ private fun HeaderSection(
 @Composable
 private fun ResendCodeSection(
     isLoading: Boolean,
-    onClickableTextClick: (String) -> Unit
+    onResendCodeClick: () -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -179,20 +177,13 @@ private fun ResendCodeSection(
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (isLoading) {
-            LoadingSpinner(modifier = Modifier.size(24.dp),)
+            LoadingSpinner(modifier = Modifier.size(24.dp))
         } else {
-            AnnotatedText(
-                text = TextResource.StringId(R.string.stripe_link_stepup_verification_resend_code),
-                maxLines = 1,
-                defaultStyle = typography.labelMediumEmphasized.copy(
-                    color = colors.textAction,
-                ),
-                annotationStyles = mapOf(
-                    StringAnnotation.CLICKABLE to typography.labelMediumEmphasized
-                        .toSpanStyle()
-                        .copy(color = colors.textAction),
-                ),
-                onClickableTextClick = onClickableTextClick,
+            Text(
+                modifier = Modifier.clickable { onResendCodeClick() },
+                text = stringResource(R.string.stripe_link_stepup_verification_resend_code),
+                style = typography.labelMediumEmphasized,
+                color = colors.textAction
             )
         }
     }
@@ -207,7 +198,7 @@ internal fun LinkStepUpVerificationPreview(
         LinkStepUpVerificationContent(
             state = state,
             onCloseFromErrorClick = {},
-            onClickableTextClick = {}
+            onResendCodeClick = {}
         )
     }
 }

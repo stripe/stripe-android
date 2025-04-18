@@ -41,7 +41,8 @@ internal class ManualEntrySuccessViewModel @AssistedInject constructor(
             val successContent = successContentRepository.get()
             val title = successContent?.heading ?: TextResource.StringId(R.string.stripe_success_pane_title)
             val content = successContent?.message ?: TextResource.PluralId(
-                value = R.plurals.stripe_success_pane_desc,
+                singular = R.string.stripe_success_pane_desc_singular,
+                plural = R.string.stripe_success_pane_desc_plural,
                 // on manual entry just one account is connected.
                 count = 1,
             )
