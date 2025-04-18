@@ -30,6 +30,10 @@ class MainThreadOnlyMutableStateFlow<T>(initialValue: T) : StateFlow<T> {
         return source.compareAndSet(expect, update)
     }
 
+    fun tryEmit(value: T) {
+        source.tryEmit(value)
+    }
+
     override suspend fun collect(collector: FlowCollector<T>): Nothing {
         source.collect(collector)
     }
