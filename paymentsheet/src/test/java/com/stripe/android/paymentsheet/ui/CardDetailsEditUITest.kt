@@ -427,10 +427,9 @@ internal class CardDetailsEditUITest {
                 isModifiable = showCardBrandDropdown,
                 areExpiryDateAndAddressModificationSupported = expiryDateEditEnabled,
                 cardBrandFilter = DefaultCardBrandFilter,
-                card = card,
+                payload = EditCardPayload.create(card, PaymentMethodFixtures.BILLING_DETAILS),
                 onBrandChoiceChanged = {},
                 onCardUpdateParamsChanged = {},
-                billingDetails = PaymentMethodFixtures.BILLING_DETAILS,
                 addressCollectionMode = addressCollectionMode
             )
         composeRule.setContent {

@@ -118,6 +118,8 @@ class RealConsumerSessionRepositoryTest {
             emailAddress = "email@email.com",
             redactedFormattedPhoneNumber = "(***) ***-1234",
             redactedPhoneNumber = "******1234",
+            unredactedPhoneNumber = null,
+            phoneNumberCountry = null,
             verificationSessions = listOf(
                 ConsumerSession.VerificationSession(
                     type = ConsumerSession.VerificationSession.SessionType.Sms,

@@ -424,10 +424,9 @@ internal class DefaultEditCardDetailsInteractorTest {
             onBrandChoiceChanged = onBrandChoiceChanged,
             coroutineScope = TestScope(testDispatcher),
             isModifiable = isModifiable,
-            card = card,
+            payload = EditCardPayload.create(card, billingDetails),
             onCardUpdateParamsChanged = onCardUpdateParamsChanged,
             areExpiryDateAndAddressModificationSupported = true,
-            billingDetails = billingDetails,
             addressCollectionMode = addressCollectionMode,
         )
     }

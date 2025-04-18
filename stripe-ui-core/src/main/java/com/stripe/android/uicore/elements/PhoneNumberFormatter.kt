@@ -1,5 +1,6 @@
 package com.stripe.android.uicore.elements
 
+import androidx.annotation.RestrictTo
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
@@ -494,4 +495,13 @@ internal sealed class PhoneNumberFormatter {
             "UZ" to Metadata(prefix = "+998", regionCode = "UZ", pattern = "## ### ## ##")
         )
     }
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun convertPhoneNumberToE164(
+    nationalPhoneNumber: String,
+    countryCode: String,
+): String? {
+    val formatter = PhoneNumberFormatter.forCountry(countryCode)
+    return formatter.toE164Format(nationalPhoneNumber)
 }

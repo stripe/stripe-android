@@ -26,7 +26,13 @@ class ConsumerPaymentDetailsJsonParserTest {
                         brand = CardBrand.MasterCard,
                         last4 = "4444",
                         cvcCheck = CvcCheck.Pass,
+                        networks = emptyList(),
                         billingAddress = ConsumerPaymentDetails.BillingAddress(
+                            name = null,
+                            line1 = null,
+                            line2 = null,
+                            locality = null,
+                            administrativeArea = null,
                             countryCode = CountryCode.US,
                             postalCode = "12312"
                         )
@@ -51,6 +57,7 @@ class ConsumerPaymentDetailsJsonParserTest {
                         brand = CardBrand.MasterCard,
                         last4 = "4444",
                         cvcCheck = CvcCheck.Unknown,
+                        networks = emptyList(),
                         billingAddress = null
                     )
                 )
@@ -109,7 +116,13 @@ class ConsumerPaymentDetailsJsonParserTest {
                         isDefault = true,
                         brand = CardBrand.MasterCard,
                         cvcCheck = CvcCheck.Pass,
+                        networks = emptyList(),
                         billingAddress = ConsumerPaymentDetails.BillingAddress(
+                            name = null,
+                            line1 = null,
+                            line2 = null,
+                            locality = null,
+                            administrativeArea = null,
                             countryCode = CountryCode.US,
                             postalCode = "12312"
                         )
@@ -122,7 +135,13 @@ class ConsumerPaymentDetailsJsonParserTest {
                         brand = CardBrand.Visa,
                         cvcCheck = CvcCheck.Fail,
                         isDefault = false,
+                        networks = emptyList(),
                         billingAddress = ConsumerPaymentDetails.BillingAddress(
+                            name = null,
+                            line1 = null,
+                            line2 = null,
+                            locality = null,
+                            administrativeArea = null,
                             countryCode = CountryCode.US,
                             postalCode = "42424"
                         )
@@ -223,7 +242,13 @@ class ConsumerPaymentDetailsJsonParserTest {
                         brand = CardBrand.AmericanExpress,
                         cvcCheck = CvcCheck.Pass,
                         isDefault = true,
+                        networks = emptyList(),
                         billingAddress = ConsumerPaymentDetails.BillingAddress(
+                            name = null,
+                            line1 = null,
+                            line2 = null,
+                            locality = null,
+                            administrativeArea = null,
                             countryCode = CountryCode.US,
                             postalCode = "12312"
                         )
@@ -236,7 +261,13 @@ class ConsumerPaymentDetailsJsonParserTest {
                         brand = CardBrand.DinersClub,
                         cvcCheck = CvcCheck.Fail,
                         isDefault = false,
+                        networks = emptyList(),
                         billingAddress = ConsumerPaymentDetails.BillingAddress(
+                            name = null,
+                            line1 = null,
+                            line2 = null,
+                            locality = null,
+                            administrativeArea = null,
                             countryCode = CountryCode.US,
                             postalCode = "42424"
                         )

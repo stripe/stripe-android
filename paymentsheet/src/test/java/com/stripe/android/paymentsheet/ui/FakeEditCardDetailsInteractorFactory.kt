@@ -14,8 +14,7 @@ internal class FakeEditCardDetailsInteractorFactory : EditCardDetailsInteractor.
         isModifiable: Boolean,
         areExpiryDateAndAddressModificationSupported: Boolean,
         cardBrandFilter: CardBrandFilter,
-        card: PaymentMethod.Card,
-        billingDetails: PaymentMethod.BillingDetails?,
+        payload: EditCardPayload,
         addressCollectionMode: PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode,
         onBrandChoiceChanged: CardBrandCallback,
         onCardUpdateParamsChanged: CardUpdateParamsCallback

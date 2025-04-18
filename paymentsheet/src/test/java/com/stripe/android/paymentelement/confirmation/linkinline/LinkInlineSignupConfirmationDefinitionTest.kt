@@ -226,6 +226,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                     expiryMonth = 4,
                     brand = CardBrand.Visa,
                     cvcCheck = CvcCheck.Pass,
+                    networks = emptyList(),
                     billingAddress = null,
                 ),
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
@@ -412,6 +413,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                         expiryMonth = 4,
                         brand = CardBrand.Visa,
                         cvcCheck = CvcCheck.Pass,
+                        networks = emptyList(),
                         billingAddress = null,
                     ),
                     paymentMethodCreateParams = expectedCreateParams,
@@ -468,6 +470,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                         expiryMonth = 4,
                         brand = CardBrand.Visa,
                         cvcCheck = CvcCheck.Pass,
+                        networks = emptyList(),
                         billingAddress = null,
                     ),
                     paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
@@ -565,7 +568,13 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                     brand = CardBrand.DinersClub,
                     cvcCheck = CvcCheck.Fail,
                     isDefault = false,
+                    networks = emptyList(),
                     billingAddress = ConsumerPaymentDetails.BillingAddress(
+                        name = null,
+                        line1 = null,
+                        line2 = null,
+                        locality = null,
+                        administrativeArea = null,
                         countryCode = CountryCode.US,
                         postalCode = "42424"
                     )

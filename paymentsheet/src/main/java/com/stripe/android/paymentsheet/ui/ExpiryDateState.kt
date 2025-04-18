@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.ui
 import androidx.compose.runtime.Immutable
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.elements.CardDetailsUtil
 import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -87,12 +86,12 @@ internal data class ExpiryDateState(
 
     companion object {
         fun create(
-            card: PaymentMethod.Card,
+            editPayload: EditCardPayload,
             enabled: Boolean
         ): ExpiryDateState {
             val text = formattedExpiryDate(
-                expiryMonth = card.expiryMonth,
-                expiryYear = card.expiryYear,
+                expiryMonth = editPayload.expiryMonth,
+                expiryYear = editPayload.expiryYear,
                 enabled = enabled
             )
             return ExpiryDateState(
