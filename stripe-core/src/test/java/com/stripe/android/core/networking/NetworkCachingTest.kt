@@ -19,13 +19,13 @@ internal class NetworkCachingTest {
 
     @Test
     fun `request that should cache creates a connection that uses cache`() = runTest {
-        networkRule.enqueue(method("GET")) { response ->
+        networkRule.enqueue(method("GET"), checkValidJson = false) { response ->
             response.setBody("response1")
         }
-        networkRule.enqueue(method("GET")) { response ->
+        networkRule.enqueue(method("GET"), checkValidJson = false) { response ->
             response.setBody("response2")
         }
-        networkRule.enqueue(method("GET")) { response ->
+        networkRule.enqueue(method("GET"), checkValidJson = false) { response ->
             response.setBody("response3")
         }
 

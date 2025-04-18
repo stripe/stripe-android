@@ -46,21 +46,27 @@ class NetworkRule private constructor(
 
     fun enqueue(
         vararg requestMatcher: RequestMatcher,
+        checkValidJson: Boolean = true,
         responseFactory: (MockResponse) -> Unit
     ) {
         mockWebServer.dispatcher.enqueue(*requestMatcher) { response ->
             responseFactory(response)
-            assertResponseBodyIsValidJson(response)
+            if (checkValidJson) {
+                assertResponseBodyIsValidJson(response)
+            }
         }
     }
 
     fun enqueue(
         vararg requestMatcher: RequestMatcher,
+        checkValidJson: Boolean = true,
         responseFactory: (TestRecordedRequest, MockResponse) -> Unit
     ) {
         mockWebServer.dispatcher.enqueue(*requestMatcher) { request, response ->
             responseFactory(request, response)
-            assertResponseBodyIsValidJson(response)
+            if (checkValidJson) {
+                assertResponseBodyIsValidJson(response)
+            }
         }
     }
 
