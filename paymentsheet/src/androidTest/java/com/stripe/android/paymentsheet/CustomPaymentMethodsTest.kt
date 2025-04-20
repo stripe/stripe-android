@@ -12,7 +12,11 @@ import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CustomPaymentMethodResult
 import com.stripe.android.paymentelement.CustomPaymentMethodResultHandler
+import com.stripe.android.paymentelement.EmbeddedContentPage
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.assertCompleted
+import com.stripe.android.paymentelement.runEmbeddedPaymentElementTest
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
 import com.stripe.android.paymentsheet.utils.ProductIntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -28,17 +32,18 @@ internal class CustomPaymentMethodsTest {
     @get:Rule
     val testRules: TestRules = TestRules.create()
 
-    @TestParameter(valuesProvider = ProductIntegrationTypeProvider::class)
-    lateinit var integrationType: ProductIntegrationType
-
     private val applicationContext = ApplicationProvider.getApplicationContext<Context>()
     private val composeTestRule = testRules.compose
     private val networkRule = testRules.networkRule
 
     private val page = PaymentSheetPage(composeTestRule)
+    private val embeddedContentPage = EmbeddedContentPage(testRules.compose)
 
     @Test
-    fun testSuccessful() {
+    fun testSuccessful(
+        @TestParameter(valuesProvider = ProductIntegrationTypeProvider::class)
+        integrationType: ProductIntegrationType
+    ) {
         val customPaymentMethod = PaymentSheet.CustomPaymentMethod(
             id = "cpmt_123",
             subtitle = "Pay now",
@@ -93,7 +98,10 @@ internal class CustomPaymentMethodsTest {
     }
 
     @Test
-    fun testSuccessfulWithBillingDetailsCollection() {
+    fun testSuccessfulWithBillingDetailsCollection(
+        @TestParameter(valuesProvider = ProductIntegrationTypeProvider::class)
+        integrationType: ProductIntegrationType
+    ) {
         val customPaymentMethod = PaymentSheet.CustomPaymentMethod(
             id = "cpmt_123",
             subtitle = "Pay now",
@@ -167,7 +175,10 @@ internal class CustomPaymentMethodsTest {
     }
 
     @Test
-    fun testSuccessfulWithBillingDetailsCollectionDisabled() {
+    fun testSuccessfulWithBillingDetailsCollectionDisabled(
+        @TestParameter(valuesProvider = ProductIntegrationTypeProvider::class)
+        integrationType: ProductIntegrationType
+    ) {
         val customPaymentMethod = PaymentSheet.CustomPaymentMethod(
             id = "cpmt_123",
             subtitle = "Pay now",
@@ -226,6 +237,66 @@ internal class CustomPaymentMethodsTest {
             )
 
             page.clickPrimaryButton()
+        }
+    }
+
+    @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+    @Test
+    fun testSuccessfulWithEmbedded() {
+        val customPaymentMethod = PaymentSheet.CustomPaymentMethod(
+            id = "cpmt_123",
+            subtitle = "Pay now",
+            disableBillingDetailCollection = true,
+        )
+
+        var calledConfirmCallback = false
+        var confirmedCustomPaymentMethod: PaymentSheet.CustomPaymentMethod? = null
+        var confirmedBillingDetails: PaymentMethod.BillingDetails? = null
+
+        runEmbeddedPaymentElementTest(
+            networkRule = networkRule,
+            builder = {
+                confirmCustomPaymentMethodCallback { customPaymentMethod, billingDetails ->
+                    calledConfirmCallback = true
+                    confirmedCustomPaymentMethod = customPaymentMethod
+                    confirmedBillingDetails = billingDetails
+
+                    CustomPaymentMethodResultHandler.handleCustomPaymentMethodResult(
+                        context = applicationContext,
+                        customPaymentMethodResult = CustomPaymentMethodResult.completed(),
+                    )
+                }
+            },
+            createIntentCallback = { _, _ ->
+                error("Should not be called!")
+            },
+            resultCallback = {
+                assertThat(calledConfirmCallback).isTrue()
+                assertThat(confirmedCustomPaymentMethod).isEqualTo(customPaymentMethod)
+                assertThat(confirmedBillingDetails).isEqualTo(PaymentMethod.BillingDetails())
+
+                assertCompleted(it)
+            },
+        ) { context ->
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("GET"),
+                path("/v1/elements/sessions"),
+            ) { response ->
+                response.testBodyFromFile("elements-sessions-cpms.json")
+            }
+
+            context.configure(
+                configurationMutator = {
+                    customPaymentMethods(listOf(customPaymentMethod))
+                    paymentMethodOrder(listOf("cpmt_123", "card"))
+                },
+            )
+
+            embeddedContentPage.clickOnLpm("cpmt_123")
+            embeddedContentPage.assertHasSelectedLpm("cpmt_123")
+
+            context.confirm()
         }
     }
 }
