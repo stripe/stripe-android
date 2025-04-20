@@ -32,6 +32,7 @@ import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.TapToPayClientModule
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.flowcontroller.DefaultPaymentSelectionUpdater
@@ -59,6 +60,9 @@ import kotlin.coroutines.CoroutineContext
 
 @SuppressWarnings("TooManyFunctions")
 @Module(
+    includes = [
+        TapToPayClientModule::class
+    ],
     subcomponents = [
         LinkAnalyticsComponent::class,
         LinkComponent::class,
