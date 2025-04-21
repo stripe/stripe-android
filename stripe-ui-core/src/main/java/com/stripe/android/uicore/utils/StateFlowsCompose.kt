@@ -1,5 +1,6 @@
 package com.stripe.android.uicore.utils
 
+import android.os.Looper
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -8,9 +9,9 @@ import androidx.compose.runtime.ProduceStateScope
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import com.stripe.android.core.BuildConfig
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -48,11 +49,10 @@ fun <T> StateFlow<T>.collectAsState(
     produceInitialValue = remember { { value } },
     key = this
 ) {
-    if (context == EmptyCoroutineContext) {
-        collect { value = it }
-    } else {
-        withContext(context) {
-            collect { value = it }
+    collect {
+        if (Looper.getMainLooper() != Looper.myLooper() && BuildConfig.DEBUG) {
+            throw AssertionError("Updates must be made on the main thread.")
         }
+        value = it
     }
 }
