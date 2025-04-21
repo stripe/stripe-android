@@ -70,7 +70,6 @@ import org.junit.Assume.assumeFalse
 import org.junit.Assume.assumeTrue
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import java.util.regex.Pattern.matches
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
