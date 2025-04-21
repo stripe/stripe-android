@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stripe_fc_lite_exit_title">Are you sure you want to exit?</string>
+    <string name="stripe_fc_lite_exit_title_confirm">Yes</string>
+    <string name="stripe_fc_lite_exit_title_cancel">No</string>
+</resources>
