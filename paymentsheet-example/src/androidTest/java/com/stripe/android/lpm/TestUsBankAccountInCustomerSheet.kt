@@ -51,7 +51,6 @@ internal class TestUsBankAccountInCustomerSheet : BasePlaygroundTest() {
                 authorizationAction = AuthorizeAction.Cancel,
             ).copyPlaygroundSettings {
                 it[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
-                it[FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsLiteEnabled)] = true
                 it[FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsFullSdkUnavailable)] = true
             }
         )
@@ -79,7 +78,6 @@ internal class TestUsBankAccountInCustomerSheet : BasePlaygroundTest() {
             ).copyPlaygroundSettings { settings ->
                 settings[CustomerSessionSettingsDefinition] = true
                 settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
-                settings[FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsLiteEnabled)] = true
                 settings[FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsFullSdkUnavailable)] = true
             }
         )

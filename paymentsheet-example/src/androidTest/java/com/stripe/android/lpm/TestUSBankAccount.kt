@@ -64,7 +64,6 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
             testParameters = testParameters
                 .copyPlaygroundSettings {
                     it[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.OnWithRandomEmail
-                    it[FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsLiteEnabled)] = true
                     it[FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsFullSdkUnavailable)] = true
                 }
                 .copy(executeInNightlyRun = false),
@@ -146,7 +145,6 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
             financialConnectionsLiteEnabled = true,
             testParameters = testParameters
                 .copyPlaygroundSettings {
-                    it[FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsLiteEnabled)] = true
                     it[FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsFullSdkUnavailable)] = true
                 }.copy(
                     authorizationAction = AuthorizeAction.Cancel,

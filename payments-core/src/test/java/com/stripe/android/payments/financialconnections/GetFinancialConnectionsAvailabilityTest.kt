@@ -1,7 +1,6 @@
 package com.stripe.android.payments.financialconnections
 
 import com.stripe.android.core.utils.FeatureFlags.financialConnectionsFullSdkUnavailable
-import com.stripe.android.core.utils.FeatureFlags.financialConnectionsLiteEnabled
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_DISABLE_FC_LITE
 import com.stripe.android.testing.FeatureFlagTestRule
@@ -16,12 +15,6 @@ class GetFinancialConnectionsAvailabilityTest {
     @get:Rule
     val financialConnectionsFullSdkUnavailableFeatureFlagTestRule = FeatureFlagTestRule(
         featureFlag = financialConnectionsFullSdkUnavailable,
-        isEnabled = false
-    )
-
-    @get:Rule
-    val financialConnectionsLiteEnabledFeatureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = financialConnectionsLiteEnabled,
         isEnabled = false
     )
 
@@ -53,7 +46,6 @@ class GetFinancialConnectionsAvailabilityTest {
 
     @Test
     fun `when full not available and killswitch not enabled, should return Lite`() {
-        financialConnectionsLiteEnabled.setEnabled(true)
         val elementsSession = createSession(flags = emptyMap())
         assertEquals(
             FinancialConnectionsAvailability.Lite,
@@ -67,7 +59,6 @@ class GetFinancialConnectionsAvailabilityTest {
     @Test
     fun `when full client flag on and killswitch not enabled, should return Lite`() {
         financialConnectionsFullSdkUnavailableFeatureFlagTestRule.setEnabled(true)
-        financialConnectionsLiteEnabled.setEnabled(true)
         val elementsSession = createSession(flags = emptyMap())
         assertEquals(
             FinancialConnectionsAvailability.Lite,
