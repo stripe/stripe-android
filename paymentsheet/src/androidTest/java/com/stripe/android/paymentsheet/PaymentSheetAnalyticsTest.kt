@@ -1,15 +1,10 @@
 package com.stripe.android.paymentsheet
 
 import android.net.Uri
-import com.google.android.gms.wallet.IsReadyToPayRequest
-import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import com.stripe.android.Stripe
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
-import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.hasQueryParam
@@ -21,7 +16,9 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.AnalyticEventRule
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
+import com.stripe.android.paymentsheet.utils.AdvancedFraudSignalsTestRule
 import com.stripe.android.paymentsheet.utils.FlowControllerTestRunnerContext
+import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
 import com.stripe.android.paymentsheet.utils.PaymentSheetTestRunnerContext
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
@@ -31,8 +28,6 @@ import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
 import com.stripe.paymentelementnetwork.setupPaymentMethodDetachResponse
 import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse
 import com.stripe.paymentelementtestpages.EditPage
-import org.junit.After
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -50,6 +45,8 @@ internal class PaymentSheetAnalyticsTest {
     @get:Rule
     val testRules: TestRules = TestRules.create(networkRule = networkRule) {
         around(analyticEventRule)
+            .around(AdvancedFraudSignalsTestRule())
+            .around(GooglePayRepositoryTestRule())
     }
 
     private val composeTestRule = testRules.compose
@@ -68,18 +65,6 @@ internal class PaymentSheetAnalyticsTest {
         merchantDisplayName = "Example, Inc.",
         paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
     )
-
-    @Before
-    fun setup() {
-        Stripe.advancedFraudSignalsEnabled = false
-        GooglePayRepository.googlePayAvailabilityClientFactory = createFakeGooglePayAvailabilityClient()
-    }
-
-    @After
-    fun teardown() {
-        Stripe.advancedFraudSignalsEnabled = true
-        GooglePayRepository.resetFactory()
-    }
 
     @Test
     fun testSuccessfulCardPayment() = runPaymentSheetTest(
@@ -523,17 +508,5 @@ internal class PaymentSheetAnalyticsTest {
             productUsage = setOf("PaymentSheet.FlowController"),
             *requestMatchers
         )
-    }
-
-    private fun createFakeGooglePayAvailabilityClient(): GooglePayAvailabilityClient.Factory {
-        return object : GooglePayAvailabilityClient.Factory {
-            override fun create(paymentsClient: PaymentsClient): GooglePayAvailabilityClient {
-                return object : GooglePayAvailabilityClient {
-                    override suspend fun isReady(request: IsReadyToPayRequest): Boolean {
-                        return true
-                    }
-                }
-            }
-        }
     }
 }

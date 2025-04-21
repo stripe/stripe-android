@@ -128,7 +128,7 @@ class PaymentSheetEventTest {
         val expectedConfig = buildInitMpeConfig(
             customer = true,
             customerAccessProvider = "legacy",
-            customPaymentMethods = listOf("cpmt_123", "cpmt_456"),
+            customPaymentMethods = "cpmt_123,cpmt_456",
         )
 
         assertThat(event.params).run {
@@ -1693,7 +1693,7 @@ class PaymentSheetEventTest {
         billingDetailsCollectionConfiguration: Map<String, Any?> = billingDetailsCollectionConfigurationDefault,
         preferredNetworks: String? = null,
         externalPaymentMethods: List<String>? = null,
-        customPaymentMethods: List<String>? = null,
+        customPaymentMethods: String? = null,
         paymentMethodLayout: String? = "horizontal",
         cardBrandAcceptance: Boolean = false,
         cardScanAvailable: Boolean = true,

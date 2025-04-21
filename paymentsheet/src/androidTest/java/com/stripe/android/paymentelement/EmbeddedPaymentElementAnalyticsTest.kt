@@ -4,14 +4,9 @@ package com.stripe.android.paymentelement
 
 import android.net.Uri
 import androidx.test.espresso.Espresso
-import com.google.android.gms.wallet.IsReadyToPayRequest
-import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.Stripe
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
-import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.host
@@ -21,6 +16,8 @@ import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.utils.AdvancedFraudSignalsTestRule
+import com.stripe.android.paymentsheet.utils.GooglePayRepositoryTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.validateAnalyticsRequest
 import com.stripe.paymentelementnetwork.CardPaymentMethodDetails
@@ -28,8 +25,6 @@ import com.stripe.paymentelementnetwork.setupPaymentMethodDetachResponse
 import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse
 import com.stripe.paymentelementtestpages.EditPage
 import com.stripe.paymentelementtestpages.ManagePage
-import org.junit.After
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import kotlin.time.Duration.Companion.seconds
@@ -45,6 +40,8 @@ internal class EmbeddedPaymentElementAnalyticsTest {
     @get:Rule
     val testRules: TestRules = TestRules.create(networkRule = networkRule) {
         around(analyticEventRule)
+            .around(AdvancedFraudSignalsTestRule())
+            .around(GooglePayRepositoryTestRule())
     }
 
     private val embeddedContentPage = EmbeddedContentPage(testRules.compose)
@@ -54,18 +51,6 @@ internal class EmbeddedPaymentElementAnalyticsTest {
 
     private val card1 = CardPaymentMethodDetails("pm_12345", "4242")
     private val card2 = CardPaymentMethodDetails("pm_67890", "5544")
-
-    @Before
-    fun setup() {
-        Stripe.advancedFraudSignalsEnabled = false
-        GooglePayRepository.googlePayAvailabilityClientFactory = createFakeGooglePayAvailabilityClient()
-    }
-
-    @After
-    fun teardown() {
-        Stripe.advancedFraudSignalsEnabled = true
-        GooglePayRepository.resetFactory()
-    }
 
     @Test
     fun testSuccessfulCardPayment() = runEmbeddedPaymentElementTest(
@@ -343,17 +328,5 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             productUsage = setOf("EmbeddedPaymentElement").plus(additionalProductUsage),
             *requestMatchers
         )
-    }
-
-    private fun createFakeGooglePayAvailabilityClient(): GooglePayAvailabilityClient.Factory {
-        return object : GooglePayAvailabilityClient.Factory {
-            override fun create(paymentsClient: PaymentsClient): GooglePayAvailabilityClient {
-                return object : GooglePayAvailabilityClient {
-                    override suspend fun isReady(request: IsReadyToPayRequest): Boolean {
-                        return true
-                    }
-                }
-            }
-        }
     }
 }
