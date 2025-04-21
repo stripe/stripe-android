@@ -26,6 +26,7 @@ import androidx.test.espresso.Espresso.closeSoftKeyboard
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingPolicies
 import androidx.test.espresso.action.ViewActions.click
+import androidx.test.espresso.matcher.RootMatchers.isDialog
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiSelector
@@ -1715,6 +1716,10 @@ internal class PlaygroundTestDriver(
         if (testParameters.authorizationAction == AuthorizeAction.Cancel) {
             selectors.authorizeAction?.click()
         }
+
+        onView(withText("YES, EXIT"))
+            .inRoot(isDialog())
+            .perform(click())
     }
 
     private fun cancelAchFlowOnLaunch() {
