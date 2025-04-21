@@ -68,7 +68,7 @@ internal class DefaultEditCardDetailsInteractorTest {
     }
 
     @Test
-    fun testInitialStateWithFullDetailsEditIsEnabled() {
+    fun testInitialStateWithFullDetailsEditEnabled() {
         val handler = handler()
 
         val state = handler.uiState
@@ -77,7 +77,7 @@ internal class DefaultEditCardDetailsInteractorTest {
     }
 
     @Test
-    fun testInitialStateWithFullDetailsEditIsDisabled() {
+    fun testInitialStateWithFullDetailsEditDisabled() {
         val handler = handler(
             areExpiryDateAndAddressModificationSupported = false
         )
