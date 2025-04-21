@@ -276,7 +276,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         withContext(Dispatchers.Main.immediate) {
             customerStateHolder.setCustomerState(state.customer)
 
-            updateSelection(state.paymentSelection)
+            when (state.paymentSelection) {
+                is PaymentSelection.GooglePay,
+                is PaymentSelection.Link -> Unit
+                else -> updateSelection(state.paymentSelection)
+            }
 
             setPaymentMethodMetadata(state.paymentMethodMetadata)
 
