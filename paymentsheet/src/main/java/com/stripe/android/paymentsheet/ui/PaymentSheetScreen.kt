@@ -181,15 +181,15 @@ internal fun PaymentSheetScreenContent(
 
     ResetScroll(scrollState = scrollState, currentScreen = currentScreen)
 
-    val showsWalletsHeader by remember(currentScreen, type) {
+    val showsWalletsHeader = remember(currentScreen, type) {
         currentScreen.showsWalletsHeader(isCompleteFlow = type == Complete)
-    }.collectAsState()
+    }.value
 
     val actualWalletsState = walletsState.takeIf { showsWalletsHeader }
 
-    val headerText by remember(currentScreen, type, actualWalletsState != null) {
+    val headerText = remember(currentScreen, type, actualWalletsState != null) {
         currentScreen.title(isCompleteFlow = type == Complete, isWalletEnabled = actualWalletsState != null)
-    }.collectAsState()
+    }.value
 
     Column(modifier) {
         PaymentSheetContent(
@@ -352,7 +352,7 @@ private fun PaymentSheetContent(
         }
     }
 
-    PrimaryButton(viewModel)
+//    PrimaryButton(viewModel)
 
     Box(modifier = modifier) {
         if (mandateText?.showAbovePrimaryButton == false && currentScreen.showsPaymentConfirmationMandates) {
