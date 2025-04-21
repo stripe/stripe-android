@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="stripe_fc_lite_exit_title">Are you sure you want to exit?</string>
-    <string name="stripe_fc_lite_exit_message">You haven\'t finished linking you bank account and all progress will be lost.</string>
+    <string name="stripe_fc_lite_exit_message">You haven\'t finished linking your bank account and all progress will be lost.</string>
     <string name="stripe_fc_lite_exit_confirm">Yes, exit</string>
     <string name="stripe_fc_lite_exit_cancel">Cancel</string>
 </resources>

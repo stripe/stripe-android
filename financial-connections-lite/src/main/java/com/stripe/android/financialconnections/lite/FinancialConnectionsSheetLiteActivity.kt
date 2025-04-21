@@ -70,7 +70,7 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity(R.layou
                     .Builder(this@FinancialConnectionsSheetLiteActivity)
                     .setTitle(R.string.stripe_fc_lite_exit_title)
                     .setMessage(R.string.stripe_fc_lite_exit_message)
-                    .setCancelable(false)
+                    .setCancelable(true)
                     .setPositiveButton(R.string.stripe_fc_lite_exit_confirm) { _, _ ->
                         finish()
                     }
