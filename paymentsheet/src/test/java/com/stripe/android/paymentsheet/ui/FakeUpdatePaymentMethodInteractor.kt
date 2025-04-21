@@ -43,7 +43,7 @@ internal class FakeUpdatePaymentMethodInteractor(
     override val editCardDetailsInteractor: EditCardDetailsInteractor by lazy {
         editCardDetailsInteractorFactory.create(
             coroutineScope = TestScope(),
-            isModifiable = isModifiablePaymentMethod,
+            isCbcModifiable = isModifiablePaymentMethod,
             cardBrandFilter = cardBrandFilter,
             card = displayableSavedPaymentMethod.paymentMethod.card!!,
             onBrandChoiceChanged = {},

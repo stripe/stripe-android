@@ -68,6 +68,26 @@ internal class DefaultEditCardDetailsInteractorTest {
     }
 
     @Test
+    fun testInitialStateWithFullDetailsEditIsEnabled() {
+        val handler = handler()
+
+        val state = handler.uiState
+        assertThat(state.billingDetailsForm).isNotNull()
+        assertThat(state.expiryDateState.enabled).isTrue()
+    }
+
+    @Test
+    fun testInitialStateWithFullDetailsEditIsDisabled() {
+        val handler = handler(
+            areExpiryDateAndAddressModificationSupported = false
+        )
+
+        val state = handler.uiState
+        assertThat(state.billingDetailsForm).isNull()
+        assertThat(state.expiryDateState.enabled).isFalse()
+    }
+
+    @Test
     fun stateIsUpdateWhenNewCardBrandIsSelected() {
         val handler = handler()
 
@@ -198,21 +218,9 @@ internal class DefaultEditCardDetailsInteractorTest {
     }
 
     @Test
-    fun expiredCardShouldNotShowCbcDropdown() {
-        val handler = handler(
-            card = PaymentMethodFixtures.CARD_WITH_NETWORKS.copy(
-                expiryYear = 1975
-            )
-        )
-
-        val state = handler.uiState
-        assertThat(state.shouldShowCardBrandDropdown).isFalse()
-    }
-
-    @Test
     fun unModifiableCardShouldNotShowCbcDropdown() {
         val handler = handler(
-            isModifiable = false
+            isCbcModifiable = false
         )
 
         val state = handler.uiState
@@ -413,7 +421,8 @@ internal class DefaultEditCardDetailsInteractorTest {
     private fun handler(
         card: PaymentMethod.Card = PaymentMethodFixtures.CARD_WITH_NETWORKS,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
-        isModifiable: Boolean = true,
+        isCbcModifiable: Boolean = true,
+        areExpiryDateAndAddressModificationSupported: Boolean = true,
         addressCollectionMode: AddressCollectionMode = AddressCollectionMode.Automatic,
         billingDetails: PaymentMethod.BillingDetails? = PaymentMethodFixtures.BILLING_DETAILS,
         onBrandChoiceChanged: (CardBrand) -> Unit = {},
@@ -423,10 +432,10 @@ internal class DefaultEditCardDetailsInteractorTest {
             cardBrandFilter = cardBrandFilter,
             onBrandChoiceChanged = onBrandChoiceChanged,
             coroutineScope = TestScope(testDispatcher),
-            isModifiable = isModifiable,
+            isCbcModifiable = isCbcModifiable,
             card = card,
             onCardUpdateParamsChanged = onCardUpdateParamsChanged,
-            areExpiryDateAndAddressModificationSupported = true,
+            areExpiryDateAndAddressModificationSupported = areExpiryDateAndAddressModificationSupported,
             billingDetails = billingDetails,
             addressCollectionMode = addressCollectionMode,
         )
