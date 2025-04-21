@@ -75,7 +75,9 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             CreateIntentResult.Success("pi_example_secret_12345")
         },
         resultCallback = ::assertCompleted,
-        analyticEventCallback = analyticEventRule,
+        builder = {
+            analyticEventCallback(analyticEventRule)
+        },
     ) { testContext ->
         networkRule.enqueue(
             host("api.stripe.com"),
@@ -165,7 +167,9 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             CreateIntentResult.Success("pi_example_secret_12345")
         },
         resultCallback = ::assertCompleted,
-        analyticEventCallback = analyticEventRule,
+        builder = {
+            analyticEventCallback(analyticEventRule)
+        },
     ) { testContext ->
         networkRule.enqueue(
             host("api.stripe.com"),
@@ -230,7 +234,9 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             CreateIntentResult.Success("pi_example_secret_12345")
         },
         resultCallback = ::assertCompleted,
-        analyticEventCallback = analyticEventRule,
+        builder = {
+            analyticEventCallback(analyticEventRule)
+        },
     ) { testContext ->
         networkRule.enqueue(
             host("api.stripe.com"),
@@ -278,7 +284,9 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             assertThat(shouldSavePaymentMethod).isFalse()
             CreateIntentResult.Success("pi_example_secret_12345")
         },
-        analyticEventCallback = analyticEventRule,
+        builder = {
+            analyticEventCallback(analyticEventRule)
+        },
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
