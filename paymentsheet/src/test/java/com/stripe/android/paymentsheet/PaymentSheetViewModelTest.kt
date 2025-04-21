@@ -1721,6 +1721,44 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
+    fun `On load with initial Google Pay selection, selection should be null & primary button disabled`() = runTest {
+        val viewModel = createViewModel(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            initialPaymentSelection = PaymentSelection.GooglePay,
+        )
+
+        viewModel.selection.test {
+            assertThat(awaitItem()).isNull()
+        }
+
+        viewModel.primaryButtonUiState.test {
+            val uiState = awaitItem()
+
+            assertThat(uiState).isNotNull()
+            assertThat(uiState?.enabled).isFalse()
+        }
+    }
+
+    @Test
+    fun `On load with initial Link selection, selection should be null & primary button disabled`() = runTest {
+        val viewModel = createViewModel(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            initialPaymentSelection = PaymentSelection.GooglePay,
+        )
+
+        viewModel.selection.test {
+            assertThat(awaitItem()).isNull()
+        }
+
+        viewModel.primaryButtonUiState.test {
+            val uiState = awaitItem()
+
+            assertThat(uiState).isNotNull()
+            assertThat(uiState?.enabled).isFalse()
+        }
+    }
+
+    @Test
     fun `Sends correct event when navigating to AddFirstPaymentMethod screen`() = runTest {
         val viewModel = createViewModel(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,

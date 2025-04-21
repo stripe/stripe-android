@@ -54,6 +54,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import java.io.IOException
 
@@ -109,11 +110,13 @@ internal class PaymentSheetPlaygroundViewModel(
     private fun prepareCheckout(
         playgroundSettings: PlaygroundSettings,
     ) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             // Snapshot before making the network request to not rely on UI staying in sync.
             val playgroundSettingsSnapshot = playgroundSettings.snapshot()
 
-            playgroundSettingsSnapshot.saveToSharedPreferences(getApplication())
+            withContext(Dispatchers.IO) {
+                playgroundSettingsSnapshot.saveToSharedPreferences(getApplication())
+            }
 
             PlaygroundRequester(playgroundSettingsSnapshot, getApplication()).fetch().fold(
                 onSuccess = { state ->

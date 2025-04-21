@@ -165,6 +165,22 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
         }
     }
 
+    @Test
+    fun updatePaymentMethodScreen_forCardWithNoNetworks_withEditEnabled() {
+        paparazziRule.snapshot {
+            PaymentSheetScreenOnUpdatePaymentMethod(
+                paymentMethod = PaymentMethodFixtures
+                    .CARD_PAYMENT_METHOD
+                    .toDisplayableSavedPaymentMethod(),
+                isModifiablePaymentMethod = true,
+                canRemove = true,
+                shouldShowSetAsDefaultCheckbox = true,
+                canUpdateFullPaymentMethodDetails = true,
+                addressCollectionMode = AddressCollectionMode.Automatic,
+            )
+        }
+    }
+
     @Composable
     fun PaymentSheetScreenOnUpdatePaymentMethod(
         paymentMethod: DisplayableSavedPaymentMethod,

@@ -77,11 +77,6 @@ internal interface CustomerSheetViewModelModule {
         }
 
         @Provides
-        fun provideCoroutineContext(): CoroutineContext {
-            return Dispatchers.IO
-        }
-
-        @Provides
         @PaymentElementCallbackIdentifier
         fun providesPaymentElementCallbackIdentifier(): String {
             // We currently do not support multiple instances of Customer Sheet

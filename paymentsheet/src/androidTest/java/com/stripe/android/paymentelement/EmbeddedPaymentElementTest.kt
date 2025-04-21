@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalAnalyticEventCallbackApi::class, ExperimentalEmbeddedPaymentElementApi::class)
+@file:OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 
 package com.stripe.android.paymentelement
 

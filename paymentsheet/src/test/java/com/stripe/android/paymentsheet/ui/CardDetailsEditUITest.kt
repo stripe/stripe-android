@@ -424,7 +424,7 @@ internal class CardDetailsEditUITest {
         val editCardDetailsInteractor = DefaultEditCardDetailsInteractor.Factory()
             .create(
                 coroutineScope = TestScope(testDispatcher),
-                isModifiable = showCardBrandDropdown,
+                isCbcModifiable = showCardBrandDropdown,
                 areExpiryDateAndAddressModificationSupported = expiryDateEditEnabled,
                 cardBrandFilter = DefaultCardBrandFilter,
                 card = card,

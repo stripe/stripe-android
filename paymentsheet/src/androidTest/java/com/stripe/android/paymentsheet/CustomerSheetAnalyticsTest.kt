@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.Stripe
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.customersheet.CustomerSheetResult
@@ -9,13 +8,12 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.paymentsheet.utils.AdvancedFraudSignalsTestRule
 import com.stripe.android.paymentsheet.utils.CustomerSheetTestType
 import com.stripe.android.paymentsheet.utils.CustomerSheetUtils
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.runCustomerSheetTest
-import org.junit.After
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import kotlin.time.Duration.Companion.seconds
@@ -27,21 +25,13 @@ internal class CustomerSheetAnalyticsTest {
     )
 
     @get:Rule
-    val testRules: TestRules = TestRules.create(networkRule = networkRule)
+    val testRules: TestRules = TestRules.create(networkRule = networkRule) {
+        around(AdvancedFraudSignalsTestRule())
+    }
 
     private val composeTestRule = testRules.compose
 
     private val page: CustomerSheetPage = CustomerSheetPage(composeTestRule)
-
-    @Before
-    fun setup() {
-        Stripe.advancedFraudSignalsEnabled = false
-    }
-
-    @After
-    fun teardown() {
-        Stripe.advancedFraudSignalsEnabled = true
-    }
 
     @Test
     fun testSuccessfulCardSave() = runCustomerSheetTest(
