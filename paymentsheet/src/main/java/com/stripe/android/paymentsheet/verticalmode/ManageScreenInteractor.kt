@@ -109,7 +109,7 @@ internal class DefaultManageScreenInteractor(
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val navigateBack: (withDelay: Boolean) -> Unit,
     private val defaultPaymentMethodId: StateFlow<String?>,
-    dispatcher: CoroutineContext = Dispatchers.Default,
+    dispatcher: CoroutineContext = Dispatchers.Main,
 ) : ManageScreenInteractor {
 
     private val coroutineScope = CoroutineScope(dispatcher + SupervisorJob())
