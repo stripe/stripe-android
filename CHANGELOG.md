@@ -7,6 +7,9 @@ Dependencies updated in [10579](https://github.com/stripe/stripe-android/pull/10
 * Bumped Compose from 1.6.8 to 1.7.8.
 * Bumped Androidx Navigation from 2.7.7 to 2.8.5.
 
+### PaymentSheet
+[Added] Bank payments are now available in the PaymentSheet without requiring a dependency on `:financial-connections`.
+
 ## 21.10.0 - 2025-04-11
 
 ### Payments
