@@ -48,6 +48,8 @@ class CheckoutRequest private constructor(
     val paymentMethodOverrideRedisplay: AllowRedisplayFilter?,
     @SerialName("customer_session_payment_method_set_as_default")
     val paymentMethodSetAsDefaultFeature: FeatureState?,
+    @SerialName("payment_method_options_setup_future_usage")
+    val pmoSfu: Map<String, String>?,
 ) {
     @Serializable
     enum class CustomerKeyType {
@@ -82,6 +84,8 @@ class CheckoutRequest private constructor(
             AllowRedisplayFilter.Always,
         )
         private var paymentMethodOverrideRedisplay: AllowRedisplayFilter? = null
+        private var paymentMethodOptionsSetupFutureUse: Map<String, String>? = null
+        private var overridePaymentMethodOptionsSetupFutureUse: Map<String, String>? = null
 
         fun initialization(initialization: String?) = apply {
             this.initialization = initialization
@@ -159,6 +163,14 @@ class CheckoutRequest private constructor(
             this.requireCvcRecollection = requireCvcRecollection
         }
 
+        fun paymentMethodOptionsSetupFutureUse(valuesMap: Map<String, String>) = apply {
+            this.paymentMethodOptionsSetupFutureUse = valuesMap
+        }
+
+        fun overridePaymentMethodOptionsSetupFutureUse(valuesMap: Map<String, String>) = apply {
+            this.overridePaymentMethodOptionsSetupFutureUse = valuesMap
+        }
+
         fun build(): CheckoutRequest {
             return CheckoutRequest(
                 initialization = initialization,
@@ -181,6 +193,7 @@ class CheckoutRequest private constructor(
                 paymentMethodRedisplayFeature = paymentMethodRedisplayFeature,
                 paymentMethodRedisplayFilters = paymentMethodRedisplayFilters,
                 paymentMethodOverrideRedisplay = paymentMethodOverrideRedisplay,
+                pmoSfu = overridePaymentMethodOptionsSetupFutureUse ?: paymentMethodOptionsSetupFutureUse
             )
         }
     }
