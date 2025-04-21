@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 
-internal object PaymentMethodOptionsSetupFutureUseOverrideSettingsDefinition :
+internal object PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition :
     PlaygroundSettingDefinition<String>,
     PlaygroundSettingDefinition.Displayable<String>,
     PlaygroundSettingDefinition.Saveable<String> {
@@ -14,10 +14,10 @@ internal object PaymentMethodOptionsSetupFutureUseOverrideSettingsDefinition :
                     pair[0] to pair[1]
                 }
             }.toMap()
-        if (map.isNotEmpty()) checkoutRequestBuilder.overridePaymentMethodOptionsSetupFutureUse(valuesMap = map)
+        if (map.isNotEmpty()) checkoutRequestBuilder.overridePaymentMethodOptionsSetupFutureUsage(valuesMap = map)
     }
 
-    override val key: String = "pmoSetupFutureUseOverride"
+    override val key: String = "pmoSetupFutureUsageOverride"
     override val displayName: String = "PMO SFU Override (comma separated, code:sfu)"
     override val defaultValue: String = ""
 

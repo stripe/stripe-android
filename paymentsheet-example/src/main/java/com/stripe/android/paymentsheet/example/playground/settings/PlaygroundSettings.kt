@@ -457,8 +457,8 @@ internal class PlaygroundSettings private constructor(
             EmbeddedViewDisplaysMandateSettingDefinition,
             EmbeddedFormSheetActionSettingDefinition,
             EmbeddedTwoStepSettingsDefinition,
-            PaymentMethodOptionsSetupFutureUseSettingsDefinition,
-            PaymentMethodOptionsSetupFutureUseOverrideSettingsDefinition
+            PaymentMethodOptionsSetupFutureUsageSettingsDefinition,
+            PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(

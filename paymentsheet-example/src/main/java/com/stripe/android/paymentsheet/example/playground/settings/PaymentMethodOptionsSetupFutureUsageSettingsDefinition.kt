@@ -3,42 +3,41 @@ package com.stripe.android.paymentsheet.example.playground.settings
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 
-internal object PaymentMethodOptionsSetupFutureUseSettingsDefinition :
-    PlaygroundSettingDefinition<PaymentMethodOptionsSetupFutureUseType>,
-    PlaygroundSettingDefinition.Saveable<PaymentMethodOptionsSetupFutureUseType> by EnumSaveable(
-        key = "paymentMethodOptionsSetupFutureUse",
-        values = PaymentMethodOptionsSetupFutureUseType.entries.toTypedArray(),
-        defaultValue = PaymentMethodOptionsSetupFutureUseType.Off
+internal object PaymentMethodOptionsSetupFutureUsageSettingsDefinition :
+    PlaygroundSettingDefinition<PaymentMethodOptionsSetupFutureUsageType>,
+    PlaygroundSettingDefinition.Saveable<PaymentMethodOptionsSetupFutureUsageType> by EnumSaveable(
+        key = "paymentMethodOptionsSetupFutureUsage",
+        values = PaymentMethodOptionsSetupFutureUsageType.entries.toTypedArray(),
+        defaultValue = PaymentMethodOptionsSetupFutureUsageType.Off
     ),
-    PlaygroundSettingDefinition.Displayable<PaymentMethodOptionsSetupFutureUseType> {
+    PlaygroundSettingDefinition.Displayable<PaymentMethodOptionsSetupFutureUsageType> {
 
-    override val displayName: String = "Payment Method Options SetupFutureUse"
+    override val displayName: String = "Payment Method Options SetupFutureUsage"
 
     override fun createOptions(
         configurationData: PlaygroundConfigurationData
-    ) = PaymentMethodOptionsSetupFutureUseType.entries.map {
+    ) = PaymentMethodOptionsSetupFutureUsageType.entries.map {
         option(it.name, it)
     }
 
-    override fun convertToValue(value: String): PaymentMethodOptionsSetupFutureUseType {
-
-        return PaymentMethodOptionsSetupFutureUseType.entries.find { it.value == value }
-            ?: PaymentMethodOptionsSetupFutureUseType.Off
+    override fun convertToValue(value: String): PaymentMethodOptionsSetupFutureUsageType {
+        return PaymentMethodOptionsSetupFutureUsageType.entries.find { it.value == value }
+            ?: PaymentMethodOptionsSetupFutureUsageType.Off
     }
 
-    override fun convertToString(value: PaymentMethodOptionsSetupFutureUseType) = value.value
+    override fun convertToString(value: PaymentMethodOptionsSetupFutureUsageType) = value.value
 
     override fun configure(
-        value: PaymentMethodOptionsSetupFutureUseType,
+        value: PaymentMethodOptionsSetupFutureUsageType,
         checkoutRequestBuilder: CheckoutRequest.Builder
     ) {
         if (value.valuesMap.isNotEmpty()) {
-            checkoutRequestBuilder.paymentMethodOptionsSetupFutureUse(value.valuesMap)
+            checkoutRequestBuilder.paymentMethodOptionsSetupFutureUsage(value.valuesMap)
         }
     }
 }
 
-enum class PaymentMethodOptionsSetupFutureUseType(
+enum class PaymentMethodOptionsSetupFutureUsageType(
     val valuesMap: Map<String, String>
 ) : ValueEnum {
     All(

@@ -49,7 +49,7 @@ class CheckoutRequest private constructor(
     @SerialName("customer_session_payment_method_set_as_default")
     val paymentMethodSetAsDefaultFeature: FeatureState?,
     @SerialName("payment_method_options_setup_future_usage")
-    val pmoSfu: Map<String, String>?,
+    val paymentMethodOptionsSetupFutureUsage: Map<String, String>?,
 ) {
     @Serializable
     enum class CustomerKeyType {
@@ -84,8 +84,8 @@ class CheckoutRequest private constructor(
             AllowRedisplayFilter.Always,
         )
         private var paymentMethodOverrideRedisplay: AllowRedisplayFilter? = null
-        private var paymentMethodOptionsSetupFutureUse: Map<String, String>? = null
-        private var overridePaymentMethodOptionsSetupFutureUse: Map<String, String>? = null
+        private var paymentMethodOptionsSetupFutureUsage: Map<String, String>? = null
+        private var overridePaymentMethodOptionsSetupFutureUsage: Map<String, String>? = null
 
         fun initialization(initialization: String?) = apply {
             this.initialization = initialization
@@ -163,12 +163,12 @@ class CheckoutRequest private constructor(
             this.requireCvcRecollection = requireCvcRecollection
         }
 
-        fun paymentMethodOptionsSetupFutureUse(valuesMap: Map<String, String>) = apply {
-            this.paymentMethodOptionsSetupFutureUse = valuesMap
+        fun paymentMethodOptionsSetupFutureUsage(valuesMap: Map<String, String>) = apply {
+            this.paymentMethodOptionsSetupFutureUsage = valuesMap
         }
 
-        fun overridePaymentMethodOptionsSetupFutureUse(valuesMap: Map<String, String>) = apply {
-            this.overridePaymentMethodOptionsSetupFutureUse = valuesMap
+        fun overridePaymentMethodOptionsSetupFutureUsage(valuesMap: Map<String, String>) = apply {
+            this.overridePaymentMethodOptionsSetupFutureUsage = valuesMap
         }
 
         fun build(): CheckoutRequest {
@@ -193,7 +193,8 @@ class CheckoutRequest private constructor(
                 paymentMethodRedisplayFeature = paymentMethodRedisplayFeature,
                 paymentMethodRedisplayFilters = paymentMethodRedisplayFilters,
                 paymentMethodOverrideRedisplay = paymentMethodOverrideRedisplay,
-                pmoSfu = overridePaymentMethodOptionsSetupFutureUse ?: paymentMethodOptionsSetupFutureUse
+                paymentMethodOptionsSetupFutureUsage = overridePaymentMethodOptionsSetupFutureUsage
+                    ?: paymentMethodOptionsSetupFutureUsage
             )
         }
     }
