@@ -146,9 +146,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
         editCardDetailsInteractorFactory.create(
             card = savedPaymentMethodCard.card,
             onCardUpdateParamsChanged = { cardUpdateParams ->
-                handleViewAction(
-                    viewAction = UpdatePaymentMethodInteractor.ViewAction.CardUpdateParamsChanged(cardUpdateParams)
-                )
+                onCardUpdateParamsChanged(cardUpdateParams)
             },
             coroutineScope = coroutineScope,
             isModifiable = displayableSavedPaymentMethod.isModifiable(canUpdateFullPaymentMethodDetails),
@@ -201,7 +199,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     }
 
     private fun removePaymentMethod() {
-        coroutineScope.launch {
+        coroutineScope.launch(Dispatchers.Main.immediate) {
             error.emit(getInitialError())
             status.emit(UpdatePaymentMethodInteractor.Status.Removing)
 
@@ -213,7 +211,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     }
 
     private fun savePaymentMethod() {
-        coroutineScope.launch {
+        coroutineScope.launch(Dispatchers.Main.immediate) {
             error.emit(getInitialError())
             status.emit(UpdatePaymentMethodInteractor.Status.Updating)
 
