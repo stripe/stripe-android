@@ -21,7 +21,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.coroutines.CoroutineContext
 
 internal interface UpdatePaymentMethodInteractor {
     val topBarState: PaymentSheetTopBarState
@@ -101,11 +100,10 @@ internal class DefaultUpdatePaymentMethodInteractor(
     private val setDefaultPaymentMethodExecutor: PaymentMethodSetAsDefaultOperation,
     private val onBrandChoiceSelected: (CardBrand) -> Unit,
     private val onUpdateSuccess: () -> Unit,
-    workContext: CoroutineContext = Dispatchers.Default,
     val editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = DefaultEditCardDetailsInteractor
         .Factory(),
 ) : UpdatePaymentMethodInteractor {
-    private val coroutineScope = CoroutineScope(workContext + SupervisorJob())
+    private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private val error = MutableStateFlow(getInitialError())
     private val status = MutableStateFlow(UpdatePaymentMethodInteractor.Status.Idle)
     private val initialSetAsDefaultCheckedValue = isDefaultPaymentMethod
@@ -200,7 +198,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     }
 
     private fun removePaymentMethod() {
-        coroutineScope.launch(Dispatchers.Main.immediate) {
+        coroutineScope.launch {
             error.emit(getInitialError())
             status.emit(UpdatePaymentMethodInteractor.Status.Removing)
 
@@ -212,7 +210,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     }
 
     private fun savePaymentMethod() {
-        coroutineScope.launch(Dispatchers.Main.immediate) {
+        coroutineScope.launch {
             error.emit(getInitialError())
             status.emit(UpdatePaymentMethodInteractor.Status.Updating)
 

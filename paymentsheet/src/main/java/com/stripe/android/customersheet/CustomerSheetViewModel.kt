@@ -14,6 +14,7 @@ import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.mainthread.MainThreadOnlyMutableStateFlow
 import com.stripe.android.core.mainthread.update
@@ -101,7 +102,7 @@ internal class CustomerSheetViewModel(
     private val stripeRepository: StripeRepository,
     private val eventReporter: CustomerSheetEventReporter,
     private val workContext: CoroutineContext = Dispatchers.IO,
-    @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
+    private val isLiveModeProvider: () -> Boolean,
     private val productUsage: Set<String>,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
     private val customerSheetLoader: CustomerSheetLoader,
@@ -118,7 +119,7 @@ internal class CustomerSheetViewModel(
         logger: Logger,
         stripeRepository: StripeRepository,
         eventReporter: CustomerSheetEventReporter,
-        workContext: CoroutineContext = Dispatchers.IO,
+        @IOContext workContext: CoroutineContext = Dispatchers.IO,
         @Named(IS_LIVE_MODE) isLiveModeProvider: () -> Boolean,
         @Named(PRODUCT_USAGE) productUsage: Set<String>,
         confirmationHandlerFactory: ConfirmationHandler.Factory,
@@ -576,7 +577,6 @@ internal class CustomerSheetViewModel(
                         }
                     },
                     updatePaymentMethodExecutor = ::updatePaymentMethodExecutor,
-                    workContext = workContext,
                     // This checkbox is never displayed in CustomerSheet.
                     shouldShowSetAsDefaultCheckbox = false,
                     isDefaultPaymentMethod = false,

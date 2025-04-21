@@ -692,7 +692,6 @@ class DefaultUpdatePaymentMethodInteractorTest {
             removeExecutor = onRemovePaymentMethod,
             updatePaymentMethodExecutor = updatePaymentMethodExecutor,
             setDefaultPaymentMethodExecutor = onSetDefaultPaymentMethod,
-            workContext = testDispatcher,
             cardBrandFilter = DefaultCardBrandFilter,
             onBrandChoiceSelected = onBrandChoiceSelected,
             shouldShowSetAsDefaultCheckbox = shouldShowSetAsDefaultCheckbox,
