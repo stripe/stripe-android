@@ -1138,11 +1138,13 @@ internal class CustomerSheetViewModel(
     private fun selectSavedPaymentMethod(savedPaymentSelection: PaymentSelection.Saved?) {
         val syncDefaultEnabled = customerState.value.metadata?.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
 
-        viewModelScope.launch(workContext) {
-            awaitSavedSelectionDataSource().setSavedSelection(
-                savedPaymentSelection?.toSavedSelection(),
-                shouldSyncDefault = syncDefaultEnabled == true,
-            ).onSuccess {
+        viewModelScope.launch {
+            withContext(workContext) {
+                awaitSavedSelectionDataSource().setSavedSelection(
+                    savedPaymentSelection?.toSavedSelection(),
+                    shouldSyncDefault = syncDefaultEnabled == true,
+                )
+            }.onSuccess {
                 confirmPaymentSelection(
                     paymentSelection = savedPaymentSelection,
                     type = savedPaymentSelection?.paymentMethod?.type?.code,
