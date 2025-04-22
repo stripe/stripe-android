@@ -1,8 +1,6 @@
 package com.stripe.android.paymentelement.embedded.form
 
 import com.stripe.android.core.injection.ViewModelScope
-import com.stripe.android.core.mainthread.MainThreadOnlyMutableStateFlow
-import com.stripe.android.core.mainthread.update
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentIntent
@@ -21,8 +19,10 @@ import com.stripe.android.paymentsheet.utils.continueButtonLabel
 import com.stripe.android.paymentsheet.utils.reportPaymentResult
 import com.stripe.android.ui.core.Amount
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -55,7 +55,7 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
     private val eventReporter: EventReporter,
     @ViewModelScope coroutineScope: CoroutineScope,
 ) : FormActivityStateHelper {
-    private val _state = MainThreadOnlyMutableStateFlow(
+    private val _state = MutableStateFlow(
         FormActivityStateHelper.State(
             primaryButtonLabel = primaryButtonLabel(paymentMethodMetadata.stripeIntent, configuration),
             isEnabled = false,

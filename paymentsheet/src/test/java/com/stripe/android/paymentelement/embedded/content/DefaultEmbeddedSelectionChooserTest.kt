@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
-import com.stripe.android.core.mainthread.MainThreadSavedStateHandle
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
@@ -323,13 +322,13 @@ internal class DefaultEmbeddedSelectionChooserTest {
         val savedStateHandle = SavedStateHandle()
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-            embeddedSelectionHolder = EmbeddedSelectionHolder(MainThreadSavedStateHandle(savedStateHandle)),
+            embeddedSelectionHolder = EmbeddedSelectionHolder(savedStateHandle),
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             savedStateHandle = savedStateHandle,
         )
         Scenario(
             chooser = DefaultEmbeddedSelectionChooser(
-                savedStateHandle = MainThreadSavedStateHandle(savedStateHandle),
+                savedStateHandle = savedStateHandle,
                 formHelperFactory = formHelperFactory,
                 coroutineScope = CoroutineScope(Dispatchers.Unconfined),
                 eventReporter = FakeEventReporter(),

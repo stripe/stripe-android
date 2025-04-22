@@ -16,8 +16,6 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.IS_LIVE_MODE
-import com.stripe.android.core.mainthread.MainThreadOnlyMutableStateFlow
-import com.stripe.android.core.mainthread.update
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
@@ -77,8 +75,10 @@ import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -149,7 +149,7 @@ internal class CustomerSheetViewModel(
         productUsageTokens = productUsage,
     )
 
-    private val backStack = MainThreadOnlyMutableStateFlow<List<CustomerSheetViewState>>(
+    private val backStack = MutableStateFlow<List<CustomerSheetViewState>>(
         listOf(
             CustomerSheetViewState.Loading(
                 isLiveMode = isLiveModeProvider()
@@ -158,19 +158,19 @@ internal class CustomerSheetViewModel(
     )
     val viewState: StateFlow<CustomerSheetViewState> = backStack.mapAsStateFlow { it.last() }
 
-    private val _result = MainThreadOnlyMutableStateFlow<InternalCustomerSheetResult?>(null)
+    private val _result = MutableStateFlow<InternalCustomerSheetResult?>(null)
     val result: StateFlow<InternalCustomerSheetResult?> = _result
 
     private val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
 
-    private val isEditing = MainThreadOnlyMutableStateFlow(false)
-    private val selectionConfirmationState = MainThreadOnlyMutableStateFlow(
+    private val isEditing = MutableStateFlow(false)
+    private val selectionConfirmationState = MutableStateFlow(
         SelectionConfirmationState(
             isConfirming = false,
             error = null,
         )
     )
-    private val customerState = MainThreadOnlyMutableStateFlow(
+    private val customerState = MutableStateFlow(
         CustomerState(
             paymentMethods = listOf(),
             configuration = configuration,

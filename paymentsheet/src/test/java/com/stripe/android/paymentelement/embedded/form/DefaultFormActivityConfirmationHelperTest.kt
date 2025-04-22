@@ -6,7 +6,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.mainthread.MainThreadSavedStateHandle
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -100,7 +99,7 @@ class DefaultFormActivityConfirmationHelperTest {
     ) = runTest {
         val confirmationHandler = FakeConfirmationHandler()
         val savedStateHandle = SavedStateHandle()
-        val selectionHolder = EmbeddedSelectionHolder(MainThreadSavedStateHandle(savedStateHandle))
+        val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
             .configurationModifier()
             .build()
