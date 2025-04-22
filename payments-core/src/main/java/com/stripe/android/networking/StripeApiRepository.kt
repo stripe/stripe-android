@@ -419,7 +419,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         return fetchStripeModelResult(
             apiRequestFactory.createPost(
                 getConfirmSetupIntentUrl(setupIntentId),
-                options,
+                options.copy(apiKey = confirmSetupIntentParams.posSessionToken ?: options.apiKey),
                 fraudDetectionDataParamsUtils.addFraudDetectionData(
                     // Add payment_user_agent if the Payment Method is being created on this call
                     maybeAddPaymentUserAgent(
