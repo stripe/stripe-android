@@ -13,6 +13,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FormHelper
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
@@ -22,6 +23,8 @@ import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutI
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -742,6 +745,64 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             onFormFieldValuesChanged = { fieldValues, selectedPaymentMethodCode ->
                 fieldValues.run {
                     assertThat(fieldValuePairs).isEmpty()
+                    assertThat(userRequestedReuse).isEqualTo(PaymentSelection.CustomerRequestedSave.NoRequest)
+                }
+                assertThat(selectedPaymentMethodCode).isEqualTo("cashapp")
+                onFormFieldValuesChangedCalled = true
+            },
+            reportPaymentMethodTypeSelected = {}
+        ) {
+            interactor.state.test {
+                assertThat(awaitItem().mandate).isNull()
+                interactor.handleViewAction(ViewAction.PaymentMethodSelected("cashapp"))
+                assertThat(onFormFieldValuesChangedCalled).isTrue()
+            }
+        }
+    }
+
+    @Test
+    fun handleViewAction_PaymentMethodSelected_callsOnFormFieldValuesChanged_withDefaultBillingDetails_whenRequired() {
+        var onFormFieldValuesChangedCalled = false
+        val paymentMethodTypes = listOf("card", "cashapp")
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = paymentMethodTypes
+            ),
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                attachDefaultsToPaymentMethod = true,
+            ),
+            defaultBillingDetails = PaymentSheet.BillingDetails(
+                name = "Jenny Rosen",
+                email = "mail@mail.com",
+                phone = "+13105551234",
+                address = PaymentSheet.Address(
+                    line1 = "123 Main Street",
+                    line2 = "456",
+                    city = "San Francisco",
+                    state = "CA",
+                    country = "US",
+                    postalCode = "94111"
+                ),
+            ),
+        )
+        runScenario(
+            paymentMethodMetadata = paymentMethodMetadata,
+            formTypeForCode = { FormHelper.FormType.MandateOnly("Foobar".resolvableString) },
+            onFormFieldValuesChanged = { fieldValues, selectedPaymentMethodCode ->
+                fieldValues.run {
+                    assertThat(fieldValuePairs).isEqualTo(
+                        mapOf(
+                            IdentifierSpec.Name to FormFieldEntry("Jenny Rosen", isComplete = true),
+                            IdentifierSpec.Email to FormFieldEntry("mail@mail.com", isComplete = true),
+                            IdentifierSpec.Phone to FormFieldEntry("+13105551234", isComplete = true),
+                            IdentifierSpec.Line1 to FormFieldEntry("123 Main Street", isComplete = true),
+                            IdentifierSpec.Line2 to FormFieldEntry("456", isComplete = true),
+                            IdentifierSpec.City to FormFieldEntry("San Francisco", isComplete = true),
+                            IdentifierSpec.State to FormFieldEntry("CA", isComplete = true),
+                            IdentifierSpec.Country to FormFieldEntry("US", isComplete = true),
+                            IdentifierSpec.PostalCode to FormFieldEntry("94111", isComplete = true),
+                        )
+                    )
                     assertThat(userRequestedReuse).isEqualTo(PaymentSelection.CustomerRequestedSave.NoRequest)
                 }
                 assertThat(selectedPaymentMethodCode).isEqualTo("cashapp")
