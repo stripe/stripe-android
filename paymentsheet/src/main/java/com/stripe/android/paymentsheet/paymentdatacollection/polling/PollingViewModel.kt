@@ -14,7 +14,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.paymentsheet.paymentdatacollection.polling.di.DaggerPollingComponent
 import com.stripe.android.polling.IntentStatusPoller
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -85,7 +84,6 @@ internal class PollingViewModel @Inject constructor(
     private val args: Args,
     private val poller: IntentStatusPoller,
     private val timeProvider: TimeProvider,
-    private val dispatcher: CoroutineDispatcher,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -95,20 +93,20 @@ internal class PollingViewModel @Inject constructor(
     init {
         val timeRemaining = computeTimeRemaining()
 
-        viewModelScope.launch(dispatcher) {
+        viewModelScope.launch {
             observeCountdown(timeRemaining)
         }
 
-        viewModelScope.launch(dispatcher) {
+        viewModelScope.launch {
             observePollingResults()
         }
 
-        viewModelScope.launch(dispatcher) {
+        viewModelScope.launch {
             delay(timeRemaining)
             handleTimeLimitReached()
         }
 
-        viewModelScope.launch(dispatcher) {
+        viewModelScope.launch {
             delay(args.initialDelay)
             poller.startPolling(scope = this)
         }
@@ -157,7 +155,7 @@ internal class PollingViewModel @Inject constructor(
     }
 
     fun resumePolling() {
-        viewModelScope.launch(dispatcher) {
+        viewModelScope.launch {
             delay(args.initialDelay)
             poller.startPolling(viewModelScope)
         }

@@ -21,8 +21,6 @@ import com.stripe.android.polling.IntentStatusPoller
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils
 import com.stripe.android.utils.injectableActivityScenario
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -35,8 +33,6 @@ internal class PollingActivityTest {
 
     @get:Rule
     val composeTestRule = createEmptyComposeRule()
-
-    private val testDispatcher = UnconfinedTestDispatcher()
 
     @Test
     fun `Displays loading screen when activity is opened`() {
@@ -142,7 +138,6 @@ internal class PollingActivityTest {
         args: PollingContract.Args = defaultArgs,
         poller: IntentStatusPoller = FakeIntentStatusPoller(),
         timeProvider: TimeProvider = TimeProvider { System.currentTimeMillis() },
-        dispatcher: CoroutineDispatcher = testDispatcher,
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
     ): InjectableActivityScenario<PollingActivity> {
         val contract = PollingContract()
@@ -161,7 +156,6 @@ internal class PollingActivityTest {
             ),
             poller = poller,
             timeProvider = timeProvider,
-            dispatcher = dispatcher,
             savedStateHandle = savedStateHandle
         )
 
@@ -180,10 +174,9 @@ internal class PollingActivityTest {
         args: PollingViewModel.Args,
         poller: IntentStatusPoller = FakeIntentStatusPoller(),
         timeProvider: TimeProvider = TimeProvider { System.currentTimeMillis() },
-        dispatcher: CoroutineDispatcher = testDispatcher,
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
     ): PollingViewModel {
-        return PollingViewModel(args, poller, timeProvider, dispatcher, savedStateHandle)
+        return PollingViewModel(args, poller, timeProvider, savedStateHandle)
     }
 
     private fun waitForActivityFinish() {
