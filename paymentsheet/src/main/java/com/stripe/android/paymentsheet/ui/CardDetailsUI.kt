@@ -137,7 +137,7 @@ private fun CardNumberField(
     onBrandChoiceChanged: (CardBrandChoice) -> Unit,
 ) {
     CommonTextField(
-        value = "•••• •••• •••• $last4",
+        value = "•••• •••• •••• ${last4 ?: "••••"}",
         label = stringResource(id = R.string.stripe_acc_label_card_number),
         trailingIcon = {
             if (shouldShowCardBrandDropdown) {
