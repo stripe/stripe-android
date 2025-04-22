@@ -91,7 +91,7 @@ internal class FormViewModel(
             currentFieldValues().map { it.toMap() },
             hiddenIdentifiers,
             userRequestedReuse,
-            defaultValuesToInclude,
+            formArguments.defaultFormValues,
         ).filterFlow()
 
     private fun currentFieldValues(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
@@ -107,31 +107,6 @@ internal class FormViewModel(
             }
         }
     }
-
-    @VisibleForTesting
-    val defaultValuesToInclude
-        get(): Map<IdentifierSpec, String> {
-            val defaults = mutableMapOf<IdentifierSpec, String>()
-
-            if (formArguments.billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod) {
-                formArguments.billingDetails?.let { billingDetails ->
-                    billingDetails.name?.let { defaults[IdentifierSpec.Name] = it }
-                    billingDetails.email?.let { defaults[IdentifierSpec.Email] = it }
-                    billingDetails.phone?.let { defaults[IdentifierSpec.Phone] = it }
-                    billingDetails.address?.line1?.let { defaults[IdentifierSpec.Companion.Line1] = it }
-                    billingDetails.address?.line2?.let { defaults[IdentifierSpec.Companion.Line2] = it }
-                    billingDetails.address?.city?.let { defaults[IdentifierSpec.Companion.City] = it }
-                    billingDetails.address?.state?.let { defaults[IdentifierSpec.Companion.State] = it }
-                    billingDetails.address?.postalCode?.let {
-                        defaults[IdentifierSpec.Companion.PostalCode] = it
-                    }
-                    billingDetails.address?.country?.let {
-                        defaults[IdentifierSpec.Companion.Country] = it
-                    }
-                }
-            }
-            return defaults
-        }
 
     private val textFieldControllerIdsFlow = combineAsStateFlow(elements.map { it.getTextFieldIdentifiers() }) {
         it.toList().flatten()
