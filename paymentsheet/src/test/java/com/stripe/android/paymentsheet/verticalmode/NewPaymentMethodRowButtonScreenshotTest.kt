@@ -159,7 +159,7 @@ internal class NewPaymentMethodRowButtonScreenshotTest {
                 trailingContent = {
                     EmbeddedNewPaymentMethodTrailingContent(
                         showChevron = true
-                    ) { }
+                    )
                 }
             )
         }
