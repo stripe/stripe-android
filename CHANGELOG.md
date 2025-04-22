@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 21.11.1 - 2025-04-22
+
 ## 21.11.0 - 2025-04-21
 
 Dependencies updated in [10579](https://github.com/stripe/stripe-android/pull/10579):
