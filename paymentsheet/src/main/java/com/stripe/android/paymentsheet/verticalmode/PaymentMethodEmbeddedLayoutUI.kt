@@ -325,7 +325,9 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
                     {
                         EmbeddedNewPaymentMethodTrailingContent(
                             showChevron = rowStyle !is Embedded.RowStyle.FlatWithCheckmark,
-                            onChangeClicked = {}
+                            onChangeClicked = {
+                                // TODO
+                            }
                         )
                     }
                 } else {
