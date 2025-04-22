@@ -285,7 +285,9 @@ internal class PaymentSheetPlaygroundViewModel(
 
                 if (isNewCustomer) {
                     playgroundSettingsFlow.value?.let { settings ->
-                        updateSettingsWithExistingCustomerId(settings, response.customerId)
+                        withContext(Dispatchers.Main) {
+                            updateSettingsWithExistingCustomerId(settings, response.customerId)
+                        }
                     }
                 }
 

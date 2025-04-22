@@ -500,19 +500,22 @@ internal class PaymentSheetPlaygroundActivity :
             )
 
             if (customerSheetState?.shouldFetchPaymentOption == true) {
-                fetchOption(customerSheet).onSuccess { option ->
-                    viewModel.customerSheetState.emit(
-                        CustomerSheetState(
-                            selectedPaymentOption = option,
-                            shouldFetchPaymentOption = false
+                val result = fetchOption(customerSheet)
+                withContext(Dispatchers.Main) {
+                    result.onSuccess { option ->
+                        viewModel.customerSheetState.emit(
+                            CustomerSheetState(
+                                selectedPaymentOption = option,
+                                shouldFetchPaymentOption = false
+                            )
                         )
-                    )
-                }.onFailure { exception ->
-                    viewModel.status.emit(
-                        StatusMessage(
-                            message = "Failed to retrieve payment options:\n${exception.message}"
+                    }.onFailure { exception ->
+                        viewModel.status.emit(
+                            StatusMessage(
+                                message = "Failed to retrieve payment options:\n${exception.message}"
+                            )
                         )
-                    )
+                    }
                 }
             }
         }
