@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -39,6 +40,7 @@ import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails.Card
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
@@ -64,15 +66,16 @@ internal fun PaymentDetailsListItem(
             onClick = null,
             modifier = Modifier
                 .testTag(WALLET_PAYMENT_DETAIL_ITEM_RADIO_BUTTON)
-                .padding(start = 20.dp, end = 6.dp),
+                .padding(start = 20.dp, end = 12.dp),
             colors = RadioButtonDefaults.colors(
                 selectedColor = MaterialTheme.linkColors.actionLabelLight,
                 unselectedColor = MaterialTheme.linkColors.disabledText
             )
         )
+
         Column(
             modifier = Modifier
-                .padding(vertical = 8.dp)
+                .padding(vertical = 16.dp)
                 .weight(1f)
         ) {
             Row(
@@ -169,9 +172,13 @@ internal fun RowScope.PaymentDetails(
 ) {
     when (paymentDetails) {
         is Card -> {
+            val title = paymentDetails.displayName?.resolve() ?: "•••• ${paymentDetails.last4}"
+            val subtitle = "•••• ${paymentDetails.last4}"
+
             CardInfo(
                 modifier = modifier,
-                last4 = paymentDetails.last4,
+                title = title,
+                subtitle = subtitle.takeIf { it != title },
                 icon = paymentDetails.brand.icon,
                 contentDescription = paymentDetails.brand.displayName
             )
@@ -182,7 +189,8 @@ internal fun RowScope.PaymentDetails(
         is ConsumerPaymentDetails.Passthrough -> {
             CardInfo(
                 modifier = modifier,
-                last4 = paymentDetails.last4,
+                title = "•••• ${paymentDetails.last4}",
+                subtitle = null,
                 icon = R.drawable.stripe_link_bank,
                 contentDescription = stringResource(R.string.stripe_wallet_passthrough_description)
             )
@@ -193,31 +201,40 @@ internal fun RowScope.PaymentDetails(
 @Composable
 private fun RowScope.CardInfo(
     modifier: Modifier = Modifier,
-    last4: String,
+    title: String,
+    subtitle: String?,
     icon: Int,
     contentDescription: String? = null,
 ) {
     Row(
         modifier = modifier.weight(1f),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Image(
             painter = painterResource(id = icon),
             contentDescription = contentDescription,
-            modifier = Modifier
-                .width(38.dp)
-                .padding(horizontal = 6.dp),
+            modifier = Modifier.width(38.dp),
             alignment = Alignment.Center,
         )
-        Text(
-            text = stringResource(R.string.stripe_wallet_last4_prefix),
-            color = MaterialTheme.colors.onPrimary,
-        )
-        Text(
-            text = last4,
-            color = MaterialTheme.colors.onPrimary,
-            style = MaterialTheme.typography.h6
-        )
+
+        Column {
+            Text(
+                text = title,
+                color = MaterialTheme.colors.onPrimary,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
+                style = MaterialTheme.typography.h6
+            )
+
+            if (subtitle != null) {
+                Text(
+                    text = subtitle,
+                    color = MaterialTheme.colors.onSecondary,
+                    style = MaterialTheme.typography.body2
+                )
+            }
+        }
     }
 }
 
@@ -228,20 +245,19 @@ private fun RowScope.BankAccountInfo(
 ) {
     Row(
         modifier = modifier.weight(1f),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Image(
             painter = painterResource(R.drawable.stripe_link_bank),
             contentDescription = null,
-            modifier = Modifier
-                .width(38.dp)
-                .padding(horizontal = 6.dp),
+            modifier = Modifier.width(38.dp),
             alignment = Alignment.Center,
             colorFilter = ColorFilter.tint(MaterialTheme.linkColors.actionLabelLight)
         )
-        Column(horizontalAlignment = Alignment.Start) {
+        Column {
             Text(
-                text = bankAccount.bankName ?: stringResource(StripeUiCoreR.string.stripe_payment_method_bank),
+                text = bankAccount.displayName?.resolve() ?: stringResource(StripeUiCoreR.string.stripe_payment_method_bank),
                 color = MaterialTheme.colors.onPrimary,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
@@ -249,12 +265,7 @@ private fun RowScope.BankAccountInfo(
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = stringResource(R.string.stripe_wallet_last4_prefix),
-                    color = MaterialTheme.colors.onSecondary,
-                    style = MaterialTheme.typography.body2
-                )
-                Text(
-                    text = bankAccount.last4,
+                    text = "•••• ${bankAccount.last4}",
                     color = MaterialTheme.colors.onSecondary,
                     style = MaterialTheme.typography.body2
                 )

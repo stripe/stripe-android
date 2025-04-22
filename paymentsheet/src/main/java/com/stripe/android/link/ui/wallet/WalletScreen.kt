@@ -5,16 +5,19 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -325,7 +328,7 @@ internal fun CollapsedPaymentDetails(
             modifier = Modifier
                 .testTag(COLLAPSED_WALLET_ROW)
                 .fillMaxWidth()
-                .height(64.dp)
+                .defaultMinSize(minHeight = 64.dp)
                 .border(
                     width = 1.dp,
                     color = MaterialTheme.linkColors.componentBorder,
@@ -339,24 +342,25 @@ internal fun CollapsedPaymentDetails(
                 .clickable(
                     enabled = enabled,
                     onClick = onClick
-                ),
-            verticalAlignment = Alignment.CenterVertically
+                )
+                .padding(vertical = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(
                 text = stringResource(R.string.stripe_wallet_collapsed_payment),
                 modifier = Modifier
                     .testTag(COLLAPSED_WALLET_HEADER_TAG)
-                    .padding(
-                        start = HorizontalPadding,
-                        end = 8.dp
-                    ),
+                    .padding(start = HorizontalPadding),
                 color = MaterialTheme.linkColors.disabledText
             )
+
             PaymentDetails(
                 modifier = Modifier
                     .testTag(COLLAPSED_WALLET_PAYMENT_DETAILS_TAG),
                 paymentDetails = selectedPaymentMethod
             )
+
             Icon(
                 painter = painterResource(R.drawable.stripe_link_chevron),
                 contentDescription = stringResource(R.string.stripe_wallet_expand_accessibility),
@@ -398,7 +402,7 @@ private fun ExpandedPaymentDetails(
             onCollapse = onCollapse
         )
 
-        uiState.paymentDetailsList.forEach { item ->
+        uiState.paymentDetailsList.forEachIndexed { index, item ->
             PaymentDetailsListItem(
                 modifier = Modifier
                     .testTag(WALLET_SCREEN_PAYMENT_METHODS_LIST),
@@ -409,6 +413,13 @@ private fun ExpandedPaymentDetails(
                 onClick = { onItemSelected(item) },
                 onMenuButtonClick = { onMenuButtonClick(item) }
             )
+
+            if (index != uiState.paymentDetailsList.lastIndex || uiState.canAddNewPaymentMethod) {
+                Divider(
+                    color = MaterialTheme.linkColors.componentBorder,
+                    modifier = Modifier.padding(horizontal = 20.dp),
+                )
+            }
         }
 
         if (uiState.canAddNewPaymentMethod) {

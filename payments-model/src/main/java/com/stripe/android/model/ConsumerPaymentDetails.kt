@@ -4,8 +4,11 @@ import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.StripeModel
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DateUtils
 import kotlinx.parcelize.Parcelize
+import com.stripe.android.core.R as StripeCoreR
 
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -18,9 +21,11 @@ data class ConsumerPaymentDetails(
         open val id: String,
         open val isDefault: Boolean,
         open val type: String,
+        open val nickname: String?,
     ) : Parcelable {
 
         abstract val last4: String
+        abstract val displayName: ResolvableString?
     }
 
     @Parcelize
@@ -29,18 +34,24 @@ data class ConsumerPaymentDetails(
         override val id: String,
         override val last4: String,
         override val isDefault: Boolean,
+        override val nickname: String?,
         val expiryYear: Int,
         val expiryMonth: Int,
         val brand: CardBrand,
         val networks: List<String>,
         val cvcCheck: CvcCheck,
+        val funding: String,
         val billingAddress: BillingAddress? = null,
         val billingEmailAddress: String? = null,
     ) : PaymentDetails(
         id = id,
         isDefault = isDefault,
-        type = TYPE
+        type = TYPE,
+        nickname = nickname,
     ) {
+
+        override val displayName: ResolvableString?
+            get() = nickname?.resolvableString ?: makeCardName(funding, brand.displayName)
 
         val requiresCardDetailsRecollection: Boolean
             get() = isExpired || cvcCheck.requiresRecollection
@@ -82,7 +93,17 @@ data class ConsumerPaymentDetails(
     data class Passthrough(
         override val id: String,
         override val last4: String,
-    ) : PaymentDetails(id = id, type = TYPE, isDefault = false) {
+        override val nickname: String?,
+    ) : PaymentDetails(
+        id = id,
+        type = TYPE,
+        isDefault = false,
+        nickname = nickname,
+    ) {
+
+        override val displayName: ResolvableString?
+            get() = nickname?.resolvableString
+
         companion object {
             const val TYPE = "card"
         }
@@ -94,13 +115,19 @@ data class ConsumerPaymentDetails(
         override val id: String,
         override val last4: String,
         override val isDefault: Boolean,
+        override val nickname: String?,
         val bankName: String?,
         val bankIconCode: String?,
     ) : PaymentDetails(
         id = id,
         type = TYPE,
-        isDefault = isDefault
+        isDefault = isDefault,
+        nickname = nickname,
     ) {
+
+        override val displayName: ResolvableString?
+            get() = nickname?.resolvableString ?: bankName?.resolvableString
+
         companion object {
             const val TYPE = "bank_account"
         }
@@ -117,4 +144,14 @@ data class ConsumerPaymentDetails(
         val postalCode: String?,
         val countryCode: CountryCode?,
     ) : Parcelable
+}
+
+private fun makeCardName(funding: String, brand: String): ResolvableString {
+    return when (funding) {
+        "CREDIT" -> resolvableString(StripeCoreR.string.stripe_link_card_type_credit, brand)
+        "DEBIT" -> resolvableString(StripeCoreR.string.stripe_link_card_type_debit, brand)
+        "PREPAID" -> resolvableString(StripeCoreR.string.stripe_link_card_type_prepaid, brand)
+        "CHARGE", "FUNDING_INVALID" -> resolvableString(StripeCoreR.string.stripe_link_card_type_unknown, brand)
+        else -> resolvableString(StripeCoreR.string.stripe_link_card_type_unknown, brand)
+    }
 }
