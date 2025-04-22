@@ -246,9 +246,8 @@ internal fun EmbeddedSavedPaymentMethodRowButton(
             isEnabled = isEnabled,
             isSelected = selection?.isSaved == true,
             trailingContent = {
-                EmbeddedSavedPaymentMethodTrailingContent(
+                SavedPaymentMethodTrailingContent(
                     savedPaymentMethodAction = savedPaymentMethodAction,
-                    rowStyle = rowStyle,
                     onViewMorePaymentMethods = onViewMorePaymentMethods,
                     onManageOneSavedPaymentMethod = { onManageOneSavedPaymentMethod(displayedSavedPaymentMethod) },
                 )
@@ -258,28 +257,6 @@ internal fun EmbeddedSavedPaymentMethodRowButton(
         )
 
         if (paymentMethods.isNotEmpty()) OptionalEmbeddedDivider(rowStyle)
-    }
-}
-
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
-@Composable
-internal fun EmbeddedSavedPaymentMethodTrailingContent(
-    savedPaymentMethodAction: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
-    rowStyle: Embedded.RowStyle,
-    onViewMorePaymentMethods: () -> Unit,
-    onManageOneSavedPaymentMethod: () -> Unit,
-) {
-    when (savedPaymentMethodAction) {
-        PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE -> Unit
-        PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE -> {
-            EditButton(onClick = onManageOneSavedPaymentMethod)
-        }
-        PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL -> {
-            ViewMoreButton(
-                showChevron = rowStyle !is Embedded.RowStyle.FlatWithCheckmark,
-                onViewMorePaymentMethods = onViewMorePaymentMethods
-            )
-        }
     }
 }
 
