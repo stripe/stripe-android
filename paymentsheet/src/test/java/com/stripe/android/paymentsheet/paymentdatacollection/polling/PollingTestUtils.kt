@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.polling
 
+import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.Turbine
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.polling.IntentStatusPoller
 import kotlinx.coroutines.CoroutineScope
@@ -14,11 +16,11 @@ internal class FakeIntentStatusPoller : IntentStatusPoller {
 
     private val forcePollChannel = Channel<StripeIntent.Status?>(capacity = 1)
 
-    var isActive: Boolean = false
-        private set
+    private val _pollingTurbine = Turbine<Boolean>()
+    val pollingTurbine: ReceiveTurbine<Boolean> = _pollingTurbine
 
     override fun startPolling(scope: CoroutineScope) {
-        isActive = true
+        _pollingTurbine.add(true)
     }
 
     override suspend fun forcePoll(): StripeIntent.Status? {
@@ -26,7 +28,7 @@ internal class FakeIntentStatusPoller : IntentStatusPoller {
     }
 
     override fun stopPolling() {
-        isActive = false
+        _pollingTurbine.add(false)
     }
 
     fun enqueueForcePollResult(status: StripeIntent.Status?) {
