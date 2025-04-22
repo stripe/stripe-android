@@ -4,6 +4,9 @@
 
 ## 21.11.1 - 2025-04-22
 
+### PaymentSheet
+* [FIXED][10693](https://github.com/stripe/stripe-android/pull/10693) Fix an issue with vertical where default provided billing details were not attached for LPMs that did not display a form.
+
 ## 21.11.0 - 2025-04-21
 
 Dependencies updated in [10579](https://github.com/stripe/stripe-android/pull/10579):
