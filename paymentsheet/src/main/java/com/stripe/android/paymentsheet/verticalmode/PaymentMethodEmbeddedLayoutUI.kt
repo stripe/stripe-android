@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.annotation.RestrictTo
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -313,21 +312,19 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
         val isSelected = index == selectedIndex
 
         if (isSelected && selection is PaymentMethodVerticalLayoutInteractor.Selection.New && selection.canBeChanged) {
+            val displayablePaymentMethod = item.copy(
+                subtitle = selection.changeDetails?.resolvableString
+            )
             NewPaymentMethodRowButton(
                 isEnabled = isEnabled,
                 isSelected = true,
-                displayablePaymentMethod = item.copy(
-                    subtitle = selection.changeDetails?.resolvableString
-                ),
+                displayablePaymentMethod = displayablePaymentMethod,
                 imageLoader = imageLoader,
                 rowStyle = rowStyle,
                 trailingContent = if (isNewPaymentSelectedCard || isNewPaymentSelectedUSBankAccount) {
                     {
                         EmbeddedNewPaymentMethodTrailingContent(
                             showChevron = rowStyle !is Embedded.RowStyle.FlatWithCheckmark,
-                            onChangeClicked = {
-                                // TODO
-                            }
                         )
                     }
                 } else {
@@ -354,13 +351,11 @@ const val TEST_TAG_CHANGE = "TEST_TAG_CHANGE"
 @Composable
 internal fun EmbeddedNewPaymentMethodTrailingContent(
     showChevron: Boolean,
-    onChangeClicked: () -> Unit,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .testTag(TEST_TAG_CHANGE)
-            .clickable(onClick = onChangeClicked)
             .padding(vertical = 4.dp)
             .wrapContentHeight()
     ) {
