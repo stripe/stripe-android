@@ -71,7 +71,6 @@ internal class StripeIntentViewModel(
             }.onSuccess {
                 status.postValue("Confirmation succeeded")
                 val response = JSONObject(it.string())
-                println("YEET response: $response")
                 if (response.optBoolean("requires_action")) {
                     piSecret = response.getString("secret")
                     requiresAction.postValue(true)
@@ -120,7 +119,6 @@ internal class StripeIntentViewModel(
             runCatching {
                 stripe.createPaymentMethod(params)
             }.onSuccess { paymentMethod ->
-                println("YEET pm: $paymentMethod")
                 confirmPaymentIntentWithPaymentMethod(paymentMethod.id!!)
             }.onFailure {
                 println(it)

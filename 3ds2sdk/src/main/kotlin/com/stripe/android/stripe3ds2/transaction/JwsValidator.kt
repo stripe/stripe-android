@@ -122,6 +122,7 @@ internal class DefaultJwsValidator(
         } else {
             "SHA256withRSA"
         }
+        println("YEET alg: ${jwsHeader.algorithm}")
         verifierFactory.jcaContext.provider = Signature.getInstance(supportAlgorithm).provider
         return verifierFactory.createJWSVerifier(jwsHeader, getPublicKeyFromHeader(jwsHeader))
     }
