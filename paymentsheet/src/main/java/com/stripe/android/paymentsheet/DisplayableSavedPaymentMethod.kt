@@ -13,7 +13,7 @@ internal data class DisplayableSavedPaymentMethod private constructor(
     val isCbcEligible: Boolean = false,
     val shouldShowDefaultBadge: Boolean = false
 ) {
-    fun isModifiable(): Boolean {
+    fun canChangeCbc(): Boolean {
         return when (savedPaymentMethod) {
             is SavedPaymentMethod.Card -> {
                 val hasMultipleNetworks = savedPaymentMethod.card.networks?.available?.let { available ->
@@ -21,6 +21,17 @@ internal data class DisplayableSavedPaymentMethod private constructor(
                 } ?: false
 
                 return isCbcEligible && hasMultipleNetworks
+            }
+            is SavedPaymentMethod.SepaDebit,
+            is SavedPaymentMethod.USBankAccount,
+            SavedPaymentMethod.Unexpected -> false
+        }
+    }
+
+    fun isModifiable(canUpdateFullPaymentMethodDetails: Boolean): Boolean {
+        return when (savedPaymentMethod) {
+            is SavedPaymentMethod.Card -> {
+                canUpdateFullPaymentMethodDetails || (savedPaymentMethod.isExpired().not() && canChangeCbc())
             }
             is SavedPaymentMethod.SepaDebit,
             is SavedPaymentMethod.USBankAccount,

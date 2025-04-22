@@ -2,10 +2,20 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 21.11.1 - 2025-04-22
+
+### PaymentSheet
+* [FIXED][10693](https://github.com/stripe/stripe-android/pull/10693) Fix an issue with vertical where default provided billing details were not attached for LPMs that did not display a form.
+
+## 21.11.0 - 2025-04-21
+
 Dependencies updated in [10579](https://github.com/stripe/stripe-android/pull/10579):
 * Bumped Accompanist from 0.34.0 to 0.36.0.
 * Bumped Compose from 1.6.8 to 1.7.8.
 * Bumped Androidx Navigation from 2.7.7 to 2.8.5.
+
+### PaymentSheet
+[Added] Bank payments are now available in the PaymentSheet without requiring a dependency on `:financial-connections`.
 
 ## 21.10.0 - 2025-04-11
 

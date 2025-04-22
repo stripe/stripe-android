@@ -13,6 +13,7 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FormHelper.FormType
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.code
+import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -20,6 +21,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -94,6 +96,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val walletsState: StateFlow<WalletsState?>,
     private val canShowWalletsInline: Boolean,
     private val canShowWalletButtons: Boolean,
+    private val canUpdateFullPaymentMethodDetails: Boolean,
     private val updateSelection: (PaymentSelection?) -> Unit,
     private val isCurrentScreen: StateFlow<Boolean>,
     private val reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit,
@@ -154,6 +157,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 walletsState = viewModel.walletsState,
                 canShowWalletsInline = !viewModel.isCompleteFlow,
                 canShowWalletButtons = true,
+                canUpdateFullPaymentMethodDetails = viewModel.customerStateHolder.canUpdateFullPaymentMethodDetails,
                 updateSelection = viewModel::updateSelection,
                 isCurrentScreen = viewModel.navigationHandler.currentScreen.mapAsStateFlow {
                     it is PaymentSheetScreen.VerticalMode
@@ -395,7 +399,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         canRemove: Boolean,
         savedPaymentMethod: DisplayableSavedPaymentMethod?,
     ): PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction {
-        return if (savedPaymentMethod?.isModifiable() == true || canRemove) {
+        return if (savedPaymentMethod?.isModifiable(canUpdateFullPaymentMethodDetails) == true || canRemove) {
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE
         } else {
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE
@@ -429,8 +433,13 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     }
 
     private fun updateSelectedPaymentMethod(selectedPaymentMethodCode: String) {
+        val formArguments = FormArgumentsFactory.create(selectedPaymentMethodCode, paymentMethodMetadata)
+
         onFormFieldValuesChanged(
             FormFieldValues(
+                fieldValuePairs = formArguments.defaultFormValues.mapValues {
+                    FormFieldEntry(it.value, isComplete = true)
+                },
                 // userRequestedReuse only changes based on `SaveForFutureUse`, which won't ever hit this
                 // code path.
                 userRequestedReuse = PaymentSelection.CustomerRequestedSave.NoRequest

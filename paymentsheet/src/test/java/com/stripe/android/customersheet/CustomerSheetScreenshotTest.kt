@@ -354,7 +354,7 @@ internal class CustomerSheetScreenshotTest {
     ): CustomerSheetViewState {
         return CustomerSheetViewState.UpdatePaymentMethod(
             updatePaymentMethodInteractor = DefaultUpdatePaymentMethodInteractor(
-                allowFullCardDetailsEdit = false,
+                canUpdateFullPaymentMethodDetails = false,
                 displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
                 removeExecutor = { null },
                 updatePaymentMethodExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },

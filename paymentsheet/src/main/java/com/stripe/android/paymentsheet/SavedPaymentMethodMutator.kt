@@ -95,7 +95,7 @@ internal class SavedPaymentMethodMutator(
         paymentOptionsItems
     ) { canRemove, items ->
         canRemove || items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>().any { item ->
-            item.isModifiable
+            item.isModifiable(customerStateHolder.canUpdateFullPaymentMethodDetails)
         }
     }
 
@@ -178,15 +178,16 @@ internal class SavedPaymentMethodMutator(
         currentCustomer.paymentMethods.find { it.id == paymentMethodId }?.type?.code?.let {
             eventReporter.onRemoveSavedPaymentMethod(it)
         }
-        customerStateHolder.setCustomerState(
-            currentCustomer.copy(
-                paymentMethods = currentCustomer.paymentMethods.filter {
-                    it.id != paymentMethodId
-                }
-            )
-        )
 
         withContext(uiContext) {
+            customerStateHolder.setCustomerState(
+                currentCustomer.copy(
+                    paymentMethods = currentCustomer.paymentMethods.filter {
+                        it.id != paymentMethodId
+                    }
+                )
+            )
+
             if ((selection.value as? PaymentSelection.Saved)?.paymentMethod?.id == paymentMethodId) {
                 setSelection(null)
             }
@@ -372,7 +373,8 @@ internal class SavedPaymentMethodMutator(
                         DefaultUpdatePaymentMethodInteractor(
                             isLiveMode = isLiveMode,
                             canRemove = canRemove,
-                            allowFullCardDetailsEdit = viewModel.customerStateHolder.updatePaymentMethodEnabled,
+                            canUpdateFullPaymentMethodDetails = viewModel.customerStateHolder
+                                .canUpdateFullPaymentMethodDetails,
                             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
                             cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
                             addressCollectionMode = viewModel.config.asCommonConfiguration()

@@ -452,11 +452,12 @@ internal class PlaygroundSettings private constructor(
             LayoutSettingsDefinition,
             CardBrandAcceptanceSettingsDefinition,
             FeatureFlagSettingsDefinition(FeatureFlags.instantDebitsIncentives),
-            FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsLiteEnabled),
             FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsFullSdkUnavailable),
             EmbeddedViewDisplaysMandateSettingDefinition,
             EmbeddedFormSheetActionSettingDefinition,
             EmbeddedTwoStepSettingsDefinition,
+            PaymentMethodOptionsSetupFutureUsageSettingsDefinition,
+            PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(

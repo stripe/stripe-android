@@ -35,7 +35,6 @@ import dagger.BindsInstance
 import dagger.Component
 import dagger.Module
 import dagger.Provides
-import kotlinx.coroutines.plus
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
@@ -67,9 +66,8 @@ internal class LpmNetworkTestActivity : AppCompatActivity() {
     class TestViewModel @Inject constructor(
         confirmationHandlerFactory: ConfirmationHandler.Factory,
         val testClient: StripeNetworkTestClient,
-        @IOContext workContext: CoroutineContext
     ) : ViewModel() {
-        val confirmationHandler = confirmationHandlerFactory.create(viewModelScope.plus(workContext))
+        val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
 
         class Factory(
             private val starterArgsSupplier: () -> Args,

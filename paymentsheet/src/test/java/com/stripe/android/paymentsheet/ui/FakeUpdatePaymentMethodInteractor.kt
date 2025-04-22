@@ -32,7 +32,7 @@ internal class FakeUpdatePaymentMethodInteractor(
         isSaveButtonEnabled = false,
     ),
     override val setAsDefaultCheckboxEnabled: Boolean = true,
-    override val allowFullCardDetailsEdit: Boolean = false,
+    override val canUpdateFullPaymentMethodDetails: Boolean = false,
     private val editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = DefaultEditCardDetailsInteractor
         .Factory(),
 ) : UpdatePaymentMethodInteractor {
@@ -41,14 +41,15 @@ internal class FakeUpdatePaymentMethodInteractor(
         displayableSavedPaymentMethod
     )
     override val editCardDetailsInteractor: EditCardDetailsInteractor by lazy {
+        val isModifiable = displayableSavedPaymentMethod.isModifiable(canUpdateFullPaymentMethodDetails)
         editCardDetailsInteractorFactory.create(
             coroutineScope = TestScope(),
-            isModifiable = isModifiablePaymentMethod,
+            isCbcModifiable = isModifiable && displayableSavedPaymentMethod.canChangeCbc(),
             cardBrandFilter = cardBrandFilter,
             card = displayableSavedPaymentMethod.paymentMethod.card!!,
             onBrandChoiceChanged = {},
             onCardUpdateParamsChanged = {},
-            areExpiryDateAndAddressModificationSupported = allowFullCardDetailsEdit,
+            areExpiryDateAndAddressModificationSupported = isModifiable && canUpdateFullPaymentMethodDetails,
             billingDetails = PaymentMethodFixtures.BILLING_DETAILS,
             addressCollectionMode = addressCollectionMode,
         )

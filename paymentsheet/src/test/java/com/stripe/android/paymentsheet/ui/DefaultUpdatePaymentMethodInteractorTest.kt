@@ -553,6 +553,60 @@ class DefaultUpdatePaymentMethodInteractorTest {
     }
 
     @Test
+    fun shouldCreateEditCardInteractorCorrectly_whenCbcEligible_andCanUpdateFullPaymentMethodDetails() {
+        val displayableSavedPaymentMethod = PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
+            .toDisplayableSavedPaymentMethod()
+        runScenario(
+            displayableSavedPaymentMethod = displayableSavedPaymentMethod,
+            canUpdateFullPaymentMethodDetails = true
+        ) {
+            val state = interactor.editCardDetailsInteractor.state.value
+            assertThat(state.shouldShowCardBrandDropdown).isTrue()
+            assertThat(state.expiryDateState.enabled).isTrue()
+            assertThat(state.billingDetailsForm).isNotNull()
+        }
+    }
+
+    @Test
+    fun shouldCreateEditCardInteractorCorrectly_whenCbcEligible_andCanNotUpdateFullPaymentMethodDetails() {
+        val displayableSavedPaymentMethod = PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
+            .toDisplayableSavedPaymentMethod()
+        runScenario(
+            displayableSavedPaymentMethod = displayableSavedPaymentMethod,
+            canUpdateFullPaymentMethodDetails = false
+        ) {
+            val state = interactor.editCardDetailsInteractor.state.value
+            assertThat(state.shouldShowCardBrandDropdown).isTrue()
+            assertThat(state.expiryDateState.enabled).isFalse()
+            assertThat(state.billingDetailsForm).isNull()
+        }
+    }
+
+    @Test
+    fun shouldCreateEditCardInteractorCorrectly_whenCbcIneligible_andCanUpdateFullPaymentMethodDetails() {
+        runScenario(
+            canUpdateFullPaymentMethodDetails = true
+        ) {
+            val state = interactor.editCardDetailsInteractor.state.value
+            assertThat(state.shouldShowCardBrandDropdown).isFalse()
+            assertThat(state.expiryDateState.enabled).isTrue()
+            assertThat(state.billingDetailsForm).isNotNull()
+        }
+    }
+
+    @Test
+    fun shouldCreateEditCardInteractorCorrectly_whenCbcIneligible_andCanNotUpdateFullPaymentMethodDetails() {
+        runScenario(
+            canUpdateFullPaymentMethodDetails = false
+        ) {
+            val state = interactor.editCardDetailsInteractor.state.value
+            assertThat(state.shouldShowCardBrandDropdown).isFalse()
+            assertThat(state.expiryDateState.enabled).isFalse()
+            assertThat(state.billingDetailsForm).isNull()
+        }
+    }
+
+    @Test
     fun shouldNotCreateEditCardInteractor_whenPaymentMethodIsNotCard() = runScenario(
         displayableSavedPaymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT.toDisplayableSavedPaymentMethod()
     ) {
@@ -585,7 +639,6 @@ class DefaultUpdatePaymentMethodInteractorTest {
         runScenario(
             editCardDetailsInteractorFactory = editCardDetailsInteractorFactory
         ) {
-            interactor.editCardDetailsInteractor
             editCardDetailsInteractorFactory.onCardUpdateParamsChanged?.invoke(
                 CardUpdateParams(cardBrand = CardBrand.Visa)
             )
@@ -624,7 +677,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         onUpdateSuccess: () -> Unit = { notImplemented() },
         shouldShowSetAsDefaultCheckbox: Boolean = false,
         isDefaultPaymentMethod: Boolean = false,
-        editSavedCardPaymentMethodEnabled: Boolean = false,
+        canUpdateFullPaymentMethodDetails: Boolean = false,
         editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = DefaultEditCardDetailsInteractor
             .Factory(),
         onBrandChoiceSelected: (CardBrand) -> Unit = {},
@@ -633,13 +686,12 @@ class DefaultUpdatePaymentMethodInteractorTest {
         val interactor = DefaultUpdatePaymentMethodInteractor(
             isLiveMode = isLiveMode,
             canRemove = canRemove,
-            allowFullCardDetailsEdit = editSavedCardPaymentMethodEnabled,
+            canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
             addressCollectionMode = AddressCollectionMode.Automatic,
             removeExecutor = onRemovePaymentMethod,
             updatePaymentMethodExecutor = updatePaymentMethodExecutor,
             setDefaultPaymentMethodExecutor = onSetDefaultPaymentMethod,
-            workContext = testDispatcher,
             cardBrandFilter = DefaultCardBrandFilter,
             onBrandChoiceSelected = onBrandChoiceSelected,
             shouldShowSetAsDefaultCheckbox = shouldShowSetAsDefaultCheckbox,

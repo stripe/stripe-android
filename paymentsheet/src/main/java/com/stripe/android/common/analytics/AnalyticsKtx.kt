@@ -97,10 +97,10 @@ internal fun CommonConfiguration.getExternalPaymentMethodsAnalyticsValue(): List
     return this.externalPaymentMethods.takeIf { it.isNotEmpty() }?.take(PaymentSheetEvent.MAX_EXTERNAL_PAYMENT_METHODS)
 }
 
-internal fun CommonConfiguration.getCustomPaymentMethodsAnalyticsValue(): List<String>? {
+internal fun CommonConfiguration.getCustomPaymentMethodsAnalyticsValue(): String? {
     return this.customPaymentMethods.takeIf { customPaymentMethods ->
         customPaymentMethods.isNotEmpty()
-    }?.map { customPaymentMethod ->
+    }?.joinToString(",") { customPaymentMethod ->
         customPaymentMethod.id
     }
 }

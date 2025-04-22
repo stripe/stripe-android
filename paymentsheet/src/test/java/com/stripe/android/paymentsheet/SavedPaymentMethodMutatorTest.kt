@@ -76,6 +76,7 @@ class SavedPaymentMethodMutatorTest {
                 createCustomerState(
                     isRemoveEnabled = true,
                     canRemoveLastPaymentMethod = false,
+                    canUpdateFullPaymentMethodDetails = false,
                     paymentMethods = listOf(
                         PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                         PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
@@ -88,6 +89,7 @@ class SavedPaymentMethodMutatorTest {
                 createCustomerState(
                     isRemoveEnabled = true,
                     canRemoveLastPaymentMethod = false,
+                    canUpdateFullPaymentMethodDetails = false,
                     paymentMethods = listOf(
                         PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD,
                     )

@@ -42,7 +42,7 @@ internal interface ConfirmationHandler {
      *
      * @param arguments required set of arguments in order to start the confirmation process
      */
-    fun start(arguments: Args)
+    suspend fun start(arguments: Args)
 
     /**
      * Awaits for the result of a started confirmation process.

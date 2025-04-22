@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.runtime.Immutable
 import com.stripe.android.CardBrandFilter
-import com.stripe.android.core.utils.DateUtils
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CardUpdateParams
@@ -48,7 +47,7 @@ internal interface EditCardDetailsInteractor {
     fun interface Factory {
         fun create(
             coroutineScope: CoroutineScope,
-            isModifiable: Boolean,
+            isCbcModifiable: Boolean,
             areExpiryDateAndAddressModificationSupported: Boolean,
             cardBrandFilter: CardBrandFilter,
             card: PaymentMethod.Card,
@@ -65,7 +64,7 @@ internal class DefaultEditCardDetailsInteractor(
     private val billingDetails: PaymentMethod.BillingDetails?,
     private val addressCollectionMode: AddressCollectionMode,
     private val cardBrandFilter: CardBrandFilter,
-    private val isModifiable: Boolean,
+    private val isCbcModifiable: Boolean,
     // Local flag for whether expiry date and address can be edited.
     // This flag has no effect on Card Brand Choice.
     // It will be removed before release.
@@ -113,31 +112,41 @@ internal class DefaultEditCardDetailsInteractor(
         cardDetailsEntry: CardDetailsEntry,
         billingDetailsEntry: BillingDetailsEntry?
     ): CardUpdateParams? {
-        val shouldEmitCardDetailsUpdate = shouldEmitCardDetailsUpdate(cardDetailsEntry)
-        val shouldEmitBillingDetailsUpdate = shouldEmitBillingDetailsUpdate(billingDetailsEntry)
-        val shouldTakeUpdate = shouldEmitCardDetailsUpdate || shouldEmitBillingDetailsUpdate
-        return if (shouldTakeUpdate) {
+        val hasChanges = hasCardDetailsChanged(cardDetailsEntry) || hasBillingDetailsChanged(billingDetailsEntry)
+        val isComplete = cardDetailsEntry.isComplete() && isComplete(billingDetailsEntry)
+
+        return if (hasChanges && isComplete) {
             cardDetailsEntry.toUpdateParams(billingDetailsEntry)
         } else {
             null
         }
     }
 
-    private fun shouldEmitCardDetailsUpdate(cardDetailsEntry: CardDetailsEntry): Boolean {
-        val hasChanged = cardDetailsEntry.hasChanged(
+    private fun hasCardDetailsChanged(cardDetailsEntry: CardDetailsEntry): Boolean {
+        return cardDetailsEntry.hasChanged(
             card = card,
             originalCardBrandChoice = defaultCardBrandChoice(),
         )
-        return hasChanged && cardDetailsEntry.isComplete()
     }
 
-    private fun shouldEmitBillingDetailsUpdate(billingDetailsEntry: BillingDetailsEntry?): Boolean {
-        val hasChanged = billingDetailsEntry?.hasChanged(
+    private fun hasBillingDetailsChanged(billingDetailsEntry: BillingDetailsEntry?): Boolean {
+        return billingDetailsEntry?.hasChanged(
             billingDetails = billingDetails,
             addressCollectionMode = addressCollectionMode
         ) ?: false
-        val isComplete = billingDetailsEntry?.isComplete(addressCollectionMode) ?: false
-        return hasChanged && isComplete
+    }
+
+    private fun isComplete(billingDetailsEntry: BillingDetailsEntry?): Boolean {
+        return when (addressCollectionMode) {
+            AddressCollectionMode.Never -> {
+                billingDetailsEntry == null
+            }
+            else -> {
+                billingDetailsEntry?.isComplete(
+                    addressCollectionMode = addressCollectionMode
+                ) ?: true
+            }
+        }
     }
 
     private fun onBrandChoiceChanged(cardBrandChoice: CardBrandChoice) {
@@ -216,29 +225,17 @@ internal class DefaultEditCardDetailsInteractor(
             card = card,
             selectedCardBrand = cardBrandChoice,
             paymentMethodIcon = card.getSavedPaymentMethodIcon(forVerticalMode = true),
-            shouldShowCardBrandDropdown = isModifiable && isExpired().not(),
+            shouldShowCardBrandDropdown = isCbcModifiable,
             availableNetworks = card.getAvailableNetworks(cardBrandFilter),
             expiryDateState = expiryDateState,
             billingDetailsForm = billingDetailsForm
         )
     }
 
-    private fun isExpired(): Boolean {
-        val cardExpiryMonth = card.expiryMonth
-        val cardExpiryYear = card.expiryYear
-        // If the card's expiration dates are missing, we can't conclude that it is expired, so we don't want to
-        // show the user an expired card error.
-        return cardExpiryMonth != null && cardExpiryYear != null &&
-            !DateUtils.isExpiryDataValid(
-                expiryMonth = cardExpiryMonth,
-                expiryYear = cardExpiryYear,
-            )
-    }
-
     class Factory : EditCardDetailsInteractor.Factory {
         override fun create(
             coroutineScope: CoroutineScope,
-            isModifiable: Boolean,
+            isCbcModifiable: Boolean,
             areExpiryDateAndAddressModificationSupported: Boolean,
             cardBrandFilter: CardBrandFilter,
             card: PaymentMethod.Card,
@@ -250,7 +247,7 @@ internal class DefaultEditCardDetailsInteractor(
             return DefaultEditCardDetailsInteractor(
                 card = card,
                 cardBrandFilter = cardBrandFilter,
-                isModifiable = isModifiable,
+                isCbcModifiable = isCbcModifiable,
                 coroutineScope = coroutineScope,
                 onBrandChoiceChanged = onBrandChoiceChanged,
                 onCardUpdateParamsChanged = onCardUpdateParamsChanged,

@@ -13,7 +13,9 @@ import com.stripe.android.model.CardMetadata
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.testing.AbsFakeStripeRepository
+import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
@@ -26,6 +28,9 @@ import kotlin.test.Test
 @RunWith(RobolectricTestRunner::class)
 internal class RemoteCardAccountRangeSourceTest {
     private val cardAccountRangeStore = mock<CardAccountRangeStore>()
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
 
     @Test
     fun `getAccountRange() should return expected AccountRange`() = runTest {

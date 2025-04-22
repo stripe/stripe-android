@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.shape.ZeroCornerSize
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextFieldDefaults.indicatorLine
@@ -11,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.uicore.elements.ExpiryDateVisualTransformation
 import com.stripe.android.uicore.elements.TextFieldColors
 import com.stripe.android.uicore.elements.compat.errorSemanticsWithDefault
@@ -51,6 +53,9 @@ internal fun ExpiryTextField(
             bottomEnd = ZeroCornerSize,
         ),
         shouldShowError = isError,
+        keyboardOptions = KeyboardOptions.Default.copy(
+            keyboardType = KeyboardType.NumberPassword
+        ),
         visualTransformation = ExpiryDateVisualTransformation(CARD_EDIT_UI_FALLBACK_EXPIRY_DATE),
         colors = colors
     )

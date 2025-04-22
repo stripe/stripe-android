@@ -16,6 +16,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
@@ -28,12 +29,16 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import kotlinx.parcelize.Parcelize
+import org.junit.Rule
 import org.mockito.kotlin.mock
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 class DefaultConfirmationHandlerTest {
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
+
     @Test
     fun `On initial register, should create launchers for each definition`() = test(shouldRegister = false) {
         assertThat(confirmationHandler.hasReloadedFromProcessDeath).isFalse()
@@ -670,9 +675,9 @@ class DefaultConfirmationHandlerTest {
             ),
         shouldRegister: Boolean = true,
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
-        dispatcher: CoroutineDispatcher = UnconfinedTestDispatcher(),
+        dispatcher: CoroutineDispatcher = StandardTestDispatcher(),
         scenarioTest: suspend Scenario.() -> Unit
-    ) = runTest {
+    ) = runTest(dispatcher) {
         RecordingConfirmationDefinition.test(
             SomeConfirmationDefinition(
                 action = someDefinitionAction,
@@ -765,6 +770,7 @@ class DefaultConfirmationHandlerTest {
             coroutineScope = CoroutineScope(dispatcher),
             errorReporter = errorReporter,
             savedStateHandle = savedStateHandle,
+            ioContext = dispatcher,
         )
     }
 

@@ -6,6 +6,8 @@ import com.stripe.android.core.networking.StripeRequest
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.mockwebserver.MockResponse
+import org.json.JSONException
+import org.json.JSONObject
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
@@ -44,24 +46,43 @@ class NetworkRule private constructor(
 
     fun enqueue(
         vararg requestMatcher: RequestMatcher,
+        ensureResponseIsValidJson: Boolean = true,
         responseFactory: (MockResponse) -> Unit
     ) {
         mockWebServer.dispatcher.enqueue(*requestMatcher) { response ->
             responseFactory(response)
+            if (ensureResponseIsValidJson) {
+                assertResponseBodyIsValidJson(response)
+            }
         }
     }
 
     fun enqueue(
         vararg requestMatcher: RequestMatcher,
+        ensureResponseIsValidJson: Boolean = true,
         responseFactory: (TestRecordedRequest, MockResponse) -> Unit
     ) {
         mockWebServer.dispatcher.enqueue(*requestMatcher) { request, response ->
             responseFactory(request, response)
+            if (ensureResponseIsValidJson) {
+                assertResponseBodyIsValidJson(response)
+            }
         }
     }
 
     fun validate() {
         mockWebServer.dispatcher.validate()
+    }
+
+    private fun assertResponseBodyIsValidJson(response: MockResponse) {
+        try {
+            response.getBody()?.readUtf8()?.let { bodyString ->
+                JSONObject(bodyString)
+            }
+        } catch (_: JSONException) {
+            // MockWebServer catches the exception so we need an error to fail the test
+            throw AssertionError("Parsing JSON failed")
+        }
     }
 }
 

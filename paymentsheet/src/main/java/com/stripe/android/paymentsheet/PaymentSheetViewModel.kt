@@ -67,7 +67,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
@@ -213,7 +212,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    private val confirmationHandler = confirmationHandlerFactory.create(viewModelScope.plus(workContext))
+    private val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
 
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
@@ -276,7 +275,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         withContext(Dispatchers.Main.immediate) {
             customerStateHolder.setCustomerState(state.customer)
 
-            updateSelection(state.paymentSelection)
+            when (state.paymentSelection) {
+                is PaymentSelection.GooglePay,
+                is PaymentSelection.Link -> Unit
+                else -> updateSelection(state.paymentSelection)
+            }
 
             setPaymentMethodMetadata(state.paymentMethodMetadata)
 
@@ -495,13 +498,15 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
                 errorReporter.report(event, StripeException.create(exception))
 
-                processConfirmationResult(
-                    ConfirmationHandler.Result.Failed(
-                        cause = exception,
-                        message = exception.stripeErrorMessage(),
-                        type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+                withContext(viewModelScope.coroutineContext) {
+                    processConfirmationResult(
+                        ConfirmationHandler.Result.Failed(
+                            cause = exception,
+                            message = exception.stripeErrorMessage(),
+                            type = ConfirmationHandler.Result.Failed.ErrorType.Internal,
+                        )
                     )
-                )
+                }
             }
         }
     }

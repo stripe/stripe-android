@@ -42,7 +42,6 @@ import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.plus
 import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
@@ -186,9 +185,8 @@ internal interface EmbeddedPaymentElementViewModelModule {
         fun provideConfirmationHandler(
             confirmationHandlerFactory: ConfirmationHandler.Factory,
             @ViewModelScope coroutineScope: CoroutineScope,
-            @IOContext ioContext: CoroutineContext,
         ): ConfirmationHandler {
-            return confirmationHandlerFactory.create(coroutineScope + ioContext)
+            return confirmationHandlerFactory.create(coroutineScope)
         }
 
         @Provides

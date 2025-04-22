@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement
 
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.isSelected
@@ -32,6 +33,13 @@ internal class EmbeddedContentPage(
         composeTestRule.onNode(hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$code"))
             .performScrollTo()
             .performClick()
+    }
+
+    fun assertHasSelectedLpm(code: String) {
+        waitUntilVisible()
+
+        composeTestRule.onNode(hasTestTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_$code"))
+            .assertIsSelected()
     }
 
     fun assertHasSelectedSavedPaymentMethod(paymentMethodId: String, cardBrand: String? = null) {
