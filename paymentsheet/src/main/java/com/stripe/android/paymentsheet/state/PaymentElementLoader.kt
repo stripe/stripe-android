@@ -25,6 +25,7 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.IntentConfiguration
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -736,6 +737,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 currency = elementsSession.stripeIntent.currency,
                 paymentSelection = state.paymentSelection,
                 initializationMode = initializationMode,
+                financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession),
                 orderedLpms = state.paymentMethodMetadata.sortedSupportedPaymentMethods().map { it.code },
                 requireCvcRecollection = cvcRecollectionHandler.cvcRecollectionEnabled(
                     state.paymentMethodMetadata.stripeIntent,

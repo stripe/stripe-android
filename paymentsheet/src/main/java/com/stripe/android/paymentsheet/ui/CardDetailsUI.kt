@@ -2,10 +2,10 @@ package com.stripe.android.paymentsheet.ui
 
 import android.content.res.Resources
 import androidx.annotation.DrawableRes
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
@@ -27,12 +27,12 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.R
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.uicore.elements.SectionError
-import com.stripe.android.uicore.getBorderStroke
+import com.stripe.android.uicore.elements.Section
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
 import com.stripe.android.uicore.utils.collectAsState
+import com.stripe.android.ui.core.R as CoreR
 
 @Composable
 internal fun CardDetailsEditUI(
@@ -47,11 +47,15 @@ internal fun CardDetailsEditUI(
         availableNetworks = state.availableNetworks,
         paymentMethodIcon = state.paymentMethodIcon,
         expiryDateState = state.expiryDateState,
+        billingDetailsForm = state.billingDetailsForm,
         onBrandChoiceChanged = {
             editCardDetailsInteractor.handleViewAction(EditCardDetailsInteractor.ViewAction.BrandChoiceChanged(it))
         },
         onExpDateChanged = {
             editCardDetailsInteractor.handleViewAction(EditCardDetailsInteractor.ViewAction.DateChanged(it))
+        },
+        onAddressChanged = {
+            editCardDetailsInteractor.handleViewAction(EditCardDetailsInteractor.ViewAction.BillingDetailsChanged(it))
         }
     )
 }
@@ -62,17 +66,21 @@ private fun CardDetailsEditUI(
     selectedBrand: CardBrandChoice,
     card: PaymentMethod.Card,
     expiryDateState: ExpiryDateState,
+    billingDetailsForm: BillingDetailsForm?,
     availableNetworks: List<CardBrandChoice>,
     @DrawableRes paymentMethodIcon: Int,
     onBrandChoiceChanged: (CardBrandChoice) -> Unit,
-    onExpDateChanged: (String) -> Unit
+    onExpDateChanged: (String) -> Unit,
+    onAddressChanged: (BillingDetailsFormState) -> Unit
 ) {
     val dividerHeight = remember { mutableStateOf(0.dp) }
 
     Column {
-        Card(
-            border = MaterialTheme.getBorderStroke(false),
-            elevation = 0.dp,
+        Section(
+            title = billingDetailsForm?.let {
+                CoreR.string.stripe_paymentsheet_add_payment_method_card_information
+            },
+            error = expiryDateState.sectionError()?.resolve(),
             modifier = Modifier.testTag(UPDATE_PM_CARD_TEST_TAG),
         ) {
             Column {
@@ -110,12 +118,12 @@ private fun CardDetailsEditUI(
             }
         }
 
-        val errorMessage = expiryDateState.sectionError()?.resolve()
-        AnimatedVisibility(errorMessage != null) {
-            SectionError(
-                modifier = Modifier
-                    .testTag(CARD_EDIT_UI_ERROR_MESSAGE),
-                error = errorMessage.orEmpty()
+        if (billingDetailsForm != null) {
+            Spacer(Modifier.height(32.dp))
+
+            BillingDetailsFormUI(
+                form = billingDetailsForm,
+                onValuesChanged = onAddressChanged
             )
         }
     }

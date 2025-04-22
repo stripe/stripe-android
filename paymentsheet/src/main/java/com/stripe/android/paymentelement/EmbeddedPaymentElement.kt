@@ -25,6 +25,7 @@ import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationSt
 import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelper
 import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentElementScope
 import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentElementViewModel
+import com.stripe.android.paymentelement.embedded.content.EmbeddedStateHelper
 import com.stripe.android.paymentelement.embedded.content.PaymentOptionDisplayDataHolder
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
@@ -47,6 +48,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
     private val selectionHolder: EmbeddedSelectionHolder,
     paymentOptionDisplayDataHolder: PaymentOptionDisplayDataHolder,
     private val configurationCoordinator: EmbeddedConfigurationCoordinator,
+    stateHelper: EmbeddedStateHelper,
 ) {
 
     /**
@@ -54,6 +56,15 @@ class EmbeddedPaymentElement @Inject internal constructor(
      * Use this to display the payment option in your own UI.
      */
     val paymentOption: StateFlow<PaymentOptionDisplayData?> = paymentOptionDisplayDataHolder.paymentOption
+
+    /**
+     * The state of an already configured [EmbeddedPaymentElement].
+     *
+     * Use this to instantly configure an [EmbeddedPaymentElement], likely from the state of another Activity.
+     */
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @set:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    var state: State? by stateHelper::state
 
     /**
      * Call this method to configure [EmbeddedPaymentElement] or when the IntentConfiguration values you used to
@@ -172,6 +183,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         internal val embeddedViewDisplaysMandateText: Boolean,
         internal val link: PaymentSheet.LinkConfiguration,
+        internal val formSheetAction: FormSheetAction,
     ) : Parcelable {
         @Suppress("TooManyFunctions")
         @ExperimentalEmbeddedPaymentElementApi
@@ -203,6 +215,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
             private var customPaymentMethods: List<PaymentSheet.CustomPaymentMethod> =
                 ConfigurationDefaults.customPaymentMethods
             private var link: PaymentSheet.LinkConfiguration = ConfigurationDefaults.link
+            private var formSheetAction: FormSheetAction = FormSheetAction.Confirm
 
             /**
              * If set, the customer can select a previously saved payment method.
@@ -393,6 +406,16 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 this.link = link
             }
 
+            /**
+             * The view can display payment methods like "Card" that, when tapped, open a sheet where customers enter
+             * their payment method details. The sheet has a button at the bottom. [formSheetAction] controls the action
+             * the button performs.
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun formSheetAction(formSheetAction: FormSheetAction): Builder = apply {
+                this.formSheetAction = formSheetAction
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -412,8 +435,30 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 customPaymentMethods = customPaymentMethods,
                 embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
                 link = link,
+                formSheetAction = formSheetAction,
             )
         }
+    }
+
+    /**
+     * The view can display payment methods like "Card" that, when tapped, open a form sheet where customers enter their
+     * payment method details. The sheet has a button at the bottom. [FormSheetAction] enumerates the actions the button
+     * can perform.
+     */
+    @ExperimentalEmbeddedPaymentElementApi
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    enum class FormSheetAction {
+
+        /**
+         * The button says "Continue". When tapped, the form sheet closes. The customer can confirm payment or setup
+         * back in your app.
+         */
+        Continue,
+
+        /**
+         * The button says "Pay" or "Setup". When tapped, we confirm the payment or setup in the form sheet.
+         */
+        Confirm
     }
 
     /**
@@ -526,10 +571,11 @@ class EmbeddedPaymentElement @Inject internal constructor(
     /**
      * A [Parcelable] state used to reconfigure [EmbeddedPaymentElement] across activity boundaries.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @ExperimentalEmbeddedPaymentElementApi
     @Poko
     @Parcelize
-    internal class State internal constructor(
+    class State internal constructor(
         internal val confirmationState: EmbeddedConfirmationStateHolder.State,
         internal val customer: CustomerState?,
     ) : Parcelable

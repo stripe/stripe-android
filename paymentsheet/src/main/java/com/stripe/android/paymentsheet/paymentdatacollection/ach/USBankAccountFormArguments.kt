@@ -56,11 +56,13 @@ internal class USBankAccountFormArguments(
     val hostedSurface: String,
     val shippingDetails: AddressDetails?,
     val draftPaymentSelection: PaymentSelection?,
+    val onAnalyticsEvent: (USBankAccountFormViewModel.AnalyticsEvent) -> Unit,
     val onMandateTextChanged: (mandate: ResolvableString?, showAbove: Boolean) -> Unit,
     val onLinkedBankAccountChanged: (PaymentSelection.New.USBankAccount?) -> Unit,
     val onUpdatePrimaryButtonUIState: ((PrimaryButton.UIState?) -> (PrimaryButton.UIState?)) -> Unit,
     val onUpdatePrimaryButtonState: (PrimaryButton.State) -> Unit,
     val onError: (ResolvableString?) -> Unit,
+    val onFormCompleted: () -> Unit,
     val setAsDefaultPaymentMethodEnabled: Boolean,
     val financialConnectionsAvailability: FinancialConnectionsAvailability?,
     val setAsDefaultMatchesSaveForFutureUse: Boolean,
@@ -100,12 +102,16 @@ internal class USBankAccountFormArguments(
                 stripeIntentId = stripeIntent.id,
                 clientSecret = stripeIntent.clientSecret,
                 shippingDetails = viewModel.config.shippingDetails,
+                onAnalyticsEvent = { viewModel.eventReporter.onUsBankAccountFormEvent(it) },
                 draftPaymentSelection = viewModel.newPaymentSelection?.paymentSelection,
                 onMandateTextChanged = viewModel.mandateHandler::updateMandateText,
                 onLinkedBankAccountChanged = bankFormInteractor::handleLinkedBankAccountChanged,
                 onUpdatePrimaryButtonUIState = { viewModel.customPrimaryButtonUiState.update(it) },
                 onUpdatePrimaryButtonState = viewModel::updatePrimaryButtonState,
                 onError = viewModel::onError,
+                onFormCompleted = {
+                    viewModel.eventReporter.onPaymentMethodFormCompleted(PaymentMethod.Type.USBankAccount.code)
+                },
                 incentive = paymentMethodMetadata.paymentMethodIncentive,
                 setAsDefaultPaymentMethodEnabled =
                 paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
@@ -121,8 +127,10 @@ internal class USBankAccountFormArguments(
             hostedSurface: String,
             setSelection: (PaymentSelection?) -> Unit,
             onMandateTextChanged: (mandate: ResolvableString?, showAbove: Boolean) -> Unit,
+            onAnalyticsEvent: (USBankAccountFormViewModel.AnalyticsEvent) -> Unit,
             onUpdatePrimaryButtonUIState: ((PrimaryButton.UIState?) -> (PrimaryButton.UIState?)) -> Unit,
             onError: (ResolvableString?) -> Unit,
+            onFormCompleted: () -> Unit,
         ): USBankAccountFormArguments {
             val isSaveForFutureUseValueChangeable = isSaveForFutureUseValueChangeable(
                 code = selectedPaymentMethodCode,
@@ -150,11 +158,13 @@ internal class USBankAccountFormArguments(
                 shippingDetails = paymentMethodMetadata.shippingDetails,
                 draftPaymentSelection = null,
                 onMandateTextChanged = onMandateTextChanged,
+                onAnalyticsEvent = onAnalyticsEvent,
                 onLinkedBankAccountChanged = bankFormInteractor::handleLinkedBankAccountChanged,
                 onUpdatePrimaryButtonUIState = onUpdatePrimaryButtonUIState,
                 onUpdatePrimaryButtonState = {
                 },
                 onError = onError,
+                onFormCompleted = onFormCompleted,
                 incentive = paymentMethodMetadata.paymentMethodIncentive,
                 setAsDefaultPaymentMethodEnabled =
                 paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled

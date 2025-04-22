@@ -132,7 +132,7 @@ class DefaultLinkAccountManagerTest {
     }
 
     @Test
-    fun `When ConsumerSession is updated with different email then consumerPublishableKey is removed`() {
+    fun `When ConsumerSession is updated with different email then consumerPublishableKey is removed`() = runTest {
         val accountManager = accountManager()
         accountManager.setLinkAccountFromLookupResult(
             TestFactory.CONSUMER_SESSION_LOOKUP,

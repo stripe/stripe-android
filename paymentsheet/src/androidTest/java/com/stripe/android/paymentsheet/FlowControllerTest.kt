@@ -459,7 +459,11 @@ internal class FlowControllerTest {
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
-        createIntentCallback = { _, _ -> CreateIntentResult.Success("pi_example_secret_example") },
+        builder = {
+            createIntentCallback { _, _ ->
+                CreateIntentResult.Success("pi_example_secret_example")
+            }
+        },
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
@@ -588,11 +592,13 @@ internal class FlowControllerTest {
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
-        createIntentCallback = { _, _ ->
-            CreateIntentResult.Failure(
-                cause = Exception("We don't accept visa"),
-                displayMessage = "We don't accept visa"
-            )
+        builder = {
+            createIntentCallback { _, _ ->
+                CreateIntentResult.Failure(
+                    cause = Exception("We don't accept visa"),
+                    displayMessage = "We don't accept visa"
+                )
+            }
         },
         resultCallback = { result ->
             assertThat(result).isInstanceOf(PaymentSheetResult.Failed::class.java)
@@ -647,8 +653,10 @@ internal class FlowControllerTest {
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
-        createIntentCallback = { _, _ ->
-            CreateIntentResult.Success(PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
+        builder = {
+            createIntentCallback { _, _ ->
+                CreateIntentResult.Success(PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
+            }
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -698,7 +706,11 @@ internal class FlowControllerTest {
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
-        createIntentCallback = { _, _ -> CreateIntentResult.Success("pi_example_secret_example") },
+        builder = {
+            createIntentCallback { _, _ ->
+                CreateIntentResult.Success("pi_example_secret_example")
+            }
+        },
         resultCallback = { result ->
             val failureResult = result as? PaymentSheetResult.Failed
             assertThat(failureResult?.error?.message).isEqualTo(

@@ -17,6 +17,7 @@ import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.paymentsheet.utils.buyButtonLabel
+import com.stripe.android.paymentsheet.utils.continueButtonLabel
 import com.stripe.android.paymentsheet.utils.reportPaymentResult
 import com.stripe.android.ui.core.Amount
 import kotlinx.coroutines.CoroutineScope
@@ -38,8 +39,9 @@ internal interface FormActivityStateHelper {
         val isEnabled: Boolean,
         val processingState: PrimaryButtonProcessingState,
         val isProcessing: Boolean,
+        val shouldDisplayLockIcon: Boolean,
         val error: ResolvableString? = null,
-        val mandateText: ResolvableString? = null
+        val mandateText: ResolvableString? = null,
     )
 }
 
@@ -58,7 +60,8 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
             primaryButtonLabel = primaryButtonLabel(paymentMethodMetadata.stripeIntent, configuration),
             isEnabled = false,
             processingState = PrimaryButtonProcessingState.Idle(null),
-            isProcessing = false
+            isProcessing = false,
+            shouldDisplayLockIcon = configuration.formSheetAction == EmbeddedPaymentElement.FormSheetAction.Confirm,
         )
     )
     override val state: StateFlow<FormActivityStateHelper.State> = _state
@@ -168,7 +171,10 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
         val amount = amount(stripeIntent.amount, stripeIntent.currency)
         val label = configuration.primaryButtonLabel
         val isForPaymentIntent = stripeIntent is PaymentIntent
-        return buyButtonLabel(amount, label, isForPaymentIntent)
+        return when (configuration.formSheetAction) {
+            EmbeddedPaymentElement.FormSheetAction.Continue -> continueButtonLabel(label)
+            EmbeddedPaymentElement.FormSheetAction.Confirm -> buyButtonLabel(amount, label, isForPaymentIntent)
+        }
     }
 
     private fun amount(amount: Long?, currency: String?): Amount? {

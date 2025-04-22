@@ -2,6 +2,7 @@
 
 package com.stripe.android.paymentelement
 
+import android.net.Uri
 import androidx.test.espresso.Espresso
 import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.google.android.gms.wallet.PaymentsClient
@@ -84,7 +85,10 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
-        validateAnalyticsRequest(eventName = "mc_embedded_init")
+        validateAnalyticsRequest(
+            eventName = "mc_embedded_init",
+            query(Uri.encode("mpe_config[analytic_callback_set]"), "true"),
+        )
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(eventName = "mc_load_succeeded")
         validateAnalyticsRequest(eventName = "mc_embedded_sheet_newpm_show")
@@ -97,11 +101,14 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_card_number_completed")
 
         testContext.configure()
-
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
 
         embeddedContentPage.clickOnLpm("card")
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.SelectedPaymentMethodType("card"))
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.DisplayedPaymentMethodForm("card"))
+
         formPage.fillOutCardDetails()
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.StartedInteractionWithPaymentMethodForm("card"))
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.CompletedPaymentMethodForm("card"))
 
         networkRule.enqueue(
@@ -145,6 +152,8 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_embedded_payment_success")
 
         formPage.clickPrimaryButton()
+        analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.TappedConfirmButton("card"))
+
         formPage.waitUntilMissing()
     }
 

@@ -4,6 +4,7 @@ import app.cash.turbine.Turbine
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.model.EmailSource
+import kotlinx.coroutines.yield
 
 internal class FakeLinkAuth : LinkAuth {
     var signupResult: LinkAuthResult = LinkAuthResult.Success(TestFactory.LINK_ACCOUNT)
@@ -28,6 +29,7 @@ internal class FakeLinkAuth : LinkAuth {
                 consentAction = consentAction
             )
         )
+        yield()
         return signupResult
     }
 
@@ -43,6 +45,7 @@ internal class FakeLinkAuth : LinkAuth {
                 startSession = startSession
             )
         )
+        yield()
         return lookupResult
     }
 

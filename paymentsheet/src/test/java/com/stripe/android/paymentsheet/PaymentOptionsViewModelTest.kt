@@ -226,6 +226,7 @@ internal class PaymentOptionsViewModelTest {
 
     @Test
     fun `when paymentMethods is empty, primary button and text below button are gone`() = runTest {
+        Dispatchers.setMain(testDispatcher)
         val paymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT
         val viewModel = createViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(

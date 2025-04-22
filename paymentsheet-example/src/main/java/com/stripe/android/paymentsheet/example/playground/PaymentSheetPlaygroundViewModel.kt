@@ -21,7 +21,9 @@ import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.AnalyticEvent
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
@@ -55,7 +57,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import java.io.IOException
 
-@OptIn(ExperimentalCustomerSessionApi::class)
+@OptIn(ExperimentalCustomerSessionApi::class, ExperimentalEmbeddedPaymentElementApi::class)
 internal class PaymentSheetPlaygroundViewModel(
     application: Application,
     private val savedStateHandle: SavedStateHandle,
@@ -394,6 +396,40 @@ internal class PaymentSheetPlaygroundViewModel(
         }
     }
 
+    fun onEmbeddedResult(result: EmbeddedPaymentElement.Result) {
+        if (result is EmbeddedPaymentElement.Result.Completed) {
+            setPlaygroundState(null)
+        }
+
+        val statusMessage = when (result) {
+            is EmbeddedPaymentElement.Result.Canceled -> {
+                "Canceled"
+            }
+
+            is EmbeddedPaymentElement.Result.Completed -> {
+                SUCCESS_RESULT
+            }
+
+            is EmbeddedPaymentElement.Result.Failed -> {
+                when (result.error) {
+                    is ConfirmIntentEndpointException -> {
+                        "Couldn't process your payment: ${result.error.message}"
+                    }
+
+                    is ConfirmIntentNetworkException -> {
+                        "No internet. Try again later."
+                    }
+
+                    else -> {
+                        "Something went wrong: ${result.error.message}"
+                    }
+                }
+            }
+        }
+
+        status.value = StatusMessage(statusMessage)
+    }
+
     fun onCustomerSheetCallback(result: CustomerSheetResult) {
         val statusMessage = when (result) {
             is CustomerSheetResult.Canceled -> {
@@ -421,7 +457,6 @@ internal class PaymentSheetPlaygroundViewModel(
         return PlaygroundRequester(playgroundSettingsSnapshot, getApplication()).fetch().fold(
             onSuccess = { state ->
                 playgroundSettingsFlow.value = state.snapshot.playgroundSettings()
-                setPlaygroundState(state)
                 val clientSecret = requireNotNull(state.asPaymentState()).clientSecret
                 CreateIntentResult.Success(clientSecret)
             },

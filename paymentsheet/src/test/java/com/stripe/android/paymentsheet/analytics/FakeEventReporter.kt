@@ -8,8 +8,10 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 
 @Suppress("EmptyFunctionBlock")
@@ -64,6 +66,10 @@ internal class FakeEventReporter : EventReporter {
     private val _pressConfirmButtonCalls = Turbine<PaymentSelection?>()
     val pressConfirmButtonCalls: ReceiveTurbine<PaymentSelection?> = _pressConfirmButtonCalls
 
+    private val _usBankAccountFormEventCalls = Turbine<USBankAccountFormViewModel.AnalyticsEvent>()
+    val usBankAccountFormEventCalls: ReceiveTurbine<USBankAccountFormViewModel.AnalyticsEvent> =
+        _usBankAccountFormEventCalls
+
     fun validate() {
         _paymentFailureCalls.ensureAllEventsConsumed()
         _paymentSuccessCalls.ensureAllEventsConsumed()
@@ -80,13 +86,14 @@ internal class FakeEventReporter : EventReporter {
         _removePaymentMethodCalls.ensureAllEventsConsumed()
         _formCompletedCalls.ensureAllEventsConsumed()
         _pressConfirmButtonCalls.ensureAllEventsConsumed()
+        _usBankAccountFormEventCalls.ensureAllEventsConsumed()
     }
 
     override fun onInit(
         commonConfiguration: CommonConfiguration,
         appearance: PaymentSheet.Appearance,
         primaryButtonColor: Boolean?,
-        paymentMethodLayout: PaymentSheet.PaymentMethodLayout?,
+        configurationSpecificPayload: PaymentSheetEvent.ConfigurationSpecificPayload,
         isDeferred: Boolean
     ) {
     }
@@ -102,11 +109,13 @@ internal class FakeEventReporter : EventReporter {
         linkDisplay: PaymentSheet.LinkConfiguration.Display,
         currency: String?,
         initializationMode: PaymentElementLoader.InitializationMode,
+        financialConectionsAvailability: FinancialConnectionsAvailability?,
         orderedLpms: List<String>,
         requireCvcRecollection: Boolean,
         hasDefaultPaymentMethod: Boolean?,
         setAsDefaultEnabled: Boolean?
-    ) {}
+    ) {
+    }
 
     override fun onLoadFailed(error: Throwable) {
     }
@@ -241,6 +250,10 @@ internal class FakeEventReporter : EventReporter {
 
     override fun onCannotProperlyReturnFromLinkAndOtherLPMs() {
         _cannotProperlyReturnFromLinkAndOtherLPMsCalls.add(Unit)
+    }
+
+    override fun onUsBankAccountFormEvent(event: USBankAccountFormViewModel.AnalyticsEvent) {
+        _usBankAccountFormEventCalls.add(event)
     }
 
     override fun onDisallowedCardBrandEntered(brand: CardBrand) {

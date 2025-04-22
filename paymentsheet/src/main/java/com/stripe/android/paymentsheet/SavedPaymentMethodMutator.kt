@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.mainthread.MainThreadOnlyMutableStateFlow
 import com.stripe.android.core.mainthread.update
 import com.stripe.android.core.strings.ResolvableString
@@ -94,7 +95,7 @@ internal class SavedPaymentMethodMutator(
         paymentOptionsItems
     ) { canRemove, items ->
         canRemove || items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>().any { item ->
-            item.isModifiable
+            item.isModifiable(customerStateHolder.canUpdateFullPaymentMethodDetails)
         }
     }
 
@@ -158,9 +159,6 @@ internal class SavedPaymentMethodMutator(
             withContext(uiContext) {
                 setSelection(null)
             }
-            currentSelection?.type?.code?.let {
-                eventReporter.onRemoveSavedPaymentMethod(it)
-            }
         }
 
         return customerRepository.detachPaymentMethod(
@@ -177,15 +175,19 @@ internal class SavedPaymentMethodMutator(
     private suspend fun removeDeletedPaymentMethodFromState(paymentMethodId: String) {
         val currentCustomer = customerStateHolder.customer.value ?: return
 
-        customerStateHolder.setCustomerState(
-            currentCustomer.copy(
-                paymentMethods = currentCustomer.paymentMethods.filter {
-                    it.id != paymentMethodId
-                }
-            )
-        )
+        currentCustomer.paymentMethods.find { it.id == paymentMethodId }?.type?.code?.let {
+            eventReporter.onRemoveSavedPaymentMethod(it)
+        }
 
         withContext(uiContext) {
+            customerStateHolder.setCustomerState(
+                currentCustomer.copy(
+                    paymentMethods = currentCustomer.paymentMethods.filter {
+                        it.id != paymentMethodId
+                    }
+                )
+            )
+
             if ((selection.value as? PaymentSelection.Saved)?.paymentMethod?.id == paymentMethodId) {
                 setSelection(null)
             }
@@ -371,8 +373,12 @@ internal class SavedPaymentMethodMutator(
                         DefaultUpdatePaymentMethodInteractor(
                             isLiveMode = isLiveMode,
                             canRemove = canRemove,
-                            displayableSavedPaymentMethod,
+                            canUpdateFullPaymentMethodDetails = viewModel.customerStateHolder
+                                .canUpdateFullPaymentMethodDetails,
+                            displayableSavedPaymentMethod = displayableSavedPaymentMethod,
                             cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
+                            addressCollectionMode = viewModel.config.asCommonConfiguration()
+                                .billingDetailsCollectionConfiguration.address,
                             removeExecutor = { method ->
                                 performRemove()
                             },

@@ -7,8 +7,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.pointer.PointerEventType
@@ -102,6 +105,10 @@ internal fun FormElement(
     // The PaymentMethodForm has a reference to a FormViewModel, which is scoped to a key. This is to ensure that
     // the FormViewModel is recreated when the PaymentElement is recomposed.
     val uuid = rememberSaveable { UUID.randomUUID().toString() }
+    // This flag is stored at the parent node level to ensure the USBankAccount form completion
+    // event is triggered exactly once per session, persisting even if the user navigates
+    // between different payment methods before returning to USBankAccount in horizontal mode.
+    var previouslyCompletedUSBankAccountForm by rememberSaveable { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -126,6 +133,12 @@ internal fun FormElement(
             USBankAccountForm(
                 formArgs = formArguments,
                 usBankAccountFormArgs = usBankAccountFormArguments,
+                onCompleted = {
+                    if (!previouslyCompletedUSBankAccountForm) {
+                        usBankAccountFormArguments.onFormCompleted()
+                    }
+                    previouslyCompletedUSBankAccountForm = true
+                },
                 modifier = Modifier.padding(horizontal = horizontalPadding),
                 enabled = enabled
             )

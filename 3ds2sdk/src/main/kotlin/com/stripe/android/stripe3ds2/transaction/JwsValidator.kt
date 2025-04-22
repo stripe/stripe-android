@@ -6,7 +6,6 @@ import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.JWSHeader
 import com.nimbusds.jose.JWSObject
 import com.nimbusds.jose.JWSVerifier
-import com.nimbusds.jose.crypto.bc.BouncyCastleProviderSingleton
 import com.nimbusds.jose.crypto.factories.DefaultJWSVerifierFactory
 import com.nimbusds.jose.util.Base64
 import com.nimbusds.jose.util.X509CertChainUtils
@@ -20,10 +19,8 @@ import java.io.IOException
 import java.security.GeneralSecurityException
 import java.security.KeyStore
 import java.security.KeyStoreException
-import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.security.PublicKey
-import java.security.Security
 import java.security.Signature
 import java.security.cert.CertPathBuilder
 import java.security.cert.CertStore
@@ -117,29 +114,15 @@ internal class DefaultJwsValidator(
         return jwsObject.verify(verifier)
     }
 
-//    @Throws(JOSEException::class, CertificateException::class)
-//    private fun getVerifier(jwsHeader: JWSHeader): JWSVerifier {
-//        println("StripeSdk algorithm: ${jwsHeader.algorithm}")
-//        val verifierFactory = DefaultJWSVerifierFactory()
-//        verifierFactory.jcaContext.provider = BouncyCastleProviderSingleton.getInstance()
-//        return verifierFactory.createJWSVerifier(jwsHeader, getPublicKeyFromHeader(jwsHeader))
-//    }
-
     @Throws(JOSEException::class, CertificateException::class)
     private fun getVerifier(jwsHeader: JWSHeader): JWSVerifier {
         val verifierFactory = DefaultJWSVerifierFactory()
-        //MessageDigest.getInstance("SHA-256").provider
-        //KeyPairGenerator.getInstance(jwsHeader.algorithm.toString()).provider
-        println("StripeSdk JWT Algorithm: ${jwsHeader.algorithm}")
-
-        val provider = if (jwsHeader.algorithm == JWSAlgorithm.ES256) {
-            Signature.getInstance("SHA256withECDSA").provider
+        val supportAlgorithm = if (jwsHeader.algorithm == JWSAlgorithm.ES256) {
+            "SHA256withECDSA"
         } else {
-            Signature.getInstance("SHA256withRSA").provider
+            "SHA256withRSA"
         }
-        //Security.addProvider(provider)
-        //verifierFactory.jcaContext.provider = s.provider//KeyPairGenerator.getInstance(jwsHeader.algorithm.toString()).provider//BouncyCastleProviderSingleton.getInstance()
-        verifierFactory.jcaContext.provider = provider//BouncyCastleProviderSingleton.getInstance()
+        verifierFactory.jcaContext.provider = Signature.getInstance(supportAlgorithm).provider
         return verifierFactory.createJWSVerifier(jwsHeader, getPublicKeyFromHeader(jwsHeader))
     }
 

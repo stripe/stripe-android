@@ -51,7 +51,7 @@ class DefaultFormActivityConfirmationHelperTest {
         onClickDelegate.set {
             onClickTurbine.add(Unit)
         }
-        confirmationHelper.confirm()
+        assertThat(confirmationHelper.confirm()).isNull()
         assertThat(onClickTurbine.awaitItem()).isNotNull()
         onClickTurbine.ensureAllEventsConsumed()
     }
@@ -60,7 +60,7 @@ class DefaultFormActivityConfirmationHelperTest {
     fun `confirm invokes eventReporter with the correct selection and starts confirmation`() = testScenario {
         selectionHolder.set(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
 
-        confirmationHelper.confirm()
+        assertThat(confirmationHelper.confirm()).isNull()
 
         assertThat(eventReporter.pressConfirmButtonCalls.awaitItem())
             .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
@@ -69,18 +69,41 @@ class DefaultFormActivityConfirmationHelperTest {
 
     @Test
     fun `confirm invokes eventReporter but does not start confirmation with null selection`() = testScenario {
-        confirmationHelper.confirm()
+        assertThat(confirmationHelper.confirm()).isNull()
 
         assertThat(eventReporter.pressConfirmButtonCalls.awaitItem()).isNull()
     }
 
+    @Test
+    fun `when formSheetAction=continue confirm returns result`() = testScenario(
+        configurationModifier = { formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue) }
+    ) {
+        selectionHolder.set(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+
+        assertThat(confirmationHelper.confirm()).isEqualTo(
+            FormResult.Complete(
+                selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+                hasBeenConfirmed = false,
+            )
+        )
+
+        assertThat(eventReporter.pressConfirmButtonCalls.awaitItem())
+            .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+    }
+
     private fun testScenario(
+        configurationModifier:
+        EmbeddedPaymentElement.Configuration.Builder.() -> EmbeddedPaymentElement.Configuration.Builder = {
+            this
+        },
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val confirmationHandler = FakeConfirmationHandler()
         val savedStateHandle = SavedStateHandle()
         val selectionHolder = EmbeddedSelectionHolder(MainThreadSavedStateHandle(savedStateHandle))
-        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
+        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
+            .configurationModifier()
+            .build()
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val stateHelper = FakeFormActivityStateHelper()
         val onClickDelegate = OnClickDelegateOverrideImpl()

@@ -4,6 +4,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.BILLING_DETAILS_FORM_DETAILS
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.billingDetailsFormState
 import org.junit.Test
 
 internal class CardDetailsEntryTest {
@@ -39,6 +41,27 @@ internal class CardDetailsEntryTest {
         assertThat(createEntry(expMonth = 12, expYear = null, expiryDateEditable = false).isComplete()).isTrue()
         assertThat(createEntry(expMonth = null, expYear = null, expiryDateEditable = false).isComplete()).isTrue()
     }
+
+//    @Test
+//    fun `isComplete() should be true when billing details is valid`() {
+//        val entry = createEntry(
+//            billingDetailsFormState = billingDetailsFormState()
+//        )
+//        assertThat(entry.isComplete()).isTrue()
+//    }
+
+//    @Test
+//    fun `isComplete() should be false when billing address is invalid`() {
+//        val entry = createEntry(
+//            expMonth = 12,
+//            expYear = 2030,
+//            billingDetailsFormState = billingDetailsFormState(
+//                line1 = FormFieldEntry("", isComplete = false),
+//            ),
+//            addressCollectionMode = AddressCollectionMode.Full
+//        )
+//        assertThat(entry.isComplete()).isFalse()
+//    }
 
     @Test
     fun `hasChanged() should return true when card brand choice changes`() {
@@ -101,6 +124,21 @@ internal class CardDetailsEntryTest {
         assertThat(entry.hasChanged(card, cardBrandChoice)).isTrue()
     }
 
+//    @Test
+//    fun `hasChanged() should return true when billing details changes`() {
+//        val cardBrandChoice = CardBrandChoice(CardBrand.Visa, true)
+//
+//        val entry = createEntry(
+//            billingDetailsFormState = billingDetailsFormState(
+//                postalCode = FormFieldEntry("94107", isComplete = true)
+//            )
+//        )
+//
+//        val card = createCard()
+//
+//        assertThat(entry.hasChanged(card, cardBrandChoice)).isTrue()
+//    }
+
     @Test
     fun `hasChanged() should return true when card brand and expiry fields all change`() {
         val originalCardBrandChoice = CardBrandChoice(CardBrand.Visa, true)
@@ -121,13 +159,9 @@ internal class CardDetailsEntryTest {
     fun `hasChanged() should return false when nothing changes`() {
         val cardBrandChoice = CardBrandChoice(CardBrand.Visa, true)
 
-        val entry = createEntry(
-            cardBrandChoice = cardBrandChoice,
-            expMonth = 12,
-            expYear = 2030
-        )
+        val entry = createEntry()
 
-        val card = createCard(expiryMonth = 12, expiryYear = 2030)
+        val card = createCard()
 
         assertThat(entry.hasChanged(card, cardBrandChoice)).isFalse()
     }
@@ -141,11 +175,12 @@ internal class CardDetailsEntryTest {
             expYear = 2030
         )
 
-        val params = entry.toUpdateParams()
+        val params = entry.toUpdateParams(billingDetailsEntry())
 
         assertThat(params.cardBrand).isEqualTo(CardBrand.Visa)
         assertThat(params.expiryMonth).isEqualTo(12)
         assertThat(params.expiryYear).isEqualTo(2030)
+        assertThat(params.billingDetails).isEqualTo(BILLING_DETAILS_FORM_DETAILS)
     }
 
     @Test
@@ -157,25 +192,50 @@ internal class CardDetailsEntryTest {
             expYear = null
         )
 
-        val params = entry.toUpdateParams()
+        val params = entry.toUpdateParams(billingDetailsEntry())
 
         assertThat(params.cardBrand).isEqualTo(CardBrand.Visa)
         assertThat(params.expiryMonth).isNull()
         assertThat(params.expiryYear).isNull()
+        assertThat(params.billingDetails).isEqualTo(BILLING_DETAILS_FORM_DETAILS)
+    }
+
+    @Test
+    fun `toUpdateParams() should include billing details when available`() {
+        val cardBrandChoice = CardBrandChoice(CardBrand.Visa, true)
+
+        val entry = createEntry(
+            cardBrandChoice = cardBrandChoice,
+            expMonth = 12,
+            expYear = 2030,
+        )
+
+        val params = entry.toUpdateParams(billingDetailsEntry())
+
+        assertThat(params.cardBrand).isEqualTo(CardBrand.Visa)
+        assertThat(params.expiryMonth).isEqualTo(12)
+        assertThat(params.expiryYear).isEqualTo(2030)
+        assertThat(params.billingDetails).isEqualTo(BILLING_DETAILS_FORM_DETAILS)
     }
 
     private fun createEntry(
         cardBrandChoice: CardBrandChoice = CardBrandChoice(CardBrand.Visa, true),
         expMonth: Int? = 12,
         expYear: Int? = 2030,
-        expiryDateEditable: Boolean = true
+        expiryDateEditable: Boolean = true,
     ) = CardDetailsEntry(
         cardBrandChoice = cardBrandChoice,
         expiryDateState = ExpiryDateState.create(
             card = createCard(expiryMonth = expMonth, expiryYear = expYear),
             enabled = expiryDateEditable
-        )
+        ),
     )
+
+    private fun billingDetailsEntry(
+        billingDetailsFormState: BillingDetailsFormState = billingDetailsFormState()
+    ): BillingDetailsEntry {
+        return BillingDetailsEntry(billingDetailsFormState)
+    }
 
     private fun createCard(
         expiryMonth: Int? = 12,

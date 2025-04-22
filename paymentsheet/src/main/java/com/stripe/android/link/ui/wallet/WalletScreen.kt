@@ -13,8 +13,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
@@ -49,6 +47,7 @@ import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.addresselement.ScrollableColumn
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.CvcElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -121,12 +120,11 @@ internal fun WalletBody(
         }
     }
 
-    Column(
+    ScrollableColumn(
         modifier = Modifier
             .testTag(WALLET_SCREEN_BOX)
             .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
     ) {
         PaymentDetailsSection(
             modifier = Modifier,

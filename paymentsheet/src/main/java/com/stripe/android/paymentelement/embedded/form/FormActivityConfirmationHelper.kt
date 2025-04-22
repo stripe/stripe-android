@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal interface FormActivityConfirmationHelper {
-    fun confirm()
+    fun confirm(): FormResult?
 }
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
@@ -44,15 +44,25 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
         }
     }
 
-    override fun confirm() {
+    override fun confirm(): FormResult? {
         if (onClickDelegate.onClickOverride != null) {
             onClickDelegate.onClickOverride?.invoke()
         } else {
             eventReporter.onPressConfirmButton(selectionHolder.selection.value)
-            confirmationArgs()?.let { args ->
-                confirmationHandler.start(args)
+
+            when (configuration.formSheetAction) {
+                EmbeddedPaymentElement.FormSheetAction.Continue -> {
+                    return FormResult.Complete(selectionHolder.selection.value, false)
+                }
+                EmbeddedPaymentElement.FormSheetAction.Confirm -> {
+                    confirmationArgs()?.let { args ->
+                        confirmationHandler.start(args)
+                    }
+                }
             }
         }
+
+        return null
     }
 
     private fun confirmationArgs(): ConfirmationHandler.Args? {

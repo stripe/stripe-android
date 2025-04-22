@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.analytics.primaryButtonColorUsage
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
@@ -105,7 +106,7 @@ class FlowControllerConfigurationHandlerTest {
             commonConfiguration = config.asCommonConfiguration(),
             appearance = config.appearance,
             primaryButtonColor = config.primaryButtonColorUsage(),
-            paymentMethodLayout = config.paymentMethodLayout,
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
             isDeferred = false,
         )
         // Configure should regenerate the analytics sessionId.
@@ -148,7 +149,7 @@ class FlowControllerConfigurationHandlerTest {
             commonConfiguration = config.asCommonConfiguration(),
             appearance = config.appearance,
             primaryButtonColor = config.primaryButtonColorUsage(),
-            paymentMethodLayout = config.paymentMethodLayout,
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
             isDeferred = false,
         )
 
@@ -193,7 +194,7 @@ class FlowControllerConfigurationHandlerTest {
             commonConfiguration = config.asCommonConfiguration(),
             appearance = config.appearance,
             primaryButtonColor = config.primaryButtonColorUsage(),
-            paymentMethodLayout = config.paymentMethodLayout,
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
             isDeferred = false,
         )
     }
@@ -236,7 +237,7 @@ class FlowControllerConfigurationHandlerTest {
             commonConfiguration = config.asCommonConfiguration(),
             appearance = config.appearance,
             primaryButtonColor = config.primaryButtonColorUsage(),
-            paymentMethodLayout = config.paymentMethodLayout,
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config),
             isDeferred = false,
         )
     }
@@ -464,7 +465,7 @@ class FlowControllerConfigurationHandlerTest {
             commonConfiguration = any(),
             appearance = any(),
             primaryButtonColor = any(),
-            paymentMethodLayout = any(),
+            configurationSpecificPayload = any(),
             isDeferred = eq(false),
         )
     }
@@ -508,7 +509,7 @@ class FlowControllerConfigurationHandlerTest {
             commonConfiguration = any(),
             appearance = any(),
             primaryButtonColor = any(),
-            paymentMethodLayout = any(),
+            configurationSpecificPayload = any(),
             isDeferred = eq(true),
         )
     }
@@ -552,7 +553,7 @@ class FlowControllerConfigurationHandlerTest {
             commonConfiguration = any(),
             appearance = any(),
             primaryButtonColor = any(),
-            paymentMethodLayout = any(),
+            configurationSpecificPayload = any(),
             isDeferred = eq(true),
         )
     }

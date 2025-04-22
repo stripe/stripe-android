@@ -48,7 +48,11 @@ internal class DefaultPaymentMethodsConfirmationTest {
     @Test
     fun setNewPMAsDefault_withSavedPaymentMethods_sendsSetAsDefaultParamInConfirmCall() = runProductIntegrationTest(
         networkRule = networkRule,
-        createIntentCallback = confirmationType.createIntentCallback,
+        builder = {
+            confirmationType.createIntentCallback?.let {
+                createIntentCallback(it)
+            }
+        },
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -94,7 +98,11 @@ internal class DefaultPaymentMethodsConfirmationTest {
     fun setNewPMAsDefault_withSavedPaymentMethods_uncheckSetAsDefault_doesNotSendSetAsDefaultParamInConfirmCall() =
         runProductIntegrationTest(
             networkRule = networkRule,
-            createIntentCallback = confirmationType.createIntentCallback,
+            builder = {
+                confirmationType.createIntentCallback?.let {
+                    createIntentCallback(it)
+                }
+            },
             integrationType = integrationType,
             resultCallback = ::assertCompleted,
         ) { testContext ->
@@ -137,7 +145,11 @@ internal class DefaultPaymentMethodsConfirmationTest {
     fun setNewPMAsDefault_withSavedPaymentMethods_uncheckSaveForFuture_doesNotSendSetAsDefaultParamInConfirmCall() =
         runProductIntegrationTest(
             networkRule = networkRule,
-            createIntentCallback = confirmationType.createIntentCallback,
+            builder = {
+                confirmationType.createIntentCallback?.let {
+                    createIntentCallback(it)
+                }
+            },
             integrationType = integrationType,
             resultCallback = ::assertCompleted,
         ) { testContext ->
@@ -180,7 +192,11 @@ internal class DefaultPaymentMethodsConfirmationTest {
     @Test
     fun payWithNewPM_savePM_sendsSetAsDefaultInConfirmCall() = runProductIntegrationTest(
         networkRule = networkRule,
-        createIntentCallback = confirmationType.createIntentCallback,
+        builder = {
+            confirmationType.createIntentCallback?.let {
+                createIntentCallback(it)
+            }
+        },
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -217,7 +233,11 @@ internal class DefaultPaymentMethodsConfirmationTest {
     @Test
     fun payWithNewPM_doNotSaveCard_doesNotSetAsDefault() = runProductIntegrationTest(
         networkRule = networkRule,
-        createIntentCallback = confirmationType.createIntentCallback,
+        builder = {
+            confirmationType.createIntentCallback?.let {
+                createIntentCallback(it)
+            }
+        },
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->

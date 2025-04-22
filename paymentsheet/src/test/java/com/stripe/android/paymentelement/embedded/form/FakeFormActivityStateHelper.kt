@@ -18,7 +18,8 @@ internal class FakeFormActivityStateHelper : FormActivityStateHelper {
                 primaryButtonLabel = "".resolvableString,
                 isEnabled = false,
                 processingState = PrimaryButtonProcessingState.Idle(null),
-                isProcessing = false
+                isProcessing = false,
+                shouldDisplayLockIcon = true,
             )
         )
 

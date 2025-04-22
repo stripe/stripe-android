@@ -78,8 +78,6 @@ dependencies {
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.coroutinesAndroid
 
-    implementation libs.bouncyCastle
-
     implementation libs.nimbusJwt
 
     testImplementation testLibs.androidx.coreKtx

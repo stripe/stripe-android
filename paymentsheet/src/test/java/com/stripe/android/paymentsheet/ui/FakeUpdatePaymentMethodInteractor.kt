@@ -3,8 +3,10 @@ package com.stripe.android.paymentsheet.ui
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +23,7 @@ internal class FakeUpdatePaymentMethodInteractor(
     override val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
     override val shouldShowSetAsDefaultCheckbox: Boolean = false,
     override val shouldShowSaveButton: Boolean = false,
+    override val addressCollectionMode: AddressCollectionMode = AddressCollectionMode.Automatic,
     val viewActionRecorder: ViewActionRecorder<UpdatePaymentMethodInteractor.ViewAction>? = ViewActionRecorder(),
     initialState: UpdatePaymentMethodInteractor.State = UpdatePaymentMethodInteractor.State(
         error = null,
@@ -29,7 +32,7 @@ internal class FakeUpdatePaymentMethodInteractor(
         isSaveButtonEnabled = false,
     ),
     override val setAsDefaultCheckboxEnabled: Boolean = true,
-    override val allowCardEdit: Boolean = false,
+    override val canUpdateFullPaymentMethodDetails: Boolean = false,
     private val editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = DefaultEditCardDetailsInteractor
         .Factory(),
 ) : UpdatePaymentMethodInteractor {
@@ -45,7 +48,9 @@ internal class FakeUpdatePaymentMethodInteractor(
             card = displayableSavedPaymentMethod.paymentMethod.card!!,
             onBrandChoiceChanged = {},
             onCardUpdateParamsChanged = {},
-            areExpiryDateAndAddressModificationSupported = allowCardEdit,
+            areExpiryDateAndAddressModificationSupported = canUpdateFullPaymentMethodDetails,
+            billingDetails = PaymentMethodFixtures.BILLING_DETAILS,
+            addressCollectionMode = addressCollectionMode,
         )
     }
 

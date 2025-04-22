@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+
 package com.stripe.android.paymentsheet.example.playground
 
 import android.content.Intent
@@ -30,8 +32,11 @@ import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -40,12 +45,15 @@ import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
+import com.stripe.android.paymentsheet.example.playground.activity.CustomPaymentMethodActivity
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
 import com.stripe.android.paymentsheet.example.playground.activity.getEmbeddedAppearance
-import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundContract
+import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundOneStepContract
+import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundTwoStepContract
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedAppearanceSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedTwoStepSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
@@ -80,8 +88,24 @@ internal class PaymentSheetPlaygroundActivity :
         )
     }
 
-    private val embeddedPlaygroundLauncher = registerForActivityResult(EmbeddedPlaygroundContract()) { success ->
+    private lateinit var embeddedPaymentElement: EmbeddedPaymentElement
+
+    private val embeddedPlaygroundOneStepLauncher = registerForActivityResult(
+        EmbeddedPlaygroundOneStepContract()
+    ) { success ->
         viewModel.onEmbeddedResult(success)
+    }
+
+    private val embeddedPlaygroundTwoStepLauncher = registerForActivityResult(
+        EmbeddedPlaygroundTwoStepContract()
+    ) { result ->
+        when (result) {
+            EmbeddedPlaygroundTwoStepContract.Result.Cancelled -> Unit
+            EmbeddedPlaygroundTwoStepContract.Result.Complete -> viewModel.onEmbeddedResult(true)
+            is EmbeddedPlaygroundTwoStepContract.Result.Updated -> {
+                embeddedPaymentElement.state = result.embeddedPaymentElementState
+            }
+        }
     }
 
     @OptIn(ExperimentalCustomerSessionApi::class, ExperimentalAnalyticEventCallbackApi::class)
@@ -109,6 +133,13 @@ internal class PaymentSheetPlaygroundActivity :
                 .createIntentCallback(viewModel::createIntentCallback)
                 .analyticEventCallback(viewModel::analyticCallback)
                 .build()
+            val embeddedPaymentElementBuilder = remember {
+                EmbeddedPaymentElement.Builder(
+                    viewModel::createIntentCallback,
+                    viewModel::onEmbeddedResult,
+                )
+            }
+            embeddedPaymentElement = rememberEmbeddedPaymentElement(embeddedPaymentElementBuilder)
 
             val addressLauncher = rememberAddressLauncher(
                 callback = viewModel::onAddressLauncherResult
@@ -402,10 +433,52 @@ internal class PaymentSheetPlaygroundActivity :
     fun EmbeddedUi(
         playgroundState: PlaygroundState.Payment,
     ) {
+        val isTwoStep = remember(playgroundState) {
+            playgroundState.snapshot[EmbeddedTwoStepSettingsDefinition]
+        }
+        var hasConfigured: Boolean by remember { mutableStateOf(false) }
+
+        LaunchedEffect(playgroundState) {
+            if (isTwoStep) {
+                val configureResult = embeddedPaymentElement.configure(
+                    intentConfiguration = playgroundState.intentConfiguration(),
+                    configuration = playgroundState.embeddedConfiguration(),
+                )
+                hasConfigured = configureResult is EmbeddedPaymentElement.ConfigureResult.Succeeded
+            }
+        }
+
+        if (isTwoStep) {
+            val paymentOption by embeddedPaymentElement.paymentOption.collectAsState()
+
+            PaymentMethodSelector(
+                isEnabled = hasConfigured,
+                paymentMethodLabel = if (hasConfigured) {
+                    paymentOption?.label ?: "Select"
+                } else {
+                    "Loading"
+                },
+                paymentMethodPainter = paymentOption?.iconPainter,
+                onClick = {
+                    embeddedPlaygroundTwoStepLauncher.launch(
+                        EmbeddedPlaygroundTwoStepContract.Args(
+                            playgroundState,
+                            requireNotNull(embeddedPaymentElement.state),
+                        )
+                    )
+                }
+            )
+        }
+
         Button(
             onClick = {
-                embeddedPlaygroundLauncher.launch(playgroundState)
+                if (isTwoStep) {
+                    embeddedPaymentElement.confirm()
+                } else {
+                    embeddedPlaygroundOneStepLauncher.launch(playgroundState)
+                }
             },
+            enabled = if (isTwoStep) hasConfigured else true,
             modifier = Modifier
                 .fillMaxWidth()
                 .testTag(CHECKOUT_TEST_TAG),
@@ -554,7 +627,14 @@ internal class PaymentSheetPlaygroundActivity :
         customPaymentMethod: PaymentSheet.CustomPaymentMethod,
         billingDetails: PaymentMethod.BillingDetails
     ) {
-        error("Currently cannot handle custom payment methods!")
+        startActivity(
+            Intent().setClass(
+                this,
+                CustomPaymentMethodActivity::class.java
+            )
+                .putExtra(CustomPaymentMethodActivity.EXTRA_CUSTOM_PAYMENT_METHOD_TYPE, customPaymentMethod)
+                .putExtra(CustomPaymentMethodActivity.EXTRA_BILLING_DETAILS, billingDetails)
+        )
     }
 }
 

@@ -1,0 +1,125 @@
+{
+  "apple_pay_preference": "enabled",
+  "business_name": "Mobile Example Account",
+  "experiments": {
+    "elements_link_aa": "control",
+    "elements_link_in_payment_element_only": "treatment",
+    "elements_link_longterm_holdback": "control",
+    "lpm_discoverability_upe_experiment_1": "rotating_cycle_treatment"
+  },
+  "flags": {
+    "elements_disable_paypal_express": true,
+    "elements_enable_blik": true,
+    "elements_enable_br_card_installments": false,
+    "elements_enable_deferred_intent": false,
+    "elements_enable_demo_pay": false,
+    "elements_enable_express_checkout": false,
+    "elements_enable_external_payment_method_paypal": false,
+    "elements_enable_external_payment_method_venmo": false,
+    "elements_enable_mobilepay": false,
+    "elements_enable_mx_card_installments": false,
+    "elements_enable_revolut_pay": false,
+    "elements_link_enable_email_domain_correction": false,
+    "elements_lpm_discoverability_downward_arrow": false,
+    "elements_lpm_discoverability_rotating_cycle": false,
+    "elements_web_lpm_server_driven_ui": true,
+    "financial_connections_enable_deferred_intent_flow": false
+  },
+  "google_pay_preference": "enabled",
+  "link_consumer_info": null,
+  "link_settings": {
+    "link_authenticated_change_event_enabled": false,
+    "link_bank_incentives_enabled": false,
+    "link_bank_onboarding_enabled": false,
+    "link_crypto_onramp_bank_upsell": false,
+    "link_crypto_onramp_elements_logout_disabled": false,
+    "link_crypto_onramp_force_cvc_reverification": false,
+    "link_elements_billing_country_sign_up_disabled": true,
+    "link_elements_is_crypto_onramp": false,
+    "link_elements_pageload_sign_up_disabled": false,
+    "link_email_verification_login_enabled": false,
+    "link_financial_incentives_experiment_enabled": false,
+    "link_funding_sources": ["CARD"],
+    "link_local_storage_login_enabled": false,
+    "link_m2_default_integration_enabled": true,
+    "link_only_for_payment_method_types_enabled": false,
+    "link_passthrough_mode_enabled": false,
+    "link_pay_button_element_enabled": false,
+    "link_session_storage_login_enabled": true
+  },
+  "merchant_country": "US",
+  "merchant_currency": "usd",
+  "merchant_id": "acct_1HvTI7Lu5o3P18Zp",
+  "meta_pay_signed_container_context": null,
+  "order": null,
+  "ordered_payment_method_types_and_wallets": [
+    "card"
+  ],
+  "custom_payment_method_data": [
+    {
+      "type": "cpmt_123",
+      "display_name": "TestPay",
+      "logo_url": "example.url"
+    }
+  ],
+  "payment_method_preference": {
+    "object": "payment_method_preference",
+    "country_code": "US",
+    "ordered_payment_method_types": [
+      "card"
+    ],
+    "payment_intent": {
+      "id": "pi_example",
+      "object": "payment_intent",
+      "amount": 5099,
+      "amount_details": {
+        "tip": {}
+      },
+      "automatic_payment_methods": {
+        "enabled": true
+      },
+      "canceled_at": null,
+      "cancellation_reason": null,
+      "capture_method": "automatic",
+      "client_secret": "pi_example_secret_example",
+      "confirmation_method": "automatic",
+      "created": 1674750417,
+      "currency": "usd",
+      "description": null,
+      "last_payment_error": null,
+      "livemode": false,
+      "next_action": null,
+      "payment_method": null,
+      "payment_method_options": {
+        "us_bank_account": {
+          "verification_method": "automatic"
+        }
+      },
+      "payment_method_types": [
+        "card"
+      ],
+      "processing": null,
+      "receipt_email": null,
+      "setup_future_usage": null,
+      "shipping": null,
+      "source": null,
+      "status": "requires_payment_method"
+    },
+    "type": "payment_intent"
+  },
+  "payment_method_specs": [
+    {
+      "async": false,
+      "fields": [],
+      "type": "card"
+    }
+  ],
+  "paypal_express_config": {
+    "client_id": null,
+    "paypal_merchant_id": null
+  },
+  "shipping_address_settings": {
+    "autocomplete_allowed": true
+  },
+  "unactivated_payment_method_types": []
+}

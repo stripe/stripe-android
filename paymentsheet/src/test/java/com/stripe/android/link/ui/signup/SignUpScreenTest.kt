@@ -46,7 +46,14 @@ internal class SignUpScreenTest {
 
     @Test
     fun `only email field displayed when controllers are empty`() = runTest(dispatcher) {
-        val viewModel = viewModel()
+        val viewModel = viewModel(
+            customerInfo = LinkConfiguration.CustomerInfo(
+                email = null,
+                phone = null,
+                name = null,
+                billingCountryCode = null,
+            )
+        )
 
         composeTestRule.setContent {
             SignUpScreen(viewModel = viewModel)

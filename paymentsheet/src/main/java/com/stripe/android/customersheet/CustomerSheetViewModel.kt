@@ -179,6 +179,7 @@ internal class CustomerSheetViewModel(
             permissions = CustomerPermissions(
                 canRemovePaymentMethods = false,
                 canRemoveLastPaymentMethod = false,
+                canUpdateFullPaymentMethodDetails = false,
             ),
             metadata = null,
         )
@@ -555,7 +556,9 @@ internal class CustomerSheetViewModel(
                 updatePaymentMethodInteractor = DefaultUpdatePaymentMethodInteractor(
                     isLiveMode = isLiveModeProvider(),
                     canRemove = customerState.canRemove,
+                    canUpdateFullPaymentMethodDetails = customerState.canUpdateFullPaymentMethodDetails,
                     displayableSavedPaymentMethod = paymentMethod,
+                    addressCollectionMode = configuration.billingDetailsCollectionConfiguration.address,
                     cardBrandFilter = PaymentSheetCardBrandFilter(customerState.configuration.cardBrandAcceptance),
                     removeExecutor = ::removeExecutor,
                     onBrandChoiceSelected = { brand ->
@@ -851,6 +854,8 @@ internal class CustomerSheetViewModel(
             onError = { error ->
                 handleViewAction(CustomerSheetViewAction.OnFormError(error))
             },
+            onFormCompleted = { /* no-op, CustomerSheetScreen does not send AnalyticEvent */ },
+            onAnalyticsEvent = { /* no-op, CustomerSheetScreen does not send AnalyticEvent */ },
             setAsDefaultPaymentMethodEnabled = false,
             financialConnectionsAvailability = GetFinancialConnectionsAvailability(elementsSession = null),
             setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
@@ -1262,10 +1267,12 @@ internal class CustomerSheetViewModel(
             else -> permissions.canRemovePaymentMethods
         }
 
+        val canUpdateFullPaymentMethodDetails = permissions.canUpdateFullPaymentMethodDetails
+
         val cbcEligibility = metadata?.cbcEligibility ?: CardBrandChoiceEligibility.Ineligible
 
         val canEdit = canRemove || paymentMethods.any { method ->
-            isModifiable(method, cbcEligibility)
+            isModifiable(method, cbcEligibility, canUpdateFullPaymentMethodDetails)
         }
 
         val canShowSavedPaymentMethods = paymentMethods.isNotEmpty() || shouldShowGooglePay(metadata)

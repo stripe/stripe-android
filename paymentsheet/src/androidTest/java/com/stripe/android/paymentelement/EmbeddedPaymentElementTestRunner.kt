@@ -22,7 +22,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 internal class EmbeddedPaymentElementTestRunnerContext(
-    private val embeddedPaymentElement: EmbeddedPaymentElement,
+    val embeddedPaymentElement: EmbeddedPaymentElement,
     private val countDownLatch: CountDownLatch,
 ) {
     suspend fun configure(

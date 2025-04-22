@@ -23,6 +23,12 @@ internal class PaymentSheetAnalyticsListener(
             savedStateHandle[PREVIOUSLY_SENT_DEEP_LINK_EVENT] = value
         }
 
+    private var previouslyPresentedSheet: Boolean
+        get() = savedStateHandle[PREVIOUSLY_PRESENTED_SHEET] ?: false
+        set(value) {
+            savedStateHandle[PREVIOUSLY_PRESENTED_SHEET] = value
+        }
+
     private var previouslyShownForm: PaymentMethodCode?
         get() = savedStateHandle[PREVIOUSLY_SHOWN_PAYMENT_FORM]
         set(value) {
@@ -77,18 +83,29 @@ internal class PaymentSheetAnalyticsListener(
                 eventReporter.onShowEditablePaymentOption()
             }
             is PaymentSheetScreen.SelectSavedPaymentMethods -> {
-                eventReporter.onShowExistingPaymentOptions()
+                reportPaymentOptions(true)
                 previouslyShownForm = null
                 previouslyInteractedForm = null
             }
             is PaymentSheetScreen.VerticalMode -> {
-                eventReporter.onShowNewPaymentOptions()
+                reportPaymentOptions(false)
             }
             is AddFirstPaymentMethod, is AddAnotherPaymentMethod -> {
                 reportFormShown(currentPaymentMethodTypeProvider())
+                reportPaymentOptions(false)
+            }
+        }
+    }
+
+    private fun reportPaymentOptions(isSaved: Boolean) {
+        if (!previouslyPresentedSheet) {
+            if (isSaved) {
+                eventReporter.onShowExistingPaymentOptions()
+            } else {
                 eventReporter.onShowNewPaymentOptions()
             }
         }
+        previouslyPresentedSheet = true
     }
 
     fun reportPaymentSheetHidden(hiddenScreen: PaymentSheetScreen) {
@@ -118,5 +135,6 @@ internal class PaymentSheetAnalyticsListener(
         internal const val PREVIOUSLY_SHOWN_PAYMENT_FORM = "previously_shown_payment_form"
         internal const val PREVIOUSLY_INTERACTION_PAYMENT_FORM = "previously_interacted_payment_form"
         internal const val PREVIOUSLY_SENT_DEEP_LINK_EVENT = "previously_sent_deep_link_event"
+        internal const val PREVIOUSLY_PRESENTED_SHEET = "previously_presented_sheet"
     }
 }
