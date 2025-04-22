@@ -47,7 +47,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     }
 
     @Test
-    fun testFlatWitRadio() {
+    fun testFlatWithRadio() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
                 rowStyle = getRowStyle(FlatWithRadio::class)
