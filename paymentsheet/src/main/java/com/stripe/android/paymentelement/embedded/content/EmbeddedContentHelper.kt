@@ -137,6 +137,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             paymentMethodMetadata = paymentMethodMetadata,
             eventReporter = eventReporter,
             selectionUpdater = ::setSelection,
+            hasSavedPaymentMethods = customerStateHolder.paymentMethods.value.isNotEmpty()
         )
         val savedPaymentMethodMutator = createSavedPaymentMethodMutator(
             coroutineScope = coroutineScope,

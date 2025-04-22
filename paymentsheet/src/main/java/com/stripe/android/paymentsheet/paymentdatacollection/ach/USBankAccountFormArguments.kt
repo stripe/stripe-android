@@ -18,7 +18,6 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.verticalmode.BankFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import kotlinx.coroutines.flow.update
 
 /**
@@ -121,11 +120,12 @@ internal class USBankAccountFormArguments(
             )
         }
 
-        fun create(
+        fun createForEmbedded(
             paymentMethodMetadata: PaymentMethodMetadata,
             selectedPaymentMethodCode: String,
             hostedSurface: String,
             setSelection: (PaymentSelection?) -> Unit,
+            hasSavedPaymentMethods: Boolean,
             onMandateTextChanged: (mandate: ResolvableString?, showAbove: Boolean) -> Unit,
             onAnalyticsEvent: (USBankAccountFormViewModel.AnalyticsEvent) -> Unit,
             onUpdatePrimaryButtonUIState: ((PrimaryButton.UIState?) -> (PrimaryButton.UIState?)) -> Unit,
@@ -170,7 +170,8 @@ internal class USBankAccountFormArguments(
                 paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
                     ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
                 financialConnectionsAvailability = paymentMethodMetadata.financialConnectionsAvailability,
-                setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
+                // If no saved payment methods, then first saved payment method is automatically set as default
+                setAsDefaultMatchesSaveForFutureUse = !hasSavedPaymentMethods,
             )
         }
     }
