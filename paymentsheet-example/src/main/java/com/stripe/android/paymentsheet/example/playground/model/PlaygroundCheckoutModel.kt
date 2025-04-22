@@ -48,6 +48,8 @@ class CheckoutRequest private constructor(
     val paymentMethodOverrideRedisplay: AllowRedisplayFilter?,
     @SerialName("customer_session_payment_method_set_as_default")
     val paymentMethodSetAsDefaultFeature: FeatureState?,
+    @SerialName("payment_method_options_setup_future_usage")
+    val paymentMethodOptionsSetupFutureUsage: Map<String, String>?,
 ) {
     @Serializable
     enum class CustomerKeyType {
@@ -82,6 +84,8 @@ class CheckoutRequest private constructor(
             AllowRedisplayFilter.Always,
         )
         private var paymentMethodOverrideRedisplay: AllowRedisplayFilter? = null
+        private var paymentMethodOptionsSetupFutureUsage: Map<String, String>? = null
+        private var overridePaymentMethodOptionsSetupFutureUsage: Map<String, String>? = null
 
         fun initialization(initialization: String?) = apply {
             this.initialization = initialization
@@ -159,6 +163,14 @@ class CheckoutRequest private constructor(
             this.requireCvcRecollection = requireCvcRecollection
         }
 
+        fun paymentMethodOptionsSetupFutureUsage(valuesMap: Map<String, String>) = apply {
+            this.paymentMethodOptionsSetupFutureUsage = valuesMap
+        }
+
+        fun overridePaymentMethodOptionsSetupFutureUsage(valuesMap: Map<String, String>) = apply {
+            this.overridePaymentMethodOptionsSetupFutureUsage = valuesMap
+        }
+
         fun build(): CheckoutRequest {
             return CheckoutRequest(
                 initialization = initialization,
@@ -181,6 +193,8 @@ class CheckoutRequest private constructor(
                 paymentMethodRedisplayFeature = paymentMethodRedisplayFeature,
                 paymentMethodRedisplayFilters = paymentMethodRedisplayFilters,
                 paymentMethodOverrideRedisplay = paymentMethodOverrideRedisplay,
+                paymentMethodOptionsSetupFutureUsage = overridePaymentMethodOptionsSetupFutureUsage
+                    ?: paymentMethodOptionsSetupFutureUsage
             )
         }
     }
