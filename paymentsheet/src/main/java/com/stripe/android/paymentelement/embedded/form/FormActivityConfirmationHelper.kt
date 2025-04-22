@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
@@ -12,6 +13,7 @@ import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -32,7 +34,8 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
     private val onClickDelegate: OnClickOverrideDelegate,
     private val eventReporter: EventReporter,
     lifecycleOwner: LifecycleOwner,
-    activityResultCaller: ActivityResultCaller
+    activityResultCaller: ActivityResultCaller,
+    @ViewModelScope private val coroutineScope: CoroutineScope,
 ) : FormActivityConfirmationHelper {
 
     init {
@@ -56,7 +59,9 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
                 }
                 EmbeddedPaymentElement.FormSheetAction.Confirm -> {
                     confirmationArgs()?.let { args ->
-                        confirmationHandler.start(args)
+                        coroutineScope.launch {
+                            confirmationHandler.start(args)
+                        }
                     }
                 }
             }

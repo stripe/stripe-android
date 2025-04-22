@@ -25,7 +25,7 @@ internal class FakeConfirmationHandler(
         )
     }
 
-    override fun start(arguments: ConfirmationHandler.Args) {
+    override suspend fun start(arguments: ConfirmationHandler.Args) {
         startTurbine.add(arguments)
     }
 

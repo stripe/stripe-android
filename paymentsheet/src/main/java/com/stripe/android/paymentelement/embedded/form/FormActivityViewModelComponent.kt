@@ -7,7 +7,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
-import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
@@ -35,10 +34,8 @@ import dagger.Provides
 import dagger.Subcomponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.plus
 import javax.inject.Named
 import javax.inject.Singleton
-import kotlin.coroutines.CoroutineContext
 
 @Component(
     modules = [
@@ -124,9 +121,8 @@ internal interface FormActivityViewModelModule {
         fun provideConfirmationHandler(
             confirmationHandlerFactory: ConfirmationHandler.Factory,
             @ViewModelScope coroutineScope: CoroutineScope,
-            @IOContext ioContext: CoroutineContext,
         ): ConfirmationHandler {
-            return confirmationHandlerFactory.create(coroutineScope + ioContext)
+            return confirmationHandlerFactory.create(coroutineScope)
         }
 
         @Provides
