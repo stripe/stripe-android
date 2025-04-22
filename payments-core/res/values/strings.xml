@@ -129,6 +129,8 @@
   <string name="stripe_done">Done</string>
   <!-- Button title to enter editing mode -->
   <string name="stripe_edit">Edit</string>
+  <!-- Button title to edit a new payment method in Embedded -->
+  <string name="stripe_change">Change</string>
   <!-- Error when the card has already expired -->
   <string name="stripe_expired_card">Your card has expired</string>
   <!-- label for text field to enter card expiry -->
