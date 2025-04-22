@@ -164,7 +164,7 @@ internal fun SavedPaymentMethodTrailingContent(
 }
 
 @Composable
-internal fun EditButton(onClick: () -> Unit) {
+private fun EditButton(onClick: () -> Unit) {
     Text(
         stringResource(id = com.stripe.android.R.string.stripe_edit),
         color = MaterialTheme.colors.primary,
@@ -179,8 +179,7 @@ internal fun EditButton(onClick: () -> Unit) {
 }
 
 @Composable
-internal fun ViewMoreButton(
-    showChevron: Boolean = true,
+private fun ViewMoreButton(
     onViewMorePaymentMethods: () -> Unit,
 ) {
     Row(
@@ -197,13 +196,11 @@ internal fun ViewMoreButton(
             style = MaterialTheme.typography.subtitle1,
             fontWeight = FontWeight.Medium,
         )
-        if (showChevron) {
-            Icon(
-                painter = painterResource(R.drawable.stripe_ic_chevron_right),
-                contentDescription = null,
-                tint = MaterialTheme.colors.primary,
-                modifier = Modifier.padding(start = 4.dp, top = 2.dp)
-            )
-        }
+        Icon(
+            painter = painterResource(R.drawable.stripe_ic_chevron_right),
+            contentDescription = null,
+            tint = MaterialTheme.colors.primary,
+            modifier = Modifier.padding(start = 4.dp, top = 2.dp)
+        )
     }
 }
