@@ -13,8 +13,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
-import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -46,9 +46,11 @@ import dagger.Component
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
+import kotlin.coroutines.CoroutineContext
 
 internal class PaymentElementConfirmationTestActivity : AppCompatActivity() {
     val viewModel: TestViewModel by viewModels {
@@ -89,7 +91,6 @@ internal class PaymentElementConfirmationTestActivity : AppCompatActivity() {
 @Component(
     modules = [
         PaymentElementConfirmationModule::class,
-        CoroutineContextModule::class,
         PaymentElementConfirmationTestModule::class,
     ]
 )
@@ -183,5 +184,10 @@ internal interface PaymentElementConfirmationTestModule {
         fun providesLinkAccountHolder(savedStateHandle: SavedStateHandle): LinkAccountHolder {
             return LinkAccountHolder(savedStateHandle)
         }
+
+        @Provides
+        @Singleton
+        @IOContext
+        fun provideWorkContext(): CoroutineContext = UnconfinedTestDispatcher()
     }
 }

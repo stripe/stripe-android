@@ -80,7 +80,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Named
@@ -162,9 +161,7 @@ internal class CustomerSheetViewModel(
     private val _result = MainThreadOnlyMutableStateFlow<InternalCustomerSheetResult?>(null)
     val result: StateFlow<InternalCustomerSheetResult?> = _result
 
-    private val confirmationHandler = confirmationHandlerFactory.create(
-        scope = viewModelScope.plus(workContext)
-    )
+    private val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
 
     private val isEditing = MainThreadOnlyMutableStateFlow(false)
     private val selectionConfirmationState = MainThreadOnlyMutableStateFlow(

@@ -67,7 +67,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.plus
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
@@ -213,7 +212,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    private val confirmationHandler = confirmationHandlerFactory.create(viewModelScope.plus(workContext))
+    private val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
 
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)

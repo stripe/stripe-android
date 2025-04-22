@@ -24,6 +24,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Cvc
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.utils.RecordingLinkStore
+import kotlinx.coroutines.Dispatchers
 
 internal fun createTestConfirmationHandlerFactory(
     paymentElementCallbackIdentifier: String,
@@ -87,5 +88,6 @@ internal fun createTestConfirmationHandlerFactory(
         ),
         savedStateHandle = savedStateHandle,
         errorReporter = FakeErrorReporter(),
+        ioContext = Dispatchers.Unconfined,
     )
 }
