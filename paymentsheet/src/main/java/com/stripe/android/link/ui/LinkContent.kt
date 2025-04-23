@@ -34,6 +34,8 @@ import com.stripe.android.link.ui.paymentmenthod.PaymentMethodScreen
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodViewModel
 import com.stripe.android.link.ui.signup.SignUpScreen
 import com.stripe.android.link.ui.signup.SignUpViewModel
+import com.stripe.android.link.ui.update.UpdateScreen
+import com.stripe.android.link.ui.update.UpdateViewModel
 import com.stripe.android.link.ui.verification.VerificationScreen
 import com.stripe.android.link.ui.verification.VerificationViewModel
 import com.stripe.android.link.ui.wallet.WalletScreen
@@ -153,6 +155,14 @@ private fun Screens(
             )
         }
 
+        composable(
+            LinkScreen.Update.route
+        ) { backStackEntry ->
+            val paymentDetailsId = backStackEntry.arguments?.getString(LinkScreen.EXTRA_PAYMENT_DETAILS)
+                ?: return@composable dismissWithResult(noLinkAccountResult())
+            UpdateRoute(paymentDetailsId)
+        }
+
         composable(LinkScreen.Verification.route) {
             val linkAccount = getLinkAccount()
                 ?: return@composable dismissWithResult(noLinkAccountResult())
@@ -169,7 +179,6 @@ private fun Screens(
                 ?: return@composable dismissWithResult(noLinkAccountResult())
             WalletRoute(
                 linkAccount = linkAccount,
-                navigate = navigate,
                 navigateAndClearStack = navigateAndClearStack,
                 showBottomSheetContent = showBottomSheetContent,
                 hideBottomSheetContent = hideBottomSheetContent,
@@ -229,6 +238,19 @@ private fun VerificationRoute(
 }
 
 @Composable
+private fun UpdateRoute(paymentDetailsId: String) {
+    val viewModel: UpdateViewModel = linkViewModel { parentComponent ->
+        UpdateViewModel.factory(
+            parentComponent = parentComponent,
+            paymentDetailsId = paymentDetailsId,
+        )
+    }
+    UpdateScreen(
+        viewModel = viewModel,
+    )
+}
+
+@Composable
 private fun PaymentMethodRoute(
     linkAccount: LinkAccount,
     dismissWithResult: (LinkActivityResult) -> Unit,
@@ -250,7 +272,6 @@ private fun PaymentMethodRoute(
 @Composable
 private fun WalletRoute(
     linkAccount: LinkAccount,
-    navigate: (route: LinkScreen) -> Unit,
     navigateAndClearStack: (route: LinkScreen) -> Unit,
     dismissWithResult: (LinkActivityResult) -> Unit,
     showBottomSheetContent: (BottomSheetContent?) -> Unit,
@@ -260,7 +281,6 @@ private fun WalletRoute(
         WalletViewModel.factory(
             parentComponent = parentComponent,
             linkAccount = linkAccount,
-            navigate = navigate,
             navigateAndClearStack = navigateAndClearStack,
             dismissWithResult = dismissWithResult
         )

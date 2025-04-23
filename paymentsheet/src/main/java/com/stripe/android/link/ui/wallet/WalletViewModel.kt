@@ -28,6 +28,7 @@ import com.stripe.android.ui.core.elements.CardDetailsUtil.createExpiryDateFormF
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
+import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,7 +44,7 @@ internal class WalletViewModel @Inject constructor(
     private val linkAccountManager: LinkAccountManager,
     private val linkConfirmationHandler: LinkConfirmationHandler,
     private val logger: Logger,
-    private val navigate: (route: LinkScreen) -> Unit,
+    private val navigationManager: NavigationManager,
     private val navigateAndClearStack: (route: LinkScreen) -> Unit,
     private val dismissWithResult: (LinkActivityResult) -> Unit
 ) : ViewModel() {
@@ -264,6 +265,14 @@ internal class WalletViewModel @Inject constructor(
         }
     }
 
+    fun onUpdateClicked(item: ConsumerPaymentDetails.PaymentDetails) {
+        navigationManager.tryNavigateTo(
+            route = LinkScreen.Update(
+                mapOf(LinkScreen.EXTRA_PAYMENT_DETAILS to item.id)
+            ),
+        )
+    }
+
     fun onSetDefaultClicked(item: ConsumerPaymentDetails.PaymentDetails) {
         _uiState.update {
             it.copy(
@@ -307,7 +316,7 @@ internal class WalletViewModel @Inject constructor(
     }
 
     fun onAddNewPaymentMethodClicked() {
-        navigate(LinkScreen.PaymentMethod)
+        navigationManager.tryNavigateTo(LinkScreen.PaymentMethod.route)
     }
 
     fun onDismissAlert() {
@@ -337,7 +346,6 @@ internal class WalletViewModel @Inject constructor(
         fun factory(
             parentComponent: NativeLinkComponent,
             linkAccount: LinkAccount,
-            navigate: (route: LinkScreen) -> Unit,
             navigateAndClearStack: (route: LinkScreen) -> Unit,
             dismissWithResult: (LinkActivityResult) -> Unit
         ): ViewModelProvider.Factory {
@@ -350,8 +358,8 @@ internal class WalletViewModel @Inject constructor(
                             confirmationHandler = parentComponent.viewModel.confirmationHandler
                         ),
                         logger = parentComponent.logger,
+                        navigationManager = parentComponent.navigationManager,
                         linkAccount = linkAccount,
-                        navigate = navigate,
                         navigateAndClearStack = navigateAndClearStack,
                         dismissWithResult = dismissWithResult
                     )

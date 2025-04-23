@@ -28,8 +28,14 @@ internal sealed class WalletPaymentMethodMenuItem(
         text = StripeR.string.stripe_cancel.resolvableString,
         testTag = WALLET_MENU_CANCEL_TAG,
     )
+
+    data object Update : WalletPaymentMethodMenuItem(
+        text = StripeR.string.stripe_title_update_card.resolvableString,
+        testTag = WALLET_MENU_UPDATE_TAG,
+    )
 }
 
 internal const val WALLET_MENU_REMOVE_ITEM_TAG = "WALLET_MENU_REMOVE_ITEM_TAG"
 internal const val WALLET_MENU_SET_AS_DEFAULT_TAG = "WALLET_MENU_SET_AS_DEFAULT_TAG"
 internal const val WALLET_MENU_CANCEL_TAG = "WALLET_MENU_CANCEL_TAG"
+internal const val WALLET_MENU_UPDATE_TAG = "WALLET_MENU_UPDATE_TAG"
