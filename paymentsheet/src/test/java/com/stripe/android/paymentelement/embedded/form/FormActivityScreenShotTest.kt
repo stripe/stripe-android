@@ -11,7 +11,6 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -91,7 +90,6 @@ internal class FormActivityScreenShotTest {
         }
     }
 
-    @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
     @Composable
     private fun TestFormActivityUi(
         confirmationState: ConfirmationHandler.State,

@@ -9,7 +9,6 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
@@ -30,7 +29,6 @@ import org.junit.Rule
 import org.mockito.Mockito.mock
 import kotlin.test.Test
 
-@ExperimentalEmbeddedPaymentElementApi
 internal class DefaultEmbeddedConfirmationHelperTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()

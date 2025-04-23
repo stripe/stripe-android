@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.verticalmode
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPaymentMethodUiDefinitionFactory
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.ui.core.R
 import com.stripe.android.utils.MockPaymentMethodsFactory
@@ -11,7 +10,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.mock
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule()
