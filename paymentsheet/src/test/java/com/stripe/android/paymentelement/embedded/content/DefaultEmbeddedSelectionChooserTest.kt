@@ -13,6 +13,7 @@ import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser.Companion.PREVIOUS_CONFIGURATION_KEY
+import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -320,9 +321,10 @@ internal class DefaultEmbeddedSelectionChooserTest {
         block: Scenario.() -> Unit,
     ) = runTest {
         val savedStateHandle = SavedStateHandle()
+        val embeddedSelectionHolder = EmbeddedSelectionHolder(savedStateHandle)
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-            embeddedSelectionHolder = EmbeddedSelectionHolder(savedStateHandle),
+            embeddedSelectionHolder = embeddedSelectionHolder,
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             savedStateHandle = savedStateHandle,
         )
@@ -332,7 +334,8 @@ internal class DefaultEmbeddedSelectionChooserTest {
                 formHelperFactory = formHelperFactory,
                 coroutineScope = CoroutineScope(Dispatchers.Unconfined),
                 eventReporter = FakeEventReporter(),
-            ),
+                customerStateHolder = CustomerStateHolder(savedStateHandle, embeddedSelectionHolder.selection)
+        ),
             savedStateHandle = savedStateHandle,
         ).block()
     }
