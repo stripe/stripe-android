@@ -5,7 +5,6 @@ package com.stripe.android.paymentelement.embedded.content
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.mainthread.MainThreadSavedStateHandle
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -101,10 +100,10 @@ internal class DefaultEmbeddedStateHelperTest {
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val savedStateHandle = SavedStateHandle()
-        val selectionHolder = EmbeddedSelectionHolder(MainThreadSavedStateHandle(savedStateHandle))
+        val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
         val customerStateHolder = CustomerStateHolder(savedStateHandle, selectionHolder.selection)
         val confirmationStateHolder = EmbeddedConfirmationStateHolder(
-            savedStateHandle = MainThreadSavedStateHandle(savedStateHandle),
+            savedStateHandle = savedStateHandle,
             selectionHolder = selectionHolder,
             coroutineScope = CoroutineScope(Dispatchers.Unconfined),
         )

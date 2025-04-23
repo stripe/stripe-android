@@ -4,7 +4,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.mainthread.MainThreadSavedStateHandle
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
@@ -88,7 +87,7 @@ internal class EmbeddedPaymentElementInitializerTest {
             sheetLauncher = FakeEmbeddedSheetLauncher(),
             contentHelper = contentHelper,
             lifecycleOwner = lifecycleOwner,
-            savedStateHandle = MainThreadSavedStateHandle(SavedStateHandle()),
+            savedStateHandle = SavedStateHandle(),
             eventReporter = eventReporter,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
         )

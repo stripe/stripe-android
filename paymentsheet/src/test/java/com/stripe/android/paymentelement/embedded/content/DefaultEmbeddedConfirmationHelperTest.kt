@@ -3,7 +3,6 @@ package com.stripe.android.paymentelement.embedded.content
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.mainthread.MainThreadSavedStateHandle
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -151,10 +150,10 @@ internal class DefaultEmbeddedConfirmationHelperTest {
     ) = runTest {
         val confirmationHandler = FakeConfirmationHandler()
         val savedStateHandle = SavedStateHandle()
-        val selectionHolder = EmbeddedSelectionHolder(MainThreadSavedStateHandle(savedStateHandle))
+        val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
         selectionHolder.set(loadedState?.selection)
         val confirmationStateHolder = EmbeddedConfirmationStateHolder(
-            savedStateHandle = MainThreadSavedStateHandle(savedStateHandle),
+            savedStateHandle = savedStateHandle,
             selectionHolder = selectionHolder,
             coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
         )
