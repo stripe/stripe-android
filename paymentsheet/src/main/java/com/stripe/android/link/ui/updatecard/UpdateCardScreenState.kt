@@ -1,19 +1,15 @@
 package com.stripe.android.link.ui.updatecard
 
 import androidx.compose.runtime.Immutable
+import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.paymentsheet.CardUpdateParams
 
 @Immutable
 internal data class UpdateCardScreenState(
-    val paymentDetailsId: String,
+    val payload: Payload? = null,
+    val cardUpdateParams: CardUpdateParams? = null,
 ) {
-
-    internal companion object {
-        fun create(
-            paymentDetailsId: String
-        ): UpdateCardScreenState {
-            return UpdateCardScreenState(
-                paymentDetailsId = paymentDetailsId
-            )
-        }
-    }
+    data class Payload(
+        val paymentDetails: ConsumerPaymentDetails.Card
+    )
 }
