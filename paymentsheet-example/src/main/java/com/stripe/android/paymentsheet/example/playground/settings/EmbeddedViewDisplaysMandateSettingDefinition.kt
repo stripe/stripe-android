@@ -1,10 +1,8 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal object EmbeddedViewDisplaysMandateSettingDefinition : BooleanSettingsDefinition(
     key = "embeddedViewDisplaysMandate",
     displayName = "Embedded View Displays Mandate",

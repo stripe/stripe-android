@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
@@ -33,7 +32,6 @@ internal object LinkSettingsDefinition : BooleanSettingsDefinition(
         )
     }
 
-    @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
     override fun configure(
         value: Boolean,
         configurationBuilder: EmbeddedPaymentElement.Configuration.Builder,
