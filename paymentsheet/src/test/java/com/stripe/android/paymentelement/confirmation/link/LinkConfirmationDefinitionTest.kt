@@ -23,12 +23,15 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.RecordingLinkPaymentLauncher
 import com.stripe.android.utils.RecordingLinkStore
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
@@ -36,6 +39,9 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 
 internal class LinkConfirmationDefinitionTest {
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
+
     @Test
     fun `'key' should be 'Link'`() {
         val definition = createLinkConfirmationDefinition()
@@ -300,7 +306,7 @@ internal class LinkConfirmationDefinitionTest {
         verify(linkAccountHolder, times(0)).set(any())
     }
 
-    private fun test(test: suspend Scenario.() -> Unit) = runTest {
+    private fun test(test: suspend Scenario.() -> Unit) = runTest(StandardTestDispatcher()) {
         RecordingLinkPaymentLauncher.test {
             val launcherScenario = this
 
