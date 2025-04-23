@@ -12,7 +12,6 @@ import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.SecondaryButton
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.CardDetailsEditUI
 import com.stripe.android.paymentsheet.ui.EditCardDetailsInteractor
 import com.stripe.android.R as StripeR

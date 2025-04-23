@@ -6,10 +6,6 @@ import com.stripe.android.paymentsheet.CardUpdateParams
 
 @Immutable
 internal data class UpdateCardScreenState(
-    val payload: Payload? = null,
+    val paymentDetails: ConsumerPaymentDetails.Card? = null,
     val cardUpdateParams: CardUpdateParams? = null,
-) {
-    data class Payload(
-        val paymentDetails: ConsumerPaymentDetails.Card
-    )
-}
+)
