@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
@@ -43,7 +42,6 @@ const val TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT = "TEST_TAG_PAYMENT_METHOD_EMB
 
 internal const val EMBEDDED_MANDATE_TEXT_TEST_TAG = "EMBEDDED_MANDATE"
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
     interactor: PaymentMethodVerticalLayoutInteractor,
@@ -91,7 +89,6 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
     )
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @VisibleForTesting
 @Composable
 internal fun PaymentMethodEmbeddedLayoutUI(
@@ -139,7 +136,6 @@ internal fun PaymentMethodEmbeddedLayoutUI(
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 private fun OptionalEmbeddedDivider(rowStyle: Embedded.RowStyle) {
     if (rowStyle.hasSeparators()) {
@@ -172,7 +168,6 @@ private fun EmbeddedMandate(
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 private fun Embedded.RowStyle.bottomSeparatorEnabled(): Boolean {
     return when (this) {
         is Embedded.RowStyle.FloatingButton -> false
@@ -181,7 +176,6 @@ private fun Embedded.RowStyle.bottomSeparatorEnabled(): Boolean {
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 private fun Embedded.RowStyle.topSeparatorEnabled(): Boolean {
     return when (this) {
         is Embedded.RowStyle.FloatingButton -> false
@@ -190,7 +184,6 @@ private fun Embedded.RowStyle.topSeparatorEnabled(): Boolean {
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 private fun Embedded.RowStyle.separatorThickness(): Dp {
     return when (this) {
         is Embedded.RowStyle.FloatingButton -> 0.dp
@@ -199,7 +192,6 @@ private fun Embedded.RowStyle.separatorThickness(): Dp {
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 private fun Embedded.RowStyle.separatorColor(isDarkMode: Boolean): Int {
     return when (this) {
         is Embedded.RowStyle.FloatingButton -> 0
@@ -208,7 +200,6 @@ private fun Embedded.RowStyle.separatorColor(isDarkMode: Boolean): Int {
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 private fun Embedded.RowStyle.startSeparatorInset(): Dp {
     return when (this) {
         is Embedded.RowStyle.FloatingButton -> 0.dp
@@ -217,7 +208,6 @@ private fun Embedded.RowStyle.startSeparatorInset(): Dp {
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 private fun Embedded.RowStyle.endSeparatorInset(): Dp {
     return when (this) {
         is Embedded.RowStyle.FloatingButton -> 0.dp
@@ -226,7 +216,6 @@ private fun Embedded.RowStyle.endSeparatorInset(): Dp {
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 internal fun EmbeddedSavedPaymentMethodRowButton(
     paymentMethods: List<DisplayablePaymentMethod>,
@@ -260,7 +249,6 @@ internal fun EmbeddedSavedPaymentMethodRowButton(
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
     paymentMethods: List<DisplayablePaymentMethod>,
@@ -311,7 +299,6 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 private val RowStyle.viewMoreShowsChevron: Boolean
     get() = when (this) {
         is RowStyle.FloatingButton -> true

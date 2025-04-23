@@ -1,10 +1,8 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal object EmbeddedFormSheetActionSettingDefinition :
     PlaygroundSettingDefinition<
         EmbeddedFormSheetActionSettingDefinition.FormSheetAction

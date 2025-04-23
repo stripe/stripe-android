@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
@@ -21,7 +20,6 @@ import com.stripe.android.uicore.strings.resolve
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON = "TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON"
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 internal fun NewPaymentMethodRowButton(
     isEnabled: Boolean,
@@ -56,7 +54,6 @@ internal fun NewPaymentMethodRowButton(
     )
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 internal fun NewPaymentMethodRowButton(
     isEnabled: Boolean,

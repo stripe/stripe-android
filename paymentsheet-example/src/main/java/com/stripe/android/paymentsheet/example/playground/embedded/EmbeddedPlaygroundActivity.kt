@@ -35,7 +35,6 @@ import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
 import com.stripe.android.paymentsheet.CreateIntentResult
@@ -60,7 +59,6 @@ import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSe
 import kotlinx.coroutines.launch
 
 @OptIn(
-    ExperimentalEmbeddedPaymentElementApi::class,
     ExperimentalCustomPaymentMethodsApi::class,
     ExperimentalAnalyticEventCallbackApi::class,
     WalletButtonsPreview::class,

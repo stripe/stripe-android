@@ -6,13 +6,11 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedResultCallbackHelper
 import com.stripe.android.paymentelement.embedded.EmbeddedResultCallbackHelper
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class DefaultEmbeddedResultCallbackHelperTest {
 
     @Test
