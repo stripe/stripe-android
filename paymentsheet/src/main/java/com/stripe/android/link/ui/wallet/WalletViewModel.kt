@@ -267,8 +267,8 @@ internal class WalletViewModel @Inject constructor(
 
     fun onUpdateClicked(item: ConsumerPaymentDetails.PaymentDetails) {
         navigationManager.tryNavigateTo(
-            route = LinkScreen.Update(
-                mapOf(LinkScreen.EXTRA_PAYMENT_DETAILS to item.id)
+            route = LinkScreen.UpdateCard(
+                paymentDetailsId = item.id
             ),
         )
     }

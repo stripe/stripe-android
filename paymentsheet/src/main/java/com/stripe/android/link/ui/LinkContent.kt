@@ -36,8 +36,8 @@ import com.stripe.android.link.ui.paymentmenthod.PaymentMethodScreen
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodViewModel
 import com.stripe.android.link.ui.signup.SignUpScreen
 import com.stripe.android.link.ui.signup.SignUpViewModel
-import com.stripe.android.link.ui.update.UpdateScreen
-import com.stripe.android.link.ui.update.UpdateViewModel
+import com.stripe.android.link.ui.updatecard.UpdateCardScreen
+import com.stripe.android.link.ui.updatecard.UpdateCardScreenViewModel
 import com.stripe.android.link.ui.verification.VerificationScreen
 import com.stripe.android.link.ui.verification.VerificationViewModel
 import com.stripe.android.link.ui.wallet.WalletScreen
@@ -154,11 +154,11 @@ private fun Screens(
         }
 
         composable(
-            LinkScreen.Update.route
+            LinkScreen.UpdateCard.route
         ) { backStackEntry ->
             val paymentDetailsId = backStackEntry.arguments?.getString(EXTRA_PAYMENT_DETAILS)
                 ?: return@composable dismissWithResult(noPaymentDetailsResult())
-            UpdateRoute(
+            UpdateCardRoute(
                 paymentDetailsId = paymentDetailsId
             )
         }
@@ -238,14 +238,14 @@ private fun VerificationRoute(
 }
 
 @Composable
-private fun UpdateRoute(paymentDetailsId: String) {
-    val viewModel: UpdateViewModel = linkViewModel { parentComponent ->
-        UpdateViewModel.factory(
+private fun UpdateCardRoute(paymentDetailsId: String) {
+    val viewModel: UpdateCardScreenViewModel = linkViewModel { parentComponent ->
+        UpdateCardScreenViewModel.factory(
             parentComponent = parentComponent,
             paymentDetailsId = paymentDetailsId,
         )
     }
-    UpdateScreen(
+    UpdateCardScreen(
         viewModel = viewModel,
     )
 }

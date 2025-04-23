@@ -1,4 +1,4 @@
-package com.stripe.android.link.ui.update
+package com.stripe.android.link.ui.updatecard
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
@@ -14,15 +14,15 @@ import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.paymentsheet.R
 
 @Composable
-internal fun UpdateScreen(viewModel: UpdateViewModel) {
-    UpdateScreenBody(
+internal fun UpdateCardScreen(viewModel: UpdateCardScreenViewModel) {
+    UpdateCardScreenBody(
         onUpdateClicked = viewModel::onUpdateClicked,
         onCancelClicked = viewModel::onCancelClicked,
     )
 }
 
 @Composable
-internal fun UpdateScreenBody(
+internal fun UpdateCardScreenBody(
     onUpdateClicked: () -> Unit,
     onCancelClicked: () -> Unit,
 ) {
@@ -30,19 +30,18 @@ internal fun UpdateScreenBody(
         Text(
             modifier = Modifier
                 .padding(bottom = 32.dp),
-            text = stringResource(R.string.stripe_wallet_update_card),
+            text = stringResource(com.stripe.android.R.string.stripe_link_update_card_title),
             style = MaterialTheme.typography.h2
         )
 
         PrimaryButton(
             modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
-            label = stringResource(R.string.stripe_wallet_update_card),
+            label = stringResource(com.stripe.android.R.string.stripe_link_update_card_confirm_cta),
             state = PrimaryButtonState.Enabled,
             onButtonClick = onUpdateClicked
         )
 
         SecondaryButton(
-            modifier = Modifier.padding(bottom = 16.dp),
             label = stringResource(com.stripe.android.R.string.stripe_cancel),
             enabled = true,
             onClick = onCancelClicked

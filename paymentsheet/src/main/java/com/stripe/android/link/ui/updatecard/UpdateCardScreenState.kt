@@ -1,17 +1,17 @@
-package com.stripe.android.link.ui.update
+package com.stripe.android.link.ui.updatecard
 
 import androidx.compose.runtime.Immutable
 
 @Immutable
-internal data class UpdateScreenState(
+internal data class UpdateCardScreenState(
     val paymentDetailsId: String,
 ) {
 
     internal companion object {
         fun create(
             paymentDetailsId: String
-        ): UpdateScreenState {
-            return UpdateScreenState(
+        ): UpdateCardScreenState {
+            return UpdateCardScreenState(
                 paymentDetailsId = paymentDetailsId
             )
         }

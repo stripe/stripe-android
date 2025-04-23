@@ -1,4 +1,4 @@
-package com.stripe.android.link.ui.update
+package com.stripe.android.link.ui.updatecard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -11,13 +11,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
-internal class UpdateViewModel @Inject constructor(
+internal class UpdateCardScreenViewModel @Inject constructor(
     private val logger: Logger,
-    initialState: UpdateScreenState,
+    initialState: UpdateCardScreenState,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(initialState)
-    val state: StateFlow<UpdateScreenState> = _state.asStateFlow()
+    val state: StateFlow<UpdateCardScreenState> = _state.asStateFlow()
 
     init {
         logger.info("paymentDetailsId: ${initialState.paymentDetailsId}")
@@ -37,8 +37,8 @@ internal class UpdateViewModel @Inject constructor(
         ): ViewModelProvider.Factory {
             return viewModelFactory {
                 initializer {
-                    UpdateViewModel(
-                        initialState = UpdateScreenState.create(paymentDetailsId),
+                    UpdateCardScreenViewModel(
+                        initialState = UpdateCardScreenState.create(paymentDetailsId),
                         logger = parentComponent.logger
                     )
                 }

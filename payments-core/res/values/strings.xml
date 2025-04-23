@@ -186,4 +186,10 @@
   <string name="stripe_update">Update</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Verify your payment</string>
+  <!-- Menu option to update card on the wallet screen on Link native -->
+  <string name="stripe_link_wallet_menu_action_update_card">Update card</string>
+  <!-- Title for the update card screen in Link native -->
+  <string name="stripe_link_update_card_title">Update card</string>
+  <!-- Confirm CTA for the update card screen in Link native -->
+  <string name="stripe_link_update_card_confirm_cta">Update card</string>
 </resources>
