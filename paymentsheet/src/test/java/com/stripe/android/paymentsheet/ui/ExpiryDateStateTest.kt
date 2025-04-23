@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import org.junit.Test
 
@@ -139,11 +138,12 @@ internal class ExpiryDateStateTest {
         assertThat(state.expiryYear).isEqualTo(2025)
     }
 
-    private fun createCard(expiryMonth: Int?, expiryYear: Int?): PaymentMethod.Card {
-        return PaymentMethodFixtures.CARD_WITH_NETWORKS.copy(
+    private fun createCard(expiryMonth: Int?, expiryYear: Int?): EditCardPayload {
+        val card = PaymentMethodFixtures.CARD_WITH_NETWORKS.copy(
             expiryMonth = expiryMonth,
             expiryYear = expiryYear
         )
+        return EditCardPayload.create(card, null)
     }
 }
 

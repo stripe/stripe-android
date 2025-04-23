@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
+import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArrayToList
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
@@ -19,12 +20,19 @@ private const val FIELD_BANK_ACCOUNT_LAST_4 = "last4"
 private const val FIELD_BANK_ACCOUNT_BANK_NAME = "bank_name"
 
 private const val FIELD_BILLING_ADDRESS = "billing_address"
+private const val FIELD_BILLING_EMAIL_ADDRESS = "billing_email_address"
 private const val FIELD_ADDRESS_COUNTRY_CODE = "country_code"
 private const val FIELD_ADDRESS_POSTAL_CODE = "postal_code"
+private const val FIELD_ADDRESS_NAME = "name"
+private const val FIELD_ADDRESS_LINE_1 = "line1"
+private const val FIELD_ADDRESS_LINE_2 = "line2"
+private const val FIELD_ADDRESS_LOCALITY = "locality"
+private const val FIELD_ADDRESS_ADMINISTRATIVE_AREA = "administrative_area"
 
 private const val FIELD_CARD_EXPIRY_YEAR = "exp_year"
 private const val FIELD_CARD_EXPIRY_MONTH = "exp_month"
 private const val FIELD_CARD_BRAND = "brand"
+private const val FIELD_CARD_NETWORKS = "networks"
 private const val FIELD_CARD_CHECKS = "checks"
 private const val FIELD_CARD_CVC_CHECK = "cvc_check"
 
@@ -53,15 +61,18 @@ object ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails
                 "card" -> {
                     val cardDetails = json.getJSONObject(FIELD_CARD_DETAILS)
                     val checks = cardDetails.optJSONObject(FIELD_CARD_CHECKS)
+                    val networks = jsonArrayToList(cardDetails.optJSONArray(FIELD_CARD_NETWORKS))
 
                     ConsumerPaymentDetails.Card(
                         id = json.getString(FIELD_ID),
                         expiryYear = cardDetails.getInt(FIELD_CARD_EXPIRY_YEAR),
                         expiryMonth = cardDetails.getInt(FIELD_CARD_EXPIRY_MONTH),
                         brand = CardBrand.fromCode(cardBrandFix(cardDetails.getString(FIELD_CARD_BRAND))),
+                        networks = networks,
                         last4 = cardDetails.getString(FIELD_CARD_LAST_4),
                         cvcCheck = CvcCheck.fromCode(checks?.getString(FIELD_CARD_CVC_CHECK)),
                         billingAddress = parseBillingAddress(json),
+                        billingEmailAddress = optString(json, FIELD_BILLING_EMAIL_ADDRESS),
                         isDefault = json.optBoolean(FIELD_IS_DEFAULT),
                     )
                 }
@@ -82,8 +93,13 @@ object ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails
     private fun parseBillingAddress(json: JSONObject) =
         json.optJSONObject(FIELD_BILLING_ADDRESS)?.let { address ->
             ConsumerPaymentDetails.BillingAddress(
-                optString(address, FIELD_ADDRESS_COUNTRY_CODE)?.let { CountryCode(it) },
-                optString(address, FIELD_ADDRESS_POSTAL_CODE)
+                name = optString(address, FIELD_ADDRESS_NAME),
+                line1 = optString(address, FIELD_ADDRESS_LINE_1),
+                line2 = optString(address, FIELD_ADDRESS_LINE_2),
+                locality = optString(address, FIELD_ADDRESS_LOCALITY),
+                postalCode = optString(address, FIELD_ADDRESS_POSTAL_CODE),
+                administrativeArea = optString(address, FIELD_ADDRESS_ADMINISTRATIVE_AREA),
+                countryCode = optString(address, FIELD_ADDRESS_COUNTRY_CODE)?.let { CountryCode(it) },
             )
         }
 

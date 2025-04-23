@@ -1,6 +1,7 @@
 package com.stripe.android.model.parsers
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.ConsumerSession
 import org.json.JSONObject
@@ -23,6 +24,8 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
             emailAddress = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_EMAIL),
             redactedFormattedPhoneNumber = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_FORMATTED_PHONE),
             redactedPhoneNumber = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_PHONE),
+            unredactedPhoneNumber = optString(consumerSessionJson, FIELD_CONSUMER_SESSION_UNREDACTED_PHONE),
+            phoneNumberCountry = optString(consumerSessionJson, FIELD_CONSUMER_SESSION_PHONE_COUNTRY),
             verificationSessions = verificationSession,
         )
     }
@@ -45,6 +48,8 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
         private const val FIELD_CONSUMER_SESSION_PHONE = "redacted_phone_number"
         private const val FIELD_CONSUMER_SESSION_FORMATTED_PHONE = "redacted_formatted_phone_number"
         private const val FIELD_CONSUMER_SESSION_VERIFICATION_SESSIONS = "verification_sessions"
+        private const val FIELD_CONSUMER_SESSION_UNREDACTED_PHONE = "unredacted_phone_number"
+        private const val FIELD_CONSUMER_SESSION_PHONE_COUNTRY = "phone_number_country"
 
         private const val FIELD_VERIFICATION_SESSION_TYPE = "type"
         private const val FIELD_VERIFICATION_SESSION_STATE = "state"

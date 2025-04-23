@@ -49,6 +49,21 @@ internal fun PaymentMethod.Card?.getSavedPaymentMethodIcon(
 }
 
 @DrawableRes
+internal fun EditCardPayload.getSavedPaymentMethodIcon(
+    forVerticalMode: Boolean = false,
+    showNightIcon: Boolean? = null,
+): Int {
+    // Vertical mode icons are the same for light & dark
+    return if (forVerticalMode) {
+        cardBrand.getCardBrandIconForVerticalMode()
+    } else {
+        cardBrand.getCardBrandIconForHorizontalMode(
+            showNightIcon = showNightIcon,
+        )
+    }
+}
+
+@DrawableRes
 internal fun CardBrand.getCardBrandIcon(): Int {
     return this.getCardBrandIconRef()
 }

@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
 import com.stripe.android.CardBrandFilter
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.CoroutineScope
 
@@ -14,15 +13,14 @@ internal class FakeEditCardDetailsInteractorFactory : EditCardDetailsInteractor.
         isModifiable: Boolean,
         areExpiryDateAndAddressModificationSupported: Boolean,
         cardBrandFilter: CardBrandFilter,
-        card: PaymentMethod.Card,
-        billingDetails: PaymentMethod.BillingDetails?,
+        payload: EditCardPayload,
         addressCollectionMode: PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode,
         onBrandChoiceChanged: CardBrandCallback,
         onCardUpdateParamsChanged: CardUpdateParamsCallback
     ): EditCardDetailsInteractor {
         this.onCardUpdateParamsChanged = onCardUpdateParamsChanged
         return FakeEditCardDetailsInteractor(
-            card = card,
+            payload = payload,
             shouldShowCardBrandDropdown = isModifiable,
             expiryDateEditEnabled = areExpiryDateAndAddressModificationSupported,
         )
