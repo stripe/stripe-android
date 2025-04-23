@@ -103,9 +103,6 @@ internal fun LinkContent(
                         navController = navController,
                         goBack = goBack,
                         moveToWeb = moveToWeb,
-                        navigate = { screen ->
-                            navigate(screen, false)
-                        },
                         navigateAndClearStack = { screen ->
                             navigate(screen, true)
                         },
@@ -130,7 +127,6 @@ private fun Screens(
     navController: NavHostController,
     getLinkAccount: () -> LinkAccount?,
     goBack: () -> Unit,
-    navigate: (route: LinkScreen) -> Unit,
     navigateAndClearStack: (route: LinkScreen) -> Unit,
     dismissWithResult: (LinkActivityResult) -> Unit,
     showBottomSheetContent: (BottomSheetContent?) -> Unit,

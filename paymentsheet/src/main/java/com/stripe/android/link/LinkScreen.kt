@@ -1,10 +1,10 @@
 package com.stripe.android.link
 
-import androidx.navigation.NamedNavArgument
-import kotlin.collections.List
 import androidx.core.net.toUri
+import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import kotlin.collections.List
 
 internal sealed class LinkScreen(
     protected val baseRoute: String,
@@ -19,7 +19,6 @@ internal sealed class LinkScreen(
     operator fun invoke(
         extraArgs: Map<String, String?> = emptyMap()
     ): String = baseRoute.appendParamValues(extraArgs)
-
 
     data object Loading : LinkScreen("loading")
     data object Verification : LinkScreen("verification")
