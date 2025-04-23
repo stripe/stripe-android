@@ -1,12 +1,10 @@
 package com.stripe.android.core.networking
 
 import android.content.Context
-import android.content.SharedPreferences
 import androidx.annotation.RestrictTo
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.util.UUID
 import javax.inject.Inject
@@ -22,15 +20,20 @@ interface AnalyticsRequestV2Storage {
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class RealAnalyticsRequestV2Storage private constructor(
-    private val sharedPrefs: SharedPreferences,
+    private val context: Context,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : AnalyticsRequestV2Storage {
 
-    @Inject constructor(context: Context) : this(
-        sharedPrefs = context.getSharedPreferences(
+    private val sharedPrefs by lazy {
+        context.getSharedPreferences(
             AnalyticsRequestV2StorageName,
             Context.MODE_PRIVATE,
-        ),
+        )
+    }
+
+    @Inject constructor(context: Context) : this(
+        context = context,
+        dispatcher = Dispatchers.IO,
     )
 
     override suspend fun store(request: AnalyticsRequestV2): String = withContext(dispatcher) {

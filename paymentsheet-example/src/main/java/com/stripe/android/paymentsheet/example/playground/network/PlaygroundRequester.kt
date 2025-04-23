@@ -16,6 +16,8 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomerSetti
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 
 internal class PlaygroundRequester(
@@ -35,10 +37,12 @@ internal class PlaygroundRequester(
     suspend fun fetch(): kotlin.Result<PlaygroundState> {
         val requestBody = playgroundSettings.checkoutRequest()
 
-        val apiResponse = Fuel.post(baseUrl + "checkout")
-            .jsonBody(Json.encodeToString(CheckoutRequest.serializer(), requestBody))
-            .suspendable()
-            .awaitModel(CheckoutResponse.serializer())
+        val apiResponse = withContext(Dispatchers.IO) {
+            Fuel.post(baseUrl + "checkout")
+                .jsonBody(Json.encodeToString(CheckoutRequest.serializer(), requestBody))
+                .suspendable()
+                .awaitModel(CheckoutResponse.serializer())
+        }
         when (apiResponse) {
             is Result.Failure -> {
                 return kotlin.Result.failure(apiResponse.getException())
@@ -50,10 +54,12 @@ internal class PlaygroundRequester(
 
                 // Init PaymentConfiguration with the publishable key returned from the backend,
                 // which will be used on all Stripe API calls
-                PaymentConfiguration.init(
-                    applicationContext,
-                    checkoutResponse.publishableKey,
-                )
+                withContext(Dispatchers.IO) {
+                    PaymentConfiguration.init(
+                        applicationContext,
+                        checkoutResponse.publishableKey,
+                    )
+                }
 
                 val customerId = checkoutResponse.customerId
                 val updatedSettings = playgroundSettings.playgroundSettings()
