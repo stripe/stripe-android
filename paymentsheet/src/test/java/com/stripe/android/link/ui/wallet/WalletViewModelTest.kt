@@ -128,11 +128,7 @@ class WalletViewModelTest {
         vm.onUpdateClicked(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD)
 
         navigationManager.assertNavigatedTo(
-            route = LinkScreen.UpdateCard(
-                extraArgs = mapOf(
-                    LinkScreen.EXTRA_PAYMENT_DETAILS to TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.id
-                )
-            )
+            route = LinkScreen.UpdateCard(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.id)
         )
     }
 
