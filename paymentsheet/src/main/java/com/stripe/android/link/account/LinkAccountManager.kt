@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.StateFlow
 internal interface LinkAccountManager {
     val linkAccount: StateFlow<LinkAccount?>
     val accountStatus: Flow<AccountStatus>
+    val paymentDetails: StateFlow<ConsumerPaymentDetails?>
     var consumerPublishableKey: String?
 
     /**

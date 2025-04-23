@@ -25,7 +25,9 @@ import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.model.amount
 import com.stripe.android.paymentsheet.model.currency
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -41,7 +43,11 @@ internal class DefaultLinkAccountManager @Inject constructor(
     private val linkEventsReporter: LinkEventsReporter,
     private val errorReporter: ErrorReporter,
 ) : LinkAccountManager {
+
     override val linkAccount: StateFlow<LinkAccount?> = linkAccountHolder.linkAccount
+
+    private val _paymentDetails: MutableStateFlow<ConsumerPaymentDetails?> = MutableStateFlow(null)
+    override val paymentDetails: StateFlow<ConsumerPaymentDetails?> = _paymentDetails.asStateFlow()
 
     /**
      * The publishable key for the signed in Link account.
@@ -334,7 +340,9 @@ internal class DefaultLinkAccountManager @Inject constructor(
             paymentMethodTypes = paymentMethodTypes,
             consumerSessionClientSecret = clientSecret,
             consumerPublishableKey = consumerPublishableKey
-        )
+        ).map { paymentDetailsList ->
+            paymentDetailsList.also { _paymentDetails.value = it }
+        }
     }
 
     override suspend fun deletePaymentDetails(paymentDetailsId: String): Result<Unit> {
@@ -369,6 +377,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         } ?: run {
             withContext(Dispatchers.Main.immediate) {
                 linkAccountHolder.set(null)
+                _paymentDetails.value = null
             }
             consumerPublishableKey = null
             null
