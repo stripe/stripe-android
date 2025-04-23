@@ -248,8 +248,6 @@ private class FinancialConnectionsManifestRepositoryImpl(
                 "emit_events" to true,
                 "locale" to locale.toLanguageTag(),
                 "mobile" to mapOf(
-                    // This ensures backend returns v3 responses.
-                    "forced_authflow_version" to "v3",
                     PARAMS_FULLSCREEN to true,
                     PARAMS_HIDE_CLOSE_BUTTON to true,
                     PARAMS_SUPPORT_APP_VERIFICATION to supportsAppVerification,
