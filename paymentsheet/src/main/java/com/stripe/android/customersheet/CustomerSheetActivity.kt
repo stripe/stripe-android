@@ -20,7 +20,6 @@ import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.fadeOut
-import kotlinx.coroutines.Dispatchers
 
 internal class CustomerSheetActivity : AppCompatActivity() {
 
@@ -78,7 +77,7 @@ internal class CustomerSheetActivity : AppCompatActivity() {
                     }
                 )
 
-                val result by viewModel.result.collectAsState(Dispatchers.Main)
+                val result by viewModel.result.collectAsState()
 
                 LaunchedEffect(result) {
                     result?.let { result ->
