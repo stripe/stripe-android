@@ -12,11 +12,13 @@ import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
+import com.stripe.android.link.utils.TestNavigationManager
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.uicore.navigation.NavigationManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -110,18 +112,32 @@ class WalletViewModelTest {
 
     @Test
     fun `viewmodel should open payment method screen when onAddNewPaymentMethodClicked`() = runTest(dispatcher) {
-        var navScreen: LinkScreen? = null
-        fun navigate(screen: LinkScreen) {
-            navScreen = screen
-        }
-
-        val vm = createViewModel(navigate = ::navigate)
+        val navigationManager = TestNavigationManager()
+        val vm = createViewModel(navigationManager = navigationManager)
 
         vm.onAddNewPaymentMethodClicked()
 
-        assertThat(navScreen).isEqualTo(LinkScreen.PaymentMethod)
+        navigationManager.assertNavigatedTo(LinkScreen.PaymentMethod.route)
     }
 
+    @Test
+    fun `viewModel should open update screen when onUpdateClicked`() = runTest(dispatcher) {
+        val navigationManager = TestNavigationManager()
+        val vm = createViewModel(navigationManager = navigationManager)
+
+
+        vm.onUpdateClicked(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD)
+
+        navigationManager.assertNavigatedTo(
+            route = LinkScreen.Update(
+                extraArgs = mapOf(
+                    LinkScreen.EXTRA_PAYMENT_DETAILS to TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.id
+                )
+            )
+        )
+    }
+
+    @Test
     fun `expiryDateController updates uiState when input changes`() = runTest(dispatcher) {
         val viewModel = createViewModel()
 
@@ -494,9 +510,9 @@ class WalletViewModelTest {
 
     private fun createViewModel(
         linkAccountManager: WalletLinkAccountManager = WalletLinkAccountManager(),
+        navigationManager: NavigationManager = TestNavigationManager(),
         logger: Logger = FakeLogger(),
         linkConfirmationHandler: LinkConfirmationHandler = FakeLinkConfirmationHandler(),
-        navigate: (route: LinkScreen) -> Unit = {},
         navigateAndClearStack: (route: LinkScreen) -> Unit = {},
         dismissWithResult: (LinkActivityResult) -> Unit = {}
     ): WalletViewModel {
@@ -506,9 +522,9 @@ class WalletViewModelTest {
             linkAccountManager = linkAccountManager,
             linkConfirmationHandler = linkConfirmationHandler,
             logger = logger,
-            navigate = navigate,
             navigateAndClearStack = navigateAndClearStack,
-            dismissWithResult = dismissWithResult
+            dismissWithResult = dismissWithResult,
+            navigationManager = navigationManager
         )
     }
 

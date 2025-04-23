@@ -30,6 +30,7 @@ import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.PrimaryButtonTag
+import com.stripe.android.link.utils.TestNavigationManager
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
@@ -363,7 +364,8 @@ internal class WalletScreenTest {
 
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager,
-            linkConfirmationHandler = linkConfirmationHandler
+            linkConfirmationHandler = linkConfirmationHandler,
+            navigationManager = TestNavigationManager()
         )
         composeTestRule.setContent {
             WalletScreen(
@@ -400,7 +402,8 @@ internal class WalletScreenTest {
 
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager,
-            linkConfirmationHandler = linkConfirmationHandler
+            linkConfirmationHandler = linkConfirmationHandler,
+            navigationManager = TestNavigationManager()
         )
         composeTestRule.setContent {
             WalletScreen(
@@ -449,7 +452,7 @@ internal class WalletScreenTest {
 
     @Test
     fun `wallet menu is displayed on payment method menu clicked`() = runTest(dispatcher) {
-        val viewModel = createViewModel()
+        val viewModel = createViewModel(navigationManager = TestNavigationManager())
         composeTestRule.setContent {
             var sheetContent by remember { mutableStateOf<BottomSheetContent?>(null) }
             Box {
@@ -629,6 +632,7 @@ internal class WalletScreenTest {
             hideBottomSheetContent = hideBottomSheetContent,
             onAddNewPaymentMethodClicked = {},
             onDismissAlert = {},
+            onUpdateClicked = {},
             expiryDateController = SimpleTextFieldController(DateConfig()),
             cvcController = CvcController(cardBrandFlow = stateFlowOf(CardBrand.Visa))
         )
@@ -636,7 +640,8 @@ internal class WalletScreenTest {
 
     private fun createViewModel(
         linkAccountManager: LinkAccountManager = FakeLinkAccountManager(),
-        linkConfirmationHandler: LinkConfirmationHandler = FakeLinkConfirmationHandler()
+        linkConfirmationHandler: LinkConfirmationHandler = FakeLinkConfirmationHandler(),
+        navigationManager: TestNavigationManager = TestNavigationManager()
     ): WalletViewModel {
         return WalletViewModel(
             configuration = TestFactory.LINK_CONFIGURATION,
@@ -644,9 +649,9 @@ internal class WalletScreenTest {
             linkAccountManager = linkAccountManager,
             linkConfirmationHandler = linkConfirmationHandler,
             logger = FakeLogger(),
-            navigate = {},
             navigateAndClearStack = {},
-            dismissWithResult = {}
+            dismissWithResult = {},
+            navigationManager = navigationManager
         )
     }
 

@@ -24,7 +24,9 @@ import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAction
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkScreen
+import com.stripe.android.link.LinkScreen.Companion.EXTRA_PAYMENT_DETAILS
 import com.stripe.android.link.NoLinkAccountFoundException
+import com.stripe.android.link.NoPaymentDetailsFoundException
 import com.stripe.android.link.linkViewModel
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
@@ -154,9 +156,11 @@ private fun Screens(
         composable(
             LinkScreen.Update.route
         ) { backStackEntry ->
-            val paymentDetailsId = backStackEntry.arguments?.getString(LinkScreen.EXTRA_PAYMENT_DETAILS)
-                ?: return@composable dismissWithResult(noLinkAccountResult())
-            UpdateRoute(paymentDetailsId)
+            val paymentDetailsId = backStackEntry.arguments?.getString(EXTRA_PAYMENT_DETAILS)
+                ?: return@composable dismissWithResult(noPaymentDetailsResult())
+            UpdateRoute(
+                paymentDetailsId = paymentDetailsId
+            )
         }
 
         composable(LinkScreen.Verification.route) {
@@ -301,6 +305,13 @@ private fun Loader() {
 private fun noLinkAccountResult(): LinkActivityResult {
     return LinkActivityResult.Failed(
         error = NoLinkAccountFoundException(),
+        linkAccountUpdate = LinkAccountUpdate.None
+    )
+}
+
+private fun noPaymentDetailsResult(): LinkActivityResult {
+    return LinkActivityResult.Failed(
+        error = NoPaymentDetailsFoundException(),
         linkAccountUpdate = LinkAccountUpdate.None
     )
 }
