@@ -4,7 +4,6 @@ import android.os.Parcelable
 import androidx.compose.runtime.Stable
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
@@ -98,7 +97,6 @@ internal sealed interface PlaygroundState : Parcelable {
             return snapshot.paymentSheetConfiguration(this)
         }
 
-        @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
         fun embeddedConfiguration(): EmbeddedPaymentElement.Configuration {
             return snapshot.embeddedConfiguration(this)
         }

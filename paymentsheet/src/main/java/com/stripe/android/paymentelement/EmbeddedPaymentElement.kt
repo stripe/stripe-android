@@ -40,7 +40,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
-@ExperimentalEmbeddedPaymentElementApi
 @EmbeddedPaymentElementScope
 class EmbeddedPaymentElement @Inject internal constructor(
     private val confirmationHelper: EmbeddedConfirmationHelper,
@@ -121,7 +120,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
      *
      * Creation can be completed with [rememberEmbeddedPaymentElement].
      */
-    @ExperimentalEmbeddedPaymentElementApi
     class Builder(
         /**
          * Called when the customer confirms the payment or setup.
@@ -182,7 +180,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
     /** Configuration for [EmbeddedPaymentElement] **/
     @Parcelize
     @Poko
-    @ExperimentalEmbeddedPaymentElementApi
     class Configuration internal constructor(
         internal val merchantDisplayName: String,
         internal val customer: PaymentSheet.CustomerConfiguration?,
@@ -205,7 +202,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val formSheetAction: FormSheetAction,
     ) : Parcelable {
         @Suppress("TooManyFunctions")
-        @ExperimentalEmbeddedPaymentElementApi
         class Builder(
             /**
              * Your customer-facing business name.
@@ -462,7 +458,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
      * payment method details. The sheet has a button at the bottom. [FormSheetAction] enumerates the actions the button
      * can perform.
      */
-    @ExperimentalEmbeddedPaymentElementApi
     enum class FormSheetAction {
 
         /**
@@ -480,12 +475,10 @@ class EmbeddedPaymentElement @Inject internal constructor(
     /**
      * The result of a [configure] call.
      */
-    @ExperimentalEmbeddedPaymentElementApi
     sealed interface ConfigureResult {
         /**
          * The configure succeeded.
          */
-        @ExperimentalEmbeddedPaymentElementApi
         class Succeeded internal constructor() : ConfigureResult
 
         /**
@@ -494,12 +487,10 @@ class EmbeddedPaymentElement @Inject internal constructor(
          * Your integration should retry with exponential backoff.
          */
         @Poko
-        @ExperimentalEmbeddedPaymentElementApi
         class Failed internal constructor(val error: Throwable) : ConfigureResult
     }
 
     @Poko
-    @ExperimentalEmbeddedPaymentElementApi
     class PaymentOptionDisplayData internal constructor(
         private val imageLoader: suspend () -> Drawable,
 
@@ -553,7 +544,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
     /**
      * The result of an attempt to confirm a [PaymentIntent] or [SetupIntent].
      */
-    @ExperimentalEmbeddedPaymentElementApi
     sealed interface Result {
         /**
          * The customer completed the payment or setup.
@@ -565,13 +555,11 @@ class EmbeddedPaymentElement @Inject internal constructor(
          *
          * See [Stripe's documentation](https://stripe.com/docs/payments/handling-payment-events).
          */
-        @ExperimentalEmbeddedPaymentElementApi
         class Completed internal constructor() : Result
 
         /**
          * The customer canceled the payment or setup attempt.
          */
-        @ExperimentalEmbeddedPaymentElementApi
         class Canceled internal constructor() : Result
 
         /**
@@ -580,14 +568,12 @@ class EmbeddedPaymentElement @Inject internal constructor(
          * @param error The error encountered by the customer.
          */
         @Poko
-        @ExperimentalEmbeddedPaymentElementApi
         class Failed internal constructor(val error: Throwable) : Result
     }
 
     /**
      * Callback that is invoked when a [Result] is available.
      */
-    @ExperimentalEmbeddedPaymentElementApi
     fun interface ResultCallback {
         fun onResult(result: Result)
     }
@@ -595,7 +581,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
     /**
      * Describes how you handle row selections in EmbeddedPaymentElement
      */
-    @ExperimentalEmbeddedPaymentElementApi
     abstract class RowSelectionBehavior internal constructor() {
         private object Default : RowSelectionBehavior()
 
@@ -640,7 +625,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
     /**
      * A [Parcelable] state used to reconfigure [EmbeddedPaymentElement] across activity boundaries.
      */
-    @ExperimentalEmbeddedPaymentElementApi
     @Poko
     @Parcelize
     class State internal constructor(
@@ -650,7 +634,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
     ) : Parcelable
 
     internal companion object {
-        @ExperimentalEmbeddedPaymentElementApi
         fun create(
             activity: Activity,
             activityResultCaller: ActivityResultCaller,

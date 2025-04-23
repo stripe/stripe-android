@@ -14,7 +14,6 @@ import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_SELECTION
 import com.stripe.android.model.PaymentMethodFixtures.LINK_INLINE_PAYMENT_SELECTION
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -281,7 +280,6 @@ class PaymentSheetEventTest {
         assertThat(config).containsEntry("customer_access_provider", "customer_session")
     }
 
-    @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
     @Test
     fun `Init event with embedded appearance should return expected params`() {
         val config = EmbeddedPaymentElement.Configuration.Builder("Example, Inc")
@@ -341,7 +339,6 @@ class PaymentSheetEventTest {
         }
     }
 
-    @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
     @Test
     fun `Init event with embedded should return expected params`() {
         val config = EmbeddedPaymentElement.Configuration.Builder("Example, Inc")
@@ -401,7 +398,6 @@ class PaymentSheetEventTest {
         }
     }
 
-    @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
     @Test
     fun `Init event with embedded immediateRowSelectionBehavior should return expected params`() {
         val config = EmbeddedPaymentElement.Configuration.Builder("Example, Inc")

@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
@@ -19,7 +18,6 @@ internal object AppearanceSettingsDefinition : PlaygroundSettingDefinition<Unit>
         configurationBuilder.appearance(AppearanceStore.state.toPaymentSheetAppearance())
     }
 
-    @ExperimentalEmbeddedPaymentElementApi
     override fun configure(
         value: Unit,
         configurationBuilder: EmbeddedPaymentElement.Configuration.Builder,

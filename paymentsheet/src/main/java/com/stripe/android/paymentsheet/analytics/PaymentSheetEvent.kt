@@ -14,7 +14,6 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.analyticsValue
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
@@ -42,7 +41,6 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                 }
         }
 
-        @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
         data class Embedded(
             private val isRowSelectionImmediateAction: Boolean,
             private val configuration: EmbeddedPaymentElement.Configuration,

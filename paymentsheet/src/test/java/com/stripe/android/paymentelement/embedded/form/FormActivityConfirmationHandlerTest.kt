@@ -7,7 +7,6 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
@@ -21,7 +20,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class FormActivityConfirmationHandlerTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()

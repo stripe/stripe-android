@@ -14,7 +14,6 @@ import com.stripe.android.link.verification.VerificationState.Render2FA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateHolder
@@ -279,7 +278,6 @@ internal class DefaultWalletButtonsInteractor(
             )
         }
 
-        @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
         fun create(
             linkInlineInteractor: LinkInlineInteractor,
             embeddedLinkHelper: EmbeddedLinkHelper,

@@ -7,7 +7,6 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.view.ActivityStarter
@@ -41,7 +40,6 @@ internal sealed interface FormResult : Parcelable {
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal object FormContract : ActivityResultContract<FormContract.Args, FormResult>() {
     internal const val EXTRA_ARGS: String = "extra_activity_args"
 

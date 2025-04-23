@@ -6,7 +6,6 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.embedded.EmbeddedResultCallbackHelper
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
@@ -39,7 +38,6 @@ internal interface EmbeddedSheetLauncher {
     )
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @EmbeddedPaymentElementScope
 internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     activityResultCaller: ActivityResultCaller,

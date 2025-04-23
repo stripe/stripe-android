@@ -40,7 +40,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.DefaultPaymentMethodLabel
@@ -52,7 +51,6 @@ import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.stripeColors
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 internal fun PaymentMethodRowButton(
     isEnabled: Boolean,
@@ -120,7 +118,6 @@ internal fun PaymentMethodRowButton(
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 private fun RowButtonOuterContent(
     style: RowStyle,
@@ -219,7 +216,6 @@ private fun RowButtonFloatingOuterContent(
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 private fun RowButtonRadioOuterContent(
     isEnabled: Boolean,
@@ -257,7 +253,6 @@ private fun RowButtonRadioOuterContent(
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 private fun RowButtonCheckmarkOuterContent(
     isSelected: Boolean,
@@ -288,7 +283,6 @@ private fun RowButtonCheckmarkOuterContent(
     )
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 private fun RowButtonChevronOuterContent(
     contentPaddingValues: PaddingValues,
@@ -345,7 +339,6 @@ private fun RowButtonWithEndIconOuterContent(
 /**
  * Icon, title, and subtitle if provided. Common across all PaymentMethodRowButton configurations
  */
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 private fun RowButtonInnerContent(
     isEnabled: Boolean,
@@ -379,7 +372,6 @@ private fun RowButtonInnerContent(
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 private fun TitleContent(
     title: String,
@@ -414,7 +406,6 @@ private fun TitleContent(
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Preview
@@ -477,14 +468,12 @@ private fun ButtonPreview() {
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 private fun RowStyle.getTitleTextColor() = when (this) {
     is RowStyle.FloatingButton -> MaterialTheme.stripeColors.onComponent
     else -> MaterialTheme.colors.onSurface
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 private fun RowStyle.getSubtitleTextColor() = when (this) {
     is RowStyle.FloatingButton -> MaterialTheme.stripeColors.placeholderText
