@@ -74,9 +74,7 @@ import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBackgroundColor
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
 
 @Composable
 internal fun PaymentSheetScreen(
@@ -118,9 +116,9 @@ private fun PaymentSheetScreen(
     scrollState: ScrollState,
     content: @Composable () -> Unit,
 ) {
-    val processing by viewModel.processing.collectAsState(Dispatchers.Main)
+    val processing by viewModel.processing.collectAsState()
 
-    val walletsProcessingState by viewModel.walletsProcessingState.collectAsState(Dispatchers.Main)
+    val walletsProcessingState by viewModel.walletsProcessingState.collectAsState()
 
     val density = LocalDensity.current
     var contentHeight by remember { mutableStateOf(0.dp) }
@@ -129,7 +127,7 @@ private fun PaymentSheetScreen(
 
     BottomSheetScaffold(
         topBar = {
-            val currentScreen by viewModel.navigationHandler.currentScreen.collectAsState(Dispatchers.Main)
+            val currentScreen by viewModel.navigationHandler.currentScreen.collectAsState()
             val topBarState by remember(currentScreen) {
                 currentScreen.topBarState()
             }.collectAsState()
@@ -423,7 +421,7 @@ internal fun Wallet(
 
 @Composable
 private fun PrimaryButton(viewModel: BaseSheetViewModel) {
-    val uiState = viewModel.primaryButtonUiState.collectAsState(Dispatchers.Main)
+    val uiState = viewModel.primaryButtonUiState.collectAsState()
 
     val modifier = Modifier
         .testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
@@ -462,17 +460,13 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
 
     LaunchedEffect(viewModel, button) {
         viewModel.primaryButtonUiState.collect { uiState ->
-            withContext(Dispatchers.Main) {
-                button?.updateUiState(uiState)
-            }
+            button?.updateUiState(uiState)
         }
     }
 
     LaunchedEffect(viewModel, button) {
         (viewModel as? PaymentSheetViewModel)?.buyButtonState?.collect { state ->
-            withContext(Dispatchers.Main) {
-                button?.updateState(state?.convert())
-            }
+            button?.updateState(state?.convert())
         }
     }
 }

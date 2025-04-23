@@ -82,10 +82,12 @@ internal class PaymentSheetPlaygroundViewModel(
         }
 
     init {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             playgroundSettingsFlow.value =
                 PaymentSheetPlaygroundUrlHelper.settingsFromUri(launchUri)
-                    ?: PlaygroundSettings.createFromSharedPreferences(application)
+                    ?: withContext(Dispatchers.IO) {
+                        PlaygroundSettings.createFromSharedPreferences(application)
+                    }
         }
     }
 
@@ -581,24 +583,26 @@ internal class PaymentSheetPlaygroundViewModel(
         }
     }
 
-    private fun updateSettingsWithExistingCustomerId(
+    private suspend fun updateSettingsWithExistingCustomerId(
         settings: PlaygroundSettings,
         customerId: String,
     ) {
         settings[CustomerSettingsDefinition] = CustomerType.Existing(customerId)
 
-        playgroundSettingsFlow.value = settings
+        withContext(viewModelScope.coroutineContext) {
+            playgroundSettingsFlow.value = settings
 
-        setPlaygroundState(
-            state.value?.let { state ->
-                val updatedSnapshot = settings.snapshot()
+            setPlaygroundState(
+                state.value?.let { state ->
+                    val updatedSnapshot = settings.snapshot()
 
-                when (state) {
-                    is PlaygroundState.Customer -> state.copy(snapshot = updatedSnapshot)
-                    is PlaygroundState.Payment -> state.copy(snapshot = updatedSnapshot)
+                    when (state) {
+                        is PlaygroundState.Customer -> state.copy(snapshot = updatedSnapshot)
+                        is PlaygroundState.Payment -> state.copy(snapshot = updatedSnapshot)
+                    }
                 }
-            }
-        )
+            )
+        }
     }
 
     fun onCustomUrlUpdated(backendUrl: String?) {
