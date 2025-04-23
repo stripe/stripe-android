@@ -92,10 +92,10 @@ internal class SignUpViewModelTest {
     }
 
     @Test
-    fun `When USE_LINK_CONFIGURATION_CUSTOMER_INFO is false, controllers should not be prefilled`() =
+    fun `When DID_SELECT_TO_CHANGE_EMAIL is true, controllers should not be prefilled`() =
         runTest(dispatcher) {
-            testUseLinkConfigurationCustomerInfo(
-                useLinkConfigurationCustomerInfo = false,
+            testDidChangeEmail(
+                didChangeEmail = true,
                 expectedSignUpState = SignUpState.InputtingPrimaryField,
                 expectedEmail = "",
                 expectedPhoneNumber = "",
@@ -104,9 +104,9 @@ internal class SignUpViewModelTest {
         }
 
     @Test
-    fun `When USE_LINK_CONFIGURATION_CUSTOMER_INFO is true, controllers should be prefilled`() = runTest(dispatcher) {
-        testUseLinkConfigurationCustomerInfo(
-            useLinkConfigurationCustomerInfo = true,
+    fun `When DID_SELECT_TO_CHANGE_EMAIL is false, controllers should be prefilled`() = runTest(dispatcher) {
+        testDidChangeEmail(
+            didChangeEmail = false,
             expectedSignUpState = SignUpState.InputtingRemainingFields,
             expectedEmail = CUSTOMER_EMAIL,
             expectedPhoneNumber = TestFactory.CUSTOMER_PHONE,
@@ -115,10 +115,10 @@ internal class SignUpViewModelTest {
     }
 
     @Test
-    fun `When USE_LINK_CONFIGURATION_CUSTOMER_INFO is not set, controllers should be prefilled`() =
+    fun `When DID_SELECT_TO_CHANGE_EMAIL is not set, controllers should be prefilled`() =
         runTest(dispatcher) {
-            testUseLinkConfigurationCustomerInfo(
-                useLinkConfigurationCustomerInfo = null,
+            testDidChangeEmail(
+                didChangeEmail = null,
                 expectedSignUpState = SignUpState.InputtingRemainingFields,
                 expectedEmail = CUSTOMER_EMAIL,
                 expectedPhoneNumber = TestFactory.CUSTOMER_PHONE,
@@ -561,8 +561,8 @@ internal class SignUpViewModelTest {
         onSignUpClick()
     }
 
-    private fun testUseLinkConfigurationCustomerInfo(
-        useLinkConfigurationCustomerInfo: Boolean?,
+    private fun testDidChangeEmail(
+        didChangeEmail: Boolean?,
         expectedSignUpState: SignUpState = SignUpState.InputtingRemainingFields,
         expectedEmail: String = CUSTOMER_EMAIL,
         expectedPhoneNumber: String = TestFactory.CUSTOMER_PHONE,
@@ -570,8 +570,8 @@ internal class SignUpViewModelTest {
     ) {
         val savedStateHandle = SavedStateHandle()
             .apply {
-                useLinkConfigurationCustomerInfo?.let {
-                    set(SignUpViewModel.USE_LINK_CONFIGURATION_CUSTOMER_INFO, it)
+                didChangeEmail?.let {
+                    set(SignUpViewModel.DID_SELECT_TO_CHANGE_EMAIL, it)
                 }
             }
         val viewModel = createViewModel(
