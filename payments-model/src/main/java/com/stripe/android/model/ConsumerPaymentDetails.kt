@@ -93,12 +93,11 @@ data class ConsumerPaymentDetails(
     data class Passthrough(
         override val id: String,
         override val last4: String,
-        override val nickname: String?,
     ) : PaymentDetails(
         id = id,
         type = TYPE,
         isDefault = false,
-        nickname = nickname,
+        nickname = null,
     ) {
 
         override val displayName: ResolvableString?

@@ -94,6 +94,8 @@ internal object TestFactory {
         cvcCheck = CvcCheck.Pass,
         isDefault = true,
         networks = emptyList(),
+        funding = "CREDIT",
+        nickname = null,
         billingAddress = ConsumerPaymentDetails.BillingAddress(
             name = null,
             line1 = null,
@@ -110,7 +112,8 @@ internal object TestFactory {
         last4 = "4242",
         isDefault = false,
         bankName = "Stripe Test Bank",
-        bankIconCode = null
+        bankIconCode = null,
+        nickname = null,
     )
 
     val CONSUMER_PAYMENT_DETAILS_PASSTHROUGH = ConsumerPaymentDetails.Passthrough(

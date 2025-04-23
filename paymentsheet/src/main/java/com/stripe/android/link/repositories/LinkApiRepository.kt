@@ -223,7 +223,6 @@ internal class LinkApiRepository @Inject constructor(
                 paymentDetails = ConsumerPaymentDetails.Passthrough(
                     id = passthroughModePaymentMethodId,
                     last4 = last4,
-                    nickname = null,
                 ),
                 paymentMethodCreateParams = PaymentMethodCreateParams.createLink(
                     paymentDetailsId = passthroughModePaymentMethodId,

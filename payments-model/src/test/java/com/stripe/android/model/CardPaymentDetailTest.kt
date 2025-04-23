@@ -15,6 +15,8 @@ class CardPaymentDetailTest {
         cvcCheck = CvcCheck.Fail,
         isDefault = false,
         networks = listOf("VISA"),
+        funding = "CREDIT",
+        nickname = null,
         billingAddress = ConsumerPaymentDetails.BillingAddress(
             name = null,
             line1 = null,

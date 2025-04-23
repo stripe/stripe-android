@@ -40,7 +40,7 @@ private const val FIELD_BANK_ACCOUNT_BANK_ICON_CODE = "bank_icon_code"
 
 private const val FIELD_IS_DEFAULT = "is_default"
 private const val FIELD_NICKNAME = "nickname"
-private const val FIELD_FUNDING= "funding"
+private const val FIELD_FUNDING = "funding"
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails> {
