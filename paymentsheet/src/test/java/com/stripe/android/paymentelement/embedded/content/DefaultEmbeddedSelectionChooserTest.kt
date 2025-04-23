@@ -334,8 +334,8 @@ internal class DefaultEmbeddedSelectionChooserTest {
                 formHelperFactory = formHelperFactory,
                 coroutineScope = CoroutineScope(Dispatchers.Unconfined),
                 eventReporter = FakeEventReporter(),
-                customerStateHolder = CustomerStateHolder(savedStateHandle, embeddedSelectionHolder.selection)
-        ),
+                customerStateHolder = CustomerStateHolder(savedStateHandle, embeddedSelectionHolder.selection),
+            ),
             savedStateHandle = savedStateHandle,
         ).block()
     }

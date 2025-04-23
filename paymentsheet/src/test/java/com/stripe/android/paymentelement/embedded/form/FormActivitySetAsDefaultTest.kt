@@ -94,7 +94,7 @@ internal class FormActivitySetAsDefaultTest {
 
         val formElements = interactor.state.value.formElements
 
-        val saveForFutureUseElement= formElements.firstOrNull {
+        val saveForFutureUseElement = formElements.firstOrNull {
             it.identifier == IdentifierSpec.SaveForFutureUse
         } as? SaveForFutureUseElement
         val setAsDefaultElement = formElements.firstOrNull {
