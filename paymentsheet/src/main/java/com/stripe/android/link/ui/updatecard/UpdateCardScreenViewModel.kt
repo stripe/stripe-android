@@ -30,7 +30,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UpdateCardScreenState())
-    val state: StateFlow<UpdateCardScreenState> = _state.asStateFlow()
+    val state: StateFlow<UpdateCardScreenState?> = _state.asStateFlow()
 
     lateinit var interactor: EditCardDetailsInteractor
 
@@ -43,7 +43,10 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                 value = paymentDetails is ConsumerPaymentDetails.Card,
                 lazyMessage = { "Payment details with id $paymentDetailsId is not a card" }
             )
-            initializeInteractor(paymentDetails)
+            interactor = initializeInteractor(paymentDetails)
+            _state.update {
+                it.copy(paymentDetails = paymentDetails)
+            }
         }.onFailure {
             logger.error("Failed to render payment update screen", it)
             navigationManager.tryNavigateBack()
