@@ -1,7 +1,6 @@
 package com.stripe.android.link.ui.verification
 
 import android.widget.Toast
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -97,8 +96,6 @@ internal fun VerificationBody(
     onResendCodeClick: () -> Unit,
     focusRequester: FocusRequester = remember { FocusRequester() },
 ) {
-    BackHandler(onBack = onBack)
-
     ScrollableTopLevelColumn {
         Header(
             isDialog = state.isDialog,
