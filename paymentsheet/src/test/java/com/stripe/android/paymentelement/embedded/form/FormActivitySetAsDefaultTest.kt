@@ -2,7 +2,6 @@ package com.stripe.android.paymentelement.embedded.form
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.mainthread.MainThreadSavedStateHandle
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
@@ -116,7 +115,7 @@ internal class FormActivitySetAsDefaultTest {
             hasCustomerConfiguration = true,
             isPaymentMethodSetAsDefaultEnabled = true,
         )
-        val selectionHolder = EmbeddedSelectionHolder(MainThreadSavedStateHandle(SavedStateHandle()))
+        val selectionHolder = EmbeddedSelectionHolder(SavedStateHandle())
         val stateHolder = DefaultFormActivityStateHelper(
             paymentMethodMetadata = paymentMethodMetadata,
             selectionHolder = selectionHolder,
