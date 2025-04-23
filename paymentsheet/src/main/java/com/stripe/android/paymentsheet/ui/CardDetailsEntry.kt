@@ -20,11 +20,11 @@ internal data class CardDetailsEntry(
      * @return True if any of the card details have changed, false otherwise.
      */
     fun hasChanged(
-        card: PaymentMethod.Card,
+        editCardPayload: EditCardPayload,
         originalCardBrandChoice: CardBrandChoice,
     ): Boolean {
         return originalCardBrandChoice != this.cardBrandChoice ||
-            expiryDateHasChanged(card)
+            expiryDateHasChanged(editCardPayload)
     }
 
     fun isComplete(): Boolean {
@@ -32,8 +32,9 @@ internal data class CardDetailsEntry(
         return expiryDateState.expiryMonth != null && expiryDateState.expiryYear != null
     }
 
-    private fun expiryDateHasChanged(card: PaymentMethod.Card): Boolean {
-        return card.expiryMonth != expiryDateState.expiryMonth || card.expiryYear != expiryDateState.expiryYear
+    private fun expiryDateHasChanged(editCardPayload: EditCardPayload): Boolean {
+        return editCardPayload.expiryMonth != expiryDateState.expiryMonth ||
+            editCardPayload.expiryYear != expiryDateState.expiryYear
     }
 }
 

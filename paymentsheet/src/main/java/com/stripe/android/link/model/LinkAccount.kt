@@ -2,6 +2,7 @@ package com.stripe.android.link.model
 
 import android.os.Parcelable
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.uicore.elements.convertPhoneNumberToE164
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 
@@ -13,6 +14,18 @@ internal class LinkAccount(private val consumerSession: ConsumerSession) : Parce
 
     @IgnoredOnParcel
     val redactedPhoneNumber = consumerSession.redactedFormattedPhoneNumber.replace("*", "•")
+
+    val unredactedPhoneNumber: String?
+        get() {
+            val nationalPhoneNumber = consumerSession.unredactedPhoneNumber
+            val countryCode = consumerSession.phoneNumberCountry
+
+            return if (nationalPhoneNumber != null && countryCode != null) {
+                convertPhoneNumberToE164(nationalPhoneNumber, countryCode)
+            } else {
+                null
+            }
+        }
 
     @IgnoredOnParcel
     val clientSecret = consumerSession.clientSecret

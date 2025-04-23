@@ -2,14 +2,13 @@ package com.stripe.android.paymentsheet.ui
 
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.PaymentMethod
 
-internal fun PaymentMethod.Card.getPreferredChoice(cardBrandFilter: CardBrandFilter): CardBrandChoice {
+internal fun EditCardPayload.getPreferredChoice(cardBrandFilter: CardBrandFilter): CardBrandChoice {
     return CardBrand.fromCode(displayBrand).toChoice(cardBrandFilter)
 }
 
-internal fun PaymentMethod.Card.getAvailableNetworks(cardBrandFilter: CardBrandFilter): List<CardBrandChoice> {
-    return networks?.available?.let { brandCodes ->
+internal fun EditCardPayload.getAvailableNetworks(cardBrandFilter: CardBrandFilter): List<CardBrandChoice> {
+    return networks?.let { brandCodes ->
         brandCodes.map { code ->
             CardBrand.fromCode(code).toChoice(cardBrandFilter)
         }
