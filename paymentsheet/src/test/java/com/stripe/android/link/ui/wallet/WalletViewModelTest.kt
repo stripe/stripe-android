@@ -518,7 +518,7 @@ class WalletViewModelTest {
     }
 }
 
-private open class WalletLinkAccountManager : FakeLinkAccountManager() {
+private open class WalletLinkAccountManager() : FakeLinkAccountManager() {
     val listPaymentDetailsCalls = arrayListOf<Set<String>>()
     val updatePaymentDetailsCalls = arrayListOf<ConsumerPaymentDetailsUpdateParams>()
     val deletePaymentDetailsCalls = arrayListOf<String>()
