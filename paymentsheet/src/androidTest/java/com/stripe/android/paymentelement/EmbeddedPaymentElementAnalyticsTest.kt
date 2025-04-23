@@ -87,7 +87,9 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_form_interacted")
         validateAnalyticsRequest(eventName = "mc_card_number_completed")
 
-        testContext.configure()
+        testContext.configure {
+            formSheetAction(EmbeddedPaymentElement.FormSheetAction.Confirm)
+        }
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
 
         embeddedContentPage.clickOnLpm("card")
