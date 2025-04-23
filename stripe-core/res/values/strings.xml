@@ -24,8 +24,12 @@
   <string name="stripe_address_label_state">State</string>
   <!-- Label for input requesting zip code, used for US based addreses -->
   <string name="stripe_address_label_zip_code">ZIP Code</string>
+  <!-- Label for a debit card, e.g. Visa Debit -->
   <string name="stripe_link_card_type_debit">%s Debit</string>
+  <!-- Label for a credit card, e.g. Visa Credit -->
   <string name="stripe_link_card_type_credit">%s Credit</string>
+  <!-- Label for a prepaid card, e.g. Visa Prepaid -->
   <string name="stripe_link_card_type_prepaid">%s Prepaid</string>
+  <!-- Label for a card of unknown funding type, e.g. Visa Card -->
   <string name="stripe_link_card_type_unknown">%s Card</string>
 </resources>
