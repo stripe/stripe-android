@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle.FloatingButton
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
@@ -31,7 +30,6 @@ import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
 import org.junit.Test
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class PaymentMethodRowFloatingButtonScreenshotTest {
 
     @get:Rule

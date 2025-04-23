@@ -17,7 +17,6 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.wallet.sublabel
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.ui.PaymentMethodIconFromResource
@@ -30,7 +29,6 @@ import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
 import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.strings.resolve
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Composable
 internal fun SavedPaymentMethodRowButton(
     displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
@@ -80,7 +78,6 @@ internal fun SavedPaymentMethodRowButton(
     )
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Preview
 @Composable
@@ -118,7 +115,6 @@ internal fun PreviewCardSavedPaymentMethodRowButton() {
     }
 }
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Preview
 @Composable

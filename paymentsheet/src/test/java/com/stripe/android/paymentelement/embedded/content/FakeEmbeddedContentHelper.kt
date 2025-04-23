@@ -3,11 +3,9 @@ package com.stripe.android.paymentelement.embedded.content
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import kotlinx.coroutines.flow.MutableStateFlow
 
-@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class FakeEmbeddedContentHelper(
     override val embeddedContent: MutableStateFlow<EmbeddedContent?> = MutableStateFlow(null)
 ) : EmbeddedContentHelper {

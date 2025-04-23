@@ -5,7 +5,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedResultCallbackHelper
@@ -18,7 +17,6 @@ internal interface EmbeddedConfirmationHelper {
     fun confirm()
 }
 
-@ExperimentalEmbeddedPaymentElementApi
 @EmbeddedPaymentElementScope
 internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
     private val confirmationStarter: EmbeddedConfirmationStarter,
@@ -69,7 +67,6 @@ internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
     }
 }
 
-@ExperimentalEmbeddedPaymentElementApi
 private fun ConfirmationHandler.Result.asEmbeddedResult(): EmbeddedPaymentElement.Result = when (this) {
     is ConfirmationHandler.Result.Canceled -> {
         EmbeddedPaymentElement.Result.Canceled()
