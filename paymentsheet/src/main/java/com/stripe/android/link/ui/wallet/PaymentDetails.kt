@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -37,9 +36,11 @@ import androidx.compose.ui.unit.sp
 import com.stripe.android.link.theme.MinimumTouchTargetSize
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails.Card
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.ui.getCardBrandIconForVerticalMode
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as StripeUiCoreR
@@ -179,7 +180,7 @@ internal fun RowScope.PaymentDetails(
                 modifier = modifier,
                 title = title,
                 subtitle = subtitle.takeIf { it != title },
-                icon = paymentDetails.brand.icon,
+                icon = paymentDetails.brand.getCardBrandIconForVerticalMode(),
                 contentDescription = paymentDetails.brand.displayName
             )
         }
@@ -191,7 +192,7 @@ internal fun RowScope.PaymentDetails(
                 modifier = modifier,
                 title = "•••• ${paymentDetails.last4}",
                 subtitle = null,
-                icon = R.drawable.stripe_link_bank,
+                icon = CardBrand.Unknown.getCardBrandIconForVerticalMode(),
                 contentDescription = stringResource(R.string.stripe_wallet_passthrough_description)
             )
         }
@@ -206,19 +207,54 @@ private fun RowScope.CardInfo(
     icon: Int,
     contentDescription: String? = null,
 ) {
+    PaymentMethodInfo(
+        modifier = modifier,
+        iconResource = icon,
+        title = title,
+        subtitle = subtitle,
+        contentDescription = contentDescription,
+    )
+}
+
+@Composable
+private fun RowScope.BankAccountInfo(
+    modifier: Modifier = Modifier,
+    bankAccount: ConsumerPaymentDetails.BankAccount,
+) {
+    PaymentMethodInfo(
+        modifier = modifier,
+        iconResource = R.drawable.stripe_link_bank,
+        iconColorFilter = ColorFilter.tint(MaterialTheme.linkColors.actionLabelLight),
+        title = bankAccount.displayName?.resolve() ?: stringResource(StripeUiCoreR.string.stripe_payment_method_bank),
+        subtitle = "•••• ${bankAccount.last4}",
+    )
+}
+
+@Composable
+private fun RowScope.PaymentMethodInfo(
+    iconResource: Int,
+    title: String,
+    subtitle: String?,
+    modifier: Modifier = Modifier,
+    iconColorFilter: ColorFilter? = null,
+    contentDescription: String? = null,
+) {
     Row(
         modifier = modifier.weight(1f),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Image(
-            painter = painterResource(id = icon),
+            painter = painterResource(iconResource),
             contentDescription = contentDescription,
-            modifier = Modifier.width(38.dp),
+            modifier = Modifier.size(24.dp),
             alignment = Alignment.Center,
+            colorFilter = iconColorFilter,
         )
 
-        Column {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
             Text(
                 text = title,
                 color = MaterialTheme.colors.onPrimary,
@@ -230,42 +266,6 @@ private fun RowScope.CardInfo(
             if (subtitle != null) {
                 Text(
                     text = subtitle,
-                    color = MaterialTheme.colors.onSecondary,
-                    style = MaterialTheme.typography.body2
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun RowScope.BankAccountInfo(
-    modifier: Modifier = Modifier,
-    bankAccount: ConsumerPaymentDetails.BankAccount,
-) {
-    Row(
-        modifier = modifier.weight(1f),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Image(
-            painter = painterResource(R.drawable.stripe_link_bank),
-            contentDescription = null,
-            modifier = Modifier.width(38.dp),
-            alignment = Alignment.Center,
-            colorFilter = ColorFilter.tint(MaterialTheme.linkColors.actionLabelLight)
-        )
-        Column {
-            Text(
-                text = bankAccount.displayName?.resolve() ?: stringResource(StripeUiCoreR.string.stripe_payment_method_bank),
-                color = MaterialTheme.colors.onPrimary,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
-                style = MaterialTheme.typography.h6
-            )
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "•••• ${bankAccount.last4}",
                     color = MaterialTheme.colors.onSecondary,
                     style = MaterialTheme.typography.body2
                 )
