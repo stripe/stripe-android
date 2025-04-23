@@ -125,7 +125,6 @@ class WalletViewModelTest {
         val navigationManager = TestNavigationManager()
         val vm = createViewModel(navigationManager = navigationManager)
 
-
         vm.onUpdateClicked(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD)
 
         navigationManager.assertNavigatedTo(
