@@ -35,7 +35,7 @@ private fun <T> produceState(
     key: Any?,
     producer: suspend ProduceStateScope<T>.() -> Unit
 ): State<T> {
-    val result = remember { mutableStateOf(produceInitialValue()) }
+    val result = remember(produceInitialValue) { mutableStateOf(produceInitialValue()) }
     LaunchedEffect(key) {
         DefaultProduceStateScope(result, coroutineContext).producer()
     }
@@ -59,7 +59,7 @@ fun <T> StateFlow<T>.collectAsState(
         }
     }
     return produceState(
-        produceInitialValue = remember { { value } },
+        produceInitialValue = remember(this) { { value } },
         key = this
     ) {
         if (context == EmptyCoroutineContext) {
