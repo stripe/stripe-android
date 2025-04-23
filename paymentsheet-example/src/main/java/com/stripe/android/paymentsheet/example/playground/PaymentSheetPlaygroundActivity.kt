@@ -148,7 +148,7 @@ internal class PaymentSheetPlaygroundActivity :
             val playgroundSettings: PlaygroundSettings? by viewModel.playgroundSettingsFlow.collectAsState()
             val localPlaygroundSettings = playgroundSettings ?: return@setContent
 
-            val playgroundState by viewModel.state.collectAsState(Dispatchers.Main)
+            val playgroundState by viewModel.state.collectAsState()
             var showCustomEndpointDialog by remember { mutableStateOf(false) }
             val endpoint = playgroundState?.endpoint
 
