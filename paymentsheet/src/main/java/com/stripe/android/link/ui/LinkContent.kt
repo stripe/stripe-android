@@ -56,7 +56,8 @@ internal fun LinkContent(
     onBackPressed: () -> Unit,
     moveToWeb: () -> Unit,
     goBack: () -> Unit,
-    changeEmail: () -> Unit
+    changeEmail: () -> Unit,
+    initialDestination: LinkScreen
 ) {
     DefaultLinkTheme {
         Surface {
@@ -81,7 +82,7 @@ internal fun LinkContent(
                     BackHandler {
                         if (bottomSheetContent != null) {
                             onUpdateSheetContent(null)
-                        } else {
+                        } else if (navController.popBackStack().not()) {
                             handleViewAction(LinkAction.BackPressed)
                         }
                     }
@@ -96,6 +97,7 @@ internal fun LinkContent(
                     )
 
                     Screens(
+                        initialDestination = initialDestination,
                         navController = navController,
                         goBack = goBack,
                         moveToWeb = moveToWeb,
@@ -133,11 +135,12 @@ private fun Screens(
     hideBottomSheetContent: () -> Unit,
     moveToWeb: () -> Unit,
     changeEmail: () -> Unit,
+    initialDestination: LinkScreen,
 ) {
     NavHost(
         modifier = Modifier.fillMaxSize(),
         navController = navController,
-        startDestination = LinkScreen.Loading.route,
+        startDestination = initialDestination.route,
     ) {
         composable(LinkScreen.Loading.route) {
             Loader()

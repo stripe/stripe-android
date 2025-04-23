@@ -24,6 +24,11 @@ sealed interface PopUpToBehavior {
     val inclusive: Boolean
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data object Start : PopUpToBehavior {
+        override val inclusive = true
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Current(
         override val inclusive: Boolean,
     ) : PopUpToBehavior
