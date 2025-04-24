@@ -519,11 +519,13 @@ internal class PaymentSheetActivityTest {
             viewModel.updateSelection(
                 PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             )
+            Espresso.onIdle()
             assertThat(activity.buyButton.isVisible).isTrue()
             assertThat(activity.buyButton.isEnabled).isTrue()
 
             // Back to empty/invalid card
             viewModel.updateSelection(null)
+            Espresso.onIdle()
             assertThat(activity.buyButton.isVisible).isTrue()
             assertThat(activity.buyButton.isEnabled).isFalse()
 
@@ -535,6 +537,7 @@ internal class PaymentSheetActivityTest {
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
                 )
             )
+            Espresso.onIdle()
             assertThat(activity.buyButton.isVisible).isTrue()
             assertThat(activity.buyButton.isEnabled).isTrue()
         }

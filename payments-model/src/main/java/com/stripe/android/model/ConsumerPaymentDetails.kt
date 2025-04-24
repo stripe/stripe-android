@@ -18,6 +18,7 @@ data class ConsumerPaymentDetails(
         open val id: String,
         open val isDefault: Boolean,
         open val type: String,
+        open val nickname: String?,
     ) : Parcelable {
 
         abstract val last4: String
@@ -29,17 +30,20 @@ data class ConsumerPaymentDetails(
         override val id: String,
         override val last4: String,
         override val isDefault: Boolean,
+        override val nickname: String?,
         val expiryYear: Int,
         val expiryMonth: Int,
         val brand: CardBrand,
         val networks: List<String>,
         val cvcCheck: CvcCheck,
+        val funding: String,
         val billingAddress: BillingAddress? = null,
         val billingEmailAddress: String? = null,
     ) : PaymentDetails(
         id = id,
         isDefault = isDefault,
-        type = TYPE
+        type = TYPE,
+        nickname = nickname,
     ) {
 
         val requiresCardDetailsRecollection: Boolean
@@ -82,7 +86,13 @@ data class ConsumerPaymentDetails(
     data class Passthrough(
         override val id: String,
         override val last4: String,
-    ) : PaymentDetails(id = id, type = TYPE, isDefault = false) {
+    ) : PaymentDetails(
+        id = id,
+        type = TYPE,
+        isDefault = false,
+        nickname = null,
+    ) {
+
         companion object {
             const val TYPE = "card"
         }
@@ -94,13 +104,16 @@ data class ConsumerPaymentDetails(
         override val id: String,
         override val last4: String,
         override val isDefault: Boolean,
+        override val nickname: String?,
         val bankName: String?,
         val bankIconCode: String?,
     ) : PaymentDetails(
         id = id,
         type = TYPE,
-        isDefault = isDefault
+        isDefault = isDefault,
+        nickname = nickname,
     ) {
+
         companion object {
             const val TYPE = "bank_account"
         }

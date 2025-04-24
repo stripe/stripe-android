@@ -184,6 +184,7 @@ internal class WalletScreenScreenshotTest {
                     onPrimaryButtonClick = {},
                     onPayAnotherWayClicked = {},
                     onRemoveClicked = {},
+                    onUpdateClicked = {},
                     onSetDefaultClicked = {},
                     showBottomSheetContent = {},
                     hideBottomSheetContent = {},

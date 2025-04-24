@@ -62,8 +62,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
      *
      * Use this to instantly configure an [EmbeddedPaymentElement], likely from the state of another Activity.
      */
-    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    @set:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     var state: State? by stateHelper::state
 
     /**
@@ -411,7 +409,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
              * their payment method details. The sheet has a button at the bottom. [formSheetAction] controls the action
              * the button performs.
              */
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun formSheetAction(formSheetAction: FormSheetAction): Builder = apply {
                 this.formSheetAction = formSheetAction
             }
@@ -446,7 +443,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
      * can perform.
      */
     @ExperimentalEmbeddedPaymentElementApi
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class FormSheetAction {
 
         /**
@@ -571,7 +567,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
     /**
      * A [Parcelable] state used to reconfigure [EmbeddedPaymentElement] across activity boundaries.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @ExperimentalEmbeddedPaymentElementApi
     @Poko
     @Parcelize

@@ -39,6 +39,8 @@ private const val FIELD_CARD_CVC_CHECK = "cvc_check"
 private const val FIELD_BANK_ACCOUNT_BANK_ICON_CODE = "bank_icon_code"
 
 private const val FIELD_IS_DEFAULT = "is_default"
+private const val FIELD_NICKNAME = "nickname"
+private const val FIELD_FUNDING = "funding"
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails> {
@@ -56,34 +58,41 @@ object ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails
     }
 
     private fun parsePaymentDetails(json: JSONObject): ConsumerPaymentDetails.PaymentDetails? =
-        optString(json, FIELD_TYPE)?.let {
-            when (it.lowercase()) {
+        optString(json, FIELD_TYPE)?.let { type ->
+            val id = json.getString(FIELD_ID)
+            val isDefault = json.optBoolean(FIELD_IS_DEFAULT)
+            val nickname = optString(json, FIELD_NICKNAME)?.takeIf { it.isNotBlank() }
+
+            when (type.lowercase()) {
                 "card" -> {
                     val cardDetails = json.getJSONObject(FIELD_CARD_DETAILS)
                     val checks = cardDetails.optJSONObject(FIELD_CARD_CHECKS)
                     val networks = jsonArrayToList(cardDetails.optJSONArray(FIELD_CARD_NETWORKS))
 
                     ConsumerPaymentDetails.Card(
-                        id = json.getString(FIELD_ID),
+                        id = id,
                         expiryYear = cardDetails.getInt(FIELD_CARD_EXPIRY_YEAR),
                         expiryMonth = cardDetails.getInt(FIELD_CARD_EXPIRY_MONTH),
                         brand = CardBrand.fromCode(cardBrandFix(cardDetails.getString(FIELD_CARD_BRAND))),
                         networks = networks,
                         last4 = cardDetails.getString(FIELD_CARD_LAST_4),
                         cvcCheck = CvcCheck.fromCode(checks?.getString(FIELD_CARD_CVC_CHECK)),
+                        funding = cardDetails.getString(FIELD_FUNDING),
                         billingAddress = parseBillingAddress(json),
                         billingEmailAddress = optString(json, FIELD_BILLING_EMAIL_ADDRESS),
-                        isDefault = json.optBoolean(FIELD_IS_DEFAULT),
+                        isDefault = isDefault,
+                        nickname = nickname,
                     )
                 }
                 "bank_account" -> {
                     val bankAccountDetails = json.getJSONObject(FIELD_BANK_ACCOUNT_DETAILS)
                     ConsumerPaymentDetails.BankAccount(
-                        id = json.getString(FIELD_ID),
+                        id = id,
                         last4 = bankAccountDetails.getString(FIELD_BANK_ACCOUNT_LAST_4),
                         bankName = optString(bankAccountDetails, FIELD_BANK_ACCOUNT_BANK_NAME),
                         bankIconCode = optString(bankAccountDetails, FIELD_BANK_ACCOUNT_BANK_ICON_CODE),
-                        isDefault = json.optBoolean(FIELD_IS_DEFAULT),
+                        isDefault = isDefault,
+                        nickname = nickname,
                     )
                 }
                 else -> null

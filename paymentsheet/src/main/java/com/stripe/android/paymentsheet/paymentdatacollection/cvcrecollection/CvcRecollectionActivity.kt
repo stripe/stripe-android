@@ -7,6 +7,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.uicore.StripeTheme
@@ -34,7 +35,7 @@ internal class CvcRecollectionActivity : AppCompatActivity() {
         setContent {
             StripeTheme {
                 val bottomSheetState = rememberStripeBottomSheetState()
-                val state = viewModel.viewState.collectAsState()
+                val state by viewModel.viewState.collectAsState()
 
                 LaunchedEffect(bottomSheetState) {
                     viewModel.result.collectLatest { result ->
@@ -54,9 +55,9 @@ internal class CvcRecollectionActivity : AppCompatActivity() {
                     },
                 ) {
                     CvcRecollectionScreen(
-                        lastFour = state.value.lastFour,
-                        isTestMode = state.value.isTestMode,
-                        cvcState = state.value.cvcState,
+                        lastFour = state.lastFour,
+                        isTestMode = state.isTestMode,
+                        cvcState = state.cvcState,
                         viewActionHandler = viewModel::handleViewAction
                     )
                 }

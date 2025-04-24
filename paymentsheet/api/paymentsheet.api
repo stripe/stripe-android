@@ -588,6 +588,8 @@ public final class com/stripe/android/paymentelement/EmbeddedPaymentElement {
 	public final fun configure (Lcom/stripe/android/paymentsheet/PaymentSheet$IntentConfiguration;Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun confirm ()V
 	public final fun getPaymentOption ()Lkotlinx/coroutines/flow/StateFlow;
+	public final fun getState ()Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$State;
+	public final fun setState (Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$State;)V
 }
 
 public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$Builder {
@@ -620,6 +622,7 @@ public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$Conf
 	public final fun defaultBillingDetails (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
 	public final fun embeddedViewDisplaysMandateText (Z)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
 	public final fun externalPaymentMethods (Ljava/util/List;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
+	public final fun formSheetAction (Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$FormSheetAction;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
 	public final fun googlePay (Lcom/stripe/android/paymentsheet/PaymentSheet$GooglePayConfiguration;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
 	public final fun link (Lcom/stripe/android/paymentsheet/PaymentSheet$LinkConfiguration;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
 	public final fun paymentMethodOrder (Ljava/util/List;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
@@ -649,6 +652,14 @@ public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$Conf
 
 public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$ConfigureResult$Succeeded : com/stripe/android/paymentelement/EmbeddedPaymentElement$ConfigureResult {
 	public static final field $stable I
+}
+
+public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$FormSheetAction : java/lang/Enum {
+	public static final field Confirm Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$FormSheetAction;
+	public static final field Continue Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$FormSheetAction;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$FormSheetAction;
+	public static fun values ()[Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$FormSheetAction;
 }
 
 public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$PaymentOptionDisplayData {
@@ -684,6 +695,16 @@ public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$Resu
 
 public abstract interface class com/stripe/android/paymentelement/EmbeddedPaymentElement$ResultCallback {
 	public abstract fun onResult (Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Result;)V
+}
+
+public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$State : android/os/Parcelable {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public final fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
 public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$State$Creator : android/os/Parcelable$Creator {

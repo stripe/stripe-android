@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
@@ -279,19 +278,12 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
         }
     }
 
-    val isNewPaymentSelectedCard = (selection as? PaymentMethodVerticalLayoutInteractor.Selection.New)?.code ==
-        PaymentMethod.Type.Card.code
-
-    val isNewPaymentSelectedUSBankAccount =
-        (selection as? PaymentMethodVerticalLayoutInteractor.Selection.New)?.code ==
-            PaymentMethod.Type.USBankAccount.code
-
     paymentMethods.forEachIndexed { index, item ->
         val isSelected = index == selectedIndex
 
         if (isSelected && selection is PaymentMethodVerticalLayoutInteractor.Selection.New && selection.canBeChanged) {
             val displayablePaymentMethod = item.copy(
-                subtitle = selection.changeDetails?.resolvableString
+                subtitle = selection.changeDetails?.resolvableString ?: item.subtitle
             )
             NewPaymentMethodRowButton(
                 isEnabled = isEnabled,
@@ -299,14 +291,10 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
                 displayablePaymentMethod = displayablePaymentMethod,
                 imageLoader = imageLoader,
                 rowStyle = rowStyle,
-                trailingContent = if (isNewPaymentSelectedCard || isNewPaymentSelectedUSBankAccount) {
-                    {
-                        EmbeddedNewPaymentMethodTrailingContent(
-                            showChevron = rowStyle !is RowStyle.FlatWithCheckmark,
-                        )
-                    }
-                } else {
-                    null
+                trailingContent = {
+                    EmbeddedNewPaymentMethodTrailingContent(
+                        showChevron = rowStyle !is Embedded.RowStyle.FlatWithCheckmark,
+                    )
                 }
             )
         } else {

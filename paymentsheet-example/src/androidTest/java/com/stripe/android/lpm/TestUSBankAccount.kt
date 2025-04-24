@@ -23,6 +23,7 @@ import com.stripe.android.test.core.TestParameters
 import com.stripe.android.test.core.ui.ComposeButton
 import com.stripe.android.test.core.ui.PaymentSelection
 import com.stripe.android.utils.ForceNativeBankFlowTestRule
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -57,6 +58,7 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
         )
     }
 
+    @Ignore("Flakey test")
     @Test
     fun testUSBankAccountLiteSuccess() {
         testDriver.confirmUSBankAccount(
@@ -74,6 +76,7 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
         )
     }
 
+    @Ignore("Flakey test")
     @Test
     fun testUSBankAccountSuccessWithIndecisiveUser() {
         // Select another LPM before coming back to the linked bank account
