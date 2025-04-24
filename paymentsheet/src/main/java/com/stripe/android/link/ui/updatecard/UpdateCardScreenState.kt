@@ -2,13 +2,15 @@ package com.stripe.android.link.ui.updatecard
 
 import androidx.compose.runtime.Immutable
 import com.stripe.android.link.ui.PrimaryButtonState
-import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.CardUpdateParams
 
 @Immutable
 internal data class UpdateCardScreenState(
-    val paymentDetails: ConsumerPaymentDetails.Card? = null,
+    val paymentDetailsId: String? = null,
+    val isDefault: Boolean = false,
     val cardUpdateParams: CardUpdateParams? = null,
+    val preferredCardBrand: CardBrand? = null,
     val error: Throwable? = null,
     val loading: Boolean = false,
 ) {

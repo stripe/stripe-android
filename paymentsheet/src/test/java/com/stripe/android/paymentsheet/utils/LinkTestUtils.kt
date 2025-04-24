@@ -23,6 +23,8 @@ internal object LinkTestUtils {
             cvcCheck = CvcCheck.Fail,
             isDefault = false,
             networks = emptyList(),
+            funding = "CREDIT",
+            nickname = null,
             billingAddress = ConsumerPaymentDetails.BillingAddress(
                 name = null,
                 line1 = null,
@@ -46,6 +48,8 @@ internal object LinkTestUtils {
             cvcCheck = CvcCheck.Fail,
             isDefault = false,
             networks = emptyList(),
+            funding = "CREDIT",
+            nickname = null,
             billingAddress = ConsumerPaymentDetails.BillingAddress(
                 name = null,
                 line1 = null,

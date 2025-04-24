@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -457,25 +458,26 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             savedSelection?.mandateText(paymentMethodMetadata.merchantName, paymentMethodMetadata.hasIntentToSetup())
         }
     }
-}
 
-private fun PaymentSelection.asVerticalSelection(): PaymentMethodVerticalLayoutInteractor.Selection = when (this) {
-    is PaymentSelection.Saved -> PaymentMethodVerticalLayoutInteractor.Selection.Saved
-    is PaymentSelection.GooglePay -> PaymentMethodVerticalLayoutInteractor.Selection.New("google_pay")
-    is PaymentSelection.Link -> PaymentMethodVerticalLayoutInteractor.Selection.New("link")
-    is PaymentSelection.New -> PaymentMethodVerticalLayoutInteractor.Selection.New(
-        code = paymentMethodCreateParams.typeCode,
-        changeDetails = changeDetails(),
-        canBeChanged = true,
-    )
-    is PaymentSelection.ExternalPaymentMethod -> PaymentMethodVerticalLayoutInteractor.Selection.New(type)
-    is PaymentSelection.CustomPaymentMethod -> PaymentMethodVerticalLayoutInteractor.Selection.New(id)
-}
-
-private fun PaymentSelection.New.changeDetails(): String? = when (this) {
-    is PaymentSelection.New.Card -> {
-        "${this.brand.displayName} ···· $last4"
+    private fun PaymentSelection.asVerticalSelection(): PaymentMethodVerticalLayoutInteractor.Selection = when (this) {
+        is PaymentSelection.Saved -> PaymentMethodVerticalLayoutInteractor.Selection.Saved
+        is PaymentSelection.GooglePay -> PaymentMethodVerticalLayoutInteractor.Selection.New("google_pay")
+        is PaymentSelection.Link -> PaymentMethodVerticalLayoutInteractor.Selection.New("link")
+        is PaymentSelection.New -> PaymentMethodVerticalLayoutInteractor.Selection.New(
+            code = paymentMethodCreateParams.typeCode,
+            changeDetails = changeDetails(),
+            canBeChanged = formTypeForCode(paymentMethodCreateParams.typeCode) == FormType.UserInteractionRequired,
+        )
+        is PaymentSelection.ExternalPaymentMethod -> PaymentMethodVerticalLayoutInteractor.Selection.New(type)
+        is PaymentSelection.CustomPaymentMethod -> PaymentMethodVerticalLayoutInteractor.Selection.New(id)
     }
-    is PaymentSelection.New.USBankAccount -> label
-    else -> null
+
+    private fun PaymentSelection.New.changeDetails(): String? = when (this) {
+        is PaymentSelection.New.Card -> {
+            val cardBrand = brand.displayName.takeIf { brand != CardBrand.Unknown }
+            "${cardBrand?.plus(" ").orEmpty()}···· $last4"
+        }
+        is PaymentSelection.New.USBankAccount -> label
+        else -> null
+    }
 }

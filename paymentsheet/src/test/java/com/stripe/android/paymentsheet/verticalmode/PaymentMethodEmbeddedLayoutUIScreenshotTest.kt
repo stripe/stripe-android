@@ -149,6 +149,20 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
         }
     }
 
+    @Test
+    fun testNewPaymentMethodsWithSelectionWithoutChangeDetails() {
+        paparazziRule.snapshot {
+            TestPaymentMethodLayoutUiWithNewSelection(
+                rowStyle = FlatWithCheckmark.default,
+                selection = PaymentMethodVerticalLayoutInteractor.Selection.New(
+                    code = "klarna",
+                    changeDetails = null,
+                    canBeChanged = true
+                )
+            )
+        }
+    }
+
     @Composable
     private fun TestPaymentMethodLayoutUi(
         rowStyle: Embedded.RowStyle,

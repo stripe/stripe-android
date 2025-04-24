@@ -27,6 +27,8 @@ class ConsumerPaymentDetailsJsonParserTest {
                         last4 = "4444",
                         cvcCheck = CvcCheck.Pass,
                         networks = emptyList(),
+                        funding = "CREDIT",
+                        nickname = null,
                         billingAddress = ConsumerPaymentDetails.BillingAddress(
                             name = null,
                             line1 = null,
@@ -58,6 +60,8 @@ class ConsumerPaymentDetailsJsonParserTest {
                         last4 = "4444",
                         cvcCheck = CvcCheck.Unknown,
                         networks = emptyList(),
+                        funding = "CREDIT",
+                        nickname = null,
                         billingAddress = null
                     )
                 )
@@ -76,6 +80,7 @@ class ConsumerPaymentDetailsJsonParserTest {
                         bankName = "STRIPE TEST BANK",
                         bankIconCode = null,
                         isDefault = true,
+                        nickname = null,
                     )
                 )
             ),
@@ -95,6 +100,7 @@ class ConsumerPaymentDetailsJsonParserTest {
                         bankName = null,
                         bankIconCode = null,
                         isDefault = false,
+                        nickname = null,
                     )
                 )
             ),
@@ -117,6 +123,8 @@ class ConsumerPaymentDetailsJsonParserTest {
                         brand = CardBrand.MasterCard,
                         cvcCheck = CvcCheck.Pass,
                         networks = emptyList(),
+                        funding = "CREDIT",
+                        nickname = null,
                         billingAddress = ConsumerPaymentDetails.BillingAddress(
                             name = null,
                             line1 = null,
@@ -136,6 +144,8 @@ class ConsumerPaymentDetailsJsonParserTest {
                         cvcCheck = CvcCheck.Fail,
                         isDefault = false,
                         networks = emptyList(),
+                        funding = "CREDIT",
+                        nickname = null,
                         billingAddress = ConsumerPaymentDetails.BillingAddress(
                             name = null,
                             line1 = null,
@@ -152,6 +162,7 @@ class ConsumerPaymentDetailsJsonParserTest {
                         bankName = "STRIPE TEST BANK",
                         bankIconCode = null,
                         isDefault = false,
+                        nickname = null,
                     )
                 )
             ),
@@ -188,6 +199,7 @@ class ConsumerPaymentDetailsJsonParserTest {
                       "address_postal_code_check": "PASS",
                       "cvc_check": "PASS"
                     },
+                    "funding": "CREDIT",
                     "exp_month": 12,
                     "exp_year": 2023,
                     "last4": "4444"
@@ -217,6 +229,7 @@ class ConsumerPaymentDetailsJsonParserTest {
                       "address_postal_code_check": "PASS",
                       "cvc_check": "FAIL"
                     },
+                    "funding": "CREDIT",
                     "exp_month": 4,
                     "exp_year": 2024,
                     "last4": "4242"
@@ -243,6 +256,8 @@ class ConsumerPaymentDetailsJsonParserTest {
                         cvcCheck = CvcCheck.Pass,
                         isDefault = true,
                         networks = emptyList(),
+                        funding = "CREDIT",
+                        nickname = null,
                         billingAddress = ConsumerPaymentDetails.BillingAddress(
                             name = null,
                             line1 = null,
@@ -262,6 +277,8 @@ class ConsumerPaymentDetailsJsonParserTest {
                         cvcCheck = CvcCheck.Fail,
                         isDefault = false,
                         networks = emptyList(),
+                        funding = "CREDIT",
+                        nickname = null,
                         billingAddress = ConsumerPaymentDetails.BillingAddress(
                             name = null,
                             line1 = null,

@@ -143,6 +143,43 @@ internal class EmbeddedPaymentElementTest {
     }
 
     @Test
+    fun testRemoveCardPreservesPreviousSelection() = runEmbeddedPaymentElementTest(
+        networkRule = networkRule,
+        createIntentCallback = { _, shouldSavePaymentMethod ->
+            assertThat(shouldSavePaymentMethod).isFalse()
+            CreateIntentResult.Success("pi_example_secret_12345")
+        },
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
+        }
+        networkRule.setupV1PaymentMethodsResponse(card1)
+
+        testContext.configure {
+            customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
+        }
+
+        embeddedContentPage.clickOnLpm("cashapp")
+        embeddedContentPage.clickEdit()
+
+        editPage.waitUntilVisible()
+
+        networkRule.setupPaymentMethodDetachResponse(card1.id)
+
+        editPage.clickRemove()
+        editPage.waitUntilMissing()
+
+        embeddedContentPage.assertHasSelectedLpm("cashapp")
+
+        testContext.markTestSucceeded()
+    }
+
+    @Test
     fun testStateCanBeTakenFromOneInstanceToAnother() {
         var state: EmbeddedPaymentElement.State? = null
 

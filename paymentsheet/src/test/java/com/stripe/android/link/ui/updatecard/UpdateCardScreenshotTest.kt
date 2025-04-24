@@ -84,6 +84,8 @@ internal class UpdateCardScreenshotTest(
             cvcCheck = CvcCheck.Fail,
             isDefault = false,
             networks = listOf("VISA"),
+            nickname = null,
+            funding = "credit",
             billingAddress = ConsumerPaymentDetails.BillingAddress(
                 name = null,
                 line1 = null,
@@ -95,7 +97,6 @@ internal class UpdateCardScreenshotTest(
             )
         )
     }
-
 
     internal data class TestCase(
         val name: String,

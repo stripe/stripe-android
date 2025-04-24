@@ -2,7 +2,6 @@ package com.stripe.android.link.ui.updatecard
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,19 +29,20 @@ import com.stripe.android.paymentsheet.ui.EditCardDetailsInteractor
 import com.stripe.android.paymentsheet.ui.EditCardPayload
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.R as StripeR
-import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
 internal fun UpdateCardScreen(viewModel: UpdateCardScreenViewModel) {
     val state by viewModel.state.collectAsState()
-    UpdateCardScreenBody(
-        interactor = viewModel.interactor,
-        isDefault = state.paymentDetails?.isDefault == true,
-        primaryButtonState = state.primaryButtonState,
-        secondaryButtonEnabled = state.loading.not(),
-        onUpdateClicked = viewModel::onUpdateClicked,
-        onCancelClicked = viewModel::onCancelClicked,
-    )
+    viewModel.interactor?.let {
+        UpdateCardScreenBody(
+            interactor = it,
+            isDefault = state.isDefault,
+            primaryButtonState = state.primaryButtonState,
+            secondaryButtonEnabled = state.loading.not(),
+            onUpdateClicked = viewModel::onUpdateClicked,
+            onCancelClicked = viewModel::onCancelClicked,
+        )
+    }
 }
 
 @Composable
@@ -96,45 +96,44 @@ internal fun UpdateCardScreenBody(
 @Composable
 internal fun UpdateCardScreenBodyPreview() {
     DefaultLinkTheme {
-        Surface {
-            UpdateCardScreenBody(
-                interactor = DefaultEditCardDetailsInteractor.Factory().create(
-                    coroutineScope = rememberCoroutineScope(),
-                    isCbcModifiable = false,
-                    areExpiryDateAndAddressModificationSupported = true,
-                    cardBrandFilter = DefaultCardBrandFilter,
-                    payload = EditCardPayload.create(
-                        ConsumerPaymentDetails.Card(
-                            id = "card_id_1234",
-                            last4 = "4242",
-                            expiryYear = 2500,
-                            expiryMonth = 4,
-                            brand = CardBrand.Visa,
-                            cvcCheck = CvcCheck.Fail,
-                            isDefault = false,
-                            networks = listOf("VISA"),
-                            billingAddress = ConsumerPaymentDetails.BillingAddress(
-                                name = null,
-                                line1 = null,
-                                line2 = null,
-                                locality = null,
-                                administrativeArea = null,
-                                countryCode = CountryCode.US,
-                                postalCode = "42424"
-                            )
-                        ),
-                        billingPhoneNumber = null
+        UpdateCardScreenBody(
+            interactor = DefaultEditCardDetailsInteractor.Factory().create(
+                coroutineScope = rememberCoroutineScope(),
+                isCbcModifiable = false,
+                areExpiryDateAndAddressModificationSupported = true,
+                cardBrandFilter = DefaultCardBrandFilter,
+                payload = EditCardPayload.create(
+                    ConsumerPaymentDetails.Card(
+                        id = "card_id_1234",
+                        last4 = "4242",
+                        expiryYear = 2500,
+                        expiryMonth = 4,
+                        brand = CardBrand.Visa,
+                        cvcCheck = CvcCheck.Fail,
+                        isDefault = false,
+                        networks = listOf("VISA"),
+                        nickname = "Fancy Card",
+                        funding = "credit", billingAddress = ConsumerPaymentDetails.BillingAddress(
+                            name = null,
+                            line1 = null,
+                            line2 = null,
+                            locality = null,
+                            administrativeArea = null,
+                            countryCode = CountryCode.US,
+                            postalCode = "42424"
+                        )
                     ),
-                    onBrandChoiceChanged = {},
-                    onCardUpdateParamsChanged = {},
-                    addressCollectionMode = AddressCollectionMode.Automatic
+                    billingPhoneNumber = null
                 ),
-                isDefault = true,
-                primaryButtonState = PrimaryButtonState.Enabled,
-                secondaryButtonEnabled = true,
-                onUpdateClicked = {},
-                onCancelClicked = {},
-            )
-        }
+                onBrandChoiceChanged = {},
+                onCardUpdateParamsChanged = {},
+                addressCollectionMode = AddressCollectionMode.Automatic
+            ),
+            isDefault = true,
+            primaryButtonState = PrimaryButtonState.Enabled,
+            secondaryButtonEnabled = true,
+            onUpdateClicked = {},
+            onCancelClicked = {},
+        )
     }
 }

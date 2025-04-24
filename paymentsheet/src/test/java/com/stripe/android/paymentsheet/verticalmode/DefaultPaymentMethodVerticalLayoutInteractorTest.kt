@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -1004,6 +1005,31 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
+    fun verticalModeScreenSelection_omitsCardBrand_whenUnknownCardBrand() {
+        val initialPaymentSelection = PaymentSelection.Link()
+        runScenario(
+            initialSelection = initialPaymentSelection,
+            formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
+            updateSelection = {},
+            shouldUpdateVerticalModeSelection = { true }
+        ) {
+            selectionSource.value = PaymentMethodFixtures.CARD_PAYMENT_SELECTION.copy(brand = CardBrand.Unknown)
+
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(selection).isEqualTo(
+                        PaymentMethodVerticalLayoutInteractor.Selection.New(
+                            code = "card",
+                            changeDetails = "···· 4242",
+                            canBeChanged = true,
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
     fun verticalModeScreenSelection_retainsLast4_whenUpdatingTemporarySelection() {
         val initialPaymentSelection = PaymentSelection.Link()
         runScenario(
@@ -1089,7 +1115,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         var verticalModeSelection: PaymentSelection? = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
         runScenario(
             initialSelection = verticalModeSelection,
-            formTypeForCode = { FormHelper.FormType.Empty },
+            formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
             updateSelection = { verticalModeSelection = it },
         ) {
             interactor.state.test {
@@ -1113,16 +1139,16 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             formTypeForCode = { FormHelper.FormType.Empty },
             updateSelection = {},
         ) {
-            val newSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
+            val newSelection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION
             selectionSource.value = newSelection
 
             interactor.state.test {
                 awaitItem().run {
                     assertThat(selection).isEqualTo(
                         PaymentMethodVerticalLayoutInteractor.Selection.New(
-                            code = "card",
-                            changeDetails = "Visa ···· 4242",
-                            canBeChanged = true,
+                            code = "cashapp",
+                            changeDetails = null,
+                            canBeChanged = false,
                         )
                     )
                 }
