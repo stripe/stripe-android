@@ -31,7 +31,7 @@ class UpdateCardScreenViewModelTest {
             paymentDetailsId = card.id
         )
 
-        assertThat(viewModel.state.value?.paymentDetails).isEqualTo(card)
+        assertThat(viewModel.state.value.paymentDetailsId).isEqualTo(card.id)
     }
 
     @Test

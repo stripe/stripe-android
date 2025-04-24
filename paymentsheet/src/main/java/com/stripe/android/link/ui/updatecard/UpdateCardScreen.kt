@@ -2,7 +2,6 @@ package com.stripe.android.link.ui.updatecard
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,18 +27,20 @@ import com.stripe.android.paymentsheet.ui.CardDetailsEditUI
 import com.stripe.android.paymentsheet.ui.DefaultEditCardDetailsInteractor
 import com.stripe.android.paymentsheet.ui.EditCardDetailsInteractor
 import com.stripe.android.paymentsheet.ui.EditCardPayload
-import com.stripe.android.R as StripeR
 import com.stripe.android.uicore.utils.collectAsState
+import com.stripe.android.R as StripeR
 
 @Composable
 internal fun UpdateCardScreen(viewModel: UpdateCardScreenViewModel) {
     val state by viewModel.state.collectAsState()
-    UpdateCardScreenBody(
-        interactor = viewModel.interactor,
-        isDefault = state?.paymentDetails?.isDefault == true,
-        onUpdateClicked = viewModel::onUpdateClicked,
-        onCancelClicked = viewModel::onCancelClicked,
-    )
+    viewModel.interactor?.let {
+        UpdateCardScreenBody(
+            interactor = it,
+            isDefault = state.isDefault,
+            onUpdateClicked = viewModel::onUpdateClicked,
+            onCancelClicked = viewModel::onCancelClicked,
+        )
+    }
 }
 
 @Composable

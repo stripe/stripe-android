@@ -93,9 +93,10 @@ internal class UpdateCardScreenshotTest(
         )
     }
 
-
     internal data class TestCase(
-        val name: String, val card: ConsumerPaymentDetails.Card, val isDefault: Boolean,
+        val name: String,
+        val card: ConsumerPaymentDetails.Card,
+        val isDefault: Boolean,
     ) {
         override fun toString(): String = name
     }

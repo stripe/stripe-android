@@ -30,9 +30,9 @@ internal class UpdateCardScreenViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UpdateCardScreenState())
-    val state: StateFlow<UpdateCardScreenState?> = _state.asStateFlow()
+    val state: StateFlow<UpdateCardScreenState> = _state.asStateFlow()
 
-    lateinit var interactor: EditCardDetailsInteractor
+    var interactor: EditCardDetailsInteractor? = null
 
     init {
         runCatching {
@@ -43,10 +43,13 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                 value = paymentDetails is ConsumerPaymentDetails.Card,
                 lazyMessage = { "Payment details with id $paymentDetailsId is not a card" }
             )
-            interactor = initializeInteractor(paymentDetails)
             _state.update {
-                it.copy(paymentDetails = paymentDetails)
+                it.copy(
+                    paymentDetailsId = paymentDetailsId,
+                    isDefault = paymentDetails.isDefault
+                )
             }
+            interactor = initializeInteractor(paymentDetails)
         }.onFailure {
             logger.error("Failed to render payment update screen", it)
             navigationManager.tryNavigateBack()
@@ -69,8 +72,6 @@ internal class UpdateCardScreenViewModel @Inject constructor(
         cardPaymentDetails: ConsumerPaymentDetails.Card
     ): EditCardDetailsInteractor = DefaultEditCardDetailsInteractor.Factory().create(
         coroutineScope = viewModelScope,
-        // Until card brand choice is supported in Link, we don't allow CBC.
-        isCbcModifiable = false,
         areExpiryDateAndAddressModificationSupported = true,
         // Until card brand filtering is supported in Link, we use the default filter (does not filter)
         cardBrandFilter = DefaultCardBrandFilter,
@@ -80,7 +81,8 @@ internal class UpdateCardScreenViewModel @Inject constructor(
         ),
         addressCollectionMode = AddressCollectionMode.Automatic,
         onCardUpdateParamsChanged = ::onCardUpdateParamsChanged,
-        // Until card brand filtering is supported in Link, we use the default filter (does not filter)
+        // TODO(carlosmuvi): Add CBC support.
+        isCbcModifiable = false,
         onBrandChoiceChanged = {}
     )
 
