@@ -15,16 +15,16 @@ dependencies {
     implementation project(":stripe-attestation")
 
     // Kotlin
-    implementation libs.kotlin.coroutines
+    api libs.kotlin.coroutines
     implementation libs.kotlin.coroutinesAndroid
     implementation libs.kotlin.serialization
 
     // AndroidX
-    implementation libs.androidx.activity
+    api libs.androidx.activity
     implementation libs.androidx.annotation
     implementation libs.androidx.appCompat
     implementation libs.androidx.browser
-    implementation libs.androidx.fragment
+    api libs.androidx.fragment
     implementation libs.androidx.lifecycle
     implementation libs.androidx.lifecycleCompose
     implementation libs.androidx.savedState
@@ -35,7 +35,7 @@ dependencies {
     ksp libs.daggerCompiler
 
     // Compose
-    implementation libs.compose.ui
+    api libs.compose.ui
     implementation libs.compose.uiViewBinding
     implementation libs.compose.foundation
     implementation libs.compose.material
