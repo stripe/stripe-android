@@ -24,7 +24,7 @@ internal class UpdateCardScreenshotTest(
 ) {
     @get:Rule
     val paparazziRule = PaparazziRule(
-        listOf(SystemAppearance.DarkTheme),
+        SystemAppearance.entries,
         listOf(FontSize.DefaultFont)
     )
 

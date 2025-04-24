@@ -65,9 +65,10 @@ internal fun UpdateCardScreenBody(
 
         if (isDefault) {
             Text(
-                modifier = Modifier.padding(top = 16.dp),
+                modifier = Modifier.padding(top = 8.dp),
                 text = stringResource(R.string.stripe_link_update_card_default_card),
-                style = MaterialTheme.typography.subtitle1,
+                style = MaterialTheme.typography.subtitle2,
+                color = MaterialTheme.colors.onSecondary
             )
         }
 
@@ -89,44 +90,42 @@ internal fun UpdateCardScreenBody(
 @Preview
 @Composable
 internal fun UpdateCardScreenBodyPreview() {
-    DefaultLinkTheme {
-        Surface {
-            UpdateCardScreenBody(
-                interactor = DefaultEditCardDetailsInteractor.Factory().create(
-                    coroutineScope = rememberCoroutineScope(),
-                    isCbcModifiable = false,
-                    areExpiryDateAndAddressModificationSupported = true,
-                    cardBrandFilter = DefaultCardBrandFilter,
-                    payload = EditCardPayload.create(
-                        ConsumerPaymentDetails.Card(
-                            id = "card_id_1234",
-                            last4 = "4242",
-                            expiryYear = 2500,
-                            expiryMonth = 4,
-                            brand = CardBrand.Visa,
-                            cvcCheck = CvcCheck.Fail,
-                            isDefault = false,
-                            networks = listOf("VISA"),
-                            billingAddress = ConsumerPaymentDetails.BillingAddress(
-                                name = null,
-                                line1 = null,
-                                line2 = null,
-                                locality = null,
-                                administrativeArea = null,
-                                countryCode = CountryCode.US,
-                                postalCode = "42424"
-                            )
-                        ),
-                        billingPhoneNumber = null
+    DefaultLinkTheme(darkTheme = true) {
+        UpdateCardScreenBody(
+            interactor = DefaultEditCardDetailsInteractor.Factory().create(
+                coroutineScope = rememberCoroutineScope(),
+                isCbcModifiable = false,
+                areExpiryDateAndAddressModificationSupported = true,
+                cardBrandFilter = DefaultCardBrandFilter,
+                payload = EditCardPayload.create(
+                    ConsumerPaymentDetails.Card(
+                        id = "card_id_1234",
+                        last4 = "4242",
+                        expiryYear = 2500,
+                        expiryMonth = 4,
+                        brand = CardBrand.Visa,
+                        cvcCheck = CvcCheck.Fail,
+                        isDefault = false,
+                        networks = listOf("VISA"),
+                        billingAddress = ConsumerPaymentDetails.BillingAddress(
+                            name = null,
+                            line1 = null,
+                            line2 = null,
+                            locality = null,
+                            administrativeArea = null,
+                            countryCode = CountryCode.US,
+                            postalCode = "42424"
+                        )
                     ),
-                    onBrandChoiceChanged = {},
-                    onCardUpdateParamsChanged = {},
-                    addressCollectionMode = AddressCollectionMode.Automatic
+                    billingPhoneNumber = null
                 ),
-                isDefault = true,
-                onUpdateClicked = {},
-                onCancelClicked = {},
-            )
-        }
+                onBrandChoiceChanged = {},
+                onCardUpdateParamsChanged = {},
+                addressCollectionMode = AddressCollectionMode.Automatic
+            ),
+            isDefault = true,
+            onUpdateClicked = {},
+            onCancelClicked = {},
+        )
     }
 }
