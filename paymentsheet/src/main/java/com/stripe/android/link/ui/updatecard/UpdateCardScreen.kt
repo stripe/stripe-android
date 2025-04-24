@@ -108,6 +108,8 @@ internal fun UpdateCardScreenBodyPreview() {
                         cvcCheck = CvcCheck.Fail,
                         isDefault = false,
                         networks = listOf("VISA"),
+                        nickname = "Fancy Card",
+                        funding = "credit",
                         billingAddress = ConsumerPaymentDetails.BillingAddress(
                             name = null,
                             line1 = null,
