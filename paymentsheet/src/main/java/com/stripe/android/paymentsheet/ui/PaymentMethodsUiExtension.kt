@@ -40,7 +40,7 @@ internal fun PaymentMethod.Card?.getSavedPaymentMethodIcon(
 
     // Vertical mode icons are the same for light & dark
     return if (forVerticalMode) {
-        brand.getCardBrandIconForVerticalMode()
+        brand.getUnpaddedIcon()
     } else {
         brand.getCardBrandIconForHorizontalMode(
             showNightIcon = showNightIcon,
@@ -55,7 +55,7 @@ internal fun EditCardPayload.getSavedPaymentMethodIcon(
 ): Int {
     // Vertical mode icons are the same for light & dark
     return if (forVerticalMode) {
-        cardBrand.getCardBrandIconForVerticalMode()
+        cardBrand.getUnpaddedIcon()
     } else {
         cardBrand.getCardBrandIconForHorizontalMode(
             showNightIcon = showNightIcon,
@@ -69,7 +69,7 @@ internal fun CardBrand.getCardBrandIcon(): Int {
 }
 
 @DrawableRes
-internal fun CardBrand.getCardBrandIconForVerticalMode(): Int = when (this) {
+internal fun CardBrand.getUnpaddedIcon(): Int = when (this) {
     CardBrand.Visa -> com.stripe.payments.model.R.drawable.stripe_ic_visa_unpadded
     CardBrand.AmericanExpress -> com.stripe.payments.model.R.drawable.stripe_ic_amex_unpadded
     CardBrand.Discover -> com.stripe.payments.model.R.drawable.stripe_ic_discover_unpadded

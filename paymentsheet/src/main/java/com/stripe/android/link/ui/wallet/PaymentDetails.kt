@@ -40,7 +40,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails.Card
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.ui.getCardBrandIconForVerticalMode
+import com.stripe.android.paymentsheet.ui.getUnpaddedIcon
 import com.stripe.android.R as StripeR
 
 @Composable
@@ -175,7 +175,7 @@ internal fun RowScope.PaymentDetails(
                 modifier = modifier,
                 title = paymentDetails.displayName,
                 subtitle = "•••• ${paymentDetails.last4}",
-                icon = paymentDetails.brand.getCardBrandIconForVerticalMode(),
+                icon = paymentDetails.brand.getUnpaddedIcon(),
             )
         }
         is ConsumerPaymentDetails.BankAccount -> {
@@ -186,7 +186,7 @@ internal fun RowScope.PaymentDetails(
                 modifier = modifier,
                 title = paymentDetails.displayName,
                 subtitle = null,
-                icon = CardBrand.Unknown.getCardBrandIconForVerticalMode(),
+                icon = CardBrand.Unknown.getUnpaddedIcon(),
             )
         }
     }
