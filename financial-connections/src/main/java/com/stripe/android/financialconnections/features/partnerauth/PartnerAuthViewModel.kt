@@ -55,9 +55,9 @@ import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.Destination.AccountPicker
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
-import com.stripe.android.financialconnections.presentation.Async.Fail
-import com.stripe.android.financialconnections.presentation.Async.Loading
-import com.stripe.android.financialconnections.presentation.Async.Uninitialized
+import com.stripe.android.uicore.presentation.Async.Fail
+import com.stripe.android.uicore.presentation.Async.Loading
+import com.stripe.android.uicore.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
 import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository

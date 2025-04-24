@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.ShapedIcon
-import com.stripe.android.financialconnections.presentation.Async.Loading
+import com.stripe.android.uicore.presentation.Async.Loading
 import com.stripe.android.financialconnections.presentation.paneViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton

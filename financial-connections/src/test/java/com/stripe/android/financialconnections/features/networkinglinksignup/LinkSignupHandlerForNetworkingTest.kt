@@ -13,7 +13,7 @@ import com.stripe.android.financialconnections.domain.RequestIntegrityToken
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
-import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.uicore.presentation.Async
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.test.runTest

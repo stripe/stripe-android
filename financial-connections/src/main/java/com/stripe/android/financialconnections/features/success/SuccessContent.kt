@@ -57,8 +57,8 @@ import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.features.success.SuccessState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
-import com.stripe.android.financialconnections.presentation.Async
-import com.stripe.android.financialconnections.presentation.Async.Loading
+import com.stripe.android.uicore.presentation.Async
+import com.stripe.android.uicore.presentation.Async.Loading
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText

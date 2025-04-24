@@ -42,9 +42,9 @@ import com.stripe.android.financialconnections.navigation.Destination.ManualEntr
 import com.stripe.android.financialconnections.navigation.Destination.Reset
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
-import com.stripe.android.financialconnections.presentation.Async
-import com.stripe.android.financialconnections.presentation.Async.Loading
-import com.stripe.android.financialconnections.presentation.Async.Uninitialized
+import com.stripe.android.uicore.presentation.Async
+import com.stripe.android.uicore.presentation.Async.Loading
+import com.stripe.android.uicore.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.ConsumerSessionProvider
 import com.stripe.android.financialconnections.ui.HandleClickableUrl

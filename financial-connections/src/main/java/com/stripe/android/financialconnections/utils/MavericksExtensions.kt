@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.utils
 
 import com.stripe.android.core.exception.StripeException
-import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.uicore.presentation.Async
 import kotlinx.coroutines.CancellationException
 
 /**

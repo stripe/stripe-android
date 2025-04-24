@@ -10,8 +10,8 @@ import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.NetworkedAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.ReturningNetworkingUserAccountPicker
-import com.stripe.android.financialconnections.presentation.Async.Loading
-import com.stripe.android.financialconnections.presentation.Async.Success
+import com.stripe.android.uicore.presentation.Async.Loading
+import com.stripe.android.uicore.presentation.Async.Success
 
 internal class LinkAccountPickerPreviewParameterProvider :
     PreviewParameterProvider<LinkAccountPickerState> {

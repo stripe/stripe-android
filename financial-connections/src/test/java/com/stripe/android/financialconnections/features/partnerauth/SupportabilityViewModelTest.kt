@@ -22,7 +22,7 @@ import com.stripe.android.financialconnections.domain.RetrieveAuthorizationSessi
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.MixedOAuthParams
-import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.uicore.presentation.Async
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
 import com.stripe.android.financialconnections.presentation.withState
 import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository

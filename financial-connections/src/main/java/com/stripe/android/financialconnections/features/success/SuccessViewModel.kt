@@ -18,9 +18,9 @@ import com.stripe.android.financialconnections.features.common.useContinueWithMe
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
-import com.stripe.android.financialconnections.presentation.Async
-import com.stripe.android.financialconnections.presentation.Async.Loading
-import com.stripe.android.financialconnections.presentation.Async.Uninitialized
+import com.stripe.android.uicore.presentation.Async
+import com.stripe.android.uicore.presentation.Async.Loading
+import com.stripe.android.uicore.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
 import com.stripe.android.financialconnections.ui.TextResource

@@ -25,8 +25,8 @@ import com.stripe.android.financialconnections.features.common.isDataFlow
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
-import com.stripe.android.financialconnections.presentation.Async
-import com.stripe.android.financialconnections.presentation.Async.Uninitialized
+import com.stripe.android.uicore.presentation.Async
+import com.stripe.android.uicore.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.AttachedPaymentAccountRepository
 import com.stripe.android.financialconnections.repository.ConsumerSessionProvider

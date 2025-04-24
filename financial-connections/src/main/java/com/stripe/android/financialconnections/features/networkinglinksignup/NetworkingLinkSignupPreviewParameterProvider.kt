@@ -5,8 +5,8 @@ import com.stripe.android.financialconnections.model.Bullet
 import com.stripe.android.financialconnections.model.LinkLoginPane
 import com.stripe.android.financialconnections.model.NetworkingLinkSignupBody
 import com.stripe.android.financialconnections.model.NetworkingLinkSignupPane
-import com.stripe.android.financialconnections.presentation.Async.Success
-import com.stripe.android.financialconnections.presentation.Async.Uninitialized
+import com.stripe.android.uicore.presentation.Async.Success
+import com.stripe.android.uicore.presentation.Async.Uninitialized
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.PhoneNumberController

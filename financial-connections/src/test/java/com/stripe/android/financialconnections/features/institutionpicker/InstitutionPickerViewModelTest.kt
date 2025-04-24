@@ -21,7 +21,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.navigation.Destination
-import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.uicore.presentation.Async
 import com.stripe.android.financialconnections.presentation.withState
 import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.TestNavigationManager

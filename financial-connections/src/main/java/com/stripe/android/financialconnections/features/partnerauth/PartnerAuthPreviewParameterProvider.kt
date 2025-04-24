@@ -12,9 +12,9 @@ import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.OauthPrepane
 import com.stripe.android.financialconnections.model.PartnerNotice
 import com.stripe.android.financialconnections.model.TextUpdate
-import com.stripe.android.financialconnections.presentation.Async.Loading
-import com.stripe.android.financialconnections.presentation.Async.Success
-import com.stripe.android.financialconnections.presentation.Async.Uninitialized
+import com.stripe.android.uicore.presentation.Async.Loading
+import com.stripe.android.uicore.presentation.Async.Success
+import com.stripe.android.uicore.presentation.Async.Uninitialized
 
 internal class PartnerAuthPreviewParameterProvider :
     PreviewParameterProvider<SharedPartnerAuthState> {

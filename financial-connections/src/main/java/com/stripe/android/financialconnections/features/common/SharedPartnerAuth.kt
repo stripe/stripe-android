@@ -47,11 +47,11 @@ import com.stripe.android.financialconnections.features.partnerauth.SharedPartne
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect
 import com.stripe.android.financialconnections.model.Entry
 import com.stripe.android.financialconnections.model.OauthPrepane
-import com.stripe.android.financialconnections.presentation.Async
-import com.stripe.android.financialconnections.presentation.Async.Fail
-import com.stripe.android.financialconnections.presentation.Async.Loading
-import com.stripe.android.financialconnections.presentation.Async.Success
-import com.stripe.android.financialconnections.presentation.Async.Uninitialized
+import com.stripe.android.uicore.presentation.Async
+import com.stripe.android.uicore.presentation.Async.Fail
+import com.stripe.android.uicore.presentation.Async.Loading
+import com.stripe.android.uicore.presentation.Async.Success
+import com.stripe.android.uicore.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
 import com.stripe.android.financialconnections.presentation.collectAsState
