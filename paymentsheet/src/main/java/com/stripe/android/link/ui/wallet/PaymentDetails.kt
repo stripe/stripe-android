@@ -41,9 +41,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails.Card
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.getCardBrandIconForVerticalMode
-import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.R as StripeR
-import com.stripe.android.ui.core.R as StripeUiCoreR
 
 @Composable
 internal fun PaymentDetailsListItem(
@@ -173,15 +171,11 @@ internal fun RowScope.PaymentDetails(
 ) {
     when (paymentDetails) {
         is Card -> {
-            val title = paymentDetails.displayName?.resolve() ?: "•••• ${paymentDetails.last4}"
-            val subtitle = "•••• ${paymentDetails.last4}"
-
             CardInfo(
                 modifier = modifier,
-                title = title,
-                subtitle = subtitle.takeIf { it != title },
+                title = paymentDetails.displayName,
+                subtitle = "•••• ${paymentDetails.last4}",
                 icon = paymentDetails.brand.getCardBrandIconForVerticalMode(),
-                contentDescription = paymentDetails.brand.displayName
             )
         }
         is ConsumerPaymentDetails.BankAccount -> {
@@ -190,10 +184,9 @@ internal fun RowScope.PaymentDetails(
         is ConsumerPaymentDetails.Passthrough -> {
             CardInfo(
                 modifier = modifier,
-                title = "•••• ${paymentDetails.last4}",
+                title = paymentDetails.displayName,
                 subtitle = null,
                 icon = CardBrand.Unknown.getCardBrandIconForVerticalMode(),
-                contentDescription = stringResource(R.string.stripe_wallet_passthrough_description)
             )
         }
     }
@@ -205,14 +198,12 @@ private fun RowScope.CardInfo(
     title: String,
     subtitle: String?,
     icon: Int,
-    contentDescription: String? = null,
 ) {
     PaymentMethodInfo(
         modifier = modifier,
         iconResource = icon,
         title = title,
         subtitle = subtitle,
-        contentDescription = contentDescription,
     )
 }
 
@@ -225,7 +216,7 @@ private fun RowScope.BankAccountInfo(
         modifier = modifier,
         iconResource = R.drawable.stripe_link_bank,
         iconColorFilter = ColorFilter.tint(MaterialTheme.linkColors.actionLabelLight),
-        title = bankAccount.displayName?.resolve() ?: stringResource(StripeUiCoreR.string.stripe_payment_method_bank),
+        title = bankAccount.displayName,
         subtitle = "•••• ${bankAccount.last4}",
     )
 }
@@ -237,7 +228,6 @@ private fun RowScope.PaymentMethodInfo(
     subtitle: String?,
     modifier: Modifier = Modifier,
     iconColorFilter: ColorFilter? = null,
-    contentDescription: String? = null,
 ) {
     Row(
         modifier = modifier.weight(1f),
@@ -246,7 +236,7 @@ private fun RowScope.PaymentMethodInfo(
     ) {
         Image(
             painter = painterResource(iconResource),
-            contentDescription = contentDescription,
+            contentDescription = title,
             modifier = Modifier.size(24.dp),
             alignment = Alignment.Center,
             colorFilter = iconColorFilter,

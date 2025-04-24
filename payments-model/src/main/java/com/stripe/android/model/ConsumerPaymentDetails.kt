@@ -4,11 +4,8 @@ import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.StripeModel
-import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DateUtils
 import kotlinx.parcelize.Parcelize
-import com.stripe.android.core.R as StripeCoreR
 
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -25,7 +22,6 @@ data class ConsumerPaymentDetails(
     ) : Parcelable {
 
         abstract val last4: String
-        abstract val displayName: ResolvableString?
     }
 
     @Parcelize
@@ -49,9 +45,6 @@ data class ConsumerPaymentDetails(
         type = TYPE,
         nickname = nickname,
     ) {
-
-        override val displayName: ResolvableString?
-            get() = nickname?.resolvableString ?: makeCardName(funding, brand.displayName)
 
         val requiresCardDetailsRecollection: Boolean
             get() = isExpired || cvcCheck.requiresRecollection
@@ -100,9 +93,6 @@ data class ConsumerPaymentDetails(
         nickname = null,
     ) {
 
-        override val displayName: ResolvableString?
-            get() = nickname?.resolvableString
-
         companion object {
             const val TYPE = "card"
         }
@@ -124,9 +114,6 @@ data class ConsumerPaymentDetails(
         nickname = nickname,
     ) {
 
-        override val displayName: ResolvableString?
-            get() = nickname?.resolvableString ?: bankName?.resolvableString
-
         companion object {
             const val TYPE = "bank_account"
         }
@@ -143,14 +130,4 @@ data class ConsumerPaymentDetails(
         val postalCode: String?,
         val countryCode: CountryCode?,
     ) : Parcelable
-}
-
-private fun makeCardName(funding: String, brand: String): ResolvableString {
-    return when (funding) {
-        "CREDIT" -> resolvableString(StripeCoreR.string.stripe_link_card_type_credit, brand)
-        "DEBIT" -> resolvableString(StripeCoreR.string.stripe_link_card_type_debit, brand)
-        "PREPAID" -> resolvableString(StripeCoreR.string.stripe_link_card_type_prepaid, brand)
-        "CHARGE", "FUNDING_INVALID" -> resolvableString(StripeCoreR.string.stripe_link_card_type_unknown, brand)
-        else -> resolvableString(StripeCoreR.string.stripe_link_card_type_unknown, brand)
-    }
 }
