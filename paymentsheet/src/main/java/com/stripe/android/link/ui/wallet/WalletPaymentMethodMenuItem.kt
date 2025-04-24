@@ -30,7 +30,7 @@ internal sealed class WalletPaymentMethodMenuItem(
     )
 
     data object Update : WalletPaymentMethodMenuItem(
-        text = StripeR.string.stripe_title_update_card.resolvableString,
+        text = StripeR.string.stripe_link_wallet_menu_action_update_card.resolvableString,
         testTag = WALLET_MENU_UPDATE_TAG,
     )
 }
