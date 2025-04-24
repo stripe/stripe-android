@@ -15,14 +15,16 @@
   "order": null,
   "ordered_payment_method_types_and_wallets": [
     "card",
-    "konbini"
+    "konbini",
+    "cashapp"
   ],
   "payment_method_preference": {
     "object": "payment_method_preference",
     "country_code": "US",
     "ordered_payment_method_types": [
       "card",
-      "konbini"
+      "konbini",
+      "cashapp"
     ],
     "type": "deferred_intent"
   },
