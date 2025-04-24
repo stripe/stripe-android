@@ -15,6 +15,10 @@
         tools:ignore="AllowBackup">
 
         <meta-data
+            android:name="firebase_crashlytics_collection_enabled"
+            android:value="${crashlyticsCollectionEnabled}" />
+
+        <meta-data
             android:name="com.stripe.android.paymentsheet.example.metadata.backend_url"
             android:value="${BACKEND_URL}" />
 

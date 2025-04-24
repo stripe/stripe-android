@@ -1,7 +1,9 @@
 apply from: configs.androidApplication
 
 apply plugin: 'com.emergetools.android'
+apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.google.firebase.appdistribution'
+apply plugin: 'com.google.firebase.crashlytics'
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
 apply plugin: 'shot'
@@ -14,6 +16,14 @@ def getBackendUrl() {
 
 def getGooglePlacesApiKey() {
     return findProperty('STRIPE_PAYMENTSHEET_EXAMPLE_GOOGLE_PLACES_API_KEY') ?: ""
+}
+
+def canUseCrashlytics() {
+    if (gradle.ext.isCi || gradle.ext.isNightlyBuild || gradle.ext.isBrowserstackBuild) {
+        return "true"
+    } else {
+        return "false"
+    }
 }
 
 emerge {
@@ -64,6 +74,10 @@ dependencies {
     implementation libs.retrofitKotlinSerializationConverter
     implementation libs.zxing
 
+    // Firebase analytics
+    implementation libs.firebase.crashlytics
+    implementation libs.firebase.analytics
+
     // Needed for createComposeRule, but not createAndroidComposeRule:
     debugImplementation libs.compose.uiTestManifest
     debugImplementation libs.leakCanary
@@ -110,7 +124,8 @@ android {
 
         manifestPlaceholders = [
                 BACKEND_URL: getBackendUrl(),
-                GOOGLE_PLACES_API_KEY: getGooglePlacesApiKey()
+                GOOGLE_PLACES_API_KEY: getGooglePlacesApiKey(),
+                crashlyticsCollectionEnabled: canUseCrashlytics()
         ]
     }
     buildFeatures {

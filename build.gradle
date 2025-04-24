@@ -18,6 +18,7 @@ buildscript {
         classpath buildLibs.detektGradlePlugin
         classpath buildLibs.dokkaPlugin
         classpath buildLibs.firebaseAppDistribution
+        classpath buildLibs.firebaseCrashlyticsPlugin
         classpath buildLibs.googleServices
         classpath buildLibs.kotlinGradlePlugin
         classpath buildLibs.kotlinSerializationPlugin
