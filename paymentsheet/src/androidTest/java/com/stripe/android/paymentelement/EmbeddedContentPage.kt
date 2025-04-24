@@ -9,6 +9,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
+import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_EDIT_SAVED_CARD
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
@@ -68,5 +69,11 @@ internal class EmbeddedContentPage(
         waitUntilVisible()
 
         composeTestRule.onNodeWithTag(TEST_TAG_VIEW_MORE).performClick()
+    }
+
+    fun clickEdit() {
+        waitUntilVisible()
+
+        composeTestRule.onNodeWithTag(TEST_TAG_EDIT_SAVED_CARD).performClick()
     }
 }
