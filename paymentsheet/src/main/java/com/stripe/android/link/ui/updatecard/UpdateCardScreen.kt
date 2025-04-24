@@ -11,6 +11,8 @@ import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.SecondaryButton
+import com.stripe.android.paymentsheet.R
+import com.stripe.android.R as StripeR
 
 @Composable
 internal fun UpdateCardScreen(viewModel: UpdateCardScreenViewModel) {
@@ -29,19 +31,19 @@ internal fun UpdateCardScreenBody(
         Text(
             modifier = Modifier
                 .padding(bottom = 32.dp),
-            text = stringResource(com.stripe.android.R.string.stripe_link_update_card_title),
+            text = stringResource(R.string.stripe_link_update_card_title),
             style = MaterialTheme.typography.h2
         )
 
         PrimaryButton(
             modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
-            label = stringResource(com.stripe.android.R.string.stripe_link_update_card_confirm_cta),
+            label = stringResource(R.string.stripe_link_update_card_confirm_cta),
             state = PrimaryButtonState.Enabled,
             onButtonClick = onUpdateClicked
         )
 
         SecondaryButton(
-            label = stringResource(com.stripe.android.R.string.stripe_cancel),
+            label = stringResource(StripeR.string.stripe_cancel),
             enabled = true,
             onClick = onCancelClicked
         )
