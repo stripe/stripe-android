@@ -7,6 +7,7 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
@@ -850,4 +851,4 @@ private fun PaymentMethod.toPaymentSelection(): PaymentSelection.Saved {
 private val CommonConfiguration.allowsLink: Boolean
     get() = link.shouldDisplay &&
         !billingDetailsCollectionConfiguration.collectsAnything &&
-        cardBrandAcceptance == PaymentSheet.CardBrandAcceptance.all()
+        (FeatureFlags.linkCardBrandFiltering.isEnabled || cardBrandAcceptance == PaymentSheet.CardBrandAcceptance.all())
