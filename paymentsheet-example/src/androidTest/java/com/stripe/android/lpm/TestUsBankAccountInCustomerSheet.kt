@@ -43,7 +43,6 @@ internal class TestUsBankAccountInCustomerSheet : BasePlaygroundTest() {
         )
     }
 
-    @Ignore("Flakey test")
     @Test
     fun testUSBankAccountLite() {
         testDriver.saveUsBankAccountInCustomerSheet(
@@ -70,7 +69,6 @@ internal class TestUsBankAccountInCustomerSheet : BasePlaygroundTest() {
         )
     }
 
-    @Ignore("Flakey test")
     @Test
     fun testUSBankAccountLiteWithCustomerSession() {
         testDriver.saveUsBankAccountInCustomerSheet(

@@ -58,7 +58,6 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
         )
     }
 
-    @Ignore("Flakey test")
     @Test
     fun testUSBankAccountLiteSuccess() {
         testDriver.confirmUSBankAccount(
@@ -76,7 +75,6 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
         )
     }
 
-    @Ignore("Flakey test")
     @Test
     fun testUSBankAccountSuccessWithIndecisiveUser() {
         // Select another LPM before coming back to the linked bank account
