@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,7 +17,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.stripe.android.link.theme.linkColors
+import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.HyperlinkedText
 
@@ -71,24 +71,28 @@ internal fun ErrorText(
     modifier: Modifier = Modifier,
     style: ErrorTextStyle = ErrorTextStyle.Medium
 ) {
-    Row(
-        modifier = modifier.background(
-            color = MaterialTheme.linkColors.errorComponentBackground,
-            shape = style.shape
-        ),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            painter = painterResource(id = R.drawable.stripe_link_error),
-            contentDescription = null,
-            modifier = style.iconModifier,
-            tint = MaterialTheme.linkColors.errorText
-        )
-        HyperlinkedText(
-            text = text,
-            modifier = style.textModifier,
-            color = MaterialTheme.linkColors.errorText,
-            style = style.textStyle
-        )
+    DefaultLinkTheme {
+        // This is also used in the inline signup form in MPE, so we need
+        // to re-apply the theme here.
+        Row(
+            modifier = modifier.background(
+                color = LinkTheme.colors.errorComponentBackground,
+                shape = style.shape
+            ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.stripe_link_error),
+                contentDescription = null,
+                modifier = style.iconModifier,
+                tint = LinkTheme.colors.errorText
+            )
+            HyperlinkedText(
+                text = text,
+                modifier = style.textModifier,
+                color = LinkTheme.colors.errorText,
+                style = style.textStyle
+            )
+        }
     }
 }

@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.uicore.elements.PhoneNumberController
@@ -79,10 +80,12 @@ internal fun LinkInlineSignupFields(
         AnimatedVisibility(
             visible = signUpState != SignUpState.InputtingRemainingFields && errorMessage != null,
         ) {
-            ErrorText(
-                text = errorMessage.orEmpty(),
-                modifier = Modifier.fillMaxWidth()
-            )
+            DefaultLinkTheme {
+                ErrorText(
+                    text = errorMessage.orEmpty(),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
 
         AnimatedVisibility(

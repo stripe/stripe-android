@@ -24,7 +24,6 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalTextStyle
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
@@ -51,8 +50,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.HorizontalPadding
-import com.stripe.android.link.theme.linkColors
-import com.stripe.android.link.theme.linkShapes
+import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.PrimaryButton
@@ -371,13 +369,13 @@ private fun PaymentMethodPicker(
             .fillMaxWidth()
             .border(
                 width = 1.dp,
-                color = MaterialTheme.linkColors.componentBorder,
-                shape = MaterialTheme.linkShapes.large
+                color = LinkTheme.colors.componentBorder,
+                shape = LinkTheme.shapes.large
             )
-            .clip(MaterialTheme.linkShapes.large)
+            .clip(LinkTheme.shapes.large)
             .background(
-                color = MaterialTheme.linkColors.componentBackground,
-                shape = MaterialTheme.linkShapes.large
+                color = LinkTheme.colors.componentBackground,
+                shape = LinkTheme.shapes.large
             )
     ) {
         EmailDetails(
@@ -388,7 +386,7 @@ private fun PaymentMethodPicker(
 
         Divider(
             modifier = Modifier.fillMaxWidth(),
-            color = MaterialTheme.linkColors.componentBorder,
+            color = LinkTheme.colors.componentBorder,
         )
 
         if (expanded || selectedItem == null) {
@@ -426,7 +424,7 @@ private fun CollapsedPaymentDetails(
             modifier = Modifier
                 .testTag(COLLAPSED_WALLET_HEADER_TAG)
                 .width(labelMaxWidth),
-            color = MaterialTheme.linkColors.disabledText,
+            color = LinkTheme.colors.disabledText,
         )
 
         PaymentDetails(
@@ -440,7 +438,7 @@ private fun CollapsedPaymentDetails(
             modifier = Modifier
                 .padding(end = 22.dp)
                 .testTag(COLLAPSED_WALLET_CHEVRON_ICON_TAG),
-            tint = MaterialTheme.linkColors.disabledText
+            tint = LinkTheme.colors.disabledText
         )
     }
 }
@@ -465,15 +463,15 @@ private fun EmailDetails(
         Text(
             modifier = Modifier.width(labelMaxWidth),
             text = label,
-            color = MaterialTheme.linkColors.disabledText,
+            color = LinkTheme.colors.disabledText,
         )
 
         Text(
             text = email,
-            color = MaterialTheme.colors.onPrimary,
+            color = LinkTheme.colors.textPrimary,
             overflow = TextOverflow.Ellipsis,
             maxLines = 1,
-            style = MaterialTheme.typography.h6,
+            style = LinkTheme.typography.bodyEmphasized,
             modifier = Modifier.weight(1f),
         )
     }
@@ -509,7 +507,7 @@ private fun ExpandedPaymentDetails(
 
             if (index != uiState.paymentDetailsList.lastIndex || uiState.canAddNewPaymentMethod) {
                 Divider(
-                    color = MaterialTheme.linkColors.componentBorder,
+                    color = LinkTheme.colors.componentBorder,
                     modifier = Modifier.padding(horizontal = 20.dp),
                 )
             }
@@ -544,14 +542,14 @@ private fun ExpandedRowHeader(
     ) {
         Text(
             text = stringResource(R.string.stripe_wallet_expanded_title),
-            color = MaterialTheme.colors.onPrimary,
-            style = MaterialTheme.typography.button
+            color = LinkTheme.colors.textPrimary,
+            style = LinkTheme.typography.bodyEmphasized,
         )
         Icon(
             painter = painterResource(id = R.drawable.stripe_link_chevron),
             contentDescription = stringResource(R.string.stripe_wallet_expand_accessibility),
             modifier = Modifier.rotate(CHEVRON_ICON_ROTATION),
-            tint = MaterialTheme.colors.onPrimary
+            tint = LinkTheme.colors.textPrimary,
         )
     }
 }
@@ -578,8 +576,8 @@ private fun AddPaymentMethodRow(
         Text(
             text = stringResource(R.string.stripe_add_payment_method),
             modifier = Modifier.padding(end = HorizontalPadding),
-            color = MaterialTheme.linkColors.actionLabel,
-            style = MaterialTheme.typography.button
+            color = LinkTheme.colors.actionLabel,
+            style = LinkTheme.typography.bodyEmphasized,
         )
     }
 }
@@ -588,15 +586,15 @@ private fun AddPaymentMethodRow(
 private fun BankAccountTerms() {
     Html(
         html = stringResource(R.string.stripe_wallet_bank_account_terms).replaceHyperlinks(),
-        color = MaterialTheme.colors.onSecondary,
-        style = MaterialTheme.typography.caption.copy(
+        color = LinkTheme.colors.textSecondary,
+        style = LinkTheme.typography.caption.copy(
             textAlign = TextAlign.Center,
         ),
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 12.dp),
         urlSpanStyle = SpanStyle(
-            color = MaterialTheme.colors.primary
+            color = LinkTheme.colors.primary,
         )
     )
 }
@@ -694,7 +692,7 @@ private fun AlertMessage(
             ) {
                 Text(
                     text = android.R.string.ok.resolvableString.resolve(context),
-                    color = MaterialTheme.linkColors.actionLabel
+                    color = LinkTheme.colors.actionLabel
                 )
             }
         }
