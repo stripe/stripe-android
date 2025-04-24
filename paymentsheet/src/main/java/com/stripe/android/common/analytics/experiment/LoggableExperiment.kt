@@ -50,7 +50,7 @@ internal sealed class LoggableExperiment(
                 if (email) "email" else null,
                 if (name) "name" else null,
                 if (phone) "phone" else null
-            ).joinToString(",")
+            ).joinToString(" ")
         }
     }
 }
