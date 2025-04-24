@@ -18,6 +18,7 @@ import com.stripe.android.model.SharePaymentDetails
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 internal open class FakeLinkAccountManager(
     val linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
@@ -28,7 +29,8 @@ internal open class FakeLinkAccountManager(
     private val _accountStatus = MutableStateFlow(AccountStatus.SignedOut)
     override val accountStatus: Flow<AccountStatus> = accountStatusOverride ?: _accountStatus
 
-    override val consumerPaymentDetails: StateFlow<ConsumerPaymentDetails?> = MutableStateFlow(null)
+    private val _consumerPaymentDetails = MutableStateFlow<ConsumerPaymentDetails?>(null)
+    override val consumerPaymentDetails: StateFlow<ConsumerPaymentDetails?> = _consumerPaymentDetails.asStateFlow()
 
     var lookupConsumerResult: Result<LinkAccount?> = Result.success(null)
     var mobileLookupConsumerResult: Result<LinkAccount?> = Result.success(TestFactory.LINK_ACCOUNT)
@@ -56,6 +58,10 @@ internal open class FakeLinkAccountManager(
     private val logoutCall = Turbine<Unit>()
 
     override var consumerPublishableKey: String? = null
+
+    fun setConsumerPaymentDetails(consumerPaymentDetails: ConsumerPaymentDetails?) {
+        _consumerPaymentDetails.value = consumerPaymentDetails
+    }
 
     fun setLinkAccount(account: LinkAccount?) {
         linkAccountHolder.set(account)
