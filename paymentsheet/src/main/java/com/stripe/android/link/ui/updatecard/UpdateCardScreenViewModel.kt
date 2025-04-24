@@ -53,7 +53,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
         }
     }
 
-    fun onCardUpdateParamsChanged(cardUpdateParams: CardUpdateParams?) {
+    private fun onCardUpdateParamsChanged(cardUpdateParams: CardUpdateParams?) {
         _state.update { it.copy(cardUpdateParams = cardUpdateParams) }
     }
 
