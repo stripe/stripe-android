@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.ui.EditCardDetailsInteractor
 import com.stripe.android.paymentsheet.ui.EditCardPayload
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.R as StripeR
+import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
 internal fun UpdateCardScreen(viewModel: UpdateCardScreenViewModel) {
@@ -69,9 +70,10 @@ internal fun UpdateCardScreenBody(
 
         if (isDefault) {
             Text(
-                modifier = Modifier.padding(top = 16.dp),
+                modifier = Modifier.padding(top = 8.dp),
                 text = stringResource(R.string.stripe_link_update_card_default_card),
-                style = MaterialTheme.typography.subtitle1,
+                style = MaterialTheme.typography.subtitle2,
+                color = MaterialTheme.colors.onSecondary
             )
         }
 
