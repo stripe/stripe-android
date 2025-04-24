@@ -107,5 +107,6 @@ abstract class ReactiveStateViewModel<S>(
     protected fun setState(reducer: S.() -> S) = _stateFlow.update(reducer)
 }
 
-internal fun <A : ReactiveStateViewModel<B>, B, C> withState(viewModel: A, block: (B) -> C) =
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun <A : ReactiveStateViewModel<B>, B, C> withState(viewModel: A, block: (B) -> C) =
     block(viewModel.stateFlow.value)
