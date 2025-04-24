@@ -116,7 +116,8 @@ internal fun UpdateCardScreenBodyPreview() {
                                 countryCode = CountryCode.US,
                                 postalCode = "42424"
                             )
-                        ), null
+                        ),
+                        billingPhoneNumber = null
                     ),
                     onBrandChoiceChanged = {},
                     onCardUpdateParamsChanged = {},
