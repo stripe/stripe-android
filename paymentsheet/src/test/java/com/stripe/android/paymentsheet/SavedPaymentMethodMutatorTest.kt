@@ -500,18 +500,14 @@ class SavedPaymentMethodMutatorTest {
                     canRemoveLastPaymentMethod = true,
                 )
             )
-
             assertThat(customerStateHolder.paymentMethods.value.first().card?.brand).isEqualTo(CardBrand.Unknown)
 
             savedPaymentMethodMutator.modifyCardPaymentMethod(
                 paymentMethod = displayableSavedPaymentMethod.paymentMethod,
-                cardUpdateParams = CardUpdateParams(
-                    cardBrand = CardBrand.CartesBancaires
-                ),
+                cardUpdateParams = CardUpdateParams(cardBrand = CardBrand.CartesBancaires),
             )
 
             assertThat(calledUpdate.awaitItem()).isTrue()
-
             val paymentMethods = customerStateHolder.paymentMethods.value
             assertThat(paymentMethods).hasSize(1)
             assertThat(paymentMethods.first().card?.brand).isEqualTo(CardBrand.CartesBancaires)
@@ -522,34 +518,61 @@ class SavedPaymentMethodMutatorTest {
     }
 
     @Test
-    fun `modifyCardPaymentMethod analytics events received`() {
-        val displayableSavedPaymentMethod = PaymentMethodFactory.cards(1).first().toDisplayableSavedPaymentMethod()
-        val customerRepository = FakeCustomerRepository(
+    fun `successful card modification updates selected payment method if already selected`() {
+        val paymentMethod = PaymentMethodFactory.cards(1).first()
+        val selection = MutableStateFlow<PaymentSelection?>(PaymentSelection.Saved(paymentMethod))
+        val customerRepository = createRepositoryThatUpdatesCard(paymentMethod)
+
+        runScenario(customerRepository = customerRepository, selection = selection) {
+            setupCustomerState(paymentMethod)
+
+            savedPaymentMethodMutator.modifyCardPaymentMethod(
+                paymentMethod = paymentMethod,
+                cardUpdateParams = CardUpdateParams(cardBrand = CardBrand.CartesBancaires),
+            )
+
+            // Verify
+            val newSelection = selection.value as? PaymentSelection.Saved
+            assertThat(newSelection?.paymentMethod?.id).isEqualTo(paymentMethod.id)
+            eventReporter.assertUpdatePaymentMethodSucceededCalls(CardBrand.CartesBancaires)
+        }
+    }
+
+    @Test
+    fun `successful card modification does not update selected payment method if not already selected`() {
+        val paymentMethod = PaymentMethodFactory.cards(1).first()
+        val differentPaymentMethodId = "1234"
+        val selection = MutableStateFlow<PaymentSelection?>(
+            PaymentSelection.Saved(paymentMethod.copy(id = differentPaymentMethodId))
+        )
+        val customerRepository = createRepositoryThatUpdatesCard(paymentMethod)
+
+        runScenario(customerRepository = customerRepository, selection = selection) {
+            setupCustomerState(paymentMethod)
+
+            savedPaymentMethodMutator.modifyCardPaymentMethod(
+                paymentMethod = paymentMethod,
+                cardUpdateParams = CardUpdateParams(cardBrand = CardBrand.CartesBancaires),
+            )
+
+            val newSelection = selection.value as? PaymentSelection.Saved
+            assertThat(newSelection?.paymentMethod?.id).isNotEqualTo(paymentMethod.id)
+            assertThat(newSelection?.paymentMethod?.id).isEqualTo(differentPaymentMethodId)
+            eventReporter.assertUpdatePaymentMethodSucceededCalls(CardBrand.CartesBancaires)
+        }
+    }
+
+    private fun createRepositoryThatUpdatesCard(paymentMethod: PaymentMethod): FakeCustomerRepository {
+        val displayable = paymentMethod.toDisplayableSavedPaymentMethod()
+        return FakeCustomerRepository(
             onUpdatePaymentMethod = {
                 Result.success(
-                    displayableSavedPaymentMethod.paymentMethod.copy(
-                        card = displayableSavedPaymentMethod.paymentMethod.card?.copy(brand = CardBrand.CartesBancaires)
+                    displayable.paymentMethod.copy(
+                        card = displayable.paymentMethod.card?.copy(brand = CardBrand.CartesBancaires)
                     )
                 )
             }
         )
-
-        runScenario(customerRepository = customerRepository) {
-            customerStateHolder.setCustomerState(
-                createCustomerState(
-                    paymentMethods = listOf(displayableSavedPaymentMethod.paymentMethod),
-                    isRemoveEnabled = true,
-                    canRemoveLastPaymentMethod = true,
-                )
-            )
-
-            savedPaymentMethodMutator.modifyCardPaymentMethod(
-                paymentMethod = displayableSavedPaymentMethod.paymentMethod,
-                cardUpdateParams = CardUpdateParams(cardBrand = CardBrand.CartesBancaires)
-            )
-
-            eventReporter.assertUpdatePaymentMethodSucceededCalls(CardBrand.CartesBancaires)
-        }
     }
 
     @Test
@@ -848,6 +871,16 @@ class SavedPaymentMethodMutatorTest {
 
             block(customerStateHolder, savedPaymentMethodMutator, paymentMethods)
         }
+    }
+
+    private fun Scenario.setupCustomerState(paymentMethod: PaymentMethod) {
+        customerStateHolder.setCustomerState(
+            createCustomerState(
+                paymentMethods = listOf(paymentMethod),
+                isRemoveEnabled = true,
+                canRemoveLastPaymentMethod = true,
+            )
+        )
     }
 
     @Suppress("LongMethod")
