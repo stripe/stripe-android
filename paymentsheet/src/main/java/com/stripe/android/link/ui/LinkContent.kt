@@ -24,7 +24,9 @@ import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkAction
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkScreen
+import com.stripe.android.link.LinkScreen.Companion.EXTRA_PAYMENT_DETAILS
 import com.stripe.android.link.NoLinkAccountFoundException
+import com.stripe.android.link.NoPaymentDetailsFoundException
 import com.stripe.android.link.linkViewModel
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
@@ -34,6 +36,8 @@ import com.stripe.android.link.ui.paymentmenthod.PaymentMethodScreen
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodViewModel
 import com.stripe.android.link.ui.signup.SignUpScreen
 import com.stripe.android.link.ui.signup.SignUpViewModel
+import com.stripe.android.link.ui.updatecard.UpdateCardScreen
+import com.stripe.android.link.ui.updatecard.UpdateCardScreenViewModel
 import com.stripe.android.link.ui.verification.VerificationScreen
 import com.stripe.android.link.ui.verification.VerificationViewModel
 import com.stripe.android.link.ui.wallet.WalletScreen
@@ -101,9 +105,6 @@ internal fun LinkContent(
                         navController = navController,
                         goBack = goBack,
                         moveToWeb = moveToWeb,
-                        navigate = { screen ->
-                            navigate(screen, false)
-                        },
                         navigateAndClearStack = { screen ->
                             navigate(screen, true)
                         },
@@ -128,7 +129,6 @@ private fun Screens(
     navController: NavHostController,
     getLinkAccount: () -> LinkAccount?,
     goBack: () -> Unit,
-    navigate: (route: LinkScreen) -> Unit,
     navigateAndClearStack: (route: LinkScreen) -> Unit,
     dismissWithResult: (LinkActivityResult) -> Unit,
     showBottomSheetContent: (BottomSheetContent?) -> Unit,
@@ -153,6 +153,16 @@ private fun Screens(
             )
         }
 
+        composable(
+            LinkScreen.UpdateCard.route
+        ) { backStackEntry ->
+            val paymentDetailsId = backStackEntry.arguments?.getString(EXTRA_PAYMENT_DETAILS)
+                ?: return@composable dismissWithResult(noPaymentDetailsResult())
+            UpdateCardRoute(
+                paymentDetailsId = paymentDetailsId
+            )
+        }
+
         composable(LinkScreen.Verification.route) {
             val linkAccount = getLinkAccount()
                 ?: return@composable dismissWithResult(noLinkAccountResult())
@@ -169,7 +179,6 @@ private fun Screens(
                 ?: return@composable dismissWithResult(noLinkAccountResult())
             WalletRoute(
                 linkAccount = linkAccount,
-                navigate = navigate,
                 navigateAndClearStack = navigateAndClearStack,
                 showBottomSheetContent = showBottomSheetContent,
                 hideBottomSheetContent = hideBottomSheetContent,
@@ -229,6 +238,19 @@ private fun VerificationRoute(
 }
 
 @Composable
+private fun UpdateCardRoute(paymentDetailsId: String) {
+    val viewModel: UpdateCardScreenViewModel = linkViewModel { parentComponent ->
+        UpdateCardScreenViewModel.factory(
+            parentComponent = parentComponent,
+            paymentDetailsId = paymentDetailsId,
+        )
+    }
+    UpdateCardScreen(
+        viewModel = viewModel,
+    )
+}
+
+@Composable
 private fun PaymentMethodRoute(
     linkAccount: LinkAccount,
     dismissWithResult: (LinkActivityResult) -> Unit,
@@ -250,7 +272,6 @@ private fun PaymentMethodRoute(
 @Composable
 private fun WalletRoute(
     linkAccount: LinkAccount,
-    navigate: (route: LinkScreen) -> Unit,
     navigateAndClearStack: (route: LinkScreen) -> Unit,
     dismissWithResult: (LinkActivityResult) -> Unit,
     showBottomSheetContent: (BottomSheetContent?) -> Unit,
@@ -260,7 +281,6 @@ private fun WalletRoute(
         WalletViewModel.factory(
             parentComponent = parentComponent,
             linkAccount = linkAccount,
-            navigate = navigate,
             navigateAndClearStack = navigateAndClearStack,
             dismissWithResult = dismissWithResult
         )
@@ -285,6 +305,13 @@ private fun Loader() {
 private fun noLinkAccountResult(): LinkActivityResult {
     return LinkActivityResult.Failed(
         error = NoLinkAccountFoundException(),
+        linkAccountUpdate = LinkAccountUpdate.None
+    )
+}
+
+private fun noPaymentDetailsResult(): LinkActivityResult {
+    return LinkActivityResult.Failed(
+        error = NoPaymentDetailsFoundException(),
         linkAccountUpdate = LinkAccountUpdate.None
     )
 }
