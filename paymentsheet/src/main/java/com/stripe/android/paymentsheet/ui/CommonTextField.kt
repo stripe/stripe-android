@@ -30,13 +30,9 @@ internal fun CommonTextField(
     keyboardActions: KeyboardActions = KeyboardActions.Default,
     shape: Shape =
         MaterialTheme.shapes.small.copy(bottomEnd = ZeroCornerSize, bottomStart = ZeroCornerSize),
-    colors: TextFieldColors = TextFieldColors(
+    colors: TextFieldColors = commonTextFieldColors(
         shouldShowError = shouldShowError,
-        backgroundColor = if (enabled) {
-            MaterialTheme.stripeColors.component
-        } else {
-            disabledBackgroundColor()
-        }
+        enabled = enabled
     ),
 ) {
     TextField(
@@ -85,4 +81,19 @@ private fun disabledBackgroundColor(): Color {
             alpha = 1f
         )
     }
+}
+
+@Composable
+internal fun commonTextFieldColors(
+    shouldShowError: Boolean,
+    enabled: Boolean
+): TextFieldColors {
+    return TextFieldColors(
+        shouldShowError = shouldShowError,
+        backgroundColor = if (enabled) {
+            MaterialTheme.stripeColors.component
+        } else {
+            disabledBackgroundColor()
+        }
+    )
 }
