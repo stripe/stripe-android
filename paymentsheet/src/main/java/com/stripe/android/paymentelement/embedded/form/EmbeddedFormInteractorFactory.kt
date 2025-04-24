@@ -33,7 +33,8 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             selectionUpdater = {
                 embeddedSelectionHolder.set(it)
             },
-            hasSavedPaymentMethods = hasSavedPaymentMethods,
+            // If no saved payment methods, then first saved payment method is automatically set as default
+            setAsDefaultMatchesSaveForFutureUse = hasSavedPaymentMethods,
         )
 
         val usBankAccountFormArguments = USBankAccountFormArguments.createForEmbedded(
