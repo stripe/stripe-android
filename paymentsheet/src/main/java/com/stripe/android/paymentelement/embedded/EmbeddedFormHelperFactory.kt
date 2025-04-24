@@ -10,6 +10,7 @@ import com.stripe.android.paymentsheet.LinkInlineHandler
 import com.stripe.android.paymentsheet.NewPaymentOptionSelection
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
 
@@ -21,7 +22,7 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
 ) {
     fun create(
         coroutineScope: CoroutineScope,
-        hasSavedPaymentMethods: Boolean,
+        hasSavedPaymentMethods: Boolean? = null,
         paymentMethodMetadata: PaymentMethodMetadata,
         eventReporter: EventReporter,
         selectionUpdater: (PaymentSelection?) -> Unit,
@@ -48,7 +49,8 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
             selectionUpdater = selectionUpdater,
             linkConfigurationCoordinator = linkConfigurationCoordinator,
             // If no saved payment methods, then first saved payment method is automatically set as default
-            setAsDefaultMatchesSaveForFutureUse = !hasSavedPaymentMethods,
+            setAsDefaultMatchesSaveForFutureUse = hasSavedPaymentMethods?.not()
+                ?: FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
             eventReporter = eventReporter,
             savedStateHandle = savedStateHandle,
         )

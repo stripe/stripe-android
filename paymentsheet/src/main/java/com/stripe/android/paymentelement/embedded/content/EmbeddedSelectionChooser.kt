@@ -10,7 +10,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
-import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -32,7 +31,6 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val formHelperFactory: EmbeddedFormHelperFactory,
     private val eventReporter: EventReporter,
-    private val customerStateHolder: CustomerStateHolder,
     @ViewModelScope private val coroutineScope: CoroutineScope,
 ) : EmbeddedSelectionChooser {
     private var previousConfiguration: CommonConfiguration?
@@ -103,7 +101,6 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
             coroutineScope = coroutineScope,
             paymentMethodMetadata = paymentMethodMetadata,
             eventReporter = eventReporter,
-            hasSavedPaymentMethods = customerStateHolder.paymentMethods.value.isNotEmpty(),
         ) {}
             .formTypeForCode(previousSelection.paymentMethodType)
         return newFormType != FormHelper.FormType.UserInteractionRequired
