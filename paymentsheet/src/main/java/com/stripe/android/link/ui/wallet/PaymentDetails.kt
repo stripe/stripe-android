@@ -25,6 +25,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -43,6 +44,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails.Card
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.TransformBankIconCodeToBankIcon
 import com.stripe.android.paymentsheet.ui.getCardBrandIconForVerticalMode
 import com.stripe.android.R as StripeR
 
@@ -227,7 +229,7 @@ private fun RowScope.BankAccountInfo(
         title = bankAccount.displayName,
         subtitle = "•••• ${bankAccount.last4}",
         icon = {
-            BankIcon()
+            BankIcon(bankAccount.bankIconCode)
         }
     )
 }
@@ -270,22 +272,40 @@ private fun RowScope.PaymentMethodInfo(
 
 @Composable
 private fun BankIcon(
+    bankIconCode: String?,
     modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = modifier
+    val icon = remember(bankIconCode) {
+        TransformBankIconCodeToBankIcon(
+            iconCode = bankIconCode,
+            fallbackIcon = R.drawable.stripe_link_bank_outlined,
+        )
+    }
+
+    val isGenericIcon = icon == R.drawable.stripe_link_bank_outlined
+
+    val containerModifier = if (isGenericIcon) {
+        modifier
             .background(
                 color = MaterialTheme.linkColors.componentBorder,
                 shape = RoundedCornerShape(3.dp),
             )
             .padding(4.dp)
-    ) {
+    } else {
+        modifier
+    }
+
+    Box(modifier = containerModifier) {
         Image(
-            painter = painterResource(R.drawable.stripe_link_bank_outlined),
+            painter = painterResource(icon),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Fit,
-            colorFilter = ColorFilter.tint(MaterialTheme.colors.onSecondary),
+            colorFilter = if (isGenericIcon) {
+                ColorFilter.tint(MaterialTheme.colors.onSecondary)
+            } else {
+                null
+            },
         )
     }
 }
