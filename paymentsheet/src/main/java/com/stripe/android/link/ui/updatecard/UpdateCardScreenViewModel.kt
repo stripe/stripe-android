@@ -9,6 +9,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.Logger
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.NativeLinkComponent
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
@@ -56,10 +57,6 @@ internal class UpdateCardScreenViewModel @Inject constructor(
         }
     }
 
-    private fun onCardUpdateParamsChanged(cardUpdateParams: CardUpdateParams?) {
-        _state.update { it.copy(cardUpdateParams = cardUpdateParams) }
-    }
-
     fun onUpdateClicked() {
         logger.info("Update button clicked")
     }
@@ -81,10 +78,17 @@ internal class UpdateCardScreenViewModel @Inject constructor(
         ),
         addressCollectionMode = AddressCollectionMode.Automatic,
         onCardUpdateParamsChanged = ::onCardUpdateParamsChanged,
-        // TODO(carlosmuvi): Add CBC support.
-        isCbcModifiable = false,
-        onBrandChoiceChanged = {}
+        isCbcModifiable = cardPaymentDetails.availableNetworks.size > 1,
+        onBrandChoiceChanged = ::onBrandChoiceChanged
     )
+
+    private fun onCardUpdateParamsChanged(cardUpdateParams: CardUpdateParams?) {
+        _state.update { it.copy(cardUpdateParams = cardUpdateParams) }
+    }
+
+    private fun onBrandChoiceChanged(cardBrand: CardBrand) {
+        _state.update { it.copy(preferredCardBrand = cardBrand) }
+    }
 
     companion object {
         fun factory(
