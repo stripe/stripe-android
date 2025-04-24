@@ -14,7 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.uicore.elements.ExpiryDateVisualTransformation
-import com.stripe.android.uicore.elements.TextFieldColors
 import com.stripe.android.uicore.elements.compat.errorSemanticsWithDefault
 import com.stripe.android.uicore.strings.resolve
 
@@ -28,8 +27,9 @@ internal fun ExpiryTextField(
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
 ) {
     val isError = state.shouldShowError()
-    val colors = TextFieldColors(
+    val colors = commonTextFieldColors(
         shouldShowError = isError,
+        enabled = state.enabled
     )
     CommonTextField(
         modifier = modifier
