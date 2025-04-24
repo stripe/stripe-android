@@ -35,14 +35,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.MinimumTouchTargetSize
 import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails.Card
+import com.stripe.android.model.CvcCheck
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.transformBankIconCodeToBankIcon
 import com.stripe.android.paymentsheet.ui.getCardBrandIconForVerticalMode
@@ -109,6 +112,52 @@ internal fun PaymentDetailsListItem(
             isUpdating = isUpdating,
             onMenuButtonClick = onMenuButtonClick
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PaymentDetailsListItemPreview() {
+    val card = Card(
+        id = "id",
+        last4 = "4242",
+        isDefault = false,
+        expiryYear = 2100,
+        expiryMonth = 12,
+        brand = CardBrand.Visa,
+        cvcCheck = CvcCheck.Pass,
+        networks = emptyList(),
+        funding = "CREDIT",
+        nickname = null,
+        billingAddress = null
+    )
+    DefaultLinkTheme {
+        Column {
+            PaymentDetailsListItem(
+                paymentDetails = card,
+                enabled = true,
+                isSelected = true,
+                isUpdating = false,
+                onClick = {},
+                onMenuButtonClick = {}
+            )
+            PaymentDetailsListItem(
+                paymentDetails = card.copy(brand = CardBrand.MasterCard, expiryYear = 0),
+                enabled = true,
+                isSelected = false,
+                isUpdating = false,
+                onClick = {},
+                onMenuButtonClick = {}
+            )
+            PaymentDetailsListItem(
+                paymentDetails = card,
+                enabled = false,
+                isSelected = false,
+                isUpdating = true,
+                onClick = {},
+                onMenuButtonClick = {}
+            )
+        }
     }
 }
 
