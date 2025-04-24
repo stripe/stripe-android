@@ -556,7 +556,16 @@ internal class DefaultEventReporter @Inject internal constructor(
                     logger.logWarningWithoutPii(
                         "AnalyticEventCallback.onEvent() failed for event: $event"
                     )
+                    return@run
                 }
+                fireEvent(
+                    PaymentSheetEvent.EmitAnalyticEvent(
+                        analyticEventName = event.toString(),
+                        isDeferred = isDeferred,
+                        linkEnabled = linkEnabled,
+                        googlePaySupported = googlePaySupported,
+                    )
+                )
             }
         }
     }

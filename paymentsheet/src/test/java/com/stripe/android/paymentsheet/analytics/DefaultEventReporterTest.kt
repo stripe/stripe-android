@@ -41,6 +41,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.reset
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
@@ -1013,6 +1014,11 @@ class DefaultEventReporterTest {
         assertThat(fakeUserFacingLoggerCall.awaitItem()).isEqualTo(
             "AnalyticEventCallback.onEvent() failed for event: PresentedSheet"
         )
+        verify(analyticsRequestExecutor, never()).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_emit_analytic_event"
+            }
+        )
     }
 
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
@@ -1025,6 +1031,29 @@ class DefaultEventReporterTest {
         analyticEventCallbackRule.setCallback(null)
 
         completeEventReporter.onShowNewPaymentOptions()
+
+        verify(analyticsRequestExecutor, never()).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_emit_analytic_event"
+            }
+        )
+    }
+
+    @Test
+    fun `Send requests if analtyic callback is set and triggered`() = runTest(testDispatcher) {
+        val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
+            simulateSuccessfulSetup(linkMode = null, googlePayReady = false)
+        }
+
+        completeEventReporter.onShowNewPaymentOptions()
+
+        analyticEventCallbackRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_emit_analytic_event" &&
+                    req.params["analytic_event"] == "PresentedSheet"
+            }
+        )
     }
 
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)

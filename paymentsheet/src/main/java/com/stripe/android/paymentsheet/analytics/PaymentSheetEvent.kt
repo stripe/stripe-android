@@ -606,6 +606,18 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         ) + experiment.dimensions.mapKeys { "dimensions-${it.key}" }
     }
 
+    class EmitAnalyticEvent(
+        analyticEventName: String,
+        override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
+        override val googlePaySupported: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_emit_analytic_event"
+
+        override val additionalParams: Map<String, Any?> = buildMap {
+            put(FIELD_ANALYTIC_EVENT, analyticEventName)
+        }
+    }
     private fun standardParams(
         isDecoupled: Boolean,
         linkEnabled: Boolean,
@@ -683,6 +695,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_CARD_SCAN_AVAILABLE = "card_scan_available"
         const val FIELD_ANALYTIC_CALLBACK_SET = "analytic_callback_set"
         const val FIELD_LINK_DISPLAY = "link_display"
+        const val FIELD_ANALYTIC_EVENT = "analytic_event"
 
         const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
         const val VALUE_ADD_CBC_EVENT_SOURCE = "add"
