@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.uicore.elements.TextFieldColors
+import com.stripe.android.uicore.stripeColors
 
 @Composable
 internal fun CommonTextField(
