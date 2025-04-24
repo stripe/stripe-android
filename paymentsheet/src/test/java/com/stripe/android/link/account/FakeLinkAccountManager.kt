@@ -28,7 +28,7 @@ internal open class FakeLinkAccountManager(
     private val _accountStatus = MutableStateFlow(AccountStatus.SignedOut)
     override val accountStatus: Flow<AccountStatus> = accountStatusOverride ?: _accountStatus
 
-    override val paymentDetails: StateFlow<ConsumerPaymentDetails?> = MutableStateFlow(null)
+    override val consumerPaymentDetails: StateFlow<ConsumerPaymentDetails?> = MutableStateFlow(null)
 
     var lookupConsumerResult: Result<LinkAccount?> = Result.success(null)
     var mobileLookupConsumerResult: Result<LinkAccount?> = Result.success(TestFactory.LINK_ACCOUNT)
