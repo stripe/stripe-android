@@ -119,6 +119,7 @@ internal object PaymentDetailsFixtures {
                       "address_postal_code_check": "PASS",
                       "cvc_check": "PASS"
                     },
+                    "funding": "CREDIT",
                     "exp_month": 12,
                     "exp_year": 2023,
                     "last4": "4444"

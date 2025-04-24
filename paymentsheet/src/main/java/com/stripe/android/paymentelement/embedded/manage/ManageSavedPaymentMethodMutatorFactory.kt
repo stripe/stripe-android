@@ -63,7 +63,6 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
     private fun onPaymentMethodRemoved() {
         val shouldCloseSheet = customerStateHolder.paymentMethods.value.isEmpty()
         if (shouldCloseSheet) {
-            selectionHolder.set(null)
             manageNavigatorProvider.get().performAction(ManageNavigator.Action.Close)
         }
     }

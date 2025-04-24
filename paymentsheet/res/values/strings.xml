@@ -26,6 +26,14 @@
   <string name="stripe_confirm_close_form_title">Do you want to close this form?</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header">Save your info for secure 1-click checkout with Link</string>
+  <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
+  <string name="stripe_link_card_type_credit">%1$s Credit</string>
+  <!-- Label a debit funding source. E.g. 'Visa Debit' -->
+  <string name="stripe_link_card_type_debit">%1$s Debit</string>
+  <!-- Label a prepaid funding source. E.g. 'Visa Prepaid' -->
+  <string name="stripe_link_card_type_prepaid">%1$s Prepaid</string>
+  <!-- Label a default funding source, which we treat as a generic card. E.g. 'Visa Card' -->
+  <string name="stripe_link_card_type_unknown">%1$s Card</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">Agree and continue</string>
   <!-- Title for the Link signup screen -->

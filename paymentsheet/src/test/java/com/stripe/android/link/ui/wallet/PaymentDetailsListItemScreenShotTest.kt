@@ -38,6 +38,8 @@ internal class PaymentDetailsListItemScreenShotTest {
                     last4 = "4444",
                     cvcCheck = CvcCheck.Pass,
                     networks = emptyList(),
+                    funding = "CREDIT",
+                    nickname = null,
                     billingAddress = ConsumerPaymentDetails.BillingAddress(
                         name = null,
                         line1 = null,
@@ -68,6 +70,8 @@ internal class PaymentDetailsListItemScreenShotTest {
                     last4 = "4444",
                     cvcCheck = CvcCheck.Pass,
                     networks = emptyList(),
+                    funding = "CREDIT",
+                    nickname = null,
                     billingAddress = ConsumerPaymentDetails.BillingAddress(
                         name = null,
                         line1 = null,
@@ -98,6 +102,8 @@ internal class PaymentDetailsListItemScreenShotTest {
                     last4 = "4444",
                     cvcCheck = CvcCheck.Pass,
                     networks = emptyList(),
+                    funding = "CREDIT",
+                    nickname = "My Personal Card",
                     billingAddress = ConsumerPaymentDetails.BillingAddress(
                         name = null,
                         line1 = null,
@@ -128,6 +134,8 @@ internal class PaymentDetailsListItemScreenShotTest {
                     last4 = "4444",
                     cvcCheck = CvcCheck.Pass,
                     networks = emptyList(),
+                    funding = "CREDIT",
+                    nickname = null,
                     billingAddress = ConsumerPaymentDetails.BillingAddress(
                         name = null,
                         line1 = null,
@@ -155,6 +163,7 @@ internal class PaymentDetailsListItemScreenShotTest {
                     bankName = "STRIPE TEST BANK",
                     bankIconCode = null,
                     isDefault = false,
+                    nickname = null,
                 ),
                 enabled = true,
                 isSelected = false,

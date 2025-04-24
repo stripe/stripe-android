@@ -421,16 +421,14 @@ internal fun Wallet(
 
 @Composable
 private fun PrimaryButton(viewModel: BaseSheetViewModel) {
-    val uiState = viewModel.primaryButtonUiState.collectAsState()
+    val uiState by viewModel.primaryButtonUiState.collectAsState()
 
     val modifier = Modifier
         .testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
         .semantics {
             role = Role.Button
 
-            val currentState = uiState.value
-
-            if (currentState == null || !currentState.enabled) {
+            if (uiState?.enabled != true) {
                 disabled()
             }
         }
@@ -455,14 +453,11 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
             )
             binding
         },
+        update = {
+            button?.updateUiState(uiState)
+        },
         modifier = modifier,
     )
-
-    LaunchedEffect(viewModel, button) {
-        viewModel.primaryButtonUiState.collect { uiState ->
-            button?.updateUiState(uiState)
-        }
-    }
 
     LaunchedEffect(viewModel, button) {
         (viewModel as? PaymentSheetViewModel)?.buyButtonState?.collect { state ->
