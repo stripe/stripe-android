@@ -248,6 +248,24 @@ internal class BillingDetailsEntryTest {
         assertThat(hasChanged).isFalse()
     }
 
+    @Test
+    fun `hasChanged() returns false when comparing String against null FormFieldEntry`() {
+        val state = billingDetailsEntry(
+            billingDetailsFormState = billingDetailsFormState(
+                line1 = null,
+                line2 = null,
+                city = null,
+                state = null,
+            )
+        )
+
+        val hasChanged = state.hasChanged(
+            billingDetails = BILLING_DETAILS_FORM_DETAILS,
+            addressCollectionMode = AddressCollectionMode.Automatic
+        )
+        assertThat(hasChanged).isFalse()
+    }
+
     private fun billingDetailsEntry(
         billingDetailsFormState: BillingDetailsFormState = billingDetailsFormState()
     ): BillingDetailsEntry {
