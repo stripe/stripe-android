@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [ADDED][10720](https://github.com/stripe/stripe-android/pull/10720) `EmbeddedPaymentElement` now supports customizing `FormSheetAction` and a 2 step flow (similar to `PaymentSheet.FlowController`).
+
 ## 21.11.1 - 2025-04-22
 
 ### PaymentSheet
