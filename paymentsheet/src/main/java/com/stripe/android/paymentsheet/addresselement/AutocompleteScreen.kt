@@ -76,7 +76,7 @@ internal fun AutocompleteScreen(
 internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
     val predictions by viewModel.predictions.collectAsState()
     val loading by viewModel.loading.collectAsState()
-    val query = viewModel.textFieldController.fieldValue.collectAsState()
+    val query by viewModel.textFieldController.fieldValue.collectAsState()
     val attributionDrawable =
         PlacesClientProxy.getPlacesPoweredByGoogleDrawable(isSystemInDarkTheme())
     val focusRequester = remember { FocusRequester() }
@@ -149,7 +149,7 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
                     LoadingIndicator(
                         modifier = Modifier.fillMaxWidth()
                     )
-                } else if (query.value.isNotBlank()) {
+                } else if (query.isNotBlank()) {
                     predictions?.let {
                         if (it.isNotEmpty()) {
                             Divider(
@@ -172,7 +172,7 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
                                                 horizontal = 16.dp
                                             )
                                     ) {
-                                        val regex = query.value
+                                        val regex = query
                                             .replace(" ", "|")
                                             .toRegex(RegexOption.IGNORE_CASE)
                                         val matches = regex.findAll(primaryText).toList()
