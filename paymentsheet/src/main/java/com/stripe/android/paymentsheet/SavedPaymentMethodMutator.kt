@@ -303,6 +303,9 @@ internal class SavedPaymentMethodMutator(
                         }
                     )
                 )
+                if (isSelectedPaymentMethod(updatedMethod)) {
+                    setSelection(PaymentSelection.Saved(updatedMethod))
+                }
 
                 onSuccess(updatedMethod)
             }
@@ -316,6 +319,11 @@ internal class SavedPaymentMethodMutator(
                 error = error,
             )
         }
+    }
+
+    private fun isSelectedPaymentMethod(paymentMethod: PaymentMethod): Boolean {
+        val currentSelection = selection.value as? PaymentSelection.Saved
+        return currentSelection?.paymentMethod?.id == paymentMethod.id
     }
 
     companion object {

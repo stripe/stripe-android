@@ -164,8 +164,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     private fun PaymentSelection.Saved.takeIfStillValid(): PaymentSelection.Saved? {
         val paymentMethods = customerStateHolder.paymentMethods.value
-        val isStillAround = paymentMethods.any { it.id == paymentMethod.id }
-        return this.takeIf { isStillAround }
+        val paymentMethod = paymentMethods.firstOrNull { it.id == paymentMethod.id }
+        return paymentMethod?.let {
+            this.copy(paymentMethod = it)
+        }
     }
 
     override fun onError(error: ResolvableString?) {

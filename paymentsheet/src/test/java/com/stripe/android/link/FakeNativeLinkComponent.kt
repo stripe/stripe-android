@@ -12,11 +12,13 @@ import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
 import com.stripe.android.link.injection.NativeLinkComponent
+import com.stripe.android.link.utils.TestNavigationManager
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FakeLogger
+import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import org.mockito.kotlin.mock
 
@@ -36,4 +38,5 @@ internal class FakeNativeLinkComponent(
     override val linkAuth: LinkAuth = FakeLinkAuth(),
     override val savedStateHandle: SavedStateHandle = SavedStateHandle(),
     override val eventReporter: EventReporter = FakeEventReporter(),
+    override val navigationManager: NavigationManager = TestNavigationManager(),
 ) : NativeLinkComponent

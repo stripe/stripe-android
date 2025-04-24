@@ -76,6 +76,7 @@ internal fun WalletScreen(
         onPrimaryButtonClick = viewModel::onPrimaryButtonClicked,
         onPayAnotherWayClicked = viewModel::onPayAnotherWayClicked,
         onRemoveClicked = viewModel::onRemoveClicked,
+        onUpdateClicked = viewModel::onUpdateClicked,
         onSetDefaultClicked = viewModel::onSetDefaultClicked,
         showBottomSheetContent = showBottomSheetContent,
         hideBottomSheetContent = hideBottomSheetContent,
@@ -97,6 +98,7 @@ internal fun WalletBody(
     onDismissAlert: () -> Unit,
     onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onRemoveClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onUpdateClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: () -> Unit
 ) {
@@ -136,6 +138,7 @@ internal fun WalletBody(
             onExpandedChanged = onExpandedChanged,
             showBottomSheetContent = showBottomSheetContent,
             onRemoveClicked = onRemoveClicked,
+            onUpdateClicked = onUpdateClicked,
             onSetDefaultClicked = onSetDefaultClicked,
             onAddNewPaymentMethodClicked = onAddNewPaymentMethodClicked,
             hideBottomSheetContent = hideBottomSheetContent
@@ -163,6 +166,7 @@ private fun PaymentDetailsSection(
     onAddNewPaymentMethodClicked: () -> Unit,
     onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onRemoveClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onUpdateClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: () -> Unit
 ) {
@@ -177,6 +181,7 @@ private fun PaymentDetailsSection(
             showBottomSheetContent = showBottomSheetContent,
             onRemoveClicked = onRemoveClicked,
             onSetDefaultClicked = onSetDefaultClicked,
+            onUpdateClicked = onUpdateClicked,
             onAddNewPaymentMethodClicked = onAddNewPaymentMethodClicked,
             hideBottomSheetContent = hideBottomSheetContent
         )
@@ -255,6 +260,7 @@ private fun PaymentMethodSection(
     onAddNewPaymentMethodClicked: () -> Unit,
     onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onRemoveClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onUpdateClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: () -> Unit
 ) {
@@ -283,6 +289,10 @@ private fun PaymentMethodSection(
                             },
                             onCancelClick = {
                                 hideBottomSheetContent()
+                            },
+                            onUpdateClick = {
+                                hideBottomSheetContent()
+                                onUpdateClicked(it)
                             }
                         )
                     }

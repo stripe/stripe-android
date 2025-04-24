@@ -77,7 +77,8 @@ internal class WalletPaymentMethodMenuScreenshotTest {
                     paymentDetails = paymentDetails,
                     onCancelClick = {},
                     onRemoveClick = {},
-                    onSetDefaultClick = {}
+                    onSetDefaultClick = {},
+                    onUpdateClick = {},
                 )
             }
         }

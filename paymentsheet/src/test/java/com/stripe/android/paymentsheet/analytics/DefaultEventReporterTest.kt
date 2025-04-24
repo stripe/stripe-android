@@ -661,6 +661,7 @@ class DefaultEventReporterTest {
             assertEquals(params["dimensions-is_returning_link_user"], "false")
             assertEquals(params["dimensions-recognition_type"], "email")
             assertEquals(params["dimensions-link_displayed"], "true")
+            assertEquals(params["dimensions-dvs_provided"], "email phone")
             assertEquals(params["dimensions-integration_shape"], "embedded")
             assertEquals(params["sdk_platform"], "android")
             assertEquals(params["plugin_type"], "native")

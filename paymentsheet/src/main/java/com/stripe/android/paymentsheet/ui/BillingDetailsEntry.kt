@@ -48,6 +48,7 @@ internal data class BillingDetailsEntry(
         get() = this?.isComplete ?: true
 
     private infix fun String?.nullableNeq(other: FormFieldEntry?): Boolean {
-        return this.orEmpty() != other?.value.orEmpty()
+        if (other == null) return false
+        return this.orEmpty() != other.value.orEmpty()
     }
 }
