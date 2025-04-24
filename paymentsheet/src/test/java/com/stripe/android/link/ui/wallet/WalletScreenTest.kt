@@ -19,6 +19,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
@@ -150,7 +151,7 @@ internal class WalletScreenTest {
         onExpandedWalletHeader().assertIsDisplayed()
         onPaymentMethodList().assertCountEquals(2)
         onWalletPayButton().assertIsDisplayed().assertIsEnabled().assertHasClickAction()
-        onWalletPayAnotherWayButton().assertIsDisplayed().assertIsEnabled().assertHasClickAction()
+        onWalletPayAnotherWayButton().performScrollTo().assertIsDisplayed().assertIsEnabled().assertHasClickAction()
     }
 
     @Test

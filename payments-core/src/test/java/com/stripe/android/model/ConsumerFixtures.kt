@@ -73,6 +73,7 @@ object ConsumerFixtures {
                       "address_postal_code_check": "PASS",
                       "cvc_check": "PASS"
                     },
+                    "funding": "CREDIT",
                     "exp_month": 12,
                     "exp_year": 2023,
                     "last4": "4444"
@@ -95,6 +96,7 @@ object ConsumerFixtures {
                   "card_details": {
                     "brand": "MASTERCARD",
                     "checks": null,
+                    "funding": "CREDIT",
                     "exp_month": 12,
                     "exp_year": 2023,
                     "last4": "4444"
@@ -196,6 +198,7 @@ object ConsumerFixtures {
                       "address_postal_code_check": "PASS",
                       "cvc_check": "PASS"
                     },
+                    "funding": "CREDIT",
                     "exp_month": 12,
                     "exp_year": 2023,
                     "last4": "4444"
@@ -225,6 +228,7 @@ object ConsumerFixtures {
                       "address_postal_code_check": "PASS",
                       "cvc_check": "FAIL"
                     },
+                    "funding": "CREDIT",
                     "exp_month": 4,
                     "exp_year": 2024,
                     "last4": "4242"
