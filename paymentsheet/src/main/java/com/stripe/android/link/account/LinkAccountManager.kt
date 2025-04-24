@@ -25,7 +25,7 @@ internal interface LinkAccountManager {
      * Cached payment details for the current Link account.
      * [listPaymentDetails] calls will update this value.
      */
-    val paymentDetails: StateFlow<ConsumerPaymentDetails?>
+    val consumerPaymentDetails: StateFlow<ConsumerPaymentDetails?>
 
     /**
      * Retrieves the Link account associated with the email if it exists.

@@ -46,8 +46,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
 
     override val linkAccount: StateFlow<LinkAccount?> = linkAccountHolder.linkAccount
 
-    private val _paymentDetails: MutableStateFlow<ConsumerPaymentDetails?> = MutableStateFlow(null)
-    override val paymentDetails: StateFlow<ConsumerPaymentDetails?> = _paymentDetails.asStateFlow()
+    private val _consumerPaymentDetails: MutableStateFlow<ConsumerPaymentDetails?> = MutableStateFlow(null)
+    override val consumerPaymentDetails: StateFlow<ConsumerPaymentDetails?> = _consumerPaymentDetails.asStateFlow()
 
     /**
      * The publishable key for the signed in Link account.
@@ -341,7 +341,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             consumerSessionClientSecret = clientSecret,
             consumerPublishableKey = consumerPublishableKey
         ).map { paymentDetailsList ->
-            paymentDetailsList.also { _paymentDetails.value = it }
+            paymentDetailsList.also { _consumerPaymentDetails.value = it }
         }
     }
 
@@ -377,7 +377,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
         } ?: run {
             withContext(Dispatchers.Main.immediate) {
                 linkAccountHolder.set(null)
-                _paymentDetails.value = null
+                _consumerPaymentDetails.value = null
             }
             consumerPublishableKey = null
             null
