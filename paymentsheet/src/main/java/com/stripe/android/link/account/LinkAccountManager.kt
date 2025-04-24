@@ -19,8 +19,13 @@ import kotlinx.coroutines.flow.StateFlow
 internal interface LinkAccountManager {
     val linkAccount: StateFlow<LinkAccount?>
     val accountStatus: Flow<AccountStatus>
-    val paymentDetails: StateFlow<ConsumerPaymentDetails?>
     var consumerPublishableKey: String?
+
+    /**
+     * Cached payment details for the current Link account.
+     * [listPaymentDetails] calls will update this value.
+     */
+    val paymentDetails: StateFlow<ConsumerPaymentDetails?>
 
     /**
      * Retrieves the Link account associated with the email if it exists.
