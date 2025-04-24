@@ -10,6 +10,8 @@ import com.stripe.android.core.Logger
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.ui.DefaultEditCardDetailsInteractor
@@ -20,6 +22,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class UpdateCardScreenViewModel @Inject constructor(
@@ -30,7 +33,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UpdateCardScreenState())
-    val state: StateFlow<UpdateCardScreenState?> = _state.asStateFlow()
+    val state: StateFlow<UpdateCardScreenState> = _state.asStateFlow()
 
     lateinit var interactor: EditCardDetailsInteractor
 
@@ -58,7 +61,34 @@ internal class UpdateCardScreenViewModel @Inject constructor(
     }
 
     fun onUpdateClicked() {
-        logger.info("Update button clicked")
+        viewModelScope.launch {
+            runCatching {
+                _state.update { it.copy(loading = true, error = null) }
+                val cardParams = requireNotNull(state.value.cardUpdateParams)
+                val paymentDetails = requireNotNull(state.value.paymentDetails)
+                val createParams = PaymentMethodCreateParams.create(
+                    card = PaymentMethodCreateParams.Card.Builder()
+                        .setExpiryMonth(cardParams.expiryMonth)
+                        .setExpiryYear(cardParams.expiryYear)
+                        .build(),
+                    billingDetails = cardParams.billingDetails
+                )
+                val updateParams = ConsumerPaymentDetailsUpdateParams(
+                    id = paymentDetails.id,
+                    // When updating a card that is not the default and you send isDefault=false to the server you get
+                    // "Can't unset payment details when it's not the default", so send nil instead of false
+                    isDefault = paymentDetails.isDefault.takeIf { it == true },
+                    cardPaymentMethodCreateParamsMap = createParams.toParamMap()
+                )
+                linkAccountManager.updatePaymentDetails(updateParams = updateParams).getOrThrow()
+                _state.update { it.copy(loading = false, error = null) }
+            }.onFailure { throwable ->
+                logger.error("Failed to update payment details", throwable)
+                _state.update { it.copy(loading = false, error = throwable) }
+            }.onSuccess {
+                navigationManager.tryNavigateBack()
+            }
+        }
     }
 
     fun onCancelClicked() {

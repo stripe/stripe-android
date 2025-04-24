@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -364,7 +365,21 @@ internal class DefaultLinkAccountManager @Inject constructor(
             updateParams = updateParams,
             consumerSessionClientSecret = clientSecret,
             consumerPublishableKey = consumerPublishableKey
-        )
+        ).map { updatedPaymentDetails ->
+            updatedPaymentDetails.also {
+                updateCachedPaymentDetails(it.paymentDetails.first())
+            }
+        }
+    }
+
+    private fun updateCachedPaymentDetails(updatedPayment: ConsumerPaymentDetails.PaymentDetails) {
+        _consumerPaymentDetails.update { currentDetails ->
+            currentDetails?.copy(
+                paymentDetails = currentDetails.paymentDetails.map { paymentDetail ->
+                    if (paymentDetail.id == updatedPayment.id) updatedPayment else paymentDetail
+                }
+            )
+        }
     }
 
     @VisibleForTesting

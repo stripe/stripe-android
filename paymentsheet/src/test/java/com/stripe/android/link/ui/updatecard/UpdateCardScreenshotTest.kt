@@ -4,6 +4,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
@@ -47,6 +48,8 @@ internal class UpdateCardScreenshotTest(
                         addressCollectionMode = AddressCollectionMode.Automatic
                     ),
                     isDefault = true,
+                    primaryButtonState = PrimaryButtonState.Enabled,
+                    secondaryButtonEnabled = true,
                     onUpdateClicked = {},
                     onCancelClicked = {},
                 )
@@ -93,9 +96,10 @@ internal class UpdateCardScreenshotTest(
         )
     }
 
-
     internal data class TestCase(
-        val name: String, val card: ConsumerPaymentDetails.Card, val isDefault: Boolean,
+        val name: String,
+        val card: ConsumerPaymentDetails.Card,
+        val isDefault: Boolean,
     ) {
         override fun toString(): String = name
     }

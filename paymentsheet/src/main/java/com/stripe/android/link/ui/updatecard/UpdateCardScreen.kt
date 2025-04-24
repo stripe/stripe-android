@@ -28,15 +28,17 @@ import com.stripe.android.paymentsheet.ui.CardDetailsEditUI
 import com.stripe.android.paymentsheet.ui.DefaultEditCardDetailsInteractor
 import com.stripe.android.paymentsheet.ui.EditCardDetailsInteractor
 import com.stripe.android.paymentsheet.ui.EditCardPayload
-import com.stripe.android.R as StripeR
 import com.stripe.android.uicore.utils.collectAsState
+import com.stripe.android.R as StripeR
 
 @Composable
 internal fun UpdateCardScreen(viewModel: UpdateCardScreenViewModel) {
     val state by viewModel.state.collectAsState()
     UpdateCardScreenBody(
         interactor = viewModel.interactor,
-        isDefault = state?.paymentDetails?.isDefault == true,
+        isDefault = state.paymentDetails?.isDefault == true,
+        primaryButtonState = state.primaryButtonState,
+        secondaryButtonEnabled = state.loading.not(),
         onUpdateClicked = viewModel::onUpdateClicked,
         onCancelClicked = viewModel::onCancelClicked,
     )
@@ -45,6 +47,8 @@ internal fun UpdateCardScreen(viewModel: UpdateCardScreenViewModel) {
 @Composable
 internal fun UpdateCardScreenBody(
     interactor: EditCardDetailsInteractor,
+    primaryButtonState: PrimaryButtonState,
+    secondaryButtonEnabled: Boolean,
     isDefault: Boolean,
     onUpdateClicked: () -> Unit,
     onCancelClicked: () -> Unit,
@@ -74,13 +78,13 @@ internal fun UpdateCardScreenBody(
         PrimaryButton(
             modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
             label = stringResource(R.string.stripe_link_update_card_confirm_cta),
-            state = PrimaryButtonState.Enabled,
+            state = primaryButtonState,
             onButtonClick = onUpdateClicked
         )
 
         SecondaryButton(
             label = stringResource(StripeR.string.stripe_cancel),
-            enabled = true,
+            enabled = secondaryButtonEnabled,
             onClick = onCancelClicked
         )
     }
@@ -124,6 +128,8 @@ internal fun UpdateCardScreenBodyPreview() {
                     addressCollectionMode = AddressCollectionMode.Automatic
                 ),
                 isDefault = true,
+                primaryButtonState = PrimaryButtonState.Enabled,
+                secondaryButtonEnabled = true,
                 onUpdateClicked = {},
                 onCancelClicked = {},
             )

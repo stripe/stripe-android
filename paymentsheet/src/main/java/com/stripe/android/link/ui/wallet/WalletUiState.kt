@@ -11,7 +11,7 @@ import com.stripe.android.uicore.forms.FormFieldEntry
 internal data class WalletUiState(
     val paymentDetailsList: List<ConsumerPaymentDetails.PaymentDetails>,
     val isExpanded: Boolean = false,
-    val selectedItem: ConsumerPaymentDetails.PaymentDetails?,
+    val selectedItemId: String?,
     val isProcessing: Boolean,
     val primaryButtonLabel: ResolvableString,
     val hasCompleted: Boolean,
@@ -22,6 +22,13 @@ internal data class WalletUiState(
     val cvcInput: FormFieldEntry = FormFieldEntry(null),
     val alertMessage: ResolvableString? = null,
 ) {
+
+    val selectedItem
+        get() = if (selectedItemId != null) {
+            paymentDetailsList.firstOrNull { it.id == selectedItemId }
+        } else {
+            paymentDetailsList.firstOrNull()
+        }
 
     val selectedCard: Card? = selectedItem as? Card
 
@@ -63,16 +70,9 @@ internal data class WalletUiState(
 
     fun updateWithResponse(
         response: ConsumerPaymentDetails,
-        selectedItemId: String? = null
     ): WalletUiState {
-        val selectedItem = if (selectedItemId != null) {
-            response.paymentDetails.firstOrNull { it.id == selectedItemId }
-        } else {
-            response.paymentDetails.firstOrNull()
-        }
         return copy(
             paymentDetailsList = response.paymentDetails,
-            selectedItem = selectedItem,
             isProcessing = false,
             cardBeingUpdated = null
         )
