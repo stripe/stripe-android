@@ -252,9 +252,7 @@ private fun RowScope.PaymentMethodInfo(
             colorFilter = iconColorFilter,
         )
 
-        Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
+        Column {
             Text(
                 text = title,
                 color = MaterialTheme.colors.onPrimary,
