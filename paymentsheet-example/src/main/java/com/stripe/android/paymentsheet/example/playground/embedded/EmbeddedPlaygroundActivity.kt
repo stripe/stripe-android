@@ -55,10 +55,6 @@ import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
 import kotlinx.coroutines.launch
 
-class FirebaseTestException : Exception(
-    "This is a test exception for Firebase!"
-)
-
 @OptIn(
     ExperimentalEmbeddedPaymentElementApi::class,
     ExperimentalCustomPaymentMethodsApi::class,
