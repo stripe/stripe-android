@@ -1,7 +1,6 @@
 package com.stripe.android.customersheet.data
 
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
@@ -58,7 +57,8 @@ internal class CustomerSessionInitializationDataSource @Inject constructor(
                                 component.isPaymentMethodRemoveEnabled
                             is ElementsSession.Customer.Components.CustomerSheet.Disabled -> false
                         },
-                        canUpdateFullPaymentMethodDetails = FeatureFlags.editSavedCardPaymentMethodEnabled.isEnabled
+                        // Should always be enabled when using `customer_session`
+                        canUpdateFullPaymentMethodDetails = true
                     ),
                     defaultPaymentMethodId = customer.defaultPaymentMethod,
                 )

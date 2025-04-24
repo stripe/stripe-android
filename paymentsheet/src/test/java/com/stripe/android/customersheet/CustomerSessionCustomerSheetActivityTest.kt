@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet
 
 import android.app.Application
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -9,6 +10,7 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.model.CardBrand
@@ -21,6 +23,7 @@ import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.RemoveDialog
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
@@ -95,7 +98,7 @@ class CustomerSessionCustomerSheetActivityTest {
         }
 
     @Test
-    fun `When single PM with remove permissions but cannot remove last PM, edit button should not be displayed`() =
+    fun `When single PM with remove permissions but cannot remove last PM, edit button should be displayed`() =
         runTest(
             cards = listOf(
                 PaymentMethodFactory.card(last4 = "4242"),
@@ -103,11 +106,11 @@ class CustomerSessionCustomerSheetActivityTest {
             isPaymentMethodRemoveEnabled = true,
             allowsRemovalOfLastSavedPaymentMethod = false,
         ) {
-            savedPaymentMethodsPage.onEditButton().assertDoesNotExist()
+            savedPaymentMethodsPage.onEditButton().assertIsDisplayed()
         }
 
     @Test
-    fun `When multiple PMs but no remove permissions, edit button should not be displayed`() =
+    fun `When multiple PMs but no remove permissions, edit button should be displayed`() =
         runTest(
             cards = listOf(
                 PaymentMethodFactory.card(last4 = "4242"),
@@ -116,7 +119,7 @@ class CustomerSessionCustomerSheetActivityTest {
             isPaymentMethodRemoveEnabled = false,
             allowsRemovalOfLastSavedPaymentMethod = true,
         ) {
-            savedPaymentMethodsPage.onEditButton().assertDoesNotExist()
+            savedPaymentMethodsPage.onEditButton().assertIsDisplayed()
         }
 
     @Test
@@ -261,6 +264,7 @@ class CustomerSessionCustomerSheetActivityTest {
         ),
         isPaymentMethodRemoveEnabled = true,
         allowsRemovalOfLastSavedPaymentMethod = true,
+        addressCollectionMode = AddressCollectionMode.Never
     ) {
         savedPaymentMethodsPage.onEditButton().performClick()
         savedPaymentMethodsPage.onModifyBadgeFor(last4 = "4242").performClick()
@@ -292,6 +296,7 @@ class CustomerSessionCustomerSheetActivityTest {
                 createDuplicateCard(id = "pm_1", addCbcNetworks = true),
                 PaymentMethodFactory.card(last4 = "1001"),
             ),
+            addressCollectionMode = AddressCollectionMode.Never
         ) {
             savedPaymentMethodsPage.onEditButton().performClick()
             savedPaymentMethodsPage.onModifyBadgeFor(last4 = "4242").performClick()
@@ -324,6 +329,7 @@ class CustomerSessionCustomerSheetActivityTest {
                 PaymentMethodFactory.card(id = "pm_1")
                     .update(last4 = "1001", addCbcNetworks = true),
             ),
+            addressCollectionMode = AddressCollectionMode.Never
         ) {
             savedPaymentMethodsPage.onEditButton().performClick()
             savedPaymentMethodsPage.onModifyBadgeFor(last4 = "1001").performClick()
@@ -343,6 +349,7 @@ class CustomerSessionCustomerSheetActivityTest {
         isPaymentMethodRemoveEnabled: Boolean = true,
         isCanRemoveLastPaymentMethodEnabled: Boolean = true,
         allowsRemovalOfLastSavedPaymentMethod: Boolean = true,
+        addressCollectionMode: AddressCollectionMode = AddressCollectionMode.Automatic,
         test: (CustomerSheetActivity) -> Unit,
     ) {
         CustomerSheetHacks.initialize(
@@ -393,6 +400,10 @@ class CustomerSessionCustomerSheetActivityTest {
                         merchantDisplayName = "Merchant, Inc.",
                         allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
                         preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa),
+                        billingDetailsCollectionConfiguration = ConfigurationDefaults
+                            .billingDetailsCollectionConfiguration.copy(
+                                address = addressCollectionMode
+                            )
                     ),
                     statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
                 )

@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
 import com.stripe.android.common.model.CommonConfiguration
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -76,7 +75,8 @@ internal data class CustomerState(
                     canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
                     // Should always remove duplicates when using `customer_session`
                     canRemoveDuplicates = true,
-                    canUpdateFullPaymentMethodDetails = FeatureFlags.editSavedCardPaymentMethodEnabled.isEnabled,
+                    // Should always be enabled when using `customer_session`
+                    canUpdateFullPaymentMethodDetails = true,
                 ),
                 defaultPaymentMethodId = customer.defaultPaymentMethod
             )
