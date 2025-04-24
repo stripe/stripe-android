@@ -38,6 +38,7 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.ui.theme.Theme
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.financialconnections.utils.UriUtils
+import com.stripe.android.uicore.presentation.withState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -237,7 +238,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
     }
 
     @Test
-    fun `handleOnNewIntent - when app2app deeplink with success, webAuthFlow async suceeds`() {
+    fun `handleOnNewIntent - when app2app deeplink with success, webAuthFlow async succeeds`() {
         val viewModel = createViewModel()
         val intent = intent(
             "stripe-auth://link-accounts/$applicationId/authentication_return#authSessionId=12345&code=success"
