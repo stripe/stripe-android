@@ -10,7 +10,7 @@ internal val ConsumerPaymentDetails.PaymentDetails.displayName: String
     @Composable
     get() = when (this) {
         is ConsumerPaymentDetails.Card -> {
-            nickname ?: makeCardName(funding, brand.displayName)
+            nickname ?: makeFallbackCardName(funding, brand.displayName)
         }
         is ConsumerPaymentDetails.BankAccount -> {
             nickname ?: bankName ?: stringResource(StripeUiCoreR.string.stripe_payment_method_bank)
@@ -21,7 +21,7 @@ internal val ConsumerPaymentDetails.PaymentDetails.displayName: String
     }
 
 @Composable
-private fun makeCardName(funding: String, brand: String): String {
+private fun makeFallbackCardName(funding: String, brand: String): String {
     return when (funding) {
         "CREDIT" -> stringResource(R.string.stripe_link_card_type_credit, brand)
         "DEBIT" -> stringResource(R.string.stripe_link_card_type_debit, brand)
