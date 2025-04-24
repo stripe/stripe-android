@@ -28,4 +28,3 @@ internal abstract class FinancialConnectionsViewModel<S>(
         }
     }
 }
-

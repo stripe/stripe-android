@@ -57,8 +57,6 @@ import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.features.success.SuccessState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
-import com.stripe.android.uicore.presentation.Async
-import com.stripe.android.uicore.presentation.Async.Loading
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
@@ -66,6 +64,8 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
+import com.stripe.android.uicore.presentation.Async
+import com.stripe.android.uicore.presentation.Async.Loading
 import com.stripe.android.uicore.text.MiddleEllipsisText
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

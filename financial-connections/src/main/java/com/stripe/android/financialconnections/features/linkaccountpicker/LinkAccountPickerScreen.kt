@@ -45,11 +45,6 @@ import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAc
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.AddNewAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
-import com.stripe.android.uicore.presentation.Async
-import com.stripe.android.uicore.presentation.Async.Fail
-import com.stripe.android.uicore.presentation.Async.Loading
-import com.stripe.android.uicore.presentation.Async.Success
-import com.stripe.android.uicore.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.paneViewModel
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -63,6 +58,11 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
 import com.stripe.android.uicore.image.StripeImage
+import com.stripe.android.uicore.presentation.Async
+import com.stripe.android.uicore.presentation.Async.Fail
+import com.stripe.android.uicore.presentation.Async.Loading
+import com.stripe.android.uicore.presentation.Async.Success
+import com.stripe.android.uicore.presentation.Async.Uninitialized
 import com.stripe.android.uicore.utils.collectAsState
 
 /*

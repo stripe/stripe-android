@@ -47,11 +47,6 @@ import com.stripe.android.financialconnections.features.partnerauth.SharedPartne
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect
 import com.stripe.android.financialconnections.model.Entry
 import com.stripe.android.financialconnections.model.OauthPrepane
-import com.stripe.android.uicore.presentation.Async
-import com.stripe.android.uicore.presentation.Async.Fail
-import com.stripe.android.uicore.presentation.Async.Loading
-import com.stripe.android.uicore.presentation.Async.Success
-import com.stripe.android.uicore.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
 import com.stripe.android.financialconnections.presentation.collectAsState
@@ -67,6 +62,11 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
 import com.stripe.android.uicore.image.StripeImage
+import com.stripe.android.uicore.presentation.Async
+import com.stripe.android.uicore.presentation.Async.Fail
+import com.stripe.android.uicore.presentation.Async.Loading
+import com.stripe.android.uicore.presentation.Async.Success
+import com.stripe.android.uicore.presentation.Async.Uninitialized
 
 @Composable
 internal fun SharedPartnerAuth(

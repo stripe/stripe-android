@@ -12,8 +12,8 @@ import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.LegalDetailsBody
 import com.stripe.android.financialconnections.model.LegalDetailsNotice
 import com.stripe.android.financialconnections.model.ServerLink
-import com.stripe.android.uicore.presentation.Async.Success
 import com.stripe.android.financialconnections.ui.theme.Theme
+import com.stripe.android.uicore.presentation.Async.Success
 
 internal class ConsentPreviewParameterProvider : PreviewParameterProvider<ConsentPreviewState> {
 

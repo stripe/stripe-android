@@ -15,6 +15,7 @@ sealed class Async<out T>(
     /**
      * Represents the initial state before any async operation has been started.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data object Uninitialized : Async<Nothing>(value = null)
 
     /**
@@ -23,6 +24,7 @@ sealed class Async<out T>(
      * @param T The type of the data being loaded
      * @param value An optional previous or intermediate value to display during loading
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Loading<T>(val value: T? = null) : Async<T>(value = value)
 
     /**
@@ -31,6 +33,7 @@ sealed class Async<out T>(
      * @param T The type of the result data
      * @param value The actual result value from the operation
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Success<out T>(private val value: T) : Async<T>(value = value) {
         override operator fun invoke(): T = value
     }
@@ -41,6 +44,7 @@ sealed class Async<out T>(
      * @param T The type of the result that would have been returned on success
      * @param error The throwable that caused the operation to fail
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Fail<out T>(val error: Throwable) : Async<T>(value = null)
 
     /**

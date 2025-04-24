@@ -2,9 +2,9 @@ package com.stripe.android.financialconnections.features.success
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.uicore.presentation.Async.Success
 import com.stripe.android.uicore.presentation.Async.Uninitialized
-import com.stripe.android.financialconnections.ui.TextResource
 
 internal class SuccessPreviewParameterProvider :
     PreviewParameterProvider<SuccessState> {
