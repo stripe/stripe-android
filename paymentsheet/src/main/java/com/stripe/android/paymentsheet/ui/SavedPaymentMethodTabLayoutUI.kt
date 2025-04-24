@@ -457,7 +457,7 @@ internal fun CvcRecollectionField(
     animationDelay: Int = ANIMATION_DELAY
 ) {
     val controller by cvcControllerFlow.collectAsState()
-    val error = controller.error.collectAsState()
+    val error by controller.error.collectAsState()
     val element = CvcElement(
         IdentifierSpec(),
         controller
@@ -507,7 +507,7 @@ internal fun CvcRecollectionField(
                     previousFocusDirection = FocusDirection.Previous
                 )
             }
-            error.value?.errorMessage?.let {
+            error?.errorMessage?.let {
                 Row {
                     SectionError(error = stringResource(id = it))
                 }
