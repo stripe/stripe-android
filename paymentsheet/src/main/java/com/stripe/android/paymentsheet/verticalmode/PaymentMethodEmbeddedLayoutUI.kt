@@ -30,6 +30,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
+import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -245,6 +246,7 @@ internal fun EmbeddedSavedPaymentMethodRowButton(
             isSelected = selection?.isSaved == true,
             trailingContent = {
                 SavedPaymentMethodTrailingContent(
+                    viewMoreShowChevron = rowStyle.viewMoreShowsChevron,
                     savedPaymentMethodAction = savedPaymentMethodAction,
                     onViewMorePaymentMethods = onViewMorePaymentMethods,
                     onManageOneSavedPaymentMethod = { onManageOneSavedPaymentMethod(displayedSavedPaymentMethod) },
@@ -308,6 +310,14 @@ internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
         if (index != paymentMethods.lastIndex) OptionalEmbeddedDivider(rowStyle)
     }
 }
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+private val RowStyle.viewMoreShowsChevron: Boolean
+    get() = when (this) {
+        is RowStyle.FloatingButton -> true
+        is RowStyle.FlatWithRadio -> true
+        is RowStyle.FlatWithCheckmark -> false
+    }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val TEST_TAG_CHANGE = "TEST_TAG_CHANGE"
