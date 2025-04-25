@@ -68,19 +68,9 @@ private fun Label(
 @Composable
 private fun disabledBackgroundColor(): Color {
     return if (isSystemInDarkTheme()) {
-        Color(
-            red = 116f / 255f,
-            green = 116f / 255f,
-            blue = 128f / 255f,
-            alpha = 0.18f
-        )
+        Color.White.copy(alpha = 0.075f)
     } else {
-        Color(
-            red = 248f / 255f,
-            green = 248f / 255f,
-            blue = 248f / 255f,
-            alpha = 1f
-        )
+        Color.Black.copy(alpha = 0.075f)
     }
 }
 
