@@ -16,6 +16,7 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.account.FakeLinkAccountManager
 import com.stripe.android.link.account.LinkAccountHolder
@@ -64,36 +65,19 @@ internal class LinkActivityViewModelTest {
         val navigationManager = TestNavigationManager()
         linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
 
-        var result: LinkActivityResult? = null
-        fun dismissWithResult(actualResult: LinkActivityResult) {
-            result = actualResult
-        }
-
         val vm = createViewModel(
             navigationManager = navigationManager,
             linkAccountManager = linkAccountManager,
-            dismissWithResult = ::dismissWithResult
         )
 
-        vm.handleViewAction(LinkAction.BackPressed)
-
-        assertThat(result)
-            .isEqualTo(
+        vm.result.test {
+            vm.handleViewAction(LinkAction.BackPressed)
+            assertThat(awaitItem()).isEqualTo(
                 LinkActivityResult.Canceled(
                     linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT)
                 )
             )
-    }
-
-    @Test
-    fun `test that activity unregister removes dismissWithResult`() = runTest(dispatcher) {
-        val vm = createViewModel()
-
-        assertThat(vm.dismissWithResult).isNotNull()
-
-        vm.unregisterActivity()
-
-        assertThat(vm.dismissWithResult).isNull()
+        }
     }
 
     @Test
@@ -375,26 +359,24 @@ internal class LinkActivityViewModelTest {
         val linkAccountManager = FakeLinkAccountManager()
         linkAccountManager.setLinkAccount(TestFactory.LINK_ACCOUNT)
 
-        var activityResult: LinkActivityResult? = null
         val vm = createViewModel(
             linkAccountManager = linkAccountManager,
             startWithVerificationDialog = true,
-            dismissWithResult = {
-                activityResult = it
-            }
         )
-        linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification)
 
-        vm.onCreate(mock())
+        vm.result.test {
+            linkAccountManager.setAccountStatus(AccountStatus.NeedsVerification)
 
-        assertThat(vm.linkScreenState.value).isEqualTo(ScreenState.VerificationDialog(TestFactory.LINK_ACCOUNT))
+            vm.onCreate(mock())
 
-        vm.onDismissVerificationClicked()
+            assertThat(vm.linkScreenState.value).isEqualTo(ScreenState.VerificationDialog(TestFactory.LINK_ACCOUNT))
 
-        assertThat(activityResult)
-            .isEqualTo(
+            vm.onDismissVerificationClicked()
+
+            assertThat(awaitItem()).isEqualTo(
                 LinkActivityResult.Canceled(linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT))
             )
+        }
     }
 
     @Test
@@ -495,23 +477,21 @@ internal class LinkActivityViewModelTest {
     @Test
     fun `logout action should dismiss screen`() = runTest {
         val linkAccountManager = FakeLinkAccountManager()
-        var result: LinkActivityResult? = null
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager,
-            dismissWithResult = {
-                result = it
-            }
         )
 
-        viewModel.handleViewAction(LinkAction.LogoutClicked)
+        viewModel.result.test {
+            viewModel.handleViewAction(LinkAction.LogoutClicked)
 
-        linkAccountManager.awaitLogoutCall()
-        assertThat(result).isEqualTo(
-            LinkActivityResult.Canceled(
-                reason = LinkActivityResult.Canceled.Reason.LoggedOut,
-                linkAccountUpdate = LinkAccountUpdate.Value(null)
+            linkAccountManager.awaitLogoutCall()
+            assertThat(awaitItem()).isEqualTo(
+                LinkActivityResult.Canceled(
+                    reason = LinkActivityResult.Canceled.Reason.LoggedOut,
+                    linkAccountUpdate = LinkAccountUpdate.Value(null)
+                )
             )
-        )
+        }
     }
 
     @Test
@@ -535,10 +515,8 @@ internal class LinkActivityViewModelTest {
 
     private fun testAttestationCheckError(
         attestationCheckResult: LinkAttestationCheck.Result,
-        expectedLinkActivityResult: LinkActivityResult? = null,
     ) = runTest {
         var launchWebConfig: LinkConfiguration? = null
-        var result: LinkActivityResult? = null
         val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
         val linkAccountManager = FakeLinkAccountManager(
             linkAccountHolder = linkAccountHolder,
@@ -560,22 +538,22 @@ internal class LinkActivityViewModelTest {
             launchWeb = { config ->
                 launchWebConfig = config
             },
-            dismissWithResult = {
-                result = it
-            }
         )
-        vm.onCreate(mock())
 
-        advanceUntilIdle()
+        vm.result.test {
+            vm.onCreate(mock())
 
-        linkAccountManager.awaitLogoutCall()
-        assertThat(linkAccountHolder.linkAccount.value).isNull()
-        assertThat(launchWebConfig).isNull()
-        assertThat(result).isEqualTo(expectedLinkActivityResult)
+            advanceUntilIdle()
 
-        val state = vm.linkScreenState.value as ScreenState.FullScreen
+            linkAccountManager.awaitLogoutCall()
+            assertThat(linkAccountHolder.linkAccount.value).isNull()
+            assertThat(launchWebConfig).isNull()
 
-        assertEquals(state.initialDestination, LinkScreen.SignUp)
+            expectNoEvents()
+
+            val state = vm.linkScreenState.value as ScreenState.FullScreen
+            assertEquals(state.initialDestination, LinkScreen.SignUp)
+        }
     }
 
     private fun createViewModel(
@@ -587,7 +565,6 @@ internal class LinkActivityViewModelTest {
         linkAttestationCheck: LinkAttestationCheck = FakeLinkAttestationCheck(),
         startWithVerificationDialog: Boolean = false,
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
-        dismissWithResult: (LinkActivityResult) -> Unit = {},
         launchWeb: (LinkConfiguration) -> Unit = {}
     ): LinkActivityViewModel {
         return LinkActivityViewModel(
@@ -602,7 +579,6 @@ internal class LinkActivityViewModelTest {
             navigationManager = navigationManager,
             savedStateHandle = savedStateHandle
         ).apply {
-            this.dismissWithResult = dismissWithResult
             this.launchWebFlow = launchWeb
         }
     }

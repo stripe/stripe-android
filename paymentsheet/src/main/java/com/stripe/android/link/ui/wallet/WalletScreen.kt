@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.AlertDialog
@@ -137,7 +138,8 @@ internal fun WalletBody(
         modifier = Modifier
             .testTag(WALLET_SCREEN_BOX)
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(16.dp)
+            .navigationBarsPadding(),
     ) {
         PaymentDetailsSection(
             modifier = Modifier,

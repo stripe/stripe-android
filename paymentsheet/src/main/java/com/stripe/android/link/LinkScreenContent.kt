@@ -9,6 +9,7 @@ import com.stripe.android.link.ui.FullScreenContent
 import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.link.ui.verification.VerificationDialog
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetState
 import com.stripe.android.uicore.navigation.NavBackStackEntryUpdate
 import com.stripe.android.uicore.navigation.NavigationIntent
 import com.stripe.android.uicore.utils.collectAsState
@@ -17,12 +18,14 @@ import kotlinx.coroutines.flow.SharedFlow
 @Composable
 internal fun LinkScreenContent(
     viewModel: LinkActivityViewModel,
+    bottomSheetState: StripeBottomSheetState,
     onBackPressed: () -> Unit
 ) {
     val screenState by viewModel.linkScreenState.collectAsState()
     val appBarState by viewModel.linkAppBarState.collectAsState()
 
     LinkScreenContentBody(
+        bottomSheetState = bottomSheetState,
         screenState = screenState,
         appBarState = appBarState,
         eventReporter = viewModel.eventReporter,
@@ -30,9 +33,8 @@ internal fun LinkScreenContent(
         onDismissClicked = viewModel::onDismissVerificationClicked,
         onBackPressed = onBackPressed,
         navigate = viewModel::navigate,
-        dismissWithResult = { result ->
-            viewModel.dismissWithResult?.invoke(result)
-        },
+        dismiss = viewModel::dismissSheet,
+        dismissWithResult = viewModel::handleResult,
         getLinkAccount = {
             viewModel.linkAccount
         },
@@ -47,6 +49,7 @@ internal fun LinkScreenContent(
 
 @Composable
 internal fun LinkScreenContentBody(
+    bottomSheetState: StripeBottomSheetState,
     screenState: ScreenState,
     appBarState: LinkAppBarState,
     eventReporter: EventReporter,
@@ -56,7 +59,8 @@ internal fun LinkScreenContentBody(
     onDismissClicked: () -> Unit,
     onBackPressed: () -> Unit,
     navigate: (route: LinkScreen, clearStack: Boolean) -> Unit,
-    dismissWithResult: ((LinkActivityResult) -> Unit)?,
+    dismiss: () -> Unit,
+    dismissWithResult: (LinkActivityResult) -> Unit,
     getLinkAccount: () -> LinkAccount?,
     handleViewAction: (LinkAction) -> Unit,
     moveToWeb: () -> Unit,
@@ -68,10 +72,12 @@ internal fun LinkScreenContentBody(
             FullScreenContent(
                 modifier = Modifier
                     .testTag(FULL_SCREEN_CONTENT_TAG),
+                bottomSheetState = bottomSheetState,
                 initialDestination = screenState.initialDestination,
                 onBackPressed = onBackPressed,
                 appBarState = appBarState,
                 navigate = navigate,
+                dismiss = dismiss,
                 dismissWithResult = dismissWithResult,
                 getLinkAccount = getLinkAccount,
                 moveToWeb = moveToWeb,

@@ -14,10 +14,11 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 internal fun ScrollableTopLevelColumn(
+    modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Box(
-        modifier = Modifier.verticalScroll(rememberScrollState())
+        modifier = modifier.verticalScroll(rememberScrollState())
     ) {
         Column(
             modifier = Modifier

@@ -1,6 +1,5 @@
 package com.stripe.android.link
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -9,11 +8,15 @@ import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
+import androidx.compose.runtime.LaunchedEffect
 import androidx.core.os.bundleOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.core.Logger
 import com.stripe.android.paymentsheet.BuildConfig
+import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
+import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
+import com.stripe.android.uicore.utils.fadeOut
 
 internal class LinkActivity : ComponentActivity() {
     @VisibleForTesting
@@ -25,12 +28,13 @@ internal class LinkActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        renderEdgeToEdge()
 
         try {
             viewModel = ViewModelProvider(this, viewModelFactory)[LinkActivityViewModel::class.java]
         } catch (e: NoArgsException) {
             Logger.getInstance(BuildConfig.DEBUG).error("Failed to create LinkActivityViewModel", e)
-            setResult(Activity.RESULT_CANCELED)
+            setResult(RESULT_CANCELED)
             finish()
         }
 
@@ -41,17 +45,26 @@ internal class LinkActivity : ComponentActivity() {
         )
 
         webLauncher = registerForActivityResult(vm.activityRetainedComponent.webLinkActivityContract) { result ->
-            dismissWithResult(result)
+            vm.handleResult(result)
         }
 
         vm.launchWebFlow = ::launchWebFlow
-        vm.dismissWithResult = ::dismissWithResult
         lifecycle.addObserver(vm)
         observeBackPress()
 
         setContent {
+            val bottomSheetState = rememberStripeBottomSheetState()
+
+            LaunchedEffect(Unit) {
+                vm.result.collect { result ->
+                    bottomSheetState.hide()
+                    dismissWithResult(result)
+                }
+            }
+
             LinkScreenContent(
                 viewModel = vm,
+                bottomSheetState = bottomSheetState,
                 onBackPressed = onBackPressedDispatcher::onBackPressed
             )
         }
@@ -75,6 +88,11 @@ internal class LinkActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         viewModel?.unregisterActivity()
+    }
+
+    override fun finish() {
+        super.finish()
+        fadeOut()
     }
 
     fun launchWebFlow(configuration: LinkConfiguration) {

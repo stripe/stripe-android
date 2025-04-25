@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.CircularProgressIndicator
@@ -40,10 +41,12 @@ import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.theme.linkShapes
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
+import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.elements.OTPElementUI
 import com.stripe.android.uicore.utils.collectAsState
+import kotlinx.coroutines.delay
 
 @Composable
 internal fun VerificationScreen(
@@ -64,6 +67,7 @@ internal fun VerificationScreen(
 
     LaunchedEffect(state.requestFocus) {
         if (state.requestFocus) {
+            delay(LINK_DEFAULT_ANIMATION_DELAY_MILLIS)
             focusRequester.requestFocus()
             keyboardController?.show()
             viewModel.onFocusRequested()
@@ -81,7 +85,10 @@ internal fun VerificationScreen(
         state = state,
         otpElement = viewModel.otpElement,
         focusRequester = focusRequester,
-        onBack = viewModel::onBack,
+        onBack = {
+            focusManager.clearFocus(true)
+            viewModel.onBack()
+        },
         onChangeEmailClick = viewModel::onChangeEmailButtonClicked,
         onResendCodeClick = viewModel::resendCode
     )
@@ -96,7 +103,9 @@ internal fun VerificationBody(
     onResendCodeClick: () -> Unit,
     focusRequester: FocusRequester = remember { FocusRequester() },
 ) {
-    ScrollableTopLevelColumn {
+    ScrollableTopLevelColumn(
+        modifier = Modifier.navigationBarsPadding(),
+    ) {
         Header(
             isDialog = state.isDialog,
             onBackClicked = onBack

@@ -2,6 +2,7 @@ package com.stripe.android.link.ui.paymentmenthod
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -50,7 +51,9 @@ internal fun PaymentMethodBody(
     val context = LocalContext.current
     val uuid = rememberSaveable { UUID.randomUUID().toString() }
 
-    ScrollableTopLevelColumn {
+    ScrollableTopLevelColumn(
+        modifier = Modifier.navigationBarsPadding(),
+    ) {
         Text(
             modifier = Modifier
                 .padding(bottom = 32.dp),

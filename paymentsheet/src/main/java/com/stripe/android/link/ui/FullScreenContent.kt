@@ -13,12 +13,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
+import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.link.LinkAction
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
+import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetState
 import com.stripe.android.uicore.navigation.NavBackStackEntryUpdate
 import com.stripe.android.uicore.navigation.NavigationEffects
 import com.stripe.android.uicore.navigation.NavigationIntent
@@ -30,6 +32,7 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun FullScreenContent(
     modifier: Modifier,
+    bottomSheetState: StripeBottomSheetState,
     initialDestination: LinkScreen,
     appBarState: LinkAppBarState,
     eventReporter: EventReporter,
@@ -40,7 +43,8 @@ internal fun FullScreenContent(
     navigationChannel: SharedFlow<NavigationIntent>,
     handleViewAction: (LinkAction) -> Unit,
     navigate: (route: LinkScreen, clearStack: Boolean) -> Unit,
-    dismissWithResult: ((LinkActivityResult) -> Unit)?,
+    dismiss: () -> Unit,
+    dismissWithResult: (LinkActivityResult) -> Unit,
     getLinkAccount: () -> LinkAccount?,
     changeEmail: () -> Unit
 ) {
@@ -70,36 +74,41 @@ internal fun FullScreenContent(
         onBackStackEntryUpdated = onNavBackStackEntryChanged
     )
 
-    Box(
-        modifier = modifier
+    ElementsBottomSheetLayout(
+        state = bottomSheetState,
+        onDismissed = dismiss,
     ) {
-        EventReporterProvider(
-            eventReporter = eventReporter
+        Box(
+            modifier = modifier
         ) {
-            LinkContent(
-                initialDestination = initialDestination,
-                navController = navController,
-                appBarState = appBarState,
-                sheetState = sheetState,
-                bottomSheetContent = bottomSheetContent,
-                onUpdateSheetContent = { content ->
-                    if (content != null) {
-                        bottomSheetContent = content
-                    } else {
-                        coroutineScope.launch {
-                            sheetState.hide()
+            EventReporterProvider(
+                eventReporter = eventReporter
+            ) {
+                LinkContent(
+                    initialDestination = initialDestination,
+                    navController = navController,
+                    appBarState = appBarState,
+                    sheetState = sheetState,
+                    bottomSheetContent = bottomSheetContent,
+                    onUpdateSheetContent = { content ->
+                        if (content != null) {
+                            bottomSheetContent = content
+                        } else {
+                            coroutineScope.launch {
+                                sheetState.hide()
+                            }
                         }
-                    }
-                },
-                onBackPressed = onBackPressed,
-                moveToWeb = moveToWeb,
-                handleViewAction = handleViewAction,
-                navigate = navigate,
-                dismissWithResult = dismissWithResult,
-                getLinkAccount = getLinkAccount,
-                goBack = goBack,
-                changeEmail = changeEmail
-            )
+                    },
+                    onBackPressed = onBackPressed,
+                    moveToWeb = moveToWeb,
+                    handleViewAction = handleViewAction,
+                    navigate = navigate,
+                    dismissWithResult = dismissWithResult,
+                    getLinkAccount = getLinkAccount,
+                    goBack = goBack,
+                    changeEmail = changeEmail
+                )
+            }
         }
     }
 }
