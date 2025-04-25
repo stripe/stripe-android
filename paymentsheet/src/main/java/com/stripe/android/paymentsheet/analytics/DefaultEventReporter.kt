@@ -226,7 +226,8 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onRemoveSavedPaymentMethod(code: PaymentMethodCode) {
         fireAnalyticEvent(AnalyticEvent.RemovedSavedPaymentMethod(code))
         fireEvent(
-            PaymentSheetEvent.RemoveSavedPaymentMethod(
+            PaymentSheetEvent.RemovePaymentOption(
+                mode = mode,
                 code = code,
                 currency = currency,
                 isDeferred = isDeferred,

@@ -282,14 +282,16 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         )
     }
 
-    class RemoveSavedPaymentMethod(
+    class RemovePaymentOption(
+        mode: EventReporter.Mode,
         code: String,
         currency: String?,
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
     ) : PaymentSheetEvent() {
-        override val eventName: String = "mc_saved_payment_method_removed"
+        override val eventName: String =
+            formatEventName(mode, "paymentoption_removed")
         override val additionalParams: Map<String, Any?> = mapOf(
             FIELD_CURRENCY to currency,
             FIELD_SELECTED_LPM to code,

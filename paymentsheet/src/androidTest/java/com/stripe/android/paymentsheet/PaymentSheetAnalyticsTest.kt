@@ -105,6 +105,7 @@ internal class PaymentSheetAnalyticsTest {
         testContext.validateAnalyticsRequest(eventName = "mc_form_interacted")
         testContext.validateAnalyticsRequest(eventName = "mc_card_number_completed")
 
+        testContext.validateAnalyticsRequest(eventName = "mc_form_completed")
         page.fillOutCardDetails()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.StartedInteractionWithPaymentMethodForm("card"))
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.CompletedPaymentMethodForm("card"))
@@ -184,6 +185,7 @@ internal class PaymentSheetAnalyticsTest {
         testContext.validateAnalyticsRequest(eventName = "mc_form_interacted")
         testContext.validateAnalyticsRequest(eventName = "mc_card_number_completed")
 
+        testContext.validateAnalyticsRequest(eventName = "mc_form_completed")
         page.fillOutCardDetails()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.StartedInteractionWithPaymentMethodForm("card"))
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.CompletedPaymentMethodForm("card"))
@@ -258,6 +260,7 @@ internal class PaymentSheetAnalyticsTest {
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.SelectedPaymentMethodType("card"))
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.DisplayedPaymentMethodForm("card"))
 
+        testContext.validateAnalyticsRequest(eventName = "mc_form_completed")
         page.fillOutCardDetails()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.StartedInteractionWithPaymentMethodForm("card"))
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.CompletedPaymentMethodForm("card"))
@@ -337,6 +340,7 @@ internal class PaymentSheetAnalyticsTest {
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.SelectedPaymentMethodType("card"))
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.DisplayedPaymentMethodForm("card"))
 
+        testContext.validateAnalyticsRequest(eventName = "mc_form_completed")
         page.fillOutCardDetails()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.StartedInteractionWithPaymentMethodForm("card"))
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.CompletedPaymentMethodForm("card"))
@@ -416,6 +420,7 @@ internal class PaymentSheetAnalyticsTest {
         testContext.validateAnalyticsRequest(eventName = "stripe_android.detach_payment_method")
         testContext.validateAnalyticsRequest(eventName = "mc_cancel_edit_screen")
 
+        testContext.validateAnalyticsRequest(eventName = "mc_complete_paymentoption_removed")
         editPage.clickRemove()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.RemovedSavedPaymentMethod("card"))
 
@@ -478,6 +483,7 @@ internal class PaymentSheetAnalyticsTest {
         testContext.validateAnalyticsRequest(eventName = "stripe_android.detach_payment_method")
         testContext.validateAnalyticsRequest(eventName = "mc_cancel_edit_screen")
 
+        testContext.validateAnalyticsRequest(eventName = "mc_custom_paymentoption_removed")
         editPage.clickRemove()
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.RemovedSavedPaymentMethod("card"))
 

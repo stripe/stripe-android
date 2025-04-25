@@ -1024,7 +1024,8 @@ class PaymentSheetEventTest {
 
     @Test
     fun `RemoveSavedPaymentMethod event should return expected toString()`() {
-        val event = PaymentSheetEvent.RemoveSavedPaymentMethod(
+        val event = PaymentSheetEvent.RemovePaymentOption(
+            mode = EventReporter.Mode.Custom,
             code = "card",
             currency = "usd",
             isDeferred = false,
@@ -1034,7 +1035,7 @@ class PaymentSheetEventTest {
         assertThat(
             event.eventName
         ).isEqualTo(
-            "mc_saved_payment_method_removed"
+            "mc_custom_paymentoption_removed"
         )
         assertThat(
             event.params
