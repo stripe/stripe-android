@@ -113,7 +113,8 @@ internal fun UpdateCardScreenBodyPreview() {
                         isDefault = false,
                         networks = listOf("VISA"),
                         nickname = "Fancy Card",
-                        funding = "credit", billingAddress = ConsumerPaymentDetails.BillingAddress(
+                        funding = "credit",
+                        billingAddress = ConsumerPaymentDetails.BillingAddress(
                             name = null,
                             line1 = null,
                             line2 = null,

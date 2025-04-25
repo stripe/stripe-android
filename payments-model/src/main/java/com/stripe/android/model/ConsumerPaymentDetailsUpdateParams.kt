@@ -22,6 +22,9 @@ data class ConsumerPaymentDetailsUpdateParams(
             (map["card"] as? Map<*, *>)?.let { card ->
                 card["exp_month"]?.let { params["exp_month"] = it }
                 card["exp_year"]?.let { params["exp_year"] = it }
+                (card["networks"] as? Map<*, *>)?.let { networks ->
+                    networks["preferred"]?.let { preferred -> params["preferred_network"] = preferred }
+                }
             }
             ConsumerPaymentDetails.Card.getAddressFromMap(map)?.let {
                 params[it.first] = it.second

@@ -15,10 +15,13 @@ internal data class UpdateCardScreenState(
     val loading: Boolean = false,
 ) {
 
+    val cardModified: Boolean
+        get() = cardUpdateParams != null || preferredCardBrand != null
+
     val primaryButtonState: PrimaryButtonState
-        get() = if (loading) {
-            PrimaryButtonState.Processing
-        } else {
-            PrimaryButtonState.Enabled
+        get() = when {
+            cardModified.not() -> PrimaryButtonState.Disabled
+            loading -> PrimaryButtonState.Processing
+            else -> PrimaryButtonState.Enabled
         }
 }

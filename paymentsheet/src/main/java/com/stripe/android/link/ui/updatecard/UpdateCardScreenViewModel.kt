@@ -13,6 +13,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodCreateParams.Card.Networks
 import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.ui.DefaultEditCardDetailsInteractor
@@ -65,20 +66,13 @@ internal class UpdateCardScreenViewModel @Inject constructor(
             runCatching {
                 _state.update { it.copy(loading = true, error = null) }
                 val cardParams = requireNotNull(state.value.cardUpdateParams)
-                val paymentDetails = requireNotNull(state.value.paymentDetails)
-                val createParams = PaymentMethodCreateParams.create(
-                    card = PaymentMethodCreateParams.Card.Builder()
-                        .setExpiryMonth(cardParams.expiryMonth)
-                        .setExpiryYear(cardParams.expiryYear)
-                        .build(),
-                    billingDetails = cardParams.billingDetails
-                )
+                val paymentDetailsId = requireNotNull(state.value.paymentDetailsId)
                 val updateParams = ConsumerPaymentDetailsUpdateParams(
-                    id = paymentDetails.id,
+                    id = paymentDetailsId,
                     // When updating a card that is not the default and you send isDefault=false to the server you get
                     // "Can't unset payment details when it's not the default", so send nil instead of false
-                    isDefault = paymentDetails.isDefault.takeIf { it == true },
-                    cardPaymentMethodCreateParamsMap = createParams.toParamMap()
+                    isDefault = state.value.isDefault.takeIf { it == true },
+                    cardPaymentMethodCreateParamsMap = cardParams.toApiParams().toParamMap()
                 )
                 linkAccountManager.updatePaymentDetails(updateParams = updateParams).getOrThrow()
                 _state.update { it.copy(loading = false, error = null) }
@@ -90,6 +84,17 @@ internal class UpdateCardScreenViewModel @Inject constructor(
             }
         }
     }
+
+    private fun CardUpdateParams.toApiParams(): PaymentMethodCreateParams = PaymentMethodCreateParams.create(
+        card = PaymentMethodCreateParams.Card.Builder().apply {
+            setExpiryMonth(this@toApiParams.expiryMonth)
+            setExpiryYear(this@toApiParams.expiryMonth)
+            state.value.preferredCardBrand?.let { preferredCardBrand ->
+                setNetworks(Networks(preferred = preferredCardBrand.code))
+            }
+        }.build(),
+        billingDetails = billingDetails
+    )
 
     fun onCancelClicked() {
         logger.info("Cancel button clicked")
