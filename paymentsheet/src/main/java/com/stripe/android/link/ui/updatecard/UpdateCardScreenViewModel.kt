@@ -30,7 +30,7 @@ internal class UpdateCardScreenViewModel @Inject constructor(
     paymentDetailsId: String,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(UpdateCardScreenState())
+    private val _state = MutableStateFlow(UpdateCardScreenState(paymentDetailsId = paymentDetailsId))
     val state: StateFlow<UpdateCardScreenState> = _state.asStateFlow()
 
     var interactor: EditCardDetailsInteractor? = null
