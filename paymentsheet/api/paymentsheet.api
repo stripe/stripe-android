@@ -557,12 +557,33 @@ public final class com/stripe/android/lpmfoundations/paymentmethod/link/LinkInli
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public abstract interface class com/stripe/android/paymentelement/ConfirmCustomPaymentMethodCallback {
+	public abstract fun onConfirmCustomPaymentMethod (Lcom/stripe/android/paymentsheet/PaymentSheet$CustomPaymentMethod;Lcom/stripe/android/model/PaymentMethod$BillingDetails;)V
+}
+
+public abstract class com/stripe/android/paymentelement/CustomPaymentMethodResult : android/os/Parcelable {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/paymentelement/CustomPaymentMethodResult$Companion;
+	public static final fun canceled ()Lcom/stripe/android/paymentelement/CustomPaymentMethodResult;
+	public static final fun completed ()Lcom/stripe/android/paymentelement/CustomPaymentMethodResult;
+	public static final fun failed ()Lcom/stripe/android/paymentelement/CustomPaymentMethodResult;
+	public static final fun failed (Ljava/lang/String;)Lcom/stripe/android/paymentelement/CustomPaymentMethodResult;
+}
+
 public final class com/stripe/android/paymentelement/CustomPaymentMethodResult$Canceled$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentelement/CustomPaymentMethodResult$Canceled;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/paymentelement/CustomPaymentMethodResult$Canceled;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentelement/CustomPaymentMethodResult$Companion {
+	public final fun canceled ()Lcom/stripe/android/paymentelement/CustomPaymentMethodResult;
+	public final fun completed ()Lcom/stripe/android/paymentelement/CustomPaymentMethodResult;
+	public final fun failed ()Lcom/stripe/android/paymentelement/CustomPaymentMethodResult;
+	public final fun failed (Ljava/lang/String;)Lcom/stripe/android/paymentelement/CustomPaymentMethodResult;
+	public static synthetic fun failed$default (Lcom/stripe/android/paymentelement/CustomPaymentMethodResult$Companion;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/paymentelement/CustomPaymentMethodResult;
 }
 
 public final class com/stripe/android/paymentelement/CustomPaymentMethodResult$Completed$Creator : android/os/Parcelable$Creator {
@@ -581,6 +602,12 @@ public final class com/stripe/android/paymentelement/CustomPaymentMethodResult$F
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/paymentelement/CustomPaymentMethodResultHandler {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/paymentelement/CustomPaymentMethodResultHandler;
+	public static final fun handleCustomPaymentMethodResult (Landroid/content/Context;Lcom/stripe/android/paymentelement/CustomPaymentMethodResult;)V
+}
+
 public final class com/stripe/android/paymentelement/EmbeddedPaymentElement {
 	public static final field $stable I
 	public final fun Content (Landroidx/compose/runtime/Composer;I)V
@@ -595,6 +622,7 @@ public final class com/stripe/android/paymentelement/EmbeddedPaymentElement {
 public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$Builder {
 	public static final field $stable I
 	public fun <init> (Lcom/stripe/android/paymentsheet/CreateIntentCallback;Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$ResultCallback;)V
+	public final fun confirmCustomPaymentMethodCallback (Lcom/stripe/android/paymentelement/ConfirmCustomPaymentMethodCallback;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Builder;
 	public final fun externalPaymentMethodConfirmHandler (Lcom/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Builder;
 }
 
@@ -618,6 +646,7 @@ public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$Conf
 	public final fun billingDetailsCollectionConfiguration (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
 	public final fun build ()Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration;
 	public final fun cardBrandAcceptance (Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
+	public final fun customPaymentMethods (Ljava/util/List;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
 	public final fun customer (Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
 	public final fun defaultBillingDetails (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
 	public final fun embeddedViewDisplaysMandateText (Z)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Configuration$Builder;
@@ -1419,6 +1448,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Builder {
 	public final fun build (Landroidx/activity/ComponentActivity;)Lcom/stripe/android/paymentsheet/PaymentSheet;
 	public final fun build (Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/paymentsheet/PaymentSheet;
 	public final fun build (Landroidx/fragment/app/Fragment;)Lcom/stripe/android/paymentsheet/PaymentSheet;
+	public final fun confirmCustomPaymentMethodCallback (Lcom/stripe/android/paymentelement/ConfirmCustomPaymentMethodCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$Builder;
 	public final fun createIntentCallback (Lcom/stripe/android/paymentsheet/CreateIntentCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$Builder;
 	public final fun externalPaymentMethodConfirmHandler (Lcom/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler;)Lcom/stripe/android/paymentsheet/PaymentSheet$Builder;
 }
@@ -1593,6 +1623,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Configuration$Bu
 	public final fun billingDetailsCollectionConfiguration (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;
 	public final fun cardBrandAcceptance (Lcom/stripe/android/paymentsheet/PaymentSheet$CardBrandAcceptance;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
+	public final fun customPaymentMethods (Ljava/util/List;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun customer (Lcom/stripe/android/paymentsheet/PaymentSheet$CustomerConfiguration;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun defaultBillingDetails (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetails;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun externalPaymentMethods (Ljava/util/List;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
@@ -1693,6 +1724,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$FlowController$B
 	public final fun build (Landroidx/activity/ComponentActivity;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
 	public final fun build (Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
 	public final fun build (Landroidx/fragment/app/Fragment;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
+	public final fun confirmCustomPaymentMethodCallback (Lcom/stripe/android/paymentelement/ConfirmCustomPaymentMethodCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$Builder;
 	public final fun createIntentCallback (Lcom/stripe/android/paymentsheet/CreateIntentCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$Builder;
 	public final fun externalPaymentMethodConfirmHandler (Lcom/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$Builder;
 }
