@@ -9,6 +9,7 @@ internal object PaymentMethodMetadataFixtures {
         canRemovePaymentMethods = true,
         canRemoveLastPaymentMethod = true,
         canRemoveDuplicates = true,
+        canUpdateFullPaymentMethodDetails = false,
     )
 
     internal val DEFAULT_CUSTOMER_METADATA = CustomerMetadata(

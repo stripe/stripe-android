@@ -26,6 +26,7 @@ import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -1420,7 +1421,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
             providePaymentMethodName = { it!!.resolvableString },
             canRemove = canRemove,
-            canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
+            canUpdateFullPaymentMethodDetails = stateFlowOf(canUpdateFullPaymentMethodDetails),
             onSelectSavedPaymentMethod = onSelectSavedPaymentMethod,
             walletsState = walletsState,
             canShowWalletsInline = canShowWalletsInline,

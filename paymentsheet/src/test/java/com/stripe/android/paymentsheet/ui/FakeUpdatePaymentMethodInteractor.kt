@@ -41,7 +41,8 @@ internal class FakeUpdatePaymentMethodInteractor(
         displayableSavedPaymentMethod
     )
     override val editCardDetailsInteractor: EditCardDetailsInteractor by lazy {
-        val isModifiable = displayableSavedPaymentMethod.isModifiable(canUpdateFullPaymentMethodDetails)
+        val isModifiable =
+            displayableSavedPaymentMethod.isModifiable(canUpdateFullPaymentMethodDetails)
         editCardDetailsInteractorFactory.create(
             coroutineScope = TestScope(),
             isCbcModifiable = isModifiable && displayableSavedPaymentMethod.canChangeCbc(),
@@ -52,7 +53,8 @@ internal class FakeUpdatePaymentMethodInteractor(
             ),
             onBrandChoiceChanged = {},
             onCardUpdateParamsChanged = {},
-            areExpiryDateAndAddressModificationSupported = isModifiable && canUpdateFullPaymentMethodDetails,
+            areExpiryDateAndAddressModificationSupported =
+            isModifiable && canUpdateFullPaymentMethodDetails,
             addressCollectionMode = addressCollectionMode,
         )
     }

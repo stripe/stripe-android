@@ -342,7 +342,8 @@ internal class CustomerStateHolderTest {
                 permissions = CustomerMetadata.Permissions(
                     canRemovePaymentMethods = isRemoveEnabled,
                     canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                    canRemoveDuplicates = true
+                    canRemoveDuplicates = true,
+                    canUpdateFullPaymentMethodDetails = false,
                 )
             )
         )

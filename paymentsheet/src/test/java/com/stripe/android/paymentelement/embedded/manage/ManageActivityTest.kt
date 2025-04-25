@@ -191,6 +191,7 @@ internal class ManageActivityTest {
                 canRemoveDuplicates = false,
                 canRemovePaymentMethods = true,
                 canRemoveLastPaymentMethod = true,
+                canUpdateFullPaymentMethodDetails = false,
             )
         ),
         paymentMethods: List<PaymentMethod> = defaultPaymentMethods(),

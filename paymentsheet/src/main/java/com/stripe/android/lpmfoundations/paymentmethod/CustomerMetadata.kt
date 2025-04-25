@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.os.Parcelable
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.data.CustomerSheetSession
 import com.stripe.android.model.ElementsSession
@@ -19,6 +20,7 @@ internal data class CustomerMetadata(
         val canRemovePaymentMethods: Boolean,
         val canRemoveLastPaymentMethod: Boolean,
         val canRemoveDuplicates: Boolean,
+        val canUpdateFullPaymentMethodDetails: Boolean,
     ) : Parcelable {
         companion object {
             internal fun createForPaymentSheetCustomerSession(
@@ -42,6 +44,7 @@ internal data class CustomerMetadata(
                     canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
                     // Should always remove duplicates when using `customer_session`
                     canRemoveDuplicates = true,
+                    canUpdateFullPaymentMethodDetails = FeatureFlags.editSavedCardPaymentMethodEnabled.isEnabled,
                 )
             }
 
@@ -66,6 +69,7 @@ internal data class CustomerMetadata(
                      * un-scoped ephemeral keys.
                      */
                     canRemoveDuplicates = false,
+                    canUpdateFullPaymentMethodDetails = false,
                 )
             }
 
@@ -77,7 +81,12 @@ internal data class CustomerMetadata(
                     canRemovePaymentMethods = customerSheetSession.permissions.canRemovePaymentMethods,
                     canRemoveLastPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
                     canRemoveDuplicates = true,
-                )
+                    /*
+                     * Un-scoped legacy ephemeral keys do not have permissions to update payment method. This should
+                     * always be set to false.
+                     */
+                    canUpdateFullPaymentMethodDetails = false,
+                    )
             }
 
             // Native link uses PaymentMethodMetadata for DefaultFormHelper and doesn't use CustomerMetadata at all
@@ -86,6 +95,7 @@ internal data class CustomerMetadata(
                     canRemovePaymentMethods = false,
                     canRemoveLastPaymentMethod = false,
                     canRemoveDuplicates = false,
+                    canUpdateFullPaymentMethodDetails = false
                 )
             }
         }

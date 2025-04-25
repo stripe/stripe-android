@@ -58,6 +58,7 @@ class SavedPaymentMethodMutatorTest {
                 canRemovePaymentMethods = true,
                 canRemoveLastPaymentMethod = true,
                 canRemoveDuplicates = false,
+                canUpdateFullPaymentMethodDetails = false,
             )
         )
     ) {
@@ -80,6 +81,7 @@ class SavedPaymentMethodMutatorTest {
                 canRemovePaymentMethods = true,
                 canRemoveLastPaymentMethod = false,
                 canRemoveDuplicates = false,
+                canUpdateFullPaymentMethodDetails = false,
             )
         )
     ) {
@@ -198,6 +200,7 @@ class SavedPaymentMethodMutatorTest {
                 canRemovePaymentMethods = true,
                 canRemoveLastPaymentMethod = true,
                 canRemoveDuplicates = false,
+                canUpdateFullPaymentMethodDetails = false,
             )
         )
     ) {
@@ -226,6 +229,7 @@ class SavedPaymentMethodMutatorTest {
                 canRemoveDuplicates = true,
                 canRemovePaymentMethods = true,
                 canRemoveLastPaymentMethod = true,
+                canUpdateFullPaymentMethodDetails = true,
             )
         )
     ) {
@@ -252,6 +256,7 @@ class SavedPaymentMethodMutatorTest {
                 canRemoveDuplicates = true,
                 canRemovePaymentMethods = true,
                 canRemoveLastPaymentMethod = false,
+                canUpdateFullPaymentMethodDetails = true,
             )
         )
     ) {
@@ -536,12 +541,6 @@ class SavedPaymentMethodMutatorTest {
 
         runScenario(customerRepository = customerRepository, selection = selection) {
             setupCustomerState(paymentMethod)
-
-        runScenario(eventReporter = eventReporter, customerRepository = customerRepository) {
-            customerStateHolder.setCustomerState(
-                createCustomerState(
-                    paymentMethods = listOf(displayableSavedPaymentMethod.paymentMethod),
-                )
             savedPaymentMethodMutator.modifyCardPaymentMethod(
                 paymentMethod = paymentMethod,
                 cardUpdateParams = CardUpdateParams(cardBrand = CardBrand.CartesBancaires),
@@ -589,6 +588,35 @@ class SavedPaymentMethodMutatorTest {
                 )
             }
         )
+    }
+
+    @Test
+    fun `modifyCardPaymentMethod analytics events received`() {
+        val displayableSavedPaymentMethod = PaymentMethodFactory.cards(1).first().toDisplayableSavedPaymentMethod()
+        val customerRepository = FakeCustomerRepository(
+            onUpdatePaymentMethod = {
+                Result.success(
+                    displayableSavedPaymentMethod.paymentMethod.copy(
+                        card = displayableSavedPaymentMethod.paymentMethod.card?.copy(brand = CardBrand.CartesBancaires)
+                    )
+                )
+            }
+        )
+
+        runScenario(customerRepository = customerRepository) {
+            customerStateHolder.setCustomerState(
+                createCustomerState(
+                    paymentMethods = listOf(displayableSavedPaymentMethod.paymentMethod),
+                )
+            )
+
+            savedPaymentMethodMutator.modifyCardPaymentMethod(
+                paymentMethod = displayableSavedPaymentMethod.paymentMethod,
+                cardUpdateParams = CardUpdateParams(cardBrand = CardBrand.CartesBancaires)
+            )
+
+            eventReporter.assertUpdatePaymentMethodSucceededCalls(CardBrand.CartesBancaires)
+        }
     }
 
     @Test
@@ -823,6 +851,7 @@ class SavedPaymentMethodMutatorTest {
                     canRemovePaymentMethods = true,
                     canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = shouldRemoveDuplicates,
+                    canUpdateFullPaymentMethodDetails = false,
                 )
             )
         ) {
@@ -896,8 +925,6 @@ class SavedPaymentMethodMutatorTest {
         customerStateHolder.setCustomerState(
             createCustomerState(
                 paymentMethods = listOf(paymentMethod),
-                isRemoveEnabled = true,
-                canRemoveLastPaymentMethod = true,
             )
         )
     }

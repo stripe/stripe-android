@@ -54,10 +54,9 @@ internal class CustomerStateHolder(
         } ?: false
     }
 
-    val canUpdateFullPaymentMethodDetails: Boolean
-        get() {
-            return customer.value?.permissions?.canUpdateFullPaymentMethodDetails ?: false
-        }
+    val canUpdateFullPaymentMethodDetails: StateFlow<Boolean> = customerMetadataPermissions.mapAsStateFlow {
+        it?.canUpdateFullPaymentMethodDetails ?: false
+    }
 
     fun setCustomerState(customerState: CustomerState?) {
         savedStateHandle[SAVED_CUSTOMER] = customerState

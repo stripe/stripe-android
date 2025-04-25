@@ -162,6 +162,7 @@ internal class DefaultPaymentElementLoaderTest {
                         canRemoveDuplicates = false,
                         canRemovePaymentMethods = true,
                         canRemoveLastPaymentMethod = true,
+                        canUpdateFullPaymentMethodDetails = false,
                     )
                 ),
             )
@@ -1736,8 +1737,8 @@ internal class DefaultPaymentElementLoaderTest {
                 initializedViaCompose = false,
             ).getOrThrow()
 
-            assertThat(state.customer?.permissions).isEqualTo(
-                CustomerState.Permissions(
+            assertThat(state.paymentMethodMetadata.customerMetadata?.permissions).isEqualTo(
+                CustomerMetadata.Permissions(
                     canRemovePaymentMethods = false,
                     canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = true,
