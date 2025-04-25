@@ -247,7 +247,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             PaymentMethodVerticalLayoutInteractor.Selection.New(
                 code = temporarySelectionCode,
                 changeDetails = changeDetails,
-                canBeChanged = temporarySelectionCode == mostRecentSelection.code(),
+                canBeChanged = temporarySelectionCode == (mostRecentSelection as? PaymentSelection.New?).code(),
             )
         } else {
             null
