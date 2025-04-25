@@ -173,6 +173,25 @@ internal class PaymentDetailsListItemScreenShotTest {
     }
 
     @Test
+    fun testBankAccountLiveModeEnabled() {
+        snapshot(
+            state = State(
+                details = ConsumerPaymentDetails.BankAccount(
+                    id = "wAAACGA",
+                    last4 = "6789",
+                    bankName = "Chase",
+                    bankIconCode = "morganchase",
+                    isDefault = false,
+                    nickname = null,
+                ),
+                enabled = true,
+                isSelected = false,
+                isUpdating = false
+            )
+        )
+    }
+
+    @Test
     fun testPassThroughEnabled() {
         snapshot(
             state = State(
