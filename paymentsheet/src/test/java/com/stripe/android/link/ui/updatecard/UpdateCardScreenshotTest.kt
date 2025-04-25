@@ -3,6 +3,8 @@ package com.stripe.android.link.ui.updatecard
 import androidx.compose.runtime.rememberCoroutineScope
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.model.CardBrand
@@ -50,6 +52,7 @@ internal class UpdateCardScreenshotTest(
                     isDefault = true,
                     primaryButtonState = PrimaryButtonState.Enabled,
                     secondaryButtonEnabled = true,
+                    errorMessage = testCase.errorMessage,
                     onUpdateClicked = {},
                     onCancelClicked = {},
                 )
@@ -65,13 +68,21 @@ internal class UpdateCardScreenshotTest(
                 TestCase(
                     name = "Canonical",
                     isDefault = false,
+                    errorMessage = null,
                     card = card()
                 ),
                 TestCase(
                     name = "Default",
                     isDefault = true,
+                    errorMessage = null,
                     card = card()
-                )
+                ),
+                TestCase(
+                    name = "Error",
+                    isDefault = false,
+                    errorMessage = "Something went wrong".resolvableString,
+                    card = card()
+                ),
             )
         }
 
@@ -101,6 +112,7 @@ internal class UpdateCardScreenshotTest(
     internal data class TestCase(
         val name: String,
         val card: ConsumerPaymentDetails.Card,
+        val errorMessage: ResolvableString?,
         val isDefault: Boolean,
     ) {
         override fun toString(): String = name

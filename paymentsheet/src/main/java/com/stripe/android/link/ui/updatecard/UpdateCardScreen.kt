@@ -7,11 +7,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.DefaultCardBrandFilter
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.Loader
@@ -38,9 +41,10 @@ internal fun UpdateCardScreen(viewModel: UpdateCardScreenViewModel) {
         null -> Loader()
         else -> UpdateCardScreenBody(
             interactor = interactor,
-            isDefault = state.isDefault,
             primaryButtonState = state.primaryButtonState,
             secondaryButtonEnabled = state.loading.not(),
+            isDefault = state.isDefault,
+            errorMessage = state.errorMessage,
             onUpdateClicked = viewModel::onUpdateClicked,
             onCancelClicked = viewModel::onCancelClicked,
         )
@@ -53,6 +57,7 @@ internal fun UpdateCardScreenBody(
     primaryButtonState: PrimaryButtonState,
     secondaryButtonEnabled: Boolean,
     isDefault: Boolean,
+    errorMessage: ResolvableString?,
     onUpdateClicked: () -> Unit,
     onCancelClicked: () -> Unit,
 ) {
@@ -76,6 +81,15 @@ internal fun UpdateCardScreenBody(
                 text = stringResource(R.string.stripe_link_update_card_default_card),
                 style = MaterialTheme.typography.subtitle2,
                 color = MaterialTheme.colors.onSecondary
+            )
+        }
+
+        errorMessage?.let {
+            Text(
+                modifier = Modifier.padding(top = 8.dp),
+                text = it.resolve(LocalContext.current),
+                style = MaterialTheme.typography.body2,
+                color = MaterialTheme.colors.error
             )
         }
 
@@ -111,7 +125,7 @@ internal fun UpdateCardScreenBodyPreview() {
                         expiryYear = 2500,
                         expiryMonth = 4,
                         brand = CardBrand.Visa,
-                        cvcCheck = CvcCheck.Fail,
+                        cvcCheck = CvcCheck.Pass,
                         isDefault = false,
                         networks = listOf("VISA"),
                         nickname = "Fancy Card",
@@ -135,6 +149,7 @@ internal fun UpdateCardScreenBodyPreview() {
             isDefault = true,
             primaryButtonState = PrimaryButtonState.Enabled,
             secondaryButtonEnabled = true,
+            errorMessage = Exception().stripeErrorMessage(),
             onUpdateClicked = {},
             onCancelClicked = {},
         )

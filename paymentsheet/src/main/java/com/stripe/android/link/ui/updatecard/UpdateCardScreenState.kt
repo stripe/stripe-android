@@ -1,6 +1,8 @@
 package com.stripe.android.link.ui.updatecard
 
 import androidx.compose.runtime.Immutable
+import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.CardUpdateParams
@@ -24,4 +26,7 @@ internal data class UpdateCardScreenState(
             loading -> PrimaryButtonState.Processing
             else -> PrimaryButtonState.Enabled
         }
+
+    val errorMessage : ResolvableString?
+        get() = error?.stripeErrorMessage()
 }
