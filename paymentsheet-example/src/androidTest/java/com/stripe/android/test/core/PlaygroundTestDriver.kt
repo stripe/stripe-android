@@ -1624,34 +1624,25 @@ internal class PlaygroundTestDriver(
             TimeUnit.MILLISECONDS.sleep(250)
         }
 
-        defaultWait()
         onWebView()
             .withElementByTestId("agree-button")
             .perform(webClick())
 
-        defaultWait()
         onWebView()
             .withElementByTestId("institution-default")
             .perform(webClick())
 
-        defaultWait()
         onWebView()
             .withElementByTestId(testId = "select-button")
             .perform(webClick())
 
-        defaultWait()
         onWebView()
             .withElementByTestId("link-not-now-button")
             .perform(webClick())
 
-        defaultWait()
         onWebView()
             .withElementByTestId("done-button")
             .perform(webClick())
-    }
-
-    private fun defaultWait() {
-        TimeUnit.SECONDS.sleep(5)
     }
 
     private fun executeUsBankAccountFlow() {
@@ -1718,7 +1709,6 @@ internal class PlaygroundTestDriver(
             TimeUnit.MILLISECONDS.sleep(250)
         }
 
-        defaultWait()
         onWebView()
             .withElementByTestId("agree-button")
             .perform(webClick())
