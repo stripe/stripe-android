@@ -2,8 +2,9 @@ package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.lifecycle.Lifecycle
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -12,16 +13,21 @@ import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.IntegrationType
+import com.stripe.android.paymentsheet.utils.PaymentSheetLayoutType
+import com.stripe.android.paymentsheet.utils.PaymentSheetLayoutTypeProvider
+import com.stripe.android.paymentsheet.utils.ProductIntegrationType
+import com.stripe.android.paymentsheet.utils.ProductIntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
+import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(TestParameterInjector::class)
 internal class PaymentSheetBillingConfigurationTest {
     private val composeTestRule = createAndroidComposeRule<MainActivity>()
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
@@ -219,5 +225,78 @@ internal class PaymentSheetBillingConfigurationTest {
         page.waitForText("123 Main Road")
 
         testContext.markTestSucceeded()
+    }
+
+    @Test
+    fun testWithDefaults(
+        @TestParameter(valuesProvider = ProductIntegrationTypeProvider::class)
+        integrationType: ProductIntegrationType,
+        @TestParameter(valuesProvider = PaymentSheetLayoutTypeProvider::class)
+        layoutType: PaymentSheetLayoutType,
+    ) = runProductIntegrationTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        testContext.launch(
+            configuration = PaymentSheet.Configuration(
+                merchantDisplayName = "Merchant, Inc.",
+                defaultBillingDetails = PaymentSheet.BillingDetails(
+                    name = "Jenny Rosen",
+                    email = "foo@bar.com",
+                    phone = "+13105551234",
+                    address = PaymentSheet.Address(
+                        postalCode = "94111",
+                        country = "US",
+                        state = "CA",
+                        city = "South San Francisco",
+                        line1 = "123 Main Street",
+                        line2 = "Unit #123",
+                    ),
+                ),
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                    attachDefaultsToPaymentMethod = true,
+                ),
+                paymentMethodLayout = layoutType.paymentMethodLayout,
+                paymentMethodOrder = listOf("cashapp", "card")
+            ),
+        )
+
+        page.clickOnLpm("cashapp", layoutType is PaymentSheetLayoutType.Vertical)
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            bodyPart(urlEncode("payment_method_data[billing_details][name]"), urlEncode("Jenny Rosen")),
+            bodyPart(urlEncode("payment_method_data[billing_details][email]"), urlEncode("foo@bar.com")),
+            bodyPart(urlEncode("payment_method_data[billing_details][phone]"), urlEncode("+13105551234")),
+            bodyPart(
+                urlEncode("payment_method_data[billing_details][address][line1]"),
+                urlEncode("123 Main Street")
+            ),
+            bodyPart(
+                urlEncode("payment_method_data[billing_details][address][line2]"),
+                urlEncode("Unit #123")
+            ),
+            bodyPart(
+                urlEncode("payment_method_data[billing_details][address][city]"),
+                urlEncode("South San Francisco")
+            ),
+            bodyPart(urlEncode("payment_method_data[billing_details][address][state]"), "CA"),
+            bodyPart(urlEncode("payment_method_data[billing_details][address][country]"), "US"),
+            bodyPart(urlEncode("payment_method_data[billing_details][address][postal_code]"), "94111"),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        page.clickPrimaryButton()
     }
 }

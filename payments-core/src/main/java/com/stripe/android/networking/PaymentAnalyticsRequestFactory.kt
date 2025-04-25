@@ -7,6 +7,7 @@ import androidx.annotation.Keep
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.NetworkTypeDetector
@@ -72,6 +73,19 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
         networkTypeProvider = NetworkTypeDetector(context)::invoke,
         defaultProductUsageTokens = defaultProductUsageTokens,
     )
+
+    override fun createRequest(
+        event: AnalyticsEvent,
+        additionalParams: Map<String, Any?>
+    ): AnalyticsRequest {
+        return super.createRequest(
+            event = event,
+            additionalParams = defaultProductUsageTokens
+                .takeUnless { it.isEmpty() }?.let { mapOf(FIELD_PRODUCT_USAGE to it.joinToString(",")) }
+                .orEmpty()
+                .plus(additionalParams),
+        )
+    }
 
     @JvmSynthetic
     internal fun create3ds2Challenge(
@@ -228,7 +242,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
     ): Map<String, Any> {
         return defaultProductUsageTokens
             .plus(productUsageTokens)
-            .takeUnless { it.isEmpty() }?.let { mapOf(FIELD_PRODUCT_USAGE to it.toList()) }
+            .takeUnless { it.isEmpty() }?.let { mapOf(FIELD_PRODUCT_USAGE to it.joinToString(",")) }
             .orEmpty()
             .plus(sourceType?.let { mapOf(FIELD_SOURCE_TYPE to it) }.orEmpty())
             .plus(createTokenTypeParam(sourceType, tokenType))

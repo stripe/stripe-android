@@ -7,7 +7,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
-import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
@@ -22,6 +21,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
 import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
+import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
@@ -34,10 +34,8 @@ import dagger.Provides
 import dagger.Subcomponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.plus
 import javax.inject.Named
 import javax.inject.Singleton
-import kotlin.coroutines.CoroutineContext
 
 @Component(
     modules = [
@@ -53,6 +51,7 @@ import kotlin.coroutines.CoroutineContext
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal interface FormActivityViewModelComponent {
     val viewModel: FormActivityViewModel
+    val selectionHolder: EmbeddedSelectionHolder
     val subcomponentFactory: FormActivitySubcomponent.Factory
 
     @Component.Factory
@@ -122,9 +121,8 @@ internal interface FormActivityViewModelModule {
         fun provideConfirmationHandler(
             confirmationHandlerFactory: ConfirmationHandler.Factory,
             @ViewModelScope coroutineScope: CoroutineScope,
-            @IOContext ioContext: CoroutineContext,
         ): ConfirmationHandler {
-            return confirmationHandlerFactory.create(coroutineScope + ioContext)
+            return confirmationHandlerFactory.create(coroutineScope)
         }
 
         @Provides

@@ -118,6 +118,8 @@
   <string name="stripe_card_with_last_4">%1$s ····%2$s</string>
   <!-- Text for close button -->
   <string name="stripe_close">关闭</string>
+  <!-- Accessibility title used during Talkback to indicate to users that a transaction is being confirmed -->
+  <string name="stripe_confirming_transaction_status">正在配置交易</string>
   <!-- Accessibility action for deleting a payment method -->
   <string name="stripe_delete_payment_method">删除支付方式</string>
   <string name="stripe_delete_payment_method_prompt_title">删除支付方式？</string>

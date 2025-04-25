@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillin
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
+import com.stripe.android.test.core.FieldPopulator
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.utils.ForceNativeBankFlowTestRule
 import org.junit.Rule
@@ -34,6 +35,28 @@ internal class TestEmbedded : BasePlaygroundTest() {
             ),
             populateCustomLpmFields = {
                 populateCardDetails()
+            },
+        )
+    }
+
+    @Test
+    fun testCardWithCardBrandChoice() {
+        testDriver.confirmEmbedded(
+            testParameters = TestParameters.create(
+                paymentMethodCode = "card",
+                authorizationAction = null,
+                executeInNightlyRun = true,
+            ) { settings ->
+                settings[CountrySettingsDefinition] = Country.FR
+            }.copy(
+                saveForFutureUseCheckboxVisible = true
+            ),
+            values = FieldPopulator.Values(
+                cardNumber = "4000002500001001"
+            ),
+            populateCustomLpmFields = {
+                populateCardDetails()
+                selectCardBrand("Cartes Bancaires")
             },
         )
     }

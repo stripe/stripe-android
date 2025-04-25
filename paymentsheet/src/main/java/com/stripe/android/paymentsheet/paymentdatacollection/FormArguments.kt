@@ -6,6 +6,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.uicore.elements.IdentifierSpec
 
 internal data class FormArguments(
     val paymentMethodCode: PaymentMethodCode,
@@ -18,4 +19,22 @@ internal data class FormArguments(
     val hasIntentToSetup: Boolean,
     val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
         PaymentSheet.BillingDetailsCollectionConfiguration(),
-)
+) {
+    val defaultFormValues by lazy {
+        mutableMapOf<IdentifierSpec, String>().apply {
+            if (billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod) {
+                billingDetails?.let { billingDetails ->
+                    billingDetails.name?.let { this[IdentifierSpec.Name] = it }
+                    billingDetails.email?.let { this[IdentifierSpec.Email] = it }
+                    billingDetails.phone?.let { this[IdentifierSpec.Phone] = it }
+                    billingDetails.address?.line1?.let { this[IdentifierSpec.Companion.Line1] = it }
+                    billingDetails.address?.line2?.let { this[IdentifierSpec.Companion.Line2] = it }
+                    billingDetails.address?.city?.let { this[IdentifierSpec.Companion.City] = it }
+                    billingDetails.address?.state?.let { this[IdentifierSpec.Companion.State] = it }
+                    billingDetails.address?.postalCode?.let { this[IdentifierSpec.Companion.PostalCode] = it }
+                    billingDetails.address?.country?.let { this[IdentifierSpec.Companion.Country] = it }
+                }
+            }
+        }.toMap()
+    }
+}

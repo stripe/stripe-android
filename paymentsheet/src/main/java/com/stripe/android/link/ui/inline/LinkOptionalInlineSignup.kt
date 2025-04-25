@@ -27,7 +27,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalTextInputService
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -69,13 +69,12 @@ internal fun LinkOptionalInlineSignup(
     }
 
     val focusManager = LocalFocusManager.current
-    val textInputService = LocalTextInputService.current
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     LaunchedEffect(viewState.signUpState) {
         if (viewState.signUpState == SignUpState.InputtingPrimaryField && viewState.userInput != null) {
             focusManager.clearFocus(true)
-            @Suppress("DEPRECATION")
-            textInputService?.hideSoftwareKeyboard()
+            keyboardController?.hide()
         }
     }
 

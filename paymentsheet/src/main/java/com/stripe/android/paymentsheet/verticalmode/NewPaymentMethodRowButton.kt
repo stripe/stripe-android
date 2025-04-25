@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
@@ -27,6 +28,7 @@ internal fun NewPaymentMethodRowButton(
     displayablePaymentMethod: DisplayablePaymentMethod,
     imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
+    trailingContent: (@Composable RowScope.() -> Unit)? = null,
     rowStyle: Embedded.RowStyle = Embedded.RowStyle.FloatingButton.default
 ) {
     val iconUrl = if (isSystemInDarkTheme() && displayablePaymentMethod.darkThemeIconUrl != null) {
@@ -48,7 +50,8 @@ internal fun NewPaymentMethodRowButton(
             displayablePaymentMethod.onClick()
         },
         modifier = modifier.testTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_${displayablePaymentMethod.code}"),
-        rowStyle = rowStyle
+        rowStyle = rowStyle,
+        trailingContent = trailingContent,
     )
 }
 
@@ -66,6 +69,7 @@ internal fun NewPaymentMethodRowButton(
     iconRequiresTinting: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    trailingContent: (@Composable RowScope.() -> Unit)? = null,
     rowStyle: Embedded.RowStyle = Embedded.RowStyle.FloatingButton.default
 ) {
     PaymentMethodRowButton(
@@ -87,6 +91,7 @@ internal fun NewPaymentMethodRowButton(
         promoText = promoText,
         onClick = onClick,
         modifier = modifier,
-        style = rowStyle
+        style = rowStyle,
+        trailingContent = trailingContent,
     )
 }

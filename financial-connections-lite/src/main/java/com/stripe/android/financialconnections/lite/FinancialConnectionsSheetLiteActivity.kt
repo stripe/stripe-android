@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.lite
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -12,6 +13,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.ProgressBar
 import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.annotation.RestrictTo
 import androidx.browser.customtabs.CustomTabsIntent
@@ -48,6 +50,7 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity(R.layou
         progressBar = findViewById(R.id.progressBar)
         setupProgressBar()
         setupWebView()
+        setupBackButtonHandling()
 
         lifecycleScope.launch {
             viewModel.viewEffects.collect { viewEffect ->
@@ -58,6 +61,29 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity(R.layou
                 }
             }
         }
+    }
+
+    private fun setupBackButtonHandling() {
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    val exitDialog = AlertDialog
+                        .Builder(this@FinancialConnectionsSheetLiteActivity)
+                        .setTitle(R.string.stripe_fc_lite_exit_title)
+                        .setMessage(R.string.stripe_fc_lite_exit_message)
+                        .setCancelable(true)
+                        .setPositiveButton(R.string.stripe_fc_lite_exit_confirm) { _, _ ->
+                            finish()
+                        }
+                        .setNegativeButton(R.string.stripe_fc_lite_exit_cancel) { dialog, _ ->
+                            dialog.dismiss()
+                        }
+                        .create()
+                    exitDialog.show()
+                }
+            }
+        )
     }
 
     private fun setupProgressBar() {

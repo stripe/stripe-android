@@ -250,6 +250,7 @@ class RealCreateInstantDebitsResultTest {
                     last4 = "4242",
                     bankIconCode = null,
                     isDefault = false,
+                    nickname = null,
                 )
             )
         )

@@ -29,6 +29,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.SavedPaymentMethod
 import com.stripe.android.paymentsheet.utils.testMetadata
 import com.stripe.android.uicore.elements.CheckboxElementUI
@@ -47,16 +48,17 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
     )
     val state by interactor.state.collectAsState()
     val shouldShowCardBrandDropdown = interactor.isModifiablePaymentMethod &&
-        interactor.displayableSavedPaymentMethod.isModifiable()
+        interactor.displayableSavedPaymentMethod.canChangeCbc()
 
     Column(
-        modifier = modifier.padding(horizontal = horizontalPadding).testTag(UPDATE_PM_SCREEN_TEST_TAG),
+        modifier = modifier
+            .padding(horizontal = horizontalPadding)
+            .testTag(UPDATE_PM_SCREEN_TEST_TAG),
     ) {
         when (val savedPaymentMethod = interactor.displayableSavedPaymentMethod.savedPaymentMethod) {
             is SavedPaymentMethod.Card -> {
                 CardDetailsEditUI(
                     editCardDetailsInteractor = interactor.editCardDetailsInteractor,
-                    isExpired = interactor.isExpiredCard
                 )
             }
             is SavedPaymentMethod.SepaDebit -> SepaDebitUI(
@@ -72,7 +74,9 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
             SavedPaymentMethod.Unexpected -> {}
         }
 
-        if (!interactor.isExpiredCard) {
+        val showCardDetailsCannotBeChanged = interactor.isExpiredCard.not() &&
+            (interactor.isModifiablePaymentMethod.not() || interactor.canUpdateFullPaymentMethodDetails.not())
+        if (showCardDetailsCannotBeChanged) {
             DetailsCannotBeChangedText(interactor, shouldShowCardBrandDropdown, context)
         }
 
@@ -133,7 +137,9 @@ private fun SetAsDefaultPaymentMethodCheckbox(
         onValueChange = onCheckChanged,
         isEnabled = isEnabled,
         label = (com.stripe.android.ui.core.R.string.stripe_set_as_default_payment_method).resolvableString.resolve(),
-        modifier = Modifier.padding(top = 12.dp).testTag(UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG)
+        modifier = Modifier
+            .padding(top = 12.dp)
+            .testTag(UPDATE_PM_SET_AS_DEFAULT_CHECKBOX_TEST_TAG)
     )
 }
 
@@ -302,7 +308,9 @@ private fun PreviewUpdatePaymentMethodUI() {
         interactor = DefaultUpdatePaymentMethodInteractor(
             isLiveMode = false,
             canRemove = true,
+            canUpdateFullPaymentMethodDetails = true,
             displayableSavedPaymentMethod = exampleCard,
+            addressCollectionMode = AddressCollectionMode.Automatic,
             removeExecutor = { null },
             updatePaymentMethodExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
             setDefaultPaymentMethodExecutor = { _ -> Result.success(Unit) },

@@ -5,11 +5,11 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.ZeroCornerSize
-import androidx.compose.material.Card
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -25,28 +25,35 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.R
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.PaymentMethod
-import com.stripe.android.uicore.getBorderStroke
+import com.stripe.android.uicore.elements.Section
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
 import com.stripe.android.uicore.utils.collectAsState
+import com.stripe.android.ui.core.R as CoreR
 
 @Composable
 internal fun CardDetailsEditUI(
     editCardDetailsInteractor: EditCardDetailsInteractor,
-    isExpired: Boolean,
 ) {
     val state by editCardDetailsInteractor.state.collectAsState()
 
     CardDetailsEditUI(
         shouldShowCardBrandDropdown = state.shouldShowCardBrandDropdown,
         selectedBrand = state.selectedCardBrand,
-        card = state.card,
-        isExpired = isExpired,
+        payload = state.payload,
         availableNetworks = state.availableNetworks,
         paymentMethodIcon = state.paymentMethodIcon,
+        expiryDateState = state.expiryDateState,
+        billingDetailsForm = state.billingDetailsForm,
         onBrandChoiceChanged = {
             editCardDetailsInteractor.handleViewAction(EditCardDetailsInteractor.ViewAction.BrandChoiceChanged(it))
+        },
+        onExpDateChanged = {
+            editCardDetailsInteractor.handleViewAction(EditCardDetailsInteractor.ViewAction.DateChanged(it))
+        },
+        onAddressChanged = {
+            editCardDetailsInteractor.handleViewAction(EditCardDetailsInteractor.ViewAction.BillingDetailsChanged(it))
         }
     )
 }
@@ -55,59 +62,74 @@ internal fun CardDetailsEditUI(
 private fun CardDetailsEditUI(
     shouldShowCardBrandDropdown: Boolean,
     selectedBrand: CardBrandChoice,
-    card: PaymentMethod.Card,
-    isExpired: Boolean,
+    payload: EditCardPayload,
+    expiryDateState: ExpiryDateState,
+    billingDetailsForm: BillingDetailsForm?,
     availableNetworks: List<CardBrandChoice>,
     @DrawableRes paymentMethodIcon: Int,
-    onBrandChoiceChanged: (CardBrandChoice) -> Unit
+    onBrandChoiceChanged: (CardBrandChoice) -> Unit,
+    onExpDateChanged: (String) -> Unit,
+    onAddressChanged: (BillingDetailsFormState) -> Unit
 ) {
     val dividerHeight = remember { mutableStateOf(0.dp) }
 
-    Card(
-        border = MaterialTheme.getBorderStroke(false),
-        elevation = 0.dp,
-        modifier = Modifier.testTag(UPDATE_PM_CARD_TEST_TAG),
-    ) {
-        Column {
-            CardNumberField(
-                card = card,
-                selectedBrand = selectedBrand,
-                shouldShowCardBrandDropdown = shouldShowCardBrandDropdown,
-                availableNetworks = availableNetworks,
-                savedPaymentMethodIcon = paymentMethodIcon,
-                onBrandChoiceChanged = onBrandChoiceChanged,
-            )
-            Divider(
-                color = MaterialTheme.stripeColors.componentDivider,
-                thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
-            )
-            Row(modifier = Modifier.fillMaxWidth()) {
-                ExpiryField(
-                    expiryMonth = card.expiryMonth,
-                    expiryYear = card.expiryYear,
-                    isExpired = isExpired,
-                    modifier = Modifier
-                        .weight(1F)
-                        .onSizeChanged {
-                            dividerHeight.value =
-                                (it.height / Resources.getSystem().displayMetrics.density).dp
-                        },
+    Column {
+        Section(
+            title = billingDetailsForm?.let {
+                CoreR.string.stripe_paymentsheet_add_payment_method_card_information
+            },
+            error = expiryDateState.sectionError()?.resolve(),
+            modifier = Modifier.testTag(UPDATE_PM_CARD_TEST_TAG),
+        ) {
+            Column {
+                CardNumberField(
+                    last4 = payload.last4,
+                    selectedBrand = selectedBrand,
+                    shouldShowCardBrandDropdown = shouldShowCardBrandDropdown,
+                    availableNetworks = availableNetworks,
+                    savedPaymentMethodIcon = paymentMethodIcon,
+                    onBrandChoiceChanged = onBrandChoiceChanged,
                 )
                 Divider(
-                    modifier = Modifier
-                        .height(dividerHeight.value)
-                        .width(MaterialTheme.stripeShapes.borderStrokeWidth.dp),
                     color = MaterialTheme.stripeColors.componentDivider,
+                    thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
                 )
-                CvcField(cardBrand = card.brand, modifier = Modifier.weight(1F))
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    ExpiryField(
+                        modifier = Modifier
+                            .weight(1F)
+                            .onSizeChanged {
+                                dividerHeight.value =
+                                    (it.height / Resources.getSystem().displayMetrics.density).dp
+                            },
+                        state = expiryDateState,
+                        onValueChanged = onExpDateChanged
+                    )
+                    Divider(
+                        modifier = Modifier
+                            .height(dividerHeight.value)
+                            .width(MaterialTheme.stripeShapes.borderStrokeWidth.dp),
+                        color = MaterialTheme.stripeColors.componentDivider,
+                    )
+                    CvcField(cardBrand = payload.brand, modifier = Modifier.weight(1F))
+                }
             }
+        }
+
+        if (billingDetailsForm != null) {
+            Spacer(Modifier.height(32.dp))
+
+            BillingDetailsFormUI(
+                form = billingDetailsForm,
+                onValuesChanged = onAddressChanged
+            )
         }
     }
 }
 
 @Composable
 private fun CardNumberField(
-    card: PaymentMethod.Card,
+    last4: String?,
     selectedBrand: CardBrandChoice,
     availableNetworks: List<CardBrandChoice>,
     shouldShowCardBrandDropdown: Boolean,
@@ -115,7 +137,7 @@ private fun CardNumberField(
     onBrandChoiceChanged: (CardBrandChoice) -> Unit,
 ) {
     CommonTextField(
-        value = "•••• •••• •••• ${card.last4}",
+        value = "•••• •••• •••• ${last4 ?: "••••"}",
         label = stringResource(id = R.string.stripe_acc_label_card_number),
         trailingIcon = {
             if (shouldShowCardBrandDropdown) {
@@ -138,55 +160,16 @@ private fun CardNumberField(
 
 @Composable
 private fun ExpiryField(
-    expiryMonth: Int?,
-    expiryYear: Int?,
-    isExpired: Boolean,
-    modifier: Modifier
+    modifier: Modifier,
+    state: ExpiryDateState,
+    onValueChanged: (String) -> Unit
 ) {
-    CommonTextField(
-        modifier = modifier.testTag(UPDATE_PM_EXPIRY_FIELD_TEST_TAG),
-        value = formattedExpiryDate(expiryMonth = expiryMonth, expiryYear = expiryYear),
-        label = stringResource(id = com.stripe.android.uicore.R.string.stripe_expiration_date_hint),
-        shape = MaterialTheme.shapes.small.copy(
-            topStart = ZeroCornerSize,
-            topEnd = ZeroCornerSize,
-            bottomEnd = ZeroCornerSize,
-        ),
-        shouldShowError = isExpired,
+    ExpiryTextField(
+        modifier = modifier
+            .testTag(UPDATE_PM_EXPIRY_FIELD_TEST_TAG),
+        state = state,
+        onValueChange = onValueChanged,
     )
-}
-
-private fun formattedExpiryDate(expiryMonth: Int?, expiryYear: Int?): String {
-    @Suppress("ComplexCondition")
-    if (
-        expiryMonth == null ||
-        monthIsInvalid(expiryMonth) ||
-        expiryYear == null ||
-        yearIsInvalid(expiryYear)
-    ) {
-        return "••/••"
-    }
-
-    val formattedExpiryMonth = if (expiryMonth < OCTOBER) {
-        "0$expiryMonth"
-    } else {
-        expiryMonth.toString()
-    }
-
-    @Suppress("MagicNumber")
-    val formattedExpiryYear = expiryYear.toString().substring(2, 4)
-
-    return "$formattedExpiryMonth/$formattedExpiryYear"
-}
-
-private fun monthIsInvalid(expiryMonth: Int): Boolean {
-    return expiryMonth < JANUARY || expiryMonth > DECEMBER
-}
-
-private fun yearIsInvalid(expiryYear: Int): Boolean {
-    // Since we use 2-digit years to represent the expiration year, we should keep dates to
-    // this century.
-    return expiryYear < YEAR_2000 || expiryYear > YEAR_2100
 }
 
 @Composable
@@ -214,8 +197,5 @@ private fun CvcField(cardBrand: CardBrand, modifier: Modifier) {
     )
 }
 
-private const val JANUARY = 1
-private const val OCTOBER = 10
-private const val DECEMBER = 12
-private const val YEAR_2000 = 2000
-private const val YEAR_2100 = 2100
+internal const val CARD_EDIT_UI_ERROR_MESSAGE = "card_edit_ui_error_message"
+internal const val CARD_EDIT_UI_FALLBACK_EXPIRY_DATE = "•• / ••"

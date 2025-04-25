@@ -36,7 +36,7 @@ import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.Matchers.allOf
 import org.junit.Rule
@@ -135,7 +135,7 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
 
     private fun test(
         test: suspend PaymentElementConfirmationTestActivity.() -> Unit
-    ) = runTest(UnconfinedTestDispatcher()) {
+    ) = runTest(StandardTestDispatcher()) {
         featureFlagTestRule.setEnabled(nativeLinkEnabled)
 
         val countDownLatch = CountDownLatch(1)

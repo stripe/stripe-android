@@ -22,7 +22,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 internal class EmbeddedPaymentElementTestRunnerContext(
-    private val embeddedPaymentElement: EmbeddedPaymentElement,
+    val embeddedPaymentElement: EmbeddedPaymentElement,
     private val countDownLatch: CountDownLatch,
 ) {
     suspend fun configure(
@@ -52,12 +52,11 @@ internal class EmbeddedPaymentElementTestRunnerContext(
     }
 }
 
-@OptIn(ExperimentalAnalyticEventCallbackApi::class)
 internal fun runEmbeddedPaymentElementTest(
     networkRule: NetworkRule,
     createIntentCallback: CreateIntentCallback,
     resultCallback: EmbeddedPaymentElement.ResultCallback,
-    analyticEventCallback: AnalyticEventCallback? = null,
+    builder: EmbeddedPaymentElement.Builder.() -> Unit = {},
     successTimeoutSeconds: Long = 5L,
     block: suspend (EmbeddedPaymentElementTestRunnerContext) -> Unit,
 ) {
@@ -65,17 +64,17 @@ internal fun runEmbeddedPaymentElementTest(
 
     val factory: (ComponentActivity) -> EmbeddedPaymentElement = {
         lateinit var embeddedPaymentElement: EmbeddedPaymentElement
-        val builder = EmbeddedPaymentElement.Builder(
+        val embeddedPaymentElementBuilder = EmbeddedPaymentElement.Builder(
             createIntentCallback = createIntentCallback,
             resultCallback = { result ->
                 resultCallback.onResult(result)
                 countDownLatch.countDown()
             },
-        ).analyticEventCallback { event ->
-            analyticEventCallback?.onEvent(event)
+        ).apply {
+            builder()
         }
         it.setContent {
-            embeddedPaymentElement = rememberEmbeddedPaymentElement(builder)
+            embeddedPaymentElement = rememberEmbeddedPaymentElement(embeddedPaymentElementBuilder)
             val scrollState = rememberScrollState()
             Box(modifier = Modifier.verticalScroll(scrollState)) {
                 embeddedPaymentElement.Content()

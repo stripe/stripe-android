@@ -21,7 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalTextInputService
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -83,7 +83,7 @@ private fun NetworkingLinkVerificationLoaded(
     onCloseFromErrorClick: (Throwable) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    val textInputService = LocalTextInputService.current
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     val focusRequester: FocusRequester = remember { FocusRequester() }
     var shouldRequestFocus by rememberSaveable { mutableStateOf(false) }
@@ -95,8 +95,7 @@ private fun NetworkingLinkVerificationLoaded(
     LaunchedEffect(confirmVerificationAsync) {
         if (confirmVerificationAsync is Loading) {
             focusManager.clearFocus(true)
-            @Suppress("DEPRECATION")
-            textInputService?.hideSoftwareKeyboard()
+            keyboardController?.hide()
         }
     }
 

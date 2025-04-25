@@ -169,8 +169,8 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
         val navController = rememberNavController(bottomSheetNavigator)
         val keyboardController = rememberKeyboardController()
 
-        NavigationEffects(viewModel.navigationFlow, navController, keyboardController) { backStackEntry ->
-            val pane = backStackEntry?.destination?.pane
+        NavigationEffects(viewModel.navigationFlow, navController, keyboardController) { backStackEntryUpdate ->
+            val pane = backStackEntryUpdate.currentBackStackEntry?.destination?.pane
             if (pane != null) {
                 viewModel.handlePaneChanged(pane)
             }

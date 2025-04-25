@@ -3,7 +3,6 @@ package com.stripe.android.paymentelement.embedded.form
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.mainthread.MainThreadSavedStateHandle
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
@@ -78,7 +77,7 @@ internal class FormActivityConfirmationHandlerTest {
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val confirmationHandler = FakeConfirmationHandler()
-        val selectionHolder = EmbeddedSelectionHolder(MainThreadSavedStateHandle(SavedStateHandle()))
+        val selectionHolder = EmbeddedSelectionHolder(SavedStateHandle())
         val embeddedState = EmbeddedConfirmationStateFixtures.defaultState()
         val stateHelper = FakeFormActivityStateHelper()
         val onClickOverrideDelegate = OnClickDelegateOverrideImpl()
@@ -93,7 +92,8 @@ internal class FormActivityConfirmationHandlerTest {
             lifecycleOwner = TestLifecycleOwner(),
             activityResultCaller = mock(),
             onClickDelegate = onClickOverrideDelegate,
-            eventReporter = FakeEventReporter()
+            eventReporter = FakeEventReporter(),
+            coroutineScope = this,
         )
 
         assertThat(confirmationHandler.registerTurbine.awaitItem()).isNotNull()

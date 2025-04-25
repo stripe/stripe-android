@@ -30,14 +30,12 @@ class TestRules private constructor(
             networkRule: NetworkRule = NetworkRule(),
             block: RuleChain.() -> RuleChain = { this }
         ): TestRules {
-            val chain =
-                RuleChain.emptyRuleChain()
-                    .around(DetectLeaksAfterTestSuccess())
-                    .around(composeTestRule)
-                    .around(RetryRule(5))
-                    .around(networkRule)
-                    .block()
-
+            val chain = RuleChain.emptyRuleChain()
+                .around(DetectLeaksAfterTestSuccess())
+                .around(composeTestRule)
+                .around(RetryRule(5))
+                .around(networkRule)
+                .block()
             return TestRules(chain, composeTestRule, networkRule)
         }
     }

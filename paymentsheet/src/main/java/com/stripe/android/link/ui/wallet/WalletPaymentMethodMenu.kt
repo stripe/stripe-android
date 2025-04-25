@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.ui.menu.LinkMenu
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.paymentsheet.R
@@ -14,12 +15,17 @@ internal fun WalletPaymentMethodMenu(
     paymentDetails: ConsumerPaymentDetails.PaymentDetails,
     onSetDefaultClick: () -> Unit,
     onRemoveClick: () -> Unit,
-    onCancelClick: () -> Unit
+    onCancelClick: () -> Unit,
+    onUpdateClick: () -> Unit,
 ) {
     val items = remember(paymentDetails) {
         buildList {
             if (!paymentDetails.isDefault) {
                 add(WalletPaymentMethodMenuItem.SetAsDefault)
+            }
+
+            if (FeatureFlags.enableCardEditInLinkNative.isEnabled && paymentDetails is ConsumerPaymentDetails.Card) {
+                add(WalletPaymentMethodMenuItem.Update)
             }
 
             add(
@@ -39,6 +45,7 @@ internal fun WalletPaymentMethodMenu(
                 is WalletPaymentMethodMenuItem.SetAsDefault -> onSetDefaultClick()
                 is WalletPaymentMethodMenuItem.RemoveItem -> onRemoveClick()
                 is WalletPaymentMethodMenuItem.Cancel -> onCancelClick()
+                is WalletPaymentMethodMenuItem.Update -> onUpdateClick()
             }
         }
     )

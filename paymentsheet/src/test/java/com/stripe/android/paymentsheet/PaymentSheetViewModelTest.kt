@@ -78,6 +78,7 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.ARGS_DEFERRED_INTENT
+import com.stripe.android.paymentsheet.PaymentSheetFixtures.BILLING_DETAILS_FORM_DETAILS
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
@@ -85,6 +86,7 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
+import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.analytics.primaryButtonColorUsage
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
@@ -118,8 +120,7 @@ import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.ui.CardBrandChoice
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
-import com.stripe.android.paymentsheet.ui.editCardDetailsInteractorHelper
-import com.stripe.android.paymentsheet.ui.updateCardBrand
+import com.stripe.android.paymentsheet.ui.cardParamsUpdateAction
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.paymentsheet.utils.prefillCreate
 import com.stripe.android.paymentsheet.utils.prefilledBuilder
@@ -227,7 +228,7 @@ internal class PaymentSheetViewModelTest {
             commonConfiguration = eq(config.asCommonConfiguration()),
             appearance = eq(config.appearance),
             primaryButtonColor = eq(config.primaryButtonColorUsage()),
-            paymentMethodLayout = eq(config.paymentMethodLayout),
+            configurationSpecificPayload = eq(PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(config)),
             isDeferred = eq(false),
         )
 
@@ -283,9 +284,7 @@ internal class PaymentSheetViewModelTest {
             if (currentScreen is PaymentSheetScreen.UpdatePaymentMethod) {
                 val interactor = currentScreen.interactor
 
-                interactor.editCardDetailsInteractorHelper {
-                    updateCardBrand(CardBrand.Visa)
-                }
+                interactor.cardParamsUpdateAction(CardBrand.Visa)
 
                 interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
             }
@@ -354,9 +353,12 @@ internal class PaymentSheetViewModelTest {
             if (currentScreen is PaymentSheetScreen.UpdatePaymentMethod) {
                 val interactor = currentScreen.interactor
 
-                interactor.editCardDetailsInteractorHelper {
-                    updateCardBrand(CardBrand.Visa)
-                }
+                interactor.cardParamsUpdateAction(
+                    cardBrand = CardBrand.Visa,
+                    expiryMonth = 12,
+                    expiryYear = 2027,
+                    billingDetails = BILLING_DETAILS_FORM_DETAILS
+                )
 
                 interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
             }
@@ -385,7 +387,10 @@ internal class PaymentSheetViewModelTest {
             PaymentMethodUpdateParams.createCard(
                 networks = PaymentMethodUpdateParams.Card.Networks(
                     preferred = CardBrand.Visa.code
-                )
+                ),
+                expiryMonth = 12,
+                expiryYear = 2027,
+                billingDetails = BILLING_DETAILS_FORM_DETAILS
             ).toParamMap()
         )
 
@@ -429,9 +434,7 @@ internal class PaymentSheetViewModelTest {
             if (currentScreen is PaymentSheetScreen.UpdatePaymentMethod) {
                 val interactor = currentScreen.interactor
 
-                interactor.editCardDetailsInteractorHelper {
-                    updateCardBrand(CardBrand.Visa)
-                }
+                interactor.cardParamsUpdateAction(CardBrand.Visa)
 
                 interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
             }
@@ -1712,6 +1715,44 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
+    fun `On load with initial Google Pay selection, selection should be null & primary button disabled`() = runTest {
+        val viewModel = createViewModel(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            initialPaymentSelection = PaymentSelection.GooglePay,
+        )
+
+        viewModel.selection.test {
+            assertThat(awaitItem()).isNull()
+        }
+
+        viewModel.primaryButtonUiState.test {
+            val uiState = awaitItem()
+
+            assertThat(uiState).isNotNull()
+            assertThat(uiState?.enabled).isFalse()
+        }
+    }
+
+    @Test
+    fun `On load with initial Link selection, selection should be null & primary button disabled`() = runTest {
+        val viewModel = createViewModel(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            initialPaymentSelection = PaymentSelection.GooglePay,
+        )
+
+        viewModel.selection.test {
+            assertThat(awaitItem()).isNull()
+        }
+
+        viewModel.primaryButtonUiState.test {
+            val uiState = awaitItem()
+
+            assertThat(uiState).isNotNull()
+            assertThat(uiState?.enabled).isFalse()
+        }
+    }
+
+    @Test
     fun `Sends correct event when navigating to AddFirstPaymentMethod screen`() = runTest {
         val viewModel = createViewModel(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
@@ -2102,7 +2143,7 @@ internal class PaymentSheetViewModelTest {
             commonConfiguration = anyOrNull(),
             appearance = anyOrNull(),
             primaryButtonColor = anyOrNull(),
-            paymentMethodLayout = anyOrNull(),
+            configurationSpecificPayload = any(),
             isDeferred = eq(false),
         )
     }
@@ -2127,7 +2168,7 @@ internal class PaymentSheetViewModelTest {
             commonConfiguration = anyOrNull(),
             appearance = anyOrNull(),
             primaryButtonColor = anyOrNull(),
-            paymentMethodLayout = anyOrNull(),
+            configurationSpecificPayload = any(),
             isDeferred = eq(true),
         )
     }
@@ -2152,7 +2193,7 @@ internal class PaymentSheetViewModelTest {
             commonConfiguration = anyOrNull(),
             appearance = anyOrNull(),
             primaryButtonColor = anyOrNull(),
-            paymentMethodLayout = anyOrNull(),
+            configurationSpecificPayload = any(),
             isDeferred = eq(true),
         )
     }
@@ -2289,7 +2330,10 @@ internal class PaymentSheetViewModelTest {
         val usBankAccount = PaymentSelection.New.USBankAccount(
             label = "Test",
             iconResource = 0,
-            paymentMethodCreateParams = mock(),
+            paymentMethodCreateParams = PaymentMethodCreateParams(
+                code = PaymentMethod.Type.USBankAccount.code,
+                requiresMandate = false,
+            ),
             customerRequestedSave = mock(),
             input = PaymentSelection.New.USBankAccount.Input(
                 name = "",
@@ -3007,9 +3051,7 @@ internal class PaymentSheetViewModelTest {
 
             if (currentScreen is PaymentSheetScreen.UpdatePaymentMethod) {
                 val interactor = currentScreen.interactor
-                interactor.editCardDetailsInteractorHelper {
-                    updateCardBrand(CardBrand.Visa)
-                }
+                interactor.cardParamsUpdateAction(CardBrand.Visa)
 
                 verify(customerRepository, never()).updatePaymentMethod(any(), any(), any())
             }

@@ -7,6 +7,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.FakeCvcRecollectionInteractor
@@ -15,7 +16,9 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.ui.FakeAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.elements.CvcConfig
 import com.stripe.android.ui.core.elements.CvcController
@@ -147,7 +150,7 @@ class PrimaryButtonUiStateMapperTest {
     }
 
     @Test
-    fun `Hides button in custom flow if on a screen that isn't supposed to show it`() = runTest {
+    fun `Hides button in custom flow if pm doesn't need confirm on hides confirm screen`() = runTest {
         val mapper = createMapper(
             isProcessingPayment = true,
             currentScreenFlow = stateFlowOf(
@@ -169,12 +172,60 @@ class PrimaryButtonUiStateMapperTest {
     }
 
     @Test
-    fun `Shows button in custom flow if selected payment method requires confirmation`() = runTest {
+    fun `Hides button in custom flow if pm requires confirm, & screen hides Mandate, hides confirm `() = runTest {
+        val mapper = createMapper(
+            isProcessingPayment = true,
+            currentScreenFlow = stateFlowOf(
+                PaymentSheetScreen.ManageSavedPaymentMethods(
+                    FakeManageScreenInteractor()
+                )
+            ),
+            buttonsEnabledFlow = stateFlowOf(false),
+            selectionFlow = stateFlowOf(usBankAccountSelection()),
+            customPrimaryButtonUiStateFlow = stateFlowOf(null),
+            cvcFlow = stateFlowOf(true)
+        )
+
+        val result = mapper.forCustomFlow()
+
+        result.test {
+            assertThat(awaitItem()).isNull()
+        }
+    }
+
+    @Test
+    fun `Show button in custom flow if pm requires confirm, & screen shows mandates, hides confirm`() = runTest {
         val mapper = createMapper(
             isProcessingPayment = true,
             currentScreenFlow = stateFlowOf(
                 PaymentSheetScreen.SelectSavedPaymentMethods(
                     FakeSelectSavedPaymentMethodsInteractor()
+                )
+            ),
+            buttonsEnabledFlow = stateFlowOf(false),
+            selectionFlow = stateFlowOf(usBankAccountSelection()),
+            customPrimaryButtonUiStateFlow = stateFlowOf(null),
+            cvcFlow = stateFlowOf(true)
+        )
+
+        val result = mapper.forCustomFlow()
+
+        result.test {
+            assertThat(awaitItem()).isNotNull()
+        }
+    }
+
+    @Test
+    fun `Show button in custom flow if pm requires confirm, & screen shows mandates, shows confirm`() = runTest {
+        val mapper = createMapper(
+            isProcessingPayment = true,
+            currentScreenFlow = stateFlowOf(
+                PaymentSheetScreen.AddFirstPaymentMethod(
+                    FakeAddPaymentMethodInteractor(
+                        initialState = FakeAddPaymentMethodInteractor.createState(
+                            paymentMethodCode = PaymentMethod.Type.USBankAccount.code
+                        )
+                    )
                 )
             ),
             buttonsEnabledFlow = stateFlowOf(false),

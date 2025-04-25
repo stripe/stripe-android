@@ -226,6 +226,7 @@ internal class PaymentOptionsViewModelTest {
 
     @Test
     fun `when paymentMethods is empty, primary button and text below button are gone`() = runTest {
+        Dispatchers.setMain(testDispatcher)
         val paymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT
         val viewModel = createViewModel(
             args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
@@ -528,41 +529,57 @@ internal class PaymentOptionsViewModelTest {
     @Test
     fun `Falls back to initial saved payment selection if user cancels`() = runTest {
         val paymentMethods = PaymentMethodFixtures.createCards(3)
-        val selection = PaymentSelection.Saved(paymentMethod = paymentMethods.random())
+        val initialSelection = PaymentSelection.Saved(paymentMethod = paymentMethods.random())
 
-        val args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
-            paymentSelection = selection,
-            paymentMethods = paymentMethods,
+        testUserCancellation(
+            initialPaymentMethods = paymentMethods,
+            initialSelection = initialSelection,
+            preCancel = { viewModel ->
+                viewModel.updateSelection(
+                    PaymentSelection.New.Card(
+                        paymentMethodCreateParams = DEFAULT_CARD,
+                        brand = CardBrand.Visa,
+                        customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                    )
+                )
+            },
+            expectedSelection = initialSelection,
+            expectedPaymentMethods = paymentMethods
+        )
+    }
+
+    @Test
+    fun `Falls back to latest saved payment selection if user cancels after payment method is updated`() = runTest {
+        val initialPaymentMethods = listOf(PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD)
+        val initialSelection = PaymentSelection.Saved(
+            paymentMethod = PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
         )
 
-        val viewModel = createViewModel(args)
-
-        viewModel.paymentOptionResult.test {
-            viewModel.transitionToAddPaymentScreen()
-
-            // Simulate user filling out a different payment method, but not confirming it
-            viewModel.updateSelection(
-                PaymentSelection.New.Card(
-                    paymentMethodCreateParams = DEFAULT_CARD,
-                    brand = CardBrand.Visa,
-                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
-                )
+        val updatedPaymentMethod = PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD.copy(
+            card = PaymentMethodFixtures.CARD_WITH_NETWORKS.copy(
+                displayBrand = "visa",
             )
+        )
+        val updatedPaymentMethods = listOf(updatedPaymentMethod)
 
-            viewModel.onUserCancel()
-
-            assertThat(awaitItem()).isEqualTo(
-                PaymentOptionResult.Canceled(
-                    mostRecentError = null,
-                    paymentSelection = selection,
-                    paymentMethods = paymentMethods,
+        testUserCancellation(
+            initialPaymentMethods = initialPaymentMethods,
+            initialSelection = initialSelection,
+            preCancel = { viewModel ->
+                viewModel.customerStateHolder.setCustomerState(
+                    customerState = viewModel.customerStateHolder.customer.value?.copy(
+                        paymentMethods = updatedPaymentMethods
+                    )
                 )
-            )
-        }
+            },
+            expectedSelection = PaymentSelection.Saved(updatedPaymentMethod),
+            expectedPaymentMethods = updatedPaymentMethods
+        )
     }
 
     @Test
     fun `Falls back to no payment selection if user cancels after deleting initial payment method`() = runTest {
+        Dispatchers.setMain(testDispatcher)
         val paymentMethods = PaymentMethodFixtures.createCards(3)
         val selection = PaymentSelection.Saved(paymentMethod = paymentMethods.random())
 
@@ -764,6 +781,40 @@ internal class PaymentOptionsViewModelTest {
         linkInlineSelectionTest(
             expectedCustomerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
         )
+
+    /**
+     * Helper function to test user cancellation scenarios
+     */
+    private suspend fun testUserCancellation(
+        initialPaymentMethods: List<PaymentMethod>,
+        initialSelection: PaymentSelection,
+        preCancel: (PaymentOptionsViewModel) -> Unit,
+        expectedSelection: PaymentSelection,
+        expectedPaymentMethods: List<PaymentMethod>
+    ) {
+        val args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+            paymentSelection = initialSelection,
+            paymentMethods = initialPaymentMethods,
+        )
+
+        val viewModel = createViewModel(args)
+
+        viewModel.paymentOptionResult.test {
+            viewModel.transitionToAddPaymentScreen()
+
+            preCancel(viewModel)
+
+            viewModel.onUserCancel()
+
+            assertThat(awaitItem()).isEqualTo(
+                PaymentOptionResult.Canceled(
+                    mostRecentError = null,
+                    paymentSelection = expectedSelection,
+                    paymentMethods = expectedPaymentMethods,
+                )
+            )
+        }
+    }
 
     private fun linkInlineSelectionTest(
         expectedCustomerRequestedSave: PaymentSelection.CustomerRequestedSave

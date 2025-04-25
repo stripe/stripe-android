@@ -10,6 +10,7 @@ class ExampleApplication : Application() {
             StrictMode.ThreadPolicy.Builder()
                 .detectAll()
                 .penaltyLog()
+                .penaltyDeathOnNetwork()
                 .also {
                     if (IS_PENALTY_DEATH_ENABLED) {
                         it.penaltyDeath()

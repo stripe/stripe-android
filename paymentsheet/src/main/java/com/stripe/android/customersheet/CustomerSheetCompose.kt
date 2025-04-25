@@ -1,7 +1,6 @@
 package com.stripe.android.customersheet
 
 import androidx.activity.compose.LocalActivityResultRegistryOwner
-import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -39,7 +38,6 @@ fun rememberCustomerSheet(
 * @param callback Called with the result of the operation after [CustomerSheet] is dismissed
 */
 @ExperimentalCustomerSessionApi
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
 fun rememberCustomerSheet(
     customerSessionProvider: CustomerSheet.CustomerSessionProvider,

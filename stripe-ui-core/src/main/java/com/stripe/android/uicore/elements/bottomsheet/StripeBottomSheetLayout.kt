@@ -37,7 +37,9 @@ fun StripeBottomSheetLayout(
     sheetContent: @Composable () -> Unit,
 ) {
     LaunchedEffect(Unit) {
-        state.show()
+        if (!state.modalBottomSheetState.isVisible) {
+            state.show()
+        }
 
         val dismissalType = state.awaitDismissal()
         if (dismissalType == DismissalType.SwipedDownByUser) {

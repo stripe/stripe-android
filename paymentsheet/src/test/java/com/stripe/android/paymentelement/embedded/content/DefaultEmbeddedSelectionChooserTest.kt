@@ -4,7 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
-import com.stripe.android.core.mainthread.MainThreadSavedStateHandle
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
@@ -14,18 +14,25 @@ import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser.Companion.PREVIOUS_CONFIGURATION_KEY
+import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser.Companion.PREVIOUS_PAYMENT_METHOD_METADATA_KEY
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
 internal class DefaultEmbeddedSelectionChooserTest {
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
+
     private val defaultConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
         .build()
         .asCommonConfiguration()
@@ -297,6 +304,48 @@ internal class DefaultEmbeddedSelectionChooserTest {
     }
 
     @Test
+    fun `PaymentSelection is preserved when form type remains user interaction required`() = runScenario {
+        val previousSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
+
+        storePreviousChooseState(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+            ),
+        )
+        val selection = chooser.choose(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            ),
+            paymentMethods = emptyList(),
+            previousSelection = previousSelection,
+            newSelection = null,
+            newConfiguration = defaultConfiguration,
+        )
+        assertThat(selection).isEqualTo(previousSelection)
+    }
+
+    @Test
+    fun `PaymentSelection is reset when new form has extra mandate field`() = runScenario {
+        val previousSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
+
+        storePreviousChooseState(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            ),
+        )
+        val selection = chooser.choose(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+            ),
+            paymentMethods = emptyList(),
+            previousSelection = previousSelection,
+            newSelection = null,
+            newConfiguration = defaultConfiguration,
+        )
+        assertThat(selection).isNull()
+    }
+
+    @Test
     fun `previousConfig is set when calling choose`() = runScenario {
         val previousSelection = PaymentSelection.GooglePay
         val paymentMethod = PaymentMethodFixtures.createCard()
@@ -322,14 +371,16 @@ internal class DefaultEmbeddedSelectionChooserTest {
         val savedStateHandle = SavedStateHandle()
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-            embeddedSelectionHolder = EmbeddedSelectionHolder(MainThreadSavedStateHandle(savedStateHandle)),
+            embeddedSelectionHolder = EmbeddedSelectionHolder(savedStateHandle),
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+            savedStateHandle = savedStateHandle,
         )
         Scenario(
             chooser = DefaultEmbeddedSelectionChooser(
-                savedStateHandle = MainThreadSavedStateHandle(savedStateHandle),
+                savedStateHandle = savedStateHandle,
                 formHelperFactory = formHelperFactory,
                 coroutineScope = CoroutineScope(Dispatchers.Unconfined),
+                eventReporter = FakeEventReporter(),
             ),
             savedStateHandle = savedStateHandle,
         ).block()
@@ -337,8 +388,10 @@ internal class DefaultEmbeddedSelectionChooserTest {
 
     private fun Scenario.storePreviousChooseState(
         configuration: CommonConfiguration = defaultConfiguration,
+        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
     ) {
         savedStateHandle[PREVIOUS_CONFIGURATION_KEY] = configuration
+        savedStateHandle[PREVIOUS_PAYMENT_METHOD_METADATA_KEY] = paymentMethodMetadata
     }
 
     private class Scenario(

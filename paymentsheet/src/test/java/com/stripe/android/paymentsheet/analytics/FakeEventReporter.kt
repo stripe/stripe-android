@@ -8,8 +8,10 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
+import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormViewModel
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 
 @Suppress("EmptyFunctionBlock")
@@ -55,6 +57,19 @@ internal class FakeEventReporter : EventReporter {
     private val _experimentExposureCalls = Turbine<ExperimentExposureCall>()
     val experimentExposureCalls: ReceiveTurbine<ExperimentExposureCall> = _experimentExposureCalls
 
+    private val _removePaymentMethodCalls = Turbine<RemovePaymentMethodCall>()
+    val removePaymentMethodCalls: ReceiveTurbine<RemovePaymentMethodCall> = _removePaymentMethodCalls
+
+    private val _formCompletedCalls = Turbine<FormCompletedCall>()
+    val formCompletedCalls: ReceiveTurbine<FormCompletedCall> = _formCompletedCalls
+
+    private val _pressConfirmButtonCalls = Turbine<PaymentSelection?>()
+    val pressConfirmButtonCalls: ReceiveTurbine<PaymentSelection?> = _pressConfirmButtonCalls
+
+    private val _usBankAccountFormEventCalls = Turbine<USBankAccountFormViewModel.AnalyticsEvent>()
+    val usBankAccountFormEventCalls: ReceiveTurbine<USBankAccountFormViewModel.AnalyticsEvent> =
+        _usBankAccountFormEventCalls
+
     fun validate() {
         _paymentFailureCalls.ensureAllEventsConsumed()
         _paymentSuccessCalls.ensureAllEventsConsumed()
@@ -68,13 +83,17 @@ internal class FakeEventReporter : EventReporter {
         _showNewPaymentOptionsCalls.ensureAllEventsConsumed()
         _showManageSavedPaymentMethods.ensureAllEventsConsumed()
         _experimentExposureCalls.ensureAllEventsConsumed()
+        _removePaymentMethodCalls.ensureAllEventsConsumed()
+        _formCompletedCalls.ensureAllEventsConsumed()
+        _pressConfirmButtonCalls.ensureAllEventsConsumed()
+        _usBankAccountFormEventCalls.ensureAllEventsConsumed()
     }
 
     override fun onInit(
         commonConfiguration: CommonConfiguration,
         appearance: PaymentSheet.Appearance,
         primaryButtonColor: Boolean?,
-        paymentMethodLayout: PaymentSheet.PaymentMethodLayout?,
+        configurationSpecificPayload: PaymentSheetEvent.ConfigurationSpecificPayload,
         isDeferred: Boolean
     ) {
     }
@@ -90,11 +109,13 @@ internal class FakeEventReporter : EventReporter {
         linkDisplay: PaymentSheet.LinkConfiguration.Display,
         currency: String?,
         initializationMode: PaymentElementLoader.InitializationMode,
+        financialConectionsAvailability: FinancialConnectionsAvailability?,
         orderedLpms: List<String>,
         requireCvcRecollection: Boolean,
         hasDefaultPaymentMethod: Boolean?,
         setAsDefaultEnabled: Boolean?
-    ) {}
+    ) {
+    }
 
     override fun onLoadFailed(error: Throwable) {
     }
@@ -119,10 +140,22 @@ internal class FakeEventReporter : EventReporter {
     override fun onSelectPaymentMethod(code: PaymentMethodCode) {
     }
 
+    override fun onRemoveSavedPaymentMethod(code: PaymentMethodCode) {
+        _removePaymentMethodCalls.add(RemovePaymentMethodCall(code))
+    }
+
     override fun onPaymentMethodFormShown(code: PaymentMethodCode) {
     }
 
     override fun onPaymentMethodFormInteraction(code: PaymentMethodCode) {
+    }
+
+    override fun onPaymentMethodFormCompleted(code: String) {
+        _formCompletedCalls.add(
+            FormCompletedCall(
+                code = code
+            )
+        )
     }
 
     override fun onCardNumberCompleted() {
@@ -132,6 +165,7 @@ internal class FakeEventReporter : EventReporter {
     }
 
     override fun onPressConfirmButton(paymentSelection: PaymentSelection?) {
+        _pressConfirmButtonCalls.add(paymentSelection)
     }
 
     override fun onPaymentSuccess(
@@ -218,6 +252,10 @@ internal class FakeEventReporter : EventReporter {
         _cannotProperlyReturnFromLinkAndOtherLPMsCalls.add(Unit)
     }
 
+    override fun onUsBankAccountFormEvent(event: USBankAccountFormViewModel.AnalyticsEvent) {
+        _usBankAccountFormEventCalls.add(event)
+    }
+
     override fun onDisallowedCardBrandEntered(brand: CardBrand) {
     }
 
@@ -251,5 +289,13 @@ internal class FakeEventReporter : EventReporter {
 
     data class ExperimentExposureCall(
         val experiment: LoggableExperiment
+    )
+
+    data class RemovePaymentMethodCall(
+        val code: PaymentMethodCode
+    )
+
+    data class FormCompletedCall(
+        val code: PaymentMethodCode
     )
 }

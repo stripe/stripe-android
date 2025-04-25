@@ -2,22 +2,22 @@ package com.stripe.android.link.ui.wallet
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -50,6 +50,7 @@ import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.addresselement.ScrollableColumn
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.CvcElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -78,6 +79,7 @@ internal fun WalletScreen(
         onPrimaryButtonClick = viewModel::onPrimaryButtonClicked,
         onPayAnotherWayClicked = viewModel::onPayAnotherWayClicked,
         onRemoveClicked = viewModel::onRemoveClicked,
+        onUpdateClicked = viewModel::onUpdateClicked,
         onSetDefaultClicked = viewModel::onSetDefaultClicked,
         showBottomSheetContent = showBottomSheetContent,
         hideBottomSheetContent = hideBottomSheetContent,
@@ -99,6 +101,7 @@ internal fun WalletBody(
     onDismissAlert: () -> Unit,
     onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onRemoveClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onUpdateClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: () -> Unit
 ) {
@@ -122,18 +125,14 @@ internal fun WalletBody(
         }
     }
 
-    Column(
+    ScrollableColumn(
         modifier = Modifier
             .testTag(WALLET_SCREEN_BOX)
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(16.dp),
     ) {
         PaymentDetailsSection(
-            modifier = Modifier
-                .weight(
-                    weight = 1f,
-                    fill = false
-                ),
+            modifier = Modifier,
             state = state,
             isExpanded = state.isExpanded,
             expiryDateController = expiryDateController,
@@ -142,6 +141,7 @@ internal fun WalletBody(
             onExpandedChanged = onExpandedChanged,
             showBottomSheetContent = showBottomSheetContent,
             onRemoveClicked = onRemoveClicked,
+            onUpdateClicked = onUpdateClicked,
             onSetDefaultClicked = onSetDefaultClicked,
             onAddNewPaymentMethodClicked = onAddNewPaymentMethodClicked,
             hideBottomSheetContent = hideBottomSheetContent
@@ -169,6 +169,7 @@ private fun PaymentDetailsSection(
     onAddNewPaymentMethodClicked: () -> Unit,
     onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onRemoveClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onUpdateClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: () -> Unit
 ) {
@@ -183,6 +184,7 @@ private fun PaymentDetailsSection(
             showBottomSheetContent = showBottomSheetContent,
             onRemoveClicked = onRemoveClicked,
             onSetDefaultClicked = onSetDefaultClicked,
+            onUpdateClicked = onUpdateClicked,
             onAddNewPaymentMethodClicked = onAddNewPaymentMethodClicked,
             hideBottomSheetContent = hideBottomSheetContent
         )
@@ -234,7 +236,8 @@ private fun ActionSection(
     Column {
         PrimaryButton(
             modifier = Modifier
-                .testTag(WALLET_SCREEN_PAY_BUTTON),
+                .testTag(WALLET_SCREEN_PAY_BUTTON)
+                .padding(top = 16.dp, bottom = 8.dp),
             label = state.primaryButtonLabel.resolve(LocalContext.current),
             state = state.primaryButtonState,
             onButtonClick = onPrimaryButtonClick,
@@ -260,6 +263,7 @@ private fun PaymentMethodSection(
     onAddNewPaymentMethodClicked: () -> Unit,
     onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onRemoveClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
+    onUpdateClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     showBottomSheetContent: (BottomSheetContent) -> Unit,
     hideBottomSheetContent: () -> Unit
 ) {
@@ -288,6 +292,10 @@ private fun PaymentMethodSection(
                             },
                             onCancelClick = {
                                 hideBottomSheetContent()
+                            },
+                            onUpdateClick = {
+                                hideBottomSheetContent()
+                                onUpdateClicked(it)
                             }
                         )
                     }
@@ -320,7 +328,7 @@ internal fun CollapsedPaymentDetails(
             modifier = Modifier
                 .testTag(COLLAPSED_WALLET_ROW)
                 .fillMaxWidth()
-                .height(64.dp)
+                .defaultMinSize(minHeight = 64.dp)
                 .border(
                     width = 1.dp,
                     color = MaterialTheme.linkColors.componentBorder,
@@ -334,24 +342,25 @@ internal fun CollapsedPaymentDetails(
                 .clickable(
                     enabled = enabled,
                     onClick = onClick
-                ),
-            verticalAlignment = Alignment.CenterVertically
+                )
+                .padding(vertical = 16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(
                 text = stringResource(R.string.stripe_wallet_collapsed_payment),
                 modifier = Modifier
                     .testTag(COLLAPSED_WALLET_HEADER_TAG)
-                    .padding(
-                        start = HorizontalPadding,
-                        end = 8.dp
-                    ),
+                    .padding(start = HorizontalPadding),
                 color = MaterialTheme.linkColors.disabledText
             )
+
             PaymentDetails(
                 modifier = Modifier
                     .testTag(COLLAPSED_WALLET_PAYMENT_DETAILS_TAG),
                 paymentDetails = selectedPaymentMethod
             )
+
             Icon(
                 painter = painterResource(R.drawable.stripe_link_chevron),
                 contentDescription = stringResource(R.string.stripe_wallet_expand_accessibility),
@@ -364,7 +373,6 @@ internal fun CollapsedPaymentDetails(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ExpandedPaymentDetails(
     uiState: WalletUiState,
@@ -394,62 +402,30 @@ private fun ExpandedPaymentDetails(
             onCollapse = onCollapse
         )
 
-        Column(
-            modifier = Modifier
-                .weight(
-                    weight = 1f,
-                    fill = false
-                )
-        ) {
-            PaymentDetailsList(
-                uiState = uiState,
-                onItemSelected = onItemSelected,
-                onMenuButtonClick = onMenuButtonClick
+        uiState.paymentDetailsList.forEachIndexed { index, item ->
+            PaymentDetailsListItem(
+                modifier = Modifier
+                    .testTag(WALLET_SCREEN_PAYMENT_METHODS_LIST),
+                paymentDetails = item,
+                enabled = isEnabled,
+                isSelected = uiState.selectedItem?.id == item.id,
+                isUpdating = uiState.cardBeingUpdated == item.id,
+                onClick = { onItemSelected(item) },
+                onMenuButtonClick = { onMenuButtonClick(item) }
             )
+
+            if (index != uiState.paymentDetailsList.lastIndex || uiState.canAddNewPaymentMethod) {
+                Divider(
+                    color = MaterialTheme.linkColors.componentBorder,
+                    modifier = Modifier.padding(horizontal = 20.dp),
+                )
+            }
         }
 
         if (uiState.canAddNewPaymentMethod) {
             AddPaymentMethodRow(
                 isEnabled = isEnabled,
                 onAddNewPaymentMethodClick = onAddNewPaymentMethodClick
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun PaymentDetailsList(
-    uiState: WalletUiState,
-    onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
-    onMenuButtonClick: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
-) {
-    val isEnabled = !uiState.primaryButtonState.isBlocking
-
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
-        items(
-            items = uiState.paymentDetailsList,
-            key = {
-                "payment_detail_${it.id}"
-            }
-        ) { item ->
-            PaymentDetailsListItem(
-                modifier = Modifier
-                    .animateItemPlacement()
-                    .testTag(WALLET_SCREEN_PAYMENT_METHODS_LIST),
-                paymentDetails = item,
-                enabled = isEnabled,
-                isSelected = uiState.selectedItem?.id == item.id,
-                isUpdating = uiState.cardBeingUpdated == item.id,
-                onClick = {
-                    onItemSelected(item)
-                },
-                onMenuButtonClick = {
-                    onMenuButtonClick(item)
-                }
             )
         }
     }

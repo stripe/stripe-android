@@ -6,6 +6,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfiguration
@@ -40,6 +41,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.MERCHANT_DISPLAY_NAME
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.FakeLogLinkGlobalHoldbackExposure
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
@@ -47,6 +49,7 @@ import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.PaymentIntentInTerminalState
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -56,6 +59,7 @@ import com.stripe.android.utils.FakeElementsSessionRepository
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.MockitoAnnotations
@@ -73,6 +77,12 @@ import kotlin.test.Test
 
 @OptIn(ExperimentalCustomPaymentMethodsApi::class)
 internal class DefaultPaymentElementLoaderTest {
+
+    @get:Rule
+    val editSavedCardPaymentMethodEnabledFeatureFlagTestRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.editSavedCardPaymentMethodEnabled,
+        isEnabled = false
+    )
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val eventReporter = mock<EventReporter>()
@@ -706,7 +716,6 @@ internal class DefaultPaymentElementLoaderTest {
                 linkConsumerIncentive = null,
                 useAttestationEndpoints = false,
                 suppress2faModal = false,
-                linkGlobalHoldbackOn = false
             )
         )
 
@@ -741,7 +750,6 @@ internal class DefaultPaymentElementLoaderTest {
                 linkConsumerIncentive = null,
                 useAttestationEndpoints = false,
                 suppress2faModal = false,
-                linkGlobalHoldbackOn = false
             )
         )
 
@@ -820,7 +828,6 @@ internal class DefaultPaymentElementLoaderTest {
                 linkConsumerIncentive = null,
                 useAttestationEndpoints = false,
                 suppress2faModal = false,
-                linkGlobalHoldbackOn = false
             ),
             linkStore = mock {
                 on { hasUsedLink() } doReturn true
@@ -850,7 +857,6 @@ internal class DefaultPaymentElementLoaderTest {
                 linkConsumerIncentive = null,
                 useAttestationEndpoints = false,
                 suppress2faModal = false,
-                linkGlobalHoldbackOn = false
             )
         )
 
@@ -1103,6 +1109,7 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
 
@@ -1162,6 +1169,7 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
 
@@ -1603,6 +1611,7 @@ internal class DefaultPaymentElementLoaderTest {
                     canRemovePaymentMethods = true,
                     canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = true,
+                    canUpdateFullPaymentMethodDetails = false
                 )
             )
         }
@@ -1645,6 +1654,7 @@ internal class DefaultPaymentElementLoaderTest {
                     canRemovePaymentMethods = false,
                     canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = true,
+                    canUpdateFullPaymentMethodDetails = false
                 )
             )
         }
@@ -1687,12 +1697,57 @@ internal class DefaultPaymentElementLoaderTest {
                     canRemovePaymentMethods = false,
                     canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = true,
+                    canUpdateFullPaymentMethodDetails = false
+                )
+            )
+        }
+
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    @Test
+    fun `customer session with edit saved payment method enabled, should enable canUpdateFullPaymentMethodDetails permission`() =
+        runTest {
+            editSavedCardPaymentMethodEnabledFeatureFlagTestRule.setEnabled(true)
+            val loader = createPaymentElementLoader(
+                customer = ElementsSession.Customer(
+                    paymentMethods = PaymentMethodFactory.cards(4),
+                    session = createElementsSessionCustomerSession(
+                        createEnabledMobilePaymentElement(
+                            isPaymentMethodRemoveEnabled = false,
+                            isPaymentMethodSaveEnabled = false,
+                            canRemoveLastPaymentMethod = true,
+                            allowRedisplayOverride = null,
+                        )
+                    ),
+                    defaultPaymentMethod = null,
+                )
+            )
+
+            val state = loader.load(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                    clientSecret = "client_secret"
+                ),
+                paymentSheetConfiguration = PaymentSheet.Configuration(
+                    merchantDisplayName = "Merchant, Inc.",
+                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                        id = "cus_1",
+                        clientSecret = "customer_client_secret",
+                    ),
+                ),
+                initializedViaCompose = false,
+            ).getOrThrow()
+
+            assertThat(state.customer?.permissions).isEqualTo(
+                CustomerState.Permissions(
+                    canRemovePaymentMethods = false,
+                    canRemoveLastPaymentMethod = true,
+                    canRemoveDuplicates = true,
+                    canUpdateFullPaymentMethodDetails = true
                 )
             )
         }
 
     @Test
-    fun `When 'LegacyEphemeralKey' config is provided, permissions should always be enabled and remove duplicates should be disabled`() =
+    fun `When 'LegacyEphemeralKey' config is provided, permissions should always be enabled and remove duplicates, payment method update should be disabled`() =
         runTest {
             val loader = createPaymentElementLoader()
 
@@ -1715,6 +1770,7 @@ internal class DefaultPaymentElementLoaderTest {
                     canRemovePaymentMethods = true,
                     canRemoveLastPaymentMethod = true,
                     canRemoveDuplicates = false,
+                    canUpdateFullPaymentMethodDetails = false
                 )
             )
         }
@@ -2251,6 +2307,7 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
 
@@ -2281,6 +2338,7 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
 
@@ -2311,6 +2369,7 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
 
@@ -2339,6 +2398,7 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
 
@@ -2377,6 +2437,7 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
 
@@ -2415,6 +2476,7 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
 
@@ -2543,10 +2605,11 @@ internal class DefaultPaymentElementLoaderTest {
             linkDisplay = eq(PaymentSheet.LinkConfiguration.Display.Automatic),
             currency = anyOrNull(),
             initializationMode = any(),
+            financialConnectionsAvailability = anyOrNull(),
             orderedLpms = any(),
             requireCvcRecollection = any(),
             hasDefaultPaymentMethod = anyOrNull(),
-            setAsDefaultEnabled = anyOrNull(),
+            setAsDefaultEnabled = anyOrNull()
         )
     }
 
@@ -2604,10 +2667,11 @@ internal class DefaultPaymentElementLoaderTest {
             linkDisplay = eq(PaymentSheet.LinkConfiguration.Display.Never),
             currency = anyOrNull(),
             initializationMode = any(),
+            financialConnectionsAvailability = anyOrNull(),
             orderedLpms = any(),
             requireCvcRecollection = any(),
             hasDefaultPaymentMethod = anyOrNull(),
-            setAsDefaultEnabled = anyOrNull(),
+            setAsDefaultEnabled = anyOrNull()
         )
     }
 
@@ -2740,6 +2804,7 @@ internal class DefaultPaymentElementLoaderTest {
             hasDefaultPaymentMethod = null,
             setAsDefaultEnabled = null,
             linkDisplay = PaymentSheet.LinkConfiguration.Display.Automatic,
+            financialConnectionsAvailability = FinancialConnectionsAvailability.Full
         )
     }
 
@@ -2753,7 +2818,6 @@ internal class DefaultPaymentElementLoaderTest {
             linkConsumerIncentive = null,
             useAttestationEndpoints = false,
             suppress2faModal = false,
-            linkGlobalHoldbackOn = false
         )
     }
 
@@ -2848,7 +2912,9 @@ internal class DefaultPaymentElementLoaderTest {
             linkStore = linkStore,
             externalPaymentMethodsRepository = ExternalPaymentMethodsRepository(errorReporter = FakeErrorReporter()),
             userFacingLogger = userFacingLogger,
-            cvcRecollectionHandler = CvcRecollectionHandlerImpl()
+            cvcRecollectionHandler = CvcRecollectionHandlerImpl(),
+            logLinkGlobalHoldbackExposure = FakeLogLinkGlobalHoldbackExposure(),
+            retrieveCustomerEmail = DefaultRetrieveCustomerEmail(customerRepo)
         )
     }
 

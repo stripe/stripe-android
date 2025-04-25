@@ -4,6 +4,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.analytics.primaryButtonColorUsage
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -118,7 +119,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
         eventReporter.onInit(
             commonConfiguration = configuration.asCommonConfiguration(),
             primaryButtonColor = configuration.primaryButtonColorUsage(),
-            paymentMethodLayout = configuration.paymentMethodLayout,
+            configurationSpecificPayload = PaymentSheetEvent.ConfigurationSpecificPayload.PaymentSheet(configuration),
             isDeferred = isDecoupling,
             appearance = configuration.appearance
         )

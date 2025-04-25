@@ -13,7 +13,7 @@ internal data class DisplayableSavedPaymentMethod private constructor(
     val isCbcEligible: Boolean = false,
     val shouldShowDefaultBadge: Boolean = false
 ) {
-    fun isModifiable(): Boolean {
+    fun canChangeCbc(): Boolean {
         return when (savedPaymentMethod) {
             is SavedPaymentMethod.Card -> {
                 val hasMultipleNetworks = savedPaymentMethod.card.networks?.available?.let { available ->
@@ -21,6 +21,17 @@ internal data class DisplayableSavedPaymentMethod private constructor(
                 } ?: false
 
                 return isCbcEligible && hasMultipleNetworks
+            }
+            is SavedPaymentMethod.SepaDebit,
+            is SavedPaymentMethod.USBankAccount,
+            SavedPaymentMethod.Unexpected -> false
+        }
+    }
+
+    fun isModifiable(canUpdateFullPaymentMethodDetails: Boolean): Boolean {
+        return when (savedPaymentMethod) {
+            is SavedPaymentMethod.Card -> {
+                canUpdateFullPaymentMethodDetails || (savedPaymentMethod.isExpired().not() && canChangeCbc())
             }
             is SavedPaymentMethod.SepaDebit,
             is SavedPaymentMethod.USBankAccount,
@@ -84,7 +95,14 @@ internal data class DisplayableSavedPaymentMethod private constructor(
             shouldShowDefaultBadge: Boolean = false
         ): DisplayableSavedPaymentMethod {
             val savedPaymentMethod = when (paymentMethod.type) {
-                PaymentMethod.Type.Card -> paymentMethod.card?.let { SavedPaymentMethod.Card(it) }
+                PaymentMethod.Type.Card -> {
+                    paymentMethod.card?.let { card ->
+                        SavedPaymentMethod.Card(
+                            card = card,
+                            billingDetails = paymentMethod.billingDetails
+                        )
+                    }
+                }
                 PaymentMethod.Type.USBankAccount -> paymentMethod.usBankAccount?.let {
                     SavedPaymentMethod.USBankAccount(
                         it
@@ -106,7 +124,10 @@ internal data class DisplayableSavedPaymentMethod private constructor(
 }
 
 internal sealed interface SavedPaymentMethod {
-    data class Card(val card: PaymentMethod.Card) : SavedPaymentMethod {
+    data class Card(
+        val card: PaymentMethod.Card,
+        val billingDetails: PaymentMethod.BillingDetails?
+    ) : SavedPaymentMethod {
         fun isExpired(): Boolean {
             val cardExpiryMonth = card.expiryMonth
             val cardExpiryYear = card.expiryYear

@@ -136,7 +136,6 @@ internal class SignUpBodyTest {
                     requiresNameCollection = requiresNameCollection,
                     errorMessage = errorMessage,
                     signUpState = signUpState,
-                    showKeyboardOnOpen = false,
                 ),
                 onSignUpClick = {}
             )

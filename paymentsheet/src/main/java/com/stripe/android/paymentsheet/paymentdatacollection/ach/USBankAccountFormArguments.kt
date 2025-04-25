@@ -18,7 +18,6 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.verticalmode.BankFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import kotlinx.coroutines.flow.update
 
 /**
@@ -56,11 +55,13 @@ internal class USBankAccountFormArguments(
     val hostedSurface: String,
     val shippingDetails: AddressDetails?,
     val draftPaymentSelection: PaymentSelection?,
+    val onAnalyticsEvent: (USBankAccountFormViewModel.AnalyticsEvent) -> Unit,
     val onMandateTextChanged: (mandate: ResolvableString?, showAbove: Boolean) -> Unit,
     val onLinkedBankAccountChanged: (PaymentSelection.New.USBankAccount?) -> Unit,
     val onUpdatePrimaryButtonUIState: ((PrimaryButton.UIState?) -> (PrimaryButton.UIState?)) -> Unit,
     val onUpdatePrimaryButtonState: (PrimaryButton.State) -> Unit,
     val onError: (ResolvableString?) -> Unit,
+    val onFormCompleted: () -> Unit,
     val setAsDefaultPaymentMethodEnabled: Boolean,
     val financialConnectionsAvailability: FinancialConnectionsAvailability?,
     val setAsDefaultMatchesSaveForFutureUse: Boolean,
@@ -100,12 +101,16 @@ internal class USBankAccountFormArguments(
                 stripeIntentId = stripeIntent.id,
                 clientSecret = stripeIntent.clientSecret,
                 shippingDetails = viewModel.config.shippingDetails,
+                onAnalyticsEvent = { viewModel.eventReporter.onUsBankAccountFormEvent(it) },
                 draftPaymentSelection = viewModel.newPaymentSelection?.paymentSelection,
                 onMandateTextChanged = viewModel.mandateHandler::updateMandateText,
                 onLinkedBankAccountChanged = bankFormInteractor::handleLinkedBankAccountChanged,
                 onUpdatePrimaryButtonUIState = { viewModel.customPrimaryButtonUiState.update(it) },
                 onUpdatePrimaryButtonState = viewModel::updatePrimaryButtonState,
                 onError = viewModel::onError,
+                onFormCompleted = {
+                    viewModel.eventReporter.onPaymentMethodFormCompleted(PaymentMethod.Type.USBankAccount.code)
+                },
                 incentive = paymentMethodMetadata.paymentMethodIncentive,
                 setAsDefaultPaymentMethodEnabled =
                 paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
@@ -115,14 +120,17 @@ internal class USBankAccountFormArguments(
             )
         }
 
-        fun create(
+        fun createForEmbedded(
             paymentMethodMetadata: PaymentMethodMetadata,
             selectedPaymentMethodCode: String,
             hostedSurface: String,
             setSelection: (PaymentSelection?) -> Unit,
+            hasSavedPaymentMethods: Boolean,
             onMandateTextChanged: (mandate: ResolvableString?, showAbove: Boolean) -> Unit,
+            onAnalyticsEvent: (USBankAccountFormViewModel.AnalyticsEvent) -> Unit,
             onUpdatePrimaryButtonUIState: ((PrimaryButton.UIState?) -> (PrimaryButton.UIState?)) -> Unit,
             onError: (ResolvableString?) -> Unit,
+            onFormCompleted: () -> Unit,
         ): USBankAccountFormArguments {
             val isSaveForFutureUseValueChangeable = isSaveForFutureUseValueChangeable(
                 code = selectedPaymentMethodCode,
@@ -150,17 +158,20 @@ internal class USBankAccountFormArguments(
                 shippingDetails = paymentMethodMetadata.shippingDetails,
                 draftPaymentSelection = null,
                 onMandateTextChanged = onMandateTextChanged,
+                onAnalyticsEvent = onAnalyticsEvent,
                 onLinkedBankAccountChanged = bankFormInteractor::handleLinkedBankAccountChanged,
                 onUpdatePrimaryButtonUIState = onUpdatePrimaryButtonUIState,
                 onUpdatePrimaryButtonState = {
                 },
                 onError = onError,
+                onFormCompleted = onFormCompleted,
                 incentive = paymentMethodMetadata.paymentMethodIncentive,
                 setAsDefaultPaymentMethodEnabled =
                 paymentMethodMetadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled
                     ?: IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE,
                 financialConnectionsAvailability = paymentMethodMetadata.financialConnectionsAvailability,
-                setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
+                // If no saved payment methods, then first saved payment method is automatically set as default
+                setAsDefaultMatchesSaveForFutureUse = !hasSavedPaymentMethods,
             )
         }
     }

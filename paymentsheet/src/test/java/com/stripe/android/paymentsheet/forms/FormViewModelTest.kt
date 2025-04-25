@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.forms
 
 import androidx.annotation.StringRes
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.TestUiDefinitionFactoryArgumentsFactory
@@ -28,6 +29,7 @@ import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionSingleFieldElement
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldController
+import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
@@ -399,7 +401,7 @@ internal class FormViewModelTest {
     }
 
     @Test
-    fun `Test default values are filled`() {
+    fun `Test default values are filled`() = runTest {
         val args = COMPOSE_FRAGMENT_ARGS.copy(
             paymentMethodCode = PaymentMethod.Type.Card.code,
             billingDetails = PaymentSheet.BillingDetails(
@@ -425,23 +427,25 @@ internal class FormViewModelTest {
             emptyList(),
         )
 
-        assertThat(viewModel.defaultValuesToInclude).containsExactlyEntriesIn(
-            mapOf(
-                IdentifierSpec.Name to "Jenny Rosen",
-                IdentifierSpec.Email to "mail@mail.com",
-                IdentifierSpec.Phone to "+13105551234",
-                IdentifierSpec.Line1 to "123 Main Street",
-                IdentifierSpec.Line2 to "456",
-                IdentifierSpec.City to "San Francisco",
-                IdentifierSpec.State to "CA",
-                IdentifierSpec.Country to "US",
-                IdentifierSpec.PostalCode to "94111",
+        viewModel.completeFormValues.test {
+            assertThat(awaitItem()?.fieldValuePairs).isEqualTo(
+                mapOf(
+                    IdentifierSpec.Name to FormFieldEntry("Jenny Rosen", isComplete = true),
+                    IdentifierSpec.Email to FormFieldEntry("mail@mail.com", isComplete = true),
+                    IdentifierSpec.Phone to FormFieldEntry("+13105551234", isComplete = true),
+                    IdentifierSpec.Line1 to FormFieldEntry("123 Main Street", isComplete = true),
+                    IdentifierSpec.Line2 to FormFieldEntry("456", isComplete = true),
+                    IdentifierSpec.City to FormFieldEntry("San Francisco", isComplete = true),
+                    IdentifierSpec.State to FormFieldEntry("CA", isComplete = true),
+                    IdentifierSpec.Country to FormFieldEntry("US", isComplete = true),
+                    IdentifierSpec.PostalCode to FormFieldEntry("94111", isComplete = true),
+                )
             )
-        )
+        }
     }
 
     @Test
-    fun `Test only provided default values are filled`() {
+    fun `Test only provided default values are filled`() = runTest {
         val args = COMPOSE_FRAGMENT_ARGS.copy(
             paymentMethodCode = PaymentMethod.Type.Card.code,
             billingDetails = PaymentSheet.BillingDetails(
@@ -462,18 +466,20 @@ internal class FormViewModelTest {
             emptyList(),
         )
 
-        assertThat(viewModel.defaultValuesToInclude).containsExactlyEntriesIn(
-            mapOf(
-                IdentifierSpec.Name to "Jenny Rosen",
-                IdentifierSpec.Email to "mail@mail.com",
-                IdentifierSpec.Country to "US",
-                IdentifierSpec.PostalCode to "94111",
+        viewModel.completeFormValues.test {
+            assertThat(awaitItem()?.fieldValuePairs).isEqualTo(
+                mapOf(
+                    IdentifierSpec.Name to FormFieldEntry("Jenny Rosen", isComplete = true),
+                    IdentifierSpec.Email to FormFieldEntry("mail@mail.com", isComplete = true),
+                    IdentifierSpec.Country to FormFieldEntry("US", isComplete = true),
+                    IdentifierSpec.PostalCode to FormFieldEntry("94111", isComplete = true),
+                )
             )
-        )
+        }
     }
 
     @Test
-    fun `Test default values are not filled`() {
+    fun `Test default values are not filled`() = runTest {
         val args = COMPOSE_FRAGMENT_ARGS.copy(
             paymentMethodCode = PaymentMethod.Type.Card.code,
             billingDetails = PaymentSheet.BillingDetails(
@@ -499,7 +505,9 @@ internal class FormViewModelTest {
             emptyList(),
         )
 
-        assertThat(viewModel.defaultValuesToInclude).isEmpty()
+        viewModel.completeFormValues.test {
+            assertThat(awaitItem()?.fieldValuePairs).isEmpty()
+        }
     }
 
     @Test

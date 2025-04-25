@@ -31,7 +31,7 @@ import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.view.ActivityStarter
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -123,7 +123,7 @@ internal class CvcRecollectionConfirmationActivityTest {
 
     private fun test(
         test: suspend ExtendedPaymentElementConfirmationTestActivity.() -> Unit
-    ) = runTest(UnconfinedTestDispatcher()) {
+    ) = runTest(StandardTestDispatcher()) {
         val countDownLatch = CountDownLatch(1)
 
         ActivityScenario.launch<ExtendedPaymentElementConfirmationTestActivity>(

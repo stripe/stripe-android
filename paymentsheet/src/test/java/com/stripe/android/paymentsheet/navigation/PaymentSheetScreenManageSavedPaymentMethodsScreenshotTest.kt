@@ -29,24 +29,68 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsScreenshotTest {
     val coroutineRule = CoroutineTestRule()
 
     private val displayableSavedPaymentMethods =
-        listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-            .plus(PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD)
-            .map {
-                DisplayableSavedPaymentMethod.create(
-                    displayName = it.card!!.last4!!.resolvableString,
-                    paymentMethod = it,
-                    isCbcEligible = true
-                )
-            }
+        listOf(
+            FIRST_CARD to FIRST_CARD.card!!.last4!!,
+            US_BANK_ACCOUNT to US_BANK_ACCOUNT.usBankAccount!!.last4!!,
+        ).map {
+            DisplayableSavedPaymentMethod.create(
+                displayName = it.second.resolvableString,
+                paymentMethod = it.first,
+                isCbcEligible = true
+            )
+        }
+
+    private val displayableCards =
+        listOf(
+            FIRST_CARD to FIRST_CARD.card!!.last4!!,
+            SECOND_CARD to SECOND_CARD.card!!.last4!!,
+        ).map {
+            DisplayableSavedPaymentMethod.create(
+                displayName = it.second.resolvableString,
+                paymentMethod = it.first,
+                isCbcEligible = true
+            )
+        }
 
     @Test
     fun displaysSelectMode() {
+        screenshotTest(
+            paymentMethods = displayableSavedPaymentMethods,
+            selection = displayableSavedPaymentMethods.first(),
+            isEditing = false
+        )
+    }
+
+    @Test
+    fun displaysEditMode() {
+        screenshotTest(paymentMethods = displayableSavedPaymentMethods, isEditing = true)
+    }
+
+    @Test
+    fun displaysSelectModeWithCardsOnly() {
+        screenshotTest(
+            paymentMethods = displayableCards,
+            selection = displayableCards.first(),
+            isEditing = false
+        )
+    }
+
+    @Test
+    fun displaysEditModeWithCardsOnly() {
+        screenshotTest(paymentMethods = displayableCards, isEditing = true)
+    }
+
+    private fun screenshotTest(
+        paymentMethods: List<DisplayableSavedPaymentMethod>,
+        selection: DisplayableSavedPaymentMethod? = null,
+        isEditing: Boolean,
+    ) {
         val metadata = PaymentMethodMetadataFactory.create()
         val interactor = FakeManageScreenInteractor(
             initialState = ManageScreenInteractor.State(
-                paymentMethods = displayableSavedPaymentMethods,
-                currentSelection = displayableSavedPaymentMethods.first(),
-                isEditing = false,
+                paymentMethods = paymentMethods,
+                currentSelection = selection,
+                isEditing = isEditing,
                 canEdit = true,
             )
         )
@@ -58,22 +102,9 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsScreenshotTest {
         }
     }
 
-    @Test
-    fun displaysEditMode() {
-        val metadata = PaymentMethodMetadataFactory.create()
-        val interactor = FakeManageScreenInteractor(
-            initialState = ManageScreenInteractor.State(
-                paymentMethods = displayableSavedPaymentMethods,
-                currentSelection = null,
-                isEditing = true,
-                canEdit = true,
-            )
-        )
-        val initialScreen = ManageSavedPaymentMethods(interactor)
-        val viewModel = FakeBaseSheetViewModel.create(metadata, initialScreen, canGoBack = true)
-
-        paparazziRule.snapshot {
-            PaymentSheetScreen(viewModel = viewModel, type = PaymentSheetFlowType.Complete)
-        }
+    private companion object {
+        private val FIRST_CARD = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        private val SECOND_CARD = PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
+        private val US_BANK_ACCOUNT = PaymentMethodFixtures.US_BANK_ACCOUNT_VERIFIED
     }
 }

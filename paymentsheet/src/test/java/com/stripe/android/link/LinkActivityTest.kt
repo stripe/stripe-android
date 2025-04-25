@@ -21,6 +21,7 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.attestation.FakeLinkAttestationCheck
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.utils.TestNavigationManager
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
@@ -151,6 +152,7 @@ internal class LinkActivityTest {
                 savedStateHandle = SavedStateHandle(),
                 linkConfiguration = TestFactory.LINK_CONFIGURATION,
                 startWithVerificationDialog = use2faDialog,
+                navigationManager = TestNavigationManager()
             )
         }
     }

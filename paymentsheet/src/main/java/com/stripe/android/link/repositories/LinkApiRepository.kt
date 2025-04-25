@@ -64,6 +64,22 @@ internal class LinkApiRepository @Inject constructor(
                 consumersApiService.lookupConsumerSession(
                     email = email,
                     requestSurface = REQUEST_SURFACE,
+                    doNotLogConsumerFunnelEvent = false,
+                    requestOptions = buildRequestOptions(),
+                )
+            )
+        }
+    }
+
+    override suspend fun lookupConsumerWithoutBackendLoggingForExposure(
+        email: String
+    ): Result<ConsumerSessionLookup> = withContext(workContext) {
+        runCatching {
+            requireNotNull(
+                consumersApiService.lookupConsumerSession(
+                    email = email,
+                    requestSurface = REQUEST_SURFACE,
+                    doNotLogConsumerFunnelEvent = true,
                     requestOptions = buildRequestOptions(),
                 )
             )

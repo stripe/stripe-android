@@ -34,7 +34,7 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.utils.PaymentElementCallbackTestRule
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
@@ -162,7 +162,7 @@ internal class ExternalPaymentMethodConfirmationActivityTest {
 
     private fun test(
         test: suspend PaymentElementConfirmationTestActivity.() -> Unit
-    ) = runTest(UnconfinedTestDispatcher()) {
+    ) = runTest(StandardTestDispatcher()) {
         val countDownLatch = CountDownLatch(1)
 
         ActivityScenario.launch<PaymentElementConfirmationTestActivity>(

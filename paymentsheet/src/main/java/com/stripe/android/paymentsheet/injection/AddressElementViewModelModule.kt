@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.injection
 import android.content.Context
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.FormControllerSubcomponent
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
@@ -26,6 +27,11 @@ internal class AddressElementViewModelModule {
     @Provides
     @Singleton
     fun provideEventReporterMode(): EventReporter.Mode = EventReporter.Mode.Custom
+
+    @Provides
+    @Named(PRODUCT_USAGE)
+    @Singleton
+    fun providesProductUsage() = setOf("PaymentSheet.AddressController")
 
     @Provides
     @Named(PUBLISHABLE_KEY)

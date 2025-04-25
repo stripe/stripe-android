@@ -92,7 +92,7 @@ internal interface LinkAccountManager {
         expectedPaymentMethodType: String,
     ): Result<SharePaymentDetails>
 
-    fun setLinkAccountFromLookupResult(
+    suspend fun setLinkAccountFromLookupResult(
         lookup: ConsumerSessionLookup,
         startSession: Boolean,
     ): LinkAccount?

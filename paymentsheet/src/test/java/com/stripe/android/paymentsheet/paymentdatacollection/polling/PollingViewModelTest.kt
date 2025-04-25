@@ -5,11 +5,12 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.polling.IntentStatusPoller
-import kotlinx.coroutines.test.TestDispatcher
-import kotlinx.coroutines.test.TestScope
+import com.stripe.android.testing.CoroutineTestRule
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.ZERO
@@ -21,13 +22,15 @@ class PollingViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule(testDispatcher)
+
     @Test
     fun `Emits provided time limit as remaining duration`() = runTest(testDispatcher) {
         val timeLimit = 5.minutes
 
         val viewModel = createPollingViewModel(
             timeLimit = timeLimit,
-            dispatcher = testDispatcher,
         )
 
         assertThat(viewModel.uiState.value.durationRemaining).isEqualTo(timeLimit)
@@ -39,7 +42,6 @@ class PollingViewModelTest {
 
         val viewModel = createPollingViewModel(
             timeLimit = timeLimit,
-            dispatcher = testDispatcher,
         )
 
         assertThat(viewModel.uiState.value.durationRemaining).isEqualTo(timeLimit)
@@ -59,14 +61,13 @@ class PollingViewModelTest {
 
         val viewModel = createPollingViewModel(
             poller = fakePoller,
-            dispatcher = testDispatcher,
         )
 
         assertThat(viewModel.uiState.value.pollingState).isEqualTo(PollingState.Active)
 
         viewModel.handleCancel()
 
-        assertThat(fakePoller.isActive).isFalse()
+        assertThat(fakePoller.pollingTurbine.awaitItem()).isFalse()
         assertThat(viewModel.uiState.value.pollingState).isEqualTo(PollingState.Canceled)
     }
 
@@ -76,7 +77,6 @@ class PollingViewModelTest {
 
         val viewModel = createPollingViewModel(
             poller = fakePoller,
-            dispatcher = testDispatcher,
         )
 
         assertThat(viewModel.uiState.value.pollingState).isEqualTo(PollingState.Active)
@@ -87,7 +87,7 @@ class PollingViewModelTest {
     }
 
     @Test
-    fun `Performs one-off poll when time limit has been exceeded`() = runTest(testDispatcher) {
+    fun `Performs one-off poll when time limit has been exceeded`() = runTest(StandardTestDispatcher()) {
         val fakePoller = FakeIntentStatusPoller().apply {
             emitNextPollResult(StripeIntent.Status.RequiresAction)
         }
@@ -95,8 +95,8 @@ class PollingViewModelTest {
         val viewModel = createPollingViewModel(
             poller = fakePoller,
             timeLimit = 10.seconds,
-            dispatcher = testDispatcher,
         )
+        assertThat(fakePoller.pollingTurbine.awaitItem()).isTrue()
 
         assertThat(viewModel.uiState.value.pollingState).isEqualTo(PollingState.Active)
 
@@ -104,7 +104,7 @@ class PollingViewModelTest {
 
         advanceTimeBy(10.seconds + 1.milliseconds)
 
-        assertThat(fakePoller.isActive).isFalse()
+        assertThat(fakePoller.pollingTurbine.awaitItem()).isFalse()
 
         advanceTimeBy(3.seconds)
 
@@ -117,19 +117,18 @@ class PollingViewModelTest {
 
         val viewModel = createPollingViewModel(
             poller = fakePoller,
-            dispatcher = testDispatcher,
         )
 
         advanceTimeBy(5.seconds + 1.milliseconds)
 
-        assertThat(fakePoller.isActive).isTrue()
+        assertThat(fakePoller.pollingTurbine.awaitItem()).isTrue()
         assertThat(viewModel.uiState.value.pollingState).isEqualTo(PollingState.Active)
 
         viewModel.pausePolling()
 
         advanceTimeBy(1.minutes)
 
-        assertThat(fakePoller.isActive).isFalse()
+        assertThat(fakePoller.pollingTurbine.awaitItem()).isFalse()
         assertThat(viewModel.uiState.value.pollingState).isEqualTo(PollingState.Active)
     }
 
@@ -139,22 +138,21 @@ class PollingViewModelTest {
 
         val viewModel = createPollingViewModel(
             poller = fakePoller,
-            dispatcher = testDispatcher,
         )
 
         advanceTimeBy(5.seconds + 1.milliseconds)
 
-        assertThat(fakePoller.isActive).isTrue()
+        assertThat(fakePoller.pollingTurbine.awaitItem()).isTrue()
 
         viewModel.pausePolling()
 
-        assertThat(fakePoller.isActive).isFalse()
+        assertThat(fakePoller.pollingTurbine.awaitItem()).isFalse()
 
         viewModel.resumePolling()
 
         advanceTimeBy(5.seconds + 1.milliseconds)
 
-        assertThat(fakePoller.isActive).isTrue()
+        assertThat(fakePoller.pollingTurbine.awaitItem()).isTrue()
     }
 
     @Test
@@ -174,7 +172,6 @@ class PollingViewModelTest {
             timeLimit = timeLimit,
             timeProvider = timeProvider,
             savedStateHandle = savedStateHandle,
-            dispatcher = testDispatcher,
         )
 
         val remainingTime = timeLimit - alreadyPassed
@@ -189,16 +186,15 @@ class PollingViewModelTest {
             timeLimit = 5.minutes,
             poller = fakePoller,
             initialDelay = ZERO,
-            dispatcher = testDispatcher,
         )
 
-        assertThat(fakePoller.isActive).isTrue()
+        assertThat(fakePoller.pollingTurbine.awaitItem()).isTrue()
 
         // Anything that's not succeeded or requires_action is considered failure
         fakePoller.emitNextPollResult(StripeIntent.Status.RequiresPaymentMethod)
 
         assertThat(viewModel.uiState.value.pollingState).isEqualTo(PollingState.Failed)
-        assertThat(fakePoller.isActive).isFalse()
+        assertThat(fakePoller.pollingTurbine.awaitItem()).isFalse()
     }
 }
 
@@ -208,7 +204,6 @@ private fun createPollingViewModel(
     poller: IntentStatusPoller = FakeIntentStatusPoller(),
     timeProvider: TimeProvider = FakeTimeProvider(),
     savedStateHandle: SavedStateHandle = SavedStateHandle(),
-    dispatcher: TestDispatcher,
 ): PollingViewModel {
     return PollingViewModel(
         args = PollingViewModel.Args(
@@ -220,11 +215,6 @@ private fun createPollingViewModel(
         ),
         poller = poller,
         timeProvider = timeProvider,
-        dispatcher = dispatcher,
         savedStateHandle = savedStateHandle,
     )
-}
-
-private fun TestScope.advanceTimeBy(duration: Duration) {
-    advanceTimeBy(duration.inWholeMilliseconds)
 }

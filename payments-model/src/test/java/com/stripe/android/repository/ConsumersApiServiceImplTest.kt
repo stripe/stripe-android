@@ -103,7 +103,8 @@ class ConsumersApiServiceImplTest {
         val lookup = consumersApiService.lookupConsumerSession(
             email = email,
             requestSurface = requestSurface,
-            requestOptions = DEFAULT_OPTIONS
+            requestOptions = DEFAULT_OPTIONS,
+            doNotLogConsumerFunnelEvent = false,
         )
 
         assertThat(lookup.exists).isTrue()
@@ -122,6 +123,7 @@ class ConsumersApiServiceImplTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/consumers/sessions/lookup"),
+            ensureResponseIsValidJson = false
         ) { response ->
             response.setResponseCode(400)
             response.setBody("""{"invalid-json"}""")
@@ -131,6 +133,7 @@ class ConsumersApiServiceImplTest {
             consumersApiService.lookupConsumerSession(
                 email = email,
                 requestSurface = requestSurface,
+                doNotLogConsumerFunnelEvent = false,
                 requestOptions = DEFAULT_OPTIONS
             )
         }

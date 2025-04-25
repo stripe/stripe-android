@@ -17,7 +17,9 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.paymentelement.ExperimentalCustomPaymentMethodsApi
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
+import com.stripe.android.paymentelement.confirmation.cpms.CustomPaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
@@ -27,6 +29,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.utils.prefilledBuilder
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.BankFormScreenStateFactory
@@ -374,6 +377,61 @@ class ConfirmationHandlerOptionKtxTest {
         assertThat(confirmationOption).isInstanceOf<LinkInlineSignupConfirmationOption>()
         val linkConfirmationOption = confirmationOption as LinkInlineSignupConfirmationOption
         assertThat(linkConfirmationOption.extraParams).isEqualTo(paymentMethodExtraParams)
+    }
+
+    @OptIn(ExperimentalCustomPaymentMethodsApi::class)
+    @Test
+    fun `On Custom Payment Method selection with no custom payment method of expected ID, should return null`() {
+        val customPaymentMethodSelection = PaymentSelection.CustomPaymentMethod(
+            id = "cpmt_123",
+            billingDetails = null,
+            label = "PayPal".resolvableString,
+            lightThemeIconUrl = null,
+            darkThemeIconUrl = null,
+        )
+
+        val confirmationOption = customPaymentMethodSelection.toConfirmationOption(
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.prefilledBuilder()
+                .customPaymentMethods(customPaymentMethods = listOf())
+                .build()
+                .asCommonConfiguration(),
+            linkConfiguration = null,
+        )
+
+        assertThat(confirmationOption).isNull()
+    }
+
+    @OptIn(ExperimentalCustomPaymentMethodsApi::class)
+    @Test
+    fun `On Custom Payment Method selection with custom payment method of expected ID, should return option`() {
+        val billingDetails = PaymentMethod.BillingDetails(name = "John Doe")
+        val customPaymentMethodSelection = PaymentSelection.CustomPaymentMethod(
+            id = "cpmt_123",
+            billingDetails = billingDetails,
+            label = "PayPal".resolvableString,
+            lightThemeIconUrl = null,
+            darkThemeIconUrl = null,
+        )
+
+        val customPaymentMethod = PaymentSheet.CustomPaymentMethod(
+            id = "cpmt_123",
+            subtitle = "Pay now with PayPal".resolvableString,
+            disableBillingDetailCollection = false,
+        )
+
+        val confirmationOption = customPaymentMethodSelection.toConfirmationOption(
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.prefilledBuilder()
+                .customPaymentMethods(customPaymentMethods = listOf(customPaymentMethod))
+                .build()
+                .asCommonConfiguration(),
+            linkConfiguration = null,
+        )
+
+        assertThat(confirmationOption).isInstanceOf<CustomPaymentMethodConfirmationOption>()
+        val customPaymentMethodConfirmationOption = confirmationOption as CustomPaymentMethodConfirmationOption
+        assertThat(customPaymentMethodConfirmationOption.customPaymentMethodType)
+            .isEqualTo(customPaymentMethod)
+        assertThat(customPaymentMethodConfirmationOption.billingDetails).isEqualTo(billingDetails)
     }
 
     private fun testLinkInlineSignupConfirmationOption(

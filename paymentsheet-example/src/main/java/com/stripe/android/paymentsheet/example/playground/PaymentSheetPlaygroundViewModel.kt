@@ -21,7 +21,9 @@ import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.AnalyticEvent
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
+import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
@@ -52,10 +54,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import java.io.IOException
 
-@OptIn(ExperimentalCustomerSessionApi::class)
+@OptIn(ExperimentalCustomerSessionApi::class, ExperimentalEmbeddedPaymentElementApi::class)
 internal class PaymentSheetPlaygroundViewModel(
     application: Application,
     private val savedStateHandle: SavedStateHandle,
@@ -79,10 +82,12 @@ internal class PaymentSheetPlaygroundViewModel(
         }
 
     init {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             playgroundSettingsFlow.value =
                 PaymentSheetPlaygroundUrlHelper.settingsFromUri(launchUri)
-                    ?: PlaygroundSettings.createFromSharedPreferences(application)
+                    ?: withContext(Dispatchers.IO) {
+                        PlaygroundSettings.createFromSharedPreferences(application)
+                    }
         }
     }
 
@@ -107,11 +112,13 @@ internal class PaymentSheetPlaygroundViewModel(
     private fun prepareCheckout(
         playgroundSettings: PlaygroundSettings,
     ) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             // Snapshot before making the network request to not rely on UI staying in sync.
             val playgroundSettingsSnapshot = playgroundSettings.snapshot()
 
-            playgroundSettingsSnapshot.saveToSharedPreferences(getApplication())
+            withContext(Dispatchers.IO) {
+                playgroundSettingsSnapshot.saveToSharedPreferences(getApplication())
+            }
 
             PlaygroundRequester(playgroundSettingsSnapshot, getApplication()).fetch().fold(
                 onSuccess = { state ->
@@ -280,7 +287,9 @@ internal class PaymentSheetPlaygroundViewModel(
 
                 if (isNewCustomer) {
                     playgroundSettingsFlow.value?.let { settings ->
-                        updateSettingsWithExistingCustomerId(settings, response.customerId)
+                        withContext(Dispatchers.Main) {
+                            updateSettingsWithExistingCustomerId(settings, response.customerId)
+                        }
                     }
                 }
 
@@ -394,6 +403,40 @@ internal class PaymentSheetPlaygroundViewModel(
         }
     }
 
+    fun onEmbeddedResult(result: EmbeddedPaymentElement.Result) {
+        if (result is EmbeddedPaymentElement.Result.Completed) {
+            setPlaygroundState(null)
+        }
+
+        val statusMessage = when (result) {
+            is EmbeddedPaymentElement.Result.Canceled -> {
+                "Canceled"
+            }
+
+            is EmbeddedPaymentElement.Result.Completed -> {
+                SUCCESS_RESULT
+            }
+
+            is EmbeddedPaymentElement.Result.Failed -> {
+                when (result.error) {
+                    is ConfirmIntentEndpointException -> {
+                        "Couldn't process your payment: ${result.error.message}"
+                    }
+
+                    is ConfirmIntentNetworkException -> {
+                        "No internet. Try again later."
+                    }
+
+                    else -> {
+                        "Something went wrong: ${result.error.message}"
+                    }
+                }
+            }
+        }
+
+        status.value = StatusMessage(statusMessage)
+    }
+
     fun onCustomerSheetCallback(result: CustomerSheetResult) {
         val statusMessage = when (result) {
             is CustomerSheetResult.Canceled -> {
@@ -420,8 +463,6 @@ internal class PaymentSheetPlaygroundViewModel(
         val playgroundSettingsSnapshot = playgroundState.snapshot
         return PlaygroundRequester(playgroundSettingsSnapshot, getApplication()).fetch().fold(
             onSuccess = { state ->
-                playgroundSettingsFlow.value = state.snapshot.playgroundSettings()
-                setPlaygroundState(state)
                 val clientSecret = requireNotNull(state.asPaymentState()).clientSecret
                 CreateIntentResult.Success(clientSecret)
             },
@@ -448,14 +489,7 @@ internal class PaymentSheetPlaygroundViewModel(
 
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
     fun analyticCallback(event: AnalyticEvent) {
-        when (event) {
-            is AnalyticEvent.PresentedSheet -> {
-                Log.d("AnalyticEvent", "Event: $event")
-            }
-            is AnalyticEvent.DisplayedPaymentMethodForm -> {
-                Log.d("AnalyticEvent", "Event: $event, PM: ${event.paymentMethodType}")
-            }
-        }
+        Log.d("AnalyticEvent", "Event: $event")
     }
 
     @OptIn(DelicatePaymentSheetApi::class)
@@ -549,24 +583,26 @@ internal class PaymentSheetPlaygroundViewModel(
         }
     }
 
-    private fun updateSettingsWithExistingCustomerId(
+    private suspend fun updateSettingsWithExistingCustomerId(
         settings: PlaygroundSettings,
         customerId: String,
     ) {
         settings[CustomerSettingsDefinition] = CustomerType.Existing(customerId)
 
-        playgroundSettingsFlow.value = settings
+        withContext(viewModelScope.coroutineContext) {
+            playgroundSettingsFlow.value = settings
 
-        setPlaygroundState(
-            state.value?.let { state ->
-                val updatedSnapshot = settings.snapshot()
+            setPlaygroundState(
+                state.value?.let { state ->
+                    val updatedSnapshot = settings.snapshot()
 
-                when (state) {
-                    is PlaygroundState.Customer -> state.copy(snapshot = updatedSnapshot)
-                    is PlaygroundState.Payment -> state.copy(snapshot = updatedSnapshot)
+                    when (state) {
+                        is PlaygroundState.Customer -> state.copy(snapshot = updatedSnapshot)
+                        is PlaygroundState.Payment -> state.copy(snapshot = updatedSnapshot)
+                    }
                 }
-            }
-        )
+            )
+        }
     }
 
     fun onCustomUrlUpdated(backendUrl: String?) {

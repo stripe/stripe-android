@@ -1,0 +1,43 @@
+{
+  "id": "pi_example",
+  "object": "payment_intent",
+  "amount": 5099,
+  "amount_details": {
+    "tip": {}
+  },
+  "automatic_payment_methods": {
+    "allow_redirects": "always",
+    "enabled": true
+  },
+  "canceled_at": null,
+  "cancellation_reason": null,
+  "capture_method": "automatic",
+  "client_secret": "pi_example_secret_example",
+  "confirmation_method": "automatic",
+  "created": 1674834562,
+  "currency": "usd",
+  "description": null,
+  "last_payment_error": null,
+  "livemode": false,
+  "next_action": null,
+  "payment_method": null,
+  "payment_method_options": {
+    "us_bank_account": {
+      "verification_method": "automatic"
+    }
+  },
+  "payment_method_types": [
+    "card",
+    "afterpay_clearpay",
+    "klarna",
+    "us_bank_account",
+    "affirm",
+    "link"
+  ],
+  "processing": null,
+  "receipt_email": null,
+  "setup_future_usage": null,
+  "shipping": null,
+  "source": null,
+  "status": "requires_payment_method"
+}

@@ -95,4 +95,23 @@ class StateFlowsComposeTest {
         testStateFlow.value = "John"
         composeTestRule.waitUntilExactlyOneExists(hasText("John"))
     }
+
+    @Test
+    fun `Custom 'collectAsState' collects initial values when sources are changed`() {
+        val countFlow = MutableStateFlow(0)
+        composeTestRule.setContent {
+            val count by countFlow.collectAsState()
+            val testStateFlow = remember(count) {
+                MutableStateFlow(count)
+            }
+            val testState by testStateFlow.collectAsState()
+
+            assertThat(testStateFlow.value).isEqualTo(testState)
+        }
+
+        for (i in 1..3) {
+            countFlow.value = i
+            composeTestRule.waitForIdle()
+        }
+    }
 }

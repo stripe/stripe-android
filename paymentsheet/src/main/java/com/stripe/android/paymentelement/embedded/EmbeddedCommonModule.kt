@@ -10,11 +10,10 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestFactory
-import com.stripe.android.core.networking.NetworkTypeDetector
-import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
@@ -58,6 +57,11 @@ internal interface EmbeddedCommonModule {
     @Binds
     fun bindsCustomerRepository(repository: CustomerApiRepository): CustomerRepository
 
+    @Binds
+    fun bindsPaymentAnalyticsRequestFactory(
+        paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
+    ): AnalyticsRequestFactory
+
     companion object {
         @Provides
         @Named(ENABLE_LOGGING)
@@ -82,18 +86,6 @@ internal interface EmbeddedCommonModule {
         fun provideDurationProvider(): DurationProvider {
             return DefaultDurationProvider.instance
         }
-
-        @Provides
-        fun provideAnalyticsRequestFactory(
-            context: Context,
-            paymentConfiguration: Provider<PaymentConfiguration>
-        ): AnalyticsRequestFactory = AnalyticsRequestFactory(
-            packageManager = context.packageManager,
-            packageName = context.packageName.orEmpty(),
-            packageInfo = context.packageInfo,
-            publishableKeyProvider = { paymentConfiguration.get().publishableKey },
-            networkTypeProvider = NetworkTypeDetector(context)::invoke,
-        )
 
         @Provides
         @Singleton

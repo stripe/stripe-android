@@ -19,6 +19,7 @@ import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
+import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.runBlocking
@@ -36,6 +37,9 @@ internal class DefaultCardAccountRangeRepositoryTest {
 
     @get:Rule
     val networkRule = NetworkRule()
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
 
     private val application = ApplicationProvider.getApplicationContext<Application>()
 

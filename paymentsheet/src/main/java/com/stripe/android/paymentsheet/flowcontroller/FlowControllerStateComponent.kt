@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.flowcontroller
 
 import android.app.Application
 import com.stripe.android.common.di.ApplicationIdModule
+import com.stripe.android.common.di.MobileSessionIdModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
@@ -12,6 +13,7 @@ import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
+import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetCommonModule
 import com.stripe.android.ui.core.di.CardScanModule
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
@@ -32,7 +34,9 @@ import javax.inject.Singleton
         CoreCommonModule::class,
         ResourceRepositoryModule::class,
         ApplicationIdModule::class,
-        CardScanModule::class
+        MobileSessionIdModule::class,
+        CardScanModule::class,
+        LinkHoldbackExposureModule::class
     ]
 )
 internal interface FlowControllerStateComponent {

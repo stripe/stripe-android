@@ -2,17 +2,19 @@
 
 package com.stripe.android.paymentelement.embedded.content
 
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.containsVolatileDifferences
 import com.stripe.android.core.injection.ViewModelScope
-import com.stripe.android.core.mainthread.MainThreadSavedStateHandle
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentsheet.FormHelper
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
+import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
 
@@ -27,13 +29,18 @@ internal fun interface EmbeddedSelectionChooser {
 }
 
 internal class DefaultEmbeddedSelectionChooser @Inject constructor(
-    private val savedStateHandle: MainThreadSavedStateHandle,
+    private val savedStateHandle: SavedStateHandle,
     private val formHelperFactory: EmbeddedFormHelperFactory,
+    private val eventReporter: EventReporter,
     @ViewModelScope private val coroutineScope: CoroutineScope,
 ) : EmbeddedSelectionChooser {
     private var previousConfiguration: CommonConfiguration?
         get() = savedStateHandle[PREVIOUS_CONFIGURATION_KEY]
         set(value) = savedStateHandle.set(PREVIOUS_CONFIGURATION_KEY, value)
+
+    private var previousPaymentMethodMetadata: PaymentMethodMetadata?
+        get() = savedStateHandle[PREVIOUS_PAYMENT_METHOD_METADATA_KEY]
+        set(value) = savedStateHandle.set(PREVIOUS_PAYMENT_METHOD_METADATA_KEY, value)
 
     override fun choose(
         paymentMethodMetadata: PaymentMethodMetadata,
@@ -51,6 +58,7 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
         } ?: newSelection
 
         previousConfiguration = newConfiguration
+        previousPaymentMethodMetadata = paymentMethodMetadata
 
         return result
     }
@@ -95,12 +103,32 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
         previousSelection: PaymentSelection.New,
         paymentMethodMetadata: PaymentMethodMetadata,
     ): Boolean {
-        val newFormType = formHelperFactory.create(coroutineScope, paymentMethodMetadata) {}
-            .formTypeForCode(previousSelection.paymentMethodType)
-        return newFormType != FormHelper.FormType.UserInteractionRequired
+        val newFormHelper = formHelperFactory.create(
+            coroutineScope = coroutineScope,
+            paymentMethodMetadata = paymentMethodMetadata,
+            eventReporter = eventReporter,
+            // Not important for determining formType so use default value
+            setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
+        ) {}
+        val newFormType = newFormHelper.formTypeForCode(previousSelection.paymentMethodType)
+        if (newFormType != FormHelper.FormType.UserInteractionRequired) {
+            return true
+        }
+        return previousPaymentMethodMetadata?.let { previousPaymentMethodMetadata ->
+            val previousFormHelper = formHelperFactory.create(
+                coroutineScope = coroutineScope,
+                paymentMethodMetadata = previousPaymentMethodMetadata,
+                eventReporter = eventReporter,
+            ) {}
+            val previousFormElements = previousFormHelper.formElementsForCode(previousSelection.paymentMethodType)
+            val newFormElements = newFormHelper.formElementsForCode(previousSelection.paymentMethodType)
+            previousFormElements.size >= newFormElements.size
+        } == true
     }
 
     companion object {
         const val PREVIOUS_CONFIGURATION_KEY = "DefaultEmbeddedSelectionChooser_PREVIOUS_CONFIGURATION_KEY"
+        const val PREVIOUS_PAYMENT_METHOD_METADATA_KEY =
+            "DefaultEmbeddedSelectionChooser_PREVIOUS_PAYMENT_METHOD_METADATA_KEY"
     }
 }

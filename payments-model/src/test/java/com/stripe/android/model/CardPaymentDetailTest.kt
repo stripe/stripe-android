@@ -14,7 +14,15 @@ class CardPaymentDetailTest {
         brand = CardBrand.Visa,
         cvcCheck = CvcCheck.Fail,
         isDefault = false,
+        networks = listOf("VISA"),
+        funding = "CREDIT",
+        nickname = null,
         billingAddress = ConsumerPaymentDetails.BillingAddress(
+            name = null,
+            line1 = null,
+            line2 = null,
+            locality = null,
+            administrativeArea = null,
             countryCode = CountryCode.US,
             postalCode = "42424"
         )

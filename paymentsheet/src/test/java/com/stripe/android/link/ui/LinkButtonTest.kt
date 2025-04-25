@@ -7,6 +7,7 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
+import com.stripe.android.testing.createComposeCleanupRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -18,6 +19,9 @@ import org.robolectric.annotation.Config
 class LinkButtonTest {
     @get:Rule
     val composeRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     @Test
     fun signedInButton_hasUsefulContentDescription() {

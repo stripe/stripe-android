@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
@@ -26,6 +27,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.util.Locale
+import java.util.UUID
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
@@ -141,6 +143,7 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
+            { MOBILE_SESSION_ID },
             appId = APP_ID
         ).get(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
@@ -176,6 +179,7 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
+            { MOBILE_SESSION_ID },
             appId = APP_ID
         ).get(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
@@ -210,6 +214,7 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
+            { MOBILE_SESSION_ID },
             appId = APP_ID
         ).get(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
@@ -249,6 +254,7 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
+            { MOBILE_SESSION_ID },
             appId = APP_ID
         )
 
@@ -273,7 +279,8 @@ internal class ElementsSessionRepositoryTest {
                     externalPaymentMethods = emptyList(),
                     customPaymentMethods = emptyList(),
                     savedPaymentMethodSelectionId = null,
-                    appId = APP_ID
+                    appId = APP_ID,
+                    mobileSessionId = MOBILE_SESSION_ID,
                 )
             ),
             options = any()
@@ -297,6 +304,7 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
+            { MOBILE_SESSION_ID },
             appId = APP_ID
         )
 
@@ -317,7 +325,8 @@ internal class ElementsSessionRepositoryTest {
                     externalPaymentMethods = emptyList(),
                     customPaymentMethods = emptyList(),
                     savedPaymentMethodSelectionId = "pm_123",
-                    appId = APP_ID
+                    appId = APP_ID,
+                    mobileSessionId = MOBILE_SESSION_ID,
                 )
             ),
             options = any()
@@ -341,6 +350,7 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
+            { MOBILE_SESSION_ID },
             appId = APP_ID
         )
 
@@ -377,6 +387,71 @@ internal class ElementsSessionRepositoryTest {
                     externalPaymentMethods = emptyList(),
                     customPaymentMethods = listOf("cpmt_123", "cpmt_456", "cpmt_789"),
                     savedPaymentMethodSelectionId = "pm_123",
+                    appId = APP_ID,
+                    mobileSessionId = MOBILE_SESSION_ID,
+                )
+            ),
+            options = any()
+        )
+    }
+
+    @Test
+    fun `Verify mobile session ID is passed to 'StripeRepository'`() = runTest {
+        AnalyticsRequestFactory.setSessionId(UUID.fromString("537a88ff-a54f-42cc-ba52-c7c5623730b6"))
+
+        whenever(
+            stripeRepository.retrieveElementsSession(any(), any())
+        ).thenReturn(
+            Result.success(
+                ElementsSession.createFromFallback(
+                    stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
+                    sessionsError = null,
+                )
+            )
+        )
+
+        val repository = RealElementsSessionRepository(
+            stripeRepository,
+            { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
+            testDispatcher,
+            { MOBILE_SESSION_ID },
+            appId = APP_ID
+        )
+
+        repository.get(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "client_secret"
+            ),
+            customer = null,
+            externalPaymentMethods = emptyList(),
+            customPaymentMethods = listOf(
+                PaymentSheet.CustomPaymentMethod(
+                    id = "cpmt_123",
+                    subtitle = "Pay now".resolvableString,
+                    disableBillingDetailCollection = true,
+                ),
+                PaymentSheet.CustomPaymentMethod(
+                    id = "cpmt_456",
+                    subtitle = "Pay later".resolvableString,
+                    disableBillingDetailCollection = true,
+                ),
+                PaymentSheet.CustomPaymentMethod(
+                    id = "cpmt_789",
+                    subtitle = "Pay never".resolvableString,
+                    disableBillingDetailCollection = true,
+                ),
+            ),
+            savedPaymentMethodSelectionId = "pm_123",
+        )
+
+        verify(stripeRepository).retrieveElementsSession(
+            params = eq(
+                ElementsSessionParams.PaymentIntentType(
+                    clientSecret = "client_secret",
+                    externalPaymentMethods = emptyList(),
+                    customPaymentMethods = listOf("cpmt_123", "cpmt_456", "cpmt_789"),
+                    savedPaymentMethodSelectionId = "pm_123",
+                    mobileSessionId = MOBILE_SESSION_ID,
                     appId = APP_ID
                 )
             ),
@@ -388,6 +463,7 @@ internal class ElementsSessionRepositoryTest {
         stripeRepository,
         { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
         testDispatcher,
+        { MOBILE_SESSION_ID },
         appId = APP_ID
     )
 
@@ -401,5 +477,6 @@ internal class ElementsSessionRepositoryTest {
 
     companion object {
         private const val APP_ID = "com.app.id"
+        private const val MOBILE_SESSION_ID = "session_123"
     }
 }

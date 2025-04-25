@@ -21,7 +21,9 @@ import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmat
 import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.ui.core.di.CardScanModule
+import com.stripe.android.uicore.navigation.NavigationManager
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Named
@@ -54,6 +56,8 @@ internal interface NativeLinkComponent {
     val linkAuth: LinkAuth
     val savedStateHandle: SavedStateHandle
     val viewModel: LinkActivityViewModel
+    val eventReporter: EventReporter
+    val navigationManager: NavigationManager
 
     @Component.Builder
     interface Builder {

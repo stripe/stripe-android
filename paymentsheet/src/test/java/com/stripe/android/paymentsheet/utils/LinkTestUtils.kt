@@ -22,7 +22,15 @@ internal object LinkTestUtils {
             brand = CardBrand.DinersClub,
             cvcCheck = CvcCheck.Fail,
             isDefault = false,
+            networks = emptyList(),
+            funding = "CREDIT",
+            nickname = null,
             billingAddress = ConsumerPaymentDetails.BillingAddress(
+                name = null,
+                line1 = null,
+                line2 = null,
+                locality = null,
+                administrativeArea = null,
                 countryCode = CountryCode.US,
                 postalCode = "42424"
             )
@@ -39,7 +47,15 @@ internal object LinkTestUtils {
             brand = CardBrand.DinersClub,
             cvcCheck = CvcCheck.Fail,
             isDefault = false,
+            networks = emptyList(),
+            funding = "CREDIT",
+            nickname = null,
             billingAddress = ConsumerPaymentDetails.BillingAddress(
+                name = null,
+                line1 = null,
+                line2 = null,
+                locality = null,
+                administrativeArea = null,
                 countryCode = CountryCode.US,
                 postalCode = "42424"
             )
@@ -48,7 +64,9 @@ internal object LinkTestUtils {
         originalParams = mock()
     )
 
-    fun createLinkConfiguration(): LinkConfiguration {
+    fun createLinkConfiguration(
+        cardBrandChoice: LinkConfiguration.CardBrandChoice? = null,
+    ): LinkConfiguration {
         return LinkConfiguration(
             stripeIntent = mock {
                 on { linkFundingSources } doReturn listOf(
@@ -60,7 +78,7 @@ internal object LinkTestUtils {
             merchantName = "Test merchant inc.",
             merchantCountryCode = "US",
             passthroughModeEnabled = false,
-            cardBrandChoice = null,
+            cardBrandChoice = cardBrandChoice,
             shippingDetails = null,
             useAttestationEndpointsForLink = false,
             suppress2faModal = false,

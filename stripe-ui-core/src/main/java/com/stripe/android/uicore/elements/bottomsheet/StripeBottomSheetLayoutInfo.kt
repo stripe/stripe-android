@@ -1,5 +1,6 @@
 package com.stripe.android.uicore.elements.bottomsheet
 
+import android.os.Build
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
@@ -27,12 +28,34 @@ fun rememberStripeBottomSheetLayoutInfo(
 ): StripeBottomSheetLayoutInfo {
     return remember {
         StripeBottomSheetLayoutInfo(
-            sheetShape = RoundedCornerShape(
-                topStart = cornerRadius,
-                topEnd = cornerRadius,
-            ),
+            sheetShape = sheetShape(cornerRadius),
             sheetBackgroundColor = sheetBackgroundColor,
             scrimColor = scrimColor,
+        )
+    }
+}
+
+private fun sheetShape(cornerRadius: Dp): RoundedCornerShape {
+    /*
+     * Following Compose 1.7.0, Compose UI tests using Robolectric & `performClick` inside of a Modal Bottom Sheet
+     * context broke. `performClick` wouldn't perform the requested action.
+     *
+     * According to https://github.com/robolectric/robolectric/issues/9595, it seems `performClick` is broken when
+     * clicking within a component with a `clip` modifier when testing with API versions excluding API 24, 25, 26, and
+     * 28 (clicking works fine in production). Modal Bottom Sheet uses the `clip` modifier internally when creating
+     * the sheet surface.
+     *
+     * Oddly the issue only occurs when passing a non-uniform shape. Passing a shape with uniform corners does not
+     * cause the above issue to occur.
+     *
+     * If this is solved by the Robolectric or Compose team, we should remove this check below.
+     */
+    return if (Build.FINGERPRINT.lowercase() == "robolectric") {
+        RoundedCornerShape(cornerRadius)
+    } else {
+        RoundedCornerShape(
+            topStart = cornerRadius,
+            topEnd = cornerRadius,
         )
     }
 }

@@ -8,6 +8,7 @@ import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.signup.SignUpState
+import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
@@ -22,6 +23,9 @@ import org.robolectric.RobolectricTestRunner
 internal class LinkInlineSignupViewTest {
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     @Test
     fun clicking_on_checkbox_triggers_callback() {

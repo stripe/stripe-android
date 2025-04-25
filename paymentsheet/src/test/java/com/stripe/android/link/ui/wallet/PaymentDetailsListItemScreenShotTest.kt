@@ -37,7 +37,15 @@ internal class PaymentDetailsListItemScreenShotTest {
                     brand = CardBrand.MasterCard,
                     last4 = "4444",
                     cvcCheck = CvcCheck.Pass,
+                    networks = emptyList(),
+                    funding = "CREDIT",
+                    nickname = null,
                     billingAddress = ConsumerPaymentDetails.BillingAddress(
+                        name = null,
+                        line1 = null,
+                        line2 = null,
+                        locality = null,
+                        administrativeArea = null,
                         countryCode = CountryCode.US,
                         postalCode = "12312"
                     )
@@ -61,7 +69,15 @@ internal class PaymentDetailsListItemScreenShotTest {
                     brand = CardBrand.MasterCard,
                     last4 = "4444",
                     cvcCheck = CvcCheck.Pass,
+                    networks = emptyList(),
+                    funding = "CREDIT",
+                    nickname = null,
                     billingAddress = ConsumerPaymentDetails.BillingAddress(
+                        name = null,
+                        line1 = null,
+                        line2 = null,
+                        locality = null,
+                        administrativeArea = null,
                         countryCode = CountryCode.US,
                         postalCode = "12312"
                     )
@@ -85,7 +101,15 @@ internal class PaymentDetailsListItemScreenShotTest {
                     brand = CardBrand.MasterCard,
                     last4 = "4444",
                     cvcCheck = CvcCheck.Pass,
+                    networks = emptyList(),
+                    funding = "CREDIT",
+                    nickname = "My Personal Card",
                     billingAddress = ConsumerPaymentDetails.BillingAddress(
+                        name = null,
+                        line1 = null,
+                        line2 = null,
+                        locality = null,
+                        administrativeArea = null,
                         countryCode = CountryCode.US,
                         postalCode = "12312"
                     )
@@ -109,7 +133,15 @@ internal class PaymentDetailsListItemScreenShotTest {
                     brand = CardBrand.MasterCard,
                     last4 = "4444",
                     cvcCheck = CvcCheck.Pass,
+                    networks = emptyList(),
+                    funding = "CREDIT",
+                    nickname = null,
                     billingAddress = ConsumerPaymentDetails.BillingAddress(
+                        name = null,
+                        line1 = null,
+                        line2 = null,
+                        locality = null,
+                        administrativeArea = null,
                         countryCode = CountryCode.US,
                         postalCode = "12312"
                     )
@@ -131,6 +163,7 @@ internal class PaymentDetailsListItemScreenShotTest {
                     bankName = "STRIPE TEST BANK",
                     bankIconCode = null,
                     isDefault = false,
+                    nickname = null,
                 ),
                 enabled = true,
                 isSelected = false,

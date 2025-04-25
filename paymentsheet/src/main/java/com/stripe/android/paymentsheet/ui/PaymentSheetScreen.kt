@@ -74,9 +74,7 @@ import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBackgroundColor
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
 
 @Composable
 internal fun PaymentSheetScreen(
@@ -118,9 +116,9 @@ private fun PaymentSheetScreen(
     scrollState: ScrollState,
     content: @Composable () -> Unit,
 ) {
-    val processing by viewModel.processing.collectAsState(Dispatchers.Main)
+    val processing by viewModel.processing.collectAsState()
 
-    val walletsProcessingState by viewModel.walletsProcessingState.collectAsState(Dispatchers.Main)
+    val walletsProcessingState by viewModel.walletsProcessingState.collectAsState()
 
     val density = LocalDensity.current
     var contentHeight by remember { mutableStateOf(0.dp) }
@@ -129,7 +127,7 @@ private fun PaymentSheetScreen(
 
     BottomSheetScaffold(
         topBar = {
-            val currentScreen by viewModel.navigationHandler.currentScreen.collectAsState(Dispatchers.Main)
+            val currentScreen by viewModel.navigationHandler.currentScreen.collectAsState()
             val topBarState by remember(currentScreen) {
                 currentScreen.topBarState()
             }.collectAsState()
@@ -331,7 +329,7 @@ private fun PaymentSheetContent(
             }
         }
 
-        if (mandateText?.showAbovePrimaryButton == true && currentScreen.showsMandates) {
+        if (mandateText?.showAbovePrimaryButton == true && currentScreen.showsPaymentConfirmationMandates) {
             Mandate(
                 mandateText = mandateText.text?.resolve(),
                 modifier = Modifier
@@ -355,7 +353,7 @@ private fun PaymentSheetContent(
     PrimaryButton(viewModel)
 
     Box(modifier = modifier) {
-        if (mandateText?.showAbovePrimaryButton == false && currentScreen.showsMandates) {
+        if (mandateText?.showAbovePrimaryButton == false && currentScreen.showsPaymentConfirmationMandates) {
             Mandate(
                 mandateText = mandateText.text?.resolve(),
                 modifier = Modifier
@@ -423,16 +421,14 @@ internal fun Wallet(
 
 @Composable
 private fun PrimaryButton(viewModel: BaseSheetViewModel) {
-    val uiState = viewModel.primaryButtonUiState.collectAsState(Dispatchers.Main)
+    val uiState by viewModel.primaryButtonUiState.collectAsState()
 
     val modifier = Modifier
         .testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
         .semantics {
             role = Role.Button
 
-            val currentState = uiState.value
-
-            if (currentState == null || !currentState.enabled) {
+            if (uiState?.enabled != true) {
                 disabled()
             }
         }
@@ -457,22 +453,15 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
             )
             binding
         },
+        update = {
+            button?.updateUiState(uiState)
+        },
         modifier = modifier,
     )
 
     LaunchedEffect(viewModel, button) {
-        viewModel.primaryButtonUiState.collect { uiState ->
-            withContext(Dispatchers.Main) {
-                button?.updateUiState(uiState)
-            }
-        }
-    }
-
-    LaunchedEffect(viewModel, button) {
         (viewModel as? PaymentSheetViewModel)?.buyButtonState?.collect { state ->
-            withContext(Dispatchers.Main) {
-                button?.updateState(state?.convert())
-            }
+            button?.updateState(state?.convert())
         }
     }
 }

@@ -44,6 +44,8 @@ internal class EmbeddedConfirmationStarter @Inject constructor(
     }
 
     fun start(args: ConfirmationHandler.Args) {
-        confirmationHandler.start(args)
+        coroutineScope.launch {
+            confirmationHandler.start(args)
+        }
     }
 }

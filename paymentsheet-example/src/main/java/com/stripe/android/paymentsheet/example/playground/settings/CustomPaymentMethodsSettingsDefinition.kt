@@ -64,11 +64,13 @@ enum class CustomPaymentMethodPlaygroundType(
         get() = name
 }
 
+internal const val DEFAULT_CUSTOM_PAYMENT_METHOD_ID = "cpmt_1QpIMNLu5o3P18Zpwln1Sm6I"
+
 @OptIn(ExperimentalCustomPaymentMethodsApi::class)
 private fun createCustomPaymentMethods(disableBillingDetails: Boolean): List<PaymentSheet.CustomPaymentMethod> {
     return listOf(
         PaymentSheet.CustomPaymentMethod(
-            id = "cpmt_1QpIMNLu5o3P18Zpwln1Sm6I",
+            id = DEFAULT_CUSTOM_PAYMENT_METHOD_ID,
             subtitle = "Pay now with BufoPay",
             disableBillingDetailCollection = disableBillingDetails,
         )

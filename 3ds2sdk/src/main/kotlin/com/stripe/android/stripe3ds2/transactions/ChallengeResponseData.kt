@@ -281,7 +281,6 @@ data class ChallengeResponseData constructor(
 
     internal companion object {
         private const val FIELD_SERVER_TRANS_ID = "threeDSServerTransID"
-        private const val FIELD_ACS_COUNTER_ACS_TO_SDK = "acsCounterAtoS"
         private const val FIELD_ACS_TRANS_ID = "acsTransID"
         private const val FIELD_ACS_HTML = "acsHTML"
         private const val FIELD_ACS_HTML_REFRESH = "acsHTMLRefresh"
@@ -319,18 +318,6 @@ data class ChallengeResponseData constructor(
 
         private val YES_NO_VALUES = listOf(YES_VALUE, NO_VALUE)
 
-        private val FINAL_CRES_FIELDS = setOf(
-            FIELD_SERVER_TRANS_ID,
-            FIELD_ACS_COUNTER_ACS_TO_SDK,
-            FIELD_ACS_TRANS_ID,
-            FIELD_CHALLENGE_COMPLETION_INDICATOR,
-            FIELD_MESSAGE_EXTENSION,
-            FIELD_MESSAGE_TYPE,
-            FIELD_MESSAGE_VERSION,
-            FIELD_SDK_TRANS_ID,
-            FIELD_TRANS_STATUS
-        )
-
         /**
          * @param cresJson the decrypted JSON returned in the CRes
          * @return a [ChallengeResponseData] model object
@@ -338,7 +325,7 @@ data class ChallengeResponseData constructor(
          * @throws ChallengeResponseParseException if the JSON format or data fails validation
          */
         @Throws(ChallengeResponseParseException::class)
-        @Suppress("LongMethod")
+        @Suppress("LongMethod", "CyclomaticComplexMethod", "MaximumLineLength", "MaxLineLength")
         internal fun fromJson(cresJson: JSONObject): ChallengeResponseData {
             checkMessageType(cresJson)
 
@@ -350,67 +337,59 @@ data class ChallengeResponseData constructor(
             val messageVersion = getMessageVersion(cresJson)
             val messageExtensions = getMessageExtensions(cresJson)
 
-            val cresData = if (isChallengedCompleted) {
-                checkFinalCresFields(cresJson)
+            val shouldShowChallengeInfoTextIndicator =
+                getYesNoValue(cresJson, FIELD_CHALLENGE_INFO_TEXT_INDICATOR, false)
+            val resendInformationLabel = getResendInformationLabel(cresJson)
+            val challengeSelectOptionsJsonArray = getChallengeSelectInfoArray(cresJson)
+            val uiType = if (isChallengedCompleted) null else getUiType(cresJson)
+            val submitAuthenticationLabel = uiType?.let { getSubmitAuthenticationLabel(cresJson, uiType) }
+            val acsHtml = uiType?.let { getDecodedAcsHtml(cresJson, uiType) }
+            val oobContinueLabel = uiType?.let { getOobContinueLabel(cresJson, uiType) }
+            val challengeSelectOptions =
+                ChallengeSelectOption.fromJson(challengeSelectOptionsJsonArray)
+            val acsHtmlRefresh = if (isChallengedCompleted) null else decodeHtml(cresJson.optString(FIELD_ACS_HTML_REFRESH))
+            val challengeInfoHeader = if (isChallengedCompleted) null else cresJson.optString(FIELD_CHALLENGE_INFO_HEADER)
+            val challengeInfoLabel = if (isChallengedCompleted) null else cresJson.optString(FIELD_CHALLENGE_INFO_LABEL)
+            val challengeInfoText = if (isChallengedCompleted) null else cresJson.optString(FIELD_CHALLENGE_INFO_TEXT)
+            val challengeAdditionalInfoText = if (isChallengedCompleted) null else cresJson.optString(FIELD_CHALLENGE_ADDITIONAL_INFO_TEXT)
+            val whitelistingInfoText = if (isChallengedCompleted) null else cresJson.optString(FIELD_WHITELISTING_INFO_TEXT)
+            val whyInfoLabel = if (isChallengedCompleted) null else cresJson.optString(FIELD_WHY_INFO_LABEL)
+            val whyInfoText = if (isChallengedCompleted) null else cresJson.optString(FIELD_WHY_INFO_TEXT)
 
-                ChallengeResponseData(
-                    serverTransId = serverTransId,
-                    acsTransId = acsTransId,
-                    sdkTransId = sdkTransId,
-                    isChallengeCompleted = isChallengedCompleted,
-                    messageVersion = messageVersion,
-                    messageExtensions = messageExtensions,
-                    transStatus = getTransStatus(cresJson).code
-                )
-            } else {
-                val shouldShowChallengeInfoTextIndicator =
-                    getYesNoValue(cresJson, FIELD_CHALLENGE_INFO_TEXT_INDICATOR, false)
-                val resendInformationLabel = getResendInformationLabel(cresJson)
-                val challengeSelectOptionsJsonArray = getChallengeSelectInfoArray(cresJson)
-                val uiType = getUiType(cresJson)
-                val submitAuthenticationLabel = getSubmitAuthenticationLabel(cresJson, uiType)
-                val acsHtml = getDecodedAcsHtml(cresJson, uiType)
-                val oobContinueLabel = getOobContinueLabel(cresJson, uiType)
-                val challengeSelectOptions =
-                    ChallengeSelectOption.fromJson(challengeSelectOptionsJsonArray)
-
-                ChallengeResponseData(
-                    serverTransId = serverTransId,
-                    acsTransId = acsTransId,
-                    sdkTransId = sdkTransId,
-                    isChallengeCompleted = isChallengedCompleted,
-                    messageVersion = messageVersion,
-                    messageExtensions = messageExtensions,
-                    acsHtml = acsHtml,
-                    acsHtmlRefresh = decodeHtml(cresJson.optString(FIELD_ACS_HTML_REFRESH)),
-                    uiType = uiType,
-                    challengeInfoHeader = cresJson.optString(FIELD_CHALLENGE_INFO_HEADER),
-                    challengeInfoLabel = cresJson.optString(FIELD_CHALLENGE_INFO_LABEL),
-                    challengeInfoText = cresJson.optString(FIELD_CHALLENGE_INFO_TEXT),
-                    challengeAdditionalInfoText = cresJson.optString(
-                        FIELD_CHALLENGE_ADDITIONAL_INFO_TEXT
-                    ),
-                    shouldShowChallengeInfoTextIndicator = shouldShowChallengeInfoTextIndicator,
-                    challengeSelectOptions = challengeSelectOptions,
-                    expandInfoLabel = cresJson.optString(FIELD_EXPAND_INFO_LABEL),
-                    expandInfoText = cresJson.optString(FIELD_EXPAND_INFO_TEXT),
-                    issuerImage = Image.fromJson(cresJson.optJSONObject(FIELD_ISSUER_IMAGE)),
-                    oobAppUrl = cresJson.optString(FIELD_OOB_APP_URL),
-                    oobAppLabel = cresJson.optString(FIELD_OOB_APP_LABEL),
-                    oobContinueLabel = oobContinueLabel,
-                    paymentSystemImage = Image.fromJson(
-                        cresJson.optJSONObject(
-                            FIELD_PAYMENT_SYSTEM_IMAGE
-                        )
-                    ),
-                    resendInformationLabel = resendInformationLabel,
-                    submitAuthenticationLabel = submitAuthenticationLabel,
-                    whitelistingInfoText = cresJson.optString(FIELD_WHITELISTING_INFO_TEXT),
-                    whyInfoLabel = cresJson.optString(FIELD_WHY_INFO_LABEL),
-                    whyInfoText = cresJson.optString(FIELD_WHY_INFO_TEXT),
-                    transStatus = ""
-                )
-            }
+            val cresData = ChallengeResponseData(
+                serverTransId = serverTransId,
+                acsTransId = acsTransId,
+                sdkTransId = sdkTransId,
+                isChallengeCompleted = isChallengedCompleted,
+                messageVersion = messageVersion,
+                messageExtensions = messageExtensions,
+                acsHtml = acsHtml,
+                acsHtmlRefresh = acsHtmlRefresh,
+                uiType = uiType,
+                challengeInfoHeader = challengeInfoHeader,
+                challengeInfoLabel = challengeInfoLabel,
+                challengeInfoText = challengeInfoText,
+                challengeAdditionalInfoText = challengeAdditionalInfoText,
+                shouldShowChallengeInfoTextIndicator = shouldShowChallengeInfoTextIndicator,
+                challengeSelectOptions = challengeSelectOptions,
+                expandInfoLabel = if (isChallengedCompleted) null else cresJson.optString(FIELD_EXPAND_INFO_LABEL),
+                expandInfoText = if (isChallengedCompleted) null else cresJson.optString(FIELD_EXPAND_INFO_TEXT),
+                issuerImage = Image.fromJson(cresJson.optJSONObject(FIELD_ISSUER_IMAGE)),
+                oobAppUrl = if (isChallengedCompleted) null else cresJson.optString(FIELD_OOB_APP_URL),
+                oobAppLabel = if (isChallengedCompleted) null else cresJson.optString(FIELD_OOB_APP_LABEL),
+                oobContinueLabel = oobContinueLabel,
+                paymentSystemImage = Image.fromJson(
+                    cresJson.optJSONObject(
+                        FIELD_PAYMENT_SYSTEM_IMAGE
+                    )
+                ),
+                resendInformationLabel = resendInformationLabel,
+                submitAuthenticationLabel = submitAuthenticationLabel,
+                whitelistingInfoText = whitelistingInfoText,
+                whyInfoLabel = whyInfoLabel,
+                whyInfoText = whyInfoText,
+                transStatus = if (isChallengedCompleted) getTransStatus(cresJson).code else ""
+            )
 
             if (!cresData.isValidForUi) {
                 throw ChallengeResponseParseException
@@ -425,21 +404,6 @@ data class ChallengeResponseData constructor(
             }
 
             return cresData
-        }
-
-        @Throws(ChallengeResponseParseException::class)
-        internal fun checkFinalCresFields(cresJson: JSONObject) {
-            val keysIter = cresJson.keys()
-            while (keysIter.hasNext()) {
-                val key = keysIter.next()
-                if (!FINAL_CRES_FIELDS.contains(key)) {
-                    throw ChallengeResponseParseException(
-                        ProtocolError.InvalidMessageReceived.code,
-                        "Message is not final CRes",
-                        "Invalid data element for final CRes: $key"
-                    )
-                }
-            }
         }
 
         @VisibleForTesting

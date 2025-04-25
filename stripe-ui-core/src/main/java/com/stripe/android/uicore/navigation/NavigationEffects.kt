@@ -20,13 +20,17 @@ fun NavigationEffects(
     navigationChannel: SharedFlow<NavigationIntent>,
     navHostController: NavHostController,
     keyboardController: KeyboardController,
-    onBackStackEntryUpdated: (NavBackStackEntry?) -> Unit
+    onBackStackEntryUpdated: (NavBackStackEntryUpdate) -> Unit
 ) {
     val activity = (LocalContext.current as? Activity)
     val backStackEntry by navHostController.currentBackStackEntryAsState()
 
     LaunchedEffect(backStackEntry) {
-        onBackStackEntryUpdated(backStackEntry)
+        val update = NavBackStackEntryUpdate(
+            previousBackStackEntry = navHostController.previousBackStackEntry,
+            currentBackStackEntry = backStackEntry,
+        )
+        onBackStackEntryUpdated(update)
     }
 
     LaunchedEffect(activity, navHostController, navigationChannel) {
@@ -47,7 +51,11 @@ fun NavigationEffects(
                             launchSingleTop = intent.isSingleTop
 
                             if (intent.popUpTo != null) {
-                                apply(from, intent.popUpTo)
+                                applyPop(
+                                    navHostController = navHostController,
+                                    currentRoute = from,
+                                    popUpTo = intent.popUpTo
+                                )
                             }
                         }
                     }
@@ -61,18 +69,30 @@ fun NavigationEffects(
     }
 }
 
-private fun NavOptionsBuilder.apply(
+private fun NavOptionsBuilder.applyPop(
+    navHostController: NavHostController,
     currentRoute: String?,
     popUpTo: PopUpToBehavior,
 ) {
-    val popUpToRoute = when (popUpTo) {
-        is PopUpToBehavior.Current -> currentRoute
-        is PopUpToBehavior.Route -> popUpTo.route
-    }
-
-    if (popUpToRoute != null) {
-        popUpTo(popUpToRoute) {
+    when (popUpTo) {
+        is PopUpToBehavior.Current -> currentRoute?.let {
+            popUpTo(it) {
+                inclusive = popUpTo.inclusive
+            }
+        }
+        is PopUpToBehavior.Route -> popUpTo(popUpTo.route) {
+            inclusive = popUpTo.inclusive
+        }
+        PopUpToBehavior.Start -> popUpTo(
+            navHostController.graph.id
+        ) {
             inclusive = popUpTo.inclusive
         }
     }
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class NavBackStackEntryUpdate(
+    val previousBackStackEntry: NavBackStackEntry?,
+    val currentBackStackEntry: NavBackStackEntry?
+)

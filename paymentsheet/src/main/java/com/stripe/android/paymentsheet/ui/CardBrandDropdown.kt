@@ -24,6 +24,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
 import com.stripe.android.uicore.elements.SingleChoiceDropdown
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 
 @Composable
@@ -56,6 +57,8 @@ internal fun CardBrandDropdown(
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Image(
+                modifier = Modifier
+                    .testTag("${SELECTED_CARD_BRAND_DROPDOWN_TAG}_${selectedBrand.label.resolve()}"),
                 painter = painterResource(id = selectedBrand.icon),
                 contentDescription = null
             )
@@ -86,3 +89,5 @@ internal fun CardBrandDropdown(
         )
     }
 }
+
+internal const val SELECTED_CARD_BRAND_DROPDOWN_TAG = "selected_card_brand_dropdown_tag"

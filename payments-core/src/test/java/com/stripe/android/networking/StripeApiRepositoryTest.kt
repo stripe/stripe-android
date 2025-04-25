@@ -371,7 +371,7 @@ internal class StripeApiRepositoryTest {
 
             verifyFraudDetectionDataAndAnalyticsRequests(
                 PaymentAnalyticsEvent.SourceCreate,
-                productUsage = listOf("CardInputView")
+                productUsage = "CardInputView"
             )
         }
 
@@ -616,7 +616,7 @@ internal class StripeApiRepositoryTest {
 
             verifyAnalyticsRequest(
                 event = PaymentAnalyticsEvent.PaymentIntentConfirm,
-                productUsage = listOf(productUsage),
+                productUsage = productUsage,
             )
         }
 
@@ -646,7 +646,7 @@ internal class StripeApiRepositoryTest {
 
             verifyAnalyticsRequest(
                 event = PaymentAnalyticsEvent.PaymentIntentConfirm,
-                productUsage = listOf(productUsage),
+                productUsage = productUsage,
                 errorMessage = "ioException",
             )
         }
@@ -680,7 +680,7 @@ internal class StripeApiRepositoryTest {
 
             verifyAnalyticsRequest(
                 event = PaymentAnalyticsEvent.PaymentIntentConfirm,
-                productUsage = listOf(productUsage),
+                productUsage = productUsage,
                 errorMessage = "apiError",
             )
         }
@@ -839,7 +839,7 @@ internal class StripeApiRepositoryTest {
 
             verifyAnalyticsRequest(
                 event = PaymentAnalyticsEvent.SetupIntentConfirm,
-                productUsage = listOf(productUsage),
+                productUsage = productUsage,
             )
         }
 
@@ -871,7 +871,7 @@ internal class StripeApiRepositoryTest {
 
             verifyAnalyticsRequest(
                 event = PaymentAnalyticsEvent.SetupIntentConfirm,
-                productUsage = listOf(productUsage),
+                productUsage = productUsage,
                 errorMessage = "ioException",
             )
         }
@@ -907,7 +907,7 @@ internal class StripeApiRepositoryTest {
 
             verifyAnalyticsRequest(
                 event = PaymentAnalyticsEvent.SetupIntentConfirm,
-                productUsage = listOf(productUsage),
+                productUsage = productUsage,
                 errorMessage = "apiError",
             )
         }
@@ -1479,7 +1479,7 @@ internal class StripeApiRepositoryTest {
 
             verifyFraudDetectionDataAndAnalyticsRequests(
                 PaymentAnalyticsEvent.TokenCreate,
-                listOf("CardInputView")
+                productUsage = "CardInputView",
             )
         }
 
@@ -1619,7 +1619,7 @@ internal class StripeApiRepositoryTest {
 
             verifyFraudDetectionDataAndAnalyticsRequests(
                 PaymentAnalyticsEvent.PaymentMethodCreate,
-                productUsage = listOf("CardInputView")
+                productUsage = "CardInputView",
             )
         }
 
@@ -1659,7 +1659,7 @@ internal class StripeApiRepositoryTest {
 
             verifyFraudDetectionDataAndAnalyticsRequests(
                 PaymentAnalyticsEvent.PaymentMethodCreate,
-                productUsage = listOf("PaymentSheet")
+                productUsage = "PaymentSheet",
             )
         }
 
@@ -2629,6 +2629,42 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
+    fun `Verify mobile session ID in params when provided`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString(),
+            emptyMap()
+        )
+
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>())).thenReturn(stripeResponse)
+
+        create().retrieveElementsSession(
+            params = ElementsSessionParams.PaymentIntentType(
+                clientSecret = "client_secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                mobileSessionId = "session_123",
+                appId = APP_ID
+            ),
+            options = DEFAULT_OPTIONS,
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
+
+        assertThat(request.baseUrl).isEqualTo("https://api.stripe.com/v1/elements/sessions")
+
+        with(params) {
+            assertThat(this["type"]).isEqualTo("payment_intent")
+            assertThat(this["locale"]).isEqualTo("en-US")
+            assertThat(this["mobile_session_id"]).isEqualTo("session_123")
+            assertThat(this["mobile_app_id"]).isEqualTo(APP_ID)
+        }
+    }
+
+    @Test
     fun `Verify that the elements session endpoint has the right query params for setup intents`() = runTest {
         val stripeResponse = StripeResponse(
             200,
@@ -2964,7 +3000,7 @@ internal class StripeApiRepositoryTest {
 
     private fun verifyFraudDetectionDataAndAnalyticsRequests(
         event: PaymentAnalyticsEvent,
-        productUsage: List<String>? = null
+        productUsage: String? = null
     ) {
         verify(fraudDetectionDataRepository, times(2))
             .refresh()
@@ -2974,7 +3010,7 @@ internal class StripeApiRepositoryTest {
 
     private fun verifyAnalyticsRequest(
         event: PaymentAnalyticsEvent,
-        productUsage: List<String>? = null,
+        productUsage: String? = null,
         errorMessage: String? = null
     ) {
         verify(analyticsRequestExecutor)

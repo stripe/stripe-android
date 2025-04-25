@@ -97,6 +97,14 @@ internal fun CommonConfiguration.getExternalPaymentMethodsAnalyticsValue(): List
     return this.externalPaymentMethods.takeIf { it.isNotEmpty() }?.take(PaymentSheetEvent.MAX_EXTERNAL_PAYMENT_METHODS)
 }
 
+internal fun CommonConfiguration.getCustomPaymentMethodsAnalyticsValue(): String? {
+    return this.customPaymentMethods.takeIf { customPaymentMethods ->
+        customPaymentMethods.isNotEmpty()
+    }?.joinToString(",") { customPaymentMethod ->
+        customPaymentMethod.id
+    }
+}
+
 internal fun PaymentSheet.CardBrandAcceptance.toAnalyticsValue(): Boolean {
     return this !is PaymentSheet.CardBrandAcceptance.All
 }

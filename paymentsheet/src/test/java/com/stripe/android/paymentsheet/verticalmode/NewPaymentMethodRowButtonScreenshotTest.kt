@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -135,6 +136,31 @@ internal class NewPaymentMethodRowButtonScreenshotTest {
                 promoText = null,
                 onClick = {},
                 modifier = Modifier,
+            )
+        }
+    }
+
+    @Test
+    fun testEmbeddedNewSelected() {
+        paparazziRule.snapshot {
+            NewPaymentMethodRowButton(
+                isEnabled = true,
+                isSelected = true,
+                iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
+                iconUrl = null,
+                imageLoader = Mockito.mock(),
+                title = "Card",
+                subtitle = "Mastercard **** 4444",
+                iconRequiresTinting = false,
+                promoText = null,
+                onClick = {},
+                modifier = Modifier,
+                rowStyle = PaymentSheet.Appearance.Embedded.RowStyle.FlatWithRadio.default,
+                trailingContent = {
+                    EmbeddedNewPaymentMethodTrailingContent(
+                        showChevron = true
+                    )
+                }
             )
         }
     }

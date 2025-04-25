@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
+import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -14,6 +16,14 @@ internal data class CustomerState(
     val paymentMethods: List<PaymentMethod>,
     val defaultPaymentMethodId: String?,
 ) : Parcelable {
+
+    @Parcelize
+    data class Permissions(
+        val canRemovePaymentMethods: Boolean,
+        val canRemoveLastPaymentMethod: Boolean,
+        val canRemoveDuplicates: Boolean,
+        val canUpdateFullPaymentMethodDetails: Boolean,
+    ) : Parcelable
 
     @Parcelize
     sealed class DefaultPaymentMethodState : Parcelable {
@@ -44,6 +54,13 @@ internal data class CustomerState(
                 paymentMethods = customer.paymentMethods.filter {
                     supportedSavedPaymentMethodTypes.contains(it.type)
                 },
+                permissions = Permissions(
+                    canRemovePaymentMethods = canRemovePaymentMethods,
+                    canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
+                    // Should always remove duplicates when using `customer_session`
+                    canRemoveDuplicates = true,
+                    canUpdateFullPaymentMethodDetails = FeatureFlags.editSavedCardPaymentMethodEnabled.isEnabled,
+                ),
                 defaultPaymentMethodId = customer.defaultPaymentMethod
             )
         }
@@ -67,6 +84,30 @@ internal data class CustomerState(
                 ephemeralKeySecret = accessType.ephemeralKeySecret,
                 customerSessionClientSecret = null,
                 paymentMethods = paymentMethods,
+                permissions = Permissions(
+                    /*
+                     * Un-scoped legacy ephemeral keys have full permissions to remove/save. This should
+                     * always be set to true.
+                     */
+                    canRemovePaymentMethods = true,
+                    /*
+                     * Un-scoped legacy ephemeral keys normally have full permissions to remove the last payment
+                     * method, however we do have client-side configuration option to configure this ability. This
+                     * should eventually be removed in favor of the server-side option available with customer
+                     * sessions.
+                     */
+                    canRemoveLastPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
+                    /*
+                     * Removing duplicates is not applicable here since we don't filter out duplicates for for
+                     * un-scoped ephemeral keys.
+                     */
+                    canRemoveDuplicates = false,
+                    /*
+                     * Un-scoped legacy ephemeral keys do not have permissions to update payment method. This should
+                     * always be set to false.
+                     */
+                    canUpdateFullPaymentMethodDetails = false,
+                ),
                 // This is a customer sessions only feature, so will always be null when using a legacy ephemeral key.
                 defaultPaymentMethodId = null
             )

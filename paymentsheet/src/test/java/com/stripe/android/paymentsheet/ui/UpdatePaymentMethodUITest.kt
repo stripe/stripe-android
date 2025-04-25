@@ -24,6 +24,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.ViewActionRecorder
+import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import com.stripe.android.ui.core.elements.TEST_TAG_SIMPLE_DIALOG
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
@@ -39,6 +40,9 @@ class UpdatePaymentMethodUITest {
 
     @get:Rule
     val composeRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     @Test
     fun canRemoveIsFalse_removeButtonHidden() = runScenario(
@@ -315,6 +319,7 @@ class UpdatePaymentMethodUITest {
         shouldShowSetAsDefaultCheckbox: Boolean = false,
         shouldShowSaveButton: Boolean = false,
         isSaveButtonEnabled: Boolean = false,
+        editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = FakeEditCardDetailsInteractorFactory(),
         testBlock: Scenario.() -> Unit,
     ) {
         val viewActionRecorder = ViewActionRecorder<UpdatePaymentMethodInteractor.ViewAction>()
@@ -335,6 +340,7 @@ class UpdatePaymentMethodUITest {
                 setAsDefaultCheckboxChecked = setAsDefaultCheckboxChecked,
                 isSaveButtonEnabled = isSaveButtonEnabled,
             ),
+            editCardDetailsInteractorFactory = editCardDetailsInteractorFactory
         )
 
         composeRule.setContent {

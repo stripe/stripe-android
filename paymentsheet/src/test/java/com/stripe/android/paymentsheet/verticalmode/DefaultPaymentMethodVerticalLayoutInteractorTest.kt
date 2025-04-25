@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -13,6 +14,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FormHelper
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
@@ -22,6 +24,8 @@ import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutI
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -758,6 +762,64 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
+    fun handleViewAction_PaymentMethodSelected_callsOnFormFieldValuesChanged_withDefaultBillingDetails_whenRequired() {
+        var onFormFieldValuesChangedCalled = false
+        val paymentMethodTypes = listOf("card", "cashapp")
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = paymentMethodTypes
+            ),
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                attachDefaultsToPaymentMethod = true,
+            ),
+            defaultBillingDetails = PaymentSheet.BillingDetails(
+                name = "Jenny Rosen",
+                email = "mail@mail.com",
+                phone = "+13105551234",
+                address = PaymentSheet.Address(
+                    line1 = "123 Main Street",
+                    line2 = "456",
+                    city = "San Francisco",
+                    state = "CA",
+                    country = "US",
+                    postalCode = "94111"
+                ),
+            ),
+        )
+        runScenario(
+            paymentMethodMetadata = paymentMethodMetadata,
+            formTypeForCode = { FormHelper.FormType.MandateOnly("Foobar".resolvableString) },
+            onFormFieldValuesChanged = { fieldValues, selectedPaymentMethodCode ->
+                fieldValues.run {
+                    assertThat(fieldValuePairs).isEqualTo(
+                        mapOf(
+                            IdentifierSpec.Name to FormFieldEntry("Jenny Rosen", isComplete = true),
+                            IdentifierSpec.Email to FormFieldEntry("mail@mail.com", isComplete = true),
+                            IdentifierSpec.Phone to FormFieldEntry("+13105551234", isComplete = true),
+                            IdentifierSpec.Line1 to FormFieldEntry("123 Main Street", isComplete = true),
+                            IdentifierSpec.Line2 to FormFieldEntry("456", isComplete = true),
+                            IdentifierSpec.City to FormFieldEntry("San Francisco", isComplete = true),
+                            IdentifierSpec.State to FormFieldEntry("CA", isComplete = true),
+                            IdentifierSpec.Country to FormFieldEntry("US", isComplete = true),
+                            IdentifierSpec.PostalCode to FormFieldEntry("94111", isComplete = true),
+                        )
+                    )
+                    assertThat(userRequestedReuse).isEqualTo(PaymentSelection.CustomerRequestedSave.NoRequest)
+                }
+                assertThat(selectedPaymentMethodCode).isEqualTo("cashapp")
+                onFormFieldValuesChangedCalled = true
+            },
+            reportPaymentMethodTypeSelected = {}
+        ) {
+            interactor.state.test {
+                assertThat(awaitItem().mandate).isNull()
+                interactor.handleViewAction(ViewAction.PaymentMethodSelected("cashapp"))
+                assertThat(onFormFieldValuesChangedCalled).isTrue()
+            }
+        }
+    }
+
+    @Test
     fun handleViewAction_PaymentMethodSelected_sameSavedPaymentMethodIsDisplayed() {
         val savedPaymentMethods = PaymentMethodFixtures.createCards(3)
         val displayedPaymentMethod = savedPaymentMethods[2]
@@ -918,16 +980,153 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
+    fun verticalModeScreenSelection_isUpdatedToNewPmWithFormFields_withCustomShouldUpdateVerticalModeSelection() {
+        val initialPaymentSelection = PaymentSelection.Link()
+        runScenario(
+            initialSelection = initialPaymentSelection,
+            formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
+            updateSelection = {},
+            shouldUpdateVerticalModeSelection = { true }
+        ) {
+            selectionSource.value = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
+
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(selection).isEqualTo(
+                        PaymentMethodVerticalLayoutInteractor.Selection.New(
+                            code = "card",
+                            changeDetails = "Visa ···· 4242",
+                            canBeChanged = true,
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
+    fun verticalModeScreenSelection_omitsCardBrand_whenUnknownCardBrand() {
+        val initialPaymentSelection = PaymentSelection.Link()
+        runScenario(
+            initialSelection = initialPaymentSelection,
+            formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
+            updateSelection = {},
+            shouldUpdateVerticalModeSelection = { true }
+        ) {
+            selectionSource.value = PaymentMethodFixtures.CARD_PAYMENT_SELECTION.copy(brand = CardBrand.Unknown)
+
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(selection).isEqualTo(
+                        PaymentMethodVerticalLayoutInteractor.Selection.New(
+                            code = "card",
+                            changeDetails = "···· 4242",
+                            canBeChanged = true,
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
+    fun verticalModeScreenSelection_retainsLast4_whenUpdatingTemporarySelection() {
+        val initialPaymentSelection = PaymentSelection.Link()
+        runScenario(
+            initialSelection = initialPaymentSelection,
+            formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
+            updateSelection = {},
+            shouldUpdateVerticalModeSelection = { true }
+        ) {
+            selectionSource.value = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
+
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(selection).isEqualTo(
+                        PaymentMethodVerticalLayoutInteractor.Selection.New(
+                            code = "card",
+                            changeDetails = "Visa ···· 4242",
+                            canBeChanged = true,
+                        )
+                    )
+                }
+                temporarySelectionSource.value = "card"
+                ensureAllEventsConsumed()
+                temporarySelectionSource.value = null
+                ensureAllEventsConsumed()
+            }
+        }
+    }
+
+    @Test
+    fun verticalModeScreenSelection_retainsCanBeChanged_whenUpdatingTemporarySelection() {
+        runScenario(
+            formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
+            updateSelection = {},
+            shouldUpdateVerticalModeSelection = { true }
+        ) {
+            selectionSource.value = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION
+
+            interactor.state.test {
+                awaitItem().run {
+                    assertThat(selection).isEqualTo(
+                        PaymentMethodVerticalLayoutInteractor.Selection.New(
+                            code = "cashapp",
+                            changeDetails = null,
+                            canBeChanged = true,
+                        )
+                    )
+                }
+                temporarySelectionSource.value = "cashapp"
+                ensureAllEventsConsumed()
+                temporarySelectionSource.value = null
+                ensureAllEventsConsumed()
+            }
+        }
+    }
+
+    @Test
+    fun verticalModeSelectionIsInitialedAsUsBankAccount() {
+        var verticalModeSelection: PaymentSelection? = PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION
+        runScenario(
+            initialSelection = verticalModeSelection,
+            formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
+            updateSelection = { true },
+        ) {
+            interactor.state.test {
+                assertThat(verticalModeSelection).isEqualTo(PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION)
+                assertThat(awaitItem().selection).isEqualTo(
+                    PaymentMethodVerticalLayoutInteractor.Selection.New(
+                        code = "us_bank_account",
+                        changeDetails = "···· 6789",
+                        canBeChanged = true,
+                    )
+                )
+                temporarySelectionSource.value = "us_bank_account"
+                ensureAllEventsConsumed()
+                temporarySelectionSource.value = null
+                ensureAllEventsConsumed()
+            }
+        }
+    }
+
+    @Test
     fun verticalModeSelectionIsNotCleared_whenInitializing() {
         var verticalModeSelection: PaymentSelection? = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
         runScenario(
             initialSelection = verticalModeSelection,
-            formTypeForCode = { FormHelper.FormType.Empty },
+            formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
             updateSelection = { verticalModeSelection = it },
         ) {
             interactor.state.test {
                 assertThat(verticalModeSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
-                assertThat(awaitItem().selection).isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.New("card"))
+                assertThat(awaitItem().selection).isEqualTo(
+                    PaymentMethodVerticalLayoutInteractor.Selection.New(
+                        code = "card",
+                        changeDetails = "Visa ···· 4242",
+                        canBeChanged = true,
+                    )
+                )
             }
         }
     }
@@ -940,12 +1139,18 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             formTypeForCode = { FormHelper.FormType.Empty },
             updateSelection = {},
         ) {
-            val newSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
+            val newSelection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION
             selectionSource.value = newSelection
 
             interactor.state.test {
                 awaitItem().run {
-                    assertThat(selection).isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.New("card"))
+                    assertThat(selection).isEqualTo(
+                        PaymentMethodVerticalLayoutInteractor.Selection.New(
+                            code = "cashapp",
+                            changeDetails = null,
+                            canBeChanged = false,
+                        )
+                    )
                 }
             }
         }
@@ -1179,9 +1384,15 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit = { notImplemented() },
         canShowWalletsInline: Boolean = false,
         canShowWalletButtons: Boolean = true,
+        canUpdateFullPaymentMethodDetails: Boolean = false,
         updateSelection: (PaymentSelection?) -> Unit = { notImplemented() },
         reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit = { notImplemented() },
         reportFormShown: (PaymentMethodCode) -> Unit = { notImplemented() },
+        shouldUpdateVerticalModeSelection: (String?) -> Boolean = { paymentMethodCode ->
+            val requiresFormScreen = paymentMethodCode != null &&
+                formTypeForCode(paymentMethodCode) == FormHelper.FormType.UserInteractionRequired
+            !requiresFormScreen
+        },
         testBlock: suspend TestParams.() -> Unit
     ) {
         val processing: MutableStateFlow<Boolean> = MutableStateFlow(initialProcessing)
@@ -1209,6 +1420,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
             providePaymentMethodName = { it!!.resolvableString },
             canRemove = canRemove,
+            canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
             onSelectSavedPaymentMethod = onSelectSavedPaymentMethod,
             walletsState = walletsState,
             canShowWalletsInline = canShowWalletsInline,
@@ -1221,6 +1433,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             reportPaymentMethodTypeSelected = reportPaymentMethodTypeSelected,
             reportFormShown = reportFormShown,
             onUpdatePaymentMethod = onUpdatePaymentMethod,
+            shouldUpdateVerticalModeSelection = shouldUpdateVerticalModeSelection,
             dispatcher = UnconfinedTestDispatcher(),
             mainDispatcher = UnconfinedTestDispatcher(),
         )

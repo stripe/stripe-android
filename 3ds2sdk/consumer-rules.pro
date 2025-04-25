@@ -13,5 +13,4 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
--dontwarn org.bouncycastle.**
 -dontwarn com.google.crypto.tink.subtle.XChaCha20Poly1305

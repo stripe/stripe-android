@@ -22,7 +22,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 internal class PlaygroundSettings private constructor(
@@ -453,9 +452,13 @@ internal class PlaygroundSettings private constructor(
             LayoutSettingsDefinition,
             CardBrandAcceptanceSettingsDefinition,
             FeatureFlagSettingsDefinition(FeatureFlags.instantDebitsIncentives),
-            FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsLiteEnabled),
             FeatureFlagSettingsDefinition(FeatureFlags.financialConnectionsFullSdkUnavailable),
+            FeatureFlagSettingsDefinition(FeatureFlags.enableCardEditInLinkNative),
             EmbeddedViewDisplaysMandateSettingDefinition,
+            EmbeddedFormSheetActionSettingDefinition,
+            EmbeddedTwoStepSettingsDefinition,
+            PaymentMethodOptionsSetupFutureUsageSettingsDefinition,
+            PaymentMethodOptionsSetupFutureUsageOverrideSettingsDefinition
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(

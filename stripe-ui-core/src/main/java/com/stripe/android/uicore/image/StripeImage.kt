@@ -68,17 +68,23 @@ fun StripeImage(
                 mutableStateOf(Loading)
             }
         }
-        LaunchedEffect(url) {
-            imageLoader
-                .load(url, width, height)
-                .onSuccess {
-                    it?.let { bitmap ->
-                        state.value = Success(BitmapPainter(bitmap.asImageBitmap()))
+        /*
+         * We should only run this in non-inspection mode, otherwise `StripeImageLoader` attempts a file
+         * system access which is only available in a real Android environment or Robolectric.
+         */
+        if (!debugMode) {
+            LaunchedEffect(url) {
+                imageLoader
+                    .load(url, width, height)
+                    .onSuccess {
+                        it?.let { bitmap ->
+                            state.value = Success(BitmapPainter(bitmap.asImageBitmap()))
+                        }
                     }
-                }
-                .onFailure {
-                    state.value = Error
-                }
+                    .onFailure {
+                        state.value = Error
+                    }
+            }
         }
         AnimatedContent(
             targetState = state.value,

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -94,7 +95,7 @@ internal class SavedPaymentMethodMutator(
         paymentOptionsItems
     ) { canRemove, items ->
         canRemove || items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>().any { item ->
-            item.isModifiable
+            item.isModifiable(customerStateHolder.canUpdateFullPaymentMethodDetails)
         }
     }
 
@@ -135,8 +136,8 @@ internal class SavedPaymentMethodMutator(
         val paymentMethodId = paymentMethod.id ?: return
 
         coroutineScope.launch(workContext) {
-            removeDeletedPaymentMethodFromState(paymentMethodId)
             removePaymentMethodInternal(paymentMethodId)
+            removeDeletedPaymentMethodFromState(paymentMethodId)
         }
     }
 
@@ -150,14 +151,15 @@ internal class SavedPaymentMethodMutator(
         )
 
         val canRemoveDuplicates = customerStateHolder.canRemoveDuplicate.value
-
-        val currentSelection = (selection.value as? PaymentSelection.Saved)?.paymentMethod?.id
-        val didRemoveSelectedItem = currentSelection == paymentMethodId
+        val currentSelection = (selection.value as? PaymentSelection.Saved)?.paymentMethod
+        val didRemoveSelectedItem = currentSelection?.id == paymentMethodId
 
         if (didRemoveSelectedItem) {
             // Remove the current selection. The new selection will be set when we're computing
             // the next PaymentOptionsState.
-            setSelection(null)
+            withContext(uiContext) {
+                setSelection(null)
+            }
         }
 
         return customerRepository.detachPaymentMethod(
@@ -174,19 +176,23 @@ internal class SavedPaymentMethodMutator(
     private suspend fun removeDeletedPaymentMethodFromState(paymentMethodId: String) {
         val currentCustomer = customerStateHolder.customer.value ?: return
 
-        customerStateHolder.setCustomerState(
-            currentCustomer.copy(
-                paymentMethods = currentCustomer.paymentMethods.filter {
-                    it.id != paymentMethodId
-                }
-            )
-        )
-
-        if ((selection.value as? PaymentSelection.Saved)?.paymentMethod?.id == paymentMethodId) {
-            setSelection(null)
+        currentCustomer.paymentMethods.find { it.id == paymentMethodId }?.type?.code?.let {
+            eventReporter.onRemoveSavedPaymentMethod(it)
         }
 
         withContext(uiContext) {
+            customerStateHolder.setCustomerState(
+                currentCustomer.copy(
+                    paymentMethods = currentCustomer.paymentMethods.filter {
+                        it.id != paymentMethodId
+                    }
+                )
+            )
+
+            if ((selection.value as? PaymentSelection.Saved)?.paymentMethod?.id == paymentMethodId) {
+                setSelection(null)
+            }
+
             postPaymentMethodRemoveActions()
         }
     }
@@ -225,8 +231,10 @@ internal class SavedPaymentMethodMutator(
                 error = error
             )
         }.onSuccess {
-            customerStateHolder.setDefaultPaymentMethod(paymentMethod = paymentMethod)
-            setSelection(PaymentSelection.Saved(paymentMethod = paymentMethod))
+            withContext(uiContext) {
+                customerStateHolder.setDefaultPaymentMethod(paymentMethod = paymentMethod)
+                setSelection(PaymentSelection.Saved(paymentMethod = paymentMethod))
+            }
 
             eventReporter.onSetAsDefaultPaymentMethodSucceeded(
                 paymentMethodType = paymentMethod.type?.code,
@@ -296,6 +304,9 @@ internal class SavedPaymentMethodMutator(
                         }
                     )
                 )
+                if (isSelectedPaymentMethod(updatedMethod)) {
+                    setSelection(PaymentSelection.Saved(updatedMethod))
+                }
 
                 onSuccess(updatedMethod)
             }
@@ -309,6 +320,11 @@ internal class SavedPaymentMethodMutator(
                 error = error,
             )
         }
+    }
+
+    private fun isSelectedPaymentMethod(paymentMethod: PaymentMethod): Boolean {
+        val currentSelection = selection.value as? PaymentSelection.Saved
+        return currentSelection?.paymentMethod?.id == paymentMethod.id
     }
 
     companion object {
@@ -366,8 +382,12 @@ internal class SavedPaymentMethodMutator(
                         DefaultUpdatePaymentMethodInteractor(
                             isLiveMode = isLiveMode,
                             canRemove = canRemove,
-                            displayableSavedPaymentMethod,
+                            canUpdateFullPaymentMethodDetails = viewModel.customerStateHolder
+                                .canUpdateFullPaymentMethodDetails,
+                            displayableSavedPaymentMethod = displayableSavedPaymentMethod,
                             cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
+                            addressCollectionMode = viewModel.config.asCommonConfiguration()
+                                .billingDetailsCollectionConfiguration.address,
                             removeExecutor = { method ->
                                 performRemove()
                             },

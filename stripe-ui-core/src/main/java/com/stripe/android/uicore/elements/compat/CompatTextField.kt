@@ -451,7 +451,8 @@ private object TextFieldTransitionScope {
     }
 }
 
-private fun Modifier.errorSemanticsWithDefault(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun Modifier.errorSemanticsWithDefault(
     isError: Boolean,
     errorMessage: String?,
 ): Modifier = composed {

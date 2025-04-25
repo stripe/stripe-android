@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.di.APPLICATION_ID
+import com.stripe.android.common.di.MOBILE_SESSION_ID
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.DeferredIntentParams
@@ -39,7 +40,8 @@ internal class RealElementsSessionRepository @Inject constructor(
     private val stripeRepository: StripeRepository,
     private val lazyPaymentConfig: Provider<PaymentConfiguration>,
     @IOContext private val workContext: CoroutineContext,
-    @Named(APPLICATION_ID) private val appId: String
+    @Named(MOBILE_SESSION_ID) private val mobileSessionIdProvider: Provider<String>,
+    @Named(APPLICATION_ID) private val appId: String,
 ) : ElementsSessionRepository {
 
     // The PaymentConfiguration can change after initialization, so this needs to get a new
@@ -62,6 +64,7 @@ internal class RealElementsSessionRepository @Inject constructor(
             customPaymentMethods = customPaymentMethods,
             externalPaymentMethods = externalPaymentMethods,
             savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
+            mobileSessionId = mobileSessionIdProvider.get(),
             appId = appId
         )
 
@@ -122,6 +125,7 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
     customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
     externalPaymentMethods: List<String>,
     savedPaymentMethodSelectionId: String?,
+    mobileSessionId: String,
     appId: String
 ): ElementsSessionParams {
     val customerSessionClientSecret = customer?.toElementSessionParam()
@@ -135,6 +139,7 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 customPaymentMethods = customPaymentMethodIds,
                 externalPaymentMethods = externalPaymentMethods,
                 savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
+                mobileSessionId = mobileSessionId,
                 appId = appId
             )
         }
@@ -146,6 +151,7 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 externalPaymentMethods = externalPaymentMethods,
                 customPaymentMethods = customPaymentMethodIds,
                 savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
+                mobileSessionId = mobileSessionId,
                 appId = appId
             )
         }
@@ -157,6 +163,7 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 externalPaymentMethods = externalPaymentMethods,
                 customerSessionClientSecret = customerSessionClientSecret,
                 savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
+                mobileSessionId = mobileSessionId,
                 appId = appId
             )
         }

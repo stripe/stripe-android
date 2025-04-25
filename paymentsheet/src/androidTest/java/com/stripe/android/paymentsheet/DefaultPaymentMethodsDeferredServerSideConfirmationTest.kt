@@ -33,8 +33,10 @@ internal class DefaultPaymentMethodsDeferredServerSideConfirmationTest {
     @Test
     fun setNewCardAsDefault_withSavedPaymentMethods_failsInTestMode() = runProductIntegrationTest(
         networkRule = networkRule,
-        createIntentCallback = { _, _ ->
-            CreateIntentResult.Success(clientSecret = "pi_example_secret_example")
+        builder = {
+            createIntentCallback { _, _ ->
+                CreateIntentResult.Success(clientSecret = "pi_example_secret_example")
+            }
         },
         integrationType = integrationType,
         resultCallback = integrationType.expectedDeferredSSCResultCallback,
@@ -95,8 +97,10 @@ internal class DefaultPaymentMethodsDeferredServerSideConfirmationTest {
     @Test
     fun addFirstCardForUser_failsInTestMode() = runProductIntegrationTest(
         networkRule = networkRule,
-        createIntentCallback = { _, _ ->
-            CreateIntentResult.Success(clientSecret = "pi_example_secret_example")
+        builder = {
+            createIntentCallback { _, _ ->
+                CreateIntentResult.Success(clientSecret = "pi_example_secret_example")
+            }
         },
         integrationType = integrationType,
         resultCallback = integrationType.expectedDeferredSSCResultCallback,

@@ -7,8 +7,7 @@ import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.AnalyticsRequestFactory
-import com.stripe.android.core.networking.NetworkTypeDetector
-import com.stripe.android.core.utils.ContextUtils.packageInfo
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -25,6 +24,11 @@ import javax.inject.Provider
 internal interface CustomerSheetDataCommonModule {
     @Binds
     fun bindsCustomerRepository(repository: CustomerApiRepository): CustomerRepository
+
+    @Binds
+    fun bindsAnalyticsRequestFactory(
+        paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
+    ): AnalyticsRequestFactory
 
     @Binds
     fun bindsErrorReporter(errorReporter: RealErrorReporter): ErrorReporter
@@ -57,23 +61,11 @@ internal interface CustomerSheetDataCommonModule {
 
         @Provides
         @Named(PRODUCT_USAGE)
-        fun providesProductUsage(): Set<String> = setOf("WalletMode")
+        fun providesProductUsage(): Set<String> = setOf("CustomerSheet")
 
         @Provides
         @Named(ENABLE_LOGGING)
         fun providesEnableLogging(): Boolean = BuildConfig.DEBUG
-
-        @Provides
-        fun provideAnalyticsRequestFactory(
-            context: Context,
-            paymentConfiguration: Provider<PaymentConfiguration>
-        ): AnalyticsRequestFactory = AnalyticsRequestFactory(
-            packageManager = context.packageManager,
-            packageName = context.packageName.orEmpty(),
-            packageInfo = context.packageInfo,
-            publishableKeyProvider = { paymentConfiguration.get().publishableKey },
-            networkTypeProvider = NetworkTypeDetector(context)::invoke,
-        )
 
         @Provides
         fun provideTimeProvider(): () -> Long = {

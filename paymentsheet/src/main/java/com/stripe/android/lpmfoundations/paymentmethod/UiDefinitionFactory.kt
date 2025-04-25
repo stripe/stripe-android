@@ -9,8 +9,11 @@ import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.InitialValuesFactory
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
+import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.model.setupFutureUsage
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
@@ -47,6 +50,7 @@ internal sealed interface UiDefinitionFactory {
                 private val linkConfigurationCoordinator: LinkConfigurationCoordinator?,
                 private val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
                 private val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
+                private val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
                 private val paymentMethodExtraParams: PaymentMethodExtraParams? = null,
                 private val initialLinkUserInput: UserInput? = null,
                 private val setAsDefaultMatchesSaveForFutureUse: Boolean =
@@ -67,7 +71,7 @@ internal sealed interface UiDefinitionFactory {
                             paymentMethodExtraParams = paymentMethodExtraParams,
                         ),
                         shippingValues = metadata.shippingDetails?.toIdentifierMap(metadata.defaultBillingDetails),
-                        saveForFutureUseInitialValue = false,
+                        saveForFutureUseInitialValue = getSaveForFutureUseInitialValue(),
                         billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
                         requiresMandate = requiresMandate,
                         onLinkInlineSignupStateChanged = onLinkInlineSignupStateChanged,
@@ -75,6 +79,12 @@ internal sealed interface UiDefinitionFactory {
                         initialLinkUserInput = initialLinkUserInput,
                         setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse
                     )
+                }
+
+                private fun getSaveForFutureUseInitialValue(): Boolean {
+                    return paymentMethodOptionsParams?.setupFutureUsage()?.let {
+                        it != ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+                    } ?: false
                 }
             }
         }

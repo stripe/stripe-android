@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
@@ -12,12 +13,13 @@ import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal interface FormActivityConfirmationHelper {
-    fun confirm()
+    fun confirm(): FormResult?
 }
 
 @OptIn(ExperimentalEmbeddedPaymentElementApi::class)
@@ -32,7 +34,8 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
     private val onClickDelegate: OnClickOverrideDelegate,
     private val eventReporter: EventReporter,
     lifecycleOwner: LifecycleOwner,
-    activityResultCaller: ActivityResultCaller
+    activityResultCaller: ActivityResultCaller,
+    @ViewModelScope private val coroutineScope: CoroutineScope,
 ) : FormActivityConfirmationHelper {
 
     init {
@@ -44,15 +47,27 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
         }
     }
 
-    override fun confirm() {
+    override fun confirm(): FormResult? {
         if (onClickDelegate.onClickOverride != null) {
             onClickDelegate.onClickOverride?.invoke()
         } else {
             eventReporter.onPressConfirmButton(selectionHolder.selection.value)
-            confirmationArgs()?.let { args ->
-                confirmationHandler.start(args)
+
+            when (configuration.formSheetAction) {
+                EmbeddedPaymentElement.FormSheetAction.Continue -> {
+                    return FormResult.Complete(selectionHolder.selection.value, false)
+                }
+                EmbeddedPaymentElement.FormSheetAction.Confirm -> {
+                    confirmationArgs()?.let { args ->
+                        coroutineScope.launch {
+                            confirmationHandler.start(args)
+                        }
+                    }
+                }
             }
         }
+
+        return null
     }
 
     private fun confirmationArgs(): ConfirmationHandler.Args? {

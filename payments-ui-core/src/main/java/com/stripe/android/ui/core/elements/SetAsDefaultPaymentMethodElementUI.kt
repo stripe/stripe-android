@@ -23,9 +23,9 @@ fun SetAsDefaultPaymentMethodElementUI(
     val label by controller.label.collectAsState()
     val resources = LocalContext.current.resources
 
-    val shouldShow = element.shouldShowElementFlow.collectAsState()
+    val shouldShow by element.shouldShowElementFlow.collectAsState()
 
-    if (shouldShow.value) {
+    if (shouldShow) {
         CheckboxElementUI(
             automationTestTag = SET_AS_DEFAULT_PAYMENT_METHOD_TEST_TAG,
             isChecked = checked,

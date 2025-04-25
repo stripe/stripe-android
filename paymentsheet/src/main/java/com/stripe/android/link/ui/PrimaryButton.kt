@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Button
@@ -52,7 +51,7 @@ internal fun PrimaryButton(
         LocalContentAlpha provides
             if (state == PrimaryButtonState.Disabled) ContentAlpha.disabled else ContentAlpha.high
     ) {
-        Box(modifier.padding(vertical = 16.dp)) {
+        Box(modifier) {
             Button(
                 onClick = onButtonClick,
                 modifier = Modifier

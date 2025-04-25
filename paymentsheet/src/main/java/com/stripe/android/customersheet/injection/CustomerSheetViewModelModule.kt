@@ -15,13 +15,12 @@ import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
-import com.stripe.android.core.networking.NetworkTypeDetector
-import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.customersheet.CustomerSheetLoader
 import com.stripe.android.customersheet.DefaultCustomerSheetLoader
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.analytics.DefaultCustomerSheetEventReporter
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -53,6 +52,11 @@ internal interface CustomerSheetViewModelModule {
     ): CustomerSheetLoader
 
     @Binds
+    fun bindsAnalyticsRequestFactory(
+        paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
+    ): AnalyticsRequestFactory
+
+    @Binds
     fun bindsStripeIntentRepository(
         impl: RealElementsSessionRepository,
     ): ElementsSessionRepository
@@ -70,11 +74,6 @@ internal interface CustomerSheetViewModelModule {
         @Provides
         fun paymentConfiguration(application: Application): PaymentConfiguration {
             return PaymentConfiguration.getInstance(application)
-        }
-
-        @Provides
-        fun provideCoroutineContext(): CoroutineContext {
-            return Dispatchers.IO
         }
 
         @Provides
@@ -109,18 +108,6 @@ internal interface CustomerSheetViewModelModule {
 
         @Provides
         fun providesUserFacingLogger(): UserFacingLogger? = null
-
-        @Provides
-        internal fun provideAnalyticsRequestFactory(
-            application: Application,
-            paymentConfiguration: Provider<PaymentConfiguration>
-        ): AnalyticsRequestFactory = AnalyticsRequestFactory(
-            packageManager = application.packageManager,
-            packageName = application.packageName.orEmpty(),
-            packageInfo = application.packageInfo,
-            publishableKeyProvider = { paymentConfiguration.get().publishableKey },
-            networkTypeProvider = NetworkTypeDetector(application)::invoke,
-        )
 
         @Provides
         internal fun providesErrorReporter(

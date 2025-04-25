@@ -63,12 +63,16 @@ import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val TEST_TAG_BILLING_DETAILS = "TEST_TAG_BILLING_DETAILS"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val TEST_TAG_ACCOUNT_DETAILS = "TEST_TAG_ACCOUNT_DETAILS"
 
 @Composable
 internal fun USBankAccountForm(
     formArgs: FormArguments,
     usBankAccountFormArgs: USBankAccountFormArguments,
+    onCompleted: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean
 ) {
@@ -102,6 +106,7 @@ internal fun USBankAccountForm(
     USBankAccountEmitters(
         viewModel = viewModel,
         usBankAccountFormArgs = usBankAccountFormArgs,
+        onFormCompleted = onCompleted,
     )
 
     BankAccountForm(
@@ -205,7 +210,11 @@ private fun BillingDetailsForm(
     lastTextFieldIdentifier: IdentifierSpec?,
     sameAsShippingElement: SameAsShippingElement?,
 ) {
-    Column(Modifier.fillMaxWidth()) {
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .testTag(TEST_TAG_BILLING_DETAILS)
+    ) {
         H6Text(
             text = if (isPaymentFlow) {
                 stringResource(R.string.stripe_paymentsheet_pay_with_bank_title)

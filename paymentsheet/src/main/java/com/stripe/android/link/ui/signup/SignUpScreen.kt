@@ -42,6 +42,7 @@ import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.ProgressIndicatorTestTag
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.addresselement.ScrollableColumn
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
@@ -78,7 +79,7 @@ internal fun SignUpBody(
     var didFocusField by rememberSaveable { mutableStateOf(false) }
     val emailFocusRequester = remember { FocusRequester() }
 
-    if (!didFocusField && signUpScreenState.showKeyboardOnOpen) {
+    if (!didFocusField && signUpScreenState.signUpState == SignUpState.InputtingPrimaryField) {
         LaunchedEffect(Unit) {
             delay(LINK_DEFAULT_ANIMATION_DELAY_MILLIS)
             emailFocusRequester.requestFocus()
@@ -86,11 +87,11 @@ internal fun SignUpBody(
         }
     }
 
-    Column(
+    ScrollableColumn(
         modifier = Modifier
             .fillMaxWidth()
             .padding(20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
             text = stringResource(R.string.stripe_link_sign_up_header),
@@ -112,7 +113,7 @@ internal fun SignUpBody(
         )
         StripeThemeForLink {
             EmailCollectionSection(
-                enabled = true,
+                enabled = signUpScreenState.canEditForm,
                 emailController = emailController,
                 signUpScreenState = signUpScreenState,
                 focusRequester = emailFocusRequester,
@@ -202,7 +203,7 @@ private fun SecondaryFields(
     Column(modifier = Modifier.fillMaxWidth()) {
         StripeThemeForLink {
             PhoneNumberCollectionSection(
-                enabled = true,
+                enabled = signUpScreenState.canEditForm,
                 phoneNumberController = phoneNumberController,
                 requestFocusWhenShown = phoneNumberController.initialPhoneNumber.isEmpty(),
                 imeAction = if (signUpScreenState.requiresNameCollection) {
@@ -220,7 +221,7 @@ private fun SecondaryFields(
                     TextField(
                         textFieldController = nameController,
                         imeAction = ImeAction.Done,
-                        enabled = true,
+                        enabled = signUpScreenState.canEditForm,
                     )
                 }
             }
@@ -242,11 +243,12 @@ private fun SecondaryFields(
             )
         }
         PrimaryButton(
+            modifier = Modifier.padding(vertical = 16.dp),
             label = stringResource(R.string.stripe_link_sign_up),
-            state = if (signUpScreenState.signUpEnabled) {
-                PrimaryButtonState.Enabled
-            } else {
-                PrimaryButtonState.Disabled
+            state = when {
+                signUpScreenState.isSubmitting -> PrimaryButtonState.Processing
+                signUpScreenState.signUpEnabled -> PrimaryButtonState.Enabled
+                else -> PrimaryButtonState.Disabled
             },
             onButtonClick = {
                 onSignUpClick()
@@ -273,7 +275,6 @@ private fun SignUpScreenPreview() {
                     signUpEnabled = false,
                     signUpState = SignUpState.InputtingRemainingFields,
                     requiresNameCollection = true,
-                    showKeyboardOnOpen = false,
                 ),
                 onSignUpClick = {}
             )

@@ -1,0 +1,34 @@
+{
+  "id": "pm_12345",
+  "object": "payment_method",
+  "billing_details": {
+    "address": {
+      "city": null,
+      "country": "US",
+      "line1": null,
+      "line2": null,
+      "postal_code": "12345",
+      "state": null
+    },
+    "email": "janedoe@example.com",
+    "name": "Jane Doe",
+    "phone": null
+  },
+  "created": 1678920485,
+  "customer": null,
+  "livemode": false,
+  "type": "us_bank_account",
+  "us_bank_account": {
+    "account_holder_type": "individual",
+    "account_type": "checking",
+    "bank_name": "STRIPE TEST BANK",
+    "financial_connections_account": "fca_111",
+    "fingerprint": "FFDMA0xfhBjWSZLu",
+    "last4": "6789",
+    "networks":{
+      "preferred": "ach",
+      "supported": ["ach","us_domestic_wire"]},
+    "routing_number": "110000000",
+    "status_details": null
+  }
+}

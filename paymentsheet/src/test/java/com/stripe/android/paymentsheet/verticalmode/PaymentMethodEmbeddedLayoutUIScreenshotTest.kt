@@ -47,7 +47,7 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
     }
 
     @Test
-    fun testFlatWitRadio() {
+    fun testFlatWithRadio() {
         paparazziRule.snapshot {
             TestPaymentMethodLayoutUi(
                 rowStyle = getRowStyle(FlatWithRadio::class)
@@ -135,6 +135,34 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
         }
     }
 
+    @Test
+    fun testNewPaymentMethodsWithSelection() {
+        paparazziRule.snapshot {
+            TestPaymentMethodLayoutUiWithNewSelection(
+                rowStyle = FlatWithCheckmark.default,
+                selection = PaymentMethodVerticalLayoutInteractor.Selection.New(
+                    code = "card",
+                    changeDetails = "Visa **** 4242",
+                    canBeChanged = true
+                )
+            )
+        }
+    }
+
+    @Test
+    fun testNewPaymentMethodsWithSelectionWithoutChangeDetails() {
+        paparazziRule.snapshot {
+            TestPaymentMethodLayoutUiWithNewSelection(
+                rowStyle = FlatWithCheckmark.default,
+                selection = PaymentMethodVerticalLayoutInteractor.Selection.New(
+                    code = "klarna",
+                    changeDetails = null,
+                    canBeChanged = true
+                )
+            )
+        }
+    }
+
     @Composable
     private fun TestPaymentMethodLayoutUi(
         rowStyle: Embedded.RowStyle,
@@ -148,6 +176,29 @@ class PaymentMethodEmbeddedLayoutUIScreenshotTest {
             savedPaymentMethodAction =
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
             selection = PaymentMethodVerticalLayoutInteractor.Selection.Saved,
+            isEnabled = true,
+            onViewMorePaymentMethods = {},
+            onSelectSavedPaymentMethod = {},
+            onManageOneSavedPaymentMethod = {},
+            imageLoader = mock(),
+            rowStyle = rowStyle,
+            modifier = Modifier.verticalScroll(scrollState),
+        )
+    }
+
+    @Composable
+    private fun TestPaymentMethodLayoutUiWithNewSelection(
+        rowStyle: Embedded.RowStyle,
+        selection: PaymentMethodVerticalLayoutInteractor.Selection? = null,
+        newPaymentMethods: List<DisplayablePaymentMethod> = paymentMethods
+    ) {
+        val scrollState = rememberScrollState()
+        PaymentMethodEmbeddedLayoutUI(
+            paymentMethods = newPaymentMethods,
+            displayedSavedPaymentMethod = null,
+            savedPaymentMethodAction =
+            PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ALL,
+            selection = selection,
             isEnabled = true,
             onViewMorePaymentMethods = {},
             onSelectSavedPaymentMethod = {},

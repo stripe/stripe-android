@@ -7,7 +7,10 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.CardUpdateParams
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
+import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
@@ -24,20 +27,86 @@ internal class DefaultEditCardDetailsInteractorTest {
 
     @Test
     fun testInitialStateForCardWithNetworks() {
+        val card = PaymentMethodFixtures.CARD_WITH_NETWORKS
         val handler = handler()
 
         val state = handler.uiState
-        assertThat(state.card).isEqualTo(PaymentMethodFixtures.CARD_WITH_NETWORKS)
+        assertThat(state.payload).isEqualTo(
+            EditCardPayload(
+                last4 = card.last4,
+                expiryMonth = card.expiryMonth,
+                expiryYear = card.expiryYear,
+                brand = card.brand,
+                displayBrand = card.displayBrand,
+                networks = card.networks?.available,
+                billingDetails = PaymentMethodFixtures.BILLING_DETAILS,
+            )
+        )
         assertThat(state.selectedCardBrand.brand).isEqualTo(CardBrand.CartesBancaires)
     }
 
     @Test
     fun testInitialStateForCardWithNoNetworks() {
-        val handler = handler(card = PaymentMethodFixtures.CARD)
+        val card = PaymentMethodFixtures.CARD
+        val handler = handler(card = card)
 
         val state = handler.uiState
-        assertThat(state.card).isEqualTo(PaymentMethodFixtures.CARD)
+        assertThat(state.payload).isEqualTo(
+            EditCardPayload(
+                last4 = card.last4,
+                expiryMonth = card.expiryMonth,
+                expiryYear = card.expiryYear,
+                brand = card.brand,
+                displayBrand = card.displayBrand,
+                networks = card.networks?.available,
+                billingDetails = PaymentMethodFixtures.BILLING_DETAILS,
+            )
+        )
         assertThat(state.selectedCardBrand.brand).isEqualTo(CardBrand.Unknown)
+    }
+
+    @Test
+    fun testInitialStateWithNoAddressCollection() {
+        val handler = handler(addressCollectionMode = AddressCollectionMode.Never)
+
+        val state = handler.uiState
+        assertThat(state.billingDetailsForm).isNull()
+    }
+
+    @Test
+    fun testInitialStateWithAutomaticAddressCollection() {
+        val handler = handler(addressCollectionMode = AddressCollectionMode.Automatic)
+
+        val state = handler.uiState
+        assertThat(state.billingDetailsForm).isNotNull()
+    }
+
+    @Test
+    fun testInitialStateWithFullAddressCollection() {
+        val handler = handler(addressCollectionMode = AddressCollectionMode.Full)
+
+        val state = handler.uiState
+        assertThat(state.billingDetailsForm).isNotNull()
+    }
+
+    @Test
+    fun testInitialStateWithFullDetailsEditEnabled() {
+        val handler = handler()
+
+        val state = handler.uiState
+        assertThat(state.billingDetailsForm).isNotNull()
+        assertThat(state.expiryDateState.enabled).isTrue()
+    }
+
+    @Test
+    fun testInitialStateWithFullDetailsEditDisabled() {
+        val handler = handler(
+            areExpiryDateAndAddressModificationSupported = false
+        )
+
+        val state = handler.uiState
+        assertThat(state.billingDetailsForm).isNull()
+        assertThat(state.expiryDateState.enabled).isFalse()
     }
 
     @Test
@@ -61,7 +130,7 @@ internal class DefaultEditCardDetailsInteractorTest {
         )
 
         handler.updateCardBrand(CardBrand.Visa)
-        assertThat(cardUpdateParams).isEqualTo(cardUpdateParams(cardBrand = CardBrand.Visa))
+        assertThat(cardUpdateParams?.cardBrand).isEqualTo(CardBrand.Visa)
 
         handler.updateCardBrand(CardBrand.CartesBancaires)
 
@@ -79,6 +148,75 @@ internal class DefaultEditCardDetailsInteractorTest {
 
         handler.updateCardBrand(CardBrand.CartesBancaires)
         assertThat(cardUpdateParams).isNull()
+    }
+
+    @Test
+    fun validExpiryDateChangeShouldProduceNewCardParams() {
+        var cardUpdateParams: CardUpdateParams? = null
+        val handler = handler(
+            onCardUpdateParamsChanged = {
+                cardUpdateParams = it
+            }
+        )
+
+        handler.updateExpiryDate(text = "1240")
+
+        assertThat(cardUpdateParams?.expiryMonth).isEqualTo(12)
+        assertThat(cardUpdateParams?.expiryYear).isEqualTo(2040)
+    }
+
+    @Test
+    fun invalidExpiryDateChangeShouldNotProduceNewCardParams() {
+        var cardUpdateParams: CardUpdateParams? = null
+        val handler = handler(
+            onCardUpdateParamsChanged = {
+                cardUpdateParams = it
+            }
+        )
+
+        handler.updateExpiryDate(text = "12/40")
+
+        assertThat(cardUpdateParams).isNull()
+    }
+
+    @Test
+    fun pastExpiryDateChangeShouldProduceNewCardParams() {
+        var cardUpdateParams: CardUpdateParams? = null
+        val handler = handler(
+            onCardUpdateParamsChanged = {
+                cardUpdateParams = it
+            }
+        )
+
+        handler.updateExpiryDate(text = "1240")
+
+        assertThat(cardUpdateParams?.expiryMonth).isEqualTo(12)
+        assertThat(cardUpdateParams?.expiryYear).isEqualTo(2040)
+
+        handler.updateExpiryDate(text = "1215")
+
+        assertThat(cardUpdateParams?.expiryMonth).isNull()
+        assertThat(cardUpdateParams?.expiryYear).isNull()
+    }
+
+    @Test
+    fun addressUpdateShouldProduceNewCardParams() {
+        var cardUpdateParams: CardUpdateParams? = null
+        val handler = handler(
+            onCardUpdateParamsChanged = {
+                cardUpdateParams = it
+            }
+        )
+
+        handler.updateBillingDetails(
+            billingDetailsFormState = PaymentSheetFixtures.billingDetailsFormState(
+                postalCode = FormFieldEntry("94444", isComplete = true),
+            )
+        )
+
+        val address = cardUpdateParams?.billingDetails?.address
+        assertThat(address?.postalCode).isEqualTo("94444")
+        assertThat(address?.country).isEqualTo("US")
     }
 
     @Test
@@ -102,11 +240,9 @@ internal class DefaultEditCardDetailsInteractorTest {
     }
 
     @Test
-    fun expiredCardShouldNotShowCbcDropdown() {
+    fun unModifiableCardShouldNotShowCbcDropdown() {
         val handler = handler(
-            card = PaymentMethodFixtures.CARD_WITH_NETWORKS.copy(
-                expiryYear = 1975
-            )
+            isCbcModifiable = false
         )
 
         val state = handler.uiState
@@ -114,13 +250,188 @@ internal class DefaultEditCardDetailsInteractorTest {
     }
 
     @Test
-    fun unModifiableCardShouldNotShowCbcDropdown() {
+    fun cardUpdateParamsIsUpdatedForValidAddressUpdate() {
+        var capturedCardUpdateParams: CardUpdateParams? = null
         val handler = handler(
-            isModifiable = false
+            onCardUpdateParamsChanged = {
+                capturedCardUpdateParams = it
+            }
         )
 
-        val state = handler.uiState
-        assertThat(state.shouldShowCardBrandDropdown).isFalse()
+        handler.handleViewAction(
+            EditCardDetailsInteractor.ViewAction.BillingDetailsChanged(
+                PaymentSheetFixtures.billingDetailsFormState(
+                    postalCode = FormFieldEntry("11111", isComplete = true),
+                )
+            )
+        )
+
+        assertThat(capturedCardUpdateParams?.billingDetails?.address?.postalCode).isEqualTo("11111")
+    }
+
+    @Test
+    fun cardUpdateParamsIsUpdatedForValidExpDateUpdate() {
+        var capturedCardUpdateParams: CardUpdateParams? = null
+        val handler = handler(
+            onCardUpdateParamsChanged = {
+                capturedCardUpdateParams = it
+            }
+        )
+
+        handler.handleViewAction(
+            EditCardDetailsInteractor.ViewAction.DateChanged("1230") // Dec 2030
+        )
+
+        assertThat(capturedCardUpdateParams).isNotNull()
+        assertThat(capturedCardUpdateParams?.expiryMonth).isEqualTo(12)
+        assertThat(capturedCardUpdateParams?.expiryYear).isEqualTo(2030)
+    }
+
+    @Test
+    fun cardUpdateParamsIsUpdatedWithNullForInvalidExpDateUpdate() {
+        var capturedCardUpdateParams: CardUpdateParams? = null
+        val handler = handler(
+            onCardUpdateParamsChanged = {
+                capturedCardUpdateParams = it
+            }
+        )
+
+        handler.handleViewAction(
+            EditCardDetailsInteractor.ViewAction.DateChanged("00/00")
+        )
+
+        assertThat(capturedCardUpdateParams).isNull()
+
+        handler.handleViewAction(
+            EditCardDetailsInteractor.ViewAction.DateChanged("1220")
+        )
+
+        assertThat(capturedCardUpdateParams).isNull()
+    }
+
+    @Test
+    fun cardUpdateParamsIsUpdatedWithNullForInvalidAddressUpdate() {
+        var capturedCardUpdateParams: CardUpdateParams? = null
+        val handler = handler(
+            onCardUpdateParamsChanged = {
+                capturedCardUpdateParams = it
+            }
+        )
+
+        handler.handleViewAction(
+            EditCardDetailsInteractor.ViewAction.BillingDetailsChanged(
+                PaymentSheetFixtures.billingDetailsFormState(
+                    postalCode = FormFieldEntry("", isComplete = false),
+                    country = FormFieldEntry("US", isComplete = true),
+                )
+            )
+        )
+
+        assertThat(capturedCardUpdateParams).isNull()
+    }
+
+    @Test
+    fun whenAddressCollectionModeIsNeverAndBillingDetailsNotNullThenCardUpdateParamsIsNull() {
+        var cardUpdateParams: CardUpdateParams? = null
+        val handler = handler(
+            addressCollectionMode = AddressCollectionMode.Never,
+            onCardUpdateParamsChanged = {
+                cardUpdateParams = it
+            }
+        )
+
+        handler.updateBillingDetails(
+            billingDetailsFormState = PaymentSheetFixtures.billingDetailsFormState(
+                postalCode = FormFieldEntry("94444", isComplete = true),
+            )
+        )
+
+        assertThat(cardUpdateParams).isNull()
+    }
+
+    @Test
+    fun whenAddressCollectionModeIsAutomaticAndBillingDetailsIsNullThenCardUpdateParamsIsUpdated() {
+        var cardUpdateParams: CardUpdateParams? = null
+        val handler = handler(
+            addressCollectionMode = AddressCollectionMode.Automatic,
+            billingDetails = null,
+            onCardUpdateParamsChanged = {
+                cardUpdateParams = it
+            }
+        )
+
+        handler.updateCardBrand(CardBrand.Visa)
+
+        assertThat(cardUpdateParams).isNotNull()
+        assertThat(cardUpdateParams?.cardBrand).isEqualTo(CardBrand.Visa)
+        assertThat(cardUpdateParams?.billingDetails).isNull()
+    }
+
+    @Test
+    fun whenAddressCollectionModeIsFullAndBillingDetailsIncompleteThenCardUpdateParamsIsNull() {
+        var cardUpdateParams: CardUpdateParams? = null
+        val handler = handler(
+            addressCollectionMode = AddressCollectionMode.Full,
+            onCardUpdateParamsChanged = {
+                cardUpdateParams = it
+            }
+        )
+
+        handler.updateCardBrand(CardBrand.Visa)
+
+        handler.updateBillingDetails(
+            billingDetailsFormState = PaymentSheetFixtures.billingDetailsFormState(
+                postalCode = FormFieldEntry("94444", isComplete = true),
+                line1 = FormFieldEntry("", isComplete = false), // Line1 is required for FULL mode but incomplete
+            )
+        )
+
+        assertThat(cardUpdateParams).isNull()
+    }
+
+    @Test
+    fun whenNoChangesButFormIsCompleteThenCardUpdateParamsIsNull() {
+        var cardUpdateParams: CardUpdateParams? = null
+        val handler = handler(
+            onCardUpdateParamsChanged = {
+                cardUpdateParams = it
+            }
+        )
+
+        handler.updateBillingDetails(
+            billingDetailsFormState = PaymentSheetFixtures.billingDetailsFormState(
+                postalCode = FormFieldEntry(
+                    value = PaymentMethodFixtures.BILLING_DETAILS.address?.postalCode ?: "",
+                    isComplete = true
+                ),
+                country = FormFieldEntry(
+                    value = PaymentMethodFixtures.BILLING_DETAILS.address?.country ?: "",
+                    isComplete = true
+                ),
+            )
+        )
+
+        assertThat(cardUpdateParams).isNull()
+    }
+
+    @Test
+    fun whenChangesAndFormIsCompleteThenCardUpdateParamsIsUpdated() {
+        var cardUpdateParams: CardUpdateParams? = null
+        val handler = handler(
+            onCardUpdateParamsChanged = {
+                cardUpdateParams = it
+            }
+        )
+
+        handler.updateBillingDetails(
+            billingDetailsFormState = PaymentSheetFixtures.billingDetailsFormState(
+                postalCode = FormFieldEntry("94444", isComplete = true), // Changed postal code
+                country = FormFieldEntry("US", isComplete = true),
+            )
+        )
+
+        assertThat(cardUpdateParams).isNotNull()
+        assertThat(cardUpdateParams?.billingDetails?.address?.postalCode).isEqualTo("94444")
     }
 
     private val EditCardDetailsInteractor.uiState
@@ -129,34 +440,25 @@ internal class DefaultEditCardDetailsInteractorTest {
     private val EditCardDetailsInteractor.selectedBrand
         get() = uiState.selectedCardBrand.brand
 
-    private fun cardUpdateParams(
-        expiryMonth: Int? = null,
-        expiryYear: Int? = null,
-        cardBrand: CardBrand? = null,
-        billingDetails: PaymentMethod.BillingDetails? = null
-    ): CardUpdateParams {
-        return CardUpdateParams(
-            expiryMonth = expiryMonth,
-            expiryYear = expiryYear,
-            cardBrand = cardBrand,
-            billingDetails = billingDetails
-        )
-    }
-
     private fun handler(
         card: PaymentMethod.Card = PaymentMethodFixtures.CARD_WITH_NETWORKS,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
-        isModifiable: Boolean = true,
+        isCbcModifiable: Boolean = true,
+        areExpiryDateAndAddressModificationSupported: Boolean = true,
+        addressCollectionMode: AddressCollectionMode = AddressCollectionMode.Automatic,
+        billingDetails: PaymentMethod.BillingDetails? = PaymentMethodFixtures.BILLING_DETAILS,
         onBrandChoiceChanged: (CardBrand) -> Unit = {},
         onCardUpdateParamsChanged: (CardUpdateParams?) -> Unit = {}
     ): EditCardDetailsInteractor {
-        return EditCardDetailsInteractor.create(
+        return DefaultEditCardDetailsInteractor.Factory().create(
             cardBrandFilter = cardBrandFilter,
             onBrandChoiceChanged = onBrandChoiceChanged,
             coroutineScope = TestScope(testDispatcher),
-            isModifiable = isModifiable,
-            card = card,
+            isCbcModifiable = isCbcModifiable,
+            payload = EditCardPayload.create(card, billingDetails),
             onCardUpdateParamsChanged = onCardUpdateParamsChanged,
+            areExpiryDateAndAddressModificationSupported = areExpiryDateAndAddressModificationSupported,
+            addressCollectionMode = addressCollectionMode,
         )
     }
 }

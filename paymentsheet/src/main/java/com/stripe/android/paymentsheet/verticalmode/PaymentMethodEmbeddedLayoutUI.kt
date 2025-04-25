@@ -5,26 +5,37 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material.Divider
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentelement.ExperimentalEmbeddedPaymentElementApi
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
+import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
-import kotlinx.coroutines.Dispatchers
 import org.jetbrains.annotations.VisibleForTesting
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -45,7 +56,7 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
         StripeImageLoader(context.applicationContext)
     }
 
-    val state by interactor.state.collectAsState(Dispatchers.Main)
+    val state by interactor.state.collectAsState()
 
     PaymentMethodEmbeddedLayoutUI(
         paymentMethods = state.displayablePaymentMethods,
@@ -103,45 +114,26 @@ internal fun PaymentMethodEmbeddedLayoutUI(
     }
     Column(modifier = modifier, verticalArrangement = arrangement) {
         if (rowStyle.topSeparatorEnabled()) OptionalEmbeddedDivider(rowStyle)
-        if (displayedSavedPaymentMethod != null) {
-            SavedPaymentMethodRowButton(
-                displayableSavedPaymentMethod = displayedSavedPaymentMethod,
-                isEnabled = isEnabled,
-                isSelected = selection?.isSaved == true,
-                trailingContent = {
-                    SavedPaymentMethodTrailingContent(
-                        savedPaymentMethodAction = savedPaymentMethodAction,
-                        onViewMorePaymentMethods = onViewMorePaymentMethods,
-                        onManageOneSavedPaymentMethod = { onManageOneSavedPaymentMethod(displayedSavedPaymentMethod) },
-                    )
-                },
-                onClick = { onSelectSavedPaymentMethod(displayedSavedPaymentMethod) },
-                rowStyle = rowStyle
-            )
 
-            if (paymentMethods.isNotEmpty()) OptionalEmbeddedDivider(rowStyle)
-        }
+        EmbeddedSavedPaymentMethodRowButton(
+            paymentMethods = paymentMethods,
+            displayedSavedPaymentMethod = displayedSavedPaymentMethod,
+            savedPaymentMethodAction = savedPaymentMethodAction,
+            selection = selection,
+            isEnabled = isEnabled,
+            onViewMorePaymentMethods = onViewMorePaymentMethods,
+            onManageOneSavedPaymentMethod = onManageOneSavedPaymentMethod,
+            onSelectSavedPaymentMethod = onSelectSavedPaymentMethod,
+            rowStyle = rowStyle
+        )
 
-        val selectedIndex = remember(selection, paymentMethods) {
-            if (selection is PaymentMethodVerticalLayoutInteractor.Selection.New) {
-                val code = selection.code
-                paymentMethods.indexOfFirst { it.code == code }
-            } else {
-                -1
-            }
-        }
-
-        paymentMethods.forEachIndexed { index, item ->
-            NewPaymentMethodRowButton(
-                isEnabled = isEnabled,
-                isSelected = index == selectedIndex,
-                displayablePaymentMethod = item,
-                imageLoader = imageLoader,
-                rowStyle = rowStyle
-            )
-
-            if (index != paymentMethods.lastIndex) OptionalEmbeddedDivider(rowStyle)
-        }
+        EmbeddedNewPaymentMethodRowButtonsLayoutUi(
+            paymentMethods = paymentMethods,
+            selection = selection,
+            isEnabled = isEnabled,
+            imageLoader = imageLoader,
+            rowStyle = rowStyle,
+        )
 
         if (rowStyle.bottomSeparatorEnabled()) OptionalEmbeddedDivider(rowStyle)
     }
@@ -231,5 +223,129 @@ private fun Embedded.RowStyle.endSeparatorInset(): Dp {
         is Embedded.RowStyle.FloatingButton -> 0.dp
         is Embedded.RowStyle.FlatWithRadio -> endSeparatorInsetDp.dp
         is Embedded.RowStyle.FlatWithCheckmark -> endSeparatorInsetDp.dp
+    }
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+@Composable
+internal fun EmbeddedSavedPaymentMethodRowButton(
+    paymentMethods: List<DisplayablePaymentMethod>,
+    displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
+    savedPaymentMethodAction: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
+    selection: PaymentMethodVerticalLayoutInteractor.Selection?,
+    isEnabled: Boolean,
+    onViewMorePaymentMethods: () -> Unit,
+    onManageOneSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    onSelectSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
+    rowStyle: Embedded.RowStyle,
+) {
+    if (displayedSavedPaymentMethod != null) {
+        SavedPaymentMethodRowButton(
+            displayableSavedPaymentMethod = displayedSavedPaymentMethod,
+            isEnabled = isEnabled,
+            isSelected = selection?.isSaved == true,
+            trailingContent = {
+                SavedPaymentMethodTrailingContent(
+                    viewMoreShowChevron = rowStyle.viewMoreShowsChevron,
+                    savedPaymentMethodAction = savedPaymentMethodAction,
+                    onViewMorePaymentMethods = onViewMorePaymentMethods,
+                    onManageOneSavedPaymentMethod = { onManageOneSavedPaymentMethod(displayedSavedPaymentMethod) },
+                )
+            },
+            onClick = { onSelectSavedPaymentMethod(displayedSavedPaymentMethod) },
+            rowStyle = rowStyle
+        )
+
+        if (paymentMethods.isNotEmpty()) OptionalEmbeddedDivider(rowStyle)
+    }
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+@Composable
+internal fun EmbeddedNewPaymentMethodRowButtonsLayoutUi(
+    paymentMethods: List<DisplayablePaymentMethod>,
+    selection: PaymentMethodVerticalLayoutInteractor.Selection?,
+    isEnabled: Boolean,
+    imageLoader: StripeImageLoader,
+    rowStyle: Embedded.RowStyle,
+) {
+    val selectedIndex = remember(selection, paymentMethods) {
+        if (selection is PaymentMethodVerticalLayoutInteractor.Selection.New) {
+            val code = selection.code
+            paymentMethods.indexOfFirst { it.code == code }
+        } else {
+            -1
+        }
+    }
+
+    paymentMethods.forEachIndexed { index, item ->
+        val isSelected = index == selectedIndex
+
+        if (isSelected && selection is PaymentMethodVerticalLayoutInteractor.Selection.New && selection.canBeChanged) {
+            val displayablePaymentMethod = item.copy(
+                subtitle = selection.changeDetails?.resolvableString ?: item.subtitle
+            )
+            NewPaymentMethodRowButton(
+                isEnabled = isEnabled,
+                isSelected = true,
+                displayablePaymentMethod = displayablePaymentMethod,
+                imageLoader = imageLoader,
+                rowStyle = rowStyle,
+                trailingContent = {
+                    EmbeddedNewPaymentMethodTrailingContent(
+                        showChevron = rowStyle !is Embedded.RowStyle.FlatWithCheckmark,
+                    )
+                }
+            )
+        } else {
+            NewPaymentMethodRowButton(
+                isEnabled = isEnabled,
+                isSelected = isSelected,
+                displayablePaymentMethod = item,
+                imageLoader = imageLoader,
+                rowStyle = rowStyle,
+            )
+        }
+
+        if (index != paymentMethods.lastIndex) OptionalEmbeddedDivider(rowStyle)
+    }
+}
+
+@OptIn(ExperimentalEmbeddedPaymentElementApi::class)
+private val RowStyle.viewMoreShowsChevron: Boolean
+    get() = when (this) {
+        is RowStyle.FloatingButton -> true
+        is RowStyle.FlatWithRadio -> true
+        is RowStyle.FlatWithCheckmark -> false
+    }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val TEST_TAG_CHANGE = "TEST_TAG_CHANGE"
+
+@Composable
+internal fun EmbeddedNewPaymentMethodTrailingContent(
+    showChevron: Boolean,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .testTag(TEST_TAG_CHANGE)
+            .padding(vertical = 4.dp)
+            .wrapContentHeight()
+    ) {
+        Text(
+            stringResource(id = com.stripe.android.uicore.R.string.stripe_change),
+            color = MaterialTheme.colors.primary,
+            style = MaterialTheme.typography.subtitle1,
+            fontWeight = FontWeight.Medium,
+        )
+        if (showChevron) {
+            Icon(
+                painter = painterResource(R.drawable.stripe_ic_chevron_right),
+                contentDescription = null,
+                tint = MaterialTheme.colors.primary,
+                modifier = Modifier.padding(start = 4.dp, top = 2.dp)
+            )
+        }
     }
 }

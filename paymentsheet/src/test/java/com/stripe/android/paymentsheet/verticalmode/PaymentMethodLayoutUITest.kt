@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.Selection
+import com.stripe.android.testing.createComposeCleanupRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -43,6 +44,9 @@ internal class PaymentMethodLayoutUITest(
 ) {
     @get:Rule
     val composeRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     @Test
     fun clickingOnViewMore_transitionsToManageScreen() = runScenario(

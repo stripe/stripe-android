@@ -6,9 +6,11 @@ import com.stripe.android.model.AccountRange
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.withContext
 
 internal class RemoteCardAccountRangeSource(
     private val stripeRepository: StripeRepository,
@@ -56,12 +58,16 @@ internal class RemoteCardAccountRangeSource(
         )
     }
 
-    private inline fun withLoading(
+    private suspend inline fun withLoading(
         block: () -> Result<List<AccountRange>>,
     ): Result<List<AccountRange>> {
-        _loading.value = true
+        withContext(Dispatchers.Main) {
+            _loading.value = true
+        }
         val accountRanges = block()
-        _loading.value = false
+        withContext(Dispatchers.Main) {
+            _loading.value = false
+        }
         return accountRanges
     }
 }
