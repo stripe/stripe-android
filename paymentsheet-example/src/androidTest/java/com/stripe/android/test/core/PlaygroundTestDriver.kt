@@ -75,7 +75,6 @@ import java.util.concurrent.TimeUnit
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
-
 /**
  * This drives the end to end payment sheet flow for any set of
  * [TestParameters].  It handles any authorization that needs to happen
